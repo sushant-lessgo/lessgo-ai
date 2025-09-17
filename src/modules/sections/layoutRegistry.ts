@@ -147,14 +147,12 @@ export const layoutRegistry = {
   ] as const,
 
   Security: [
-    "ComplianceBadgeRow",
+    "AuditResultsPanel",
+    "PenetrationTestResults",
+    "PrivacyCommitmentBlock",
     "SecurityChecklist",
-    "AuditTrustPanel",
-    "FAQStyleSecurity",
-    "StatWithShieldIcons",
-    "PartnerValidationRow",
-    "DiagramInfraSecurity",
-    "ExpandablePolicyCards",
+    "SecurityGuaranteePanel",
+    "TrustSealCollection",
   ] as const,
 
   SocialProof: [

@@ -1613,7 +1613,7 @@ const elementRules: SectionLayoutRules = {
 
 // Security Section Rules - Add these to elementRules object
 
-"Security_ComplianceBadgeRow": [
+"Security_TrustSealCollection": [
   {
     element: "badge_descriptions",
     conditions: [
@@ -1652,7 +1652,7 @@ const elementRules: SectionLayoutRules = {
   }
 ],
 
-"Security_AuditTrustPanel": [
+"Security_AuditResultsPanel": [
   {
     element: "audit_dates",
     conditions: [
@@ -1664,19 +1664,27 @@ const elementRules: SectionLayoutRules = {
   }
 ],
 
-"Security_FAQStyleSecurity": [
+"Security_PenetrationTestResults": [
   {
-    element: "technical_details",
+    element: "test_descriptions",
     conditions: [
       { variable: "targetAudience", values: ["developers", "enterprise-tech-teams", "startup-ctos"], weight: 4 },
       { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 3 },
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 2 }
     ],
     minScore: 6
+  },
+  {
+    element: "test_dates",
+    conditions: [
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "it-decision-makers"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
   }
 ],
 
-"Security_StatWithShieldIcons": [
+"Security_SecurityGuaranteePanel": [
   {
     element: "stat_descriptions",
     conditions: [
@@ -1688,31 +1696,7 @@ const elementRules: SectionLayoutRules = {
   }
 ],
 
-"Security_PartnerValidationRow": [
-  {
-    element: "partnership_types",
-    conditions: [
-      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "it-decision-makers"], weight: 4 },
-      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
-      { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k"], weight: 2 }
-    ],
-    minScore: 6
-  }
-],
-
-"Security_DiagramInfraSecurity": [
-  {
-    element: "diagram_labels",
-    conditions: [
-      { variable: "targetAudience", values: ["developers", "enterprise-tech-teams", "startup-ctos"], weight: 4 },
-      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
-      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 2 }
-    ],
-    minScore: 6
-  }
-],
-
-"Security_ExpandablePolicyCards": [
+"Security_PrivacyCommitmentBlock": [
   {
     element: "policy_details",
     conditions: [

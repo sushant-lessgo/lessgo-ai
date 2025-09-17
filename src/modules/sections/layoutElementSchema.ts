@@ -132,11 +132,29 @@ export const layoutElementSchema: LayoutSchema = {
   ],
 
   // Security Section
-  ComplianceBadgeRow: [
+  // Security Section - Using actual component names
+  AuditResultsPanel: [
     { element: "headline", mandatory: true },
-    { element: "compliance_names", mandatory: true },
-    { element: "badge_descriptions", mandatory: false },
-    { element: "subheadline", mandatory: false },
+    { element: "audit_titles", mandatory: true },
+    { element: "audit_descriptions", mandatory: true },
+    { element: "auditor_names", mandatory: true },
+    { element: "audit_dates", mandatory: false },
+  ],
+
+  PenetrationTestResults: [
+    { element: "headline", mandatory: true },
+    { element: "test_categories", mandatory: true },
+    { element: "test_results", mandatory: true },
+    { element: "test_descriptions", mandatory: false },
+    { element: "test_dates", mandatory: false },
+  ],
+
+  PrivacyCommitmentBlock: [
+    { element: "headline", mandatory: true },
+    { element: "policy_titles", mandatory: true },
+    { element: "policy_summaries", mandatory: true },
+    { element: "policy_details", mandatory: false },
+    { element: "expand_labels", mandatory: false },
   ],
 
   SecurityChecklist: [
@@ -146,49 +164,18 @@ export const layoutElementSchema: LayoutSchema = {
     { element: "compliance_note", mandatory: false },
   ],
 
-  AuditTrustPanel: [
-    { element: "headline", mandatory: true },
-    { element: "audit_titles", mandatory: true },
-    { element: "audit_descriptions", mandatory: true },
-    { element: "auditor_names", mandatory: true },
-    { element: "audit_dates", mandatory: false },
-  ],
-
-  FAQStyleSecurity: [
-    { element: "headline", mandatory: true },
-    { element: "security_questions", mandatory: true },
-    { element: "security_answers", mandatory: true },
-    { element: "technical_details", mandatory: false },
-  ],
-
-  StatWithShieldIcons: [
+  SecurityGuaranteePanel: [
     { element: "headline", mandatory: true },
     { element: "security_stats", mandatory: true },
     { element: "stat_labels", mandatory: true },
     { element: "stat_descriptions", mandatory: false },
   ],
 
-  PartnerValidationRow: [
+  TrustSealCollection: [
     { element: "headline", mandatory: true },
-    { element: "partner_names", mandatory: true },
-    { element: "validation_descriptions", mandatory: true },
-    { element: "partnership_types", mandatory: false },
-  ],
-
-  DiagramInfraSecurity: [
-    { element: "headline", mandatory: true },
-    { element: "layer_titles", mandatory: true },
-    { element: "layer_descriptions", mandatory: true },
-    { element: "security_features", mandatory: true },
-    { element: "diagram_labels", mandatory: false },
-  ],
-
-  ExpandablePolicyCards: [
-    { element: "headline", mandatory: true },
-    { element: "policy_titles", mandatory: true },
-    { element: "policy_summaries", mandatory: true },
-    { element: "policy_details", mandatory: false },
-    { element: "expand_labels", mandatory: false },
+    { element: "compliance_names", mandatory: true },
+    { element: "badge_descriptions", mandatory: false },
+    { element: "subheadline", mandatory: false },
   ],
 
   // SocialProof Section

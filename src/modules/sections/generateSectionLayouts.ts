@@ -23,7 +23,7 @@ function getSectionFallback(sectionId: string): string {
     cta: "CenteredHeadlineCTA",
     problem: "StackedPainBullets",
     results: "StatBlocks",
-    security: "ComplianceBadgeRow",
+    security: "SecurityChecklist",
     socialProof: "LogoWall",
     testimonials: "QuoteGrid",
     uniqueMechanism: "StackedHighlights",

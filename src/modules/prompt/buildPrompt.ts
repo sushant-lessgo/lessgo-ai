@@ -241,14 +241,12 @@ function getSectionLayoutGuidance(sectionType: string, layout: string): string {
     },
 
     Security: {
-      ComplianceBadgeRow: "Compliance credential showcase. Let badges establish credibility. Use minimal, supportive compliance language.",
+      AuditResultsPanel: "Third-party validation presentation. Use authoritative, credible language. Include relevant dates and certification details.",
+      PenetrationTestResults: "Security testing results showcase. Present test categories and results clearly. Use technical yet accessible language.",
+      PrivacyCommitmentBlock: "Detailed policy presentation. Policy titles should be clear categories. Details should be comprehensive but understandable.",
       SecurityChecklist: "Security feature enumeration. Use clear, non-technical security language. Focus on user protection and peace of mind.",
-      AuditTrustPanel: "Third-party validation presentation. Use authoritative, credible language. Include relevant dates and certification details.",
-      FAQStyleSecurity: "Security concern addressing. Address real security questions directly. Use reassuring, technically accurate responses.",
-      StatWithShieldIcons: "Security metric presentation. Combine protection statistics with visual security symbols. Use confidence-building language.",
-      PartnerValidationRow: "Partnership credential display. Use partner credibility to build trust. Include relevant partnership context.",
-      DiagramInfraSecurity: "Technical security visualization. Use accessible technical language. Explain security layers and protections clearly.",
-      ExpandablePolicyCards: "Detailed policy presentation. Policy titles should be clear categories. Details should be comprehensive but understandable."
+      SecurityGuaranteePanel: "Security metric presentation. Combine protection statistics with visual security symbols. Use confidence-building language.",
+      TrustSealCollection: "Compliance credential showcase. Let badges establish credibility. Use minimal, supportive compliance language."
     },
 
     SocialProof: {

@@ -321,20 +321,12 @@ export const componentRegistry: ComponentRegistry = {
   },
   
   security: {
+    AuditResultsPanel: AuditResultsPanel,
+    PenetrationTestResults: PenetrationTestResults,
+    PrivacyCommitmentBlock: PrivacyCommitmentBlock,
     SecurityChecklist: SecurityChecklist,
-    // AuditResultsPanel: AuditResultsPanel, // Not in layoutRegistry
-    // PenetrationTestResults: PenetrationTestResults, // Not in layoutRegistry
-    // PrivacyCommitmentBlock: PrivacyCommitmentBlock, // Not in layoutRegistry
-    // SecurityGuaranteePanel: SecurityGuaranteePanel, // Not in layoutRegistry
-    // TrustSealCollection: TrustSealCollection, // Not in layoutRegistry
-    // Map missing layouts from layoutRegistry to existing components
-    ComplianceBadgeRow: TrustSealCollection,
-    AuditTrustPanel: AuditResultsPanel,
-    FAQStyleSecurity: SecurityChecklist,
-    StatWithShieldIcons: SecurityGuaranteePanel,
-    PartnerValidationRow: TrustSealCollection,
-    DiagramInfraSecurity: SecurityGuaranteePanel,
-    ExpandablePolicyCards: PrivacyCommitmentBlock,
+    SecurityGuaranteePanel: SecurityGuaranteePanel,
+    TrustSealCollection: TrustSealCollection,
   },
   
   integrations: {

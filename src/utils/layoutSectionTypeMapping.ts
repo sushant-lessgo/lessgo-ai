@@ -127,14 +127,12 @@ export const layoutToSectionType: Record<string, string> = {
   'PersonaResultPanels': 'results',
 
   // Security layouts
-  'ComplianceBadgeRow': 'security',
+  'AuditResultsPanel': 'security',
+  'PenetrationTestResults': 'security',
+  'PrivacyCommitmentBlock': 'security',
   'SecurityChecklist': 'security',
-  'AuditTrustPanel': 'security',
-  'FAQStyleSecurity': 'security',
-  'StatWithShieldIcons': 'security',
-  'PartnerValidationRow': 'security',
-  'DiagramInfraSecurity': 'security',
-  'ExpandablePolicyCards': 'security',
+  'SecurityGuaranteePanel': 'security',
+  'TrustSealCollection': 'security',
 
   // SocialProof layouts
   'LogoWall': 'socialProof',

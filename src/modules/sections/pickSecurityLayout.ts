@@ -1,14 +1,12 @@
 import type { LayoutPickerInput } from "./layoutPickerInput";
 
 export type SecurityLayout =
-  | "ComplianceBadgeRow"
+  | "AuditResultsPanel"
+  | "PenetrationTestResults"
+  | "PrivacyCommitmentBlock"
   | "SecurityChecklist"
-  | "AuditTrustPanel"
-  | "FAQStyleSecurity"
-  | "StatWithShieldIcons"
-  | "PartnerValidationRow"
-  | "DiagramInfraSecurity"
-  | "ExpandablePolicyCards";
+  | "SecurityGuaranteePanel"
+  | "TrustSealCollection";
 
 /**
  * Selects the optimal Security section layout based on trust requirements and technical depth needs
@@ -38,7 +36,7 @@ export function pickSecurityLayout(input: LayoutPickerInput): SecurityLayout {
     (problemType === "compliance-or-risk") &&
     (targetAudience === "enterprise" || targetAudience === "businesses")
   ) {
-    return "ComplianceBadgeRow";
+    return "TrustSealCollection";
   }
 
   // 2. Technical audiences need infrastructure details
@@ -47,7 +45,7 @@ export function pickSecurityLayout(input: LayoutPickerInput): SecurityLayout {
     (marketCategory === "Engineering & Development Tools" || marketCategory === "Data & Analytics Tools" || marketCategory === "AI Tools") &&
     marketSophisticationLevel >= "level-4"
   ) {
-    return "DiagramInfraSecurity";
+    return "SecurityGuaranteePanel";
   }
 
   // 3. Enterprise with formal audit requirements
@@ -57,16 +55,16 @@ export function pickSecurityLayout(input: LayoutPickerInput): SecurityLayout {
     (problemType === "compliance-or-risk") &&
     marketSophisticationLevel >= "level-4"
   ) {
-    return "AuditTrustPanel";
+    return "AuditResultsPanel";
   }
 
-  // 4. Detailed security concerns need FAQ format
+  // 4. Detailed security concerns need checklist format
   if (
     (awarenessLevel === "solution-aware" || awarenessLevel === "product-aware") &&
     (targetAudience === "builders" || targetAudience === "enterprise") &&
     marketSophisticationLevel >= "level-3"
   ) {
-    return "FAQStyleSecurity";
+    return "SecurityChecklist";
   }
 
   // 5. Simple trust building for early stage or SMB
@@ -75,207 +73,205 @@ export function pickSecurityLayout(input: LayoutPickerInput): SecurityLayout {
     (targetAudience === "founders" || targetAudience === "businesses") &&
     marketSophisticationLevel <= "level-2"
   ) {
-    return "StatWithShieldIcons";
+    return "SecurityGuaranteePanel";
   }
 
   // Medium-Priority Rules (Scoring system)
   
   const scores: Record<SecurityLayout, number> = {
-    ComplianceBadgeRow: 0,
+    AuditResultsPanel: 0,
+    PenetrationTestResults: 0,
+    PrivacyCommitmentBlock: 0,
     SecurityChecklist: 0,
-    AuditTrustPanel: 0,
-    FAQStyleSecurity: 0,
-    StatWithShieldIcons: 0,
-    PartnerValidationRow: 0,
-    DiagramInfraSecurity: 0,
-    ExpandablePolicyCards: 0,
+    SecurityGuaranteePanel: 0,
+    TrustSealCollection: 0,
   };
 
   // Target Audience Scoring (Highest Weight: 4-5 points)
   if (targetAudience === "enterprise") {
-    scores.ComplianceBadgeRow += 5;
-    scores.AuditTrustPanel += 5;
-    scores.ExpandablePolicyCards += 4;
-    scores.PartnerValidationRow += 4;
-    scores.DiagramInfraSecurity += 3;
+    scores.TrustSealCollection += 5;
+    scores.AuditResultsPanel += 5;
+    scores.PrivacyCommitmentBlock += 4;
+    scores.PenetrationTestResults += 3;
+    scores.SecurityGuaranteePanel += 3;
   } else if (targetAudience === "builders") {
-    scores.DiagramInfraSecurity += 5;
-    scores.FAQStyleSecurity += 4;
-    scores.SecurityChecklist += 3;
-    scores.ExpandablePolicyCards += 2;
-  } else if (targetAudience === "businesses") {
-    scores.ComplianceBadgeRow += 4;
+    scores.SecurityGuaranteePanel += 5;
     scores.SecurityChecklist += 4;
-    scores.PartnerValidationRow += 3;
-    scores.StatWithShieldIcons += 3;
+    scores.PenetrationTestResults += 3;
+    scores.PrivacyCommitmentBlock += 2;
+  } else if (targetAudience === "businesses") {
+    scores.TrustSealCollection += 4;
+    scores.SecurityChecklist += 4;
+    scores.SecurityGuaranteePanel += 3;
+    scores.AuditResultsPanel += 2;
   } else if (targetAudience === "founders" || targetAudience === "creators") {
-    scores.StatWithShieldIcons += 4;
+    scores.SecurityGuaranteePanel += 4;
     scores.SecurityChecklist += 3;
-    scores.ComplianceBadgeRow += 2;
+    scores.TrustSealCollection += 2;
   } else if (targetAudience === "marketers") {
     scores.SecurityChecklist += 4;
-    scores.StatWithShieldIcons += 3;
-    scores.ComplianceBadgeRow += 2;
+    scores.SecurityGuaranteePanel += 3;
+    scores.TrustSealCollection += 2;
   }
 
   // Problem Type Scoring (High Weight: 3-4 points)
   if (problemType === "compliance-or-risk") {
-    scores.ComplianceBadgeRow += 4;
-    scores.AuditTrustPanel += 4;
-    scores.ExpandablePolicyCards += 4;
-    scores.PartnerValidationRow += 3;
-    scores.FAQStyleSecurity += 2;
+    scores.TrustSealCollection += 4;
+    scores.AuditResultsPanel += 4;
+    scores.PrivacyCommitmentBlock += 4;
+    scores.PenetrationTestResults += 3;
+    scores.SecurityChecklist += 2;
   } else if (problemType === "lost-revenue-or-inefficiency") {
     scores.SecurityChecklist += 3;
-    scores.StatWithShieldIcons += 3;
-    scores.PartnerValidationRow += 2;
+    scores.SecurityGuaranteePanel += 3;
+    scores.TrustSealCollection += 2;
   } else if (problemType === "professional-image-or-branding") {
-    scores.PartnerValidationRow += 3;
-    scores.ComplianceBadgeRow += 3;
-    scores.StatWithShieldIcons += 2;
+    scores.TrustSealCollection += 3;
+    scores.SecurityGuaranteePanel += 2;
+    scores.AuditResultsPanel += 2;
   } else {
     // Default for other problem types
     scores.SecurityChecklist += 2;
-    scores.StatWithShieldIcons += 2;
+    scores.SecurityGuaranteePanel += 2;
   }
 
   // Market Category Scoring (High Weight: 3-4 points)
   if (marketCategory === "Engineering & Development Tools" || marketCategory === "AI Tools") {
-    scores.DiagramInfraSecurity += 4;
-    scores.FAQStyleSecurity += 3;
+    scores.SecurityGuaranteePanel += 4;
+    scores.PenetrationTestResults += 3;
     scores.SecurityChecklist += 2;
   } else if (marketCategory === "Data & Analytics Tools") {
-    scores.DiagramInfraSecurity += 4;
-    scores.ExpandablePolicyCards += 3;
-    scores.AuditTrustPanel += 2;
+    scores.SecurityGuaranteePanel += 4;
+    scores.PrivacyCommitmentBlock += 3;
+    scores.AuditResultsPanel += 2;
   } else if (marketCategory === "HR & People Operations Tools" || marketCategory === "Finance & Accounting Tools") {
-    scores.ComplianceBadgeRow += 4;
-    scores.AuditTrustPanel += 4;
-    scores.ExpandablePolicyCards += 3;
-    scores.PartnerValidationRow += 2;
+    scores.TrustSealCollection += 4;
+    scores.AuditResultsPanel += 4;
+    scores.PrivacyCommitmentBlock += 3;
+    scores.PenetrationTestResults += 2;
   } else if (marketCategory === "Marketing & Sales Tools") {
     scores.SecurityChecklist += 3;
-    scores.PartnerValidationRow += 3;
-    scores.ComplianceBadgeRow += 2;
+    scores.TrustSealCollection += 3;
+    scores.SecurityGuaranteePanel += 2;
   } else if (marketCategory === "Work & Productivity Tools") {
     scores.SecurityChecklist += 3;
-    scores.StatWithShieldIcons += 3;
-    scores.ComplianceBadgeRow += 2;
+    scores.SecurityGuaranteePanel += 3;
+    scores.TrustSealCollection += 2;
   } else if (marketCategory === "Customer Support & Service Tools") {
-    scores.ComplianceBadgeRow += 3;
+    scores.TrustSealCollection += 3;
     scores.SecurityChecklist += 3;
-    scores.PartnerValidationRow += 2;
+    scores.PrivacyCommitmentBlock += 2;
   }
 
   // Market Sophistication Scoring (High Weight: 3-4 points)
   if (marketSophisticationLevel === "level-1" || marketSophisticationLevel === "level-2") {
-    scores.StatWithShieldIcons += 4;
+    scores.SecurityGuaranteePanel += 4;
     scores.SecurityChecklist += 3;
-    scores.ComplianceBadgeRow += 2;
+    scores.TrustSealCollection += 2;
   } else if (marketSophisticationLevel === "level-3") {
     scores.SecurityChecklist += 4;
-    scores.PartnerValidationRow += 3;
-    scores.FAQStyleSecurity += 2;
+    scores.TrustSealCollection += 3;
+    scores.AuditResultsPanel += 2;
   } else if (marketSophisticationLevel === "level-4" || marketSophisticationLevel === "level-5") {
-    scores.DiagramInfraSecurity += 4;
-    scores.AuditTrustPanel += 4;
-    scores.ExpandablePolicyCards += 3;
-    scores.FAQStyleSecurity += 3;
+    scores.PenetrationTestResults += 4;
+    scores.AuditResultsPanel += 4;
+    scores.PrivacyCommitmentBlock += 3;
+    scores.SecurityGuaranteePanel += 3;
   }
 
   // Startup Stage Scoring (Medium Weight: 2-3 points)
   if (startupStage === "idea" || startupStage === "mvp") {
-    scores.StatWithShieldIcons += 3;
+    scores.SecurityGuaranteePanel += 3;
     scores.SecurityChecklist += 2;
-    scores.ComplianceBadgeRow += 1;
+    scores.TrustSealCollection += 1;
   } else if (startupStage === "traction") {
     scores.SecurityChecklist += 3;
-    scores.PartnerValidationRow += 2;
-    scores.ComplianceBadgeRow += 2;
+    scores.TrustSealCollection += 2;
+    scores.SecurityGuaranteePanel += 2;
   } else if (startupStage === "growth") {
-    scores.AuditTrustPanel += 3;
-    scores.PartnerValidationRow += 3;
-    scores.ComplianceBadgeRow += 2;
-    scores.ExpandablePolicyCards += 2;
+    scores.AuditResultsPanel += 3;
+    scores.TrustSealCollection += 3;
+    scores.PrivacyCommitmentBlock += 2;
+    scores.PenetrationTestResults += 2;
   } else if (startupStage === "scale") {
-    scores.AuditTrustPanel += 3;
-    scores.DiagramInfraSecurity += 3;
-    scores.ExpandablePolicyCards += 2;
-    scores.ComplianceBadgeRow += 2;
+    scores.AuditResultsPanel += 3;
+    scores.PenetrationTestResults += 3;
+    scores.PrivacyCommitmentBlock += 2;
+    scores.TrustSealCollection += 2;
   }
 
   // Awareness Level Scoring (Medium Weight: 2-3 points)
   if (awarenessLevel === "unaware" || awarenessLevel === "problem-aware") {
-    scores.StatWithShieldIcons += 3;
+    scores.SecurityGuaranteePanel += 3;
     scores.SecurityChecklist += 2;
-    scores.ComplianceBadgeRow += 2;
+    scores.TrustSealCollection += 2;
   } else if (awarenessLevel === "solution-aware") {
-    scores.FAQStyleSecurity += 3;
     scores.SecurityChecklist += 3;
-    scores.PartnerValidationRow += 2;
+    scores.AuditResultsPanel += 2;
+    scores.TrustSealCollection += 2;
   } else if (awarenessLevel === "product-aware" || awarenessLevel === "most-aware") {
-    scores.ExpandablePolicyCards += 3;
-    scores.DiagramInfraSecurity += 3;
-    scores.AuditTrustPanel += 2;
+    scores.PrivacyCommitmentBlock += 3;
+    scores.PenetrationTestResults += 3;
+    scores.AuditResultsPanel += 2;
   }
 
   // Tone Profile Scoring (Medium Weight: 2-3 points)
   if (toneProfile === "minimal-technical") {
-    scores.DiagramInfraSecurity += 3;
+    scores.PenetrationTestResults += 3;
     scores.SecurityChecklist += 2;
-    scores.FAQStyleSecurity += 2;
+    scores.SecurityGuaranteePanel += 2;
   } else if (toneProfile === "luxury-expert") {
-    scores.AuditTrustPanel += 3;
-    scores.PartnerValidationRow += 3;
-    scores.ExpandablePolicyCards += 2;
+    scores.AuditResultsPanel += 3;
+    scores.TrustSealCollection += 3;
+    scores.PrivacyCommitmentBlock += 2;
   } else if (toneProfile === "friendly-helpful") {
     scores.SecurityChecklist += 3;
-    scores.StatWithShieldIcons += 2;
-    scores.FAQStyleSecurity += 2;
+    scores.SecurityGuaranteePanel += 2;
+    scores.TrustSealCollection += 2;
   } else if (toneProfile === "confident-playful") {
-    scores.StatWithShieldIcons += 3;
+    scores.SecurityGuaranteePanel += 3;
     scores.SecurityChecklist += 2;
   } else if (toneProfile === "bold-persuasive") {
-    scores.ComplianceBadgeRow += 3;
-    scores.PartnerValidationRow += 2;
-    scores.AuditTrustPanel += 2;
+    scores.TrustSealCollection += 3;
+    scores.AuditResultsPanel += 2;
+    scores.SecurityGuaranteePanel += 2;
   }
 
   // Landing Goal Scoring (Low Weight: 1-2 points)
   if (landingPageGoals === "contact-sales" || landingPageGoals === "demo") {
-    scores.AuditTrustPanel += 2;
-    scores.DiagramInfraSecurity += 2;
-    scores.ExpandablePolicyCards += 1;
+    scores.AuditResultsPanel += 2;
+    scores.PenetrationTestResults += 2;
+    scores.PrivacyCommitmentBlock += 1;
   } else if (landingPageGoals === "buy-now" || landingPageGoals === "subscribe") {
-    scores.ComplianceBadgeRow += 2;
-    scores.PartnerValidationRow += 1;
+    scores.TrustSealCollection += 2;
+    scores.SecurityGuaranteePanel += 1;
   } else if (landingPageGoals === "free-trial") {
     scores.SecurityChecklist += 2;
-    scores.FAQStyleSecurity += 1;
+    scores.SecurityGuaranteePanel += 1;
   } else if (landingPageGoals === "signup") {
-    scores.StatWithShieldIcons += 2;
+    scores.SecurityGuaranteePanel += 2;
     scores.SecurityChecklist += 1;
   }
 
   // Pricing Model Scoring (Low Weight: 1-2 points)
   if (pricingModel === "custom-quote") {
-    scores.AuditTrustPanel += 2;
-    scores.ExpandablePolicyCards += 1;
+    scores.AuditResultsPanel += 2;
+    scores.PrivacyCommitmentBlock += 1;
   } else if (pricingModel === "free" || pricingModel === "freemium") {
-    scores.StatWithShieldIcons += 2;
+    scores.SecurityGuaranteePanel += 2;
     scores.SecurityChecklist += 1;
   } else if (pricingModel === "tiered") {
-    scores.ComplianceBadgeRow += 2;
-    scores.PartnerValidationRow += 1;
+    scores.TrustSealCollection += 2;
+    scores.SecurityGuaranteePanel += 1;
   }
 
   // Copy Intent Scoring (Low Weight: 1-2 points)
   if (copyIntent === "pain-led") {
     scores.SecurityChecklist += 2;
-    scores.StatWithShieldIcons += 1;
+    scores.SecurityGuaranteePanel += 1;
   } else if (copyIntent === "desire-led") {
-    scores.PartnerValidationRow += 2;
-    scores.AuditTrustPanel += 1;
+    scores.TrustSealCollection += 2;
+    scores.AuditResultsPanel += 1;
   }
 
   // Find the highest scoring layout
