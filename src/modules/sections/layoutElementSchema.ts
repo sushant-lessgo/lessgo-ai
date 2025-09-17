@@ -571,10 +571,14 @@ export const layoutElementSchema: LayoutSchema = {
 
   AnimatedUpgradePath: [
     { element: "headline", mandatory: true },
-    { element: "current_solution_title", mandatory: true },
-    { element: "upgraded_solution_title", mandatory: true },
-    { element: "upgrade_benefits", mandatory: true },
-    { element: "transition_text", mandatory: false },
+    { element: "stage_titles", mandatory: true },
+    { element: "stage_descriptions", mandatory: true },
+    { element: "subheadline", mandatory: false },
+    { element: "stage_icons", mandatory: false },
+    { element: "stage_icon_1", mandatory: false },
+    { element: "stage_icon_2", mandatory: false },
+    { element: "stage_icon_3", mandatory: false },
+    { element: "cta_text", mandatory: false },
   ],
 
   PersonaUseCaseCompare: [

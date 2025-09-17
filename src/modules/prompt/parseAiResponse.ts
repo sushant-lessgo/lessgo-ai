@@ -156,6 +156,17 @@ function processSectionContent(sectionId: string, content: SectionContent): {
 }
 
 /**
+ * Determines if a field should contain pipe-separated data based on naming patterns
+ */
+function isPipeSeparatedField(elementKey: string): boolean {
+  const pipeSeparatedPatterns = [
+    'titles', 'descriptions', 'quotes', 'names',
+    'items', 'labels', 'steps', 'list'
+  ];
+  return pipeSeparatedPatterns.some(pattern => elementKey.includes(pattern));
+}
+
+/**
  * Processes individual elements with validation
  */
 function processElement(sectionId: string, elementKey: string, value: any): {
@@ -178,6 +189,49 @@ function processElement(sectionId: string, elementKey: string, value: any): {
     return result
   }
 
+  // Convert JSON arrays to pipe-separated strings for appropriate fields
+  if (Array.isArray(value) && isPipeSeparatedField(elementKey)) {
+    // Validate array items before conversion
+    const invalidItems = value.filter(item => typeof item !== 'string' || !item.trim())
+    if (invalidItems.length > 0) {
+      result.isValid = false
+      result.warnings.push(`${sectionId}.${elementKey}: Contains ${invalidItems.length} invalid items in array`)
+      return result
+    }
+
+    // Convert to pipe-separated string
+    result.value = value.join('|')
+    // Continue validation as string
+    value = result.value
+  }
+
+  // Convert stringified JSON arrays to pipe-separated strings for appropriate fields
+  if (typeof value === 'string' && isPipeSeparatedField(elementKey)) {
+    const trimmedValue = value.trim()
+    // Check if string looks like JSON array: starts with [ and ends with ]
+    if (trimmedValue.startsWith('[') && trimmedValue.endsWith(']')) {
+      try {
+        const parsedArray = JSON.parse(trimmedValue)
+        if (Array.isArray(parsedArray)) {
+          // Validate parsed array items
+          const invalidItems = parsedArray.filter(item => typeof item !== 'string' || !item.trim())
+          if (invalidItems.length > 0) {
+            result.isValid = false
+            result.warnings.push(`${sectionId}.${elementKey}: Stringified array contains ${invalidItems.length} invalid items`)
+            return result
+          }
+
+          // Convert to pipe-separated string
+          result.value = parsedArray.join('|')
+          value = result.value
+        }
+      } catch (error) {
+        // If JSON parsing fails, continue with string validation (fallback)
+        result.warnings.push(`${sectionId}.${elementKey}: Failed to parse potential JSON array: ${trimmedValue}`)
+      }
+    }
+  }
+
   // String validation
   if (typeof value === 'string') {
     if (!value.trim()) {
@@ -197,7 +251,7 @@ function processElement(sectionId: string, elementKey: string, value: any): {
     }
   }
 
-  // Array validation
+  // Array validation (for fields that should remain as arrays)
   if (Array.isArray(value)) {
     if (value.length === 0) {
       result.isValid = false

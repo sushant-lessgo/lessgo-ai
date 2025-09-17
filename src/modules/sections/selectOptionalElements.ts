@@ -376,11 +376,53 @@ const elementRules: SectionLayoutRules = {
 
   "Comparison_AnimatedUpgradePath": [
     {
-      element: "transition_text",
+      element: "subheadline",
       conditions: [
-        { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
-        { variable: "copyIntent", values: ["desire-led"], weight: 3 },
-        { variable: "toneProfile", values: ["confident-playful", "bold-persuasive"], weight: 2 }
+        { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
+        { variable: "copyIntent", values: ["pain-led"], weight: 3 },
+        { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 2 }
+      ],
+      minScore: 6
+    },
+    {
+      element: "stage_icons",
+      conditions: [
+        { variable: "toneProfile", values: ["confident-playful", "friendly-approachable"], weight: 4 },
+        { variable: "targetAudience", values: ["small-business-owners", "mid-market-companies"], weight: 3 },
+        { variable: "copyIntent", values: ["desire-led"], weight: 2 }
+      ],
+      minScore: 6
+    },
+    {
+      element: "stage_icon_1",
+      conditions: [
+        { variable: "toneProfile", values: ["confident-playful", "friendly-approachable"], weight: 4 },
+        { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 3 }
+      ],
+      minScore: 5
+    },
+    {
+      element: "stage_icon_2",
+      conditions: [
+        { variable: "toneProfile", values: ["confident-playful", "friendly-approachable"], weight: 4 },
+        { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 3 }
+      ],
+      minScore: 5
+    },
+    {
+      element: "stage_icon_3",
+      conditions: [
+        { variable: "toneProfile", values: ["confident-playful", "friendly-approachable"], weight: 4 },
+        { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 3 }
+      ],
+      minScore: 5
+    },
+    {
+      element: "cta_text",
+      conditions: [
+        { variable: "landingPageGoals", values: ["lead-capture", "trial-signup"], weight: 4 },
+        { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 },
+        { variable: "copyIntent", values: ["desire-led"], weight: 2 }
       ],
       minScore: 6
     }
