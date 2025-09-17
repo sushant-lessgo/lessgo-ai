@@ -403,13 +403,9 @@ export const extractLayoutContent = <T extends Record<string, any>>(
         }
         logger.dev(`✅ Using default for mandatory element "${key}":`, config.default);
       } else if (isInSchema && isExcluded) {
-        // Category 2: Optional elements IN SCHEMA that are excluded - use empty values to hide
-        if (config.type === 'string') {
-          result[key as keyof T] = '' as T[keyof T];
-        } else if (config.type === 'array') {
-          result[key as keyof T] = [] as T[keyof T];
-        }
-        logger.dev(`❌ Using empty for excluded optional element "${key}"`);
+        // Category 2: Optional elements IN SCHEMA that are excluded - skip entirely to hide from UI
+        logger.dev(`❌ Skipping excluded optional element "${key}" - will not appear in UI`);
+        continue; // Skip adding this key to result object, leaving it undefined
       } else {
         // Category 3: Elements NOT IN SCHEMA (assets) OR optional elements that are included - use default values
         if (config.type === 'string') {
