@@ -190,7 +190,6 @@ export const layoutRegistry = {
   ] as const,
 
   UseCase: [
-    "BeforeAfterWorkflow",
     "CustomerJourneyFlow",
     "IndustryUseCaseGrid",
     "InteractiveUseCaseMap",

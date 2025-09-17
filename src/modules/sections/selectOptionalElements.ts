@@ -2126,17 +2126,17 @@ const elementRules: SectionLayoutRules = {
   }
 ],
 
-"UseCase_BeforeAfterWorkflow": [
-  {
-    element: "before_after_steps",
-    conditions: [
-      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
-      { variable: "targetAudience", values: ["businesses", "enterprise"], weight: 3 },
-      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 2 }
-    ],
-    minScore: 6
-  }
-],
+// "UseCase_BeforeAfterWorkflow": [
+//   {
+//     element: "before_after_steps",
+//     conditions: [
+//       { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
+//       { variable: "targetAudience", values: ["businesses", "enterprise"], weight: 3 },
+//       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 2 }
+//     ],
+//     minScore: 6
+//   }
+// ],
 
 "UseCase_InteractiveUseCaseMap": [
   {

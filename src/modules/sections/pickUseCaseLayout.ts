@@ -1,7 +1,6 @@
 import type { LayoutPickerInput } from "./layoutPickerInput";
 
 export type UseCaseLayout =
-  | "BeforeAfterWorkflow"
   | "CustomerJourneyFlow"
   | "IndustryUseCaseGrid"
   | "InteractiveUseCaseMap"
@@ -80,13 +79,13 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
   // Medium-Priority Rules (Scoring system)
   
   const scores: Record<UseCaseLayout, number> = {
-    PersonaGrid: 0,
-    UseCaseCarousel: 0,
+    CustomerJourneyFlow: 0,
     IndustryUseCaseGrid: 0,
-    RoleBasedScenarios: 0,
+    InteractiveUseCaseMap: 0,
     PersonaGrid: 0,
-    UseCaseCarousel: 0,
     RoleBasedScenarios: 0,
+    UseCaseCarousel: 0,
+    WorkflowDiagrams: 0,
   };
 
   // Target Audience Scoring (Highest Weight: 4-5 points)
@@ -101,29 +100,29 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
   } else if (targetAudience === "businesses") {
     scores.IndustryUseCaseGrid += 4;
     scores.PersonaGrid += 4;
-    scores.PersonaGrid += 3;
+    scores.CustomerJourneyFlow += 3;
     scores.RoleBasedScenarios += 2;
   } else if (targetAudience === "founders" || targetAudience === "creators") {
     scores.UseCaseCarousel += 4;
     scores.PersonaGrid += 4;
-    scores.UseCaseCarousel += 3;
+    scores.WorkflowDiagrams += 3;
     scores.RoleBasedScenarios += 2;
   } else if (targetAudience === "marketers") {
     scores.PersonaGrid += 4;
     scores.RoleBasedScenarios += 4;
-    scores.PersonaGrid += 3;
+    scores.CustomerJourneyFlow += 3;
     scores.IndustryUseCaseGrid += 2;
   }
 
   // Market Sophistication Scoring (High Weight: 3-4 points)
   if (marketSophisticationLevel === "level-1" || marketSophisticationLevel === "level-2") {
     scores.UseCaseCarousel += 4;
-    scores.UseCaseCarousel += 4;
+    scores.WorkflowDiagrams += 4;
     scores.PersonaGrid += 3;
     scores.RoleBasedScenarios += 2;
   } else if (marketSophisticationLevel === "level-3") {
     scores.PersonaGrid += 4;
-    scores.PersonaGrid += 3;
+    scores.CustomerJourneyFlow += 3;
     scores.IndustryUseCaseGrid += 3;
     scores.RoleBasedScenarios += 2;
   } else if (marketSophisticationLevel === "level-4" || marketSophisticationLevel === "level-5") {
@@ -136,7 +135,7 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
   if (awarenessLevel === "unaware" || awarenessLevel === "problem-aware") {
     scores.UseCaseCarousel += 4;
     scores.PersonaGrid += 4;
-    scores.UseCaseCarousel += 3;
+    scores.WorkflowDiagrams += 3;
     scores.RoleBasedScenarios += 2;
   } else if (awarenessLevel === "solution-aware") {
     scores.PersonaGrid += 4;
@@ -144,7 +143,7 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
     scores.RoleBasedScenarios += 3;
   } else if (awarenessLevel === "product-aware" || awarenessLevel === "most-aware") {
     scores.RoleBasedScenarios += 4;
-    scores.RoleBasedScenarios += 3;
+    scores.InteractiveUseCaseMap += 3;
     scores.PersonaGrid += 2;
   }
 
@@ -152,7 +151,7 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
   if (copyIntent === "pain-led") {
     scores.UseCaseCarousel += 4;
     scores.PersonaGrid += 3;
-    scores.UseCaseCarousel += 3;
+    scores.WorkflowDiagrams += 3;
     scores.RoleBasedScenarios += 2;
   } else if (copyIntent === "desire-led") {
     scores.PersonaGrid += 4;
@@ -166,15 +165,15 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
     scores.PersonaGrid += 2;
   } else if (marketCategory === "Marketing & Sales Tools") {
     scores.PersonaGrid += 3;
-    scores.PersonaGrid += 3;
+    scores.CustomerJourneyFlow += 3;
     scores.RoleBasedScenarios += 2;
   } else if (marketCategory === "Engineering & Development Tools" || marketCategory === "AI Tools") {
     scores.RoleBasedScenarios += 3;
-    scores.UseCaseCarousel += 2;
+    scores.WorkflowDiagrams += 2;
   } else if (marketCategory === "Design & Creative Tools") {
     scores.UseCaseCarousel += 3;
     scores.PersonaGrid += 2;
-    scores.RoleBasedScenarios += 2;
+    scores.WorkflowDiagrams += 2;
   } else if (marketCategory === "Data & Analytics Tools") {
     scores.RoleBasedScenarios += 3;
     scores.IndustryUseCaseGrid += 3;
@@ -187,12 +186,12 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
   // Startup Stage Scoring (Medium Weight: 2-3 points)
   if (startupStage === "idea" || startupStage === "mvp") {
     scores.UseCaseCarousel += 3;
-    scores.UseCaseCarousel += 2;
+    scores.WorkflowDiagrams += 2;
     scores.PersonaGrid += 2;
   } else if (startupStage === "traction") {
     scores.PersonaGrid += 3;
     scores.RoleBasedScenarios += 2;
-    scores.PersonaGrid += 2;
+    scores.CustomerJourneyFlow += 2;
   } else if (startupStage === "growth") {
     scores.PersonaGrid += 3;
     scores.IndustryUseCaseGrid += 2;
@@ -206,7 +205,7 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
   if (toneProfile === "friendly-helpful") {
     scores.UseCaseCarousel += 3;
     scores.PersonaGrid += 2;
-    scores.UseCaseCarousel += 2;
+    scores.WorkflowDiagrams += 2;
   } else if (toneProfile === "confident-playful") {
     scores.UseCaseCarousel += 3;
     scores.RoleBasedScenarios += 2;
@@ -217,7 +216,7 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
     scores.RoleBasedScenarios += 2;
   } else if (toneProfile === "minimal-technical") {
     scores.RoleBasedScenarios += 2;
-    scores.UseCaseCarousel += 2;
+    scores.WorkflowDiagrams += 2;
   } else if (toneProfile === "luxury-expert") {
     scores.RoleBasedScenarios += 3;
     scores.IndustryUseCaseGrid += 3;
@@ -238,10 +237,10 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
     scores.UseCaseCarousel += 2;
     scores.PersonaGrid += 1;
   } else if (problemType === "time-freedom-or-automation") {
-    scores.PersonaGrid += 1;
+    scores.WorkflowDiagrams += 1;
   } else if (problemType === "professional-image-or-branding") {
     scores.PersonaGrid += 2;
-    scores.PersonaGrid += 1;
+    scores.CustomerJourneyFlow += 1;
   }
 
   // Landing Goal Scoring (Low Weight: 1-2 points)
@@ -250,7 +249,7 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
     scores.IndustryUseCaseGrid += 2;
   } else if (landingPageGoals === "buy-now" || landingPageGoals === "subscribe") {
     scores.PersonaGrid += 2;
-    scores.PersonaGrid += 1;
+    scores.CustomerJourneyFlow += 1;
   } else if (landingPageGoals === "free-trial") {
     scores.RoleBasedScenarios += 2;
   } else if (landingPageGoals === "signup") {
@@ -267,10 +266,10 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
     scores.IndustryUseCaseGrid += 1;
   } else if (pricingModel === "free" || pricingModel === "freemium") {
     scores.UseCaseCarousel += 2;
-    scores.UseCaseCarousel += 1;
+    scores.WorkflowDiagrams += 1;
   } else if (pricingModel === "tiered") {
     scores.PersonaGrid += 2;
-    scores.PersonaGrid += 1;
+    scores.CustomerJourneyFlow += 1;
   } else if (pricingModel === "per-seat") {
     scores.RoleBasedScenarios += 2;
   }

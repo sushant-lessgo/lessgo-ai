@@ -27,7 +27,7 @@ import BeforeImageAfterText from '@/modules/UIBlocks/Problem/BeforeImageAfterTex
 import BoldGuaranteePanel from '@/modules/UIBlocks/Objection/BoldGuaranteePanel';
 import BonusStackCTA from '@/modules/UIBlocks/Close/BonusStackCTA';
 import BeforeAfterSlider from '@/modules/UIBlocks/BeforeAfter/BeforeAfterSlider';
-import BeforeAfterWorkflow from '@/modules/UIBlocks/UseCase/BeforeAfterWorkflow';
+// import BeforeAfterWorkflow from '@/modules/UIBlocks/UseCase/BeforeAfterWorkflow'; // Temporarily disabled - not related to use case
 import CallToQuotePlan from '@/modules/UIBlocks/Pricing/CallToQuotePlan';
 import CardFlipSteps from '@/modules/UIBlocks/HowItWorks/CardFlipSteps';
 import CardWithTestimonial from '@/modules/UIBlocks/Pricing/CardWithTestimonial';
@@ -271,7 +271,7 @@ export const componentRegistry: ComponentRegistry = {
   },
   
   useCases: {
-    BeforeAfterWorkflow: BeforeAfterWorkflow,
+    // BeforeAfterWorkflow: BeforeAfterWorkflow, // Temporarily disabled - not related to use case
     CustomerJourneyFlow: CustomerJourneyFlow,
     IndustryUseCaseGrid: IndustryUseCaseGrid,
     InteractiveUseCaseMap: InteractiveUseCaseMap,
