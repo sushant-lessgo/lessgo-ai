@@ -51,6 +51,64 @@ export default function PropertyComparisonMatrix(props: LayoutComponentProps) {
     const updatedValues = updateListData(blockContent.competitors_values, index, value);
     handleContentUpdate('competitors_values', updatedValues);
   };
+
+  // Helper function to add a new property row (following StackedHighlights pattern)
+  const addProperty = (properties: string, usValues: string, competitorValues: string): { newProperties: string; newUsValues: string; newCompetitorValues: string } => {
+    const propertyList = parsePipeData(properties);
+    const usValueList = parsePipeData(usValues);
+    const competitorValueList = parsePipeData(competitorValues);
+
+    // Add new property with default content
+    propertyList.push('New Property');
+    usValueList.push('Our advantage');
+    competitorValueList.push('Their limitation');
+
+    return {
+      newProperties: propertyList.join('|'),
+      newUsValues: usValueList.join('|'),
+      newCompetitorValues: competitorValueList.join('|')
+    };
+  };
+
+  // Helper function to remove a property row (following StackedHighlights pattern)
+  const removeProperty = (properties: string, usValues: string, competitorValues: string, indexToRemove: number): { newProperties: string; newUsValues: string; newCompetitorValues: string } => {
+    const propertyList = parsePipeData(properties);
+    const usValueList = parsePipeData(usValues);
+    const competitorValueList = parsePipeData(competitorValues);
+
+    // Remove the property at the specified index
+    if (indexToRemove >= 0 && indexToRemove < propertyList.length) {
+      propertyList.splice(indexToRemove, 1);
+    }
+    if (indexToRemove >= 0 && indexToRemove < usValueList.length) {
+      usValueList.splice(indexToRemove, 1);
+    }
+    if (indexToRemove >= 0 && indexToRemove < competitorValueList.length) {
+      competitorValueList.splice(indexToRemove, 1);
+    }
+
+    return {
+      newProperties: propertyList.join('|'),
+      newUsValues: usValueList.join('|'),
+      newCompetitorValues: competitorValueList.join('|')
+    };
+  };
+
+  // Handle adding a new property
+  const handleAddProperty = () => {
+    const { newProperties, newUsValues, newCompetitorValues } = addProperty(blockContent.properties, blockContent.us_values, blockContent.competitors_values);
+    handleContentUpdate('properties', newProperties);
+    handleContentUpdate('us_values', newUsValues);
+    handleContentUpdate('competitors_values', newCompetitorValues);
+  };
+
+  // Handle removing a property
+  const handleRemoveProperty = (indexToRemove: number) => {
+    const { newProperties, newUsValues, newCompetitorValues } = removeProperty(blockContent.properties, blockContent.us_values, blockContent.competitors_values, indexToRemove);
+    handleContentUpdate('properties', newProperties);
+    handleContentUpdate('us_values', newUsValues);
+    handleContentUpdate('competitors_values', newCompetitorValues);
+  };
   
   // Typography styles
   const bodyStyle = getTypographyStyle('body-lg');
@@ -109,7 +167,7 @@ export default function PropertyComparisonMatrix(props: LayoutComponentProps) {
             </div>
           </div>
           {properties.map((property, index) => (
-            <div key={index} className="grid grid-cols-3 border-b border-gray-100 last:border-b-0">
+            <div key={index} className={`relative group/property-row-${index} grid grid-cols-3 border-b border-gray-100 last:border-b-0`}>
               <div style={bodyStyle} className="p-4 font-medium text-gray-900">
                 <EditableAdaptiveText
                   mode={mode}
@@ -140,7 +198,7 @@ export default function PropertyComparisonMatrix(props: LayoutComponentProps) {
                   data-element-key={`us_value_${index}`}
                 />
               </div>
-              <div style={bodyStyle} className="p-4 text-center text-gray-500">
+              <div style={bodyStyle} className="p-4 text-center text-gray-500 relative">
                 <EditableAdaptiveText
                   mode={mode}
                   value={competitorValues[index] || ''}
@@ -154,10 +212,41 @@ export default function PropertyComparisonMatrix(props: LayoutComponentProps) {
                   data-section-id={sectionId}
                   data-element-key={`competitor_value_${index}`}
                 />
+
+                {/* Delete button - only show in edit mode and if more than 1 property */}
+                {mode !== 'preview' && properties.length > 1 && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemoveProperty(index);
+                    }}
+                    className={`opacity-0 group-hover/property-row-${index}:opacity-100 absolute top-2 right-2 text-red-500 hover:text-red-700 transition-opacity duration-200`}
+                    title="Remove this property"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
               </div>
             </div>
           ))}
         </div>
+
+        {/* Add Property Button - only show in edit mode and if under max limit */}
+        {mode !== 'preview' && properties.length < 8 && (
+          <div className="mt-6 text-center">
+            <button
+              onClick={handleAddProperty}
+              className="flex items-center space-x-2 mx-auto px-4 py-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-xl transition-all duration-200 group"
+            >
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span className="text-blue-700 font-medium">Add Property</span>
+            </button>
+          </div>
+        )}
       </div>
     </LayoutSection>
   );

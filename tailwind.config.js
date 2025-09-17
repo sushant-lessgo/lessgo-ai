@@ -272,6 +272,15 @@ module.exports = {
   'group-hover/timeline-item:opacity-100',
   // AlgorithmExplainer specific patterns
   'group-hover/algorithm-step:opacity-100',
+  // PropertyComparisonMatrix specific patterns
+  'group-hover/property-row-0:opacity-100',
+  'group-hover/property-row-1:opacity-100',
+  'group-hover/property-row-2:opacity-100',
+  'group-hover/property-row-3:opacity-100',
+  'group-hover/property-row-4:opacity-100',
+  'group-hover/property-row-5:opacity-100',
+  'group-hover/property-row-6:opacity-100',
+  'group-hover/property-row-7:opacity-100',
   
   // ✅ Gap utilities for spacing
   'gap-1',
