@@ -392,6 +392,14 @@ export const componentMeta = {
     backgroundType: '"primary" | "secondary" | "neutral" | "divider" - Controls text color adaptation',
     className: 'string - Additional CSS classes'
   },
+  contentFields: [
+    'headline',
+    'emojis',
+    'outcomes',
+    'descriptions',
+    'subheadline',
+    'footer_text'
+  ],
   contentSchema: {
     headline: 'Main heading text',
     emojis: 'Pipe-separated list of emojis for each outcome',

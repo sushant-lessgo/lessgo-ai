@@ -233,7 +233,7 @@ function getSectionLayoutGuidance(sectionType: string, layout: string): string {
       StatBlocks: "Metric-focused results presentation. Lead with compelling numbers. Support statistics with clear context and explanations.",
       BeforeAfterStats: "Comparative results showcase. Use clear before-after language. Emphasize improvement and transformation metrics.",
       QuoteWithMetric: "Social proof enhanced results. Combine customer voice with quantifiable outcomes. Use specific, credible testimonials.",
-      EmojiOutcomeGrid: "Visual results representation. Use emojis to enhance emotional impact. Keep outcomes clear and immediately understandable.",
+      EmojiOutcomeGrid: "Visual results representation. Generate pipe-separated values for emojis, outcomes, and descriptions (e.g., '🚀|💰|⚡' and 'Faster Launch|Higher Revenue|Lightning Speed' and 'Get to market 3x faster|Increase revenue by 200%|Process in milliseconds'). Keep each outcome clear and immediately understandable. Use emojis that match the outcome theme.",
       TimelineResults: "Progressive results demonstration. Show improvement over time. Use time-based language and milestone markers.",
       OutcomeIcons: "Icon-enhanced results display. Icons should support outcome comprehension. Keep text concise and impact-focused.",
       StackedWinsList: "Achievement-focused results list. Use victory language and positive framing. Stack wins for cumulative impact.",
@@ -768,6 +768,9 @@ function getElementFormatGuidance(element: string): string {
 
     // Miscellaneous
     'emoji_labels': "[\"🚀\", \"💡\", \"⭐\"]",
+    'emojis': "Pipe-separated emojis (e.g., \"🚀|💰|⚡|🎯|📈|⭐\")",
+    'outcomes': "Pipe-separated outcome titles (e.g., \"Faster Launch|Higher Revenue|Lightning Speed|Perfect Accuracy\")",
+    'descriptions': "Pipe-separated outcome descriptions (e.g., \"Get to market 3x faster|Increase revenue by 200%|Process in milliseconds\")",
     'icon_labels': "[\"Speed\", \"Security\", \"Scale\"]",
     'badge_text': "Badge text (e.g., \"#1 Rated\")",
     'caption_text': "Image/video caption",

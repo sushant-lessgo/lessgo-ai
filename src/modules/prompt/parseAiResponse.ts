@@ -148,6 +148,15 @@ function processSectionContent(sectionId: string, content: SectionContent): {
     return result;
   }
 
+  // Special handling for EmojiOutcomeGrid sections
+  if (sectionId.includes('EmojiOutcomeGrid')) {
+    const processedEmojiGrid = processEmojiOutcomeGridContent(sectionId, content);
+    result.content = processedEmojiGrid.content;
+    result.warnings = processedEmojiGrid.warnings;
+    result.hasIssues = processedEmojiGrid.hasIssues;
+    return result;
+  }
+
   Object.entries(content).forEach(([elementKey, elementValue]) => {
     const processedElement = processElement(sectionId, elementKey, elementValue)
 
@@ -464,4 +473,115 @@ function validateQnAPairs(content: SectionContent): {
   }
 
   return { warnings };
+}
+
+/**
+ * Special processing for EmojiOutcomeGrid sections to handle pipe-separated format
+ */
+function processEmojiOutcomeGridContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Process all fields normally
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    // Handle pipe-separated fields
+    if (elementKey === 'emojis' || elementKey === 'outcomes' || elementKey === 'descriptions') {
+      // Ensure it's a string and convert to pipe-separated format if needed
+      let processedValue: string = '';
+
+      if (Array.isArray(elementValue)) {
+        // Convert array to pipe-separated string
+        processedValue = elementValue.join('|');
+        result.warnings.push(`${sectionId}: Converted array to pipe-separated format for ${elementKey}`);
+      } else if (typeof elementValue === 'string') {
+        // Already a string, use as-is
+        processedValue = elementValue;
+      } else {
+        // Invalid format
+        result.warnings.push(`${sectionId}: Invalid format for ${elementKey}, expected string or array`);
+        result.hasIssues = true;
+        processedValue = '';
+      }
+
+      result.content[elementKey] = processedValue;
+    } else {
+      // Process other fields normally
+      const processedElement = processElement(sectionId, elementKey, elementValue);
+
+      if (processedElement.isValid) {
+        result.content[elementKey] = processedElement.value;
+      } else {
+        result.warnings.push(...processedElement.warnings);
+        result.hasIssues = true;
+        result.content[elementKey] = processedElement.fallback;
+      }
+    }
+  });
+
+  // Validate matching counts for emojis, outcomes, and descriptions
+  const emojiValidation = validateEmojiOutcomeGridData(result.content);
+  if (emojiValidation.warnings.length > 0) {
+    result.warnings.push(...emojiValidation.warnings);
+    // Apply corrections if needed
+    if (emojiValidation.corrected) {
+      Object.assign(result.content, emojiValidation.corrected);
+      result.warnings.push(`${sectionId}: Applied automatic correction to match emoji/outcome/description counts`);
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Validates EmojiOutcomeGrid data consistency
+ */
+function validateEmojiOutcomeGridData(content: SectionContent): {
+  warnings: string[];
+  corrected?: SectionContent;
+} {
+  const warnings: string[] = [];
+  let corrected: SectionContent | undefined;
+
+  // Get the pipe-separated values
+  const emojis = typeof content.emojis === 'string' ? content.emojis.split('|').filter(Boolean) : [];
+  const outcomes = typeof content.outcomes === 'string' ? content.outcomes.split('|').filter(Boolean) : [];
+  const descriptions = typeof content.descriptions === 'string' ? content.descriptions.split('|').filter(Boolean) : [];
+
+  // Check if counts match
+  const maxCount = Math.max(emojis.length, outcomes.length, descriptions.length);
+  const minCount = Math.min(emojis.length, outcomes.length, descriptions.length);
+
+  if (maxCount !== minCount && maxCount > 0) {
+    warnings.push(`Mismatched counts: ${emojis.length} emojis, ${outcomes.length} outcomes, ${descriptions.length} descriptions`);
+
+    // Auto-correct by trimming to minimum count or filling with defaults
+    if (minCount > 0) {
+      corrected = {
+        emojis: emojis.slice(0, minCount).join('|'),
+        outcomes: outcomes.slice(0, minCount).join('|'),
+        descriptions: descriptions.slice(0, minCount).join('|')
+      };
+    } else {
+      // If any is empty, provide defaults
+      const defaultCount = maxCount || 3;
+      const defaultEmojis = ['🚀', '💡', '⭐', '🎯', '📈', '✨'];
+      const defaultOutcomes = ['Amazing Result', 'Great Outcome', 'Success Achieved', 'Goal Reached', 'Milestone Hit', 'Victory Won'];
+      const defaultDescriptions = ['Experience incredible improvements', 'See remarkable transformations', 'Achieve outstanding results', 'Reach new heights', 'Unlock new potential', 'Discover new possibilities'];
+
+      corrected = {
+        emojis: emojis.length === 0 ? defaultEmojis.slice(0, defaultCount).join('|') : content.emojis,
+        outcomes: outcomes.length === 0 ? defaultOutcomes.slice(0, defaultCount).join('|') : content.outcomes,
+        descriptions: descriptions.length === 0 ? defaultDescriptions.slice(0, defaultCount).join('|') : content.descriptions
+      };
+    }
+  }
+
+  return { warnings, corrected };
 }

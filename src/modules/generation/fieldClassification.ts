@@ -30,6 +30,10 @@ export function classifyField(fieldName: string, sectionType?: string): Classifi
     return classifyInlineQnAListField(fieldName);
   }
 
+  if (sectionType === 'EmojiOutcomeGrid') {
+    return classifyEmojiOutcomeGridField(fieldName);
+  }
+
   // AI-Generated Fields (high confidence for content generation)
   if (isAiGeneratedField(field)) {
     return {
@@ -331,6 +335,105 @@ function classifyInlineQnAListField(fieldName: string): ClassificationResult {
     classification: {
       category: 'hybrid',
       reason: 'Unknown InlineQnAList field, using hybrid approach',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    },
+    user_guidance: 'Please review this field as it may need manual adjustment'
+  };
+}
+
+/**
+ * Specific classification for EmojiOutcomeGrid fields
+ */
+function classifyEmojiOutcomeGridField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  // Headline and subheadline are AI-generated
+  if (field === 'headline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Outcome headlines are perfect for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create an engaging headline about achieving results'
+    };
+  }
+
+  if (field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Supporting text that provides context for outcomes',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will add context about the outcomes creators will achieve'
+    };
+  }
+
+  // Main content fields - pipe-separated values
+  if (field === 'emojis') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Emoji selection that visually represents each outcome',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will select relevant emojis for each outcome (pipe-separated)'
+    };
+  }
+
+  if (field === 'outcomes') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Outcome titles that showcase key results',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will generate impactful outcome titles (pipe-separated)'
+    };
+  }
+
+  if (field === 'descriptions') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Detailed descriptions explaining each outcome',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create compelling descriptions for each outcome (pipe-separated)'
+    };
+  }
+
+  if (field === 'footer_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Social proof text to build trust',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will add social proof about others achieving these results'
+    };
+  }
+
+  // Fallback to general classification
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown EmojiOutcomeGrid field, using hybrid approach',
       fallback_strategy: 'generate',
       confidence: 0.7
     },

@@ -88,9 +88,11 @@ export const layoutElementSchema: LayoutSchema = {
 
   EmojiOutcomeGrid: [
     { element: "headline", mandatory: true },
-    { element: "outcome_titles", mandatory: true },
-    { element: "outcome_descriptions", mandatory: true },
-    { element: "emoji_labels", mandatory: false },
+    { element: "emojis", mandatory: true },
+    { element: "outcomes", mandatory: true },
+    { element: "descriptions", mandatory: true },
+    { element: "subheadline", mandatory: false },
+    { element: "footer_text", mandatory: false },
   ],
 
   TimelineResults: [

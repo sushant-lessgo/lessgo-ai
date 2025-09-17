@@ -1611,13 +1611,31 @@ const elementRules: SectionLayoutRules = {
 
 "Results_EmojiOutcomeGrid": [
   {
-    element: "emoji_labels",
+    element: "emojis",
     conditions: [
       { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 4 },
       { variable: "targetAudience", values: ["creators", "solopreneurs", "early-stage-founders"], weight: 3 },
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 2 }
     ],
     minScore: 6
+  },
+  {
+    element: "subheadline",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2", "level-3"], weight: 3 },
+      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 3 },
+      { variable: "targetAudience", values: ["creators", "solopreneurs"], weight: 2 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "footer_text",
+    conditions: [
+      { variable: "copyIntent", values: ["desire-led", "trust-led"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-2", "level-3", "level-4"], weight: 2 },
+      { variable: "targetAudience", values: ["early-stage-founders", "growth-stage-founders"], weight: 2 }
+    ],
+    minScore: 4
   }
 ],
 
