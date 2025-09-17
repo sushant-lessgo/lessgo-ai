@@ -281,7 +281,14 @@ module.exports = {
   'group-hover/property-row-5:opacity-100',
   'group-hover/property-row-6:opacity-100',
   'group-hover/property-row-7:opacity-100',
-  
+  // SystemArchitecture specific patterns
+  'group-hover/component-0:opacity-100',
+  'group-hover/component-1:opacity-100',
+  'group-hover/component-2:opacity-100',
+  'group-hover/component-3:opacity-100',
+  'group-hover/component-4:opacity-100',
+  'group-hover/component-5:opacity-100',
+
   // ✅ Gap utilities for spacing
   'gap-1',
   'gap-2', 
