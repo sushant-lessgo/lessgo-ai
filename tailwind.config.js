@@ -288,6 +288,14 @@ module.exports = {
   'group-hover/component-3:opacity-100',
   'group-hover/component-4:opacity-100',
   'group-hover/component-5:opacity-100',
+  // WorkflowDiagrams specific patterns
+  'group-hover/workflow-step-0:opacity-100',
+  'group-hover/workflow-step-1:opacity-100',
+  'group-hover/workflow-step-2:opacity-100',
+  'group-hover/workflow-step-3:opacity-100',
+  'group-hover/workflow-step-4:opacity-100',
+  'group-hover/workflow-step-5:opacity-100',
+  'group-hover/add-workflow:opacity-100',
 
   // ✅ Gap utilities for spacing
   'gap-1',
