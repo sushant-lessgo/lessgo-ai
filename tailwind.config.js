@@ -288,6 +288,13 @@ module.exports = {
   'group-hover/component-3:opacity-100',
   'group-hover/component-4:opacity-100',
   'group-hover/component-5:opacity-100',
+  // CustomerJourneyFlow specific patterns
+  'group-hover/journey-stage-0:opacity-100',
+  'group-hover/journey-stage-1:opacity-100',
+  'group-hover/journey-stage-2:opacity-100',
+  'group-hover/journey-stage-3:opacity-100',
+  'group-hover/journey-stage-4:opacity-100',
+  'group-hover/journey-stage-5:opacity-100',
   // WorkflowDiagrams specific patterns
   'group-hover/workflow-step-0:opacity-100',
   'group-hover/workflow-step-1:opacity-100',
