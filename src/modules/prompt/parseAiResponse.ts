@@ -157,6 +157,35 @@ function processSectionContent(sectionId: string, content: SectionContent): {
     return result;
   }
 
+  // Special handling for SideBySideBlocks sections
+  if (sectionId.includes('SideBySideBlocks')) {
+    const processedSideBySide = processSideBySideBlocksContent(sectionId, content);
+    result.content = processedSideBySide.content;
+    result.warnings = processedSideBySide.warnings;
+    result.hasIssues = processedSideBySide.hasIssues;
+    return result;
+  }
+
+  // Special handling for TextListTransformation sections
+  if (sectionId.includes('TextListTransformation')) {
+    const processedTextList = processTextListTransformationContent(sectionId, content);
+    result.content = processedTextList.content;
+    result.warnings = processedTextList.warnings;
+    result.hasIssues = processedTextList.hasIssues;
+    return result;
+  }
+
+  // Special handling for remaining BeforeAfter sections
+  if (sectionId.includes('StatComparison') || sectionId.includes('StackedTextVisual') ||
+      sectionId.includes('VisualStoryline') || sectionId.includes('PersonaJourney') ||
+      sectionId.includes('SplitCard')) {
+    const processedGeneric = processBeforeAfterGenericContent(sectionId, content);
+    result.content = processedGeneric.content;
+    result.warnings = processedGeneric.warnings;
+    result.hasIssues = processedGeneric.hasIssues;
+    return result;
+  }
+
   // Special handling for EmojiOutcomeGrid sections
   if (sectionId.includes('EmojiOutcomeGrid')) {
     const processedEmojiGrid = processEmojiOutcomeGridContent(sectionId, content);
@@ -609,6 +638,297 @@ function validateBeforeAfterPairs(content: SectionContent): {
   }
 
   return { warnings };
+}
+
+/**
+ * Special processing for SideBySideBlocks sections
+ */
+function processSideBySideBlocksContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Process all fields
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    // Special handling for trust_items field (pipe-separated)
+    if (elementKey === 'trust_items') {
+      if (typeof elementValue === 'string' && elementValue.includes('|')) {
+        // Already pipe-separated, validate format
+        const items = elementValue.split('|').map(item => item.trim()).filter(Boolean);
+        if (items.length > 0) {
+          result.content[elementKey] = items.join(' | ');
+        } else {
+          result.warnings.push(`${sectionId}: trust_items has invalid pipe-separated format`);
+          result.hasIssues = true;
+          result.content[elementKey] = '';
+        }
+      } else {
+        // Process normally
+        const processedElement = processElement(sectionId, elementKey, elementValue);
+        result.content[elementKey] = processedElement.value;
+        if (!processedElement.isValid) {
+          result.warnings.push(...processedElement.warnings);
+          result.hasIssues = true;
+        }
+      }
+    }
+    // Special handling for icon fields (ensure single emoji)
+    else if (elementKey.includes('icon')) {
+      const iconValue = String(elementValue || '').trim();
+      if (iconValue) {
+        // Extract first emoji if multiple characters
+        const emojiRegex = /[\p{Emoji_Presentation}\p{Emoji}\u200D]/gu;
+        const emojis = iconValue.match(emojiRegex);
+        if (emojis && emojis.length > 0) {
+          result.content[elementKey] = emojis[0];
+        } else {
+          // Use default based on field name
+          if (elementKey === 'before_icon') {
+            result.content[elementKey] = '⚠️';
+          } else if (elementKey === 'after_icon') {
+            result.content[elementKey] = '✅';
+          } else {
+            result.content[elementKey] = '📌';
+          }
+          result.warnings.push(`${sectionId}: ${elementKey} had invalid icon format, using default`);
+        }
+      } else {
+        // Set defaults for empty icons
+        if (elementKey === 'before_icon') {
+          result.content[elementKey] = '⚠️';
+        } else if (elementKey === 'after_icon') {
+          result.content[elementKey] = '✅';
+        } else {
+          result.content[elementKey] = '';
+        }
+      }
+    }
+    // Regular processing for other fields
+    else {
+      const processedElement = processElement(sectionId, elementKey, elementValue);
+
+      if (processedElement.isValid) {
+        result.content[elementKey] = processedElement.value;
+      } else {
+        result.warnings.push(...processedElement.warnings);
+        result.hasIssues = true;
+        result.content[elementKey] = processedElement.fallback;
+      }
+    }
+  });
+
+  // Validate paired fields
+  const pairValidation = validateBeforeAfterPairs(result.content);
+  if (pairValidation.warnings.length > 0) {
+    result.warnings.push(...pairValidation.warnings);
+    result.hasIssues = true;
+  }
+
+  return result;
+}
+
+/**
+ * Special processing for TextListTransformation sections
+ */
+function processTextListTransformationContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Process all fields
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    // Special handling for list fields (pipe-separated)
+    if (elementKey === 'before_list' || elementKey === 'after_list') {
+      if (typeof elementValue === 'string' && elementValue.includes('|')) {
+        // Already pipe-separated, validate format
+        const items = elementValue.split('|').map(item => item.trim()).filter(Boolean);
+        if (items.length > 0) {
+          result.content[elementKey] = items.join('|');
+        } else {
+          result.warnings.push(`${sectionId}: ${elementKey} has invalid pipe-separated format`);
+          result.hasIssues = true;
+          result.content[elementKey] = '';
+        }
+      } else {
+        // Process normally
+        const processedElement = processElement(sectionId, elementKey, elementValue);
+        result.content[elementKey] = processedElement.value;
+        if (!processedElement.isValid) {
+          result.warnings.push(...processedElement.warnings);
+          result.hasIssues = true;
+        }
+      }
+    }
+    // Special handling for trust_items field (pipe-separated)
+    else if (elementKey === 'trust_items') {
+      if (typeof elementValue === 'string' && elementValue.includes('|')) {
+        // Already pipe-separated, validate format
+        const items = elementValue.split('|').map(item => item.trim()).filter(Boolean);
+        if (items.length > 0) {
+          result.content[elementKey] = items.join(' | ');
+        } else {
+          result.warnings.push(`${sectionId}: trust_items has invalid pipe-separated format`);
+          result.hasIssues = true;
+          result.content[elementKey] = '';
+        }
+      } else {
+        // Process normally
+        const processedElement = processElement(sectionId, elementKey, elementValue);
+        result.content[elementKey] = processedElement.value;
+        if (!processedElement.isValid) {
+          result.warnings.push(...processedElement.warnings);
+          result.hasIssues = true;
+        }
+      }
+    }
+    // Special handling for icon fields (ensure single emoji)
+    else if (elementKey.includes('icon')) {
+      const iconValue = String(elementValue || '').trim();
+      if (iconValue) {
+        // Extract first emoji if multiple characters
+        const emojiRegex = /[\p{Emoji_Presentation}\p{Emoji}\u200D]/gu;
+        const emojis = iconValue.match(emojiRegex);
+        if (emojis && emojis.length > 0) {
+          result.content[elementKey] = emojis[0];
+        } else {
+          // Use default based on field name
+          if (elementKey === 'before_icon') {
+            result.content[elementKey] = '❌';
+          } else if (elementKey === 'after_icon') {
+            result.content[elementKey] = '✅';
+          } else if (elementKey === 'transformation_icon') {
+            result.content[elementKey] = '➡️';
+          } else {
+            result.content[elementKey] = '📌';
+          }
+          result.warnings.push(`${sectionId}: ${elementKey} had invalid icon format, using default`);
+        }
+      } else {
+        // Set defaults for empty icons
+        if (elementKey === 'before_icon') {
+          result.content[elementKey] = '❌';
+        } else if (elementKey === 'after_icon') {
+          result.content[elementKey] = '✅';
+        } else if (elementKey === 'transformation_icon') {
+          result.content[elementKey] = '➡️';
+        } else {
+          result.content[elementKey] = '';
+        }
+      }
+    }
+    // Regular processing for other fields
+    else {
+      const processedElement = processElement(sectionId, elementKey, elementValue);
+
+      if (processedElement.isValid) {
+        result.content[elementKey] = processedElement.value;
+      } else {
+        result.warnings.push(...processedElement.warnings);
+        result.hasIssues = true;
+        result.content[elementKey] = processedElement.fallback;
+      }
+    }
+  });
+
+  // Validate paired fields
+  const pairValidation = validateBeforeAfterPairs(result.content);
+  if (pairValidation.warnings.length > 0) {
+    result.warnings.push(...pairValidation.warnings);
+    result.hasIssues = true;
+  }
+
+  return result;
+}
+
+/**
+ * Generic processing for BeforeAfter sections
+ */
+function processBeforeAfterGenericContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Process all fields
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    // Special handling for pipe-separated fields
+    if (elementKey.includes('stats') || elementKey.includes('steps') || elementKey.includes('journey') ||
+        elementKey === 'trust_items') {
+      if (typeof elementValue === 'string' && elementValue.includes('|')) {
+        // Already pipe-separated, validate format
+        const items = elementValue.split('|').map(item => item.trim()).filter(Boolean);
+        if (items.length > 0) {
+          result.content[elementKey] = items.join(' | ');
+        } else {
+          result.warnings.push(`${sectionId}: ${elementKey} has invalid pipe-separated format`);
+          result.hasIssues = true;
+          result.content[elementKey] = '';
+        }
+      } else {
+        // Process normally
+        const processedElement = processElement(sectionId, elementKey, elementValue);
+        result.content[elementKey] = processedElement.value;
+        if (!processedElement.isValid) {
+          result.warnings.push(...processedElement.warnings);
+          result.hasIssues = true;
+        }
+      }
+    }
+    // Special handling for icon fields (ensure single emoji)
+    else if (elementKey.includes('icon')) {
+      const iconValue = String(elementValue || '').trim();
+      if (iconValue) {
+        // Extract first emoji if multiple characters
+        const emojiRegex = /[\p{Emoji_Presentation}\p{Emoji}\u200D]/gu;
+        const emojis = iconValue.match(emojiRegex);
+        if (emojis && emojis.length > 0) {
+          result.content[elementKey] = emojis[0];
+        } else {
+          // Use default emoji
+          result.content[elementKey] = '📊';
+          result.warnings.push(`${sectionId}: ${elementKey} had invalid icon format, using default`);
+        }
+      } else {
+        result.content[elementKey] = '📊';
+      }
+    }
+    // Special handling for boolean flags
+    else if (elementKey.includes('show_')) {
+      const value = String(elementValue || 'true').toLowerCase();
+      result.content[elementKey] = (value === 'true' || value === 'yes' || value === '1') ? 'true' : 'false';
+    }
+    // Regular processing for other fields
+    else {
+      const processedElement = processElement(sectionId, elementKey, elementValue);
+
+      if (processedElement.isValid) {
+        result.content[elementKey] = processedElement.value;
+      } else {
+        result.warnings.push(...processedElement.warnings);
+        result.hasIssues = true;
+        result.content[elementKey] = processedElement.fallback;
+      }
+    }
+  });
+
+  return result;
 }
 
 /**

@@ -15,8 +15,12 @@ export const layoutElementSchema: LayoutSchema = {
     { element: "after_label", mandatory: true },
     { element: "before_description", mandatory: true },
     { element: "after_description", mandatory: true },
+    { element: "before_icon", mandatory: false },
+    { element: "after_icon", mandatory: false },
     { element: "subheadline", mandatory: false },
     { element: "supporting_text", mandatory: false },
+    { element: "cta_text", mandatory: false },
+    { element: "trust_items", mandatory: false },
   ],
 
   StackedTextVisual: [
@@ -25,6 +29,9 @@ export const layoutElementSchema: LayoutSchema = {
     { element: "after_text", mandatory: true },
     { element: "transition_text", mandatory: false },
     { element: "subheadline", mandatory: false },
+    { element: "supporting_text", mandatory: false },
+    { element: "cta_text", mandatory: false },
+    { element: "trust_items", mandatory: false },
   ],
 
   BeforeAfterSlider: [
@@ -56,15 +63,25 @@ export const layoutElementSchema: LayoutSchema = {
     { element: "before_description", mandatory: true },
     { element: "after_description", mandatory: true },
     { element: "subheadline", mandatory: false },
+    { element: "supporting_text", mandatory: false },
+    { element: "cta_text", mandatory: false },
+    { element: "trust_items", mandatory: false },
   ],
 
   TextListTransformation: [
     { element: "headline", mandatory: true },
-    { element: "before_list_title", mandatory: true },
-    { element: "after_list_title", mandatory: true },
-    { element: "before_list_items", mandatory: true },
-    { element: "after_list_items", mandatory: true },
-    { element: "transformation_arrow_text", mandatory: false },
+    { element: "before_label", mandatory: true },
+    { element: "after_label", mandatory: true },
+    { element: "before_list", mandatory: true },
+    { element: "after_list", mandatory: true },
+    { element: "transformation_text", mandatory: false },
+    { element: "before_icon", mandatory: false },
+    { element: "after_icon", mandatory: false },
+    { element: "transformation_icon", mandatory: false },
+    { element: "subheadline", mandatory: false },
+    { element: "supporting_text", mandatory: false },
+    { element: "cta_text", mandatory: false },
+    { element: "trust_items", mandatory: false },
   ],
 
   VisualStoryline: [
@@ -73,6 +90,9 @@ export const layoutElementSchema: LayoutSchema = {
     { element: "step_descriptions", mandatory: true },
     { element: "subheadline", mandatory: false },
     { element: "conclusion_text", mandatory: false },
+    { element: "supporting_text", mandatory: false },
+    { element: "cta_text", mandatory: false },
+    { element: "trust_items", mandatory: false },
   ],
 
   // Results Section
@@ -462,11 +482,28 @@ export const layoutElementSchema: LayoutSchema = {
 
   StatComparison: [
     { element: "headline", mandatory: true },
+    { element: "before_label", mandatory: true },
+    { element: "after_label", mandatory: true },
     { element: "before_stats", mandatory: true },
     { element: "after_stats", mandatory: true },
-    { element: "stat_labels", mandatory: true },
-    { element: "improvement_percentages", mandatory: false },
+    { element: "improvement_text", mandatory: false },
+    { element: "summary_title", mandatory: false },
+    { element: "summary_stat_1_value", mandatory: false },
+    { element: "summary_stat_1_label", mandatory: false },
+    { element: "summary_stat_2_value", mandatory: false },
+    { element: "summary_stat_2_label", mandatory: false },
+    { element: "summary_stat_3_value", mandatory: false },
+    { element: "summary_stat_3_label", mandatory: false },
+    { element: "show_summary_section", mandatory: false },
+    { element: "improvement_icon", mandatory: false },
+    { element: "flow_icon", mandatory: false },
+    { element: "stat_icon_1", mandatory: false },
+    { element: "stat_icon_2", mandatory: false },
+    { element: "stat_icon_3", mandatory: false },
     { element: "subheadline", mandatory: false },
+    { element: "supporting_text", mandatory: false },
+    { element: "cta_text", mandatory: false },
+    { element: "trust_items", mandatory: false },
   ],
 
   PersonaJourney: [
@@ -476,6 +513,10 @@ export const layoutElementSchema: LayoutSchema = {
     { element: "after_scenario", mandatory: true },
     { element: "journey_steps", mandatory: false },
     { element: "persona_quote", mandatory: false },
+    { element: "subheadline", mandatory: false },
+    { element: "supporting_text", mandatory: false },
+    { element: "cta_text", mandatory: false },
+    { element: "trust_items", mandatory: false },
   ],
 
   // Close Section

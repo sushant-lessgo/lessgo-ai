@@ -34,6 +34,20 @@ export function classifyField(fieldName: string, sectionType?: string): Classifi
     return classifyBeforeAfterSliderField(fieldName);
   }
 
+  if (sectionType === 'SideBySideBlocks') {
+    return classifySideBySideBlocksField(fieldName);
+  }
+
+  if (sectionType === 'TextListTransformation') {
+    return classifyTextListTransformationField(fieldName);
+  }
+
+  if (sectionType === 'StatComparison' || sectionType === 'StackedTextVisual' ||
+      sectionType === 'VisualStoryline' || sectionType === 'PersonaJourney' ||
+      sectionType === 'SplitCard') {
+    return classifyBeforeAfterGenericField(fieldName, sectionType);
+  }
+
   if (sectionType === 'EmojiOutcomeGrid') {
     return classifyEmojiOutcomeGridField(fieldName);
   }
@@ -496,6 +510,331 @@ function classifyBeforeAfterSliderField(fieldName: string): ClassificationResult
     classification: {
       category: 'hybrid',
       reason: 'Unknown BeforeAfterSlider field, using hybrid approach',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    },
+    user_guidance: 'Please review this field as it may need manual adjustment'
+  };
+}
+
+/**
+ * Specific classification for SideBySideBlocks fields
+ */
+function classifySideBySideBlocksField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  // Headlines and descriptions are AI-generated
+  if (field === 'headline' || field === 'subheadline' || field === 'supporting_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Before/After header content is ideal for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create compelling comparison messaging'
+    };
+  }
+
+  // Before/After labels and descriptions
+  if (field.includes('before_') || field.includes('after_')) {
+    if (field.includes('label') || field.includes('description')) {
+      return {
+        field: fieldName,
+        classification: {
+          category: 'ai_generated',
+          reason: 'Before/After comparison content is perfect for AI generation',
+          fallback_strategy: 'generate',
+          confidence: 0.9
+        },
+        user_guidance: 'AI will create contrasting before/after scenarios'
+      };
+    }
+    if (field.includes('icon')) {
+      return {
+        field: fieldName,
+        classification: {
+          category: 'hybrid',
+          reason: 'Icons benefit from AI suggestion with user customization',
+          fallback_strategy: 'default',
+          confidence: 0.7
+        },
+        suggested_default: field.includes('before') ? '⚠️' : '✅',
+        user_guidance: 'Choose icons that represent the transformation'
+      };
+    }
+  }
+
+  // CTA and trust items
+  if (field === 'cta_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Call-to-action text generation',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create action-oriented CTA text'
+    };
+  }
+
+  if (field === 'trust_items') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Trust indicators for credibility',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will generate pipe-separated trust indicators'
+    };
+  }
+
+  // Fallback to general classification
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown SideBySideBlocks field, using hybrid approach',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    },
+    user_guidance: 'Please review this field as it may need manual adjustment'
+  };
+}
+
+/**
+ * Specific classification for TextListTransformation fields
+ */
+function classifyTextListTransformationField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  // Headlines and descriptions are AI-generated
+  if (field === 'headline' || field === 'subheadline' || field === 'supporting_text' || field === 'transformation_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Transformation messaging content is ideal for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create compelling transformation messaging'
+    };
+  }
+
+  // Before/After labels and lists
+  if (field.includes('before_') || field.includes('after_')) {
+    if (field.includes('label')) {
+      return {
+        field: fieldName,
+        classification: {
+          category: 'ai_generated',
+          reason: 'Before/After labels are perfect for AI generation',
+          fallback_strategy: 'generate',
+          confidence: 0.9
+        },
+        user_guidance: 'AI will create contrasting before/after labels'
+      };
+    }
+    if (field.includes('list')) {
+      return {
+        field: fieldName,
+        classification: {
+          category: 'ai_generated',
+          reason: 'List content benefits from AI generation with business context',
+          fallback_strategy: 'generate',
+          confidence: 0.9
+        },
+        user_guidance: 'AI will generate pipe-separated list items for transformation comparison'
+      };
+    }
+    if (field.includes('icon')) {
+      return {
+        field: fieldName,
+        classification: {
+          category: 'hybrid',
+          reason: 'Icons benefit from AI suggestion with user customization',
+          fallback_strategy: 'default',
+          confidence: 0.7
+        },
+        suggested_default: field.includes('before') ? '❌' : '✅',
+        user_guidance: 'Choose icons that represent the transformation state'
+      };
+    }
+  }
+
+  // Transformation icon
+  if (field === 'transformation_icon') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Transformation arrow icon for visual flow',
+        fallback_strategy: 'default',
+        confidence: 0.7
+      },
+      suggested_default: '➡️',
+      user_guidance: 'Choose an icon that represents transformation or progression'
+    };
+  }
+
+  // CTA and trust items
+  if (field === 'cta_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Call-to-action text generation',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create action-oriented CTA text'
+    };
+  }
+
+  if (field === 'trust_items') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Trust indicators for credibility',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will generate pipe-separated trust indicators'
+    };
+  }
+
+  // Fallback to general classification
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown TextListTransformation field, using hybrid approach',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    },
+    user_guidance: 'Please review this field as it may need manual adjustment'
+  };
+}
+
+/**
+ * Generic classification for BeforeAfter components
+ */
+function classifyBeforeAfterGenericField(fieldName: string, sectionType: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  // Headlines and text content are AI-generated
+  if (field === 'headline' || field === 'subheadline' || field === 'supporting_text' ||
+      field.includes('text') || field.includes('title') || field.includes('description') ||
+      field.includes('scenario') || field.includes('quote')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: `${sectionType} content is ideal for AI generation`,
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create compelling content based on your business context'
+    };
+  }
+
+  // Stats and data fields (pipe-separated)
+  if (field.includes('stats') || field.includes('steps') || field.includes('journey')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Data and step content for structured presentation',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will generate pipe-separated content for structured display'
+    };
+  }
+
+  // Icon fields
+  if (field.includes('icon')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Icons benefit from AI suggestion with user customization',
+        fallback_strategy: 'default',
+        confidence: 0.7
+      },
+      suggested_default: '📊',
+      user_guidance: 'Choose icons that represent your content theme'
+    };
+  }
+
+  // Boolean flags
+  if (field.includes('show_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Display preference based on content complexity',
+        fallback_strategy: 'default',
+        confidence: 0.7
+      },
+      suggested_default: 'true',
+      user_guidance: 'Control visibility based on your audience needs'
+    };
+  }
+
+  // Name fields
+  if (field.includes('name')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Names can be generated based on target audience',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      },
+      user_guidance: 'AI will create appropriate names for your personas'
+    };
+  }
+
+  // CTA and trust items
+  if (field === 'cta_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Call-to-action text generation',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create action-oriented CTA text'
+    };
+  }
+
+  if (field === 'trust_items') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Trust indicators for credibility',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will generate pipe-separated trust indicators'
+    };
+  }
+
+  // Fallback to general classification
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: `Unknown ${sectionType} field, using hybrid approach`,
       fallback_strategy: 'generate',
       confidence: 0.7
     },
