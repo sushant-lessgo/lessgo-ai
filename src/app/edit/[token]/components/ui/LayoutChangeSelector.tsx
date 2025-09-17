@@ -392,6 +392,80 @@ function LayoutPreview({ layoutId, sectionType }: { layoutId: string; sectionTyp
         <div className="w-10 h-6 bg-muted rounded" />
       </div>
     ),
+    // UseCase layouts
+    'BeforeAfterWorkflow': (
+      <div className="flex gap-0.5 w-16 h-12 p-1">
+        <div className="flex-1 space-y-0.5">
+          <div className="h-2 bg-muted rounded" />
+          <div className="h-1 bg-muted/60 rounded" />
+        </div>
+        <div className="flex-1 space-y-0.5">
+          <div className="h-2 bg-primary/50 rounded" />
+          <div className="h-1 bg-primary/30 rounded" />
+        </div>
+      </div>
+    ),
+    'CustomerJourneyFlow': (
+      <div className="flex items-center gap-0.5 w-16 h-12 p-1">
+        <div className="w-2 h-2 bg-muted rounded-full" />
+        <div className="h-0.5 bg-muted flex-1" />
+        <div className="w-2 h-2 bg-muted rounded-full" />
+        <div className="h-0.5 bg-muted flex-1" />
+        <div className="w-2 h-2 bg-primary/50 rounded-full" />
+      </div>
+    ),
+    'IndustryUseCaseGrid': (
+      <div className="grid grid-cols-2 gap-0.5 w-16 h-12 p-1">
+        <div className="bg-muted rounded" />
+        <div className="bg-muted rounded" />
+        <div className="bg-muted rounded" />
+        <div className="bg-primary/50 rounded" />
+      </div>
+    ),
+    'InteractiveUseCaseMap': (
+      <div className="flex items-center justify-center w-16 h-12">
+        <div className="w-8 h-8 border-2 border-muted rounded border-dashed" />
+      </div>
+    ),
+    'PersonaGrid': (
+      <div className="grid grid-cols-3 gap-0.5 w-16 h-12 p-1">
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="aspect-square bg-muted rounded-full" />
+        ))}
+      </div>
+    ),
+    'RoleBasedScenarios': (
+      <div className="flex flex-col gap-0.5 w-16 h-12 p-1">
+        <div className="flex gap-0.5">
+          <div className="h-1 bg-muted rounded w-4" />
+          <div className="h-1 bg-primary/50 rounded flex-1" />
+        </div>
+        <div className="flex gap-0.5">
+          <div className="h-1 bg-muted rounded w-4" />
+          <div className="h-1 bg-muted/60 rounded flex-1" />
+        </div>
+        <div className="flex gap-0.5">
+          <div className="h-1 bg-muted rounded w-4" />
+          <div className="h-1 bg-muted/60 rounded flex-1" />
+        </div>
+      </div>
+    ),
+    'UseCaseCarousel': (
+      <div className="flex items-center gap-0.5 w-16 h-12 p-1">
+        <div className="w-1 h-1 bg-muted rounded-full" />
+        <div className="flex-1 h-6 bg-primary/50 rounded" />
+        <div className="w-1 h-1 bg-muted rounded-full" />
+      </div>
+    ),
+    'WorkflowDiagrams': (
+      <div className="flex items-center justify-between w-16 h-12 p-1">
+        <div className="w-3 h-3 bg-muted rounded" />
+        <div className="w-0.5 h-6 bg-muted/60" />
+        <div className="w-3 h-3 bg-muted rounded" />
+        <div className="w-0.5 h-6 bg-muted/60" />
+        <div className="w-3 h-3 bg-primary/50 rounded" />
+      </div>
+    ),
   };
 
   return previewMap[layoutId] || (

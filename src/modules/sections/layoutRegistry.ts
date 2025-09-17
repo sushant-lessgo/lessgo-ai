@@ -190,13 +190,14 @@ export const layoutRegistry = {
   ] as const,
 
   UseCase: [
+    "BeforeAfterWorkflow",
+    "CustomerJourneyFlow",
+    "IndustryUseCaseGrid",
+    "InteractiveUseCaseMap",
     "PersonaGrid",
-    "TabbedUseCases",
-    "IndustryTiles",
-    "ScenarioCards",
-    "SegmentSplitBlocks",
-    "CarouselAvatars",
-    "RoleBenefitMatrix",
+    "RoleBasedScenarios",
+    "UseCaseCarousel",
+    "WorkflowDiagrams",
   ] as const,
 
   Header: [

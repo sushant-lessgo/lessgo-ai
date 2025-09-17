@@ -166,14 +166,14 @@ export const layoutToSectionType: Record<string, string> = {
   'TechnicalAdvantage': 'uniqueMechanism',
 
   // UseCase layouts
-  'PersonaCards': 'useCases',
-  'IndustryTabs': 'useCases',
-  'ScenarioSlider': 'useCases',
+  'BeforeAfterWorkflow': 'useCases',
+  'CustomerJourneyFlow': 'useCases',
+  'IndustryUseCaseGrid': 'useCases',
+  'InteractiveUseCaseMap': 'useCases',
+  'PersonaGrid': 'useCases',
+  'RoleBasedScenarios': 'useCases',
+  'UseCaseCarousel': 'useCases',
   'WorkflowDiagrams': 'useCases',
-  'RoleBasedBenefits': 'useCases',
-  'DayInTheLife': 'useCases',
-  'MatrixByIndustrySize': 'useCases',
-  'SuccessStoryTiles': 'useCases',
 
   // CTA layouts
   'CenteredHeadlineCTA': 'cta',

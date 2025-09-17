@@ -379,7 +379,36 @@ export const layoutElementSchema: LayoutSchema = {
     { element: "advantage_icon_6", mandatory: false },
   ],
 
-  // UseCase Section
+  // UseCase Section - Using actual component names
+  BeforeAfterWorkflow: [
+    { element: "headline", mandatory: true },
+    { element: "workflow_steps", mandatory: true },
+    { element: "before_descriptions", mandatory: true },
+    { element: "after_descriptions", mandatory: true },
+    { element: "workflow_benefits", mandatory: false },
+  ],
+
+  CustomerJourneyFlow: [
+    { element: "headline", mandatory: true },
+    { element: "journey_stages", mandatory: true },
+    { element: "stage_descriptions", mandatory: true },
+    { element: "stage_outcomes", mandatory: false },
+  ],
+
+  IndustryUseCaseGrid: [
+    { element: "headline", mandatory: true },
+    { element: "industry_names", mandatory: true },
+    { element: "industry_descriptions", mandatory: true },
+    { element: "industry_examples", mandatory: false },
+  ],
+
+  InteractiveUseCaseMap: [
+    { element: "headline", mandatory: true },
+    { element: "use_case_categories", mandatory: true },
+    { element: "use_case_descriptions", mandatory: true },
+    { element: "interaction_labels", mandatory: false },
+  ],
+
   PersonaGrid: [
     { element: "headline", mandatory: true },
     { element: "persona_names", mandatory: true },
@@ -387,26 +416,25 @@ export const layoutElementSchema: LayoutSchema = {
     { element: "use_case_examples", mandatory: false },
   ],
 
-  TabbedUseCases: [
+  RoleBasedScenarios: [
     { element: "headline", mandatory: true },
-    { element: "tab_labels", mandatory: true },
-    { element: "use_case_titles", mandatory: true },
-    { element: "use_case_descriptions", mandatory: true },
-    { element: "tab_descriptions", mandatory: false },
-  ],
-
-  IndustryTiles: [
-    { element: "headline", mandatory: true },
-    { element: "industry_names", mandatory: true },
-    { element: "industry_descriptions", mandatory: true },
-    { element: "industry_examples", mandatory: false },
-  ],
-
-  ScenarioCards: [
-    { element: "headline", mandatory: true },
-    { element: "scenario_titles", mandatory: true },
+    { element: "role_names", mandatory: true },
     { element: "scenario_descriptions", mandatory: true },
     { element: "scenario_outcomes", mandatory: false },
+  ],
+
+  UseCaseCarousel: [
+    { element: "headline", mandatory: true },
+    { element: "use_case_titles", mandatory: true },
+    { element: "use_case_descriptions", mandatory: true },
+    { element: "carousel_navigation", mandatory: false },
+  ],
+
+  WorkflowDiagrams: [
+    { element: "headline", mandatory: true },
+    { element: "workflow_steps", mandatory: true },
+    { element: "step_descriptions", mandatory: true },
+    { element: "diagram_labels", mandatory: false },
   ],
 
   JobToBeDoneList: [
@@ -414,29 +442,6 @@ export const layoutElementSchema: LayoutSchema = {
     { element: "job_titles", mandatory: true },
     { element: "job_descriptions", mandatory: true },
     { element: "solution_approaches", mandatory: false },
-  ],
-
-  SegmentSplitBlocks: [
-    { element: "headline", mandatory: true },
-    { element: "segment_names", mandatory: true },
-    { element: "segment_descriptions", mandatory: true },
-    { element: "segment_benefits", mandatory: false },
-  ],
-
-  CarouselAvatars: [
-    { element: "headline", mandatory: true },
-    { element: "avatar_names", mandatory: true },
-    { element: "avatar_descriptions", mandatory: true },
-    { element: "use_case_examples", mandatory: false },
-    { element: "carousel_navigation", mandatory: false },
-  ],
-
-  RoleBenefitMatrix: [
-    { element: "headline", mandatory: true },
-    { element: "role_names", mandatory: true },
-    { element: "benefit_categories", mandatory: true },
-    { element: "benefit_descriptions", mandatory: true },
-    { element: "matrix_labels", mandatory: false },
   ],
 
   StatComparison: [

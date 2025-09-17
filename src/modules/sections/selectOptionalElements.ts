@@ -2065,82 +2065,86 @@ const elementRules: SectionLayoutRules = {
   }
 ],
 
-"UseCase_TabbedUseCases": [
+"UseCase_UseCaseCarousel": [
   {
-    element: "tab_descriptions",
+    element: "carousel_navigation",
     conditions: [
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
       { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 3 },
-      { variable: "targetAudience", values: ["smbs", "early-stage-startups", "solopreneurs"], weight: 2 }
+      { variable: "targetAudience", values: ["founders", "creators"], weight: 2 }
     ],
     minScore: 6
   }
 ],
 
-"UseCase_IndustryTiles": [
+"UseCase_IndustryUseCaseGrid": [
   {
     element: "industry_examples",
     conditions: [
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
-      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "mid-market-companies"], weight: 3 },
+      { variable: "targetAudience", values: ["enterprise", "businesses"], weight: 3 },
       { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
     ],
     minScore: 6
   }
 ],
 
-"UseCase_ScenarioCards": [
+"UseCase_RoleBasedScenarios": [
   {
-    element: "scenario_outcomes",
+    element: "role_scenarios",
     conditions: [
       { variable: "copyIntent", values: ["desire-led"], weight: 4 },
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 },
-      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
+      { variable: "targetAudience", values: ["enterprise", "builders"], weight: 2 }
     ],
     minScore: 6
   }
 ],
 
 
-"UseCase_SegmentSplitBlocks": [
+"UseCase_CustomerJourneyFlow": [
   {
-    element: "segment_benefits",
+    element: "journey_steps",
     conditions: [
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
       { variable: "copyIntent", values: ["desire-led"], weight: 3 },
-      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "mid-market-companies"], weight: 2 }
+      { variable: "targetAudience", values: ["businesses", "marketers"], weight: 2 }
     ],
     minScore: 6
   }
 ],
 
-"UseCase_CarouselAvatars": [
+"UseCase_WorkflowDiagrams": [
   {
-    element: "use_case_examples",
+    element: "workflow_steps",
     conditions: [
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
-      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
+      { variable: "targetAudience", values: ["builders", "enterprise"], weight: 3 },
       { variable: "copyIntent", values: ["desire-led"], weight: 2 }
     ],
     minScore: 6
-  },
-  {
-    element: "carousel_navigation",
-    conditions: [
-      { variable: "marketSophisticationLevel", values: ["level-1", "level-2", "level-3"], weight: 4 },
-      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 3 }
-    ],
-    minScore: 5
   }
 ],
 
-"UseCase_RoleBenefitMatrix": [
+"UseCase_BeforeAfterWorkflow": [
   {
-    element: "matrix_labels",
+    element: "before_after_steps",
     conditions: [
       { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
-      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "product-managers"], weight: 3 },
+      { variable: "targetAudience", values: ["businesses", "enterprise"], weight: 3 },
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 2 }
+    ],
+    minScore: 6
+  }
+],
+
+"UseCase_InteractiveUseCaseMap": [
+  {
+    element: "interactive_elements",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 4 },
+      { variable: "targetAudience", values: ["enterprise", "builders"], weight: 3 },
+      { variable: "awarenessLevel", values: ["product-aware", "most-aware"], weight: 2 }
     ],
     minScore: 6
   }

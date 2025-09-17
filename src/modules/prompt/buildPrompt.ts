@@ -284,13 +284,14 @@ function getSectionLayoutGuidance(sectionType: string, layout: string): string {
     },
 
     UseCase: {
+      BeforeAfterWorkflow: "Workflow transformation showcase. Use clear before/after contrast. Show step-by-step improvement in processes.",
+      CustomerJourneyFlow: "Customer journey visualization. Use journey-stage language. Show progression and touchpoints clearly.",
+      IndustryUseCaseGrid: "Industry-specific application display. Use industry-appropriate language and terminology. Address industry-specific needs.",
+      InteractiveUseCaseMap: "Interactive use case exploration. Use clear categorization. Enable easy navigation between different use cases.",
       PersonaGrid: "User type showcase layout. Use persona-specific language and concerns. Address different user needs and motivations.",
-      TabbedUseCases: "Category-organized use case presentation. Tab labels should be clear use case categories. Content should be category-specific.",
-      IndustryTiles: "Industry-specific application display. Use industry-appropriate language and terminology. Address industry-specific needs.",
-      ScenarioCards: "Situation-based use case presentation. Use scenario-specific language. Show practical application in real situations.",
-      SegmentSplitBlocks: "Market segment presentation. Use segment-appropriate language and positioning. Address different market needs.",
-      CarouselAvatars: "Rotating user story presentation. Each story should be complete and relatable. Use consistent narrative structure.",
-      RoleBenefitMatrix: "Role-based benefit mapping. Connect specific roles to relevant benefits. Use role-appropriate language and concerns."
+      RoleBasedScenarios: "Role-specific scenario presentation. Use role-appropriate language and concerns. Show practical application for each role.",
+      UseCaseCarousel: "Rotating use case presentation. Each use case should be complete and relatable. Use consistent narrative structure.",
+      WorkflowDiagrams: "Process visualization showcase. Use clear workflow language. Show logical progression and decision points."
     },
 
     Footer: {

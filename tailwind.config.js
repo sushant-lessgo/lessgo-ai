@@ -186,7 +186,7 @@ module.exports = {
   'transition-opacity',
   'duration-200',
   'ease-in-out',
-  // RoleBasedScenarios (ScenarioCards) patterns
+  // RoleBasedScenarios patterns
   'group-hover/scenario-card-0:opacity-100',
   'group-hover/scenario-card-1:opacity-100',
   'group-hover/scenario-card-2:opacity-100',

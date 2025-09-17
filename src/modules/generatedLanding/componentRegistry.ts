@@ -271,21 +271,14 @@ export const componentRegistry: ComponentRegistry = {
   },
   
   useCases: {
+    BeforeAfterWorkflow: BeforeAfterWorkflow,
+    CustomerJourneyFlow: CustomerJourneyFlow,
+    IndustryUseCaseGrid: IndustryUseCaseGrid,
+    InteractiveUseCaseMap: InteractiveUseCaseMap,
     PersonaGrid: PersonaGrid,
-    // BeforeAfterWorkflow: BeforeAfterWorkflow, // Not in layoutRegistry
-    // CustomerJourneyFlow: CustomerJourneyFlow, // Not in layoutRegistry
-    // IndustryUseCaseGrid: IndustryUseCaseGrid, // Not in layoutRegistry
-    // InteractiveUseCaseMap: InteractiveUseCaseMap, // Not in layoutRegistry
-    // RoleBasedScenarios: RoleBasedScenarios, // Not in layoutRegistry
-    // UseCaseCarousel: UseCaseCarousel, // Not in layoutRegistry
-    // WorkflowDiagrams: WorkflowDiagrams, // Not in layoutRegistry
-    // Map missing layouts from layoutRegistry to existing components
-    TabbedUseCases: UseCaseCarousel,
-    IndustryTiles: IndustryUseCaseGrid,
-    ScenarioCards: RoleBasedScenarios,
-    SegmentSplitBlocks: PersonaGrid,
-    CarouselAvatars: UseCaseCarousel,
-    RoleBenefitMatrix: RoleBasedScenarios,
+    RoleBasedScenarios: RoleBasedScenarios,
+    UseCaseCarousel: UseCaseCarousel,
+    WorkflowDiagrams: WorkflowDiagrams,
   },
   
   uniqueMechanism: {
