@@ -270,6 +270,8 @@ module.exports = {
   'group-hover/myth-reality-5:opacity-100',
   // InnovationTimeline specific patterns
   'group-hover/timeline-item:opacity-100',
+  // AlgorithmExplainer specific patterns
+  'group-hover/algorithm-step:opacity-100',
   
   // ✅ Gap utilities for spacing
   'gap-1',
