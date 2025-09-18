@@ -326,6 +326,71 @@ function processSectionContent(sectionId: string, content: SectionContent): {
     return result;
   }
 
+  // Special handling for Pricing sections
+  if (sectionId.includes('TierCards')) {
+    const processedTierCards = processTierCardsContent(sectionId, content);
+    result.content = processedTierCards.content;
+    result.warnings = processedTierCards.warnings;
+    result.hasIssues = processedTierCards.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('ToggleableMonthlyYearly')) {
+    const processedToggleableMonthlyYearly = processToggleableMonthlyYearlyContent(sectionId, content);
+    result.content = processedToggleableMonthlyYearly.content;
+    result.warnings = processedToggleableMonthlyYearly.warnings;
+    result.hasIssues = processedToggleableMonthlyYearly.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('FeatureMatrix')) {
+    const processedFeatureMatrix = processFeatureMatrixContent(sectionId, content);
+    result.content = processedFeatureMatrix.content;
+    result.warnings = processedFeatureMatrix.warnings;
+    result.hasIssues = processedFeatureMatrix.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('SegmentBasedPricing')) {
+    const processedSegmentBasedPricing = processSegmentBasedPricingContent(sectionId, content);
+    result.content = processedSegmentBasedPricing.content;
+    result.warnings = processedSegmentBasedPricing.warnings;
+    result.hasIssues = processedSegmentBasedPricing.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('SliderPricing')) {
+    const processedSliderPricing = processSliderPricingContent(sectionId, content);
+    result.content = processedSliderPricing.content;
+    result.warnings = processedSliderPricing.warnings;
+    result.hasIssues = processedSliderPricing.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('CallToQuotePlan')) {
+    const processedCallToQuotePlan = processCallToQuotePlanContent(sectionId, content);
+    result.content = processedCallToQuotePlan.content;
+    result.warnings = processedCallToQuotePlan.warnings;
+    result.hasIssues = processedCallToQuotePlan.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('CardWithTestimonial')) {
+    const processedCardWithTestimonial = processCardWithTestimonialContent(sectionId, content);
+    result.content = processedCardWithTestimonial.content;
+    result.warnings = processedCardWithTestimonial.warnings;
+    result.hasIssues = processedCardWithTestimonial.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('MiniStackedCards')) {
+    const processedMiniStackedCards = processMiniStackedCardsContent(sectionId, content);
+    result.content = processedMiniStackedCards.content;
+    result.warnings = processedMiniStackedCards.warnings;
+    result.hasIssues = processedMiniStackedCards.hasIssues;
+    return result;
+  }
+
   // Special handling for Problem sections
   if (sectionId.includes('StackedPainBullets')) {
     const processedStackedPain = processStackedPainBulletsContent(sectionId, content);
@@ -1086,7 +1151,7 @@ function processHeroContent(sectionId: string, content: SectionContent): {
     if (processedElement.isValid) {
       result.content[elementKey] = processedElement.value;
     } else {
-      result.warnings.push(processedElement.warning || `${sectionId}: Invalid value for ${elementKey}`);
+      result.warnings.push(processedElement.warnings?.[0] || `${sectionId}: Invalid value for ${elementKey}`);
       result.hasIssues = true;
     }
   });
@@ -2885,8 +2950,12 @@ function processEmotionalQuotesContent(sectionId: string, content: SectionConten
 
   // Validate quote/attribution pairing
   if (content.emotional_quotes && content.quote_attributions) {
-    const quotes = content.emotional_quotes.split('|').map(item => item.trim()).filter(Boolean);
-    const attributions = content.quote_attributions.split('|').map(item => item.trim()).filter(Boolean);
+    const quotes = typeof content.emotional_quotes === 'string'
+      ? content.emotional_quotes.split('|').map((item: string) => item.trim()).filter(Boolean)
+      : [];
+    const attributions = typeof content.quote_attributions === 'string'
+      ? content.quote_attributions.split('|').map((item: string) => item.trim()).filter(Boolean)
+      : [];
 
     if (quotes.length !== attributions.length) {
       result.warnings.push(`${sectionId}: Number of quotes (${quotes.length}) doesn't match attributions (${attributions.length})`);
@@ -3004,7 +3073,7 @@ function processPainMeterChartContent(sectionId: string, content: SectionContent
     }
 
     // Validate pain levels are numbers 0-100
-    levels.forEach((level, index) => {
+    levels.forEach((level: string, index: number) => {
       const numLevel = parseInt(level);
       if (isNaN(numLevel) || numLevel < 0 || numLevel > 100) {
         result.warnings.push(`${sectionId}: Pain level ${index + 1} '${level}' should be a number between 0-100`);
@@ -4428,4 +4497,566 @@ function processFounderCardWithQuoteContent(sectionId: string, content: SectionC
   }
 
   return result;
+}
+
+/**
+ * Pricing Section Processing Functions - Enhanced for 5/5 completeness rating
+ */
+
+/**
+ * Processes TierCards content with comprehensive validation for pricing accuracy
+ */
+function processTierCardsContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: { ...content },
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Validate tier structure consistency
+  if (content.tier_names && content.tier_prices) {
+    const tierNames = parseContentArray(content.tier_names);
+    const tierPrices = parseContentArray(content.tier_prices);
+
+    if (tierNames.length !== tierPrices.length) {
+      result.warnings.push(`${sectionId}: Mismatch between number of tier names (${tierNames.length}) and prices (${tierPrices.length})`);
+      result.hasIssues = true;
+    }
+
+    // Validate pricing format
+    tierPrices.forEach((price, index) => {
+      if (typeof price === 'string' && !price.match(/^\$?\d+(\.\d{2})?(\s*\/\s*(month|mo|year|yr))?$/i)) {
+        result.warnings.push(`${sectionId}: Tier ${index + 1} price "${price}" should follow format like "$29/month" or "$299"`);
+        result.hasIssues = true;
+      }
+    });
+
+    // Validate tier naming consistency
+    tierNames.forEach((name, index) => {
+      if (typeof name === 'string' && name.length < 3) {
+        result.warnings.push(`${sectionId}: Tier ${index + 1} name "${name}" is too short for clarity`);
+        result.hasIssues = true;
+      }
+    });
+  }
+
+  // Validate individual tier features
+  const tierFeaturePattern = /tier_\d+_feature_\d+/;
+  const tierFeatures = Object.keys(content).filter(key => tierFeaturePattern.test(key));
+
+  if (tierFeatures.length > 0) {
+    // Group features by tier
+    const tierGroups: { [key: string]: string[] } = {};
+    tierFeatures.forEach(feature => {
+      const tierMatch = feature.match(/tier_(\d+)_feature_\d+/);
+      if (tierMatch) {
+        const tierNum = tierMatch[1];
+        if (!tierGroups[tierNum]) tierGroups[tierNum] = [];
+        tierGroups[tierNum].push(feature);
+      }
+    });
+
+    // Validate each tier has meaningful features
+    Object.entries(tierGroups).forEach(([tierNum, features]) => {
+      const populatedFeatures = features.filter(f => content[f] && typeof content[f] === 'string' && content[f].toString().trim().length > 0);
+      if (populatedFeatures.length > 0 && populatedFeatures.length < 3) {
+        result.warnings.push(`${sectionId}: Tier ${tierNum} has only ${populatedFeatures.length} features - consider adding more for value clarity`);
+        result.hasIssues = true;
+      }
+    });
+  }
+
+  // Validate trust indicators
+  const trustItems = Object.keys(content).filter(key => key.includes('trust_item'));
+  if (trustItems.length > 0) {
+    const populatedTrustItems = trustItems.filter(key => content[key] && typeof content[key] === 'string' && content[key].toString().trim().length > 0);
+    if (populatedTrustItems.length > 0 && populatedTrustItems.length < 2) {
+      result.warnings.push(`${sectionId}: Should have at least 2 trust items when trust indicators are included`);
+      result.hasIssues = true;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Processes ToggleableMonthlyYearly content with billing validation
+ */
+function processToggleableMonthlyYearlyContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: { ...content },
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Validate monthly vs yearly pricing consistency
+  if (content.monthly_prices && content.yearly_prices) {
+    const monthlyPrices = parseContentArray(content.monthly_prices);
+    const yearlyPrices = parseContentArray(content.yearly_prices);
+
+    if (monthlyPrices.length !== yearlyPrices.length) {
+      result.warnings.push(`${sectionId}: Mismatch between monthly (${monthlyPrices.length}) and yearly (${yearlyPrices.length}) pricing tiers`);
+      result.hasIssues = true;
+    }
+
+    // Validate pricing logic (yearly should typically be discounted)
+    for (let i = 0; i < Math.min(monthlyPrices.length, yearlyPrices.length); i++) {
+      const monthlyPrice = parseFloat(monthlyPrices[i].toString().replace(/[^\d.]/g, ''));
+      const yearlyPrice = parseFloat(yearlyPrices[i].toString().replace(/[^\d.]/g, ''));
+
+      if (!isNaN(monthlyPrice) && !isNaN(yearlyPrice)) {
+        const annualFromMonthly = monthlyPrice * 12;
+        const savings = ((annualFromMonthly - yearlyPrice) / annualFromMonthly) * 100;
+
+        if (savings < 10) {
+          result.warnings.push(`${sectionId}: Tier ${i + 1} annual discount is only ${savings.toFixed(1)}% - consider increasing for better conversion`);
+          result.hasIssues = true;
+        }
+        if (savings > 50) {
+          result.warnings.push(`${sectionId}: Tier ${i + 1} annual discount is ${savings.toFixed(1)}% - verify this is realistic`);
+          result.hasIssues = true;
+        }
+      }
+    }
+  }
+
+  // Validate platform features structure
+  const platformFeatures = Object.keys(content).filter(key => key.includes('platform_feature') && key.includes('title'));
+  if (platformFeatures.length > 0) {
+    platformFeatures.forEach(titleKey => {
+      const descKey = titleKey.replace('title', 'desc');
+      const iconKey = titleKey.replace('title', 'icon');
+
+      if (!content[descKey] || !content[descKey].toString().trim()) {
+        result.warnings.push(`${sectionId}: ${titleKey} has no corresponding description in ${descKey}`);
+        result.hasIssues = true;
+      }
+    });
+  }
+
+  return result;
+}
+
+/**
+ * Processes FeatureMatrix content with matrix validation
+ */
+function processFeatureMatrixContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: { ...content },
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Validate feature matrix structure
+  if (content.feature_names && content.feature_categories && content.feature_availability) {
+    const featureNames = parseContentArray(content.feature_names);
+    const featureCategories = parseContentArray(content.feature_categories);
+    const featureAvailability = parseContentArray(content.feature_availability);
+
+    if (featureNames.length !== featureAvailability.length) {
+      result.warnings.push(`${sectionId}: Feature names (${featureNames.length}) and availability (${featureAvailability.length}) arrays must match`);
+      result.hasIssues = true;
+    }
+
+    // Validate feature availability format (should be like "✓|✓|✗" for 3 tiers)
+    featureAvailability.forEach((availability, index) => {
+      if (typeof availability === 'string') {
+        const tierAvailability = availability.split('|');
+        if (tierAvailability.length < 2) {
+          result.warnings.push(`${sectionId}: Feature ${index + 1} availability "${availability}" should specify availability per tier (e.g., "✓|✓|✗")`);
+          result.hasIssues = true;
+        }
+      }
+    });
+
+    // Validate feature categories distribution
+    if (featureCategories.length < 2) {
+      result.warnings.push(`${sectionId}: Should have at least 2 feature categories for meaningful comparison`);
+      result.hasIssues = true;
+    }
+  }
+
+  // Validate enterprise features section
+  const enterpriseFeatures = Object.keys(content).filter(key => key.includes('enterprise_feature') && key.includes('title'));
+  if (enterpriseFeatures.length > 0) {
+    if (enterpriseFeatures.length < 2) {
+      result.warnings.push(`${sectionId}: Enterprise section should have at least 2 features to justify premium positioning`);
+      result.hasIssues = true;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Processes SegmentBasedPricing content with segment validation
+ */
+function processSegmentBasedPricingContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: { ...content },
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Validate segment structure consistency
+  if (content.segment_names && content.segment_descriptions && content.segment_use_cases) {
+    const segmentNames = parseContentArray(content.segment_names);
+    const segmentDescriptions = parseContentArray(content.segment_descriptions);
+    const segmentUseCases = parseContentArray(content.segment_use_cases);
+
+    if (segmentNames.length !== segmentDescriptions.length || segmentNames.length !== segmentUseCases.length) {
+      result.warnings.push(`${sectionId}: Segment names, descriptions, and use cases must have matching lengths`);
+      result.hasIssues = true;
+    }
+
+    // Validate segment differentiation
+    segmentNames.forEach((name, index) => {
+      if (typeof name === 'string' && name.length < 5) {
+        result.warnings.push(`${sectionId}: Segment ${index + 1} name "${name}" should be more descriptive`);
+        result.hasIssues = true;
+      }
+    });
+
+    segmentUseCases.forEach((useCase, index) => {
+      if (typeof useCase === 'string' && useCase.length < 30) {
+        result.warnings.push(`${sectionId}: Segment ${index + 1} use case should be more detailed for clarity`);
+        result.hasIssues = true;
+      }
+    });
+  }
+
+  // Validate tier features for segments
+  if (content.tier_features) {
+    const tierFeatures = parseContentArray(content.tier_features);
+    tierFeatures.forEach((features, index) => {
+      if (typeof features === 'string') {
+        const featureList = features.split('|');
+        if (featureList.length < 3) {
+          result.warnings.push(`${sectionId}: Tier ${index + 1} should have at least 3 features for value justification`);
+          result.hasIssues = true;
+        }
+      }
+    });
+  }
+
+  return result;
+}
+
+/**
+ * Processes SliderPricing content with usage-based validation
+ */
+function processSliderPricingContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: { ...content },
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Validate pricing configuration
+  if (content.base_price && content.unit_price) {
+    const basePrice = parseFloat(content.base_price.toString().replace(/[^\d.]/g, ''));
+    const unitPrice = parseFloat(content.unit_price.toString().replace(/[^\d.]/g, ''));
+
+    if (isNaN(basePrice) || isNaN(unitPrice)) {
+      result.warnings.push(`${sectionId}: Base price and unit price must be valid numbers`);
+      result.hasIssues = true;
+    }
+
+    if (basePrice > unitPrice * 10) {
+      result.warnings.push(`${sectionId}: Base price (${basePrice}) seems high compared to unit price (${unitPrice}) - verify pricing structure`);
+      result.hasIssues = true;
+    }
+  }
+
+  // Validate unit configuration
+  if (content.min_units && content.max_units && content.default_units) {
+    const minUnits = parseInt(content.min_units.toString());
+    const maxUnits = parseInt(content.max_units.toString());
+    const defaultUnits = parseInt(content.default_units.toString());
+
+    if (minUnits >= maxUnits) {
+      result.warnings.push(`${sectionId}: min_units (${minUnits}) must be less than max_units (${maxUnits})`);
+      result.hasIssues = true;
+    }
+
+    if (defaultUnits < minUnits || defaultUnits > maxUnits) {
+      result.warnings.push(`${sectionId}: default_units (${defaultUnits}) must be between min_units (${minUnits}) and max_units (${maxUnits})`);
+      result.hasIssues = true;
+    }
+  }
+
+  // Validate tier breakpoints and discounts
+  if (content.tier_breakpoints && content.tier_discounts) {
+    const breakpoints = parseContentArray(content.tier_breakpoints);
+    const discounts = parseContentArray(content.tier_discounts);
+
+    if (breakpoints.length !== discounts.length) {
+      result.warnings.push(`${sectionId}: Tier breakpoints and discounts must have matching lengths`);
+      result.hasIssues = true;
+    }
+
+    // Validate breakpoint progression
+    for (let i = 1; i < breakpoints.length; i++) {
+      const current = parseInt(breakpoints[i].toString());
+      const previous = parseInt(breakpoints[i - 1].toString());
+
+      if (current <= previous) {
+        result.warnings.push(`${sectionId}: Tier breakpoints must be in ascending order`);
+        result.hasIssues = true;
+        break;
+      }
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Processes CallToQuotePlan content with enterprise validation
+ */
+function processCallToQuotePlanContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: { ...content },
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Validate contact options structure
+  if (content.contact_options && content.contact_ctas) {
+    const contactOptions = parseContentArray(content.contact_options);
+    const contactCtas = parseContentArray(content.contact_ctas);
+
+    if (contactOptions.length !== contactCtas.length) {
+      result.warnings.push(`${sectionId}: Contact options (${contactOptions.length}) and CTAs (${contactCtas.length}) must match`);
+      result.hasIssues = true;
+    }
+
+    // Validate variety in contact methods
+    if (contactOptions.length < 2) {
+      result.warnings.push(`${sectionId}: Should provide at least 2 contact options for customer preference`);
+      result.hasIssues = true;
+    } else if (contactOptions.length > 4) {
+      result.warnings.push(`${sectionId}: Too many contact options (${contactOptions.length}) may overwhelm users - consider 2-4 options`);
+      result.hasIssues = true;
+    }
+
+    // Validate CTA text quality
+    contactCtas.forEach((cta, index) => {
+      if (typeof cta === 'string' && cta.length < 5) {
+        result.warnings.push(`${sectionId}: Contact CTA ${index + 1} "${cta}" should be more descriptive`);
+        result.hasIssues = true;
+      }
+    });
+  }
+
+  // Validate value proposition length
+  if (content.value_proposition && typeof content.value_proposition === 'string') {
+    if (content.value_proposition.length < 50) {
+      result.warnings.push(`${sectionId}: Value proposition should be more detailed for enterprise audience`);
+      result.hasIssues = true;
+    }
+    if (content.value_proposition.length > 300) {
+      result.warnings.push(`${sectionId}: Value proposition is too long - keep it concise for executive attention`);
+      result.hasIssues = true;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Processes CardWithTestimonial content with social proof validation
+ */
+function processCardWithTestimonialContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: { ...content },
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Validate testimonial authenticity
+  if (content.testimonial_quote && typeof content.testimonial_quote === 'string') {
+    if (content.testimonial_quote.length < 50) {
+      result.warnings.push(`${sectionId}: Testimonial quote should be more substantial for credibility`);
+      result.hasIssues = true;
+    }
+    if (content.testimonial_quote.length > 200) {
+      result.warnings.push(`${sectionId}: Testimonial quote is too long for card format - keep under 200 characters`);
+      result.hasIssues = true;
+    }
+
+    // Check for generic testimonial language
+    const genericPhrases = ['great product', 'amazing service', 'highly recommend', 'best ever'];
+    const hasGenericLanguage = genericPhrases.some(phrase =>
+      content.testimonial_quote.toLowerCase().includes(phrase)
+    );
+
+    if (hasGenericLanguage) {
+      result.warnings.push(`${sectionId}: Testimonial contains generic language - consider more specific, outcome-focused quotes`);
+      result.hasIssues = true;
+    }
+  }
+
+  // Validate social metrics structure
+  const socialMetrics = Object.keys(content).filter(key => key.includes('social_metric_') && !key.includes('label'));
+  const socialLabels = Object.keys(content).filter(key => key.includes('social_metric_') && key.includes('label'));
+
+  if (socialMetrics.length !== socialLabels.length) {
+    result.warnings.push(`${sectionId}: Social metrics and labels must have matching counts`);
+    result.hasIssues = true;
+  }
+
+  // Validate social metrics realism
+  socialMetrics.forEach((metricKey, index) => {
+    const metric = content[metricKey];
+    if (typeof metric === 'string') {
+      const numericValue = parseInt(metric.replace(/[^\d]/g, ''));
+      if (!isNaN(numericValue)) {
+        if (numericValue > 1000000) {
+          result.warnings.push(`${sectionId}: Social metric ${index + 1} (${numericValue}) seems unrealistically high - verify accuracy`);
+          result.hasIssues = true;
+        }
+        if (numericValue < 10) {
+          result.warnings.push(`${sectionId}: Social metric ${index + 1} (${numericValue}) may be too low for credibility`);
+          result.hasIssues = true;
+        }
+      }
+    }
+  });
+
+  // Validate guarantee section
+  if (content.guarantee_title || content.guarantee_description) {
+    if (content.guarantee_title && typeof content.guarantee_title === 'string' && content.guarantee_title.length < 10) {
+      result.warnings.push(`${sectionId}: Guarantee title should be more descriptive`);
+      result.hasIssues = true;
+    }
+
+    if (content.guarantee_description && typeof content.guarantee_description === 'string' && content.guarantee_description.length < 30) {
+      result.warnings.push(`${sectionId}: Guarantee description should provide clear terms`);
+      result.hasIssues = true;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Processes MiniStackedCards content with compact format validation
+ */
+function processMiniStackedCardsContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: { ...content },
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Validate FAQ structure
+  const faqQuestions = Object.keys(content).filter(key => key.includes('faq_question_'));
+  const faqAnswers = Object.keys(content).filter(key => key.includes('faq_answer_'));
+
+  if (faqQuestions.length !== faqAnswers.length) {
+    result.warnings.push(`${sectionId}: FAQ questions (${faqQuestions.length}) and answers (${faqAnswers.length}) must match`);
+    result.hasIssues = true;
+  }
+
+  // Validate FAQ content quality
+  faqQuestions.forEach((questionKey, index) => {
+    const answerKey = questionKey.replace('question', 'answer');
+    const question = content[questionKey];
+    const answer = content[answerKey];
+
+    if (typeof question === 'string' && question.length < 10) {
+      result.warnings.push(`${sectionId}: FAQ question ${index + 1} should be more detailed`);
+      result.hasIssues = true;
+    }
+
+    if (typeof answer === 'string' && answer.length < 20) {
+      result.warnings.push(`${sectionId}: FAQ answer ${index + 1} should provide more comprehensive information`);
+      result.hasIssues = true;
+    }
+  });
+
+  // Validate plans features structure
+  const plansFeatures = Object.keys(content).filter(key => key.includes('plans_feature_') && key.includes('title'));
+  if (plansFeatures.length > 0) {
+    plansFeatures.forEach((titleKey, index) => {
+      const descKey = titleKey.replace('title', 'desc');
+      if (!content[descKey] || !content[descKey].toString().trim()) {
+        result.warnings.push(`${sectionId}: Plans feature ${index + 1} title has no corresponding description`);
+        result.hasIssues = true;
+      }
+    });
+
+    if (plansFeatures.length < 2) {
+      result.warnings.push(`${sectionId}: Should have at least 2 plan features to highlight value`);
+      result.hasIssues = true;
+    }
+  }
+
+  // Validate trust indicators structure
+  const trustItems = Object.keys(content).filter(key => key.includes('trust_item_') && !key.includes('show_'));
+  const showTrustItems = Object.keys(content).filter(key => key.includes('show_trust_item_'));
+
+  if (trustItems.length > 0 && showTrustItems.length === 0) {
+    result.warnings.push(`${sectionId}: Trust items defined but no show/hide flags found - consider adding visibility controls`);
+    result.hasIssues = true;
+  }
+
+  // Validate compact format constraints
+  if (content.tier_descriptions) {
+    const descriptions = parseContentArray(content.tier_descriptions);
+    descriptions.forEach((desc, index) => {
+      if (typeof desc === 'string' && desc.length > 100) {
+        result.warnings.push(`${sectionId}: Tier ${index + 1} description is too long for mini card format - keep under 100 characters`);
+        result.hasIssues = true;
+      }
+    });
+  }
+
+  return result;
+}
+
+/**
+ * Helper function to parse content that might be a string or array
+ */
+function parseContentArray(content: string | string[]): string[] {
+  if (Array.isArray(content)) {
+    return content;
+  }
+  if (typeof content === 'string') {
+    return content.split('|').map((item: string) => item.trim()).filter(Boolean);
+  }
+  return [];
 }

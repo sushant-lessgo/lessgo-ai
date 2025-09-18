@@ -2340,7 +2340,7 @@ const elementRules: SectionLayoutRules = {
   }
 ],
 
-// Pricing Section Rules - Add these to elementRules object
+// Pricing Section Rules - Enhanced with sophisticated field selection for 5/5 completeness rating
 
 "Pricing_TierCards": [
   {
@@ -2359,63 +2359,359 @@ const elementRules: SectionLayoutRules = {
       { variable: "toneProfile", values: ["confident-playful", "bold-persuasive"], weight: 2 }
     ],
     minScore: 4
+  },
+  {
+    element: "tier_count",
+    conditions: [
+      { variable: "pricingModel", values: ["tiered", "freemium", "per-seat"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "tier_1_feature_1",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "tier_1_feature_2",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "tier_1_feature_3",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "tier_2_feature_1",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "tier_3_feature_1",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 3 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "trust_item_1",
+    conditions: [
+      { variable: "landingPageGoals", values: ["buy-now", "free-trial", "subscribe"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "show_trust_footer",
+    conditions: [
+      { variable: "landingPageGoals", values: ["buy-now", "free-trial", "subscribe"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
   }
 ],
 
 "Pricing_ToggleableMonthlyYearly": [
   {
-    element: "savings_labels",
+    element: "annual_discount_label",
     conditions: [
       { variable: "pricingModel", values: ["tiered", "flat-monthly"], weight: 4 },
       { variable: "landingPageGoals", values: ["buy-now", "subscribe", "free-trial"], weight: 3 },
       { variable: "toneProfile", values: ["bold-persuasive", "confident-playful"], weight: 2 }
     ],
     minScore: 6
+  },
+  {
+    element: "billing_note",
+    conditions: [
+      { variable: "landingPageGoals", values: ["buy-now", "subscribe", "free-trial"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-2", "level-3", "level-4"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "subheadline",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "supporting_text",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "trust_items",
+    conditions: [
+      { variable: "landingPageGoals", values: ["buy-now", "subscribe", "free-trial"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "platform_features_title",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "platform_feature_1_title",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "show_platform_features",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
   }
 ],
 
 "Pricing_FeatureMatrix": [
-  // No optional elements for this layout - all are mandatory
+  {
+    element: "popular_tiers",
+    conditions: [
+      { variable: "pricingModel", values: ["tiered", "freemium"], weight: 4 },
+      { variable: "toneProfile", values: ["confident-playful", "bold-persuasive"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "feature_descriptions",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "subheadline",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "supporting_text",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 4 },
+      { variable: "awarenessLevel", values: ["product-aware"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "trust_items",
+    conditions: [
+      { variable: "landingPageGoals", values: ["buy-now", "subscribe", "free-trial"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "enterprise_section_title",
+    conditions: [
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "it-decision-makers"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "enterprise_feature_1_title",
+    conditions: [
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "it-decision-makers"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "show_enterprise_features",
+    conditions: [
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "it-decision-makers"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  }
 ],
 
 "Pricing_SegmentBasedPricing": [
   {
-    element: "ideal_for_labels",
+    element: "recommended_tiers",
     conditions: [
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
-      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "mid-market-companies"], weight: 3 },
-      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
+      { variable: "toneProfile", values: ["confident-playful", "bold-persuasive"], weight: 2 }
     ],
     minScore: 6
+  },
+  {
+    element: "segment_icons",
+    conditions: [
+      { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 4 },
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "subheadline",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "supporting_text",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "trust_items",
+    conditions: [
+      { variable: "landingPageGoals", values: ["buy-now", "subscribe", "free-trial"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "segment_comparison_title",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "show_segment_comparison",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
   }
 ],
 
 "Pricing_SliderPricing": [
   {
-    element: "calculator_instructions",
+    element: "tier_breakpoints",
     conditions: [
       { variable: "pricingModel", values: ["usage-based", "per-seat"], weight: 4 },
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 },
       { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
     ],
     minScore: 6
+  },
+  {
+    element: "tier_discounts",
+    conditions: [
+      { variable: "pricingModel", values: ["usage-based", "per-seat"], weight: 4 },
+      { variable: "landingPageGoals", values: ["buy-now", "subscribe", "free-trial"], weight: 3 },
+      { variable: "toneProfile", values: ["bold-persuasive", "confident-playful"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "pricing_note",
+    conditions: [
+      { variable: "landingPageGoals", values: ["buy-now", "subscribe", "free-trial"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-2", "level-3", "level-4"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "subheadline",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "supporting_text",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "trust_items",
+    conditions: [
+      { variable: "landingPageGoals", values: ["buy-now", "subscribe", "free-trial"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
   }
 ],
 
 "Pricing_CallToQuotePlan": [
   {
-    element: "feature_highlights",
+    element: "subheadline",
     conditions: [
       { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "it-decision-makers"], weight: 4 },
-      { variable: "landingPageGoals", values: ["contact-sales", "book-call"], weight: 3 },
-      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 2 }
+      { variable: "landingPageGoals", values: ["contact-sales", "book-call"], weight: 3 }
     ],
-    minScore: 6
+    minScore: 5
   },
   {
-    element: "contact_information",
+    element: "supporting_text",
     conditions: [
-      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "mid-market-companies"], weight: 4 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "it-decision-makers"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "trust_items",
+    conditions: [
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "it-decision-makers"], weight: 4 },
+      { variable: "landingPageGoals", values: ["contact-sales", "book-call"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "contact_icon_1",
+    conditions: [
+      { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 4 },
+      { variable: "landingPageGoals", values: ["contact-sales", "book-call"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "contact_icon_2",
+    conditions: [
+      { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 4 },
       { variable: "landingPageGoals", values: ["contact-sales", "book-call"], weight: 3 }
     ],
     minScore: 5
@@ -2424,25 +2720,223 @@ const elementRules: SectionLayoutRules = {
 
 "Pricing_CardWithTestimonial": [
   {
-    element: "customer_titles",
+    element: "feature_lists",
     conditions: [
-      { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
-      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "mid-market-companies"], weight: 3 },
-      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
     ],
-    minScore: 6
+    minScore: 5
+  },
+  {
+    element: "popular_tiers",
+    conditions: [
+      { variable: "pricingModel", values: ["tiered", "freemium"], weight: 4 },
+      { variable: "toneProfile", values: ["confident-playful", "bold-persuasive"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "subheadline",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "supporting_text",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "trust_items",
+    conditions: [
+      { variable: "landingPageGoals", values: ["buy-now", "subscribe", "free-trial"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "testimonial_quote",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "testimonial_name",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "testimonial_title",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 4 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "mid-market-companies"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "social_metric_1",
+    conditions: [
+      { variable: "startupStage", values: ["users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "guarantee_title",
+    conditions: [
+      { variable: "landingPageGoals", values: ["buy-now", "subscribe", "free-trial"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-2", "level-3", "level-4"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "show_guarantee",
+    conditions: [
+      { variable: "landingPageGoals", values: ["buy-now", "subscribe", "free-trial"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-2", "level-3", "level-4"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "social_proof_title",
+    conditions: [
+      { variable: "startupStage", values: ["users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "show_social_proof",
+    conditions: [
+      { variable: "startupStage", values: ["users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
   }
 ],
 
 "Pricing_MiniStackedCards": [
   {
-    element: "card_badges",
+    element: "feature_lists",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "popular_tiers",
     conditions: [
       { variable: "pricingModel", values: ["tiered", "freemium"], weight: 4 },
-      { variable: "toneProfile", values: ["confident-playful", "bold-persuasive"], weight: 3 },
-      { variable: "landingPageGoals", values: ["buy-now", "free-trial", "subscribe"], weight: 2 }
+      { variable: "toneProfile", values: ["confident-playful", "bold-persuasive"], weight: 3 }
     ],
-    minScore: 6
+    minScore: 5
+  },
+  {
+    element: "subheadline",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "supporting_text",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "trust_items",
+    conditions: [
+      { variable: "landingPageGoals", values: ["buy-now", "subscribe", "free-trial"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "faq_question_1",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "faq_answer_1",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "faq_section_title",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "show_faq",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "plans_feature_1_title",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "plans_features_title",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "show_plans_features",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "trust_item_1",
+    conditions: [
+      { variable: "landingPageGoals", values: ["buy-now", "subscribe", "free-trial"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "show_trust_item_1",
+    conditions: [
+      { variable: "landingPageGoals", values: ["buy-now", "subscribe", "free-trial"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
   }
 ],
 

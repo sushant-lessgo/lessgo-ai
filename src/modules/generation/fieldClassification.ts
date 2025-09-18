@@ -288,6 +288,39 @@ export function classifyField(fieldName: string, sectionType?: string): Classifi
     return classifyAnimatedProcessLineField(fieldName);
   }
 
+  // Pricing Section Classifications
+  if (sectionType === 'TierCards') {
+    return classifyTierCardsField(fieldName);
+  }
+
+  if (sectionType === 'ToggleableMonthlyYearly') {
+    return classifyToggleableMonthlyYearlyField(fieldName);
+  }
+
+  if (sectionType === 'FeatureMatrix') {
+    return classifyFeatureMatrixField(fieldName);
+  }
+
+  if (sectionType === 'SegmentBasedPricing') {
+    return classifySegmentBasedPricingField(fieldName);
+  }
+
+  if (sectionType === 'SliderPricing') {
+    return classifySliderPricingField(fieldName);
+  }
+
+  if (sectionType === 'CallToQuotePlan') {
+    return classifyCallToQuotePlanField(fieldName);
+  }
+
+  if (sectionType === 'CardWithTestimonial') {
+    return classifyCardWithTestimonialField(fieldName);
+  }
+
+  if (sectionType === 'MiniStackedCards') {
+    return classifyMiniStackedCardsField(fieldName);
+  }
+
   // AI-Generated Fields (high confidence for content generation)
   if (isAiGeneratedField(field)) {
     return {
@@ -5705,6 +5738,876 @@ function classifyFounderCardWithQuoteField(fieldName: string): ClassificationRes
       reason: 'Founder card content suitable for AI',
       fallback_strategy: 'generate',
       confidence: 0.85
+    }
+  };
+}
+
+/**
+ * Pricing Section Classifications - Enhanced for 5/5 completeness rating
+ */
+
+/**
+ * Specific classification for TierCards fields
+ */
+function classifyTierCardsField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  // Headlines and subheadlines - AI generated
+  if (field === 'headline' || field === 'subheadline' || field === 'supporting_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Pricing section headers and descriptions suitable for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create compelling pricing headers that highlight value'
+    };
+  }
+
+  // Tier names and descriptions - AI generated
+  if (field.includes('tier_names') || field.includes('tier_descriptions') || field.includes('feature_lists')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Tier content and features can be generated from business context',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create tier names and feature lists based on your business model'
+    };
+  }
+
+  // Individual tier features - AI generated
+  if (field.match(/tier_\d+_feature_\d+/)) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Individual tier features can be generated to match pricing tiers',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will generate specific features for each pricing tier'
+    };
+  }
+
+  // Pricing information - Manual preferred
+  if (field.includes('tier_prices') || field.includes('price') || field.includes('cost')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Requires accurate business pricing information',
+        fallback_strategy: 'default',
+        confidence: 0.9
+      },
+      suggested_default: '$29/month|$99/month|$299/month',
+      user_guidance: 'Enter your actual pricing tiers and values for accuracy'
+    };
+  }
+
+  // CTA texts - AI generated
+  if (field.includes('cta_texts') || field.includes('cta')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'CTA text can be optimized for conversion',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create compelling CTA text for each tier'
+    };
+  }
+
+  // Trust indicators - AI generated
+  if (field.includes('trust_item') || field.includes('trust_items')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Trust indicators can be generated from business context',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will create relevant trust indicators for your pricing section'
+    };
+  }
+
+  // Popular labels and visual elements - Hybrid
+  if (field.includes('popular') || field.includes('label') || field.includes('badge')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Popular tier selection benefits from business insight',
+        fallback_strategy: 'generate',
+        confidence: 0.75
+      },
+      user_guidance: 'AI will suggest popular tiers, but consider your actual sales data'
+    };
+  }
+
+  // Default to AI-generated
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Pricing tier content suitable for AI generation',
+      fallback_strategy: 'generate',
+      confidence: 0.8
+    }
+  };
+}
+
+/**
+ * Specific classification for ToggleableMonthlyYearly fields
+ */
+function classifyToggleableMonthlyYearlyField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  // Headlines and descriptions - AI generated
+  if (field === 'headline' || field === 'subheadline' || field === 'supporting_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Pricing section headers suitable for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create headers that emphasize annual savings value'
+    };
+  }
+
+  // Pricing information - Manual preferred
+  if (field.includes('monthly_prices') || field.includes('yearly_prices') || field.includes('price')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Requires accurate business pricing information',
+        fallback_strategy: 'default',
+        confidence: 0.95
+      },
+      suggested_default: '$29|$99|$299',
+      user_guidance: 'Enter your actual monthly and yearly pricing for accuracy'
+    };
+  }
+
+  // Discount and billing information - Hybrid
+  if (field.includes('annual_discount') || field.includes('billing_note') || field.includes('savings')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Discount information should reflect actual business policies',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      },
+      user_guidance: 'AI will generate discount messaging, but verify against your actual pricing'
+    };
+  }
+
+  // Platform features - AI generated
+  if (field.includes('platform_feature') || field.includes('platform_features')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Platform features can be generated from business context',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create platform features that apply to all pricing tiers'
+    };
+  }
+
+  // Tier content - AI generated
+  if (field.includes('tier_names') || field.includes('tier_descriptions') || field.includes('feature_lists')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Tier content can be generated from business model',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create compelling tier names and feature descriptions'
+    };
+  }
+
+  // Trust indicators - AI generated
+  if (field.includes('trust_items')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Trust indicators can be generated from business context',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will create trust indicators for your pricing section'
+    };
+  }
+
+  // Default to AI-generated
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Pricing toggle content suitable for AI generation',
+      fallback_strategy: 'generate',
+      confidence: 0.8
+    }
+  };
+}
+
+/**
+ * Specific classification for FeatureMatrix fields
+ */
+function classifyFeatureMatrixField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  // Headlines and descriptions - AI generated
+  if (field === 'headline' || field === 'subheadline' || field === 'supporting_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Feature matrix headers suitable for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create headers that highlight feature comparison value'
+    };
+  }
+
+  // Pricing information - Manual preferred
+  if (field.includes('tier_prices') || field.includes('price')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Requires accurate business pricing information',
+        fallback_strategy: 'default',
+        confidence: 0.95
+      },
+      suggested_default: '$29|$99|$299',
+      user_guidance: 'Enter your actual pricing for each tier'
+    };
+  }
+
+  // Feature content - AI generated
+  if (field.includes('feature_names') || field.includes('feature_categories') || field.includes('feature_descriptions')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Feature content can be generated from business capabilities',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will organize features into logical categories for comparison'
+    };
+  }
+
+  // Feature availability matrix - Hybrid
+  if (field.includes('feature_availability')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Feature availability should match actual tier limitations',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      },
+      user_guidance: 'AI will suggest feature distribution, but verify against your actual tier capabilities'
+    };
+  }
+
+  // Enterprise features - AI generated
+  if (field.includes('enterprise_feature') || field.includes('enterprise_section')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Enterprise features can be generated for high-tier differentiation',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will create enterprise-grade features that justify premium pricing'
+    };
+  }
+
+  // Tier names and descriptions - AI generated
+  if (field.includes('tier_names') || field.includes('tier_descriptions')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Tier naming can be optimized for clarity and appeal',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create clear tier names that communicate value levels'
+    };
+  }
+
+  // Default to AI-generated
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Feature matrix content suitable for AI generation',
+      fallback_strategy: 'generate',
+      confidence: 0.8
+    }
+  };
+}
+
+/**
+ * Specific classification for SegmentBasedPricing fields
+ */
+function classifySegmentBasedPricingField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  // Headlines and descriptions - AI generated
+  if (field === 'headline' || field === 'subheadline' || field === 'supporting_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Segment pricing headers suitable for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create headers that emphasize tailored pricing approach'
+    };
+  }
+
+  // Segment content - AI generated
+  if (field.includes('segment_names') || field.includes('segment_descriptions') || field.includes('segment_use_cases')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Business segments can be generated from target audience analysis',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create business segments with relevant use cases and descriptions'
+    };
+  }
+
+  // Pricing information - Manual preferred
+  if (field.includes('tier_prices') || field.includes('price')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Requires accurate segment-specific pricing information',
+        fallback_strategy: 'default',
+        confidence: 0.95
+      },
+      suggested_default: '$29|$99|$299',
+      user_guidance: 'Enter your actual pricing for each business segment'
+    };
+  }
+
+  // Tier and feature content - AI generated
+  if (field.includes('tier_names') || field.includes('tier_features') || field.includes('cta_texts')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Segment-specific tiers and features can be generated',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will create tiers and features tailored to each business segment'
+    };
+  }
+
+  // Recommended tiers - Hybrid
+  if (field.includes('recommended_tiers')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Recommendations should align with business strategy',
+        fallback_strategy: 'generate',
+        confidence: 0.75
+      },
+      user_guidance: 'AI will suggest recommended tiers, but consider your sales strategy'
+    };
+  }
+
+  // Segment icons - Hybrid
+  if (field.includes('segment_icons')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Icons should align with brand and segment representation',
+        fallback_strategy: 'generate',
+        confidence: 0.7
+      },
+      user_guidance: 'AI will suggest segment icons, but consider brand-specific icons'
+    };
+  }
+
+  // Comparison features - AI generated
+  if (field.includes('segment_comparison')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Segment comparison content can be generated for clarity',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will create comparison content that highlights segment differences'
+    };
+  }
+
+  // Default to AI-generated
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Segment pricing content suitable for AI generation',
+      fallback_strategy: 'generate',
+      confidence: 0.8
+    }
+  };
+}
+
+/**
+ * Specific classification for SliderPricing fields
+ */
+function classifySliderPricingField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  // Headlines and descriptions - AI generated
+  if (field === 'headline' || field === 'subheadline' || field === 'supporting_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Slider pricing headers suitable for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create headers that emphasize flexible pricing benefits'
+    };
+  }
+
+  // Pricing configuration - Manual preferred
+  if (field.includes('base_price') || field.includes('unit_price') || field.includes('tier_breakpoints') || field.includes('tier_discounts')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Requires accurate pricing structure and discount tiers',
+        fallback_strategy: 'default',
+        confidence: 0.95
+      },
+      suggested_default: field.includes('price') ? '29' : '1|10|25|50',
+      user_guidance: 'Enter your actual pricing structure, unit costs, and volume discounts'
+    };
+  }
+
+  // Unit configuration - Manual preferred
+  if (field.includes('min_units') || field.includes('max_units') || field.includes('default_units')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Unit limits should reflect actual business constraints',
+        fallback_strategy: 'default',
+        confidence: 0.9
+      },
+      suggested_default: field.includes('min') ? '1' : field.includes('max') ? '100' : '10',
+      user_guidance: 'Set unit limits based on your actual business capacity and pricing model'
+    };
+  }
+
+  // Pricing type and labels - Hybrid
+  if (field.includes('pricing_type') || field.includes('unit_label')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Pricing model terminology should match business language',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      },
+      user_guidance: 'AI will suggest pricing terminology, but ensure it matches your business model'
+    };
+  }
+
+  // Features and benefits - AI generated
+  if (field.includes('included_features')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Included features can be generated from business capabilities',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create comprehensive feature lists for your pricing tiers'
+    };
+  }
+
+  // Pricing notes and disclaimers - AI generated
+  if (field.includes('pricing_note')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Pricing notes can be generated for transparency and trust',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will create helpful pricing notes about billing and discounts'
+    };
+  }
+
+  // Trust indicators - AI generated
+  if (field.includes('trust_items')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Trust indicators can be generated for flexible pricing confidence',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will create trust indicators for your usage-based pricing'
+    };
+  }
+
+  // Default to AI-generated
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Slider pricing content suitable for AI generation',
+      fallback_strategy: 'generate',
+      confidence: 0.8
+    }
+  };
+}
+
+/**
+ * Specific classification for CallToQuotePlan fields
+ */
+function classifyCallToQuotePlanField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  // Headlines and descriptions - AI generated
+  if (field === 'headline' || field === 'subheadline' || field === 'supporting_text' || field.includes('value_proposition')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Quote request content suitable for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create compelling content that encourages quote requests'
+    };
+  }
+
+  // Contact options and CTAs - AI generated
+  if (field.includes('contact_options') || field.includes('contact_ctas')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Contact options can be generated for enterprise sales flow',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create varied contact options for different customer preferences'
+    };
+  }
+
+  // Contact icons - Hybrid
+  if (field.includes('contact_icon')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Icons should align with brand and contact method representation',
+        fallback_strategy: 'generate',
+        confidence: 0.75
+      },
+      user_guidance: 'AI will suggest contact icons, but consider brand-specific icons'
+    };
+  }
+
+  // Trust indicators - AI generated
+  if (field.includes('trust_items')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Trust indicators can be generated for enterprise credibility',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will create trust indicators appropriate for enterprise sales'
+    };
+  }
+
+  // Default to AI-generated
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Quote request content suitable for AI generation',
+      fallback_strategy: 'generate',
+      confidence: 0.8
+    }
+  };
+}
+
+/**
+ * Specific classification for CardWithTestimonial fields
+ */
+function classifyCardWithTestimonialField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  // Headlines and descriptions - AI generated
+  if (field === 'headline' || field === 'subheadline' || field === 'supporting_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Pricing with testimonial headers suitable for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create headers that combine pricing appeal with social proof'
+    };
+  }
+
+  // Pricing information - Manual preferred
+  if (field.includes('tier_prices') || field.includes('price')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Requires accurate business pricing information',
+        fallback_strategy: 'default',
+        confidence: 0.95
+      },
+      suggested_default: '$29|$99|$299',
+      user_guidance: 'Enter your actual pricing for credibility with testimonials'
+    };
+  }
+
+  // Testimonial content - Hybrid
+  if (field.includes('testimonial_quote') || field.includes('testimonial_name') || field.includes('testimonial_title') || field.includes('testimonial_company')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Testimonials should be authentic but can be generated for testing',
+        fallback_strategy: 'generate',
+        confidence: 0.7
+      },
+      user_guidance: 'AI will create realistic testimonials, but replace with real customer feedback'
+    };
+  }
+
+  // Social metrics - Hybrid
+  if (field.includes('social_metric') || field.includes('social_proof')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Social metrics should reflect actual performance but can be estimated',
+        fallback_strategy: 'generate',
+        confidence: 0.75
+      },
+      user_guidance: 'AI will suggest social metrics, but use actual numbers when available'
+    };
+  }
+
+  // Guarantee content - AI generated
+  if (field.includes('guarantee')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Guarantee content can be generated for trust building',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will create guarantee content, but ensure it matches your actual policies'
+    };
+  }
+
+  // Tier content and features - AI generated
+  if (field.includes('tier_names') || field.includes('tier_descriptions') || field.includes('feature_lists')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Tier content can be generated with testimonial context',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create tier content that aligns with testimonial themes'
+    };
+  }
+
+  // Trust indicators - AI generated
+  if (field.includes('trust_items')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Trust indicators complement testimonial social proof',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will create trust indicators that reinforce testimonial credibility'
+    };
+  }
+
+  // Default to AI-generated
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Pricing with testimonial content suitable for AI generation',
+      fallback_strategy: 'generate',
+      confidence: 0.8
+    }
+  };
+}
+
+/**
+ * Specific classification for MiniStackedCards fields
+ */
+function classifyMiniStackedCardsField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  // Headlines and descriptions - AI generated
+  if (field === 'headline' || field === 'subheadline' || field === 'supporting_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Compact pricing headers suitable for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create concise headers perfect for mini pricing cards'
+    };
+  }
+
+  // Pricing information - Manual preferred
+  if (field.includes('tier_prices') || field.includes('price')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Requires accurate business pricing information',
+        fallback_strategy: 'default',
+        confidence: 0.95
+      },
+      suggested_default: '$29|$99|$299',
+      user_guidance: 'Enter your actual pricing for each tier'
+    };
+  }
+
+  // FAQ content - AI generated
+  if (field.includes('faq_question') || field.includes('faq_answer') || field.includes('faq_section')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Pricing FAQ content can be generated from common concerns',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create FAQ content addressing common pricing questions'
+    };
+  }
+
+  // Plans features - AI generated
+  if (field.includes('plans_feature') || field.includes('plans_features')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Plan features can be generated to highlight value',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create features that showcase plan benefits'
+    };
+  }
+
+  // Trust indicators - AI generated
+  if (field.includes('trust_item') || field.includes('trust_items')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Trust indicators can be generated for pricing confidence',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will create trust indicators appropriate for compact pricing'
+    };
+  }
+
+  // Show/hide flags - Hybrid
+  if (field.includes('show_') || field.includes('_show')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Section visibility should align with pricing strategy',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      },
+      user_guidance: 'AI will suggest which sections to show, but consider your specific needs'
+    };
+  }
+
+  // Tier content - AI generated
+  if (field.includes('tier_names') || field.includes('tier_descriptions') || field.includes('feature_lists')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Compact tier content can be generated for quick scanning',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create concise tier content perfect for mini cards'
+    };
+  }
+
+  // Default to AI-generated
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Mini pricing card content suitable for AI generation',
+      fallback_strategy: 'generate',
+      confidence: 0.8
     }
   };
 }
