@@ -391,6 +391,71 @@ function processSectionContent(sectionId: string, content: SectionContent): {
     return result;
   }
 
+  // Special handling for FounderNote sections
+  if (sectionId.includes('FoundersBeliefStack')) {
+    const processedFoundersBeliefStack = processFoundersBeliefStackContent(sectionId, content);
+    result.content = processedFoundersBeliefStack.content;
+    result.warnings = processedFoundersBeliefStack.warnings;
+    result.hasIssues = processedFoundersBeliefStack.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('LetterStyleBlock')) {
+    const processedLetterStyle = processLetterStyleBlockContent(sectionId, content);
+    result.content = processedLetterStyle.content;
+    result.warnings = processedLetterStyle.warnings;
+    result.hasIssues = processedLetterStyle.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('VideoNoteWithTranscript')) {
+    const processedVideoNote = processVideoNoteWithTranscriptContent(sectionId, content);
+    result.content = processedVideoNote.content;
+    result.warnings = processedVideoNote.warnings;
+    result.hasIssues = processedVideoNote.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('MissionQuoteOverlay')) {
+    const processedMissionQuote = processMissionQuoteOverlayContent(sectionId, content);
+    result.content = processedMissionQuote.content;
+    result.warnings = processedMissionQuote.warnings;
+    result.hasIssues = processedMissionQuote.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('TimelineToToday')) {
+    const processedTimelineToToday = processTimelineTodayContent(sectionId, content);
+    result.content = processedTimelineToToday.content;
+    result.warnings = processedTimelineToToday.warnings;
+    result.hasIssues = processedTimelineToToday.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('SideBySidePhotoStory')) {
+    const processedSideBySidePhotoStory = processSideBySidePhotoStoryContent(sectionId, content);
+    result.content = processedSideBySidePhotoStory.content;
+    result.warnings = processedSideBySidePhotoStory.warnings;
+    result.hasIssues = processedSideBySidePhotoStory.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('StoryBlockWithPullquote')) {
+    const processedStoryBlock = processStoryBlockWithPullquoteContent(sectionId, content);
+    result.content = processedStoryBlock.content;
+    result.warnings = processedStoryBlock.warnings;
+    result.hasIssues = processedStoryBlock.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('FounderCardWithQuote')) {
+    const processedFounderCard = processFounderCardWithQuoteContent(sectionId, content);
+    result.content = processedFounderCard.content;
+    result.warnings = processedFounderCard.warnings;
+    result.hasIssues = processedFounderCard.hasIssues;
+    return result;
+  }
+
   // Special handling for UniqueMechanism sections
   if (sectionId.includes('AlgorithmExplainer')) {
     const processedAlgorithm = processAlgorithmExplainerContent(sectionId, content);
@@ -3997,6 +4062,369 @@ function processObjectionCarouselContent(sectionId: string, content: SectionCont
 
   if (validSlides > 6) {
     result.warnings.push(`${sectionId}: ${validSlides} slides may cause carousel fatigue - consider 3-6 key objections`);
+  }
+
+  return result;
+}
+
+/**
+ * Processes FoundersBeliefStack content with special handling for belief items and company values
+ */
+function processFoundersBeliefStackContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: { ...content },
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Process belief_items (pipe-separated format: Icon|Title|Description)
+  if (content.belief_items && typeof content.belief_items === 'string') {
+    const beliefItems = content.belief_items.split('|').map(item => item.trim());
+    if (beliefItems.length % 3 !== 0) {
+      result.warnings.push(`${sectionId}: belief_items should be in groups of 3 (Icon|Title|Description format)`);
+      result.hasIssues = true;
+    } else if (beliefItems.length < 6) {
+      result.warnings.push(`${sectionId}: belief_items should have at least 2 beliefs (6 pipe-separated values)`);
+      result.hasIssues = true;
+    }
+  }
+
+  // Validate company values progression
+  const companyValueFields = ['company_value_1', 'company_value_2', 'company_value_3', 'company_value_4', 'company_value_5'];
+  let valueCount = 0;
+  companyValueFields.forEach(field => {
+    if (content[field] && typeof content[field] === 'string' && content[field].length > 0) {
+      valueCount++;
+    }
+  });
+
+  if (valueCount > 0 && valueCount < 3) {
+    result.warnings.push(`${sectionId}: Should have at least 3 company values when values are included`);
+    result.hasIssues = true;
+  }
+
+  // Validate trust items progression
+  const trustItemFields = ['trust_item_1', 'trust_item_2', 'trust_item_3', 'trust_item_4', 'trust_item_5'];
+  let trustCount = 0;
+  trustItemFields.forEach(field => {
+    if (content[field] && typeof content[field] === 'string' && content[field].length > 0) {
+      trustCount++;
+    }
+  });
+
+  if (trustCount > 0 && trustCount < 2) {
+    result.warnings.push(`${sectionId}: Should have at least 2 trust items when trust items are included`);
+    result.hasIssues = true;
+  }
+
+  return result;
+}
+
+/**
+ * Processes LetterStyleBlock content with special handling for letter formatting
+ */
+function processLetterStyleBlockContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: { ...content },
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Validate letter_body formatting
+  if (content.letter_body && typeof content.letter_body === 'string') {
+    if (!content.letter_body.includes('\\n')) {
+      result.warnings.push(`${sectionId}: letter_body should include \\n for proper paragraph formatting`);
+      result.hasIssues = true;
+    }
+
+    if (content.letter_body.length < 200) {
+      result.warnings.push(`${sectionId}: letter_body seems too short for a personal letter`);
+      result.hasIssues = true;
+    }
+  }
+
+  // Validate ps_text if present
+  if (content.ps_text && typeof content.ps_text === 'string') {
+    if (!content.ps_text.toLowerCase().includes('p.s.')) {
+      result.warnings.push(`${sectionId}: ps_text should start with 'P.S.' for proper letter format`);
+      result.hasIssues = true;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Processes VideoNoteWithTranscript content with special handling for transcript formatting
+ */
+function processVideoNoteWithTranscriptContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: { ...content },
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Validate transcript_text formatting
+  if (content.transcript_text && typeof content.transcript_text === 'string') {
+    if (!content.transcript_text.includes('\\n')) {
+      result.warnings.push(`${sectionId}: transcript_text should include \\n for natural conversation breaks`);
+      result.hasIssues = true;
+    }
+
+    if (content.transcript_text.length < 300) {
+      result.warnings.push(`${sectionId}: transcript_text seems too short for a meaningful video transcript`);
+      result.hasIssues = true;
+    }
+
+    // Check for conversational tone indicators
+    const conversationalIndicators = ['I', 'you', 'we', 'our', 'my', 'your'];
+    const hasConversationalTone = conversationalIndicators.some(indicator =>
+      content.transcript_text.toLowerCase().includes(indicator.toLowerCase())
+    );
+
+    if (!hasConversationalTone) {
+      result.warnings.push(`${sectionId}: transcript_text should sound conversational and personal`);
+      result.hasIssues = true;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Processes MissionQuoteOverlay content with special handling for mission stats
+ */
+function processMissionQuoteOverlayContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: { ...content },
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Validate mission stats progression
+  const missionStatFields = ['mission_stat_1', 'mission_stat_2', 'mission_stat_3', 'mission_stat_4'];
+  let statCount = 0;
+  missionStatFields.forEach(field => {
+    if (content[field] && typeof content[field] === 'string' && content[field].length > 0) {
+      statCount++;
+
+      // Check if stat contains numbers
+      const hasNumbers = /\d/.test(content[field] as string);
+      if (!hasNumbers) {
+        result.warnings.push(`${sectionId}: ${field} should include specific numbers for credibility`);
+        result.hasIssues = true;
+      }
+    }
+  });
+
+  if (statCount > 0 && statCount < 2) {
+    result.warnings.push(`${sectionId}: Should have at least 2 mission stats when stats are included`);
+    result.hasIssues = true;
+  }
+
+  return result;
+}
+
+/**
+ * Processes TimelineToToday content with special handling for timeline format
+ */
+function processTimelineTodayContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: { ...content },
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Process timeline_items (pipe-separated format: Year|Event|Description)
+  if (content.timeline_items && typeof content.timeline_items === 'string') {
+    const timelineItems = content.timeline_items.split('|').map(item => item.trim());
+    if (timelineItems.length % 3 !== 0) {
+      result.warnings.push(`${sectionId}: timeline_items should be in groups of 3 (Year|Event|Description format)`);
+      result.hasIssues = true;
+    } else if (timelineItems.length < 9) {
+      result.warnings.push(`${sectionId}: timeline_items should have at least 3 timeline entries (9 pipe-separated values)`);
+      result.hasIssues = true;
+    } else {
+      // Validate year format in timeline
+      for (let i = 0; i < timelineItems.length; i += 3) {
+        const year = timelineItems[i];
+        if (!/^\d{4}$/.test(year)) {
+          result.warnings.push(`${sectionId}: Timeline year "${year}" should be in YYYY format`);
+          result.hasIssues = true;
+        }
+      }
+    }
+  }
+
+  // Validate trust items progression
+  const trustItemFields = ['trust_item_1', 'trust_item_2', 'trust_item_3', 'trust_item_4', 'trust_item_5'];
+  let trustCount = 0;
+  trustItemFields.forEach(field => {
+    if (content[field] && typeof content[field] === 'string' && content[field].length > 0) {
+      trustCount++;
+    }
+  });
+
+  if (trustCount > 0 && trustCount < 2) {
+    result.warnings.push(`${sectionId}: Should have at least 2 trust items when trust items are included`);
+    result.hasIssues = true;
+  }
+
+  return result;
+}
+
+/**
+ * Processes SideBySidePhotoStory content with special handling for story stats
+ */
+function processSideBySidePhotoStoryContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: { ...content },
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Validate story stats progression
+  const storyStatFields = ['story_stat_1', 'story_stat_2', 'story_stat_3', 'story_stat_4'];
+  let statCount = 0;
+  storyStatFields.forEach(field => {
+    if (content[field] && typeof content[field] === 'string' && content[field].length > 0) {
+      statCount++;
+
+      // Check if stat contains numbers
+      const hasNumbers = /\d/.test(content[field] as string);
+      if (!hasNumbers) {
+        result.warnings.push(`${sectionId}: ${field} should include specific numbers for impact`);
+        result.hasIssues = true;
+      }
+    }
+  });
+
+  if (statCount > 0 && statCount < 2) {
+    result.warnings.push(`${sectionId}: Should have at least 2 story stats when stats are included`);
+    result.hasIssues = true;
+  }
+
+  // Validate trust items progression
+  const trustItemFields = ['trust_item_1', 'trust_item_2', 'trust_item_3', 'trust_item_4', 'trust_item_5'];
+  let trustCount = 0;
+  trustItemFields.forEach(field => {
+    if (content[field] && typeof content[field] === 'string' && content[field].length > 0) {
+      trustCount++;
+    }
+  });
+
+  if (trustCount > 0 && trustCount < 2) {
+    result.warnings.push(`${sectionId}: Should have at least 2 trust items when trust items are included`);
+    result.hasIssues = true;
+  }
+
+  return result;
+}
+
+/**
+ * Processes StoryBlockWithPullquote content with special handling for pullquote extraction
+ */
+function processStoryBlockWithPullquoteContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: { ...content },
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Validate that pullquote relates to story content
+  if (content.story_content && content.pullquote_text &&
+      typeof content.story_content === 'string' && typeof content.pullquote_text === 'string') {
+
+    // Check if pullquote appears to be extracted from story content
+    const storyWords = content.story_content.toLowerCase().split(/\s+/);
+    const pullquoteWords = content.pullquote_text.toLowerCase().split(/\s+/);
+
+    // Look for word overlap
+    const overlap = pullquoteWords.filter(word => storyWords.includes(word));
+    if (overlap.length < pullquoteWords.length * 0.3) {
+      result.warnings.push(`${sectionId}: pullquote_text should be extracted from or closely related to story_content`);
+      result.hasIssues = true;
+    }
+  }
+
+  // Validate trust items progression
+  const trustItemFields = ['trust_item_1', 'trust_item_2', 'trust_item_3', 'trust_item_4', 'trust_item_5'];
+  let trustCount = 0;
+  trustItemFields.forEach(field => {
+    if (content[field] && typeof content[field] === 'string' && content[field].length > 0) {
+      trustCount++;
+    }
+  });
+
+  if (trustCount > 0 && trustCount < 2) {
+    result.warnings.push(`${sectionId}: Should have at least 2 trust items when trust items are included`);
+    result.hasIssues = true;
+  }
+
+  return result;
+}
+
+/**
+ * Processes FounderCardWithQuote content with basic validation
+ */
+function processFounderCardWithQuoteContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: { ...content },
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Validate quote authenticity indicators
+  if (content.founder_quote && typeof content.founder_quote === 'string') {
+    if (content.founder_quote.length < 50) {
+      result.warnings.push(`${sectionId}: founder_quote seems too short for meaningful impact`);
+      result.hasIssues = true;
+    }
+
+    if (content.founder_quote.length > 300) {
+      result.warnings.push(`${sectionId}: founder_quote is too long for a card format - keep under 300 characters`);
+      result.hasIssues = true;
+    }
+  }
+
+  // Validate founder bio length
+  if (content.founder_bio && typeof content.founder_bio === 'string') {
+    if (content.founder_bio.length < 100) {
+      result.warnings.push(`${sectionId}: founder_bio should provide meaningful credibility information`);
+      result.hasIssues = true;
+    }
   }
 
   return result;

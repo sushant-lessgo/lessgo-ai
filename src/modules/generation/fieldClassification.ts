@@ -148,6 +148,39 @@ export function classifyField(fieldName: string, sectionType?: string): Classifi
     return classifyProblemChecklistField(fieldName);
   }
 
+  // FounderNote Section Classifications
+  if (sectionType === 'FoundersBeliefStack') {
+    return classifyFoundersBeliefStackField(fieldName);
+  }
+
+  if (sectionType === 'LetterStyleBlock') {
+    return classifyLetterStyleBlockField(fieldName);
+  }
+
+  if (sectionType === 'VideoNoteWithTranscript') {
+    return classifyVideoNoteWithTranscriptField(fieldName);
+  }
+
+  if (sectionType === 'MissionQuoteOverlay') {
+    return classifyMissionQuoteOverlayField(fieldName);
+  }
+
+  if (sectionType === 'TimelineToToday') {
+    return classifyTimelineTodayField(fieldName);
+  }
+
+  if (sectionType === 'SideBySidePhotoStory') {
+    return classifySideBySidePhotoStoryField(fieldName);
+  }
+
+  if (sectionType === 'StoryBlockWithPullquote') {
+    return classifyStoryBlockWithPullquoteField(fieldName);
+  }
+
+  if (sectionType === 'FounderCardWithQuote') {
+    return classifyFounderCardWithQuoteField(fieldName);
+  }
+
   // UniqueMechanism Section Classifications
   if (sectionType === 'AlgorithmExplainer') {
     return classifyAlgorithmExplainerField(fieldName);
@@ -5120,6 +5153,558 @@ function classifyObjectionCarouselField(fieldName: string): ClassificationResult
       reason: 'Unknown objection carousel field',
       fallback_strategy: 'generate',
       confidence: 0.7
+    }
+  };
+}
+
+/**
+ * Specific classification for FoundersBeliefStack fields
+ */
+function classifyFoundersBeliefStackField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'beliefs_headline' || field === 'beliefs_intro') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Belief-focused headers should convey founder values effectively',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create value-driven headlines that resonate with your mission'
+    };
+  }
+
+  if (field === 'belief_items') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Belief statements should reflect core company values',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will generate belief items in format: Icon Title|Description (pipe-separated pairs)'
+    };
+  }
+
+  if (field === 'commitment_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Commitment message should be personal and authentic',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create authentic commitment text from founder perspective'
+    };
+  }
+
+  if (field.startsWith('company_value_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Company values should align with brand mission',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will suggest company values aligned with your beliefs'
+    };
+  }
+
+  if (field.startsWith('trust_item_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Trust items should be factual certifications/badges',
+        fallback_strategy: 'default',
+        confidence: 0.9
+      },
+      user_guidance: 'Add actual certifications, badges, or trust indicators'
+    };
+  }
+
+  if (field.startsWith('belief_icon_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Icons should match belief themes',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      },
+      user_guidance: 'AI will suggest appropriate emoji icons for each belief'
+    };
+  }
+
+  if (field === 'founder_image') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Founder image requires actual photo',
+        fallback_strategy: 'skip',
+        confidence: 1.0
+      },
+      user_guidance: 'Upload actual founder photo for authenticity'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Standard belief stack content suitable for AI generation',
+      fallback_strategy: 'generate',
+      confidence: 0.85
+    }
+  };
+}
+
+/**
+ * Specific classification for LetterStyleBlock fields
+ */
+function classifyLetterStyleBlockField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'letter_header') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Letter header sets the tone for personal communication',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create a personal letter header'
+    };
+  }
+
+  if (field === 'letter_greeting') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Greeting should be warm and audience-appropriate',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create appropriate greeting for your audience'
+    };
+  }
+
+  if (field === 'letter_body') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Letter body should tell authentic founder story',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will craft personal letter content with proper formatting (use \\n for line breaks)'
+    };
+  }
+
+  if (field === 'letter_signature' || field === 'founder_name' || field === 'founder_title') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Signature details should be accurate',
+        fallback_strategy: 'generate',
+        confidence: 0.7
+      },
+      user_guidance: 'Provide actual founder name and title'
+    };
+  }
+
+  if (field === 'ps_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'P.S. adds personal touch and urgency',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will add compelling P.S. note'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Letter content suitable for AI generation',
+      fallback_strategy: 'generate',
+      confidence: 0.85
+    }
+  };
+}
+
+/**
+ * Specific classification for VideoNoteWithTranscript fields
+ */
+function classifyVideoNoteWithTranscriptField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline' || field === 'video_intro') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Video introduction should be compelling and personal',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create engaging video introduction'
+    };
+  }
+
+  if (field === 'transcript_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Transcript should sound natural and conversational',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will generate natural-sounding video transcript with line breaks'
+    };
+  }
+
+  if (field === 'video_url') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Video URL requires actual video link',
+        fallback_strategy: 'skip',
+        confidence: 1.0
+      },
+      user_guidance: 'Provide actual video URL or leave empty for placeholder'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Video note content suitable for AI',
+      fallback_strategy: 'generate',
+      confidence: 0.85
+    }
+  };
+}
+
+/**
+ * Specific classification for MissionQuoteOverlay fields
+ */
+function classifyMissionQuoteOverlayField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'mission_quote') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Mission quote should be inspirational and memorable',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create powerful mission statement quote'
+    };
+  }
+
+  if (field.startsWith('mission_stat_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Mission stats demonstrate impact',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will suggest impact statistics'
+    };
+  }
+
+  if (field === 'badge_text' || field === 'badge_icon') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Badge enhances mission context',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      },
+      user_guidance: 'AI will create appropriate badge text and icon'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Mission content suitable for AI',
+      fallback_strategy: 'generate',
+      confidence: 0.85
+    }
+  };
+}
+
+/**
+ * Specific classification for TimelineToToday fields
+ */
+function classifyTimelineTodayField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline' || field === 'intro_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Timeline headers should tell journey story',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create engaging journey narrative'
+    };
+  }
+
+  if (field === 'timeline_items') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Timeline events show company evolution',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will generate timeline in format: Year|Event|Description (pipe-separated triplets)'
+    };
+  }
+
+  if (field === 'current_milestone') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Current milestone shows present achievement',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will highlight current company milestone'
+    };
+  }
+
+  if (field.startsWith('timeline_icon_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Timeline icons mark milestones',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      },
+      user_guidance: 'AI will suggest milestone icons'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Timeline content suitable for AI',
+      fallback_strategy: 'generate',
+      confidence: 0.85
+    }
+  };
+}
+
+/**
+ * Specific classification for SideBySidePhotoStory fields
+ */
+function classifySideBySidePhotoStoryField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'story_headline' || field === 'story_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Story content should be personal and engaging',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will craft compelling founder story'
+    };
+  }
+
+  if (field === 'story_quote') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Quote should capture key insight',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create memorable story quote'
+    };
+  }
+
+  if (field.startsWith('story_stat_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Story stats show growth and impact',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will suggest relevant growth statistics'
+    };
+  }
+
+  if (field === 'story_image' || field === 'secondary_image') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Story images require actual photos',
+        fallback_strategy: 'skip',
+        confidence: 1.0
+      },
+      user_guidance: 'Upload actual story photos'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Story content suitable for AI',
+      fallback_strategy: 'generate',
+      confidence: 0.85
+    }
+  };
+}
+
+/**
+ * Specific classification for StoryBlockWithPullquote fields
+ */
+function classifyStoryBlockWithPullquoteField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'story_headline' || field === 'story_content') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Story should build to pullquote moment',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create story that highlights key insight'
+    };
+  }
+
+  if (field === 'pullquote_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Pullquote should capture story essence',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will extract powerful quote from story'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Story block content suitable for AI',
+      fallback_strategy: 'generate',
+      confidence: 0.85
+    }
+  };
+}
+
+/**
+ * Specific classification for FounderCardWithQuote fields
+ */
+function classifyFounderCardWithQuoteField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'founder_quote') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Founder quote should be authentic and inspiring',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create authentic founder quote'
+    };
+  }
+
+  if (field === 'founder_bio') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Bio should establish founder credibility',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will write compelling founder bio'
+    };
+  }
+
+  if (field === 'company_context') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Context explains company founding story',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will provide company context'
+    };
+  }
+
+  if (field === 'founder_name' || field === 'founder_title') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Founder details should be accurate',
+        fallback_strategy: 'generate',
+        confidence: 0.7
+      },
+      user_guidance: 'Provide actual founder information'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Founder card content suitable for AI',
+      fallback_strategy: 'generate',
+      confidence: 0.85
     }
   };
 }

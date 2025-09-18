@@ -140,13 +140,13 @@ function getSectionLayoutGuidance(sectionType: string, layout: string): string {
 
     FounderNote: {
       FounderCardWithQuote: "Personal founder introduction. Use authentic, personal voice. Balance credibility with relatability.",
-      LetterStyleBlock: "Formal letter format presentation. Use personal, direct address. Maintain professional yet warm tone.",
-      VideoNoteWithTranscript: "Video-first personal message. Transcript should capture spoken authenticity. Include human elements.",
-      MissionQuoteOverlay: "Mission-focused founder statement. Use inspirational, purpose-driven language. Keep message clear and compelling.",
-      TimelineToToday: "Founder journey narrative. Show progression and growth. Connect past experience to current solution.",
-      SideBySidePhotoStory: "Visual storytelling format. Let image support story. Use personal, relatable language throughout.",
-      StoryBlockWithPullquote: "Narrative with highlighted quote. Pullquote should capture key insight. Story should build to that moment.",
-      FoundersBeliefStack: "Value-driven founder presentation. Use conviction-based language. Connect beliefs to product benefits."
+      LetterStyleBlock: "Formal letter format presentation. Use personal, direct address. Maintain professional yet warm tone. LETTER_BODY FORMAT: Use \\n for line breaks to create proper paragraphs. PS_TEXT: Add compelling postscript for urgency or final value point.",
+      VideoNoteWithTranscript: "Video-first personal message. Transcript should capture spoken authenticity. Include human elements. TRANSCRIPT_TEXT FORMAT: Use \\n for natural conversation breaks and pauses. Make it sound genuinely spoken, not written.",
+      MissionQuoteOverlay: "Mission-focused founder statement. Use inspirational, purpose-driven language. Keep message clear and compelling. MISSION_STATS: Use specific numbers with context (e.g., '10,000+ customers served', '$2M+ saved for clients').",
+      TimelineToToday: "Founder journey narrative. Show progression and growth. Connect past experience to current solution. TIMELINE_ITEMS FORMAT: Use pipe-separated format 'Year|Event|Description' for chronological journey (e.g., '2019|Started in garage|Built first prototype'). TRUST_ITEMS: Include actual certifications, press mentions, or achievements.",
+      SideBySidePhotoStory: "Visual storytelling format. Let image support story. Use personal, relatable language throughout. STORY_STATS: Use growth metrics with context. TRUST_ITEMS: Include relevant industry badges or certifications.",
+      StoryBlockWithPullquote: "Narrative with highlighted quote. Pullquote should capture key insight. Story should build to that moment. STORY_CONTENT: Write full narrative that builds to pullquote moment. PULLQUOTE_TEXT: Extract most powerful quote from story.",
+      FoundersBeliefStack: "Value-driven founder presentation. Use conviction-based language. Connect beliefs to product benefits. BELIEF_ITEMS FORMAT: Use pipe-separated format 'Icon|Title|Description' for each belief (e.g., '🌟|Quality First|We never compromise on excellence'). COMPANY_VALUES: Use individual value fields (company_value_1, company_value_2, etc.) for core principles. TRUST_ITEMS: Include actual certifications, awards, or industry recognition."
     },
 
     Header: {

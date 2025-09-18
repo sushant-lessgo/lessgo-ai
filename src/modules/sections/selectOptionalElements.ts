@@ -1181,16 +1181,70 @@ const elementRules: SectionLayoutRules = {
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 2 }
     ],
     minScore: 6
+  },
+  {
+    element: "cta_text",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "landingPageGoals", values: ["signup", "free-trial", "demo"], weight: 3 },
+      { variable: "copyIntent", values: ["desire-led"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "founder_image",
+    conditions: [
+      { variable: "toneProfile", values: ["luxury-expert", "friendly-helpful"], weight: 4 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams"], weight: 3 },
+      { variable: "startupStage", values: ["users-250-500", "users-500-1k", "users-1k-5k"], weight: 2 }
+    ],
+    minScore: 6
   }
 ],
 
 "FounderNote_LetterStyleBlock": [
   {
-    element: "date",
+    element: "founder_name",
     conditions: [
       { variable: "toneProfile", values: ["friendly-helpful", "luxury-expert"], weight: 4 },
       { variable: "targetAudience", values: ["early-stage-founders", "solopreneurs", "creators"], weight: 3 },
       { variable: "copyIntent", values: ["desire-led"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "company_name",
+    conditions: [
+      { variable: "startupStage", values: ["mvp-launched", "targeting-pmf", "users-250-500"], weight: 4 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "mid-market-companies"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "date_text",
+    conditions: [
+      { variable: "toneProfile", values: ["friendly-helpful", "luxury-expert"], weight: 4 },
+      { variable: "targetAudience", values: ["early-stage-founders", "solopreneurs", "creators"], weight: 3 },
+      { variable: "copyIntent", values: ["desire-led"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "ps_text",
+    conditions: [
+      { variable: "copyIntent", values: ["desire-led"], weight: 4 },
+      { variable: "landingPageGoals", values: ["signup", "free-trial", "early-access"], weight: 3 },
+      { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "founder_image",
+    conditions: [
+      { variable: "toneProfile", values: ["luxury-expert", "friendly-helpful"], weight: 4 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams"], weight: 3 },
+      { variable: "startupStage", values: ["users-250-500", "users-500-1k", "users-1k-5k"], weight: 2 }
     ],
     minScore: 6
   }
@@ -1198,11 +1252,20 @@ const elementRules: SectionLayoutRules = {
 
 "FounderNote_VideoNoteWithTranscript": [
   {
-    element: "video_duration",
+    element: "video_url",
     conditions: [
-      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
-      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
-      { variable: "targetAudience", values: ["enterprise-tech-teams", "mid-market-companies"], weight: 2 }
+      { variable: "startupStage", values: ["mvp-launched", "targeting-pmf", "users-250-500"], weight: 4 },
+      { variable: "landingPageGoals", values: ["demo", "video-watch", "learn-more"], weight: 3 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "product-managers"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "trust_items",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "mid-market-companies"], weight: 3 },
+      { variable: "landingPageGoals", values: ["demo", "free-trial"], weight: 2 }
     ],
     minScore: 6
   }
@@ -1210,44 +1273,175 @@ const elementRules: SectionLayoutRules = {
 
 "FounderNote_MissionQuoteOverlay": [
   {
-    element: "context_text",
+    element: "founder_title",
     conditions: [
-      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
-      { variable: "copyIntent", values: ["pain-led"], weight: 3 },
-      { variable: "targetAudience", values: ["early-stage-founders", "solopreneurs", "creators"], weight: 2 }
-    ],
-    minScore: 6
-  }
-],
-
-"FounderNote_TimelineToToday": [
-  {
-    element: "event_dates",
-    conditions: [
-      { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams"], weight: 4 },
       { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
-      { variable: "copyIntent", values: ["desire-led"], weight: 2 }
+      { variable: "toneProfile", values: ["luxury-expert", "bold-persuasive"], weight: 2 }
     ],
     minScore: 6
-  }
-],
-
-"FounderNote_SideBySidePhotoStory": [
+  },
   {
-    element: "photo_caption",
+    element: "badge_text",
     conditions: [
-      { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 4 },
-      { variable: "targetAudience", values: ["creators", "solopreneurs", "early-stage-founders"], weight: 3 },
+      { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k"], weight: 4 },
+      { variable: "copyIntent", values: ["desire-led"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "badge_icon",
+    conditions: [
+      { variable: "targetAudience", values: ["developers", "no-code-builders", "creators"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
+    ],
+    minScore: 3
+  },
+  {
+    element: "mission_stat_1",
+    conditions: [
+      { variable: "startupStage", values: ["users-250-500", "users-500-1k", "users-1k-5k"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-2", "level-3", "level-4"], weight: 3 },
       { variable: "copyIntent", values: ["desire-led"], weight: 2 }
     ],
     minScore: 6
   },
   {
-    element: "story_conclusion",
+    element: "mission_stat_2",
+    conditions: [
+      { variable: "startupStage", values: ["users-250-500", "users-500-1k", "users-1k-5k"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-2", "level-3", "level-4"], weight: 3 },
+      { variable: "copyIntent", values: ["desire-led"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "mission_year",
+    conditions: [
+      { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
+    ],
+    minScore: 4
+  }
+],
+
+"FounderNote_TimelineToToday": [
+  {
+    element: "founder_name",
+    conditions: [
+      { variable: "toneProfile", values: ["friendly-helpful", "luxury-expert"], weight: 4 },
+      { variable: "targetAudience", values: ["early-stage-founders", "solopreneurs", "creators"], weight: 3 },
+      { variable: "startupStage", values: ["mvp-launched", "targeting-pmf"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "company_name",
+    conditions: [
+      { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k"], weight: 4 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "mid-market-companies"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "trust_item_1",
+    conditions: [
+      { variable: "startupStage", values: ["users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "mid-market-companies"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "current_state_heading",
     conditions: [
       { variable: "copyIntent", values: ["desire-led"], weight: 4 },
-      { variable: "landingPageGoals", values: ["signup", "join-community", "waitlist"], weight: 3 },
-      { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 2 }
+      { variable: "startupStage", values: ["users-250-500", "users-500-1k", "users-1k-5k"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "timeline_icon_1",
+    conditions: [
+      { variable: "targetAudience", values: ["developers", "no-code-builders", "creators"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
+    ],
+    minScore: 3
+  }
+],
+
+"FounderNote_SideBySidePhotoStory": [
+  {
+    element: "founder_name",
+    conditions: [
+      { variable: "toneProfile", values: ["friendly-helpful", "luxury-expert"], weight: 4 },
+      { variable: "targetAudience", values: ["creators", "solopreneurs", "early-stage-founders"], weight: 3 },
+      { variable: "startupStage", values: ["mvp-launched", "targeting-pmf"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "story_stat_1",
+    conditions: [
+      { variable: "startupStage", values: ["users-250-500", "users-500-1k", "users-1k-5k"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-2", "level-3", "level-4"], weight: 3 },
+      { variable: "copyIntent", values: ["desire-led"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "story_stat_2",
+    conditions: [
+      { variable: "startupStage", values: ["users-250-500", "users-500-1k", "users-1k-5k"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
+      { variable: "copyIntent", values: ["desire-led"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "badge_text",
+    conditions: [
+      { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
+      { variable: "copyIntent", values: ["desire-led"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "badge_icon",
+    conditions: [
+      { variable: "targetAudience", values: ["developers", "no-code-builders", "creators"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
+    ],
+    minScore: 3
+  },
+  {
+    element: "trust_item_1",
+    conditions: [
+      { variable: "marketSubcategory", values: ["Healthcare & MedTech SaaS", "FinTech SaaS", "LegalTech SaaS"], weight: 5 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "it-decision-makers"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
+    ],
+    minScore: 7
+  },
+  {
+    element: "story_image",
+    conditions: [
+      { variable: "toneProfile", values: ["luxury-expert", "friendly-helpful"], weight: 4 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams"], weight: 3 },
+      { variable: "startupStage", values: ["users-250-500", "users-500-1k", "users-1k-5k"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "secondary_image",
+    conditions: [
+      { variable: "toneProfile", values: ["luxury-expert", "confident-playful"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 3 },
+      { variable: "startupStage", values: ["users-500-1k", "users-1k-5k"], weight: 2 }
     ],
     minScore: 6
   }
@@ -1255,11 +1449,46 @@ const elementRules: SectionLayoutRules = {
 
 "FounderNote_StoryBlockWithPullquote": [
   {
-    element: "story_context",
+    element: "founder_name",
     conditions: [
-      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
-      { variable: "copyIntent", values: ["pain-led"], weight: 3 },
-      { variable: "targetAudience", values: ["early-stage-founders", "solopreneurs", "creators"], weight: 2 }
+      { variable: "toneProfile", values: ["friendly-helpful", "luxury-expert"], weight: 4 },
+      { variable: "targetAudience", values: ["early-stage-founders", "solopreneurs", "creators"], weight: 3 },
+      { variable: "startupStage", values: ["mvp-launched", "targeting-pmf"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "badge_text",
+    conditions: [
+      { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
+      { variable: "copyIntent", values: ["desire-led"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "badge_icon",
+    conditions: [
+      { variable: "targetAudience", values: ["developers", "no-code-builders", "creators"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
+    ],
+    minScore: 3
+  },
+  {
+    element: "trust_item_1",
+    conditions: [
+      { variable: "marketSubcategory", values: ["Healthcare & MedTech SaaS", "FinTech SaaS", "LegalTech SaaS"], weight: 5 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "it-decision-makers"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
+    ],
+    minScore: 7
+  },
+  {
+    element: "story_image",
+    conditions: [
+      { variable: "toneProfile", values: ["luxury-expert", "friendly-helpful"], weight: 4 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams"], weight: 3 },
+      { variable: "startupStage", values: ["users-250-500", "users-500-1k", "users-1k-5k"], weight: 2 }
     ],
     minScore: 6
   }
@@ -1267,22 +1496,92 @@ const elementRules: SectionLayoutRules = {
 
 "FounderNote_FoundersBeliefStack": [
   {
-    element: "belief_explanations",
+    element: "founder_name",
     conditions: [
-      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
-      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 3 },
-      { variable: "copyIntent", values: ["pain-led"], weight: 2 }
+      { variable: "startupStage", values: ["mvp-launched", "targeting-pmf", "users-250-500"], weight: 4 },
+      { variable: "toneProfile", values: ["friendly-helpful", "luxury-expert"], weight: 3 },
+      { variable: "copyIntent", values: ["desire-led"], weight: 2 }
     ],
     minScore: 6
   },
   {
-    element: "company_mission",
+    element: "founder_title",
     conditions: [
-      { variable: "startupStage", values: ["problem-exploration", "pre-mvp", "mvp-development"], weight: 4 },
-      { variable: "copyIntent", values: ["desire-led"], weight: 3 },
-      { variable: "toneProfile", values: ["confident-playful", "bold-persuasive"], weight: 2 }
+      { variable: "startupStage", values: ["mvp-launched", "targeting-pmf", "users-250-500"], weight: 4 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
     ],
     minScore: 6
+  },
+  {
+    element: "company_value_1",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-2", "level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "mid-market-companies"], weight: 3 },
+      { variable: "copyIntent", values: ["desire-led"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "company_value_2",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-2", "level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "mid-market-companies"], weight: 3 },
+      { variable: "copyIntent", values: ["desire-led"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "company_value_3",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "mid-market-companies"], weight: 3 },
+      { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k"], weight: 2 }
+    ],
+    minScore: 7
+  },
+  {
+    element: "trust_item_1",
+    conditions: [
+      { variable: "marketSubcategory", values: ["Healthcare & MedTech SaaS", "FinTech SaaS", "LegalTech SaaS"], weight: 5 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "it-decision-makers"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
+    ],
+    minScore: 7
+  },
+  {
+    element: "trust_item_2",
+    conditions: [
+      { variable: "marketSubcategory", values: ["Healthcare & MedTech SaaS", "FinTech SaaS", "LegalTech SaaS"], weight: 5 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "it-decision-makers"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
+    ],
+    minScore: 7
+  },
+  {
+    element: "founder_image",
+    conditions: [
+      { variable: "toneProfile", values: ["friendly-helpful", "luxury-expert"], weight: 4 },
+      { variable: "targetAudience", values: ["early-stage-founders", "solopreneurs", "creators"], weight: 3 },
+      { variable: "startupStage", values: ["mvp-launched", "targeting-pmf", "users-250-500"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "belief_icon_1",
+    conditions: [
+      { variable: "targetAudience", values: ["developers", "no-code-builders", "creators"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
+    ],
+    minScore: 3
+  },
+  {
+    element: "belief_icon_2",
+    conditions: [
+      { variable: "targetAudience", values: ["developers", "no-code-builders", "creators"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
+    ],
+    minScore: 3
   }
 ],
 
