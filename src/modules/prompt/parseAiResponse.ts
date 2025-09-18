@@ -326,6 +326,63 @@ function processSectionContent(sectionId: string, content: SectionContent): {
     return result;
   }
 
+  // Special handling for other Results sections with pipe-separated content
+  if (sectionId.includes('StatBlocks')) {
+    const processedStatBlocks = processStatBlocksContent(sectionId, content);
+    result.content = processedStatBlocks.content;
+    result.warnings = processedStatBlocks.warnings;
+    result.hasIssues = processedStatBlocks.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('BeforeAfterStats')) {
+    const processedBeforeAfterStats = processBeforeAfterStatsContent(sectionId, content);
+    result.content = processedBeforeAfterStats.content;
+    result.warnings = processedBeforeAfterStats.warnings;
+    result.hasIssues = processedBeforeAfterStats.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('QuoteWithMetric')) {
+    const processedQuoteWithMetric = processQuoteWithMetricContent(sectionId, content);
+    result.content = processedQuoteWithMetric.content;
+    result.warnings = processedQuoteWithMetric.warnings;
+    result.hasIssues = processedQuoteWithMetric.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('TimelineResults')) {
+    const processedTimelineResults = processTimelineResultsContent(sectionId, content);
+    result.content = processedTimelineResults.content;
+    result.warnings = processedTimelineResults.warnings;
+    result.hasIssues = processedTimelineResults.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('OutcomeIcons')) {
+    const processedOutcomeIcons = processOutcomeIconsContent(sectionId, content);
+    result.content = processedOutcomeIcons.content;
+    result.warnings = processedOutcomeIcons.warnings;
+    result.hasIssues = processedOutcomeIcons.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('StackedWinsList')) {
+    const processedStackedWinsList = processStackedWinsListContent(sectionId, content);
+    result.content = processedStackedWinsList.content;
+    result.warnings = processedStackedWinsList.warnings;
+    result.hasIssues = processedStackedWinsList.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('PersonaResultPanels')) {
+    const processedPersonaResultPanels = processPersonaResultPanelsContent(sectionId, content);
+    result.content = processedPersonaResultPanels.content;
+    result.warnings = processedPersonaResultPanels.warnings;
+    result.hasIssues = processedPersonaResultPanels.hasIssues;
+    return result;
+  }
+
   // Special handling for Pricing sections
   if (sectionId.includes('TierCards')) {
     const processedTierCards = processTierCardsContent(sectionId, content);
@@ -5059,4 +5116,313 @@ function parseContentArray(content: string | string[]): string[] {
     return content.split('|').map((item: string) => item.trim()).filter(Boolean);
   }
   return [];
+}
+
+/**
+ * Results Section Processing Functions
+ */
+
+/**
+ * Special processing for StatBlocks sections to handle pipe-separated statistics
+ */
+function processStatBlocksContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = { content: { ...content }, warnings: [] as string[], hasIssues: false };
+
+  // Validate required fields
+  if (!content.headline || !content.stat_values || !content.stat_labels) {
+    result.warnings.push(`${sectionId}: Missing required fields (headline, stat_values, or stat_labels)`);
+    result.hasIssues = true;
+  }
+
+  // Process pipe-separated stat data
+  if (content.stat_values && content.stat_labels) {
+    const values = parseContentArray(content.stat_values);
+    const labels = parseContentArray(content.stat_labels);
+    const descriptions = content.stat_descriptions ? parseContentArray(content.stat_descriptions) : [];
+
+    // Validate counts match
+    if (values.length !== labels.length) {
+      result.warnings.push(`${sectionId}: Stat values (${values.length}) and labels (${labels.length}) count mismatch`);
+      result.hasIssues = true;
+    }
+
+    if (descriptions.length > 0 && descriptions.length !== values.length) {
+      result.warnings.push(`${sectionId}: Stat descriptions (${descriptions.length}) count doesn't match values (${values.length})`);
+      result.hasIssues = true;
+    }
+
+    // Validate reasonable count (2-6 stats optimal)
+    if (values.length < 2) {
+      result.warnings.push(`${sectionId}: Only ${values.length} stat(s) - consider adding more for better impact`);
+    } else if (values.length > 6) {
+      result.warnings.push(`${sectionId}: ${values.length} stats may be overwhelming - consider reducing to 4-6`);
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Special processing for BeforeAfterStats sections to handle transformation metrics
+ */
+function processBeforeAfterStatsContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = { content: { ...content }, warnings: [] as string[], hasIssues: false };
+
+  // Validate required fields
+  if (!content.headline || !content.stat_metrics || !content.stat_before || !content.stat_after || !content.stat_improvements) {
+    result.warnings.push(`${sectionId}: Missing required fields for before/after comparison`);
+    result.hasIssues = true;
+  }
+
+  // Process pipe-separated transformation data
+  if (content.stat_metrics && content.stat_before && content.stat_after && content.stat_improvements) {
+    const metrics = parseContentArray(content.stat_metrics);
+    const before = parseContentArray(content.stat_before);
+    const after = parseContentArray(content.stat_after);
+    const improvements = parseContentArray(content.stat_improvements);
+
+    // Validate all arrays have same length
+    if (metrics.length !== before.length || before.length !== after.length || after.length !== improvements.length) {
+      result.warnings.push(`${sectionId}: All transformation arrays must have equal length (metrics: ${metrics.length}, before: ${before.length}, after: ${after.length}, improvements: ${improvements.length})`);
+      result.hasIssues = true;
+    }
+
+    // Validate reasonable count (3-5 metrics optimal)
+    if (metrics.length < 2) {
+      result.warnings.push(`${sectionId}: Only ${metrics.length} metric(s) - consider adding more for better transformation story`);
+    } else if (metrics.length > 5) {
+      result.warnings.push(`${sectionId}: ${metrics.length} metrics may be too many - consider focusing on 3-5 key transformations`);
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Special processing for QuoteWithMetric sections to handle testimonials with metrics
+ */
+function processQuoteWithMetricContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = { content: { ...content }, warnings: [] as string[], hasIssues: false };
+
+  // Validate required fields
+  if (!content.headline || !content.quotes || !content.authors || !content.companies || !content.roles || !content.metric_labels || !content.metric_values) {
+    result.warnings.push(`${sectionId}: Missing required fields for quote with metric testimonials`);
+    result.hasIssues = true;
+  }
+
+  // Process pipe-separated testimonial data
+  if (content.quotes && content.authors && content.companies && content.roles && content.metric_labels && content.metric_values) {
+    const quotes = parseContentArray(content.quotes);
+    const authors = parseContentArray(content.authors);
+    const companies = parseContentArray(content.companies);
+    const roles = parseContentArray(content.roles);
+    const metricLabels = parseContentArray(content.metric_labels);
+    const metricValues = parseContentArray(content.metric_values);
+
+    // Validate customer data consistency
+    if (quotes.length !== authors.length || authors.length !== companies.length || companies.length !== roles.length) {
+      result.warnings.push(`${sectionId}: Customer data count mismatch (quotes: ${quotes.length}, authors: ${authors.length}, companies: ${companies.length}, roles: ${roles.length})`);
+      result.hasIssues = true;
+    }
+
+    // Validate metric data consistency
+    if (metricLabels.length !== metricValues.length) {
+      result.warnings.push(`${sectionId}: Metric labels (${metricLabels.length}) and values (${metricValues.length}) count mismatch`);
+      result.hasIssues = true;
+    }
+
+    // Validate reasonable testimonial count (1-4 optimal)
+    if (quotes.length < 1) {
+      result.warnings.push(`${sectionId}: No testimonials found - at least 1 required`);
+      result.hasIssues = true;
+    } else if (quotes.length > 4) {
+      result.warnings.push(`${sectionId}: ${quotes.length} testimonials may be too many - consider focusing on 2-3 strongest ones`);
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Special processing for TimelineResults sections to handle progression timeline
+ */
+function processTimelineResultsContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = { content: { ...content }, warnings: [] as string[], hasIssues: false };
+
+  // Validate required fields
+  if (!content.headline || !content.timeframes || !content.titles || !content.descriptions) {
+    result.warnings.push(`${sectionId}: Missing required fields for timeline (headline, timeframes, titles, descriptions)`);
+    result.hasIssues = true;
+  }
+
+  // Process pipe-separated timeline data
+  if (content.timeframes && content.titles && content.descriptions) {
+    const timeframes = parseContentArray(content.timeframes);
+    const titles = parseContentArray(content.titles);
+    const descriptions = parseContentArray(content.descriptions);
+    const metrics = content.metrics ? parseContentArray(content.metrics) : [];
+
+    // Validate all arrays have same length
+    if (timeframes.length !== titles.length || titles.length !== descriptions.length) {
+      result.warnings.push(`${sectionId}: Timeline arrays must have equal length (timeframes: ${timeframes.length}, titles: ${titles.length}, descriptions: ${descriptions.length})`);
+      result.hasIssues = true;
+    }
+
+    if (metrics.length > 0 && metrics.length !== timeframes.length) {
+      result.warnings.push(`${sectionId}: Timeline metrics (${metrics.length}) count doesn't match timeframes (${timeframes.length})`);
+      result.hasIssues = true;
+    }
+
+    // Validate reasonable timeline length (4-8 phases optimal)
+    if (timeframes.length < 3) {
+      result.warnings.push(`${sectionId}: Timeline has only ${timeframes.length} phase(s) - consider adding more to show progression`);
+    } else if (timeframes.length > 8) {
+      result.warnings.push(`${sectionId}: Timeline has ${timeframes.length} phases - consider condensing to 4-8 key milestones`);
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Special processing for OutcomeIcons sections to handle icon-based outcomes
+ */
+function processOutcomeIconsContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = { content: { ...content }, warnings: [] as string[], hasIssues: false };
+
+  // Validate required fields
+  if (!content.headline || !content.icon_types || !content.titles || !content.descriptions) {
+    result.warnings.push(`${sectionId}: Missing required fields for outcome icons (headline, icon_types, titles, descriptions)`);
+    result.hasIssues = true;
+  }
+
+  // Process pipe-separated outcome data
+  if (content.icon_types && content.titles && content.descriptions) {
+    const iconTypes = parseContentArray(content.icon_types);
+    const titles = parseContentArray(content.titles);
+    const descriptions = parseContentArray(content.descriptions);
+
+    // Validate all arrays have same length
+    if (iconTypes.length !== titles.length || titles.length !== descriptions.length) {
+      result.warnings.push(`${sectionId}: Outcome arrays must have equal length (icons: ${iconTypes.length}, titles: ${titles.length}, descriptions: ${descriptions.length})`);
+      result.hasIssues = true;
+    }
+
+    // Validate reasonable outcome count (3-6 optimal)
+    if (iconTypes.length < 3) {
+      result.warnings.push(`${sectionId}: Only ${iconTypes.length} outcome(s) - consider adding more for comprehensive coverage`);
+    } else if (iconTypes.length > 6) {
+      result.warnings.push(`${sectionId}: ${iconTypes.length} outcomes may be overwhelming - consider focusing on 3-6 key ones`);
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Special processing for StackedWinsList sections to handle categorized wins
+ */
+function processStackedWinsListContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = { content: { ...content }, warnings: [] as string[], hasIssues: false };
+
+  // Validate required fields
+  if (!content.headline || !content.wins) {
+    result.warnings.push(`${sectionId}: Missing required fields (headline and wins)`);
+    result.hasIssues = true;
+  }
+
+  // Process pipe-separated wins data
+  if (content.wins) {
+    const wins = parseContentArray(content.wins);
+    const descriptions = content.descriptions ? parseContentArray(content.descriptions) : [];
+    const categories = content.categories ? parseContentArray(content.categories) : [];
+
+    // Validate optional arrays match wins length
+    if (descriptions.length > 0 && descriptions.length !== wins.length) {
+      result.warnings.push(`${sectionId}: Win descriptions (${descriptions.length}) count doesn't match wins (${wins.length})`);
+      result.hasIssues = true;
+    }
+
+    if (categories.length > 0 && categories.length !== wins.length) {
+      result.warnings.push(`${sectionId}: Win categories (${categories.length}) count doesn't match wins (${wins.length})`);
+      result.hasIssues = true;
+    }
+
+    // Validate reasonable wins count (5-12 optimal)
+    if (wins.length < 3) {
+      result.warnings.push(`${sectionId}: Only ${wins.length} win(s) - consider adding more to build momentum`);
+    } else if (wins.length > 12) {
+      result.warnings.push(`${sectionId}: ${wins.length} wins may be too many - consider focusing on 8-12 strongest ones`);
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Special processing for PersonaResultPanels sections to handle role-specific results
+ */
+function processPersonaResultPanelsContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = { content: { ...content }, warnings: [] as string[], hasIssues: false };
+
+  // Validate required fields
+  if (!content.headline || !content.personas || !content.roles || !content.result_metrics || !content.result_descriptions || !content.key_benefits) {
+    result.warnings.push(`${sectionId}: Missing required fields for persona result panels`);
+    result.hasIssues = true;
+  }
+
+  // Process pipe-separated persona data
+  if (content.personas && content.roles && content.result_metrics && content.result_descriptions && content.key_benefits) {
+    const personas = parseContentArray(content.personas);
+    const roles = parseContentArray(content.roles);
+    const metrics = parseContentArray(content.result_metrics);
+    const descriptions = parseContentArray(content.result_descriptions);
+    const benefits = parseContentArray(content.key_benefits);
+
+    // Validate all arrays have same length
+    const lengths = [personas.length, roles.length, metrics.length, descriptions.length, benefits.length];
+    const uniqueLengths = [...new Set(lengths)];
+
+    if (uniqueLengths.length > 1) {
+      result.warnings.push(`${sectionId}: All persona arrays must have equal length (personas: ${personas.length}, roles: ${roles.length}, metrics: ${metrics.length}, descriptions: ${descriptions.length}, benefits: ${benefits.length})`);
+      result.hasIssues = true;
+    }
+
+    // Validate reasonable persona count (2-6 optimal)
+    if (personas.length < 2) {
+      result.warnings.push(`${sectionId}: Only ${personas.length} persona(s) - consider adding more for broader appeal`);
+    } else if (personas.length > 6) {
+      result.warnings.push(`${sectionId}: ${personas.length} personas may be too many - consider focusing on 3-5 key roles`);
+    }
+  }
+
+  return result;
 }

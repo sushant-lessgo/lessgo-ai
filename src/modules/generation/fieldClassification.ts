@@ -222,6 +222,34 @@ export function classifyField(fieldName: string, sectionType?: string): Classifi
     return classifyEmojiOutcomeGridField(fieldName);
   }
 
+  if (sectionType === 'StatBlocks') {
+    return classifyStatBlocksField(fieldName);
+  }
+
+  if (sectionType === 'BeforeAfterStats') {
+    return classifyBeforeAfterStatsField(fieldName);
+  }
+
+  if (sectionType === 'QuoteWithMetric') {
+    return classifyQuoteWithMetricField(fieldName);
+  }
+
+  if (sectionType === 'TimelineResults') {
+    return classifyTimelineResultsField(fieldName);
+  }
+
+  if (sectionType === 'OutcomeIcons') {
+    return classifyOutcomeIconsField(fieldName);
+  }
+
+  if (sectionType === 'StackedWinsList') {
+    return classifyStackedWinsListField(fieldName);
+  }
+
+  if (sectionType === 'PersonaResultPanels') {
+    return classifyPersonaResultPanelsField(fieldName);
+  }
+
   // PrimaryCTA Section Classifications
   if (sectionType === 'CenteredHeadlineCTA') {
     return classifyCenteredHeadlineCTAField(fieldName);
@@ -6609,5 +6637,634 @@ function classifyMiniStackedCardsField(fieldName: string): ClassificationResult 
       fallback_strategy: 'generate',
       confidence: 0.8
     }
+  };
+}
+
+/**
+ * Results Section Classification Functions
+ */
+
+function classifyStatBlocksField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Results headlines showcase impact effectively',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create compelling headlines about results'
+    };
+  }
+
+  if (field === 'stat_values' || field === 'stat_labels') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Statistics should align with business value and be quantifiable',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will generate pipe-separated stats that resonate with your audience'
+    };
+  }
+
+  if (field === 'stat_descriptions') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Supporting descriptions add context to statistics',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will create explanatory text for each statistic'
+    };
+  }
+
+  if (field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Context for the statistics being presented',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will add supporting context for your results'
+    };
+  }
+
+  if (field === 'achievement_footer') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Credibility statement about result authenticity',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will add credibility text about how results were measured'
+    };
+  }
+
+  if (field.startsWith('stat_icon_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Icons that represent each statistic category',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      },
+      user_guidance: 'AI will select appropriate icons for each statistic'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown StatBlocks field, using hybrid approach',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    },
+    user_guidance: 'Please review this field as it may need manual adjustment'
+  };
+}
+
+function classifyBeforeAfterStatsField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Transformation headlines are powerful for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create compelling transformation headlines'
+    };
+  }
+
+  if (field === 'stat_metrics' || field === 'stat_before' || field === 'stat_after' || field === 'stat_improvements') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Before/after comparisons showcase transformation effectively',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will generate pipe-separated transformation metrics'
+    };
+  }
+
+  if (field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Context about the transformation results',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will add context about customer transformation'
+    };
+  }
+
+  if (field === 'time_period') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Time frame for achieving results adds credibility',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will specify realistic time frames for results'
+    };
+  }
+
+  if (field === 'footer_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Credibility statement about result measurement',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will add credibility about result authenticity'
+    };
+  }
+
+  if (field.includes('_icon')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Icons that represent before/after states',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      },
+      user_guidance: 'AI will select appropriate icons for before/after states'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown BeforeAfterStats field, using hybrid approach',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    },
+    user_guidance: 'Please review this field as it may need manual adjustment'
+  };
+}
+
+function classifyQuoteWithMetricField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Testimonial section headlines build trust',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create trust-building headlines for testimonials'
+    };
+  }
+
+  if (field === 'quotes' || field === 'authors' || field === 'companies' || field === 'roles') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Customer testimonials with realistic personas and credible companies',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will create believable customer testimonials with roles and companies'
+    };
+  }
+
+  if (field === 'metric_labels' || field === 'metric_values') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Quantified results that support testimonial claims',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will generate metrics that align with testimonial content'
+    };
+  }
+
+  if (field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Context about customer success stories',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will add context about customer testimonials'
+    };
+  }
+
+  if (field === 'footer_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Credibility statement about testimonial verification',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will add credibility about testimonial authenticity'
+    };
+  }
+
+  if (field.includes('_icon')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Icons that support testimonial presentation',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      },
+      user_guidance: 'AI will select appropriate icons for testimonials'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown QuoteWithMetric field, using hybrid approach',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    },
+    user_guidance: 'Please review this field as it may need manual adjustment'
+  };
+}
+
+function classifyTimelineResultsField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Timeline headlines show progression and growth',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create compelling progression headlines'
+    };
+  }
+
+  if (field === 'timeframes' || field === 'titles' || field === 'descriptions') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Timeline progression showing realistic growth journey',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create realistic timeline progression (pipe-separated)'
+    };
+  }
+
+  if (field === 'metrics') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Quantified results for each timeline milestone',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will generate metrics that support timeline progression'
+    };
+  }
+
+  if (field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Context about progression and timeline',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will add context about growth timeline'
+    };
+  }
+
+  if (field === 'timeline_period') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Overall timeframe for the complete journey',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will specify realistic timeline for complete transformation'
+    };
+  }
+
+  if (field.includes('success_') || field.includes('_icon')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Success indicators and visual elements for timeline',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      },
+      user_guidance: 'AI will create success messaging and appropriate icons'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown TimelineResults field, using hybrid approach',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    },
+    user_guidance: 'Please review this field as it may need manual adjustment'
+  };
+}
+
+function classifyOutcomeIconsField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Outcome headlines focus on achievements',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create compelling outcome-focused headlines'
+    };
+  }
+
+  if (field === 'icon_types' || field === 'titles' || field === 'descriptions') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Icon-supported outcomes with clear descriptions',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will generate outcomes with appropriate icons (pipe-separated)'
+    };
+  }
+
+  if (field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Context about the outcomes being presented',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will add context about expected outcomes'
+    };
+  }
+
+  if (field === 'layout_style') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Layout optimization based on content and audience',
+        fallback_strategy: 'generate',
+        confidence: 0.75
+      },
+      user_guidance: 'AI will select optimal layout style for your outcomes'
+    };
+  }
+
+  if (field === 'footer_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Supporting text about outcome delivery',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will add credibility about outcome delivery'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown OutcomeIcons field, using hybrid approach',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    },
+    user_guidance: 'Please review this field as it may need manual adjustment'
+  };
+}
+
+function classifyStackedWinsListField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Win-focused headlines build momentum',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create momentum-building headlines about wins'
+    };
+  }
+
+  if (field === 'wins' || field === 'descriptions' || field === 'categories') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'List of achievements with categorization and detail',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will generate categorized wins with descriptions (pipe-separated)'
+    };
+  }
+
+  if (field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Context about accumulating wins and momentum',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will add context about building momentum through wins'
+    };
+  }
+
+  if (field === 'win_count') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Social proof about others achieving these wins',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will add social proof about win achievement'
+    };
+  }
+
+  if (field === 'footer_title' || field === 'footer_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Momentum messaging about continued success',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will create messaging about momentum and continued wins'
+    };
+  }
+
+  if (field.includes('_icon')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Icons that represent wins and momentum',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      },
+      user_guidance: 'AI will select appropriate icons for wins and achievements'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown StackedWinsList field, using hybrid approach',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    },
+    user_guidance: 'Please review this field as it may need manual adjustment'
+  };
+}
+
+function classifyPersonaResultPanelsField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Persona-focused results showcase targeted value',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create headlines about role-specific results'
+    };
+  }
+
+  if (field === 'personas' || field === 'roles' || field === 'result_metrics' || field === 'result_descriptions' || field === 'key_benefits') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Role-specific results with targeted metrics and benefits',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will generate role-specific results and benefits (pipe-separated)'
+    };
+  }
+
+  if (field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Context about personalized results for different roles',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will add context about role-specific value'
+    };
+  }
+
+  if (field === 'footer_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Universal benefits that apply across all personas',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will add messaging about universal benefits'
+    };
+  }
+
+  if (field.includes('persona_icon_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Icons representing different persona types',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      },
+      user_guidance: 'AI will select appropriate icons for each persona'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown PersonaResultPanels field, using hybrid approach',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    },
+    user_guidance: 'Please review this field as it may need manual adjustment'
   };
 }
