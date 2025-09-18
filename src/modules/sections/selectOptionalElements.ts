@@ -3862,6 +3862,48 @@ const elementRules: SectionLayoutRules = {
       { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
     ],
     minScore: 6
+  },
+  {
+    element: "customer_companies",
+    conditions: [
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "it-decision-makers"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 3 },
+      { variable: "startupStage", values: ["users-1k-5k", "mrr-growth"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "video_urls",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 4 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams"], weight: 3 },
+      { variable: "copyIntent", values: ["desire-led"], weight: 2 }
+    ],
+    minScore: 7
+  },
+  {
+    element: "video_thumbnails",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams"], weight: 3 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "industry_leaders_title",
+    conditions: [
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "it-decision-makers"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "enterprise_customers_stat",
+    conditions: [
+      { variable: "startupStage", values: ["users-1k-5k", "mrr-growth"], weight: 4 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams"], weight: 3 }
+    ],
+    minScore: 6
   }
 ],
 
@@ -3905,6 +3947,39 @@ const elementRules: SectionLayoutRules = {
       { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k"], weight: 2 }
     ],
     minScore: 6
+  },
+  {
+    element: "customer_companies",
+    conditions: [
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 3 },
+      { variable: "startupStage", values: ["users-1k-5k", "mrr-growth"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "ratings",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "copyIntent", values: ["desire-led"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "segments_trust_title",
+    conditions: [
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "mid-market-companies"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "enterprise_stat",
+    conditions: [
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "it-decision-makers"], weight: 4 },
+      { variable: "startupStage", values: ["users-1k-5k", "mrr-growth"], weight: 3 }
+    ],
+    minScore: 6
   }
 ],
 
@@ -3917,6 +3992,40 @@ const elementRules: SectionLayoutRules = {
       { variable: "copyIntent", values: ["desire-led"], weight: 2 }
     ],
     minScore: 6
+  },
+  {
+    element: "verified_badges",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 4 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams"], weight: 3 },
+      { variable: "copyIntent", values: ["desire-led"], weight: 2 }
+    ],
+    minScore: 7
+  },
+  {
+    element: "customer_locations",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "mid-market-companies"], weight: 3 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "avatar_urls",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 4 },
+      { variable: "copyIntent", values: ["desire-led"], weight: 3 },
+      { variable: "toneProfile", values: ["confident-playful", "friendly-helpful"], weight: 2 }
+    ],
+    minScore: 7
+  },
+  {
+    element: "subheadline",
+    conditions: [
+      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2", "level-3"], weight: 3 }
+    ],
+    minScore: 5
   }
 ],
 

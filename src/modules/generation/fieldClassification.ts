@@ -60,6 +60,19 @@ export function classifyField(fieldName: string, sectionType?: string): Classifi
     return classifyTestimonialFAQsField(fieldName);
   }
 
+  // Testimonial Section Classifications
+  if (sectionType === 'RatingCards') {
+    return classifyRatingCardsField(fieldName);
+  }
+
+  if (sectionType === 'SegmentedTestimonials') {
+    return classifySegmentedTestimonialsField(fieldName);
+  }
+
+  if (sectionType === 'VideoTestimonials') {
+    return classifyVideoTestimonialsField(fieldName);
+  }
+
   if (sectionType === 'ChatBubbleFAQ') {
     return classifyChatBubbleFAQField(fieldName);
   }
@@ -7927,6 +7940,311 @@ function classifySocialProofStripField(fieldName: string): ClassificationResult 
       reason: 'Unknown SocialProofStrip field, using hybrid approach',
       fallback_strategy: 'generate',
       confidence: 0.7
+    }
+  };
+}
+
+/**
+ * Testimonial Section Classifications - Enhanced for 5/5 completeness rating
+ */
+
+/**
+ * Specific classification for RatingCards fields
+ */
+function classifyRatingCardsField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  // Headlines and content - AI generated
+  if (field === 'headline' || field === 'subheadline' || field === 'supporting_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Rating testimonial headers and supporting content suitable for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create compelling rating testimonial headers that build trust'
+    };
+  }
+
+  // Testimonial content - AI generated
+  if (field.includes('testimonial_quotes') || field.includes('customer_names') || field.includes('customer_titles')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Customer testimonial content can be generated from business context with authentic feel',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create realistic customer testimonials with appropriate names and titles'
+    };
+  }
+
+  // Rating-specific data - AI generated
+  if (field.includes('ratings') || field.includes('review_platforms') || field.includes('review_dates')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Rating data and platform information can be generated for authenticity',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will create believable rating scores and platform references'
+    };
+  }
+
+  // Location and verification - AI generated
+  if (field.includes('customer_locations') || field.includes('verified_badges')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Location and verification data adds credibility when AI-generated',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      },
+      user_guidance: 'AI will add realistic location and verification details'
+    };
+  }
+
+  // CTA and trust elements - AI generated
+  if (field.includes('cta_text') || field.includes('trust_items')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'CTA and trust elements work well with AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create compelling call-to-action and trust indicators'
+    };
+  }
+
+  // Avatar URLs - Manual preferred
+  if (field.includes('avatar_urls')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Avatar images should use actual customer photos or branded avatars',
+        fallback_strategy: 'default',
+        confidence: 0.8
+      },
+      user_guidance: 'Provide real customer photos or use consistent avatar system'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Rating cards content suitable for AI generation',
+      fallback_strategy: 'generate',
+      confidence: 0.85
+    }
+  };
+}
+
+/**
+ * Specific classification for SegmentedTestimonials fields
+ */
+function classifySegmentedTestimonialsField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  // Headlines and content - AI generated
+  if (field === 'headline' || field === 'subheadline' || field === 'supporting_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Segmented testimonial headers suitable for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create headers that introduce segment-based testimonials'
+    };
+  }
+
+  // Segment definitions - AI generated
+  if (field.includes('segment_names') || field.includes('segment_descriptions') || field.includes('use_cases')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Business segment definitions can be generated from target audience context',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create relevant business segments based on your target market'
+    };
+  }
+
+  // Customer testimonial content - AI generated
+  if (field.includes('testimonial_quotes') || field.includes('customer_names') || field.includes('customer_titles') || field.includes('customer_companies')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Segment-specific testimonials can be generated with appropriate business context',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create testimonials tailored to each business segment'
+    };
+  }
+
+  // Trust indicators and stats - AI generated
+  if (field.includes('segments_trust_title') || field.includes('_stat') || field.includes('_label')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Segment trust indicators and statistics can be generated for credibility',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will create believable segment-specific statistics and trust indicators'
+    };
+  }
+
+  // Icons - AI generated
+  if (field.includes('segment_icon_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Segment icons can be generated as emoji or symbols for visual consistency',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      },
+      user_guidance: 'AI will select appropriate icons/emojis for each business segment'
+    };
+  }
+
+  // CTA and trust elements - AI generated
+  if (field.includes('cta_text') || field.includes('trust_items') || field.includes('ratings')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'CTA and trust elements work well with AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      }
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Segmented testimonials content suitable for AI generation',
+      fallback_strategy: 'generate',
+      confidence: 0.85
+    }
+  };
+}
+
+/**
+ * Specific classification for VideoTestimonials fields
+ */
+function classifyVideoTestimonialsField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  // Headlines and content - AI generated
+  if (field === 'headline' || field === 'subheadline' || field === 'supporting_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Video testimonial headers suitable for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create compelling headers for enterprise video testimonials'
+    };
+  }
+
+  // Video content descriptions - AI generated
+  if (field.includes('video_titles') || field.includes('video_descriptions')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Video titles and descriptions can be generated to complement actual video content',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create engaging video titles and descriptions that highlight key benefits'
+    };
+  }
+
+  // Customer details - AI generated
+  if (field.includes('customer_names') || field.includes('customer_titles') || field.includes('customer_companies')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Enterprise customer details can be generated with appropriate business context',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create realistic enterprise customer profiles and company names'
+    };
+  }
+
+  // Video URLs and thumbnails - Manual preferred
+  if (field.includes('video_urls') || field.includes('video_thumbnails')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Video content should link to actual customer testimonial videos',
+        fallback_strategy: 'default',
+        confidence: 0.9
+      },
+      user_guidance: 'Provide actual video testimonial URLs and custom thumbnail images'
+    };
+  }
+
+  // Enterprise trust indicators - AI generated
+  if (field.includes('industry_leaders_title') || field.includes('_stat') || field.includes('_label')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Enterprise statistics and labels can be generated for credibility',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will create enterprise-appropriate statistics and trust indicators'
+    };
+  }
+
+  // CTA and trust elements - AI generated
+  if (field.includes('cta_text') || field.includes('trust_items')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Enterprise CTA and trust elements work well with AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      }
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Video testimonials content suitable for AI generation',
+      fallback_strategy: 'generate',
+      confidence: 0.85
     }
   };
 }

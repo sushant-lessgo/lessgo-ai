@@ -206,6 +206,31 @@ function processSectionContent(sectionId: string, content: SectionContent): {
     return result;
   }
 
+  // Special handling for Testimonial sections
+  if (sectionId.includes('RatingCards')) {
+    const processedRatingCards = processRatingCardsContent(sectionId, content);
+    result.content = processedRatingCards.content;
+    result.warnings = processedRatingCards.warnings;
+    result.hasIssues = processedRatingCards.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('SegmentedTestimonials')) {
+    const processedSegmentedTestimonials = processSegmentedTestimonialsContent(sectionId, content);
+    result.content = processedSegmentedTestimonials.content;
+    result.warnings = processedSegmentedTestimonials.warnings;
+    result.hasIssues = processedSegmentedTestimonials.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('VideoTestimonials')) {
+    const processedVideoTestimonials = processVideoTestimonialsContent(sectionId, content);
+    result.content = processedVideoTestimonials.content;
+    result.warnings = processedVideoTestimonials.warnings;
+    result.hasIssues = processedVideoTestimonials.hasIssues;
+    return result;
+  }
+
   if (sectionId.includes('ChatBubbleFAQ')) {
     const processedChat = processChatBubbleFAQContent(sectionId, content);
     result.content = processedChat.content;
@@ -5822,6 +5847,242 @@ function processSocialProofStripContent(sectionId: string, content: SectionConte
     result.warnings.push(`${sectionId}: No social proof content provided - section may appear empty`);
     result.hasIssues = true;
   }
+
+  return result;
+}
+
+/**
+ * Processes RatingCards content with rating platform validation and consistency checks
+ */
+function processRatingCardsContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = { content: { ...content }, warnings: [] as string[], hasIssues: false };
+
+  // Validate core testimonial field alignment
+  const requiredFields = ['testimonial_quotes', 'customer_names', 'customer_titles', 'ratings', 'review_platforms'];
+  const fieldCounts: Record<string, number> = {};
+
+  requiredFields.forEach(field => {
+    if (content[field]) {
+      const items = content[field].toString().split('|').map(item => item.trim()).filter(Boolean);
+      fieldCounts[field] = items.length;
+    } else {
+      fieldCounts[field] = 0;
+    }
+  });
+
+  // Check for field count mismatches
+  const counts = Object.values(fieldCounts);
+  const maxCount = Math.max(...counts);
+  const minCount = Math.min(...counts.filter(c => c > 0));
+
+  if (maxCount !== minCount && minCount > 0) {
+    result.warnings.push(`${sectionId}: Testimonial field counts don't match (${Object.entries(fieldCounts).map(([k,v]) => `${k}:${v}`).join(', ')})`);
+    result.hasIssues = true;
+  }
+
+  // Validate rating values (should be 1-5)
+  if (content.ratings) {
+    const ratings = content.ratings.toString().split('|').map(r => r.trim());
+    ratings.forEach((rating, index) => {
+      const numRating = parseInt(rating);
+      if (isNaN(numRating) || numRating < 1 || numRating > 5) {
+        result.warnings.push(`${sectionId}: Invalid rating "${rating}" at position ${index + 1} (should be 1-5)`);
+        result.hasIssues = true;
+      }
+    });
+  }
+
+  // Validate review platforms (should be recognizable platform names)
+  if (content.review_platforms) {
+    const validPlatforms = ['g2', 'capterra', 'trustpilot', 'product hunt', 'google', 'yelp', 'software advice', 'getapp'];
+    const platforms = content.review_platforms.toString().split('|').map(p => p.trim().toLowerCase());
+    platforms.forEach((platform, index) => {
+      if (!validPlatforms.some(valid => platform.includes(valid))) {
+        result.warnings.push(`${sectionId}: Unrecognized review platform "${platform}" at position ${index + 1}`);
+        result.hasIssues = true;
+      }
+    });
+  }
+
+  // Validate verified badges format (should be true/false)
+  if (content.verified_badges) {
+    const badges = content.verified_badges.toString().split('|').map(b => b.trim().toLowerCase());
+    badges.forEach((badge, index) => {
+      if (badge !== 'true' && badge !== 'false') {
+        result.warnings.push(`${sectionId}: Invalid verified badge "${badge}" at position ${index + 1} (should be "true" or "false")`);
+        result.hasIssues = true;
+      }
+    });
+  }
+
+  return result;
+}
+
+/**
+ * Processes SegmentedTestimonials content with segment validation and business context checks
+ */
+function processSegmentedTestimonialsContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = { content: { ...content }, warnings: [] as string[], hasIssues: false };
+
+  // Validate segment field alignment (should have 4 segments by default)
+  const segmentFields = ['segment_names', 'segment_descriptions', 'testimonial_quotes', 'customer_names', 'customer_titles', 'customer_companies', 'use_cases'];
+  const fieldCounts: Record<string, number> = {};
+
+  segmentFields.forEach(field => {
+    if (content[field]) {
+      const items = content[field].toString().split('|').map(item => item.trim()).filter(Boolean);
+      fieldCounts[field] = items.length;
+    } else {
+      fieldCounts[field] = 0;
+    }
+  });
+
+  // Check for field count mismatches
+  const counts = Object.values(fieldCounts);
+  const maxCount = Math.max(...counts);
+  const minCount = Math.min(...counts.filter(c => c > 0));
+
+  if (maxCount !== minCount && minCount > 0) {
+    result.warnings.push(`${sectionId}: Segment field counts don't match (${Object.entries(fieldCounts).map(([k,v]) => `${k}:${v}`).join(', ')})`);
+    result.hasIssues = true;
+  }
+
+  // Validate segment icons if provided (should have same count as segments)
+  const segmentCount = fieldCounts['segment_names'] || 0;
+  const iconFields = ['segment_icon_1', 'segment_icon_2', 'segment_icon_3', 'segment_icon_4'];
+  let providedIcons = 0;
+
+  iconFields.forEach(iconField => {
+    if (content[iconField] && content[iconField] !== '') {
+      providedIcons++;
+    }
+  });
+
+  if (providedIcons > 0 && providedIcons !== segmentCount) {
+    result.warnings.push(`${sectionId}: Icon count (${providedIcons}) doesn't match segment count (${segmentCount})`);
+    result.hasIssues = true;
+  }
+
+  // Validate segment statistics if provided
+  const statFields = ['enterprise_stat', 'agencies_stat', 'small_business_stat', 'dev_teams_stat'];
+  const labelFields = ['enterprise_label', 'agencies_label', 'small_business_label', 'dev_teams_label'];
+
+  let statsProvided = 0;
+  let labelsProvided = 0;
+
+  statFields.forEach(statField => {
+    if (content[statField] && content[statField] !== '') {
+      statsProvided++;
+    }
+  });
+
+  labelFields.forEach(labelField => {
+    if (content[labelField] && content[labelField] !== '') {
+      labelsProvided++;
+    }
+  });
+
+  if (statsProvided !== labelsProvided && statsProvided > 0 && labelsProvided > 0) {
+    result.warnings.push(`${sectionId}: Segment stats count (${statsProvided}) doesn't match labels count (${labelsProvided})`);
+    result.hasIssues = true;
+  }
+
+  return result;
+}
+
+/**
+ * Processes VideoTestimonials content with enterprise focus and video URL validation
+ */
+function processVideoTestimonialsContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = { content: { ...content }, warnings: [] as string[], hasIssues: false };
+
+  // Validate core video testimonial field alignment
+  const coreFields = ['video_titles', 'video_descriptions', 'customer_names', 'customer_titles', 'customer_companies'];
+  const fieldCounts: Record<string, number> = {};
+
+  coreFields.forEach(field => {
+    if (content[field]) {
+      const items = content[field].toString().split('|').map(item => item.trim()).filter(Boolean);
+      fieldCounts[field] = items.length;
+    } else {
+      fieldCounts[field] = 0;
+    }
+  });
+
+  // Check for field count mismatches
+  const counts = Object.values(fieldCounts);
+  const maxCount = Math.max(...counts);
+  const minCount = Math.min(...counts.filter(c => c > 0));
+
+  if (maxCount !== minCount && minCount > 0) {
+    result.warnings.push(`${sectionId}: Video testimonial field counts don't match (${Object.entries(fieldCounts).map(([k,v]) => `${k}:${v}`).join(', ')})`);
+    result.hasIssues = true;
+  }
+
+  // Validate video URLs if provided
+  if (content.video_urls) {
+    const urls = content.video_urls.toString().split('|').map(url => url.trim()).filter(Boolean);
+    urls.forEach((url, index) => {
+      // Check for valid URL format and common video platforms
+      const isValidUrl = /^https?:\/\/.+/.test(url);
+      const isSupportedPlatform = /youtube|vimeo|wistia|loom/.test(url.toLowerCase());
+
+      if (!isValidUrl) {
+        result.warnings.push(`${sectionId}: Invalid video URL format at position ${index + 1}: "${url}"`);
+        result.hasIssues = true;
+      } else if (!isSupportedPlatform) {
+        result.warnings.push(`${sectionId}: Video URL at position ${index + 1} may not be from a supported platform: "${url}"`);
+      }
+    });
+
+    // Video URLs should match video count
+    const videoCount = fieldCounts['video_titles'] || 0;
+    if (urls.length !== videoCount && videoCount > 0) {
+      result.warnings.push(`${sectionId}: Video URLs count (${urls.length}) doesn't match video titles count (${videoCount})`);
+      result.hasIssues = true;
+    }
+  }
+
+  // Validate video thumbnails if provided
+  if (content.video_thumbnails) {
+    const thumbnails = content.video_thumbnails.toString().split('|').map(thumb => thumb.trim()).filter(Boolean);
+    const videoCount = fieldCounts['video_titles'] || 0;
+
+    if (thumbnails.length !== videoCount && videoCount > 0) {
+      result.warnings.push(`${sectionId}: Video thumbnails count (${thumbnails.length}) doesn't match video titles count (${videoCount})`);
+      result.hasIssues = true;
+    }
+  }
+
+  // Validate enterprise statistics alignment
+  const enterpriseFields = ['enterprise_customers_stat', 'enterprise_customers_label', 'uptime_stat', 'uptime_label', 'support_stat', 'support_label'];
+  const statPairs = [
+    ['enterprise_customers_stat', 'enterprise_customers_label'],
+    ['uptime_stat', 'uptime_label'],
+    ['support_stat', 'support_label']
+  ];
+
+  statPairs.forEach(([statField, labelField]) => {
+    const hasStat = content[statField] && content[statField] !== '';
+    const hasLabel = content[labelField] && content[labelField] !== '';
+
+    if (hasStat !== hasLabel) {
+      result.warnings.push(`${sectionId}: ${statField} and ${labelField} should both be provided or both be empty`);
+      result.hasIssues = true;
+    }
+  });
 
   return result;
 }
