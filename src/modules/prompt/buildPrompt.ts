@@ -208,14 +208,21 @@ function getSectionLayoutGuidance(sectionType: string, layout: string): string {
     },
 
     CTA: {
-      CenteredHeadlineCTA: "Central focus call-to-action. Headline should create urgency and desire. CTA text should be action-specific and valuable.",
-      CTAWithBadgeRow: "Trust-building CTA layout. Use badges to reinforce credibility. CTA should feel like natural, logical next step.",
-      VisualCTAWithMockup: "Product-focused action section. Let mockup showcase ease of use. Copy should focus on immediate getting started benefits.",
-      SideBySideCTA: "Balanced value-action presentation. Value proposition should address final hesitations. Benefits should be scannable and compelling.",
-      CountdownLimitedCTA: "Urgency-driven action section. Use time-sensitive language throughout. Create genuine scarcity and urgency.",
-      CTAWithFormField: "Lead capture focused design. Form labels should be clear and minimal. Address privacy and value exchange explicitly.",
-      ValueStackCTA: "Value reinforcement with action. Stack value propositions progressively. Build to natural action conclusion.",
-      TestimonialCTACombo: "Social proof enhanced CTA. Use testimonial to overcome final objections. Combine validation with clear action."
+      CenteredHeadlineCTA: "Central focus call-to-action with maximum conversion impact. HEADLINE: Create irresistible urgency using power words like 'instant', 'exclusive', or 'guaranteed'. Address the primary benefit and time sensitivity. CTA TEXT: Use action verbs with immediate benefit promise (e.g., 'Start Saving Today', 'Get Instant Access'). URGENCY TEXT: Create legitimate time pressure with specific deadlines or limited availability. TRUST INDICATORS: Include security badges, customer counts, or satisfaction guarantees to reduce friction. SOCIAL PROOF: Display customer numbers or ratings if startup stage allows credible metrics.",
+
+      CTAWithBadgeRow: "Trust-building CTA with credibility-first approach. HEADLINE: Balance urgency with trustworthiness - use authoritative language. TRUST BADGES: Select 3-5 relevant badges (security, compliance, awards, integrations) that match target audience concerns. For enterprise: SOC2, GDPR, SSL. For SMB: Customer reviews, uptime, support. CTA TEXT: Emphasize low-risk trial or guarantee. CUSTOMER AVATARS: Show diverse, professional customer base if metrics support it. RATING DISPLAY: Only show ratings above 4.5 stars with substantial review counts.",
+
+      VisualCTAWithMockup: "Product-demonstration CTA focusing on ease-of-use. HEADLINE: Emphasize how simple the product is to start using. MOCKUP STRATEGY: Show the actual product interface or key workflow. SECONDARY CTA: Offer alternative engagement like 'Watch Demo' or 'See Examples'. CTA TEXT: Use getting-started language like 'Try It Now' or 'Start Building'. TRUST ITEMS: Focus on technical credibility (uptime, security, reliability) since users see product complexity.",
+
+      SideBySideCTA: "Balanced value-action presentation for comprehensive conversion. VALUE PROPOSITION: Address the #1 customer objection or hesitation. HEADLINE: Create desire for the transformation, not just the product. BENEFIT LIST: Use 3-4 scannable benefits with outcome-focused language. SUPPORTING TEXT: Include social proof elements or risk-reduction messaging. CTA TEXT: Match the value proposition intensity. TRUST ITEMS: Select items that support the primary value claim.",
+
+      CountdownLimitedCTA: "Urgency-driven conversion with scarcity psychology. HEADLINE: Combine time urgency with value urgency - what they'll miss. SCARCITY TEXT: Be specific about limitations (seats, spots, early-bird pricing). COUNTDOWN MECHANICS: Set realistic but urgent deadlines. URGENCY TEXT: Use loss-aversion language ('Don't miss out', 'Limited time only'). BONUS TEXT: Add value to justify immediate action. AVAILABILITY TEXT: Show decreasing availability if authentic. TRUST ITEMS: Counter urgency skepticism with credibility signals.",
+
+      CTAWithFormField: "Lead capture optimization with friction reduction. HEADLINE: Focus on what they get, not what they give. FORM STRATEGY: Minimize fields to essential data only. FORM LABELS: Use benefit-focused labels ('Get My Custom Demo' vs 'Email'). PLACEHOLDER TEXT: Provide examples and reduce cognitive load. BENEFITS: List 3-4 specific, time-bound benefits of submitting form. PRIVACY TEXT: Address data security concerns explicitly for enterprise audiences. CTA TEXT: Promise immediate next step ('Get Instant Access', 'Start My Trial'). SUCCESS MESSAGE: Set clear expectations for follow-up timing.",
+
+      ValueStackCTA: "Value amplification strategy for high-value conversions. VALUE PROPOSITIONS: List 4-6 core benefits with specific outcomes. VALUE DESCRIPTIONS: Include quantified benefits where possible. FINAL CTA HEADLINE: Summarize total transformation promise. FINAL CTA DESCRIPTION: Address why now vs. later. GUARANTEE TEXT: Offer specific, time-bound guarantee to reduce risk. VALUE ICONS: Use icons that clearly represent each value prop. STACKING STRATEGY: Build perceived value progressively toward irresistible total.",
+
+      TestimonialCTACombo: "Social proof amplified conversion with trust transfer. HEADLINE: Leverage testimonial theme in CTA messaging. TESTIMONIAL CONTENT: Use specific, quantified results with metrics. CUSTOMER ATTRIBUTION: Include title, company, and credibility signals. COMPANY LOGO: Add visual trust transfer from recognizable brands. CASE STUDY TAG: Highlight specific success type. SOCIAL PROOF METRICS: Display customer count, ratings, or uptime that complement testimonial. TESTIMONIAL DATE: Include recent dates for relevance. CTA TEXT: Reference social proof in action language ('Join [X] Happy Customers')."
     },
 
     Problem: {

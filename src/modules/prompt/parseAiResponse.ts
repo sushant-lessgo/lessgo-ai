@@ -334,6 +334,71 @@ function processSectionContent(sectionId: string, content: SectionContent): {
     return result;
   }
 
+  // Special handling for PrimaryCTA sections
+  if (sectionId.includes('CenteredHeadlineCTA')) {
+    const processedCTA = processCenteredHeadlineCTAContent(sectionId, content);
+    result.content = processedCTA.content;
+    result.warnings = processedCTA.warnings;
+    result.hasIssues = processedCTA.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('CTAWithBadgeRow')) {
+    const processedCTA = processCTAWithBadgeRowContent(sectionId, content);
+    result.content = processedCTA.content;
+    result.warnings = processedCTA.warnings;
+    result.hasIssues = processedCTA.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('VisualCTAWithMockup')) {
+    const processedCTA = processVisualCTAWithMockupContent(sectionId, content);
+    result.content = processedCTA.content;
+    result.warnings = processedCTA.warnings;
+    result.hasIssues = processedCTA.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('SideBySideCTA')) {
+    const processedCTA = processSideBySideCTAContent(sectionId, content);
+    result.content = processedCTA.content;
+    result.warnings = processedCTA.warnings;
+    result.hasIssues = processedCTA.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('CountdownLimitedCTA')) {
+    const processedCTA = processCountdownLimitedCTAContent(sectionId, content);
+    result.content = processedCTA.content;
+    result.warnings = processedCTA.warnings;
+    result.hasIssues = processedCTA.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('CTAWithFormField')) {
+    const processedCTA = processCTAWithFormFieldContent(sectionId, content);
+    result.content = processedCTA.content;
+    result.warnings = processedCTA.warnings;
+    result.hasIssues = processedCTA.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('ValueStackCTA')) {
+    const processedCTA = processValueStackCTAContent(sectionId, content);
+    result.content = processedCTA.content;
+    result.warnings = processedCTA.warnings;
+    result.hasIssues = processedCTA.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('TestimonialCTACombo')) {
+    const processedCTA = processTestimonialCTAComboContent(sectionId, content);
+    result.content = processedCTA.content;
+    result.warnings = processedCTA.warnings;
+    result.hasIssues = processedCTA.hasIssues;
+    return result;
+  }
+
   Object.entries(content).forEach(([elementKey, elementValue]) => {
     const processedElement = processElement(sectionId, elementKey, elementValue)
 
@@ -478,7 +543,24 @@ function validateStringLength(elementKey: string, value: string): {
     subheadline: { min: 15, max: 150, severity: 'warning' },
     cta_text: { min: 5, max: 30, severity: 'error' },
     description: { min: 20, max: 300, severity: 'warning' },
-    quote: { min: 20, max: 200, severity: 'warning' }
+    quote: { min: 20, max: 200, severity: 'warning' },
+    // CTA-specific field rules
+    urgency_text: { min: 10, max: 80, severity: 'warning' },
+    scarcity_text: { min: 10, max: 100, severity: 'warning' },
+    trust_item: { min: 5, max: 50, severity: 'warning' },
+    form_label: { min: 5, max: 40, severity: 'warning' },
+    placeholder_text: { min: 5, max: 60, severity: 'warning' },
+    privacy_text: { min: 10, max: 150, severity: 'warning' },
+    value_proposition: { min: 15, max: 120, severity: 'warning' },
+    testimonial_quote: { min: 30, max: 400, severity: 'warning' },
+    testimonial_author: { min: 3, max: 50, severity: 'error' },
+    testimonial_company: { min: 2, max: 50, severity: 'error' },
+    testimonial_title: { min: 5, max: 80, severity: 'warning' },
+    case_study_tag: { min: 5, max: 30, severity: 'warning' },
+    customer_count: { min: 2, max: 20, severity: 'warning' },
+    average_rating: { min: 2, max: 10, severity: 'warning' },
+    guarantee_text: { min: 10, max: 200, severity: 'warning' },
+    countdown_label: { min: 5, max: 40, severity: 'warning' }
   }
 
   // Find matching rule (check for partial matches)
@@ -528,13 +610,41 @@ function getElementFallback(elementKey: string): string | string[] {
     cta_text: "Get Started",
     description: "Discover how our solution can help you achieve your goals",
     quote: "This solution changed everything for our business",
-    
+
+    // CTA-specific fallbacks
+    urgency_text: "Limited time offer - Act now!",
+    scarcity_text: "Only 50 spots remaining",
+    trust_item_1: "Secure & encrypted",
+    trust_item_2: "GDPR compliant",
+    trust_item_3: "24/7 support",
+    form_label: "Work Email",
+    placeholder_text: "Enter your email address",
+    privacy_text: "We respect your privacy. Unsubscribe at any time.",
+    value_proposition: "Get more done in less time with powerful automation",
+    testimonial_quote: "This platform transformed our workflow and increased our productivity by 300%.",
+    testimonial_author: "Sarah Johnson",
+    testimonial_company: "TechCorp Inc.",
+    testimonial_title: "Head of Operations",
+    case_study_tag: "Success Story",
+    customer_count: "10,000+",
+    average_rating: "4.9/5",
+    guarantee_text: "30-day money-back guarantee",
+    countdown_label: "Sale ends in:",
+    availability_text: "Only 3 spots left at this price",
+    bonus_text: "Plus get free premium support",
+    supporting_text: "Trusted by industry leaders worldwide",
+    secondary_cta: "Learn More",
+
     // Array fallbacks
     feature_titles: ["Feature 1", "Feature 2", "Feature 3"],
     feature_descriptions: ["Benefit description 1", "Benefit description 2", "Benefit description 3"],
     testimonial_quotes: ["Great product!", "Highly recommended", "Best investment we made"],
     questions: ["How does it work?", "Is it secure?", "What's included?"],
-    answers: ["It works seamlessly", "Yes, enterprise-grade security", "Everything you need"]
+    answers: ["It works seamlessly", "Yes, enterprise-grade security", "Everything you need"],
+    benefits: ["Free 14-day trial", "No credit card required", "Cancel anytime"],
+    trust_badges: ["SOC 2 Certified", "GDPR Compliant", "SSL Secured"],
+    value_propositions: ["Save 10+ hours weekly", "Increase productivity by 200%", "Reduce errors by 95%"],
+    value_descriptions: ["Automate repetitive tasks", "Streamline your workflow", "Focus on what matters most"]
   }
 
   // Check for exact match
@@ -2280,6 +2390,56 @@ function processTechnicalAdvantageContent(sectionId: string, content: SectionCon
       }
     }
   });
+
+  return result;
+}
+
+
+/**
+ * Special processing for CenteredHeadlineCTA sections
+ */
+function processCenteredHeadlineCTAContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Process each element with CTA-specific validation
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    const processedElement = processElement(sectionId, elementKey, elementValue);
+
+    if (processedElement.isValid) {
+      result.content[elementKey] = processedElement.value;
+    } else {
+      result.warnings.push(...processedElement.warnings);
+      result.hasIssues = true;
+      result.content[elementKey] = processedElement.fallback;
+    }
+  });
+
+  // CTA-specific validations
+  if (!result.content.headline) {
+    result.warnings.push(`${sectionId}: Missing required field 'headline'`);
+    result.hasIssues = true;
+  }
+
+  if (!result.content.cta_text) {
+    result.warnings.push(`${sectionId}: Missing required field 'cta_text'`);
+    result.hasIssues = true;
+  }
+
+  // Process trust items (pipe-separated to individual fields)
+  if (content.trust_items && typeof content.trust_items === 'string') {
+    const trustItems = content.trust_items.split('|').map(item => item.trim()).filter(Boolean);
+    for (let i = 0; i < Math.min(trustItems.length, 5); i++) {
+      result.content[`trust_item_${i + 1}`] = trustItems[i];
+    }
+  }
 
   return result;
 }

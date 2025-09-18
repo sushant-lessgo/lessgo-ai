@@ -1954,120 +1954,6 @@ const elementRules: SectionLayoutRules = {
   }
 ],
 
-// CTA Section Rules - Add these to elementRules object
-
-"CTA_CenteredHeadlineCTA": [
-  {
-    element: "subheadline",
-    conditions: [
-      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
-      { variable: "copyIntent", values: ["pain-led"], weight: 3 },
-      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 2 }
-    ],
-    minScore: 6
-  },
-  {
-    element: "urgency_text",
-    conditions: [
-      { variable: "landingPageGoals", values: ["buy-now", "free-trial", "early-access"], weight: 4 },
-      { variable: "toneProfile", values: ["bold-persuasive"], weight: 3 },
-    // { variable: "pricingModifier", values: ["discount"], weight: 2 }
-    ],
-    minScore: 6
-  }
-],
-
-"CTA_CTAWithBadgeRow": [
-  {
-    element: "subheadline",
-    conditions: [
-      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
-      { variable: "copyIntent", values: ["pain-led"], weight: 3 }
-    ],
-    minScore: 5
-  }
-],
-
-"CTA_VisualCTAWithMockup": [
-  {
-    element: "mockup_caption",
-    conditions: [
-      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
-      { variable: "targetAudience", values: ["developers", "product-managers", "no-code-builders"], weight: 3 },
-      { variable: "landingPageGoals", values: ["demo", "free-trial"], weight: 2 }
-    ],
-    minScore: 6
-  },
-  {
-    element: "supporting_text",
-    conditions: [
-      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
-      { variable: "copyIntent", values: ["pain-led"], weight: 3 }
-    ],
-    minScore: 5
-  }
-],
-
-"CTA_SideBySideCTA": [
-  {
-    element: "benefit_list",
-    conditions: [
-      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
-      { variable: "copyIntent", values: ["desire-led"], weight: 3 },
-      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
-    ],
-    minScore: 6
-  }
-],
-
-"CTA_CountdownLimitedCTA": [
-  {
-    element: "urgency_text",
-    conditions: [
-      { variable: "landingPageGoals", values: ["buy-now", "early-access"], weight: 5 },
-      { variable: "toneProfile", values: ["bold-persuasive"], weight: 3 },
-     // { variable: "pricingModifier", values: ["discount"], weight: 2 }
-    ],
-    minScore: 7
-  }
-],
-
-"CTA_CTAWithFormField": [
-  {
-    element: "privacy_text",
-    conditions: [
-      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "it-decision-makers"], weight: 4 },
-      { variable: "marketSubcategory", values: ["Healthcare & MedTech SaaS", "LegalTech SaaS"], weight: 3 },
-      { variable: "landingPageGoals", values: ["download", "signup", "waitlist"], weight: 2 }
-    ],
-    minScore: 6
-  }
-],
-
-"CTA_ValueStackCTA": [
-  {
-    element: "total_value_text",
-    conditions: [
-      { variable: "landingPageGoals", values: ["buy-now", "subscribe"], weight: 4 },
-      { variable: "toneProfile", values: ["bold-persuasive"], weight: 3 },
-      { variable: "pricingModel", values: ["tiered", "flat-monthly"], weight: 2 }
-    ],
-    minScore: 6
-  }
-],
-
-"CTA_TestimonialCTACombo": [
-  {
-    element: "customer_title",
-    conditions: [
-      { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
-      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "mid-market-companies"], weight: 3 },
-      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
-    ],
-    minScore: 6
-  }
-],
-
 // Problem Section Rules - Add these to elementRules object
 
 "Problem_StackedPainBullets": [
@@ -2963,8 +2849,357 @@ const elementRules: SectionLayoutRules = {
     ],
     minScore: 6
   }
+],
+
+// PrimaryCTA Section Rules - Enhanced field selection logic
+"CTA_CenteredHeadlineCTA": [
+  {
+    element: "subheadline",
+    conditions: [
+      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
+      { variable: "copyIntent", values: ["pain-led"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "urgency_text",
+    conditions: [
+      { variable: "landingPageGoals", values: ["buy-now", "free-trial", "early-access"], weight: 4 },
+      { variable: "toneProfile", values: ["bold-persuasive"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "trust_item_1",
+    conditions: [
+      { variable: "awarenessLevel", values: ["unaware", "problem-aware", "solution-aware"], weight: 4 },
+      { variable: "landingPageGoals", values: ["free-trial", "signup", "demo"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2", "level-3"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "customer_count",
+    conditions: [
+      { variable: "startupStage", values: ["users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-2", "level-3", "level-4"], weight: 3 },
+      { variable: "landingPageGoals", values: ["free-trial", "buy-now", "signup"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "rating_stat",
+    conditions: [
+      { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
+      { variable: "targetAudience", values: ["mid-market-companies", "enterprise-tech-teams"], weight: 2 }
+    ],
+    minScore: 6
+  }
+],
+
+"CTA_CTAWithBadgeRow": [
+  {
+    element: "subheadline",
+    conditions: [
+      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
+      { variable: "copyIntent", values: ["pain-led"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 2 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "trust_item_1",
+    conditions: [
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "it-decision-makers"], weight: 4 },
+      { variable: "marketSubcategory", values: ["Healthcare & MedTech SaaS", "LegalTech SaaS", "FinTech SaaS"], weight: 3 },
+      { variable: "landingPageGoals", values: ["demo", "free-trial", "enterprise-contact"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "show_customer_avatars",
+    conditions: [
+      { variable: "startupStage", values: ["users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4"], weight: 3 },
+      { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "rating_value",
+    conditions: [
+      { variable: "startupStage", values: ["targeting-pmf", "users-250-500"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-2", "level-3", "level-4"], weight: 3 },
+      { variable: "landingPageGoals", values: ["free-trial", "buy-now"], weight: 2 }
+    ],
+    minScore: 6
+  }
+],
+
+"CTA_VisualCTAWithMockup": [
+  {
+    element: "subheadline",
+    conditions: [
+      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
+      { variable: "copyIntent", values: ["pain-led"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 2 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "secondary_cta",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "landingPageGoals", values: ["demo", "learn-more", "video-watch"], weight: 3 },
+      { variable: "targetAudience", values: ["developers", "product-managers", "no-code-builders"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "mockup_image",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "targetAudience", values: ["developers", "product-managers", "no-code-builders"], weight: 3 },
+      { variable: "marketSubcategory", values: ["Developer Tools SaaS", "Productivity & Project Management SaaS"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "trust_item_1",
+    conditions: [
+      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 3 },
+      { variable: "landingPageGoals", values: ["free-trial", "demo"], weight: 2 }
+    ],
+    minScore: 6
+  }
+],
+
+"CTA_SideBySideCTA": [
+  {
+    element: "benefit_list",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "copyIntent", values: ["desire-led"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "subheadline",
+    conditions: [
+      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
+      { variable: "copyIntent", values: ["pain-led"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "supporting_text",
+    conditions: [
+      { variable: "copyIntent", values: ["pain-led", "desire-led"], weight: 4 },
+      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 3 },
+      { variable: "toneProfile", values: ["friendly-helpful"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "trust_item_1",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2", "level-3"], weight: 4 },
+      { variable: "landingPageGoals", values: ["free-trial", "signup", "demo"], weight: 3 },
+      { variable: "targetAudience", values: ["solopreneurs", "small-teams", "mid-market-companies"], weight: 2 }
+    ],
+    minScore: 6
+  }
+],
+
+"CTA_CountdownLimitedCTA": [
+  {
+    element: "urgency_text",
+    conditions: [
+      { variable: "landingPageGoals", values: ["buy-now", "early-access"], weight: 5 },
+      { variable: "toneProfile", values: ["bold-persuasive"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 2 }
+    ],
+    minScore: 7
+  },
+  {
+    element: "subheadline",
+    conditions: [
+      { variable: "awarenessLevel", values: ["product-aware", "most-aware"], weight: 4 },
+      { variable: "copyIntent", values: ["desire-led"], weight: 3 },
+      { variable: "landingPageGoals", values: ["buy-now", "early-access"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "countdown_end_date",
+    conditions: [
+      { variable: "landingPageGoals", values: ["buy-now", "early-access", "subscribe"], weight: 4 },
+      { variable: "toneProfile", values: ["bold-persuasive"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-2", "level-3"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "limited_quantity",
+    conditions: [
+      { variable: "landingPageGoals", values: ["buy-now", "early-access"], weight: 4 },
+      { variable: "toneProfile", values: ["bold-persuasive"], weight: 3 },
+      { variable: "pricingModel", values: ["one-time", "course"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "bonus_text",
+    conditions: [
+      { variable: "landingPageGoals", values: ["buy-now", "subscribe"], weight: 4 },
+      { variable: "toneProfile", values: ["bold-persuasive", "confident-playful"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 2 }
+    ],
+    minScore: 6
+  }
+],
+
+"CTA_CTAWithFormField": [
+  {
+    element: "privacy_text",
+    conditions: [
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "it-decision-makers"], weight: 4 },
+      { variable: "marketSubcategory", values: ["Healthcare & MedTech SaaS", "LegalTech SaaS"], weight: 3 },
+      { variable: "landingPageGoals", values: ["download", "signup", "waitlist"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "subheadline",
+    conditions: [
+      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
+      { variable: "copyIntent", values: ["pain-led"], weight: 3 },
+      { variable: "landingPageGoals", values: ["signup", "download", "waitlist"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "benefit_1",
+    conditions: [
+      { variable: "landingPageGoals", values: ["free-trial", "signup", "download"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2", "level-3"], weight: 3 },
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "trust_item_1",
+    conditions: [
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "it-decision-makers"], weight: 4 },
+      { variable: "marketSubcategory", values: ["Healthcare & MedTech SaaS", "FinTech SaaS"], weight: 3 },
+      { variable: "landingPageGoals", values: ["demo", "enterprise-contact"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "form_type",
+    conditions: [
+      { variable: "landingPageGoals", values: ["demo", "enterprise-contact", "waitlist"], weight: 4 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
+    ],
+    minScore: 6
+  }
+],
+
+"CTA_ValueStackCTA": [
+  {
+    element: "subheadline",
+    conditions: [
+      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
+      { variable: "copyIntent", values: ["pain-led"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "guarantee_text",
+    conditions: [
+      { variable: "landingPageGoals", values: ["buy-now", "free-trial"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2", "level-3"], weight: 3 },
+      { variable: "toneProfile", values: ["bold-persuasive", "confident-playful"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "value_icon_1",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "copyIntent", values: ["desire-led"], weight: 3 },
+      { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 2 }
+    ],
+    minScore: 6
+  }
+],
+
+"CTA_TestimonialCTACombo": [
+  {
+    element: "subheadline",
+    conditions: [
+      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
+      { variable: "copyIntent", values: ["pain-led"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "testimonial_company_logo",
+    conditions: [
+      { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "mid-market-companies"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "testimonial_date",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "mid-market-companies"], weight: 3 },
+      { variable: "landingPageGoals", values: ["demo", "enterprise-contact"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "case_study_tag",
+    conditions: [
+      { variable: "startupStage", values: ["users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 3 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "customer_count",
+    conditions: [
+      { variable: "startupStage", values: ["users-250-500", "users-500-1k", "users-1k-5k"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-2", "level-3"], weight: 3 },
+      { variable: "landingPageGoals", values: ["free-trial", "signup"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "show_social_proof",
+    conditions: [
+      { variable: "startupStage", values: ["targeting-pmf", "users-250-500"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2", "level-3"], weight: 3 },
+      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 2 }
+    ],
+    minScore: 6
+  }
 ]
- 
+
 };
 
 /**

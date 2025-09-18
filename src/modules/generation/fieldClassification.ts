@@ -123,6 +123,39 @@ export function classifyField(fieldName: string, sectionType?: string): Classifi
     return classifyEmojiOutcomeGridField(fieldName);
   }
 
+  // PrimaryCTA Section Classifications
+  if (sectionType === 'CenteredHeadlineCTA') {
+    return classifyCenteredHeadlineCTAField(fieldName);
+  }
+
+  if (sectionType === 'CTAWithBadgeRow') {
+    return classifyCTAWithBadgeRowField(fieldName);
+  }
+
+  if (sectionType === 'VisualCTAWithMockup') {
+    return classifyVisualCTAWithMockupField(fieldName);
+  }
+
+  if (sectionType === 'SideBySideCTA') {
+    return classifySideBySideCTAField(fieldName);
+  }
+
+  if (sectionType === 'CountdownLimitedCTA') {
+    return classifyCountdownLimitedCTAField(fieldName);
+  }
+
+  if (sectionType === 'CTAWithFormField') {
+    return classifyCTAWithFormFieldField(fieldName);
+  }
+
+  if (sectionType === 'ValueStackCTA') {
+    return classifyValueStackCTAField(fieldName);
+  }
+
+  if (sectionType === 'TestimonialCTACombo') {
+    return classifyTestimonialCTAComboField(fieldName);
+  }
+
   // AI-Generated Fields (high confidence for content generation)
   if (isAiGeneratedField(field)) {
     return {
@@ -2224,6 +2257,739 @@ function classifyTechnicalAdvantageField(fieldName: string): ClassificationResul
       reason: 'Technical advantage content suitable for AI generation',
       fallback_strategy: 'generate',
       confidence: 0.85
+    }
+  };
+}
+
+/**
+ * Specific classification for CenteredHeadlineCTA fields
+ */
+function classifyCenteredHeadlineCTAField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  // Headlines and subheadlines - AI generated
+  if (field === 'headline' || field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'CTA headlines should be compelling and action-oriented',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create conversion-optimized headlines'
+    };
+  }
+
+  // CTA text - AI generated but conversion-critical
+  if (field === 'cta_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'CTA text should align with landing page goals and conversion psychology',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create action-oriented CTA text'
+    };
+  }
+
+  // Urgency text - AI generated for persuasion
+  if (field === 'urgency_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Urgency messaging requires persuasive copywriting',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create compelling urgency messaging'
+    };
+  }
+
+  // Trust items - hybrid approach
+  if (field.includes('trust_item') || field === 'trust_items') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Trust indicators should be accurate and credible',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      },
+      user_guidance: 'AI will suggest trust indicators; verify accuracy'
+    };
+  }
+
+  // Social proof metrics - manual preferred
+  if (field === 'customer_count' || field === 'rating_stat' || field === 'uptime_stat' || field === 'customer_label' || field === 'uptime_label') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Metrics and statistics must be accurate and verifiable',
+        fallback_strategy: 'default',
+        confidence: 0.95
+      },
+      user_guidance: 'Provide accurate company metrics and statistics'
+    };
+  }
+
+  // Default for other fields
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Standard CTA content suitable for AI generation',
+      fallback_strategy: 'generate',
+      confidence: 0.8
+    }
+  };
+}
+
+/**
+ * Specific classification for CTAWithBadgeRow fields
+ */
+function classifyCTAWithBadgeRowField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  // Headlines and subheadlines - AI generated
+  if (field === 'headline' || field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'CTA headlines should be compelling and badge-focused',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create conversion-optimized headlines'
+    };
+  }
+
+  // CTA text - AI generated
+  if (field === 'cta_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'CTA text should align with trust badge messaging',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create action-oriented CTA text'
+    };
+  }
+
+  // Trust badges and items - hybrid approach
+  if (field.includes('trust_') || field === 'trust_badges') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Trust badges should be accurate and credible',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      },
+      user_guidance: 'AI will suggest trust badges; verify accuracy and compliance'
+    };
+  }
+
+  // Social proof and ratings - manual preferred
+  if (field === 'customer_count' || field === 'rating_value' || field === 'rating_count' || field.includes('avatar')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Social proof metrics must be accurate and verifiable',
+        fallback_strategy: 'default',
+        confidence: 0.95
+      },
+      user_guidance: 'Provide accurate customer metrics and avatar data'
+    };
+  }
+
+  // Boolean flags - manual preferred
+  if (field.includes('show_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Display preferences should be set based on available data',
+        fallback_strategy: 'default',
+        confidence: 0.9
+      },
+      user_guidance: 'Configure based on your available social proof data'
+    };
+  }
+
+  // Default for other fields
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Standard badge CTA content suitable for AI generation',
+      fallback_strategy: 'generate',
+      confidence: 0.8
+    }
+  };
+}
+
+/**
+ * Specific classification for VisualCTAWithMockup fields
+ */
+function classifyVisualCTAWithMockupField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  // Headlines and subheadlines - AI generated
+  if (field === 'headline' || field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Visual CTA headlines should complement mockup messaging',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create visually-oriented headlines'
+    };
+  }
+
+  // CTA text - AI generated
+  if (field === 'cta_text' || field === 'secondary_cta') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'CTA text should drive engagement with visual elements',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create action-oriented CTA text'
+    };
+  }
+
+  // Mockup image - manual preferred
+  if (field === 'mockup_image') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Product mockups should be actual product screenshots or demos',
+        fallback_strategy: 'skip',
+        confidence: 0.95
+      },
+      user_guidance: 'Upload actual product screenshots or demo images'
+    };
+  }
+
+  // Trust items - hybrid approach
+  if (field.includes('trust_item')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Trust indicators should support visual credibility',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      },
+      user_guidance: 'AI will suggest trust indicators; verify accuracy'
+    };
+  }
+
+  // Default for other fields
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Standard visual CTA content suitable for AI generation',
+      fallback_strategy: 'generate',
+      confidence: 0.8
+    }
+  };
+}
+
+/**
+ * Specific classification for SideBySideCTA fields
+ */
+function classifySideBySideCTAField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  // Headlines and text content - AI generated
+  if (field === 'headline' || field === 'subheadline' || field === 'supporting_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Side-by-side content should create compelling value proposition',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create balanced side-by-side messaging'
+    };
+  }
+
+  // CTA text - AI generated
+  if (field === 'cta_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'CTA text should align with value proposition',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create action-oriented CTA text'
+    };
+  }
+
+  // Value proposition - AI generated
+  if (field === 'value_proposition') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Value propositions require persuasive copywriting',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will craft compelling value propositions'
+    };
+  }
+
+  // Benefit list - AI generated
+  if (field === 'benefit_list') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Benefit lists showcase product advantages effectively',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create comprehensive benefit lists'
+    };
+  }
+
+  // Trust items - hybrid approach
+  if (field.includes('trust_item') || field === 'trust_items') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Trust indicators should be accurate and credible',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      },
+      user_guidance: 'AI will suggest trust indicators; verify accuracy'
+    };
+  }
+
+  // Default for other fields
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Standard side-by-side CTA content suitable for AI generation',
+      fallback_strategy: 'generate',
+      confidence: 0.8
+    }
+  };
+}
+
+/**
+ * Specific classification for CountdownLimitedCTA fields
+ */
+function classifyCountdownLimitedCTAField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  // Headlines and subheadlines - AI generated
+  if (field === 'headline' || field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Countdown CTA headlines should create urgency and scarcity',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create urgency-focused headlines'
+    };
+  }
+
+  // CTA text - AI generated
+  if (field === 'cta_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'CTA text should reinforce urgency messaging',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create urgent action-oriented CTA text'
+    };
+  }
+
+  // Urgency and scarcity text - AI generated
+  if (field === 'urgency_text' || field === 'scarcity_text' || field === 'availability_text' || field === 'bonus_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Urgency messaging requires persuasive copywriting',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create compelling urgency and scarcity messaging'
+    };
+  }
+
+  // Countdown mechanics - manual preferred
+  if (field === 'countdown_label' || field === 'countdown_end_date' || field === 'countdown_end_time' || field === 'limited_quantity') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Countdown mechanics must be accurate and realistic',
+        fallback_strategy: 'default',
+        confidence: 0.95
+      },
+      user_guidance: 'Set accurate countdown dates and quantities'
+    };
+  }
+
+  // Trust items - hybrid approach
+  if (field.includes('trust_item') || field === 'trust_items') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Trust indicators should counter urgency skepticism',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      },
+      user_guidance: 'AI will suggest trust indicators; verify accuracy'
+    };
+  }
+
+  // Default for other fields
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Standard countdown CTA content suitable for AI generation',
+      fallback_strategy: 'generate',
+      confidence: 0.8
+    }
+  };
+}
+
+/**
+ * Specific classification for CTAWithFormField fields
+ */
+function classifyCTAWithFormFieldField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  // Headlines and subheadlines - AI generated
+  if (field === 'headline' || field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Form CTA headlines should encourage form completion',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create form-focused headlines'
+    };
+  }
+
+  // CTA text - AI generated
+  if (field === 'cta_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'CTA text should encourage form submission',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create submission-focused CTA text'
+    };
+  }
+
+  // Form fields - manual preferred
+  if (field === 'form_label' || field === 'placeholder_text' || field === 'form_type' || field === 'required_fields') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Form field configuration should match data collection needs',
+        fallback_strategy: 'default',
+        confidence: 0.9
+      },
+      user_guidance: 'Configure form fields based on your data collection requirements'
+    };
+  }
+
+  // Privacy and legal text - manual preferred
+  if (field === 'privacy_text' || field === 'success_message') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Privacy and legal text must comply with regulations',
+        fallback_strategy: 'default',
+        confidence: 0.95
+      },
+      user_guidance: 'Ensure compliance with privacy regulations (GDPR, CCPA, etc.)'
+    };
+  }
+
+  // Benefits - AI generated
+  if (field.includes('benefit') || field === 'benefits') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Benefits should motivate form completion',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create form completion benefits'
+    };
+  }
+
+  // Trust items - hybrid approach
+  if (field.includes('trust_item')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Trust indicators should reduce form abandonment',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      },
+      user_guidance: 'AI will suggest trust indicators; verify accuracy'
+    };
+  }
+
+  // Default for other fields
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Standard form CTA content suitable for AI generation',
+      fallback_strategy: 'generate',
+      confidence: 0.8
+    }
+  };
+}
+
+/**
+ * Specific classification for ValueStackCTA fields
+ */
+function classifyValueStackCTAField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  // Headlines and subheadlines - AI generated
+  if (field === 'headline' || field === 'subheadline' || field === 'final_cta_headline' || field === 'final_cta_description') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Value stack headlines should emphasize comprehensive benefits',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create value-focused headlines'
+    };
+  }
+
+  // CTA text - AI generated
+  if (field === 'cta_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'CTA text should reflect high value proposition',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create value-driven CTA text'
+    };
+  }
+
+  // Value propositions and descriptions - AI generated
+  if (field === 'value_propositions' || field === 'value_descriptions') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Value propositions require persuasive benefit articulation',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will craft compelling value propositions and detailed benefits'
+    };
+  }
+
+  // Guarantee text - hybrid approach
+  if (field === 'guarantee_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Guarantee terms should be accurate and legally sound',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      },
+      user_guidance: 'AI will suggest guarantee language; verify legal accuracy'
+    };
+  }
+
+  // Value icons - manual preferred
+  if (field.includes('value_icon')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Icons should visually represent specific value propositions',
+        fallback_strategy: 'default',
+        confidence: 0.8
+      },
+      user_guidance: 'Choose icons that clearly represent each value proposition'
+    };
+  }
+
+  // Default for other fields
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Standard value stack content suitable for AI generation',
+      fallback_strategy: 'generate',
+      confidence: 0.8
+    }
+  };
+}
+
+/**
+ * Specific classification for TestimonialCTACombo fields
+ */
+function classifyTestimonialCTAComboField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  // Headlines and subheadlines - AI generated
+  if (field === 'headline' || field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Testimonial CTA headlines should leverage social proof',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create social proof-focused headlines'
+    };
+  }
+
+  // CTA text - AI generated
+  if (field === 'cta_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'CTA text should build on testimonial credibility',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create trust-based CTA text'
+    };
+  }
+
+  // Testimonial content - manual preferred
+  if (field === 'testimonial_quote' || field === 'testimonial_author' || field === 'testimonial_title' ||
+      field === 'testimonial_company' || field === 'testimonial_date' || field === 'testimonial_industry') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Testimonial content must be authentic and verifiable',
+        fallback_strategy: 'default',
+        confidence: 0.95
+      },
+      user_guidance: 'Use actual customer testimonials with verified attribution'
+    };
+  }
+
+  // Company logo - manual preferred
+  if (field === 'testimonial_company_logo') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Company logos must be authentic and properly licensed',
+        fallback_strategy: 'skip',
+        confidence: 0.95
+      },
+      user_guidance: 'Upload authentic company logos with proper permissions'
+    };
+  }
+
+  // Case study elements - hybrid approach
+  if (field === 'case_study_tag') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Case study tags should accurately reflect testimonial content',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      },
+      user_guidance: 'AI will suggest case study tags; verify accuracy'
+    };
+  }
+
+  // Social proof metrics - manual preferred
+  if (field === 'customer_count' || field === 'average_rating' || field === 'uptime_percentage') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Social proof metrics must be accurate and verifiable',
+        fallback_strategy: 'default',
+        confidence: 0.95
+      },
+      user_guidance: 'Provide accurate company metrics and statistics'
+    };
+  }
+
+  // Display flags - manual preferred
+  if (field === 'show_social_proof') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Display preferences should be set based on available data',
+        fallback_strategy: 'default',
+        confidence: 0.9
+      },
+      user_guidance: 'Configure based on your available social proof data'
+    };
+  }
+
+  // Default for other fields
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Standard testimonial CTA content suitable for AI generation',
+      fallback_strategy: 'generate',
+      confidence: 0.8
     }
   };
 }
