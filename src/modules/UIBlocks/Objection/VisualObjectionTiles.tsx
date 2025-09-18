@@ -15,7 +15,37 @@ import { LayoutComponentProps } from '@/types/storeTypes';
 interface VisualObjectionTilesContent {
   headline: string;
   subheadline?: string;
-  objection_tiles: string;
+  // Individual tile fields (up to 6 tiles)
+  tile_objection_1: string;
+  tile_response_1: string;
+  tile_label_1?: string;
+  tile_objection_2: string;
+  tile_response_2: string;
+  tile_label_2?: string;
+  tile_objection_3: string;
+  tile_response_3: string;
+  tile_label_3?: string;
+  tile_objection_4: string;
+  tile_response_4: string;
+  tile_label_4?: string;
+  tile_objection_5: string;
+  tile_response_5: string;
+  tile_label_5?: string;
+  tile_objection_6: string;
+  tile_response_6: string;
+  tile_label_6?: string;
+  // Tile icons
+  tile_icon_1?: string;
+  tile_icon_2?: string;
+  tile_icon_3?: string;
+  tile_icon_4?: string;
+  tile_icon_5?: string;
+  tile_icon_6?: string;
+  // Legacy fields for backward compatibility
+  objection_tiles?: string;
+  objection_titles?: string;
+  objection_responses?: string;
+  tile_labels?: string;
 }
 
 // Content schema - defines structure and defaults
@@ -28,9 +58,36 @@ const CONTENT_SCHEMA = {
     type: 'string' as const,
     default: 'Here are the questions we hear most often and why they shouldn\'t hold you back.'
   },
+  // Individual tile fields
+  tile_objection_1: { type: 'string' as const, default: 'Too expensive for small teams' },
+  tile_response_1: { type: 'string' as const, default: 'Actually starts at just $10/month with no hidden fees' },
+  tile_label_1: { type: 'string' as const, default: 'Pricing' },
+  tile_objection_2: { type: 'string' as const, default: 'Takes too long to set up' },
+  tile_response_2: { type: 'string' as const, default: 'Most customers are up and running in under 10 minutes' },
+  tile_label_2: { type: 'string' as const, default: 'Setup' },
+  tile_objection_3: { type: 'string' as const, default: 'Too complex for non-technical users' },
+  tile_response_3: { type: 'string' as const, default: 'Designed with simplicity in mind - no coding required' },
+  tile_label_3: { type: 'string' as const, default: 'Ease of Use' },
+  tile_objection_4: { type: 'string' as const, default: 'Not enough integrations' },
+  tile_response_4: { type: 'string' as const, default: 'Works with 500+ popular tools out of the box' },
+  tile_label_4: { type: 'string' as const, default: 'Integrations' },
+  tile_objection_5: { type: 'string' as const, default: 'Security concerns' },
+  tile_response_5: { type: 'string' as const, default: 'Enterprise-grade security with SOC 2 compliance' },
+  tile_label_5: { type: 'string' as const, default: 'Security' },
+  tile_objection_6: { type: 'string' as const, default: 'Will slow down our workflow' },
+  tile_response_6: { type: 'string' as const, default: 'Actually speeds up processes by 3x on average' },
+  tile_label_6: { type: 'string' as const, default: 'Performance' },
+  // Tile icons
+  tile_icon_1: { type: 'string' as const, default: '💰' },
+  tile_icon_2: { type: 'string' as const, default: '⏰' },
+  tile_icon_3: { type: 'string' as const, default: '🔧' },
+  tile_icon_4: { type: 'string' as const, default: '📊' },
+  tile_icon_5: { type: 'string' as const, default: '🔒' },
+  tile_icon_6: { type: 'string' as const, default: '⚡' },
+  // Legacy fields for backward compatibility
   objection_tiles: {
     type: 'string' as const,
-    default: '💰|"Too expensive for small teams"|Actually starts at just $10/month with no hidden fees|⏰|"Takes too long to set up"|Most customers are up and running in under 10 minutes|🔧|"Too complex for non-technical users"|Designed with simplicity in mind - no coding required|📊|"Not enough integrations"|Works with 500+ popular tools out of the box|🔒|"Security concerns"|Enterprise-grade security with SOC 2 compliance|⚡|"Will slow down our workflow"|Actually speeds up processes by 3x on average'
+    default: '💰|Too expensive for small teams|Actually starts at just $10/month with no hidden fees|⏰|Takes too long to set up|Most customers are up and running in under 10 minutes|🔧|Too complex for non-technical users|Designed with simplicity in mind - no coding required|📊|Not enough integrations|Works with 500+ popular tools out of the box|🔒|Security concerns|Enterprise-grade security with SOC 2 compliance|⚡|Will slow down our workflow|Actually speeds up processes by 3x on average'
   }
 };
 
@@ -51,34 +108,104 @@ export default function VisualObjectionTiles(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
-  // Parse objection tiles from pipe-separated string
-  const objectionTiles = blockContent.objection_tiles
-    ? blockContent.objection_tiles.split('|').reduce((tiles, item, index) => {
+  // Parse objection tiles from both individual and legacy formats
+  const parseObjectionTiles = (content: VisualObjectionTilesContent): Array<{icon: string, objection: string, answer: string, label?: string, index: number}> => {
+    const tiles: Array<{icon: string, objection: string, answer: string, label?: string, index: number}> = [];
+
+    // Check for individual fields first (preferred format)
+    const individualTiles = [
+      { objection: content.tile_objection_1, response: content.tile_response_1, label: content.tile_label_1, icon: content.tile_icon_1 },
+      { objection: content.tile_objection_2, response: content.tile_response_2, label: content.tile_label_2, icon: content.tile_icon_2 },
+      { objection: content.tile_objection_3, response: content.tile_response_3, label: content.tile_label_3, icon: content.tile_icon_3 },
+      { objection: content.tile_objection_4, response: content.tile_response_4, label: content.tile_label_4, icon: content.tile_icon_4 },
+      { objection: content.tile_objection_5, response: content.tile_response_5, label: content.tile_label_5, icon: content.tile_icon_5 },
+      { objection: content.tile_objection_6, response: content.tile_response_6, label: content.tile_label_6, icon: content.tile_icon_6 }
+    ];
+
+    // Process individual fields
+    individualTiles.forEach((tile, index) => {
+      if (tile.objection && tile.objection.trim() && tile.response && tile.response.trim()) {
+        tiles.push({
+          icon: tile.icon || getDefaultTileIcon(tile.objection),
+          objection: tile.objection.trim().replace(/"/g, ''),
+          answer: tile.response.trim(),
+          label: tile.label?.trim(),
+          index
+        });
+      }
+    });
+
+    // Fallback to legacy pipe-separated format if no individual fields
+    if (tiles.length === 0 && content.objection_tiles) {
+      const legacyTiles = content.objection_tiles.split('|').reduce((acc, item, index) => {
         if (index % 3 === 0) {
-          tiles.push({ icon: item.trim(), objection: '', answer: '' });
+          acc.push({ icon: item.trim(), objection: '', answer: '', index: Math.floor(index / 3) });
         } else if (index % 3 === 1) {
-          tiles[tiles.length - 1].objection = item.trim().replace(/"/g, '');
+          acc[acc.length - 1].objection = item.trim().replace(/"/g, '');
         } else {
-          tiles[tiles.length - 1].answer = item.trim();
+          acc[acc.length - 1].answer = item.trim();
         }
-        return tiles;
-      }, [] as Array<{icon: string, objection: string, answer: string}>)
-    : [];
+        return acc;
+      }, [] as Array<{icon: string, objection: string, answer: string, index: number}>);
+
+      tiles.push(...legacyTiles);
+    }
+
+    return tiles;
+  };
+
+  // Helper function to get default tile icon based on content
+  const getDefaultTileIcon = (objection: string) => {
+    const lower = objection.toLowerCase();
+    if (lower.includes('expensive') || lower.includes('cost') || lower.includes('price')) return '💰';
+    if (lower.includes('time') || lower.includes('setup') || lower.includes('install')) return '⏰';
+    if (lower.includes('complex') || lower.includes('difficult') || lower.includes('hard')) return '🔧';
+    if (lower.includes('integration') || lower.includes('connect') || lower.includes('tool')) return '📊';
+    if (lower.includes('security') || lower.includes('safe') || lower.includes('privacy')) return '🔒';
+    if (lower.includes('slow') || lower.includes('speed') || lower.includes('performance')) return '⚡';
+    return '💡';
+  };
+
+  const objectionTiles = parseObjectionTiles(blockContent);
+
+  // Helper function to get next available tile slot
+  const getNextAvailableTileSlot = (content: VisualObjectionTilesContent): number => {
+    const tiles = [
+      content.tile_objection_1,
+      content.tile_objection_2,
+      content.tile_objection_3,
+      content.tile_objection_4,
+      content.tile_objection_5,
+      content.tile_objection_6
+    ];
+
+    for (let i = 0; i < tiles.length; i++) {
+      if (!tiles[i] || tiles[i].trim() === '') {
+        return i + 1;
+      }
+    }
+
+    return -1; // No slots available
+  };
 
   // Helper function to add a new objection tile
   const handleAddObjectionTile = () => {
-    const currentTiles = blockContent.objection_tiles.split('|');
-    const newTileData = ['💡', '"New Objection"', 'Address this concern here'];
-    const updatedTiles = [...currentTiles, ...newTileData].join('|');
-    handleContentUpdate('objection_tiles', updatedTiles);
+    const nextSlot = getNextAvailableTileSlot(blockContent);
+    if (nextSlot > 0) {
+      handleContentUpdate(`tile_objection_${nextSlot}` as keyof VisualObjectionTilesContent, 'New objection');
+      handleContentUpdate(`tile_response_${nextSlot}` as keyof VisualObjectionTilesContent, 'Address this concern with a clear, concise response');
+      handleContentUpdate(`tile_icon_${nextSlot}` as keyof VisualObjectionTilesContent, '💡');
+      handleContentUpdate(`tile_label_${nextSlot}` as keyof VisualObjectionTilesContent, 'General');
+    }
   };
 
   // Helper function to remove an objection tile
   const handleRemoveObjectionTile = (indexToRemove: number) => {
-    const tiles = blockContent.objection_tiles.split('|');
-    const startIndex = indexToRemove * 3;
-    tiles.splice(startIndex, 3);
-    handleContentUpdate('objection_tiles', tiles.join('|'));
+    const fieldNum = indexToRemove + 1;
+    handleContentUpdate(`tile_objection_${fieldNum}` as keyof VisualObjectionTilesContent, '');
+    handleContentUpdate(`tile_response_${fieldNum}` as keyof VisualObjectionTilesContent, '');
+    handleContentUpdate(`tile_icon_${fieldNum}` as keyof VisualObjectionTilesContent, '');
+    handleContentUpdate(`tile_label_${fieldNum}` as keyof VisualObjectionTilesContent, '');
   };
 
   return (
@@ -155,7 +282,7 @@ export default function VisualObjectionTiles(props: LayoutComponentProps) {
                     mode={mode}
                     value={tile.icon}
                     onEdit={(value) => {
-                      const updatedTiles = blockContent.objection_tiles.split('|');
+                      const updatedTiles = (blockContent.objection_tiles || '').split('|');
                       updatedTiles[index * 3] = value;
                       handleContentUpdate('objection_tiles', updatedTiles.join('|'));
                     }}
@@ -177,7 +304,7 @@ export default function VisualObjectionTiles(props: LayoutComponentProps) {
                   mode={mode}
                   value={tile.objection || ''}
                   onEdit={(value) => {
-                    const updatedTiles = blockContent.objection_tiles.split('|');
+                    const updatedTiles = (blockContent.objection_tiles || '').split('|');
                     updatedTiles[index * 3 + 1] = `"${value}"`;
                     handleContentUpdate('objection_tiles', updatedTiles.join('|'));
                   }}
@@ -198,7 +325,7 @@ export default function VisualObjectionTiles(props: LayoutComponentProps) {
                   mode={mode}
                   value={tile.answer || ''}
                   onEdit={(value) => {
-                    const updatedTiles = blockContent.objection_tiles.split('|');
+                    const updatedTiles = (blockContent.objection_tiles || '').split('|');
                     updatedTiles[index * 3 + 2] = value;
                     handleContentUpdate('objection_tiles', updatedTiles.join('|'));
                   }}

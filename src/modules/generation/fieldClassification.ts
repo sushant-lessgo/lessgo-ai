@@ -64,6 +64,39 @@ export function classifyField(fieldName: string, sectionType?: string): Classifi
     return classifyChatBubbleFAQField(fieldName);
   }
 
+  // Objection Section Classifications
+  if (sectionType === 'ObjectionAccordion') {
+    return classifyObjectionAccordionField(fieldName);
+  }
+
+  if (sectionType === 'MythVsRealityGrid') {
+    return classifyMythVsRealityGridField(fieldName);
+  }
+
+  if (sectionType === 'QuoteBackedAnswers') {
+    return classifyQuoteBackedAnswersField(fieldName);
+  }
+
+  if (sectionType === 'SkepticToBelieverSteps') {
+    return classifySkepticToBelieverStepsField(fieldName);
+  }
+
+  if (sectionType === 'VisualObjectionTiles') {
+    return classifyVisualObjectionTilesField(fieldName);
+  }
+
+  if (sectionType === 'ProblemToReframeBlocks') {
+    return classifyProblemToReframeBlocksField(fieldName);
+  }
+
+  if (sectionType === 'BoldGuaranteePanel') {
+    return classifyBoldGuaranteePanelField(fieldName);
+  }
+
+  if (sectionType === 'ObjectionCarousel') {
+    return classifyObjectionCarouselField(fieldName);
+  }
+
   if (sectionType === 'BeforeAfterSlider') {
     return classifyBeforeAfterSliderField(fieldName);
   }
@@ -4484,5 +4517,609 @@ function classifyAnimatedProcessLineField(fieldName: string): ClassificationResu
       confidence: 0.7
     },
     user_guidance: 'Please review this field as it may need manual adjustment'
+  };
+}
+
+/**
+ * Specific classification for ObjectionAccordion fields
+ */
+function classifyObjectionAccordionField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline' || field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Section headers should be compelling and audience-focused',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create persuasive headlines for objection handling'
+    };
+  }
+
+  if (field.startsWith('objection_') && (field.includes('_1') || field.includes('_2') || field.includes('_3'))) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Core objections should be tailored to target audience and market sophistication',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will generate market-specific objections based on audience analysis'
+    };
+  }
+
+  if (field.startsWith('response_') && (field.includes('_1') || field.includes('_2') || field.includes('_3'))) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Responses require persuasive copywriting and trust-building language',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create compelling responses that build trust and address concerns'
+    };
+  }
+
+  if (field.startsWith('objection_') && !field.includes('icon')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Additional objections benefit from market research and audience insights',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will generate relevant objections for your specific market'
+    };
+  }
+
+  if (field.startsWith('response_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'All responses need consistent tone and persuasive messaging',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will maintain consistent persuasive tone across all responses'
+    };
+  }
+
+  if (field.includes('icon') || field === 'help_text' || field === 'trust_icon') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Visual elements and micro-copy often need brand-specific customization',
+        fallback_strategy: 'default',
+        confidence: 0.8
+      },
+      user_guidance: 'Consider customizing icons and helper text to match your brand'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown objection accordion field',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    }
+  };
+}
+
+/**
+ * Specific classification for MythVsRealityGrid fields
+ */
+function classifyMythVsRealityGridField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline' || field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Headlines should be attention-grabbing and set up the myth-busting framework',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create compelling headlines that frame myths vs reality'
+    };
+  }
+
+  if (field.startsWith('myth_') && !field.includes('icon')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Myths should reflect actual market misconceptions and competitor positioning',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will identify common market myths based on industry analysis'
+    };
+  }
+
+  if (field.startsWith('reality_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Reality statements need compelling evidence and benefit-focused messaging',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create evidence-based reality statements that build credibility'
+    };
+  }
+
+  if (field.includes('icon')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Icons should align with brand visual identity',
+        fallback_strategy: 'default',
+        confidence: 0.8
+      },
+      user_guidance: 'Consider using brand-specific icons for myths and reality indicators'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown myth vs reality field',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    }
+  };
+}
+
+/**
+ * Specific classification for QuoteBackedAnswers fields
+ */
+function classifyQuoteBackedAnswersField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline' || field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Headers should emphasize authority and credibility',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create authority-focused headlines for expert validation'
+    };
+  }
+
+  if (field.startsWith('objection_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Objections should reflect sophisticated buyer concerns',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will generate sophisticated objections that experts can address'
+    };
+  }
+
+  if (field.startsWith('quote_response_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Expert quotes need authenticity but can be AI-enhanced for clarity',
+        fallback_strategy: 'generate',
+        confidence: 0.75
+      },
+      user_guidance: 'AI will create realistic expert quotes - consider replacing with real testimonials'
+    };
+  }
+
+  if (field.startsWith('quote_attribution_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Attributions should be realistic but can be AI-generated for prototyping',
+        fallback_strategy: 'generate',
+        confidence: 0.7
+      },
+      user_guidance: 'AI will create realistic expert profiles - replace with actual contacts when possible'
+    };
+  }
+
+  if (field.includes('credentials') || field.includes('trust_') || field.includes('verification')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Trust indicators and credentials should be verifiable and brand-specific',
+        fallback_strategy: 'default',
+        confidence: 0.8
+      },
+      user_guidance: 'Use actual credentials and trust indicators specific to your industry'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown quote-backed answers field',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    }
+  };
+}
+
+/**
+ * Specific classification for SkepticToBelieverSteps fields
+ */
+function classifySkepticToBelieverStepsField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline' || field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Headers should create narrative tension and emotional connection',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create compelling narrative headlines for the conversion journey'
+    };
+  }
+
+  if (field.startsWith('step_name_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Step names should create relatable personas and scenarios',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will create relatable customer personas and scenarios'
+    };
+  }
+
+  if (field.startsWith('step_quote_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Quotes should reflect authentic skepticism and transformation',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will create authentic-sounding customer quotes for each transformation step'
+    };
+  }
+
+  if (field.startsWith('step_result_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Results should be specific, measurable, and compelling',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create specific, measurable results that demonstrate transformation'
+    };
+  }
+
+  if (field.includes('icon') || field === 'objections_summary') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Visual elements and summaries benefit from brand customization',
+        fallback_strategy: 'default',
+        confidence: 0.8
+      },
+      user_guidance: 'Consider customizing icons and summary text for your specific brand narrative'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown skeptic to believer steps field',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    }
+  };
+}
+
+/**
+ * Specific classification for VisualObjectionTiles fields
+ */
+function classifyVisualObjectionTilesField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline' || field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Headers should be visually-focused and create scanning appeal',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create scan-friendly headlines optimized for visual presentation'
+    };
+  }
+
+  if (field.startsWith('tile_objection_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Tile objections should be concise and visually scannable',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create concise, scannable objections perfect for tile format'
+    };
+  }
+
+  if (field.startsWith('tile_response_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Tile responses need concise yet persuasive messaging',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create punchy responses that work well in visual tile format'
+    };
+  }
+
+  if (field.startsWith('tile_label_') || field.includes('icon')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Visual elements and labels should align with design system',
+        fallback_strategy: 'default',
+        confidence: 0.8
+      },
+      user_guidance: 'Consider customizing tile labels and icons for visual consistency'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown visual objection tiles field',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    }
+  };
+}
+
+/**
+ * Specific classification for ProblemToReframeBlocks fields
+ */
+function classifyProblemToReframeBlocksField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline' || field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Headers should set up the problem-reframing narrative effectively',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create compelling headers that introduce problem reframing'
+    };
+  }
+
+  if (field.startsWith('problem_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Problems should reflect genuine customer pain points and limiting beliefs',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will identify authentic customer problems and limiting beliefs'
+    };
+  }
+
+  if (field.startsWith('reframe_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Reframes require strategic thinking and perspective-shifting language',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create powerful reframes that shift customer perspective'
+    };
+  }
+
+  if (field.includes('icon') || field === 'transition_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Visual transitions and micro-copy should align with brand voice',
+        fallback_strategy: 'default',
+        confidence: 0.8
+      },
+      user_guidance: 'Consider customizing transition elements for your specific brand voice'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown problem to reframe blocks field',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    }
+  };
+}
+
+/**
+ * Specific classification for BoldGuaranteePanel fields
+ */
+function classifyBoldGuaranteePanelField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline' || field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Headers should create confidence and reduce purchase anxiety',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create confidence-building headlines for guarantee section'
+    };
+  }
+
+  if (field.includes('guarantee_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Guarantee language should be legally sound but compelling',
+        fallback_strategy: 'generate',
+        confidence: 0.75
+      },
+      user_guidance: 'AI will draft guarantee language - please review with legal team before publishing'
+    };
+  }
+
+  if (field.includes('risk_reversal') || field.includes('refund_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Risk reversal terms should reflect actual business policies',
+        fallback_strategy: 'default',
+        confidence: 0.9
+      },
+      user_guidance: 'Ensure risk reversal terms match your actual refund and guarantee policies'
+    };
+  }
+
+  if (field.includes('trust_') || field.includes('security_') || field.includes('backing')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Trust elements should be verifiable and company-specific',
+        fallback_strategy: 'default',
+        confidence: 0.85
+      },
+      user_guidance: 'Use actual trust badges and security credentials specific to your business'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown guarantee panel field',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    }
+  };
+}
+
+/**
+ * Specific classification for ObjectionCarousel fields
+ */
+function classifyObjectionCarouselField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline' || field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Headers should create engagement and carousel navigation appeal',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create engaging headlines that encourage carousel interaction'
+    };
+  }
+
+  if (field.startsWith('slide_objection_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Carousel objections should build progressive understanding',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create objections that flow logically through carousel progression'
+    };
+  }
+
+  if (field.startsWith('slide_response_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Carousel responses should maintain engagement across slides',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create responses optimized for carousel presentation format'
+    };
+  }
+
+  if (field.includes('carousel_') || field.includes('slide_') || field.includes('auto_') || field.includes('duration')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Carousel behavior settings should match user experience goals',
+        fallback_strategy: 'default',
+        confidence: 0.8
+      },
+      user_guidance: 'Configure carousel settings based on your audience engagement preferences'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown objection carousel field',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    }
   };
 }

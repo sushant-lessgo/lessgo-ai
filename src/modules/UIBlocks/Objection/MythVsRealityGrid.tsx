@@ -16,27 +16,57 @@ import { LayoutComponentProps } from '@/types/storeTypes';
 interface MythVsRealityGridContent {
   headline: string;
   subheadline?: string;
-  myth_reality_pairs: string;
+  // Individual myth/reality fields (up to 6 pairs)
+  myth_1: string;
+  reality_1: string;
+  myth_2: string;
+  reality_2: string;
+  myth_3: string;
+  reality_3: string;
+  myth_4: string;
+  reality_4: string;
+  myth_5: string;
+  reality_5: string;
+  myth_6: string;
+  reality_6: string;
+  // Global icons
   myth_icon?: string;
   reality_icon?: string;
+  // Legacy field for backward compatibility
+  myth_reality_pairs?: string;
 }
 
 // Content schema - defines structure and defaults
 const CONTENT_SCHEMA = {
-  headline: { 
-    type: 'string' as const, 
-    default: 'Separating Myth from Reality' 
+  headline: {
+    type: 'string' as const,
+    default: 'Separating Myth from Reality'
   },
-  subheadline: { 
-    type: 'string' as const, 
-    default: 'Let\'s address the common misconceptions and show you what\'s actually true.' 
+  subheadline: {
+    type: 'string' as const,
+    default: 'Let\'s address the common misconceptions and show you what\'s actually true.'
   },
-  myth_reality_pairs: { 
-    type: 'string' as const, 
-    default: 'Myth: This is too complex for small teams|Reality: Our platform is designed for teams of any size, with setup taking less than 5 minutes|Myth: AI tools replace human creativity|Reality: Our AI enhances your creativity by handling repetitive tasks so you can focus on strategy|Myth: Implementation takes months|Reality: Most customers see results within the first week|Myth: It\'s just another analytics tool|Reality: We provide actionable insights with automated recommendations, not just data' 
-  },
+  // Individual myth/reality pairs
+  myth_1: { type: 'string' as const, default: 'This is too complex for small teams' },
+  reality_1: { type: 'string' as const, default: 'Our platform is designed for teams of any size, with setup taking less than 5 minutes' },
+  myth_2: { type: 'string' as const, default: 'AI tools replace human creativity' },
+  reality_2: { type: 'string' as const, default: 'Our AI enhances your creativity by handling repetitive tasks so you can focus on strategy' },
+  myth_3: { type: 'string' as const, default: 'Implementation takes months' },
+  reality_3: { type: 'string' as const, default: 'Most customers see results within the first week' },
+  myth_4: { type: 'string' as const, default: 'It\'s just another analytics tool' },
+  reality_4: { type: 'string' as const, default: 'We provide actionable insights with automated recommendations, not just data' },
+  myth_5: { type: 'string' as const, default: 'You need technical expertise' },
+  reality_5: { type: 'string' as const, default: 'Our drag-and-drop interface requires zero coding knowledge' },
+  myth_6: { type: 'string' as const, default: 'It won\'t integrate with our existing tools' },
+  reality_6: { type: 'string' as const, default: 'We connect seamlessly with 500+ popular business tools and platforms' },
+  // Global icons
   myth_icon: { type: 'string' as const, default: '❌' },
-  reality_icon: { type: 'string' as const, default: '✅' }
+  reality_icon: { type: 'string' as const, default: '✅' },
+  // Legacy field for backward compatibility
+  myth_reality_pairs: {
+    type: 'string' as const,
+    default: 'Myth: This is too complex for small teams|Reality: Our platform is designed for teams of any size, with setup taking less than 5 minutes|Myth: AI tools replace human creativity|Reality: Our AI enhances your creativity by handling repetitive tasks so you can focus on strategy|Myth: Implementation takes months|Reality: Most customers see results within the first week|Myth: It\'s just another analytics tool|Reality: We provide actionable insights with automated recommendations, not just data'
+  }
 };
 
 export default function MythVsRealityGrid(props: LayoutComponentProps) {
@@ -61,55 +91,134 @@ export default function MythVsRealityGrid(props: LayoutComponentProps) {
   const bodyLgStyle = getTypographyStyle('body-lg');
   const bodyStyle = getTypographyStyle('body');
 
-  // Parse myth/reality pairs from pipe-separated string
-  const parseMythRealityPairs = (pairString: string): Array<{myth: string, reality: string}> => {
-    if (!pairString) return [];
-    return pairString.split('|').reduce((pairs, item, index) => {
-      if (index % 2 === 0) {
-        pairs.push({ myth: item.replace('Myth:', '').trim(), reality: '' });
-      } else {
-        pairs[pairs.length - 1].reality = item.replace('Reality:', '').trim();
+  // Parse myth/reality pairs from both individual and legacy formats
+  const parseMythRealityPairs = (content: MythVsRealityGridContent): Array<{myth: string, reality: string, index: number}> => {
+    const pairs: Array<{myth: string, reality: string, index: number}> = [];
+
+    // Check for individual fields first (preferred format)
+    const individualPairs = [
+      { myth: content.myth_1, reality: content.reality_1 },
+      { myth: content.myth_2, reality: content.reality_2 },
+      { myth: content.myth_3, reality: content.reality_3 },
+      { myth: content.myth_4, reality: content.reality_4 },
+      { myth: content.myth_5, reality: content.reality_5 },
+      { myth: content.myth_6, reality: content.reality_6 }
+    ];
+
+    // Process individual fields
+    individualPairs.forEach((pair, index) => {
+      if (pair.myth && pair.myth.trim() && pair.reality && pair.reality.trim()) {
+        pairs.push({
+          myth: pair.myth.trim(),
+          reality: pair.reality.trim(),
+          index
+        });
       }
-      return pairs;
-    }, [] as Array<{myth: string, reality: string}>);
+    });
+
+    // Fallback to legacy pipe-separated format if no individual fields
+    if (pairs.length === 0 && content.myth_reality_pairs) {
+      const legacyPairs = content.myth_reality_pairs.split('|').reduce((acc, item, index) => {
+        if (index % 2 === 0) {
+          acc.push({ myth: item.replace('Myth:', '').trim(), reality: '', index: Math.floor(index / 2) });
+        } else {
+          acc[acc.length - 1].reality = item.replace('Reality:', '').trim();
+        }
+        return acc;
+      }, [] as Array<{myth: string, reality: string, index: number}>);
+
+      pairs.push(...legacyPairs);
+    }
+
+    return pairs;
   };
 
-  const mythRealityPairs = parseMythRealityPairs(blockContent.myth_reality_pairs);
+  const mythRealityPairs = parseMythRealityPairs(blockContent);
+
+  // Helper function to get next available pair slot
+  const getNextAvailablePairSlot = (content: MythVsRealityGridContent): number => {
+    const pairs = [
+      { myth: content.myth_1, reality: content.reality_1 },
+      { myth: content.myth_2, reality: content.reality_2 },
+      { myth: content.myth_3, reality: content.reality_3 },
+      { myth: content.myth_4, reality: content.reality_4 },
+      { myth: content.myth_5, reality: content.reality_5 },
+      { myth: content.myth_6, reality: content.reality_6 }
+    ];
+
+    for (let i = 0; i < pairs.length; i++) {
+      if (!pairs[i].myth || pairs[i].myth.trim() === '') {
+        return i + 1;
+      }
+    }
+
+    return -1; // No slots available
+  };
+
+  // Helper function to shift pairs down when removing one
+  const shiftPairsDown = (content: MythVsRealityGridContent, removedIndex: number): Partial<MythVsRealityGridContent> => {
+    const updates: Partial<MythVsRealityGridContent> = {};
+
+    // Get all pairs after filtering out empty ones
+    const allPairs = [
+      { myth: content.myth_1, reality: content.reality_1 },
+      { myth: content.myth_2, reality: content.reality_2 },
+      { myth: content.myth_3, reality: content.reality_3 },
+      { myth: content.myth_4, reality: content.reality_4 },
+      { myth: content.myth_5, reality: content.reality_5 },
+      { myth: content.myth_6, reality: content.reality_6 }
+    ];
+
+    // Filter out the removed item and empty pairs
+    const validPairs = allPairs
+      .map((pair, index) => ({ ...pair, originalIndex: index }))
+      .filter((pair, index) => index !== removedIndex && pair.myth && pair.myth.trim())
+      .slice(0, 5); // Limit to 5 since one is being removed
+
+    // Clear all fields first
+    for (let i = 1; i <= 6; i++) {
+      updates[`myth_${i}` as keyof MythVsRealityGridContent] = '';
+      updates[`reality_${i}` as keyof MythVsRealityGridContent] = '';
+    }
+
+    // Reassign remaining pairs
+    validPairs.forEach((pair, newIndex) => {
+      const fieldNum = newIndex + 1;
+      updates[`myth_${fieldNum}` as keyof MythVsRealityGridContent] = pair.myth || '';
+      updates[`reality_${fieldNum}` as keyof MythVsRealityGridContent] = pair.reality || '';
+    });
+
+    return updates;
+  };
 
   // Helper function to add a new myth/reality pair
   const addMythRealityPair = () => {
-    const titles = blockContent.myth_reality_pairs.split('|').filter(t => t.trim());
-    titles.push('Myth: New myth to address', 'Reality: The actual truth about this topic');
-    handleContentUpdate('myth_reality_pairs', titles.join('|'));
+    const nextSlot = getNextAvailablePairSlot(blockContent);
+    if (nextSlot > 0) {
+      handleContentUpdate(`myth_${nextSlot}` as keyof MythVsRealityGridContent, 'New myth to address');
+      handleContentUpdate(`reality_${nextSlot}` as keyof MythVsRealityGridContent, 'The actual truth about this topic');
+    }
   };
 
   // Helper function to remove a myth/reality pair
   const removeMythRealityPair = (indexToRemove: number) => {
-    const pairs = parseMythRealityPairs(blockContent.myth_reality_pairs);
-    if (pairs.length <= 1) return; // Don't allow removing the last pair
+    const updates = shiftPairsDown(blockContent, indexToRemove);
 
-    pairs.splice(indexToRemove, 1);
-    const newPairString = pairs.map(pair => `Myth: ${pair.myth}|Reality: ${pair.reality}`).join('|');
-    handleContentUpdate('myth_reality_pairs', newPairString);
+    // Apply all updates at once
+    Object.entries(updates).forEach(([key, value]) => {
+      handleContentUpdate(key as keyof MythVsRealityGridContent, value as string);
+    });
   };
 
   // Helper function to update individual myth/reality text
   const updateMythAtIndex = (index: number, value: string) => {
-    const pairs = parseMythRealityPairs(blockContent.myth_reality_pairs);
-    if (pairs[index]) {
-      pairs[index].myth = value;
-      const newPairString = pairs.map(pair => `Myth: ${pair.myth}|Reality: ${pair.reality}`).join('|');
-      handleContentUpdate('myth_reality_pairs', newPairString);
-    }
+    const fieldName = `myth_${index + 1}` as keyof MythVsRealityGridContent;
+    handleContentUpdate(fieldName, value);
   };
 
   const updateRealityAtIndex = (index: number, value: string) => {
-    const pairs = parseMythRealityPairs(blockContent.myth_reality_pairs);
-    if (pairs[index]) {
-      pairs[index].reality = value;
-      const newPairString = pairs.map(pair => `Myth: ${pair.myth}|Reality: ${pair.reality}`).join('|');
-      handleContentUpdate('myth_reality_pairs', newPairString);
-    }
+    const fieldName = `reality_${index + 1}` as keyof MythVsRealityGridContent;
+    handleContentUpdate(fieldName, value);
   };
 
   return (
@@ -289,7 +398,19 @@ export const componentMeta = {
   contentFields: [
     { key: 'headline', label: 'Main Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
-    { key: 'myth_reality_pairs', label: 'Myth vs Reality Pairs', type: 'dynamic-cards', required: true }
+    // Individual myth/reality pairs
+    { key: 'myth_1', label: 'First Myth', type: 'text', required: true },
+    { key: 'reality_1', label: 'First Reality', type: 'textarea', required: true },
+    { key: 'myth_2', label: 'Second Myth', type: 'text', required: true },
+    { key: 'reality_2', label: 'Second Reality', type: 'textarea', required: true },
+    { key: 'myth_3', label: 'Third Myth', type: 'text', required: false },
+    { key: 'reality_3', label: 'Third Reality', type: 'textarea', required: false },
+    { key: 'myth_4', label: 'Fourth Myth', type: 'text', required: false },
+    { key: 'reality_4', label: 'Fourth Reality', type: 'textarea', required: false },
+    { key: 'myth_5', label: 'Fifth Myth', type: 'text', required: false },
+    { key: 'reality_5', label: 'Fifth Reality', type: 'textarea', required: false },
+    { key: 'myth_6', label: 'Sixth Myth', type: 'text', required: false },
+    { key: 'reality_6', label: 'Sixth Reality', type: 'textarea', required: false }
   ],
 
   features: [

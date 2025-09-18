@@ -529,6 +529,71 @@ function processSectionContent(sectionId: string, content: SectionContent): {
     return result;
   }
 
+  // Special handling for Objection sections
+  if (sectionId.includes('ObjectionAccordion')) {
+    const processedObjection = processObjectionAccordionContent(sectionId, content);
+    result.content = processedObjection.content;
+    result.warnings = processedObjection.warnings;
+    result.hasIssues = processedObjection.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('MythVsRealityGrid')) {
+    const processedMyth = processMythVsRealityGridContent(sectionId, content);
+    result.content = processedMyth.content;
+    result.warnings = processedMyth.warnings;
+    result.hasIssues = processedMyth.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('QuoteBackedAnswers')) {
+    const processedQuoteBacked = processQuoteBackedAnswersContent(sectionId, content);
+    result.content = processedQuoteBacked.content;
+    result.warnings = processedQuoteBacked.warnings;
+    result.hasIssues = processedQuoteBacked.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('SkepticToBelieverSteps')) {
+    const processedSkeptic = processSkepticToBelieverStepsContent(sectionId, content);
+    result.content = processedSkeptic.content;
+    result.warnings = processedSkeptic.warnings;
+    result.hasIssues = processedSkeptic.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('VisualObjectionTiles')) {
+    const processedTiles = processVisualObjectionTilesContent(sectionId, content);
+    result.content = processedTiles.content;
+    result.warnings = processedTiles.warnings;
+    result.hasIssues = processedTiles.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('ProblemToReframeBlocks')) {
+    const processedReframe = processProblemToReframeBlocksContent(sectionId, content);
+    result.content = processedReframe.content;
+    result.warnings = processedReframe.warnings;
+    result.hasIssues = processedReframe.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('BoldGuaranteePanel')) {
+    const processedGuarantee = processBoldGuaranteePanelContent(sectionId, content);
+    result.content = processedGuarantee.content;
+    result.warnings = processedGuarantee.warnings;
+    result.hasIssues = processedGuarantee.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('ObjectionCarousel')) {
+    const processedCarousel = processObjectionCarouselContent(sectionId, content);
+    result.content = processedCarousel.content;
+    result.warnings = processedCarousel.warnings;
+    result.hasIssues = processedCarousel.hasIssues;
+    return result;
+  }
+
   Object.entries(content).forEach(([elementKey, elementValue]) => {
     const processedElement = processElement(sectionId, elementKey, elementValue)
 
@@ -3490,6 +3555,448 @@ function processAnimatedProcessLineContent(sectionId: string, content: SectionCo
     if (titles.length > 8) {
       result.warnings.push(`${sectionId}: AnimatedProcessLine works best with 3-8 steps for animation clarity, found ${titles.length}`);
     }
+  }
+
+  return result;
+}
+
+/**
+ * Special processing for ObjectionAccordion sections
+ */
+function processObjectionAccordionContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: { ...content } as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Check for individual objection fields (preferred format)
+  const individualFields = ['objection_1', 'objection_2', 'objection_3', 'objection_4', 'objection_5', 'objection_6'];
+  const responseFields = ['response_1', 'response_2', 'response_3', 'response_4', 'response_5', 'response_6'];
+
+  let hasIndividualFields = individualFields.some(field => content[field]);
+  let hasResponseFields = responseFields.some(field => content[field]);
+
+  if (hasIndividualFields || hasResponseFields) {
+    // Validate individual field pairs
+    for (let i = 1; i <= 6; i++) {
+      const objectionField = `objection_${i}`;
+      const responseField = `response_${i}`;
+
+      if (content[objectionField] && !content[responseField]) {
+        result.warnings.push(`${sectionId}: Found ${objectionField} but missing ${responseField}`);
+        result.hasIssues = true;
+      }
+      if (content[responseField] && !content[objectionField]) {
+        result.warnings.push(`${sectionId}: Found ${responseField} but missing ${objectionField}`);
+        result.hasIssues = true;
+      }
+    }
+
+    // Ensure at least 3 objection/response pairs for meaningful conversion
+    const validPairs = individualFields.filter((field, index) =>
+      content[field] && content[responseFields[index]]
+    ).length;
+
+    if (validPairs < 2) {
+      result.warnings.push(`${sectionId}: ObjectionAccordion should have at least 2 objection/response pairs, found ${validPairs}`);
+      result.hasIssues = true;
+    }
+  }
+
+  // Legacy format support
+  if (content.objection_titles && content.objection_responses) {
+    const titles = String(content.objection_titles).split('|').filter(t => t.trim());
+    const responses = String(content.objection_responses).split('|').filter(r => r.trim());
+
+    if (titles.length !== responses.length) {
+      result.warnings.push(`${sectionId}: Objection titles (${titles.length}) and responses (${responses.length}) count mismatch`);
+      result.hasIssues = true;
+    }
+
+    if (titles.length < 2) {
+      result.warnings.push(`${sectionId}: ObjectionAccordion should have at least 2 objections for credibility, found ${titles.length}`);
+      result.hasIssues = true;
+    }
+
+    if (titles.length > 6) {
+      result.warnings.push(`${sectionId}: ObjectionAccordion with ${titles.length} objections may be overwhelming - consider 3-6 key objections`);
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Special processing for MythVsRealityGrid sections
+ */
+function processMythVsRealityGridContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: { ...content } as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Check for individual myth/reality pairs (preferred format)
+  const mythFields = ['myth_1', 'myth_2', 'myth_3', 'myth_4', 'myth_5', 'myth_6'];
+  const realityFields = ['reality_1', 'reality_2', 'reality_3', 'reality_4', 'reality_5', 'reality_6'];
+
+  let hasIndividualFields = mythFields.some(field => content[field]) || realityFields.some(field => content[field]);
+
+  if (hasIndividualFields) {
+    // Validate individual field pairs
+    for (let i = 1; i <= 6; i++) {
+      const mythField = `myth_${i}`;
+      const realityField = `reality_${i}`;
+
+      if (content[mythField] && !content[realityField]) {
+        result.warnings.push(`${sectionId}: Found ${mythField} but missing ${realityField}`);
+        result.hasIssues = true;
+      }
+      if (content[realityField] && !content[mythField]) {
+        result.warnings.push(`${sectionId}: Found ${realityField} but missing ${mythField}`);
+        result.hasIssues = true;
+      }
+    }
+
+    // Ensure at least 2 myth/reality pairs for effective comparison
+    const validPairs = mythFields.filter((field, index) =>
+      content[field] && content[realityFields[index]]
+    ).length;
+
+    if (validPairs < 2) {
+      result.warnings.push(`${sectionId}: MythVsRealityGrid should have at least 2 myth/reality pairs, found ${validPairs}`);
+      result.hasIssues = true;
+    }
+  }
+
+  // Legacy format support
+  if (content.myth_reality_pairs) {
+    const pairs = String(content.myth_reality_pairs).split('|');
+    if (pairs.length % 2 !== 0) {
+      result.warnings.push(`${sectionId}: myth_reality_pairs should have even number of items (myth|reality pairs), found ${pairs.length}`);
+      result.hasIssues = true;
+    }
+
+    const pairCount = Math.floor(pairs.length / 2);
+    if (pairCount < 2) {
+      result.warnings.push(`${sectionId}: MythVsRealityGrid should have at least 2 pairs for effective comparison, found ${pairCount}`);
+      result.hasIssues = true;
+    }
+
+    if (pairCount > 6) {
+      result.warnings.push(`${sectionId}: ${pairCount} myth/reality pairs may be overwhelming - consider 2-4 key contrasts`);
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Special processing for QuoteBackedAnswers sections
+ */
+function processQuoteBackedAnswersContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: { ...content } as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Check for individual triplet fields (preferred format)
+  let validTriplets = 0;
+  for (let i = 1; i <= 6; i++) {
+    const objectionField = `objection_${i}`;
+    const quoteField = `quote_response_${i}`;
+    const attributionField = `quote_attribution_${i}`;
+
+    const hasObjection = content[objectionField];
+    const hasQuote = content[quoteField];
+    const hasAttribution = content[attributionField];
+
+    if (hasObjection || hasQuote || hasAttribution) {
+      if (!hasObjection) {
+        result.warnings.push(`${sectionId}: Missing ${objectionField} for quote ${i}`);
+        result.hasIssues = true;
+      }
+      if (!hasQuote) {
+        result.warnings.push(`${sectionId}: Missing ${quoteField} for quote ${i}`);
+        result.hasIssues = true;
+      }
+      if (!hasAttribution) {
+        result.warnings.push(`${sectionId}: Missing ${attributionField} for quote ${i} - attribution is crucial for credibility`);
+        result.hasIssues = true;
+      }
+
+      if (hasObjection && hasQuote && hasAttribution) {
+        validTriplets++;
+      }
+    }
+  }
+
+  if (validTriplets > 0 && validTriplets < 2) {
+    result.warnings.push(`${sectionId}: QuoteBackedAnswers should have at least 2 complete quote triplets for authority, found ${validTriplets}`);
+    result.hasIssues = true;
+  }
+
+  return result;
+}
+
+/**
+ * Special processing for SkepticToBelieverSteps sections
+ */
+function processSkepticToBelieverStepsContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: { ...content } as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Check for individual step fields (preferred format)
+  let validSteps = 0;
+  for (let i = 1; i <= 5; i++) {
+    const nameField = `step_name_${i}`;
+    const quoteField = `step_quote_${i}`;
+    const resultField = `step_result_${i}`;
+
+    const hasName = content[nameField];
+    const hasQuote = content[quoteField];
+    const hasResult = content[resultField];
+
+    if (hasName || hasQuote || hasResult) {
+      if (!hasName) {
+        result.warnings.push(`${sectionId}: Missing ${nameField} for step ${i}`);
+        result.hasIssues = true;
+      }
+      if (!hasQuote) {
+        result.warnings.push(`${sectionId}: Missing ${quoteField} for step ${i}`);
+        result.hasIssues = true;
+      }
+      if (!hasResult) {
+        result.warnings.push(`${sectionId}: Missing ${resultField} for step ${i}`);
+        result.hasIssues = true;
+      }
+
+      if (hasName && hasQuote && hasResult) {
+        validSteps++;
+      }
+    }
+  }
+
+  if (validSteps > 0 && validSteps < 3) {
+    result.warnings.push(`${sectionId}: SkepticToBelieverSteps should show a clear progression with at least 3 steps, found ${validSteps}`);
+    result.hasIssues = true;
+  }
+
+  // Legacy format support
+  if (content.conversion_steps) {
+    const steps = String(content.conversion_steps).split('|');
+    if (steps.length % 3 !== 0) {
+      result.warnings.push(`${sectionId}: conversion_steps should have groups of 3 (name|quote|result), found ${steps.length} items`);
+      result.hasIssues = true;
+    }
+
+    const stepCount = Math.floor(steps.length / 3);
+    if (stepCount < 3) {
+      result.warnings.push(`${sectionId}: SkepticToBelieverSteps needs at least 3 steps for credible progression, found ${stepCount}`);
+      result.hasIssues = true;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Special processing for VisualObjectionTiles sections
+ */
+function processVisualObjectionTilesContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: { ...content } as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Check for individual tile fields (preferred format)
+  let validTiles = 0;
+  for (let i = 1; i <= 6; i++) {
+    const objectionField = `tile_objection_${i}`;
+    const responseField = `tile_response_${i}`;
+
+    const hasObjection = content[objectionField];
+    const hasResponse = content[responseField];
+
+    if (hasObjection || hasResponse) {
+      if (!hasObjection) {
+        result.warnings.push(`${sectionId}: Missing ${objectionField} for tile ${i}`);
+        result.hasIssues = true;
+      }
+      if (!hasResponse) {
+        result.warnings.push(`${sectionId}: Missing ${responseField} for tile ${i}`);
+        result.hasIssues = true;
+      }
+
+      if (hasObjection && hasResponse) {
+        validTiles++;
+      }
+    }
+  }
+
+  if (validTiles > 0 && validTiles < 3) {
+    result.warnings.push(`${sectionId}: VisualObjectionTiles should have at least 3 tiles for visual impact, found ${validTiles}`);
+    result.hasIssues = true;
+  }
+
+  return result;
+}
+
+/**
+ * Special processing for ProblemToReframeBlocks sections
+ */
+function processProblemToReframeBlocksContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: { ...content } as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Check for individual problem/reframe pairs (preferred format)
+  let validPairs = 0;
+  for (let i = 1; i <= 6; i++) {
+    const problemField = `problem_${i}`;
+    const reframeField = `reframe_${i}`;
+
+    const hasProblem = content[problemField];
+    const hasReframe = content[reframeField];
+
+    if (hasProblem || hasReframe) {
+      if (!hasProblem) {
+        result.warnings.push(`${sectionId}: Missing ${problemField} for reframe ${i}`);
+        result.hasIssues = true;
+      }
+      if (!hasReframe) {
+        result.warnings.push(`${sectionId}: Missing ${reframeField} for problem ${i}`);
+        result.hasIssues = true;
+      }
+
+      if (hasProblem && hasReframe) {
+        validPairs++;
+      }
+    }
+  }
+
+  if (validPairs > 0 && validPairs < 2) {
+    result.warnings.push(`${sectionId}: ProblemToReframeBlocks should have at least 2 problem/reframe pairs, found ${validPairs}`);
+    result.hasIssues = true;
+  }
+
+  return result;
+}
+
+/**
+ * Special processing for BoldGuaranteePanel sections
+ */
+function processBoldGuaranteePanelContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: { ...content } as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Validate essential guarantee elements
+  if (!content.guarantee_statement) {
+    result.warnings.push(`${sectionId}: Missing guarantee_statement - essential for bold guarantee panel`);
+    result.hasIssues = true;
+  }
+
+  if (!content.guarantee_details) {
+    result.warnings.push(`${sectionId}: Missing guarantee_details - specifics build credibility`);
+    result.hasIssues = true;
+  }
+
+  // Check for risk reversal elements
+  const riskReversalFields = ['risk_reversal_text', 'refund_process', 'no_questions_asked'];
+  const hasRiskReversal = riskReversalFields.some(field => content[field]);
+
+  if (!hasRiskReversal) {
+    result.warnings.push(`${sectionId}: Consider adding risk reversal elements to strengthen the guarantee`);
+  }
+
+  return result;
+}
+
+/**
+ * Special processing for ObjectionCarousel sections
+ */
+function processObjectionCarouselContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: { ...content } as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Check for individual slide fields (preferred format)
+  let validSlides = 0;
+  for (let i = 1; i <= 8; i++) {
+    const objectionField = `slide_objection_${i}`;
+    const responseField = `slide_response_${i}`;
+
+    const hasObjection = content[objectionField];
+    const hasResponse = content[responseField];
+
+    if (hasObjection || hasResponse) {
+      if (!hasObjection) {
+        result.warnings.push(`${sectionId}: Missing ${objectionField} for slide ${i}`);
+        result.hasIssues = true;
+      }
+      if (!hasResponse) {
+        result.warnings.push(`${sectionId}: Missing ${responseField} for slide ${i}`);
+        result.hasIssues = true;
+      }
+
+      if (hasObjection && hasResponse) {
+        validSlides++;
+      }
+    }
+  }
+
+  if (validSlides > 0 && validSlides < 3) {
+    result.warnings.push(`${sectionId}: ObjectionCarousel should have at least 3 slides for meaningful progression, found ${validSlides}`);
+    result.hasIssues = true;
+  }
+
+  if (validSlides > 6) {
+    result.warnings.push(`${sectionId}: ${validSlides} slides may cause carousel fatigue - consider 3-6 key objections`);
   }
 
   return result;

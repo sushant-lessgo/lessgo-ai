@@ -186,14 +186,21 @@ function getSectionLayoutGuidance(sectionType: string, layout: string): string {
     },
 
     Objection: {
-      ObjectionAccordion: "Expandable objection handling. Questions should address real concerns directly. Answers should be comprehensive but reassuring.",
-      MythVsRealityGrid: "Side-by-side myth vs reality comparison. Use pipe-separated format: 'Myth: [misconception]|Reality: [truth]'. Myths should be real market misconceptions, realities should be factual and compelling. Keep each pair focused and contrasted clearly.",
-      QuoteBackedAnswers: "Authority-supported responses. Use credible sources and expert validation. Include proper attribution and context.",
-      VisualObjectionTiles: "Visual objection addressing. Use clear, non-defensive language. Address concerns while building confidence.",
-      ProblemToReframeBlocks: "Perspective-shifting presentation. Show new way of thinking about challenges. Use reframing language techniques.",
-      SkepticToBelieverSteps: "Step-by-step conversion journey. Use pipe-separated format: 'Name|Quote|Result' pattern. Show progression from skeptical to believer to champion. Each step should build credibility with real customer examples and increasing enthusiasm.",
-      BoldGuaranteePanel: "Risk-reversal focused presentation. Use confident, guarantee-focused language. Address risk concerns directly.",
-      ObjectionCarousel: "Multiple objection showcase. Each objection should be distinct. Responses should be complete and convincing."
+      ObjectionAccordion: "EXPANDABLE OBJECTION HANDLING: Address real concerns with individual fields (objection_1, response_1, etc.). OBJECTION STRATEGY: Use market sophistication-aware concerns - Level 1-2 markets focus on basic functionality/cost, Level 3-4 markets address implementation/integration, Level 5 markets tackle differentiation/ROI. RESPONSE APPROACH: Start with acknowledgment, provide evidence-backed answers, end with confidence-building statements. TONE: Never defensive - use consultative, understanding language that builds trust.",
+
+      MythVsRealityGrid: "MYTH VS REALITY COMPARISON: Use individual myth_1/reality_1 field pairs for better content control. MYTH SELECTION: Address actual market misconceptions from competitor messaging, outdated information, or industry assumptions. Focus on myths that create purchase hesitation. REALITY STATEMENTS: Provide compelling counter-evidence with specifics, numbers, or proof points. Use confident, factual language that builds credibility. VISUAL STRATEGY: Create clear contrast between misconception (red/warning) and truth (green/positive).",
+
+      QuoteBackedAnswers: "EXPERT AUTHORITY RESPONSES: Use individual objection/quote/attribution triplets for sophisticated markets (Level 4-5). OBJECTION FOCUS: Address high-level strategic concerns that experts would validate. QUOTE STRATEGY: Create realistic expert voices with specific credentials - CTOs for technical concerns, CEOs for ROI/strategy, consultants for implementation. ATTRIBUTION: Include company type, role, and context that matches target audience sophistication. CREDIBILITY: Use industry-specific language and concerns.",
+
+      SkepticToBelieverSteps: "CONVERSION JOURNEY NARRATIVE: Use individual step fields (step_name_1, step_quote_1, step_result_1) to show progression. NARRATIVE ARC: Start with relatable skepticism, show gradual buy-in with evidence, demonstrate increasing enthusiasm and results. PERSONA STRATEGY: Use company names and scenarios that match target audience. QUOTE EVOLUTION: Progress from 'I was skeptical...' to 'This actually works...' to 'Best decision we made.' RESULTS: Make outcomes specific and measurable - time savings, revenue increases, efficiency gains.",
+
+      VisualObjectionTiles: "VISUAL OBJECTION TILES: Use individual tile fields (tile_objection_1, tile_response_1) for scannable format. TILE STRATEGY: Keep objections concise for visual presentation, responses punchy but complete. OBJECTION SELECTION: Choose concerns that benefit from visual/icon treatment. RESPONSE TONE: Use confident, reassuring language that works in limited space. VISUAL HIERARCHY: Ensure responses feel more prominent than objections through design contrast.",
+
+      ProblemToReframeBlocks: "PERSPECTIVE REFRAMING: Use individual problem/reframe pairs to shift customer mindset. PROBLEM IDENTIFICATION: Address limiting beliefs and old-paradigm thinking that prevents adoption. REFRAME STRATEGY: Show new perspective that makes your solution the obvious choice. LANGUAGE PATTERNS: Use 'Instead of thinking... consider...' or 'What if... actually meant...' reframing structures. TRANSITION: Include smooth transition text between problems and reframes.",
+
+      BoldGuaranteePanel: "RISK REVERSAL FOCUS: Use detailed guarantee fields for maximum confidence-building. GUARANTEE STRUCTURE: Include specific guarantee statement, detailed terms, and clear risk reversal language. CONFIDENCE BUILDING: Address the #1 purchase anxiety with bold, unconditional language. LEGAL BALANCE: Create compelling copy while maintaining realistic business terms. TRUST ELEMENTS: Include security badges, company backing, and verification indicators.",
+
+      ObjectionCarousel: "PROGRESSIVE OBJECTION FLOW: Use individual slide fields (slide_objection_1, slide_response_1) for 5-8 sequential concerns. FLOW STRATEGY: Order objections from surface-level to deep concerns, building complexity and addressing sophistication. CAROUSEL ADVANTAGE: Use multiple objections to demonstrate thoroughness and preparedness. RESPONSE CONSISTENCY: Maintain confident, helpful tone across all slides while varying evidence and approach."
     },
 
     Pricing: {
@@ -764,12 +771,79 @@ function getElementFormatGuidance(element: string): string {
     'persona_icon_6': "👤",
     'footer_text': "Tailored results for every team in your organization",
 
-    // MythVsRealityGrid specific fields
+    // ObjectionAccordion individual fields
+    'objection_1': "Primary market objection - most common concern prospects have (e.g., 'Is this too expensive for a small business?')",
+    'response_1': "Evidence-backed response with specific proof points - address concern while building confidence",
+    'objection_2': "Secondary concern about implementation, complexity, or fit (e.g., 'Will this replace our current system?')",
+    'response_2': "Reassuring response that reduces perceived risk and shows smooth transition",
+    'objection_3': "Trust/proof related concern (e.g., 'How do we know it will actually work?')",
+    'response_3': "Credibility-building response with social proof, guarantees, or trial offers",
+    'objection_4': "Support or service concern (optional) - deeper implementation questions",
+    'response_4': "Service-focused response highlighting support quality and availability",
+    'objection_5': "Advanced/technical concern (optional) - sophisticated buyer questions",
+    'response_5': "Technical validation response with specifics and expert backing",
+    'objection_6': "Edge case or niche concern (optional) - addresses specific market segments",
+    'response_6': "Comprehensive response that shows thoroughness and market understanding",
+
+    // MythVsRealityGrid individual fields
+    'myth_1': "Most damaging market misconception that prevents adoption",
+    'reality_1': "Compelling truth with specific evidence that counters the myth",
+    'myth_2': "Secondary myth about complexity, cost, or implementation",
+    'reality_2': "Factual counter with proof points or customer examples",
+    'myth_3': "Industry assumption or competitor-driven misconception",
+    'reality_3': "Evidence-based reality that differentiates your solution",
+    'myth_4': "Advanced myth for sophisticated markets (optional)",
+    'reality_4': "Expert-level truth with industry-specific validation",
+    'myth_5': "Niche myth for specific market segments (optional)",
+    'reality_5': "Targeted truth that addresses specific audience concerns",
+    'myth_6': "Emerging myth or new market misconception (optional)",
+    'reality_6': "Forward-looking reality that positions market leadership",
+
+    // QuoteBackedAnswers individual fields (using unique guidance for this context)
+    'quote_response_1': "Expert quote addressing strategic concerns with authority and credibility",
+    'quote_attribution_1': "Credible expert with relevant title and company (e.g., 'Dr. Sarah Chen, CTO at TechForward')",
+    'quote_response_2': "Technical expert quote with specific industry knowledge and implementation insights",
+    'quote_attribution_2': "Technical authority with relevant credentials and hands-on experience",
+    'quote_response_3': "Industry expert quote with market insights and competitive validation",
+    'quote_attribution_3': "Market authority or analyst with relevant industry expertise and research background",
+
+    // SkepticToBelieverSteps individual fields
+    'step_name_1': "First customer persona - initial skeptic (e.g., 'Sarah from TechCorp was skeptical')",
+    'step_quote_1': "Skeptical quote expressing initial doubts and concerns",
+    'step_result_1': "Context or background that explains their situation and skepticism",
+    'step_name_2': "Second persona - testing/trying (e.g., 'Marcus from DataFlow decided to test it')",
+    'step_quote_2': "Cautiously optimistic quote about initial trial or test",
+    'step_result_2': "Early positive results that surprised them",
+    'step_name_3': "Third persona - early believer (e.g., 'Jennifer from ScaleUp got instant access')",
+    'step_quote_3': "Positive quote about immediate benefits or ease of use",
+    'step_result_3': "Specific results or outcomes that convinced them",
+    'step_name_4': "Fourth persona - full adopter (e.g., 'David from Enterprise Inc rolled it out')",
+    'step_quote_4': "Enthusiastic quote about full implementation success",
+    'step_result_4': "Company-wide results and transformation outcomes",
+    'step_name_5': "Fifth persona - champion/advocate (e.g., 'Lisa from InnovateCo became the champion')",
+    'step_quote_5': "Champion quote about being the internal hero who found the solution",
+    'step_result_5': "Leadership recognition and expanded role/influence",
+
+    // VisualObjectionTiles individual fields
+    'tile_objection_1': "Concise objection perfect for visual tile format",
+    'tile_response_1': "Punchy response that works in limited visual space",
+    'tile_label_1': "Optional category label for the objection type",
+    'tile_objection_2': "Second tile objection - different concern category",
+    'tile_response_2': "Confident response with visual appeal",
+    'tile_label_2': "Optional label for second objection category",
+
+    // ProblemToReframeBlocks individual fields
+    'problem_1': "Limiting belief or old-paradigm thinking that blocks adoption",
+    'reframe_1': "New perspective that makes your solution the obvious choice",
+    'problem_2': "Second limiting belief about implementation or change",
+    'reframe_2': "Reframe that shows change as opportunity, not burden",
+    'problem_3': "Mindset issue about cost, time, or resource investment",
+    'reframe_3': "Investment reframe that focuses on returns and outcomes",
+
+    // Legacy format fields for backward compatibility
     'myth_reality_pairs': "Myth: Statement 1|Reality: Truth 1|Myth: Statement 2|Reality: Truth 2",
     'myth_icon': "❌",
     'reality_icon': "✅",
-
-    // SkepticToBelieverSteps specific fields
     'conversion_steps': "Name from Company|Initial skeptical thought|Background context|Name from Company 2|Believer quote|Transformation result|Name from Company 3|Success quote|Specific outcome|Name from Company 4|Champion quote|Final transformation|Name from Company 5|Hero quote|Long-term impact",
     'objections_summary': "Summary text addressing how objections were overcome with real proof",
 

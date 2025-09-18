@@ -26,9 +26,17 @@ interface BoldGuaranteePanelContent {
   subheadline?: string;
   main_guarantee: string;
   guarantee_details: string;
-  key_guarantees: string;
+  // Individual guarantee fields (up to 3 guarantees)
+  guarantee_title_1: string;
+  guarantee_description_1: string;
+  guarantee_title_2: string;
+  guarantee_description_2: string;
+  guarantee_title_3: string;
+  guarantee_description_3: string;
   cta_text: string;
   trust_indicators: string;
+  // Legacy field for backward compatibility
+  key_guarantees?: string;
 }
 
 // Content schema - defines structure and defaults
@@ -49,6 +57,14 @@ const CONTENT_SCHEMA = {
     type: 'string' as const,
     default: 'If you don\'t see measurable results within 30 days, we\'ll refund every penny. No questions asked, no hoops to jump through.'
   },
+  // Individual guarantee fields
+  guarantee_title_1: { type: 'string' as const, default: 'Setup Support' },
+  guarantee_description_1: { type: 'string' as const, default: 'We handle the complete setup for you' },
+  guarantee_title_2: { type: 'string' as const, default: 'Results Promise' },
+  guarantee_description_2: { type: 'string' as const, default: 'See improvement in 30 days or get your money back' },
+  guarantee_title_3: { type: 'string' as const, default: 'Price Lock' },
+  guarantee_description_3: { type: 'string' as const, default: 'Your price never increases - locked in forever' },
+  // Legacy field for backward compatibility
   key_guarantees: {
     type: 'string' as const,
     default: 'Setup Support|We handle the complete setup|Results Promise|See improvement in 30 days|Price Lock|Your price never increases'
@@ -63,20 +79,39 @@ const CONTENT_SCHEMA = {
   }
 };
 
-// Parse guarantee data from pipe-separated strings
-const parseGuaranteeData = (keyGuarantees: string): GuaranteeItem[] => {
-  if (!keyGuarantees) return [];
-
-  const parts = keyGuarantees.split('|').map(t => t.trim()).filter(t => t);
+// Parse guarantee data from both individual and legacy formats
+const parseGuaranteeData = (content: BoldGuaranteePanelContent): GuaranteeItem[] => {
   const guarantees: GuaranteeItem[] = [];
 
-  for (let i = 0; i < parts.length; i += 2) {
-    if (parts[i]) {
+  // Check for individual fields first (preferred format)
+  const individualGuarantees = [
+    { title: content.guarantee_title_1, description: content.guarantee_description_1 },
+    { title: content.guarantee_title_2, description: content.guarantee_description_2 },
+    { title: content.guarantee_title_3, description: content.guarantee_description_3 }
+  ];
+
+  // Process individual fields
+  individualGuarantees.forEach((guarantee, index) => {
+    if (guarantee.title && guarantee.title.trim() && guarantee.description && guarantee.description.trim()) {
       guarantees.push({
-        id: `guarantee-${i / 2}`,
-        title: parts[i],
-        description: parts[i + 1] || 'Description not provided.'
+        id: `guarantee-${index}`,
+        title: guarantee.title.trim(),
+        description: guarantee.description.trim()
       });
+    }
+  });
+
+  // Fallback to legacy pipe-separated format if no individual fields
+  if (guarantees.length === 0 && content.key_guarantees) {
+    const parts = content.key_guarantees.split('|').map(t => t.trim()).filter(t => t);
+    for (let i = 0; i < parts.length; i += 2) {
+      if (parts[i]) {
+        guarantees.push({
+          id: `guarantee-${i / 2}`,
+          title: parts[i],
+          description: parts[i + 1] || 'Description not provided.'
+        });
+      }
     }
   }
 
@@ -221,40 +256,50 @@ export default function BoldGuaranteePanel(props: LayoutComponentProps) {
   const bodyStyle = getTypographyStyle('body');
 
   // Parse guarantee data
-  const guaranteeItems = parseGuaranteeData(blockContent.key_guarantees);
+  const guaranteeItems = parseGuaranteeData(blockContent);
 
-  // Handle individual editing
+  // Handle individual guarantee editing
   const handleTitleEdit = (index: number, value: string) => {
-    const parts = blockContent.key_guarantees.split('|').map(t => t.trim()).filter(t => t);
-    const startIndex = index * 2;
-    if (startIndex < parts.length) {
-      parts[startIndex] = value;
-      handleContentUpdate('key_guarantees', parts.join('|'));
-    }
+    const fieldName = `guarantee_title_${index + 1}` as keyof BoldGuaranteePanelContent;
+    handleContentUpdate(fieldName, value);
   };
 
   const handleDescriptionEdit = (index: number, value: string) => {
-    const parts = blockContent.key_guarantees.split('|').map(t => t.trim()).filter(t => t);
-    const startIndex = index * 2 + 1;
-    if (startIndex < parts.length) {
-      parts[startIndex] = value;
-    } else {
-      // Add description if it doesn't exist
-      parts.push(value);
+    const fieldName = `guarantee_description_${index + 1}` as keyof BoldGuaranteePanelContent;
+    handleContentUpdate(fieldName, value);
+  };
+
+  // Helper function to get next available guarantee slot
+  const getNextAvailableGuaranteeSlot = (content: BoldGuaranteePanelContent): number => {
+    const titles = [
+      content.guarantee_title_1,
+      content.guarantee_title_2,
+      content.guarantee_title_3
+    ];
+
+    for (let i = 0; i < titles.length; i++) {
+      if (!titles[i] || titles[i].trim() === '') {
+        return i + 1;
+      }
     }
-    handleContentUpdate('key_guarantees', parts.join('|'));
+
+    return -1; // No slots available
   };
 
   // Handle adding a new guarantee
   const handleAddGuarantee = () => {
-    const newKeyGuarantees = addGuarantee(blockContent.key_guarantees);
-    handleContentUpdate('key_guarantees', newKeyGuarantees);
+    const nextSlot = getNextAvailableGuaranteeSlot(blockContent);
+    if (nextSlot > 0) {
+      handleContentUpdate(`guarantee_title_${nextSlot}` as keyof BoldGuaranteePanelContent, 'New Guarantee');
+      handleContentUpdate(`guarantee_description_${nextSlot}` as keyof BoldGuaranteePanelContent, 'Describe this guarantee benefit');
+    }
   };
 
   // Handle removing a guarantee
   const handleRemoveGuarantee = (indexToRemove: number) => {
-    const newKeyGuarantees = removeGuarantee(blockContent.key_guarantees, indexToRemove);
-    handleContentUpdate('key_guarantees', newKeyGuarantees);
+    const fieldNum = indexToRemove + 1;
+    handleContentUpdate(`guarantee_title_${fieldNum}` as keyof BoldGuaranteePanelContent, '');
+    handleContentUpdate(`guarantee_description_${fieldNum}` as keyof BoldGuaranteePanelContent, '');
   };
 
   return (
@@ -431,7 +476,12 @@ export const componentMeta = {
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
     { key: 'main_guarantee', label: 'Main Guarantee Title', type: 'text', required: true },
     { key: 'guarantee_details', label: 'Guarantee Details', type: 'textarea', required: true },
-    { key: 'key_guarantees', label: 'Key Guarantees (pipe separated, max 3)', type: 'textarea', required: false },
+    { key: 'guarantee_title_1', label: 'Guarantee 1 Title', type: 'text', required: false },
+    { key: 'guarantee_description_1', label: 'Guarantee 1 Description', type: 'textarea', required: false },
+    { key: 'guarantee_title_2', label: 'Guarantee 2 Title', type: 'text', required: false },
+    { key: 'guarantee_description_2', label: 'Guarantee 2 Description', type: 'textarea', required: false },
+    { key: 'guarantee_title_3', label: 'Guarantee 3 Title', type: 'text', required: false },
+    { key: 'guarantee_description_3', label: 'Guarantee 3 Description', type: 'textarea', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: true },
     { key: 'trust_indicators', label: 'Trust Indicators', type: 'text', required: false }
   ],

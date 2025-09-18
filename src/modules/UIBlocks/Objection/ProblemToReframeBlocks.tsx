@@ -22,9 +22,24 @@ interface ReframeBlock {
 interface ProblemToReframeBlocksContent {
   headline: string;
   subheadline?: string;
-  reframe_blocks: string;
+  // Individual problem/reframe pairs (up to 6 pairs)
+  problem_1: string;
+  reframe_1: string;
+  problem_2: string;
+  reframe_2: string;
+  problem_3: string;
+  reframe_3: string;
+  problem_4: string;
+  reframe_4: string;
+  problem_5: string;
+  reframe_5: string;
+  problem_6: string;
+  reframe_6: string;
+  // Transition and styling
+  transition_text?: string;
   problem_icon?: string;
   reframe_icon?: string;
+  transition_icon?: string;
   arrow_icon?: string;
   benefit_icon_1?: string;
   benefit_icon_2?: string;
@@ -34,6 +49,10 @@ interface ProblemToReframeBlocksContent {
   benefit_label_1?: string;
   benefit_label_2?: string;
   benefit_label_3?: string;
+  // Legacy fields for backward compatibility
+  reframe_blocks?: string;
+  problem_statements?: string;
+  reframe_statements?: string;
 }
 
 // Content schema - defines structure and defaults
@@ -46,10 +65,21 @@ const CONTENT_SCHEMA = {
     type: 'string' as const,
     default: 'What seems like a problem might actually be your biggest opportunity.'
   },
-  reframe_blocks: {
-    type: 'string' as const,
-    default: `"We don't have time to learn new tools"|Think of this as investing 30 minutes to save 5 hours every week|"Our current process works fine"|Every manual process is an opportunity waiting to be optimized|"It's too risky to change systems"|The biggest risk is staying behind while competitors automate|"We can't afford another subscription"|Can you afford to keep paying your team to do manual work?`
-  },
+  // Individual problem/reframe pairs
+  problem_1: { type: 'string' as const, default: 'We don\'t have time to learn new tools' },
+  reframe_1: { type: 'string' as const, default: 'Think of this as investing 30 minutes to save 5 hours every week' },
+  problem_2: { type: 'string' as const, default: 'Our current process works fine' },
+  reframe_2: { type: 'string' as const, default: 'Every manual process is an opportunity waiting to be optimized' },
+  problem_3: { type: 'string' as const, default: 'It\'s too risky to change systems' },
+  reframe_3: { type: 'string' as const, default: 'The biggest risk is staying behind while competitors automate' },
+  problem_4: { type: 'string' as const, default: 'We can\'t afford another subscription' },
+  reframe_4: { type: 'string' as const, default: 'Can you afford to keep paying your team to do manual work?' },
+  problem_5: { type: 'string' as const, default: 'This seems too complex for our team' },
+  reframe_5: { type: 'string' as const, default: 'Complexity is where your competitors get stuck - simplicity is your advantage' },
+  problem_6: { type: 'string' as const, default: 'We\'re not ready for this change' },
+  reframe_6: { type: 'string' as const, default: 'The market won\'t wait for you to be ready - but this makes you ready for the market' },
+  // Transition and styling
+  transition_text: { type: 'string' as const, default: 'Instead of seeing obstacles, see opportunities' },
   problem_icon: { type: 'string' as const, default: '⚠️' },
   reframe_icon: { type: 'string' as const, default: '💡' },
   arrow_icon: { type: 'string' as const, default: '➡️' },
@@ -60,7 +90,12 @@ const CONTENT_SCHEMA = {
   bottom_description: { type: 'string' as const, default: 'Every limitation is actually an opportunity in disguise. When you change how you look at challenges, the challenges change how they look back at you.' },
   benefit_label_1: { type: 'string' as const, default: 'Instant mindset shift' },
   benefit_label_2: { type: 'string' as const, default: 'Proven approach' },
-  benefit_label_3: { type: 'string' as const, default: 'Immediate results' }
+  benefit_label_3: { type: 'string' as const, default: 'Immediate results' },
+  // Legacy fields for backward compatibility
+  reframe_blocks: {
+    type: 'string' as const,
+    default: `We don't have time to learn new tools|Think of this as investing 30 minutes to save 5 hours every week|Our current process works fine|Every manual process is an opportunity waiting to be optimized|It's too risky to change systems|The biggest risk is staying behind while competitors automate|We can't afford another subscription|Can you afford to keep paying your team to do manual work?`
+  }
 };
 
 // Helper function to add a new reframe block
@@ -112,51 +147,95 @@ export default function ProblemToReframeBlocks(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
-  // Parse reframe blocks from pipe-separated string
-  const parseReframeBlocks = (): ReframeBlock[] => {
-    if (!blockContent.reframe_blocks) return [];
+  // Parse reframe blocks from both individual and legacy formats
+  const parseReframeBlocks = (content: ProblemToReframeBlocksContent): ReframeBlock[] => {
+    const blocks: ReframeBlock[] = [];
 
-    const blocks = blockContent.reframe_blocks.split('|');
-    const result: ReframeBlock[] = [];
+    // Check for individual fields first (preferred format)
+    const individualPairs = [
+      { problem: content.problem_1, reframe: content.reframe_1 },
+      { problem: content.problem_2, reframe: content.reframe_2 },
+      { problem: content.problem_3, reframe: content.reframe_3 },
+      { problem: content.problem_4, reframe: content.reframe_4 },
+      { problem: content.problem_5, reframe: content.reframe_5 },
+      { problem: content.problem_6, reframe: content.reframe_6 }
+    ];
 
-    for (let i = 0; i < blocks.length; i += 2) {
-      if (blocks[i] && blocks[i + 1]) {
-        result.push({
-          id: `reframe-${i / 2}`,
-          problem: blocks[i].trim().replace(/"/g, ''),
-          reframe: blocks[i + 1].trim()
+    // Process individual fields
+    individualPairs.forEach((pair, index) => {
+      if (pair.problem && pair.problem.trim() && pair.reframe && pair.reframe.trim()) {
+        blocks.push({
+          id: `reframe-${index}`,
+          problem: pair.problem.trim().replace(/"/g, ''),
+          reframe: pair.reframe.trim()
         });
+      }
+    });
+
+    // Fallback to legacy pipe-separated format if no individual fields
+    if (blocks.length === 0 && content.reframe_blocks) {
+      const legacyBlocks = content.reframe_blocks.split('|');
+      for (let i = 0; i < legacyBlocks.length; i += 2) {
+        if (legacyBlocks[i] && legacyBlocks[i + 1]) {
+          blocks.push({
+            id: `reframe-${i / 2}`,
+            problem: legacyBlocks[i].trim().replace(/"/g, ''),
+            reframe: legacyBlocks[i + 1].trim()
+          });
+        }
       }
     }
 
-    return result;
+    return blocks;
   };
 
-  const reframeBlocks = parseReframeBlocks();
+  const reframeBlocks = parseReframeBlocks(blockContent);
+
+  // Helper function to get next available pair slot
+  const getNextAvailablePairSlot = (content: ProblemToReframeBlocksContent): number => {
+    const pairs = [
+      content.problem_1,
+      content.problem_2,
+      content.problem_3,
+      content.problem_4,
+      content.problem_5,
+      content.problem_6
+    ];
+
+    for (let i = 0; i < pairs.length; i++) {
+      if (!pairs[i] || pairs[i].trim() === '') {
+        return i + 1;
+      }
+    }
+
+    return -1; // No slots available
+  };
 
   // Handle individual problem/reframe editing
   const handleProblemEdit = (index: number, value: string) => {
-    const blocks = blockContent.reframe_blocks.split('|');
-    blocks[index * 2] = `"${value}"`;
-    handleContentUpdate('reframe_blocks', blocks.join('|'));
+    const fieldName = `problem_${index + 1}` as keyof ProblemToReframeBlocksContent;
+    handleContentUpdate(fieldName, value);
   };
 
   const handleReframeEdit = (index: number, value: string) => {
-    const blocks = blockContent.reframe_blocks.split('|');
-    blocks[index * 2 + 1] = value;
-    handleContentUpdate('reframe_blocks', blocks.join('|'));
+    const fieldName = `reframe_${index + 1}` as keyof ProblemToReframeBlocksContent;
+    handleContentUpdate(fieldName, value);
   };
 
   // Handle adding a new reframe block
   const handleAddReframeBlock = () => {
-    const newBlocks = addReframeBlock(blockContent.reframe_blocks);
-    handleContentUpdate('reframe_blocks', newBlocks);
+    const nextSlot = getNextAvailablePairSlot(blockContent);
+    if (nextSlot > 0) {
+      handleContentUpdate(`problem_${nextSlot}` as keyof ProblemToReframeBlocksContent, 'New limiting belief or concern');
+      handleContentUpdate(`reframe_${nextSlot}` as keyof ProblemToReframeBlocksContent, 'Reframe this as an opportunity or benefit');
+    }
   };
 
   // Handle removing a reframe block
   const handleRemoveReframeBlock = (indexToRemove: number) => {
-    const newBlocks = removeReframeBlock(blockContent.reframe_blocks, indexToRemove);
-    handleContentUpdate('reframe_blocks', newBlocks);
+    const fieldNum = indexToRemove + 1;
+    handleContentUpdate(`problem_${fieldNum}` as keyof ProblemToReframeBlocksContent, '');
+    handleContentUpdate(`reframe_${fieldNum}` as keyof ProblemToReframeBlocksContent, '');
   };
 
   return (

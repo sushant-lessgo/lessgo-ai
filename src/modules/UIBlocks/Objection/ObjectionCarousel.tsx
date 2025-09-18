@@ -16,8 +16,28 @@ import { LayoutComponentProps } from '@/types/storeTypes';
 interface ObjectionCarouselContent {
   headline: string;
   subheadline?: string;
-  objection_slides: string;
+  // Individual objection slides (up to 6 slides)
+  objection_1: string;
+  answer_1: string;
+  icon_1: string;
+  objection_2: string;
+  answer_2: string;
+  icon_2: string;
+  objection_3: string;
+  answer_3: string;
+  icon_3: string;
+  objection_4: string;
+  answer_4: string;
+  icon_4: string;
+  objection_5: string;
+  answer_5: string;
+  icon_5: string;
+  objection_6: string;
+  answer_6: string;
+  icon_6: string;
   autoplay_button_text?: string;
+  // Legacy field for backward compatibility
+  objection_slides?: string;
 }
 
 // Content schema - defines structure and defaults
@@ -30,9 +50,29 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: 'Browse through the most common questions and concerns from people just like you.' 
   },
-  objection_slides: { 
-    type: 'string' as const, 
-    default: 'Is this really worth the investment?|We understand budget concerns. Most customers save 10x their investment within 3 months through improved efficiency.|🤔|Will this integrate with our existing tools?|Absolutely! We have pre-built integrations with 500+ popular tools, plus a robust API for custom connections.|🔗|How long does implementation take?|Most teams are up and running in under 24 hours. Our onboarding team guides you through every step.|⚡|What if we need support or have issues?|You get dedicated support with response times under 2 hours. Plus, our 99.9% uptime guarantee means reliability you can count on.|🛠️|Is our data secure with your platform?|Security is our top priority. We\'re SOC 2 compliant, GDPR ready, and use enterprise-grade encryption for all data.|🔒|What if it doesn\'t work for our specific use case?|Every business is unique. We offer a 30-day money-back guarantee and custom configuration to ensure it fits your exact needs.|✨' 
+  // Individual objection slides
+  objection_1: { type: 'string' as const, default: 'Is this really worth the investment?' },
+  answer_1: { type: 'string' as const, default: 'We understand budget concerns. Most customers save 10x their investment within 3 months through improved efficiency.' },
+  icon_1: { type: 'string' as const, default: '🤔' },
+  objection_2: { type: 'string' as const, default: 'Will this integrate with our existing tools?' },
+  answer_2: { type: 'string' as const, default: 'Absolutely! We have pre-built integrations with 500+ popular tools, plus a robust API for custom connections.' },
+  icon_2: { type: 'string' as const, default: '🔗' },
+  objection_3: { type: 'string' as const, default: 'How long does implementation take?' },
+  answer_3: { type: 'string' as const, default: 'Most teams are up and running in under 24 hours. Our onboarding team guides you through every step.' },
+  icon_3: { type: 'string' as const, default: '⚡' },
+  objection_4: { type: 'string' as const, default: 'What if we need support or have issues?' },
+  answer_4: { type: 'string' as const, default: 'You get dedicated support with response times under 2 hours. Plus, our 99.9% uptime guarantee means reliability you can count on.' },
+  icon_4: { type: 'string' as const, default: '🛠️' },
+  objection_5: { type: 'string' as const, default: 'Is our data secure with your platform?' },
+  answer_5: { type: 'string' as const, default: 'Security is our top priority. We\'re SOC 2 compliant, GDPR ready, and use enterprise-grade encryption for all data.' },
+  icon_5: { type: 'string' as const, default: '🔒' },
+  objection_6: { type: 'string' as const, default: 'What if it doesn\'t work for our specific use case?' },
+  answer_6: { type: 'string' as const, default: 'Every business is unique. We offer a 30-day money-back guarantee and custom configuration to ensure it fits your exact needs.' },
+  icon_6: { type: 'string' as const, default: '✨' },
+  // Legacy field for backward compatibility
+  objection_slides: {
+    type: 'string' as const,
+    default: 'Is this really worth the investment?|We understand budget concerns. Most customers save 10x their investment within 3 months through improved efficiency.|🤔|Will this integrate with our existing tools?|Absolutely! We have pre-built integrations with 500+ popular tools, plus a robust API for custom connections.|🔗|How long does implementation take?|Most teams are up and running in under 24 hours. Our onboarding team guides you through every step.|⚡|What if we need support or have issues?|You get dedicated support with response times under 2 hours. Plus, our 99.9% uptime guarantee means reliability you can count on.|🛠️|Is our data secure with your platform?|Security is our top priority. We\'re SOC 2 compliant, GDPR ready, and use enterprise-grade encryption for all data.|🔒|What if it doesn\'t work for our specific use case?|Every business is unique. We offer a 30-day money-back guarantee and custom configuration to ensure it fits your exact needs.|✨'
   },
   autoplay_button_text: {
     type: 'string' as const,
@@ -57,19 +97,49 @@ export default function ObjectionCarousel(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
-  // Parse objection slides from pipe-separated string
-  const objectionSlides = blockContent.objection_slides 
-    ? blockContent.objection_slides.split('|').reduce((slides, item, index) => {
+  // Parse objection slides from both individual and legacy formats
+  const parseObjectionSlides = (content: ObjectionCarouselContent) => {
+    const slides: Array<{question: string, answer: string, icon: string}> = [];
+
+    // Check for individual fields first (preferred format)
+    const individualSlides = [
+      { question: content.objection_1, answer: content.answer_1, icon: content.icon_1 },
+      { question: content.objection_2, answer: content.answer_2, icon: content.icon_2 },
+      { question: content.objection_3, answer: content.answer_3, icon: content.icon_3 },
+      { question: content.objection_4, answer: content.answer_4, icon: content.icon_4 },
+      { question: content.objection_5, answer: content.answer_5, icon: content.icon_5 },
+      { question: content.objection_6, answer: content.answer_6, icon: content.icon_6 }
+    ];
+
+    // Process individual fields
+    individualSlides.forEach(slide => {
+      if (slide.question && slide.question.trim() && slide.answer && slide.answer.trim()) {
+        slides.push({
+          question: slide.question.trim(),
+          answer: slide.answer.trim(),
+          icon: slide.icon?.trim() || '🤔'
+        });
+      }
+    });
+
+    // Fallback to legacy pipe-separated format if no individual fields
+    if (slides.length === 0 && content.objection_slides) {
+      content.objection_slides.split('|').reduce((acc, item, index) => {
         if (index % 3 === 0) {
-          slides.push({ question: item.trim(), answer: '', icon: '' });
+          acc.push({ question: item.trim(), answer: '', icon: '' });
         } else if (index % 3 === 1) {
-          slides[slides.length - 1].answer = item.trim();
+          acc[acc.length - 1].answer = item.trim();
         } else {
-          slides[slides.length - 1].icon = item.trim();
+          acc[acc.length - 1].icon = item.trim();
         }
-        return slides;
-      }, [] as Array<{question: string, answer: string, icon: string}>)
-    : [];
+        return acc;
+      }, slides);
+    }
+
+    return slides;
+  };
+
+  const objectionSlides = parseObjectionSlides(blockContent);
 
   // Carousel state
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -157,9 +227,8 @@ export default function ObjectionCarousel(props: LayoutComponentProps) {
                           mode={mode}
                           value={slide.icon || '🤔'}
                           onEdit={(value) => {
-                            const updatedSlides = blockContent.objection_slides.split('|');
-                            updatedSlides[index * 3 + 2] = value;
-                            handleContentUpdate('objection_slides', updatedSlides.join('|'));
+                            const fieldName = `icon_${index + 1}` as keyof ObjectionCarouselContent;
+                            handleContentUpdate(fieldName, value);
                           }}
                           backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                           colorTokens={colorTokens}
@@ -175,9 +244,8 @@ export default function ObjectionCarousel(props: LayoutComponentProps) {
                         mode={mode}
                         value={slide.question || ''}
                         onEdit={(value) => {
-                          const updatedSlides = blockContent.objection_slides.split('|');
-                          updatedSlides[index * 3] = value;
-                          handleContentUpdate('objection_slides', updatedSlides.join('|'));
+                          const fieldName = `objection_${index + 1}` as keyof ObjectionCarouselContent;
+                          handleContentUpdate(fieldName, value);
                         }}
                         backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                         colorTokens={colorTokens}
@@ -194,9 +262,8 @@ export default function ObjectionCarousel(props: LayoutComponentProps) {
                         mode={mode}
                         value={slide.answer || ''}
                         onEdit={(value) => {
-                          const updatedSlides = blockContent.objection_slides.split('|');
-                          updatedSlides[index * 3 + 1] = value;
-                          handleContentUpdate('objection_slides', updatedSlides.join('|'));
+                          const fieldName = `answer_${index + 1}` as keyof ObjectionCarouselContent;
+                          handleContentUpdate(fieldName, value);
                         }}
                         backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                         colorTokens={colorTokens}
@@ -273,9 +340,8 @@ export default function ObjectionCarousel(props: LayoutComponentProps) {
                   mode={mode}
                   value={slide.icon || '🤔'}
                   onEdit={(value) => {
-                    const updatedSlides = blockContent.objection_slides.split('|');
-                    updatedSlides[index * 3 + 2] = value;
-                    handleContentUpdate('objection_slides', updatedSlides.join('|'));
+                    const fieldName = `icon_${index + 1}` as keyof ObjectionCarouselContent;
+                    handleContentUpdate(fieldName, value);
                   }}
                   backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                   colorTokens={colorTokens}
@@ -292,9 +358,8 @@ export default function ObjectionCarousel(props: LayoutComponentProps) {
                 mode={mode}
                 value={slide.question.length > 60 ? slide.question.substring(0, 60) + '...' : slide.question}
                 onEdit={(value) => {
-                  const updatedSlides = blockContent.objection_slides.split('|');
-                  updatedSlides[index * 3] = value;
-                  handleContentUpdate('objection_slides', updatedSlides.join('|'));
+                  const fieldName = `objection_${index + 1}` as keyof ObjectionCarouselContent;
+                  handleContentUpdate(fieldName, value);
                 }}
                 backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                 colorTokens={colorTokens}
@@ -342,7 +407,7 @@ export default function ObjectionCarousel(props: LayoutComponentProps) {
         {mode !== 'preview' && (
           <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <p className="text-blue-800 text-sm">
-              <strong>Edit Objection Slides:</strong> Use format "[question]|[answer]|[emoji]|[next question]|[next answer]|[next emoji]"
+              <strong>Edit Objection Slides:</strong> Each slide has individual fields for question, answer, and icon. Up to 6 slides supported.
             </p>
           </div>
         )}
@@ -364,7 +429,25 @@ export const componentMeta = {
   contentFields: [
     { key: 'headline', label: 'Main Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
-    { key: 'objection_slides', label: 'Objection Slides (pipe separated: question|answer|icon)', type: 'textarea', required: true }
+    { key: 'objection_1', label: 'Objection 1', type: 'text', required: false },
+    { key: 'answer_1', label: 'Answer 1', type: 'textarea', required: false },
+    { key: 'icon_1', label: 'Icon 1', type: 'text', required: false },
+    { key: 'objection_2', label: 'Objection 2', type: 'text', required: false },
+    { key: 'answer_2', label: 'Answer 2', type: 'textarea', required: false },
+    { key: 'icon_2', label: 'Icon 2', type: 'text', required: false },
+    { key: 'objection_3', label: 'Objection 3', type: 'text', required: false },
+    { key: 'answer_3', label: 'Answer 3', type: 'textarea', required: false },
+    { key: 'icon_3', label: 'Icon 3', type: 'text', required: false },
+    { key: 'objection_4', label: 'Objection 4', type: 'text', required: false },
+    { key: 'answer_4', label: 'Answer 4', type: 'textarea', required: false },
+    { key: 'icon_4', label: 'Icon 4', type: 'text', required: false },
+    { key: 'objection_5', label: 'Objection 5', type: 'text', required: false },
+    { key: 'answer_5', label: 'Answer 5', type: 'textarea', required: false },
+    { key: 'icon_5', label: 'Icon 5', type: 'text', required: false },
+    { key: 'objection_6', label: 'Objection 6', type: 'text', required: false },
+    { key: 'answer_6', label: 'Answer 6', type: 'textarea', required: false },
+    { key: 'icon_6', label: 'Icon 6', type: 'text', required: false },
+    { key: 'autoplay_button_text', label: 'Auto-play Button Text', type: 'text', required: false }
   ],
   
   features: [

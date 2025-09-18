@@ -15,14 +15,33 @@ import { LayoutComponentProps } from '@/types/storeTypes';
 interface SkepticToBelieverStepsContent {
   headline: string;
   subheadline?: string;
-  conversion_steps: string;
-  objections_summary?: string;
+  // Individual step progression fields (up to 5 steps)
+  step_name_1: string;
+  step_quote_1: string;
+  step_result_1: string;
+  step_name_2: string;
+  step_quote_2: string;
+  step_result_2: string;
+  step_name_3: string;
+  step_quote_3: string;
+  step_result_3: string;
+  step_name_4: string;
+  step_quote_4: string;
+  step_result_4: string;
+  step_name_5: string;
+  step_quote_5: string;
+  step_result_5: string;
+  // Step icons
   step_icon_1?: string;
   step_icon_2?: string;
   step_icon_3?: string;
   step_icon_4?: string;
   step_icon_5?: string;
   step_icon_6?: string;
+  // Summary and context
+  objections_summary?: string;
+  // Legacy field for backward compatibility
+  conversion_steps?: string;
 }
 
 // Content schema - defines structure and defaults
@@ -35,20 +54,39 @@ const CONTENT_SCHEMA = {
     type: 'string' as const,
     default: 'You\'re not the first to be skeptical. Here\'s exactly how 2,847+ professionals went from "this won\'t work" to transforming their entire workflow.'
   },
-  conversion_steps: {
-    type: 'string' as const,
-    default: 'Sarah from TechCorp was skeptical|"Another productivity tool? We\'ve tried everything and nothing works"|Sarah had been burned by 3 failed implementations in 2 years|Marcus from DataFlow decided to test it|"I was shocked - it actually delivered on every promise"|Marcus saw 40% faster workflows within 48 hours of setup|Jennifer from ScaleUp got instant access|"My team adopted it immediately - no training needed"|Jennifer\'s team completed projects 3x faster in the first week|David from Enterprise Inc rolled it out company-wide|"Best decision we made this year - transformed our entire operation"|David\'s 200+ person team achieved 92% faster task completion|Lisa from InnovateCo became the internal champion|"I\'m the hero who found the solution that actually works"|Lisa now leads productivity initiatives and speaks at conferences'
-  },
-  objections_summary: {
-    type: 'string' as const,
-    default: 'Every objection has been addressed with real proof from customers who had the same concerns. Now it\'s your turn to join them.'
-  },
+  // Individual step progression fields
+  step_name_1: { type: 'string' as const, default: 'Sarah from TechCorp was skeptical' },
+  step_quote_1: { type: 'string' as const, default: 'Another productivity tool? We\'ve tried everything and nothing works' },
+  step_result_1: { type: 'string' as const, default: 'Sarah had been burned by 3 failed implementations in 2 years' },
+  step_name_2: { type: 'string' as const, default: 'Marcus from DataFlow decided to test it' },
+  step_quote_2: { type: 'string' as const, default: 'I was shocked - it actually delivered on every promise' },
+  step_result_2: { type: 'string' as const, default: 'Marcus saw 40% faster workflows within 48 hours of setup' },
+  step_name_3: { type: 'string' as const, default: 'Jennifer from ScaleUp got instant access' },
+  step_quote_3: { type: 'string' as const, default: 'My team adopted it immediately - no training needed' },
+  step_result_3: { type: 'string' as const, default: 'Jennifer\'s team completed projects 3x faster in the first week' },
+  step_name_4: { type: 'string' as const, default: 'David from Enterprise Inc rolled it out company-wide' },
+  step_quote_4: { type: 'string' as const, default: 'Best decision we made this year - transformed our entire operation' },
+  step_result_4: { type: 'string' as const, default: 'David\'s 200+ person team achieved 92% faster task completion' },
+  step_name_5: { type: 'string' as const, default: 'Lisa from InnovateCo became the internal champion' },
+  step_quote_5: { type: 'string' as const, default: 'I\'m the hero who found the solution that actually works' },
+  step_result_5: { type: 'string' as const, default: 'Lisa now leads productivity initiatives and speaks at conferences' },
+  // Step icons
   step_icon_1: { type: 'string' as const, default: '👩‍💼' },
   step_icon_2: { type: 'string' as const, default: '👨‍💻' },
   step_icon_3: { type: 'string' as const, default: '👩‍🚀' },
   step_icon_4: { type: 'string' as const, default: '👨‍💼' },
   step_icon_5: { type: 'string' as const, default: '👩‍🎓' },
-  step_icon_6: { type: 'string' as const, default: '👤' }
+  step_icon_6: { type: 'string' as const, default: '👤' },
+  // Summary and context
+  objections_summary: {
+    type: 'string' as const,
+    default: 'Every objection has been addressed with real proof from customers who had the same concerns. Now it\'s your turn to join them.'
+  },
+  // Legacy field for backward compatibility
+  conversion_steps: {
+    type: 'string' as const,
+    default: 'Sarah from TechCorp was skeptical|Another productivity tool? We\'ve tried everything and nothing works|Sarah had been burned by 3 failed implementations in 2 years|Marcus from DataFlow decided to test it|I was shocked - it actually delivered on every promise|Marcus saw 40% faster workflows within 48 hours of setup|Jennifer from ScaleUp got instant access|My team adopted it immediately - no training needed|Jennifer\'s team completed projects 3x faster in the first week|David from Enterprise Inc rolled it out company-wide|Best decision we made this year - transformed our entire operation|David\'s 200+ person team achieved 92% faster task completion|Lisa from InnovateCo became the internal champion|I\'m the hero who found the solution that actually works|Lisa now leads productivity initiatives and speaks at conferences'
+  }
 };
 
 export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
@@ -68,19 +106,51 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
-  // Parse conversion steps from pipe-separated string
-  const conversionSteps = blockContent.conversion_steps 
-    ? blockContent.conversion_steps.split('|').reduce((steps, item, index) => {
+  // Parse conversion steps from both individual and legacy formats
+  const parseConversionSteps = (content: SkepticToBelieverStepsContent): Array<{title: string, thought: string, description: string, index: number}> => {
+    const steps: Array<{title: string, thought: string, description: string, index: number}> = [];
+
+    // Check for individual fields first (preferred format)
+    const individualSteps = [
+      { name: content.step_name_1, quote: content.step_quote_1, result: content.step_result_1 },
+      { name: content.step_name_2, quote: content.step_quote_2, result: content.step_result_2 },
+      { name: content.step_name_3, quote: content.step_quote_3, result: content.step_result_3 },
+      { name: content.step_name_4, quote: content.step_quote_4, result: content.step_result_4 },
+      { name: content.step_name_5, quote: content.step_quote_5, result: content.step_result_5 }
+    ];
+
+    // Process individual fields
+    individualSteps.forEach((step, index) => {
+      if (step.name && step.name.trim() && step.quote && step.quote.trim()) {
+        steps.push({
+          title: step.name.trim(),
+          thought: step.quote.trim().replace(/"/g, ''),
+          description: step.result?.trim() || '',
+          index
+        });
+      }
+    });
+
+    // Fallback to legacy pipe-separated format if no individual fields
+    if (steps.length === 0 && content.conversion_steps) {
+      const legacySteps = content.conversion_steps.split('|').reduce((acc, item, index) => {
         if (index % 3 === 0) {
-          steps.push({ title: item.trim(), thought: '', description: '' });
+          acc.push({ title: item.trim(), thought: '', description: '', index: Math.floor(index / 3) });
         } else if (index % 3 === 1) {
-          steps[steps.length - 1].thought = item.trim().replace(/"/g, '');
+          acc[acc.length - 1].thought = item.trim().replace(/"/g, '');
         } else {
-          steps[steps.length - 1].description = item.trim();
+          acc[acc.length - 1].description = item.trim();
         }
-        return steps;
-      }, [] as Array<{title: string, thought: string, description: string}>)
-    : [];
+        return acc;
+      }, [] as Array<{title: string, thought: string, description: string, index: number}>);
+
+      steps.push(...legacySteps);
+    }
+
+    return steps;
+  };
+
+  const conversionSteps = parseConversionSteps(blockContent);
 
   const getStepIcon = (index: number) => {
     const iconFields = ['step_icon_1', 'step_icon_2', 'step_icon_3', 'step_icon_4', 'step_icon_5', 'step_icon_6'];
@@ -112,19 +182,44 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
     return stepsList.join('|');
   };
 
+  // Helper function to get next available step slot
+  const getNextAvailableStepSlot = (content: SkepticToBelieverStepsContent): number => {
+    const stepNames = [
+      content.step_name_1,
+      content.step_name_2,
+      content.step_name_3,
+      content.step_name_4,
+      content.step_name_5
+    ];
+
+    for (let i = 0; i < stepNames.length; i++) {
+      if (!stepNames[i] || stepNames[i].trim() === '') {
+        return i + 1;
+      }
+    }
+
+    return -1; // No slots available
+  };
+
   // Handle adding a new step
   const handleAddStep = () => {
-    const newSteps = addStep(blockContent.conversion_steps);
-    handleContentUpdate('conversion_steps', newSteps);
+    const nextSlot = getNextAvailableStepSlot(blockContent);
+    if (nextSlot > 0) {
+      handleContentUpdate(`step_name_${nextSlot}` as keyof SkepticToBelieverStepsContent, 'New step');
+      handleContentUpdate(`step_quote_${nextSlot}` as keyof SkepticToBelieverStepsContent, 'Compelling quote or statistic');
+      handleContentUpdate(`step_result_${nextSlot}` as keyof SkepticToBelieverStepsContent, 'Outcome achieved');
+    }
   };
 
   // Handle removing a step
   const handleRemoveStep = (indexToRemove: number) => {
-    const newSteps = removeStep(blockContent.conversion_steps, indexToRemove);
-    handleContentUpdate('conversion_steps', newSteps);
+    const fieldNum = indexToRemove + 1;
+    handleContentUpdate(`step_name_${fieldNum}` as keyof SkepticToBelieverStepsContent, '');
+    handleContentUpdate(`step_quote_${fieldNum}` as keyof SkepticToBelieverStepsContent, '');
+    handleContentUpdate(`step_result_${fieldNum}` as keyof SkepticToBelieverStepsContent, '');
 
     // Also clear the corresponding icon if it exists
-    const iconField = `step_icon_${indexToRemove + 1}` as keyof SkepticToBelieverStepsContent;
+    const iconField = `step_icon_${fieldNum}` as keyof SkepticToBelieverStepsContent;
     if (blockContent[iconField]) {
       handleContentUpdate(iconField, '');
     }
@@ -231,7 +326,7 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
                         mode={mode}
                         value={step.title || ''}
                         onEdit={(value) => {
-                          const updatedSteps = blockContent.conversion_steps.split('|');
+                          const updatedSteps = (blockContent.conversion_steps || '').split('|');
                           updatedSteps[index * 3] = value;
                           handleContentUpdate('conversion_steps', updatedSteps.join('|'));
                         }}
@@ -252,7 +347,7 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
                             mode={mode}
                             value={step.thought || ''}
                             onEdit={(value) => {
-                              const updatedSteps = blockContent.conversion_steps.split('|');
+                              const updatedSteps = (blockContent.conversion_steps || '').split('|');
                               updatedSteps[index * 3 + 1] = `"${value}"`;
                               handleContentUpdate('conversion_steps', updatedSteps.join('|'));
                             }}
@@ -273,7 +368,7 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
                         mode={mode}
                         value={step.description || ''}
                         onEdit={(value) => {
-                          const updatedSteps = blockContent.conversion_steps.split('|');
+                          const updatedSteps = (blockContent.conversion_steps || '').split('|');
                           updatedSteps[index * 3 + 2] = value;
                           handleContentUpdate('conversion_steps', updatedSteps.join('|'));
                         }}

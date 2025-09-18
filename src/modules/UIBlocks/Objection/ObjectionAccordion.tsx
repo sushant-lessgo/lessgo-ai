@@ -17,12 +17,34 @@ import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
 interface ObjectionAccordionContent {
   headline: string;
   subheadline?: string;
-  objection_titles: string;
-  objection_responses: string;
-  objection_icons?: string;
+  // Individual objection fields (up to 6 items)
+  objection_1: string;
+  response_1: string;
+  objection_2: string;
+  response_2: string;
+  objection_3: string;
+  response_3: string;
+  objection_4: string;
+  response_4: string;
+  objection_5: string;
+  response_5: string;
+  objection_6: string;
+  response_6: string;
+  // Icon fields for each objection
+  objection_icon_1?: string;
+  objection_icon_2?: string;
+  objection_icon_3?: string;
+  objection_icon_4?: string;
+  objection_icon_5?: string;
+  objection_icon_6?: string;
+  // Global settings
   response_icon?: string;
   trust_icon?: string;
   help_text?: string;
+  // Legacy fields for backward compatibility
+  objection_titles?: string;
+  objection_responses?: string;
+  objection_icons?: string;
 }
 
 // Objection item structure
@@ -36,53 +58,89 @@ interface ObjectionItem {
 
 // Content schema - defines structure and defaults
 const CONTENT_SCHEMA = {
-  headline: { 
-    type: 'string' as const, 
-    default: 'Common Questions & Concerns' 
-  },
-  subheadline: { 
-    type: 'string' as const, 
-    default: 'We understand your concerns. Here are honest answers to the questions we hear most often.' 
-  },
-  objection_titles: { 
-    type: 'string' as const, 
-    default: 'Is this too expensive for a small business?|Will this replace our current system?|How do we know it will actually work?|What if we need help setting it up?|Is our data really secure with you?' 
-  },
-  objection_responses: { 
-    type: 'string' as const, 
-    default: 'We designed our pricing specifically for growing businesses. Most customers save more than the monthly cost within the first week through improved efficiency.|Not at all. We integrate seamlessly with your existing tools and workflows. You can start small and gradually expand usage as your team gets comfortable.|We offer a 30-day free trial with full access to all features. Plus, over 10,000 businesses already trust us with their operations.|Our dedicated onboarding team provides white-glove setup, training, and ongoing support. Most customers are fully operational within 24 hours.|Absolutely. We use bank-level encryption, are SOC 2 compliant, and never share your data with third parties. Your information is more secure with us than on local systems.' 
-  },
-  objection_icons: {
+  headline: {
     type: 'string' as const,
-    default: '💰|🔧|❓|🛠️|🔒'
+    default: 'Common Questions & Concerns'
   },
-  response_icon: {
+  subheadline: {
     type: 'string' as const,
-    default: '✅'
+    default: 'We understand your concerns. Here are honest answers to the questions we hear most often.'
   },
-  trust_icon: {
-    type: 'string' as const,
-    default: '✅'
-  },
-  help_text: {
-    type: 'string' as const,
-    default: 'Still have questions? We\'re here to help.'
-  }
+  // Individual objection fields
+  objection_1: { type: 'string' as const, default: 'Is this too expensive for a small business?' },
+  response_1: { type: 'string' as const, default: 'We designed our pricing specifically for growing businesses. Most customers save more than the monthly cost within the first week through improved efficiency.' },
+  objection_2: { type: 'string' as const, default: 'Will this replace our current system?' },
+  response_2: { type: 'string' as const, default: 'Not at all. We integrate seamlessly with your existing tools and workflows. You can start small and gradually expand usage as your team gets comfortable.' },
+  objection_3: { type: 'string' as const, default: 'How do we know it will actually work?' },
+  response_3: { type: 'string' as const, default: 'We offer a 30-day free trial with full access to all features. Plus, over 10,000 businesses already trust us with their operations.' },
+  objection_4: { type: 'string' as const, default: 'What if we need help setting it up?' },
+  response_4: { type: 'string' as const, default: 'Our dedicated onboarding team provides white-glove setup, training, and ongoing support. Most customers are fully operational within 24 hours.' },
+  objection_5: { type: 'string' as const, default: 'Is our data really secure with you?' },
+  response_5: { type: 'string' as const, default: 'Absolutely. We use bank-level encryption, are SOC 2 compliant, and never share your data with third parties. Your information is more secure with us than on local systems.' },
+  objection_6: { type: 'string' as const, default: 'What about integration complexity?' },
+  response_6: { type: 'string' as const, default: 'Our platform connects with 500+ popular tools through our API. Most integrations take under 10 minutes to set up with our step-by-step guides.' },
+  // Icon fields
+  objection_icon_1: { type: 'string' as const, default: '💰' },
+  objection_icon_2: { type: 'string' as const, default: '🔧' },
+  objection_icon_3: { type: 'string' as const, default: '❓' },
+  objection_icon_4: { type: 'string' as const, default: '🛠️' },
+  objection_icon_5: { type: 'string' as const, default: '🔒' },
+  objection_icon_6: { type: 'string' as const, default: '⚡' },
+  // Global settings
+  response_icon: { type: 'string' as const, default: '✅' },
+  trust_icon: { type: 'string' as const, default: '✅' },
+  help_text: { type: 'string' as const, default: 'Still have questions? We\'re here to help.' },
+  // Legacy fields for backward compatibility
+  objection_titles: { type: 'string' as const, default: 'Is this too expensive for a small business?|Will this replace our current system?|How do we know it will actually work?|What if we need help setting it up?|Is our data really secure with you?' },
+  objection_responses: { type: 'string' as const, default: 'We designed our pricing specifically for growing businesses. Most customers save more than the monthly cost within the first week through improved efficiency.|Not at all. We integrate seamlessly with your existing tools and workflows. You can start small and gradually expand usage as your team gets comfortable.|We offer a 30-day free trial with full access to all features. Plus, over 10,000 businesses already trust us with their operations.|Our dedicated onboarding team provides white-glove setup, training, and ongoing support. Most customers are fully operational within 24 hours.|Absolutely. We use bank-level encryption, are SOC 2 compliant, and never share your data with third parties. Your information is more secure with us than on local systems.' },
+  objection_icons: { type: 'string' as const, default: '💰|🔧|❓|🛠️|🔒' }
 };
 
-// Parse objection data from pipe-separated strings
-const parseObjectionData = (titles: string, responses: string, icons?: string): ObjectionItem[] => {
-  const titleList = parsePipeData(titles);
-  const responseList = parsePipeData(responses);
-  const iconList = icons ? parsePipeData(icons) : [];
-  
-  return titleList.map((title, index) => ({
-    id: `objection-${index}`,
-    index,
-    title,
-    response: responseList[index] || 'Response not provided.',
-    icon: iconList[index] || getDefaultIcon(title)
-  }));
+// Parse objection data from both individual and pipe-separated formats
+const parseObjectionData = (content: ObjectionAccordionContent): ObjectionItem[] => {
+  const objections: ObjectionItem[] = [];
+
+  // Check for individual fields first (preferred format)
+  const individualFields = [
+    { objection: content.objection_1, response: content.response_1, icon: content.objection_icon_1 },
+    { objection: content.objection_2, response: content.response_2, icon: content.objection_icon_2 },
+    { objection: content.objection_3, response: content.response_3, icon: content.objection_icon_3 },
+    { objection: content.objection_4, response: content.response_4, icon: content.objection_icon_4 },
+    { objection: content.objection_5, response: content.response_5, icon: content.objection_icon_5 },
+    { objection: content.objection_6, response: content.response_6, icon: content.objection_icon_6 }
+  ];
+
+  // Process individual fields
+  individualFields.forEach((field, index) => {
+    if (field.objection && field.objection.trim()) {
+      objections.push({
+        id: `objection-${index}`,
+        index,
+        title: field.objection.trim(),
+        response: field.response?.trim() || 'Response not provided.',
+        icon: field.icon || getDefaultIcon(field.objection)
+      });
+    }
+  });
+
+  // Fallback to legacy pipe-separated format if no individual fields
+  if (objections.length === 0 && content.objection_titles && content.objection_responses) {
+    const titleList = parsePipeData(content.objection_titles);
+    const responseList = parsePipeData(content.objection_responses);
+    const iconList = content.objection_icons ? parsePipeData(content.objection_icons) : [];
+
+    titleList.forEach((title, index) => {
+      objections.push({
+        id: `objection-${index}`,
+        index,
+        title,
+        response: responseList[index] || 'Response not provided.',
+        icon: iconList[index] || getDefaultIcon(title)
+      });
+    });
+  }
+
+  return objections;
 };
 
 // Get default icon based on content
@@ -101,38 +159,62 @@ const getDefaultIcon = (title: string) => {
   return '❓';
 };
 
-// Helper function to add a new objection
-const addObjection = (titles: string, responses: string): { newTitles: string; newResponses: string } => {
-  const titleList = titles.split('|').map(t => t.trim()).filter(t => t);
-  const responseList = responses.split('|').map(r => r.trim()).filter(r => r);
+// Helper function to get next available objection slot
+const getNextAvailableSlot = (content: ObjectionAccordionContent): number => {
+  const fields = [
+    content.objection_1,
+    content.objection_2,
+    content.objection_3,
+    content.objection_4,
+    content.objection_5,
+    content.objection_6
+  ];
 
-  // Add new objection with default content
-  titleList.push('New objection or concern');
-  responseList.push('Address this objection with a clear, honest response that builds trust.');
+  for (let i = 0; i < fields.length; i++) {
+    if (!fields[i] || fields[i].trim() === '') {
+      return i + 1;
+    }
+  }
 
-  return {
-    newTitles: titleList.join('|'),
-    newResponses: responseList.join('|')
-  };
+  return -1; // No slots available
 };
 
-// Helper function to remove an objection
-const removeObjection = (titles: string, responses: string, indexToRemove: number): { newTitles: string; newResponses: string } => {
-  const titleList = titles.split('|').map(t => t.trim()).filter(t => t);
-  const responseList = responses.split('|').map(r => r.trim()).filter(r => r);
+// Helper function to shift objections down when removing one
+const shiftObjectionsDown = (content: ObjectionAccordionContent, removedIndex: number): Partial<ObjectionAccordionContent> => {
+  const updates: Partial<ObjectionAccordionContent> = {};
 
-  // Remove the objection at the specified index
-  if (indexToRemove >= 0 && indexToRemove < titleList.length) {
-    titleList.splice(indexToRemove, 1);
-  }
-  if (indexToRemove >= 0 && indexToRemove < responseList.length) {
-    responseList.splice(indexToRemove, 1);
+  // Get all objections after the removed one
+  const allObjections = [
+    { objection: content.objection_1, response: content.response_1, icon: content.objection_icon_1 },
+    { objection: content.objection_2, response: content.response_2, icon: content.objection_icon_2 },
+    { objection: content.objection_3, response: content.response_3, icon: content.objection_icon_3 },
+    { objection: content.objection_4, response: content.response_4, icon: content.objection_icon_4 },
+    { objection: content.objection_5, response: content.response_5, icon: content.objection_icon_5 },
+    { objection: content.objection_6, response: content.response_6, icon: content.objection_icon_6 }
+  ];
+
+  // Filter out the removed item and empty slots
+  const validObjections = allObjections
+    .map((obj, index) => ({ ...obj, originalIndex: index }))
+    .filter((obj, index) => index !== removedIndex && obj.objection && obj.objection.trim())
+    .slice(0, 5); // Limit to 5 since one is being removed
+
+  // Clear all fields first
+  for (let i = 1; i <= 6; i++) {
+    updates[`objection_${i}` as keyof ObjectionAccordionContent] = '';
+    updates[`response_${i}` as keyof ObjectionAccordionContent] = '';
+    updates[`objection_icon_${i}` as keyof ObjectionAccordionContent] = '';
   }
 
-  return {
-    newTitles: titleList.join('|'),
-    newResponses: responseList.join('|')
-  };
+  // Reassign remaining objections
+  validObjections.forEach((obj, newIndex) => {
+    const fieldNum = newIndex + 1;
+    updates[`objection_${fieldNum}` as keyof ObjectionAccordionContent] = obj.objection || '';
+    updates[`response_${fieldNum}` as keyof ObjectionAccordionContent] = obj.response || '';
+    updates[`objection_icon_${fieldNum}` as keyof ObjectionAccordionContent] = obj.icon || '';
+  });
+
+  return updates;
 };
 
 // Individual Objection Accordion Item
@@ -317,45 +399,43 @@ export default function ObjectionAccordion(props: LayoutComponentProps) {
   // State for accordion open/closed items
   const [openItems, setOpenItems] = useState<Set<string>>(new Set());
 
-  // Parse objection data
-  const objectionItems = parseObjectionData(
-    blockContent.objection_titles, 
-    blockContent.objection_responses,
-    blockContent.objection_icons
-  );
+  // Parse objection data from both individual and legacy formats
+  const objectionItems = parseObjectionData(blockContent);
 
-  // Handle individual title/response editing
+  // Handle individual field editing
   const handleTitleEdit = (index: number, value: string) => {
-    const updatedTitles = updateListData(blockContent.objection_titles, index, value);
-    handleContentUpdate('objection_titles', updatedTitles);
+    const fieldName = `objection_${index + 1}` as keyof ObjectionAccordionContent;
+    handleContentUpdate(fieldName, value);
   };
 
   const handleResponseEdit = (index: number, value: string) => {
-    const updatedResponses = updateListData(blockContent.objection_responses, index, value);
-    handleContentUpdate('objection_responses', updatedResponses);
+    const fieldName = `response_${index + 1}` as keyof ObjectionAccordionContent;
+    handleContentUpdate(fieldName, value);
   };
 
   const handleIconEdit = (index: number, value: string) => {
-    const icons = blockContent.objection_icons ? blockContent.objection_icons.split('|') : [];
-    while (icons.length <= index) {
-      icons.push('❓');
-    }
-    icons[index] = value;
-    handleContentUpdate('objection_icons', icons.join('|'));
+    const fieldName = `objection_icon_${index + 1}` as keyof ObjectionAccordionContent;
+    handleContentUpdate(fieldName, value);
   };
 
   // Handle adding a new objection
   const handleAddObjection = () => {
-    const { newTitles, newResponses } = addObjection(blockContent.objection_titles, blockContent.objection_responses);
-    handleContentUpdate('objection_titles', newTitles);
-    handleContentUpdate('objection_responses', newResponses);
+    const nextSlot = getNextAvailableSlot(blockContent);
+    if (nextSlot > 0) {
+      handleContentUpdate(`objection_${nextSlot}` as keyof ObjectionAccordionContent, 'New objection or concern');
+      handleContentUpdate(`response_${nextSlot}` as keyof ObjectionAccordionContent, 'Address this objection with a clear, honest response that builds trust.');
+      handleContentUpdate(`objection_icon_${nextSlot}` as keyof ObjectionAccordionContent, '❓');
+    }
   };
 
   // Handle removing an objection
   const handleRemoveObjection = (indexToRemove: number) => {
-    const { newTitles, newResponses } = removeObjection(blockContent.objection_titles, blockContent.objection_responses, indexToRemove);
-    handleContentUpdate('objection_titles', newTitles);
-    handleContentUpdate('objection_responses', newResponses);
+    const updates = shiftObjectionsDown(blockContent, indexToRemove);
+
+    // Apply all updates at once
+    Object.entries(updates).forEach(([key, value]) => {
+      handleContentUpdate(key as keyof ObjectionAccordionContent, value as string);
+    });
   };
 
   // Toggle accordion item
@@ -508,8 +588,19 @@ export const componentMeta = {
   contentFields: [
     { key: 'headline', label: 'Section Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
-    { key: 'objection_titles', label: 'Objection Titles (pipe separated)', type: 'textarea', required: true },
-    { key: 'objection_responses', label: 'Objection Responses (pipe separated)', type: 'textarea', required: true }
+    // Individual objection fields
+    { key: 'objection_1', label: 'First Objection', type: 'text', required: true },
+    { key: 'response_1', label: 'First Response', type: 'textarea', required: true },
+    { key: 'objection_2', label: 'Second Objection', type: 'text', required: true },
+    { key: 'response_2', label: 'Second Response', type: 'textarea', required: true },
+    { key: 'objection_3', label: 'Third Objection', type: 'text', required: true },
+    { key: 'response_3', label: 'Third Response', type: 'textarea', required: true },
+    { key: 'objection_4', label: 'Fourth Objection', type: 'text', required: false },
+    { key: 'response_4', label: 'Fourth Response', type: 'textarea', required: false },
+    { key: 'objection_5', label: 'Fifth Objection', type: 'text', required: false },
+    { key: 'response_5', label: 'Fifth Response', type: 'textarea', required: false },
+    { key: 'objection_6', label: 'Sixth Objection', type: 'text', required: false },
+    { key: 'response_6', label: 'Sixth Response', type: 'textarea', required: false }
   ],
   
   // ✅ NEW: Enhanced features

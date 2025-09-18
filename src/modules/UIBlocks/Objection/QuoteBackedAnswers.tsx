@@ -15,7 +15,27 @@ import { LayoutComponentProps } from '@/types/storeTypes';
 interface QuoteBackedAnswersContent {
   headline: string;
   subheadline?: string;
-  quote_blocks: string;
+  // Individual quote/objection fields (up to 6 items)
+  objection_1: string;
+  quote_response_1: string;
+  quote_attribution_1: string;
+  objection_2: string;
+  quote_response_2: string;
+  quote_attribution_2: string;
+  objection_3: string;
+  quote_response_3: string;
+  quote_attribution_3: string;
+  objection_4: string;
+  quote_response_4: string;
+  quote_attribution_4: string;
+  objection_5: string;
+  quote_response_5: string;
+  quote_attribution_5: string;
+  objection_6: string;
+  quote_response_6: string;
+  quote_attribution_6: string;
+  // Optional source credential fields
+  source_credentials?: string;
   expert_label?: string;
   verification_label?: string;
   trust_indicator_1?: string;
@@ -26,101 +46,159 @@ interface QuoteBackedAnswersContent {
   trust_icon_1?: string;
   trust_icon_2?: string;
   trust_icon_3?: string;
+  // Legacy field for backward compatibility
+  quote_blocks?: string;
 }
 
 // Content schema - defines structure and defaults
 const CONTENT_SCHEMA = {
-  headline: { 
-    type: 'string' as const, 
-    default: 'What Industry Experts Are Saying' 
-  },
-  subheadline: { 
-    type: 'string' as const, 
-    default: 'Don\'t just take our word for it. Here\'s what leading authorities in the field have to say.' 
-  },
-  quote_blocks: { 
-    type: 'string' as const, 
-    default: 'This approach is exactly what the industry has been waiting for. The implementation is both sophisticated and accessible.|Dr. Sarah Chen, CTO at TechForward|The security framework they\'ve built exceeds enterprise standards while remaining user-friendly.|Mark Rodriguez, CISO at SecureBase|I\'ve seen many solutions in this space, but this one actually delivers on its promises.|Lisa Thompson, VP Engineering at DataScale|The ROI we\'ve seen is unprecedented - this isn\'t just a tool, it\'s a competitive advantage.|James Wilson, CEO at GrowthTech' 
-  },
-  expert_label: {
+  headline: {
     type: 'string' as const,
-    default: 'Industry Expert'
+    default: 'What Industry Experts Are Saying'
   },
-  verification_label: {
+  subheadline: {
     type: 'string' as const,
-    default: 'Verified'
+    default: 'Don\'t just take our word for it. Here\'s what leading authorities in the field have to say.'
   },
-  trust_indicator_1: {
-    type: 'string' as const,
-    default: 'Verified Experts'
-  },
-  trust_indicator_2: {
-    type: 'string' as const,
-    default: 'Industry Recognition'
-  },
-  trust_indicator_3: {
-    type: 'string' as const,
-    default: 'Independent Reviews'
-  },
+  // Individual objection/quote/attribution triplets
+  objection_1: { type: 'string' as const, default: 'Is this really better than existing solutions?' },
+  quote_response_1: { type: 'string' as const, default: 'This approach is exactly what the industry has been waiting for. The implementation is both sophisticated and accessible.' },
+  quote_attribution_1: { type: 'string' as const, default: 'Dr. Sarah Chen, CTO at TechForward' },
+  objection_2: { type: 'string' as const, default: 'How secure is this platform really?' },
+  quote_response_2: { type: 'string' as const, default: 'The security framework they\'ve built exceeds enterprise standards while remaining user-friendly.' },
+  quote_attribution_2: { type: 'string' as const, default: 'Mark Rodriguez, CISO at SecureBase' },
+  objection_3: { type: 'string' as const, default: 'Does it actually deliver on its promises?' },
+  quote_response_3: { type: 'string' as const, default: 'I\'ve seen many solutions in this space, but this one actually delivers on its promises.' },
+  quote_attribution_3: { type: 'string' as const, default: 'Lisa Thompson, VP Engineering at DataScale' },
+  objection_4: { type: 'string' as const, default: 'What about the return on investment?' },
+  quote_response_4: { type: 'string' as const, default: 'The ROI we\'ve seen is unprecedented - this isn\'t just a tool, it\'s a competitive advantage.' },
+  quote_attribution_4: { type: 'string' as const, default: 'James Wilson, CEO at GrowthTech' },
+  objection_5: { type: 'string' as const, default: 'Is this suitable for our industry?' },
+  quote_response_5: { type: 'string' as const, default: 'We\'ve implemented this across multiple verticals, and the results are consistently exceptional.' },
+  quote_attribution_5: { type: 'string' as const, default: 'Amanda Foster, Solutions Architect at IndustryTech' },
+  objection_6: { type: 'string' as const, default: 'What about support and maintenance?' },
+  quote_response_6: { type: 'string' as const, default: 'Their support team is incredibly responsive, and the platform practically maintains itself.' },
+  quote_attribution_6: { type: 'string' as const, default: 'Michael Thompson, Operations Director at ScaleUp' },
+  // Source credibility settings
+  source_credentials: { type: 'string' as const, default: 'All quotes from verified industry professionals with 10+ years experience' },
+  expert_label: { type: 'string' as const, default: 'Industry Expert' },
+  verification_label: { type: 'string' as const, default: 'Verified' },
+  trust_indicator_1: { type: 'string' as const, default: 'Verified Experts' },
+  trust_indicator_2: { type: 'string' as const, default: 'Industry Recognition' },
+  trust_indicator_3: { type: 'string' as const, default: 'Independent Reviews' },
+  // Icons
   quote_icon: { type: 'string' as const, default: '💬' },
   verification_icon: { type: 'string' as const, default: '✅' },
   trust_icon_1: { type: 'string' as const, default: '🛡️' },
   trust_icon_2: { type: 'string' as const, default: '⭐' },
-  trust_icon_3: { type: 'string' as const, default: '📊' }
+  trust_icon_3: { type: 'string' as const, default: '📊' },
+  // Legacy field for backward compatibility
+  quote_blocks: {
+    type: 'string' as const,
+    default: 'This approach is exactly what the industry has been waiting for. The implementation is both sophisticated and accessible.|Dr. Sarah Chen, CTO at TechForward|The security framework they\'ve built exceeds enterprise standards while remaining user-friendly.|Mark Rodriguez, CISO at SecureBase|I\'ve seen many solutions in this space, but this one actually delivers on its promises.|Lisa Thompson, VP Engineering at DataScale|The ROI we\'ve seen is unprecedented - this isn\'t just a tool, it\'s a competitive advantage.|James Wilson, CEO at GrowthTech'
+  }
 };
 
-// Helper function to add a new quote block
-const addQuoteBlock = (quoteBlocks: string): string => {
-  const blocks = quoteBlocks ? quoteBlocks.split('|') : [];
-  const quotes = [];
-  const authors = [];
+// Parse quote data from both individual and legacy formats
+const parseQuoteData = (content: QuoteBackedAnswersContent): Array<{objection: string, quote: string, attribution: string, index: number}> => {
+  const quotes: Array<{objection: string, quote: string, attribution: string, index: number}> = [];
 
-  // Parse existing blocks
-  for (let i = 0; i < blocks.length; i += 2) {
-    if (blocks[i]) quotes.push(blocks[i].trim());
-    if (blocks[i + 1]) authors.push(blocks[i + 1].trim());
+  // Check for individual fields first (preferred format)
+  const individualQuotes = [
+    { objection: content.objection_1, quote: content.quote_response_1, attribution: content.quote_attribution_1 },
+    { objection: content.objection_2, quote: content.quote_response_2, attribution: content.quote_attribution_2 },
+    { objection: content.objection_3, quote: content.quote_response_3, attribution: content.quote_attribution_3 },
+    { objection: content.objection_4, quote: content.quote_response_4, attribution: content.quote_attribution_4 },
+    { objection: content.objection_5, quote: content.quote_response_5, attribution: content.quote_attribution_5 },
+    { objection: content.objection_6, quote: content.quote_response_6, attribution: content.quote_attribution_6 }
+  ];
+
+  // Process individual fields
+  individualQuotes.forEach((item, index) => {
+    if (item.objection && item.objection.trim() && item.quote && item.quote.trim()) {
+      quotes.push({
+        objection: item.objection.trim(),
+        quote: item.quote.trim(),
+        attribution: item.attribution?.trim() || 'Anonymous Expert',
+        index
+      });
+    }
+  });
+
+  // Fallback to legacy format if no individual fields
+  if (quotes.length === 0 && content.quote_blocks) {
+    const blocks = content.quote_blocks.split('|');
+    for (let i = 0; i < blocks.length; i += 2) {
+      if (blocks[i] && blocks[i].trim()) {
+        quotes.push({
+          objection: `Expert perspective ${Math.floor(i / 2) + 1}`, // Generate generic objection
+          quote: blocks[i].trim(),
+          attribution: blocks[i + 1]?.trim() || 'Anonymous Expert',
+          index: Math.floor(i / 2)
+        });
+      }
+    }
   }
 
-  // Add new quote
-  quotes.push('Enter a compelling quote from an industry expert that validates your solution.');
-  authors.push('Expert Name, Title at Company');
-
-  // Rebuild the string
-  const result = [];
-  for (let i = 0; i < quotes.length; i++) {
-    result.push(quotes[i]);
-    result.push(authors[i] || '');
-  }
-
-  return result.join('|');
+  return quotes;
 };
 
-// Helper function to remove a quote block
-const removeQuoteBlock = (quoteBlocks: string, indexToRemove: number): string => {
-  const blocks = quoteBlocks ? quoteBlocks.split('|') : [];
-  const quotes = [];
-  const authors = [];
+// Helper function to get next available quote slot
+const getNextAvailableQuoteSlot = (content: QuoteBackedAnswersContent): number => {
+  const quotes = [
+    content.objection_1,
+    content.objection_2,
+    content.objection_3,
+    content.objection_4,
+    content.objection_5,
+    content.objection_6
+  ];
 
-  // Parse existing blocks
-  for (let i = 0; i < blocks.length; i += 2) {
-    if (blocks[i]) quotes.push(blocks[i].trim());
-    if (blocks[i + 1]) authors.push(blocks[i + 1].trim());
-  }
-
-  // Remove the quote at the specified index
-  if (indexToRemove >= 0 && indexToRemove < quotes.length) {
-    quotes.splice(indexToRemove, 1);
-    authors.splice(indexToRemove, 1);
-  }
-
-  // Rebuild the string
-  const result = [];
   for (let i = 0; i < quotes.length; i++) {
-    result.push(quotes[i]);
-    result.push(authors[i] || '');
+    if (!quotes[i] || quotes[i].trim() === '') {
+      return i + 1;
+    }
   }
 
-  return result.join('|');
+  return -1; // No slots available
+};
+
+// Helper function to shift quotes down when removing one
+const shiftQuotesDown = (content: QuoteBackedAnswersContent, removedIndex: number): Partial<QuoteBackedAnswersContent> => {
+  const updates: Partial<QuoteBackedAnswersContent> = {};
+
+  // Get all quotes after filtering out empty ones
+  const allQuotes = [
+    { objection: content.objection_1, quote: content.quote_response_1, attribution: content.quote_attribution_1 },
+    { objection: content.objection_2, quote: content.quote_response_2, attribution: content.quote_attribution_2 },
+    { objection: content.objection_3, quote: content.quote_response_3, attribution: content.quote_attribution_3 },
+    { objection: content.objection_4, quote: content.quote_response_4, attribution: content.quote_attribution_4 },
+    { objection: content.objection_5, quote: content.quote_response_5, attribution: content.quote_attribution_5 },
+    { objection: content.objection_6, quote: content.quote_response_6, attribution: content.quote_attribution_6 }
+  ];
+
+  // Filter out the removed item and empty quotes
+  const validQuotes = allQuotes
+    .map((quote, index) => ({ ...quote, originalIndex: index }))
+    .filter((quote, index) => index !== removedIndex && quote.objection && quote.objection.trim())
+    .slice(0, 5); // Limit to 5 since one is being removed
+
+  // Clear all fields first
+  for (let i = 1; i <= 6; i++) {
+    updates[`objection_${i}` as keyof QuoteBackedAnswersContent] = '';
+    updates[`quote_response_${i}` as keyof QuoteBackedAnswersContent] = '';
+    updates[`quote_attribution_${i}` as keyof QuoteBackedAnswersContent] = '';
+  }
+
+  // Reassign remaining quotes
+  validQuotes.forEach((quote, newIndex) => {
+    const fieldNum = newIndex + 1;
+    updates[`objection_${fieldNum}` as keyof QuoteBackedAnswersContent] = quote.objection || '';
+    updates[`quote_response_${fieldNum}` as keyof QuoteBackedAnswersContent] = quote.quote || '';
+    updates[`quote_attribution_${fieldNum}` as keyof QuoteBackedAnswersContent] = quote.attribution || '';
+  });
+
+  return updates;
 };
 
 export default function QuoteBackedAnswers(props: LayoutComponentProps) {
@@ -154,14 +232,20 @@ export default function QuoteBackedAnswers(props: LayoutComponentProps) {
 
   // Handle adding a new quote
   const handleAddQuote = () => {
-    const newQuoteBlocks = addQuoteBlock(blockContent.quote_blocks);
-    handleContentUpdate('quote_blocks', newQuoteBlocks);
+    const nextSlot = getNextAvailableQuoteSlot(blockContent);
+    if (nextSlot > 0) {
+      handleContentUpdate(`objection_${nextSlot}` as keyof QuoteBackedAnswersContent, 'New objection or concern');
+      handleContentUpdate(`quote_response_${nextSlot}` as keyof QuoteBackedAnswersContent, 'Response backed by credible quote');
+      handleContentUpdate(`quote_attribution_${nextSlot}` as keyof QuoteBackedAnswersContent, 'Expert Name, Title');
+    }
   };
 
   // Handle removing a quote
   const handleRemoveQuote = (indexToRemove: number) => {
-    const newQuoteBlocks = removeQuoteBlock(blockContent.quote_blocks, indexToRemove);
-    handleContentUpdate('quote_blocks', newQuoteBlocks);
+    const fieldNum = indexToRemove + 1;
+    handleContentUpdate(`objection_${fieldNum}` as keyof QuoteBackedAnswersContent, '');
+    handleContentUpdate(`quote_response_${fieldNum}` as keyof QuoteBackedAnswersContent, '');
+    handleContentUpdate(`quote_attribution_${fieldNum}` as keyof QuoteBackedAnswersContent, '');
   };
 
   return (
@@ -238,7 +322,7 @@ export default function QuoteBackedAnswers(props: LayoutComponentProps) {
                     mode={mode}
                     value={quoteBlock.quote || ''}
                     onEdit={(value) => {
-                      const updatedQuotes = blockContent.quote_blocks.split('|');
+                      const updatedQuotes = (blockContent.quote_blocks || '').split('|');
                       updatedQuotes[index * 2] = value;
                       handleContentUpdate('quote_blocks', updatedQuotes.join('|'));
                     }}
@@ -262,7 +346,7 @@ export default function QuoteBackedAnswers(props: LayoutComponentProps) {
                         mode={mode}
                         value={quoteBlock.author || ''}
                         onEdit={(value) => {
-                          const updatedQuotes = blockContent.quote_blocks.split('|');
+                          const updatedQuotes = (blockContent.quote_blocks || '').split('|');
                           updatedQuotes[index * 2 + 1] = value;
                           handleContentUpdate('quote_blocks', updatedQuotes.join('|'));
                         }}
