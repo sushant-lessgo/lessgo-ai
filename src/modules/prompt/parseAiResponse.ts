@@ -251,6 +251,79 @@ function processSectionContent(sectionId: string, content: SectionContent): {
     return result;
   }
 
+  // Special handling for UniqueMechanism sections
+  if (sectionId.includes('AlgorithmExplainer')) {
+    const processedAlgorithm = processAlgorithmExplainerContent(sectionId, content);
+    result.content = processedAlgorithm.content;
+    result.warnings = processedAlgorithm.warnings;
+    result.hasIssues = processedAlgorithm.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('InnovationTimeline')) {
+    const processedTimeline = processInnovationTimelineContent(sectionId, content);
+    result.content = processedTimeline.content;
+    result.warnings = processedTimeline.warnings;
+    result.hasIssues = processedTimeline.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('MethodologyBreakdown')) {
+    const processedMethodology = processMethodologyBreakdownContent(sectionId, content);
+    result.content = processedMethodology.content;
+    result.warnings = processedMethodology.warnings;
+    result.hasIssues = processedMethodology.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('ProcessFlowDiagram')) {
+    const processedFlow = processProcessFlowDiagramContent(sectionId, content);
+    result.content = processedFlow.content;
+    result.warnings = processedFlow.warnings;
+    result.hasIssues = processedFlow.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('PropertyComparisonMatrix')) {
+    const processedMatrix = processPropertyComparisonMatrixContent(sectionId, content);
+    result.content = processedMatrix.content;
+    result.warnings = processedMatrix.warnings;
+    result.hasIssues = processedMatrix.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('SecretSauceReveal')) {
+    const processedSecret = processSecretSauceRevealContent(sectionId, content);
+    result.content = processedSecret.content;
+    result.warnings = processedSecret.warnings;
+    result.hasIssues = processedSecret.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('StackedHighlights')) {
+    const processedHighlights = processStackedHighlightsContent(sectionId, content);
+    result.content = processedHighlights.content;
+    result.warnings = processedHighlights.warnings;
+    result.hasIssues = processedHighlights.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('SystemArchitecture')) {
+    const processedArchitecture = processSystemArchitectureContent(sectionId, content);
+    result.content = processedArchitecture.content;
+    result.warnings = processedArchitecture.warnings;
+    result.hasIssues = processedArchitecture.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('TechnicalAdvantage')) {
+    const processedAdvantage = processTechnicalAdvantageContent(sectionId, content);
+    result.content = processedAdvantage.content;
+    result.warnings = processedAdvantage.warnings;
+    result.hasIssues = processedAdvantage.hasIssues;
+    return result;
+  }
+
   Object.entries(content).forEach(([elementKey, elementValue]) => {
     const processedElement = processElement(sectionId, elementKey, elementValue)
 
@@ -1733,4 +1806,388 @@ function validateEmojiOutcomeGridData(content: SectionContent): {
   }
 
   return { warnings, corrected };
+}
+
+/**
+ * UniqueMechanism section processing functions
+ */
+
+function processAlgorithmExplainerContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Convert legacy algorithm_steps format if exists
+  if (content.algorithm_steps && typeof content.algorithm_steps === 'string' && content.algorithm_steps.includes('|')) {
+    const steps = content.algorithm_steps.split('|').map(step => step.trim()).filter(Boolean);
+
+    steps.forEach((step, index) => {
+      result.content[`algorithm_step_${index + 1}`] = step;
+    });
+
+    result.warnings.push(`${sectionId}: Converted legacy algorithm_steps to individual step fields`);
+    delete content.algorithm_steps; // Remove to avoid double processing
+  }
+
+  // Process all fields
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    const processedElement = processElement(sectionId, elementKey, elementValue);
+    if (processedElement.isValid) {
+      result.content[elementKey] = processedElement.value;
+    } else {
+      result.warnings.push(...processedElement.warnings);
+      result.hasIssues = true;
+      result.content[elementKey] = processedElement.fallback;
+    }
+  });
+
+  return result;
+}
+
+function processInnovationTimelineContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Convert legacy timeline_items format if exists
+  if (content.timeline_items && typeof content.timeline_items === 'string' && content.timeline_items.includes('|')) {
+    const items = content.timeline_items.split('|').map(item => item.trim()).filter(Boolean);
+
+    items.forEach((item, index) => {
+      result.content[`timeline_item_${index + 1}`] = item;
+    });
+
+    result.warnings.push(`${sectionId}: Converted legacy timeline_items to individual item fields`);
+    delete content.timeline_items; // Remove to avoid double processing
+  }
+
+  // Process all fields
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    const processedElement = processElement(sectionId, elementKey, elementValue);
+    if (processedElement.isValid) {
+      result.content[elementKey] = processedElement.value;
+    } else {
+      result.warnings.push(...processedElement.warnings);
+      result.hasIssues = true;
+      result.content[elementKey] = processedElement.fallback;
+    }
+  });
+
+  return result;
+}
+
+function processMethodologyBreakdownContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Convert legacy formats if they exist
+  if (content.key_principles && typeof content.key_principles === 'string' && content.key_principles.includes('|')) {
+    const principles = content.key_principles.split('|').map(p => p.trim()).filter(Boolean);
+    principles.forEach((principle, index) => {
+      result.content[`principle_${index + 1}`] = principle;
+    });
+    result.warnings.push(`${sectionId}: Converted legacy key_principles to individual principle fields`);
+    delete content.key_principles;
+  }
+
+  if (content.principle_details && typeof content.principle_details === 'string' && content.principle_details.includes('|')) {
+    const details = content.principle_details.split('|').map(d => d.trim()).filter(Boolean);
+    details.forEach((detail, index) => {
+      result.content[`detail_${index + 1}`] = detail;
+    });
+    result.warnings.push(`${sectionId}: Converted legacy principle_details to individual detail fields`);
+    delete content.principle_details;
+  }
+
+  if (content.result_metrics && typeof content.result_metrics === 'string' && content.result_metrics.includes('|')) {
+    const metrics = content.result_metrics.split('|').map(m => m.trim()).filter(Boolean);
+    metrics.forEach((metric, index) => {
+      result.content[`result_metric_${index + 1}`] = metric;
+    });
+    result.warnings.push(`${sectionId}: Converted legacy result_metrics to individual metric fields`);
+    delete content.result_metrics;
+  }
+
+  if (content.result_labels && typeof content.result_labels === 'string' && content.result_labels.includes('|')) {
+    const labels = content.result_labels.split('|').map(l => l.trim()).filter(Boolean);
+    labels.forEach((label, index) => {
+      result.content[`result_label_${index + 1}`] = label;
+    });
+    result.warnings.push(`${sectionId}: Converted legacy result_labels to individual label fields`);
+    delete content.result_labels;
+  }
+
+  // Process all fields
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    const processedElement = processElement(sectionId, elementKey, elementValue);
+    if (processedElement.isValid) {
+      result.content[elementKey] = processedElement.value;
+    } else {
+      result.warnings.push(...processedElement.warnings);
+      result.hasIssues = true;
+      result.content[elementKey] = processedElement.fallback;
+    }
+  });
+
+  return result;
+}
+
+function processProcessFlowDiagramContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Process all fields with special handling for pipe-separated fields
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    if (elementKey === 'process_steps' || elementKey === 'step_descriptions' ||
+        elementKey === 'benefit_titles' || elementKey === 'benefit_descriptions') {
+      // Ensure pipe-separated format
+      if (typeof elementValue === 'string' && elementValue.includes('|')) {
+        const items = elementValue.split('|').map(item => item.trim()).filter(Boolean);
+        if (items.length >= 2) {
+          result.content[elementKey] = items.join(' | ');
+        } else {
+          result.warnings.push(`${sectionId}: ${elementKey} should have at least 2 items`);
+          result.hasIssues = true;
+          result.content[elementKey] = elementValue;
+        }
+      } else if (Array.isArray(elementValue)) {
+        result.content[elementKey] = elementValue.filter(item => item && item.trim()).join(' | ');
+      } else {
+        result.content[elementKey] = String(elementValue || '');
+      }
+    } else {
+      const processedElement = processElement(sectionId, elementKey, elementValue);
+      if (processedElement.isValid) {
+        result.content[elementKey] = processedElement.value;
+      } else {
+        result.warnings.push(...processedElement.warnings);
+        result.hasIssues = true;
+        result.content[elementKey] = processedElement.fallback;
+      }
+    }
+  });
+
+  return result;
+}
+
+function processPropertyComparisonMatrixContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Process all fields with special handling for pipe-separated comparison fields
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    if (elementKey === 'properties' || elementKey === 'us_values' || elementKey === 'competitors_values') {
+      // Ensure pipe-separated format
+      if (typeof elementValue === 'string' && elementValue.includes('|')) {
+        const items = elementValue.split('|').map(item => item.trim()).filter(Boolean);
+        if (items.length >= 3) {
+          result.content[elementKey] = items.join(' | ');
+        } else {
+          result.warnings.push(`${sectionId}: ${elementKey} should have at least 3 comparison points`);
+          result.hasIssues = true;
+          result.content[elementKey] = elementValue;
+        }
+      } else if (Array.isArray(elementValue)) {
+        result.content[elementKey] = elementValue.filter(item => item && item.trim()).join(' | ');
+      } else {
+        result.content[elementKey] = String(elementValue || '');
+      }
+    } else {
+      const processedElement = processElement(sectionId, elementKey, elementValue);
+      if (processedElement.isValid) {
+        result.content[elementKey] = processedElement.value;
+      } else {
+        result.warnings.push(...processedElement.warnings);
+        result.hasIssues = true;
+        result.content[elementKey] = processedElement.fallback;
+      }
+    }
+  });
+
+  return result;
+}
+
+function processSecretSauceRevealContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Process all fields normally
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    const processedElement = processElement(sectionId, elementKey, elementValue);
+    if (processedElement.isValid) {
+      result.content[elementKey] = processedElement.value;
+    } else {
+      result.warnings.push(...processedElement.warnings);
+      result.hasIssues = true;
+      result.content[elementKey] = processedElement.fallback;
+    }
+  });
+
+  return result;
+}
+
+function processStackedHighlightsContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Process all fields with special handling for pipe-separated highlight fields
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    if (elementKey === 'highlight_titles' || elementKey === 'highlight_descriptions') {
+      // Ensure pipe-separated format
+      if (typeof elementValue === 'string' && elementValue.includes('|')) {
+        const items = elementValue.split('|').map(item => item.trim()).filter(Boolean);
+        if (items.length >= 3) {
+          result.content[elementKey] = items.join(' | ');
+        } else {
+          result.warnings.push(`${sectionId}: ${elementKey} should have at least 3 highlights`);
+          result.hasIssues = true;
+          result.content[elementKey] = elementValue;
+        }
+      } else if (Array.isArray(elementValue)) {
+        result.content[elementKey] = elementValue.filter(item => item && item.trim()).join(' | ');
+      } else {
+        result.content[elementKey] = String(elementValue || '');
+      }
+    } else {
+      const processedElement = processElement(sectionId, elementKey, elementValue);
+      if (processedElement.isValid) {
+        result.content[elementKey] = processedElement.value;
+      } else {
+        result.warnings.push(...processedElement.warnings);
+        result.hasIssues = true;
+        result.content[elementKey] = processedElement.fallback;
+      }
+    }
+  });
+
+  return result;
+}
+
+function processSystemArchitectureContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Convert legacy architecture_components format if exists
+  if (content.architecture_components && typeof content.architecture_components === 'string' && content.architecture_components.includes('|')) {
+    const components = content.architecture_components.split('|').map(comp => comp.trim()).filter(Boolean);
+
+    components.forEach((component, index) => {
+      result.content[`component_${index + 1}`] = component;
+    });
+
+    result.warnings.push(`${sectionId}: Converted legacy architecture_components to individual component fields`);
+    delete content.architecture_components; // Remove to avoid double processing
+  }
+
+  // Process all fields
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    const processedElement = processElement(sectionId, elementKey, elementValue);
+    if (processedElement.isValid) {
+      result.content[elementKey] = processedElement.value;
+    } else {
+      result.warnings.push(...processedElement.warnings);
+      result.hasIssues = true;
+      result.content[elementKey] = processedElement.fallback;
+    }
+  });
+
+  return result;
+}
+
+function processTechnicalAdvantageContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Process all fields with special handling for pipe-separated advantage fields
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    if (elementKey === 'advantages' || elementKey === 'advantage_descriptions') {
+      // Ensure pipe-separated format
+      if (typeof elementValue === 'string' && elementValue.includes('|')) {
+        const items = elementValue.split('|').map(item => item.trim()).filter(Boolean);
+        if (items.length >= 3) {
+          result.content[elementKey] = items.join(' | ');
+        } else {
+          result.warnings.push(`${sectionId}: ${elementKey} should have at least 3 advantages`);
+          result.hasIssues = true;
+          result.content[elementKey] = elementValue;
+        }
+      } else if (Array.isArray(elementValue)) {
+        result.content[elementKey] = elementValue.filter(item => item && item.trim()).join(' | ');
+      } else {
+        result.content[elementKey] = String(elementValue || '');
+      }
+    } else {
+      const processedElement = processElement(sectionId, elementKey, elementValue);
+      if (processedElement.isValid) {
+        result.content[elementKey] = processedElement.value;
+      } else {
+        result.warnings.push(...processedElement.warnings);
+        result.hasIssues = true;
+        result.content[elementKey] = processedElement.fallback;
+      }
+    }
+  });
+
+  return result;
 }

@@ -343,70 +343,130 @@ export const layoutElementSchema: LayoutSchema = {
     { element: "location_labels", mandatory: false },
   ],
 
-  // UniqueMechanism Section - Using actual component names
+  // UniqueMechanism Section - Updated to match actual component implementations
   AlgorithmExplainer: [
     { element: "headline", mandatory: true },
     { element: "algorithm_name", mandatory: true },
-    { element: "algorithm_description", mandatory: true },
-    { element: "algorithm_steps", mandatory: true },
-    { element: "algorithm_benefits", mandatory: false },
+    { element: "algorithm_steps", mandatory: false }, // Legacy pipe-separated format
+    { element: "algorithm_step_1", mandatory: true },
+    { element: "algorithm_step_2", mandatory: true },
+    { element: "algorithm_step_3", mandatory: true },
+    { element: "algorithm_step_4", mandatory: false },
+    { element: "algorithm_step_5", mandatory: false },
+    { element: "algorithm_step_6", mandatory: false },
+    { element: "algorithm_step_7", mandatory: false },
+    { element: "algorithm_step_8", mandatory: false },
   ],
 
   InnovationTimeline: [
     { element: "headline", mandatory: true },
-    { element: "timeline_entries", mandatory: true },
-    { element: "entry_descriptions", mandatory: true },
-    { element: "entry_dates", mandatory: false },
+    { element: "timeline_items", mandatory: false }, // Legacy pipe-separated format
+    { element: "timeline_item_1", mandatory: true },
+    { element: "timeline_item_2", mandatory: true },
+    { element: "timeline_item_3", mandatory: true },
+    { element: "timeline_item_4", mandatory: false },
+    { element: "timeline_item_5", mandatory: false },
+    { element: "timeline_item_6", mandatory: false },
   ],
 
   MethodologyBreakdown: [
     { element: "headline", mandatory: true },
-    { element: "explainer_content", mandatory: true },
-    { element: "tag_labels", mandatory: true },
-    { element: "tag_descriptions", mandatory: false },
+    { element: "methodology_name", mandatory: true },
+    { element: "methodology_description", mandatory: true },
+    { element: "principle_1", mandatory: true },
+    { element: "principle_2", mandatory: true },
+    { element: "principle_3", mandatory: true },
+    { element: "principle_4", mandatory: false },
+    { element: "principle_5", mandatory: false },
+    { element: "principle_6", mandatory: false },
+    { element: "detail_1", mandatory: true },
+    { element: "detail_2", mandatory: true },
+    { element: "detail_3", mandatory: true },
+    { element: "detail_4", mandatory: false },
+    { element: "detail_5", mandatory: false },
+    { element: "detail_6", mandatory: false },
+    { element: "result_metric_1", mandatory: false },
+    { element: "result_metric_2", mandatory: false },
+    { element: "result_metric_3", mandatory: false },
+    { element: "result_metric_4", mandatory: false },
+    { element: "result_label_1", mandatory: false },
+    { element: "result_label_2", mandatory: false },
+    { element: "result_label_3", mandatory: false },
+    { element: "result_label_4", mandatory: false },
+    { element: "results_title", mandatory: false },
+    { element: "methodology_icon", mandatory: false },
+    // Legacy fields for backward compatibility
+    { element: "key_principles", mandatory: false },
+    { element: "principle_details", mandatory: false },
+    { element: "result_metrics", mandatory: false },
+    { element: "result_labels", mandatory: false },
   ],
 
   ProcessFlowDiagram: [
     { element: "headline", mandatory: true },
-    { element: "flywheel_steps", mandatory: true },
-    { element: "step_descriptions", mandatory: true },
-    { element: "connection_labels", mandatory: false },
+    { element: "subheadline", mandatory: false },
+    { element: "process_steps", mandatory: true }, // Pipe-separated format
+    { element: "step_descriptions", mandatory: true }, // Pipe-separated format
+    { element: "benefits_title", mandatory: false },
+    { element: "benefit_titles", mandatory: false },
+    { element: "benefit_descriptions", mandatory: false },
+    { element: "benefit_icon_1", mandatory: false },
+    { element: "benefit_icon_2", mandatory: false },
+    { element: "benefit_icon_3", mandatory: false },
   ],
 
   PropertyComparisonMatrix: [
     { element: "headline", mandatory: true },
-    { element: "comparison_categories", mandatory: true },
-    { element: "your_approach", mandatory: true },
-    { element: "traditional_approach", mandatory: true },
-    { element: "table_headers", mandatory: false },
+    { element: "properties", mandatory: true }, // Pipe-separated format
+    { element: "us_values", mandatory: true }, // Pipe-separated format
+    { element: "competitors_values", mandatory: true }, // Pipe-separated format
+    { element: "feature_header", mandatory: true },
+    { element: "us_header", mandatory: true },
+    { element: "competitors_header", mandatory: true },
   ],
 
   SecretSauceReveal: [
     { element: "headline", mandatory: true },
-    { element: "patent_titles", mandatory: true },
-    { element: "patent_descriptions", mandatory: true },
-    { element: "patent_numbers", mandatory: false },
+    { element: "secret_sauce", mandatory: true },
+    { element: "explanation", mandatory: true },
+    { element: "secret_icon", mandatory: false },
   ],
 
   StackedHighlights: [
     { element: "headline", mandatory: true },
-    { element: "highlight_titles", mandatory: true },
-    { element: "highlight_descriptions", mandatory: true },
+    { element: "highlight_titles", mandatory: true }, // Pipe-separated format
+    { element: "highlight_descriptions", mandatory: true }, // Pipe-separated format
     { element: "mechanism_name", mandatory: false },
+    { element: "footer_text", mandatory: false },
+    { element: "highlight_icon_1", mandatory: false },
+    { element: "highlight_icon_2", mandatory: false },
+    { element: "highlight_icon_3", mandatory: false },
+    { element: "highlight_icon_4", mandatory: false },
+    { element: "highlight_icon_5", mandatory: false },
+    { element: "highlight_icon_6", mandatory: false },
   ],
 
   SystemArchitecture: [
     { element: "headline", mandatory: true },
-    { element: "model_title", mandatory: true },
-    { element: "model_description", mandatory: true },
-    { element: "component_labels", mandatory: true },
-    { element: "illustration_caption", mandatory: false },
+    { element: "architecture_components", mandatory: false }, // Legacy pipe-separated format
+    { element: "component_1", mandatory: true },
+    { element: "component_2", mandatory: true },
+    { element: "component_3", mandatory: true },
+    { element: "component_4", mandatory: false },
+    { element: "component_5", mandatory: false },
+    { element: "component_6", mandatory: false },
+    { element: "component_icon_1", mandatory: false },
+    { element: "component_icon_2", mandatory: false },
+    { element: "component_icon_3", mandatory: false },
+    { element: "component_icon_4", mandatory: false },
+    { element: "component_icon_5", mandatory: false },
+    { element: "component_icon_6", mandatory: false },
   ],
 
   TechnicalAdvantage: [
     { element: "headline", mandatory: true },
-    { element: "advantages", mandatory: true },
-    { element: "advantage_descriptions", mandatory: true },
+    { element: "advantages", mandatory: true }, // Pipe-separated format
+    { element: "advantage_descriptions", mandatory: false }, // Pipe-separated format
     { element: "advantage_icon_1", mandatory: false },
     { element: "advantage_icon_2", mandatory: false },
     { element: "advantage_icon_3", mandatory: false },

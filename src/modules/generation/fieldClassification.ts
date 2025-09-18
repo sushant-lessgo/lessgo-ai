@@ -77,6 +77,43 @@ export function classifyField(fieldName: string, sectionType?: string): Classifi
     return classifyBeforeAfterGenericField(fieldName, sectionType);
   }
 
+  // UniqueMechanism Section Classifications
+  if (sectionType === 'AlgorithmExplainer') {
+    return classifyAlgorithmExplainerField(fieldName);
+  }
+
+  if (sectionType === 'InnovationTimeline') {
+    return classifyInnovationTimelineField(fieldName);
+  }
+
+  if (sectionType === 'MethodologyBreakdown') {
+    return classifyMethodologyBreakdownField(fieldName);
+  }
+
+  if (sectionType === 'ProcessFlowDiagram') {
+    return classifyProcessFlowDiagramField(fieldName);
+  }
+
+  if (sectionType === 'PropertyComparisonMatrix') {
+    return classifyPropertyComparisonMatrixField(fieldName);
+  }
+
+  if (sectionType === 'SecretSauceReveal') {
+    return classifySecretSauceRevealField(fieldName);
+  }
+
+  if (sectionType === 'StackedHighlights') {
+    return classifyStackedHighlightsField(fieldName);
+  }
+
+  if (sectionType === 'SystemArchitecture') {
+    return classifySystemArchitectureField(fieldName);
+  }
+
+  if (sectionType === 'TechnicalAdvantage') {
+    return classifyTechnicalAdvantageField(fieldName);
+  }
+
   if (sectionType === 'EmojiOutcomeGrid') {
     return classifyEmojiOutcomeGridField(fieldName);
   }
@@ -1536,5 +1573,489 @@ function classifyEmojiOutcomeGridField(fieldName: string): ClassificationResult 
       confidence: 0.7
     },
     user_guidance: 'Please review this field as it may need manual adjustment'
+  };
+}
+
+/**
+ * Classification functions for UniqueMechanism UIBlocks
+ */
+
+function classifyAlgorithmExplainerField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Section headline describing algorithm/process',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create a compelling headline about your algorithm'
+    };
+  }
+
+  if (field === 'algorithm_name') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Company/product-specific algorithm name',
+        fallback_strategy: 'default',
+        confidence: 0.9
+      },
+      suggested_default: 'SmartOptimize AI™',
+      user_guidance: 'Your branded algorithm/technology name'
+    };
+  }
+
+  if (field.startsWith('algorithm_step_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Individual algorithm steps based on business logic',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will break down your process into clear steps'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Algorithm content suitable for AI generation',
+      fallback_strategy: 'generate',
+      confidence: 0.85
+    }
+  };
+}
+
+function classifyInnovationTimelineField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Section headline for innovation timeline',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create a headline highlighting your innovation journey'
+    };
+  }
+
+  if (field.startsWith('timeline_item_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Timeline milestones need business-specific dates and achievements',
+        fallback_strategy: 'generate',
+        confidence: 0.75
+      },
+      user_guidance: 'AI will suggest timeline milestones, but dates should be reviewed'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Timeline content suitable for AI generation',
+      fallback_strategy: 'generate',
+      confidence: 0.85
+    }
+  };
+}
+
+function classifyMethodologyBreakdownField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Section headline for methodology breakdown',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create a compelling methodology headline'
+    };
+  }
+
+  if (field === 'methodology_name') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Company-specific methodology name',
+        fallback_strategy: 'default',
+        confidence: 0.9
+      },
+      suggested_default: 'Adaptive Intelligence Framework™',
+      user_guidance: 'Your branded methodology or framework name'
+    };
+  }
+
+  if (field === 'methodology_description') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'High-level methodology description',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will describe your methodology benefits'
+    };
+  }
+
+  if (field.startsWith('principle_') || field.startsWith('detail_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Methodology principles and details',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will generate methodology principles based on your business'
+    };
+  }
+
+  if (field.startsWith('result_metric_') || field.startsWith('result_label_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Result metrics may need specific business data',
+        fallback_strategy: 'generate',
+        confidence: 0.75
+      },
+      user_guidance: 'AI will suggest metrics, but verify with actual business results'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Methodology content suitable for AI generation',
+      fallback_strategy: 'generate',
+      confidence: 0.85
+    }
+  };
+}
+
+function classifyProcessFlowDiagramField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline' || field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Section headlines for process flow',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create compelling process flow headlines'
+    };
+  }
+
+  if (field === 'process_steps' || field === 'step_descriptions') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Process steps based on business workflow',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will map out your process workflow steps'
+    };
+  }
+
+  if (field.includes('benefit')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Process benefits and advantages',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will highlight key process benefits'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Process content suitable for AI generation',
+      fallback_strategy: 'generate',
+      confidence: 0.85
+    }
+  };
+}
+
+function classifyPropertyComparisonMatrixField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Comparison section headline',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create a competitive comparison headline'
+    };
+  }
+
+  if (field === 'properties' || field === 'us_values' || field === 'competitors_values') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Comparison data needs specific competitive analysis',
+        fallback_strategy: 'generate',
+        confidence: 0.75
+      },
+      user_guidance: 'AI will suggest comparison points, but verify competitive accuracy'
+    };
+  }
+
+  if (field.includes('header')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Table headers for comparison matrix',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create clear comparison table headers'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Comparison content may need competitive research',
+      fallback_strategy: 'generate',
+      confidence: 0.75
+    }
+  };
+}
+
+function classifySecretSauceRevealField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Compelling headline for secret sauce reveal',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create an intriguing secret sauce headline'
+    };
+  }
+
+  if (field === 'secret_sauce') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Company-specific unique differentiator',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      },
+      suggested_default: 'Quantum-Enhanced Machine Learning',
+      user_guidance: 'Your actual unique technology or approach'
+    };
+  }
+
+  if (field === 'explanation') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Explanation of secret sauce benefits',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will explain why your approach is unique'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Secret sauce content suitable for AI generation',
+      fallback_strategy: 'generate',
+      confidence: 0.85
+    }
+  };
+}
+
+function classifyStackedHighlightsField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Section headline for stacked highlights',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create a powerful highlights headline'
+    };
+  }
+
+  if (field === 'highlight_titles' || field === 'highlight_descriptions') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Highlight content based on business features',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create compelling highlight titles and descriptions'
+    };
+  }
+
+  if (field === 'mechanism_name') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Branded mechanism or system name',
+        fallback_strategy: 'default',
+        confidence: 0.9
+      },
+      user_guidance: 'Your branded system or mechanism name'
+    };
+  }
+
+  if (field === 'footer_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Supporting text for unique value proposition',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will add reinforcing value proposition text'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Highlight content suitable for AI generation',
+      fallback_strategy: 'generate',
+      confidence: 0.85
+    }
+  };
+}
+
+function classifySystemArchitectureField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'System architecture section headline',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create a technical architecture headline'
+    };
+  }
+
+  if (field.startsWith('component_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'System components may be business-specific',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      },
+      user_guidance: 'AI will suggest system components, but verify technical accuracy'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Architecture content suitable for AI generation',
+      fallback_strategy: 'generate',
+      confidence: 0.85
+    }
+  };
+}
+
+function classifyTechnicalAdvantageField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Technical advantages section headline',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create a compelling technical advantages headline'
+    };
+  }
+
+  if (field === 'advantages' || field === 'advantage_descriptions') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Technical advantages based on business capabilities',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will highlight your technical competitive advantages'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Technical advantage content suitable for AI generation',
+      fallback_strategy: 'generate',
+      confidence: 0.85
+    }
   };
 }

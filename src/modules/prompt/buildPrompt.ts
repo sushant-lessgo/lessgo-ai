@@ -1069,7 +1069,81 @@ function getSpecificElementGuidance(elementName: string, sectionType: string): s
     questions: "Address real user concerns. Match awareness level. End with question mark.",
     answers: "Direct, helpful responses. Build confidence and trust.",
     value_proposition: "Clear differentiation. Why choose this over alternatives.",
-    supporting_text: "Reinforce main message. Add credibility or urgency."
+    supporting_text: "Reinforce main message. Add credibility or urgency.",
+
+    // UniqueMechanism field guidance
+    algorithm_name: "Brand your algorithm/technology. Make it memorable and proprietary.",
+    algorithm_step_1: "First step in your process. Clear action verb, specific outcome.",
+    algorithm_step_2: "Second step in your process. Build on previous step logically.",
+    algorithm_step_3: "Third step in your process. Show progression and value.",
+    algorithm_step_4: "Fourth step (optional). Advanced functionality or refinement.",
+    algorithm_step_5: "Fifth step (optional). Enhanced capabilities or optimization.",
+    algorithm_step_6: "Sixth step (optional). Advanced features for complex workflows.",
+    algorithm_step_7: "Seventh step (optional). Specialized functionality.",
+    algorithm_step_8: "Eighth step (optional). Complete workflow coverage.",
+
+    timeline_item_1: "First milestone. Include date and achievement. Format: 'Year: Achievement'",
+    timeline_item_2: "Second milestone. Show progression from first milestone.",
+    timeline_item_3: "Third milestone. Demonstrate growth and development.",
+    timeline_item_4: "Fourth milestone (optional). Advanced achievements.",
+    timeline_item_5: "Fifth milestone (optional). Market expansion or sophistication.",
+    timeline_item_6: "Sixth milestone (optional). Latest developments or future plans.",
+
+    methodology_name: "Brand your methodology/framework. Include trademark if applicable.",
+    methodology_description: "High-level benefits of your methodology. Why it's superior.",
+    principle_1: "First core principle. Fundamental concept driving your approach.",
+    principle_2: "Second core principle. Complementary to first principle.",
+    principle_3: "Third core principle. Complete the foundational trilogy.",
+    principle_4: "Fourth principle (optional). Advanced methodology component.",
+    principle_5: "Fifth principle (optional). Sophisticated approach element.",
+    principle_6: "Sixth principle (optional). Complete methodology coverage.",
+    detail_1: "Explanation of first principle. How it works in practice.",
+    detail_2: "Explanation of second principle. Specific implementation.",
+    detail_3: "Explanation of third principle. Real-world application.",
+    detail_4: "Explanation of fourth principle (optional). Advanced detail.",
+    detail_5: "Explanation of fifth principle (optional). Sophisticated explanation.",
+    detail_6: "Explanation of sixth principle (optional). Complete detail set.",
+    result_metric_1: "First key result. Quantifiable outcome (e.g., '300%').",
+    result_metric_2: "Second key result. Different metric type.",
+    result_metric_3: "Third key result. Additional proof point.",
+    result_metric_4: "Fourth key result. Complete results picture.",
+    result_label_1: "Description of first metric. What the number represents.",
+    result_label_2: "Description of second metric. Clear label.",
+    result_label_3: "Description of third metric. Specific outcome.",
+    result_label_4: "Description of fourth metric. Complete label set.",
+    results_title: "Section header for results. Emphasize proven outcomes.",
+
+    process_steps: "Pipe-separated process steps. Clear sequence of actions.",
+    step_descriptions: "Pipe-separated step explanations. Match step order exactly.",
+    benefits_title: "Benefits section header. Why this process is superior.",
+    benefit_titles: "Pipe-separated benefit names. Key advantages.",
+    benefit_descriptions: "Pipe-separated benefit explanations. Specific value.",
+
+    properties: "Pipe-separated comparison categories. Key differentiators.",
+    us_values: "Pipe-separated your advantages. Strong, specific benefits.",
+    competitors_values: "Pipe-separated competitor limitations. Factual, not disparaging.",
+    feature_header: "Table column header for features/properties.",
+    us_header: "Table column header for your solution.",
+    competitors_header: "Table column header for alternatives.",
+
+    secret_sauce: "Your unique differentiator. Proprietary technology or approach.",
+    explanation: "Why your secret sauce matters. Competitive advantage explanation.",
+    secret_icon: "Icon representing your secret sauce. Visual symbol.",
+
+    highlight_titles: "Pipe-separated feature highlights. Unique capabilities.",
+    highlight_descriptions: "Pipe-separated highlight explanations. Specific benefits.",
+    mechanism_name: "Branded system name. Proprietary methodology identifier.",
+    footer_text: "Supporting value proposition. Reinforce uniqueness.",
+
+    component_1: "First system component. Core architectural element.",
+    component_2: "Second system component. Build on first component.",
+    component_3: "Third system component. Complete basic architecture.",
+    component_4: "Fourth component (optional). Advanced system element.",
+    component_5: "Fifth component (optional). Sophisticated architecture.",
+    component_6: "Sixth component (optional). Complete system coverage.",
+
+    advantages: "Pipe-separated technical advantages. Key competitive benefits.",
+    advantage_descriptions: "Pipe-separated advantage explanations. Technical value."
   };
 
   const sectionSpecific: Record<string, Record<string, string>> = {
@@ -1084,6 +1158,56 @@ function getSpecificElementGuidance(elementName: string, sectionType: string): s
     CTA: {
       headline: "Create urgency and desire. Overcome final hesitations.",
       cta_text: "Final push to action. Address any remaining objections."
+    },
+    AlgorithmExplainer: {
+      headline: "Emphasize intelligence and sophistication of your process.",
+      algorithm_name: "Position as proprietary IP. Use technical but accessible naming.",
+      algorithm_step_1: "Start with data input or user action. Make it concrete.",
+      algorithm_step_2: "Show intelligent processing. Highlight AI or automation.",
+      algorithm_step_3: "Demonstrate output or result. Focus on user benefit."
+    },
+    InnovationTimeline: {
+      headline: "Show evolution and continuous improvement over time.",
+      timeline_item_1: "Early foundation or breakthrough. Establish credibility.",
+      timeline_item_2: "Major milestone or validation. Show market traction.",
+      timeline_item_3: "Recent innovation or expansion. Demonstrate momentum."
+    },
+    MethodologyBreakdown: {
+      headline: "Position your approach as scientifically superior.",
+      methodology_name: "Brand as proprietary framework. Include trademark.",
+      principle_1: "Core differentiating principle. Foundation of your advantage.",
+      detail_1: "Explain the science or logic. Make it credible and unique."
+    },
+    ProcessFlowDiagram: {
+      headline: "Emphasize systematic approach and reliability.",
+      process_steps: "Show clear workflow. Each step builds value.",
+      benefits_title: "Highlight why this process is superior to alternatives."
+    },
+    PropertyComparisonMatrix: {
+      headline: "Set up competitive comparison favorably.",
+      properties: "Choose categories where you excel. Stack the deck.",
+      us_values: "Strong, specific advantages. Quantify when possible.",
+      competitors_values: "Factual limitations. Not disparaging but clear."
+    },
+    SecretSauceReveal: {
+      headline: "Build anticipation and exclusivity around revelation.",
+      secret_sauce: "Make it sound proprietary and valuable. Intellectual property.",
+      explanation: "Justify why this gives unfair advantage. Competitive moat."
+    },
+    StackedHighlights: {
+      headline: "Present your unique approach as comprehensive solution.",
+      highlight_titles: "Focus on unique capabilities others can't match.",
+      mechanism_name: "Brand the overall system. Proprietary methodology."
+    },
+    SystemArchitecture: {
+      headline: "Communicate technical sophistication and reliability.",
+      component_1: "Core system element. Foundation of your platform.",
+      component_2: "Build complexity gradually. Show integration."
+    },
+    TechnicalAdvantage: {
+      headline: "Highlight superior technical capabilities and innovation.",
+      advantages: "Focus on technical differentiators that create business value.",
+      advantage_descriptions: "Explain why each advantage matters to users."
     }
   };
 

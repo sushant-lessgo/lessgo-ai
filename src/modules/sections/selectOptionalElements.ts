@@ -2494,7 +2494,152 @@ const elementRules: SectionLayoutRules = {
   }
 ],
 
-// UniqueMechanism Section Rules - Add these to elementRules object
+// UniqueMechanism Section Rules - Updated to match actual component implementations
+
+"UniqueMechanism_AlgorithmExplainer": [
+  {
+    element: "algorithm_step_4",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 },
+      { variable: "targetAudience", values: ["developers", "enterprise-tech-teams", "startup-ctos"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "algorithm_step_5",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 4 },
+      { variable: "awarenessLevel", values: ["product-aware"], weight: 3 },
+      { variable: "targetAudience", values: ["developers", "enterprise-tech-teams"], weight: 2 }
+    ],
+    minScore: 7
+  },
+  {
+    element: "algorithm_step_6",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-5"], weight: 4 },
+      { variable: "targetAudience", values: ["developers", "enterprise-tech-teams"], weight: 3 },
+      { variable: "copyIntent", values: ["desire-led"], weight: 2 }
+    ],
+    minScore: 8
+  }
+],
+
+"UniqueMechanism_InnovationTimeline": [
+  {
+    element: "timeline_item_4",
+    conditions: [
+      { variable: "startupStage", values: ["users-250-500", "users-500-1k", "users-1k-5k"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
+      { variable: "copyIntent", values: ["desire-led"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "timeline_item_5",
+    conditions: [
+      { variable: "startupStage", values: ["users-500-1k", "users-1k-5k"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 3 },
+      { variable: "copyIntent", values: ["desire-led"], weight: 2 }
+    ],
+    minScore: 7
+  },
+  {
+    element: "timeline_item_6",
+    conditions: [
+      { variable: "startupStage", values: ["users-1k-5k"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-5"], weight: 3 },
+      { variable: "copyIntent", values: ["desire-led"], weight: 2 }
+    ],
+    minScore: 8
+  }
+],
+
+"UniqueMechanism_MethodologyBreakdown": [
+  {
+    element: "principle_4",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 },
+      { variable: "targetAudience", values: ["developers", "product-managers", "enterprise-tech-teams"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "principle_5",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 4 },
+      { variable: "awarenessLevel", values: ["product-aware"], weight: 3 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "developers"], weight: 2 }
+    ],
+    minScore: 7
+  },
+  {
+    element: "result_metric_1",
+    conditions: [
+      { variable: "copyIntent", values: ["desire-led"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "results_title",
+    conditions: [
+      { variable: "copyIntent", values: ["desire-led"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 3 },
+      { variable: "awarenessLevel", values: ["product-aware"], weight: 2 }
+    ],
+    minScore: 7
+  }
+],
+
+"UniqueMechanism_ProcessFlowDiagram": [
+  {
+    element: "subheadline",
+    conditions: [
+      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2", "level-3"], weight: 3 },
+      { variable: "toneProfile", values: ["friendly-helpful"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "benefits_title",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
+      { variable: "copyIntent", values: ["desire-led"], weight: 2 }
+    ],
+    minScore: 7
+  },
+  {
+    element: "benefit_titles",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 3 },
+      { variable: "copyIntent", values: ["desire-led"], weight: 2 }
+    ],
+    minScore: 8
+  }
+],
+
+"UniqueMechanism_PropertyComparisonMatrix": [
+  // No optional elements - all fields are mandatory for comparison table functionality
+],
+
+"UniqueMechanism_SecretSauceReveal": [
+  {
+    element: "secret_icon",
+    conditions: [
+      { variable: "toneProfile", values: ["confident-playful", "bold-persuasive"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
+      { variable: "targetAudience", values: ["creators", "founders"], weight: 2 }
+    ],
+    minScore: 6
+  }
+],
 
 "UniqueMechanism_StackedHighlights": [
   {
@@ -2505,40 +2650,22 @@ const elementRules: SectionLayoutRules = {
       { variable: "toneProfile", values: ["confident-playful", "bold-persuasive"], weight: 2 }
     ],
     minScore: 6
-  }
-],
-
-"UniqueMechanism_ProcessFlowDiagram": [
+  },
   {
-    element: "connection_labels",
+    element: "footer_text",
     conditions: [
-      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
-      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
-      { variable: "targetAudience", values: ["developers", "product-managers", "enterprise-tech-teams"], weight: 2 }
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 4 },
+      { variable: "copyIntent", values: ["desire-led"], weight: 3 },
+      { variable: "toneProfile", values: ["luxury-expert", "confident-playful"], weight: 2 }
     ],
-    minScore: 6
-  }
-],
-
-"UniqueMechanism_AlgorithmExplainer": [
+    minScore: 7
+  },
   {
-    element: "algorithm_benefits",
+    element: "highlight_icon_1",
     conditions: [
-      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
-      { variable: "targetAudience", values: ["developers", "enterprise-tech-teams", "startup-ctos"], weight: 3 },
-      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
-    ],
-    minScore: 6
-  }
-],
-
-"UniqueMechanism_InnovationTimeline": [
-  {
-    element: "entry_dates",
-    conditions: [
-      { variable: "startupStage", values: ["users-250-500", "users-500-1k", "users-1k-5k"], weight: 4 },
-      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 3 },
-      { variable: "copyIntent", values: ["desire-led"], weight: 2 }
+      { variable: "toneProfile", values: ["confident-playful", "friendly-helpful"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-2", "level-3", "level-4"], weight: 3 },
+      { variable: "targetAudience", values: ["creators", "founders"], weight: 2 }
     ],
     minScore: 6
   }
@@ -2546,59 +2673,50 @@ const elementRules: SectionLayoutRules = {
 
 "UniqueMechanism_SystemArchitecture": [
   {
-    element: "illustration_caption",
+    element: "component_4",
     conditions: [
-      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
-      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 3 },
-      { variable: "toneProfile", values: ["friendly-helpful"], weight: 2 }
-    ],
-    minScore: 6
-  }
-],
-
-"UniqueMechanism_MethodologyBreakdown": [
-  {
-    element: "tag_descriptions",
-    conditions: [
-      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
-      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
-      { variable: "targetAudience", values: ["developers", "product-managers", "enterprise-tech-teams"], weight: 2 }
-    ],
-    minScore: 6
-  }
-],
-
-"UniqueMechanism_PropertyComparisonMatrix": [
-  {
-    element: "table_headers",
-    conditions: [
-      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 },
-      { variable: "targetAudience", values: ["enterprise-tech-teams", "developers", "product-managers"], weight: 2 }
+      { variable: "targetAudience", values: ["developers", "enterprise-tech-teams"], weight: 2 }
     ],
     minScore: 6
-  }
-],
-
-"UniqueMechanism_SecretSauceReveal": [
+  },
   {
-    element: "patent_numbers",
+    element: "component_5",
     conditions: [
       { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 4 },
-      { variable: "targetAudience", values: ["enterprise-tech-teams", "developers", "startup-ctos"], weight: 3 },
-      { variable: "toneProfile", values: ["luxury-expert", "confident-playful"], weight: 2 }
+      { variable: "awarenessLevel", values: ["product-aware"], weight: 3 },
+      { variable: "targetAudience", values: ["developers", "enterprise-tech-teams"], weight: 2 }
     ],
-    minScore: 6
+    minScore: 7
+  },
+  {
+    element: "component_6",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-5"], weight: 4 },
+      { variable: "targetAudience", values: ["developers", "enterprise-tech-teams"], weight: 3 },
+      { variable: "copyIntent", values: ["desire-led"], weight: 2 }
+    ],
+    minScore: 8
   }
 ],
 
 "UniqueMechanism_TechnicalAdvantage": [
   {
-    element: "supporting_evidence",
+    element: "advantage_descriptions",
     conditions: [
-      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
-      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 },
-      { variable: "copyIntent", values: ["desire-led"], weight: 2 }
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
+      { variable: "targetAudience", values: ["developers", "enterprise-tech-teams", "product-managers"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "advantage_icon_1",
+    conditions: [
+      { variable: "toneProfile", values: ["confident-playful", "friendly-helpful"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-2", "level-3", "level-4"], weight: 3 },
+      { variable: "targetAudience", values: ["creators", "founders"], weight: 2 }
     ],
     minScore: 6
   }
