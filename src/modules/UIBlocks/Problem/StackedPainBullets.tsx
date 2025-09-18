@@ -400,7 +400,15 @@ export const componentMeta = {
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
     { key: 'pain_points', label: 'Pain Points (pipe separated)', type: 'textarea', required: true },
     { key: 'pain_descriptions', label: 'Pain Point Descriptions (pipe separated)', type: 'textarea', required: false },
-    { key: 'conclusion_text', label: 'Conclusion Text', type: 'text', required: false }
+    { key: 'conclusion_text', label: 'Conclusion Text', type: 'text', required: false },
+    { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
+    { key: 'trust_items', label: 'Trust Items (pipe separated)', type: 'textarea', required: false },
+    { key: 'pain_icon_1', label: 'Pain Icon 1', type: 'icon', required: false },
+    { key: 'pain_icon_2', label: 'Pain Icon 2', type: 'icon', required: false },
+    { key: 'pain_icon_3', label: 'Pain Icon 3', type: 'icon', required: false },
+    { key: 'pain_icon_4', label: 'Pain Icon 4', type: 'icon', required: false },
+    { key: 'pain_icon_5', label: 'Pain Icon 5', type: 'icon', required: false },
+    { key: 'pain_icon_6', label: 'Pain Icon 6', type: 'icon', required: false }
   ],
   
   features: [

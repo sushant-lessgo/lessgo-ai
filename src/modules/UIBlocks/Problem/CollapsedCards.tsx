@@ -673,7 +673,13 @@ export const componentMeta = {
     { key: 'solution_hints', label: 'Solution Hints (pipe separated)', type: 'textarea', required: false },
     { key: 'intro_text', label: 'Introduction Text', type: 'textarea', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
+    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
+    { key: 'problem_icon_1', label: 'Problem Icon 1', type: 'icon', required: false },
+    { key: 'problem_icon_2', label: 'Problem Icon 2', type: 'icon', required: false },
+    { key: 'problem_icon_3', label: 'Problem Icon 3', type: 'icon', required: false },
+    { key: 'problem_icon_4', label: 'Problem Icon 4', type: 'icon', required: false },
+    { key: 'problem_icon_5', label: 'Problem Icon 5', type: 'icon', required: false },
+    { key: 'problem_icon_6', label: 'Problem Icon 6', type: 'icon', required: false }
   ],
   
   features: [

@@ -702,7 +702,11 @@ export const componentMeta = {
     { key: 'persona_goals', label: 'Persona Goals (pipe separated personas, comma separated goals)', type: 'textarea', required: false },
     { key: 'intro_text', label: 'Introduction Text', type: 'textarea', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
+    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
+    { key: 'persona_icon_1', label: 'Persona Icon 1', type: 'icon', required: false },
+    { key: 'persona_icon_2', label: 'Persona Icon 2', type: 'icon', required: false },
+    { key: 'persona_icon_3', label: 'Persona Icon 3', type: 'icon', required: false },
+    { key: 'persona_icon_4', label: 'Persona Icon 4', type: 'icon', required: false }
   ],
 
   features: [

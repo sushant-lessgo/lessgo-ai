@@ -553,7 +553,12 @@ export const componentMeta = {
     { key: 'emotional_impact', label: 'Emotional Impact Statement', type: 'text', required: false },
     { key: 'relatable_intro', label: 'Relatable Introduction', type: 'text', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
+    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
+    { key: 'category_icon_1', label: 'Category Icon 1', type: 'icon', required: false },
+    { key: 'category_icon_2', label: 'Category Icon 2', type: 'icon', required: false },
+    { key: 'category_icon_3', label: 'Category Icon 3', type: 'icon', required: false },
+    { key: 'category_icon_4', label: 'Category Icon 4', type: 'icon', required: false },
+    { key: 'category_icon_5', label: 'Category Icon 5', type: 'icon', required: false }
   ],
 
   features: [

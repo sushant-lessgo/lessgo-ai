@@ -1973,6 +1973,15 @@ const elementRules: SectionLayoutRules = {
       { variable: "problemType", values: ["burnout-or-overload", "lost-revenue-or-inefficiency"], weight: 3 }
     ],
     minScore: 5
+  },
+  {
+    element: "conclusion_text",
+    conditions: [
+      { variable: "copyIntent", values: ["pain-led"], weight: 4 },
+      { variable: "toneProfile", values: ["friendly-helpful", "empathetic-supportive"], weight: 3 },
+      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 2 }
+    ],
+    minScore: 6
   }
 ],
 
@@ -1985,21 +1994,72 @@ const elementRules: SectionLayoutRules = {
       { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 2 }
     ],
     minScore: 6
+  },
+  {
+    element: "subheadline",
+    conditions: [
+      { variable: "copyIntent", values: ["pain-led"], weight: 4 },
+      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 3 },
+      { variable: "problemType", values: ["lost-revenue-or-inefficiency", "competitive-disadvantage"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "supporting_text",
+    conditions: [
+      { variable: "copyIntent", values: ["desire-led"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-2", "level-3"], weight: 3 }
+    ],
+    minScore: 5
   }
 ],
 
-// TODO: Temporarily disabled - not useful as of now
-// "Problem_SideBySideSplit": [
-//   {
-//     element: "solution_preview",
-//     conditions: [
-//       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
-//       { variable: "copyIntent", values: ["desire-led"], weight: 3 },
-//       { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
-//     ],
-//     minScore: 6
-//   }
-// ],
+"Problem_SideBySideSplit": [
+  {
+    element: "solution_preview",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "copyIntent", values: ["desire-led"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "problem_points",
+    conditions: [
+      { variable: "copyIntent", values: ["pain-led"], weight: 4 },
+      { variable: "problemType", values: ["lost-revenue-or-inefficiency", "manual-repetition"], weight: 3 },
+      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "solution_points",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "copyIntent", values: ["desire-led"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-2", "level-3", "level-4"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "transition_text",
+    conditions: [
+      { variable: "copyIntent", values: ["desire-led"], weight: 4 },
+      { variable: "toneProfile", values: ["confident-playful", "friendly-helpful"], weight: 3 },
+      { variable: "landingPageGoals", values: ["signup", "start-trial"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "bottom_stat_1",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "problemType", values: ["lost-revenue-or-inefficiency", "competitive-disadvantage"], weight: 3 }
+    ],
+    minScore: 5
+  }
+],
 
 "Problem_EmotionalQuotes": [
   {
@@ -2010,6 +2070,23 @@ const elementRules: SectionLayoutRules = {
       { variable: "problemType", values: ["burnout-or-overload", "personal-growth-or-productivity"], weight: 2 }
     ],
     minScore: 6
+  },
+  {
+    element: "quote_categories",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "copyIntent", values: ["pain-led"], weight: 3 },
+      { variable: "problemType", values: ["burnout-or-overload", "personal-growth-or-productivity"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "emotional_impact",
+    conditions: [
+      { variable: "copyIntent", values: ["pain-led"], weight: 4 },
+      { variable: "toneProfile", values: ["empathetic-supportive", "friendly-helpful"], weight: 3 }
+    ],
+    minScore: 5
   }
 ],
 
@@ -2022,6 +2099,32 @@ const elementRules: SectionLayoutRules = {
       { variable: "copyIntent", values: ["desire-led"], weight: 2 }
     ],
     minScore: 6
+  },
+  {
+    element: "problem_impacts",
+    conditions: [
+      { variable: "copyIntent", values: ["pain-led"], weight: 4 },
+      { variable: "problemType", values: ["lost-revenue-or-inefficiency", "competitive-disadvantage"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-2", "level-3"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "solution_hints",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "copyIntent", values: ["desire-led"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "intro_text",
+    conditions: [
+      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
+      { variable: "toneProfile", values: ["friendly-helpful"], weight: 3 }
+    ],
+    minScore: 5
   }
 ],
 
@@ -2034,6 +2137,31 @@ const elementRules: SectionLayoutRules = {
       { variable: "toneProfile", values: ["friendly-helpful"], weight: 2 }
     ],
     minScore: 6
+  },
+  {
+    element: "category_descriptions",
+    conditions: [
+      { variable: "copyIntent", values: ["pain-led"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-2", "level-3"], weight: 3 },
+      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "intro_text",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "benchmark_text",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 4 },
+      { variable: "problemType", values: ["lost-revenue-or-inefficiency"], weight: 3 }
+    ],
+    minScore: 5
   }
 ],
 
@@ -2046,21 +2174,70 @@ const elementRules: SectionLayoutRules = {
       { variable: "copyIntent", values: ["pain-led"], weight: 2 }
     ],
     minScore: 6
+  },
+  {
+    element: "persona_titles",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-2", "level-3", "level-4"], weight: 4 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "mid-market-companies"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "persona_pain_points",
+    conditions: [
+      { variable: "copyIntent", values: ["pain-led"], weight: 4 },
+      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 3 },
+      { variable: "problemType", values: ["burnout-or-overload", "personal-growth-or-productivity"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "intro_text",
+    conditions: [
+      { variable: "awarenessLevel", values: ["unaware"], weight: 4 },
+      { variable: "toneProfile", values: ["friendly-helpful"], weight: 3 }
+    ],
+    minScore: 5
   }
 ],
 
-// TODO: Temporarily disabled - not useful currently
-// "Problem_ProblemChecklist": [
-//   {
-//     element: "conclusion_text",
-//     conditions: [
-//       { variable: "copyIntent", values: ["desire-led"], weight: 4 },
-//       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 },
-//       { variable: "landingPageGoals", values: ["free-trial", "demo", "signup"], weight: 2 }
-//     ],
-//     minScore: 6
-//   }
-// ],
+"Problem_ProblemChecklist": [
+  {
+    element: "conclusion_text",
+    conditions: [
+      { variable: "copyIntent", values: ["desire-led"], weight: 4 },
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 },
+      { variable: "landingPageGoals", values: ["free-trial", "demo", "signup"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "intro_text",
+    conditions: [
+      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
+      { variable: "copyIntent", values: ["pain-led"], weight: 3 },
+      { variable: "toneProfile", values: ["friendly-helpful"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "scoring_labels",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "problemType", values: ["personal-growth-or-productivity", "burnout-or-overload"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "result_stat_1",
+    conditions: [
+      { variable: "landingPageGoals", values: ["signup", "start-trial", "book-demo"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4"], weight: 3 }
+    ],
+    minScore: 5
+  }
+],
 
 // Results Section Rules - Add these to elementRules object
 

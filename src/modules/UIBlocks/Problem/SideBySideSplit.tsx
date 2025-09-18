@@ -623,7 +623,16 @@ export const componentMeta = {
     { key: 'call_to_action', label: 'Call to Action Text', type: 'text', required: false },
     { key: 'transition_text', label: 'Transition Text', type: 'text', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
+    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
+    { key: 'bottom_stat_1', label: 'Bottom Statistic 1', type: 'text', required: false },
+    { key: 'bottom_stat_1_label', label: 'Bottom Statistic 1 Label', type: 'text', required: false },
+    { key: 'bottom_stat_2', label: 'Bottom Statistic 2', type: 'text', required: false },
+    { key: 'bottom_stat_2_label', label: 'Bottom Statistic 2 Label', type: 'text', required: false },
+    { key: 'bottom_stat_3', label: 'Bottom Statistic 3', type: 'text', required: false },
+    { key: 'bottom_stat_3_label', label: 'Bottom Statistic 3 Label', type: 'text', required: false },
+    { key: 'cta_section_message', label: 'CTA Section Message', type: 'text', required: false },
+    { key: 'path_1_icon', label: 'Problem Path Icon', type: 'icon', required: false },
+    { key: 'path_2_icon', label: 'Solution Path Icon', type: 'icon', required: false }
   ],
   
   features: [

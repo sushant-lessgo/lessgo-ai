@@ -82,6 +82,39 @@ export function classifyField(fieldName: string, sectionType?: string): Classifi
     return classifyBeforeAfterGenericField(fieldName, sectionType);
   }
 
+  // Problem Section Classifications
+  if (sectionType === 'StackedPainBullets') {
+    return classifyStackedPainBulletsField(fieldName);
+  }
+
+  if (sectionType === 'BeforeImageAfterText') {
+    return classifyBeforeImageAfterTextField(fieldName);
+  }
+
+  if (sectionType === 'SideBySideSplit') {
+    return classifySideBySideSplitField(fieldName);
+  }
+
+  if (sectionType === 'EmotionalQuotes') {
+    return classifyEmotionalQuotesField(fieldName);
+  }
+
+  if (sectionType === 'CollapsedCards') {
+    return classifyCollapsedCardsField(fieldName);
+  }
+
+  if (sectionType === 'PainMeterChart') {
+    return classifyPainMeterChartField(fieldName);
+  }
+
+  if (sectionType === 'PersonaPanels') {
+    return classifyPersonaPanelsField(fieldName);
+  }
+
+  if (sectionType === 'ProblemChecklist') {
+    return classifyProblemChecklistField(fieldName);
+  }
+
   // UniqueMechanism Section Classifications
   if (sectionType === 'AlgorithmExplainer') {
     return classifyAlgorithmExplainerField(fieldName);
@@ -2990,6 +3023,870 @@ function classifyTestimonialCTAComboField(fieldName: string): ClassificationResu
       reason: 'Standard testimonial CTA content suitable for AI generation',
       fallback_strategy: 'generate',
       confidence: 0.8
+    }
+  };
+}
+
+/**
+ * Problem Section Classifications
+ */
+
+function classifyStackedPainBulletsField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Pain point headlines should be emotionally resonant and specific',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create compelling pain point headlines'
+    };
+  }
+
+  if (field === 'pain_points') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Pain points should be specific and relatable to target audience',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will generate pipe-separated pain points based on business context'
+    };
+  }
+
+  if (field === 'pain_descriptions') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Detailed pain descriptions amplify emotional impact',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create detailed pain descriptions (pipe-separated)'
+    };
+  }
+
+  if (field === 'conclusion_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Conclusion text should validate and relate to user experience',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create validating conclusion text'
+    };
+  }
+
+  if (field.includes('pain_icon_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Pain icons should visually represent specific pain points',
+        fallback_strategy: 'default',
+        confidence: 0.8
+      },
+      suggested_default: '⚠️',
+      user_guidance: 'AI will suggest relevant pain icons; customize for your specific pain points'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Standard pain bullet content suitable for AI generation',
+      fallback_strategy: 'generate',
+      confidence: 0.85
+    }
+  };
+}
+
+function classifyBeforeImageAfterTextField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Headlines should frame the before/after transformation story',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create transformation-focused headlines'
+    };
+  }
+
+  if (field === 'before_description' || field === 'after_description') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Before/after descriptions create compelling transformation narrative',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create contrasting before/after descriptions'
+    };
+  }
+
+  if (field === 'before_after_image') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Visual proof of transformation should be authentic',
+        fallback_strategy: 'skip',
+        confidence: 0.9
+      },
+      user_guidance: 'Upload actual before/after images showing your transformation'
+    };
+  }
+
+  if (field === 'image_caption') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Captions explain and amplify the visual transformation',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create descriptive image captions'
+    };
+  }
+
+  if (field.includes('transformation_icon_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Icons should represent transformation states',
+        fallback_strategy: 'default',
+        confidence: 0.8
+      },
+      suggested_default: field.includes('1') ? '⚡' : (field.includes('2') ? '✓' : '💖'),
+      user_guidance: 'AI will suggest transformation icons; customize for your specific transformation'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Standard transformation content suitable for AI generation',
+      fallback_strategy: 'generate',
+      confidence: 0.85
+    }
+  };
+}
+
+function classifySideBySideSplitField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Headlines should present clear path choice to audience',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create path-choice focused headlines'
+    };
+  }
+
+  if (field === 'problem_title' || field === 'problem_description') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Problem path content should create urgency and relatability',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create compelling problem path description'
+    };
+  }
+
+  if (field === 'solution_preview') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Solution preview should provide hope and direction',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create aspirational solution preview'
+    };
+  }
+
+  if (field === 'problem_points' || field === 'solution_points') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Contrasting points amplify the path differences',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create contrasting problem/solution points (pipe-separated)'
+    };
+  }
+
+  if (field === 'call_to_action' || field === 'transition_text' || field === 'cta_section_message') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Action text should motivate path switching',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create motivating action and transition text'
+    };
+  }
+
+  if (field.includes('bottom_stat_') && !field.includes('label')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Statistics should be relevant and credible',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      },
+      user_guidance: 'AI will suggest relevant statistics; verify accuracy'
+    };
+  }
+
+  if (field.includes('bottom_stat_') && field.includes('label')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Stat labels should clearly explain the numbers',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create clear statistical labels'
+    };
+  }
+
+  if (field.includes('path_') && field.includes('icon')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Path icons should represent problem vs solution states',
+        fallback_strategy: 'default',
+        confidence: 0.8
+      },
+      suggested_default: field.includes('1') ? '⚠️' : '✓',
+      user_guidance: 'AI will suggest path icons; customize for your specific paths'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Standard path comparison content suitable for AI generation',
+      fallback_strategy: 'generate',
+      confidence: 0.85
+    }
+  };
+}
+
+function classifyEmotionalQuotesField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Headlines should introduce emotional resonance and relatability',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create empathetic headline about shared struggles'
+    };
+  }
+
+  if (field === 'emotional_quotes') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Quotes should feel authentic and emotionally resonate with target audience',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create relatable emotional quotes (pipe-separated)'
+    };
+  }
+
+  if (field === 'quote_attributions') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Attribution names and titles should feel realistic for target audience',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create believable quote attributions (pipe-separated)'
+    };
+  }
+
+  if (field === 'context_text' || field === 'emotional_impact' || field === 'relatable_intro') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Context text should validate user feelings and create connection',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create validating context and emotional impact text'
+    };
+  }
+
+  if (field === 'quote_categories') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Categories should organize quotes by pain type or user segment',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create quote categories (pipe-separated)'
+    };
+  }
+
+  if (field.includes('category_icon_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Category icons should represent different types of emotional pain',
+        fallback_strategy: 'default',
+        confidence: 0.8
+      },
+      suggested_default: '💼',
+      user_guidance: 'AI will suggest category icons; customize for your pain categories'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Standard emotional quote content suitable for AI generation',
+      fallback_strategy: 'generate',
+      confidence: 0.85
+    }
+  };
+}
+
+function classifyCollapsedCardsField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Headlines should encourage exploration of business challenges',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create engaging headline about business challenges'
+    };
+  }
+
+  if (field === 'problem_titles') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Problem titles should be immediately recognizable and clickable',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create recognizable problem titles (pipe-separated)'
+    };
+  }
+
+  if (field === 'problem_descriptions') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Detailed descriptions should build emotional connection with problems',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create detailed problem descriptions (pipe-separated)'
+    };
+  }
+
+  if (field === 'problem_impacts') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Impact statements should show consequences of unresolved problems',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create problem impact statements (pipe-separated)'
+    };
+  }
+
+  if (field === 'solution_hints') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Solution hints should provide hope and tease resolution',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create solution hints (pipe-separated)'
+    };
+  }
+
+  if (field === 'expand_labels') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Expand labels should encourage interaction with card content',
+        fallback_strategy: 'default',
+        confidence: 0.8
+      },
+      suggested_default: 'Learn More',
+      user_guidance: 'AI will suggest expand labels; customize for your UI preferences'
+    };
+  }
+
+  if (field === 'intro_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Intro text should set up the challenge exploration experience',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create introductory exploration text'
+    };
+  }
+
+  if (field.includes('problem_icon_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Problem icons should visually represent different business challenges',
+        fallback_strategy: 'default',
+        confidence: 0.8
+      },
+      suggested_default: '⚙️',
+      user_guidance: 'AI will suggest problem icons; customize for your specific challenges'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Standard collapsed card content suitable for AI generation',
+      fallback_strategy: 'generate',
+      confidence: 0.85
+    }
+  };
+}
+
+function classifyPainMeterChartField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Headlines should introduce quantified pain measurement',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create data-focused pain measurement headline'
+    };
+  }
+
+  if (field === 'pain_categories') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Pain categories should cover key business challenge areas',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create business pain categories (pipe-separated)'
+    };
+  }
+
+  if (field === 'pain_levels') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Pain levels should provide realistic severity scores',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will generate pain level scores 0-100 (pipe-separated numbers)'
+    };
+  }
+
+  if (field === 'category_descriptions') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Descriptions should explain each pain category impact',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create category descriptions (pipe-separated)'
+    };
+  }
+
+  if (field === 'chart_labels' || field === 'total_score_text' || field === 'benchmark_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Chart labeling and scoring text for data interpretation',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create clear chart labels and scoring text'
+    };
+  }
+
+  if (field === 'intro_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Intro text should contextualize the pain measurement data',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create pain meter introduction text'
+    };
+  }
+
+  if (field.includes('action_stat_') && !field.includes('label')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Action statistics should be credible and relevant',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      },
+      user_guidance: 'AI will suggest relevant statistics; verify accuracy'
+    };
+  }
+
+  if (field.includes('action_stat_') && field.includes('label')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Stat labels should clearly explain the action metrics',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create clear action statistic labels'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Standard pain meter content suitable for AI generation',
+      fallback_strategy: 'generate',
+      confidence: 0.85
+    }
+  };
+}
+
+function classifyPersonaPanelsField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Headlines should encourage persona identification and self-selection',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create persona identification headline'
+    };
+  }
+
+  if (field === 'persona_names') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Persona names should be recognizable business archetypes',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create business persona names (pipe-separated)'
+    };
+  }
+
+  if (field === 'persona_problems') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Persona problems should be specific to each business stage/role',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create persona-specific problems (pipe-separated)'
+    };
+  }
+
+  if (field === 'persona_descriptions' || field === 'persona_titles') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Persona details should help users self-identify',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create persona descriptions and titles (pipe-separated)'
+    };
+  }
+
+  if (field === 'persona_pain_points' || field === 'persona_goals') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Detailed persona characteristics for deeper identification',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create persona pain points and goals (pipe-separated)'
+    };
+  }
+
+  if (field === 'intro_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Intro text should set up persona selection process',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create persona introduction text'
+    };
+  }
+
+  if (field.includes('persona_icon_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Persona icons should represent different business stages/roles',
+        fallback_strategy: 'default',
+        confidence: 0.8
+      },
+      suggested_default: '👤',
+      user_guidance: 'AI will suggest persona icons; customize for your business types'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Standard persona content suitable for AI generation',
+      fallback_strategy: 'generate',
+      confidence: 0.85
+    }
+  };
+}
+
+function classifyProblemChecklistField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Headlines should encourage checklist participation and assessment',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create assessment-focused headline'
+    };
+  }
+
+  if (field === 'problem_statements') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Problem statements should be specific and relatable',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create relatable problem statements (pipe-separated)'
+    };
+  }
+
+  if (field === 'checklist_items') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Checklist items should be clear, short labels for each problem',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create clear checklist labels (pipe-separated)'
+    };
+  }
+
+  if (field === 'conclusion_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Conclusion should validate user experience and provide next steps',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create validating conclusion text'
+    };
+  }
+
+  if (field === 'scoring_labels' || field === 'action_thresholds') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Scoring guidance helps users interpret their assessment results',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create scoring labels and action thresholds'
+    };
+  }
+
+  if (field === 'intro_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Intro text should set up the assessment experience',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create assessment introduction text'
+    };
+  }
+
+  if (field === 'cta_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'CTA should guide users to next step based on assessment',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create assessment-based CTA text'
+    };
+  }
+
+  if (field.includes('result_stat_') && !field.includes('label')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Result statistics should be credible and relevant',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      },
+      user_guidance: 'AI will suggest relevant statistics; verify accuracy'
+    };
+  }
+
+  if (field.includes('result_stat_') && field.includes('label')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Stat labels should clearly explain the result metrics',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create clear result statistic labels'
+    };
+  }
+
+  if (field.includes('encouragement_tip_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Encouragement tips should provide positive guidance based on score ranges',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create encouraging tips for different score ranges'
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'ai_generated',
+      reason: 'Standard problem checklist content suitable for AI generation',
+      fallback_strategy: 'generate',
+      confidence: 0.85
     }
   };
 }

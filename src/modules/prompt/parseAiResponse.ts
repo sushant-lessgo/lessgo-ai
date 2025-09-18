@@ -261,6 +261,71 @@ function processSectionContent(sectionId: string, content: SectionContent): {
     return result;
   }
 
+  // Special handling for Problem sections
+  if (sectionId.includes('StackedPainBullets')) {
+    const processedStackedPain = processStackedPainBulletsContent(sectionId, content);
+    result.content = processedStackedPain.content;
+    result.warnings = processedStackedPain.warnings;
+    result.hasIssues = processedStackedPain.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('BeforeImageAfterText')) {
+    const processedBeforeImageAfter = processBeforeImageAfterTextContent(sectionId, content);
+    result.content = processedBeforeImageAfter.content;
+    result.warnings = processedBeforeImageAfter.warnings;
+    result.hasIssues = processedBeforeImageAfter.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('SideBySideSplit')) {
+    const processedSideBySideSplit = processSideBySideSplitContent(sectionId, content);
+    result.content = processedSideBySideSplit.content;
+    result.warnings = processedSideBySideSplit.warnings;
+    result.hasIssues = processedSideBySideSplit.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('EmotionalQuotes')) {
+    const processedEmotionalQuotes = processEmotionalQuotesContent(sectionId, content);
+    result.content = processedEmotionalQuotes.content;
+    result.warnings = processedEmotionalQuotes.warnings;
+    result.hasIssues = processedEmotionalQuotes.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('CollapsedCards')) {
+    const processedCollapsedCards = processCollapsedCardsContent(sectionId, content);
+    result.content = processedCollapsedCards.content;
+    result.warnings = processedCollapsedCards.warnings;
+    result.hasIssues = processedCollapsedCards.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('PainMeterChart')) {
+    const processedPainMeter = processPainMeterChartContent(sectionId, content);
+    result.content = processedPainMeter.content;
+    result.warnings = processedPainMeter.warnings;
+    result.hasIssues = processedPainMeter.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('PersonaPanels')) {
+    const processedPersonaPanels = processPersonaPanelsContent(sectionId, content);
+    result.content = processedPersonaPanels.content;
+    result.warnings = processedPersonaPanels.warnings;
+    result.hasIssues = processedPersonaPanels.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('ProblemChecklist')) {
+    const processedProblemChecklist = processProblemChecklistContent(sectionId, content);
+    result.content = processedProblemChecklist.content;
+    result.warnings = processedProblemChecklist.warnings;
+    result.hasIssues = processedProblemChecklist.hasIssues;
+    return result;
+  }
+
   // Special handling for UniqueMechanism sections
   if (sectionId.includes('AlgorithmExplainer')) {
     const processedAlgorithm = processAlgorithmExplainerContent(sectionId, content);
@@ -2438,6 +2503,433 @@ function processCenteredHeadlineCTAContent(sectionId: string, content: SectionCo
     const trustItems = content.trust_items.split('|').map(item => item.trim()).filter(Boolean);
     for (let i = 0; i < Math.min(trustItems.length, 5); i++) {
       result.content[`trust_item_${i + 1}`] = trustItems[i];
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Problem Section Processing Functions
+ */
+
+/**
+ * Special processing for StackedPainBullets sections
+ */
+function processStackedPainBulletsContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Process each element with pain bullet-specific validation
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    const processedElement = processElement(sectionId, elementKey, elementValue);
+
+    if (processedElement.isValid) {
+      result.content[elementKey] = processedElement.value;
+    } else {
+      result.warnings.push(...processedElement.warnings);
+      result.hasIssues = true;
+      result.content[elementKey] = processedElement.fallback;
+    }
+  });
+
+  // Required field validation
+  if (!result.content.headline) {
+    result.warnings.push(`${sectionId}: Missing required field 'headline'`);
+    result.hasIssues = true;
+  }
+
+  if (!result.content.pain_points) {
+    result.warnings.push(`${sectionId}: Missing required field 'pain_points'`);
+    result.hasIssues = true;
+  }
+
+  // Validate pipe-separated pain points
+  if (content.pain_points && typeof content.pain_points === 'string') {
+    const painPoints = content.pain_points.split('|').map(item => item.trim()).filter(Boolean);
+    if (painPoints.length < 3) {
+      result.warnings.push(`${sectionId}: pain_points should contain at least 3 items`);
+      result.hasIssues = true;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Special processing for BeforeImageAfterText sections
+ */
+function processBeforeImageAfterTextContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Process each element
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    const processedElement = processElement(sectionId, elementKey, elementValue);
+
+    if (processedElement.isValid) {
+      result.content[elementKey] = processedElement.value;
+    } else {
+      result.warnings.push(...processedElement.warnings);
+      result.hasIssues = true;
+      result.content[elementKey] = processedElement.fallback;
+    }
+  });
+
+  // Required field validation
+  const requiredFields = ['headline', 'before_description', 'after_description'];
+  requiredFields.forEach(field => {
+    if (!result.content[field]) {
+      result.warnings.push(`${sectionId}: Missing required field '${field}'`);
+      result.hasIssues = true;
+    }
+  });
+
+  return result;
+}
+
+/**
+ * Special processing for SideBySideSplit sections
+ */
+function processSideBySideSplitContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Process each element
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    const processedElement = processElement(sectionId, elementKey, elementValue);
+
+    if (processedElement.isValid) {
+      result.content[elementKey] = processedElement.value;
+    } else {
+      result.warnings.push(...processedElement.warnings);
+      result.hasIssues = true;
+      result.content[elementKey] = processedElement.fallback;
+    }
+  });
+
+  // Required field validation
+  const requiredFields = ['headline', 'problem_title', 'problem_description', 'solution_preview'];
+  requiredFields.forEach(field => {
+    if (!result.content[field]) {
+      result.warnings.push(`${sectionId}: Missing required field '${field}'`);
+      result.hasIssues = true;
+    }
+  });
+
+  // Validate pipe-separated points
+  ['problem_points', 'solution_points'].forEach(field => {
+    if (content[field] && typeof content[field] === 'string') {
+      const points = content[field].split('|').map(item => item.trim()).filter(Boolean);
+      if (points.length < 3) {
+        result.warnings.push(`${sectionId}: ${field} should contain at least 3 items`);
+        result.hasIssues = true;
+      }
+    }
+  });
+
+  return result;
+}
+
+/**
+ * Special processing for EmotionalQuotes sections
+ */
+function processEmotionalQuotesContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Process each element
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    const processedElement = processElement(sectionId, elementKey, elementValue);
+
+    if (processedElement.isValid) {
+      result.content[elementKey] = processedElement.value;
+    } else {
+      result.warnings.push(...processedElement.warnings);
+      result.hasIssues = true;
+      result.content[elementKey] = processedElement.fallback;
+    }
+  });
+
+  // Required field validation
+  const requiredFields = ['headline', 'emotional_quotes', 'quote_attributions'];
+  requiredFields.forEach(field => {
+    if (!result.content[field]) {
+      result.warnings.push(`${sectionId}: Missing required field '${field}'`);
+      result.hasIssues = true;
+    }
+  });
+
+  // Validate quote/attribution pairing
+  if (content.emotional_quotes && content.quote_attributions) {
+    const quotes = content.emotional_quotes.split('|').map(item => item.trim()).filter(Boolean);
+    const attributions = content.quote_attributions.split('|').map(item => item.trim()).filter(Boolean);
+
+    if (quotes.length !== attributions.length) {
+      result.warnings.push(`${sectionId}: Number of quotes (${quotes.length}) doesn't match attributions (${attributions.length})`);
+      result.hasIssues = true;
+    }
+
+    if (quotes.length < 3) {
+      result.warnings.push(`${sectionId}: Should have at least 3 emotional quotes`);
+      result.hasIssues = true;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Special processing for CollapsedCards sections
+ */
+function processCollapsedCardsContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Process each element
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    const processedElement = processElement(sectionId, elementKey, elementValue);
+
+    if (processedElement.isValid) {
+      result.content[elementKey] = processedElement.value;
+    } else {
+      result.warnings.push(...processedElement.warnings);
+      result.hasIssues = true;
+      result.content[elementKey] = processedElement.fallback;
+    }
+  });
+
+  // Required field validation
+  const requiredFields = ['headline', 'problem_titles', 'problem_descriptions'];
+  requiredFields.forEach(field => {
+    if (!result.content[field]) {
+      result.warnings.push(`${sectionId}: Missing required field '${field}'`);
+      result.hasIssues = true;
+    }
+  });
+
+  // Validate title/description pairing
+  if (content.problem_titles && content.problem_descriptions) {
+    const titles = content.problem_titles.split('|').map(item => item.trim()).filter(Boolean);
+    const descriptions = content.problem_descriptions.split('|').map(item => item.trim()).filter(Boolean);
+
+    if (titles.length !== descriptions.length) {
+      result.warnings.push(`${sectionId}: Number of titles (${titles.length}) doesn't match descriptions (${descriptions.length})`);
+      result.hasIssues = true;
+    }
+
+    if (titles.length < 4) {
+      result.warnings.push(`${sectionId}: Should have at least 4 problem cards`);
+      result.hasIssues = true;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Special processing for PainMeterChart sections
+ */
+function processPainMeterChartContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Process each element
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    const processedElement = processElement(sectionId, elementKey, elementValue);
+
+    if (processedElement.isValid) {
+      result.content[elementKey] = processedElement.value;
+    } else {
+      result.warnings.push(...processedElement.warnings);
+      result.hasIssues = true;
+      result.content[elementKey] = processedElement.fallback;
+    }
+  });
+
+  // Required field validation
+  const requiredFields = ['headline', 'pain_categories', 'pain_levels'];
+  requiredFields.forEach(field => {
+    if (!result.content[field]) {
+      result.warnings.push(`${sectionId}: Missing required field '${field}'`);
+      result.hasIssues = true;
+    }
+  });
+
+  // Validate category/level pairing and numeric levels
+  if (content.pain_categories && content.pain_levels) {
+    const categories = content.pain_categories.split('|').map(item => item.trim()).filter(Boolean);
+    const levels = content.pain_levels.split('|').map(item => item.trim()).filter(Boolean);
+
+    if (categories.length !== levels.length) {
+      result.warnings.push(`${sectionId}: Number of categories (${categories.length}) doesn't match levels (${levels.length})`);
+      result.hasIssues = true;
+    }
+
+    // Validate pain levels are numbers 0-100
+    levels.forEach((level, index) => {
+      const numLevel = parseInt(level);
+      if (isNaN(numLevel) || numLevel < 0 || numLevel > 100) {
+        result.warnings.push(`${sectionId}: Pain level ${index + 1} '${level}' should be a number between 0-100`);
+        result.hasIssues = true;
+      }
+    });
+
+    if (categories.length < 4) {
+      result.warnings.push(`${sectionId}: Should have at least 4 pain categories for meaningful chart`);
+      result.hasIssues = true;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Special processing for PersonaPanels sections
+ */
+function processPersonaPanelsContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Process each element
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    const processedElement = processElement(sectionId, elementKey, elementValue);
+
+    if (processedElement.isValid) {
+      result.content[elementKey] = processedElement.value;
+    } else {
+      result.warnings.push(...processedElement.warnings);
+      result.hasIssues = true;
+      result.content[elementKey] = processedElement.fallback;
+    }
+  });
+
+  // Required field validation
+  const requiredFields = ['headline', 'persona_names', 'persona_problems'];
+  requiredFields.forEach(field => {
+    if (!result.content[field]) {
+      result.warnings.push(`${sectionId}: Missing required field '${field}'`);
+      result.hasIssues = true;
+    }
+  });
+
+  // Validate name/problem pairing
+  if (content.persona_names && content.persona_problems) {
+    const names = content.persona_names.split('|').map(item => item.trim()).filter(Boolean);
+    const problems = content.persona_problems.split('|').map(item => item.trim()).filter(Boolean);
+
+    if (names.length !== problems.length) {
+      result.warnings.push(`${sectionId}: Number of names (${names.length}) doesn't match problems (${problems.length})`);
+      result.hasIssues = true;
+    }
+
+    if (names.length < 3) {
+      result.warnings.push(`${sectionId}: Should have at least 3 persona panels`);
+      result.hasIssues = true;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Special processing for ProblemChecklist sections
+ */
+function processProblemChecklistContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Process each element
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    const processedElement = processElement(sectionId, elementKey, elementValue);
+
+    if (processedElement.isValid) {
+      result.content[elementKey] = processedElement.value;
+    } else {
+      result.warnings.push(...processedElement.warnings);
+      result.hasIssues = true;
+      result.content[elementKey] = processedElement.fallback;
+    }
+  });
+
+  // Required field validation
+  const requiredFields = ['headline', 'problem_statements', 'checklist_items'];
+  requiredFields.forEach(field => {
+    if (!result.content[field]) {
+      result.warnings.push(`${sectionId}: Missing required field '${field}'`);
+      result.hasIssues = true;
+    }
+  });
+
+  // Validate statement/item pairing
+  if (content.problem_statements && content.checklist_items) {
+    const statements = content.problem_statements.split('|').map(item => item.trim()).filter(Boolean);
+    const items = content.checklist_items.split('|').map(item => item.trim()).filter(Boolean);
+
+    if (statements.length !== items.length) {
+      result.warnings.push(`${sectionId}: Number of statements (${statements.length}) doesn't match items (${items.length})`);
+      result.hasIssues = true;
+    }
+
+    if (statements.length < 6) {
+      result.warnings.push(`${sectionId}: Should have at least 6 checklist items for meaningful assessment`);
+      result.hasIssues = true;
     }
   }
 

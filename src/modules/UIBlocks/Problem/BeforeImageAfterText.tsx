@@ -434,7 +434,10 @@ export const componentMeta = {
     { key: 'after_description', label: 'After Description (Desired Outcomes)', type: 'textarea', required: true },
     { key: 'image_caption', label: 'Image Caption', type: 'text', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
+    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
+    { key: 'transformation_icon_1', label: 'Transformation Icon 1', type: 'icon', required: false },
+    { key: 'transformation_icon_2', label: 'Transformation Icon 2', type: 'icon', required: false },
+    { key: 'transformation_icon_3', label: 'Transformation Icon 3', type: 'icon', required: false }
   ],
   
   features: [
