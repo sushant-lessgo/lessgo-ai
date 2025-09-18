@@ -252,6 +252,71 @@ function processSectionContent(sectionId: string, content: SectionContent): {
     return result;
   }
 
+  // Special handling for HowItWorks sections
+  if (sectionId.includes('ThreeStepHorizontal')) {
+    const processedThreeStep = processThreeStepHorizontalContent(sectionId, content);
+    result.content = processedThreeStep.content;
+    result.warnings = processedThreeStep.warnings;
+    result.hasIssues = processedThreeStep.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('VerticalTimeline')) {
+    const processedVerticalTimeline = processVerticalTimelineContent(sectionId, content);
+    result.content = processedVerticalTimeline.content;
+    result.warnings = processedVerticalTimeline.warnings;
+    result.hasIssues = processedVerticalTimeline.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('IconCircleSteps')) {
+    const processedIconCircle = processIconCircleStepsContent(sectionId, content);
+    result.content = processedIconCircle.content;
+    result.warnings = processedIconCircle.warnings;
+    result.hasIssues = processedIconCircle.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('AccordionSteps')) {
+    const processedAccordionSteps = processAccordionStepsContent(sectionId, content);
+    result.content = processedAccordionSteps.content;
+    result.warnings = processedAccordionSteps.warnings;
+    result.hasIssues = processedAccordionSteps.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('CardFlipSteps')) {
+    const processedCardFlip = processCardFlipStepsContent(sectionId, content);
+    result.content = processedCardFlip.content;
+    result.warnings = processedCardFlip.warnings;
+    result.hasIssues = processedCardFlip.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('VideoWalkthrough')) {
+    const processedVideoWalkthrough = processVideoWalkthroughContent(sectionId, content);
+    result.content = processedVideoWalkthrough.content;
+    result.warnings = processedVideoWalkthrough.warnings;
+    result.hasIssues = processedVideoWalkthrough.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('ZigzagImageSteps')) {
+    const processedZigzagImage = processZigzagImageStepsContent(sectionId, content);
+    result.content = processedZigzagImage.content;
+    result.warnings = processedZigzagImage.warnings;
+    result.hasIssues = processedZigzagImage.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('AnimatedProcessLine')) {
+    const processedAnimatedProcess = processAnimatedProcessLineContent(sectionId, content);
+    result.content = processedAnimatedProcess.content;
+    result.warnings = processedAnimatedProcess.warnings;
+    result.hasIssues = processedAnimatedProcess.hasIssues;
+    return result;
+  }
+
   // Special handling for EmojiOutcomeGrid sections
   if (sectionId.includes('EmojiOutcomeGrid')) {
     const processedEmojiGrid = processEmojiOutcomeGridContent(sectionId, content);
@@ -2930,6 +2995,500 @@ function processProblemChecklistContent(sectionId: string, content: SectionConte
     if (statements.length < 6) {
       result.warnings.push(`${sectionId}: Should have at least 6 checklist items for meaningful assessment`);
       result.hasIssues = true;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Special processing for ThreeStepHorizontal sections
+ */
+function processThreeStepHorizontalContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Process each element
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    const processedElement = processElement(sectionId, elementKey, elementValue);
+
+    if (processedElement.isValid) {
+      result.content[elementKey] = processedElement.value;
+    } else {
+      result.warnings.push(...processedElement.warnings);
+      result.hasIssues = true;
+      result.content[elementKey] = processedElement.fallback;
+    }
+  });
+
+  // Required field validation
+  const requiredFields = ['headline', 'step_titles', 'step_descriptions'];
+  requiredFields.forEach(field => {
+    if (!result.content[field]) {
+      result.warnings.push(`${sectionId}: Missing required field '${field}'`);
+      result.hasIssues = true;
+    }
+  });
+
+  // Validate step consistency
+  if (content.step_titles && content.step_descriptions) {
+    const titles = content.step_titles.split('|').map(item => item.trim()).filter(Boolean);
+    const descriptions = content.step_descriptions.split('|').map(item => item.trim()).filter(Boolean);
+
+    if (titles.length !== descriptions.length) {
+      result.warnings.push(`${sectionId}: Number of step titles (${titles.length}) doesn't match descriptions (${descriptions.length})`);
+      result.hasIssues = true;
+    }
+
+    if (titles.length !== 3) {
+      result.warnings.push(`${sectionId}: ThreeStepHorizontal should have exactly 3 steps, found ${titles.length}`);
+      result.hasIssues = true;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Special processing for VerticalTimeline sections
+ */
+function processVerticalTimelineContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Process each element
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    const processedElement = processElement(sectionId, elementKey, elementValue);
+
+    if (processedElement.isValid) {
+      result.content[elementKey] = processedElement.value;
+    } else {
+      result.warnings.push(...processedElement.warnings);
+      result.hasIssues = true;
+      result.content[elementKey] = processedElement.fallback;
+    }
+  });
+
+  // Required field validation
+  const requiredFields = ['headline', 'step_titles', 'step_descriptions'];
+  requiredFields.forEach(field => {
+    if (!result.content[field]) {
+      result.warnings.push(`${sectionId}: Missing required field '${field}'`);
+      result.hasIssues = true;
+    }
+  });
+
+  // Validate step consistency and durations
+  if (content.step_titles && content.step_descriptions) {
+    const titles = content.step_titles.split('|').map(item => item.trim()).filter(Boolean);
+    const descriptions = content.step_descriptions.split('|').map(item => item.trim()).filter(Boolean);
+
+    if (titles.length !== descriptions.length) {
+      result.warnings.push(`${sectionId}: Number of step titles (${titles.length}) doesn't match descriptions (${descriptions.length})`);
+      result.hasIssues = true;
+    }
+
+    // Check durations if provided
+    if (content.step_durations) {
+      const durations = content.step_durations.split('|').map(item => item.trim()).filter(Boolean);
+      if (durations.length !== titles.length) {
+        result.warnings.push(`${sectionId}: Number of durations (${durations.length}) doesn't match steps (${titles.length})`);
+        result.hasIssues = true;
+      }
+    }
+
+    if (titles.length < 3) {
+      result.warnings.push(`${sectionId}: VerticalTimeline should have at least 3 steps, found ${titles.length}`);
+      result.hasIssues = true;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Special processing for IconCircleSteps sections
+ */
+function processIconCircleStepsContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Process each element
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    const processedElement = processElement(sectionId, elementKey, elementValue);
+
+    if (processedElement.isValid) {
+      result.content[elementKey] = processedElement.value;
+    } else {
+      result.warnings.push(...processedElement.warnings);
+      result.hasIssues = true;
+      result.content[elementKey] = processedElement.fallback;
+    }
+  });
+
+  // Required field validation
+  const requiredFields = ['headline', 'step_titles', 'step_descriptions'];
+  requiredFields.forEach(field => {
+    if (!result.content[field]) {
+      result.warnings.push(`${sectionId}: Missing required field '${field}'`);
+      result.hasIssues = true;
+    }
+  });
+
+  // Validate step consistency
+  if (content.step_titles && content.step_descriptions) {
+    const titles = content.step_titles.split('|').map(item => item.trim()).filter(Boolean);
+    const descriptions = content.step_descriptions.split('|').map(item => item.trim()).filter(Boolean);
+
+    if (titles.length !== descriptions.length) {
+      result.warnings.push(`${sectionId}: Number of step titles (${titles.length}) doesn't match descriptions (${descriptions.length})`);
+      result.hasIssues = true;
+    }
+
+    if (titles.length < 3) {
+      result.warnings.push(`${sectionId}: IconCircleSteps should have at least 3 steps, found ${titles.length}`);
+      result.hasIssues = true;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Special processing for AccordionSteps sections
+ */
+function processAccordionStepsContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Process each element
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    const processedElement = processElement(sectionId, elementKey, elementValue);
+
+    if (processedElement.isValid) {
+      result.content[elementKey] = processedElement.value;
+    } else {
+      result.warnings.push(...processedElement.warnings);
+      result.hasIssues = true;
+      result.content[elementKey] = processedElement.fallback;
+    }
+  });
+
+  // Required field validation
+  const requiredFields = ['headline', 'step_titles', 'step_descriptions'];
+  requiredFields.forEach(field => {
+    if (!result.content[field]) {
+      result.warnings.push(`${sectionId}: Missing required field '${field}'`);
+      result.hasIssues = true;
+    }
+  });
+
+  // Validate step consistency and details
+  if (content.step_titles && content.step_descriptions) {
+    const titles = content.step_titles.split('|').map(item => item.trim()).filter(Boolean);
+    const descriptions = content.step_descriptions.split('|').map(item => item.trim()).filter(Boolean);
+
+    if (titles.length !== descriptions.length) {
+      result.warnings.push(`${sectionId}: Number of step titles (${titles.length}) doesn't match descriptions (${descriptions.length})`);
+      result.hasIssues = true;
+    }
+
+    // Check details if provided
+    if (content.step_details) {
+      const details = content.step_details.split('|').map(item => item.trim()).filter(Boolean);
+      if (details.length !== titles.length) {
+        result.warnings.push(`${sectionId}: Number of step details (${details.length}) doesn't match steps (${titles.length})`);
+        result.hasIssues = true;
+      }
+    }
+
+    if (titles.length < 3) {
+      result.warnings.push(`${sectionId}: AccordionSteps should have at least 3 steps, found ${titles.length}`);
+      result.hasIssues = true;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Special processing for CardFlipSteps sections
+ */
+function processCardFlipStepsContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Process each element
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    const processedElement = processElement(sectionId, elementKey, elementValue);
+
+    if (processedElement.isValid) {
+      result.content[elementKey] = processedElement.value;
+    } else {
+      result.warnings.push(...processedElement.warnings);
+      result.hasIssues = true;
+      result.content[elementKey] = processedElement.fallback;
+    }
+  });
+
+  // Required field validation
+  const requiredFields = ['headline', 'step_titles', 'step_descriptions'];
+  requiredFields.forEach(field => {
+    if (!result.content[field]) {
+      result.warnings.push(`${sectionId}: Missing required field '${field}'`);
+      result.hasIssues = true;
+    }
+  });
+
+  // Validate step consistency and flip content
+  if (content.step_titles && content.step_descriptions) {
+    const titles = content.step_titles.split('|').map(item => item.trim()).filter(Boolean);
+    const descriptions = content.step_descriptions.split('|').map(item => item.trim()).filter(Boolean);
+
+    if (titles.length !== descriptions.length) {
+      result.warnings.push(`${sectionId}: Number of step titles (${titles.length}) doesn't match descriptions (${descriptions.length})`);
+      result.hasIssues = true;
+    }
+
+    // Check details for card flip reveal content
+    if (content.step_details) {
+      const details = content.step_details.split('|').map(item => item.trim()).filter(Boolean);
+      if (details.length !== titles.length) {
+        result.warnings.push(`${sectionId}: Number of flip details (${details.length}) doesn't match steps (${titles.length})`);
+        result.hasIssues = true;
+      }
+    }
+
+    if (titles.length < 3) {
+      result.warnings.push(`${sectionId}: CardFlipSteps should have at least 3 steps, found ${titles.length}`);
+      result.hasIssues = true;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Special processing for VideoWalkthrough sections
+ */
+function processVideoWalkthroughContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Process each element
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    const processedElement = processElement(sectionId, elementKey, elementValue);
+
+    if (processedElement.isValid) {
+      result.content[elementKey] = processedElement.value;
+    } else {
+      result.warnings.push(...processedElement.warnings);
+      result.hasIssues = true;
+      result.content[elementKey] = processedElement.fallback;
+    }
+  });
+
+  // Required field validation
+  const requiredFields = ['headline', 'video_title', 'video_description'];
+  requiredFields.forEach(field => {
+    if (!result.content[field]) {
+      result.warnings.push(`${sectionId}: Missing required field '${field}'`);
+      result.hasIssues = true;
+    }
+  });
+
+  // Validate video chapters if provided
+  if (content.chapter_titles) {
+    const chapters = content.chapter_titles.split('|').map(item => item.trim()).filter(Boolean);
+    if (chapters.length > 8) {
+      result.warnings.push(`${sectionId}: Too many chapters (${chapters.length}), consider limiting to 8 for better UX`);
+    }
+  }
+
+  // Validate video duration format if provided
+  if (content.video_duration && typeof content.video_duration === 'string') {
+    const durationPattern = /^\d+:\d{2}$/;
+    if (!durationPattern.test(content.video_duration)) {
+      result.warnings.push(`${sectionId}: Video duration should be in MM:SS format (e.g., "3:45")`);
+      result.hasIssues = true;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Special processing for ZigzagImageSteps sections
+ */
+function processZigzagImageStepsContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Process each element
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    const processedElement = processElement(sectionId, elementKey, elementValue);
+
+    if (processedElement.isValid) {
+      result.content[elementKey] = processedElement.value;
+    } else {
+      result.warnings.push(...processedElement.warnings);
+      result.hasIssues = true;
+      result.content[elementKey] = processedElement.fallback;
+    }
+  });
+
+  // Required field validation
+  const requiredFields = ['headline', 'step_titles', 'step_descriptions'];
+  requiredFields.forEach(field => {
+    if (!result.content[field]) {
+      result.warnings.push(`${sectionId}: Missing required field '${field}'`);
+      result.hasIssues = true;
+    }
+  });
+
+  // Validate step and image caption consistency
+  if (content.step_titles && content.step_descriptions) {
+    const titles = content.step_titles.split('|').map(item => item.trim()).filter(Boolean);
+    const descriptions = content.step_descriptions.split('|').map(item => item.trim()).filter(Boolean);
+
+    if (titles.length !== descriptions.length) {
+      result.warnings.push(`${sectionId}: Number of step titles (${titles.length}) doesn't match descriptions (${descriptions.length})`);
+      result.hasIssues = true;
+    }
+
+    // Check image captions if provided
+    if (content.image_captions) {
+      const captions = content.image_captions.split('|').map(item => item.trim()).filter(Boolean);
+      if (captions.length !== titles.length) {
+        result.warnings.push(`${sectionId}: Number of image captions (${captions.length}) doesn't match steps (${titles.length})`);
+        result.hasIssues = true;
+      }
+    }
+
+    if (titles.length < 3) {
+      result.warnings.push(`${sectionId}: ZigzagImageSteps should have at least 3 steps, found ${titles.length}`);
+      result.hasIssues = true;
+    }
+
+    if (titles.length > 6) {
+      result.warnings.push(`${sectionId}: ZigzagImageSteps works best with 3-6 steps, found ${titles.length}`);
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Special processing for AnimatedProcessLine sections
+ */
+function processAnimatedProcessLineContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Process each element
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    const processedElement = processElement(sectionId, elementKey, elementValue);
+
+    if (processedElement.isValid) {
+      result.content[elementKey] = processedElement.value;
+    } else {
+      result.warnings.push(...processedElement.warnings);
+      result.hasIssues = true;
+      result.content[elementKey] = processedElement.fallback;
+    }
+  });
+
+  // Required field validation
+  const requiredFields = ['headline', 'process_titles', 'process_descriptions'];
+  requiredFields.forEach(field => {
+    if (!result.content[field]) {
+      result.warnings.push(`${sectionId}: Missing required field '${field}'`);
+      result.hasIssues = true;
+    }
+  });
+
+  // Validate process consistency and animation labels
+  if (content.process_titles && content.process_descriptions) {
+    const titles = content.process_titles.split('|').map(item => item.trim()).filter(Boolean);
+    const descriptions = content.process_descriptions.split('|').map(item => item.trim()).filter(Boolean);
+
+    if (titles.length !== descriptions.length) {
+      result.warnings.push(`${sectionId}: Number of process titles (${titles.length}) doesn't match descriptions (${descriptions.length})`);
+      result.hasIssues = true;
+    }
+
+    // Check animation labels if provided
+    if (content.animation_labels) {
+      const labels = content.animation_labels.split('|').map(item => item.trim()).filter(Boolean);
+      if (labels.length !== titles.length) {
+        result.warnings.push(`${sectionId}: Number of animation labels (${labels.length}) doesn't match process steps (${titles.length})`);
+        result.hasIssues = true;
+      }
+    }
+
+    if (titles.length < 3) {
+      result.warnings.push(`${sectionId}: AnimatedProcessLine should have at least 3 process steps, found ${titles.length}`);
+      result.hasIssues = true;
+    }
+
+    if (titles.length > 8) {
+      result.warnings.push(`${sectionId}: AnimatedProcessLine works best with 3-8 steps for animation clarity, found ${titles.length}`);
     }
   }
 

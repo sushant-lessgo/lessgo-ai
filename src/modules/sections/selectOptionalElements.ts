@@ -1533,8 +1533,7 @@ const elementRules: SectionLayoutRules = {
   }
 ],
 
-// HowItWorks Section Rules - Add these to elementRules object
-
+// HowItWorks Section Rules
 "HowItWorks_ThreeStepHorizontal": [
   {
     element: "step_numbers",

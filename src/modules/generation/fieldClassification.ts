@@ -189,6 +189,39 @@ export function classifyField(fieldName: string, sectionType?: string): Classifi
     return classifyTestimonialCTAComboField(fieldName);
   }
 
+  // HowItWorks Section Classifications
+  if (sectionType === 'ThreeStepHorizontal') {
+    return classifyThreeStepHorizontalField(fieldName);
+  }
+
+  if (sectionType === 'VerticalTimeline') {
+    return classifyVerticalTimelineField(fieldName);
+  }
+
+  if (sectionType === 'IconCircleSteps') {
+    return classifyIconCircleStepsField(fieldName);
+  }
+
+  if (sectionType === 'AccordionSteps') {
+    return classifyAccordionStepsField(fieldName);
+  }
+
+  if (sectionType === 'CardFlipSteps') {
+    return classifyCardFlipStepsField(fieldName);
+  }
+
+  if (sectionType === 'VideoWalkthrough') {
+    return classifyVideoWalkthroughField(fieldName);
+  }
+
+  if (sectionType === 'ZigzagImageSteps') {
+    return classifyZigzagImageStepsField(fieldName);
+  }
+
+  if (sectionType === 'AnimatedProcessLine') {
+    return classifyAnimatedProcessLineField(fieldName);
+  }
+
   // AI-Generated Fields (high confidence for content generation)
   if (isAiGeneratedField(field)) {
     return {
@@ -3888,5 +3921,568 @@ function classifyProblemChecklistField(fieldName: string): ClassificationResult 
       fallback_strategy: 'generate',
       confidence: 0.85
     }
+  };
+}
+
+/**
+ * Specific classification for ThreeStepHorizontal fields
+ */
+function classifyThreeStepHorizontalField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  // Core content fields are AI-generated
+  if (field === 'headline' || field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Process header content is ideal for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create engaging headlines that introduce your 3-step process'
+    };
+  }
+
+  if (field === 'step_titles' || field === 'step_descriptions') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Step content is perfect for AI generation based on business context',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will generate clear, actionable steps based on your business process'
+    };
+  }
+
+  if (field === 'conclusion_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Conclusion text summarizes the process effectively',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will create compelling conclusion text for your process'
+    };
+  }
+
+  if (field.startsWith('step_icon_') || field === 'step_numbers') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Visual elements require specific brand choices',
+        fallback_strategy: 'default',
+        confidence: 0.6
+      },
+      suggested_default: field.startsWith('step_icon_') ? '⭐' : '1|2|3'
+    };
+  }
+
+  // Fallback
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown ThreeStepHorizontal field, using hybrid approach',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    },
+    user_guidance: 'Please review this field as it may need manual adjustment'
+  };
+}
+
+/**
+ * Specific classification for VerticalTimeline fields
+ */
+function classifyVerticalTimelineField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  // Core content fields are AI-generated
+  if (field === 'headline' || field === 'subheadline' || field === 'supporting_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Timeline header content is ideal for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create engaging timeline headers that introduce your process'
+    };
+  }
+
+  if (field === 'step_titles' || field === 'step_descriptions') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Timeline step content is perfect for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will generate clear, progressive timeline steps'
+    };
+  }
+
+  if (field === 'step_durations' || field === 'process_time_label') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Time estimates can be reasonably generated based on typical processes',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      },
+      user_guidance: 'AI will suggest realistic time estimates; adjust based on your specific process'
+    };
+  }
+
+  if (field.includes('process_summary') || field === 'process_steps_label') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Process summary content works well with AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will create compelling process summary content'
+    };
+  }
+
+  if (field.startsWith('step_icon_') || field === 'use_step_icons') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Visual elements require specific brand choices',
+        fallback_strategy: 'default',
+        confidence: 0.6
+      },
+      suggested_default: field.startsWith('step_icon_') ? '⭐' : undefined
+    };
+  }
+
+  if (field === 'cta_text' || field === 'trust_items') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'CTA and trust elements are suitable for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will generate compelling CTA and trust indicators'
+    };
+  }
+
+  // Fallback
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown VerticalTimeline field, using hybrid approach',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    },
+    user_guidance: 'Please review this field as it may need manual adjustment'
+  };
+}
+
+/**
+ * Specific classification for IconCircleSteps fields
+ */
+function classifyIconCircleStepsField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  // Core content fields are AI-generated
+  if (field === 'headline' || field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Icon-based process headers are ideal for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create engaging headlines for your icon-driven process'
+    };
+  }
+
+  if (field === 'step_titles' || field === 'step_descriptions') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Step content with icon support is perfect for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will generate clear, icon-friendly step descriptions'
+    };
+  }
+
+  if (field === 'step_labels') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Step labels complement the icon-driven design',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will create concise, descriptive step labels'
+    };
+  }
+
+  if (field.startsWith('step_icon_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Icons require specific brand and visual choices',
+        fallback_strategy: 'default',
+        confidence: 0.6
+      },
+      suggested_default: '⭐'
+    };
+  }
+
+  // Fallback
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown IconCircleSteps field, using hybrid approach',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    },
+    user_guidance: 'Please review this field as it may need manual adjustment'
+  };
+}
+
+/**
+ * Specific classification for AccordionSteps fields
+ */
+function classifyAccordionStepsField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  // Core content fields are AI-generated
+  if (field === 'headline' || field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Accordion process headers are ideal for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create engaging headlines for your expandable process steps'
+    };
+  }
+
+  if (field === 'step_titles' || field === 'step_descriptions') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Accordion step content is perfect for detailed AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will generate comprehensive step titles and descriptions for accordion format'
+    };
+  }
+
+  if (field === 'step_details') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Detailed step information is ideal for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will create detailed explanations for each accordion step'
+    };
+  }
+
+  // Fallback
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown AccordionSteps field, using hybrid approach',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    },
+    user_guidance: 'Please review this field as it may need manual adjustment'
+  };
+}
+
+/**
+ * Specific classification for CardFlipSteps fields
+ */
+function classifyCardFlipStepsField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  // Core content fields are AI-generated
+  if (field === 'headline' || field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Card flip process headers are ideal for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create engaging headlines for your interactive card flip process'
+    };
+  }
+
+  if (field === 'step_titles' || field === 'step_descriptions') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Card flip content is perfect for AI generation with front/back structure',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will generate compelling card front titles and detailed back descriptions'
+    };
+  }
+
+  if (field === 'step_details') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Card back details are ideal for comprehensive AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will create detailed explanations for card flip reveal'
+    };
+  }
+
+  if (field === 'flip_instruction') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'User interaction instructions can be generated effectively',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      },
+      user_guidance: 'AI will create clear flip interaction instructions'
+    };
+  }
+
+  // Fallback
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown CardFlipSteps field, using hybrid approach',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    },
+    user_guidance: 'Please review this field as it may need manual adjustment'
+  };
+}
+
+/**
+ * Specific classification for VideoWalkthrough fields
+ */
+function classifyVideoWalkthroughField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  // Core content fields are AI-generated
+  if (field === 'headline' || field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Video walkthrough headers are ideal for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create engaging headlines that introduce your video walkthrough'
+    };
+  }
+
+  if (field === 'video_title' || field === 'video_description') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Video content descriptions are perfect for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will generate compelling video titles and descriptions'
+    };
+  }
+
+  if (field === 'chapter_titles') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Video chapter organization is suitable for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will create logical video chapter titles'
+    };
+  }
+
+  if (field === 'video_duration') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Video duration requires actual video content knowledge',
+        fallback_strategy: 'default',
+        confidence: 0.3
+      },
+      suggested_default: '3:45'
+    };
+  }
+
+  // Fallback
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown VideoWalkthrough field, using hybrid approach',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    },
+    user_guidance: 'Please review this field as it may need manual adjustment'
+  };
+}
+
+/**
+ * Specific classification for ZigzagImageSteps fields
+ */
+function classifyZigzagImageStepsField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  // Core content fields are AI-generated
+  if (field === 'headline' || field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Zigzag visual process headers are ideal for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create engaging headlines for your visual zigzag process'
+    };
+  }
+
+  if (field === 'step_titles' || field === 'step_descriptions') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Image-supported step content is perfect for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will generate clear steps that work well with alternating image layout'
+    };
+  }
+
+  if (field === 'image_captions') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Image captions can be generated to complement step content',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      },
+      user_guidance: 'AI will create descriptive captions for your process images'
+    };
+  }
+
+  // Fallback
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown ZigzagImageSteps field, using hybrid approach',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    },
+    user_guidance: 'Please review this field as it may need manual adjustment'
+  };
+}
+
+/**
+ * Specific classification for AnimatedProcessLine fields
+ */
+function classifyAnimatedProcessLineField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  // Core content fields are AI-generated
+  if (field === 'headline' || field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Animated process headers are ideal for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create engaging headlines for your animated process flow'
+    };
+  }
+
+  if (field === 'process_titles' || field === 'process_descriptions') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Animated process content is perfect for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will generate dynamic process steps with animation-friendly language'
+    };
+  }
+
+  if (field === 'animation_labels') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Animation labels complement the process flow effectively',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will create concise animation labels for your process flow'
+    };
+  }
+
+  // Fallback
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown AnimatedProcessLine field, using hybrid approach',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    },
+    user_guidance: 'Please review this field as it may need manual adjustment'
   };
 }
