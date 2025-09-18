@@ -25,6 +25,11 @@ export interface ClassificationResult {
 export function classifyField(fieldName: string, sectionType?: string): ClassificationResult {
   const field = fieldName.toLowerCase();
 
+  // Hero Section Classifications
+  if (['leftCopyRightImage', 'centerStacked', 'splitScreen', 'imageFirst'].includes(sectionType || '')) {
+    return classifyHeroField(fieldName);
+  }
+
   // Section-specific classifications
   if (sectionType === 'InlineQnAList') {
     return classifyInlineQnAListField(fieldName);
@@ -728,6 +733,169 @@ function classifyQuoteStyleAnswersField(fieldName: string): ClassificationResult
       reason: 'Unknown QuoteStyleAnswers field',
       fallback_strategy: 'generate',
       confidence: 0.7
+    }
+  };
+}
+
+/**
+ * Specific classification for Hero section fields
+ */
+function classifyHeroField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  // Core content fields - AI generated
+  if (field === 'headline' || field === 'subheadline' || field === 'supporting_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Core hero messaging should be generated based on product value proposition',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create compelling hero copy based on your product'
+    };
+  }
+
+  if (field === 'cta_text' || field === 'secondary_cta_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'CTA text should align with landing page goals and user journey stage',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create action-oriented CTA text'
+    };
+  }
+
+  if (field === 'badge_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Badge text provides social proof or credibility signals',
+        fallback_strategy: 'skip',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will generate credibility badges when appropriate'
+    };
+  }
+
+  if (field === 'value_proposition') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Value prop should clearly communicate unique benefits',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      }
+    };
+  }
+
+  // Trust indicators - AI generated
+  if (field === 'trust_items' || field.startsWith('trust_item_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Trust indicators build confidence and reduce friction',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will generate trust-building elements'
+    };
+  }
+
+  // Social proof fields - hybrid approach
+  if (field === 'customer_count' || field === 'rating_value' || field === 'rating_count') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Social proof metrics should be real or clearly marked as examples',
+        fallback_strategy: 'default',
+        confidence: 0.8
+      },
+      suggested_default: field === 'customer_count' ? '500+ happy customers' :
+                        field === 'rating_value' ? '4.9/5' : 'from 127 reviews',
+      user_guidance: 'Provide real metrics or use placeholder values'
+    };
+  }
+
+  // Customer avatars - manual preferred
+  if (field === 'customer_names' || field === 'avatar_urls') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Customer information should be authentic or clearly marked as examples',
+        fallback_strategy: 'default',
+        confidence: 0.85
+      },
+      suggested_default: field === 'customer_names' ? 'Sarah Chen|Alex Rivera|Jordan Kim|Maya Patel' : '{}',
+      user_guidance: 'Use real customer names or example personas'
+    };
+  }
+
+  // Images - manual required
+  if (field.includes('hero_image')) {
+    const defaultImage = field === 'image_first_hero_image' ? '/hero-placeholder.jpg' :
+                        field === 'split_hero_image' ? '/hero-placeholder.jpg' :
+                        field === 'center_hero_image' ? '/hero-placeholder.jpg' :
+                        '/hero-placeholder.jpg';
+
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Hero images require brand-specific visuals',
+        fallback_strategy: 'default',
+        confidence: 0.95
+      },
+      suggested_default: defaultImage,
+      user_guidance: 'Upload hero image that represents your product'
+    };
+  }
+
+  // Boolean flags - manual preferred
+  if (field.startsWith('show_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Display preferences should match design intent',
+        fallback_strategy: 'default',
+        confidence: 0.8
+      },
+      suggested_default: 'true'
+    };
+  }
+
+  // Avatar count - manual preferred
+  if (field === 'avatar_count') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Number of avatars affects visual balance',
+        fallback_strategy: 'default',
+        confidence: 0.8
+      },
+      suggested_default: '4'
+    };
+  }
+
+  // Default fallback
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown Hero field',
+      fallback_strategy: 'skip',
+      confidence: 0.6
     }
   };
 }

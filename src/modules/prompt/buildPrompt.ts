@@ -1062,14 +1062,21 @@ function getSpecificElementGuidance(elementName: string, sectionType: string): s
   const elementGuidance: Record<string, string> = {
     headline: "Lead with strongest benefit. Hook attention immediately. 5-12 words optimal.",
     subheadline: "Support and clarify the headline. Add context or urgency. 10-20 words.",
+    supporting_text: "Reinforce main message. Add credibility, urgency or key metrics. 15-25 words.",
     cta_text: "Action-oriented, value-focused. Promise immediate benefit. 2-4 words.",
+    secondary_cta_text: "Alternative action for different readiness levels. 2-4 words.",
+    badge_text: "Social proof or credibility signal. Keep ultra-concise. 2-5 words.",
+    value_proposition: "Clear differentiation. Why choose this over alternatives. 10-20 words.",
+    trust_item_1: "Primary trust signal - most important guarantee or proof point.",
+    trust_item_2: "Secondary trust signal - reduce friction or objection.",
+    trust_item_3: "Tertiary trust signal - additional confidence builder.",
+    trust_item_4: "Optional extra trust signal if highly relevant.",
+    trust_item_5: "Optional extra trust signal if highly relevant.",
     feature_titles: "Benefit-focused, not feature-focused. What user gets, not what it does.",
     feature_descriptions: "Specific outcomes and value. Use 'you' language. Be concrete.",
     testimonial_quotes: "Authentic voice, specific results. Include emotion and outcome.",
     questions: "Address real user concerns. Match awareness level. End with question mark.",
     answers: "Direct, helpful responses. Build confidence and trust.",
-    value_proposition: "Clear differentiation. Why choose this over alternatives.",
-    supporting_text: "Reinforce main message. Add credibility or urgency.",
 
     // UniqueMechanism field guidance
     algorithm_name: "Brand your algorithm/technology. Make it memorable and proprietary.",
@@ -1149,7 +1156,15 @@ function getSpecificElementGuidance(elementName: string, sectionType: string): s
   const sectionSpecific: Record<string, Record<string, string>> = {
     Hero: {
       headline: "Hook attention with biggest benefit. First impression is critical.",
-      cta_text: "Low-friction entry point. Match landing goal and offer."
+      subheadline: "Support main headline with compelling clarification or urgency.",
+      supporting_text: "Add social proof, metrics, or trust signals below main copy.",
+      cta_text: "Low-friction entry point. Match landing goal and offer.",
+      secondary_cta_text: "Alternative action for users not ready for primary CTA.",
+      badge_text: "Highlight awards, recognition, or credibility markers.",
+      value_proposition: "Clearly articulate unique advantage over competitors.",
+      trust_item_1: "Strongest guarantee or proof point (e.g., 'Free 14-day trial').",
+      trust_item_2: "Remove friction or objection (e.g., 'No credit card required').",
+      trust_item_3: "Additional confidence builder (e.g., 'Cancel anytime')."
     },
     Features: {
       feature_titles: "Lead with outcome, not process. What user achieves.",

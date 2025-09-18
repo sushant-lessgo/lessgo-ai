@@ -24,7 +24,7 @@ Page 3
 
 Centerstacked
 IconGrid
-IllustratedModel
+stackedhighlights
 Emojioutcomegrid
 AvatarCarousel
 AnimationUpgradePath

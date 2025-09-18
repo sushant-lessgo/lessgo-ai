@@ -139,6 +139,16 @@ function processSectionContent(sectionId: string, content: SectionContent): {
     hasIssues: false
   };
 
+  // Special handling for Hero sections
+  if (sectionId.includes('Hero') ||
+      ['leftCopyRightImage', 'centerStacked', 'splitScreen', 'imageFirst'].some(layout => sectionId.includes(layout))) {
+    const processedHero = processHeroContent(sectionId, content);
+    result.content = processedHero.content;
+    result.warnings = processedHero.warnings;
+    result.hasIssues = processedHero.hasIssues;
+    return result;
+  }
+
   // Special handling for FAQ sections
   if (sectionId.includes('InlineQnAList')) {
     const processedInlineQnA = processInlineQnAListContent(sectionId, content);
@@ -640,6 +650,88 @@ function validateQnAPairs(content: SectionContent): {
   }
 
   return { warnings };
+}
+
+/**
+ * Special processing for Hero sections
+ */
+function processHeroContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Handle trust items - support both individual fields and legacy pipe-separated format
+  const hasTrustItems = content.trust_items;
+  const hasIndividualTrustItems = Object.keys(content).some(key => key.startsWith('trust_item_'));
+
+  if (hasTrustItems && !hasIndividualTrustItems) {
+    // Convert pipe-separated trust_items to individual fields
+    if (typeof content.trust_items === 'string') {
+      const trustItems = content.trust_items.split('|').map(item => item.trim()).filter(Boolean);
+      trustItems.forEach((item, index) => {
+        if (index < 5) {
+          result.content[`trust_item_${index + 1}`] = item;
+        }
+      });
+      // Keep the legacy format as well for backward compatibility
+      result.content.trust_items = content.trust_items;
+      result.warnings.push(`${sectionId}: Converted trust_items to individual fields`);
+    }
+  }
+
+  // Validate social proof fields
+  if (content.rating_value && typeof content.rating_value === 'string') {
+    // Ensure rating format is valid (e.g., "4.9/5" or "4.9")
+    if (!content.rating_value.match(/^\d+(\.\d+)?(\/\d+)?$/)) {
+      result.warnings.push(`${sectionId}: rating_value should be in format "4.9/5" or "4.9"`);
+      result.hasIssues = true;
+    }
+  }
+
+  if (content.customer_names && typeof content.customer_names === 'string') {
+    // Validate pipe-separated customer names
+    const names = content.customer_names.split('|');
+    if (names.length > 6) {
+      result.warnings.push(`${sectionId}: customer_names should have max 6 names`);
+      content.customer_names = names.slice(0, 6).join('|');
+    }
+  }
+
+  // Process badge text - ensure it's not too long
+  if (content.badge_text && typeof content.badge_text === 'string' && content.badge_text.length > 30) {
+    result.warnings.push(`${sectionId}: badge_text should be concise (max 30 chars)`);
+    result.hasIssues = true;
+  }
+
+  // Process all fields normally
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    const processedElement = processElement(sectionId, elementKey, elementValue);
+
+    if (processedElement.isValid) {
+      result.content[elementKey] = processedElement.value;
+    } else {
+      result.warnings.push(processedElement.warning || `${sectionId}: Invalid value for ${elementKey}`);
+      result.hasIssues = true;
+    }
+  });
+
+  // Ensure required fields are present
+  if (!result.content.headline) {
+    result.warnings.push(`${sectionId}: Missing required field 'headline'`);
+    result.hasIssues = true;
+  }
+  if (!result.content.cta_text) {
+    result.warnings.push(`${sectionId}: Missing required field 'cta_text'`);
+    result.hasIssues = true;
+  }
+
+  return result;
 }
 
 /**

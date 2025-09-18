@@ -1316,6 +1316,46 @@ const elementRules: SectionLayoutRules = {
       { variable: "toneProfile", values: ["confident-playful", "bold-persuasive"], weight: 2 }
     ],
     minScore: 6
+  },
+  {
+    element: "trust_item_1",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-2", "level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 }
+    ],
+    minScore: 4
+  },
+  {
+    element: "trust_item_2",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-2", "level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 }
+    ],
+    minScore: 4
+  },
+  {
+    element: "trust_item_3",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "customer_count",
+    conditions: [
+      { variable: "startupStage", values: ["users-500-1k", "users-1k-5k", "mrr-growth", "seed-funded"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "rating_value",
+    conditions: [
+      { variable: "startupStage", values: ["users-250-500", "users-500-1k", "users-1k-5k"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
   }
 ],
 
@@ -1344,6 +1384,38 @@ const elementRules: SectionLayoutRules = {
       { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k"], weight: 3 }
     ],
     minScore: 5
+  },
+  {
+    element: "badge_text",
+    conditions: [
+      { variable: "startupStage", values: ["users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "trust_item_1",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-2", "level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 }
+    ],
+    minScore: 4
+  },
+  {
+    element: "trust_item_2",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-2", "level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 }
+    ],
+    minScore: 4
+  },
+  {
+    element: "trust_item_3",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 }
+    ],
+    minScore: 5
   }
 ],
 
@@ -1358,6 +1430,22 @@ const elementRules: SectionLayoutRules = {
     minScore: 6
   },
   {
+    element: "supporting_text",
+    conditions: [
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "product-managers"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "badge_text",
+    conditions: [
+      { variable: "startupStage", values: ["users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
     element: "value_proposition",
     conditions: [
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
@@ -1365,6 +1453,30 @@ const elementRules: SectionLayoutRules = {
       { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
     ],
     minScore: 6
+  },
+  {
+    element: "trust_item_1",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-2", "level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 }
+    ],
+    minScore: 4
+  },
+  {
+    element: "trust_item_2",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-2", "level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 }
+    ],
+    minScore: 4
+  },
+  {
+    element: "trust_item_3",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 }
+    ],
+    minScore: 5
   }
 ],
 
@@ -1379,13 +1491,45 @@ const elementRules: SectionLayoutRules = {
     minScore: 6
   },
   {
-    element: "caption_text",
+    element: "supporting_text",
     conditions: [
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
       { variable: "targetAudience", values: ["developers", "product-managers", "no-code-builders"], weight: 3 },
       { variable: "landingPageGoals", values: ["demo", "free-trial"], weight: 2 }
     ],
     minScore: 6
+  },
+  {
+    element: "badge_text",
+    conditions: [
+      { variable: "startupStage", values: ["users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "trust_item_1",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-2", "level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 }
+    ],
+    minScore: 4
+  },
+  {
+    element: "trust_item_2",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-2", "level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 }
+    ],
+    minScore: 4
+  },
+  {
+    element: "trust_item_3",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 }
+    ],
+    minScore: 5
   }
 ],
 

@@ -293,10 +293,25 @@ export function pickHeroLayout(input: LayoutPickerInput): HeroLayout {
   }
 
   // Find the highest scoring layout
-  const topLayout = Object.entries(scores).reduce((max, [layout, score]) => 
+  const topLayout = Object.entries(scores).reduce((max, [layout, score]) =>
     score > max.score ? { layout: layout as HeroLayout, score } : max,
     { layout: "leftCopyRightImage" as HeroLayout, score: 0 }
   );
+
+  // Check for randomization between leftCopyRightImage and centerStacked
+  // If they have similar scores (within 2 points), randomize for variety
+  const leftCopyScore = scores.leftCopyRightImage;
+  const centerStackedScore = scores.centerStacked;
+  const scoreDifference = Math.abs(leftCopyScore - centerStackedScore);
+
+  if (scoreDifference <= 2 &&
+      (topLayout.layout === "leftCopyRightImage" || topLayout.layout === "centerStacked") &&
+      (leftCopyScore >= 8 || centerStackedScore >= 8)) { // Only randomize if both have decent scores
+
+    // Randomize between the two equally good layouts
+    const randomChoice = Math.random() < 0.5 ? "leftCopyRightImage" : "centerStacked";
+    return randomChoice;
+  }
 
   // Return top scoring layout, fallback to most universal available layout
   return topLayout.score > 0 ? topLayout.layout : "leftCopyRightImage";
