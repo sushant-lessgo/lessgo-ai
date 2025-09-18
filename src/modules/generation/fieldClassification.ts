@@ -148,6 +148,39 @@ export function classifyField(fieldName: string, sectionType?: string): Classifi
     return classifyProblemChecklistField(fieldName);
   }
 
+  // SocialProof Section Classifications
+  if (sectionType === 'LogoWall') {
+    return classifyLogoWallField(fieldName);
+  }
+
+  if (sectionType === 'MediaMentions') {
+    return classifyMediaMentionsField(fieldName);
+  }
+
+  if (sectionType === 'UserCountBar') {
+    return classifyUserCountBarField(fieldName);
+  }
+
+  if (sectionType === 'IndustryBadgeLine') {
+    return classifyIndustryBadgeLineField(fieldName);
+  }
+
+  if (sectionType === 'MapHeatSpots') {
+    return classifyMapHeatSpotsField(fieldName);
+  }
+
+  if (sectionType === 'StackedStats') {
+    return classifyStackedStatsField(fieldName);
+  }
+
+  if (sectionType === 'StripWithReviews') {
+    return classifyStripWithReviewsField(fieldName);
+  }
+
+  if (sectionType === 'SocialProofStrip') {
+    return classifySocialProofStripField(fieldName);
+  }
+
   // FounderNote Section Classifications
   if (sectionType === 'FoundersBeliefStack') {
     return classifyFoundersBeliefStackField(fieldName);
@@ -7266,5 +7299,634 @@ function classifyPersonaResultPanelsField(fieldName: string): ClassificationResu
       confidence: 0.7
     },
     user_guidance: 'Please review this field as it may need manual adjustment'
+  };
+}
+
+// =====================================================
+// SocialProof Section Field Classifications
+// =====================================================
+
+/**
+ * Classifies LogoWall fields for AI generation suitability
+ */
+function classifyLogoWallField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline' || field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Headlines and subheadlines benefit from AI optimization for social proof messaging',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      }
+    };
+  }
+
+  if (field === 'company_names') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Company names should be actual customer/partner names, not AI-generated',
+        fallback_strategy: 'default',
+        confidence: 0.95
+      },
+      user_guidance: 'Use real company names from your customer base or notable partnerships'
+    };
+  }
+
+  if (field === 'logo_urls') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Logo URLs require actual company logo assets',
+        fallback_strategy: 'skip',
+        confidence: 0.98
+      },
+      user_guidance: 'Upload actual company logos for maximum credibility'
+    };
+  }
+
+  if (field.includes('stat_') && (field.includes('_number') || field.includes('_label'))) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Statistics can be generated based on company stage and industry',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      }
+    };
+  }
+
+  if (field === 'trust_badge_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Trust badge text can be optimized for conversion',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      }
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown LogoWall field, using hybrid approach',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    }
+  };
+}
+
+/**
+ * Classifies MediaMentions fields for AI generation suitability
+ */
+function classifyMediaMentionsField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline' || field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Headlines can be optimized for media credibility messaging',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      }
+    };
+  }
+
+  if (field === 'media_outlets') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Media outlets should be actual publications that covered the company',
+        fallback_strategy: 'default',
+        confidence: 0.95
+      },
+      user_guidance: 'List actual media outlets that have covered your company'
+    };
+  }
+
+  if (field === 'testimonial_quotes') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Quotes should be real but can be AI-optimized for clarity',
+        fallback_strategy: 'generate',
+        confidence: 0.7
+      },
+      user_guidance: 'Use actual quotes but AI can help optimize wording'
+    };
+  }
+
+  if (field === 'logo_urls') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Media logo URLs require actual publication logos',
+        fallback_strategy: 'skip',
+        confidence: 0.98
+      }
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown MediaMentions field, using hybrid approach',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    }
+  };
+}
+
+/**
+ * Classifies UserCountBar fields for AI generation suitability
+ */
+function classifyUserCountBarField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline' || field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Headlines can be optimized for user growth messaging',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      }
+    };
+  }
+
+  if (field === 'user_metrics' || field === 'metric_labels') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Metrics should be real but labels can be AI-optimized',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      },
+      user_guidance: 'Use real user metrics with AI-optimized labels'
+    };
+  }
+
+  if (field === 'growth_indicators') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Growth indicators can be generated based on startup stage',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      }
+    };
+  }
+
+  if (field.includes('trust_item_') || field === 'users_joined_text' || field === 'rating_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Trust and engagement text benefits from AI optimization',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      }
+    };
+  }
+
+  if (field === 'customer_names' || field === 'avatar_urls') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Customer data should be real for authenticity',
+        fallback_strategy: 'skip',
+        confidence: 0.95
+      }
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown UserCountBar field, using hybrid approach',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    }
+  };
+}
+
+/**
+ * Classifies IndustryBadgeLine fields for AI generation suitability
+ */
+function classifyIndustryBadgeLineField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline' || field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Headlines can be optimized for industry credibility',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      }
+    };
+  }
+
+  if (field === 'certification_badges') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Certification badges must be actual certifications held',
+        fallback_strategy: 'default',
+        confidence: 0.98
+      },
+      user_guidance: 'Only include certifications your company actually holds'
+    };
+  }
+
+  if (field === 'industry_awards' || field === 'compliance_standards') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Awards and compliance must be factual and verifiable',
+        fallback_strategy: 'default',
+        confidence: 0.95
+      }
+    };
+  }
+
+  if (field.includes('_section_title') || field.includes('trust_summary_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Section titles and summaries can be AI-optimized',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      }
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown IndustryBadgeLine field, using hybrid approach',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    }
+  };
+}
+
+/**
+ * Classifies MapHeatSpots fields for AI generation suitability
+ */
+function classifyMapHeatSpotsField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline' || field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Headlines can be optimized for global reach messaging',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      }
+    };
+  }
+
+  if (field === 'global_stats' || field === 'stat_labels') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Statistics should be real but labels can be optimized',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      }
+    };
+  }
+
+  if (field === 'countries_list') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Country list should reflect actual user base',
+        fallback_strategy: 'default',
+        confidence: 0.9
+      },
+      user_guidance: 'List countries where you actually have users'
+    };
+  }
+
+  if (field === 'countries_title') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Country section titles can be AI-optimized',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      }
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown MapHeatSpots field, using hybrid approach',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    }
+  };
+}
+
+/**
+ * Classifies StackedStats fields for AI generation suitability
+ */
+function classifyStackedStatsField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline' || field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Headlines can be optimized for metrics messaging',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      }
+    };
+  }
+
+  if (field === 'metric_values') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Metric values should be real but can be AI-suggested based on industry',
+        fallback_strategy: 'generate',
+        confidence: 0.7
+      },
+      user_guidance: 'Use real metrics when available'
+    };
+  }
+
+  if (field === 'metric_labels' || field === 'metric_descriptions') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Metric labels and descriptions can be AI-optimized for clarity',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      }
+    };
+  }
+
+  if (field.includes('metric_icon_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Icons can be AI-suggested based on metric context',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      }
+    };
+  }
+
+  if (field.includes('summary_') || field.includes('customer_satisfaction_') || field.includes('response_time_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Summary and satisfaction metrics can be AI-optimized',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      }
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown StackedStats field, using hybrid approach',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    }
+  };
+}
+
+/**
+ * Classifies StripWithReviews fields for AI generation suitability
+ */
+function classifyStripWithReviewsField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline' || field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Headlines can be optimized for review/testimonial messaging',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      }
+    };
+  }
+
+  if (field === 'reviews' || field.includes('review_text_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Reviews should be authentic customer feedback',
+        fallback_strategy: 'default',
+        confidence: 0.95
+      },
+      user_guidance: 'Use real customer reviews for authenticity'
+    };
+  }
+
+  if (field === 'reviewer_names' || field.includes('reviewer_name_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Reviewer names should be real customers',
+        fallback_strategy: 'default',
+        confidence: 0.95
+      }
+    };
+  }
+
+  if (field === 'reviewer_titles' || field.includes('reviewer_title_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Titles should be real but can be AI-optimized for presentation',
+        fallback_strategy: 'generate',
+        confidence: 0.7
+      }
+    };
+  }
+
+  if (field === 'ratings' || field.includes('rating_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Ratings should be real but format can be AI-optimized',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      }
+    };
+  }
+
+  if (field.includes('trust_') || field === 'overall_rating_text' || field === 'total_reviews_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Trust indicators and summary text can be AI-optimized',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      }
+    };
+  }
+
+  if (field === 'customer_names' || field === 'avatar_urls') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Customer data should be real for authenticity',
+        fallback_strategy: 'skip',
+        confidence: 0.95
+      }
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown StripWithReviews field, using hybrid approach',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    }
+  };
+}
+
+/**
+ * Classifies SocialProofStrip fields for AI generation suitability
+ */
+function classifySocialProofStripField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Headlines can be optimized for social proof messaging',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      }
+    };
+  }
+
+  if (field === 'proof_stats') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Stats should be real but can be AI-suggested based on context',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      }
+    };
+  }
+
+  if (field === 'stat_labels') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Stat labels can be AI-optimized for impact',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      }
+    };
+  }
+
+  if (field === 'company_names' || field === 'company_logos') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Company information should be real for credibility',
+        fallback_strategy: 'default',
+        confidence: 0.95
+      }
+    };
+  }
+
+  if (field === 'logo_urls') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Logo URLs require actual company assets',
+        fallback_strategy: 'skip',
+        confidence: 0.98
+      }
+    };
+  }
+
+  if (field.includes('trust_badge_') || field === 'rating_display') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Trust badges and rating display can be AI-optimized',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      }
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown SocialProofStrip field, using hybrid approach',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    }
   };
 }

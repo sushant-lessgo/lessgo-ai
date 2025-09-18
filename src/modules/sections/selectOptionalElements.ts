@@ -3571,10 +3571,26 @@ const elementRules: SectionLayoutRules = {
     minScore: 5
   },
   {
-    element: "category_labels",
+    element: "logo_urls",
     conditions: [
-      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams"], weight: 4 },
-      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+      { variable: "startupStage", values: ["users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "stat_1_number",
+    conditions: [
+      { variable: "startupStage", values: ["users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
+      { variable: "copyIntent", values: ["desire-led"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "trust_badge_text",
+    conditions: [
+      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 3 }
     ],
     minScore: 5
   }
@@ -3582,87 +3598,231 @@ const elementRules: SectionLayoutRules = {
 
 "SocialProof_MediaMentions": [
   {
-    element: "mention_dates",
+    element: "subheadline",
+    conditions: [
+      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "testimonial_quotes",
     conditions: [
       { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
       { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth"], weight: 3 },
       { variable: "toneProfile", values: ["luxury-expert", "confident-playful"], weight: 2 }
     ],
     minScore: 6
+  },
+  {
+    element: "logo_urls",
+    conditions: [
+      { variable: "startupStage", values: ["users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams"], weight: 3 }
+    ],
+    minScore: 5
   }
 ],
 
 "SocialProof_UserCountBar": [
   {
-    element: "growth_stats",
+    element: "subheadline",
+    conditions: [
+      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "growth_indicators",
     conditions: [
       { variable: "startupStage", values: ["users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth", "seed-funded"], weight: 4 },
       { variable: "copyIntent", values: ["desire-led"], weight: 3 },
       { variable: "toneProfile", values: ["confident-playful", "bold-persuasive"], weight: 2 }
     ],
     minScore: 6
+  },
+  {
+    element: "users_joined_text",
+    conditions: [
+      { variable: "startupStage", values: ["users-250-500", "users-500-1k", "users-1k-5k"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-2", "level-3"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "avatar_urls",
+    conditions: [
+      { variable: "startupStage", values: ["users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams"], weight: 3 }
+    ],
+    minScore: 5
   }
 ],
 
 "SocialProof_IndustryBadgeLine": [
   {
-    element: "badge_descriptions",
+    element: "subheadline",
+    conditions: [
+      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "industry_awards",
+    conditions: [
+      { variable: "startupStage", values: ["users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "compliance_standards",
+    conditions: [
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "mid-market-companies"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "trust_summary_description",
     conditions: [
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
       { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 3 },
       { variable: "targetAudience", values: ["smbs", "early-stage-startups"], weight: 2 }
     ],
     minScore: 6
-  },
-  {
-    element: "industry_context",
-    conditions: [
-      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
-      { variable: "targetAudience", values: ["enterprise-tech-teams", "mid-market-companies"], weight: 3 }
-    ],
-    minScore: 5
   }
 ],
 
 "SocialProof_MapHeatSpots": [
   {
-    element: "map_legend",
+    element: "subheadline",
     conditions: [
-      { variable: "marketSophisticationLevel", values: ["level-1", "level-2", "level-3"], weight: 4 },
-      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 3 },
-      { variable: "toneProfile", values: ["friendly-helpful"], weight: 2 }
+      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "countries_list",
+    conditions: [
+      { variable: "startupStage", values: ["users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2", "level-3"], weight: 3 },
+      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 2 }
     ],
     minScore: 6
+  },
+  {
+    element: "countries_title",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 4 },
+      { variable: "toneProfile", values: ["friendly-helpful"], weight: 3 }
+    ],
+    minScore: 5
   }
 ],
 
 "SocialProof_StackedStats": [
   {
-    element: "stat_contexts",
+    element: "subheadline",
+    conditions: [
+      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "metric_descriptions",
     conditions: [
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
       { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 3 },
       { variable: "copyIntent", values: ["pain-led"], weight: 2 }
     ],
     minScore: 6
+  },
+  {
+    element: "summary_description",
+    conditions: [
+      { variable: "startupStage", values: ["users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-2", "level-3"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "customer_satisfaction_value",
+    conditions: [
+      { variable: "startupStage", values: ["users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
+      { variable: "copyIntent", values: ["desire-led"], weight: 3 }
+    ],
+    minScore: 5
   }
 ],
 
 "SocialProof_StripWithReviews": [
   {
-    element: "rating_scores",
+    element: "subheadline",
+    conditions: [
+      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "reviewer_titles",
+    conditions: [
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "overall_rating_value",
     conditions: [
       { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
       { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
       { variable: "copyIntent", values: ["desire-led"], weight: 2 }
     ],
     minScore: 6
+  },
+  {
+    element: "avatar_urls",
+    conditions: [
+      { variable: "startupStage", values: ["users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams"], weight: 3 }
+    ],
+    minScore: 5
   }
 ],
 
 "SocialProof_SocialProofStrip": [
   {
-    element: "credibility_markers",
+    element: "stat_labels",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 4 },
+      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "company_logos",
+    conditions: [
+      { variable: "startupStage", values: ["users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "logo_urls",
+    conditions: [
+      { variable: "startupStage", values: ["users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "trust_badge_1",
     conditions: [
       { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
       { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k"], weight: 3 },

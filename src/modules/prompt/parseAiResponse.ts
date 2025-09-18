@@ -383,6 +383,71 @@ function processSectionContent(sectionId: string, content: SectionContent): {
     return result;
   }
 
+  // Special handling for SocialProof sections
+  if (sectionId.includes('LogoWall')) {
+    const processedLogoWall = processLogoWallContent(sectionId, content);
+    result.content = processedLogoWall.content;
+    result.warnings = processedLogoWall.warnings;
+    result.hasIssues = processedLogoWall.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('MediaMentions')) {
+    const processedMediaMentions = processMediaMentionsContent(sectionId, content);
+    result.content = processedMediaMentions.content;
+    result.warnings = processedMediaMentions.warnings;
+    result.hasIssues = processedMediaMentions.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('UserCountBar')) {
+    const processedUserCountBar = processUserCountBarContent(sectionId, content);
+    result.content = processedUserCountBar.content;
+    result.warnings = processedUserCountBar.warnings;
+    result.hasIssues = processedUserCountBar.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('IndustryBadgeLine')) {
+    const processedIndustryBadgeLine = processIndustryBadgeLineContent(sectionId, content);
+    result.content = processedIndustryBadgeLine.content;
+    result.warnings = processedIndustryBadgeLine.warnings;
+    result.hasIssues = processedIndustryBadgeLine.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('MapHeatSpots')) {
+    const processedMapHeatSpots = processMapHeatSpotsContent(sectionId, content);
+    result.content = processedMapHeatSpots.content;
+    result.warnings = processedMapHeatSpots.warnings;
+    result.hasIssues = processedMapHeatSpots.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('StackedStats')) {
+    const processedStackedStats = processStackedStatsContent(sectionId, content);
+    result.content = processedStackedStats.content;
+    result.warnings = processedStackedStats.warnings;
+    result.hasIssues = processedStackedStats.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('StripWithReviews')) {
+    const processedStripWithReviews = processStripWithReviewsContent(sectionId, content);
+    result.content = processedStripWithReviews.content;
+    result.warnings = processedStripWithReviews.warnings;
+    result.hasIssues = processedStripWithReviews.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('SocialProofStrip')) {
+    const processedSocialProofStrip = processSocialProofStripContent(sectionId, content);
+    result.content = processedSocialProofStrip.content;
+    result.warnings = processedSocialProofStrip.warnings;
+    result.hasIssues = processedSocialProofStrip.hasIssues;
+    return result;
+  }
+
   // Special handling for Pricing sections
   if (sectionId.includes('TierCards')) {
     const processedTierCards = processTierCardsContent(sectionId, content);
@@ -5422,6 +5487,340 @@ function processPersonaResultPanelsContent(sectionId: string, content: SectionCo
     } else if (personas.length > 6) {
       result.warnings.push(`${sectionId}: ${personas.length} personas may be too many - consider focusing on 3-5 key roles`);
     }
+  }
+
+  return result;
+}
+
+// =====================================================
+// SocialProof Section Content Processing Functions
+// =====================================================
+
+/**
+ * Processes LogoWall content with company logo management and social proof stats
+ */
+function processLogoWallContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = { content: { ...content }, warnings: [] as string[], hasIssues: false };
+
+  // Validate company names (pipe-separated)
+  if (content.company_names && typeof content.company_names === 'string') {
+    const companies = content.company_names.split('|').map(c => c.trim()).filter(Boolean);
+    if (companies.length === 0) {
+      result.warnings.push(`${sectionId}: Company names list is empty`);
+      result.hasIssues = true;
+    } else if (companies.length > 20) {
+      result.warnings.push(`${sectionId}: Too many companies (${companies.length}) - consider limiting to 12-15 for visual clarity`);
+    }
+  }
+
+  // Validate logo URLs JSON format
+  if (content.logo_urls && typeof content.logo_urls === 'string') {
+    try {
+      const logoData = JSON.parse(content.logo_urls);
+      if (typeof logoData !== 'object' || Array.isArray(logoData)) {
+        result.warnings.push(`${sectionId}: logo_urls should be a JSON object mapping company names to URLs`);
+        result.hasIssues = true;
+      }
+    } catch (e) {
+      result.warnings.push(`${sectionId}: logo_urls contains invalid JSON`);
+      result.hasIssues = true;
+    }
+  }
+
+  // Validate social proof stats consistency
+  const statPairs = [
+    ['stat_1_number', 'stat_1_label'],
+    ['stat_2_number', 'stat_2_label'],
+    ['stat_3_number', 'stat_3_label']
+  ];
+
+  statPairs.forEach(([numberField, labelField], index) => {
+    const hasNumber = content[numberField] && content[numberField] !== '';
+    const hasLabel = content[labelField] && content[labelField] !== '';
+
+    if (hasNumber && !hasLabel) {
+      result.warnings.push(`${sectionId}: ${numberField} provided but missing ${labelField}`);
+      result.hasIssues = true;
+    } else if (!hasNumber && hasLabel) {
+      result.warnings.push(`${sectionId}: ${labelField} provided but missing ${numberField}`);
+      result.hasIssues = true;
+    }
+  });
+
+  return result;
+}
+
+/**
+ * Processes MediaMentions content with media outlet validation
+ */
+function processMediaMentionsContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = { content: { ...content }, warnings: [] as string[], hasIssues: false };
+
+  // Validate media outlets (pipe-separated)
+  if (content.media_outlets && typeof content.media_outlets === 'string') {
+    const outlets = content.media_outlets.split('|').map(o => o.trim()).filter(Boolean);
+    if (outlets.length === 0) {
+      result.warnings.push(`${sectionId}: Media outlets list is empty`);
+      result.hasIssues = true;
+    } else if (outlets.length > 12) {
+      result.warnings.push(`${sectionId}: Too many media outlets (${outlets.length}) - consider limiting to 8-10 for visual clarity`);
+    }
+  }
+
+  // Validate testimonial quotes if provided
+  if (content.testimonial_quotes && typeof content.testimonial_quotes === 'string') {
+    const quotes = content.testimonial_quotes.split('|').map(q => q.trim()).filter(Boolean);
+    if (quotes.length > 3) {
+      result.warnings.push(`${sectionId}: Too many testimonial quotes (${quotes.length}) - consider limiting to 3 for better readability`);
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Processes UserCountBar content with user metrics validation
+ */
+function processUserCountBarContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = { content: { ...content }, warnings: [] as string[], hasIssues: false };
+
+  // Validate user metrics and labels alignment
+  if (content.user_metrics && content.metric_labels) {
+    const metrics = content.user_metrics.toString().split('|').map(m => m.trim()).filter(Boolean);
+    const labels = content.metric_labels.toString().split('|').map(l => l.trim()).filter(Boolean);
+
+    if (metrics.length !== labels.length) {
+      result.warnings.push(`${sectionId}: User metrics count (${metrics.length}) doesn't match labels count (${labels.length})`);
+      result.hasIssues = true;
+    }
+  }
+
+  // Validate avatar data consistency
+  if (content.customer_names && content.avatar_urls) {
+    try {
+      const names = content.customer_names.toString().split('|').map(n => n.trim()).filter(Boolean);
+      const avatarData = JSON.parse(content.avatar_urls.toString());
+
+      if (typeof avatarData === 'object' && !Array.isArray(avatarData)) {
+        const avatarCount = Object.keys(avatarData).length;
+        if (names.length > 0 && avatarCount > 0 && names.length !== avatarCount) {
+          result.warnings.push(`${sectionId}: Customer names count (${names.length}) doesn't match avatar URLs count (${avatarCount})`);
+        }
+      }
+    } catch (e) {
+      result.warnings.push(`${sectionId}: avatar_urls contains invalid JSON`);
+      result.hasIssues = true;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Processes IndustryBadgeLine content with certification validation
+ */
+function processIndustryBadgeLineContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = { content: { ...content }, warnings: [] as string[], hasIssues: false };
+
+  // Validate certification badges
+  if (content.certification_badges && typeof content.certification_badges === 'string') {
+    const badges = content.certification_badges.split('|').map(b => b.trim()).filter(Boolean);
+    if (badges.length === 0) {
+      result.warnings.push(`${sectionId}: Certification badges list is empty`);
+      result.hasIssues = true;
+    } else if (badges.length > 8) {
+      result.warnings.push(`${sectionId}: Too many certification badges (${badges.length}) - consider limiting to 6-8 for visual clarity`);
+    }
+  }
+
+  // Check for balanced content across certification types
+  const hasCerts = content.certification_badges && content.certification_badges !== '';
+  const hasAwards = content.industry_awards && content.industry_awards !== '';
+  const hasCompliance = content.compliance_standards && content.compliance_standards !== '';
+
+  if (!hasCerts && !hasAwards && !hasCompliance) {
+    result.warnings.push(`${sectionId}: No certification, award, or compliance content provided - section may appear empty`);
+    result.hasIssues = true;
+  }
+
+  return result;
+}
+
+/**
+ * Processes MapHeatSpots content with geographic data validation
+ */
+function processMapHeatSpotsContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = { content: { ...content }, warnings: [] as string[], hasIssues: false };
+
+  // Validate global stats and labels alignment
+  if (content.global_stats && content.stat_labels) {
+    const stats = content.global_stats.toString().split('|').map(s => s.trim()).filter(Boolean);
+    const labels = content.stat_labels.toString().split('|').map(l => l.trim()).filter(Boolean);
+
+    if (stats.length !== labels.length) {
+      result.warnings.push(`${sectionId}: Global stats count (${stats.length}) doesn't match labels count (${labels.length})`);
+      result.hasIssues = true;
+    }
+  }
+
+  // Validate countries list if provided
+  if (content.countries_list && typeof content.countries_list === 'string') {
+    const countries = content.countries_list.split('|').map(c => c.trim()).filter(Boolean);
+    if (countries.length > 15) {
+      result.warnings.push(`${sectionId}: Too many countries (${countries.length}) - consider limiting to 10-12 for map readability`);
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Processes StackedStats content with comprehensive metrics validation
+ */
+function processStackedStatsContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = { content: { ...content }, warnings: [] as string[], hasIssues: false };
+
+  // Validate core metric data alignment
+  if (content.metric_values && content.metric_labels) {
+    const values = content.metric_values.toString().split('|').map(v => v.trim()).filter(Boolean);
+    const labels = content.metric_labels.toString().split('|').map(l => l.trim()).filter(Boolean);
+
+    if (values.length !== labels.length) {
+      result.warnings.push(`${sectionId}: Metric values count (${values.length}) doesn't match labels count (${labels.length})`);
+      result.hasIssues = true;
+    }
+
+    if (values.length > 6) {
+      result.warnings.push(`${sectionId}: Too many metrics (${values.length}) - consider limiting to 6 for better visual presentation`);
+    }
+  }
+
+  // Validate metric descriptions alignment if provided
+  if (content.metric_descriptions && content.metric_values) {
+    const descriptions = content.metric_descriptions.toString().split('|').map(d => d.trim()).filter(Boolean);
+    const values = content.metric_values.toString().split('|').map(v => v.trim()).filter(Boolean);
+
+    if (descriptions.length > 0 && descriptions.length !== values.length) {
+      result.warnings.push(`${sectionId}: Metric descriptions count (${descriptions.length}) doesn't match values count (${values.length})`);
+      result.hasIssues = true;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Processes StripWithReviews content with review data validation
+ */
+function processStripWithReviewsContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = { content: { ...content }, warnings: [] as string[], hasIssues: false };
+
+  // Validate core review data alignment
+  if (content.reviews && typeof content.reviews === 'string') {
+    const reviews = content.reviews.split('|').map(r => r.trim()).filter(Boolean);
+
+    if (reviews.length > 4) {
+      result.warnings.push(`${sectionId}: Too many reviews (${reviews.length}) - consider limiting to 3-4 for better readability`);
+    }
+  }
+
+  // Check reviewer data consistency
+  const reviewerFields = ['reviewer_names', 'reviewer_titles', 'ratings'];
+  const fieldValues: { [key: string]: string[] } = {};
+
+  reviewerFields.forEach(field => {
+    if (content[field] && typeof content[field] === 'string') {
+      fieldValues[field] = content[field].toString().split('|').map(item => item.trim()).filter(Boolean);
+    }
+  });
+
+  // Validate alignment between reviewer data fields
+  const fieldLengths = Object.values(fieldValues);
+  if (fieldLengths.length > 1) {
+    const firstLength = fieldLengths[0]?.length || 0;
+    const mismatchedFields = Object.entries(fieldValues)
+      .filter(([_, values]) => values.length !== firstLength)
+      .map(([field, _]) => field);
+
+    if (mismatchedFields.length > 0) {
+      result.warnings.push(`${sectionId}: Reviewer data fields have mismatched lengths - check ${mismatchedFields.join(', ')}`);
+      result.hasIssues = true;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Processes SocialProofStrip content with compact social proof validation
+ */
+function processSocialProofStripContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = { content: { ...content }, warnings: [] as string[], hasIssues: false };
+
+  // Validate proof stats and labels alignment
+  if (content.proof_stats && content.stat_labels) {
+    const stats = content.proof_stats.toString().split('|').map(s => s.trim()).filter(Boolean);
+    const labels = content.stat_labels.toString().split('|').map(l => l.trim()).filter(Boolean);
+
+    if (stats.length !== labels.length) {
+      result.warnings.push(`${sectionId}: Proof stats count (${stats.length}) doesn't match labels count (${labels.length})`);
+      result.hasIssues = true;
+    }
+  }
+
+  // Validate company data if provided
+  if (content.company_names && content.company_logos) {
+    const names = content.company_names.toString().split('|').map(n => n.trim()).filter(Boolean);
+    const logos = content.company_logos.toString().split('|').map(l => l.trim()).filter(Boolean);
+
+    if (names.length !== logos.length) {
+      result.warnings.push(`${sectionId}: Company names count (${names.length}) doesn't match logos count (${logos.length})`);
+      result.hasIssues = true;
+    }
+  }
+
+  // Check for minimal content requirements
+  const hasStats = content.proof_stats && content.proof_stats !== '';
+  const hasCompanies = content.company_names && content.company_names !== '';
+  const hasTrustBadges = (content.trust_badge_1 && content.trust_badge_1 !== '') ||
+                        (content.trust_badge_2 && content.trust_badge_2 !== '') ||
+                        (content.trust_badge_3 && content.trust_badge_3 !== '');
+
+  if (!hasStats && !hasCompanies && !hasTrustBadges) {
+    result.warnings.push(`${sectionId}: No social proof content provided - section may appear empty`);
+    result.hasIssues = true;
   }
 
   return result;
