@@ -58,15 +58,24 @@ async function inferFieldsHandler(req: NextRequest) {
     // Production: Real AI inference
     const inferredFields = await inferFields(input);
     logger.debug('✅ AI inference completed');
+    logger.info('📤 Raw AI Output:', JSON.stringify(inferredFields, null, 2));
 
     // Step 2: Semantic Validation (if requested) - REAL EMBEDDINGS API
     let validationResults: Record<string, ValidationResult> | undefined;
-    
+
     if (includeValidation) {
       logger.debug('🔍 Starting semantic validation...');
+
+      // Log what we're sending to validation
+      logger.info('🔄 Sending to embedding validation:', {
+        marketCategory: inferredFields.marketCategory,
+        marketSubcategory: inferredFields.marketSubcategory,
+        targetAudience: inferredFields.targetAudience,
+      });
+
       // Cast to InputVariables type - the validation function will handle type safety
       const rawValidationResults = await validateInferredFields(inferredFields as any);
-      
+
       // Clean validation results to remove 'field' property (prevent React rendering errors)
       validationResults = {};
       for (const [key, result] of Object.entries(rawValidationResults)) {
@@ -74,6 +83,25 @@ async function inferFieldsHandler(req: NextRequest) {
         validationResults[key] = cleanResult as ValidationResult;
       }
       logger.debug('✅ Semantic validation completed');
+
+      // Log comparison of AI output vs validation results
+      logger.info('📊 Validation Results Comparison:', {
+        marketCategory: {
+          ai: inferredFields.marketCategory,
+          validated: validationResults?.['Market Category']?.value,
+          confidence: validationResults?.['Market Category']?.confidence
+        },
+        marketSubcategory: {
+          ai: inferredFields.marketSubcategory,
+          validated: validationResults?.['Market Subcategory']?.value,
+          confidence: validationResults?.['Market Subcategory']?.confidence
+        },
+        targetAudience: {
+          ai: inferredFields.targetAudience,
+          validated: validationResults?.['Target Audience']?.value,
+          confidence: validationResults?.['Target Audience']?.confidence
+        }
+      });
     }
 
     return Response.json({ 

@@ -107,8 +107,8 @@ async function callAIProvider(prompt: string, useOpenAI: boolean) {
       ? process.env.OPENAI_API_KEY
       : process.env.NEBIUS_API_KEY;
 
-    const model = useOpenAI 
-      ? "gpt-3.5-turbo" 
+    const model = useOpenAI
+      ? "gpt-4o-mini"
       : "mistralai/Mixtral-8x7B-Instruct-v0.1";
 
     if (!apiKey) {

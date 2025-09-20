@@ -19,26 +19,39 @@ export type InferredFields = z.infer<typeof InferredFieldsSchema>;
 
 function buildSystemPrompt(): string {
   return `
-You are a startup analyst.
+You are an expert startup analyst specializing in SaaS categorization.
 
-Given a one-line startup idea, infer the following 7 structured fields based on common startup patterns and standard taxonomies used in the SaaS ecosystem:
+Given a one-line startup idea, infer the following 7 structured fields based on common startup patterns and standard taxonomies used in the SaaS ecosystem.
 
-1. marketCategory - choose the closest matching top-level SaaS industry category (e.g., productivity, marketing, AI, finance, etc.).
+## Fields to Infer:
 
-2. marketSubcategory - select a relevant subcategory typically found under the chosen category (e.g., CRM under marketing, DevOps under engineering).
+1. marketCategory - top-level SaaS industry category
+2. marketSubcategory - specific subcategory under the main category
+3. keyProblem - core user problem being solved (one sentence)
+4. targetAudience - primary user type
+5. startupStage - current development stage
+6. pricingModel - likely SaaS pricing model
+7. landingPageGoals - primary conversion goal for landing page
 
-3. keyProblem - summarize the core user problem the startup aims to solve in one sentence.
+## Examples:
 
-4. targetAudience - identify the most relevant user type (e.g., developers, SMBs, e-commerce sellers, indie hackers, enterprise teams).
+Input: "AI-powered email writer for marketing teams"
+Output: {"marketCategory": "AI", "marketSubcategory": "Content Generation", "keyProblem": "Marketing teams waste hours writing and personalizing email campaigns", "targetAudience": "Marketing Teams", "startupStage": "MVP", "pricingModel": "Tiered", "landingPageGoals": "Start Free Trial"}
 
-5. startupStage - infer the likely stage of the startup (e.g., idea, MVP launched, 100 users, scaling, etc.) based on phrasing and maturity cues.
+Input: "Code review automation tool for engineering teams"
+Output: {"marketCategory": "Engineering", "marketSubcategory": "DevOps", "keyProblem": "Manual code reviews slow down development cycles and miss critical issues", "targetAudience": "Engineering Teams", "startupStage": "Early Access", "pricingModel": "Usage-Based", "landingPageGoals": "Request Demo"}
 
-6. pricingModel - suggest the most likely SaaS pricing model (e.g., freemium, tiered, usage-based, one-time fee).
+Input: "Subscription management platform for SaaS founders"
+Output: {"marketCategory": "Finance", "marketSubcategory": "Billing & Payments", "keyProblem": "SaaS founders struggle with complex subscription billing and revenue tracking", "targetAudience": "SaaS Founders", "startupStage": "Growth", "pricingModel": "Tiered", "landingPageGoals": "Start Free Trial"}
 
-7. landingPageGoals - recommend the most appropriate landing page goal (e.g., collect emails, request demo, start free trial, join waitlist, etc.).
+Input: "No-code website builder for small businesses"
+Output: {"marketCategory": "No-Code", "marketSubcategory": "Website Builders", "keyProblem": "Small businesses need professional websites but can't afford developers", "targetAudience": "Small Businesses", "startupStage": "Scaling", "pricingModel": "Freemium", "landingPageGoals": "Start Building"}
 
-
-Only return a JSON object with the inferred values. Do not explain.
+## Instructions:
+- Use the examples above as reference for output format and quality
+- Be specific and accurate in your categorization
+- Match the style and detail level shown in examples
+- Return ONLY valid JSON, no explanations
 `.trim();
 }
 
@@ -55,7 +68,7 @@ export async function inferFields(input: string): Promise<InferredFields> {
   try {
     const res =
       model === 'openai'
-        ? await openai.chat.completions.create({ model: 'gpt-3.5-turbo-0125', messages })
+        ? await openai.chat.completions.create({ model: 'gpt-4o-mini', messages })
         : await mistral.chat.completions.create({ model: 'open-mistral-7b', messages });
 
     const raw = res.choices[0]?.message?.content?.trim() || '';
@@ -66,7 +79,7 @@ export async function inferFields(input: string): Promise<InferredFields> {
 
     try {
       const fallback = model === 'openai' ? mistral : openai;
-      const fallbackModel = model === 'openai' ? 'open-mistral-7b' : 'gpt-3.5-turbo-0125';
+      const fallbackModel = model === 'openai' ? 'open-mistral-7b' : 'gpt-4o-mini';
 
       const res = await fallback.chat.completions.create({ model: fallbackModel, messages });
       const raw = res.choices[0]?.message?.content?.trim() || '';

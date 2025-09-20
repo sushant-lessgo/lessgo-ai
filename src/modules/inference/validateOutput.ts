@@ -17,8 +17,19 @@ interface ValidatedFields {
   [key: string]: ValidationResult;
 }
 
-// Confidence thresholds
-const CONFIDENCE_THRESHOLDS = {
+// Field-specific confidence thresholds for better accuracy
+const FIELD_CONFIDENCE_THRESHOLDS: Record<string, { HIGH: number; MEDIUM: number }> = {
+  marketCategory: { HIGH: 0.90, MEDIUM: 0.75 },     // Broad categories, should be confident
+  marketSubcategory: { HIGH: 0.85, MEDIUM: 0.70 },  // More specific, moderate confidence
+  targetAudience: { HIGH: 0.80, MEDIUM: 0.65 },     // Complex field, lower thresholds
+  startupStage: { HIGH: 0.85, MEDIUM: 0.70 },       // Contextual, moderate confidence
+  pricingModel: { HIGH: 0.75, MEDIUM: 0.60 },       // Highly contextual, lower thresholds
+  landingGoal: { HIGH: 0.80, MEDIUM: 0.65 },        // Depends on context
+  keyProblem: { HIGH: 1.0, MEDIUM: 1.0 },           // Free text, always high confidence
+};
+
+// Default thresholds for backwards compatibility
+const DEFAULT_CONFIDENCE_THRESHOLDS = {
   HIGH: 0.85,    // Auto-confirm
   MEDIUM: 0.7,   // Show as suggestion
   LOW: 0.0       // Manual selection with alternatives
@@ -35,6 +46,16 @@ async function validateField(
   parentCategory?: string
 ): Promise<ValidationResult> {
   try {
+    // Special handling for free text fields
+    if (fieldType === 'keyProblem') {
+      return {
+        field: displayName,
+        value: value.trim(),
+        confidence: 1.0, // Always high confidence for free text
+        alternatives: []
+      };
+    }
+
     // Special handling for subcategories - filter by parent category
     if (fieldType === 'marketSubcategory' && parentCategory) {
       // Get allowed subcategories for the parent category
@@ -59,11 +80,17 @@ async function validateField(
       
       const bestMatch = filteredMatches[0];
       const alternatives = filteredMatches.slice(1, 4).map(m => m.value);
-      
+
+      // Apply confidence boost for exact matches
+      let confidence = bestMatch?.confidence || 0;
+      if (bestMatch && value.toLowerCase() === bestMatch.value.toLowerCase()) {
+        confidence = Math.min(1.0, confidence + 0.1); // Boost by 10% for exact matches
+      }
+
       return {
         field: displayName,
         value: bestMatch?.value || null,
-        confidence: bestMatch?.confidence || 0,
+        confidence,
         alternatives: alternatives.length > 0 ? alternatives : allowedSubcategories.slice(0, 3)
       };
     }
@@ -71,11 +98,17 @@ async function validateField(
     // Standard semantic matching for other fields
     const bestMatch = await getBestSemanticMatch(value, fieldType, 0.0); // Get best match regardless of threshold
     const alternatives = await findSemanticMatches(value, fieldType, 4);
-    
+
+    // Apply confidence boost for exact matches
+    let confidence = bestMatch?.confidence || 0;
+    if (bestMatch && value.toLowerCase() === bestMatch.value.toLowerCase()) {
+      confidence = Math.min(1.0, confidence + 0.1); // Boost by 10% for exact matches
+    }
+
     return {
       field: displayName,
       value: bestMatch?.value || null,
-      confidence: bestMatch?.confidence || 0,
+      confidence,
       alternatives: alternatives.slice(1, 4).map(m => m.value) // Skip the best match
     };
     
@@ -139,12 +172,21 @@ export async function validateInferredFields(raw: InputVariables): Promise<Recor
     'Pricing Category and Model': pricingResult,
   };
 
-  // Log results for debugging
+  // Log results for debugging with field-specific confidence levels
+  const fieldTypeMap: Record<string, string> = {
+    'Market Category': 'marketCategory',
+    'Market Subcategory': 'marketSubcategory',
+    'Target Audience': 'targetAudience',
+    'Key Problem Getting Solved': 'keyProblem',
+    'Startup Stage': 'startupStage',
+    'Landing Page Goals': 'landingGoal',
+    'Pricing Category and Model': 'pricingModel',
+  };
+
   Object.entries(results).forEach(([field, result]) => {
-    const confidenceLevel = 
-      result.confidence >= CONFIDENCE_THRESHOLDS.HIGH ? 'HIGH' :
-      result.confidence >= CONFIDENCE_THRESHOLDS.MEDIUM ? 'MEDIUM' : 'LOW';
-    
+    const fieldType = fieldTypeMap[field];
+    const confidenceLevel = getConfidenceLevel(result.confidence, fieldType);
+
     logger.debug(`🔍 ${field}: "${result.value}" (${confidenceLevel} - ${(result.confidence * 100).toFixed(1)}%)`);
   });
 
@@ -162,11 +204,16 @@ export function extractValidatedValues(results: Record<string, ValidationResult>
   return extracted;
 }
 
-// Helper function to get confidence level
-export function getConfidenceLevel(confidence: number): 'HIGH' | 'MEDIUM' | 'LOW' {
-  if (confidence >= CONFIDENCE_THRESHOLDS.HIGH) return 'HIGH';
-  if (confidence >= CONFIDENCE_THRESHOLDS.MEDIUM) return 'MEDIUM';
+// Helper function to get confidence level with field-specific thresholds
+export function getConfidenceLevel(confidence: number, fieldType?: string): 'HIGH' | 'MEDIUM' | 'LOW' {
+  const thresholds = fieldType && FIELD_CONFIDENCE_THRESHOLDS[fieldType]
+    ? FIELD_CONFIDENCE_THRESHOLDS[fieldType]
+    : DEFAULT_CONFIDENCE_THRESHOLDS;
+
+  if (confidence >= thresholds.HIGH) return 'HIGH';
+  if (confidence >= thresholds.MEDIUM) return 'MEDIUM';
   return 'LOW';
 }
 
-export { CONFIDENCE_THRESHOLDS };
+// Export default thresholds for backward compatibility
+export { DEFAULT_CONFIDENCE_THRESHOLDS as CONFIDENCE_THRESHOLDS, FIELD_CONFIDENCE_THRESHOLDS };
