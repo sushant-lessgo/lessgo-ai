@@ -63,9 +63,9 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: 'Content Creator|Digital Artist|YouTuber|Brand Designer|Social Media Manager' 
   },
-  customer_avatars: { 
-    type: 'string' as const, 
-    default: '/avatar-1.jpg|/avatar-2.jpg|/avatar-3.jpg|/avatar-4.jpg|/avatar-5.jpg' 
+  customer_avatars: {
+    type: 'string' as const,
+    default: '/avatar-1.svg|/avatar-2.svg|/avatar-3.svg|/avatar-4.svg|/avatar-5.svg'
   },
   customer_companies: { 
     type: 'string' as const, 
