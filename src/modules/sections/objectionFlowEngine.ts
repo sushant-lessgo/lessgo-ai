@@ -198,6 +198,50 @@ const GOAL_MODIFIERS: Record<string, { add: string[], prioritize: string[], inse
   }
 };
 
+// ===== CATEGORY-BASED MODIFIERS =====
+const CATEGORY_MODIFIERS: Record<string, { add: string[], prioritize: string[], deprioritize: string[] }> = {
+  "Education & Learning": {
+    add: [SECTION_IDS.results, SECTION_IDS.testimonials],
+    prioritize: [SECTION_IDS.results, SECTION_IDS.howItWorks, SECTION_IDS.testimonials],
+    deprioritize: [SECTION_IDS.security, SECTION_IDS.integrations, SECTION_IDS.pricing]
+  },
+  "Health & Wellness": {
+    add: [SECTION_IDS.results, SECTION_IDS.testimonials],
+    prioritize: [SECTION_IDS.results, SECTION_IDS.beforeAfter, SECTION_IDS.testimonials],
+    deprioritize: [SECTION_IDS.security, SECTION_IDS.integrations, SECTION_IDS.comparisonTable]
+  },
+  "Entertainment & Gaming": {
+    add: [SECTION_IDS.howItWorks, SECTION_IDS.socialProof],
+    prioritize: [SECTION_IDS.howItWorks, SECTION_IDS.socialProof, SECTION_IDS.features],
+    deprioritize: [SECTION_IDS.security, SECTION_IDS.objectionHandling, SECTION_IDS.comparisonTable]
+  },
+  "Content & Creator Economy": {
+    add: [SECTION_IDS.results, SECTION_IDS.useCases],
+    prioritize: [SECTION_IDS.results, SECTION_IDS.features, SECTION_IDS.testimonials],
+    deprioritize: [SECTION_IDS.security, SECTION_IDS.integrations]
+  },
+  "Personal Productivity Tools": {
+    add: [SECTION_IDS.howItWorks, SECTION_IDS.beforeAfter],
+    prioritize: [SECTION_IDS.howItWorks, SECTION_IDS.features, SECTION_IDS.beforeAfter],
+    deprioritize: [SECTION_IDS.security, SECTION_IDS.integrations, SECTION_IDS.comparisonTable]
+  },
+  "Business Productivity Tools": {
+    add: [SECTION_IDS.integrations, SECTION_IDS.results],
+    prioritize: [SECTION_IDS.integrations, SECTION_IDS.results, SECTION_IDS.features],
+    deprioritize: []
+  },
+  "Healthcare Technology": {
+    add: [SECTION_IDS.security, SECTION_IDS.objectionHandling],
+    prioritize: [SECTION_IDS.security, SECTION_IDS.objectionHandling, SECTION_IDS.testimonials],
+    deprioritize: []
+  },
+  "Legal Technology": {
+    add: [SECTION_IDS.security, SECTION_IDS.objectionHandling],
+    prioritize: [SECTION_IDS.security, SECTION_IDS.objectionHandling, SECTION_IDS.testimonials],
+    deprioritize: []
+  }
+};
+
 // ===== AUDIENCE-BASED MODIFIERS =====
 const AUDIENCE_MODIFIERS: Record<string, { add: string[], prioritize: string[] }> = {
   "founders": {
@@ -215,6 +259,22 @@ const AUDIENCE_MODIFIERS: Record<string, { add: string[], prioritize: string[] }
   "marketers": {
     add: [SECTION_IDS.results, SECTION_IDS.useCases],
     prioritize: [SECTION_IDS.results, SECTION_IDS.features]
+  },
+  "students": {
+    add: [SECTION_IDS.testimonials, SECTION_IDS.howItWorks],
+    prioritize: [SECTION_IDS.testimonials, SECTION_IDS.howItWorks, SECTION_IDS.results]
+  },
+  "freelancers": {
+    add: [SECTION_IDS.results, SECTION_IDS.testimonials],
+    prioritize: [SECTION_IDS.results, SECTION_IDS.features, SECTION_IDS.testimonials]
+  },
+  "families": {
+    add: [SECTION_IDS.testimonials, SECTION_IDS.howItWorks],
+    prioritize: [SECTION_IDS.testimonials, SECTION_IDS.howItWorks, SECTION_IDS.socialProof]
+  },
+  "gamers": {
+    add: [SECTION_IDS.socialProof, SECTION_IDS.features],
+    prioritize: [SECTION_IDS.socialProof, SECTION_IDS.features, SECTION_IDS.howItWorks]
   }
 };
 

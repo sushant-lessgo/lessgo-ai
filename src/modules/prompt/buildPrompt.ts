@@ -40,6 +40,119 @@ ${features || 'Features not available'}`;
 }
 
 /**
+ * Builds category-specific copy guidance for audience and market context
+ */
+function buildCategoryContext(onboardingStore: OnboardingStore): string {
+  const { validatedFields } = onboardingStore;
+  const category = validatedFields.marketCategory || 'Not specified';
+  const audience = validatedFields.targetAudience || 'Not specified';
+
+  // Category-specific copy guidance
+  const categoryGuidance: Record<string, string> = {
+    'Education & Learning': `
+EDUCATION & LEARNING COPY CONTEXT:
+- Tone: Encouraging, supportive, clear, and motivational
+- Language: Simple, jargon-free, accessible to learners
+- Focus: Learning outcomes, progress tracking, skill development, achievement
+- Avoid: Complex technical terms, overwhelming feature lists
+- CTAs: "Start Learning", "Begin Your Journey", "Try Free", "Start Course"
+- Benefits: Personal growth, skill mastery, career advancement, confidence building
+- Emotional appeals: Achievement, progress, transformation, empowerment`,
+
+    'Health & Wellness': `
+HEALTH & WELLNESS COPY CONTEXT:
+- Tone: Calm, trustworthy, professional, encouraging
+- Language: Warm but authoritative, avoid medical claims
+- Focus: Well-being, prevention, lifestyle improvement, peace of mind
+- Avoid: Medical diagnosis language, unrealistic promises
+- CTAs: "Start Your Journey", "Take Control", "Begin Today", "Get Started"
+- Benefits: Better health, increased energy, peace of mind, lifestyle improvement
+- Emotional appeals: Security, control, vitality, family care`,
+
+    'Entertainment & Gaming': `
+ENTERTAINMENT & GAMING COPY CONTEXT:
+- Tone: Fun, energetic, playful, exciting
+- Language: Casual, enthusiastic, community-focused
+- Focus: Entertainment value, social connection, engagement, enjoyment
+- Avoid: Overly serious language, complex business terms
+- CTAs: "Play Now", "Join the Fun", "Start Playing", "Get in the Game"
+- Benefits: Fun, social connection, entertainment, skill competition
+- Emotional appeals: Excitement, community, achievement, escapism`,
+
+    'Content & Creator Economy': `
+CONTENT & CREATOR COPY CONTEXT:
+- Tone: Creative, inspiring, empowering, authentic
+- Language: Creator-focused, growth-oriented, artistic
+- Focus: Creative expression, audience building, monetization, artistic growth
+- Avoid: Corporate jargon, overly technical language
+- CTAs: "Create Now", "Build Your Audience", "Start Creating", "Grow Your Brand"
+- Benefits: Creative freedom, audience growth, income potential, artistic expression
+- Emotional appeals: Creativity, independence, success, self-expression`,
+
+    'Personal Productivity Tools': `
+PERSONAL PRODUCTIVITY COPY CONTEXT:
+- Tone: Efficient, helpful, encouraging, practical
+- Language: Clear, action-oriented, time-focused
+- Focus: Time savings, organization, life balance, efficiency
+- Avoid: Corporate complexity, enterprise features
+- CTAs: "Get Organized", "Save Time", "Start Organizing", "Boost Productivity"
+- Benefits: Time savings, less stress, better organization, work-life balance
+- Emotional appeals: Control, accomplishment, peace of mind, efficiency`,
+
+    'Healthcare Technology': `
+HEALTHCARE TECH COPY CONTEXT:
+- Tone: Professional, trustworthy, compliant, authoritative
+- Language: Clinical accuracy balanced with accessibility
+- Focus: Patient outcomes, compliance, efficiency, safety
+- Avoid: Casual language, unsubstantiated claims
+- CTAs: "Request Demo", "Learn More", "Contact Sales", "See Results"
+- Benefits: Better patient care, compliance, operational efficiency, safety
+- Emotional appeals: Trust, responsibility, patient care, professional excellence`,
+
+    'Legal Technology': `
+LEGAL TECH COPY CONTEXT:
+- Tone: Professional, precise, authoritative, conservative
+- Language: Formal but accessible, legally appropriate
+- Focus: Accuracy, compliance, efficiency, risk mitigation
+- Avoid: Casual language, overstated claims, legal advice
+- CTAs: "Request Demo", "Contact Sales", "Learn More", "Schedule Consultation"
+- Benefits: Risk reduction, compliance, efficiency, accuracy
+- Emotional appeals: Security, professionalism, competence, trust`,
+
+    'Real Estate Technology': `
+REAL ESTATE TECH COPY CONTEXT:
+- Tone: Professional, trustworthy, success-oriented, aspirational
+- Language: Market-focused, ROI-driven, relationship-oriented
+- Focus: Market success, client satisfaction, business growth, efficiency
+- Avoid: Overly technical language, generic business speak
+- CTAs: "Grow Your Business", "Get More Listings", "Request Demo", "Start Selling"
+- Benefits: More sales, better client relationships, market advantage, growth
+- Emotional appeals: Success, professionalism, growth, achievement`
+  };
+
+  // Audience-specific guidance
+  const audienceGuidance: Record<string, string> = {
+    'Students': 'Address affordability, simplicity, and learning outcomes. Use encouraging, supportive language.',
+    'Teachers': 'Focus on classroom impact, student success, and ease of implementation.',
+    'Freelancers': 'Emphasize independence, flexibility, and business growth. Address solo work challenges.',
+    'Small Business Owners': 'Focus on growth, efficiency, and cost-effectiveness. Address resource constraints.',
+    'Families': 'Use warm, inclusive language. Focus on family benefits and safety.',
+    'Gamers': 'Use gaming terminology, competitive language, and community-focused messaging.',
+    'Content Creators': 'Emphasize creative freedom, audience growth, and monetization opportunities.',
+    'Health-Conscious Individuals': 'Use wellness-focused language, emphasize prevention and lifestyle.',
+    'Lifelong Learners': 'Focus on continuous improvement, personal growth, and skill development.'
+  };
+
+  let guidance = categoryGuidance[category] || '';
+
+  if (audienceGuidance[audience]) {
+    guidance += `\n\nAUDIENCE-SPECIFIC GUIDANCE:\n${audienceGuidance[audience]}`;
+  }
+
+  return guidance || 'CATEGORY CONTEXT: Use standard professional copy approach.';
+}
+
+/**
  * ✅ FIXED: Builds brand and tone context section using canonical field names
  */
 function buildBrandContext(onboardingStore: OnboardingStore): string {
@@ -919,6 +1032,7 @@ export function buildFullPrompt(
 
   const businessContext = buildBusinessContext(onboardingStore, pageStore);
   const brandContext = buildBrandContext(onboardingStore);
+  const categoryContext = buildCategoryContext(onboardingStore);
   const layoutContext = buildLayoutContext(elementsMap);
   const sectionFlowContext = buildSectionFlowContext(elementsMap, pageStore);
   const fieldClassificationGuidance = buildFieldClassificationGuidance(elementsMap);
@@ -930,6 +1044,7 @@ export function buildFullPrompt(
 ${businessContext}
 
 ${brandContext}
+${categoryContext}
 
 ${layoutContext}
 
@@ -972,6 +1087,7 @@ export function buildSectionPrompt(
   const sectionRequirements = getSectionElementRequirements(sectionId, layout, variables);
   const businessContext = buildBusinessContext(onboardingStore, pageStore);
   const brandContext = buildBrandContext(onboardingStore);
+  const categoryContext = buildCategoryContext(onboardingStore);
 
   // Get existing content from other sections for context
   const otherSectionsContext = buildOtherSectionsContext(pageStore, sectionId);
@@ -1001,6 +1117,7 @@ export function buildSectionPrompt(
 ${businessContext}
 
 ${brandContext}
+${categoryContext}
 
 SECTION CONTEXT:
 Section: ${sectionRequirements.sectionType} (${layout})
@@ -1089,6 +1206,7 @@ export function buildElementPrompt(
 
   const businessContext = buildBusinessContext(onboardingStore, pageStore);
   const brandContext = buildBrandContext(onboardingStore);
+  const categoryContext = buildCategoryContext(onboardingStore);
   const existingContent = getExistingElementContext(pageStore, sectionId, elementName);
   const elementGuidance = getSpecificElementGuidance(elementName, sectionRequirements.sectionType);
 
@@ -1097,6 +1215,7 @@ export function buildElementPrompt(
 ${businessContext}
 
 ${brandContext}
+${categoryContext}
 
 ELEMENT CONTEXT:
 Section: ${sectionRequirements.sectionType} (${layout})

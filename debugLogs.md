@@ -1,68 +1,66 @@
-Input: Personalized study planner and quiz generator that adapts to how you learn best.
-
-[2025-09-20T08:27:54.967Z] DEBUG: 🚀 Starting inference for: Personalized study planner and quiz generator that adapts to how you learn best....
-[2025-09-20T08:27:57.367Z] DEBUG: ✅ AI inference completed
-[2025-09-20T08:27:57.367Z] INFO: 📤 Raw AI Output: {
-  "marketCategory": "Education",
-  "marketSubcategory": "EdTech",
-  "keyProblem": "Students struggle to create effective study plans that align with their individual learning styles and needs.",
-  "targetAudience": "Students",
-  "startupStage": "Prototype",
+[2025-09-20T10:42:08.279Z] DEBUG: 🚀 Starting inference for: GrowOnX Insights – AI assistant for audience growth on X/Twitter...
+[2025-09-20T10:42:11.696Z] DEBUG: ✅ AI inference completed
+[2025-09-20T10:42:11.697Z] INFO: 📤 Raw AI Output: {
+  "marketCategory": "Marketing & Sales Tools",
+  "marketSubcategory": "Social Media Management & Analytics",
+  "keyProblem": "Marketers struggle to effectively grow their audience on X/Twitter without actionable insights and automation.",
+  "targetAudience": "Social Media Marketers",
+  "startupStage": "MVP",
   "pricingModel": "Freemium",
-  "landingPageGoals": "Sign Up for Free"
+  "landingPageGoals": "Start Free Trial"
 }
-[2025-09-20T08:27:57.368Z] DEBUG: 🔍 Starting semantic validation...
-[2025-09-20T08:27:57.368Z] INFO: 🔄 Sending to embedding validation: {
-  "marketCategory": "Education",
-  "marketSubcategory": "EdTech",
-  "targetAudience": "Students"
+[2025-09-20T10:42:11.697Z] DEBUG: 🔍 Starting semantic validation...
+[2025-09-20T10:42:11.697Z] INFO: 🔄 Sending to embedding validation: {
+  "marketCategory": "Marketing & Sales Tools",
+  "marketSubcategory": "Social Media Management & Analytics",
+  "targetAudience": "Social Media Marketers"
 }
-[2025-09-20T08:27:57.368Z] DEBUG: 🔍 Starting semantic validation...
-[DEV] 🔑 Generating embedding for: Education...
-[2025-09-20T08:27:57.671Z] DEBUG: ✅ Embedding generated successfully
-[DEV] 🔑 Generating embedding for: Education...
-[2025-09-20T08:27:59.318Z] DEBUG: ✅ Embedding generated successfully
-[DEV] 🔑 Generating embedding for: EdTech...
-[DEV] 🔑 Generating embedding for: Students...
-[DEV] 🔑 Generating embedding for: Prototype...
+[2025-09-20T10:42:11.698Z] DEBUG: 🔍 Starting semantic validation...
+[DEV] 🔑 Generating embedding for: Marketing & Sales Tools...
+[2025-09-20T10:42:12.161Z] DEBUG: ✅ Embedding generated successfully
+[DEV] 🔑 Generating embedding for: Marketing & Sales Tools...
+[2025-09-20T10:42:12.922Z] DEBUG: ✅ Embedding generated successfully
+[DEV] 🔑 Generating embedding for: Social Media Management & Analytics...
+[DEV] 🔑 Generating embedding for: Social Media Marketers...
+[DEV] 🔑 Generating embedding for: MVP...
 [DEV] 🔑 Generating embedding for: Freemium...
-[DEV] 🔑 Generating embedding for: Sign Up for Free...
-[2025-09-20T08:27:59.766Z] DEBUG: ✅ Embedding generated successfully
-[2025-09-20T08:27:59.832Z] DEBUG: ✅ Embedding generated successfully
-[2025-09-20T08:27:59.836Z] DEBUG: ✅ Embedding generated successfully
-[2025-09-20T08:27:59.840Z] DEBUG: ✅ Embedding generated successfully
-[2025-09-20T08:27:59.912Z] DEBUG: ✅ Embedding generated successfully
+[DEV] 🔑 Generating embedding for: Start Free Trial...
+[2025-09-20T10:42:13.444Z] DEBUG: ✅ Embedding generated successfully
+[2025-09-20T10:42:13.446Z] DEBUG: ✅ Embedding generated successfully
+[2025-09-20T10:42:13.447Z] DEBUG: ✅ Embedding generated successfully
+[2025-09-20T10:42:13.448Z] DEBUG: ✅ Embedding generated successfully
+[DEV] 🔑 Generating embedding for: Start Free Trial...
+[2025-09-20T10:42:13.698Z] DEBUG: ✅ Embedding generated successfully
+[2025-09-20T10:42:13.809Z] DEBUG: ✅ Embedding generated successfully
 [DEV] 🔑 Generating embedding for: Freemium...
-[DEV] 🔑 Generating embedding for: Sign Up for Free...
-[DEV] 🔑 Generating embedding for: Students...
-[DEV] 🔑 Generating embedding for: Prototype...
-[2025-09-20T08:28:00.725Z] DEBUG: ✅ Embedding generated successfully
-[2025-09-20T08:28:00.825Z] DEBUG: ✅ Embedding generated successfully
-[2025-09-20T08:28:00.880Z] DEBUG: ✅ Embedding generated successfully
-[2025-09-20T08:28:00.964Z] DEBUG: ✅ Embedding generated successfully
-[2025-09-20T08:28:01.069Z] DEBUG: 🔍 Market Category: "Engineering & Development Tools" (LOW - 29.6%)
-[2025-09-20T08:28:01.070Z] DEBUG: 🔍 Market Subcategory: "null" (LOW - 0.0%)
-[2025-09-20T08:28:01.070Z] DEBUG: 🔍 Target Audience: "Online Educators" (LOW - 46.8%)
-[2025-09-20T08:28:01.070Z] DEBUG: 🔍 Key Problem Getting Solved: "Students struggle to create effective study plans that align with their individual learning styles and needs." (HIGH - 100.0%)
-[2025-09-20T08:28:01.070Z] DEBUG: 🔍 Startup Stage: "Pre-MVP (wireframes or prototype only)" (LOW - 45.8%)
-[2025-09-20T08:28:01.070Z] DEBUG: 🔍 Landing Page Goals: "Create Free Account" (MEDIUM - 72.5%)
-[2025-09-20T08:28:01.070Z] DEBUG: 🔍 Pricing Category and Model: "Freemium (limited features)" (HIGH - 83.0%)
-[2025-09-20T08:28:01.070Z] DEBUG: ✅ Semantic validation completed
-[2025-09-20T08:28:01.070Z] INFO: 📊 Validation Results Comparison: {
+[DEV] 🔑 Generating embedding for: MVP...
+[DEV] 🔑 Generating embedding for: Social Media Marketers...
+[2025-09-20T10:42:14.085Z] DEBUG: ✅ Embedding generated successfully
+[2025-09-20T10:42:14.264Z] DEBUG: ✅ Embedding generated successfully
+[2025-09-20T10:42:14.334Z] DEBUG: ✅ Embedding generated successfully
+[2025-09-20T10:42:14.475Z] DEBUG: 🔍 Market Category: "Marketing & Sales Tools" (HIGH - 100.0%)
+[2025-09-20T10:42:14.475Z] DEBUG: 🔍 Market Subcategory: "Social Media Management & Scheduling" (MEDIUM - 82.7%)
+[2025-09-20T10:42:14.475Z] DEBUG: 🔍 Target Audience: "Performance Marketers" (MEDIUM - 70.0%)
+[2025-09-20T10:42:14.475Z] DEBUG: 🔍 Key Problem Getting Solved: "Marketers struggle to effectively grow their audience on X/Twitter without actionable insights and automation." (HIGH - 100.0%)
+[2025-09-20T10:42:14.476Z] DEBUG: 🔍 Startup Stage: "MVP in development" (MEDIUM - 84.0%)
+[2025-09-20T10:42:14.476Z] DEBUG: 🔍 Landing Page Goals: "Start Free Trial" (HIGH - 100.0%)
+[2025-09-20T10:42:14.476Z] DEBUG: 🔍 Pricing Category and Model: "Freemium (limited features)" (HIGH - 83.0%)
+[2025-09-20T10:42:14.476Z] DEBUG: ✅ Semantic validation completed
+[2025-09-20T10:42:14.476Z] INFO: 📊 Validation Results Comparison: {
   "marketCategory": {
-    "ai": "Education",
-    "validated": "Engineering & Development Tools",
-    "confidence": 0.2964714016987227
+    "ai": "Marketing & Sales Tools",
+    "validated": "Marketing & Sales Tools",
+    "confidence": 1
   },
   "marketSubcategory": {
-    "ai": "EdTech",
-    "validated": null,
-    "confidence": 0
+    "ai": "Social Media Management & Analytics",
+    "validated": "Social Media Management & Scheduling",
+    "confidence": 0.8265724692484404
   },
   "targetAudience": {
-    "ai": "Students",
-    "validated": "Online Educators",
-    "confidence": 0.46844638028209756
+    "ai": "Social Media Marketers",
+    "validated": "Performance Marketers",
+    "confidence": 0.6996773629929588
   }
 }
- POST /api/infer-fields 200 in 6747ms
+ POST /api/infer-fields 200 in 6226ms

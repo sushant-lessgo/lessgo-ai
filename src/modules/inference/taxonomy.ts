@@ -5,19 +5,35 @@
  * ===== MARKET CATEGORIES =====
  */
 export const marketCategories = [
-  'Work & Productivity Tools',
+  // Business-Focused Categories
+  'Business Productivity Tools',
   'Marketing & Sales Tools',
   'Engineering & Development Tools',
   'AI Tools',
-  'Design & Creative Tools',
-  'No-Code & Low-Code Platforms',
   'Customer Support & Service Tools',
   'Data & Analytics Tools',
   'HR & People Operations Tools',
   'Finance & Accounting Tools',
-  'Web3 & Blockchain Tools',
+
+  // Individual/Consumer Categories
+  'Personal Productivity Tools',
+  'Education & Learning',
+  'Health & Wellness',
+  'Entertainment & Gaming',
+  'Content & Creator Economy',
+
+  // Creative & Media Categories
+  'Design & Creative Tools',
+
+  // Specialized Industry Categories
+  'Healthcare Technology',
+  'Legal Technology',
+  'Real Estate Technology',
+
+  // Technical/Platform Categories
+  'No-Code & Development Platforms',
+  'Web3 & Crypto Tools',
   'Product Add-ons & Integrations',
-  'Industry-Specific SaaS',
 ] as const;
 
 export type MarketCategory = (typeof marketCategories)[number];
@@ -26,23 +42,30 @@ export type MarketCategory = (typeof marketCategories)[number];
  * ===== MARKET SUBCATEGORIES =====
  */
 export const marketSubcategories: Record<MarketCategory, readonly string[]> = {
-  'Work & Productivity Tools': [
+  'Business Productivity Tools': [
     'Project & Task Management',
-    'Note-Taking & Knowledge Management',
     'Team Collaboration & Communication',
-    'Email Clients & Management',
-    'Calendar & Scheduling Software',
     'Meeting & Video Conferencing Software',
     'Virtual Office Platforms',
     'File Storage & Sharing Solutions',
     'Document Creation & Management',
     'E-Signature Solutions',
     'PDF Editors & Management',
-    'Password Management',
-    'Time Tracking Software',
     'Productivity Suites',
-    'Writing Assistants',
     'Screen Recording & Screenshot Tools',
+    'Business Process Automation',
+  ],
+  'Personal Productivity Tools': [
+    'Personal Note-Taking & Knowledge Management',
+    'Individual Task & Goal Management',
+    'Personal Calendar & Scheduling',
+    'Password Management',
+    'Personal Time Tracking',
+    'Habit & Routine Tracking',
+    'Personal Finance Management',
+    'Personal Automation Tools',
+    'Individual Writing Assistants',
+    'Personal Data Organization',
   ],
   'Marketing & Sales Tools': [
     'CRM',
@@ -98,22 +121,24 @@ export const marketSubcategories: Record<MarketCategory, readonly string[]> = {
   'Design & Creative Tools': [
     'Graphic Design Software',
     'Photo Editing & Management Software',
-    'Video Editing & Hosting Platforms',
+    'Video Editing & Production',
+    'Audio Production & Podcasting',
     'UI/UX Design & Prototyping Tools',
     'Wireframing & Mockup Tools',
     '3D Modeling & Animation Software',
     'Design Asset Management & Libraries',
     'Digital Whiteboards & Visual Collaboration',
-    'User Research & Testing Platforms',
-    'Presentation Design Software',
+    'Creative Writing & Publishing',
+    'Digital Art & Illustration',
   ],
-  'No-Code & Low-Code Platforms': [
-    'No-Code/Low-Code Website Builders',
-    'No-Code/Low-Code Web & Mobile App Builders',
-    'No-Code/Low-Code Automation & Workflow Builders',
-    'No-Code/Low-Code Form & Survey Builders',
-    'No-Code/Low-Code Database & Backend Builders',
-    'No-Code/Low-Code Chatbot Builders',
+  'No-Code & Development Platforms': [
+    'No-Code Website Builders',
+    'No-Code App Builders',
+    'Workflow & Automation Builders',
+    'Form & Survey Builders',
+    'Database & Backend Builders',
+    'Chatbot & AI Builders',
+    'API & Integration Platforms',
   ],
   'Customer Support & Service Tools': [
     'Helpdesk & Ticketing Systems',
@@ -156,14 +181,15 @@ export const marketSubcategories: Record<MarketCategory, readonly string[]> = {
     'Startup Financial Planning & Cap Table Management',
     'Fundraising & Investor Relations Platforms',
   ],
-  'Web3 & Blockchain Tools': [
-    'Crypto Payment Gateways & Processing',
-    'NFT Creation & Marketplace Platforms',
-    'DAO Management & Tooling',
+  'Web3 & Crypto Tools': [
+    'Crypto Payment Processing',
+    'NFT Creation & Marketplaces',
+    'DAO Management & Governance',
     'Blockchain Development Platforms',
-    'Smart Contract Auditing & Security',
-    'Decentralized Identity Solutions',
-    'Crypto Wallet Infrastructure',
+    'Smart Contract Tools',
+    'Decentralized Identity & Security',
+    'Crypto Wallet & Portfolio Management',
+    'DeFi Protocols & Tools',
   ],
   'Product Add-ons & Integrations': [
     'Browser Extensions',
@@ -171,14 +197,72 @@ export const marketSubcategories: Record<MarketCategory, readonly string[]> = {
     'Application Connectors & Native Integrations',
     'Templates as a Product',
   ],
-  'Industry-Specific SaaS': [
-    'Healthcare & MedTech SaaS',
-    'LegalTech SaaS',
-    'Real Estate Tech SaaS',
-    'EdTech SaaS',
-    'Travel & Hospitality Tech SaaS',
-    'E-commerce Platforms & Tools',
-    'Fitness & Wellness Tech SaaS',
+  'Education & Learning': [
+    'Study Tools & Planners',
+    'Language Learning Platforms',
+    'Test Prep & Certification',
+    'Online Course Platforms',
+    'Skill Development Tools',
+    'Academic Writing & Research',
+    'Interactive Learning Tools',
+    'Educational Games & Simulations',
+  ],
+  'Health & Wellness': [
+    'Health Tracking & Monitoring',
+    'Fitness & Exercise Apps',
+    'Nutrition & Diet Management',
+    'Mental Health & Therapy',
+    'Medication & Care Management',
+    'Sleep & Recovery Tracking',
+    'Habit & Lifestyle Coaching',
+    'Telemedicine & Remote Health',
+  ],
+  'Entertainment & Gaming': [
+    'Game Development Tools',
+    'Gaming Platforms & Communities',
+    'Interactive Entertainment',
+    'Party & Social Games',
+    'Streaming & Live Entertainment',
+    'Virtual Events & Experiences',
+    'Hobby & Interest Communities',
+    'Creative Entertainment Tools',
+  ],
+  'Content & Creator Economy': [
+    'Content Planning & Scheduling',
+    'Social Media Management',
+    'Audience Growth & Analytics',
+    'Creator Monetization Tools',
+    'Video & Audio Production',
+    'Live Streaming & Broadcasting',
+    'Community Building Platforms',
+    'Influencer & Partnership Tools',
+  ],
+  'Healthcare Technology': [
+    'Electronic Health Records',
+    'Medical Practice Management',
+    'Healthcare Analytics & Reporting',
+    'Medical Device Integration',
+    'Patient Communication & Portals',
+    'Healthcare Compliance & Security',
+    'Medical Billing & Revenue Cycle',
+  ],
+  'Legal Technology': [
+    'Case Management Systems',
+    'Legal Document Automation',
+    'Contract Management & Review',
+    'Legal Research & Analytics',
+    'Client Communication & Portals',
+    'Legal Billing & Time Tracking',
+    'Compliance & Risk Management',
+  ],
+  'Real Estate Technology': [
+    'Property Management Systems',
+    'Real Estate CRM & Lead Management',
+    'Property Listing & Marketing',
+    'Real Estate Analytics & Valuation',
+    'Transaction Management',
+    'Real Estate Investment Tools',
+    'Property Maintenance & Operations',
   ],
 } as const;
 
@@ -410,6 +494,20 @@ export const targetAudienceGroups = [
       { id: 'enterprise-tech-teams', label: 'Enterprise Tech Teams', tags: ['B2B', 'Enterprise', 'Technical Buyer'] },
       { id: 'enterprise-marketing-teams', label: 'Enterprise Marketing Teams', tags: ['B2B', 'Enterprise', 'Technical Buyer'] },
       { id: 'it-decision-makers', label: 'IT Decision Makers', tags: ['B2B', 'Enterprise', 'Technical Buyer'] },
+    ],
+  },
+  {
+    id: 'individuals',
+    label: 'Individual Users',
+    audiences: [
+      { id: 'students', label: 'Students', tags: ['B2C', 'Low Budget', 'Learning-Focused'] },
+      { id: 'freelancers', label: 'Freelancers', tags: ['B2C', 'Professional', 'Budget-Conscious'] },
+      { id: 'families', label: 'Families', tags: ['B2C', 'Multi-User', 'Simple'] },
+      { id: 'hobbyists', label: 'Hobbyists', tags: ['B2C', 'Passionate', 'Quality-Focused'] },
+      { id: 'seniors', label: 'Seniors', tags: ['B2C', 'Simple', 'Trust-Focused'] },
+      { id: 'young-professionals', label: 'Young Professionals', tags: ['B2C', 'Career-Growth', 'Tech-Savvy'] },
+      { id: 'gamers', label: 'Gamers', tags: ['B2C', 'Entertainment', 'Performance-Focused'] },
+      { id: 'fitness-enthusiasts', label: 'Fitness Enthusiasts', tags: ['B2C', 'Health-Focused', 'Goal-Oriented'] },
     ],
   },
   {
