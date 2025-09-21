@@ -456,6 +456,7 @@ export const targetAudienceGroups = [
     audiences: [
       { id: 'growth-hackers', label: 'Growth Hackers', tags: ['B2B', 'Technical Buyer', 'Fast Mover'] },
       { id: 'performance-marketers', label: 'Performance Marketers', tags: ['B2B', 'Technical Buyer', 'High Friction'] },
+      { id: 'social-media-marketers', label: 'Social Media Marketers', tags: ['B2B', 'Technical Buyer', 'Fast Mover'] },
       { id: 'product-marketers', label: 'Product Marketers', tags: ['B2B', 'Technical Buyer'] },
       { id: 'fractional-cmos', label: 'Fractional CMOs', tags: ['B2B', 'High Friction'] },
       { id: 'freelance-marketers', label: 'Freelance Marketers', tags: ['B2B', 'Low Budget'] },

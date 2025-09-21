@@ -172,9 +172,28 @@ export default function FieldConfirmationCard({
       {mode === "edit" && isLowConfidence && alternatives.length > 0 && (
         <>
           <p className="text-sm text-gray-600">
-            We found multiple good matches. Choose the best one:
+            We found <span className="font-semibold">{aiGuess}</span> with {Math.round(confidence * 100)}% confidence.
+            Select the best match for your use case:
           </p>
           <div className="grid grid-cols-1 gap-3">
+            {/* Include AI guess as first option with recommendation badge */}
+            <button
+              onClick={() => setSelected(aiGuess)}
+              className={`p-3 border rounded-md text-sm transition text-left relative ${
+                selected === aiGuess
+                  ? "border-brand-accentPrimary bg-brand-highlightBG font-semibold"
+                  : "border-gray-300 hover:border-brand-accentPrimary"
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span>{aiGuess}</span>
+                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">
+                  ⭐ AI Recommended ({Math.round(confidence * 100)}%)
+                </span>
+              </div>
+            </button>
+
+            {/* Show alternatives */}
             {alternatives.map((alternative) => (
               <button
                 key={alternative}

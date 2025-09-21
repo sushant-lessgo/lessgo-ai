@@ -60,7 +60,7 @@ Input: "Code review automation for engineering teams"
 Output: {"marketCategory": "Engineering & Development Tools", "marketSubcategory": "Testing & QA Software", "keyProblem": "Manual code reviews slow down development cycles and miss critical issues", "targetAudience": "Engineering Teams", "startupStage": "Growth", "pricingModel": "Usage-Based", "landingPageGoals": "Request Demo"}
 
 Input: "Social media analytics platform with performance insights"
-Output: {"marketCategory": "Marketing & Sales Tools", "marketSubcategory": "Social Media Management & Scheduling", "keyProblem": "Marketers struggle to understand which social content drives engagement and need actionable insights to improve performance", "targetAudience": "Digital Marketers", "startupStage": "Growth", "pricingModel": "Tiered", "landingPageGoals": "Request Demo"}
+Output: {"marketCategory": "Marketing & Sales Tools", "marketSubcategory": "Social Media Management & Scheduling", "keyProblem": "Marketers struggle to understand which social content drives engagement and need actionable insights to improve performance", "targetAudience": "Social Media Marketers", "startupStage": "Growth", "pricingModel": "Tiered", "landingPageGoals": "Request Demo"}
 
 ## CRITICAL CONSTRAINTS:
 
