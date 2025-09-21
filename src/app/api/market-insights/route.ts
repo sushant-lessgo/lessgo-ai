@@ -1,7 +1,7 @@
 // app/api/market-insights/route.ts
 import { NextResponse } from "next/server";
 import { generateFeatures } from "@/modules/inference/generateFeatures";
-import { validateInferredFields } from "@/modules/inference/validateOutput";
+import { inferHiddenFields } from "@/modules/inference/inferHiddenFields";
 import { generateMockHiddenInferredFields } from '@/modules/mock/mockDataGenerators';
 
 import { logger } from '@/lib/logger';
@@ -73,20 +73,71 @@ export async function POST(req: Request) {
     };
 
     logger.debug('🤖 Generating features with AI...');
-    
+
     // Generate features using AI (similar pattern to inferFields)
     const features = await generateFeatures(inputData);
-    
-    // Validate and enhance with semantic search for hidden fields - REAL EMBEDDINGS API
-    logger.debug('🔍 Performing semantic validation for hidden inferred fields...');
-    const hiddenInferredFields = await validateInferredFields(inputData);
-    
+
+    // Log generated features in detail
+    logger.debug('📊 AI-Generated Features:', {
+      count: features?.length || 0,
+      features: features?.map((f, index) => ({
+        index: index + 1,
+        feature: f.feature,
+        benefit: f.benefit,
+        featureLength: f.feature.length,
+        benefitLength: f.benefit.length
+      })),
+      rawFeatures: features
+    });
+
+    // Generate hidden copywriting fields using AI market research
+    logger.debug('🔍 Performing AI market research for hidden copywriting fields...');
+    const hiddenInferredFields = await inferHiddenFields(inputData);
+
+    // Log hidden inferred fields with confidence scores
+    logger.debug('🧠 Hidden Inferred Fields (AI Analysis):', {
+      awarenessLevel: hiddenInferredFields?.awarenessLevel || 'not inferred',
+      copyIntent: hiddenInferredFields?.copyIntent || 'not inferred',
+      toneProfile: hiddenInferredFields?.toneProfile || 'not inferred',
+      marketSophisticationLevel: hiddenInferredFields?.marketSophisticationLevel || 'not inferred',
+      problemType: hiddenInferredFields?.problemType || 'not inferred',
+      fieldCount: Object.keys(hiddenInferredFields || {}).length,
+      rawHiddenFields: hiddenInferredFields
+    });
+
+    // Log how hidden fields map to copywriting strategy
+    logger.debug('📝 Copywriting Strategy Mapping:', {
+      audience: `${inputData.targetAudience} → Awareness: ${hiddenInferredFields?.awarenessLevel}`,
+      messaging: `${hiddenInferredFields?.copyIntent} copy with ${hiddenInferredFields?.toneProfile} tone`,
+      market: `Sophistication Level ${hiddenInferredFields?.marketSophisticationLevel}`,
+      problem: `${inputData.keyProblem} → Type: ${hiddenInferredFields?.problemType}`,
+      approach: hiddenInferredFields?.copyIntent === 'pain-led'
+        ? 'Focus on problem agitation and pain points'
+        : 'Focus on aspirations and desired outcomes'
+    });
+
     logger.debug('✅ Market insights generation completed');
 
-    return NextResponse.json({ 
+    // Log the complete response structure
+    const responseData = {
       features: features || [],
       hiddenInferredFields: hiddenInferredFields || {}
+    };
+
+    logger.debug('📤 Sending Market Insights Response:', {
+      featureCount: responseData.features.length,
+      hiddenFieldCount: Object.keys(responseData.hiddenInferredFields).length,
+      hasAwarenessLevel: !!responseData.hiddenInferredFields.awarenessLevel,
+      hasCopyIntent: !!responseData.hiddenInferredFields.copyIntent,
+      hasToneProfile: !!responseData.hiddenInferredFields.toneProfile,
+      summary: {
+        features: responseData.features.map(f => f.feature).join(', '),
+        tone: responseData.hiddenInferredFields.toneProfile,
+        intent: responseData.hiddenInferredFields.copyIntent
+      }
     });
+
+    return NextResponse.json(responseData);
 
   } catch (err: any) {
     // A09: Security Logging - Safe error handling
