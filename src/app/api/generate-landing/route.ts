@@ -43,7 +43,8 @@ async function generateLandingHandler(req: NextRequest) {
     }
 
     const useOpenAI = process.env.USE_OPENAI === "true"
-    const model = useOpenAI ? "gpt-3.5-turbo" : "mistralai/Mixtral-8x7B-Instruct-v0.1"
+    // Upgraded to GPT-4o-mini for better copy quality at minimal cost increase
+    const model = useOpenAI ? "gpt-4o-mini" : "mistralai/Mixtral-8x7B-Instruct-v0.1"
 
     // Try primary AI provider
     let result = await callAIProvider(prompt, useOpenAI, model)
@@ -51,7 +52,7 @@ async function generateLandingHandler(req: NextRequest) {
     // If primary fails, try secondary provider
     if (!result.success) {
       logger.warn(`Primary AI provider (${useOpenAI ? 'OpenAI' : 'Nebius'}) failed, trying secondary...`)
-      result = await callAIProvider(prompt, !useOpenAI, !useOpenAI ? "gpt-3.5-turbo" : "mistralai/Mixtral-8x7B-Instruct-v0.1")
+      result = await callAIProvider(prompt, !useOpenAI, !useOpenAI ? "gpt-4o-mini" : "mistralai/Mixtral-8x7B-Instruct-v0.1")
     }
 
     // If both AI providers fail, return graceful degradation
@@ -122,7 +123,7 @@ async function callAIProvider(prompt: string, useOpenAI: boolean, model: string)
           content: prompt
         }
       ],
-      temperature: 0.7,
+      temperature: 0.5, // Reduced for more consistent business copy
     }
 
     const response = await fetch(apiURL, {
