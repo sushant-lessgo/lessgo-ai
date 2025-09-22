@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { SectionTypeSelector } from './SectionTypeSelector';
 import { LayoutSelector } from './LayoutSelector';
-import { layoutElementSchema } from '@/modules/sections/layoutElementSchema';
+import { layoutElementSchema, getAllElements } from '@/modules/sections/layoutElementSchema';
 import { sectionList } from '@/modules/sections/sectionList';
 import type { EditableElement } from '@/types/core/content';
 
@@ -75,14 +75,22 @@ export function EnhancedAddSection({
     // Get elements for this layout using the correct registry key
     const registryKey = sectionToRegistryKey(selectedSection);
     const schemaKey = `${registryKey}/${layoutId}` as keyof typeof layoutElementSchema;
-    const elementDefs = layoutElementSchema[schemaKey] || [];
-    
+    const schema = layoutElementSchema[schemaKey];
+
+    if (!schema) {
+      console.warn(`No schema found for ${schemaKey}`);
+      return;
+    }
+
+    // Get all elements using helper function
+    const elementDefs = getAllElements(schema);
+
     // Get section info for default content
     const sectionInfo = sectionList.find(s => s.id === selectedSection);
-    
+
     // Create elements object with all mandatory and optional elements
     const elements: Record<string, EditableElement> = {};
-    
+
     elementDefs.forEach(({ element, mandatory }) => {
       // Generate default content based on element name
       const defaultContent = getDefaultContent(selectedSection, element, sectionInfo?.label || '');

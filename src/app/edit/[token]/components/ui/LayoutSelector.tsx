@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { layoutRegistry } from '@/modules/sections/layoutRegistry';
-import { layoutElementSchema } from '@/modules/sections/layoutElementSchema';
+import { layoutElementSchema, getAllElements } from '@/modules/sections/layoutElementSchema';
 import { sectionList } from '@/modules/sections/sectionList';
 
 interface LayoutSelectorProps {
@@ -86,7 +86,11 @@ export function LayoutSelector({
     if (!sectionType) return { mandatory: 0, optional: 0, total: 0 };
     const registryKey = sectionToRegistryKey(sectionType);
     const schemaKey = `${registryKey}/${layoutId}` as keyof typeof layoutElementSchema;
-    const elements = layoutElementSchema[schemaKey] || [];
+    const schema = layoutElementSchema[schemaKey];
+
+    if (!schema) return { mandatory: 0, optional: 0, total: 0 };
+
+    const elements = getAllElements(schema);
     const mandatory = elements.filter(e => e.mandatory).length;
     const optional = elements.filter(e => !e.mandatory).length;
     return { mandatory, optional, total: elements.length };

@@ -1,10 +1,73 @@
 interface LayoutElement {
   element: string;
   mandatory: boolean;
+  generation: 'ai_generated' | 'manual_preferred';
+}
+
+interface CardStructure {
+  type: 'cards' | 'pairs' | 'items' | 'blocks';
+  elements: string[];  // All card elements are mandatory by default
+  generation: 'ai_generated' | 'manual_preferred';
+}
+
+interface CardRequirements {
+  type: string;
+  min: number;
+  max: number;
+  optimal: [number, number];
+  description: string;
+}
+
+interface UnifiedLayoutElement {
+  sectionElements: LayoutElement[];
+  cardStructure: CardStructure;
+  cardRequirements: CardRequirements;
 }
 
 interface LayoutSchema {
-  [layoutName: string]: LayoutElement[];
+  [layoutName: string]: LayoutElement[] | UnifiedLayoutElement;
+}
+
+// Helper functions to work with both old and new schema formats
+export function isUnifiedSchema(schema: LayoutElement[] | UnifiedLayoutElement): schema is UnifiedLayoutElement {
+  return typeof schema === 'object' && !Array.isArray(schema) && 'sectionElements' in schema;
+}
+
+export function getAllElements(schema: LayoutElement[] | UnifiedLayoutElement): LayoutElement[] {
+  if (isUnifiedSchema(schema)) {
+    const cardElements = schema.cardStructure.elements.map(elementName => ({
+      element: elementName,
+      mandatory: true, // All card elements are mandatory
+      generation: schema.cardStructure.generation
+    }));
+    return [...schema.sectionElements, ...cardElements];
+  }
+  return schema;
+}
+
+export function getSectionElements(schema: LayoutElement[] | UnifiedLayoutElement): LayoutElement[] {
+  if (isUnifiedSchema(schema)) {
+    return schema.sectionElements;
+  }
+  return schema;
+}
+
+export function getCardElements(schema: LayoutElement[] | UnifiedLayoutElement): LayoutElement[] {
+  if (isUnifiedSchema(schema)) {
+    return schema.cardStructure.elements.map(elementName => ({
+      element: elementName,
+      mandatory: true, // All card elements are mandatory
+      generation: schema.cardStructure.generation
+    }));
+  }
+  return [];
+}
+
+export function getCardRequirements(schema: LayoutElement[] | UnifiedLayoutElement): CardRequirements | null {
+  if (isUnifiedSchema(schema)) {
+    return schema.cardRequirements;
+  }
+  return null;
 }
 
 export const layoutElementSchema: LayoutSchema = {
@@ -148,20 +211,32 @@ export const layoutElementSchema: LayoutSchema = {
     { element: "footer_text", mandatory: false },
   ],
 
-  TimelineResults: [
-    { element: "headline", mandatory: true },
-    { element: "timeframes", mandatory: true },
-    { element: "titles", mandatory: true },
-    { element: "descriptions", mandatory: true },
-    { element: "metrics", mandatory: false },
-    { element: "subheadline", mandatory: false },
-    { element: "timeline_period", mandatory: false },
-    { element: "metric_icon", mandatory: false },
-    { element: "timeline_icon", mandatory: false },
-    { element: "success_icon", mandatory: false },
-    { element: "success_title", mandatory: false },
-    { element: "success_subtitle", mandatory: false },
-  ],
+  TimelineResults: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "timeline_period", mandatory: false, generation: "ai_generated" },
+      { element: "success_title", mandatory: false, generation: "ai_generated" },
+      { element: "success_subtitle", mandatory: false, generation: "ai_generated" },
+      { element: "metric_icon", mandatory: true, generation: "manual_preferred" },
+      { element: "timeline_icon", mandatory: true, generation: "manual_preferred" },
+      { element: "success_icon", mandatory: true, generation: "manual_preferred" }
+    ],
+
+    cardStructure: {
+      type: "cards",
+      elements: ["timeframes", "titles", "descriptions", "metrics"],
+      generation: "ai_generated"
+    },
+
+    cardRequirements: {
+      type: 'cards',
+      min: 2,
+      max: 8,
+      optimal: [4, 5, 6],
+      description: 'Timeline of results/achievements'
+    }
+  },
 
   OutcomeIcons: [
     { element: "headline", mandatory: true },
@@ -598,19 +673,25 @@ export const layoutElementSchema: LayoutSchema = {
     { element: "secret_icon", mandatory: false },
   ],
 
-  StackedHighlights: [
-    { element: "headline", mandatory: true },
-    { element: "highlight_titles", mandatory: true }, // Pipe-separated format
-    { element: "highlight_descriptions", mandatory: true }, // Pipe-separated format
-    { element: "mechanism_name", mandatory: false },
-    { element: "footer_text", mandatory: false },
-    { element: "highlight_icon_1", mandatory: false },
-    { element: "highlight_icon_2", mandatory: false },
-    { element: "highlight_icon_3", mandatory: false },
-    { element: "highlight_icon_4", mandatory: false },
-    { element: "highlight_icon_5", mandatory: false },
-    { element: "highlight_icon_6", mandatory: false },
-  ],
+  StackedHighlights: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "mechanism_name", mandatory: false, generation: "manual_preferred" },
+      { element: "footer_text", mandatory: false, generation: "ai_generated" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["highlight_titles", "highlight_descriptions", "highlight_icons"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 2,
+      max: 6,
+      optimal: [3, 4],
+      description: 'Unique mechanism highlight cards'
+    }
+  },
 
   SystemArchitecture: [
     { element: "headline", mandatory: true },

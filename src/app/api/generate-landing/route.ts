@@ -2,22 +2,86 @@ import { NextRequest, NextResponse } from "next/server"
 import { parseAiResponse } from "@/modules/prompt/parseAiResponse"
 import { generateMockResponse } from "@/modules/prompt/mockResponseGenerator"
 import { buildStrategyPrompt } from "@/modules/prompt/buildStrategyPrompt"
-import { buildStrategicCopyPrompt, buildFullPrompt } from "@/modules/prompt/buildPrompt"
+import { buildStrategicCopyPrompt, buildFullPrompt, generateCardRequirementsReport } from "@/modules/prompt/buildPrompt"
 import { parseStrategyResponse, applyCardCountConstraints } from "@/modules/prompt/parseStrategyResponse"
+import { getCompleteElementsMap } from "@/modules/sections/elementDetermination"
 import { logger } from '@/lib/logger'
 import { withAIRateLimit } from '@/lib/rateLimit'
+
+// Debug mode environment variables
+const DEBUG_AI_PROMPTS = process.env.DEBUG_AI_PROMPTS === 'true';
+const DEBUG_AI_RESPONSES = process.env.DEBUG_AI_RESPONSES === 'true';
+
+/**
+ * Smart truncation for logging large content
+ */
+function smartTruncate(content: string, maxLength: number = 1000): string {
+  if (content.length <= maxLength) return content;
+
+  const truncated = content.substring(0, maxLength);
+  const lastSpace = truncated.lastIndexOf(' ');
+  const cutPoint = lastSpace > maxLength * 0.8 ? lastSpace : maxLength;
+
+  return content.substring(0, cutPoint) + `... [truncated, total: ${content.length} chars]`;
+}
+
+/**
+ * Logs AI prompt with smart formatting and truncation
+ */
+function logAIPrompt(promptType: string, prompt: string, metadata?: any) {
+  const promptLength = prompt.length;
+  const sections = prompt.split('\n\n').length;
+
+  logger.debug(`🤖 ${promptType} Prompt Generated:`, {
+    length: promptLength,
+    sections,
+    ...metadata
+  });
+
+  if (DEBUG_AI_PROMPTS) {
+    logger.debug(`📝 Full ${promptType} Prompt:`, prompt);
+  } else {
+    logger.debug(`📝 ${promptType} Prompt Preview:`, smartTruncate(prompt, 800));
+  }
+}
+
+/**
+ * Logs AI response with detailed analysis
+ */
+function logAIResponse(responseType: string, response: any, metadata?: any) {
+  const content = response.choices?.[0]?.message?.content || '';
+  const usage = response.usage;
+
+  logger.debug(`🔄 ${responseType} AI Response Received:`, {
+    contentLength: content.length,
+    usage: usage ? {
+      promptTokens: usage.prompt_tokens,
+      completionTokens: usage.completion_tokens,
+      totalTokens: usage.total_tokens
+    } : 'Not available',
+    hasChoices: !!response.choices?.length,
+    ...metadata
+  });
+
+  if (DEBUG_AI_RESPONSES) {
+    logger.debug(`📤 Full ${responseType} Response:`, content);
+  } else {
+    logger.debug(`📤 ${responseType} Response Preview:`, smartTruncate(content, 1000));
+  }
+}
 
 async function generateLandingHandler(req: NextRequest) {
   logger.dev("🚀 /api/generate-landing route called")
   try {
     const body = await req.json()
-    const { prompt, onboardingStore, pageStore, use2Phase = true } = body
+    const { prompt, onboardingStore, pageStore, layoutRequirements, use2Phase = true } = body
 
     logger.dev("📝 Request received:", {
       hasPrompt: !!prompt,
       promptLength: prompt?.length || 0,
       hasOnboardingStore: !!onboardingStore,
       hasPageStore: !!pageStore,
+      hasLayoutRequirements: !!layoutRequirements,
       use2Phase
     })
 
@@ -74,9 +138,39 @@ async function generateLandingHandler(req: NextRequest) {
       try {
         // Phase 1: Strategic Analysis
         logger.dev("📊 Phase 1: Strategic Analysis")
-        const strategyPrompt = buildStrategyPrompt(onboardingStore, pageStore)
+
+        // Generate card requirements debug report
+        const elementsMap = getCompleteElementsMap(onboardingStore, pageStore);
+        const userFeatureCount = onboardingStore.featuresFromAI?.length;
+
+        // Log card requirements analysis
+        if (layoutRequirements) {
+          const cardRequirementsReport = generateCardRequirementsReport(
+            elementsMap,
+            {}, // Empty strategy counts for initial analysis
+            userFeatureCount
+          );
+          logger.debug("🎯 Card Requirements Analysis:", cardRequirementsReport);
+        }
+
+        const strategyPrompt = buildStrategyPrompt(onboardingStore, pageStore, layoutRequirements)
+
+        // Log strategy prompt
+        logAIPrompt("Strategy", strategyPrompt, {
+          hasLayoutRequirements: !!layoutRequirements,
+          userFeatureCount,
+          sectionsCount: Object.keys(elementsMap).length
+        });
 
         let strategyResult = await callAIProvider(strategyPrompt, useOpenAI, model)
+
+        // Log strategy response
+        if (strategyResult.success) {
+          logAIResponse("Strategy", strategyResult.data, {
+            provider: useOpenAI ? 'OpenAI' : 'Nebius',
+            model
+          });
+        }
 
         // If strategy phase fails, try secondary provider
         if (!strategyResult.success) {
@@ -106,8 +200,12 @@ async function generateLandingHandler(req: NextRequest) {
           throw new Error("No strategy content received from AI provider")
         }
 
-        const strategy = parseStrategyResponse(strategyContent)
+        const strategy = parseStrategyResponse(strategyContent, layoutRequirements)
         if (!strategy.success) {
+          logger.warn("❌ Strategy parsing failed:", {
+            errors: strategy.errors,
+            warnings: strategy.warnings
+          });
           logger.warn("❌ Strategy parsing failed, falling back to single-phase generation")
           const fallbackPrompt = buildFullPrompt(onboardingStore, pageStore)
           const fallbackResult = await callAIProvider(fallbackPrompt, useOpenAI, model)
@@ -124,23 +222,67 @@ async function generateLandingHandler(req: NextRequest) {
 
         logger.dev("✅ Strategy parsed successfully:", {
           bigIdea: strategy.copyStrategy.bigIdea,
-          cardCounts: strategy.cardCounts
+          cardCounts: strategy.cardCounts,
+          errors: strategy.errors,
+          warnings: strategy.warnings
         })
 
+        // Map strategy card counts to actual UIBlocks if layout requirements available
+        let mappedCardCounts: Record<string, number> = strategy.cardCounts
+        if (layoutRequirements) {
+          const { mapStrategyToUIBlocks } = await import('@/modules/sections/getLayoutRequirements')
+          mappedCardCounts = mapStrategyToUIBlocks(strategy.cardCounts, layoutRequirements)
+          logger.dev("📊 Mapped card counts to UIBlocks:", {
+            originalCounts: strategy.cardCounts,
+            mappedCounts: mappedCardCounts,
+            sectionsCount: layoutRequirements.sections.length
+          })
+
+          // Generate post-mapping card requirements report
+          const postMappingReport = generateCardRequirementsReport(
+            elementsMap,
+            mappedCardCounts,
+            userFeatureCount
+          );
+          logger.debug("🎯 Post-Mapping Card Requirements Analysis:", postMappingReport);
+        }
+
         // Apply constraints based on available features
+        const constrainedCardCounts = applyCardCountConstraints(
+          mappedCardCounts,
+          onboardingStore.featuresFromAI?.length
+        );
+
         const constrainedStrategy = {
           ...strategy,
-          cardCounts: applyCardCountConstraints(
-            strategy.cardCounts,
-            onboardingStore.featuresFromAI?.length
-          )
+          cardCounts: {
+            ...strategy.cardCounts,
+            ...constrainedCardCounts
+          },
+          layoutRequirements // Include layout requirements in strategy
         }
 
         // Phase 2: Strategic Copy Generation
         logger.dev("✍️ Phase 2: Strategic Copy Generation")
         const copyPrompt = buildStrategicCopyPrompt(onboardingStore, pageStore, constrainedStrategy)
 
+        // Log copy prompt
+        logAIPrompt("Copy", copyPrompt, {
+          constrainedCardCounts: constrainedCardCounts,
+          totalCards: Object.values(constrainedCardCounts).reduce((sum, count) => sum + count, 0),
+          sectionsWithCards: Object.keys(constrainedCardCounts).length
+        });
+
         let copyResult = await callAIProvider(copyPrompt, useOpenAI, model)
+
+        // Log copy response
+        if (copyResult.success) {
+          logAIResponse("Copy", copyResult.data, {
+            provider: useOpenAI ? 'OpenAI' : 'Nebius',
+            model,
+            expectedCards: Object.values(constrainedCardCounts).reduce((sum, count) => sum + count, 0)
+          });
+        }
 
         // If copy phase fails, try secondary provider
         if (!copyResult.success) {
@@ -170,7 +312,45 @@ async function generateLandingHandler(req: NextRequest) {
           throw new Error("No copy content received from AI provider")
         }
 
-        const parsed = parseAiResponse(copyContent)
+        logger.debug("🔍 Starting copy content parsing and validation")
+        const parsed = parseAiResponse(
+          copyContent,
+          constrainedStrategy.cardCounts
+        )
+
+        // Log parsing results
+        logger.debug("✅ Copy parsing completed:", {
+          success: parsed.success,
+          contentSections: Object.keys(parsed.content).length,
+          errors: parsed.errors,
+          warnings: parsed.warnings,
+          isPartial: parsed.isPartial
+        });
+
+        // Validate against expected card counts
+        if (layoutRequirements && parsed.success) {
+          const { validateGeneratedJSON } = await import('@/modules/prompt/buildPrompt');
+          const validation = validateGeneratedJSON(
+            parsed.content,
+            elementsMap,
+            constrainedStrategy.cardCounts,
+            userFeatureCount
+          );
+
+          logger.debug("🎯 JSON Validation Results:", {
+            isValid: validation.isValid,
+            errors: validation.errors,
+            warnings: validation.warnings,
+            summary: validation.summary
+          });
+
+          // Add validation results to response
+          if (!validation.isValid) {
+            parsed.warnings = parsed.warnings || [];
+            parsed.warnings.push(...validation.errors);
+            parsed.warnings.push("Generated content failed card count validation");
+          }
+        }
 
         // Add strategy metadata to response
         parsed.strategy = constrainedStrategy
@@ -179,7 +359,12 @@ async function generateLandingHandler(req: NextRequest) {
           parsed.warnings.push(...constrainedStrategy.warnings)
         }
 
-        logger.dev("✅ 2-phase generation completed successfully")
+        logger.dev("✅ 2-phase generation completed successfully:", {
+          finalSections: Object.keys(parsed.content).length,
+          hasStrategy: !!parsed.strategy,
+          totalWarnings: parsed.warnings.length,
+          totalErrors: parsed.errors.length
+        });
         return NextResponse.json(parsed)
 
       } catch (error) {
@@ -207,8 +392,23 @@ async function generateLandingHandler(req: NextRequest) {
       // Single-Phase Legacy Generation
       logger.dev("📝 Using single-phase legacy generation")
 
+      // Log single-phase prompt
+      logAIPrompt("Single-Phase", prompt, {
+        promptType: "legacy",
+        useOpenAI,
+        model
+      });
+
       // Try primary AI provider
       let result = await callAIProvider(prompt, useOpenAI, model)
+
+      // Log single-phase response
+      if (result.success) {
+        logAIResponse("Single-Phase", result.data, {
+          provider: useOpenAI ? 'OpenAI' : 'Nebius',
+          model
+        });
+      }
 
       // If primary fails, try secondary provider
       if (!result.success) {

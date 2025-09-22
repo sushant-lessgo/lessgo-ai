@@ -1,4 +1,5 @@
 
+import { logger } from '@/lib/logger';
 
 interface ParsedResponse {
   success: boolean
@@ -16,7 +17,17 @@ interface SectionContent {
 /**
  * Parses and validates AI response for landing page copy generation
  */
-export function parseAiResponse(aiContent: string): ParsedResponse {
+export function parseAiResponse(
+  aiContent: string,
+  expectedCounts?: Record<string, number>
+): ParsedResponse {
+  logger.debug('🔍 Starting AI response parsing:', {
+    contentLength: aiContent.length,
+    hasExpectedCounts: !!expectedCounts,
+    expectedCountsKeys: expectedCounts ? Object.keys(expectedCounts) : [],
+    contentPreview: aiContent.substring(0, 150) + '...'
+  });
+
   const result: ParsedResponse = {
     success: false,
     content: {},
@@ -27,57 +38,250 @@ export function parseAiResponse(aiContent: string): ParsedResponse {
 
   try {
     // Extract JSON from AI response (handle potential markdown code blocks)
+    logger.debug('🔍 Extracting JSON from AI response...');
     const jsonContent = extractJSON(aiContent)
     if (!jsonContent) {
+      logger.error('❌ No valid JSON found in AI response', {
+        hasCodeBlocks: aiContent.includes('```'),
+        hasBraces: aiContent.includes('{'),
+        contentStart: aiContent.substring(0, 200) + '...'
+      });
       result.errors.push("No valid JSON found in AI response")
       return result
     }
 
-    const parsedContent = JSON.parse(jsonContent)
-    
+    logger.debug('✅ JSON extracted successfully:', {
+      extractedLength: jsonContent.length,
+      startsWithBrace: jsonContent.trim().startsWith('{'),
+      endsWithBrace: jsonContent.trim().endsWith('}')
+    });
+
+    // Parse extracted JSON
+    logger.debug('🔍 Parsing extracted JSON...');
+    let parsedContent: any;
+    try {
+      parsedContent = JSON.parse(jsonContent)
+      logger.debug('✅ JSON parsed successfully:', {
+        topLevelKeys: Object.keys(parsedContent),
+        sectionCount: Object.keys(parsedContent).length
+      });
+    } catch (parseError) {
+      logger.error('❌ JSON parsing failed:', {
+        error: parseError,
+        jsonPreview: jsonContent.substring(0, 300) + '...'
+      });
+      result.errors.push(`JSON parsing failed: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`)
+      return result
+    }
+
     // Validate structure
-    const validation = validateContent(parsedContent)
+    logger.debug('🔍 Validating parsed content structure...');
+    const validation = validateContent(parsedContent, expectedCounts)
+
     result.content = validation.content
     result.warnings = validation.warnings
     result.errors = validation.errors
     result.isPartial = validation.isPartial
     result.success = validation.errors.length === 0
 
+    logger.debug('✅ Content validation completed:', {
+      success: result.success,
+      finalSectionCount: Object.keys(result.content).length,
+      errorCount: result.errors.length,
+      warningCount: result.warnings.length,
+      isPartial: result.isPartial
+    });
+
+    if (result.errors.length > 0) {
+      logger.warn('⚠️ Validation errors found:', result.errors);
+    }
+
+    if (result.warnings.length > 0) {
+      logger.debug('⚠️ Validation warnings:', result.warnings);
+    }
+
     return result
 
   } catch (error) {
+    logger.error('❌ Unexpected error during AI response parsing:', {
+      error: error,
+      errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      errorStack: error instanceof Error ? error.stack : undefined
+    });
     result.errors.push(`JSON parsing failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
     return result
   }
 }
 
 /**
- * Extracts JSON from AI response, handling markdown code blocks
+ * Extracts JSON from AI response with enhanced patterns and content cleaning
  */
 function extractJSON(content: string): string | null {
-  // Remove potential markdown code blocks
-  const codeBlockRegex = /```(?:json)?\s*([\s\S]*?)\s*```/i
-  const codeBlockMatch = content.match(codeBlockRegex)
-  
+  logger.debug('🔍 Starting enhanced JSON extraction from AI response:', {
+    contentLength: content.length,
+    hasCodeBlocks: content.includes('```'),
+    hasJsonKeyword: content.includes('json'),
+    startsWithBrace: content.trim().startsWith('{'),
+    firstLine: content.split('\n')[0],
+    contentPreview: content.substring(0, 100) + '...'
+  });
+
+  // Clean content first - remove common AI response artifacts
+  let cleanedContent = content
+    .replace(/^Here(?:'s|\'s| is).*?:\s*/i, '') // Remove "Here's the content:" type prefixes
+    .replace(/^Based on.*?:\s*/i, '') // Remove "Based on analysis:" type prefixes
+    .replace(/\*\*JSON\*\*\s*/i, '') // Remove **JSON** markers
+    .replace(/```json\s+/gi, '```json\n') // Normalize code block formatting
+    .replace(/^\s*```\s*\n/gm, '```\n') // Clean up empty code block lines
+    .trim();
+
+  logger.debug('📝 Content cleaned for extraction:', {
+    originalLength: content.length,
+    cleanedLength: cleanedContent.length,
+    significantChange: Math.abs(content.length - cleanedContent.length) > 50
+  });
+
+  // Pattern 1: Standard markdown code blocks with json label
+  const codeBlockRegex = /```(?:json)?\s*([\s\S]*?)\s*```/i;
+  const codeBlockMatch = cleanedContent.match(codeBlockRegex);
+
   if (codeBlockMatch) {
-    return codeBlockMatch[1].trim()
+    const extracted = codeBlockMatch[1].trim();
+    if (isValidJSONStructure(extracted)) {
+      logger.debug('✅ JSON extracted from standard code block:', {
+        extractedLength: extracted.length,
+        startsWithBrace: extracted.startsWith('{'),
+        endsWithBrace: extracted.endsWith('}'),
+        firstChars: extracted.substring(0, 50) + '...'
+      });
+      return extracted;
+    }
   }
 
-  // Try to find JSON object directly
-  const jsonRegex = /\{[\s\S]*\}/
-  const jsonMatch = content.match(jsonRegex)
-  
+  // Pattern 2: Backtick blocks without json label
+  const simpleCodeBlockRegex = /```\s*([\s\S]*?)\s*```/;
+  const simpleCodeMatch = cleanedContent.match(simpleCodeBlockRegex);
+
+  if (simpleCodeMatch) {
+    const extracted = simpleCodeMatch[1].trim();
+    if (isValidJSONStructure(extracted)) {
+      logger.debug('✅ JSON extracted from simple code block:', {
+        extractedLength: extracted.length,
+        firstChars: extracted.substring(0, 50) + '...'
+      });
+      return extracted;
+    }
+  }
+
+  // Pattern 3: Direct JSON object with balanced braces
+  const balancedJsonMatch = findBalancedJSON(cleanedContent);
+  if (balancedJsonMatch) {
+    logger.debug('✅ JSON extracted from balanced brace matching:', {
+      extractedLength: balancedJsonMatch.length,
+      startIndex: cleanedContent.indexOf(balancedJsonMatch),
+      firstChars: balancedJsonMatch.substring(0, 50) + '...'
+    });
+    return balancedJsonMatch;
+  }
+
+  // Pattern 4: Greedy JSON match as fallback
+  const jsonRegex = /\{[\s\S]*\}/;
+  const jsonMatch = cleanedContent.match(jsonRegex);
+
   if (jsonMatch) {
-    return jsonMatch[0]
+    const extracted = jsonMatch[0];
+    if (isValidJSONStructure(extracted)) {
+      logger.debug('✅ JSON extracted from greedy match:', {
+        extractedLength: extracted.length,
+        matchIndex: cleanedContent.indexOf(extracted),
+        firstChars: extracted.substring(0, 50) + '...'
+      });
+      return extracted;
+    }
   }
 
-  return null
+  logger.warn('❌ No valid JSON patterns found. Analysis:', {
+    hasBraces: cleanedContent.includes('{') && cleanedContent.includes('}'),
+    bracePositions: {
+      firstBrace: cleanedContent.indexOf('{'),
+      lastBrace: cleanedContent.lastIndexOf('}')
+    },
+    contentSample: cleanedContent.substring(0, 300) + '...'
+  });
+
+  return null;
 }
 
 /**
- * Validates and cleans the parsed content
+ * Validates basic JSON structure before parsing
  */
-function validateContent(content: any): {
+function isValidJSONStructure(text: string): boolean {
+  if (!text || typeof text !== 'string') return false;
+
+  const trimmed = text.trim();
+  if (!trimmed.startsWith('{') || !trimmed.endsWith('}')) return false;
+
+  // Basic brace balance check
+  let braceCount = 0;
+  for (const char of trimmed) {
+    if (char === '{') braceCount++;
+    if (char === '}') braceCount--;
+    if (braceCount < 0) return false; // More closing than opening
+  }
+
+  return braceCount === 0; // Balanced braces
+}
+
+/**
+ * Finds JSON with balanced braces starting from first '{'
+ */
+function findBalancedJSON(content: string): string | null {
+  const firstBrace = content.indexOf('{');
+  if (firstBrace === -1) return null;
+
+  let braceCount = 0;
+  let inString = false;
+  let escaped = false;
+
+  for (let i = firstBrace; i < content.length; i++) {
+    const char = content[i];
+
+    if (escaped) {
+      escaped = false;
+      continue;
+    }
+
+    if (char === '\\' && inString) {
+      escaped = true;
+      continue;
+    }
+
+    if (char === '"') {
+      inString = !inString;
+      continue;
+    }
+
+    if (!inString) {
+      if (char === '{') braceCount++;
+      if (char === '}') braceCount--;
+
+      if (braceCount === 0) {
+        const extracted = content.substring(firstBrace, i + 1);
+        return extracted.trim();
+      }
+    }
+  }
+
+  return null; // Unbalanced braces
+}
+
+/**
+ * Validates and cleans the parsed content with enhanced error recovery
+ */
+function validateContent(
+  content: any,
+  expectedCounts?: Record<string, number>
+): {
   content: Record<string, any>;
   warnings: string[];
   errors: string[];
@@ -90,38 +294,128 @@ function validateContent(content: any): {
     isPartial: false
   }
 
-  if (!content || typeof content !== 'object') {
-    validation.errors.push("Content must be an object")
+  logger.debug('🔍 Starting content validation:', {
+    contentType: typeof content,
+    isArray: Array.isArray(content),
+    hasExpectedCounts: !!expectedCounts,
+    expectedCountKeys: expectedCounts ? Object.keys(expectedCounts) : []
+  });
+
+  if (!content || typeof content !== 'object' || Array.isArray(content)) {
+    validation.errors.push("Content must be an object (not array or primitive)")
+    logger.error('❌ Content validation failed: invalid root type', {
+      actualType: typeof content,
+      isArray: Array.isArray(content),
+      isNull: content === null
+    });
     return validation
   }
 
-  // Required sections - removed hardcoded requirement
-  // Different pages might have different sections based on business rules
-  const availableSections = Object.keys(content)
-  
-  // Only warn if no sections at all
-  if (availableSections.length === 0) {
-    validation.errors.push('No sections found in content')
-    validation.isPartial = true
+  // Try to salvage content from common AI response formats
+  let processedContent = content;
+
+  // Check if content is wrapped in a data/content/response property
+  if (content.data && typeof content.data === 'object') {
+    processedContent = content.data;
+    validation.warnings.push('Content extracted from "data" wrapper');
+    logger.debug('📦 Content extracted from data wrapper');
+  } else if (content.content && typeof content.content === 'object') {
+    processedContent = content.content;
+    validation.warnings.push('Content extracted from "content" wrapper');
+    logger.debug('📦 Content extracted from content wrapper');
+  } else if (content.response && typeof content.response === 'object') {
+    processedContent = content.response;
+    validation.warnings.push('Content extracted from "response" wrapper');
+    logger.debug('📦 Content extracted from response wrapper');
   }
 
-  // Process each section
-  Object.entries(content).forEach(([sectionId, sectionContent]) => {
+  const availableSections = Object.keys(processedContent);
+
+  logger.debug('📊 Available sections analysis:', {
+    totalSections: availableSections.length,
+    sectionList: availableSections,
+    hasExpectedCounts: !!expectedCounts,
+    expectedSections: expectedCounts ? Object.keys(expectedCounts) : []
+  });
+
+  // Only error if no sections at all
+  if (availableSections.length === 0) {
+    validation.errors.push('No sections found in content after extraction attempts')
+    validation.isPartial = true
+    logger.warn('❌ No sections found after all extraction attempts');
+    return validation;
+  }
+
+  // Warn if very few sections
+  if (availableSections.length < 3) {
+    validation.warnings.push(`Only ${availableSections.length} sections found - this may be incomplete content`);
+    validation.isPartial = true;
+  }
+
+  // Process each section with enhanced error handling
+  let processedSectionCount = 0;
+  const totalSections = availableSections.length;
+
+  Object.entries(processedContent).forEach(([sectionId, sectionContent]) => {
+    logger.debug(`🔍 Processing section: ${sectionId}`, {
+      sectionType: typeof sectionContent,
+      isObject: typeof sectionContent === 'object',
+      isNull: sectionContent === null,
+      keys: typeof sectionContent === 'object' && sectionContent !== null ? Object.keys(sectionContent) : []
+    });
+
     if (!sectionContent || typeof sectionContent !== 'object') {
-      validation.warnings.push(`Section ${sectionId} has invalid format`)
+      validation.warnings.push(`Section ${sectionId} has invalid format (${typeof sectionContent})`)
       validation.isPartial = true
+      logger.warn(`⚠️ Section ${sectionId} invalid:`, {
+        type: typeof sectionContent,
+        isNull: sectionContent === null,
+        value: sectionContent
+      });
       return
     }
 
-    const processedSection = processSectionContent(sectionId, sectionContent as SectionContent)
-    
-    if (processedSection.hasIssues) {
-      validation.warnings.push(...processedSection.warnings)
-      validation.isPartial = true
-    }
+    try {
+      const processedSection = processSectionContent(
+        sectionId,
+        sectionContent as SectionContent,
+        expectedCounts
+      )
 
-    validation.content[sectionId] = processedSection.content
+      if (processedSection.hasIssues) {
+        validation.warnings.push(...processedSection.warnings)
+        validation.isPartial = true
+        logger.debug(`⚠️ Section ${sectionId} had processing issues:`, processedSection.warnings);
+      } else {
+        processedSectionCount++;
+      }
+
+      validation.content[sectionId] = processedSection.content
+      logger.debug(`✅ Section ${sectionId} processed successfully`);
+
+    } catch (error) {
+      validation.warnings.push(`Section ${sectionId} processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      validation.isPartial = true
+      logger.error(`❌ Section ${sectionId} processing error:`, {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      });
+
+      // Still add the section with basic processing
+      validation.content[sectionId] = sectionContent;
+    }
   })
+
+  logger.debug('✅ Content validation completed:', {
+    totalSections,
+    processedSuccessfully: processedSectionCount,
+    successRate: `${Math.round((processedSectionCount / totalSections) * 100)}%`,
+    finalSectionCount: Object.keys(validation.content).length,
+    isPartial: validation.isPartial,
+    warningCount: validation.warnings.length,
+    errorCount: validation.errors.length
+  });
+
 
   return validation
 }
@@ -129,7 +423,11 @@ function validateContent(content: any): {
 /**
  * Processes and validates individual section content
  */
-function processSectionContent(sectionId: string, content: SectionContent): {
+function processSectionContent(
+  sectionId: string,
+  content: SectionContent,
+  expectedCounts?: Record<string, number>
+): {
   content: SectionContent;
   warnings: string[];
   hasIssues: boolean;
@@ -354,7 +652,8 @@ function processSectionContent(sectionId: string, content: SectionContent): {
 
   // Special handling for other Results sections with pipe-separated content
   if (sectionId.includes('StatBlocks')) {
-    const processedStatBlocks = processStatBlocksContent(sectionId, content);
+    const expectedCount = getExpectedCountForSection(sectionId, expectedCounts);
+    const processedStatBlocks = processStatBlocksContent(sectionId, content, expectedCount);
     result.content = processedStatBlocks.content;
     result.warnings = processedStatBlocks.warnings;
     result.hasIssues = processedStatBlocks.hasIssues;
@@ -751,56 +1050,9 @@ function processSectionContent(sectionId: string, content: SectionContent): {
     return result;
   }
 
-  if (sectionId.includes('CTAWithBadgeRow')) {
-    const processedCTA = processCTAWithBadgeRowContent(sectionId, content);
-    result.content = processedCTA.content;
-    result.warnings = processedCTA.warnings;
-    result.hasIssues = processedCTA.hasIssues;
-    return result;
-  }
-
-  if (sectionId.includes('VisualCTAWithMockup')) {
-    const processedCTA = processVisualCTAWithMockupContent(sectionId, content);
-    result.content = processedCTA.content;
-    result.warnings = processedCTA.warnings;
-    result.hasIssues = processedCTA.hasIssues;
-    return result;
-  }
-
-  if (sectionId.includes('SideBySideCTA')) {
-    const processedCTA = processSideBySideCTAContent(sectionId, content);
-    result.content = processedCTA.content;
-    result.warnings = processedCTA.warnings;
-    result.hasIssues = processedCTA.hasIssues;
-    return result;
-  }
-
-  if (sectionId.includes('CountdownLimitedCTA')) {
-    const processedCTA = processCountdownLimitedCTAContent(sectionId, content);
-    result.content = processedCTA.content;
-    result.warnings = processedCTA.warnings;
-    result.hasIssues = processedCTA.hasIssues;
-    return result;
-  }
-
-  if (sectionId.includes('CTAWithFormField')) {
-    const processedCTA = processCTAWithFormFieldContent(sectionId, content);
-    result.content = processedCTA.content;
-    result.warnings = processedCTA.warnings;
-    result.hasIssues = processedCTA.hasIssues;
-    return result;
-  }
-
-  if (sectionId.includes('ValueStackCTA')) {
-    const processedCTA = processValueStackCTAContent(sectionId, content);
-    result.content = processedCTA.content;
-    result.warnings = processedCTA.warnings;
-    result.hasIssues = processedCTA.hasIssues;
-    return result;
-  }
-
-  if (sectionId.includes('TestimonialCTACombo')) {
-    const processedCTA = processTestimonialCTAComboContent(sectionId, content);
+  // Generic CTA section processing
+  if (sectionId.includes('CTA') || sectionId.includes('Close')) {
+    const processedCTA = processGenericCTAContent(sectionId, content);
     result.content = processedCTA.content;
     result.warnings = processedCTA.warnings;
     result.hasIssues = processedCTA.hasIssues;
@@ -3157,8 +3409,12 @@ function processCollapsedCardsContent(sectionId: string, content: SectionContent
 
   // Validate title/description pairing
   if (content.problem_titles && content.problem_descriptions) {
-    const titles = content.problem_titles.split('|').map(item => item.trim()).filter(Boolean);
-    const descriptions = content.problem_descriptions.split('|').map(item => item.trim()).filter(Boolean);
+    const titles = typeof content.problem_titles === 'string'
+      ? content.problem_titles.split('|').map((item: string) => item.trim()).filter(Boolean)
+      : [];
+    const descriptions = typeof content.problem_descriptions === 'string'
+      ? content.problem_descriptions.split('|').map((item: string) => item.trim()).filter(Boolean)
+      : [];
 
     if (titles.length !== descriptions.length) {
       result.warnings.push(`${sectionId}: Number of titles (${titles.length}) doesn't match descriptions (${descriptions.length})`);
@@ -5214,9 +5470,48 @@ function parseContentArray(content: string | string[]): string[] {
  */
 
 /**
+ * Helper function to get expected count for a section from various mapping formats
+ */
+function getExpectedCountForSection(
+  sectionId: string,
+  expectedCounts?: Record<string, number>
+): number | undefined {
+  if (!expectedCounts) return undefined;
+
+  // Try direct section ID match first
+  if (expectedCounts[sectionId] !== undefined) {
+    return expectedCounts[sectionId];
+  }
+
+  // Try to extract layout name and create UIBlock key
+  // e.g., "results-StatBlocks" -> "results_StatBlocks"
+  const uiBlockKey = sectionId.replace('-', '_');
+  if (expectedCounts[uiBlockKey] !== undefined) {
+    return expectedCounts[uiBlockKey];
+  }
+
+  // Try generic section type mapping
+  if (sectionId.includes('StatBlocks') || sectionId.includes('results')) {
+    return expectedCounts['results'];
+  }
+  if (sectionId.includes('features')) {
+    return expectedCounts['features'];
+  }
+  if (sectionId.includes('testimonials')) {
+    return expectedCounts['testimonials'];
+  }
+
+  return undefined;
+}
+
+/**
  * Special processing for StatBlocks sections to handle pipe-separated statistics
  */
-function processStatBlocksContent(sectionId: string, content: SectionContent): {
+function processStatBlocksContent(
+  sectionId: string,
+  content: SectionContent,
+  expectedCount?: number
+): {
   content: SectionContent;
   warnings: string[];
   hasIssues: boolean;
@@ -5246,11 +5541,21 @@ function processStatBlocksContent(sectionId: string, content: SectionContent): {
       result.hasIssues = true;
     }
 
-    // Validate reasonable count (2-6 stats optimal)
-    if (values.length < 2) {
-      result.warnings.push(`${sectionId}: Only ${values.length} stat(s) - consider adding more for better impact`);
-    } else if (values.length > 6) {
-      result.warnings.push(`${sectionId}: ${values.length} stats may be overwhelming - consider reducing to 4-6`);
+    // Validate count against expected if provided, otherwise use reasonable defaults
+    if (expectedCount !== undefined) {
+      if (values.length !== expectedCount) {
+        result.warnings.push(
+          `${sectionId}: Expected ${expectedCount} stat(s) but got ${values.length} - this may not match the layout requirements`
+        );
+        result.hasIssues = true;
+      }
+    } else {
+      // Fallback to reasonable defaults when no expected count provided
+      if (values.length < 2) {
+        result.warnings.push(`${sectionId}: Only ${values.length} stat(s) - consider adding more for better impact`);
+      } else if (values.length > 6) {
+        result.warnings.push(`${sectionId}: ${values.length} stats may be overwhelming - consider reducing to 4-6`);
+      }
     }
   }
 
@@ -5356,27 +5661,22 @@ function processTimelineResultsContent(sectionId: string, content: SectionConten
 } {
   const result = { content: { ...content }, warnings: [] as string[], hasIssues: false };
 
-  // Validate required fields
-  if (!content.headline || !content.timeframes || !content.titles || !content.descriptions) {
-    result.warnings.push(`${sectionId}: Missing required fields for timeline (headline, timeframes, titles, descriptions)`);
+  // Validate required fields (now including metrics as mandatory)
+  if (!content.headline || !content.timeframes || !content.titles || !content.descriptions || !content.metrics) {
+    result.warnings.push(`${sectionId}: Missing required fields for timeline (headline, timeframes, titles, descriptions, metrics)`);
     result.hasIssues = true;
   }
 
   // Process pipe-separated timeline data
-  if (content.timeframes && content.titles && content.descriptions) {
+  if (content.timeframes && content.titles && content.descriptions && content.metrics) {
     const timeframes = parseContentArray(content.timeframes);
     const titles = parseContentArray(content.titles);
     const descriptions = parseContentArray(content.descriptions);
-    const metrics = content.metrics ? parseContentArray(content.metrics) : [];
+    const metrics = parseContentArray(content.metrics);
 
-    // Validate all arrays have same length
-    if (timeframes.length !== titles.length || titles.length !== descriptions.length) {
-      result.warnings.push(`${sectionId}: Timeline arrays must have equal length (timeframes: ${timeframes.length}, titles: ${titles.length}, descriptions: ${descriptions.length})`);
-      result.hasIssues = true;
-    }
-
-    if (metrics.length > 0 && metrics.length !== timeframes.length) {
-      result.warnings.push(`${sectionId}: Timeline metrics (${metrics.length}) count doesn't match timeframes (${timeframes.length})`);
+    // Validate all arrays have same length (including metrics as required)
+    if (timeframes.length !== titles.length || titles.length !== descriptions.length || metrics.length !== timeframes.length) {
+      result.warnings.push(`${sectionId}: Timeline arrays must have equal length (timeframes: ${timeframes.length}, titles: ${titles.length}, descriptions: ${descriptions.length}, metrics: ${metrics.length})`);
       result.hasIssues = true;
     }
 
@@ -6084,6 +6384,51 @@ function processVideoTestimonialsContent(sectionId: string, content: SectionCont
       result.hasIssues = true;
     }
   });
+
+  return result;
+}
+
+/**
+ * Generic processing for CTA and Close sections
+ */
+function processGenericCTAContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Process each element normally
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    const processedElement = processElement(sectionId, elementKey, elementValue);
+
+    if (processedElement.isValid) {
+      result.content[elementKey] = processedElement.value;
+    } else {
+      result.warnings.push(...processedElement.warnings);
+      result.hasIssues = true;
+      result.content[elementKey] = processedElement.fallback;
+    }
+  });
+
+  // Basic validation for CTA sections
+  const commonCTAFields = ['headline', 'cta_text', 'subheadline', 'description'];
+  let foundFields = 0;
+
+  commonCTAFields.forEach(field => {
+    if (result.content[field]) {
+      foundFields++;
+    }
+  });
+
+  if (foundFields === 0) {
+    result.warnings.push(`${sectionId}: No common CTA fields found`);
+    result.hasIssues = true;
+  }
 
   return result;
 }

@@ -1,4 +1,4 @@
-import { layoutElementSchema } from './layoutElementSchema';
+import { layoutElementSchema, getAllElements } from './layoutElementSchema';
 import type { InputVariables, HiddenInferredFields } from '@/types/core/index';
 
 type Variables = Partial<InputVariables> & Partial<HiddenInferredFields>;
@@ -3327,15 +3327,6 @@ const elementRules: SectionLayoutRules = {
 
 "Results_TimelineResults": [
   {
-    element: "metrics",
-    conditions: [
-      { variable: "copyIntent", values: ["desire-led"], weight: 4 },
-      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
-      { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k"], weight: 2 }
-    ],
-    minScore: 6
-  },
-  {
     element: "subheadline",
     conditions: [
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
@@ -3348,6 +3339,24 @@ const elementRules: SectionLayoutRules = {
     conditions: [
       { variable: "copyIntent", values: ["trust-led"], weight: 4 },
       { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "success_title",
+    conditions: [
+      { variable: "copyIntent", values: ["trust-led"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
+      { variable: "awarenessLevel", values: ["problem-aware", "solution-aware"], weight: 2 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "success_subtitle",
+    conditions: [
+      { variable: "copyIntent", values: ["trust-led"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
+      { variable: "awarenessLevel", values: ["problem-aware", "solution-aware"], weight: 2 }
     ],
     minScore: 5
   }
@@ -4218,15 +4227,6 @@ const elementRules: SectionLayoutRules = {
       { variable: "toneProfile", values: ["luxury-expert", "confident-playful"], weight: 2 }
     ],
     minScore: 7
-  },
-  {
-    element: "highlight_icon_1",
-    conditions: [
-      { variable: "toneProfile", values: ["confident-playful", "friendly-helpful"], weight: 4 },
-      { variable: "marketSophisticationLevel", values: ["level-2", "level-3", "level-4"], weight: 3 },
-      { variable: "targetAudience", values: ["creators", "founders"], weight: 2 }
-    ],
-    minScore: 6
   }
 ],
 
@@ -4751,7 +4751,7 @@ export function selectOptionalElements(
   }
 
   // Get optional elements (non-mandatory)
-  const optionalElements = layoutSchema
+  const optionalElements = getAllElements(layoutSchema)
     .filter(element => !element.mandatory)
     .map(element => element.element);
 
@@ -4811,7 +4811,7 @@ export function getExcludedOptionalElements(
     return [];
   }
   
-  const allOptionalElements = layoutSchema
+  const allOptionalElements = getAllElements(layoutSchema)
     .filter(element => !element.mandatory)
     .map(element => element.element);
   

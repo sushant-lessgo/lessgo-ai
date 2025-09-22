@@ -1,6 +1,12 @@
-// modules/prompt/buildPrompt.ts - ✅ PHASE 4: API Layer Migration Complete
-import { getCompleteElementsMap, getSectionElementRequirements, mapStoreToVariables } from '../sections/elementDetermination'
-import { classifyFieldsForSection, getGenerationStrategy } from '../generation/fieldClassification'
+// modules/prompt/buildPrompt.ts - Using unified schema as single source of truth
+import {
+  layoutElementSchema,
+  isUnifiedSchema,
+  getAllElements,
+  getCardElements,
+  getSectionElements,
+  getCardRequirements
+} from '../sections/layoutElementSchema'
 import type { ParsedStrategy } from './parseStrategyResponse'
 
 import type {
@@ -18,6 +24,215 @@ import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 // ✅ FIXED: Extract actual store types from Zustand stores
 type OnboardingStore = ReturnType<typeof useOnboardingStore.getState>;
 type PageStore = ReturnType<typeof useEditStore.getState>;
+
+// Type for section information
+type SectionInfo = {
+  sectionId: string;
+  sectionType: string;
+  layoutName: string;
+};
+
+
+/**
+ * Creates a simplified elements map from page store
+ */
+function buildElementsMap(pageStore: any): Record<string, SectionInfo> {
+  const elementsMap: Record<string, SectionInfo> = {};
+
+  const sections = pageStore.layout?.sections || [];
+  const sectionLayouts = pageStore.layout?.sectionLayouts || {};
+
+  sections.forEach((sectionId: string) => {
+    const layoutName = sectionLayouts[sectionId];
+    if (layoutName) {
+      elementsMap[sectionId] = {
+        sectionId,
+        sectionType: sectionId, // Use sectionId as sectionType for simplicity
+        layoutName
+      };
+    }
+  });
+
+  return elementsMap;
+}
+
+/**
+ * Determines optimal card count based on strategy, constraints, and fallbacks
+ */
+function determineOptimalCardCount(
+  sectionId: string,
+  layoutName: string,
+  strategyCounts: Record<string, number>,
+  userFeatureCount?: number
+): number {
+  const cardRequirements = getEnhancedCardRequirements(sectionId, layoutName);
+
+  // Try to get count from strategy first
+  let strategyCount: number | undefined;
+  let strategySource: string | undefined;
+
+  // Direct section lookup
+  if (strategyCounts[sectionId] !== undefined) {
+    strategyCount = strategyCounts[sectionId];
+    strategySource = `direct:${sectionId}`;
+  } else {
+    // Try strategy key mappings
+    for (const [strategyKey, sectionIds] of Object.entries(strategyToSectionMapping)) {
+      if (sectionIds.includes(sectionId) && strategyCounts[strategyKey] !== undefined) {
+        strategyCount = strategyCounts[strategyKey];
+        strategySource = `mapped:${strategyKey}`;
+        break;
+      }
+    }
+  }
+
+  if (!cardRequirements) {
+    // No card requirements - return strategy count or default
+    const result = strategyCount || 1;
+    logger.debug(`🎯 Card count for ${sectionId}: ${result} (no constraints, source: ${strategySource || 'default'})`);
+    return result;
+  }
+
+  // Apply constraints intelligently
+  let finalCount: number;
+
+  if (strategyCount !== undefined) {
+    // Strategy provided a count - respect it but apply constraints
+    finalCount = strategyCount;
+
+    // Apply min/max constraints
+    const constrainedCount = Math.max(cardRequirements.min, Math.min(cardRequirements.max, finalCount));
+
+    if (constrainedCount !== finalCount) {
+      logger.debug(`🔧 Constraining ${sectionId}: strategy=${finalCount} → constrained=${constrainedCount} (min=${cardRequirements.min}, max=${cardRequirements.max})`);
+      finalCount = constrainedCount;
+    }
+  } else {
+    // No strategy count - use optimal midpoint
+    finalCount = Math.round((cardRequirements.optimal[0] + cardRequirements.optimal[1]) / 2);
+    logger.debug(`🎯 Using optimal midpoint for ${sectionId}: ${finalCount} (range: ${cardRequirements.optimal[0]}-${cardRequirements.optimal[1]})`);
+  }
+
+  // Respect user content for features
+  if (sectionId === 'features' && userFeatureCount && cardRequirements.respectUserContent) {
+    const beforeUserContent = finalCount;
+    finalCount = Math.max(finalCount, userFeatureCount);
+    if (finalCount !== beforeUserContent) {
+      logger.debug(`🔧 Adjusted ${sectionId} for user features: ${beforeUserContent} → ${finalCount} (user has ${userFeatureCount} features)`);
+    }
+  }
+
+  logger.debug(`✅ Final card count for ${sectionId}: ${finalCount} (source: ${strategySource || 'default'}, constraints: ${cardRequirements.min}-${cardRequirements.max})`);
+
+  return finalCount;
+}
+
+/**
+ * Determines card count for a section from strategy or schema defaults
+ */
+function getCardCount(
+  layoutName: string,
+  sectionId: string,
+  strategyCounts?: Record<string, number>,
+  userFeatureCount?: number
+): number {
+  const schema = layoutElementSchema[layoutName];
+
+  // If no schema or not unified, no cards needed
+  if (!schema || !isUnifiedSchema(schema)) {
+    return 0;
+  }
+
+  // Try to get count from strategy first
+  let count = strategyCounts?.[sectionId];
+
+  // For features, respect user feature count
+  if (sectionId === 'features' && userFeatureCount) {
+    count = userFeatureCount;
+  }
+
+  // If no strategy count, use optimal average from schema
+  if (!count && schema.cardRequirements) {
+    const optimal = schema.cardRequirements.optimal;
+    // Calculate average of optimal range
+    count = Math.round(optimal.reduce((a, b) => a + b, 0) / optimal.length);
+  }
+
+  // Apply min/max constraints if available
+  if (count && schema.cardRequirements) {
+    const { min, max } = schema.cardRequirements;
+    count = Math.max(min, Math.min(max, count));
+  }
+
+  return count || 0;
+}
+
+/**
+ * Gets section requirements from schema
+ */
+function getSectionRequirements(sectionId: string, layoutName: string) {
+  const aiElements = getAIGeneratedElements(layoutName);
+  const cardCount = getCardCount(layoutName, sectionId);
+
+  return {
+    sectionType: sectionId,
+    layoutName,
+    aiElements,
+    cardCount,
+    allElements: aiElements.map(el => el.element)
+  };
+}
+
+/**
+ * Gets all section card information for the elements map
+ */
+function getAllSectionCardInfo(
+  elementsMap: any,
+  strategyCounts: Record<string, number>,
+  userFeatureCount?: number
+): Record<string, SectionCardInfo> {
+  const cardInfo: Record<string, SectionCardInfo> = {};
+
+  Object.entries(elementsMap).forEach(([sectionId, section]: [string, any]) => {
+    const { sectionType, layout } = section;
+    const layoutName = layout || 'default';
+
+    const cardRequirements = getEnhancedCardRequirements(sectionId, layoutName);
+    const recommendedCount = determineOptimalCardCount(sectionId, layoutName, strategyCounts, userFeatureCount);
+
+    cardInfo[sectionId] = {
+      sectionId,
+      sectionType,
+      layoutName,
+      cardRequirements,
+      recommendedCount
+    };
+  });
+
+  return cardInfo;
+}
+
+/**
+ * Validates card counts against registry requirements
+ */
+function validateCardCounts(cardInfo: Record<string, SectionCardInfo>): string[] {
+  const errors: string[] = [];
+
+  Object.values(cardInfo).forEach(info => {
+    const { sectionId, cardRequirements, recommendedCount } = info;
+
+    if (cardRequirements) {
+      if (recommendedCount < cardRequirements.min) {
+        errors.push(`${sectionId}: Card count ${recommendedCount} below minimum ${cardRequirements.min}`);
+      }
+      if (recommendedCount > cardRequirements.max) {
+        errors.push(`${sectionId}: Card count ${recommendedCount} exceeds maximum ${cardRequirements.max}`);
+      }
+    }
+  });
+
+  return errors;
+}
 
 /**
  * Builds business context section for all prompt types
@@ -177,12 +392,12 @@ Pricing Model: ${validatedFields.pricingModel || 'Not specified'}`;
 /**
  * Builds layout context for copy-layout harmony
  */
-function buildLayoutContext(elementsMap: any): string {
+function buildLayoutContext(elementsMap: Record<string, SectionInfo>): string {
   const layoutContexts: string[] = [];
-  
-  Object.values(elementsMap).forEach((section: any) => {
-    const { sectionId, sectionType, layout } = section;
-    layoutContexts.push(`${sectionType} (${layout}): ${getSectionLayoutGuidance(sectionType, layout)}`);
+
+  Object.values(elementsMap).forEach((section) => {
+    const { sectionId, sectionType, layoutName } = section;
+    layoutContexts.push(`${sectionType} (${layoutName}): ${getSectionLayoutGuidance(sectionType, layoutName)}`);
   });
 
   return `LAYOUT CONTEXT FOR COPY OPTIMIZATION:
@@ -444,21 +659,21 @@ function getSectionLayoutGuidance(sectionType: string, layout: string): string {
 /**
  * Builds section flow context for cohesive messaging
  */
-function buildSectionFlowContext(elementsMap: any, pageStore: PageStore): string {
-  const sectionOrder = (pageStore as any).layout?.sections || [];
+function buildSectionFlowContext(elementsMap: Record<string, SectionInfo>, pageStore: any): string {
+  const sectionOrder = pageStore.layout?.sections || [];
   const flowContext: string[] = [];
-  
+
   sectionOrder.forEach((sectionId: string, index: number) => {
     const section = elementsMap[sectionId];
     if (!section) return;
-    
-    const position = index === 0 ? 'OPENING' : 
-                    index === sectionOrder.length - 1 ? 'CLOSING' : 
+
+    const position = index === 0 ? 'OPENING' :
+                    index === sectionOrder.length - 1 ? 'CLOSING' :
                     'MIDDLE';
-    
+
     const previousSection = index > 0 ? elementsMap[sectionOrder[index - 1]]?.sectionType : null;
     const nextSection = index < sectionOrder.length - 1 ? elementsMap[sectionOrder[index + 1]]?.sectionType : null;
-    
+
     flowContext.push(`${section.sectionType} (${position}): ${getSectionFlowGuidance(section.sectionType, position, previousSection, nextSection)}`);
   });
 
@@ -607,13 +822,13 @@ function getSectionFlowGuidance(sectionType: string, position: string, previousS
 /**
  * Builds explicit feature mapping instructions for Features section
  */
-function buildFeatureMappingInstructions(onboardingStore: OnboardingStore, elementsMap: any): string {
+function buildFeatureMappingInstructions(onboardingStore: OnboardingStore, elementsMap: Record<string, SectionInfo>): string {
   const { featuresFromAI } = onboardingStore;
   const featureCount = featuresFromAI.length;
 
   // Check if there's a Features section in the elementsMap
   const hasFeatureSection = Object.values(elementsMap).some(
-    (section: any) => section.sectionType === 'Features'
+    (section) => section.sectionType === 'features' || section.sectionId === 'features'
   );
 
   if (!hasFeatureSection || featureCount === 0) {
@@ -639,27 +854,94 @@ IMPORTANT: If you generate fewer than ${featureCount} features, users will not s
 }
 
 /**
- * Builds output format specification
+ * Builds output format specification with basic card awareness
  */
-function buildOutputFormat(elementsMap: any): string {
+function buildOutputFormat(elementsMap: Record<string, SectionInfo>): string {
   const formatExample: Record<string, any> = {};
-  
-  Object.entries(elementsMap).forEach(([sectionId, section]: [string, any]) => {
+
+  Object.entries(elementsMap).forEach(([sectionId, section]) => {
     const elementFormat: Record<string, string> = {};
-    
-    section.allElements.forEach((element: string) => {
-      elementFormat[element] = getElementFormatGuidance(element);
+    const { layoutName } = section;
+
+    // Get only AI-generated elements from schema
+    const aiElements = getAIGeneratedElements(layoutName);
+
+    // Get card count (0 if no cards needed)
+    const cardCount = getCardCount(layoutName, sectionId);
+
+    aiElements.forEach(({ element, isCard }) => {
+      if (isCard && cardCount > 0) {
+        // Create array placeholder for card elements
+        const placeholders = Array.from({ length: cardCount }, (_, i) => `${element.charAt(0).toUpperCase() + element.slice(1)} ${i + 1}`);
+        elementFormat[element] = placeholders;
+      } else if (!isCard) {
+        // Single element format guidance
+        elementFormat[element] = getElementFormatGuidance(element);
+      }
     });
-    
-    formatExample[sectionId] = elementFormat;
+
+    if (Object.keys(elementFormat).length > 0) {
+      formatExample[sectionId] = elementFormat;
+    }
   });
 
   return `OUTPUT FORMAT:
-Return a valid JSON object with this exact structure where each key is a section ID and contains the required elements:
+Return a valid JSON object with this exact structure where each key is a section ID and contains ONLY the AI-generated elements:
 
 ${JSON.stringify(formatExample, null, 2)}
 
-IMPORTANT: The above is the structure. Replace the example values with actual generated content.`;
+IMPORTANT:
+- Only generate copy for elements shown above (ai_generated elements only)
+- For array elements, generate exactly the number of items shown
+- For single elements, generate appropriate copy based on the guidance
+- All values should be actual generated content, not placeholders`;
+}
+
+/**
+ * Gets AI-generated elements from unified or legacy schema
+ */
+function getAIGeneratedElements(layoutName: string) {
+  const schema = layoutElementSchema[layoutName];
+
+  if (isUnifiedSchema(schema)) {
+    // Get section elements where generation = 'ai_generated'
+    const aiSectionElements = schema.sectionElements
+      .filter(el => el.generation === 'ai_generated')
+      .map(el => ({ ...el, isCard: false }));
+
+    // Get card elements if cardStructure.generation = 'ai_generated'
+    const aiCardElements = schema.cardStructure.generation === 'ai_generated'
+      ? schema.cardStructure.elements.map(name => ({
+          element: name,
+          mandatory: true,
+          generation: 'ai_generated' as const,
+          isCard: true
+        }))
+      : [];
+
+    return [...aiSectionElements, ...aiCardElements];
+  }
+
+  // Fallback for old array format - return all elements
+  return getAllElements(schema).map(el => ({ ...el, isCard: false }));
+}
+
+/**
+ * Checks if an element is card-based using schema structure
+ */
+function isCardElement(element: string, layoutName: string): boolean {
+  const schema = layoutElementSchema[layoutName];
+  if (isUnifiedSchema(schema)) {
+    return schema.cardStructure.elements.includes(element);
+  }
+  // Fallback to pattern matching for old schemas
+  return element.includes('titles') || element.includes('descriptions') ||
+         element.includes('questions') || element.includes('answers') ||
+         element.includes('names') || element.includes('quotes') ||
+         element.includes('stats') || element.includes('metrics') ||
+         element.includes('features') || element.includes('benefits') ||
+         element.includes('testimonials') || element.includes('problems') ||
+         element.includes('solutions') || element.includes('timeframes');
 }
 
 /**
@@ -994,32 +1276,9 @@ function getElementFormatGuidance(element: string): string {
 /**
  * Builds field classification guidance for AI generation
  */
-function buildFieldClassificationGuidance(elementsMap: any): string {
-  const guidanceLines: string[] = [];
-
-  Object.entries(elementsMap).forEach(([sectionId, section]: [string, any]) => {
-    const { sectionType, allElements } = section;
-    const classifications = classifyFieldsForSection(allElements, sectionType);
-    const strategy = getGenerationStrategy(classifications);
-
-    if (strategy.manualFieldsCount > 0) {
-      const manualFields = strategy.manualPreferred.join(', ');
-      guidanceLines.push(`${sectionType}: Manual fields [${manualFields}] - Use suggested defaults, require user review`);
-    }
-  });
-
-  if (guidanceLines.length === 0) {
-    return `FIELD CLASSIFICATION: All fields are AI-generatable. Focus on high-quality, conversion-optimized content.`;
-  }
-
-  return `FIELD CLASSIFICATION:
-${guidanceLines.join('\n')}
-
-GENERATION PRIORITY:
-1. AI-generate all content fields (headlines, descriptions, quotes, etc.)
-2. Use realistic defaults for manual-preferred fields (ratings, dates, locations)
-3. Ensure manual fields use placeholder data that feels authentic
-4. Flag complex interactive fields for post-generation review`;
+function buildFieldClassificationGuidance(elementsMap: Record<string, SectionInfo>): string {
+  // Since we only process ai_generated elements now, this is simplified
+  return `FIELD CLASSIFICATION: All requested fields are AI-generatable. Focus on high-quality, conversion-optimized content that aligns with the strategic objectives.`;
 }
 
 /**
@@ -1029,7 +1288,7 @@ export function buildFullPrompt(
   onboardingStore: OnboardingStore,
   pageStore: PageStore | any
 ): string {
-  const elementsMap = getCompleteElementsMap(onboardingStore, pageStore);
+  const elementsMap = buildElementsMap(pageStore);
 
   const businessContext = buildBusinessContext(onboardingStore, pageStore);
   const brandContext = buildBrandContext(onboardingStore);
@@ -1078,14 +1337,13 @@ export function buildSectionPrompt(
   sectionId: string,
   userPrompt?: string
 ): string {
-  const variables = mapStoreToVariables(onboardingStore, pageStore);
   const layout = pageStore.layout?.sectionLayouts?.[sectionId];
 
   if (!layout) {
     throw new Error(`No layout found for section "${sectionId}"`);
   }
 
-  const sectionRequirements = getSectionElementRequirements(sectionId, layout, variables);
+  const sectionRequirements = getSectionRequirements(sectionId, layout);
   const businessContext = buildBusinessContext(onboardingStore, pageStore);
   const brandContext = buildBrandContext(onboardingStore);
   const categoryContext = buildCategoryContext(onboardingStore);
@@ -1191,15 +1449,14 @@ export function buildElementPrompt(
   elementName: string,
   variationCount: number = 5
 ): string {
-  const variables = mapStoreToVariables(onboardingStore, pageStore);
   const layout = pageStore.layout?.sectionLayouts?.[sectionId];
-  
+
   if (!layout) {
     throw new Error(`No layout found for section "${sectionId}"`);
   }
 
-  const sectionRequirements = getSectionElementRequirements(sectionId, layout, variables);
-  
+  const sectionRequirements = getSectionRequirements(sectionId, layout);
+
   // Check if element is required for this section
   if (!sectionRequirements.allElements.includes(elementName)) {
     throw new Error(`Element "${elementName}" not required for ${sectionRequirements.sectionType} with ${layout} layout`);
@@ -1473,42 +1730,83 @@ EXECUTION REQUIREMENTS:
 }
 
 /**
- * Builds dynamic card count instructions for specific elements
+ * Enhanced card count instructions using comprehensive registry
  */
-function buildCardCountInstructions(cardCounts: any, elementsMap: any): string {
+function buildCardCountInstructions(
+  strategyCounts: Record<string, number>,
+  elementsMap: Record<string, SectionInfo>,
+  userFeatureCount?: number
+): string {
   const instructions: string[] = [];
+  let totalCards = 0;
 
-  Object.entries(elementsMap).forEach(([sectionId, section]: [string, any]) => {
-    const { sectionType } = section;
+  Object.entries(elementsMap).forEach(([sectionId, section]) => {
+    const { layoutName, sectionType } = section;
+    const cardCount = getCardCount(layoutName, sectionId, strategyCounts, userFeatureCount);
 
-    // Map section types to card count fields
-    const cardCountMapping: Record<string, string> = {
-      'Features': 'features',
-      'Testimonials': 'testimonials',
-      'FAQ': 'faq',
-      'Results': 'results',
-      'SocialProof': 'social_proof',
-      'Pricing': 'pricing',
-      'Problem': 'problem',
-      'Comparison': 'comparison'
-    };
-
-    const cardCountField = cardCountMapping[sectionType];
-    if (cardCountField && cardCounts[cardCountField]) {
-      const count = cardCounts[cardCountField];
-      instructions.push(`${sectionType} section: Generate exactly ${count} cards`);
-
-      // Add specific element instructions for features
-      if (sectionType === 'Features') {
-        instructions.push(`- feature_titles: Must contain exactly ${count} pipe-separated titles`);
-        instructions.push(`- feature_descriptions: Must contain exactly ${count} pipe-separated descriptions`);
-      }
+    if (cardCount > 0) {
+      instructions.push(`${sectionType} section: Generate exactly ${cardCount} cards`);
+      totalCards += cardCount;
     }
   });
 
   return instructions.length > 0
-    ? `CRITICAL CARD COUNT INSTRUCTIONS:\n${instructions.join('\n')}`
+    ? `CARD COUNT INSTRUCTIONS:\n${instructions.join('\n')}\n\nTotal cards to generate: ${totalCards}`
     : '';
+}
+
+/**
+ * Builds element-specific instructions based on section type and layout
+ */
+function buildElementSpecificInstructions(sectionId: string, sectionType: string, layoutName: string, cardCount: number): string[] {
+  const instructions: string[] = [];
+
+  // Get AI-generated elements from schema
+  const aiElements = getAIGeneratedElements(layoutName);
+  if (aiElements.length === 0) {
+    return instructions;
+  }
+
+  // Find elements that need card-based generation using schema
+  const cardBasedElements = aiElements.filter(el => el.isCard || isCardElement(el.element, layoutName));
+
+  cardBasedElements.forEach(el => {
+    if (el.element.includes('titles') || el.element.includes('names')) {
+      instructions.push(`${el.element}: Must contain exactly ${cardCount} pipe-separated titles`);
+    } else if (el.element.includes('descriptions') || el.element.includes('quotes')) {
+      instructions.push(`${el.element}: Must contain exactly ${cardCount} pipe-separated descriptions`);
+    } else if (el.element.includes('questions')) {
+      instructions.push(`${el.element}: Must contain exactly ${cardCount} pipe-separated questions`);
+    } else if (el.element.includes('answers')) {
+      instructions.push(`${el.element}: Must contain exactly ${cardCount} pipe-separated answers`);
+    } else {
+      instructions.push(`${el.element}: Must contain exactly ${cardCount} pipe-separated items`);
+    }
+  });
+
+  // Section-specific instructions
+  switch (sectionType) {
+    case 'Features':
+      if (cardBasedElements.some(el => el.element.includes('feature'))) {
+        instructions.push(`Use ALL ${cardCount} features from KEY FEATURES & BENEFITS section`);
+        instructions.push(`Match feature titles with their corresponding benefits`);
+      }
+      break;
+    case 'Testimonials':
+      instructions.push(`Generate ${cardCount} distinct testimonials with varied customer profiles`);
+      break;
+    case 'FAQ':
+      instructions.push(`Cover ${cardCount} most important objections and questions`);
+      break;
+    case 'Results':
+      instructions.push(`Generate ${cardCount} compelling metrics/statistics`);
+      break;
+    case 'Pricing':
+      instructions.push(`Generate ${cardCount} pricing tiers with distinct value propositions`);
+      break;
+  }
+
+  return instructions;
 }
 
 /**
@@ -1535,7 +1833,8 @@ export function buildStrategicCopyPrompt(
   pageStore: PageStore | any,
   strategy: ParsedStrategy
 ): string {
-  const elementsMap = getCompleteElementsMap(onboardingStore, pageStore);
+  const elementsMap = buildElementsMap(pageStore);
+  const userFeatureCount = onboardingStore.featuresFromAI?.length;
 
   const businessContext = buildBusinessContext(onboardingStore, pageStore);
   const brandContext = buildBrandContext(onboardingStore);
@@ -1543,10 +1842,10 @@ export function buildStrategicCopyPrompt(
   const strategicContext = buildStrategicContext(strategy);
   const layoutContext = buildLayoutContext(elementsMap);
   const sectionFlowContext = buildSectionFlowContext(elementsMap, pageStore);
-  const cardCountInstructions = buildCardCountInstructions(strategy.cardCounts, elementsMap);
+  const cardCountInstructions = buildCardCountInstructions(strategy.cardCounts, elementsMap, userFeatureCount);
   const fieldClassificationGuidance = buildFieldClassificationGuidance(elementsMap);
   const featureMappingInstructions = buildFeatureMappingInstructions(onboardingStore, elementsMap);
-  const outputFormat = buildStrategicOutputFormat(elementsMap, strategy.cardCounts);
+  const outputFormat = buildStrategicOutputFormat(elementsMap, strategy.cardCounts, userFeatureCount);
 
   return `You are an expert copywriter executing a strategic copy plan for maximum conversion.
 
@@ -1582,41 +1881,379 @@ Execute the strategic copy plan and generate conversion-optimized content now.`;
 }
 
 /**
- * Builds output format with strategic card count specifications
+ * Enhanced output format using comprehensive registry and layout schemas
  */
-function buildStrategicOutputFormat(elementsMap: any, cardCounts: any): string {
+function buildStrategicOutputFormat(
+  elementsMap: Record<string, SectionInfo>,
+  strategyCounts: Record<string, number>,
+  userFeatureCount?: number
+): string {
   const formatExample: Record<string, any> = {};
+  const cardCountSummary: string[] = [];
 
-  Object.entries(elementsMap).forEach(([sectionId, section]: [string, any]) => {
-    const elementFormat: Record<string, string> = {};
+  Object.entries(elementsMap).forEach(([sectionId, section]) => {
+    const elementFormat: Record<string, any> = {};
+    const { layoutName } = section;
 
-    section.allElements.forEach((element: string) => {
-      // Try to get card count for this section type
-      const sectionTypeMapping: Record<string, string> = {
-        'Features': 'features',
-        'Testimonials': 'testimonials',
-        'FAQ': 'faq',
-        'Results': 'results',
-        'SocialProof': 'social_proof',
-        'Pricing': 'pricing',
-        'Problem': 'problem',
-        'Comparison': 'comparison'
-      };
+    // Get only AI-generated elements from schema
+    const aiElements = getAIGeneratedElements(layoutName);
 
-      const cardCountField = sectionTypeMapping[(section as any).sectionType];
-      const cardCount = cardCountField ? cardCounts[cardCountField] : undefined;
+    // Get card count using strategy
+    const cardCount = getCardCount(layoutName, sectionId, strategyCounts, userFeatureCount);
 
-      elementFormat[element] = getStrategicElementFormatGuidance(element, cardCount);
+    aiElements.forEach(({ element, isCard }) => {
+      if (isCard && cardCount > 0) {
+        // Create array placeholder for card elements
+        const placeholders = Array.from({ length: cardCount }, (_, i) => `${element.charAt(0).toUpperCase() + element.slice(1)} ${i + 1}`);
+        elementFormat[element] = placeholders;
+      } else if (!isCard) {
+        // Single element format guidance
+        elementFormat[element] = getElementFormatGuidance(element);
+      }
     });
 
-    formatExample[sectionId] = elementFormat;
+    if (Object.keys(elementFormat).length > 0) {
+      formatExample[sectionId] = elementFormat;
+
+      // Add to summary if has cards
+      if (cardCount > 0) {
+        cardCountSummary.push(`${sectionId}: Generate exactly ${cardCount} cards`);
+      }
+    }
   });
 
+  const constraintText = cardCountSummary.length > 0
+    ? `\nCARD COUNT REQUIREMENTS:\n${cardCountSummary.join('\n')}\n`
+    : '';
+
   return `OUTPUT FORMAT:
-Return a valid JSON object with this exact structure where each key is a section ID and contains the required elements:
+Return a valid JSON object with this exact structure where each key is a section ID and contains ONLY the AI-generated elements:
 
-${JSON.stringify(formatExample, null, 2)}
+${JSON.stringify(formatExample, null, 2)}${constraintText}
+IMPORTANT STRATEGIC EXECUTION RULES:
+- Generate strategic copy that executes the provided strategy
+- For array elements, generate exactly the number of items shown
+- For single elements, generate copy aligned with strategic objectives
+- All copy must serve the strategic goals and card count specifications
+- Maintain consistency between related elements (titles and descriptions)
+- Focus on conversion optimization and strategic coherence`;
+}
 
-IMPORTANT: The above shows the structure. Replace example values with actual strategic copy that executes the plan.
-CRITICAL: Generate exactly the specified number of cards for each section as outlined in the strategic requirements.`;
+/**
+ * Enhanced element format guidance with layout schema integration
+ */
+function getEnhancedElementFormatGuidance(element: string, cardCount: number, sectionType: string, layoutName: string): string {
+  // Check if this is a card-based element
+  const isCardBased = element.includes('titles') || element.includes('descriptions') ||
+                     element.includes('questions') || element.includes('answers') ||
+                     element.includes('names') || element.includes('quotes') ||
+                     element.includes('stats') || element.includes('metrics') ||
+                     element.includes('features') || element.includes('benefits') ||
+                     element.includes('problems') || element.includes('solutions');
+
+  if (isCardBased) {
+    // Generate pipe-separated placeholder based on card count
+    const items = Array.from({length: cardCount}, (_, i) => {
+      if (element.includes('titles') || element.includes('names')) {
+        return `Title ${i + 1}`;
+      } else if (element.includes('descriptions')) {
+        return `Description for item ${i + 1}`;
+      } else if (element.includes('questions')) {
+        return `Question ${i + 1}?`;
+      } else if (element.includes('answers')) {
+        return `Answer to question ${i + 1}`;
+      } else if (element.includes('stats') || element.includes('metrics')) {
+        return `${(i + 1) * 100}%`;
+      } else {
+        return `Item ${i + 1}`;
+      }
+    });
+
+    return items.join('|');
+  }
+
+  // Single value elements - use enhanced guidance
+  return getEnhancedSingleElementGuidance(element, sectionType, layoutName);
+}
+
+/**
+ * Enhanced guidance for single-value elements
+ */
+function getEnhancedSingleElementGuidance(element: string, sectionType: string, layoutName: string): string {
+  // Headlines and titles
+  if (element.includes('headline') || element === 'headline') {
+    return "One powerful sentence, 5-12 words that captures the core value proposition";
+  }
+
+  // Subheadlines
+  if (element.includes('subheadline') || element === 'subheadline') {
+    return "Supporting sentence that clarifies or expands the main headline, 8-15 words";
+  }
+
+  // CTA elements
+  if (element.includes('cta') || element.includes('_cta')) {
+    return "Action phrase, 2-4 words (e.g., \"Get Started Now\", \"Try Free\", \"Book Demo\")";
+  }
+
+  // Supporting text
+  if (element.includes('supporting_text') || element.includes('description')) {
+    return "1-2 sentences that provide context or explanation, 15-30 words";
+  }
+
+  // Trust elements
+  if (element.includes('trust')) {
+    return "Trust signal or social proof element, brief and credible";
+  }
+
+  // Icons and visuals
+  if (element.includes('icon')) {
+    return "Icon identifier or description";
+  }
+
+  // Labels
+  if (element.includes('label')) {
+    return "Short descriptive label, 1-3 words";
+  }
+
+  // Section-specific elements
+  switch (sectionType) {
+    case 'Pricing':
+      if (element.includes('price')) {
+        return "Price value (e.g., \"$29/month\", \"Free\")";
+      }
+      if (element.includes('currency')) {
+        return "Currency symbol (e.g., \"$\", \"€\")";
+      }
+      break;
+    case 'Results':
+      if (element.includes('metric') || element.includes('stat')) {
+        return "Numerical value with unit (e.g., \"150%\", \"2.5x\", \"30 days\")";
+      }
+      break;
+  }
+
+  // Default guidance
+  return "Appropriate content for this element based on section context";
+}
+
+// =============================================================================
+// VALIDATION AND DEBUGGING UTILITIES
+// =============================================================================
+
+/**
+ * Validates generated JSON against card requirements
+ */
+export function validateGeneratedJSON(
+  jsonOutput: Record<string, any>,
+  elementsMap: any,
+  cardCounts: Record<string, number>,
+  userFeatureCount?: number
+): {
+  isValid: boolean;
+  errors: string[];
+  warnings: string[];
+  summary: string;
+} {
+  const errors: string[] = [];
+  const warnings: string[] = [];
+  const cardInfo = getAllSectionCardInfo(elementsMap, cardCounts, userFeatureCount);
+
+  // Check each section in the JSON output
+  Object.entries(jsonOutput).forEach(([sectionId, sectionData]) => {
+    const info = cardInfo[sectionId];
+    if (!info) {
+      warnings.push(`Section ${sectionId} not found in card requirements`);
+      return;
+    }
+
+    if (!info.cardRequirements) {
+      // No card requirements for this section
+      return;
+    }
+
+    // Check AI-generated elements only
+    const aiElements = getAIGeneratedElements(info.layoutName);
+    if (aiElements.length > 0) {
+      aiElements.forEach(el => {
+        const element = el.element;
+        const elementValue = sectionData[element];
+
+        if (el.mandatory && !elementValue) {
+          errors.push(`${sectionId}.${element}: Mandatory element missing`);
+          return;
+        }
+
+        // Check card count for multi-card elements using schema
+        const isCardBased = el.isCard || isCardElement(element, info.layoutName);
+
+        if (isCardBased && elementValue) {
+          // For sections with card requirements = 1, pipe-separated content is expected within that single card
+          // Only validate card count for sections that expect multiple cards
+          if (info.recommendedCount > 1) {
+            const cardCount = typeof elementValue === 'string' ?
+              elementValue.split('|').length :
+              Array.isArray(elementValue) ? elementValue.length : 1;
+
+            if (cardCount !== info.recommendedCount) {
+              errors.push(`${sectionId}.${element}: Expected ${info.recommendedCount} cards, got ${cardCount}`);
+            }
+          } else {
+            // For single-card sections (like ProcessFlowDiagram), pipe-separated content is part of that single card
+            const pipeCount = typeof elementValue === 'string' ? elementValue.split('|').length : 1;
+            logger.debug(`✅ Single-card section validation passed for ${sectionId}.${element}: Contains ${pipeCount} pipe-separated items within 1 card/block`);
+          }
+        }
+      });
+    }
+  });
+
+  // Check for missing sections
+  Object.keys(cardInfo).forEach(sectionId => {
+    if (!jsonOutput[sectionId]) {
+      errors.push(`Missing section: ${sectionId}`);
+    }
+  });
+
+  const totalExpectedCards = Object.values(cardInfo)
+    .filter(info => info.cardRequirements)
+    .reduce((sum, info) => sum + info.recommendedCount, 0);
+
+  const summary = `Validation Summary: ${errors.length} errors, ${warnings.length} warnings. Expected ${totalExpectedCards} total cards across ${Object.keys(cardInfo).length} sections.`;
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+    warnings,
+    summary
+  };
+}
+
+/**
+ * Generates debugging report for card requirements and JSON generation
+ */
+export function generateCardRequirementsReport(
+  elementsMap: any,
+  cardCounts: Record<string, number>,
+  userFeatureCount?: number
+): string {
+  const cardInfo = getAllSectionCardInfo(elementsMap, cardCounts, userFeatureCount);
+  const validationErrors = validateCardCounts(cardInfo);
+
+  let report = "=== CARD REQUIREMENTS DEBUG REPORT ===\n\n";
+
+  // Registry coverage summary
+  const sectionsWithRequirements = Object.values(cardInfo).filter(info => info.cardRequirements).length;
+  const totalSections = Object.keys(cardInfo).length;
+  report += `COVERAGE: ${sectionsWithRequirements}/${totalSections} sections have card requirements\n\n`;
+
+  // Section details
+  report += "SECTION DETAILS:\n";
+  Object.values(cardInfo).forEach(info => {
+    report += `\n${info.sectionId} (${info.sectionType}.${info.layoutName}):\n`;
+    if (info.cardRequirements) {
+      report += `  Card Requirements: ${info.cardRequirements.min}-${info.cardRequirements.max} ${info.cardRequirements.type}\n`;
+      report += `  Optimal Range: ${info.cardRequirements.optimal.join('-')}\n`;
+      report += `  Recommended Count: ${info.recommendedCount}\n`;
+      report += `  Description: ${info.cardRequirements.description}\n`;
+    } else {
+      report += `  No card requirements (single layout section)\n`;
+    }
+  });
+
+  // Strategy mapping analysis
+  report += "\n\nSTRATEGY MAPPING:\n";
+  Object.entries(cardCounts).forEach(([key, count]) => {
+    const mappedSections = Object.values(cardInfo).filter(info => {
+      // Check if this strategy key maps to this section
+      for (const [strategyKey, sectionIds] of Object.entries(strategyToSectionMapping)) {
+        if (strategyKey === key && sectionIds.includes(info.sectionId)) {
+          return true;
+        }
+      }
+      return key === info.sectionId;
+    });
+
+    report += `  ${key}: ${count} → mapped to ${mappedSections.map(s => s.sectionId).join(', ')}\n`;
+  });
+
+  // Validation errors
+  if (validationErrors.length > 0) {
+    report += "\n\nVALIDATION ERRORS:\n";
+    validationErrors.forEach(error => {
+      report += `  ❌ ${error}\n`;
+    });
+  }
+
+  // User feature handling
+  if (userFeatureCount) {
+    report += `\n\nUSER FEATURES: ${userFeatureCount} features provided\n`;
+    const featuresSection = cardInfo['features'];
+    if (featuresSection) {
+      report += `  Features section recommended count: ${featuresSection.recommendedCount}\n`;
+      if (featuresSection.cardRequirements?.respectUserContent) {
+        report += `  ✅ User content priority enabled\n`;
+      }
+    }
+  }
+
+  report += "\n=== END REPORT ===";
+
+  return report;
+}
+
+/**
+ * Helper function to debug card count determination
+ */
+export function debugCardCountDetermination(
+  sectionId: string,
+  layoutName: string,
+  strategyCounts: Record<string, number>
+): {
+  sectionType: string;
+  cardRequirements: CardRequirements | null;
+  strategyCount: number | undefined;
+  finalCount: number;
+  reasoning: string[];
+} {
+  const sectionType = sectionTypeMapping[sectionId] || 'Unknown';
+  const cardRequirements = getEnhancedCardRequirements(sectionId, layoutName);
+  const reasoning: string[] = [];
+
+  reasoning.push(`Section: ${sectionId} → Type: ${sectionType} → Layout: ${layoutName}`);
+
+  // Strategy count lookup
+  let strategyCount: number | undefined;
+  if (strategyCounts[sectionId] !== undefined) {
+    strategyCount = strategyCounts[sectionId];
+    reasoning.push(`Found direct strategy count: ${strategyCount}`);
+  } else {
+    for (const [strategyKey, sectionIds] of Object.entries(strategyToSectionMapping)) {
+      if (sectionIds.includes(sectionId) && strategyCounts[strategyKey] !== undefined) {
+        strategyCount = strategyCounts[strategyKey];
+        reasoning.push(`Found mapped strategy count: ${strategyKey} → ${strategyCount}`);
+        break;
+      }
+    }
+    if (strategyCount === undefined) {
+      reasoning.push(`No strategy count found`);
+    }
+  }
+
+  const finalCount = determineOptimalCardCount(sectionId, layoutName, strategyCounts);
+
+  if (cardRequirements) {
+    reasoning.push(`Card requirements: min=${cardRequirements.min}, max=${cardRequirements.max}, optimal=${cardRequirements.optimal.join('-')}`);
+    reasoning.push(`Final count: ${finalCount} (within constraints)`);
+  } else {
+    reasoning.push(`No card requirements - using strategy count or default`);
+    reasoning.push(`Final count: ${finalCount}`);
+  }
+
+  return {
+    sectionType,
+    cardRequirements,
+    strategyCount,
+    finalCount,
+    reasoning
+  };
 }

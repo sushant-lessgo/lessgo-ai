@@ -12,7 +12,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # Development server
 npm run dev
 
-# Build for production  
+# Build for production
 npm run build
 
 # Start production server
@@ -24,6 +24,33 @@ npm run lint
 # Database operations (run automatically on install)
 npm run postinstall  # Runs: prisma generate && prisma migrate deploy
 ```
+
+## Debug Environment Variables
+
+For enhanced AI debugging and troubleshooting, set these environment variables in your `.env.local` file:
+
+```bash
+# AI Debug Controls
+DEBUG_AI_PROMPTS=true     # Log full AI prompts (strategy + copy generation)
+DEBUG_AI_RESPONSES=true   # Log full AI responses with detailed analysis
+
+# Default behavior (when not set or false):
+# - Prompts are logged with smart truncation (~800 chars)
+# - Responses are logged with smart truncation (~1000 chars)
+# - All prompt/response metadata is still logged (length, sections, usage, etc.)
+```
+
+**Debug Output Features:**
+- **Prompt Debugging**: Full strategy and copy generation prompts with metadata
+- **Response Analysis**: Token usage, content length, parsing steps
+- **Card Requirements**: Detailed reports on UIBlock constraints and mappings
+- **JSON Validation**: Step-by-step parsing and validation with error context
+- **Strategy Mapping**: Card count determination and constraint application
+
+**Recommended Usage:**
+- Enable for debugging specific AI generation issues
+- Disable in production due to log volume
+- Use in combination with backend log analysis tools
 
 ## Architecture Overview
 

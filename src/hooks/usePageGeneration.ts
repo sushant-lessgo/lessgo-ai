@@ -293,6 +293,19 @@ export function usePageGeneration(tokenId: string) {
     isPartial: boolean
   }> => {
     try {
+      // Extract layout requirements for card count strategy
+      const { getLayoutRequirements } = await import('@/modules/sections/getLayoutRequirements');
+      const layoutRequirements = getLayoutRequirements(
+        sections,
+        layouts,
+        onboardingStore.featuresFromAI?.length || 0
+      );
+
+      logger.debug('📋 Layout requirements extracted:', {
+        sectionsWithRequirements: layoutRequirements.sections.length,
+        userFeatures: layoutRequirements.userProvidedFeatures
+      });
+
       // Prepare page store with sections and layouts
       const tempPageStore = {
         layout: {
@@ -316,7 +329,8 @@ export function usePageGeneration(tokenId: string) {
         sections: tempPageStore.layout.sections,
         layouts: tempPageStore.layout.sectionLayouts,
         featuresCount: onboardingStore.featuresFromAI?.length || 0,
-        oneLiner: onboardingStore.oneLiner
+        oneLiner: onboardingStore.oneLiner,
+        layoutRequirements: layoutRequirements.sections.map(s => `${s.layoutName}: ${s.cardRequirements?.min}-${s.cardRequirements?.max} ${s.cardRequirements?.type}`)
       }));
 
       // Call AI API with 2-phase approach
@@ -330,6 +344,7 @@ export function usePageGeneration(tokenId: string) {
         body: JSON.stringify({
           onboardingStore,
           pageStore: tempPageStore,
+          layoutRequirements, // Pass layout requirements to API
           use2Phase: true
         })
       });

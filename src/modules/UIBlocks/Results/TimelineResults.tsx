@@ -15,7 +15,7 @@ interface TimelineMilestone {
   timeframe: string;
   title: string;
   description: string;
-  metric?: string;
+  metric: string;
   id: string;
 }
 
@@ -25,7 +25,7 @@ interface TimelineResultsContent {
   timeframes: string;
   titles: string;
   descriptions: string;
-  metrics?: string;
+  metrics: string;
   subheadline?: string;
   timeline_period?: string;
   metric_icon?: string;
@@ -56,19 +56,19 @@ const parseTimelineData = (
   timeframes: string,
   titles: string,
   descriptions: string,
-  metrics?: string
+  metrics: string
 ): TimelineMilestone[] => {
   const timeframeList = timeframes.split('|').map(t => t.trim()).filter(t => t);
   const titleList = titles.split('|').map(t => t.trim()).filter(t => t);
   const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
-  const metricList = metrics ? metrics.split('|').map(m => m.trim()).filter(m => m) : [];
+  const metricList = metrics.split('|').map(m => m.trim()).filter(m => m);
 
   return timeframeList.map((timeframe, index) => ({
     id: `milestone-${index}`,
     timeframe,
     title: titleList[index] || 'Milestone',
     description: descriptionList[index] || 'Great progress made',
-    metric: metricList[index] || undefined
+    metric: metricList[index] || 'Progress'
   }));
 };
 
@@ -77,12 +77,12 @@ const addTimelineMilestone = (
   timeframes: string,
   titles: string,
   descriptions: string,
-  metrics?: string
+  metrics: string
 ): { newTimeframes: string; newTitles: string; newDescriptions: string; newMetrics: string } => {
   const timeframeList = timeframes.split('|').map(t => t.trim()).filter(t => t);
   const titleList = titles.split('|').map(t => t.trim()).filter(t => t);
   const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
-  const metricList = metrics ? metrics.split('|').map(m => m.trim()).filter(m => m) : [];
+  const metricList = metrics.split('|').map(m => m.trim()).filter(m => m);
 
   // Add new milestone with default content
   timeframeList.push('New timeframe');
@@ -103,13 +103,13 @@ const removeTimelineMilestone = (
   timeframes: string,
   titles: string,
   descriptions: string,
-  metrics: string | undefined,
+  metrics: string,
   indexToRemove: number
 ): { newTimeframes: string; newTitles: string; newDescriptions: string; newMetrics: string } => {
   const timeframeList = timeframes.split('|').map(t => t.trim()).filter(t => t);
   const titleList = titles.split('|').map(t => t.trim()).filter(t => t);
   const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
-  const metricList = metrics ? metrics.split('|').map(m => m.trim()).filter(m => m) : [];
+  const metricList = metrics.split('|').map(m => m.trim()).filter(m => m);
 
   // Remove the milestone at the specified index
   if (indexToRemove >= 0 && indexToRemove < timeframeList.length) {
@@ -244,38 +244,36 @@ const TimelineMilestone = ({
           )}
         </div>
 
-        {/* Optional Metric */}
-        {(milestone.metric || mode === 'edit') && (
-          <div className="inline-flex items-center px-4 py-2 bg-green-50 border border-green-200 rounded-lg">
-            <IconEditableText
-              mode={mode}
-              value={metricIcon || '📈'}
-              onEdit={onMetricIconEdit}
-              backgroundType="neutral"
-              colorTokens={colorTokens}
-              iconSize="sm"
-              className="text-green-600 text-sm mr-2"
-              sectionId={sectionId}
-              elementKey="metric_icon"
-            />
-            {mode !== 'preview' ? (
-              <div
-                contentEditable
-                suppressContentEditableWarning
-                onBlur={(e) => onMetricEdit(index, e.currentTarget.textContent || '')}
-                className={`outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[20px] cursor-text font-semibold text-green-800 ${!milestone.metric ? 'opacity-50 italic' : ''}`}
-              >
-                {milestone.metric || 'Add metric...'}
-              </div>
-            ) : milestone.metric && (
-              <span
-                className="font-semibold text-green-800"
-              >
-                {milestone.metric}
-              </span>
-            )}
-          </div>
-        )}
+        {/* Metric */}
+        <div className="inline-flex items-center px-4 py-2 bg-green-50 border border-green-200 rounded-lg">
+          <IconEditableText
+            mode={mode}
+            value={metricIcon || '📈'}
+            onEdit={onMetricIconEdit}
+            backgroundType="neutral"
+            colorTokens={colorTokens}
+            iconSize="sm"
+            className="text-green-600 text-sm mr-2"
+            sectionId={sectionId}
+            elementKey="metric_icon"
+          />
+          {mode !== 'preview' ? (
+            <div
+              contentEditable
+              suppressContentEditableWarning
+              onBlur={(e) => onMetricEdit(index, e.currentTarget.textContent || '')}
+              className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[20px] cursor-text font-semibold text-green-800"
+            >
+              {milestone.metric || 'Add metric...'}
+            </div>
+          ) : (
+            <span
+              className="font-semibold text-green-800"
+            >
+              {milestone.metric}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Delete button - only show in edit mode and if can remove */}
@@ -318,7 +316,7 @@ export default function TimelineResults(props: TimelineResultsProps) {
     blockContent.timeframes,
     blockContent.titles,
     blockContent.descriptions,
-    blockContent.metrics
+    blockContent.metrics || ''
   );
 
   // Handle individual editing
@@ -352,7 +350,7 @@ export default function TimelineResults(props: TimelineResultsProps) {
       blockContent.timeframes,
       blockContent.titles,
       blockContent.descriptions,
-      blockContent.metrics
+      blockContent.metrics || ''
     );
     handleContentUpdate('timeframes', newTimeframes);
     handleContentUpdate('titles', newTitles);
@@ -366,7 +364,7 @@ export default function TimelineResults(props: TimelineResultsProps) {
       blockContent.timeframes,
       blockContent.titles,
       blockContent.descriptions,
-      blockContent.metrics,
+      blockContent.metrics || '',
       indexToRemove
     );
     handleContentUpdate('timeframes', newTimeframes);
@@ -482,9 +480,10 @@ export default function TimelineResults(props: TimelineResultsProps) {
           </div>
         )}
 
-        {/* Success Indicator */}
-        <div className="mt-12 text-center">
-          <div className="inline-flex items-center px-6 py-4 bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-2xl">
+        {/* Success Indicator - only show if content exists or in edit mode */}
+        {(blockContent.success_title || blockContent.success_subtitle || mode === 'edit') && (
+          <div className="mt-12 text-center">
+            <div className="inline-flex items-center px-6 py-4 bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-2xl">
             <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-green-600 rounded-full flex items-center justify-center mr-4">
               <IconEditableText
                 mode={mode}
@@ -526,7 +525,8 @@ export default function TimelineResults(props: TimelineResultsProps) {
               )}
             </div>
           </div>
-        </div>
+          </div>
+        )}
 
       </div>
     </section>
@@ -558,7 +558,7 @@ export const componentMeta = {
     timeframes: 'Pipe-separated list of time periods',
     titles: 'Pipe-separated list of milestone titles',
     descriptions: 'Pipe-separated list of milestone descriptions',
-    metrics: 'Optional pipe-separated list of metrics for each milestone',
+    metrics: 'Pipe-separated list of metrics for each milestone',
     subheadline: 'Optional subheading for context',
     timeline_period: 'Optional overall timeline period description',
     success_title: 'Success guarantee title text',
