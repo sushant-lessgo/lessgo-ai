@@ -1,6 +1,7 @@
 // modules/prompt/buildPrompt.ts - ✅ PHASE 4: API Layer Migration Complete
 import { getCompleteElementsMap, getSectionElementRequirements, mapStoreToVariables } from '../sections/elementDetermination'
 import { classifyFieldsForSection, getGenerationStrategy } from '../generation/fieldClassification'
+import type { ParsedStrategy } from './parseStrategyResponse'
 
 import type {
   InputVariables,
@@ -1440,4 +1441,182 @@ function getSpecificElementGuidance(elementName: string, sectionType: string): s
   }
 
   return guidance;
+}
+
+/**
+ * Builds strategic context section for copy execution
+ */
+function buildStrategicContext(strategy: ParsedStrategy): string {
+  const { copyStrategy, cardCounts, reasoning } = strategy;
+
+  return `STRATEGIC FOUNDATION FOR COPY EXECUTION:
+
+BIG IDEA: ${copyStrategy.bigIdea}
+CORE PROMISE: ${copyStrategy.corePromise}
+UNIQUE MECHANISM: ${copyStrategy.uniqueMechanism}
+PRIMARY EMOTIONAL TRIGGER: ${copyStrategy.primaryEmotion}
+OBJECTION PRIORITY: ${copyStrategy.objectionPriority.join(' → ')}
+
+STRATEGIC CARD COUNT SPECIFICATIONS:
+${Object.entries(cardCounts).map(([section, count]) =>
+  `- ${section}: ${count} cards (${reasoning[section] || 'Strategic requirement'})`
+).join('\n')}
+
+EXECUTION REQUIREMENTS:
+- Every section must reinforce the big idea: "${copyStrategy.bigIdea}"
+- All copy must serve the core promise: "${copyStrategy.corePromise}"
+- Features and mechanisms must prove: "${copyStrategy.uniqueMechanism}"
+- Emotional triggers must focus on: "${copyStrategy.primaryEmotion}"
+- Objection handling must prioritize: ${copyStrategy.objectionPriority.join(', ')}
+- Generate EXACTLY the specified number of cards for each section
+- Maintain strategic coherence across all sections`;
+}
+
+/**
+ * Builds dynamic card count instructions for specific elements
+ */
+function buildCardCountInstructions(cardCounts: any, elementsMap: any): string {
+  const instructions: string[] = [];
+
+  Object.entries(elementsMap).forEach(([sectionId, section]: [string, any]) => {
+    const { sectionType } = section;
+
+    // Map section types to card count fields
+    const cardCountMapping: Record<string, string> = {
+      'Features': 'features',
+      'Testimonials': 'testimonials',
+      'FAQ': 'faq',
+      'Results': 'results',
+      'SocialProof': 'social_proof',
+      'Pricing': 'pricing',
+      'Problem': 'problem',
+      'Comparison': 'comparison'
+    };
+
+    const cardCountField = cardCountMapping[sectionType];
+    if (cardCountField && cardCounts[cardCountField]) {
+      const count = cardCounts[cardCountField];
+      instructions.push(`${sectionType} section: Generate exactly ${count} cards`);
+
+      // Add specific element instructions for features
+      if (sectionType === 'Features') {
+        instructions.push(`- feature_titles: Must contain exactly ${count} pipe-separated titles`);
+        instructions.push(`- feature_descriptions: Must contain exactly ${count} pipe-separated descriptions`);
+      }
+    }
+  });
+
+  return instructions.length > 0
+    ? `CRITICAL CARD COUNT INSTRUCTIONS:\n${instructions.join('\n')}`
+    : '';
+}
+
+/**
+ * Enhanced element format guidance with dynamic card counts
+ */
+function getStrategicElementFormatGuidance(element: string, cardCount?: number): string {
+  // Use dynamic card count if provided
+  if (cardCount && (element.includes('titles') || element.includes('descriptions') ||
+                   element.includes('questions') || element.includes('answers') ||
+                   element.includes('names') || element.includes('quotes'))) {
+    const placeholder = Array.from({length: cardCount}, (_, i) => `Item ${i + 1}`);
+    return JSON.stringify(placeholder);
+  }
+
+  // Fall back to original logic
+  return getElementFormatGuidance(element);
+}
+
+/**
+ * Builds strategic copy prompt that executes the provided strategy
+ */
+export function buildStrategicCopyPrompt(
+  onboardingStore: OnboardingStore,
+  pageStore: PageStore | any,
+  strategy: ParsedStrategy
+): string {
+  const elementsMap = getCompleteElementsMap(onboardingStore, pageStore);
+
+  const businessContext = buildBusinessContext(onboardingStore, pageStore);
+  const brandContext = buildBrandContext(onboardingStore);
+  const categoryContext = buildCategoryContext(onboardingStore);
+  const strategicContext = buildStrategicContext(strategy);
+  const layoutContext = buildLayoutContext(elementsMap);
+  const sectionFlowContext = buildSectionFlowContext(elementsMap, pageStore);
+  const cardCountInstructions = buildCardCountInstructions(strategy.cardCounts, elementsMap);
+  const fieldClassificationGuidance = buildFieldClassificationGuidance(elementsMap);
+  const featureMappingInstructions = buildFeatureMappingInstructions(onboardingStore, elementsMap);
+  const outputFormat = buildStrategicOutputFormat(elementsMap, strategy.cardCounts);
+
+  return `You are an expert copywriter executing a strategic copy plan for maximum conversion.
+
+${businessContext}
+
+${brandContext}
+${categoryContext}
+
+${strategicContext}
+
+${layoutContext}
+
+${sectionFlowContext}
+
+${cardCountInstructions}
+
+${fieldClassificationGuidance}
+${featureMappingInstructions}
+
+COPYWRITING EXECUTION REQUIREMENTS:
+- Execute the strategic plan with absolute precision
+- Generate EXACTLY the specified number of cards for each section
+- Every piece of copy must reinforce the big idea and core promise
+- Address objections in the specified priority order
+- Maintain the strategic emotional trigger throughout
+- Create cohesive flow that serves the conversion goal
+- Use layout context to optimize copy for visual presentation
+- For manual-preferred fields, use realistic placeholder data
+
+${outputFormat}
+
+Execute the strategic copy plan and generate conversion-optimized content now.`;
+}
+
+/**
+ * Builds output format with strategic card count specifications
+ */
+function buildStrategicOutputFormat(elementsMap: any, cardCounts: any): string {
+  const formatExample: Record<string, any> = {};
+
+  Object.entries(elementsMap).forEach(([sectionId, section]: [string, any]) => {
+    const elementFormat: Record<string, string> = {};
+
+    section.allElements.forEach((element: string) => {
+      // Try to get card count for this section type
+      const sectionTypeMapping: Record<string, string> = {
+        'Features': 'features',
+        'Testimonials': 'testimonials',
+        'FAQ': 'faq',
+        'Results': 'results',
+        'SocialProof': 'social_proof',
+        'Pricing': 'pricing',
+        'Problem': 'problem',
+        'Comparison': 'comparison'
+      };
+
+      const cardCountField = sectionTypeMapping[(section as any).sectionType];
+      const cardCount = cardCountField ? cardCounts[cardCountField] : undefined;
+
+      elementFormat[element] = getStrategicElementFormatGuidance(element, cardCount);
+    });
+
+    formatExample[sectionId] = elementFormat;
+  });
+
+  return `OUTPUT FORMAT:
+Return a valid JSON object with this exact structure where each key is a section ID and contains the required elements:
+
+${JSON.stringify(formatExample, null, 2)}
+
+IMPORTANT: The above shows the structure. Replace example values with actual strategic copy that executes the plan.
+CRITICAL: Generate exactly the specified number of cards for each section as outlined in the strategic requirements.`;
 }

@@ -6,6 +6,7 @@ interface ParsedResponse {
   isPartial: boolean
   warnings: string[]
   errors: string[]
+  strategy?: any // Optional strategy metadata from 2-phase generation
 }
 
 interface SectionContent {

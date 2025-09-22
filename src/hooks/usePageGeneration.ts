@@ -311,25 +311,27 @@ export function usePageGeneration(tokenId: string) {
         content: {}
       };
 
-      // Build the prompt
-      const prompt = buildFullPrompt(onboardingStore, tempPageStore as any);
-      
-      logger.debug(() => '📝 Sending prompt to API:', () => ({
-        promptLength: prompt.length,
+      // Use 2-phase strategic generation
+      logger.debug(() => '🧠 Starting 2-phase strategic copy generation:', () => ({
         sections: tempPageStore.layout.sections,
         layouts: tempPageStore.layout.sectionLayouts,
-        promptPreview: prompt.substring(0, 500) + '...'
+        featuresCount: onboardingStore.featuresFromAI?.length || 0,
+        oneLiner: onboardingStore.oneLiner
       }));
-      
-      // Call AI API
-      logger.debug('🌐 Making API call to /api/generate-landing');
+
+      // Call AI API with 2-phase approach
+      logger.debug('🌐 Making API call to /api/generate-landing (2-phase)');
       const response = await fetch('/api/generate-landing', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${tokenId}`
         },
-        body: JSON.stringify({ prompt })
+        body: JSON.stringify({
+          onboardingStore,
+          pageStore: tempPageStore,
+          use2Phase: true
+        })
       });
 
       logger.debug('📡 API Response status:', { status: response.status, statusText: response.statusText });

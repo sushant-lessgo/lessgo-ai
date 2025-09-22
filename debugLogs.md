@@ -1,204 +1,329 @@
-[2025-09-21T09:50:21.010Z] DEBUG: 🚀 Starting inference for: GrowOnX Insights – AI assistant for audience growth on X/Twitter...
-[2025-09-21T09:50:23.725Z] DEBUG: ✅ AI inference completed
-[2025-09-21T09:50:23.726Z] INFO: 📤 Raw AI Output: {
-  "marketCategory": "Marketing & Sales Tools",
-  "marketSubcategory": "Social Media Analytics & Growth",
-  "keyProblem": "Businesses aim to grow their audience on social media platforms but lack insights and strategies tailored for effective engagement.",
-  "targetAudience": "Social Media Managers",
+[2025-09-22T07:48:33.409Z] DEBUG: 🚀 Starting inference for: DataStory ChartCraft – An AI service that turns spreadsheets into engaging data stories with suggest...
+[2025-09-22T07:48:36.655Z] DEBUG: ✅ AI inference completed
+[2025-09-22T07:48:36.656Z] INFO: 📤 Raw AI Output: {
+  "marketCategory": "Data & Analytics Tools",
+  "marketSubcategory": "Data Visualization & Storytelling",
+  "keyProblem": "Users find it difficult to translate raw data from spreadsheets into compelling visual narratives that are easy to understand",
+  "targetAudience": "Data Analysts and Business Professionals",
   "startupStage": "MVP",
-  "pricingModel": "Freemium",
-  "landingPageGoals": "Start Growing Your Audience"
+  "pricingModel": "Tiered",
+  "landingPageGoals": "Start Creating Data Stories"
 }
-[2025-09-21T09:50:23.726Z] DEBUG: 🔍 Starting semantic validation...
-[2025-09-21T09:50:23.726Z] INFO: 🔄 Sending to embedding validation: {
-  "marketCategory": "Marketing & Sales Tools",
-  "marketSubcategory": "Social Media Analytics & Growth",
-  "targetAudience": "Social Media Managers"
+[2025-09-22T07:48:36.656Z] DEBUG: 🔍 Starting semantic validation...
+[2025-09-22T07:48:36.656Z] INFO: 🔄 Sending to embedding validation: {
+  "marketCategory": "Data & Analytics Tools",
+  "marketSubcategory": "Data Visualization & Storytelling",
+  "targetAudience": "Data Analysts and Business Professionals"
 }
-[2025-09-21T09:50:23.726Z] DEBUG: 🔍 Starting semantic validation...
-[DEV] 🔑 Generating embedding for: Marketing & Sales Tools...
-[2025-09-21T09:50:24.335Z] DEBUG: ✅ Embedding generated successfully
-[DEV] 🔑 Generating embedding for: Marketing & Sales Tools...
-[2025-09-21T09:50:25.537Z] DEBUG: ✅ Embedding generated successfully
-[DEV] 🔑 Generating embedding for: Social Media Analytics & Growth...
-[DEV] 🔑 Generating embedding for: Social Media Managers...
+[2025-09-22T07:48:36.656Z] DEBUG: 🔍 Starting semantic validation...
+[DEV] 🔑 Generating embedding for: Data & Analytics Tools...
+[2025-09-22T07:48:37.586Z] DEBUG: ✅ Embedding generated successfully
+[DEV] 🔑 Generating embedding for: Data & Analytics Tools...
+[2025-09-22T07:48:39.852Z] DEBUG: ✅ Embedding generated successfully
+[DEV] 🔑 Generating embedding for: Data Visualization & Storytelling...
+[DEV] 🔑 Generating embedding for: Data Analysts and Business Professionals...
 [DEV] 🔑 Generating embedding for: MVP...
-[DEV] 🔑 Generating embedding for: Freemium...
-[DEV] 🔑 Generating embedding for: Start Growing Your Audience...
-[2025-09-21T09:50:25.920Z] DEBUG: ✅ Embedding generated successfully
-[2025-09-21T09:50:25.957Z] DEBUG: ✅ Embedding generated successfully
-[2025-09-21T09:50:26.070Z] DEBUG: ✅ Embedding generated successfully
-[2025-09-21T09:50:26.080Z] DEBUG: ✅ Embedding generated successfully
-[2025-09-21T09:50:26.088Z] DEBUG: ✅ Embedding generated successfully
-[DEV] 🔑 Generating embedding for: Start Growing Your Audience...
-[DEV] 🔑 Generating embedding for: Freemium...
+[DEV] 🔑 Generating embedding for: Tiered...
+[DEV] 🔑 Generating embedding for: Start Creating Data Stories...
+[2025-09-22T07:48:40.292Z] DEBUG: ✅ Embedding generated successfully
+[2025-09-22T07:48:40.336Z] DEBUG: ✅ Embedding generated successfully
+[2025-09-22T07:48:40.350Z] DEBUG: ✅ Embedding generated successfully
+[2025-09-22T07:48:40.358Z] DEBUG: ✅ Embedding generated successfully
+[2025-09-22T07:48:40.427Z] DEBUG: ✅ Embedding generated successfully
 [DEV] 🔑 Generating embedding for: MVP...
-[DEV] 🔑 Generating embedding for: Social Media Managers...
-[2025-09-21T09:50:26.559Z] DEBUG: ✅ Embedding generated successfully
-[2025-09-21T09:50:26.655Z] DEBUG: ✅ Embedding generated successfully
-[2025-09-21T09:50:26.775Z] DEBUG: ✅ Embedding generated successfully
-[2025-09-21T09:50:26.826Z] DEBUG: ✅ Embedding generated successfully
-[2025-09-21T09:50:26.913Z] DEBUG: 🔍 Market Category: "Marketing & Sales Tools" (HIGH - 100.0%)
-[2025-09-21T09:50:26.913Z] DEBUG: 🔍 Market Subcategory: "Social Media Management & Scheduling" (LOW - 64.9%)
-[2025-09-21T09:50:26.913Z] DEBUG: 🔍 Target Audience: "Social Media Marketers" (HIGH - 86.7%)
-[2025-09-21T09:50:26.913Z] DEBUG: 🔍 Key Problem Getting Solved: "Businesses aim to grow their audience on social media platforms but lack insights and strategies tailored for effective engagement." (HIGH - 100.0%)
-[2025-09-21T09:50:26.913Z] DEBUG: 🔍 Startup Stage: "MVP in development" (MEDIUM - 84.0%)
-[2025-09-21T09:50:26.913Z] DEBUG: 🔍 Landing Page Goals: "Create Free Account" (LOW - 34.2%)
-[2025-09-21T09:50:26.914Z] DEBUG: 🔍 Pricing Category and Model: "Freemium (limited features)" (HIGH - 83.0%)
-[2025-09-21T09:50:26.914Z] DEBUG: ✅ Semantic validation completed
-[2025-09-21T09:50:26.914Z] INFO: 📊 Validation Results Comparison: {
+[DEV] 🔑 Generating embedding for: Tiered...
+[DEV] 🔑 Generating embedding for: Start Creating Data Stories...
+[DEV] 🔑 Generating embedding for: Data Analysts and Business Professionals...
+[2025-09-22T07:48:40.913Z] DEBUG: ✅ Embedding generated successfully
+[2025-09-22T07:48:40.915Z] DEBUG: ✅ Embedding generated successfully
+[2025-09-22T07:48:40.915Z] DEBUG: ✅ Embedding generated successfully
+[2025-09-22T07:48:41.189Z] DEBUG: ✅ Embedding generated successfully
+[2025-09-22T07:48:41.351Z] DEBUG: 🔍 Market Category: "Data & Analytics Tools" (HIGH - 100.0%)
+[2025-09-22T07:48:41.351Z] DEBUG: 🔍 Market Subcategory: "Data Visualization Tools" (MEDIUM - 80.6%)
+[2025-09-22T07:48:41.351Z] DEBUG: 🔍 Target Audience: "IT Decision Makers" (LOW - 50.7%)
+[2025-09-22T07:48:41.351Z] DEBUG: 🔍 Key Problem Getting Solved: "Users find it difficult to translate raw data from spreadsheets into compelling visual narratives that are easy to understand" (HIGH - 100.0%)
+[2025-09-22T07:48:41.352Z] DEBUG: 🔍 Startup Stage: "MVP in development" (MEDIUM - 84.0%)
+[2025-09-22T07:48:41.352Z] DEBUG: 🔍 Landing Page Goals: "Create Free Account" (LOW - 36.9%)
+[2025-09-22T07:48:41.352Z] DEBUG: 🔍 Pricing Category and Model: "Tiered Plans (Basic / Pro / Enterprise)" (MEDIUM - 61.9%)
+[2025-09-22T07:48:41.352Z] DEBUG: ✅ Semantic validation completed
+[2025-09-22T07:48:41.352Z] INFO: 📊 Validation Results Comparison: {
   "marketCategory": {
-    "ai": "Marketing & Sales Tools",
-    "validated": "Marketing & Sales Tools",
+    "ai": "Data & Analytics Tools",
+    "validated": "Data & Analytics Tools",
     "confidence": 1
   },
   "marketSubcategory": {
-    "ai": "Social Media Analytics & Growth",
-    "validated": "Social Media Management & Scheduling",
-    "confidence": 0.6485654193738972
+    "ai": "Data Visualization & Storytelling",
+    "validated": "Data Visualization Tools",
+    "confidence": 0.805546369985421
   },
   "targetAudience": {
-    "ai": "Social Media Managers",
-    "validated": "Social Media Marketers",
-    "confidence": 0.8671676963549726
+    "ai": "Data Analysts and Business Professionals",
+    "validated": "IT Decision Makers",
+    "confidence": 0.5072511221002933
   }
 }
- POST /api/infer-fields 200 in 6217ms
- ✓ Compiled /api/saveDraft in 112ms (927 modules)
+ POST /api/infer-fields 200 in 8498ms
+ ✓ Compiled /api/saveDraft in 125ms (921 modules)
 [DEV] Rate limit check - Key: user:user_2xd9rxqOOyXmfy1JhrFtKOmD1yw, Requests: 1/30, Remaining: 29 
- POST /api/saveDraft 200 in 509ms
+ POST /api/saveDraft 200 in 665ms
 [DEV] Rate limit check - Key: user:user_2xd9rxqOOyXmfy1JhrFtKOmD1yw, Requests: 2/30, Remaining: 28 
- POST /api/saveDraft 200 in 211ms
+ POST /api/saveDraft 200 in 180ms
 [DEV] Rate limit check - Key: user:user_2xd9rxqOOyXmfy1JhrFtKOmD1yw, Requests: 3/30, Remaining: 27 
- POST /api/saveDraft 200 in 892ms
+ POST /api/saveDraft 200 in 668ms
 [DEV] Rate limit check - Key: user:user_2xd9rxqOOyXmfy1JhrFtKOmD1yw, Requests: 4/30, Remaining: 26 
- POST /api/saveDraft 200 in 614ms
+ POST /api/saveDraft 200 in 1055ms
 [DEV] Rate limit check - Key: user:user_2xd9rxqOOyXmfy1JhrFtKOmD1yw, Requests: 5/30, Remaining: 25 
- POST /api/saveDraft 200 in 201ms
- ✓ Compiled /api/market-insights in 207ms (931 modules)
+ POST /api/saveDraft 200 in 646ms
+[DEV] Rate limit check - Key: user:user_2xd9rxqOOyXmfy1JhrFtKOmD1yw, Requests: 6/30, Remaining: 24 
+ POST /api/saveDraft 200 in 945ms
+ ✓ Compiled /api/market-insights in 334ms (925 modules)
 [DEV] Rate limit check - Key: user:user_2xd9rxqOOyXmfy1JhrFtKOmD1yw, Requests: 1/30, Remaining: 29 
-[2025-09-21T09:50:38.501Z] DEBUG: 🔍 Market insights request received
-[2025-09-21T09:50:38.501Z] DEBUG: 🔍 Request fields validated
-[2025-09-21T09:50:38.502Z] DEBUG: 🚀 Starting market insights generation
-[2025-09-21T09:50:38.502Z] DEBUG: 🤖 Generating features with AI...
- POST /api/saveDraft 200 in 534ms
-[2025-09-21T09:50:41.431Z] DEBUG: ✅ Generated 5 features successfully
-[2025-09-21T09:50:41.431Z] DEBUG: 📊 AI-Generated Features: {
-  "count": 5,
+[2025-09-22T07:49:23.573Z] DEBUG: 🔍 Market insights request received
+[2025-09-22T07:49:23.573Z] DEBUG: 🔍 Request fields validated
+[2025-09-22T07:49:23.573Z] DEBUG: 🚀 Starting market insights generation
+[2025-09-22T07:49:23.573Z] DEBUG: 🤖 Generating features with AI...
+ POST /api/saveDraft 200 in 894ms
+[2025-09-22T07:49:26.832Z] DEBUG: ✅ Generated 6 features successfully
+[2025-09-22T07:49:26.832Z] DEBUG: 📊 AI-Generated Features: {
+  "count": 6,
   "features": [
     {
       "index": 1,
-      "feature": "Audience Insights",
-      "benefit": "Understand your audience for targeted social media strategies.",
-      "featureLength": 17,
-      "benefitLength": 62
+      "feature": "Interactive Dashboards",
+      "benefit": "Transform raw data into engaging, intuitive visual insights.",
+      "featureLength": 22,
+      "benefitLength": 60
     },
     {
       "index": 2,
-      "feature": "Automated Scheduling",
-      "benefit": "Save time by scheduling posts for optimal engagement.",
+      "feature": "Customizable Visuals",
+      "benefit": "Tailor charts and graphs to suit your unique data storytelling.",
       "featureLength": 20,
-      "benefitLength": 53
+      "benefitLength": 63
     },
     {
       "index": 3,
-      "feature": "Performance Analytics",
-      "benefit": "Track engagement metrics to refine your marketing efforts.",
-      "featureLength": 21,
-      "benefitLength": 58
+      "feature": "Real-time Data Updates",
+      "benefit": "Instantly reflect changes for accurate, up-to-date decision making.",
+      "featureLength": 22,
+      "benefitLength": 67
     },
     {
       "index": 4,
-      "feature": "Content Suggestions",
-      "benefit": "Receive tailored content ideas to boost audience interaction.",
-      "featureLength": 19,
-      "benefitLength": 61
+      "feature": "Collaborative Sharing",
+      "benefit": "Easily share visual reports with teams for enhanced collaboration.",
+      "featureLength": 21,
+      "benefitLength": 66
     },
     {
       "index": 5,
-      "feature": "Freemium Access",
-      "benefit": "Start using essential features without any upfront cost.",
-      "featureLength": 15,
+      "feature": "User-Friendly Interface",
+      "benefit": "Simplified design makes data visualization accessible for everyone.",
+      "featureLength": 23,
+      "benefitLength": 67
+    },
+    {
+      "index": 6,
+      "feature": "Tiered Pricing Plans",
+      "benefit": "Choose a plan that grows with your organization’s needs.",
+      "featureLength": 20,
       "benefitLength": 56
     }
   ],
   "rawFeatures": [
     {
-      "feature": "Audience Insights",
-      "benefit": "Understand your audience for targeted social media strategies."
+      "feature": "Interactive Dashboards",
+      "benefit": "Transform raw data into engaging, intuitive visual insights."
     },
     {
-      "feature": "Automated Scheduling",
-      "benefit": "Save time by scheduling posts for optimal engagement."
+      "feature": "Customizable Visuals",
+      "benefit": "Tailor charts and graphs to suit your unique data storytelling."
     },
     {
-      "feature": "Performance Analytics",
-      "benefit": "Track engagement metrics to refine your marketing efforts."
+      "feature": "Real-time Data Updates",
+      "benefit": "Instantly reflect changes for accurate, up-to-date decision making."
     },
     {
-      "feature": "Content Suggestions",
-      "benefit": "Receive tailored content ideas to boost audience interaction."
+      "feature": "Collaborative Sharing",
+      "benefit": "Easily share visual reports with teams for enhanced collaboration."
     },
     {
-      "feature": "Freemium Access",
-      "benefit": "Start using essential features without any upfront cost."
+      "feature": "User-Friendly Interface",
+      "benefit": "Simplified design makes data visualization accessible for everyone."
+    },
+    {
+      "feature": "Tiered Pricing Plans",
+      "benefit": "Choose a plan that grows with your organization’s needs."
     }
   ]
 }
-[2025-09-21T09:50:41.432Z] DEBUG: 🔍 Performing AI market research for hidden copywriting fields...
-[2025-09-21T09:50:41.432Z] DEBUG: 🧠 Starting AI inference for hidden copywriting fields...
-[2025-09-21T09:50:41.432Z] DEBUG: 📊 Input context: {
-  "category": "Marketing & Sales Tools",
-  "audience": "Social Media Marketers",
-  "problem": "Businesses aim to grow their audience on social media platforms but lack insights and strategies tai..."
+[2025-09-22T07:49:26.833Z] DEBUG: 🔍 Performing AI market research for hidden copywriting fields...
+[2025-09-22T07:49:26.833Z] DEBUG: 🧠 Starting AI inference for hidden copywriting fields...
+[2025-09-22T07:49:26.833Z] DEBUG: 📊 Input context: {
+  "category": "Data & Analytics Tools",
+  "audience": "IT Decision Makers",
+  "problem": "Users find it difficult to translate raw data from spreadsheets into compelling visual narratives th..."
 }
-[2025-09-21T09:50:44.605Z] DEBUG: 🤖 Raw AI response for hidden fields: {
+[2025-09-22T07:49:29.189Z] DEBUG: 🤖 Raw AI response for hidden fields: {
   "awarenessLevel": "problem-aware",
   "copyIntent": "pain-led",
   "toneProfile": "bold-persuasive",
-  "marketSophisticationLevel": "level-5",
+  "marketSophisticationLevel": "level-3",
   "problemType": "lost-revenue-or-inefficiency"
 }
-[2025-09-21T09:50:44.605Z] INFO: ✅ Hidden fields inferred successfully: {
+[2025-09-22T07:49:29.189Z] INFO: ✅ Hidden fields inferred successfully: {
   "awarenessLevel": "problem-aware",
   "copyIntent": "pain-led",
   "toneProfile": "bold-persuasive",
-  "marketSophisticationLevel": "level-5",
+  "marketSophisticationLevel": "level-3",
   "problemType": "lost-revenue-or-inefficiency"
 }
-[2025-09-21T09:50:44.606Z] DEBUG: 🧠 Hidden Inferred Fields (AI Analysis): {
+[2025-09-22T07:49:29.189Z] DEBUG: 🧠 Hidden Inferred Fields (AI Analysis): {
   "awarenessLevel": "problem-aware",
   "copyIntent": "pain-led",
   "toneProfile": "bold-persuasive",
-  "marketSophisticationLevel": "level-5",
+  "marketSophisticationLevel": "level-3",
   "problemType": "lost-revenue-or-inefficiency",
   "fieldCount": 5,
   "rawHiddenFields": {
     "awarenessLevel": "problem-aware",
     "copyIntent": "pain-led",
     "toneProfile": "bold-persuasive",
-    "marketSophisticationLevel": "level-5",
+    "marketSophisticationLevel": "level-3",
     "problemType": "lost-revenue-or-inefficiency"
   }
 }
-[2025-09-21T09:50:44.606Z] DEBUG: 📝 Copywriting Strategy Mapping: {
-  "audience": "Social Media Marketers → Awareness: problem-aware",
+[2025-09-22T07:49:29.190Z] DEBUG: 📝 Copywriting Strategy Mapping: {
+  "audience": "IT Decision Makers → Awareness: problem-aware",
   "messaging": "pain-led copy with bold-persuasive tone",
-  "market": "Sophistication Level level-5",
-  "problem": "Businesses aim to grow their audience on social media platforms but lack insights and strategies tailored for effective engagement. → Type: lost-revenue-or-inefficiency",
+  "market": "Sophistication Level level-3",
+  "problem": "Users find it difficult to translate raw data from spreadsheets into compelling visual narratives that are easy to understand → Type: lost-revenue-or-inefficiency",      
   "approach": "Focus on problem agitation and pain points"
 }
-[2025-09-21T09:50:44.606Z] DEBUG: ✅ Market insights generation completed
-[2025-09-21T09:50:44.606Z] DEBUG: 📤 Sending Market Insights Response: {
-  "featureCount": 5,
+[2025-09-22T07:49:29.190Z] DEBUG: ✅ Market insights generation completed
+[2025-09-22T07:49:29.190Z] DEBUG: 📤 Sending Market Insights Response: {
+  "featureCount": 6,
   "hiddenFieldCount": 5,
   "hasAwarenessLevel": true,
   "hasCopyIntent": true,
   "hasToneProfile": true,
   "summary": {
-    "features": "Audience Insights, Automated Scheduling, Performance Analytics, Content Suggestions, Freemium Access",
+    "features": "Interactive Dashboards, Customizable Visuals, Real-time Data Updates, Collaborative Sharing, User-Friendly Interface, Tiered Pricing Plans",
     "tone": "bold-persuasive",
     "intent": "pain-led"
   }
 }
- POST /api/market-insights 200 in 6501ms
+ POST /api/market-insights 200 in 6132ms
+ ✓ Compiled /api/generate-landing in 491ms (932 modules)
+[DEV] Rate limit check - Key: ip:::1, Requests: 1/5, Remaining: 4 
+[DEV] 🚀 /api/generate-landing route called 
+[DEV] 📝 Request received: {
+  hasPrompt: false,
+  promptLength: 0,
+  hasOnboardingStore: true,
+  hasPageStore: true,
+  use2Phase: true
+}
+[DEV] 🔍 Environment check: {
+  NEXT_PUBLIC_USE_MOCK_GPT: 'false',
+  token: 'Tws1Djtd5l...',
+  isDemoToken: false
+}
+[DEV] 🧠 Starting 2-phase strategic copy generation
+[DEV] 📊 Phase 1: Strategic Analysis
+[2025-09-22T07:49:56.733Z] DEBUG: 🧠 Parsing strategy response from AI...
+[2025-09-22T07:49:56.733Z] DEBUG: 📊 Raw strategy JSON parsed successfully
+[2025-09-22T07:49:56.734Z] INFO: ✅ Strategy parsed successfully: {
+  "bigIdea": "Transform your data chaos into compelling stories that drive smarter decisions.",
+  "cardCounts": {
+    "features": 4,
+    "testimonials": 3,
+    "faq": 5,
+    "results": 3,
+    "social_proof": 4,
+    "pricing": 3,
+    "problem": 2,
+    "comparison": 3
+  },
+  "warnings": []
+}
+[DEV] ✅ Strategy parsed successfully: {
+  bigIdea: 'Transform your data chaos into compelling stories that drive smarter decisions.',
+  cardCounts: {
+    features: 4,
+    testimonials: 3,
+    faq: 5,
+    results: 3,
+    social_proof: 4,
+    pricing: 3,
+    problem: 2,
+    comparison: 3
+  }
+}
+[DEV] ✍️ Phase 2: Strategic Copy Generation
+[DEV] ✅ 2-phase generation completed successfully 
+ POST /api/generate-landing 200 in 29556ms
+[DEV] Rate limit check - Key: user:user_2xd9rxqOOyXmfy1JhrFtKOmD1yw, Requests: 1/30, Remaining: 29 
+ POST /api/saveDraft 200 in 798ms
+ ○ Compiling /generate/[token] ...
+ ✓ Compiled /generate/[token] in 3s (2060 modules)
+ ✓ Compiled /api/loadDraft in 278ms (1114 modules)
+ ⨯ src\utils\storage.ts (332:4) @ window
+ ⨯ ReferenceError: window is not defined
+    at eval (./src/utils/storage.ts:265:5)
+    at (ssr)/./src/utils/storage.ts (C:\Users\susha\lessgo-ai\.next\server\app\generate\[token]\page.js:2910:1)
+    at __webpack_require__ (C:\Users\susha\lessgo-ai\.next\server\webpack-runtime.js:33:42)
+    at eval (./src/stores/storeManager.ts:6:72)
+    at (ssr)/./src/stores/storeManager.ts (C:\Users\susha\lessgo-ai\.next\server\app\generate\[token]\page.js:2734:1)
+    at __webpack_require__ (C:\Users\susha\lessgo-ai\.next\server\webpack-runtime.js:33:42)
+    at eval (./src/hooks/useEditStore.ts:11:78)
+    at (ssr)/./src/hooks/useEditStore.ts (C:\Users\susha\lessgo-ai\.next\server\app\generate\[token]\page.js:644:1)
+    at __webpack_require__ (C:\Users\susha\lessgo-ai\.next\server\webpack-runtime.js:33:42)
+    at eval (./src/components/EditProvider.tsx:16:77)
+    at (ssr)/./src/components/EditProvider.tsx (C:\Users\susha\lessgo-ai\.next\server\app\generate\[token]\page.js:292:1)
+    at __webpack_require__ (C:\Users\susha\lessgo-ai\.next\server\webpack-runtime.js:33:42)
+    at eval (./src/app/generate/[token]/page.tsx:10:82)
+    at (ssr)/./src/app/generate/[token]/page.tsx (C:\Users\susha\lessgo-ai\.next\server\app\generate\[token]\page.js:259:1)
+    at Object.__webpack_require__ [as require] (C:\Users\susha\lessgo-ai\.next\server\webpack-runtime.js:33:42)
+digest: "2499193528"
+  330 | // Development utilities (only available in development mode)
+  331 | if (process.env.NODE_ENV === 'development') {
+> 332 |   (window as any).__storageDebug = {
+      |    ^
+  333 |     getStorageMetadata,
+  334 |     getStorageStats,
+  335 |     cleanupOldProjects: (tokenId: string) => cleanupOldProjects(tokenId, true),
+ GET /api/loadDraft?tokenId=Tws1Djtd5liV 200 in 522ms
+ GET /generate/URL_to_visual_image_representing_DataStory_ChartCraft 500 in 282ms
+[DEV] Rate limit check - Key: user:user_2xd9rxqOOyXmfy1JhrFtKOmD1yw, Requests: 1/30, Remaining: 29 
+ POST /api/saveDraft 200 in 858ms
+ ○ Compiling /edit/[token] ...
+ ✓ Compiled /edit/[token] in 1655ms (2195 modules)
+ GET /api/loadDraft?tokenId=Tws1Djtd5liV 200 in 200ms
+ ⨯ src\utils\storage.ts (332:4) @ window
+ ⨯ ReferenceError: window is not defined
+    at eval (./src/utils/storage.ts:265:5)
+    at (ssr)/./src/utils/storage.ts (C:\Users\susha\lessgo-ai\.next\server\app\edit\[token]\page.js:3988:1)
+    at __webpack_require__ (C:\Users\susha\lessgo-ai\.next\server\webpack-runtime.js:33:42)
+    at eval (./src/stores/storeManager.ts:6:72)
+    at (ssr)/./src/stores/storeManager.ts (C:\Users\susha\lessgo-ai\.next\server\app\edit\[token]\page.js:3702:1)
+    at __webpack_require__ (C:\Users\susha\lessgo-ai\.next\server\webpack-runtime.js:33:42)
+    at eval (./src/hooks/useEditStore.ts:11:78)
+    at (ssr)/./src/hooks/useEditStore.ts (C:\Users\susha\lessgo-ai\.next\server\app\edit\[token]\page.js:1502:1)
+    at __webpack_require__ (C:\Users\susha\lessgo-ai\.next\server\webpack-runtime.js:33:42)
+    at eval (./src/components/EditProvider.tsx:16:77)
+    at (ssr)/./src/components/EditProvider.tsx (C:\Users\susha\lessgo-ai\.next\server\app\edit\[token]\page.js:996:1)
+    at __webpack_require__ (C:\Users\susha\lessgo-ai\.next\server\webpack-runtime.js:33:42)
+    at eval (./src/app/edit/[token]/page.tsx:10:82)
+    at (ssr)/./src/app/edit/[token]/page.tsx (C:\Users\susha\lessgo-ai\.next\server\app\edit\[token]\page.js:974:1)
+    at Object.__webpack_require__ [as require] (C:\Users\susha\lessgo-ai\.next\server\webpack-runtime.js:33:42)
+digest: "3655924400"
+  330 | // Development utilities (only available in development mode)
+  331 | if (process.env.NODE_ENV === 'development') {
+> 332 |   (window as any).__storageDebug = {
+      |    ^
+  333 |     getStorageMetadata,
+  334 |     getStorageStats,
+  335 |     cleanupOldProjects: (tokenId: string) => cleanupOldProjects(tokenId, true),
+ GET /edit/URL_to_visual_image_representing_DataStory_ChartCraft 500 in 110ms
