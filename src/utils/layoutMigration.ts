@@ -1,4 +1,4 @@
-import { layoutElementSchema } from '@/modules/sections/layoutElementSchema';
+import { layoutElementSchema, getAllElements } from '@/modules/sections/layoutElementSchema';
 import type { EditableElement, SectionData } from '@/types/core';
 
 export interface MigrationResult {
@@ -21,10 +21,11 @@ export function migrateLayoutData(
   const newRequiredFields: string[] = [];
   const warnings: string[] = [];
 
-  // Create mapping of target fields
-  const targetFields = new Set(toSchema.map(item => item.element));
+  // Create mapping of target fields using helper function
+  const allElements = getAllElements(toSchema);
+  const targetFields = new Set(allElements.map(item => item.element));
   const requiredTargetFields = new Set(
-    toSchema.filter(item => item.mandatory).map(item => item.element)
+    allElements.filter(item => item.mandatory).map(item => item.element)
   );
 
   // Migrate existing data where fields match
@@ -49,7 +50,7 @@ export function migrateLayoutData(
   });
 
   // Identify new required fields that need values
-  toSchema.forEach(({ element, mandatory }) => {
+  allElements.forEach(({ element, mandatory }) => {
     if (mandatory && !migratedData[element]) {
       newRequiredFields.push(element);
       
@@ -167,13 +168,18 @@ export function getLayoutCompatibilityScore(
   fromLayout: string,
   toLayout: string
 ): number {
-  const fromSchema = layoutElementSchema[fromLayout] || [];
-  const toSchema = layoutElementSchema[toLayout] || [];
-  
-  if (fromSchema.length === 0 || toSchema.length === 0) return 0;
+  const fromSchema = layoutElementSchema[fromLayout];
+  const toSchema = layoutElementSchema[toLayout];
 
-  const fromFields = new Set(fromSchema.map(item => item.element));
-  const toFields = new Set(toSchema.map(item => item.element));
+  if (!fromSchema || !toSchema) return 0;
+
+  const fromElements = getAllElements(fromSchema);
+  const toElements = getAllElements(toSchema);
+
+  if (fromElements.length === 0 || toElements.length === 0) return 0;
+
+  const fromFields = new Set(fromElements.map(item => item.element));
+  const toFields = new Set(toElements.map(item => item.element));
   
   const intersection = new Set([...fromFields].filter(x => toFields.has(x)));
   const union = new Set([...fromFields, ...toFields]);

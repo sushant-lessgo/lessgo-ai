@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
+import {
+  EditableAdaptiveHeadline,
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { 
   CTAButton,
   TrustIndicators 
 } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { getIconFromCategory, getRandomIconFromCategory } from '@/utils/iconMapping';
 
 interface SliderPricingContent {
   headline: string;
@@ -28,6 +30,15 @@ interface SliderPricingContent {
   subheadline?: string;
   supporting_text?: string;
   trust_items?: string;
+  // Feature icons
+  feature_icon_1?: string;
+  feature_icon_2?: string;
+  feature_icon_3?: string;
+  feature_icon_4?: string;
+  feature_icon_5?: string;
+  feature_icon_6?: string;
+  // Pricing tier icon
+  pricing_icon?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -91,10 +102,19 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: '' 
   },
-  trust_items: { 
-    type: 'string' as const, 
-    default: '' 
-  }
+  trust_items: {
+    type: 'string' as const,
+    default: ''
+  },
+  // Feature icons
+  feature_icon_1: { type: 'string' as const, default: '⚡' },
+  feature_icon_2: { type: 'string' as const, default: '📊' },
+  feature_icon_3: { type: 'string' as const, default: '🔧' },
+  feature_icon_4: { type: 'string' as const, default: '🛡️' },
+  feature_icon_5: { type: 'string' as const, default: '📈' },
+  feature_icon_6: { type: 'string' as const, default: '💬' },
+  // Pricing tier icon
+  pricing_icon: { type: 'string' as const, default: '💰' }
 };
 
 export default function SliderPricing(props: LayoutComponentProps) {
@@ -139,6 +159,19 @@ export default function SliderPricing(props: LayoutComponentProps) {
     : [];
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
+
+  // Helper function to get feature icon
+  const getFeatureIcon = (index: number) => {
+    const iconFields = [
+      blockContent.feature_icon_1,
+      blockContent.feature_icon_2,
+      blockContent.feature_icon_3,
+      blockContent.feature_icon_4,
+      blockContent.feature_icon_5,
+      blockContent.feature_icon_6
+    ];
+    return iconFields[index] || ['⚡', '📊', '🔧', '🛡️', '📈', '💬'][index] || '✨';
+  };
 
   // Calculate pricing with tiered discounts
   const calculatePrice = (unitCount: number) => {
@@ -297,6 +330,21 @@ export default function SliderPricing(props: LayoutComponentProps) {
               {/* Units Slider */}
               <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-200">
                 <div className="text-center mb-6">
+                  <div className="flex items-center justify-center space-x-3 mb-4">
+                    <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center">
+                      <IconEditableText
+                        mode={mode}
+                        value={blockContent.pricing_icon || '💰'}
+                        onEdit={(value) => handleContentUpdate('pricing_icon', value)}
+                        backgroundType="primary"
+                        colorTokens={colorTokens}
+                        iconSize="lg"
+                        className="text-white text-xl"
+                        sectionId={sectionId}
+                        elementKey="pricing_icon"
+                      />
+                    </div>
+                  </div>
                   <div className="text-4xl font-bold text-gray-900 mb-2">{units}</div>
                   {mode !== 'preview' ? (
                     <div 
@@ -384,9 +432,22 @@ export default function SliderPricing(props: LayoutComponentProps) {
                 <div className="space-y-3">
                   {includedFeatures.map((feature, index) => (
                     <div key={index} className="flex items-center space-x-3 group/feature relative">
-                      <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
+                      <div className="w-6 h-6 flex items-center justify-center rounded-full bg-green-100 flex-shrink-0">
+                        <IconEditableText
+                          mode={mode}
+                          value={getFeatureIcon(index)}
+                          onEdit={(value) => {
+                            const iconField = `feature_icon_${index + 1}` as keyof SliderPricingContent;
+                            handleContentUpdate(iconField, value);
+                          }}
+                          backgroundType="neutral"
+                          colorTokens={colorTokens}
+                          iconSize="sm"
+                          className="text-green-600 text-sm"
+                          sectionId={sectionId}
+                          elementKey={`feature_icon_${index + 1}`}
+                        />
+                      </div>
                       {mode !== 'preview' ? (
                         <div 
                           contentEditable

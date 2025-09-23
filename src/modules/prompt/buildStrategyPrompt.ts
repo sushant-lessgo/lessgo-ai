@@ -14,26 +14,28 @@ type PageStore = ReturnType<typeof useEditStore.getState>;
  * Extracts enhanced requirements from unified schema where available
  */
 function getUnifiedSchemaRequirements(layoutRequirements: PageLayoutRequirements | undefined): string {
-  if (!layoutRequirements) return '';
+  if (!layoutRequirements || !layoutRequirements.sections) return '';
 
   const enhancedRequirements: string[] = [];
 
-  for (const [sectionId, requirement] of Object.entries(layoutRequirements)) {
-    const { layoutName } = requirement;
+  for (const requirement of layoutRequirements.sections) {
+    const { sectionId, layoutName } = requirement;
     const schema = layoutElementSchema[layoutName];
 
     if (isUnifiedSchema(schema)) {
-      const { cardRequirements, cardStructure } = schema;
-      const structureType = cardStructure.type;
-      const optimalRange = `${cardRequirements.optimal[0]}-${cardRequirements.optimal[1]}`;
-      const constraintRange = `(min: ${cardRequirements.min}, max: ${cardRequirements.max})`;
+      const cardRequirements = getCardRequirements(schema);
+      if (cardRequirements && schema.cardStructure) {
+        const structureType = schema.cardStructure.type;
+        const optimalRange = `${cardRequirements.optimal[0]}-${cardRequirements.optimal[1]}`;
+        const constraintRange = `(min: ${cardRequirements.min}, max: ${cardRequirements.max})`;
 
-      enhancedRequirements.push(
-        `${sectionId}: Generate ${optimalRange} ${structureType} ${constraintRange} - ${cardRequirements.description}`
-      );
+        enhancedRequirements.push(
+          `${sectionId}: Generate ${optimalRange} ${structureType} ${constraintRange} - ${cardRequirements.description}`
+        );
+      }
     } else {
-      // Fallback to original requirements for non-unified schemas
-      enhancedRequirements.push(`${sectionId}: ${requirement.layoutName} layout`);
+      // Fallback for non-unified schemas
+      enhancedRequirements.push(`${sectionId}: ${layoutName} layout`);
     }
   }
 

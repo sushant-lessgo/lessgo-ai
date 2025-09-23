@@ -4,15 +4,17 @@ import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useOnboardingStore } from '@/hooks/useOnboardingStore';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
+import {
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { CTAButton } from '@/components/layout/ComponentRegistry';
-import { 
-  LayoutComponentProps, 
+import {
+  LayoutComponentProps,
   extractLayoutContent,
-  StoreElementTypes 
+  StoreElementTypes
 } from '@/types/storeTypes';
+import { getIconFromCategory, getRandomIconFromCategory } from '@/utils/iconMapping';
 
 interface TierCardsProps extends LayoutComponentProps {}
 
@@ -67,6 +69,10 @@ interface TierCardsContent {
   trust_item_2?: string;
   trust_item_3?: string;
   show_trust_footer?: boolean;
+  // Tier icons
+  tier_icon_1?: string;
+  tier_icon_2?: string;
+  tier_icon_3?: string;
 }
 
 // Content schema for TierCards layout
@@ -110,23 +116,37 @@ const CONTENT_SCHEMA = {
   trust_item_1: { type: 'string' as const, default: '14-day free trial' },
   trust_item_2: { type: 'string' as const, default: 'Cancel anytime' },
   trust_item_3: { type: 'string' as const, default: 'No setup fees' },
-  show_trust_footer: { type: 'boolean' as const, default: true }
+  show_trust_footer: { type: 'boolean' as const, default: true },
+  // Tier icons
+  tier_icon_1: { type: 'string' as const, default: '🚀' },
+  tier_icon_2: { type: 'string' as const, default: '⭐' },
+  tier_icon_3: { type: 'string' as const, default: '💎' }
 };
 
+
+// Helper function to get tier icon
+const getTierIcon = (blockContent: TierCardsContent, index: number) => {
+  const iconFields = [
+    blockContent.tier_icon_1,
+    blockContent.tier_icon_2,
+    blockContent.tier_icon_3
+  ];
+  return iconFields[index] || ['🚀', '⭐', '💎'][index] || '🎯';
+};
 
 // Helper function to get tier features from individual fields
 const getTierFeatures = (tierIndex: number, blockContent: TierCardsContent): string[] => {
   const features = [];
-  
+
   for (let i = 1; i <= 8; i++) {
     const featureKey = `tier_${tierIndex + 1}_feature_${i}` as keyof TierCardsContent;
     const feature = blockContent[featureKey];
-    
+
     if (feature && typeof feature === 'string' && feature.trim() !== '' && feature !== '___REMOVED___') {
       features.push(feature.trim());
     }
   }
-  
+
   return features;
 };
 
@@ -312,7 +332,27 @@ const PricingCard = ({
             </svg>
           </button>
         )}
-        
+
+        {/* Tier Icon */}
+        <div className="text-center mb-6">
+          <div className={`w-16 h-16 mx-auto rounded-full ${colorTokens.ctaBg} flex items-center justify-center text-white shadow-lg transition-all duration-300 hover:shadow-xl`}>
+            <IconEditableText
+              mode={mode}
+              value={getTierIcon(blockContent, index)}
+              onEdit={(value) => {
+                const iconField = `tier_icon_${index + 1}` as keyof TierCardsContent;
+                handleContentUpdate(iconField, value);
+              }}
+              backgroundType="primary"
+              colorTokens={colorTokens}
+              iconSize="lg"
+              className="text-white text-2xl"
+              sectionId={sectionId}
+              elementKey={`tier_icon_${index + 1}`}
+            />
+          </div>
+        </div>
+
         {/* Tier Name */}
         <div className="text-center mb-6">
           {mode !== 'preview' ? (
@@ -644,6 +684,14 @@ export default function TierCards(props: TierCardsProps) {
     handleContentUpdate('tier_descriptions', descriptions.join('|'));
     handleContentUpdate('cta_texts', ctas.join('|'));
     handleContentUpdate('popular_labels', popularLabels.join('|'));
+
+    // Add a smart icon for the new tier
+    const iconField = `tier_icon_${newCount}` as keyof TierCardsContent;
+    if (newCount <= 3) {
+      // Use random icon from pricing/business category for new tiers
+      const defaultIcon = getRandomIconFromCategory('business');
+      handleContentUpdate(iconField, defaultIcon);
+    }
   };
 
   // Remove a tier
@@ -673,6 +721,12 @@ export default function TierCards(props: TierCardsProps) {
     for (let i = 1; i <= 8; i++) {
       const featureKey = `tier_${indexToRemove + 1}_feature_${i}` as keyof TierCardsContent;
       handleContentUpdate(featureKey, '');
+    }
+
+    // Also clear the corresponding icon if it exists
+    const iconField = `tier_icon_${indexToRemove + 1}` as keyof TierCardsContent;
+    if (blockContent[iconField]) {
+      handleContentUpdate(iconField, '');
     }
   };
 
@@ -831,7 +885,7 @@ export const componentMeta = {
   name: 'TierCards',
   category: 'Pricing',
   description: 'Flexible pricing tier cards with 1-3 tiers, adaptive text colors and popular tier highlighting',
-  tags: ['pricing', 'tiers', 'cards', 'features', 'adaptive-colors', 'flexible'],
+  tags: ['pricing', 'tiers', 'cards', 'features', 'adaptive-colors', 'flexible', 'icons'],
   features: [
     'Flexible tier count (1-3 tiers)',
     'Add/remove tiers dynamically in edit mode',
@@ -843,7 +897,9 @@ export const componentMeta = {
     'Intelligent feature generation based on tier names',
     'Popular tier highlighting and scaling',
     'Responsive grid layout based on tier count',
-    'Trust indicators footer'
+    'Trust indicators footer',
+    'Dynamic tier icons with smart generation',
+    'Editable icons per tier'
   ],
   props: {
     sectionId: 'string - Required section identifier',
@@ -862,7 +918,10 @@ export const componentMeta = {
     trust_item_1: 'Trust indicator item 1',
     trust_item_2: 'Trust indicator item 2',
     trust_item_3: 'Trust indicator item 3',
-    show_trust_footer: 'Boolean to show/hide trust footer section'
+    show_trust_footer: 'Boolean to show/hide trust footer section',
+    tier_icon_1: 'Icon for tier 1',
+    tier_icon_2: 'Icon for tier 2',
+    tier_icon_3: 'Icon for tier 3'
   },
   examples: [
     'SaaS pricing plans',

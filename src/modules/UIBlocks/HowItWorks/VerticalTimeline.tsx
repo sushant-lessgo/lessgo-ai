@@ -12,6 +12,7 @@ import {
   TrustIndicators 
 } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { getIconFromCategory, getRandomIconFromCategory } from '@/utils/iconMapping';
 
 interface VerticalTimelineContent {
   headline: string;
@@ -433,10 +434,18 @@ export default function VerticalTimeline(props: LayoutComponentProps) {
                       stepTitles.push(`Step ${stepTitles.length + 1}`);
                       stepDescriptions.push('Add step description here');
                       stepDurations.push('5 minutes');
-                      
+
                       handleContentUpdate('step_titles', stepTitles.join('|'));
                       handleContentUpdate('step_descriptions', stepDescriptions.join('|'));
                       handleContentUpdate('step_durations', stepDurations.join('|'));
+
+                      // Add a smart icon for the new step
+                      const newStepCount = stepTitles.length;
+                      const iconField = `step_icon_${newStepCount}` as keyof VerticalTimelineContent;
+                      if (newStepCount <= 4) {
+                        const defaultIcon = getRandomIconFromCategory('process');
+                        handleContentUpdate(iconField, defaultIcon);
+                      }
                     }}
                     className="w-full bg-white rounded-xl p-6 border-2 border-dashed border-gray-300 hover:border-gray-400 text-gray-400 hover:text-gray-500 transition-all duration-300 hover:bg-gray-50"
                     title="Add new step"

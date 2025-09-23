@@ -168,6 +168,15 @@ export default function PersonaPanels(props: LayoutComponentProps) {
     handleContentUpdate('persona_titles', titles.join('|'));
     handleContentUpdate('persona_pain_points', painPoints.join('|'));
     handleContentUpdate('persona_goals', goals.join('|'));
+
+    // Add smart icon for the new persona
+    const newPersonaCount = names.length;
+    const iconField = `persona_icon_${newPersonaCount}` as keyof PersonaPanelsContent;
+    if (newPersonaCount <= 4) {
+      const personaIcons = ['👤', '👥', '👔', '🎯', '💼', '🚀'];
+      const defaultIcon = personaIcons[Math.floor(Math.random() * personaIcons.length)];
+      handleContentUpdate(iconField, defaultIcon);
+    }
   };
 
   // Remove a persona

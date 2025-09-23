@@ -13,6 +13,7 @@ import { EditableList } from '@/components/layout/EditableList';
 import { StarRating } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
+import { getIconFromCategory, getRandomIconFromCategory } from '@/utils/iconMapping';
 
 // Content interface for type safety
 interface QuoteGridContent {
@@ -25,6 +26,12 @@ interface QuoteGridContent {
   rating_value?: string;
   quote_mark_icon?: string;
   verification_icon?: string;
+  testimonial_icon_1?: string;
+  testimonial_icon_2?: string;
+  testimonial_icon_3?: string;
+  testimonial_icon_4?: string;
+  testimonial_icon_5?: string;
+  testimonial_icon_6?: string;
 }
 
 // Testimonial structure
@@ -74,6 +81,30 @@ const CONTENT_SCHEMA = {
   verification_icon: {
     type: 'string' as const,
     default: '✅'
+  },
+  testimonial_icon_1: {
+    type: 'string' as const,
+    default: '💬'
+  },
+  testimonial_icon_2: {
+    type: 'string' as const,
+    default: '⭐'
+  },
+  testimonial_icon_3: {
+    type: 'string' as const,
+    default: '🎯'
+  },
+  testimonial_icon_4: {
+    type: 'string' as const,
+    default: '💎'
+  },
+  testimonial_icon_5: {
+    type: 'string' as const,
+    default: '🚀'
+  },
+  testimonial_icon_6: {
+    type: 'string' as const,
+    default: '✨'
   }
 };
 
@@ -192,6 +223,26 @@ const addTestimonial = (
   };
 };
 
+// Helper function to get testimonial icon
+const getTestimonialIcon = (blockContent: QuoteGridContent, index: number) => {
+  const iconFields = [
+    blockContent.testimonial_icon_1,
+    blockContent.testimonial_icon_2,
+    blockContent.testimonial_icon_3,
+    blockContent.testimonial_icon_4,
+    blockContent.testimonial_icon_5,
+    blockContent.testimonial_icon_6
+  ];
+
+  const icon = iconFields[index];
+  if (icon && icon.trim()) {
+    return icon;
+  }
+
+  // Fallback to random icon from testimonial category
+  return getRandomIconFromCategory('testimonial');
+};
+
 // Customer Avatar Component
 const CustomerAvatar = React.memo(({ name }: { name: string }) => {
   // Generate initials and consistent color
@@ -302,6 +353,21 @@ const TestimonialCard = React.memo(({
         </button>
       )}
       
+      {/* Testimonial Icon */}
+      <div className="mb-4">
+        <IconEditableText
+          mode={mode}
+          value={getTestimonialIcon(blockContent, testimonial.index)}
+          onEdit={(value) => handleContentUpdate(`testimonial_icon_${testimonial.index + 1}`, value)}
+          backgroundType={backgroundType}
+          colorTokens={colorTokens}
+          iconSize="lg"
+          className="text-2xl text-blue-500"
+          sectionId={sectionId}
+          elementKey={`testimonial_icon_${testimonial.index + 1}`}
+        />
+      </div>
+
       {/* Testimonial Quote */}
       <div className="mb-6">
         {mode !== 'preview' ? (

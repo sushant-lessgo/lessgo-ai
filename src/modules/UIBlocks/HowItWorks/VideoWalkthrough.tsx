@@ -12,6 +12,7 @@ import {
   TrustIndicators 
 } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { getIconFromCategory, getRandomIconFromCategory } from '@/utils/iconMapping';
 
 interface VideoWalkthroughContent {
   headline: string;

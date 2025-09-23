@@ -4,73 +4,13 @@ import type {
   LayoutRequirement,
   SectionTypeMapping
 } from '@/types/layoutTypes';
-import { layoutRegistryWithRequirements, getCardRequirements } from './layoutRegistryWithRequirements';
+import { layoutElementSchema, getCardRequirements } from './layoutElementSchema';
 import { logger } from '@/lib/logger';
 
 /**
- * Maps section IDs to their section types for requirement lookup
- * Complete mapping for all 21 sections in the comprehensive registry
+ * Section type mapping is no longer needed as we use layout names directly
+ * with the unified schema. Layout names are the keys in layoutElementSchema.
  */
-const sectionTypeMap: Record<string, string> = {
-  // Core sections
-  hero: 'Hero',
-  features: 'Features',
-  testimonials: 'Testimonials',
-  faq: 'FAQ',
-  results: 'Results',
-
-  // Comparison sections
-  comparisonTable: 'Comparison',
-  comparison: 'Comparison',
-
-  // Mechanism and problem
-  uniqueMechanism: 'UniqueMechanism',
-  problem: 'Problem',
-
-  // Social proof and pricing
-  socialProof: 'SocialProof',
-  pricing: 'Pricing',
-
-  // Process and interaction
-  howItWorks: 'HowItWorks',
-  objectionHandling: 'ObjectionHandling',
-
-  // CTA sections
-  cta: 'CTA',
-  primaryCTA: 'PrimaryCTA', // Added missing PrimaryCTA
-
-  // Additional sections
-  beforeAfter: 'BeforeAfter',
-  close: 'Close', // Fixed: was 'closeSection'
-
-  // Integration and utility sections
-  integration: 'Integration', // Fixed: was 'integrations'
-  security: 'Security',
-  useCase: 'UseCase', // Fixed: was 'useCases'
-  founderNote: 'FounderNote',
-
-  // Layout sections
-  header: 'Header', // Added missing Header
-  footer: 'Footer', // Added missing Footer
-
-  // Alternative naming conventions (case variations)
-  'social-proof': 'SocialProof',
-  'social_proof': 'SocialProof',
-  'unique-mechanism': 'UniqueMechanism',
-  'unique_mechanism': 'UniqueMechanism',
-  'objection-handling': 'ObjectionHandling',
-  'objection_handling': 'ObjectionHandling',
-  'how-it-works': 'HowItWorks',
-  'how_it_works': 'HowItWorks',
-  'founder-note': 'FounderNote',
-  'founder_note': 'FounderNote',
-  'use-case': 'UseCase',
-  'use_case': 'UseCase',
-  'before-after': 'BeforeAfter',
-  'before_after': 'BeforeAfter',
-  'primary-cta': 'PrimaryCTA',
-  'primary_cta': 'PrimaryCTA'
-};
 
 /**
  * Maps generic section types from strategy to actual UIBlock section types
@@ -116,51 +56,17 @@ export const genericToUIBlockMapping: SectionTypeMapping = {
 };
 
 /**
- * Normalizes section ID to handle various naming conventions
- * @param sectionId Raw section ID from page layout
- * @returns Normalized section ID that matches sectionTypeMap keys
+ * Normalization is no longer needed as we work directly with layout names
+ * from the unified schema
  */
-function normalizeSectionId(sectionId: string): string {
-  // Convert to lowercase and handle common variations
-  const normalized = sectionId.toLowerCase()
-    .replace(/[-_]/g, '') // Remove hyphens and underscores
-    .replace(/section$/, ''); // Remove 'section' suffix
-
-  // Handle special cases
-  const specialCases: Record<string, string> = {
-    'socialpoof': 'socialProof',
-    'socialproof': 'socialProof',
-    'uniquemechanism': 'uniqueMechanism',
-    'objectionhandling': 'objectionHandling',
-    'howitworks': 'howItWorks',
-    'beforeafter': 'beforeAfter',
-    'foundernote': 'founderNote',
-    'usecase': 'useCase',
-    'primarycta': 'primaryCTA',
-    'comparisonTable': 'comparisonTable'
-  };
-
-  return specialCases[normalized] || sectionId;
-}
 
 /**
- * Validates if a section type exists in the registry
- * @param sectionType Section type to validate
- * @returns True if section exists in registry
- */
-function validateSectionType(sectionType: string): boolean {
-  return sectionType in layoutRegistryWithRequirements;
-}
-
-/**
- * Validates if a layout exists for a given section type
- * @param sectionType Section type
+ * Validates if a layout exists in the unified schema
  * @param layoutName Layout name to validate
- * @returns True if layout exists in the section
+ * @returns True if layout exists in schema
  */
-function validateLayout(sectionType: string, layoutName: string): boolean {
-  const section = layoutRegistryWithRequirements[sectionType];
-  return section && layoutName in section;
+function validateLayout(layoutName: string): boolean {
+  return layoutName in layoutElementSchema;
 }
 
 /**
@@ -190,40 +96,21 @@ export function getLayoutRequirements(
       return;
     }
 
-    // Normalize section ID for consistent lookup
-    const normalizedSectionId = normalizeSectionId(originalSectionId);
-
-    // Get section type from mapping (try both original and normalized)
-    let sectionType = sectionTypeMap[originalSectionId] || sectionTypeMap[normalizedSectionId];
-
-    if (!sectionType) {
-      logger.warn(`❌ Unknown section type for: ${originalSectionId} (normalized: ${normalizedSectionId})`);
-      logger.debug('Available section types:', Object.keys(sectionTypeMap));
+    // Validate layout exists in unified schema
+    if (!validateLayout(layoutName)) {
+      logger.error(`❌ Layout '${layoutName}' not found in layoutElementSchema`);
+      logger.debug('Available layouts:', Object.keys(layoutElementSchema));
       return;
     }
 
-    // Validate section type exists in registry
-    if (!validateSectionType(sectionType)) {
-      logger.error(`❌ Section type '${sectionType}' not found in layoutRegistryWithRequirements`);
-      return;
-    }
-
-    // Validate layout exists in section
-    if (!validateLayout(sectionType, layoutName)) {
-      logger.error(`❌ Layout '${layoutName}' not found in section '${sectionType}'`);
-      const section = layoutRegistryWithRequirements[sectionType];
-      const availableLayouts = section ? Object.keys(section) : [];
-      logger.debug(`Available layouts for ${sectionType}:`, availableLayouts);
-      return;
-    }
-
-    // Get card requirements for this layout
-    const cardRequirements = getCardRequirements(sectionType, layoutName);
+    // Get card requirements for this layout from unified schema
+    const schema = layoutElementSchema[layoutName];
+    const cardRequirements = getCardRequirements(schema);
 
     if (cardRequirements) {
       requirements.push({
         sectionId: originalSectionId, // Keep original section ID for consistency
-        sectionType,
+        sectionType: originalSectionId, // Use section ID as type for simplicity
         layoutName,
         cardRequirements
       });
@@ -241,7 +128,7 @@ export function getLayoutRequirements(
       // Still add to requirements for completeness
       requirements.push({
         sectionId: originalSectionId,
-        sectionType,
+        sectionType: originalSectionId, // Use section ID as type for simplicity
         layoutName,
         cardRequirements: undefined
       });

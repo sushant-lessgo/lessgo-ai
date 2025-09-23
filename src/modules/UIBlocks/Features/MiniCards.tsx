@@ -13,6 +13,7 @@ import {
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
+import { getRandomIconFromCategory } from '@/utils/iconMapping';
 
 interface MiniCardsContent {
   headline: string;
@@ -26,6 +27,12 @@ interface MiniCardsContent {
   feature_icon_4?: string;
   feature_icon_5?: string;
   feature_icon_6?: string;
+  feature_icon_7?: string;
+  feature_icon_8?: string;
+  feature_icon_9?: string;
+  feature_icon_10?: string;
+  feature_icon_11?: string;
+  feature_icon_12?: string;
   subheadline?: string;
   supporting_text?: string;
   cta_text?: string;
@@ -75,9 +82,33 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: '📱' 
   },
-  feature_icon_6: { 
-    type: 'string' as const, 
-    default: '🔧' 
+  feature_icon_6: {
+    type: 'string' as const,
+    default: '🔧'
+  },
+  feature_icon_7: {
+    type: 'string' as const,
+    default: '🎯'
+  },
+  feature_icon_8: {
+    type: 'string' as const,
+    default: '✨'
+  },
+  feature_icon_9: {
+    type: 'string' as const,
+    default: '🚀'
+  },
+  feature_icon_10: {
+    type: 'string' as const,
+    default: '🔥'
+  },
+  feature_icon_11: {
+    type: 'string' as const,
+    default: '💎'
+  },
+  feature_icon_12: {
+    type: 'string' as const,
+    default: '⭐'
   },
   subheadline: { 
     type: 'string' as const, 
@@ -158,7 +189,13 @@ const MiniCard = React.memo(({
       blockContent.feature_icon_3,
       blockContent.feature_icon_4,
       blockContent.feature_icon_5,
-      blockContent.feature_icon_6
+      blockContent.feature_icon_6,
+      blockContent.feature_icon_7,
+      blockContent.feature_icon_8,
+      blockContent.feature_icon_9,
+      blockContent.feature_icon_10,
+      blockContent.feature_icon_11,
+      blockContent.feature_icon_12
     ];
     return iconFields[index] || '📊';
   };
@@ -451,15 +488,17 @@ export default function MiniCards(props: LayoutComponentProps) {
                 featureDescriptions.push('Add feature description here');
                 featureKeywords.push('New');
                 
-                // Add default icon for the new feature
-                const defaultIcons = ['⚡', '💽', '🔒', '👥', '📱', '🔧'];
+                // Add smart icon for the new feature
                 const iconField = `feature_icon_${newFeatureIndex + 1}` as keyof MiniCardsContent;
-                const defaultIcon = defaultIcons[newFeatureIndex] || '⭐';
+                if (newFeatureIndex < 12) {
+                  // Use random icon from features category for new features beyond defaults
+                  const smartIcon = getRandomIconFromCategory('features');
+                  handleContentUpdate(iconField, smartIcon);
+                }
                 
                 handleContentUpdate('feature_titles', featureTitles.join('|'));
                 handleContentUpdate('feature_descriptions', featureDescriptions.join('|'));
                 handleContentUpdate('feature_keywords', featureKeywords.join('|'));
-                handleContentUpdate(iconField, defaultIcon);
               }}
               className="px-6 py-3 border-2 border-dashed border-gray-300 hover:border-gray-400 text-gray-500 hover:text-gray-600 transition-all duration-300 flex items-center space-x-3 bg-gray-50 hover:bg-gray-100 rounded-2xl"
               title="Add new feature"

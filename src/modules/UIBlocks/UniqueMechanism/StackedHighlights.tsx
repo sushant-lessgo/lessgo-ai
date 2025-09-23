@@ -4,16 +4,17 @@ import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useOnboardingStore } from '@/hooks/useOnboardingStore';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
-  EditableAdaptiveText 
+import {
+  EditableAdaptiveHeadline,
+  EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
-import { 
-  LayoutComponentProps, 
+import {
+  LayoutComponentProps,
   extractLayoutContent,
-  StoreElementTypes 
+  StoreElementTypes
 } from '@/types/storeTypes';
+import { getIconFromCategory, getRandomIconFromCategory } from '@/utils/iconMapping';
 
 interface StackedHighlightsProps extends LayoutComponentProps {}
 
@@ -279,6 +280,15 @@ export default function StackedHighlights(props: StackedHighlightsProps) {
     const { newTitles, newDescriptions } = addHighlight(blockContent.highlight_titles, blockContent.highlight_descriptions);
     handleContentUpdate('highlight_titles', newTitles);
     handleContentUpdate('highlight_descriptions', newDescriptions);
+
+    // Add a smart icon for the new highlight
+    const newHighlightCount = newTitles.split('|').length;
+    const iconField = `highlight_icon_${newHighlightCount}` as keyof StackedHighlightsContent;
+    if (newHighlightCount <= 6) {
+      // Use random icon from innovation category for new highlights
+      const defaultIcon = getRandomIconFromCategory('innovation');
+      handleContentUpdate(iconField, defaultIcon);
+    }
   };
 
   // Handle removing a highlight

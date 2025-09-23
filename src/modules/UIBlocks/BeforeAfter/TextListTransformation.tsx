@@ -12,6 +12,7 @@ import {
 } from '@/components/layout/ComponentRegistry';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { getIconFromCategory, getRandomIconFromCategory } from '@/utils/iconMapping';
 
 interface TextListTransformationContent {
   headline: string;

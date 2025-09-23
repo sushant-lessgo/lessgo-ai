@@ -1,138 +1,241 @@
-// components/layout/InnovationTimeline.tsx
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useOnboardingStore } from '@/hooks/useOnboardingStore';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { EditableAdaptiveHeadline, EditableAdaptiveText } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { getIconFromCategory, getRandomIconFromCategory } from '@/utils/iconMapping';
 
 interface InnovationTimelineContent {
   headline: string;
-  timeline_items: string; // Legacy format for backward compatibility
-  timeline_item_1?: string;
-  timeline_item_2?: string;
-  timeline_item_3?: string;
-  timeline_item_4?: string;
-  timeline_item_5?: string;
-  timeline_item_6?: string;
+  timeline_subtitle?: string;
+  timeline_dates: string;
+  timeline_events: string;
+  timeline_descriptions: string;
+  timeline_icon_1?: string;
+  timeline_icon_2?: string;
+  timeline_icon_3?: string;
+  timeline_icon_4?: string;
+  timeline_icon_5?: string;
+  timeline_icon_6?: string;
+  timeline_icon_7?: string;
+}
+
+interface TimelineItem {
+  date: string;
+  event: string;
+  description: string;
+  id: string;
 }
 
 const CONTENT_SCHEMA = {
   headline: { type: 'string' as const, default: 'Innovation Timeline' },
-  timeline_items: { type: 'string' as const, default: '2020: Initial Research|2021: First Prototype|2022: Beta Testing|2023: Market Launch|2024: AI Integration|2025: Global Expansion' },
-  timeline_item_1: { type: 'string' as const, default: '2020: Initial Research' },
-  timeline_item_2: { type: 'string' as const, default: '2021: First Prototype' },
-  timeline_item_3: { type: 'string' as const, default: '2022: Beta Testing' },
-  timeline_item_4: { type: 'string' as const, default: '2023: Market Launch' },
-  timeline_item_5: { type: 'string' as const, default: '2024: AI Integration' },
-  timeline_item_6: { type: 'string' as const, default: '2025: Global Expansion' }
+  timeline_subtitle: { type: 'string' as const, default: '' },
+  timeline_dates: { type: 'string' as const, default: '2020|2021|2022|2023|2024' },
+  timeline_events: { type: 'string' as const, default: 'Initial Research|First Prototype|Beta Testing|Market Launch|AI Integration' },
+  timeline_descriptions: { type: 'string' as const, default: 'Started fundamental research into breakthrough technology|Built first working prototype demonstrating core concepts|Conducted extensive testing with select customers|Officially launched product to the market|Integrated advanced AI capabilities for enhanced performance' },
+  timeline_icon_1: { type: 'string' as const, default: '🔬' },
+  timeline_icon_2: { type: 'string' as const, default: '🔧' },
+  timeline_icon_3: { type: 'string' as const, default: '🧪' },
+  timeline_icon_4: { type: 'string' as const, default: '🚀' },
+  timeline_icon_5: { type: 'string' as const, default: '🤖' },
+  timeline_icon_6: { type: 'string' as const, default: '🌍' },
+  timeline_icon_7: { type: 'string' as const, default: '💡' }
 };
 
-// Parse timeline data from individual fields
-const parseTimelineData = (blockContent: InnovationTimelineContent): { item: string; id: string }[] => {
-  const individualItems = [
-    blockContent.timeline_item_1,
-    blockContent.timeline_item_2,
-    blockContent.timeline_item_3,
-    blockContent.timeline_item_4,
-    blockContent.timeline_item_5,
-    blockContent.timeline_item_6
-  ].map((item, index) => ({
-    item: item || '',
-    id: `timeline-${index}`
-  })).filter(timelineItem =>
-    timelineItem.item &&
-    timelineItem.item.trim() !== '' &&
-    timelineItem.item !== '___REMOVED___'
-  );
+const parseTimelineData = (dates: string, events: string, descriptions: string): TimelineItem[] => {
+  const dateList = dates.split('|').map(d => d.trim()).filter(d => d);
+  const eventList = events.split('|').map(e => e.trim()).filter(e => e);
+  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
 
-  // Fallback to legacy format if no individual items
-  if (individualItems.length === 0 && blockContent.timeline_items) {
-    return blockContent.timeline_items
-      .split('|')
-      .map((item, index) => ({
-        item: item.trim(),
-        id: `timeline-legacy-${index}`
-      }))
-      .filter(timelineItem => timelineItem.item);
+  return dateList.map((date, index) => ({
+    id: `timeline-${index}`,
+    date,
+    event: eventList[index] || 'Event not provided',
+    description: descriptionList[index] || 'Description not provided.'
+  }));
+};
+
+const getTimelineIcon = (blockContent: InnovationTimelineContent, index: number) => {
+  const iconFields = [
+    blockContent.timeline_icon_1,
+    blockContent.timeline_icon_2,
+    blockContent.timeline_icon_3,
+    blockContent.timeline_icon_4,
+    blockContent.timeline_icon_5,
+    blockContent.timeline_icon_6,
+    blockContent.timeline_icon_7
+  ];
+  return iconFields[index] || '📅';
+};
+
+const addTimelineItem = (dates: string, events: string, descriptions: string): {
+  newDates: string;
+  newEvents: string;
+  newDescriptions: string;
+} => {
+  const dateList = dates.split('|').map(d => d.trim()).filter(d => d);
+  const eventList = events.split('|').map(e => e.trim()).filter(e => e);
+  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
+
+  const currentYear = new Date().getFullYear();
+  dateList.push(`${currentYear + dateList.length}`);
+  eventList.push('New Milestone');
+  descriptionList.push('Describe this innovation milestone.');
+
+  return {
+    newDates: dateList.join('|'),
+    newEvents: eventList.join('|'),
+    newDescriptions: descriptionList.join('|')
+  };
+};
+
+const removeTimelineItem = (dates: string, events: string, descriptions: string, indexToRemove: number): {
+  newDates: string;
+  newEvents: string;
+  newDescriptions: string;
+} => {
+  const dateList = dates.split('|').map(d => d.trim()).filter(d => d);
+  const eventList = events.split('|').map(e => e.trim()).filter(e => e);
+  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
+
+  if (indexToRemove >= 0 && indexToRemove < dateList.length) {
+    dateList.splice(indexToRemove, 1);
+  }
+  if (indexToRemove >= 0 && indexToRemove < eventList.length) {
+    eventList.splice(indexToRemove, 1);
+  }
+  if (indexToRemove >= 0 && indexToRemove < descriptionList.length) {
+    descriptionList.splice(indexToRemove, 1);
   }
 
-  return individualItems;
+  return {
+    newDates: dateList.join('|'),
+    newEvents: eventList.join('|'),
+    newDescriptions: descriptionList.join('|')
+  };
 };
 
-
-// Individual Timeline Card Component
 const TimelineCard = ({
   timelineItem,
   index,
   mode,
   sectionId,
-  onEdit,
-  onRemove,
+  onDateEdit,
+  onEventEdit,
+  onDescriptionEdit,
+  onRemoveItem,
+  blockContent,
   colorTokens,
-  backgroundType,
+  handleContentUpdate,
+  canRemove = true,
   sectionBackground,
-  canRemove = true
+  isLast = false
 }: {
-  timelineItem: { item: string; id: string };
+  timelineItem: TimelineItem;
   index: number;
   mode: 'edit' | 'preview';
   sectionId: string;
-  onEdit: (index: number, value: string) => void;
-  onRemove?: (index: number) => void;
+  onDateEdit: (index: number, value: string) => void;
+  onEventEdit: (index: number, value: string) => void;
+  onDescriptionEdit: (index: number, value: string) => void;
+  onRemoveItem?: (index: number) => void;
+  blockContent: InnovationTimelineContent;
   colorTokens: any;
-  backgroundType: string;
-  sectionBackground: string;
+  handleContentUpdate: (field: keyof InnovationTimelineContent, value: string) => void;
   canRemove?: boolean;
+  sectionBackground?: string;
+  isLast?: boolean;
 }) => {
   const { getTextStyle } = useTypography();
-  const h3Style = getTextStyle('h3');
 
   return (
-    <div className="group/timeline-item relative flex items-center space-x-6">
-      {/* Timeline Number Circle */}
-      <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0 shadow-lg">
-        {index + 1}
+    <div className="group/timeline-item relative flex items-start space-x-6">
+      {/* Timeline Line */}
+      {!isLast && (
+        <div className="absolute left-6 top-16 w-0.5 h-20 bg-gradient-to-b from-blue-600 to-blue-300"></div>
+      )}
+
+      {/* Timeline Icon Circle */}
+      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0 shadow-lg z-10">
+        <IconEditableText
+          mode={mode}
+          value={getTimelineIcon(blockContent, index)}
+          onEdit={(value) => {
+            const iconField = `timeline_icon_${index + 1}` as keyof InnovationTimelineContent;
+            handleContentUpdate(iconField, value);
+          }}
+          backgroundType="primary"
+          colorTokens={colorTokens}
+          iconSize="sm"
+          className="text-white"
+          sectionId={sectionId}
+          elementKey={`timeline_icon_${index + 1}`}
+        />
       </div>
 
       {/* Timeline Card */}
       <div className="bg-white p-6 rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300 flex-1 relative">
+        <div className="flex items-center gap-4 mb-3">
+          <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full font-semibold text-sm">
+            {mode !== 'preview' ? (
+              <div
+                contentEditable
+                suppressContentEditableWarning
+                onBlur={(e) => onDateEdit(index, e.currentTarget.textContent || '')}
+                className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-blue-200"
+              >
+                {timelineItem.date}
+              </div>
+            ) : (
+              <span>{timelineItem.date}</span>
+            )}
+          </div>
+        </div>
+
         {mode !== 'preview' ? (
-          <EditableAdaptiveText
-            mode={mode}
-            value={timelineItem.item || ''}
-            onEdit={(value) => onEdit(index, value)}
-            backgroundType="neutral"
-            colorTokens={colorTokens}
-            variant="body"
-            className="font-bold text-gray-900 text-lg leading-relaxed"
-            placeholder={`Timeline item ${index + 1} (e.g., "2024: Product Launch")`}
-            sectionBackground="bg-white"
-            sectionId={sectionId}
-            elementKey={`timeline_item_${index + 1}`}
-          />
+          <div
+            contentEditable
+            suppressContentEditableWarning
+            onBlur={(e) => onEventEdit(index, e.currentTarget.textContent || '')}
+            className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 mb-2 cursor-text hover:bg-gray-50 font-bold text-gray-900 text-lg"
+          >
+            {timelineItem.event}
+          </div>
         ) : (
-          <h3 style={h3Style} className="font-bold text-gray-900 text-lg leading-relaxed">
-            {timelineItem.item}
-          </h3>
+          <h3 className="font-bold text-gray-900 text-lg mb-2">{timelineItem.event}</h3>
         )}
 
-        {/* Delete button - only show in edit mode and if can remove */}
-        {mode !== 'preview' && onRemove && canRemove && (
+        {mode !== 'preview' ? (
+          <div
+            contentEditable
+            suppressContentEditableWarning
+            onBlur={(e) => onDescriptionEdit(index, e.currentTarget.textContent || '')}
+            className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[48px] cursor-text hover:bg-gray-50 text-gray-600"
+          >
+            {timelineItem.description}
+          </div>
+        ) : (
+          <p className="text-gray-600">{timelineItem.description}</p>
+        )}
+
+        {mode === 'edit' && canRemove && (
           <button
             onClick={(e) => {
               e.stopPropagation();
-              onRemove(index);
+              onRemoveItem?.(index);
             }}
-            className="opacity-0 group-hover/timeline-item:opacity-100 absolute top-4 right-4 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-200"
+            className="opacity-0 group-hover/timeline-item:opacity-100 absolute top-4 right-4 w-8 h-8 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-200"
             title="Remove this timeline item"
           >
-            <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         )}
-
       </div>
     </div>
   );
@@ -144,105 +247,157 @@ export default function InnovationTimeline(props: LayoutComponentProps) {
     mode,
     blockContent,
     colorTokens,
+    getTextStyle,
     sectionBackground,
-    handleContentUpdate,
-    backgroundType
+    handleContentUpdate
   } = useLayoutComponent<InnovationTimelineContent>({
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
 
-  // Parse timeline data
-  const timelineItems = parseTimelineData(blockContent);
+  const { getTextStyle: getTypographyStyle } = useTypography();
+  const store = useEditStore();
+  const onboardingStore = useOnboardingStore();
 
-  // Handle individual timeline item editing
-  const handleTimelineEdit = (index: number, value: string) => {
-    const fieldKey = `timeline_item_${index + 1}` as keyof InnovationTimelineContent;
-    handleContentUpdate(fieldKey, value);
-  };
+  // Auto-populate icons on initial generation
+  useEffect(() => {
+    if (mode === 'edit' && blockContent.timeline_dates) {
+      const timelineItems = parseTimelineData(
+        blockContent.timeline_dates,
+        blockContent.timeline_events,
+        blockContent.timeline_descriptions
+      );
 
-  // Handle adding a new timeline item
-  const handleAddTimelineItem = () => {
-    const emptyIndex = [
-      blockContent.timeline_item_1,
-      blockContent.timeline_item_2,
-      blockContent.timeline_item_3,
-      blockContent.timeline_item_4,
-      blockContent.timeline_item_5,
-      blockContent.timeline_item_6
-    ].findIndex(item => !item || item.trim() === '' || item === '___REMOVED___');
-
-    if (emptyIndex !== -1) {
-      const fieldKey = `timeline_item_${emptyIndex + 1}` as keyof InnovationTimelineContent;
-      handleContentUpdate(fieldKey, `Timeline Item ${emptyIndex + 1}`);
+      timelineItems.forEach((_, index) => {
+        const iconField = `timeline_icon_${index + 1}` as keyof InnovationTimelineContent;
+        if (!blockContent[iconField] || blockContent[iconField] === '') {
+          const categories = ['innovation', 'technology', 'growth', 'success', 'advanced', 'cutting_edge'];
+          const icon = getRandomIconFromCategory(categories[index % categories.length]);
+          handleContentUpdate(iconField, icon);
+        }
+      });
     }
+  }, [blockContent.timeline_dates]);
+
+  const timelineItems = parseTimelineData(
+    blockContent.timeline_dates || '',
+    blockContent.timeline_events || '',
+    blockContent.timeline_descriptions || ''
+  );
+
+  const handleDateEdit = (index: number, newDate: string) => {
+    const dates = (blockContent.timeline_dates || '').split('|').map(d => d.trim());
+    dates[index] = newDate;
+    handleContentUpdate('timeline_dates', dates.join('|'));
   };
 
-  // Handle removing a timeline item
-  const handleRemoveTimelineItem = (indexToRemove: number) => {
-    const fieldKey = `timeline_item_${indexToRemove + 1}` as keyof InnovationTimelineContent;
-    handleContentUpdate(fieldKey, '___REMOVED___');
+  const handleEventEdit = (index: number, newEvent: string) => {
+    const events = (blockContent.timeline_events || '').split('|').map(e => e.trim());
+    events[index] = newEvent;
+    handleContentUpdate('timeline_events', events.join('|'));
+  };
+
+  const handleDescriptionEdit = (index: number, newDescription: string) => {
+    const descriptions = (blockContent.timeline_descriptions || '').split('|').map(d => d.trim());
+    descriptions[index] = newDescription;
+    handleContentUpdate('timeline_descriptions', descriptions.join('|'));
+  };
+
+  const handleAddItem = () => {
+    const { newDates, newEvents, newDescriptions } = addTimelineItem(
+      blockContent.timeline_dates || '',
+      blockContent.timeline_events || '',
+      blockContent.timeline_descriptions || ''
+    );
+    handleContentUpdate('timeline_dates', newDates);
+    handleContentUpdate('timeline_events', newEvents);
+    handleContentUpdate('timeline_descriptions', newDescriptions);
+  };
+
+  const handleRemoveItem = (index: number) => {
+    const { newDates, newEvents, newDescriptions } = removeTimelineItem(
+      blockContent.timeline_dates || '',
+      blockContent.timeline_events || '',
+      blockContent.timeline_descriptions || '',
+      index
+    );
+    handleContentUpdate('timeline_dates', newDates);
+    handleContentUpdate('timeline_events', newEvents);
+    handleContentUpdate('timeline_descriptions', newDescriptions);
   };
 
   return (
     <LayoutSection
       sectionId={sectionId}
       sectionType="InnovationTimeline"
-      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
     >
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <EditableAdaptiveHeadline
-          mode={mode}
-          value={blockContent.headline || ''}
-          onEdit={(value) => handleContentUpdate('headline', value)}
-          level="h2"
-          backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-          colorTokens={colorTokens}
-          className="text-center mb-12"
-          sectionId={sectionId}
-          elementKey="headline"
-          sectionBackground={sectionBackground}
-        />
+        <div className="text-center mb-12">
+          <EditableAdaptiveHeadline
+            mode={mode}
+            value={blockContent.headline || ''}
+            onEdit={(value) => handleContentUpdate('headline', value)}
+            level="h2"
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+            colorTokens={colorTokens}
+            className="mb-4"
+            sectionId={sectionId}
+            elementKey="headline"
+            sectionBackground={sectionBackground}
+          />
 
-        {/* Timeline Items */}
-        <div className="relative">
-          {/* Connecting Line */}
-          <div className="absolute left-6 top-12 bottom-12 w-0.5 bg-gradient-to-b from-blue-200 via-blue-300 to-blue-200 hidden md:block"></div>
-
-          <div className="space-y-8">
-            {timelineItems.map((timelineItem, index) => (
-              <TimelineCard
-                key={timelineItem.id}
-                timelineItem={timelineItem}
-                index={index}
-                mode={mode}
-                sectionId={sectionId}
-                onEdit={handleTimelineEdit}
-                onRemove={handleRemoveTimelineItem}
-                colorTokens={colorTokens}
-                backgroundType={backgroundType || 'neutral'}
-                sectionBackground={sectionBackground}
-                canRemove={timelineItems.length > 1}
-              />
-            ))}
-          </div>
+          {blockContent.timeline_subtitle && (
+            <EditableAdaptiveText
+              mode={mode}
+              value={blockContent.timeline_subtitle}
+              onEdit={(value) => handleContentUpdate('timeline_subtitle', value)}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+              colorTokens={colorTokens}
+              variant="body"
+              className="text-lg max-w-3xl mx-auto"
+              sectionId={sectionId}
+              elementKey="timeline_subtitle"
+              sectionBackground={sectionBackground}
+            />
+          )}
         </div>
 
-        {/* Add Timeline Item Button - only show in edit mode and if under max limit */}
-        {mode !== 'preview' && timelineItems.length < 6 && (
+        <div className="space-y-8">
+          {timelineItems.map((timelineItem, index) => (
+            <TimelineCard
+              key={timelineItem.id}
+              timelineItem={timelineItem}
+              index={index}
+              mode={mode}
+              sectionId={sectionId}
+              onDateEdit={handleDateEdit}
+              onEventEdit={handleEventEdit}
+              onDescriptionEdit={handleDescriptionEdit}
+              onRemoveItem={handleRemoveItem}
+              blockContent={blockContent}
+              colorTokens={colorTokens}
+              handleContentUpdate={handleContentUpdate}
+              canRemove={timelineItems.length > 3}
+              sectionBackground={sectionBackground}
+              isLast={index === timelineItems.length - 1}
+            />
+          ))}
+        </div>
+
+        {mode === 'edit' && timelineItems.length < 7 && (
           <div className="mt-8 text-center">
             <button
-              onClick={handleAddTimelineItem}
-              className="flex items-center space-x-2 mx-auto px-4 py-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-xl transition-all duration-200 group"
+              onClick={handleAddItem}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200"
             >
-              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              <span className="text-blue-700 font-medium">Add Timeline Item</span>
+              Add Timeline Item
             </button>
           </div>
         )}
@@ -254,13 +409,6 @@ export default function InnovationTimeline(props: LayoutComponentProps) {
 export const componentMeta = {
   name: 'InnovationTimeline',
   category: 'Unique Mechanism',
-  description: 'Interactive innovation and development timeline with editable milestones',
-  defaultBackgroundType: 'neutral' as const,
-  features: [
-    'Editable timeline milestones',
-    'Add/remove timeline items (up to 6)',
-    'Sequential numbering with progress indicators',
-    'Hover-based delete controls',
-    'Visual connecting line for timeline flow'
-  ]
+  description: 'Showcase your innovation journey through a dynamic timeline',
+  defaultBackgroundType: 'primary' as const
 };

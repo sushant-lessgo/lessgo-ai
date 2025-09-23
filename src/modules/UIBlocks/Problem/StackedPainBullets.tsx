@@ -1,12 +1,13 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
+import {
+  EditableAdaptiveHeadline,
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { getRandomIconFromCategory } from '@/utils/iconMapping';
 
 
 // Pain point structure
@@ -217,36 +218,21 @@ export default function StackedPainBullets(props: LayoutComponentProps) {
   const addPainPoint = () => {
     const points = blockContent.pain_points.split('|');
     if (points.length >= 6) return; // Maximum 6 pain points
-    
+
     const newPoints = [...points, 'New pain point'];
-    
+
     // Update pain points
     handleContentUpdate('pain_points', newPoints.join('|'));
-    
-    // Set icon based on new length - use setTimeout to avoid Immer conflicts
-    setTimeout(() => {
-      const iconNumber = newPoints.length;
-      switch(iconNumber) {
-        case 1:
-          handleContentUpdate('pain_icon_1', '⚠️');
-          break;
-        case 2:
-          handleContentUpdate('pain_icon_2', '⚠️');
-          break;
-        case 3:
-          handleContentUpdate('pain_icon_3', '⚠️');
-          break;
-        case 4:
-          handleContentUpdate('pain_icon_4', '⚠️');
-          break;
-        case 5:
-          handleContentUpdate('pain_icon_5', '⚠️');
-          break;
-        case 6:
-          handleContentUpdate('pain_icon_6', '⚠️');
-          break;
-      }
-    }, 0);
+
+    // Add a smart icon for the new pain point
+    const newPainCount = newPoints.length;
+    const iconField = `pain_icon_${newPainCount}` as keyof StackedPainBulletsContent;
+    if (newPainCount <= 6) {
+      // Use random icon from pain/problem category
+      const painIcons = ['😰', '⚠️', '😤', '😫', '💢', '😓'];
+      const defaultIcon = painIcons[Math.floor(Math.random() * painIcons.length)];
+      handleContentUpdate(iconField, defaultIcon);
+    }
   };
 
   // Remove pain point

@@ -2,12 +2,10 @@
 import {
   layoutElementSchema,
   isUnifiedSchema,
-  getAllElements,
-  getCardElements,
-  getSectionElements,
-  getCardRequirements
+  getCardRequirements as getSchemaCardRequirements
 } from '../sections/layoutElementSchema'
 import type { ParsedStrategy } from './parseStrategyResponse'
+import type { CardRequirements } from '@/types/layoutTypes'
 
 import type {
   InputVariables,
@@ -114,7 +112,7 @@ function determineOptimalCardCount(
   }
 
   // Respect user content for features
-  if (sectionId === 'features' && userFeatureCount && cardRequirements.respectUserContent) {
+  if (sectionId === 'features' && userFeatureCount && 'respectUserContent' in cardRequirements && cardRequirements.respectUserContent) {
     const beforeUserContent = finalCount;
     finalCount = Math.max(finalCount, userFeatureCount);
     if (finalCount !== beforeUserContent) {
@@ -628,7 +626,7 @@ function getSectionLayoutGuidance(sectionType: string, layout: string): string {
       ProcessFlowDiagram: "Process visualization presentation. Use cyclical, momentum-building language. Show how components work together.",
       PropertyComparisonMatrix: "Approach comparison presentation. Use clear differentiation language. Show advantages of unique approach.",
       SecretSauceReveal: "Intellectual property showcase. Use innovation and proprietary language. Include relevant patent or IP context.",
-      StackedHighlights: "Feature uniqueness showcase. Use differentiation-focused language. Emphasize unique approach and methodology.",
+      StackedHighlights: "Feature uniqueness showcase. Use differentiation-focused language. Emphasize unique approach and methodology. HIGHLIGHT_ICONS FORMAT: Generate individual icon fields (highlight_icon_1, highlight_icon_2, etc.) using semantic category names that match each highlight's function. AVAILABLE CATEGORIES: analytics, insights, data, metrics, speed, performance, fast, instant, automation, ai, intelligence, smart, security, protection, safe, privacy, growth, success, results, achievement, efficiency, optimization, streamline, workflow, process, system, method, integration, connection, sync, connect, innovation, technology, advanced, cutting_edge, quality, excellence, premium, professional, collaboration, team, communication, social, scale, enterprise, global, massive. SELECTION STRATEGY: Analyze each highlight title and description, then select the most semantically relevant category. Example: For 'Intelligent Auto-Prioritization' use 'intelligence', for 'Real-Time Analytics' use 'analytics', for 'Speed Optimization' use 'speed'.",
       SystemArchitecture: "Conceptual model presentation. Use clear, explanatory language that supports visual understanding.",
       TechnicalAdvantage: "Technical advantage cards layout. Use clear technical benefits language. Present multiple technical capabilities as structured advantage cards."
     },
@@ -898,19 +896,76 @@ IMPORTANT:
 }
 
 /**
+ * Type guard to check if schema is in unified format
+ */
+function isUnifiedSchemaObject(schema: any): schema is { sectionElements: any[], cardStructure?: any, cardRequirements?: any } {
+  return schema && typeof schema === 'object' && Array.isArray(schema.sectionElements);
+}
+
+/**
+ * Gets all elements from a schema (unified or legacy)
+ */
+function getAllElements(schema: any) {
+  if (isUnifiedSchemaObject(schema)) {
+    const sectionElements = schema.sectionElements || [];
+    const cardElements = schema.cardStructure?.elements?.map(name => ({
+      element: name,
+      mandatory: true
+    })) || [];
+    return [...sectionElements, ...cardElements];
+  }
+  // Legacy array format
+  return Array.isArray(schema) ? schema : [];
+}
+
+/**
+ * Gets card requirements from schema
+ */
+function getCardRequirements(layoutName: string) {
+  const schema = layoutElementSchema[layoutName];
+  return getSchemaCardRequirements(schema) || { type: 'cards', min: 1, max: 3, optimal: [2, 3] } as CardRequirements;
+}
+
+/**
+ * Enhanced card requirements (wrapper around getCardRequirements)
+ */
+function getEnhancedCardRequirements(sectionId: string, layoutName: string) {
+  return getCardRequirements(layoutName);
+}
+
+// Type for section card info
+type SectionCardInfo = {
+  sectionId: string;
+  layoutName: string;
+  cardRequirements: any;
+  currentCount: number;
+};
+
+// Mock strategy mapping - this would be imported from another module
+const strategyToSectionMapping: Record<string, string[]> = {};
+
+// Simple logger replacement
+const logger = {
+  debug: (msg: string, data?: any) => console.log(`[DEBUG] ${msg}`, data || ''),
+  info: (msg: string, data?: any) => console.log(`[INFO] ${msg}`, data || ''),
+  warn: (msg: string, data?: any) => console.warn(`[WARN] ${msg}`, data || ''),
+  error: (msg: string, data?: any) => console.error(`[ERROR] ${msg}`, data || '')
+};
+
+/**
  * Gets AI-generated elements from unified or legacy schema
  */
 function getAIGeneratedElements(layoutName: string) {
   const schema = layoutElementSchema[layoutName];
 
-  if (isUnifiedSchema(schema)) {
+  if (isUnifiedSchemaObject(schema)) {
     // Get section elements where generation = 'ai_generated'
     const aiSectionElements = schema.sectionElements
       .filter(el => el.generation === 'ai_generated')
       .map(el => ({ ...el, isCard: false }));
 
     // Get card elements if cardStructure.generation = 'ai_generated'
-    const aiCardElements = schema.cardStructure.generation === 'ai_generated'
+    const aiCardElements = schema.cardStructure && schema.cardStructure.generation === 'ai_generated'
       ? schema.cardStructure.elements.map(name => ({
           element: name,
           mandatory: true,
@@ -931,7 +986,7 @@ function getAIGeneratedElements(layoutName: string) {
  */
 function isCardElement(element: string, layoutName: string): boolean {
   const schema = layoutElementSchema[layoutName];
-  if (isUnifiedSchema(schema)) {
+  if (isUnifiedSchema(schema) && schema.cardStructure) {
     return schema.cardStructure.elements.includes(element);
   }
   // Fallback to pattern matching for old schemas
@@ -1277,7 +1332,30 @@ function getElementFormatGuidance(element: string): string {
  * Builds field classification guidance for AI generation
  */
 function buildFieldClassificationGuidance(elementsMap: Record<string, SectionInfo>): string {
-  // Since we only process ai_generated elements now, this is simplified
+  // Generate field classification guidance from unified schema
+  const guidance: string[] = [];
+
+  Object.values(elementsMap).forEach(sectionInfo => {
+    const { layoutName } = sectionInfo;
+    const schema = layoutElementSchema[layoutName];
+
+    if (schema) {
+      const elements = Array.isArray(schema) ? schema : [...schema.sectionElements, ...(schema.cardStructure?.elements.map(e => ({ element: e, generation: schema.cardStructure!.generation })) || [])];
+
+      const aiGenerated = elements.filter(el => el.generation === 'ai_generated').length;
+      const manualPreferred = elements.filter(el => el.generation === 'manual_preferred').length;
+      const hybrid = elements.filter(el => el.generation === 'hybrid').length;
+
+      if (manualPreferred > 0 || hybrid > 0) {
+        guidance.push(`${layoutName}: ${aiGenerated} AI fields, ${manualPreferred} manual-preferred, ${hybrid} hybrid`);
+      }
+    }
+  });
+
+  if (guidance.length > 0) {
+    return `FIELD CLASSIFICATION GUIDANCE:\n${guidance.join('\n')}\n- AI fields: Generate high-quality content\n- Manual-preferred: Use realistic placeholders users can replace\n- Hybrid: Use AI but prioritize user customization\n\nFocus on conversion-optimized content that aligns with strategic objectives.`;
+  }
+
   return `FIELD CLASSIFICATION: All requested fields are AI-generatable. Focus on high-quality, conversion-optimized content that aligns with the strategic objectives.`;
 }
 
@@ -1677,6 +1755,13 @@ function getSpecificElementGuidance(elementName: string, sectionType: string): s
     StackedHighlights: {
       headline: "Present your unique approach as comprehensive solution.",
       highlight_titles: "Focus on unique capabilities others can't match.",
+      highlight_descriptions: "Explain how each unique capability creates competitive advantage.",
+      highlight_icon_1: "Semantic category for first highlight. Match to highlight meaning (e.g., 'intelligence' for AI features).",
+      highlight_icon_2: "Semantic category for second highlight. Match to highlight purpose (e.g., 'speed' for performance).",
+      highlight_icon_3: "Semantic category for third highlight. Match to highlight function (e.g., 'analytics' for data features).",
+      highlight_icon_4: "Semantic category for fourth highlight. Match to highlight benefit (e.g., 'security' for protection).",
+      highlight_icon_5: "Semantic category for fifth highlight if needed.",
+      highlight_icon_6: "Semantic category for sixth highlight if needed.",
       mechanism_name: "Brand the overall system. Proprietary methodology."
     },
     SystemArchitecture: {
@@ -2215,7 +2300,7 @@ export function debugCardCountDetermination(
   finalCount: number;
   reasoning: string[];
 } {
-  const sectionType = sectionTypeMapping[sectionId] || 'Unknown';
+  const sectionType = sectionId;
   const cardRequirements = getEnhancedCardRequirements(sectionId, layoutName);
   const reasoning: string[] = [];
 

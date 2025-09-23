@@ -11,6 +11,7 @@ import {
   StoreElementTypes 
 } from '@/types/storeTypes';
 import IconEditableText from '@/components/ui/IconEditableText';
+import { getIconFromCategory, getRandomIconFromCategory } from '@/utils/iconMapping';
 
 interface ThreeStepHorizontalProps extends LayoutComponentProps {}
 
@@ -62,6 +63,50 @@ const parseStepData = (titles: string, descriptions: string, numbers?: string): 
   }));
 };
 
+// Helper function to get step icon
+const getStepIcon = (blockContent: ThreeStepHorizontalContent, index: number) => {
+  const iconFields = [
+    blockContent.step_icon_1,
+    blockContent.step_icon_2,
+    blockContent.step_icon_3
+  ];
+  return iconFields[index] || ['👤', '⚙️', '📊'][index] || '⭐';
+};
+
+// Helper function to add a new step
+const addStep = (titles: string, descriptions: string): { newTitles: string; newDescriptions: string } => {
+  const titleList = titles.split('|').map(t => t.trim()).filter(t => t);
+  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
+
+  // Add new step with default content
+  titleList.push('New Step');
+  descriptionList.push('Describe this step in your process.');
+
+  return {
+    newTitles: titleList.join('|'),
+    newDescriptions: descriptionList.join('|')
+  };
+};
+
+// Helper function to remove a step
+const removeStep = (titles: string, descriptions: string, indexToRemove: number): { newTitles: string; newDescriptions: string } => {
+  const titleList = titles.split('|').map(t => t.trim()).filter(t => t);
+  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
+
+  // Remove the step at the specified index
+  if (indexToRemove >= 0 && indexToRemove < titleList.length) {
+    titleList.splice(indexToRemove, 1);
+  }
+  if (indexToRemove >= 0 && indexToRemove < descriptionList.length) {
+    descriptionList.splice(indexToRemove, 1);
+  }
+
+  return {
+    newTitles: titleList.join('|'),
+    newDescriptions: descriptionList.join('|')
+  };
+};
+
 // ModeWrapper component for handling edit/preview modes
 const ModeWrapper = ({ 
   mode, 
@@ -93,71 +138,22 @@ const ModeWrapper = ({
   return <>{children}</>;
 };
 
-// Step Icon Component
-const StepIcon = ({ 
-  stepNumber, 
-  mode, 
-  blockContent, 
-  handleContentUpdate, 
-  backgroundType, 
-  colorTokens, 
-  sectionId 
-}: { 
-  stepNumber: string;
-  mode: 'edit' | 'preview';
-  blockContent: ThreeStepHorizontalContent;
-  handleContentUpdate: (key: string, value: any) => void;
-  backgroundType: any;
-  colorTokens: any;
-  sectionId: string;
-}) => {
-  const stepIndex = parseInt(stepNumber) - 1;
-  const iconFields = ['step_icon_1', 'step_icon_2', 'step_icon_3'];
-  const defaultIcons = ['👤', '⚙️', '📊'];
-  
-  const getStepIcon = () => {
-    if (stepIndex >= 0 && stepIndex < iconFields.length) {
-      return blockContent[iconFields[stepIndex] as keyof ThreeStepHorizontalContent] || defaultIcons[stepIndex];
-    }
-    return '⭐'; // default for any other step
-  };
-
-  const handleIconEdit = (value: string) => {
-    if (stepIndex >= 0 && stepIndex < iconFields.length) {
-      handleContentUpdate(iconFields[stepIndex], value);
-    }
-  };
-
-  return (
-    <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-lg mb-4 mx-auto">
-      <IconEditableText
-        mode={mode}
-        value={getStepIcon()}
-        onEdit={handleIconEdit}
-        backgroundType={backgroundType as any}
-        colorTokens={colorTokens}
-        iconSize="md"
-        className="text-2xl text-white"
-        sectionId={sectionId}
-        elementKey={iconFields[stepIndex] || 'step_icon_default'}
-      />
-    </div>
-  );
-};
 
 // Individual Step Card
-const StepCard = ({ 
-  item, 
-  mode, 
-  sectionId, 
+const StepCard = ({
+  item,
+  mode,
+  sectionId,
   index,
   onTitleEdit,
   onDescriptionEdit,
+  onRemoveStep,
   isLast = false,
   blockContent,
   handleContentUpdate,
   backgroundType,
-  colorTokens
+  colorTokens,
+  canRemove = true
 }: {
   item: StepItem;
   mode: 'edit' | 'preview';
@@ -165,16 +161,18 @@ const StepCard = ({
   index: number;
   onTitleEdit: (index: number, value: string) => void;
   onDescriptionEdit: (index: number, value: string) => void;
+  onRemoveStep?: (index: number) => void;
   isLast?: boolean;
   blockContent: ThreeStepHorizontalContent;
   handleContentUpdate: (key: string, value: any) => void;
   backgroundType: any;
   colorTokens: any;
+  canRemove?: boolean;
 }) => {
   const { getTextStyle } = useTypography();
   
   return (
-    <div className="relative flex-1">
+    <div className="relative flex-1 group">
       {/* Step Content */}
       <div className="text-center">
         
@@ -186,15 +184,22 @@ const StepCard = ({
           
           {/* Step Icon */}
           <div className="mt-4">
-            <StepIcon 
-              stepNumber={item.number}
-              mode={mode}
-              blockContent={blockContent}
-              handleContentUpdate={handleContentUpdate}
-              backgroundType={backgroundType}
-              colorTokens={colorTokens}
-              sectionId={sectionId}
-            />
+            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg mx-auto">
+              <IconEditableText
+                mode={mode}
+                value={getStepIcon(blockContent, index)}
+                onEdit={(value) => {
+                  const iconField = `step_icon_${index + 1}` as keyof ThreeStepHorizontalContent;
+                  handleContentUpdate(iconField, value);
+                }}
+                backgroundType="primary"
+                colorTokens={colorTokens}
+                iconSize="lg"
+                className="text-white text-2xl"
+                sectionId={sectionId}
+                elementKey={`step_icon_${index + 1}`}
+              />
+            </div>
           </div>
         </div>
 
@@ -237,6 +242,22 @@ const StepCard = ({
             </p>
           )}
         </div>
+
+        {/* Delete button - only show in edit mode and if can remove */}
+        {mode !== 'preview' && onRemoveStep && canRemove && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemoveStep(index);
+            }}
+            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-200"
+            title="Remove this step"
+          >
+            <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
       </div>
 
       {/* Connecting Arrow (Desktop Only) */}
@@ -292,6 +313,34 @@ export default function ThreeStepHorizontal(props: ThreeStepHorizontalProps) {
     handleContentUpdate('step_descriptions', descriptions.join('|'));
   };
 
+  // Handle adding a new step
+  const handleAddStep = () => {
+    const { newTitles, newDescriptions } = addStep(blockContent.step_titles, blockContent.step_descriptions);
+    handleContentUpdate('step_titles', newTitles);
+    handleContentUpdate('step_descriptions', newDescriptions);
+
+    // Add a smart icon for the new step
+    const newStepCount = newTitles.split('|').length;
+    const iconField = `step_icon_${newStepCount}` as keyof ThreeStepHorizontalContent;
+    if (newStepCount <= 3) {
+      const defaultIcon = getRandomIconFromCategory('process');
+      handleContentUpdate(iconField, defaultIcon);
+    }
+  };
+
+  // Handle removing a step
+  const handleRemoveStep = (indexToRemove: number) => {
+    const { newTitles, newDescriptions } = removeStep(blockContent.step_titles, blockContent.step_descriptions, indexToRemove);
+    handleContentUpdate('step_titles', newTitles);
+    handleContentUpdate('step_descriptions', newDescriptions);
+
+    // Also clear the corresponding icon if it exists
+    const iconField = `step_icon_${indexToRemove + 1}` as keyof ThreeStepHorizontalContent;
+    if (blockContent[iconField]) {
+      handleContentUpdate(iconField, '');
+    }
+  };
+
 
   return (
     <LayoutSection
@@ -330,14 +379,31 @@ export default function ThreeStepHorizontal(props: ThreeStepHorizontalProps) {
               index={index}
               onTitleEdit={handleTitleEdit}
               onDescriptionEdit={handleDescriptionEdit}
+              onRemoveStep={handleRemoveStep}
               isLast={index === stepItems.length - 1}
               blockContent={blockContent}
               handleContentUpdate={handleContentUpdate}
               backgroundType={backgroundType}
               colorTokens={colorTokens}
+              canRemove={stepItems.length > 1}
             />
           ))}
         </div>
+
+        {/* Add Step Button - only show in edit mode and if under max limit */}
+        {mode !== 'preview' && stepItems.length < 6 && (
+          <div className="mt-12 text-center">
+            <button
+              onClick={handleAddStep}
+              className="flex items-center space-x-2 mx-auto px-4 py-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-xl transition-all duration-200 group"
+            >
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span className="text-blue-700 font-medium">Add Step</span>
+            </button>
+          </div>
+        )}
 
         {/* Optional Conclusion Text */}
         {(blockContent.conclusion_text || mode === 'edit') && (

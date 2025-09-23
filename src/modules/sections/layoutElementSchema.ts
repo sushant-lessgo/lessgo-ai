@@ -1,13 +1,13 @@
 interface LayoutElement {
   element: string;
   mandatory: boolean;
-  generation: 'ai_generated' | 'manual_preferred';
+  generation?: 'ai_generated' | 'manual_preferred' | 'hybrid';
 }
 
 interface CardStructure {
-  type: 'cards' | 'pairs' | 'items' | 'blocks';
+  type: 'cards' | 'pairs' | 'items' | 'blocks' | 'steps' | 'triplets' | 'quadruplets' | 'sextuplets' | 'tabbed_pairs';
   elements: string[];  // All card elements are mandatory by default
-  generation: 'ai_generated' | 'manual_preferred';
+  generation: 'ai_generated' | 'manual_preferred' | 'hybrid';
 }
 
 interface CardRequirements {
@@ -16,12 +16,13 @@ interface CardRequirements {
   max: number;
   optimal: [number, number];
   description: string;
+  respectUserContent?: boolean; // Prioritize user-provided features
 }
 
 interface UnifiedLayoutElement {
   sectionElements: LayoutElement[];
-  cardStructure: CardStructure;
-  cardRequirements: CardRequirements;
+  cardStructure?: CardStructure;
+  cardRequirements: CardRequirements | null;
 }
 
 interface LayoutSchema {
@@ -35,11 +36,11 @@ export function isUnifiedSchema(schema: LayoutElement[] | UnifiedLayoutElement):
 
 export function getAllElements(schema: LayoutElement[] | UnifiedLayoutElement): LayoutElement[] {
   if (isUnifiedSchema(schema)) {
-    const cardElements = schema.cardStructure.elements.map(elementName => ({
+    const cardElements = schema.cardStructure ? schema.cardStructure.elements.map(elementName => ({
       element: elementName,
       mandatory: true, // All card elements are mandatory
-      generation: schema.cardStructure.generation
-    }));
+      generation: schema.cardStructure!.generation
+    })) : [];
     return [...schema.sectionElements, ...cardElements];
   }
   return schema;
@@ -53,11 +54,11 @@ export function getSectionElements(schema: LayoutElement[] | UnifiedLayoutElemen
 }
 
 export function getCardElements(schema: LayoutElement[] | UnifiedLayoutElement): LayoutElement[] {
-  if (isUnifiedSchema(schema)) {
+  if (isUnifiedSchema(schema) && schema.cardStructure) {
     return schema.cardStructure.elements.map(elementName => ({
       element: elementName,
       mandatory: true, // All card elements are mandatory
-      generation: schema.cardStructure.generation
+      generation: schema.cardStructure!.generation
     }));
   }
   return [];
@@ -65,151 +66,287 @@ export function getCardElements(schema: LayoutElement[] | UnifiedLayoutElement):
 
 export function getCardRequirements(schema: LayoutElement[] | UnifiedLayoutElement): CardRequirements | null {
   if (isUnifiedSchema(schema)) {
-    return schema.cardRequirements;
+    return schema.cardRequirements || null;
   }
   return null;
 }
 
 export const layoutElementSchema: LayoutSchema = {
   // BeforeAfter Section
-  SideBySideBlocks: [
-    { element: "headline", mandatory: true },
-    { element: "before_label", mandatory: true },
-    { element: "after_label", mandatory: true },
-    { element: "before_description", mandatory: true },
-    { element: "after_description", mandatory: true },
-    { element: "before_icon", mandatory: false },
-    { element: "after_icon", mandatory: false },
-    { element: "subheadline", mandatory: false },
-    { element: "supporting_text", mandatory: false },
-    { element: "cta_text", mandatory: false },
-    { element: "trust_items", mandatory: false },
-  ],
+  SideBySideBlocks: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "before_label", mandatory: true, generation: "ai_generated" },
+      { element: "after_label", mandatory: true, generation: "ai_generated" },
+      { element: "before_description", mandatory: true, generation: "ai_generated" },
+      { element: "after_description", mandatory: true, generation: "ai_generated" },
+      { element: "before_icon", mandatory: false, generation: "hybrid" },
+      { element: "after_icon", mandatory: false, generation: "hybrid" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" }
+    ],
+    cardRequirements: {
+      type: 'pairs',
+      min: 1,
+      max: 3,
+      optimal: [2, 2],
+      description: 'Before/after comparison blocks'
+    }
+  },
 
-  StackedTextVisual: [
-    { element: "headline", mandatory: true },
-    { element: "before_text", mandatory: true },
-    { element: "after_text", mandatory: true },
-    { element: "transition_text", mandatory: false },
-    { element: "subheadline", mandatory: false },
-    { element: "supporting_text", mandatory: false },
-    { element: "cta_text", mandatory: false },
-    { element: "trust_items", mandatory: false },
-  ],
+  StackedTextVisual: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "before_text", mandatory: true, generation: "ai_generated" },
+      { element: "after_text", mandatory: true, generation: "ai_generated" },
+      { element: "before_label", mandatory: true, generation: "ai_generated" },
+      { element: "after_label", mandatory: true, generation: "ai_generated" },
+      { element: "transition_text", mandatory: false, generation: "ai_generated" },
+      { element: "before_icon", mandatory: false, generation: "hybrid" },
+      { element: "after_icon", mandatory: false, generation: "hybrid" },
+      { element: "transition_icon", mandatory: false, generation: "hybrid" },
+      { element: "summary_text", mandatory: false, generation: "ai_generated" },
+      { element: "show_summary_box", mandatory: false, generation: "hybrid" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" }
+    ],
+    cardRequirements: {
+      type: 'pairs',
+      min: 1,
+      max: 3,
+      optimal: [2, 2],
+      description: 'Stacked before/after comparisons'
+    }
+  },
 
-  BeforeAfterSlider: [
-    { element: "headline", mandatory: true },
-    { element: "before_label", mandatory: true },
-    { element: "after_label", mandatory: true },
-    { element: "before_description", mandatory: true },
-    { element: "after_description", mandatory: true },
-    { element: "before_visual", mandatory: false },
-    { element: "after_visual", mandatory: false },
-    { element: "before_placeholder_text", mandatory: false },
-    { element: "after_placeholder_text", mandatory: false },
-    { element: "interaction_hint_text", mandatory: false },
-    { element: "show_interaction_hint", mandatory: false },
-    { element: "before_icon", mandatory: false },
-    { element: "after_icon", mandatory: false },
-    { element: "hint_icon", mandatory: false },
-    { element: "subheadline", mandatory: false },
-    { element: "supporting_text", mandatory: false },
-    { element: "cta_text", mandatory: false },
-    { element: "trust_items", mandatory: false },
-    { element: "slider_instruction", mandatory: false },
-  ],
+  BeforeAfterSlider: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "before_label", mandatory: true, generation: "ai_generated" },
+      { element: "after_label", mandatory: true, generation: "ai_generated" },
+      { element: "before_description", mandatory: true, generation: "ai_generated" },
+      { element: "after_description", mandatory: true, generation: "ai_generated" },
+      { element: "before_visual", mandatory: false, generation: "manual_preferred" },
+      { element: "after_visual", mandatory: false, generation: "manual_preferred" },
+      { element: "before_placeholder_text", mandatory: false, generation: "ai_generated" },
+      { element: "after_placeholder_text", mandatory: false, generation: "ai_generated" },
+      { element: "interaction_hint_text", mandatory: false, generation: "ai_generated" },
+      { element: "show_interaction_hint", mandatory: false, generation: "hybrid" },
+      { element: "before_icon", mandatory: false, generation: "hybrid" },
+      { element: "after_icon", mandatory: false, generation: "hybrid" },
+      { element: "hint_icon", mandatory: false, generation: "hybrid" },
+      { element: "slider_instruction", mandatory: false, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" }
+    ],
+    cardRequirements: {
+      type: 'pairs',
+      min: 1,
+      max: 1,
+      optimal: [1, 1],
+      description: 'Interactive before/after slider'
+    }
+  },
 
-  SplitCard: [
-    { element: "headline", mandatory: true },
-    { element: "before_title", mandatory: true },
-    { element: "after_title", mandatory: true },
-    { element: "before_description", mandatory: true },
-    { element: "after_description", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    { element: "supporting_text", mandatory: false },
-    { element: "cta_text", mandatory: false },
-    { element: "trust_items", mandatory: false },
-  ],
+  SplitCard: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "before_label", mandatory: true, generation: "ai_generated" },
+      { element: "after_label", mandatory: true, generation: "ai_generated" },
+      { element: "before_description", mandatory: true, generation: "ai_generated" },
+      { element: "after_description", mandatory: true, generation: "ai_generated" },
+      { element: "before_visual", mandatory: false, generation: "manual_preferred" },
+      { element: "after_visual", mandatory: false, generation: "manual_preferred" },
+      { element: "premium_features_text", mandatory: false, generation: "ai_generated" },
+      { element: "upgrade_text", mandatory: false, generation: "ai_generated" },
+      { element: "before_placeholder_text", mandatory: false, generation: "ai_generated" },
+      { element: "after_placeholder_text", mandatory: false, generation: "ai_generated" },
+      { element: "premium_badge_text", mandatory: false, generation: "ai_generated" },
+      { element: "before_icon", mandatory: false, generation: "hybrid" },
+      { element: "after_icon", mandatory: false, generation: "hybrid" },
+      { element: "upgrade_icon", mandatory: false, generation: "hybrid" },
+      { element: "premium_feature_icon", mandatory: false, generation: "hybrid" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" }
+    ],
+    cardRequirements: {
+      type: 'pairs',
+      min: 1,
+      max: 1,
+      optimal: [1, 1],
+      description: 'Split card premium vs standard comparison'
+    }
+  },
 
-  TextListTransformation: [
-    { element: "headline", mandatory: true },
-    { element: "before_label", mandatory: true },
-    { element: "after_label", mandatory: true },
-    { element: "before_list", mandatory: true },
-    { element: "after_list", mandatory: true },
-    { element: "transformation_text", mandatory: false },
-    { element: "before_icon", mandatory: false },
-    { element: "after_icon", mandatory: false },
-    { element: "transformation_icon", mandatory: false },
-    { element: "subheadline", mandatory: false },
-    { element: "supporting_text", mandatory: false },
-    { element: "cta_text", mandatory: false },
-    { element: "trust_items", mandatory: false },
-  ],
+  TextListTransformation: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "before_label", mandatory: true, generation: "ai_generated" },
+      { element: "after_label", mandatory: true, generation: "ai_generated" },
+      { element: "transformation_text", mandatory: false, generation: "ai_generated" },
+      { element: "before_icon", mandatory: false, generation: "hybrid" },
+      { element: "after_icon", mandatory: false, generation: "hybrid" },
+      { element: "transformation_icon", mandatory: false, generation: "hybrid" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["before_list", "after_list"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 8,
+      optimal: [4, 5],
+      description: 'Before/after list transformation with multiple items'
+    }
+  },
 
-  VisualStoryline: [
-    { element: "headline", mandatory: true },
-    { element: "story_steps", mandatory: true },
-    { element: "step_descriptions", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    { element: "conclusion_text", mandatory: false },
-    { element: "supporting_text", mandatory: false },
-    { element: "cta_text", mandatory: false },
-    { element: "trust_items", mandatory: false },
-  ],
+  VisualStoryline: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "step1_title", mandatory: true, generation: "ai_generated" },
+      { element: "step1_description", mandatory: true, generation: "ai_generated" },
+      { element: "step1_visual", mandatory: false, generation: "manual_preferred" },
+      { element: "step2_title", mandatory: true, generation: "ai_generated" },
+      { element: "step2_description", mandatory: true, generation: "ai_generated" },
+      { element: "step2_visual", mandatory: false, generation: "manual_preferred" },
+      { element: "step3_title", mandatory: true, generation: "ai_generated" },
+      { element: "step3_description", mandatory: true, generation: "ai_generated" },
+      { element: "step3_visual", mandatory: false, generation: "manual_preferred" },
+      { element: "journey_summary_title", mandatory: false, generation: "ai_generated" },
+      { element: "journey_summary_description", mandatory: false, generation: "ai_generated" },
+      { element: "show_journey_summary", mandatory: false, generation: "hybrid" },
+      { element: "step_connector_icon", mandatory: false, generation: "hybrid" },
+      { element: "summary_icon_1", mandatory: false, generation: "hybrid" },
+      { element: "summary_icon_2", mandatory: false, generation: "hybrid" },
+      { element: "summary_icon_3", mandatory: false, generation: "hybrid" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" }
+    ],
+    cardRequirements: {
+      type: 'steps',
+      min: 3,
+      max: 5,
+      optimal: [3, 3],
+      description: 'Multi-step transformation journey with visuals'
+    }
+  },
 
   // Results Section
-  StatBlocks: [
-    { element: "headline", mandatory: true },
-    { element: "stat_values", mandatory: true },
-    { element: "stat_labels", mandatory: true },
-    { element: "stat_descriptions", mandatory: false },
-    { element: "subheadline", mandatory: false },
-    { element: "achievement_footer", mandatory: false },
-    { element: "stat_icon_1", mandatory: false },
-    { element: "stat_icon_2", mandatory: false },
-    { element: "stat_icon_3", mandatory: false },
-    { element: "stat_icon_4", mandatory: false },
-    { element: "stat_icon_5", mandatory: false },
-    { element: "stat_icon_6", mandatory: false },
-  ],
+  StatBlocks: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "achievement_footer", mandatory: false, generation: "ai_generated" },
+      { element: "stat_icon_1", mandatory: true, generation: "ai_generated" },
+      { element: "stat_icon_2", mandatory: true, generation: "ai_generated" },
+      { element: "stat_icon_3", mandatory: true, generation: "ai_generated" },
+      { element: "stat_icon_4", mandatory: true, generation: "ai_generated" },
+      { element: "stat_icon_5", mandatory: true, generation: "ai_generated" },
+      { element: "stat_icon_6", mandatory: true, generation: "ai_generated" }
+    ],
 
-  BeforeAfterStats: [
-    { element: "headline", mandatory: true },
-    { element: "stat_metrics", mandatory: true },
-    { element: "stat_before", mandatory: true },
-    { element: "stat_after", mandatory: true },
-    { element: "stat_improvements", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    { element: "time_period", mandatory: false },
-    { element: "footer_text", mandatory: false },
-    { element: "before_icon", mandatory: false },
-    { element: "after_icon", mandatory: false },
-    { element: "improvement_icon", mandatory: false },
-  ],
+    cardStructure: {
+      type: "cards",
+      elements: ["stat_values", "stat_labels", "stat_descriptions"],
+      generation: "ai_generated"
+    },
 
-  QuoteWithMetric: [
-    { element: "headline", mandatory: true },
-    { element: "quotes", mandatory: true },
-    { element: "authors", mandatory: true },
-    { element: "companies", mandatory: true },
-    { element: "roles", mandatory: true },
-    { element: "metric_labels", mandatory: true },
-    { element: "metric_values", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    { element: "footer_text", mandatory: false },
-    { element: "quote_icon", mandatory: false },
-    { element: "credibility_icon", mandatory: false },
-  ],
+    cardRequirements: {
+      type: 'cards',
+      min: 1,
+      max: 6,
+      optimal: [3, 4],
+      description: 'Statistical result blocks'
+    }
+  },
 
-  EmojiOutcomeGrid: [
-    { element: "headline", mandatory: true },
-    { element: "emojis", mandatory: true },
-    { element: "outcomes", mandatory: true },
-    { element: "descriptions", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    { element: "footer_text", mandatory: false },
-  ],
+  BeforeAfterStats: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "time_period", mandatory: false, generation: "ai_generated" },
+      { element: "footer_text", mandatory: false, generation: "ai_generated" },
+      { element: "before_icon", mandatory: true, generation: "ai_generated" },
+      { element: "after_icon", mandatory: true, generation: "ai_generated" },
+      { element: "improvement_icon", mandatory: true, generation: "ai_generated" }
+    ],
+
+    cardStructure: {
+      type: "pairs",
+      elements: ["stat_metrics", "stat_before", "stat_after", "stat_improvements"],
+      generation: "ai_generated"
+    },
+
+    cardRequirements: {
+      type: 'pairs',
+      min: 2,
+      max: 4,
+      optimal: [3, 3],
+      description: 'Before/after statistics pairs'
+    }
+  },
+
+  QuoteWithMetric: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "footer_text", mandatory: false, generation: "ai_generated" },
+      { element: "quote_icon", mandatory: true, generation: "ai_generated" },
+      { element: "credibility_icon", mandatory: true, generation: "ai_generated" }
+    ],
+
+    cardStructure: {
+      type: "cards",
+      elements: ["quotes", "authors", "companies", "roles", "metric_labels", "metric_values"],
+      generation: "ai_generated"
+    },
+
+    cardRequirements: {
+      type: 'cards',
+      min: 2,
+      max: 5,
+      optimal: [3, 4],
+      description: 'Testimonial quotes with metrics'
+    }
+  },
+
+  EmojiOutcomeGrid: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "footer_text", mandatory: false, generation: "ai_generated" }
+    ],
+
+    cardStructure: {
+      type: "cards",
+      elements: ["emojis", "outcomes", "descriptions"],
+      generation: "ai_generated"
+    },
+
+    cardRequirements: {
+      type: 'cards',
+      min: 4,
+      max: 8,
+      optimal: [6, 6],
+      description: 'Emoji-based outcome grid'
+    }
+  },
 
   TimelineResults: {
     sectionElements: [
@@ -233,51 +370,88 @@ export const layoutElementSchema: LayoutSchema = {
       type: 'cards',
       min: 2,
       max: 8,
-      optimal: [4, 5, 6],
+      optimal: [4, 5],
       description: 'Timeline of results/achievements'
     }
   },
 
-  OutcomeIcons: [
-    { element: "headline", mandatory: true },
-    { element: "icon_types", mandatory: true },
-    { element: "titles", mandatory: true },
-    { element: "descriptions", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    { element: "layout_style", mandatory: false },
-    { element: "footer_text", mandatory: false },
-  ],
+  OutcomeIcons: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "layout_style", mandatory: false, generation: "ai_generated" },
+      { element: "footer_text", mandatory: false, generation: "ai_generated" }
+    ],
 
-  StackedWinsList: [
-    { element: "headline", mandatory: true },
-    { element: "wins", mandatory: true },
-    { element: "descriptions", mandatory: false },
-    { element: "categories", mandatory: false },
-    { element: "subheadline", mandatory: false },
-    { element: "win_count", mandatory: false },
-    { element: "footer_title", mandatory: false },
-    { element: "footer_text", mandatory: false },
-    { element: "win_icon", mandatory: false },
-    { element: "momentum_icon", mandatory: false },
-    { element: "badge_icon", mandatory: false },
-  ],
+    cardStructure: {
+      type: "cards",
+      elements: ["icon_types", "titles", "descriptions"],
+      generation: "ai_generated"
+    },
 
-  PersonaResultPanels: [
-    { element: "headline", mandatory: true },
-    { element: "personas", mandatory: true },
-    { element: "roles", mandatory: true },
-    { element: "result_metrics", mandatory: true },
-    { element: "result_descriptions", mandatory: true },
-    { element: "key_benefits", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    { element: "footer_text", mandatory: false },
-    { element: "persona_icon_1", mandatory: false },
-    { element: "persona_icon_2", mandatory: false },
-    { element: "persona_icon_3", mandatory: false },
-    { element: "persona_icon_4", mandatory: false },
-    { element: "persona_icon_5", mandatory: false },
-    { element: "persona_icon_6", mandatory: false },
-  ],
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 8,
+      optimal: [4, 6],
+      description: 'Outcome icons with descriptions'
+    }
+  },
+
+  StackedWinsList: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "win_count", mandatory: false, generation: "ai_generated" },
+      { element: "footer_title", mandatory: false, generation: "ai_generated" },
+      { element: "footer_text", mandatory: false, generation: "ai_generated" },
+      { element: "win_icon", mandatory: true, generation: "ai_generated" },
+      { element: "momentum_icon", mandatory: true, generation: "ai_generated" },
+      { element: "badge_icon", mandatory: true, generation: "ai_generated" }
+    ],
+
+    cardStructure: {
+      type: "items",
+      elements: ["wins", "descriptions", "categories"],
+      generation: "ai_generated"
+    },
+
+    cardRequirements: {
+      type: 'items',
+      min: 3,
+      max: 8,
+      optimal: [4, 6],
+      description: 'Stacked list of wins/achievements'
+    }
+  },
+
+  PersonaResultPanels: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "footer_text", mandatory: false, generation: "ai_generated" },
+      { element: "persona_icon_1", mandatory: true, generation: "ai_generated" },
+      { element: "persona_icon_2", mandatory: true, generation: "ai_generated" },
+      { element: "persona_icon_3", mandatory: true, generation: "ai_generated" },
+      { element: "persona_icon_4", mandatory: true, generation: "ai_generated" },
+      { element: "persona_icon_5", mandatory: true, generation: "ai_generated" },
+      { element: "persona_icon_6", mandatory: true, generation: "ai_generated" }
+    ],
+
+    cardStructure: {
+      type: "cards",
+      elements: ["personas", "roles", "result_metrics", "result_descriptions", "key_benefits"],
+      generation: "ai_generated"
+    },
+
+    cardRequirements: {
+      type: 'cards',
+      min: 2,
+      max: 6,
+      optimal: [3, 4],
+      description: 'Persona-specific result panels'
+    }
+  },
 
   // Security Section
   // Security Section - Using actual component names
@@ -305,19 +479,68 @@ export const layoutElementSchema: LayoutSchema = {
     { element: "expand_labels", mandatory: false },
   ],
 
-  SecurityChecklist: [
-    { element: "headline", mandatory: true },
-    { element: "security_items", mandatory: true },
-    { element: "item_descriptions", mandatory: false },
-    { element: "compliance_note", mandatory: false },
-  ],
+  SecurityFeatureCards: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" }
+    ],
 
-  SecurityGuaranteePanel: [
-    { element: "headline", mandatory: true },
-    { element: "security_stats", mandatory: true },
-    { element: "stat_labels", mandatory: true },
-    { element: "stat_descriptions", mandatory: false },
-  ],
+    cardStructure: {
+      type: "cards",
+      elements: ["security_features", "feature_descriptions"],
+      generation: "ai_generated"
+    },
+
+    cardRequirements: {
+      type: 'cards',
+      min: 4,
+      max: 10,
+      optimal: [6, 8],
+      description: 'Security feature cards with detailed descriptions'
+    }
+  },
+
+  SecurityChecklist: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "compliance_note", mandatory: false, generation: "ai_generated" }
+    ],
+
+    cardStructure: {
+      type: "cards",
+      elements: ["security_items", "item_descriptions"],
+      generation: "ai_generated"
+    },
+
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 12,
+      optimal: [6, 8],
+      description: 'Security checklist items with optional descriptions'
+    }
+  },
+
+  SecurityGuaranteePanel: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "guarantee_text", mandatory: false, generation: "ai_generated" }
+    ],
+
+    cardStructure: {
+      type: "cards",
+      elements: ["security_guarantees"],
+      generation: "ai_generated"
+    },
+
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 8,
+      optimal: [4, 6],
+      description: 'Security guarantees and SLA promises'
+    }
+  },
 
   TrustSealCollection: [
     { element: "headline", mandatory: true },
@@ -327,351 +550,612 @@ export const layoutElementSchema: LayoutSchema = {
   ],
 
   // SocialProof Section
-  LogoWall: [
-    { element: "headline", mandatory: true },
-    { element: "company_names", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    { element: "logo_urls", mandatory: false },
-    // Social proof stats fields
-    { element: "stat_1_number", mandatory: false },
-    { element: "stat_1_label", mandatory: false },
-    { element: "stat_2_number", mandatory: false },
-    { element: "stat_2_label", mandatory: false },
-    { element: "stat_3_number", mandatory: false },
-    { element: "stat_3_label", mandatory: false },
-    { element: "show_stats_section", mandatory: false },
-    // Trust reinforcement fields
-    { element: "trust_badge_text", mandatory: false },
-    { element: "show_trust_badge", mandatory: false },
-  ],
+  LogoWall: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "logo_urls", mandatory: false, generation: "manual_preferred" },
+      { element: "stat_1_number", mandatory: false, generation: "ai_generated" },
+      { element: "stat_1_label", mandatory: false, generation: "ai_generated" },
+      { element: "stat_2_number", mandatory: false, generation: "ai_generated" },
+      { element: "stat_2_label", mandatory: false, generation: "ai_generated" },
+      { element: "stat_3_number", mandatory: false, generation: "ai_generated" },
+      { element: "stat_3_label", mandatory: false, generation: "ai_generated" },
+      { element: "show_stats_section", mandatory: false, generation: "manual_preferred" },
+      { element: "trust_badge_text", mandatory: false, generation: "ai_generated" },
+      { element: "show_trust_badge", mandatory: false, generation: "manual_preferred" }
+    ],
+    cardStructure: {
+      type: "items",
+      elements: ["company_names"],
+      generation: "manual_preferred"
+    },
+    cardRequirements: {
+      type: 'items',
+      min: 4,
+      max: 12,
+      optimal: [6, 8],
+      description: 'Company logo grid'
+    }
+  },
 
-  MediaMentions: [
-    { element: "headline", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    { element: "media_outlets", mandatory: true },
-    { element: "testimonial_quotes", mandatory: false },
-    { element: "logo_urls", mandatory: false },
-  ],
+  MediaMentions: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "testimonial_quotes", mandatory: false, generation: "hybrid" },
+      { element: "logo_urls", mandatory: false, generation: "manual_preferred" }
+    ],
+    cardStructure: {
+      type: "items",
+      elements: ["media_outlets"],
+      generation: "manual_preferred"
+    },
+    cardRequirements: {
+      type: 'items',
+      min: 3,
+      max: 8,
+      optimal: [4, 6],
+      description: 'Media mention logos'
+    }
+  },
 
-  UserCountBar: [
-    { element: "headline", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    { element: "user_metrics", mandatory: true },
-    { element: "metric_labels", mandatory: true },
-    { element: "growth_indicators", mandatory: false },
-    // User avatar group fields
-    { element: "users_joined_text", mandatory: false },
-    { element: "rating_value", mandatory: false },
-    { element: "rating_text", mandatory: false },
-    // Trust indicator fields
-    { element: "trust_item_1", mandatory: false },
-    { element: "trust_item_2", mandatory: false },
-    { element: "trust_item_3", mandatory: false },
-    // Dynamic avatar system
-    { element: "customer_names", mandatory: false },
-    { element: "avatar_urls", mandatory: false },
-  ],
+  UserCountBar: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "users_joined_text", mandatory: false, generation: "ai_generated" },
+      { element: "rating_value", mandatory: false, generation: "hybrid" },
+      { element: "rating_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_1", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_2", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_3", mandatory: false, generation: "ai_generated" },
+      { element: "customer_names", mandatory: false, generation: "manual_preferred" },
+      { element: "avatar_urls", mandatory: false, generation: "manual_preferred" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["user_metrics", "metric_labels", "growth_indicators"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 1,
+      max: 3,
+      optimal: [2, 2],
+      description: 'User count metric cards'
+    }
+  },
 
-  IndustryBadgeLine: [
-    { element: "headline", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    { element: "certification_badges", mandatory: true },
-    { element: "industry_awards", mandatory: false },
-    { element: "compliance_standards", mandatory: false },
-    { element: "cert_icon_override", mandatory: false },
-    { element: "award_icon_override", mandatory: false },
-    { element: "compliance_icon_override", mandatory: false },
-    // Section titles
-    { element: "cert_section_title", mandatory: false },
-    { element: "award_section_title", mandatory: false },
-    { element: "compliance_section_title", mandatory: false },
-    // Trust summary
-    { element: "trust_summary_title", mandatory: false },
-    { element: "trust_summary_description", mandatory: false },
-  ],
+  IndustryBadgeLine: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "cert_icon_override", mandatory: false, generation: "manual_preferred" },
+      { element: "award_icon_override", mandatory: false, generation: "manual_preferred" },
+      { element: "compliance_icon_override", mandatory: false, generation: "manual_preferred" },
+      { element: "cert_section_title", mandatory: false, generation: "ai_generated" },
+      { element: "award_section_title", mandatory: false, generation: "ai_generated" },
+      { element: "compliance_section_title", mandatory: false, generation: "ai_generated" },
+      { element: "trust_summary_title", mandatory: false, generation: "ai_generated" },
+      { element: "trust_summary_description", mandatory: false, generation: "ai_generated" }
+    ],
+    cardStructure: {
+      type: "items",
+      elements: ["certification_badges", "industry_awards", "compliance_standards"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'items',
+      min: 3,
+      max: 8,
+      optimal: [4, 6],
+      description: 'Industry badge certifications'
+    }
+  },
 
-  MapHeatSpots: [
-    { element: "headline", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    { element: "global_stats", mandatory: true },
-    { element: "stat_labels", mandatory: true },
-    { element: "countries_list", mandatory: false },
-    { element: "countries_title", mandatory: false },
-  ],
+  MapHeatSpots: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "countries_list", mandatory: false, generation: "manual_preferred" },
+      { element: "countries_title", mandatory: false, generation: "ai_generated" }
+    ],
+    cardStructure: {
+      type: "items",
+      elements: ["global_stats", "stat_labels"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'items',
+      min: 5,
+      max: 15,
+      optimal: [8, 12],
+      description: 'Geographic usage heat spots'
+    }
+  },
 
-  StackedStats: [
-    { element: "headline", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    { element: "metric_values", mandatory: true },
-    { element: "metric_labels", mandatory: true },
-    { element: "metric_descriptions", mandatory: false },
-    // Metric icons
-    { element: "metric_icon_1", mandatory: false },
-    { element: "metric_icon_2", mandatory: false },
-    { element: "metric_icon_3", mandatory: false },
-    { element: "metric_icon_4", mandatory: false },
-    { element: "metric_icon_5", mandatory: false },
-    { element: "metric_icon_6", mandatory: false },
-    // Summary section fields
-    { element: "summary_title", mandatory: false },
-    { element: "summary_description", mandatory: false },
-    { element: "customer_satisfaction_value", mandatory: false },
-    { element: "customer_satisfaction_label", mandatory: false },
-    { element: "response_time_value", mandatory: false },
-    { element: "response_time_label", mandatory: false },
-  ],
+  StackedStats: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "metric_icon_1", mandatory: false, generation: "ai_generated" },
+      { element: "metric_icon_2", mandatory: false, generation: "ai_generated" },
+      { element: "metric_icon_3", mandatory: false, generation: "ai_generated" },
+      { element: "metric_icon_4", mandatory: false, generation: "ai_generated" },
+      { element: "metric_icon_5", mandatory: false, generation: "ai_generated" },
+      { element: "metric_icon_6", mandatory: false, generation: "ai_generated" },
+      { element: "summary_title", mandatory: false, generation: "ai_generated" },
+      { element: "summary_description", mandatory: false, generation: "ai_generated" },
+      { element: "customer_satisfaction_value", mandatory: false, generation: "ai_generated" },
+      { element: "customer_satisfaction_label", mandatory: false, generation: "ai_generated" },
+      { element: "response_time_value", mandatory: false, generation: "ai_generated" },
+      { element: "response_time_label", mandatory: false, generation: "ai_generated" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["metric_values", "metric_labels", "metric_descriptions"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 6,
+      optimal: [4, 6],
+      description: 'Stacked social proof metrics'
+    }
+  },
 
-  StripWithReviews: [
-    { element: "headline", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    { element: "reviews", mandatory: true },
-    { element: "reviewer_names", mandatory: false },
-    { element: "reviewer_titles", mandatory: false },
-    { element: "ratings", mandatory: false },
-    // Individual editable review fields
-    { element: "review_text_1", mandatory: false },
-    { element: "review_text_2", mandatory: false },
-    { element: "review_text_3", mandatory: false },
-    { element: "review_text_4", mandatory: false },
-    { element: "reviewer_name_1", mandatory: false },
-    { element: "reviewer_name_2", mandatory: false },
-    { element: "reviewer_name_3", mandatory: false },
-    { element: "reviewer_name_4", mandatory: false },
-    { element: "reviewer_title_1", mandatory: false },
-    { element: "reviewer_title_2", mandatory: false },
-    { element: "reviewer_title_3", mandatory: false },
-    { element: "reviewer_title_4", mandatory: false },
-    { element: "rating_1", mandatory: false },
-    { element: "rating_2", mandatory: false },
-    { element: "rating_3", mandatory: false },
-    { element: "rating_4", mandatory: false },
-    // Social proof elements
-    { element: "overall_rating_value", mandatory: false },
-    { element: "overall_rating_text", mandatory: false },
-    { element: "total_reviews_text", mandatory: false },
-    // Trust indicators
-    { element: "trust_indicator_1", mandatory: false },
-    { element: "trust_indicator_2", mandatory: false },
-    { element: "trust_indicator_3", mandatory: false },
-    { element: "trust_icon_1", mandatory: false },
-    { element: "trust_icon_2", mandatory: false },
-    { element: "trust_icon_3", mandatory: false },
-    // Avatar system
-    { element: "customer_names", mandatory: false },
-    { element: "avatar_urls", mandatory: false },
-    { element: "avatar_count", mandatory: false },
-    { element: "show_customer_avatars", mandatory: false },
-  ],
+  StripWithReviews: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "review_text_1", mandatory: false, generation: "ai_generated" },
+      { element: "review_text_2", mandatory: false, generation: "ai_generated" },
+      { element: "review_text_3", mandatory: false, generation: "ai_generated" },
+      { element: "review_text_4", mandatory: false, generation: "ai_generated" },
+      { element: "reviewer_name_1", mandatory: false, generation: "manual_preferred" },
+      { element: "reviewer_name_2", mandatory: false, generation: "manual_preferred" },
+      { element: "reviewer_name_3", mandatory: false, generation: "manual_preferred" },
+      { element: "reviewer_name_4", mandatory: false, generation: "manual_preferred" },
+      { element: "reviewer_title_1", mandatory: false, generation: "ai_generated" },
+      { element: "reviewer_title_2", mandatory: false, generation: "ai_generated" },
+      { element: "reviewer_title_3", mandatory: false, generation: "ai_generated" },
+      { element: "reviewer_title_4", mandatory: false, generation: "ai_generated" },
+      { element: "rating_1", mandatory: false, generation: "hybrid" },
+      { element: "rating_2", mandatory: false, generation: "hybrid" },
+      { element: "rating_3", mandatory: false, generation: "hybrid" },
+      { element: "rating_4", mandatory: false, generation: "hybrid" },
+      { element: "overall_rating_value", mandatory: false, generation: "hybrid" },
+      { element: "overall_rating_text", mandatory: false, generation: "ai_generated" },
+      { element: "total_reviews_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_indicator_1", mandatory: false, generation: "ai_generated" },
+      { element: "trust_indicator_2", mandatory: false, generation: "ai_generated" },
+      { element: "trust_indicator_3", mandatory: false, generation: "ai_generated" },
+      { element: "trust_icon_1", mandatory: false, generation: "ai_generated" },
+      { element: "trust_icon_2", mandatory: false, generation: "ai_generated" },
+      { element: "trust_icon_3", mandatory: false, generation: "ai_generated" },
+      { element: "customer_names", mandatory: false, generation: "manual_preferred" },
+      { element: "avatar_urls", mandatory: false, generation: "manual_preferred" },
+      { element: "avatar_count", mandatory: false, generation: "manual_preferred" },
+      { element: "show_customer_avatars", mandatory: false, generation: "manual_preferred" }
+    ],
+    cardStructure: {
+      type: "items",
+      elements: ["reviews", "reviewer_names", "reviewer_titles", "ratings"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'items',
+      min: 3,
+      max: 6,
+      optimal: [4, 5],
+      description: 'Review strip items'
+    }
+  },
 
-  SocialProofStrip: [
-    { element: "headline", mandatory: true },
-    { element: "proof_stats", mandatory: true },
-    { element: "stat_labels", mandatory: false },
-    { element: "company_logos", mandatory: false },
-    { element: "company_names", mandatory: false },
-    { element: "logo_urls", mandatory: false },
-    { element: "trust_badge_1", mandatory: false },
-    { element: "trust_badge_2", mandatory: false },
-    { element: "trust_badge_3", mandatory: false },
-    { element: "rating_display", mandatory: false },
-  ],
+  SocialProofStrip: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "company_logos", mandatory: false, generation: "manual_preferred" },
+      { element: "logo_urls", mandatory: false, generation: "manual_preferred" },
+      { element: "trust_badge_1", mandatory: false, generation: "ai_generated" },
+      { element: "trust_badge_2", mandatory: false, generation: "ai_generated" },
+      { element: "trust_badge_3", mandatory: false, generation: "ai_generated" },
+      { element: "rating_display", mandatory: false, generation: "hybrid" }
+    ],
+    cardStructure: {
+      type: "items",
+      elements: ["proof_stats", "stat_labels", "company_names"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'items',
+      min: 4,
+      max: 10,
+      optimal: [6, 8],
+      description: 'Social proof strip elements'
+    }
+  },
 
   // Testimonial Section
-  QuoteGrid: [
-    { element: "headline", mandatory: true },
-    { element: "testimonial_quotes", mandatory: true },
-    { element: "customer_names", mandatory: true },
-    { element: "customer_titles", mandatory: false },
-    { element: "customer_companies", mandatory: false },
-  ],
+  QuoteGrid: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "verification_message", mandatory: false, generation: "ai_generated" },
+      { element: "rating_value", mandatory: false, generation: "manual_preferred" },
+      { element: "quote_mark_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "verification_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "testimonial_icon_1", mandatory: true, generation: "manual_preferred" },
+      { element: "testimonial_icon_2", mandatory: true, generation: "manual_preferred" },
+      { element: "testimonial_icon_3", mandatory: true, generation: "manual_preferred" },
+      { element: "testimonial_icon_4", mandatory: true, generation: "manual_preferred" },
+      { element: "testimonial_icon_5", mandatory: true, generation: "manual_preferred" },
+      { element: "testimonial_icon_6", mandatory: true, generation: "manual_preferred" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["testimonial_quotes", "customer_names", "customer_titles", "customer_companies"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 2,
+      max: 6,
+      optimal: [3, 4],
+      description: 'Grid of testimonial quotes'
+    }
+  },
 
-  VideoTestimonials: [
-    { element: "headline", mandatory: true },
-    { element: "video_titles", mandatory: true },
-    { element: "video_descriptions", mandatory: true },
-    { element: "video_urls", mandatory: false },
-    { element: "video_thumbnails", mandatory: false },
-    { element: "customer_names", mandatory: true },
-    { element: "customer_titles", mandatory: true },
-    { element: "customer_companies", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    { element: "supporting_text", mandatory: false },
-    { element: "cta_text", mandatory: false },
-    { element: "trust_items", mandatory: false },
-    { element: "industry_leaders_title", mandatory: false },
-    { element: "enterprise_customers_stat", mandatory: false },
-    { element: "enterprise_customers_label", mandatory: false },
-    { element: "uptime_stat", mandatory: false },
-    { element: "uptime_label", mandatory: false },
-    { element: "support_stat", mandatory: false },
-    { element: "support_label", mandatory: false },
-  ],
+  VideoTestimonials: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" },
+      { element: "industry_leaders_title", mandatory: false, generation: "ai_generated" },
+      { element: "enterprise_customers_stat", mandatory: false, generation: "manual_preferred" },
+      { element: "enterprise_customers_label", mandatory: false, generation: "ai_generated" },
+      { element: "uptime_stat", mandatory: false, generation: "manual_preferred" },
+      { element: "uptime_label", mandatory: false, generation: "ai_generated" },
+      { element: "support_stat", mandatory: false, generation: "manual_preferred" },
+      { element: "support_label", mandatory: false, generation: "ai_generated" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["video_titles", "video_descriptions", "video_urls", "video_thumbnails", "customer_names", "customer_titles", "customer_companies"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 2,
+      max: 6,
+      optimal: [3, 4],
+      description: 'Video testimonial cards'
+    }
+  },
 
-  AvatarCarousel: [
-    { element: "headline", mandatory: true },
-    { element: "testimonial_quotes", mandatory: true },
-    { element: "customer_names", mandatory: true },
-    { element: "customer_titles", mandatory: false },
-    { element: "carousel_navigation", mandatory: false },
-  ],
+  AvatarCarousel: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" },
+      { element: "community_title", mandatory: false, generation: "ai_generated" },
+      { element: "active_creators_count", mandatory: false, generation: "manual_preferred" },
+      { element: "active_creators_label", mandatory: false, generation: "ai_generated" },
+      { element: "average_rating_display", mandatory: false, generation: "manual_preferred" },
+      { element: "average_rating_label", mandatory: false, generation: "ai_generated" },
+      { element: "creations_count", mandatory: false, generation: "manual_preferred" },
+      { element: "creations_label", mandatory: false, generation: "ai_generated" },
+      { element: "auto_rotate", mandatory: false, generation: "manual_preferred" },
+      { element: "avatar_urls", mandatory: false, generation: "manual_preferred" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["testimonial_quotes", "customer_names", "customer_titles", "customer_companies", "customer_avatars", "ratings"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 4,
+      max: 10,
+      optimal: [6, 8],
+      description: 'Avatar carousel testimonials'
+    }
+  },
 
-  BeforeAfterQuote: [
-    { element: "headline", mandatory: true },
-    { element: "before_quotes", mandatory: true },
-    { element: "after_quotes", mandatory: true },
-    { element: "customer_names", mandatory: true },
-    { element: "transformation_labels", mandatory: false },
-  ],
+  BeforeAfterQuote: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: false, generation: "ai_generated" },
+      { element: "before_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "after_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "before_icon_1", mandatory: true, generation: "manual_preferred" },
+      { element: "before_icon_2", mandatory: true, generation: "manual_preferred" },
+      { element: "before_icon_3", mandatory: true, generation: "manual_preferred" },
+      { element: "before_icon_4", mandatory: true, generation: "manual_preferred" },
+      { element: "after_icon_1", mandatory: true, generation: "manual_preferred" },
+      { element: "after_icon_2", mandatory: true, generation: "manual_preferred" },
+      { element: "after_icon_3", mandatory: true, generation: "manual_preferred" },
+      { element: "after_icon_4", mandatory: true, generation: "manual_preferred" },
+      { element: "avatar_urls", mandatory: false, generation: "manual_preferred" }
+    ],
+    cardStructure: {
+      type: "pairs",
+      elements: ["before_situations", "after_outcomes", "testimonial_quotes", "customer_names", "customer_titles"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'pairs',
+      min: 1,
+      max: 4,
+      optimal: [2, 3],
+      description: 'Before/after testimonial pairs'
+    }
+  },
 
-  SegmentedTestimonials: [
-    { element: "headline", mandatory: true },
-    { element: "segment_names", mandatory: true },
-    { element: "segment_descriptions", mandatory: true },
-    { element: "testimonial_quotes", mandatory: true },
-    { element: "customer_names", mandatory: true },
-    { element: "customer_titles", mandatory: true },
-    { element: "customer_companies", mandatory: true },
-    { element: "use_cases", mandatory: true },
-    { element: "ratings", mandatory: false },
-    { element: "subheadline", mandatory: false },
-    { element: "supporting_text", mandatory: false },
-    { element: "cta_text", mandatory: false },
-    { element: "trust_items", mandatory: false },
-    { element: "segments_trust_title", mandatory: false },
-    { element: "enterprise_stat", mandatory: false },
-    { element: "enterprise_label", mandatory: false },
-    { element: "agencies_stat", mandatory: false },
-    { element: "agencies_label", mandatory: false },
-    { element: "small_business_stat", mandatory: false },
-    { element: "small_business_label", mandatory: false },
-    { element: "dev_teams_stat", mandatory: false },
-    { element: "dev_teams_label", mandatory: false },
-    { element: "segment_icon_1", mandatory: false },
-    { element: "segment_icon_2", mandatory: false },
-    { element: "segment_icon_3", mandatory: false },
-    { element: "segment_icon_4", mandatory: false },
-  ],
+  SegmentedTestimonials: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" },
+      { element: "segments_trust_title", mandatory: false, generation: "ai_generated" },
+      { element: "enterprise_stat", mandatory: false, generation: "manual_preferred" },
+      { element: "enterprise_label", mandatory: false, generation: "ai_generated" },
+      { element: "agencies_stat", mandatory: false, generation: "manual_preferred" },
+      { element: "agencies_label", mandatory: false, generation: "ai_generated" },
+      { element: "small_business_stat", mandatory: false, generation: "manual_preferred" },
+      { element: "small_business_label", mandatory: false, generation: "ai_generated" },
+      { element: "dev_teams_stat", mandatory: false, generation: "manual_preferred" },
+      { element: "dev_teams_label", mandatory: false, generation: "ai_generated" },
+      { element: "segment_icon_1", mandatory: true, generation: "manual_preferred" },
+      { element: "segment_icon_2", mandatory: true, generation: "manual_preferred" },
+      { element: "segment_icon_3", mandatory: true, generation: "manual_preferred" },
+      { element: "segment_icon_4", mandatory: true, generation: "manual_preferred" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["segment_names", "segment_descriptions", "testimonial_quotes", "customer_names", "customer_titles", "customer_companies", "use_cases", "ratings"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 8,
+      optimal: [4, 6],
+      description: 'Segmented testimonial categories'
+    }
+  },
 
-  RatingCards: [
-    { element: "headline", mandatory: true },
-    { element: "testimonial_quotes", mandatory: true },
-    { element: "customer_names", mandatory: true },
-    { element: "customer_titles", mandatory: true },
-    { element: "ratings", mandatory: true },
-    { element: "review_platforms", mandatory: true },
-    { element: "review_dates", mandatory: false },
-    { element: "verified_badges", mandatory: false },
-    { element: "customer_locations", mandatory: false },
-    { element: "avatar_urls", mandatory: false },
-    { element: "subheadline", mandatory: false },
-    { element: "supporting_text", mandatory: false },
-    { element: "cta_text", mandatory: false },
-    { element: "trust_items", mandatory: false },
-  ],
+  RatingCards: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" },
+      { element: "avatar_urls", mandatory: false, generation: "manual_preferred" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["testimonial_quotes", "customer_names", "customer_titles", "ratings", "review_platforms", "review_dates", "verified_badges", "customer_locations"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 8,
+      optimal: [6, 6],
+      description: 'Testimonial rating cards'
+    }
+  },
 
-  PullQuoteStack: [
-    { element: "headline", mandatory: true },
-    { element: "pullquote_texts", mandatory: true },
-    { element: "quote_attributions", mandatory: true },
-    { element: "quote_contexts", mandatory: false },
-  ],
+  PullQuoteStack: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" },
+      { element: "context_icon_1", mandatory: true, generation: "manual_preferred" },
+      { element: "context_icon_2", mandatory: true, generation: "manual_preferred" },
+      { element: "context_icon_3", mandatory: true, generation: "manual_preferred" },
+      { element: "context_icon_4", mandatory: true, generation: "manual_preferred" },
+      { element: "context_icon_5", mandatory: true, generation: "manual_preferred" },
+      { element: "context_icon_6", mandatory: true, generation: "manual_preferred" },
+      { element: "avatar_1", mandatory: false, generation: "manual_preferred" },
+      { element: "avatar_2", mandatory: false, generation: "manual_preferred" },
+      { element: "avatar_3", mandatory: false, generation: "manual_preferred" },
+      { element: "avatar_4", mandatory: false, generation: "manual_preferred" },
+      { element: "avatar_5", mandatory: false, generation: "manual_preferred" },
+      { element: "avatar_6", mandatory: false, generation: "manual_preferred" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["testimonial_quotes", "customer_names", "customer_titles", "customer_companies", "problem_contexts", "emotional_hooks"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 2,
+      max: 5,
+      optimal: [3, 4],
+      description: 'Stacked pull quote testimonials'
+    }
+  },
 
-  InteractiveTestimonialMap: [
-    { element: "headline", mandatory: true },
-    { element: "location_markers", mandatory: true },
-    { element: "testimonial_quotes", mandatory: true },
-    { element: "customer_names", mandatory: true },
-    { element: "location_labels", mandatory: false },
-  ],
+  InteractiveTestimonialMap: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" },
+      { element: "community_features_title", mandatory: false, generation: "ai_generated" },
+      { element: "global_reach_title", mandatory: false, generation: "ai_generated" },
+      { element: "global_reach_stat", mandatory: false, generation: "manual_preferred" },
+      { element: "currency_title", mandatory: false, generation: "ai_generated" },
+      { element: "currency_description", mandatory: false, generation: "ai_generated" },
+      { element: "support_title", mandatory: false, generation: "ai_generated" },
+      { element: "support_description", mandatory: false, generation: "ai_generated" },
+      { element: "collaboration_title", mandatory: false, generation: "ai_generated" },
+      { element: "collaboration_description", mandatory: false, generation: "ai_generated" },
+      { element: "global_reach_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "currency_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "support_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "collaboration_icon", mandatory: false, generation: "manual_preferred" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["testimonial_quotes", "customer_names", "customer_locations", "customer_countries", "customer_titles", "testimonial_categories", "ratings"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 8,
+      optimal: [4, 6],
+      description: 'Interactive testimonial map cards'
+    }
+  },
 
   // UniqueMechanism Section - Updated to match actual component implementations
-  AlgorithmExplainer: [
-    { element: "headline", mandatory: true },
-    { element: "algorithm_name", mandatory: true },
-    { element: "algorithm_steps", mandatory: false }, // Legacy pipe-separated format
-    { element: "algorithm_step_1", mandatory: true },
-    { element: "algorithm_step_2", mandatory: true },
-    { element: "algorithm_step_3", mandatory: true },
-    { element: "algorithm_step_4", mandatory: false },
-    { element: "algorithm_step_5", mandatory: false },
-    { element: "algorithm_step_6", mandatory: false },
-    { element: "algorithm_step_7", mandatory: false },
-    { element: "algorithm_step_8", mandatory: false },
-  ],
+  AlgorithmExplainer: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "algorithm_name", mandatory: true, generation: "manual_preferred" },
+      { element: "algorithm_description", mandatory: false, generation: "ai_generated" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["algorithm_steps", "step_descriptions"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 5,
+      optimal: [3, 4],
+      description: 'Algorithm step explanations'
+    }
+  },
 
-  InnovationTimeline: [
-    { element: "headline", mandatory: true },
-    { element: "timeline_items", mandatory: false }, // Legacy pipe-separated format
-    { element: "timeline_item_1", mandatory: true },
-    { element: "timeline_item_2", mandatory: true },
-    { element: "timeline_item_3", mandatory: true },
-    { element: "timeline_item_4", mandatory: false },
-    { element: "timeline_item_5", mandatory: false },
-    { element: "timeline_item_6", mandatory: false },
-  ],
+  InnovationTimeline: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "timeline_subtitle", mandatory: false, generation: "ai_generated" }
+    ],
+    cardStructure: {
+      type: "items",
+      elements: ["timeline_dates", "timeline_events", "timeline_descriptions", "timeline_icons"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'items',
+      min: 3,
+      max: 7,
+      optimal: [4, 5],
+      description: 'Innovation timeline milestones'
+    }
+  },
 
-  MethodologyBreakdown: [
-    { element: "headline", mandatory: true },
-    { element: "methodology_name", mandatory: true },
-    { element: "methodology_description", mandatory: true },
-    { element: "principle_1", mandatory: true },
-    { element: "principle_2", mandatory: true },
-    { element: "principle_3", mandatory: true },
-    { element: "principle_4", mandatory: false },
-    { element: "principle_5", mandatory: false },
-    { element: "principle_6", mandatory: false },
-    { element: "detail_1", mandatory: true },
-    { element: "detail_2", mandatory: true },
-    { element: "detail_3", mandatory: true },
-    { element: "detail_4", mandatory: false },
-    { element: "detail_5", mandatory: false },
-    { element: "detail_6", mandatory: false },
-    { element: "result_metric_1", mandatory: false },
-    { element: "result_metric_2", mandatory: false },
-    { element: "result_metric_3", mandatory: false },
-    { element: "result_metric_4", mandatory: false },
-    { element: "result_label_1", mandatory: false },
-    { element: "result_label_2", mandatory: false },
-    { element: "result_label_3", mandatory: false },
-    { element: "result_label_4", mandatory: false },
-    { element: "results_title", mandatory: false },
-    { element: "methodology_icon", mandatory: false },
-    // Legacy fields for backward compatibility
-    { element: "key_principles", mandatory: false },
-    { element: "principle_details", mandatory: false },
-    { element: "result_metrics", mandatory: false },
-    { element: "result_labels", mandatory: false },
-  ],
+  MethodologyBreakdown: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "methodology_name", mandatory: true, generation: "manual_preferred" },
+      { element: "methodology_description", mandatory: true, generation: "ai_generated" },
+      { element: "results_title", mandatory: false, generation: "ai_generated" },
+      { element: "methodology_icon", mandatory: false, generation: "manual_preferred" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["principles", "principle_details", "principle_icons"],
+      generation: "ai_generated"
+    },
+    resultStructure: {
+      type: "metrics",
+      elements: ["result_metrics", "result_labels"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 6,
+      optimal: [3, 4],
+      description: 'Methodology breakdown steps'
+    }
+  },
 
-  ProcessFlowDiagram: [
-    { element: "headline", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    { element: "process_steps", mandatory: true }, // Pipe-separated format
-    { element: "step_descriptions", mandatory: true }, // Pipe-separated format
-    { element: "benefits_title", mandatory: false },
-    { element: "benefit_titles", mandatory: false },
-    { element: "benefit_descriptions", mandatory: false },
-    { element: "benefit_icon_1", mandatory: false },
-    { element: "benefit_icon_2", mandatory: false },
-    { element: "benefit_icon_3", mandatory: false },
-  ],
+  ProcessFlowDiagram: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "benefits_title", mandatory: false, generation: "ai_generated" }
+    ],
+    processStructure: {
+      type: "steps",
+      elements: ["process_steps", "step_descriptions"],
+      generation: "ai_generated"
+    },
+    benefitStructure: {
+      type: "benefits",
+      elements: ["benefit_titles", "benefit_descriptions", "benefit_icons"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'blocks',
+      min: 1,
+      max: 1,
+      optimal: [1, 1],
+      description: 'Single process flow diagram'
+    }
+  },
 
-  PropertyComparisonMatrix: [
-    { element: "headline", mandatory: true },
-    { element: "properties", mandatory: true }, // Pipe-separated format
-    { element: "us_values", mandatory: true }, // Pipe-separated format
-    { element: "competitors_values", mandatory: true }, // Pipe-separated format
-    { element: "feature_header", mandatory: true },
-    { element: "us_header", mandatory: true },
-    { element: "competitors_header", mandatory: true },
-  ],
+  PropertyComparisonMatrix: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "feature_header", mandatory: true, generation: "ai_generated" },
+      { element: "us_header", mandatory: true, generation: "manual_preferred" },
+      { element: "competitors_header", mandatory: true, generation: "ai_generated" }
+    ],
+    cardStructure: {
+      type: "rows",
+      elements: ["properties", "us_values", "competitors_values", "property_icons"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'rows',
+      min: 3,
+      max: 8,
+      optimal: [4, 6],
+      description: 'Property comparison matrix rows'
+    }
+  },
 
-  SecretSauceReveal: [
-    { element: "headline", mandatory: true },
-    { element: "secret_sauce", mandatory: true },
-    { element: "explanation", mandatory: true },
-    { element: "secret_icon", mandatory: false },
-  ],
+  SecretSauceReveal: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["secret_titles", "secret_descriptions", "secret_icons"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 2,
+      max: 4,
+      optimal: [3, 3],
+      description: 'Secret sauce feature reveals'
+    }
+  },
 
   StackedHighlights: {
     sectionElements: [
@@ -693,92 +1177,195 @@ export const layoutElementSchema: LayoutSchema = {
     }
   },
 
-  SystemArchitecture: [
-    { element: "headline", mandatory: true },
-    { element: "architecture_components", mandatory: false }, // Legacy pipe-separated format
-    { element: "component_1", mandatory: true },
-    { element: "component_2", mandatory: true },
-    { element: "component_3", mandatory: true },
-    { element: "component_4", mandatory: false },
-    { element: "component_5", mandatory: false },
-    { element: "component_6", mandatory: false },
-    { element: "component_icon_1", mandatory: false },
-    { element: "component_icon_2", mandatory: false },
-    { element: "component_icon_3", mandatory: false },
-    { element: "component_icon_4", mandatory: false },
-    { element: "component_icon_5", mandatory: false },
-    { element: "component_icon_6", mandatory: false },
-  ],
+  SystemArchitecture: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "architecture_description", mandatory: false, generation: "ai_generated" }
+    ],
+    componentStructure: {
+      type: "components",
+      elements: ["component_names", "component_descriptions", "component_icons"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'blocks',
+      min: 1,
+      max: 1,
+      optimal: [1, 1],
+      description: 'Single system architecture diagram'
+    }
+  },
 
-  TechnicalAdvantage: [
-    { element: "headline", mandatory: true },
-    { element: "advantages", mandatory: true }, // Pipe-separated format
-    { element: "advantage_descriptions", mandatory: false }, // Pipe-separated format
-    { element: "advantage_icon_1", mandatory: false },
-    { element: "advantage_icon_2", mandatory: false },
-    { element: "advantage_icon_3", mandatory: false },
-    { element: "advantage_icon_4", mandatory: false },
-    { element: "advantage_icon_5", mandatory: false },
-    { element: "advantage_icon_6", mandatory: false },
-  ],
+  TechnicalAdvantage: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["advantage_titles", "advantage_descriptions", "advantage_icons"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 6,
+      optimal: [3, 4],
+      description: 'Technical advantage points'
+    }
+  },
 
-  // UseCase Section - Using actual component names
-  BeforeAfterWorkflow: [
-    { element: "headline", mandatory: true },
-    { element: "workflow_steps", mandatory: true },
-    { element: "before_descriptions", mandatory: true },
-    { element: "after_descriptions", mandatory: true },
-    { element: "workflow_benefits", mandatory: false },
-  ],
+  // UseCase Section - Unified schema transformations following elementTransform.md SOP
+  BeforeAfterWorkflow: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "before_title", mandatory: false, generation: "ai_generated" },
+      { element: "after_title", mandatory: false, generation: "ai_generated" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["before_steps", "after_steps", "before_icons", "after_icons"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 2,
+      max: 6,
+      optimal: [3, 4],
+      description: 'Before/after workflow comparison steps'
+    }
+  },
 
-  CustomerJourneyFlow: [
-    { element: "headline", mandatory: true },
-    { element: "journey_stages", mandatory: true },
-    { element: "stage_descriptions", mandatory: true },
-    { element: "stage_outcomes", mandatory: false },
-  ],
+  CustomerJourneyFlow: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "footer_title", mandatory: false, generation: "ai_generated" },
+      { element: "footer_description", mandatory: false, generation: "ai_generated" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["journey_stages", "stage_descriptions", "stage_icons"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 6,
+      optimal: [4, 5],
+      description: 'Customer journey stages with descriptions'
+    }
+  },
 
-  IndustryUseCaseGrid: [
-    { element: "headline", mandatory: true },
-    { element: "industry_names", mandatory: true },
-    { element: "industry_descriptions", mandatory: true },
-    { element: "industry_examples", mandatory: false },
-  ],
+  IndustryUseCaseGrid: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["industry_names", "use_case_descriptions", "industry_icons"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 6,
+      optimal: [4, 6],
+      description: 'Industry-specific use cases with examples'
+    }
+  },
 
-  InteractiveUseCaseMap: [
-    { element: "headline", mandatory: true },
-    { element: "use_case_categories", mandatory: true },
-    { element: "use_case_descriptions", mandatory: true },
-    { element: "interaction_labels", mandatory: false },
-  ],
+  InteractiveUseCaseMap: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["category_names", "use_case_descriptions", "category_icons"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 6,
+      optimal: [4, 6],
+      description: 'Interactive use case categories with descriptions'
+    }
+  },
 
-  PersonaGrid: [
-    { element: "headline", mandatory: true },
-    { element: "persona_names", mandatory: true },
-    { element: "persona_descriptions", mandatory: true },
-    { element: "use_case_examples", mandatory: false },
-  ],
+  PersonaGrid: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "footer_text", mandatory: false, generation: "ai_generated" },
+      { element: "badge_text", mandatory: false, generation: "ai_generated" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["persona_names", "persona_descriptions", "persona_icons"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 2,
+      max: 6,
+      optimal: [3, 4],
+      description: 'User persona cards with descriptions and roles'
+    }
+  },
 
-  RoleBasedScenarios: [
-    { element: "headline", mandatory: true },
-    { element: "role_names", mandatory: true },
-    { element: "scenario_descriptions", mandatory: true },
-    { element: "scenario_outcomes", mandatory: false },
-  ],
+  RoleBasedScenarios: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["roles", "scenarios", "role_icons"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 6,
+      optimal: [4, 6],
+      description: 'Role-based scenarios and use cases'
+    }
+  },
 
-  UseCaseCarousel: [
-    { element: "headline", mandatory: true },
-    { element: "use_case_titles", mandatory: true },
-    { element: "use_case_descriptions", mandatory: true },
-    { element: "carousel_navigation", mandatory: false },
-  ],
+  UseCaseCarousel: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "use_case_description", mandatory: false, generation: "ai_generated" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["use_case_titles", "usecase_icons"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 6,
+      optimal: [4, 6],
+      description: 'Scrollable use case carousel with icons'
+    }
+  },
 
-  WorkflowDiagrams: [
-    { element: "headline", mandatory: true },
-    { element: "workflow_steps", mandatory: true },
-    { element: "step_descriptions", mandatory: true },
-    { element: "diagram_labels", mandatory: false },
-  ],
+  WorkflowDiagrams: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["workflow_steps", "step_icons"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 6,
+      optimal: [4, 5],
+      description: 'Workflow process steps with visual icons'
+    }
+  },
 
   JobToBeDoneList: [
     { element: "headline", mandatory: true },
@@ -787,179 +1374,492 @@ export const layoutElementSchema: LayoutSchema = {
     { element: "solution_approaches", mandatory: false },
   ],
 
-  StatComparison: [
-    { element: "headline", mandatory: true },
-    { element: "before_label", mandatory: true },
-    { element: "after_label", mandatory: true },
-    { element: "before_stats", mandatory: true },
-    { element: "after_stats", mandatory: true },
-    { element: "improvement_text", mandatory: false },
-    { element: "summary_title", mandatory: false },
-    { element: "summary_stat_1_value", mandatory: false },
-    { element: "summary_stat_1_label", mandatory: false },
-    { element: "summary_stat_2_value", mandatory: false },
-    { element: "summary_stat_2_label", mandatory: false },
-    { element: "summary_stat_3_value", mandatory: false },
-    { element: "summary_stat_3_label", mandatory: false },
-    { element: "show_summary_section", mandatory: false },
-    { element: "improvement_icon", mandatory: false },
-    { element: "flow_icon", mandatory: false },
-    { element: "stat_icon_1", mandatory: false },
-    { element: "stat_icon_2", mandatory: false },
-    { element: "stat_icon_3", mandatory: false },
-    { element: "subheadline", mandatory: false },
-    { element: "supporting_text", mandatory: false },
-    { element: "cta_text", mandatory: false },
-    { element: "trust_items", mandatory: false },
-  ],
+  StatComparison: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "before_label", mandatory: true, generation: "ai_generated" },
+      { element: "after_label", mandatory: true, generation: "ai_generated" },
+      { element: "improvement_text", mandatory: false, generation: "ai_generated" },
+      { element: "summary_title", mandatory: false, generation: "ai_generated" },
+      { element: "show_summary_section", mandatory: false, generation: "hybrid" },
+      { element: "improvement_icon", mandatory: false, generation: "hybrid" },
+      { element: "flow_icon", mandatory: false, generation: "hybrid" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["before_stats", "after_stats"],
+      generation: "ai_generated"
+    },
+    summaryCardStructure: {
+      type: "cards",
+      elements: ["summary_stat_values", "summary_stat_labels", "stat_icons"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 4,
+      max: 8,
+      optimal: [4, 6],
+      description: 'Statistical before/after comparison with metrics'
+    }
+  },
 
-  PersonaJourney: [
-    { element: "headline", mandatory: true },
-    { element: "persona_name", mandatory: true },
-    { element: "before_scenario", mandatory: true },
-    { element: "after_scenario", mandatory: true },
-    { element: "journey_steps", mandatory: false },
-    { element: "persona_quote", mandatory: false },
-    { element: "subheadline", mandatory: false },
-    { element: "supporting_text", mandatory: false },
-    { element: "cta_text", mandatory: false },
-    { element: "trust_items", mandatory: false },
-  ],
+  PersonaJourney: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "persona_name", mandatory: true, generation: "ai_generated" },
+      { element: "persona_role", mandatory: false, generation: "ai_generated" },
+      { element: "persona_company", mandatory: false, generation: "ai_generated" },
+      { element: "before_title", mandatory: true, generation: "ai_generated" },
+      { element: "before_challenges", mandatory: true, generation: "ai_generated" },
+      { element: "journey_title", mandatory: false, generation: "ai_generated" },
+      { element: "journey_description", mandatory: false, generation: "ai_generated" },
+      { element: "after_title", mandatory: true, generation: "ai_generated" },
+      { element: "after_outcomes", mandatory: true, generation: "ai_generated" },
+      { element: "after_benefits", mandatory: false, generation: "ai_generated" },
+      { element: "summary_title", mandatory: false, generation: "ai_generated" },
+      { element: "summary_description", mandatory: false, generation: "ai_generated" },
+      { element: "show_summary_section", mandatory: false, generation: "hybrid" },
+      { element: "persona_avatar", mandatory: false, generation: "manual_preferred" },
+      { element: "before_icon", mandatory: false, generation: "hybrid" },
+      { element: "journey_icon", mandatory: false, generation: "hybrid" },
+      { element: "after_icon", mandatory: false, generation: "hybrid" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" }
+    ],
+    cardStructure: {
+      type: "steps",
+      elements: ["before_pain_points", "journey_steps", "summary_labels"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'steps',
+      min: 3,
+      max: 6,
+      optimal: [4, 5],
+      description: 'Persona transformation journey with pain points and outcomes'
+    }
+  },
 
   // Close Section
-  MockupWithCTA: [
-    { element: "headline", mandatory: true },
-    { element: "cta_text", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    { element: "urgency_text", mandatory: false },
-    { element: "guarantee_text", mandatory: false },
-  ],
+  MockupWithCTA: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "cta_text", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "urgency_text", mandatory: false, generation: "ai_generated" },
+      { element: "guarantee_text", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" }
+    ]
+  },
 
-  BonusStackCTA: [
-    { element: "headline", mandatory: true },
-    { element: "cta_text", mandatory: true },
-    { element: "bonus_items", mandatory: true },
-    { element: "total_value_text", mandatory: false },
-    { element: "urgency_text", mandatory: false },
-  ],
+  BonusStackCTA: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "value_proposition", mandatory: true, generation: "ai_generated" },
+      { element: "main_offer", mandatory: true, generation: "ai_generated" },
+      { element: "total_value", mandatory: true, generation: "ai_generated" },
+      { element: "discount_amount", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: true, generation: "ai_generated" },
+      { element: "urgency_text", mandatory: false, generation: "ai_generated" },
+      { element: "guarantee_text", mandatory: false, generation: "ai_generated" },
+      { element: "scarcity_text", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_1", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_2", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_3", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_4", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_5", mandatory: false, generation: "ai_generated" },
+      { element: "main_offer_badge", mandatory: false, generation: "ai_generated" },
+      { element: "bonus_badge", mandatory: false, generation: "ai_generated" },
+      { element: "bonus_description", mandatory: false, generation: "ai_generated" },
+      { element: "total_value_label", mandatory: false, generation: "ai_generated" },
+      { element: "final_cta_title", mandatory: false, generation: "ai_generated" },
+      { element: "final_cta_description", mandatory: false, generation: "ai_generated" },
+      { element: "social_proof_footer_text", mandatory: false, generation: "ai_generated" },
+      { element: "bonus_check_icon", mandatory: true, generation: "manual_preferred" },
+      { element: "urgency_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "scarcity_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "guarantee_icon", mandatory: false, generation: "manual_preferred" }
+    ],
 
-  LeadMagnetCard: [
-    { element: "headline", mandatory: true },
-    { element: "cta_text", mandatory: true },
-    { element: "magnet_title", mandatory: true },
-    { element: "magnet_description", mandatory: true },
-    { element: "form_labels", mandatory: false },
-    { element: "privacy_text", mandatory: false },
-  ],
+    cardStructure: {
+      type: "items",
+      elements: ["bonus_items", "bonus_values"],
+      generation: "ai_generated"
+    },
 
-  EnterpriseContactBox: [
-    { element: "headline", mandatory: true },
-    { element: "cta_text", mandatory: true },
-    { element: "contact_description", mandatory: true },
-    { element: "features_list", mandatory: false },
-    { element: "contact_methods", mandatory: false },
-  ],
+    cardRequirements: {
+      type: 'items',
+      min: 3,
+      max: 6,
+      optimal: [4, 5],
+      description: 'Bonus stack items with values'
+    }
+  },
 
-  ValueReinforcementBlock: [
-    { element: "headline", mandatory: true },
-    { element: "value_points", mandatory: true },
-    { element: "cta_text", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    { element: "closing_statement", mandatory: false },
-  ],
+  LeadMagnetCard: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "cta_text", mandatory: true, generation: "ai_generated" },
+      { element: "magnet_title", mandatory: true, generation: "ai_generated" },
+      { element: "magnet_description", mandatory: true, generation: "ai_generated" },
+      { element: "form_labels", mandatory: false, generation: "ai_generated" },
+      { element: "privacy_text", mandatory: false, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" }
+    ]
+  },
 
-  LivePreviewEmbed: [
-    { element: "headline", mandatory: true },
-    { element: "cta_text", mandatory: true },
-    { element: "preview_description", mandatory: true },
-    { element: "instruction_text", mandatory: false },
-  ],
+  EnterpriseContactBox: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "value_proposition", mandatory: true, generation: "ai_generated" },
+      { element: "cta_primary", mandatory: true, generation: "ai_generated" },
+      { element: "cta_secondary", mandatory: false, generation: "ai_generated" },
+      { element: "availability_text", mandatory: false, generation: "ai_generated" },
+      { element: "team_size_text", mandatory: false, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" },
+      { element: "calendar_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "demo_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "quote_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "download_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "response_time_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "enterprise_check_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "qualification_check_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "social_proof_icon", mandatory: false, generation: "manual_preferred" }
+    ],
 
-  SideBySideOfferCards: [
-    { element: "headline", mandatory: true },
-    { element: "offer_titles", mandatory: true },
-    { element: "offer_descriptions", mandatory: true },
-    { element: "cta_texts", mandatory: true },
-    { element: "comparison_points", mandatory: false },
-  ],
+    cardStructure: {
+      type: "cards",
+      elements: ["contact_options", "contact_descriptions", "response_times", "enterprise_features", "qualification_points"],
+      generation: "ai_generated"
+    },
 
-  MultistepCTAStack: [
-    { element: "headline", mandatory: true },
-    { element: "step_titles", mandatory: true },
-    { element: "step_descriptions", mandatory: true },
-    { element: "final_cta_text", mandatory: true },
-    { element: "progress_labels", mandatory: false },
-  ],
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 6,
+      optimal: [4, 4],
+      description: 'Enterprise contact options with features'
+    }
+  },
+
+  ValueReinforcementBlock: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "primary_value", mandatory: true, generation: "ai_generated" },
+      { element: "transformation_title", mandatory: false, generation: "ai_generated" },
+      { element: "transformation_description", mandatory: false, generation: "ai_generated" },
+      { element: "social_proof_title", mandatory: false, generation: "ai_generated" },
+      { element: "final_cta_title", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: true, generation: "ai_generated" },
+      { element: "urgency_text", mandatory: false, generation: "ai_generated" },
+      { element: "risk_reversal", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_1", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_2", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_3", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_4", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_5", mandatory: false, generation: "ai_generated" },
+      { element: "trending_up_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "dollar_sign_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "automation_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "users_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "chart_bar_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "integration_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "before_cross_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "after_check_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "arrow_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "urgency_clock_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "guarantee_shield_icon", mandatory: false, generation: "manual_preferred" }
+    ],
+
+    cardStructure: {
+      type: "items",
+      elements: ["value_points", "value_icons", "transformation_before", "transformation_after", "social_proof_stats", "social_proof_labels"],
+      generation: "ai_generated"
+    },
+
+    cardRequirements: {
+      type: 'items',
+      min: 3,
+      max: 8,
+      optimal: [4, 6],
+      description: 'Value reinforcement points with transformation elements'
+    }
+  },
+
+  LivePreviewEmbed: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "cta_text", mandatory: true, generation: "ai_generated" },
+      { element: "preview_description", mandatory: true, generation: "ai_generated" },
+      { element: "instruction_text", mandatory: false, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" }
+    ]
+  },
+
+  SideBySideOfferCards: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "comparison_note", mandatory: false, generation: "ai_generated" },
+      { element: "guarantee_text", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" },
+      { element: "feature_check_icon", mandatory: true, generation: "manual_preferred" },
+      { element: "feature_unavailable_icon", mandatory: true, generation: "manual_preferred" },
+      { element: "info_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "guarantee_shield_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "proven_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "setup_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "support_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "security_icon", mandatory: false, generation: "manual_preferred" }
+    ],
+
+    cardStructure: {
+      type: "cards",
+      elements: ["offer_titles", "offer_descriptions", "offer_prices", "offer_features", "offer_ctas", "offer_badges", "offer_highlights"],
+      generation: "ai_generated"
+    },
+
+    cardRequirements: {
+      type: 'cards',
+      min: 2,
+      max: 4,
+      optimal: [2, 3],
+      description: 'Offer comparison cards with features and pricing'
+    }
+  },
+
+  MultistepCTAStack: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "final_cta", mandatory: true, generation: "ai_generated" },
+      { element: "process_note", mandatory: false, generation: "ai_generated" },
+      { element: "guarantee_text", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" },
+      { element: "step_1_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "step_2_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "step_3_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "time_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "detail_check_icon", mandatory: true, generation: "manual_preferred" },
+      { element: "benefit_check_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "quick_setup_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "guided_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "user_friendly_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "support_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "info_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "guarantee_icon", mandatory: false, generation: "manual_preferred" }
+    ],
+
+    cardStructure: {
+      type: "steps",
+      elements: ["step_titles", "step_descriptions", "step_details", "step_ctas", "completion_times", "step_benefits"],
+      generation: "ai_generated"
+    },
+
+    cardRequirements: {
+      type: 'steps',
+      min: 3,
+      max: 5,
+      optimal: [3, 3],
+      description: 'Multistep process steps with details and CTAs'
+    }
+  },
 
   // Comparison Section
-  BasicFeatureGrid: [
-    { element: "headline", mandatory: true },
-    { element: "feature_names", mandatory: true },
-    { element: "competitor_names", mandatory: true },
-    { element: "your_product_name", mandatory: true },
-    { element: "subheadline", mandatory: false },
-  ],
+  BasicFeatureGrid: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "your_product_name", mandatory: true, generation: "manual_preferred" }
+    ],
+    cardStructure: {
+      type: "rows",
+      elements: ["feature_names", "competitor_names"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'rows',
+      min: 4,
+      max: 10,
+      optimal: [5, 7],
+      description: 'Feature comparison rows'
+    }
+  },
 
-  CheckmarkComparison: [
-    { element: "headline", mandatory: true },
-    { element: "feature_list", mandatory: true },
-    { element: "competitor_name", mandatory: true },
-    { element: "your_product_name", mandatory: true },
-    { element: "comparison_summary", mandatory: false },
-  ],
+  CheckmarkComparison: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "highlight_column", mandatory: false, generation: "manual_preferred" }
+    ],
+    cardStructure: {
+      type: "rows",
+      elements: ["column_headers", "feature_labels", "column_features"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'rows',
+      min: 3,
+      max: 8,
+      optimal: [4, 6],
+      description: 'Checkmark comparison rows'
+    }
+  },
 
-  YouVsThemHighlight: [
-    { element: "headline", mandatory: true },
-    { element: "your_approach_title", mandatory: true },
-    { element: "their_approach_title", mandatory: true },
-    { element: "your_approach_description", mandatory: true },
-    { element: "their_approach_description", mandatory: true },
-    { element: "conclusion_text", mandatory: false },
-  ],
+  CompetitorCallouts: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "trust_badge", mandatory: false, generation: "manual_preferred" },
+      { element: "issue_icon_1", mandatory: false, generation: "manual_preferred" },
+      { element: "issue_icon_2", mandatory: false, generation: "manual_preferred" },
+      { element: "issue_icon_3", mandatory: false, generation: "manual_preferred" },
+      { element: "solution_icon_1", mandatory: false, generation: "manual_preferred" },
+      { element: "solution_icon_2", mandatory: false, generation: "manual_preferred" },
+      { element: "solution_icon_3", mandatory: false, generation: "manual_preferred" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["competitor_names", "competitor_issues", "our_solution"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 2,
+      max: 4,
+      optimal: [3, 3],
+      description: 'Competitor comparison cards'
+    }
+  },
 
-  ToggleableComparison: [
-    { element: "headline", mandatory: true },
-    { element: "toggle_labels", mandatory: true },
-    { element: "comparison_categories", mandatory: true },
-    { element: "comparison_values", mandatory: true },
-    { element: "subheadline", mandatory: false },
-  ],
+  LiteVsProVsEnterprise: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["tier_names", "tier_prices", "tier_descriptions", "tier_ctas"],
+      generation: "ai_generated"
+    },
+    featureStructure: {
+      type: "rows",
+      elements: ["feature_categories", "feature_items", "tier_features"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 2,
+      max: 4,
+      optimal: [3, 3],
+      description: 'Pricing tier cards'
+    }
+  },
 
-  CompetitorCallouts: [
-    { element: "headline", mandatory: true },
-    { element: "competitor_names", mandatory: true },
-    { element: "callout_titles", mandatory: true },
-    { element: "callout_descriptions", mandatory: true },
-    { element: "your_advantage_text", mandatory: false },
-  ],
+  PersonaUseCaseCompare: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "persona_icon_1", mandatory: false, generation: "manual_preferred" },
+      { element: "persona_icon_2", mandatory: false, generation: "manual_preferred" },
+      { element: "persona_icon_3", mandatory: false, generation: "manual_preferred" },
+      { element: "persona_icon_4", mandatory: false, generation: "manual_preferred" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["persona_labels", "persona_descriptions", "use_cases", "solutions"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 2,
+      max: 5,
+      optimal: [3, 4],
+      description: 'Persona use case cards'
+    }
+  },
 
-  AnimatedUpgradePath: [
-    { element: "headline", mandatory: true },
-    { element: "stage_titles", mandatory: true },
-    { element: "stage_descriptions", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    { element: "stage_icons", mandatory: false },
-    { element: "stage_icon_1", mandatory: false },
-    { element: "stage_icon_2", mandatory: false },
-    { element: "stage_icon_3", mandatory: false },
-    { element: "cta_text", mandatory: false },
-  ],
+  ToggleableComparison: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" }
+    ],
+    cardStructure: {
+      type: "rows",
+      elements: ["option_labels", "feature_categories", "feature_items", "option_features"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'rows',
+      min: 4,
+      max: 10,
+      optimal: [5, 7],
+      description: 'Toggleable comparison table'
+    }
+  },
 
-  PersonaUseCaseCompare: [
-    { element: "headline", mandatory: true },
-    { element: "persona_names", mandatory: true },
-    { element: "use_case_titles", mandatory: true },
-    { element: "solution_descriptions", mandatory: true },
-    { element: "outcome_comparisons", mandatory: false },
-  ],
+  AnimatedUpgradePath: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: false, generation: "ai_generated" },
+      { element: "stage_icons", mandatory: false, generation: "manual_preferred" },
+      { element: "stage_icon_1", mandatory: false, generation: "manual_preferred" },
+      { element: "stage_icon_2", mandatory: false, generation: "manual_preferred" },
+      { element: "stage_icon_3", mandatory: false, generation: "manual_preferred" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["stage_titles", "stage_descriptions"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 5,
+      optimal: [3, 4],
+      description: 'Upgrade path stages'
+    }
+  },
 
-  LiteVsProVsEnterprise: [
-    { element: "headline", mandatory: true },
-    { element: "tier_names", mandatory: true },
-    { element: "tier_descriptions", mandatory: true },
-    { element: "feature_comparisons", mandatory: true },
-    { element: "recommended_labels", mandatory: false },
-  ],
+  YouVsThemHighlight: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "them_headline", mandatory: true, generation: "ai_generated" },
+      { element: "you_headline", mandatory: true, generation: "ai_generated" },
+      { element: "cta_text", mandatory: false, generation: "ai_generated" }
+    ],
+    cardStructure: {
+      type: "rows",
+      elements: ["them_points", "you_points"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'rows',
+      min: 3,
+      max: 8,
+      optimal: [4, 6],
+      description: 'You vs Them comparison rows'
+    }
+  },
 
   // FAQ Section
   AccordionFAQ: [
@@ -1014,911 +1914,1430 @@ export const layoutElementSchema: LayoutSchema = {
     { element: "answers_right", mandatory: false },
   ],
 
-  InlineQnAList: [
-    { element: "headline", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    { element: "question_1", mandatory: true },
-    { element: "answer_1", mandatory: true },
-    { element: "question_2", mandatory: true },
-    { element: "answer_2", mandatory: true },
-    { element: "question_3", mandatory: true },
-    { element: "answer_3", mandatory: true },
-    { element: "question_4", mandatory: false },
-    { element: "answer_4", mandatory: false },
-    { element: "question_5", mandatory: false },
-    { element: "answer_5", mandatory: false },
-    { element: "question_6", mandatory: false },
-    { element: "answer_6", mandatory: false },
-    { element: "questions", mandatory: false },
-    { element: "answers", mandatory: false },
-  ],
+  InlineQnAList: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" }
+    ],
 
-  SegmentedFAQTabs: [
-    { element: "headline", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    // Tab configuration
-    { element: "tab_1_label", mandatory: true },
-    { element: "tab_2_label", mandatory: true },
-    { element: "tab_3_label", mandatory: false },
-    { element: "tab_1_description", mandatory: false },
-    { element: "tab_2_description", mandatory: false },
-    { element: "tab_3_description", mandatory: false },
-    // Tab 1 Q&A (up to 3 items per tab)
-    { element: "tab_1_question_1", mandatory: true },
-    { element: "tab_1_answer_1", mandatory: true },
-    { element: "tab_1_question_2", mandatory: false },
-    { element: "tab_1_answer_2", mandatory: false },
-    { element: "tab_1_question_3", mandatory: false },
-    { element: "tab_1_answer_3", mandatory: false },
-    // Tab 2 Q&A
-    { element: "tab_2_question_1", mandatory: true },
-    { element: "tab_2_answer_1", mandatory: true },
-    { element: "tab_2_question_2", mandatory: false },
-    { element: "tab_2_answer_2", mandatory: false },
-    { element: "tab_2_question_3", mandatory: false },
-    { element: "tab_2_answer_3", mandatory: false },
-    // Tab 3 Q&A
-    { element: "tab_3_question_1", mandatory: false },
-    { element: "tab_3_answer_1", mandatory: false },
-    { element: "tab_3_question_2", mandatory: false },
-    { element: "tab_3_answer_2", mandatory: false },
-    { element: "tab_3_question_3", mandatory: false },
-    { element: "tab_3_answer_3", mandatory: false },
-    // Legacy fields for backward compatibility
-    { element: "tab_labels", mandatory: false },
-    { element: "tab_descriptions", mandatory: false },
-    { element: "questions", mandatory: false },
-    { element: "answers", mandatory: false },
-  ],
+    cardStructure: {
+      type: "pairs",
+      elements: ["question", "answer"],
+      generation: "ai_generated"
+    },
 
-  QuoteStyleAnswers: [
-    { element: "headline", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    // Individual Q&A with quotes (up to 5 items)
-    { element: "question_1", mandatory: true },
-    { element: "quote_answer_1", mandatory: true },
-    { element: "attribution_1", mandatory: true },
-    { element: "question_2", mandatory: true },
-    { element: "quote_answer_2", mandatory: true },
-    { element: "attribution_2", mandatory: true },
-    { element: "question_3", mandatory: false },
-    { element: "quote_answer_3", mandatory: false },
-    { element: "attribution_3", mandatory: false },
-    { element: "question_4", mandatory: false },
-    { element: "quote_answer_4", mandatory: false },
-    { element: "attribution_4", mandatory: false },
-    { element: "question_5", mandatory: false },
-    { element: "quote_answer_5", mandatory: false },
-    { element: "attribution_5", mandatory: false },
-    // Style configuration
-    { element: "quote_style", mandatory: false },
-    { element: "attribution_style", mandatory: false },
-    // Legacy fields for backward compatibility
-    { element: "questions", mandatory: false },
-    { element: "quote_answers", mandatory: false },
-    { element: "quote_attributions", mandatory: false },
-  ],
+    cardRequirements: {
+      type: 'items',
+      min: 2,
+      max: 10,
+      optimal: [4, 6],
+      description: 'Inline Q&A list items'
+    }
+  },
 
-  IconWithAnswers: [
-    { element: "headline", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    // Individual Q&A with icons (up to 6 items)
-    { element: "question_1", mandatory: true },
-    { element: "answer_1", mandatory: true },
-    { element: "icon_1", mandatory: true },
-    { element: "question_2", mandatory: true },
-    { element: "answer_2", mandatory: true },
-    { element: "icon_2", mandatory: true },
-    { element: "question_3", mandatory: true },
-    { element: "answer_3", mandatory: true },
-    { element: "icon_3", mandatory: true },
-    { element: "question_4", mandatory: false },
-    { element: "answer_4", mandatory: false },
-    { element: "icon_4", mandatory: false },
-    { element: "question_5", mandatory: false },
-    { element: "answer_5", mandatory: false },
-    { element: "icon_5", mandatory: false },
-    { element: "question_6", mandatory: false },
-    { element: "answer_6", mandatory: false },
-    { element: "icon_6", mandatory: false },
-    // Icon configuration
-    { element: "icon_position", mandatory: false },
-    { element: "icon_size", mandatory: false },
-    // Legacy fields for backward compatibility
-    { element: "questions", mandatory: false },
-    { element: "answers", mandatory: false },
-    { element: "icon_labels", mandatory: false },
-  ],
+  SegmentedFAQTabs: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "tab_label_1", mandatory: true, generation: "ai_generated" },
+      { element: "tab_label_2", mandatory: true, generation: "ai_generated" },
+      { element: "tab_label_3", mandatory: false, generation: "ai_generated" }
+    ],
 
-  TestimonialFAQs: [
-    { element: "headline", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    // Individual Q&A with testimonials (up to 5 items)
-    { element: "question_1", mandatory: true },
-    { element: "testimonial_answer_1", mandatory: true },
-    { element: "customer_name_1", mandatory: true },
-    { element: "customer_title_1", mandatory: false },
-    { element: "customer_company_1", mandatory: false },
-    { element: "question_2", mandatory: true },
-    { element: "testimonial_answer_2", mandatory: true },
-    { element: "customer_name_2", mandatory: true },
-    { element: "customer_title_2", mandatory: false },
-    { element: "customer_company_2", mandatory: false },
-    { element: "question_3", mandatory: false },
-    { element: "testimonial_answer_3", mandatory: false },
-    { element: "customer_name_3", mandatory: false },
-    { element: "customer_title_3", mandatory: false },
-    { element: "customer_company_3", mandatory: false },
-    { element: "question_4", mandatory: false },
-    { element: "testimonial_answer_4", mandatory: false },
-    { element: "customer_name_4", mandatory: false },
-    { element: "customer_title_4", mandatory: false },
-    { element: "customer_company_4", mandatory: false },
-    { element: "question_5", mandatory: false },
-    { element: "testimonial_answer_5", mandatory: false },
-    { element: "customer_name_5", mandatory: false },
-    { element: "customer_title_5", mandatory: false },
-    { element: "customer_company_5", mandatory: false },
-    // Style configuration
-    { element: "testimonial_style", mandatory: false },
-    { element: "customer_photo_style", mandatory: false },
-    // Legacy fields for backward compatibility
-    { element: "questions", mandatory: false },
-    { element: "testimonial_answers", mandatory: false },
-    { element: "customer_names", mandatory: false },
-    { element: "customer_titles", mandatory: false },
-  ],
+    cardStructure: {
+      type: "tabbed_pairs",
+      elements: ["tab_questions", "tab_answers"],
+      generation: "ai_generated"
+    },
 
-  ChatBubbleFAQ: [
-    { element: "headline", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    // Individual chat conversations (up to 5 items)
-    { element: "question_1", mandatory: true },
-    { element: "answer_1", mandatory: true },
-    { element: "persona_1", mandatory: false },
-    { element: "question_2", mandatory: true },
-    { element: "answer_2", mandatory: true },
-    { element: "persona_2", mandatory: false },
-    { element: "question_3", mandatory: false },
-    { element: "answer_3", mandatory: false },
-    { element: "persona_3", mandatory: false },
-    { element: "question_4", mandatory: false },
-    { element: "answer_4", mandatory: false },
-    { element: "persona_4", mandatory: false },
-    { element: "question_5", mandatory: false },
-    { element: "answer_5", mandatory: false },
-    { element: "persona_5", mandatory: false },
-    // Chat configuration
-    { element: "customer_persona_name", mandatory: false },
-    { element: "support_persona_name", mandatory: false },
-    { element: "chat_style", mandatory: false },
-    { element: "bubble_alignment", mandatory: false },
-    // Legacy fields for backward compatibility
-    { element: "questions", mandatory: false },
-    { element: "answers", mandatory: false },
-    { element: "chat_personas", mandatory: false },
-  ],
+    cardRequirements: {
+      type: 'items',
+      min: 4,
+      max: 15,
+      optimal: [8, 10],
+      description: 'Categorized FAQ tabs'
+    }
+  },
+
+  QuoteStyleAnswers: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "show_quote_mark", mandatory: false, generation: "manual_preferred" },
+      { element: "quote_icon", mandatory: false, generation: "manual_preferred" }
+    ],
+
+    cardStructure: {
+      type: "quadruplets",
+      elements: ["question", "answer", "expert_name", "expert_title"],
+      generation: "ai_generated"
+    },
+
+    cardRequirements: {
+      type: 'items',
+      min: 2,
+      max: 5,
+      optimal: [3, 4],
+      description: 'Expert quote-style FAQ answers'
+    }
+  },
+
+  IconWithAnswers: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "help_text", mandatory: false, generation: "ai_generated" },
+      { element: "show_help_section", mandatory: false, generation: "manual_preferred" }
+    ],
+
+    cardStructure: {
+      type: "triplets",
+      elements: ["question", "answer", "icon"],
+      generation: "ai_generated"
+    },
+
+    cardRequirements: {
+      type: 'items',
+      min: 3,
+      max: 8,
+      optimal: [4, 5],
+      description: 'Icon-supported Q&A items'
+    }
+  },
+
+  TestimonialFAQs: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "trust_text", mandatory: false, generation: "ai_generated" },
+      { element: "overall_rating", mandatory: false, generation: "ai_generated" },
+      { element: "satisfaction_text", mandatory: false, generation: "ai_generated" },
+      { element: "show_trust_section", mandatory: false, generation: "manual_preferred" },
+      { element: "star_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "overall_rating_star_icon", mandatory: false, generation: "manual_preferred" }
+    ],
+
+    cardStructure: {
+      type: "sextuplets",
+      elements: ["question", "answer", "customer_name", "customer_title", "customer_company", "rating"],
+      generation: "ai_generated"
+    },
+
+    cardRequirements: {
+      type: 'items',
+      min: 2,
+      max: 6,
+      optimal: [3, 4],
+      description: 'Customer testimonial-based FAQ items'
+    }
+  },
+
+  ChatBubbleFAQ: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "user_name", mandatory: false, generation: "ai_generated" },
+      { element: "support_name", mandatory: false, generation: "ai_generated" },
+      { element: "support_avatar", mandatory: false, generation: "manual_preferred" },
+      { element: "online_status_text", mandatory: false, generation: "ai_generated" },
+      { element: "chat_placeholder", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: false, generation: "ai_generated" },
+      { element: "button_text", mandatory: false, generation: "ai_generated" },
+      { element: "show_typing_indicator", mandatory: false, generation: "manual_preferred" },
+      { element: "show_cta_section", mandatory: false, generation: "manual_preferred" },
+      { element: "status_indicator_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "send_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "support_avatar_icon", mandatory: false, generation: "manual_preferred" }
+    ],
+
+    cardStructure: {
+      type: "pairs",
+      elements: ["question", "answer"],
+      generation: "ai_generated"
+    },
+
+    cardRequirements: {
+      type: 'items',
+      min: 3,
+      max: 8,
+      optimal: [5, 6],
+      description: 'Chat conversation-style FAQ items'
+    }
+  },
 
   // Features Section
-  IconGrid: [
-    { element: "headline", mandatory: true },
-    { element: "feature_titles", mandatory: true },
-    { element: "feature_descriptions", mandatory: true },
-    { element: "subheadline", mandatory: false },
-  ],
+  IconGrid: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "icon_1", mandatory: true, generation: "manual_preferred" },
+      { element: "icon_2", mandatory: true, generation: "manual_preferred" },
+      { element: "icon_3", mandatory: true, generation: "manual_preferred" },
+      { element: "icon_4", mandatory: true, generation: "manual_preferred" },
+      { element: "icon_5", mandatory: true, generation: "manual_preferred" },
+      { element: "icon_6", mandatory: true, generation: "manual_preferred" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["feature_titles", "feature_descriptions"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 9,
+      optimal: [4, 6],
+      description: 'Feature cards with icons',
+      respectUserContent: true
+    }
+  },
 
-  SplitAlternating: [
-    { element: "headline", mandatory: true },
-    { element: "feature_titles", mandatory: true },
-    { element: "feature_descriptions", mandatory: true },
-    { element: "feature_benefits", mandatory: false },
-  ],
+  SplitAlternating: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "feature_icon_1", mandatory: true, generation: "manual_preferred" },
+      { element: "feature_icon_2", mandatory: true, generation: "manual_preferred" },
+      { element: "feature_icon_3", mandatory: true, generation: "manual_preferred" },
+      { element: "feature_icon_4", mandatory: true, generation: "manual_preferred" },
+      { element: "feature_icon_5", mandatory: true, generation: "manual_preferred" },
+      { element: "feature_icon_6", mandatory: true, generation: "manual_preferred" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["feature_titles", "feature_descriptions", "feature_benefits"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 2,
+      max: 6,
+      optimal: [3, 4],
+      description: 'Alternating feature sections',
+      respectUserContent: true
+    }
+  },
 
-  Tabbed: [
-    { element: "headline", mandatory: true },
-    { element: "tab_labels", mandatory: true },
-    { element: "tab_titles", mandatory: true },
-    { element: "tab_descriptions", mandatory: true },
-    { element: "subheadline", mandatory: false },
-  ],
+  Tabbed: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "tab_icon_1", mandatory: true, generation: "manual_preferred" },
+      { element: "tab_icon_2", mandatory: true, generation: "manual_preferred" },
+      { element: "tab_icon_3", mandatory: true, generation: "manual_preferred" },
+      { element: "tab_icon_4", mandatory: true, generation: "manual_preferred" },
+      { element: "tab_icon_5", mandatory: true, generation: "manual_preferred" },
+      { element: "tab_icon_6", mandatory: true, generation: "manual_preferred" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["tab_labels", "tab_titles", "tab_descriptions"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 6,
+      optimal: [3, 4],
+      description: 'Tabbed feature cards',
+      respectUserContent: true
+    }
+  },
 
-  Timeline: [
-    { element: "headline", mandatory: true },
-    { element: "timeline_titles", mandatory: true },
-    { element: "timeline_descriptions", mandatory: true },
-    { element: "timeline_dates", mandatory: false },
-    { element: "milestone_labels", mandatory: false },
-  ],
+  Timeline: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" },
+      { element: "step_benefit_1", mandatory: false, generation: "ai_generated" },
+      { element: "step_benefit_2", mandatory: false, generation: "ai_generated" },
+      { element: "step_benefit_icon_1", mandatory: true, generation: "manual_preferred" },
+      { element: "step_benefit_icon_2", mandatory: true, generation: "manual_preferred" },
+      { element: "process_summary_title", mandatory: false, generation: "ai_generated" },
+      { element: "process_summary_description", mandatory: false, generation: "ai_generated" },
+      { element: "show_process_summary", mandatory: false, generation: "manual_preferred" },
+      { element: "timeline_icon_1", mandatory: true, generation: "manual_preferred" },
+      { element: "timeline_icon_2", mandatory: true, generation: "manual_preferred" },
+      { element: "timeline_icon_3", mandatory: true, generation: "manual_preferred" },
+      { element: "timeline_icon_4", mandatory: true, generation: "manual_preferred" },
+      { element: "timeline_icon_5", mandatory: true, generation: "manual_preferred" },
+      { element: "timeline_icon_6", mandatory: true, generation: "manual_preferred" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["step_numbers", "step_titles", "step_descriptions", "step_durations"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 8,
+      optimal: [4, 6],
+      description: 'Timeline feature cards',
+      respectUserContent: true
+    }
+  },
 
-  FeatureTestimonial: [
-    { element: "headline", mandatory: true },
-    { element: "feature_titles", mandatory: true },
-    { element: "feature_descriptions", mandatory: true },
-    { element: "testimonial_quotes", mandatory: true },
-    { element: "customer_names", mandatory: true },
-    { element: "customer_titles", mandatory: false },
-  ],
+  FeatureTestimonial: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "feature_icon_1", mandatory: true, generation: "manual_preferred" },
+      { element: "feature_icon_2", mandatory: true, generation: "manual_preferred" },
+      { element: "feature_icon_3", mandatory: true, generation: "manual_preferred" },
+      { element: "feature_icon_4", mandatory: true, generation: "manual_preferred" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["feature_titles", "feature_descriptions", "testimonial_quotes", "customer_names", "customer_titles"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 2,
+      max: 4,
+      optimal: [3, 3],
+      description: 'Features with testimonials',
+      respectUserContent: true
+    }
+  },
 
-  MetricTiles: [
-    { element: "headline", mandatory: true },
-    { element: "metric_values", mandatory: true },
-    { element: "metric_labels", mandatory: true },
-    { element: "metric_descriptions", mandatory: false },
-    { element: "subheadline", mandatory: false },
-  ],
+  MetricTiles: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "metric_icon_1", mandatory: true, generation: "manual_preferred" },
+      { element: "metric_icon_2", mandatory: true, generation: "manual_preferred" },
+      { element: "metric_icon_3", mandatory: true, generation: "manual_preferred" },
+      { element: "metric_icon_4", mandatory: true, generation: "manual_preferred" },
+      { element: "metric_icon_5", mandatory: true, generation: "manual_preferred" },
+      { element: "metric_icon_6", mandatory: true, generation: "manual_preferred" },
+      { element: "metric_icon_7", mandatory: true, generation: "manual_preferred" },
+      { element: "metric_icon_8", mandatory: true, generation: "manual_preferred" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["metric_values", "metric_labels", "metric_descriptions"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 1,
+      max: 8,
+      optimal: [3, 5],
+      description: 'Metric-focused feature cards',
+      respectUserContent: true
+    }
+  },
 
-  MiniCards: [
-    { element: "headline", mandatory: true },
-    { element: "card_titles", mandatory: true },
-    { element: "card_descriptions", mandatory: true },
-    { element: "card_tags", mandatory: false },
-  ],
+  MiniCards: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" },
+      { element: "summary_item_1", mandatory: false, generation: "ai_generated" },
+      { element: "summary_item_2", mandatory: false, generation: "ai_generated" },
+      { element: "summary_item_3", mandatory: false, generation: "ai_generated" },
+      { element: "show_feature_summary", mandatory: false, generation: "manual_preferred" },
+      { element: "feature_icon_1", mandatory: true, generation: "manual_preferred" },
+      { element: "feature_icon_2", mandatory: true, generation: "manual_preferred" },
+      { element: "feature_icon_3", mandatory: true, generation: "manual_preferred" },
+      { element: "feature_icon_4", mandatory: true, generation: "manual_preferred" },
+      { element: "feature_icon_5", mandatory: true, generation: "manual_preferred" },
+      { element: "feature_icon_6", mandatory: true, generation: "manual_preferred" },
+      { element: "feature_icon_7", mandatory: true, generation: "manual_preferred" },
+      { element: "feature_icon_8", mandatory: true, generation: "manual_preferred" },
+      { element: "feature_icon_9", mandatory: true, generation: "manual_preferred" },
+      { element: "feature_icon_10", mandatory: true, generation: "manual_preferred" },
+      { element: "feature_icon_11", mandatory: true, generation: "manual_preferred" },
+      { element: "feature_icon_12", mandatory: true, generation: "manual_preferred" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["card_titles", "card_descriptions", "feature_keywords"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 4,
+      max: 12,
+      optimal: [6, 8],
+      description: 'Mini feature cards',
+      respectUserContent: true
+    }
+  },
 
-  Carousel: [
-    { element: "headline", mandatory: true },
-    { element: "slide_titles", mandatory: true },
-    { element: "slide_descriptions", mandatory: true },
-    { element: "navigation_labels", mandatory: false },
-    { element: "slide_numbers", mandatory: false },
-  ],
+  Carousel: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" },
+      { element: "auto_play", mandatory: false, generation: "manual_preferred" },
+      { element: "benefit_1", mandatory: false, generation: "ai_generated" },
+      { element: "benefit_2", mandatory: false, generation: "ai_generated" },
+      { element: "benefit_icon_1", mandatory: true, generation: "manual_preferred" },
+      { element: "benefit_icon_2", mandatory: true, generation: "manual_preferred" },
+      { element: "feature_icon_1", mandatory: true, generation: "manual_preferred" },
+      { element: "feature_icon_2", mandatory: true, generation: "manual_preferred" },
+      { element: "feature_icon_3", mandatory: true, generation: "manual_preferred" },
+      { element: "feature_icon_4", mandatory: true, generation: "manual_preferred" },
+      { element: "feature_icon_5", mandatory: true, generation: "manual_preferred" },
+      { element: "feature_icon_6", mandatory: true, generation: "manual_preferred" },
+      { element: "feature_icon_7", mandatory: true, generation: "manual_preferred" },
+      { element: "feature_icon_8", mandatory: true, generation: "manual_preferred" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["feature_titles", "feature_descriptions", "feature_visuals", "feature_tags"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 8,
+      optimal: [4, 6],
+      description: 'Feature carousel cards',
+      respectUserContent: true
+    }
+  },
 
-  // FounderNote Section
-  FounderCardWithQuote: [
-    { element: "founder_name", mandatory: true },
-    { element: "founder_title", mandatory: true },
-    { element: "founder_quote", mandatory: true },
-    { element: "founder_bio", mandatory: false },
-    { element: "company_context", mandatory: false },
-    { element: "cta_text", mandatory: false },
-    { element: "founder_image", mandatory: false },
-  ],
+  // FounderNote Section - Unified Schema
+  FounderCardWithQuote: {
+    sectionElements: [
+      { element: "founder_name", mandatory: true, generation: "ai_generated" },
+      { element: "founder_title", mandatory: true, generation: "ai_generated" },
+      { element: "founder_quote", mandatory: true, generation: "ai_generated" },
+      { element: "founder_bio", mandatory: false, generation: "ai_generated" },
+      { element: "company_context", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: false, generation: "ai_generated" },
+      { element: "founder_image", mandatory: false, generation: "manual_preferred" }
+    ],
+    cardStructure: null,
+    cardRequirements: null
+  },
 
-  LetterStyleBlock: [
-    { element: "letter_header", mandatory: true },
-    { element: "letter_greeting", mandatory: true },
-    { element: "letter_body", mandatory: true },
-    { element: "letter_signature", mandatory: true },
-    { element: "founder_title", mandatory: true },
-    { element: "cta_text", mandatory: true },
-    { element: "founder_name", mandatory: false },
-    { element: "company_name", mandatory: false },
-    { element: "date_text", mandatory: false },
-    { element: "ps_text", mandatory: false },
-    { element: "founder_image", mandatory: false },
-  ],
+  LetterStyleBlock: {
+    sectionElements: [
+      { element: "letter_header", mandatory: true, generation: "ai_generated" },
+      { element: "letter_greeting", mandatory: true, generation: "ai_generated" },
+      { element: "letter_body", mandatory: true, generation: "ai_generated" },
+      { element: "letter_signature", mandatory: true, generation: "ai_generated" },
+      { element: "founder_title", mandatory: true, generation: "ai_generated" },
+      { element: "cta_text", mandatory: true, generation: "ai_generated" },
+      { element: "founder_name", mandatory: false, generation: "ai_generated" },
+      { element: "company_name", mandatory: false, generation: "ai_generated" },
+      { element: "date_text", mandatory: false, generation: "ai_generated" },
+      { element: "ps_text", mandatory: false, generation: "ai_generated" },
+      { element: "founder_image", mandatory: false, generation: "manual_preferred" }
+    ],
+    cardStructure: null,
+    cardRequirements: null
+  },
 
-  VideoNoteWithTranscript: [
-    { element: "headline", mandatory: true },
-    { element: "video_intro", mandatory: true },
-    { element: "transcript_text", mandatory: true },
-    { element: "founder_name", mandatory: true },
-    { element: "cta_text", mandatory: true },
-    { element: "video_url", mandatory: false },
-    { element: "trust_items", mandatory: false },
-  ],
+  VideoNoteWithTranscript: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "video_intro", mandatory: true, generation: "ai_generated" },
+      { element: "transcript_text", mandatory: true, generation: "ai_generated" },
+      { element: "founder_name", mandatory: true, generation: "ai_generated" },
+      { element: "cta_text", mandatory: true, generation: "ai_generated" },
+      { element: "video_url", mandatory: false, generation: "manual_preferred" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" }
+    ],
+    cardStructure: null,
+    cardRequirements: null
+  },
 
-  MissionQuoteOverlay: [
-    { element: "mission_quote", mandatory: true },
-    { element: "founder_name", mandatory: true },
-    { element: "cta_text", mandatory: true },
-    { element: "founder_title", mandatory: false },
-    { element: "badge_text", mandatory: false },
-    { element: "badge_icon", mandatory: false },
-    { element: "mission_stats", mandatory: false },
-    { element: "mission_stat_1", mandatory: false },
-    { element: "mission_stat_2", mandatory: false },
-    { element: "mission_stat_3", mandatory: false },
-    { element: "mission_stat_4", mandatory: false },
-    { element: "mission_year", mandatory: false },
-    { element: "background_image", mandatory: false },
-  ],
+  MissionQuoteOverlay: {
+    sectionElements: [
+      { element: "mission_quote", mandatory: true, generation: "ai_generated" },
+      { element: "founder_name", mandatory: true, generation: "ai_generated" },
+      { element: "cta_text", mandatory: true, generation: "ai_generated" },
+      { element: "founder_title", mandatory: false, generation: "ai_generated" },
+      { element: "badge_text", mandatory: false, generation: "ai_generated" },
+      { element: "badge_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "mission_year", mandatory: false, generation: "ai_generated" },
+      { element: "background_image", mandatory: false, generation: "manual_preferred" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["mission_stats", "mission_stat_1", "mission_stat_2", "mission_stat_3", "mission_stat_4"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 1,
+      max: 4,
+      optimal: [3, 3],
+      description: 'Mission impact statistics'
+    }
+  },
 
-  TimelineToToday: [
-    { element: "headline", mandatory: true },
-    { element: "intro_text", mandatory: true },
-    { element: "timeline_items", mandatory: true },
-    { element: "current_milestone", mandatory: true },
-    { element: "cta_text", mandatory: true },
-    { element: "founder_name", mandatory: false },
-    { element: "company_name", mandatory: false },
-    { element: "trust_items", mandatory: false },
-    { element: "trust_item_1", mandatory: false },
-    { element: "trust_item_2", mandatory: false },
-    { element: "trust_item_3", mandatory: false },
-    { element: "trust_item_4", mandatory: false },
-    { element: "trust_item_5", mandatory: false },
-    { element: "current_state_heading", mandatory: false },
-    { element: "timeline_icon_1", mandatory: false },
-    { element: "timeline_icon_2", mandatory: false },
-    { element: "timeline_icon_3", mandatory: false },
-    { element: "timeline_icon_4", mandatory: false },
-    { element: "timeline_icon_5", mandatory: false },
-    { element: "timeline_icon_6", mandatory: false },
-    { element: "current_state_icon", mandatory: false },
-  ],
+  TimelineToToday: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "intro_text", mandatory: true, generation: "ai_generated" },
+      { element: "current_milestone", mandatory: true, generation: "ai_generated" },
+      { element: "cta_text", mandatory: true, generation: "ai_generated" },
+      { element: "founder_name", mandatory: false, generation: "ai_generated" },
+      { element: "company_name", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_1", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_2", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_3", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_4", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_5", mandatory: false, generation: "ai_generated" },
+      { element: "current_state_heading", mandatory: false, generation: "ai_generated" },
+      { element: "current_state_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "timeline_icon_1", mandatory: false, generation: "manual_preferred" },
+      { element: "timeline_icon_2", mandatory: false, generation: "manual_preferred" },
+      { element: "timeline_icon_3", mandatory: false, generation: "manual_preferred" },
+      { element: "timeline_icon_4", mandatory: false, generation: "manual_preferred" },
+      { element: "timeline_icon_5", mandatory: false, generation: "manual_preferred" },
+      { element: "timeline_icon_6", mandatory: false, generation: "manual_preferred" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["timeline_items"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 8,
+      optimal: [4, 5],
+      description: 'Timeline milestone cards'
+    }
+  },
 
-  SideBySidePhotoStory: [
-    { element: "story_headline", mandatory: true },
-    { element: "story_text", mandatory: true },
-    { element: "story_quote", mandatory: true },
-    { element: "cta_text", mandatory: true },
-    { element: "founder_name", mandatory: false },
-    { element: "story_stats", mandatory: false },
-    { element: "story_stat_1", mandatory: false },
-    { element: "story_stat_2", mandatory: false },
-    { element: "story_stat_3", mandatory: false },
-    { element: "story_stat_4", mandatory: false },
-    { element: "badge_text", mandatory: false },
-    { element: "badge_icon", mandatory: false },
-    { element: "trust_items", mandatory: false },
-    { element: "trust_item_1", mandatory: false },
-    { element: "trust_item_2", mandatory: false },
-    { element: "trust_item_3", mandatory: false },
-    { element: "trust_item_4", mandatory: false },
-    { element: "trust_item_5", mandatory: false },
-    { element: "story_image", mandatory: false },
-    { element: "secondary_image", mandatory: false },
-    { element: "placeholder_icon_1", mandatory: false },
-    { element: "placeholder_icon_2", mandatory: false },
-  ],
+  SideBySidePhotoStory: {
+    sectionElements: [
+      { element: "story_headline", mandatory: true, generation: "ai_generated" },
+      { element: "story_text", mandatory: true, generation: "ai_generated" },
+      { element: "story_quote", mandatory: true, generation: "ai_generated" },
+      { element: "cta_text", mandatory: true, generation: "ai_generated" },
+      { element: "founder_name", mandatory: false, generation: "ai_generated" },
+      { element: "badge_text", mandatory: false, generation: "ai_generated" },
+      { element: "badge_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_1", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_2", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_3", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_4", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_5", mandatory: false, generation: "ai_generated" },
+      { element: "story_image", mandatory: false, generation: "manual_preferred" },
+      { element: "secondary_image", mandatory: false, generation: "manual_preferred" },
+      { element: "placeholder_icon_1", mandatory: false, generation: "manual_preferred" },
+      { element: "placeholder_icon_2", mandatory: false, generation: "manual_preferred" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["story_stats", "story_stat_1", "story_stat_2", "story_stat_3", "story_stat_4"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 1,
+      max: 4,
+      optimal: [3, 4],
+      description: 'Story impact statistics'
+    }
+  },
 
-  StoryBlockWithPullquote: [
-    { element: "story_headline", mandatory: true },
-    { element: "story_content", mandatory: true },
-    { element: "pullquote_text", mandatory: true },
-    { element: "cta_text", mandatory: true },
-    { element: "founder_name", mandatory: false },
-    { element: "badge_text", mandatory: false },
-    { element: "badge_icon", mandatory: false },
-    { element: "trust_items", mandatory: false },
-    { element: "trust_item_1", mandatory: false },
-    { element: "trust_item_2", mandatory: false },
-    { element: "trust_item_3", mandatory: false },
-    { element: "trust_item_4", mandatory: false },
-    { element: "trust_item_5", mandatory: false },
-    { element: "story_image", mandatory: false },
-  ],
+  StoryBlockWithPullquote: {
+    sectionElements: [
+      { element: "story_headline", mandatory: true, generation: "ai_generated" },
+      { element: "story_intro", mandatory: true, generation: "ai_generated" },
+      { element: "story_body", mandatory: true, generation: "ai_generated" },
+      { element: "pullquote_text", mandatory: true, generation: "ai_generated" },
+      { element: "story_conclusion", mandatory: true, generation: "ai_generated" },
+      { element: "cta_text", mandatory: true, generation: "ai_generated" },
+      { element: "founder_name", mandatory: false, generation: "ai_generated" },
+      { element: "founder_title", mandatory: false, generation: "ai_generated" },
+      { element: "company_name", mandatory: false, generation: "ai_generated" },
+      { element: "reading_time", mandatory: false, generation: "ai_generated" },
+      { element: "cta_section_heading", mandatory: false, generation: "ai_generated" },
+      { element: "cta_section_description", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_1", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_2", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_3", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_4", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_5", mandatory: false, generation: "ai_generated" },
+      { element: "founder_image", mandatory: false, generation: "manual_preferred" },
+      { element: "quote_icon", mandatory: false, generation: "manual_preferred" }
+    ],
+    cardStructure: null,
+    cardRequirements: null
+  },
 
-  FoundersBeliefStack: [
-    { element: "beliefs_headline", mandatory: true },
-    { element: "beliefs_intro", mandatory: true },
-    { element: "belief_items", mandatory: true },
-    { element: "commitment_text", mandatory: true },
-    { element: "cta_text", mandatory: true },
-    { element: "founder_name", mandatory: false },
-    { element: "founder_title", mandatory: false },
-    { element: "company_values", mandatory: false },
-    { element: "company_value_1", mandatory: false },
-    { element: "company_value_2", mandatory: false },
-    { element: "company_value_3", mandatory: false },
-    { element: "company_value_4", mandatory: false },
-    { element: "company_value_5", mandatory: false },
-    { element: "values_heading", mandatory: false },
-    { element: "show_company_values", mandatory: false },
-    { element: "trust_items", mandatory: false },
-    { element: "trust_item_1", mandatory: false },
-    { element: "trust_item_2", mandatory: false },
-    { element: "trust_item_3", mandatory: false },
-    { element: "trust_item_4", mandatory: false },
-    { element: "trust_item_5", mandatory: false },
-    { element: "founder_image", mandatory: false },
-    { element: "belief_icon_1", mandatory: false },
-    { element: "belief_icon_2", mandatory: false },
-    { element: "belief_icon_3", mandatory: false },
-    { element: "belief_icon_4", mandatory: false },
-    { element: "belief_icon_5", mandatory: false },
-    { element: "belief_icon_6", mandatory: false },
-  ],
+  FoundersBeliefStack: {
+    sectionElements: [
+      { element: "beliefs_headline", mandatory: true, generation: "ai_generated" },
+      { element: "beliefs_intro", mandatory: true, generation: "ai_generated" },
+      { element: "commitment_text", mandatory: true, generation: "ai_generated" },
+      { element: "cta_text", mandatory: true, generation: "ai_generated" },
+      { element: "founder_name", mandatory: false, generation: "ai_generated" },
+      { element: "founder_title", mandatory: false, generation: "ai_generated" },
+      { element: "company_values", mandatory: false, generation: "ai_generated" },
+      { element: "company_value_1", mandatory: false, generation: "ai_generated" },
+      { element: "company_value_2", mandatory: false, generation: "ai_generated" },
+      { element: "company_value_3", mandatory: false, generation: "ai_generated" },
+      { element: "company_value_4", mandatory: false, generation: "ai_generated" },
+      { element: "company_value_5", mandatory: false, generation: "ai_generated" },
+      { element: "values_heading", mandatory: false, generation: "ai_generated" },
+      { element: "show_company_values", mandatory: false, generation: "manual_preferred" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_1", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_2", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_3", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_4", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_5", mandatory: false, generation: "ai_generated" },
+      { element: "founder_image", mandatory: false, generation: "manual_preferred" },
+      { element: "belief_icon_1", mandatory: false, generation: "manual_preferred" },
+      { element: "belief_icon_2", mandatory: false, generation: "manual_preferred" },
+      { element: "belief_icon_3", mandatory: false, generation: "manual_preferred" },
+      { element: "belief_icon_4", mandatory: false, generation: "manual_preferred" },
+      { element: "belief_icon_5", mandatory: false, generation: "manual_preferred" },
+      { element: "belief_icon_6", mandatory: false, generation: "manual_preferred" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["belief_items"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 2,
+      max: 8,
+      optimal: [3, 4],
+      description: 'Founder belief and value cards'
+    }
+  },
 
   // Hero Section
-  leftCopyRightImage: [
-    { element: "headline", mandatory: true },
-    { element: "cta_text", mandatory: true },
-    { element: "subheadline", mandatory: true },
-    { element: "supporting_text", mandatory: false },
-    { element: "badge_text", mandatory: false },
-    { element: "trust_items", mandatory: false },
-    { element: "trust_item_1", mandatory: false },
-    { element: "trust_item_2", mandatory: false },
-    { element: "trust_item_3", mandatory: false },
-    { element: "trust_item_4", mandatory: false },
-    { element: "trust_item_5", mandatory: false },
-    { element: "hero_image", mandatory: true },
-    { element: "customer_count", mandatory: false },
-    { element: "rating_value", mandatory: false },
-    { element: "rating_count", mandatory: false },
-    { element: "show_social_proof", mandatory: false },
-    { element: "show_customer_avatars", mandatory: false },
-    { element: "avatar_count", mandatory: false },
-    { element: "customer_names", mandatory: false },
-    { element: "avatar_urls", mandatory: false },
-  ],
+  leftCopyRightImage: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "cta_text", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: true, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "badge_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_1", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_2", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_3", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_4", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_5", mandatory: false, generation: "ai_generated" },
+      { element: "hero_image", mandatory: true, generation: "manual_preferred" },
+      { element: "customer_count", mandatory: false, generation: "manual_preferred" },
+      { element: "rating_value", mandatory: false, generation: "manual_preferred" },
+      { element: "rating_count", mandatory: false, generation: "manual_preferred" },
+      { element: "show_social_proof", mandatory: false, generation: "manual_preferred" },
+      { element: "show_customer_avatars", mandatory: false, generation: "manual_preferred" },
+      { element: "avatar_count", mandatory: false, generation: "manual_preferred" },
+      { element: "customer_names", mandatory: false, generation: "manual_preferred" },
+      { element: "avatar_urls", mandatory: false, generation: "manual_preferred" },
+    ],
+    cardRequirements: null
+  },
 
-  centerStacked: [
-    { element: "headline", mandatory: true },
-    { element: "cta_text", mandatory: true },
-    { element: "subheadline", mandatory: true },
-    { element: "supporting_text", mandatory: false },
-    { element: "secondary_cta_text", mandatory: false },
-    { element: "badge_text", mandatory: false },
-    { element: "trust_items", mandatory: false },
-    { element: "trust_item_1", mandatory: false },
-    { element: "trust_item_2", mandatory: false },
-    { element: "trust_item_3", mandatory: false },
-    { element: "trust_item_4", mandatory: false },
-    { element: "trust_item_5", mandatory: false },
-    { element: "center_hero_image", mandatory: true },
-    { element: "customer_count", mandatory: false },
-    { element: "rating_value", mandatory: false },
-    { element: "rating_count", mandatory: false },
-    { element: "show_social_proof", mandatory: false },
-    { element: "show_customer_avatars", mandatory: false },
-    { element: "avatar_count", mandatory: false },
-    { element: "customer_names", mandatory: false },
-    { element: "avatar_urls", mandatory: false },
-  ],
+  centerStacked: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "cta_text", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: true, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "secondary_cta_text", mandatory: false, generation: "ai_generated" },
+      { element: "badge_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_1", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_2", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_3", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_4", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_5", mandatory: false, generation: "ai_generated" },
+      { element: "center_hero_image", mandatory: true, generation: "manual_preferred" },
+      { element: "customer_count", mandatory: false, generation: "manual_preferred" },
+      { element: "rating_value", mandatory: false, generation: "manual_preferred" },
+      { element: "rating_count", mandatory: false, generation: "manual_preferred" },
+      { element: "show_social_proof", mandatory: false, generation: "manual_preferred" },
+      { element: "show_customer_avatars", mandatory: false, generation: "manual_preferred" },
+      { element: "avatar_count", mandatory: false, generation: "manual_preferred" },
+      { element: "customer_names", mandatory: false, generation: "manual_preferred" },
+      { element: "avatar_urls", mandatory: false, generation: "manual_preferred" },
+    ],
+    cardRequirements: null
+  },
 
-  splitScreen: [
-    { element: "headline", mandatory: true },
-    { element: "cta_text", mandatory: true },
-    { element: "subheadline", mandatory: true },
-    { element: "supporting_text", mandatory: false },
-    { element: "badge_text", mandatory: false },
-    { element: "value_proposition", mandatory: false },
-    { element: "trust_items", mandatory: false },
-    { element: "trust_item_1", mandatory: false },
-    { element: "trust_item_2", mandatory: false },
-    { element: "trust_item_3", mandatory: false },
-    { element: "trust_item_4", mandatory: false },
-    { element: "trust_item_5", mandatory: false },
-    { element: "split_hero_image", mandatory: true },
-    { element: "customer_count", mandatory: false },
-    { element: "rating_value", mandatory: false },
-    { element: "rating_count", mandatory: false },
-    { element: "show_social_proof", mandatory: false },
-    { element: "show_customer_avatars", mandatory: false },
-    { element: "avatar_count", mandatory: false },
-    { element: "customer_names", mandatory: false },
-    { element: "avatar_urls", mandatory: false },
-  ],
+  splitScreen: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "cta_text", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: true, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "badge_text", mandatory: false, generation: "ai_generated" },
+      { element: "value_proposition", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_1", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_2", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_3", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_4", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_5", mandatory: false, generation: "ai_generated" },
+      { element: "split_hero_image", mandatory: true, generation: "manual_preferred" },
+      { element: "customer_count", mandatory: false, generation: "manual_preferred" },
+      { element: "rating_value", mandatory: false, generation: "manual_preferred" },
+      { element: "rating_count", mandatory: false, generation: "manual_preferred" },
+      { element: "show_social_proof", mandatory: false, generation: "manual_preferred" },
+      { element: "show_customer_avatars", mandatory: false, generation: "manual_preferred" },
+      { element: "avatar_count", mandatory: false, generation: "manual_preferred" },
+      { element: "customer_names", mandatory: false, generation: "manual_preferred" },
+      { element: "avatar_urls", mandatory: false, generation: "manual_preferred" },
+    ],
+    cardRequirements: null
+  },
 
-  imageFirst: [
-    { element: "headline", mandatory: true },
-    { element: "cta_text", mandatory: true },
-    { element: "subheadline", mandatory: true },
-    { element: "supporting_text", mandatory: false },
-    { element: "badge_text", mandatory: false },
-    { element: "trust_items", mandatory: false },
-    { element: "trust_item_1", mandatory: false },
-    { element: "trust_item_2", mandatory: false },
-    { element: "trust_item_3", mandatory: false },
-    { element: "trust_item_4", mandatory: false },
-    { element: "trust_item_5", mandatory: false },
-    { element: "image_first_hero_image", mandatory: true },
-    { element: "customer_count", mandatory: false },
-    { element: "rating_value", mandatory: false },
-    { element: "rating_count", mandatory: false },
-    { element: "show_social_proof", mandatory: false },
-    { element: "show_customer_avatars", mandatory: false },
-    { element: "avatar_count", mandatory: false },
-    { element: "customer_names", mandatory: false },
-    { element: "avatar_urls", mandatory: false },
-  ],
+  imageFirst: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "cta_text", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: true, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "badge_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_1", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_2", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_3", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_4", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_5", mandatory: false, generation: "ai_generated" },
+      { element: "image_first_hero_image", mandatory: true, generation: "manual_preferred" },
+      { element: "customer_count", mandatory: false, generation: "manual_preferred" },
+      { element: "rating_value", mandatory: false, generation: "manual_preferred" },
+      { element: "rating_count", mandatory: false, generation: "manual_preferred" },
+      { element: "show_social_proof", mandatory: false, generation: "manual_preferred" },
+      { element: "show_customer_avatars", mandatory: false, generation: "manual_preferred" },
+      { element: "avatar_count", mandatory: false, generation: "manual_preferred" },
+      { element: "customer_names", mandatory: false, generation: "manual_preferred" },
+      { element: "avatar_urls", mandatory: false, generation: "manual_preferred" },
+    ],
+    cardRequirements: null
+  },
 
   // HowItWorks Section
-  ThreeStepHorizontal: [
-    { element: "headline", mandatory: true },
-    { element: "step_titles", mandatory: true },
-    { element: "step_descriptions", mandatory: true },
-    { element: "step_numbers", mandatory: false },
-    { element: "conclusion_text", mandatory: false },
-  ],
+  ThreeStepHorizontal: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "conclusion_text", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" },
+      { element: "step_numbers", mandatory: false, generation: "manual_preferred" },
+      { element: "step_icon_1", mandatory: false, generation: "manual_preferred" },
+      { element: "step_icon_2", mandatory: false, generation: "manual_preferred" },
+      { element: "step_icon_3", mandatory: false, generation: "manual_preferred" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["step_titles", "step_descriptions"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 3,
+      optimal: [3, 3],
+      description: 'Three-step process'
+    }
+  },
 
-  VerticalTimeline: [
-    { element: "headline", mandatory: true },
-    { element: "step_titles", mandatory: true },
-    { element: "step_descriptions", mandatory: true },
-    { element: "timeline_connector_text", mandatory: false },
-  ],
+  VerticalTimeline: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" },
+      { element: "process_steps_label", mandatory: false, generation: "ai_generated" },
+      { element: "process_summary_heading", mandatory: false, generation: "ai_generated" },
+      { element: "process_summary_description", mandatory: false, generation: "ai_generated" },
+      { element: "process_time_label", mandatory: false, generation: "ai_generated" },
+      { element: "timeline_connector_text", mandatory: false, generation: "ai_generated" },
+      { element: "use_step_icons", mandatory: false, generation: "manual_preferred" },
+      { element: "step_icon_1", mandatory: false, generation: "manual_preferred" },
+      { element: "step_icon_2", mandatory: false, generation: "manual_preferred" },
+      { element: "step_icon_3", mandatory: false, generation: "manual_preferred" },
+      { element: "step_icon_4", mandatory: false, generation: "manual_preferred" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["step_titles", "step_descriptions", "step_durations"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 6,
+      optimal: [4, 5],
+      description: 'Timeline process steps'
+    }
+  },
 
-  IconCircleSteps: [
-    { element: "headline", mandatory: true },
-    { element: "step_titles", mandatory: true },
-    { element: "step_descriptions", mandatory: true },
-    { element: "step_labels", mandatory: false },
-  ],
+  IconCircleSteps: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" },
+      { element: "step_labels", mandatory: false, generation: "ai_generated" },
+      { element: "circle_feature_1_text", mandatory: false, generation: "ai_generated" },
+      { element: "circle_feature_2_text", mandatory: false, generation: "ai_generated" },
+      { element: "circle_feature_3_text", mandatory: false, generation: "ai_generated" },
+      { element: "summary_card_heading", mandatory: false, generation: "ai_generated" },
+      { element: "summary_card_description", mandatory: false, generation: "ai_generated" },
+      { element: "summary_stat_1_text", mandatory: false, generation: "ai_generated" },
+      { element: "summary_stat_2_text", mandatory: false, generation: "ai_generated" },
+      { element: "summary_stat_3_text", mandatory: false, generation: "ai_generated" },
+      { element: "show_circle_features", mandatory: false, generation: "manual_preferred" },
+      { element: "show_summary_card", mandatory: false, generation: "manual_preferred" },
+      { element: "step_icon_1", mandatory: false, generation: "manual_preferred" },
+      { element: "step_icon_2", mandatory: false, generation: "manual_preferred" },
+      { element: "step_icon_3", mandatory: false, generation: "manual_preferred" },
+      { element: "step_icon_4", mandatory: false, generation: "manual_preferred" },
+      { element: "step_icon_5", mandatory: false, generation: "manual_preferred" },
+      { element: "step_icon_6", mandatory: false, generation: "manual_preferred" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["step_titles", "step_descriptions"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 6,
+      optimal: [3, 4],
+      description: 'Icon-based simple steps'
+    }
+  },
 
-  AccordionSteps: [
-    { element: "headline", mandatory: true },
-    { element: "step_titles", mandatory: true },
-    { element: "step_descriptions", mandatory: true },
-    { element: "step_details", mandatory: false },
-  ],
+  AccordionSteps: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" },
+      { element: "tech_specs_heading", mandatory: false, generation: "ai_generated" },
+      { element: "tech_spec_1_value", mandatory: false, generation: "ai_generated" },
+      { element: "tech_spec_1_label", mandatory: false, generation: "ai_generated" },
+      { element: "tech_spec_2_value", mandatory: false, generation: "ai_generated" },
+      { element: "tech_spec_2_label", mandatory: false, generation: "ai_generated" },
+      { element: "tech_spec_3_value", mandatory: false, generation: "ai_generated" },
+      { element: "tech_spec_3_label", mandatory: false, generation: "ai_generated" },
+      { element: "tech_specs_description", mandatory: false, generation: "ai_generated" },
+      { element: "show_step_indicators", mandatory: false, generation: "manual_preferred" },
+      { element: "show_tech_specs", mandatory: false, generation: "manual_preferred" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["step_titles", "step_descriptions", "step_details"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 6,
+      optimal: [4, 5],
+      description: 'Technical implementation steps with details'
+    }
+  },
 
-  CardFlipSteps: [
-    { element: "headline", mandatory: true },
-    { element: "step_titles", mandatory: true },
-    { element: "step_descriptions", mandatory: true },
-    { element: "step_details", mandatory: false },
-    { element: "flip_instruction", mandatory: false },
-  ],
+  CardFlipSteps: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" },
+      { element: "flip_instruction", mandatory: false, generation: "ai_generated" },
+      { element: "flip_feature_1_text", mandatory: false, generation: "ai_generated" },
+      { element: "flip_feature_2_text", mandatory: false, generation: "ai_generated" },
+      { element: "guide_heading", mandatory: false, generation: "ai_generated" },
+      { element: "guide_description", mandatory: false, generation: "ai_generated" },
+      { element: "guide_indicator_1_text", mandatory: false, generation: "ai_generated" },
+      { element: "guide_indicator_2_text", mandatory: false, generation: "ai_generated" },
+      { element: "guide_indicator_3_text", mandatory: false, generation: "ai_generated" },
+      { element: "show_flip_features", mandatory: false, generation: "manual_preferred" },
+      { element: "show_interactive_guide", mandatory: false, generation: "manual_preferred" },
+      { element: "flip_feature_1_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "flip_feature_2_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "guide_indicator_1_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "guide_indicator_2_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "guide_indicator_3_icon", mandatory: false, generation: "manual_preferred" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["step_titles", "step_descriptions", "step_visuals", "step_actions"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 6,
+      optimal: [4, 4],
+      description: 'Interactive design process steps'
+    }
+  },
 
-  VideoWalkthrough: [
-    { element: "headline", mandatory: true },
-    { element: "video_title", mandatory: true },
-    { element: "video_description", mandatory: true },
-    { element: "chapter_titles", mandatory: false },
-    { element: "video_duration", mandatory: false },
-  ],
+  VideoWalkthrough: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "video_title", mandatory: true, generation: "ai_generated" },
+      { element: "video_description", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" },
+      { element: "demo_stats_heading", mandatory: false, generation: "ai_generated" },
+      { element: "demo_stat_1_label", mandatory: false, generation: "ai_generated" },
+      { element: "demo_stat_1_description", mandatory: false, generation: "ai_generated" },
+      { element: "demo_stat_2_label", mandatory: false, generation: "ai_generated" },
+      { element: "demo_stat_2_description", mandatory: false, generation: "ai_generated" },
+      { element: "demo_stat_3_label", mandatory: false, generation: "ai_generated" },
+      { element: "demo_stat_3_description", mandatory: false, generation: "ai_generated" },
+      { element: "video_info_1_text", mandatory: false, generation: "ai_generated" },
+      { element: "video_info_2_text", mandatory: false, generation: "ai_generated" },
+      { element: "video_duration", mandatory: false, generation: "manual_preferred" },
+      { element: "video_url", mandatory: false, generation: "manual_preferred" },
+      { element: "video_thumbnail", mandatory: false, generation: "manual_preferred" },
+      { element: "show_demo_stats", mandatory: false, generation: "manual_preferred" },
+      { element: "show_video_info", mandatory: false, generation: "manual_preferred" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["chapter_titles"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 8,
+      optimal: [4, 6],
+      description: 'Video chapter breakdown'
+    }
+  },
 
-  ZigzagImageSteps: [
-    { element: "headline", mandatory: true },
-    { element: "step_titles", mandatory: true },
-    { element: "step_descriptions", mandatory: true },
-    { element: "image_captions", mandatory: false },
-  ],
+  ZigzagImageSteps: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" },
+      { element: "flow_summary_heading", mandatory: false, generation: "ai_generated" },
+      { element: "flow_feature_1_text", mandatory: false, generation: "ai_generated" },
+      { element: "flow_feature_2_text", mandatory: false, generation: "ai_generated" },
+      { element: "flow_feature_3_text", mandatory: false, generation: "ai_generated" },
+      { element: "flow_summary_description", mandatory: false, generation: "ai_generated" },
+      { element: "show_flow_summary", mandatory: false, generation: "manual_preferred" },
+      { element: "flow_feature_1_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "flow_feature_2_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "flow_feature_3_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "step_visual_0", mandatory: false, generation: "manual_preferred" },
+      { element: "step_visual_1", mandatory: false, generation: "manual_preferred" },
+      { element: "step_visual_2", mandatory: false, generation: "manual_preferred" },
+      { element: "step_visual_3", mandatory: false, generation: "manual_preferred" },
+      { element: "step_visual_4", mandatory: false, generation: "manual_preferred" },
+      { element: "step_visual_5", mandatory: false, generation: "manual_preferred" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["step_titles", "step_descriptions", "step_visuals", "image_captions"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 6,
+      optimal: [4, 4],
+      description: 'Visual step-by-step creative journey'
+    }
+  },
 
-  AnimatedProcessLine: [
-    { element: "headline", mandatory: true },
-    { element: "process_titles", mandatory: true },
-    { element: "process_descriptions", mandatory: true },
-    { element: "animation_labels", mandatory: false },
-  ],
+  AnimatedProcessLine: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" },
+      { element: "animation_labels", mandatory: false, generation: "ai_generated" },
+      { element: "process_indicator_1_text", mandatory: false, generation: "ai_generated" },
+      { element: "process_indicator_2_text", mandatory: false, generation: "ai_generated" },
+      { element: "process_indicator_3_text", mandatory: false, generation: "ai_generated" },
+      { element: "auto_animate", mandatory: false, generation: "manual_preferred" },
+      { element: "show_process_indicators", mandatory: false, generation: "manual_preferred" },
+      { element: "step_icon_1", mandatory: false, generation: "manual_preferred" },
+      { element: "step_icon_2", mandatory: false, generation: "manual_preferred" },
+      { element: "step_icon_3", mandatory: false, generation: "manual_preferred" },
+      { element: "step_icon_4", mandatory: false, generation: "manual_preferred" },
+      { element: "process_indicator_1_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "process_indicator_2_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "process_indicator_3_icon", mandatory: false, generation: "manual_preferred" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["step_titles", "step_descriptions"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 6,
+      optimal: [4, 4],
+      description: 'Automated process flow steps'
+    }
+  },
 
   // Integration Section
-  LogoGrid: [
-    { element: "headline", mandatory: true },
-    { element: "integration_names", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    { element: "category_labels", mandatory: false },
-  ],
+  LogoGrid: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "default_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "logo_urls", mandatory: false, generation: "manual_preferred" }
+    ],
 
-  CategoryAccordion: [
-    { element: "headline", mandatory: true },
-    { element: "category_titles", mandatory: true },
-    { element: "integration_names", mandatory: true },
-    { element: "category_descriptions", mandatory: false },
-  ],
+    cardStructure: {
+      type: "items",
+      elements: ["integration_names"],
+      generation: "ai_generated"
+    },
 
-  InteractiveStackDiagram: [
-    { element: "headline", mandatory: true },
-    { element: "layer_titles", mandatory: true },
-    { element: "layer_descriptions", mandatory: true },
-    { element: "interaction_labels", mandatory: false },
-  ],
+    cardRequirements: {
+      type: 'items',
+      min: 6,
+      max: 20,
+      optimal: [8, 12],
+      description: 'Integration partner logos'
+    }
+  },
 
-  UseCaseTiles: [
-    { element: "headline", mandatory: true },
-    { element: "use_case_titles", mandatory: true },
-    { element: "use_case_descriptions", mandatory: true },
-    { element: "integration_lists", mandatory: false },
-  ],
+  CategoryAccordion: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" }
+    ],
 
-  BadgeCarousel: [
-    { element: "headline", mandatory: true },
-    { element: "badge_titles", mandatory: true },
-    { element: "badge_descriptions", mandatory: true },
-    { element: "carousel_navigation", mandatory: false },
-  ],
+    cardStructure: {
+      type: "cards",
+      elements: ["category_titles", "category_integrations", "category_icons"],
+      generation: "ai_generated"
+    },
 
-  TabbyIntegrationCards: [
-    { element: "headline", mandatory: true },
-    { element: "tab_labels", mandatory: true },
-    { element: "integration_titles", mandatory: true },
-    { element: "integration_descriptions", mandatory: true },
-    { element: "setup_instructions", mandatory: false },
-  ],
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 6,
+      optimal: [4, 5],
+      description: 'Integration categories with grouped tools'
+    }
+  },
 
-  ZapierLikeBuilderPreview: [
-    { element: "headline", mandatory: true },
-    { element: "trigger_labels", mandatory: true },
-    { element: "action_labels", mandatory: true },
-    { element: "connection_descriptions", mandatory: true },
-    { element: "builder_instructions", mandatory: false },
-  ],
+  InteractiveStackDiagram: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" }
+    ],
 
-  LogoWithQuoteUse: [
-    { element: "headline", mandatory: true },
-    { element: "integration_names", mandatory: true },
-    { element: "usage_quotes", mandatory: true },
-    { element: "customer_names", mandatory: true },
-    { element: "customer_titles", mandatory: false },
-  ],
+    cardStructure: {
+      type: "cards",
+      elements: ["layer_titles", "layer_descriptions", "layer_technologies"],
+      generation: "ai_generated"
+    },
+
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 8,
+      optimal: [4, 6],
+      description: 'Integration stack layers'
+    }
+  },
+
+  UseCaseTiles: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" }
+    ],
+
+    cardStructure: {
+      type: "cards",
+      elements: ["usecase_titles", "usecase_descriptions", "usecase_integrations", "usecase_icons"],
+      generation: "ai_generated"
+    },
+
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 6,
+      optimal: [4, 4],
+      description: 'Integration use case examples'
+    }
+  },
+
+  BadgeCarousel: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "carousel_navigation", mandatory: false, generation: "manual_preferred" }
+    ],
+
+    cardStructure: {
+      type: "cards",
+      elements: ["badge_titles", "badge_descriptions", "badge_icons"],
+      generation: "ai_generated"
+    },
+
+    cardRequirements: {
+      type: 'cards',
+      min: 4,
+      max: 12,
+      optimal: [6, 8],
+      description: 'Integration badges or certifications'
+    }
+  },
+
+  TabbyIntegrationCards: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" }
+    ],
+
+    cardStructure: {
+      type: "tabbed_pairs",
+      elements: ["tab_titles", "tab_integrations", "tab_icons"],
+      generation: "ai_generated"
+    },
+
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 6,
+      optimal: [4, 4],
+      description: 'Tabbed integration categories'
+    }
+  },
+
+  ZapierLikeBuilderPreview: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "builder_instructions", mandatory: false, generation: "ai_generated" }
+    ],
+
+    cardStructure: {
+      type: "pairs",
+      elements: ["trigger_labels", "action_labels", "connection_descriptions"],
+      generation: "ai_generated"
+    },
+
+    cardRequirements: {
+      type: 'pairs',
+      min: 3,
+      max: 8,
+      optimal: [4, 6],
+      description: 'Integration automation flows'
+    }
+  },
+
+  LogoWithQuoteUse: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" }
+    ],
+
+    cardStructure: {
+      type: "cards",
+      elements: ["integration_names", "usage_quotes", "customer_names", "customer_titles"],
+      generation: "ai_generated"
+    },
+
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 8,
+      optimal: [4, 6],
+      description: 'Integration testimonials with logos'
+    }
+  },
 
   // Objection Section
-  ObjectionAccordion: [
-    { element: "headline", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    // Individual objection fields (up to 6 items)
-    { element: "objection_1", mandatory: true },
-    { element: "response_1", mandatory: true },
-    { element: "objection_2", mandatory: true },
-    { element: "response_2", mandatory: true },
-    { element: "objection_3", mandatory: true },
-    { element: "response_3", mandatory: true },
-    { element: "objection_4", mandatory: false },
-    { element: "response_4", mandatory: false },
-    { element: "objection_5", mandatory: false },
-    { element: "response_5", mandatory: false },
-    { element: "objection_6", mandatory: false },
-    { element: "response_6", mandatory: false },
-    // Icon fields
-    { element: "objection_icon_1", mandatory: false },
-    { element: "objection_icon_2", mandatory: false },
-    { element: "objection_icon_3", mandatory: false },
-    { element: "objection_icon_4", mandatory: false },
-    { element: "objection_icon_5", mandatory: false },
-    { element: "objection_icon_6", mandatory: false },
-    // Global settings
-    { element: "response_icon", mandatory: false },
-    { element: "trust_icon", mandatory: false },
-    { element: "help_text", mandatory: false },
-    // Legacy fields for backward compatibility
-    { element: "objection_titles", mandatory: false },
-    { element: "objection_responses", mandatory: false },
-    { element: "objection_icons", mandatory: false },
-  ],
+  ObjectionAccordion: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "response_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "trust_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "help_text", mandatory: false, generation: "ai_generated" }
+    ],
 
-  MythVsRealityGrid: [
-    { element: "headline", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    // Individual myth/reality fields (up to 6 pairs)
-    { element: "myth_1", mandatory: true },
-    { element: "reality_1", mandatory: true },
-    { element: "myth_2", mandatory: true },
-    { element: "reality_2", mandatory: true },
-    { element: "myth_3", mandatory: false },
-    { element: "reality_3", mandatory: false },
-    { element: "myth_4", mandatory: false },
-    { element: "reality_4", mandatory: false },
-    { element: "myth_5", mandatory: false },
-    { element: "reality_5", mandatory: false },
-    { element: "myth_6", mandatory: false },
-    { element: "reality_6", mandatory: false },
-    // Global icons
-    { element: "myth_icon", mandatory: false },
-    { element: "reality_icon", mandatory: false },
-    // Legacy field for backward compatibility
-    { element: "myth_reality_pairs", mandatory: false },
-  ],
+    cardStructure: {
+      type: "pairs",
+      elements: ["objection_titles", "objection_responses", "objection_icons"],
+      generation: "ai_generated"
+    },
 
-  QuoteBackedAnswers: [
-    { element: "headline", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    // Individual objection/quote/attribution triplets (up to 6 items)
-    { element: "objection_1", mandatory: true },
-    { element: "quote_response_1", mandatory: true },
-    { element: "quote_attribution_1", mandatory: true },
-    { element: "objection_2", mandatory: true },
-    { element: "quote_response_2", mandatory: true },
-    { element: "quote_attribution_2", mandatory: true },
-    { element: "objection_3", mandatory: false },
-    { element: "quote_response_3", mandatory: false },
-    { element: "quote_attribution_3", mandatory: false },
-    { element: "objection_4", mandatory: false },
-    { element: "quote_response_4", mandatory: false },
-    { element: "quote_attribution_4", mandatory: false },
-    { element: "objection_5", mandatory: false },
-    { element: "quote_response_5", mandatory: false },
-    { element: "quote_attribution_5", mandatory: false },
-    { element: "objection_6", mandatory: false },
-    { element: "quote_response_6", mandatory: false },
-    { element: "quote_attribution_6", mandatory: false },
-    // Source credibility and styling
-    { element: "source_credentials", mandatory: false },
-    { element: "expert_label", mandatory: false },
-    { element: "verification_label", mandatory: false },
-    { element: "trust_indicator_1", mandatory: false },
-    { element: "trust_indicator_2", mandatory: false },
-    { element: "trust_indicator_3", mandatory: false },
-    { element: "quote_icon", mandatory: false },
-    { element: "verification_icon", mandatory: false },
-    { element: "trust_icon_1", mandatory: false },
-    { element: "trust_icon_2", mandatory: false },
-    { element: "trust_icon_3", mandatory: false },
-    // Legacy fields for backward compatibility
-    { element: "objection_titles", mandatory: false },
-    { element: "quote_responses", mandatory: false },
-    { element: "quote_attributions", mandatory: false },
-    { element: "quote_blocks", mandatory: false },
-  ],
+    cardRequirements: {
+      type: 'items',
+      min: 3,
+      max: 8,
+      optimal: [4, 6],
+      description: 'Objection accordion items'
+    }
+  },
 
-  VisualObjectionTiles: [
-    { element: "headline", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    // Individual tile fields (up to 6 tiles)
-    { element: "tile_objection_1", mandatory: true },
-    { element: "tile_response_1", mandatory: true },
-    { element: "tile_label_1", mandatory: false },
-    { element: "tile_objection_2", mandatory: true },
-    { element: "tile_response_2", mandatory: true },
-    { element: "tile_label_2", mandatory: false },
-    { element: "tile_objection_3", mandatory: true },
-    { element: "tile_response_3", mandatory: true },
-    { element: "tile_label_3", mandatory: false },
-    { element: "tile_objection_4", mandatory: false },
-    { element: "tile_response_4", mandatory: false },
-    { element: "tile_label_4", mandatory: false },
-    { element: "tile_objection_5", mandatory: false },
-    { element: "tile_response_5", mandatory: false },
-    { element: "tile_label_5", mandatory: false },
-    { element: "tile_objection_6", mandatory: false },
-    { element: "tile_response_6", mandatory: false },
-    { element: "tile_label_6", mandatory: false },
-    // Tile icons
-    { element: "tile_icon_1", mandatory: false },
-    { element: "tile_icon_2", mandatory: false },
-    { element: "tile_icon_3", mandatory: false },
-    { element: "tile_icon_4", mandatory: false },
-    { element: "tile_icon_5", mandatory: false },
-    { element: "tile_icon_6", mandatory: false },
-    // Legacy fields for backward compatibility
-    { element: "objection_titles", mandatory: false },
-    { element: "objection_responses", mandatory: false },
-    { element: "tile_labels", mandatory: false },
-  ],
+  MythVsRealityGrid: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "myth_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "reality_icon", mandatory: false, generation: "manual_preferred" }
+    ],
 
-  ProblemToReframeBlocks: [
-    { element: "headline", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    // Individual problem/reframe pairs (up to 6 pairs)
-    { element: "problem_1", mandatory: true },
-    { element: "reframe_1", mandatory: true },
-    { element: "problem_2", mandatory: true },
-    { element: "reframe_2", mandatory: true },
-    { element: "problem_3", mandatory: true },
-    { element: "reframe_3", mandatory: true },
-    { element: "problem_4", mandatory: false },
-    { element: "reframe_4", mandatory: false },
-    { element: "problem_5", mandatory: false },
-    { element: "reframe_5", mandatory: false },
-    { element: "problem_6", mandatory: false },
-    { element: "reframe_6", mandatory: false },
-    // Transition and styling
-    { element: "transition_text", mandatory: false },
-    { element: "problem_icon", mandatory: false },
-    { element: "reframe_icon", mandatory: false },
-    { element: "transition_icon", mandatory: false },
-    // Legacy fields for backward compatibility
-    { element: "problem_statements", mandatory: false },
-    { element: "reframe_statements", mandatory: false },
-  ],
+    cardStructure: {
+      type: "pairs",
+      elements: ["myth_reality_pairs"],
+      generation: "ai_generated"
+    },
 
-  SkepticToBelieverSteps: [
-    { element: "headline", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    // Individual step progression fields (up to 5 steps)
-    { element: "step_name_1", mandatory: true },
-    { element: "step_quote_1", mandatory: true },
-    { element: "step_result_1", mandatory: true },
-    { element: "step_name_2", mandatory: true },
-    { element: "step_quote_2", mandatory: true },
-    { element: "step_result_2", mandatory: true },
-    { element: "step_name_3", mandatory: true },
-    { element: "step_quote_3", mandatory: true },
-    { element: "step_result_3", mandatory: true },
-    { element: "step_name_4", mandatory: false },
-    { element: "step_quote_4", mandatory: false },
-    { element: "step_result_4", mandatory: false },
-    { element: "step_name_5", mandatory: false },
-    { element: "step_quote_5", mandatory: false },
-    { element: "step_result_5", mandatory: false },
-    // Step icons
-    { element: "step_icon_1", mandatory: false },
-    { element: "step_icon_2", mandatory: false },
-    { element: "step_icon_3", mandatory: false },
-    { element: "step_icon_4", mandatory: false },
-    { element: "step_icon_5", mandatory: false },
-    { element: "step_icon_6", mandatory: false },
-    // Summary and context
-    { element: "objections_summary", mandatory: false },
-    // Legacy field for backward compatibility
-    { element: "conversion_steps", mandatory: false },
-  ],
+    cardRequirements: {
+      type: 'pairs',
+      min: 3,
+      max: 6,
+      optimal: [4, 5],
+      description: 'Myth vs reality comparison pairs'
+    }
+  },
 
-  BoldGuaranteePanel: [
-    { element: "headline", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    // Guarantee structure
-    { element: "guarantee_statement", mandatory: true },
-    { element: "guarantee_details", mandatory: true },
-    { element: "guarantee_period", mandatory: false },
-    { element: "guarantee_conditions", mandatory: false },
-    // Risk reversal elements
-    { element: "risk_reversal_text", mandatory: false },
-    { element: "refund_process", mandatory: false },
-    { element: "no_questions_asked", mandatory: false },
-    // Trust building elements
-    { element: "trust_badges", mandatory: false },
-    { element: "security_assurance", mandatory: false },
-    { element: "company_backing", mandatory: false },
-    // Visual elements
-    { element: "guarantee_icon", mandatory: false },
-    { element: "security_icon", mandatory: false },
-    { element: "refund_icon", mandatory: false },
-    { element: "shield_icon", mandatory: false },
-  ],
+  QuoteBackedAnswers: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "source_credentials", mandatory: false, generation: "ai_generated" },
+      { element: "expert_label", mandatory: false, generation: "ai_generated" },
+      { element: "verification_label", mandatory: false, generation: "ai_generated" },
+      { element: "trust_indicator_1", mandatory: false, generation: "ai_generated" },
+      { element: "trust_indicator_2", mandatory: false, generation: "ai_generated" },
+      { element: "trust_indicator_3", mandatory: false, generation: "ai_generated" },
+      { element: "quote_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "verification_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "trust_icon_1", mandatory: false, generation: "manual_preferred" },
+      { element: "trust_icon_2", mandatory: false, generation: "manual_preferred" },
+      { element: "trust_icon_3", mandatory: false, generation: "manual_preferred" }
+    ],
 
-  ObjectionCarousel: [
-    { element: "headline", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    // Individual carousel objection slides (up to 8 slides for carousel)
-    { element: "slide_objection_1", mandatory: true },
-    { element: "slide_response_1", mandatory: true },
-    { element: "slide_objection_2", mandatory: true },
-    { element: "slide_response_2", mandatory: true },
-    { element: "slide_objection_3", mandatory: true },
-    { element: "slide_response_3", mandatory: true },
-    { element: "slide_objection_4", mandatory: false },
-    { element: "slide_response_4", mandatory: false },
-    { element: "slide_objection_5", mandatory: false },
-    { element: "slide_response_5", mandatory: false },
-    { element: "slide_objection_6", mandatory: false },
-    { element: "slide_response_6", mandatory: false },
-    { element: "slide_objection_7", mandatory: false },
-    { element: "slide_response_7", mandatory: false },
-    { element: "slide_objection_8", mandatory: false },
-    { element: "slide_response_8", mandatory: false },
-    // Carousel styling and navigation
-    { element: "carousel_navigation", mandatory: false },
-    { element: "slide_indicators", mandatory: false },
-    { element: "auto_advance", mandatory: false },
-    { element: "slide_duration", mandatory: false },
-    // Slide icons
-    { element: "slide_icon_1", mandatory: false },
-    { element: "slide_icon_2", mandatory: false },
-    { element: "slide_icon_3", mandatory: false },
-    { element: "slide_icon_4", mandatory: false },
-    { element: "slide_icon_5", mandatory: false },
-    { element: "slide_icon_6", mandatory: false },
-    { element: "slide_icon_7", mandatory: false },
-    { element: "slide_icon_8", mandatory: false },
-    // Legacy fields for backward compatibility
-    { element: "objection_titles", mandatory: false },
-    { element: "objection_responses", mandatory: false },
-  ],
+    cardStructure: {
+      type: "cards",
+      elements: ["quote_blocks"],
+      generation: "ai_generated"
+    },
+
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 6,
+      optimal: [3, 4],
+      description: 'Quote-backed objection answers'
+    }
+  },
+
+  VisualObjectionTiles: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" }
+    ],
+
+    cardStructure: {
+      type: "cards",
+      elements: ["objection_tiles"],
+      generation: "ai_generated"
+    },
+
+    cardRequirements: {
+      type: 'cards',
+      min: 4,
+      max: 8,
+      optimal: [4, 6],
+      description: 'Visual objection handling tiles'
+    }
+  },
+
+  ProblemToReframeBlocks: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "transition_text", mandatory: false, generation: "ai_generated" },
+      { element: "problem_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "reframe_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "transition_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "arrow_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "benefit_icon_1", mandatory: false, generation: "manual_preferred" },
+      { element: "benefit_icon_2", mandatory: false, generation: "manual_preferred" },
+      { element: "benefit_icon_3", mandatory: false, generation: "manual_preferred" },
+      { element: "bottom_headline", mandatory: false, generation: "ai_generated" },
+      { element: "bottom_description", mandatory: false, generation: "ai_generated" },
+      { element: "benefit_label_1", mandatory: false, generation: "ai_generated" },
+      { element: "benefit_label_2", mandatory: false, generation: "ai_generated" },
+      { element: "benefit_label_3", mandatory: false, generation: "ai_generated" }
+    ],
+
+    cardStructure: {
+      type: "pairs",
+      elements: ["reframe_blocks"],
+      generation: "ai_generated"
+    },
+
+    cardRequirements: {
+      type: 'pairs',
+      min: 2,
+      max: 6,
+      optimal: [3, 4],
+      description: 'Problem/reframe block pairs'
+    }
+  },
+
+  SkepticToBelieverSteps: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "objections_summary", mandatory: false, generation: "ai_generated" }
+    ],
+
+    cardStructure: {
+      type: "cards",
+      elements: ["conversion_steps"],
+      generation: "ai_generated"
+    },
+
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 5,
+      optimal: [3, 4],
+      description: 'Skeptic to believer transformation steps'
+    }
+  },
+
+  BoldGuaranteePanel: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "main_guarantee", mandatory: true, generation: "ai_generated" },
+      { element: "guarantee_details", mandatory: true, generation: "ai_generated" },
+      { element: "cta_text", mandatory: true, generation: "ai_generated" },
+      { element: "trust_indicators", mandatory: false, generation: "ai_generated" }
+    ],
+
+    cardStructure: {
+      type: "cards",
+      elements: ["key_guarantees"],
+      generation: "ai_generated"
+    },
+
+    cardRequirements: {
+      type: 'blocks',
+      min: 1,
+      max: 1,
+      optimal: [1, 1],
+      description: 'Single guarantee panel'
+    }
+  },
+
+  ObjectionCarousel: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "autoplay_button_text", mandatory: false, generation: "ai_generated" }
+    ],
+
+    cardStructure: {
+      type: "items",
+      elements: ["objection_slides"],
+      generation: "ai_generated"
+    },
+
+    cardRequirements: {
+      type: 'items',
+      min: 3,
+      max: 8,
+      optimal: [4, 6],
+      description: 'Objection carousel slides'
+    }
+  },
 
   // Pricing Section - Enhanced with complete field definitions for 5/5 completeness rating
-  TierCards: [
-    { element: "headline", mandatory: true },
-    { element: "tier_names", mandatory: true },
-    { element: "tier_prices", mandatory: true },
-    { element: "tier_descriptions", mandatory: true },
-    { element: "cta_texts", mandatory: true },
-    { element: "feature_lists", mandatory: false },
-    { element: "popular_labels", mandatory: false },
-    { element: "tier_count", mandatory: false },
-    // Individual tier features (up to 3 tiers, 8 features each)
-    { element: "tier_1_feature_1", mandatory: false },
-    { element: "tier_1_feature_2", mandatory: false },
-    { element: "tier_1_feature_3", mandatory: false },
-    { element: "tier_1_feature_4", mandatory: false },
-    { element: "tier_1_feature_5", mandatory: false },
-    { element: "tier_1_feature_6", mandatory: false },
-    { element: "tier_1_feature_7", mandatory: false },
-    { element: "tier_1_feature_8", mandatory: false },
-    { element: "tier_2_feature_1", mandatory: false },
-    { element: "tier_2_feature_2", mandatory: false },
-    { element: "tier_2_feature_3", mandatory: false },
-    { element: "tier_2_feature_4", mandatory: false },
-    { element: "tier_2_feature_5", mandatory: false },
-    { element: "tier_2_feature_6", mandatory: false },
-    { element: "tier_2_feature_7", mandatory: false },
-    { element: "tier_2_feature_8", mandatory: false },
-    { element: "tier_3_feature_1", mandatory: false },
-    { element: "tier_3_feature_2", mandatory: false },
-    { element: "tier_3_feature_3", mandatory: false },
-    { element: "tier_3_feature_4", mandatory: false },
-    { element: "tier_3_feature_5", mandatory: false },
-    { element: "tier_3_feature_6", mandatory: false },
-    { element: "tier_3_feature_7", mandatory: false },
-    { element: "tier_3_feature_8", mandatory: false },
-    // Trust indicators
-    { element: "trust_item_1", mandatory: false },
-    { element: "trust_item_2", mandatory: false },
-    { element: "trust_item_3", mandatory: false },
-    { element: "show_trust_footer", mandatory: false },
-  ],
+  TierCards: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "tier_count", mandatory: false, generation: "manual_preferred" },
+      { element: "feature_lists", mandatory: false, generation: "ai_generated" },
+      { element: "popular_labels", mandatory: false, generation: "manual_preferred" },
+      // Individual tier features (up to 3 tiers, 8 features each)
+      { element: "tier_1_feature_1", mandatory: false, generation: "ai_generated" },
+      { element: "tier_1_feature_2", mandatory: false, generation: "ai_generated" },
+      { element: "tier_1_feature_3", mandatory: false, generation: "ai_generated" },
+      { element: "tier_1_feature_4", mandatory: false, generation: "ai_generated" },
+      { element: "tier_1_feature_5", mandatory: false, generation: "ai_generated" },
+      { element: "tier_1_feature_6", mandatory: false, generation: "ai_generated" },
+      { element: "tier_1_feature_7", mandatory: false, generation: "ai_generated" },
+      { element: "tier_1_feature_8", mandatory: false, generation: "ai_generated" },
+      { element: "tier_2_feature_1", mandatory: false, generation: "ai_generated" },
+      { element: "tier_2_feature_2", mandatory: false, generation: "ai_generated" },
+      { element: "tier_2_feature_3", mandatory: false, generation: "ai_generated" },
+      { element: "tier_2_feature_4", mandatory: false, generation: "ai_generated" },
+      { element: "tier_2_feature_5", mandatory: false, generation: "ai_generated" },
+      { element: "tier_2_feature_6", mandatory: false, generation: "ai_generated" },
+      { element: "tier_2_feature_7", mandatory: false, generation: "ai_generated" },
+      { element: "tier_2_feature_8", mandatory: false, generation: "ai_generated" },
+      { element: "tier_3_feature_1", mandatory: false, generation: "ai_generated" },
+      { element: "tier_3_feature_2", mandatory: false, generation: "ai_generated" },
+      { element: "tier_3_feature_3", mandatory: false, generation: "ai_generated" },
+      { element: "tier_3_feature_4", mandatory: false, generation: "ai_generated" },
+      { element: "tier_3_feature_5", mandatory: false, generation: "ai_generated" },
+      { element: "tier_3_feature_6", mandatory: false, generation: "ai_generated" },
+      { element: "tier_3_feature_7", mandatory: false, generation: "ai_generated" },
+      { element: "tier_3_feature_8", mandatory: false, generation: "ai_generated" },
+      // Trust indicators
+      { element: "trust_item_1", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_2", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_3", mandatory: false, generation: "ai_generated" },
+      { element: "show_trust_footer", mandatory: false, generation: "manual_preferred" },
+      // Tier icons
+      { element: "tier_icon_1", mandatory: false, generation: "manual_preferred" },
+      { element: "tier_icon_2", mandatory: false, generation: "manual_preferred" },
+      { element: "tier_icon_3", mandatory: false, generation: "manual_preferred" }
+    ],
+
+    cardStructure: {
+      type: "cards",
+      elements: ["tier_names", "tier_prices", "tier_descriptions", "cta_texts"],
+      generation: "ai_generated"
+    },
+
+    cardRequirements: {
+      type: 'cards',
+      min: 2,
+      max: 4,
+      optimal: [3, 3],
+      description: 'Pricing tier cards'
+    }
+  },
 
   ToggleableMonthlyYearly: [
     { element: "headline", mandatory: true },
@@ -2002,24 +3421,49 @@ export const layoutElementSchema: LayoutSchema = {
     { element: "show_segment_comparison", mandatory: false },
   ],
 
-  SliderPricing: [
-    { element: "headline", mandatory: true },
-    { element: "pricing_type", mandatory: true },
-    { element: "base_price", mandatory: true },
-    { element: "unit_price", mandatory: true },
-    { element: "min_units", mandatory: true },
-    { element: "max_units", mandatory: true },
-    { element: "default_units", mandatory: true },
-    { element: "unit_label", mandatory: true },
-    { element: "included_features", mandatory: true },
-    { element: "cta_text", mandatory: true },
-    { element: "tier_breakpoints", mandatory: false },
-    { element: "tier_discounts", mandatory: false },
-    { element: "pricing_note", mandatory: false },
-    { element: "subheadline", mandatory: false },
-    { element: "supporting_text", mandatory: false },
-    { element: "trust_items", mandatory: false },
-  ],
+  SliderPricing: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "pricing_type", mandatory: true, generation: "manual_preferred" },
+      { element: "base_price", mandatory: true, generation: "manual_preferred" },
+      { element: "unit_price", mandatory: true, generation: "manual_preferred" },
+      { element: "min_units", mandatory: true, generation: "manual_preferred" },
+      { element: "max_units", mandatory: true, generation: "manual_preferred" },
+      { element: "default_units", mandatory: true, generation: "manual_preferred" },
+      { element: "unit_label", mandatory: true, generation: "ai_generated" },
+      { element: "included_features", mandatory: true, generation: "ai_generated" },
+      { element: "cta_text", mandatory: true, generation: "ai_generated" },
+      { element: "tier_breakpoints", mandatory: false, generation: "manual_preferred" },
+      { element: "tier_discounts", mandatory: false, generation: "manual_preferred" },
+      { element: "pricing_note", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" },
+      // Feature icons
+      { element: "feature_icon_1", mandatory: false, generation: "manual_preferred" },
+      { element: "feature_icon_2", mandatory: false, generation: "manual_preferred" },
+      { element: "feature_icon_3", mandatory: false, generation: "manual_preferred" },
+      { element: "feature_icon_4", mandatory: false, generation: "manual_preferred" },
+      { element: "feature_icon_5", mandatory: false, generation: "manual_preferred" },
+      { element: "feature_icon_6", mandatory: false, generation: "manual_preferred" },
+      // Pricing icon
+      { element: "pricing_icon", mandatory: false, generation: "manual_preferred" }
+    ],
+
+    cardStructure: {
+      type: "usage_based",
+      elements: [],
+      generation: "manual_preferred"
+    },
+
+    cardRequirements: {
+      type: 'usage_slider',
+      min: 1,
+      max: 1,
+      optimal: [1, 1],
+      description: 'Usage-based pricing slider'
+    }
+  },
 
   CallToQuotePlan: [
     { element: "headline", mandatory: true },
@@ -2036,43 +3480,62 @@ export const layoutElementSchema: LayoutSchema = {
     { element: "contact_icon_4", mandatory: false },
   ],
 
-  CardWithTestimonial: [
-    { element: "headline", mandatory: true },
-    { element: "tier_names", mandatory: true },
-    { element: "tier_prices", mandatory: true },
-    { element: "tier_descriptions", mandatory: true },
-    { element: "cta_texts", mandatory: true },
-    { element: "feature_lists", mandatory: false },
-    { element: "popular_tiers", mandatory: false },
-    { element: "subheadline", mandatory: false },
-    { element: "supporting_text", mandatory: false },
-    { element: "trust_items", mandatory: false },
-    // Testimonial section
-    { element: "testimonial_quote", mandatory: false },
-    { element: "testimonial_name", mandatory: false },
-    { element: "testimonial_title", mandatory: false },
-    { element: "testimonial_company", mandatory: false },
-    { element: "testimonial_avatar", mandatory: false },
-    { element: "testimonial_rating", mandatory: false },
-    // Social proof metrics
-    { element: "social_metric_1", mandatory: false },
-    { element: "social_metric_1_label", mandatory: false },
-    { element: "social_metric_2", mandatory: false },
-    { element: "social_metric_2_label", mandatory: false },
-    { element: "social_metric_3", mandatory: false },
-    { element: "social_metric_3_label", mandatory: false },
-    { element: "social_metric_4", mandatory: false },
-    { element: "social_metric_4_label", mandatory: false },
-    // Guarantee section
-    { element: "guarantee_title", mandatory: false },
-    { element: "guarantee_description", mandatory: false },
-    { element: "guarantee_period", mandatory: false },
-    { element: "guarantee_icon", mandatory: false },
-    { element: "show_guarantee", mandatory: false },
-    // Social proof section
-    { element: "social_proof_title", mandatory: false },
-    { element: "show_social_proof", mandatory: false },
-  ],
+  CardWithTestimonial: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" },
+      { element: "tier_count", mandatory: false, generation: "manual_preferred" },
+      { element: "feature_lists", mandatory: false, generation: "ai_generated" },
+      { element: "popular_tiers", mandatory: false, generation: "manual_preferred" },
+      // Testimonial fields (pipe-separated)
+      { element: "testimonial_quotes", mandatory: false, generation: "ai_generated" },
+      { element: "testimonial_names", mandatory: false, generation: "ai_generated" },
+      { element: "testimonial_companies", mandatory: false, generation: "ai_generated" },
+      { element: "testimonial_ratings", mandatory: false, generation: "manual_preferred" },
+      { element: "testimonial_images", mandatory: false, generation: "manual_preferred" },
+      // Social proof metrics
+      { element: "social_metric_1", mandatory: false, generation: "manual_preferred" },
+      { element: "social_metric_1_label", mandatory: false, generation: "ai_generated" },
+      { element: "social_metric_2", mandatory: false, generation: "manual_preferred" },
+      { element: "social_metric_2_label", mandatory: false, generation: "ai_generated" },
+      { element: "social_metric_3", mandatory: false, generation: "manual_preferred" },
+      { element: "social_metric_3_label", mandatory: false, generation: "ai_generated" },
+      { element: "social_metric_4", mandatory: false, generation: "manual_preferred" },
+      { element: "social_metric_4_label", mandatory: false, generation: "ai_generated" },
+      { element: "show_social_proof", mandatory: false, generation: "manual_preferred" },
+      { element: "social_proof_title", mandatory: false, generation: "ai_generated" },
+      // Guarantee section
+      { element: "guarantee_title", mandatory: false, generation: "ai_generated" },
+      { element: "guarantee_description", mandatory: false, generation: "ai_generated" },
+      { element: "show_guarantee", mandatory: false, generation: "manual_preferred" },
+      // Tier icons
+      { element: "tier_icon_1", mandatory: false, generation: "manual_preferred" },
+      { element: "tier_icon_2", mandatory: false, generation: "manual_preferred" },
+      { element: "tier_icon_3", mandatory: false, generation: "manual_preferred" },
+      { element: "tier_icon_4", mandatory: false, generation: "manual_preferred" },
+      // Social proof icons
+      { element: "social_icon_1", mandatory: false, generation: "manual_preferred" },
+      { element: "social_icon_2", mandatory: false, generation: "manual_preferred" },
+      { element: "social_icon_3", mandatory: false, generation: "manual_preferred" },
+      { element: "social_icon_4", mandatory: false, generation: "manual_preferred" }
+    ],
+
+    cardStructure: {
+      type: "cards",
+      elements: ["tier_names", "tier_prices", "tier_descriptions", "cta_texts"],
+      generation: "ai_generated"
+    },
+
+    cardRequirements: {
+      type: 'cards',
+      min: 2,
+      max: 4,
+      optimal: [3, 3],
+      description: 'Pricing cards with testimonials'
+    }
+  },
 
   MiniStackedCards: [
     { element: "headline", mandatory: true },
@@ -2120,299 +3583,421 @@ export const layoutElementSchema: LayoutSchema = {
   ],
 
   // PrimaryCTA Section - Enhanced with complete field definitions
-  CenteredHeadlineCTA: [
-    { element: "headline", mandatory: true },
-    { element: "cta_text", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    { element: "urgency_text", mandatory: false },
-    { element: "trust_items", mandatory: false },
-    { element: "trust_item_1", mandatory: false },
-    { element: "trust_item_2", mandatory: false },
-    { element: "trust_item_3", mandatory: false },
-    { element: "trust_item_4", mandatory: false },
-    { element: "trust_item_5", mandatory: false },
-    { element: "customer_count", mandatory: false },
-    { element: "customer_label", mandatory: false },
-    { element: "rating_stat", mandatory: false },
-    { element: "uptime_stat", mandatory: false },
-    { element: "uptime_label", mandatory: false },
-  ],
+  CenteredHeadlineCTA: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: true, generation: "ai_generated" },
+      { element: "urgency_text", mandatory: false, generation: "ai_generated" },
+      { element: "customer_count", mandatory: false, generation: "manual_preferred" },
+      { element: "customer_label", mandatory: false, generation: "manual_preferred" },
+      { element: "rating_stat", mandatory: false, generation: "manual_preferred" },
+      { element: "uptime_stat", mandatory: false, generation: "manual_preferred" },
+      { element: "uptime_label", mandatory: false, generation: "manual_preferred" }
+    ],
 
-  CTAWithBadgeRow: [
-    { element: "headline", mandatory: true },
-    { element: "cta_text", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    { element: "trust_badges", mandatory: false },
-    { element: "trust_item_1", mandatory: false },
-    { element: "trust_item_2", mandatory: false },
-    { element: "trust_item_3", mandatory: false },
-    { element: "trust_item_4", mandatory: false },
-    { element: "trust_item_5", mandatory: false },
-    { element: "customer_count", mandatory: false },
-    { element: "rating_value", mandatory: false },
-    { element: "rating_count", mandatory: false },
-    { element: "show_social_proof", mandatory: false },
-    { element: "show_customer_avatars", mandatory: false },
-    { element: "avatar_count", mandatory: false },
-    { element: "customer_names", mandatory: false },
-    { element: "avatar_urls", mandatory: false },
-  ],
+    cardStructure: {
+      type: "items",
+      elements: ["trust_item_1", "trust_item_2", "trust_item_3", "trust_item_4", "trust_item_5"],
+      generation: "hybrid"
+    },
 
-  VisualCTAWithMockup: [
-    { element: "headline", mandatory: true },
-    { element: "cta_text", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    { element: "secondary_cta", mandatory: false },
-    { element: "mockup_image", mandatory: false },
-    { element: "trust_item_1", mandatory: false },
-    { element: "trust_item_2", mandatory: false },
-    { element: "trust_item_3", mandatory: false },
-    { element: "trust_item_4", mandatory: false },
-    { element: "trust_item_5", mandatory: false },
-  ],
+    cardRequirements: {
+      type: 'items',
+      min: 2,
+      max: 5,
+      optimal: [3, 4],
+      description: 'Trust indicators and benefit statements'
+    }
+  },
 
-  SideBySideCTA: [
-    { element: "headline", mandatory: true },
-    { element: "cta_text", mandatory: true },
-    { element: "value_proposition", mandatory: true },
-    { element: "benefit_list", mandatory: false },
-    { element: "subheadline", mandatory: false },
-    { element: "supporting_text", mandatory: false },
-    { element: "trust_items", mandatory: false },
-    { element: "trust_item_1", mandatory: false },
-    { element: "trust_item_2", mandatory: false },
-    { element: "trust_item_3", mandatory: false },
-    { element: "trust_item_4", mandatory: false },
-    { element: "trust_item_5", mandatory: false },
-  ],
+  CTAWithBadgeRow: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: true, generation: "ai_generated" },
+      { element: "customer_count", mandatory: false, generation: "manual_preferred" },
+      { element: "rating_value", mandatory: false, generation: "manual_preferred" },
+      { element: "rating_count", mandatory: false, generation: "manual_preferred" },
+      { element: "show_social_proof", mandatory: false, generation: "manual_preferred" },
+      { element: "show_customer_avatars", mandatory: false, generation: "manual_preferred" },
+      { element: "avatar_count", mandatory: false, generation: "manual_preferred" },
+      { element: "customer_names", mandatory: false, generation: "manual_preferred" },
+      { element: "avatar_urls", mandatory: false, generation: "manual_preferred" }
+    ],
 
-  CountdownLimitedCTA: [
-    { element: "headline", mandatory: true },
-    { element: "cta_text", mandatory: true },
-    { element: "countdown_label", mandatory: true },
-    { element: "scarcity_text", mandatory: true },
-    { element: "urgency_text", mandatory: false },
-    { element: "subheadline", mandatory: false },
-    { element: "countdown_end_date", mandatory: false },
-    { element: "countdown_end_time", mandatory: false },
-    { element: "limited_quantity", mandatory: false },
-    { element: "availability_text", mandatory: false },
-    { element: "bonus_text", mandatory: false },
-    { element: "trust_items", mandatory: false },
-    { element: "trust_item_1", mandatory: false },
-    { element: "trust_item_2", mandatory: false },
-    { element: "trust_item_3", mandatory: false },
-    { element: "trust_item_4", mandatory: false },
-    { element: "trust_item_5", mandatory: false },
-  ],
+    cardStructure: {
+      type: "items",
+      elements: ["trust_item_1", "trust_item_2", "trust_item_3", "trust_item_4", "trust_item_5"],
+      generation: "hybrid"
+    },
 
-  CTAWithFormField: [
-    { element: "headline", mandatory: true },
-    { element: "cta_text", mandatory: true },
-    { element: "form_label", mandatory: true },
-    { element: "placeholder_text", mandatory: true },
-    { element: "privacy_text", mandatory: false },
-    { element: "subheadline", mandatory: false },
-    { element: "benefits", mandatory: false },
-    { element: "benefit_1", mandatory: false },
-    { element: "benefit_2", mandatory: false },
-    { element: "benefit_3", mandatory: false },
-    { element: "benefit_4", mandatory: false },
-    { element: "benefit_5", mandatory: false },
-    { element: "trust_item_1", mandatory: false },
-    { element: "trust_item_2", mandatory: false },
-    { element: "trust_item_3", mandatory: false },
-    { element: "trust_item_4", mandatory: false },
-    { element: "trust_item_5", mandatory: false },
-    { element: "form_type", mandatory: false },
-    { element: "required_fields", mandatory: false },
-    { element: "success_message", mandatory: false },
-  ],
+    cardRequirements: {
+      type: 'items',
+      min: 2,
+      max: 5,
+      optimal: [3, 4],
+      description: 'Trust badges and compliance indicators'
+    }
+  },
 
-  ValueStackCTA: [
-    { element: "headline", mandatory: true },
-    { element: "cta_text", mandatory: true },
-    { element: "value_propositions", mandatory: true },
-    { element: "value_descriptions", mandatory: true },
-    { element: "final_cta_headline", mandatory: true },
-    { element: "final_cta_description", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    { element: "guarantee_text", mandatory: false },
-    { element: "value_icon_1", mandatory: false },
-    { element: "value_icon_2", mandatory: false },
-    { element: "value_icon_3", mandatory: false },
-    { element: "value_icon_4", mandatory: false },
-    { element: "value_icon_5", mandatory: false },
-    { element: "value_icon_6", mandatory: false },
-  ],
+  VisualCTAWithMockup: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: true, generation: "ai_generated" },
+      { element: "secondary_cta", mandatory: false, generation: "ai_generated" },
+      { element: "mockup_image", mandatory: false, generation: "manual_preferred" }
+    ],
 
-  TestimonialCTACombo: [
-    { element: "headline", mandatory: true },
-    { element: "cta_text", mandatory: true },
-    { element: "testimonial_quote", mandatory: true },
-    { element: "testimonial_author", mandatory: true },
-    { element: "testimonial_title", mandatory: true },
-    { element: "testimonial_company", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    { element: "testimonial_company_logo", mandatory: false },
-    { element: "testimonial_date", mandatory: false },
-    { element: "testimonial_industry", mandatory: false },
-    { element: "case_study_tag", mandatory: false },
-    { element: "customer_count", mandatory: false },
-    { element: "average_rating", mandatory: false },
-    { element: "uptime_percentage", mandatory: false },
-    { element: "show_social_proof", mandatory: false },
-  ],
+    cardStructure: {
+      type: "items",
+      elements: ["trust_item_1", "trust_item_2", "trust_item_3", "trust_item_4", "trust_item_5"],
+      generation: "hybrid"
+    },
+
+    cardRequirements: {
+      type: 'items',
+      min: 1,
+      max: 5,
+      optimal: [2, 3],
+      description: 'Trust indicators and key benefits'
+    }
+  },
+
+  SideBySideCTA: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: true, generation: "ai_generated" },
+      { element: "value_proposition", mandatory: true, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" }
+    ],
+
+    cardStructure: {
+      type: "items",
+      elements: ["benefit_list", "trust_item_1", "trust_item_2", "trust_item_3", "trust_item_4", "trust_item_5"],
+      generation: "hybrid"
+    },
+
+    cardRequirements: {
+      type: 'items',
+      min: 3,
+      max: 6,
+      optimal: [4, 5],
+      description: 'Benefits and trust indicators for side-by-side layout'
+    }
+  },
+
+  CountdownLimitedCTA: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: true, generation: "ai_generated" },
+      { element: "countdown_label", mandatory: true, generation: "ai_generated" },
+      { element: "scarcity_text", mandatory: true, generation: "ai_generated" },
+      { element: "urgency_text", mandatory: false, generation: "ai_generated" },
+      { element: "countdown_end_date", mandatory: false, generation: "manual_preferred" },
+      { element: "countdown_end_time", mandatory: false, generation: "manual_preferred" },
+      { element: "limited_quantity", mandatory: false, generation: "manual_preferred" },
+      { element: "availability_text", mandatory: false, generation: "ai_generated" },
+      { element: "bonus_text", mandatory: false, generation: "ai_generated" }
+    ],
+
+    cardStructure: {
+      type: "items",
+      elements: ["trust_item_1", "trust_item_2", "trust_item_3", "trust_item_4", "trust_item_5"],
+      generation: "hybrid"
+    },
+
+    cardRequirements: {
+      type: 'items',
+      min: 2,
+      max: 5,
+      optimal: [3, 4],
+      description: 'Trust indicators and urgency reinforcement'
+    }
+  },
+
+  CTAWithFormField: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: true, generation: "ai_generated" },
+      { element: "form_label", mandatory: true, generation: "ai_generated" },
+      { element: "placeholder_text", mandatory: true, generation: "ai_generated" },
+      { element: "privacy_text", mandatory: false, generation: "ai_generated" },
+      { element: "form_type", mandatory: false, generation: "manual_preferred" },
+      { element: "required_fields", mandatory: false, generation: "manual_preferred" },
+      { element: "success_message", mandatory: false, generation: "ai_generated" }
+    ],
+
+    cardStructure: {
+      type: "items",
+      elements: ["benefit_1", "benefit_2", "benefit_3", "benefit_4", "benefit_5", "trust_item_1", "trust_item_2", "trust_item_3", "trust_item_4", "trust_item_5"],
+      generation: "hybrid"
+    },
+
+    cardRequirements: {
+      type: 'items',
+      min: 3,
+      max: 8,
+      optimal: [4, 6],
+      description: 'Benefits and trust indicators for form completion'
+    }
+  },
+
+  ValueStackCTA: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: true, generation: "ai_generated" },
+      { element: "final_cta_headline", mandatory: true, generation: "ai_generated" },
+      { element: "final_cta_description", mandatory: true, generation: "ai_generated" },
+      { element: "guarantee_text", mandatory: false, generation: "ai_generated" }
+    ],
+
+    cardStructure: {
+      type: "cards",
+      elements: ["value_propositions", "value_descriptions", "value_icon_1", "value_icon_2", "value_icon_3", "value_icon_4", "value_icon_5", "value_icon_6"],
+      generation: "ai_generated"
+    },
+
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 6,
+      optimal: [4, 5],
+      description: 'Value propositions with icons and detailed descriptions'
+    }
+  },
+
+  TestimonialCTACombo: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: true, generation: "ai_generated" },
+      { element: "testimonial_quote", mandatory: true, generation: "ai_generated" },
+      { element: "testimonial_author", mandatory: true, generation: "ai_generated" },
+      { element: "testimonial_title", mandatory: true, generation: "ai_generated" },
+      { element: "testimonial_company", mandatory: true, generation: "ai_generated" },
+      { element: "testimonial_company_logo", mandatory: false, generation: "manual_preferred" },
+      { element: "testimonial_date", mandatory: false, generation: "manual_preferred" },
+      { element: "testimonial_industry", mandatory: false, generation: "ai_generated" },
+      { element: "case_study_tag", mandatory: false, generation: "ai_generated" },
+      { element: "customer_count", mandatory: false, generation: "manual_preferred" },
+      { element: "average_rating", mandatory: false, generation: "manual_preferred" },
+      { element: "uptime_percentage", mandatory: false, generation: "manual_preferred" },
+      { element: "show_social_proof", mandatory: false, generation: "manual_preferred" }
+    ],
+
+    cardRequirements: null
+  },
 
   // Problem Section
-  StackedPainBullets: [
-    { element: "headline", mandatory: true },
-    { element: "pain_points", mandatory: true },
-    { element: "pain_descriptions", mandatory: false },
-    { element: "subheadline", mandatory: false },
-    { element: "conclusion_text", mandatory: false },
-    { element: "pain_icon_1", mandatory: false },
-    { element: "pain_icon_2", mandatory: false },
-    { element: "pain_icon_3", mandatory: false },
-    { element: "pain_icon_4", mandatory: false },
-    { element: "pain_icon_5", mandatory: false },
-    { element: "pain_icon_6", mandatory: false },
-  ],
+  StackedPainBullets: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "conclusion_text", mandatory: false, generation: "ai_generated" }
+    ],
+    cardStructure: {
+      type: "items",
+      elements: ["pain_points", "pain_descriptions", "pain_icons"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'items',
+      min: 2,
+      max: 5,
+      optimal: [3, 3],
+      description: 'Pain point items with optional descriptions'
+    }
+  },
 
-  BeforeImageAfterText: [
-    { element: "headline", mandatory: true },
-    { element: "before_description", mandatory: true },
-    { element: "after_description", mandatory: true },
-    { element: "before_after_image", mandatory: false },
-    { element: "image_caption", mandatory: false },
-    { element: "subheadline", mandatory: false },
-    { element: "supporting_text", mandatory: false },
-    { element: "trust_items", mandatory: false },
-    { element: "transformation_icon_1", mandatory: false },
-    { element: "transformation_icon_2", mandatory: false },
-    { element: "transformation_icon_3", mandatory: false },
-  ],
+  BeforeImageAfterText: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "before_description", mandatory: true, generation: "ai_generated" },
+      { element: "after_description", mandatory: true, generation: "ai_generated" },
+      { element: "before_after_image", mandatory: false, generation: "manual_preferred" },
+      { element: "image_caption", mandatory: false, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" },
+      { element: "transformation_icon_1", mandatory: false, generation: "manual_preferred" },
+      { element: "transformation_icon_2", mandatory: false, generation: "manual_preferred" },
+      { element: "transformation_icon_3", mandatory: false, generation: "manual_preferred" }
+    ],
+    cardRequirements: null
+  },
 
-  SideBySideSplit: [
-    { element: "headline", mandatory: true },
-    { element: "problem_title", mandatory: true },
-    { element: "problem_description", mandatory: true },
-    { element: "solution_preview", mandatory: true },
-    { element: "problem_points", mandatory: false },
-    { element: "solution_points", mandatory: false },
-    { element: "call_to_action", mandatory: false },
-    { element: "transition_text", mandatory: false },
-    { element: "subheadline", mandatory: false },
-    { element: "supporting_text", mandatory: false },
-    { element: "trust_items", mandatory: false },
-    { element: "bottom_stat_1", mandatory: false },
-    { element: "bottom_stat_1_label", mandatory: false },
-    { element: "bottom_stat_2", mandatory: false },
-    { element: "bottom_stat_2_label", mandatory: false },
-    { element: "bottom_stat_3", mandatory: false },
-    { element: "bottom_stat_3_label", mandatory: false },
-    { element: "cta_section_message", mandatory: false },
-    { element: "path_1_icon", mandatory: false },
-    { element: "path_2_icon", mandatory: false },
-  ],
+  SideBySideSplit: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "problem_title", mandatory: true, generation: "ai_generated" },
+      { element: "problem_description", mandatory: true, generation: "ai_generated" },
+      { element: "solution_preview", mandatory: true, generation: "ai_generated" },
+      { element: "call_to_action", mandatory: false, generation: "ai_generated" },
+      { element: "transition_text", mandatory: false, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" },
+      { element: "bottom_stat_1", mandatory: false, generation: "ai_generated" },
+      { element: "bottom_stat_1_label", mandatory: false, generation: "ai_generated" },
+      { element: "bottom_stat_2", mandatory: false, generation: "ai_generated" },
+      { element: "bottom_stat_2_label", mandatory: false, generation: "ai_generated" },
+      { element: "bottom_stat_3", mandatory: false, generation: "ai_generated" },
+      { element: "bottom_stat_3_label", mandatory: false, generation: "ai_generated" },
+      { element: "cta_section_message", mandatory: false, generation: "ai_generated" },
+      { element: "path_1_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "path_2_icon", mandatory: false, generation: "manual_preferred" }
+    ],
+    cardStructure: {
+      type: "pairs",
+      elements: ["problem_points", "solution_points"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'pairs',
+      min: 3,
+      max: 5,
+      optimal: [4, 5],
+      description: 'Problem vs solution point pairs'
+    }
+  },
 
-  EmotionalQuotes: [
-    { element: "headline", mandatory: true },
-    { element: "emotional_quotes", mandatory: true },
-    { element: "quote_attributions", mandatory: true },
-    { element: "context_text", mandatory: false },
-    { element: "quote_categories", mandatory: false },
-    { element: "emotional_impact", mandatory: false },
-    { element: "relatable_intro", mandatory: false },
-    { element: "subheadline", mandatory: false },
-    { element: "supporting_text", mandatory: false },
-    { element: "trust_items", mandatory: false },
-    { element: "category_icon_1", mandatory: false },
-    { element: "category_icon_2", mandatory: false },
-    { element: "category_icon_3", mandatory: false },
-    { element: "category_icon_4", mandatory: false },
-    { element: "category_icon_5", mandatory: false },
-  ],
+  EmotionalQuotes: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "context_text", mandatory: false, generation: "ai_generated" },
+      { element: "emotional_impact", mandatory: false, generation: "ai_generated" },
+      { element: "relatable_intro", mandatory: false, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["emotional_quotes", "quote_attributions", "quote_categories", "category_icons"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 5,
+      optimal: [4, 5],
+      description: 'Emotional quote cards with attributions'
+    }
+  },
 
-  CollapsedCards: [
-    { element: "headline", mandatory: true },
-    { element: "problem_titles", mandatory: true },
-    { element: "problem_descriptions", mandatory: true },
-    { element: "expand_labels", mandatory: false },
-    { element: "problem_impacts", mandatory: false },
-    { element: "solution_hints", mandatory: false },
-    { element: "intro_text", mandatory: false },
-    { element: "subheadline", mandatory: false },
-    { element: "supporting_text", mandatory: false },
-    { element: "trust_items", mandatory: false },
-    { element: "problem_icon_1", mandatory: false },
-    { element: "problem_icon_2", mandatory: false },
-    { element: "problem_icon_3", mandatory: false },
-    { element: "problem_icon_4", mandatory: false },
-    { element: "problem_icon_5", mandatory: false },
-    { element: "problem_icon_6", mandatory: false },
-  ],
+  CollapsedCards: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "intro_text", mandatory: false, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["problem_titles", "problem_descriptions", "expand_labels", "problem_impacts", "solution_hints", "problem_icons"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 2,
+      max: 4,
+      optimal: [3, 3],
+      description: 'Expandable problem challenge cards'
+    }
+  },
 
-  PainMeterChart: [
-    { element: "headline", mandatory: true },
-    { element: "pain_categories", mandatory: true },
-    { element: "pain_levels", mandatory: true },
-    { element: "chart_labels", mandatory: false },
-    { element: "category_descriptions", mandatory: false },
-    { element: "total_score_text", mandatory: false },
-    { element: "benchmark_text", mandatory: false },
-    { element: "intro_text", mandatory: false },
-    { element: "subheadline", mandatory: false },
-    { element: "supporting_text", mandatory: false },
-    { element: "trust_items", mandatory: false },
-    { element: "action_stat_1", mandatory: false },
-    { element: "action_stat_1_label", mandatory: false },
-    { element: "action_stat_2", mandatory: false },
-    { element: "action_stat_2_label", mandatory: false },
-    { element: "action_stat_3", mandatory: false },
-    { element: "action_stat_3_label", mandatory: false },
-  ],
+  PainMeterChart: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "chart_labels", mandatory: false, generation: "ai_generated" },
+      { element: "total_score_text", mandatory: false, generation: "ai_generated" },
+      { element: "benchmark_text", mandatory: false, generation: "ai_generated" },
+      { element: "intro_text", mandatory: false, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" },
+      { element: "action_stat_1", mandatory: false, generation: "ai_generated" },
+      { element: "action_stat_1_label", mandatory: false, generation: "ai_generated" },
+      { element: "action_stat_2", mandatory: false, generation: "ai_generated" },
+      { element: "action_stat_2_label", mandatory: false, generation: "ai_generated" },
+      { element: "action_stat_3", mandatory: false, generation: "ai_generated" },
+      { element: "action_stat_3_label", mandatory: false, generation: "ai_generated" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["pain_categories", "pain_levels", "category_descriptions"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 4,
+      max: 6,
+      optimal: [5, 6],
+      description: 'Pain meter measurement categories'
+    }
+  },
 
-  PersonaPanels: [
-    { element: "headline", mandatory: true },
-    { element: "persona_names", mandatory: true },
-    { element: "persona_problems", mandatory: true },
-    { element: "persona_descriptions", mandatory: false },
-    { element: "persona_titles", mandatory: false },
-    { element: "persona_pain_points", mandatory: false },
-    { element: "persona_goals", mandatory: false },
-    { element: "intro_text", mandatory: false },
-    { element: "subheadline", mandatory: false },
-    { element: "supporting_text", mandatory: false },
-    { element: "trust_items", mandatory: false },
-    { element: "persona_icon_1", mandatory: false },
-    { element: "persona_icon_2", mandatory: false },
-    { element: "persona_icon_3", mandatory: false },
-    { element: "persona_icon_4", mandatory: false },
-  ],
+  PersonaPanels: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "intro_text", mandatory: false, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["persona_names", "persona_problems", "persona_descriptions", "persona_titles", "persona_pain_points", "persona_goals", "persona_icons"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 3,
+      max: 4,
+      optimal: [4, 4],
+      description: 'Business owner persona panels'
+    }
+  },
 
-  ProblemChecklist: [
-    { element: "headline", mandatory: true },
-    { element: "problem_statements", mandatory: true },
-    { element: "checklist_items", mandatory: true },
-    { element: "conclusion_text", mandatory: false },
-    { element: "scoring_labels", mandatory: false },
-    { element: "action_thresholds", mandatory: false },
-    { element: "intro_text", mandatory: false },
-    { element: "subheadline", mandatory: false },
-    { element: "supporting_text", mandatory: false },
-    { element: "cta_text", mandatory: false },
-    { element: "trust_items", mandatory: false },
-    { element: "result_stat_1", mandatory: false },
-    { element: "result_stat_1_label", mandatory: false },
-    { element: "result_stat_2", mandatory: false },
-    { element: "result_stat_2_label", mandatory: false },
-    { element: "result_stat_3", mandatory: false },
-    { element: "result_stat_3_label", mandatory: false },
-    { element: "encouragement_tip_1", mandatory: false },
-    { element: "encouragement_tip_2", mandatory: false },
-    { element: "encouragement_tip_3", mandatory: false },
-  ],
+  ProblemChecklist: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "conclusion_text", mandatory: false, generation: "ai_generated" },
+      { element: "intro_text", mandatory: false, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "cta_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" },
+      { element: "result_stat_1", mandatory: false, generation: "ai_generated" },
+      { element: "result_stat_1_label", mandatory: false, generation: "ai_generated" },
+      { element: "result_stat_2", mandatory: false, generation: "ai_generated" },
+      { element: "result_stat_2_label", mandatory: false, generation: "ai_generated" },
+      { element: "result_stat_3", mandatory: false, generation: "ai_generated" },
+      { element: "result_stat_3_label", mandatory: false, generation: "ai_generated" },
+      { element: "encouragement_tip_1", mandatory: false, generation: "ai_generated" },
+      { element: "encouragement_tip_2", mandatory: false, generation: "ai_generated" },
+      { element: "encouragement_tip_3", mandatory: false, generation: "ai_generated" }
+    ],
+    cardStructure: {
+      type: "cards",
+      elements: ["problem_statements", "checklist_items", "scoring_labels", "action_thresholds"],
+      generation: "ai_generated"
+    },
+    cardRequirements: {
+      type: 'cards',
+      min: 5,
+      max: 10,
+      optimal: [7, 10],
+      description: 'Problem assessment checklist items'
+    }
+  },
 
   // Header Section
   MinimalNavHeader: [

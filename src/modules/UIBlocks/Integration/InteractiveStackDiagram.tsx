@@ -1,92 +1,48 @@
 // Integration/InteractiveStackDiagram.tsx - Technical stack visualization for developers
 // Production-ready integration component using abstraction system with background-aware text colors
 
-import React, { useState } from 'react';
-import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import React, { useState, useEffect } from 'react';
 import { useTypography } from '@/hooks/useTypography';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useOnboardingStore } from '@/hooks/useOnboardingStore';
+import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
-  EditableAdaptiveText 
+import {
+  EditableAdaptiveHeadline,
+  EditableAdaptiveText
 } from '@/components/layout/EditableContent';
-import { LayoutComponentProps } from '@/types/storeTypes';
+import {
+  LayoutComponentProps,
+  extractLayoutContent,
+  StoreElementTypes
+} from '@/types/storeTypes';
 
-// Content interface for type safety
+interface InteractiveStackDiagramProps extends LayoutComponentProps {}
+
+// Layer item structure
+interface LayerItem {
+  title: string;
+  description: string;
+  technologies: string;
+  id: string;
+}
+
+// Content interface for InteractiveStackDiagram layout
 interface InteractiveStackDiagramContent {
   headline: string;
   subheadline?: string;
-  layer_1_title: string;
-  layer_1_description: string;
-  layer_1_technologies: string;
-  layer_2_title: string;
-  layer_2_description: string;
-  layer_2_technologies: string;
-  layer_3_title: string;
-  layer_3_description: string;
-  layer_3_technologies: string;
-  layer_4_title: string;
-  layer_4_description: string;
-  layer_4_technologies: string;
+  layer_titles: string;
+  layer_descriptions: string;
+  layer_technologies: string;
 }
 
-// Content schema - defines structure and defaults
+// Content schema for InteractiveStackDiagram layout
 const CONTENT_SCHEMA = {
-  headline: { 
-    type: 'string' as const, 
-    default: 'Built for Enterprise-Grade Integration' 
-  },
-  subheadline: { 
-    type: 'string' as const, 
-    default: 'Our comprehensive technology stack ensures seamless connectivity across your entire development ecosystem.' 
-  },
-  layer_1_title: { 
-    type: 'string' as const, 
-    default: 'Frontend & UI' 
-  },
-  layer_1_description: { 
-    type: 'string' as const, 
-    default: 'Modern JavaScript frameworks and component libraries for rapid development' 
-  },
-  layer_1_technologies: { 
-    type: 'string' as const, 
-    default: 'React|Vue.js|Angular|Svelte|Next.js|Nuxt.js|TypeScript|Tailwind CSS' 
-  },
-  layer_2_title: { 
-    type: 'string' as const, 
-    default: 'APIs & Backend' 
-  },
-  layer_2_description: { 
-    type: 'string' as const, 
-    default: 'RESTful and GraphQL APIs with robust authentication and real-time capabilities' 
-  },
-  layer_2_technologies: { 
-    type: 'string' as const, 
-    default: 'Node.js|Python|Go|Ruby|REST API|GraphQL|WebSockets|JWT|OAuth 2.0' 
-  },
-  layer_3_title: { 
-    type: 'string' as const, 
-    default: 'Database & Storage' 
-  },
-  layer_3_description: { 
-    type: 'string' as const, 
-    default: 'Scalable data storage solutions with caching and real-time synchronization' 
-  },
-  layer_3_technologies: { 
-    type: 'string' as const, 
-    default: 'PostgreSQL|MongoDB|Redis|Elasticsearch|AWS S3|Google Cloud Storage|CDN' 
-  },
-  layer_4_title: { 
-    type: 'string' as const, 
-    default: 'Infrastructure & DevOps' 
-  },
-  layer_4_description: { 
-    type: 'string' as const, 
-    default: 'Cloud-native deployment with monitoring, security, and automated scaling' 
-  },
-  layer_4_technologies: { 
-    type: 'string' as const, 
-    default: 'Docker|Kubernetes|AWS|Google Cloud|Azure|GitHub Actions|Terraform|Monitoring' 
-  }
+  headline: { type: 'string' as const, default: 'Built for Enterprise-Grade Integration' },
+  subheadline: { type: 'string' as const, default: 'Our comprehensive technology stack ensures seamless connectivity across your entire development ecosystem.' },
+  layer_titles: { type: 'string' as const, default: 'Frontend & UI|APIs & Backend|Database & Storage|Infrastructure & DevOps' },
+  layer_descriptions: { type: 'string' as const, default: 'Modern JavaScript frameworks and component libraries for rapid development|RESTful and GraphQL APIs with robust authentication and real-time capabilities|Scalable data storage solutions with caching and real-time synchronization|Cloud-native deployment with monitoring, security, and automated scaling' },
+  layer_technologies: { type: 'string' as const, default: 'React|Vue.js|Angular|Svelte|Next.js|Nuxt.js|TypeScript|Tailwind CSS!Node.js|Python|Go|Ruby|REST API|GraphQL|WebSockets|JWT|OAuth 2.0!PostgreSQL|MongoDB|Redis|Elasticsearch|AWS S3|Google Cloud Storage|CDN!Docker|Kubernetes|AWS|Google Cloud|Azure|GitHub Actions|Terraform|Monitoring' }
 };
 
 // Technology Badge Component
@@ -192,13 +148,35 @@ const StackLayer = React.memo(({
 });
 StackLayer.displayName = 'StackLayer';
 
-export default function InteractiveStackDiagram(props: LayoutComponentProps) {
+// Parse layer data with dynamic structure
+const parseLayerData = (titles: string, descriptions: string, technologies: string): LayerItem[] => {
+  const titleList = titles.split('|');
+  const descriptionList = descriptions.split('|');
+  const technologyList = technologies.split('!'); // Using ! as separator between layers
+
+  return titleList.map((title, index) => ({
+    id: `layer-${index}`,
+    title: title.trim(),
+    description: descriptionList[index] || '',
+    technologies: technologyList[index] || ''
+  }));
+};
+
+export default function InteractiveStackDiagram(props: InteractiveStackDiagramProps) {
   const { getTextStyle: getTypographyStyle } = useTypography();
-  
+  const { blockContent: storeContent, setBlockContent, getBusinessContext } = useEditStore();
+  const { getOnboardingFieldValue } = useOnboardingStore();
+
+  // Extract content using the extractLayoutContent helper
+  const blockContent = extractLayoutContent<InteractiveStackDiagramContent>(
+    storeContent,
+    props.sectionId,
+    CONTENT_SCHEMA
+  );
+
   const {
     sectionId,
     mode,
-    blockContent,
     colorTokens,
     dynamicTextColors,
     getTextStyle,
@@ -211,7 +189,7 @@ export default function InteractiveStackDiagram(props: LayoutComponentProps) {
 
   const [activeLayer, setActiveLayer] = useState<number | null>(null);
   const [activeTech, setActiveTech] = useState<string | null>(null);
-  
+
   // Create typography styles
   const h3Style = getTypographyStyle('h3');
   const h4Style = getTypographyStyle('h4');
@@ -219,32 +197,60 @@ export default function InteractiveStackDiagram(props: LayoutComponentProps) {
   const bodySmStyle = getTypographyStyle('body-sm');
   const labelStyle = getTypographyStyle('label');
 
-  // Parse technology lists
-  const layers = [
-    {
-      title: blockContent.layer_1_title,
-      description: blockContent.layer_1_description,
-      technologies: blockContent.layer_1_technologies ? blockContent.layer_1_technologies.split('|') : []
-    },
-    {
-      title: blockContent.layer_2_title,
-      description: blockContent.layer_2_description,
-      technologies: blockContent.layer_2_technologies ? blockContent.layer_2_technologies.split('|') : []
-    },
-    {
-      title: blockContent.layer_3_title,
-      description: blockContent.layer_3_description,
-      technologies: blockContent.layer_3_technologies ? blockContent.layer_3_technologies.split('|') : []
-    },
-    {
-      title: blockContent.layer_4_title,
-      description: blockContent.layer_4_description,
-      technologies: blockContent.layer_4_technologies ? blockContent.layer_4_technologies.split('|') : []
-    }
-  ];
+  // Parse layer data
+  const layers = parseLayerData(
+    blockContent.layer_titles,
+    blockContent.layer_descriptions,
+    blockContent.layer_technologies
+  );
 
   const handleTechClick = (tech: string) => {
     setActiveTech(activeTech === tech ? null : tech);
+  };
+
+  // Add new layer
+  const handleAddLayer = () => {
+    const newLayerTitle = prompt('Enter layer title:');
+    if (newLayerTitle && newLayerTitle.trim()) {
+      const currentTitles = blockContent.layer_titles.split('|');
+      const currentDescriptions = blockContent.layer_descriptions.split('|');
+      const currentTechnologies = blockContent.layer_technologies.split('!');
+
+      const updatedTitles = [...currentTitles, newLayerTitle.trim()].join('|');
+      const updatedDescriptions = [...currentDescriptions, 'New layer description'].join('|');
+      const updatedTechnologies = [...currentTechnologies, 'Technology 1|Technology 2|Technology 3'].join('!');
+
+      handleContentUpdate('layer_titles', updatedTitles);
+      handleContentUpdate('layer_descriptions', updatedDescriptions);
+      handleContentUpdate('layer_technologies', updatedTechnologies);
+    }
+  };
+
+  // Remove layer
+  const handleRemoveLayer = (layerIndex: number) => {
+    if (layers.length <= 1) {
+      alert('Cannot remove the last layer');
+      return;
+    }
+
+    if (confirm(`Remove "${layers[layerIndex].title}" layer?`)) {
+      const currentTitles = blockContent.layer_titles.split('|');
+      const currentDescriptions = blockContent.layer_descriptions.split('|');
+      const currentTechnologies = blockContent.layer_technologies.split('!');
+
+      currentTitles.splice(layerIndex, 1);
+      currentDescriptions.splice(layerIndex, 1);
+      currentTechnologies.splice(layerIndex, 1);
+
+      handleContentUpdate('layer_titles', currentTitles.join('|'));
+      handleContentUpdate('layer_descriptions', currentDescriptions.join('|'));
+      handleContentUpdate('layer_technologies', currentTechnologies.join('!'));
+
+      // Reset active layer if needed
+      if (activeLayer === layerIndex) {
+        setActiveLayer(null);
+      }
+    }
   };
 
   return (
@@ -295,21 +301,51 @@ export default function InteractiveStackDiagram(props: LayoutComponentProps) {
         <div className="relative">
           <div className="space-y-6">
             {layers.map((layer, index) => (
-              <StackLayer
-                key={index}
-                layer={layer}
-                index={index}
-                isActive={activeLayer === index}
-                onHover={() => setActiveLayer(index)}
-                onTechClick={handleTechClick}
-                colorTokens={colorTokens}
-                textStyle={{}}
-                activeTech={activeTech}
-                h3Style={h3Style}
-                labelStyle={labelStyle}
-                bodySmStyle={bodySmStyle}
-              />
+              <div key={layer.id} className="relative">
+                <StackLayer
+                  layer={{
+                    ...layer,
+                    technologies: layer.technologies.split('|')
+                  }}
+                  index={index}
+                  isActive={activeLayer === index}
+                  onHover={() => setActiveLayer(index)}
+                  onTechClick={handleTechClick}
+                  colorTokens={colorTokens}
+                  textStyle={{}}
+                  activeTech={activeTech}
+                  h3Style={h3Style}
+                  labelStyle={labelStyle}
+                  bodySmStyle={bodySmStyle}
+                />
+                {mode !== 'preview' && (
+                  <button
+                    onClick={() => handleRemoveLayer(index)}
+                    className="absolute top-2 right-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs transition-colors z-10"
+                    title="Remove layer"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
             ))}
+
+            {/* Add Layer Button (Edit Mode Only) */}
+            {mode !== 'preview' && (
+              <div className="p-6 bg-white/20 backdrop-blur-sm rounded-lg border-2 border-dashed border-gray-300 hover:border-gray-400 transition-all duration-300 flex flex-col items-center justify-center min-h-[120px]">
+                <button
+                  onClick={handleAddLayer}
+                  className="flex flex-col items-center space-y-2 text-gray-600 hover:text-gray-800 transition-colors"
+                >
+                  <div className="w-12 h-12 bg-gray-200 rounded-xl flex items-center justify-center">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                  </div>
+                  <span className="text-sm font-medium">Add Layer</span>
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Active Technology Info */}

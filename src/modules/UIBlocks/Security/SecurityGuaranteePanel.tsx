@@ -28,6 +28,22 @@ const CONTENT_SCHEMA = {
   }
 };
 
+// Helper function to add a new guarantee
+const addGuarantee = (guarantees: string): string => {
+  const guaranteeList = guarantees.split('|').map(g => g.trim()).filter(g => g);
+  guaranteeList.push('New Security Guarantee');
+  return guaranteeList.join('|');
+};
+
+// Helper function to remove a guarantee
+const removeGuarantee = (guarantees: string, indexToRemove: number): string => {
+  const guaranteeList = guarantees.split('|').map(g => g.trim()).filter(g => g);
+  if (indexToRemove >= 0 && indexToRemove < guaranteeList.length) {
+    guaranteeList.splice(indexToRemove, 1);
+  }
+  return guaranteeList.join('|');
+};
+
 export default function SecurityGuaranteePanel(props: LayoutComponentProps) {
   const {
     sectionId,
@@ -36,15 +52,35 @@ export default function SecurityGuaranteePanel(props: LayoutComponentProps) {
     colorTokens,
     getTextStyle,
     sectionBackground,
+    backgroundType,
     handleContentUpdate
   } = useLayoutComponent<SecurityGuaranteePanelContent>({
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
 
-  const guarantees = blockContent.security_guarantees 
+  const guarantees = blockContent.security_guarantees
     ? blockContent.security_guarantees.split('|').map(item => item.trim()).filter(Boolean)
     : [];
+
+  // Handle individual guarantee editing
+  const handleGuaranteeEdit = (index: number, value: string) => {
+    const guaranteeList = blockContent.security_guarantees.split('|');
+    guaranteeList[index] = value;
+    handleContentUpdate('security_guarantees', guaranteeList.join('|'));
+  };
+
+  // Handle adding a new guarantee
+  const handleAddGuarantee = () => {
+    const newGuarantees = addGuarantee(blockContent.security_guarantees);
+    handleContentUpdate('security_guarantees', newGuarantees);
+  };
+
+  // Handle removing a guarantee
+  const handleRemoveGuarantee = (indexToRemove: number) => {
+    const newGuarantees = removeGuarantee(blockContent.security_guarantees, indexToRemove);
+    handleContentUpdate('security_guarantees', newGuarantees);
+  };
 
   return (
     <LayoutSection
@@ -96,19 +132,63 @@ export default function SecurityGuaranteePanel(props: LayoutComponentProps) {
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {guarantees.map((guarantee, index) => (
-                <div key={index} className="bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-6 border border-white border-opacity-20">
+                <div key={index} className="group bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-6 border border-white border-opacity-20 relative">
                   <div className="flex items-center space-x-3 mb-3">
                     <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
                       <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                       </svg>
                     </div>
-                    <span className="text-white font-semibold">{guarantee}</span>
+                    <div className="flex-1">
+                      {mode !== 'preview' ? (
+                        <div
+                          contentEditable
+                          suppressContentEditableWarning
+                          onBlur={(e) => handleGuaranteeEdit(index, e.currentTarget.textContent || '')}
+                          className="outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-white hover:bg-opacity-10 text-white font-semibold"
+                        >
+                          {guarantee}
+                        </div>
+                      ) : (
+                        <span className="text-white font-semibold">{guarantee}</span>
+                      )}
+                    </div>
                   </div>
                   <div className="text-blue-200 text-sm">Guaranteed in our service agreement</div>
+
+                  {/* Delete button - only show in edit mode and if can remove */}
+                  {mode !== 'preview' && guarantees.length > 1 && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveGuarantee(index);
+                      }}
+                      className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-200"
+                      title="Remove this guarantee"
+                    >
+                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
+
+            {/* Add Guarantee Button - only show in edit mode and if under max limit */}
+            {mode !== 'preview' && guarantees.length < 8 && (
+              <div className="mt-8 text-center">
+                <button
+                  onClick={handleAddGuarantee}
+                  className="flex items-center space-x-2 mx-auto px-6 py-3 bg-white bg-opacity-20 hover:bg-opacity-30 border-2 border-white border-opacity-30 hover:border-opacity-50 rounded-xl transition-all duration-200 group"
+                >
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  <span className="text-white font-medium">Add Security Guarantee</span>
+                </button>
+              </div>
+            )}
 
             <div className="text-center mt-12">
               <div className="inline-flex items-center px-6 py-3 bg-white bg-opacity-20 rounded-full border border-white border-opacity-30">

@@ -4,7 +4,7 @@ export type ArrayElement = string[];
 export type ContentElement = StringElement | ArrayElement;
 
 // Import layout element schema for mandatory/optional checking
-import { layoutElementSchema } from '@/modules/sections/layoutElementSchema';
+import { layoutElementSchema, getAllElements } from '@/modules/sections/layoutElementSchema';
 import { logger } from '@/lib/logger';
 
 // Store element definitions based on layoutElementSchema
@@ -332,8 +332,10 @@ function isElementMandatory(layout: string, elementKey: string): boolean {
     logger.dev(`⚠️ isElementMandatory: No schema found for layout "${layout}"`);
     return false;
   }
-  
-  const element = schema.find(el => el.element === elementKey);
+
+  // Use helper function to get all elements (works with both old and new schema formats)
+  const allElements = getAllElements(schema);
+  const element = allElements.find(el => el.element === elementKey);
   const isMandatory = element?.mandatory ?? false;
   
   // DEBUG: Log mandatory checks for step elements
@@ -356,8 +358,10 @@ function isElementInSchema(layout: string, elementKey: string): boolean {
   if (!schema) {
     return false;
   }
-  
-  return schema.some(el => el.element === elementKey);
+
+  // Use helper function to get all elements (works with both old and new schema formats)
+  const allElements = getAllElements(schema);
+  return allElements.some(el => el.element === elementKey);
 }
 
 // Generic content extractor for any layout

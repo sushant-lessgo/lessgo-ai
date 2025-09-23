@@ -20,6 +20,7 @@ import {
   parsePipeData,
   updateListData
 } from '@/utils/dataParsingUtils';
+import { getIconFromCategory, getRandomIconFromCategory } from '@/utils/iconMapping';
 
 interface BeforeAfterQuoteContent {
   headline: string;
@@ -33,6 +34,14 @@ interface BeforeAfterQuoteContent {
   before_icon?: string;
   after_icon?: string;
   avatar_urls?: string;
+  before_icon_1?: string;
+  before_icon_2?: string;
+  before_icon_3?: string;
+  before_icon_4?: string;
+  after_icon_1?: string;
+  after_icon_2?: string;
+  after_icon_3?: string;
+  after_icon_4?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -79,6 +88,38 @@ const CONTENT_SCHEMA = {
   avatar_urls: {
     type: 'string' as const,
     default: '{}'
+  },
+  before_icon_1: {
+    type: 'string' as const,
+    default: '😰'
+  },
+  before_icon_2: {
+    type: 'string' as const,
+    default: '⏳'
+  },
+  before_icon_3: {
+    type: 'string' as const,
+    default: '📊'
+  },
+  before_icon_4: {
+    type: 'string' as const,
+    default: '💸'
+  },
+  after_icon_1: {
+    type: 'string' as const,
+    default: '😊'
+  },
+  after_icon_2: {
+    type: 'string' as const,
+    default: '⚡'
+  },
+  after_icon_3: {
+    type: 'string' as const,
+    default: '📈'
+  },
+  after_icon_4: {
+    type: 'string' as const,
+    default: '💰'
   }
 };
 
@@ -173,6 +214,29 @@ export default function BeforeAfterQuote(props: LayoutComponentProps) {
   const handleAvatarChange = (customerName: string, avatarUrl: string) => {
     const updatedAvatarUrls = updateAvatarUrls(blockContent.avatar_urls || '{}', customerName, avatarUrl);
     handleContentUpdate('avatar_urls', updatedAvatarUrls);
+  };
+
+  // Helper functions to get dynamic icons
+  const getBeforeIcon = (blockContent: BeforeAfterQuoteContent, index: number) => {
+    const iconFields = [
+      blockContent.before_icon_1,
+      blockContent.before_icon_2,
+      blockContent.before_icon_3,
+      blockContent.before_icon_4
+    ];
+    const icon = iconFields[index];
+    return icon && icon.trim() ? icon : getRandomIconFromCategory('problem');
+  };
+
+  const getAfterIcon = (blockContent: BeforeAfterQuoteContent, index: number) => {
+    const iconFields = [
+      blockContent.after_icon_1,
+      blockContent.after_icon_2,
+      blockContent.after_icon_3,
+      blockContent.after_icon_4
+    ];
+    const icon = iconFields[index];
+    return icon && icon.trim() ? icon : getRandomIconFromCategory('success');
   };
 
   // Helper function to add a new transformation

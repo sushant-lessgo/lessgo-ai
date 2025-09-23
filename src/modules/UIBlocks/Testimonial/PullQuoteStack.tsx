@@ -13,6 +13,7 @@ import {
   TrustIndicators 
 } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { getIconFromCategory, getRandomIconFromCategory } from '@/utils/iconMapping';
 
 interface PullQuoteStackContent {
   headline: string;
@@ -145,9 +146,29 @@ export default function PullQuoteStack(props: LayoutComponentProps) {
     ? blockContent.problem_contexts.split('|').map(item => item.trim()).filter(Boolean)
     : [];
 
-  const emotionalHooks = blockContent.emotional_hooks 
+  const emotionalHooks = blockContent.emotional_hooks
     ? blockContent.emotional_hooks.split('|').map(item => item.trim()).filter(Boolean)
     : [];
+
+  // Helper function to get context icon
+  const getContextIcon = (blockContent: PullQuoteStackContent, index: number) => {
+    const iconFields = [
+      blockContent.context_icon_1,
+      blockContent.context_icon_2,
+      blockContent.context_icon_3,
+      blockContent.context_icon_4,
+      blockContent.context_icon_5,
+      blockContent.context_icon_6
+    ];
+
+    const icon = iconFields[index];
+    if (icon && icon.trim()) {
+      return icon;
+    }
+
+    // Fallback to random icon from emotional category
+    return getRandomIconFromCategory('emotional');
+  };
 
   const testimonials = testimonialQuotes.map((quote, index) => ({
     quote,
@@ -164,14 +185,7 @@ export default function PullQuoteStack(props: LayoutComponentProps) {
       index === 4 ? blockContent.avatar_5 :
       blockContent.avatar_6
     ) || '',
-    contextIcon: (
-      index === 0 ? blockContent.context_icon_1 :
-      index === 1 ? blockContent.context_icon_2 :
-      index === 2 ? blockContent.context_icon_3 :
-      index === 3 ? blockContent.context_icon_4 :
-      index === 4 ? blockContent.context_icon_5 :
-      blockContent.context_icon_6
-    ) || '💢'
+    contextIcon: getContextIcon(blockContent, index)
   }));
 
   const trustItems = blockContent.trust_items 
@@ -340,7 +354,7 @@ export default function PullQuoteStack(props: LayoutComponentProps) {
     // Add default context icon for new testimonial
     const newIndex = newQuotes.split('|').length - 1;
     const iconField = `context_icon_${newIndex + 1}` as keyof PullQuoteStackContent;
-    handleContentUpdate(iconField, '✨');
+    handleContentUpdate(iconField, getRandomIconFromCategory('emotional'));
   };
 
   // Handle removing a testimonial

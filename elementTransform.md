@@ -233,5 +233,7 @@ So ensure
 
 Make sure that UIBlock code is capable enough to receive dynamic Card counts and is able to generate dynamic number of cards as per the guidance from buildprompt.ts
 
+Make sure that dynamic icons UIBlock is able to receive.. We implemented recently in stackedhighlights.tsx
+
 MAKE SURE ADD AND REMOVE FUNCTIONALITY OF CARDS IN A UIBLOCK IS NOT IMPACTED
 

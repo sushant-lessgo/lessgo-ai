@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
+import {
+  EditableAdaptiveHeadline,
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
-import { 
+import {
   CTAButton,
-  TrustIndicators 
+  TrustIndicators
 } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { getRandomIconFromCategory } from '@/utils/iconMapping';
 
 interface CollapsedCardsContent {
   headline: string;
@@ -189,10 +190,12 @@ export default function CollapsedCards(props: LayoutComponentProps) {
     handleContentUpdate('problem_impacts', newImpacts.join('|'));
     handleContentUpdate('solution_hints', newHints.join('|'));
 
-    // Set default icon for the new card
+    // Set smart icon for the new card
     const iconNumber = newTitles.length;
     const iconField = `problem_icon_${iconNumber}` as keyof CollapsedCardsContent;
-    handleContentUpdate(iconField, '⚙️');
+    const problemIcons = ['🚨', '⚠️', '❌', '🔥', '💔', '😓'];
+    const smartIcon = problemIcons[Math.floor(Math.random() * problemIcons.length)];
+    handleContentUpdate(iconField, smartIcon);
   };
 
   // Remove problem card

@@ -2,16 +2,18 @@ import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
+import {
+  EditableAdaptiveHeadline,
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { 
   CTAButton,
   TrustIndicators,
   StarRating 
 } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { getIconFromCategory, getRandomIconFromCategory } from '@/utils/iconMapping';
 
 interface CardWithTestimonialContent {
   headline: string;
@@ -44,6 +46,18 @@ interface CardWithTestimonialContent {
   guarantee_title?: string;
   guarantee_description?: string;
   show_guarantee?: boolean;
+  // Tier icons
+  tier_icon_1?: string;
+  tier_icon_2?: string;
+  tier_icon_3?: string;
+  tier_icon_4?: string;
+  // Social proof icons
+  social_icon_1?: string;
+  social_icon_2?: string;
+  social_icon_3?: string;
+  social_icon_4?: string;
+  // Additional fields for tier count
+  tier_count?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -157,10 +171,22 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: 'Try risk-free. If you\'re not completely satisfied, we\'ll refund every penny.' 
   },
-  show_guarantee: { 
-    type: 'boolean' as const, 
-    default: true 
-  }
+  show_guarantee: {
+    type: 'boolean' as const,
+    default: true
+  },
+  // Tier icons
+  tier_icon_1: { type: 'string' as const, default: '🚀' },
+  tier_icon_2: { type: 'string' as const, default: '⭐' },
+  tier_icon_3: { type: 'string' as const, default: '💎' },
+  tier_icon_4: { type: 'string' as const, default: '🏆' },
+  // Social proof icons
+  social_icon_1: { type: 'string' as const, default: '👥' },
+  social_icon_2: { type: 'string' as const, default: '⚡' },
+  social_icon_3: { type: 'string' as const, default: '⭐' },
+  social_icon_4: { type: 'string' as const, default: '🛡️' },
+  // Tier count
+  tier_count: { type: 'string' as const, default: '3' }
 };
 
 export default function CardWithTestimonial(props: LayoutComponentProps) {
@@ -251,7 +277,8 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
     ? blockContent.popular_tiers.split('|').map(item => item.trim().toLowerCase() === 'true')
     : [];
 
-  const pricingTiers = tierNames.map((name, index) => ({
+  const pricingTiers = tierNames.slice(0, tierCount).map((name, index) => ({
+    id: `tier-${index}`,
     name,
     price: tierPrices[index] || '',
     description: tierDescriptions[index] || '',
@@ -267,9 +294,142 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
     }
   }));
 
-  const trustItems = blockContent.trust_items 
+  const trustItems = blockContent.trust_items
     ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
     : [];
+
+  // Get tier count (default to 3 for backward compatibility)
+  const tierCount = parseInt(blockContent.tier_count || '3') || 3;
+
+  // Helper function to get tier icon
+  const getTierIcon = (index: number) => {
+    const iconFields = [
+      blockContent.tier_icon_1,
+      blockContent.tier_icon_2,
+      blockContent.tier_icon_3,
+      blockContent.tier_icon_4
+    ];
+    return iconFields[index] || ['🚀', '⭐', '💎', '🏆'][index] || '🎯';
+  };
+
+  // Helper function to get social proof icon
+  const getSocialIcon = (index: number) => {
+    const iconFields = [
+      blockContent.social_icon_1,
+      blockContent.social_icon_2,
+      blockContent.social_icon_3,
+      blockContent.social_icon_4
+    ];
+    return iconFields[index] || ['👥', '⚡', '⭐', '🛡️'][index] || '📊';
+  };
+
+  // Add a new tier
+  const handleAddTier = () => {
+    if (tierCount >= 4) return; // Max 4 tiers
+
+    const newCount = tierCount + 1;
+    handleContentUpdate('tier_count', newCount.toString());
+
+    // Add default values for the new tier
+    const names = blockContent.tier_names.split('|');
+    const prices = blockContent.tier_prices.split('|');
+    const descriptions = blockContent.tier_descriptions.split('|');
+    const ctas = blockContent.cta_texts.split('|');
+    const features = blockContent.feature_lists.split('|');
+    const quotes = blockContent.testimonial_quotes.split('|');
+    const testimonialNamesList = blockContent.testimonial_names.split('|');
+    const companies = blockContent.testimonial_companies.split('|');
+    const ratings = blockContent.testimonial_ratings ? blockContent.testimonial_ratings.split('|') : [];
+    const popularLabels = blockContent.popular_tiers ? blockContent.popular_tiers.split('|') : [];
+
+    // Add smart defaults based on position
+    names.push(newCount === 1 ? 'Basic' : newCount === 2 ? 'Professional' : newCount === 3 ? 'Premium' : 'Enterprise');
+    prices.push(newCount === 1 ? '$19/month' : newCount === 2 ? '$49/month' : newCount === 3 ? '$99/month' : '$199/month');
+    descriptions.push(newCount === 1 ? 'Perfect for getting started' : newCount === 2 ? 'For growing teams' : newCount === 3 ? 'For scaling businesses' : 'For large organizations');
+    ctas.push(newCount === 4 ? 'Contact Sales' : 'Start Free Trial');
+    features.push('Feature 1,Feature 2,Feature 3');
+    quotes.push('This plan has been perfect for our needs. Highly recommend!');
+    testimonialNamesList.push('Alex Johnson');
+    companies.push('TechCorp Inc.');
+    ratings.push('5');
+    popularLabels.push(newCount === 2 ? 'true' : 'false'); // Make second tier popular by default
+
+    handleContentUpdate('tier_names', names.join('|'));
+    handleContentUpdate('tier_prices', prices.join('|'));
+    handleContentUpdate('tier_descriptions', descriptions.join('|'));
+    handleContentUpdate('cta_texts', ctas.join('|'));
+    handleContentUpdate('feature_lists', features.join('|'));
+    handleContentUpdate('testimonial_quotes', quotes.join('|'));
+    handleContentUpdate('testimonial_names', testimonialNamesList.join('|'));
+    handleContentUpdate('testimonial_companies', companies.join('|'));
+    handleContentUpdate('testimonial_ratings', ratings.join('|'));
+    handleContentUpdate('popular_tiers', popularLabels.join('|'));
+
+    // Add a smart icon for the new tier
+    const iconField = `tier_icon_${newCount}` as keyof CardWithTestimonialContent;
+    if (newCount <= 4) {
+      const defaultIcon = getRandomIconFromCategory('business');
+      handleContentUpdate(iconField, defaultIcon);
+    }
+  };
+
+  // Remove a tier
+  const handleRemoveTier = (indexToRemove: number) => {
+    if (tierCount <= 1) return; // Keep at least 1 tier
+
+    const newCount = tierCount - 1;
+    handleContentUpdate('tier_count', newCount.toString());
+
+    // Remove the tier from all pipe-separated fields
+    const removeFromPipeList = (value: string) => {
+      const items = value.split('|');
+      items.splice(indexToRemove, 1);
+      return items.join('|');
+    };
+
+    handleContentUpdate('tier_names', removeFromPipeList(blockContent.tier_names));
+    handleContentUpdate('tier_prices', removeFromPipeList(blockContent.tier_prices));
+    handleContentUpdate('tier_descriptions', removeFromPipeList(blockContent.tier_descriptions));
+    handleContentUpdate('cta_texts', removeFromPipeList(blockContent.cta_texts));
+    handleContentUpdate('feature_lists', removeFromPipeList(blockContent.feature_lists));
+    handleContentUpdate('testimonial_quotes', removeFromPipeList(blockContent.testimonial_quotes));
+    handleContentUpdate('testimonial_names', removeFromPipeList(blockContent.testimonial_names));
+    handleContentUpdate('testimonial_companies', removeFromPipeList(blockContent.testimonial_companies));
+
+    if (blockContent.testimonial_ratings) {
+      handleContentUpdate('testimonial_ratings', removeFromPipeList(blockContent.testimonial_ratings));
+    }
+    if (blockContent.popular_tiers) {
+      handleContentUpdate('popular_tiers', removeFromPipeList(blockContent.popular_tiers));
+    }
+
+    // Clear the corresponding icon if it exists
+    const iconField = `tier_icon_${indexToRemove + 1}` as keyof CardWithTestimonialContent;
+    if (blockContent[iconField]) {
+      handleContentUpdate(iconField, '');
+    }
+  };
+
+  // Handle individual editing
+  const handleTierEdit = (index: number, field: string, value: string) => {
+    const fieldMap: { [key: string]: keyof CardWithTestimonialContent } = {
+      'name': 'tier_names',
+      'price': 'tier_prices',
+      'description': 'tier_descriptions',
+      'cta': 'cta_texts',
+      'features': 'feature_lists',
+      'quote': 'testimonial_quotes',
+      'testimonial_name': 'testimonial_names',
+      'company': 'testimonial_companies'
+    };
+
+    const contentField = fieldMap[field];
+    if (contentField) {
+      const items = blockContent[contentField]?.split('|') || [];
+      items[index] = value;
+      handleContentUpdate(contentField, items.join('|'));
+    }
+  };
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
 
@@ -352,7 +512,43 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
         </div>
       )}
 
+      {/* Remove Button - Only in edit mode and when allowed */}
+      {mode === 'edit' && tierCount > 1 && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            handleRemoveTier(index);
+          }}
+          className="absolute -top-2 -right-2 p-2 rounded-full bg-red-500 hover:bg-red-600 text-white transition-all duration-200 z-30 shadow-lg"
+          title="Remove this pricing tier"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
+
       <div className="p-8">
+        {/* Tier Icon */}
+        <div className="text-center mb-6">
+          <div className={`w-16 h-16 mx-auto rounded-full ${colorTokens.ctaBg} flex items-center justify-center text-white shadow-lg transition-all duration-300 hover:shadow-xl`}>
+            <IconEditableText
+              mode={mode}
+              value={getTierIcon(index)}
+              onEdit={(value) => {
+                const iconField = `tier_icon_${index + 1}` as keyof CardWithTestimonialContent;
+                handleContentUpdate(iconField, value);
+              }}
+              backgroundType="primary"
+              colorTokens={colorTokens}
+              iconSize="lg"
+              className="text-white text-2xl"
+              sectionId={sectionId}
+              elementKey={`tier_icon_${index + 1}`}
+            />
+          </div>
+        </div>
+
         {/* Tier Header */}
         <div className="text-center mb-6">
           {/* Editable Tier Name */}
@@ -771,53 +967,42 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
           )}
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8 mb-16 relative">
-          {/* Add tier button - only in edit mode and when we have less than 3 tiers */}
-          {mode === 'edit' && pricingTiers.length < 3 && (
-            <div className="flex items-center justify-center">
-              <button
-                onClick={() => {
-                  const names = blockContent.tier_names.split('|');
-                  const prices = blockContent.tier_prices.split('|');
-                  const descriptions = blockContent.tier_descriptions.split('|');
-                  const ctas = blockContent.cta_texts.split('|');
-                  const popularLabels = blockContent.popular_tiers ? blockContent.popular_tiers.split('|') : [];
-                  const testimonialQuotesArr = blockContent.testimonial_quotes.split('|');
-                  const testimonialNamesArr = blockContent.testimonial_names.split('|');
-                  const testimonialCompaniesArr = blockContent.testimonial_companies.split('|');
-                  const featureListsArr = blockContent.feature_lists.split('|');
-                  
-                  const tierNumber = names.length + 1;
-                  names.push(tierNumber === 1 ? 'Starter' : tierNumber === 2 ? 'Professional' : 'Enterprise');
-                  prices.push(tierNumber === 1 ? '$29/month' : tierNumber === 2 ? '$79/month' : 'Custom Pricing');
-                  descriptions.push(tierNumber === 1 ? 'Perfect for getting started' : tierNumber === 2 ? 'For growing teams' : 'Enterprise solutions');
-                  ctas.push(tierNumber === 3 ? 'Contact Sales' : 'Start Free Trial');
-                  popularLabels.push(tierNumber === 2 ? 'true' : 'false');
-                  testimonialQuotesArr.push('Great product that delivered results for our team.');
-                  testimonialNamesArr.push('John Doe');
-                  testimonialCompaniesArr.push('Example Co.');
-                  featureListsArr.push('Basic feature,Another feature');
-                  
-                  handleContentUpdate('tier_names', names.join('|'));
-                  handleContentUpdate('tier_prices', prices.join('|'));
-                  handleContentUpdate('tier_descriptions', descriptions.join('|'));
-                  handleContentUpdate('cta_texts', ctas.join('|'));
-                  handleContentUpdate('popular_tiers', popularLabels.join('|'));
-                  handleContentUpdate('testimonial_quotes', testimonialQuotesArr.join('|'));
-                  handleContentUpdate('testimonial_names', testimonialNamesArr.join('|'));
-                  handleContentUpdate('testimonial_companies', testimonialCompaniesArr.join('|'));
-                  handleContentUpdate('feature_lists', featureListsArr.join('|'));
-                }}
-                className="px-6 py-4 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg font-medium transition-all duration-300 border border-blue-300 hover:border-blue-400 flex items-center space-x-2"
-                title="Add new pricing tier"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+        {/* Tier Management Controls - Only in edit mode */}
+        {mode === 'edit' && (
+          <div className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                 </svg>
-                <span>Add Tier</span>
-              </button>
+                <span className="text-sm font-medium text-gray-700">
+                  Pricing Tiers: {tierCount} {tierCount === 1 ? 'tier' : 'tiers'}
+                </span>
+              </div>
+              {tierCount < 4 && (
+                <button
+                  onClick={handleAddTier}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition-colors duration-200 flex items-center space-x-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  <span>Add Tier</span>
+                </button>
+              )}
             </div>
-          )}
+            <p className="text-xs text-gray-600 mt-2">
+              You can have between 1-4 pricing tiers with testimonials. {tierCount === 4 ? 'Maximum tiers reached.' : `${4 - tierCount} more tier${4 - tierCount === 1 ? '' : 's'} available.`}
+            </p>
+          </div>
+        )}
+
+        <div className={`grid gap-8 mb-16 relative ${
+          pricingTiers.length === 1 ? 'max-w-md mx-auto' :
+          pricingTiers.length === 2 ? 'md:grid-cols-2 max-w-4xl mx-auto' :
+          pricingTiers.length === 3 ? 'lg:grid-cols-3 max-w-6xl mx-auto' :
+          'lg:grid-cols-2 xl:grid-cols-4 max-w-7xl mx-auto'
+        }`}>
           
           {pricingTiers.map((tier, index) => (
             <div key={index} className="relative">
@@ -858,6 +1043,23 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
                       return (
                         <div key={index} className="text-center relative group/social-metric">
                           <div className="space-y-2">
+                            {/* Social Proof Icon */}
+                            <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-blue-100 flex items-center justify-center">
+                              <IconEditableText
+                                mode={mode}
+                                value={getSocialIcon(index - 1)}
+                                onEdit={(value) => {
+                                  const iconField = `social_icon_${index}` as keyof CardWithTestimonialContent;
+                                  handleContentUpdate(iconField, value);
+                                }}
+                                backgroundType="neutral"
+                                colorTokens={colorTokens}
+                                iconSize="md"
+                                className="text-blue-600 text-xl"
+                                sectionId={sectionId}
+                                elementKey={`social_icon_${index}`}
+                              />
+                            </div>
                             <EditableAdaptiveText
                               mode={mode}
                               value={metricValue}
@@ -911,6 +1113,12 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
                 <div className="grid md:grid-cols-4 gap-8">
                   {socialMetrics.map((metric, index) => (
                     <div key={index} className="text-center">
+                      {/* Social Proof Icon */}
+                      <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-blue-100 flex items-center justify-center">
+                        <span className="text-blue-600 text-xl">
+                          {getSocialIcon(index)}
+                        </span>
+                      </div>
                       <div style={{...getTypographyStyle('h2'), fontSize: 'clamp(1.8rem, 3vw, 2rem)'}} className={`font-bold ${metric.color} mb-2`}>{metric.value}</div>
                       <div className={`text-sm ${mutedTextColor}`}>{metric.label}</div>
                     </div>
@@ -1074,7 +1282,16 @@ export const componentMeta = {
     { key: 'guarantee_description', label: 'Guarantee Description', type: 'text', required: false },
     { key: 'show_guarantee', label: 'Show Guarantee Section', type: 'boolean', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
+    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
+    { key: 'tier_count', label: 'Number of Tiers (1-4)', type: 'text', required: false },
+    { key: 'tier_icon_1', label: 'Tier 1 Icon', type: 'text', required: false },
+    { key: 'tier_icon_2', label: 'Tier 2 Icon', type: 'text', required: false },
+    { key: 'tier_icon_3', label: 'Tier 3 Icon', type: 'text', required: false },
+    { key: 'tier_icon_4', label: 'Tier 4 Icon', type: 'text', required: false },
+    { key: 'social_icon_1', label: 'Social Metric 1 Icon', type: 'text', required: false },
+    { key: 'social_icon_2', label: 'Social Metric 2 Icon', type: 'text', required: false },
+    { key: 'social_icon_3', label: 'Social Metric 3 Icon', type: 'text', required: false },
+    { key: 'social_icon_4', label: 'Social Metric 4 Icon', type: 'text', required: false }
   ],
   
   features: [
@@ -1083,7 +1300,11 @@ export const componentMeta = {
     'Social proof integration',
     'Popular plan highlighting',
     'Money-back guarantee section',
-    'Trust metrics display'
+    'Trust metrics display',
+    'Dynamic tier icons with smart generation',
+    'Editable icons per tier and social metric',
+    'Add/remove tiers dynamically (1-4 tiers)',
+    'Responsive grid layout based on tier count'
   ],
   
   useCases: [

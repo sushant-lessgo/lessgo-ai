@@ -13,6 +13,7 @@ import { CTAButton } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { createCTAClickHandler } from '@/utils/ctaHandler';
 import IconEditableText from '@/components/ui/IconEditableText';
+import { getRandomIconFromCategory } from '@/utils/iconMapping';
 
 // Content interface for type safety
 interface ValueStackCTAContent {
@@ -108,9 +109,43 @@ const parseValueProps = (titles: string, descriptions: string, content: ValueSta
   }));
 };
 
+// Helper function to add a new value proposition
+const addValueProp = (titles: string, descriptions: string): { newTitles: string; newDescriptions: string } => {
+  const titleList = titles.split('|').map(t => t.trim()).filter(Boolean);
+  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(Boolean);
+
+  // Add new value proposition with default content
+  titleList.push('New Value Proposition');
+  descriptionList.push('Describe the unique benefit or value this feature provides to your customers.');
+
+  return {
+    newTitles: titleList.join('|'),
+    newDescriptions: descriptionList.join('|')
+  };
+};
+
+// Helper function to remove a value proposition
+const removeValueProp = (titles: string, descriptions: string, indexToRemove: number): { newTitles: string; newDescriptions: string } => {
+  const titleList = titles.split('|').map(t => t.trim()).filter(Boolean);
+  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(Boolean);
+
+  // Remove the value proposition at the specified index
+  if (indexToRemove >= 0 && indexToRemove < titleList.length) {
+    titleList.splice(indexToRemove, 1);
+  }
+  if (indexToRemove >= 0 && indexToRemove < descriptionList.length) {
+    descriptionList.splice(indexToRemove, 1);
+  }
+
+  return {
+    newTitles: titleList.join('|'),
+    newDescriptions: descriptionList.join('|')
+  };
+};
+
 // Value Proposition Card
-const ValuePropCard = React.memo(({ 
-  valueProp, 
+const ValuePropCard = React.memo(({
+  valueProp,
   index,
   colorTokens,
   getTextStyle,
@@ -120,7 +155,9 @@ const ValuePropCard = React.memo(({
   sectionBackground,
   onIconEdit,
   onTitleEdit,
-  onDescriptionEdit
+  onDescriptionEdit,
+  onRemoveValueProp,
+  canRemove = true
 }: {
   valueProp: ValueProp;
   index: number;
@@ -133,9 +170,11 @@ const ValuePropCard = React.memo(({
   onIconEdit: (index: number, value: string) => void;
   onTitleEdit: (index: number, value: string) => void;
   onDescriptionEdit: (index: number, value: string) => void;
+  onRemoveValueProp?: (index: number) => void;
+  canRemove?: boolean;
 }) => {
   return (
-    <div className="flex items-start space-x-4 p-6 bg-white rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300">
+    <div className="group relative flex items-start space-x-4 p-6 bg-white rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300">
       
       {/* Icon */}
       <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -189,6 +228,22 @@ const ValuePropCard = React.memo(({
           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
         </svg>
       </div>
+
+      {/* Delete button - only show in edit mode and if can remove */}
+      {mode !== 'preview' && onRemoveValueProp && canRemove && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemoveValueProp(index);
+          }}
+          className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-200"
+          title="Remove this value proposition"
+        >
+          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 });
@@ -234,6 +289,35 @@ export default function ValueStackCTA(props: LayoutComponentProps) {
     const descriptions = blockContent.value_descriptions.split('|').map(d => d.trim());
     descriptions[index] = value;
     handleContentUpdate('value_descriptions', descriptions.join('|'));
+  };
+
+  // Handle adding a new value proposition
+  const handleAddValueProp = () => {
+    const { newTitles, newDescriptions } = addValueProp(blockContent.value_propositions, blockContent.value_descriptions);
+    handleContentUpdate('value_propositions', newTitles);
+    handleContentUpdate('value_descriptions', newDescriptions);
+
+    // Add a smart icon for the new value proposition
+    const newValuePropCount = newTitles.split('|').length;
+    const iconField = `value_icon_${newValuePropCount}` as keyof ValueStackCTAContent;
+    if (newValuePropCount <= 6) {
+      // Use random icon from innovation category for new value props
+      const defaultIcon = getRandomIconFromCategory('innovation');
+      handleContentUpdate(iconField, defaultIcon);
+    }
+  };
+
+  // Handle removing a value proposition
+  const handleRemoveValueProp = (indexToRemove: number) => {
+    const { newTitles, newDescriptions } = removeValueProp(blockContent.value_propositions, blockContent.value_descriptions, indexToRemove);
+    handleContentUpdate('value_propositions', newTitles);
+    handleContentUpdate('value_descriptions', newDescriptions);
+
+    // Also clear the corresponding icon if it exists
+    const iconField = `value_icon_${indexToRemove + 1}` as keyof ValueStackCTAContent;
+    if (blockContent[iconField]) {
+      handleContentUpdate(iconField, '');
+    }
   };
 
   return (
@@ -295,9 +379,26 @@ export default function ValueStackCTA(props: LayoutComponentProps) {
               onIconEdit={handleIconEdit}
               onTitleEdit={handleTitleEdit}
               onDescriptionEdit={handleDescriptionEdit}
+              onRemoveValueProp={handleRemoveValueProp}
+              canRemove={valueProps.length > 1}
             />
           ))}
         </div>
+
+        {/* Add Value Proposition Button - only show in edit mode and if under max limit */}
+        {mode !== 'preview' && valueProps.length < 6 && (
+          <div className="mb-12 text-center">
+            <button
+              onClick={handleAddValueProp}
+              className="flex items-center space-x-2 mx-auto px-4 py-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-xl transition-all duration-200 group"
+            >
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span className="text-blue-700 font-medium">Add Value Proposition</span>
+            </button>
+          </div>
+        )}
 
         {/* CTA Section */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-12 text-center text-white">

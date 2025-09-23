@@ -38,18 +38,22 @@ export function createGenerationActions(set: any, get: any) {
   // ✅ Bulk section initialization method from PageStore
   initializeSections: (sectionIds: string[], sectionLayouts: Record<string, string>) =>
     set((state: EditStore) => {
-      logger.debug('🏗️ EditStore: Initializing sections:', { 
-        sectionIds, 
+      logger.debug('🏗️ EditStore: START initializeSections:', {
+        sectionIds,
         sectionLayouts,
         heroLayout: sectionLayouts.hero,
-        layoutKeys: Object.keys(sectionLayouts)
+        layoutKeys: Object.keys(sectionLayouts),
+        currentContentKeys: Object.keys(state.content || {}),
+        timestamp: Date.now()
       });
-      
+
       // Set sections array
       state.sections = [...sectionIds];
-      
+      logger.debug('✅ Sections array set:', state.sections);
+
       // Set section layouts
       state.sectionLayouts = { ...sectionLayouts };
+      logger.debug('✅ Section layouts set:', state.sectionLayouts);
       
       // ✅ CRITICAL: Initialize content for ALL sections
       sectionIds.forEach(sectionId => {
@@ -68,6 +72,7 @@ export function createGenerationActions(set: any, get: any) {
         });
         
         // Create content entry for each section
+        logger.debug(`🔧 Creating content entry for section: ${sectionId}`);
         state.content[sectionId] = {
           id: sectionId,
           layout: layout,
@@ -102,11 +107,14 @@ export function createGenerationActions(set: any, get: any) {
       
       state.persistence.isDirty = true;
       
-      logger.debug('📊 Initialization complete:', () => ({
+      logger.debug('📊 Initialization complete:', {
         sectionsCount: state.sections.length,
         contentCount: Object.keys(state.content).length,
-        layoutsCount: Object.keys(state.sectionLayouts).length
-      }));
+        layoutsCount: Object.keys(state.sectionLayouts).length,
+        finalSections: state.sections,
+        finalContentKeys: Object.keys(state.content),
+        timestamp: Date.now()
+      });
     }),
 
   // ✅ AI Response Processing from PageStore (adapted for EditStore structure)
@@ -122,6 +130,21 @@ export function createGenerationActions(set: any, get: any) {
         currentSections: state.sections,
         currentContent: Object.keys(state.content),
         fullAiResponse: aiResponse
+      });
+
+      // ✅ CRITICAL: Verify content store state BEFORE processing
+      logger.debug('🔍 CONTENT STORE VERIFICATION:', {
+        sectionsArray: state.sections,
+        sectionsCount: state.sections.length,
+        contentKeys: Object.keys(state.content),
+        contentCount: Object.keys(state.content).length,
+        sectionLayoutsKeys: Object.keys(state.sectionLayouts),
+        detailedContentCheck: state.sections.map(sectionId => ({
+          sectionId,
+          existsInContent: !!state.content[sectionId],
+          contentValue: state.content[sectionId] ? 'exists' : 'MISSING'
+        })),
+        timestamp: Date.now()
       });
 
       // Update AI generation status
@@ -160,7 +183,69 @@ export function createGenerationActions(set: any, get: any) {
             rawValue: v
           }))
         });
-        
+
+        // ✅ CRITICAL: Pre-check if content store is completely empty (indicates initialization failure)
+        const missingSections = preSelectedSections.filter(sectionId => !state.content[sectionId]);
+        if (missingSections.length > 0) {
+          logger.error('🚨 INITIALIZATION FAILURE DETECTED:', {
+            missingSectionsCount: missingSections.length,
+            totalExpectedSections: preSelectedSections.length,
+            missingSections,
+            availableContentKeys: Object.keys(state.content),
+            isCompleteFailure: missingSections.length === preSelectedSections.length,
+            timestamp: Date.now()
+          });
+
+          if (missingSections.length === preSelectedSections.length) {
+            logger.error('💥 COMPLETE CONTENT STORE FAILURE: All sections missing! initializeSections was never called or state was completely reset.');
+
+            // ✅ EMERGENCY RECOVERY: Reinitialize missing sections inline
+            logger.debug('🚑 EMERGENCY RECOVERY: Reinitializing all missing sections...');
+
+            // Ensure sections array is set if empty
+            if (state.sections.length === 0) {
+              state.sections = [...preSelectedSections];
+              logger.debug('🚑 Emergency recovery: Set sections array:', state.sections);
+            }
+            preSelectedSections.forEach(sectionId => {
+              if (!state.content[sectionId]) {
+                const layout = state.sectionLayouts[sectionId] || 'default';
+                const backgroundType = getSectionBackgroundType(sectionId, state.sections, undefined, state.onboardingData as any) as BackgroundType;
+
+                logger.debug(`🛠️ Emergency creating section: ${sectionId} with layout: ${layout}`);
+                state.content[sectionId] = {
+                  id: sectionId,
+                  layout: layout,
+                  elements: {},
+                  backgroundType: backgroundType,
+                  aiMetadata: {
+                    lastGenerated: Date.now(),
+                    aiGenerated: false,
+                    isCustomized: false,
+                    aiGeneratedElements: []
+                  },
+                  editMetadata: {
+                    isSelected: false,
+                    lastModified: Date.now(),
+                    completionPercentage: 0,
+                    isEditing: false,
+                    isDeletable: true,
+                    isMovable: true,
+                    isDuplicable: true,
+                    validationStatus: {
+                      isValid: true,
+                      errors: [],
+                      warnings: []
+                    }
+                  }
+                };
+              }
+            });
+
+            logger.debug('🚑 Emergency recovery complete. Content keys now:', Object.keys(state.content));
+          }
+        }
+
         Object.entries(aiResponse.content).forEach(([sectionId, sectionData]: [string, any]) => {
           // ✅ Only process sections that were pre-selected by rules
           if (!preSelectedSections.includes(sectionId)) {
@@ -179,8 +264,18 @@ export function createGenerationActions(set: any, get: any) {
 
           // ✅ Section should already exist in content, but verify
           if (!state.content[sectionId]) {
-            logger.error(`❌ CRITICAL: Section ${sectionId} not found in content store! This should not happen.`);
-            // Create it as fallback, but this indicates a bug in initialization
+            logger.error(`❌ CRITICAL: Section ${sectionId} not found in content store!`, {
+              sectionId,
+              availableContentKeys: Object.keys(state.content),
+              preSelectedSections,
+              sectionLayouts: state.sectionLayouts,
+              totalExpectedSections: preSelectedSections.length,
+              timestamp: Date.now(),
+              debugInfo: 'This indicates initializeSections was not called or state was reset'
+            });
+
+            // Create it as fallback with comprehensive logging
+            logger.debug(`🛠️ Creating fallback content for missing section: ${sectionId}`);
             state.content[sectionId] = {
               id: sectionId,
               layout: state.sectionLayouts[sectionId] || 'default',

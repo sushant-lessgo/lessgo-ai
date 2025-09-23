@@ -12,6 +12,7 @@ import {
   TrustIndicators 
 } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { getIconFromCategory, getRandomIconFromCategory } from '@/utils/iconMapping';
 
 interface IconCircleStepsContent {
   headline: string;
@@ -399,9 +400,17 @@ export default function IconCircleSteps(props: LayoutComponentProps) {
                     
                     stepTitles.push(`Step ${stepTitles.length + 1}`);
                     stepDescriptions.push('Add step description here');
-                    
+
                     handleContentUpdate('step_titles', stepTitles.join('|'));
                     handleContentUpdate('step_descriptions', stepDescriptions.join('|'));
+
+                    // Add a smart icon for the new step
+                    const newStepCount = stepTitles.length;
+                    const iconField = `step_icon_${newStepCount}` as keyof IconCircleStepsContent;
+                    if (newStepCount <= 6) {
+                      const defaultIcon = getRandomIconFromCategory('process');
+                      handleContentUpdate(iconField, defaultIcon);
+                    }
                   }}
                   className="w-24 h-24 rounded-full border-2 border-dashed border-gray-300 hover:border-gray-400 text-gray-400 hover:text-gray-500 transition-all duration-300 flex items-center justify-center bg-gray-50 hover:bg-gray-100"
                   title="Add new step"

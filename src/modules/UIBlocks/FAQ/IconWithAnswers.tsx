@@ -7,6 +7,7 @@ import {
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { getIconFromCategory, getRandomIconFromCategory } from '@/utils/iconMapping';
 
 interface IconWithAnswersContent {
   headline: string;
@@ -276,7 +277,10 @@ export default function IconWithAnswers(props: LayoutComponentProps) {
                   if (!blockContent[questionKey] || blockContent[questionKey] === '' || blockContent[questionKey] === '___REMOVED___') {
                     handleContentUpdate(questionKey, 'New question');
                     handleContentUpdate(`answer_${i}` as keyof IconWithAnswersContent, 'New answer');
-                    handleContentUpdate(`icon_${i}` as keyof IconWithAnswersContent, '💡');
+
+                    // Use smart icon generation with fallback
+                    const smartIcon = getRandomIconFromCategory('faq') || getRandomIconFromCategory('support') || '💡';
+                    handleContentUpdate(`icon_${i}` as keyof IconWithAnswersContent, smartIcon);
                     break;
                   }
                 }

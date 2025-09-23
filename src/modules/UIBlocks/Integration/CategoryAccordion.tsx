@@ -1,93 +1,50 @@
 // Integration/CategoryAccordion.tsx - Integrations organized by category with accordion
 // Production-ready integration component using abstraction system with background-aware text colors
 
-import React, { useState } from 'react';
-import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import React, { useState, useEffect } from 'react';
 import { useTypography } from '@/hooks/useTypography';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useOnboardingStore } from '@/hooks/useOnboardingStore';
+import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
-  EditableAdaptiveText 
+import {
+  EditableAdaptiveHeadline,
+  EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
-import { LayoutComponentProps } from '@/types/storeTypes';
+import {
+  LayoutComponentProps,
+  extractLayoutContent,
+  StoreElementTypes
+} from '@/types/storeTypes';
+import { getIconFromCategory, getRandomIconFromCategory } from '@/utils/iconMapping';
 
-// Content interface for type safety
+interface CategoryAccordionProps extends LayoutComponentProps {}
+
+// Category item structure
+interface CategoryItem {
+  title: string;
+  integrations: string;
+  icon: string;
+  id: string;
+}
+
+// Content interface for CategoryAccordion layout
 interface CategoryAccordionContent {
   headline: string;
   subheadline?: string;
-  category_1_title: string;
-  category_1_integrations: string;
-  category_1_icon?: string;
-  category_2_title: string;
-  category_2_integrations: string;
-  category_2_icon?: string;
-  category_3_title: string;
-  category_3_integrations: string;
-  category_3_icon?: string;
-  category_4_title: string;
-  category_4_integrations: string;
-  category_4_icon?: string;
+  category_titles: string;
+  category_integrations: string;
+  category_icons?: string;
 }
 
-// Content schema - defines structure and defaults
+// Content schema for CategoryAccordion layout
 const CONTENT_SCHEMA = {
-  headline: { 
-    type: 'string' as const, 
-    default: 'Connect With Your Favorite Tools' 
-  },
-  subheadline: { 
-    type: 'string' as const, 
-    default: 'Seamlessly integrate with 200+ popular tools and services to supercharge your workflow.' 
-  },
-  category_1_title: { 
-    type: 'string' as const, 
-    default: 'Communication & Collaboration' 
-  },
-  category_1_integrations: { 
-    type: 'string' as const, 
-    default: 'Slack|Microsoft Teams|Discord|Zoom|Google Meet|Notion|Asana|Trello' 
-  },
-  category_2_title: { 
-    type: 'string' as const, 
-    default: 'Marketing & Sales' 
-  },
-  category_2_integrations: { 
-    type: 'string' as const, 
-    default: 'HubSpot|Salesforce|Mailchimp|ConvertKit|Klaviyo|Stripe|PayPal|Shopify' 
-  },
-  category_3_title: { 
-    type: 'string' as const, 
-    default: 'Development & Analytics' 
-  },
-  category_3_integrations: { 
-    type: 'string' as const, 
-    default: 'GitHub|GitLab|Jira|Google Analytics|Mixpanel|Amplitude|Datadog|New Relic' 
-  },
-  category_4_title: { 
-    type: 'string' as const, 
-    default: 'Cloud & Storage' 
-  },
-  category_4_integrations: { 
-    type: 'string' as const, 
-    default: 'AWS|Google Cloud|Azure|Dropbox|Google Drive|OneDrive|Box|S3' 
-  },
-  category_1_icon: { 
-    type: 'string' as const, 
-    default: '💬' 
-  },
-  category_2_icon: { 
-    type: 'string' as const, 
-    default: '📊' 
-  },
-  category_3_icon: { 
-    type: 'string' as const, 
-    default: '⚡' 
-  },
-  category_4_icon: { 
-    type: 'string' as const, 
-    default: '☁️' 
-  }
+  headline: { type: 'string' as const, default: 'Connect With Your Favorite Tools' },
+  subheadline: { type: 'string' as const, default: 'Seamlessly integrate with 200+ popular tools and services to supercharge your workflow.' },
+  category_titles: { type: 'string' as const, default: 'Communication & Collaboration|Marketing & Sales|Development & Analytics|Cloud & Storage' },
+  category_integrations: { type: 'string' as const, default: 'Slack|Microsoft Teams|Discord|Zoom|Google Meet|Notion|Asana|Trello!HubSpot|Salesforce|Mailchimp|ConvertKit|Klaviyo|Stripe|PayPal|Shopify!GitHub|GitLab|Jira|Google Analytics|Mixpanel|Amplitude|Datadog|New Relic!AWS|Google Cloud|Azure|Dropbox|Google Drive|OneDrive|Box|S3' },
+  category_icons: { type: 'string' as const, default: '💬|📊|⚡|☁️' }
 };
 
 // Integration Badge Component
@@ -177,13 +134,35 @@ const AccordionItem = React.memo(({
 ));
 AccordionItem.displayName = 'AccordionItem';
 
-export default function CategoryAccordion(props: LayoutComponentProps) {
+// Parse category data with dynamic icon integration
+const parseCategoryData = (titles: string, integrations: string, icons?: string): CategoryItem[] => {
+  const titleList = titles.split('|');
+  const integrationsList = integrations.split('!'); // Using ! as separator between categories
+  const iconList = icons ? icons.split('|') : [];
+
+  return titleList.map((title, index) => ({
+    id: `category-${index}`,
+    title: title.trim(),
+    integrations: integrationsList[index] || '',
+    icon: iconList[index] || getRandomIconFromCategory('integration') || '📁'
+  }));
+};
+
+export default function CategoryAccordion(props: CategoryAccordionProps) {
   const { getTextStyle: getTypographyStyle } = useTypography();
-  
+  const { blockContent: storeContent, setBlockContent, getBusinessContext } = useEditStore();
+  const { getOnboardingFieldValue } = useOnboardingStore();
+
+  // Extract content using the extractLayoutContent helper
+  const blockContent = extractLayoutContent<CategoryAccordionContent>(
+    storeContent,
+    props.sectionId,
+    CONTENT_SCHEMA
+  );
+
   const {
     sectionId,
     mode,
-    blockContent,
     colorTokens,
     dynamicTextColors,
     getTextStyle,
@@ -195,17 +174,49 @@ export default function CategoryAccordion(props: LayoutComponentProps) {
   });
 
   const [openItems, setOpenItems] = useState<Set<number>>(new Set([0])); // First item open by default
-  
+
   // Create typography styles
   const h3Style = getTypographyStyle('h3');
   const labelStyle = getTypographyStyle('label');
   const bodySmStyle = getTypographyStyle('body-sm');
   const bodyLgStyle = getTypographyStyle('body-lg');
 
+  // Auto-populate icons for categories if they're missing
+  useEffect(() => {
+    const categoryData = parseCategoryData(
+      blockContent.category_titles,
+      blockContent.category_integrations,
+      blockContent.category_icons
+    );
+
+    const businessContext = getBusinessContext();
+
+    // Auto-generate icons if missing or insufficient
+    if (!blockContent.category_icons || blockContent.category_icons.split('|').length < categoryData.length) {
+      const generatedIcons = categoryData.map((category, index) => {
+        const existingIcon = blockContent.category_icons?.split('|')[index];
+        if (existingIcon) return existingIcon;
+
+        // Generate appropriate icon based on category title
+        return getIconFromCategory(category.title, businessContext?.category) || getRandomIconFromCategory('integration');
+      });
+
+      handleContentUpdate('category_icons', generatedIcons.join('|'));
+    }
+  }, [blockContent.category_titles, blockContent.category_integrations, blockContent.category_icons, getBusinessContext, handleContentUpdate]);
+
+  // Parse category data
+  const categories = parseCategoryData(
+    blockContent.category_titles,
+    blockContent.category_integrations,
+    blockContent.category_icons
+  );
+
   // Icon edit handler
   const handleCategoryIconEdit = (categoryIndex: number, value: string) => {
-    const iconField = `category_${categoryIndex + 1}_icon` as keyof CategoryAccordionContent;
-    handleContentUpdate(iconField, value);
+    const currentIcons = blockContent.category_icons?.split('|') || [];
+    currentIcons[categoryIndex] = value;
+    handleContentUpdate('category_icons', currentIcons.join('|'));
   };
 
   const toggleItem = (index: number) => {
@@ -218,29 +229,51 @@ export default function CategoryAccordion(props: LayoutComponentProps) {
     setOpenItems(newOpenItems);
   };
 
-  // Parse integration lists
-  const categories = [
-    {
-      title: blockContent.category_1_title,
-      integrations: blockContent.category_1_integrations ? blockContent.category_1_integrations.split('|') : [],
-      icon: blockContent.category_1_icon || '💬'
-    },
-    {
-      title: blockContent.category_2_title,
-      integrations: blockContent.category_2_integrations ? blockContent.category_2_integrations.split('|') : [],
-      icon: blockContent.category_2_icon || '📊'
-    },
-    {
-      title: blockContent.category_3_title,
-      integrations: blockContent.category_3_integrations ? blockContent.category_3_integrations.split('|') : [],
-      icon: blockContent.category_3_icon || '⚡'
-    },
-    {
-      title: blockContent.category_4_title,
-      integrations: blockContent.category_4_integrations ? blockContent.category_4_integrations.split('|') : [],
-      icon: blockContent.category_4_icon || '☁️'
+  // Add new category
+  const handleAddCategory = () => {
+    const newCategoryTitle = prompt('Enter category title:');
+    if (newCategoryTitle && newCategoryTitle.trim()) {
+      const currentTitles = blockContent.category_titles.split('|');
+      const currentIntegrations = blockContent.category_integrations.split('!');
+      const currentIcons = blockContent.category_icons?.split('|') || [];
+
+      const updatedTitles = [...currentTitles, newCategoryTitle.trim()].join('|');
+      const updatedIntegrations = [...currentIntegrations, 'New Integration|Another Tool'].join('!');
+      const newIcon = getRandomIconFromCategory('integration') || '📁';
+      const updatedIcons = [...currentIcons, newIcon].join('|');
+
+      handleContentUpdate('category_titles', updatedTitles);
+      handleContentUpdate('category_integrations', updatedIntegrations);
+      handleContentUpdate('category_icons', updatedIcons);
     }
-  ];
+  };
+
+  // Remove category
+  const handleRemoveCategory = (categoryIndex: number) => {
+    if (categories.length <= 1) {
+      alert('Cannot remove the last category');
+      return;
+    }
+
+    if (confirm(`Remove "${categories[categoryIndex].title}" category?`)) {
+      const currentTitles = blockContent.category_titles.split('|');
+      const currentIntegrations = blockContent.category_integrations.split('!');
+      const currentIcons = blockContent.category_icons?.split('|') || [];
+
+      currentTitles.splice(categoryIndex, 1);
+      currentIntegrations.splice(categoryIndex, 1);
+      currentIcons.splice(categoryIndex, 1);
+
+      handleContentUpdate('category_titles', currentTitles.join('|'));
+      handleContentUpdate('category_integrations', currentIntegrations.join('!'));
+      handleContentUpdate('category_icons', currentIcons.join('|'));
+
+      // Close removed item if it was open
+      const newOpenItems = new Set(openItems);
+      newOpenItems.delete(categoryIndex);
+      setOpenItems(newOpenItems);
+    }
+  };
 
   return (
     <LayoutSection
@@ -289,22 +322,49 @@ export default function CategoryAccordion(props: LayoutComponentProps) {
         {/* Accordion */}
         <div className="space-y-4">
           {categories.map((category, index) => (
-            <AccordionItem
-              key={index}
-              title={category.title}
-              integrations={category.integrations}
-              isOpen={openItems.has(index)}
-              onToggle={() => toggleItem(index)}
-              colorTokens={colorTokens}
-              h3Style={h3Style}
-              labelStyle={labelStyle}
-              categoryIcon={category.icon}
-              mode={mode}
-              onIconEdit={(value) => handleCategoryIconEdit(index, value)}
-              sectionId={sectionId}
-              categoryIndex={index}
-            />
+            <div key={category.id} className="relative">
+              <AccordionItem
+                title={category.title}
+                integrations={category.integrations.split('|')}
+                isOpen={openItems.has(index)}
+                onToggle={() => toggleItem(index)}
+                colorTokens={colorTokens}
+                h3Style={h3Style}
+                labelStyle={labelStyle}
+                categoryIcon={category.icon}
+                mode={mode}
+                onIconEdit={(value) => handleCategoryIconEdit(index, value)}
+                sectionId={sectionId}
+                categoryIndex={index}
+              />
+              {mode !== 'preview' && (
+                <button
+                  onClick={() => handleRemoveCategory(index)}
+                  className="absolute top-2 right-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs transition-colors z-10"
+                  title="Remove category"
+                >
+                  ×
+                </button>
+              )}
+            </div>
           ))}
+
+          {/* Add Category Button (Edit Mode Only) */}
+          {mode !== 'preview' && (
+            <div className="p-6 bg-white/20 backdrop-blur-sm rounded-lg border-2 border-dashed border-gray-300 hover:border-gray-400 transition-all duration-300 flex flex-col items-center justify-center min-h-[80px]">
+              <button
+                onClick={handleAddCategory}
+                className="flex flex-col items-center space-y-2 text-gray-600 hover:text-gray-800 transition-colors"
+              >
+                <div className="w-12 h-12 bg-gray-200 rounded-xl flex items-center justify-center">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                </div>
+                <span className="text-sm font-medium">Add Category</span>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Footer CTA */}

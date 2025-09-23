@@ -11,6 +11,7 @@ import {
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
+import { getRandomIconFromCategory } from '@/utils/iconMapping';
 
 // Content interface for type safety
 interface IconGridContent {
@@ -25,6 +26,9 @@ interface IconGridContent {
   icon_4?: string;
   icon_5?: string;
   icon_6?: string;
+  icon_7?: string;
+  icon_8?: string;
+  icon_9?: string;
 }
 
 // Feature item structure
@@ -61,7 +65,10 @@ const CONTENT_SCHEMA = {
   icon_3: { type: 'string' as const, default: '⚡' },
   icon_4: { type: 'string' as const, default: '🔒' },
   icon_5: { type: 'string' as const, default: '🔗' },
-  icon_6: { type: 'string' as const, default: '💬' }
+  icon_6: { type: 'string' as const, default: '💬' },
+  icon_7: { type: 'string' as const, default: '🎯' },
+  icon_8: { type: 'string' as const, default: '✨' },
+  icon_9: { type: 'string' as const, default: '🚀' }
 };
 
 // Auto-select emoji icon based on feature title
@@ -88,7 +95,10 @@ const parseFeatureData = (titles: string, descriptions: string, blockContent: Ic
     blockContent.icon_3,
     blockContent.icon_4,
     blockContent.icon_5,
-    blockContent.icon_6
+    blockContent.icon_6,
+    blockContent.icon_7,
+    blockContent.icon_8,
+    blockContent.icon_9
   ];
 
   return titleList.map((title, index) => ({
@@ -294,6 +304,15 @@ export default function IconGrid(props: LayoutComponentProps) {
     const { newTitles, newDescriptions } = addFeature(blockContent.feature_titles, blockContent.feature_descriptions);
     handleContentUpdate('feature_titles', newTitles);
     handleContentUpdate('feature_descriptions', newDescriptions);
+
+    // Add a smart icon for the new feature
+    const newFeatureCount = newTitles.split('|').length;
+    const iconField = `icon_${newFeatureCount}` as keyof IconGridContent;
+    if (newFeatureCount <= 9) {
+      // Use random icon from features category for new features
+      const defaultIcon = getRandomIconFromCategory('features');
+      handleContentUpdate(iconField, defaultIcon);
+    }
   };
 
   // Handle removing a feature
@@ -309,7 +328,10 @@ export default function IconGrid(props: LayoutComponentProps) {
       blockContent.icon_3,
       blockContent.icon_4,
       blockContent.icon_5,
-      blockContent.icon_6
+      blockContent.icon_6,
+      blockContent.icon_7,
+      blockContent.icon_8,
+      blockContent.icon_9
     ];
 
     // Remove the icon at the specified index and shift remaining icons
@@ -426,7 +448,7 @@ export default function IconGrid(props: LayoutComponentProps) {
         </div>
 
         {/* Add Feature Button - only show in edit mode and if under max limit */}
-        {mode !== 'preview' && featureItems.length < 6 && (
+        {mode !== 'preview' && featureItems.length < 9 && (
           <div className="mt-8 text-center">
             <button
               onClick={handleAddFeature}

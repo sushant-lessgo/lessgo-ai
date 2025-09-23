@@ -39,12 +39,46 @@ const CONTENT_SCHEMA = {
 const parseSecurityData = (items: string, descriptions?: string): SecurityItem[] => {
   const itemList = items.split('|').map(i => i.trim()).filter(i => i);
   const descriptionList = descriptions ? descriptions.split('|').map(d => d.trim()).filter(d => d) : [];
-  
+
   return itemList.map((item, index) => ({
     id: `security-${index}`,
     item,
     description: descriptionList[index] || undefined
   }));
+};
+
+// Helper function to add a new security item
+const addSecurityItem = (items: string, descriptions?: string): { newItems: string; newDescriptions: string } => {
+  const itemList = items.split('|').map(i => i.trim()).filter(i => i);
+  const descriptionList = descriptions ? descriptions.split('|').map(d => d.trim()).filter(d => d) : [];
+
+  // Add new security item with default content
+  itemList.push('New Security Measure');
+  descriptionList.push('Describe how this security measure protects your data and users.');
+
+  return {
+    newItems: itemList.join('|'),
+    newDescriptions: descriptionList.join('|')
+  };
+};
+
+// Helper function to remove a security item
+const removeSecurityItem = (items: string, descriptions: string, indexToRemove: number): { newItems: string; newDescriptions: string } => {
+  const itemList = items.split('|').map(i => i.trim()).filter(i => i);
+  const descriptionList = descriptions ? descriptions.split('|').map(d => d.trim()).filter(d => d) : [];
+
+  // Remove the item at the specified index
+  if (indexToRemove >= 0 && indexToRemove < itemList.length) {
+    itemList.splice(indexToRemove, 1);
+  }
+  if (indexToRemove >= 0 && indexToRemove < descriptionList.length) {
+    descriptionList.splice(indexToRemove, 1);
+  }
+
+  return {
+    newItems: itemList.join('|'),
+    newDescriptions: descriptionList.join('|')
+  };
 };
 
 // ModeWrapper component for handling edit/preview modes
@@ -139,13 +173,15 @@ const SecurityIcon = ({ item, index }: { item: string, index: number }) => {
 };
 
 // Individual Security Item
-const SecurityChecklistItem = ({ 
-  securityItem, 
-  index, 
-  mode, 
+const SecurityChecklistItem = ({
+  securityItem,
+  index,
+  mode,
   sectionId,
   onItemEdit,
-  onDescriptionEdit
+  onDescriptionEdit,
+  onRemoveItem,
+  canRemove = true
 }: {
   securityItem: SecurityItem;
   index: number;
@@ -153,6 +189,8 @@ const SecurityChecklistItem = ({
   sectionId: string;
   onItemEdit: (index: number, value: string) => void;
   onDescriptionEdit: (index: number, value: string) => void;
+  onRemoveItem?: (index: number) => void;
+  canRemove?: boolean;
 }) => {
   const { getTextStyle } = useTypography();
   
@@ -218,6 +256,22 @@ const SecurityChecklistItem = ({
           </div>
         )}
       </div>
+
+      {/* Delete button - only show in edit mode and if can remove */}
+      {mode !== 'preview' && onRemoveItem && canRemove && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemoveItem(index);
+          }}
+          className="opacity-0 group-hover:opacity-100 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-200 flex-shrink-0"
+          title="Remove this security item"
+        >
+          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 };
@@ -254,6 +308,20 @@ export default function SecurityChecklist(props: SecurityChecklistProps) {
     const descriptions = blockContent.item_descriptions ? blockContent.item_descriptions.split('|') : [];
     descriptions[index] = value;
     handleContentUpdate('item_descriptions', descriptions.join('|'));
+  };
+
+  // Handle adding a new security item
+  const handleAddItem = () => {
+    const { newItems, newDescriptions } = addSecurityItem(blockContent.security_items, blockContent.item_descriptions);
+    handleContentUpdate('security_items', newItems);
+    handleContentUpdate('item_descriptions', newDescriptions);
+  };
+
+  // Handle removing a security item
+  const handleRemoveItem = (indexToRemove: number) => {
+    const { newItems, newDescriptions } = removeSecurityItem(blockContent.security_items, blockContent.item_descriptions || '', indexToRemove);
+    handleContentUpdate('security_items', newItems);
+    handleContentUpdate('item_descriptions', newDescriptions);
   };
 
 
@@ -294,9 +362,26 @@ export default function SecurityChecklist(props: SecurityChecklistProps) {
               sectionId={sectionId}
               onItemEdit={handleItemEdit}
               onDescriptionEdit={handleDescriptionEdit}
+              onRemoveItem={handleRemoveItem}
+              canRemove={securityItems.length > 1}
             />
           ))}
         </div>
+
+        {/* Add Item Button - only show in edit mode and if under max limit */}
+        {mode !== 'preview' && securityItems.length < 12 && (
+          <div className="mb-12 text-center">
+            <button
+              onClick={handleAddItem}
+              className="flex items-center space-x-2 mx-auto px-6 py-3 bg-green-50 hover:bg-green-100 border-2 border-green-200 hover:border-green-300 rounded-xl transition-all duration-200 group"
+            >
+              <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span className="text-green-700 font-medium">Add Security Item</span>
+            </button>
+          </div>
+        )}
 
         {/* Optional Compliance Note */}
         {(blockContent.compliance_note || mode === 'edit') && (

@@ -4,11 +4,13 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
-  EditableAdaptiveText 
+import {
+  EditableAdaptiveHeadline,
+  EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { getRandomIconFromCategory } from '@/utils/iconMapping';
 
 // Content interface for type safety
 interface SecurityFeatureCardsContent {
@@ -16,26 +18,46 @@ interface SecurityFeatureCardsContent {
   subheadline?: string;
   security_features: string;
   feature_descriptions: string;
+  feature_icon_1?: string;
+  feature_icon_2?: string;
+  feature_icon_3?: string;
+  feature_icon_4?: string;
+  feature_icon_5?: string;
+  feature_icon_6?: string;
+  feature_icon_7?: string;
+  feature_icon_8?: string;
+  feature_icon_9?: string;
+  feature_icon_10?: string;
 }
 
 // Content schema - defines structure and defaults
 const CONTENT_SCHEMA = {
-  headline: { 
-    type: 'string' as const, 
-    default: 'Built with Security at the Core' 
+  headline: {
+    type: 'string' as const,
+    default: 'Built with Security at the Core'
   },
-  subheadline: { 
-    type: 'string' as const, 
-    default: 'Our comprehensive security framework protects your data with multiple layers of defense and industry-leading protocols.' 
+  subheadline: {
+    type: 'string' as const,
+    default: 'Our comprehensive security framework protects your data with multiple layers of defense and industry-leading protocols.'
   },
-  security_features: { 
-    type: 'string' as const, 
-    default: 'End-to-End Encryption|Multi-Factor Authentication|Zero Trust Architecture|Real-time Threat Detection|Automated Backup Systems|Role-Based Access Control' 
+  security_features: {
+    type: 'string' as const,
+    default: 'End-to-End Encryption|Multi-Factor Authentication|Zero Trust Architecture|Real-time Threat Detection|Automated Backup Systems|Role-Based Access Control'
   },
-  feature_descriptions: { 
-    type: 'string' as const, 
-    default: 'All data is encrypted in transit and at rest using AES-256 encryption standards|Mandatory MFA for all user accounts with support for authenticator apps and hardware keys|Every request is verified and validated regardless of location or user credentials|AI-powered monitoring detects and blocks suspicious activities in real-time|Automated daily backups with geographic redundancy and point-in-time recovery|Granular permissions ensure users only access data relevant to their role' 
-  }
+  feature_descriptions: {
+    type: 'string' as const,
+    default: 'All data is encrypted in transit and at rest using AES-256 encryption standards|Mandatory MFA for all user accounts with support for authenticator apps and hardware keys|Every request is verified and validated regardless of location or user credentials|AI-powered monitoring detects and blocks suspicious activities in real-time|Automated daily backups with geographic redundancy and point-in-time recovery|Granular permissions ensure users only access data relevant to their role'
+  },
+  feature_icon_1: { type: 'string' as const, default: '🔒' },
+  feature_icon_2: { type: 'string' as const, default: '🔐' },
+  feature_icon_3: { type: 'string' as const, default: '🛡️' },
+  feature_icon_4: { type: 'string' as const, default: '🔍' },
+  feature_icon_5: { type: 'string' as const, default: '💾' },
+  feature_icon_6: { type: 'string' as const, default: '👥' },
+  feature_icon_7: { type: 'string' as const, default: '🔧' },
+  feature_icon_8: { type: 'string' as const, default: '⚡' },
+  feature_icon_9: { type: 'string' as const, default: '🎯' },
+  feature_icon_10: { type: 'string' as const, default: '✅' }
 };
 
 // Security Feature Interface
@@ -118,39 +140,161 @@ const parseSecurityFeatures = (features: string, descriptions: string): Security
   }));
 };
 
+// Helper function to get feature icon
+const getFeatureIcon = (blockContent: SecurityFeatureCardsContent, index: number) => {
+  const iconFields = [
+    blockContent.feature_icon_1,
+    blockContent.feature_icon_2,
+    blockContent.feature_icon_3,
+    blockContent.feature_icon_4,
+    blockContent.feature_icon_5,
+    blockContent.feature_icon_6,
+    blockContent.feature_icon_7,
+    blockContent.feature_icon_8,
+    blockContent.feature_icon_9,
+    blockContent.feature_icon_10
+  ];
+  return iconFields[index] || '🔒';
+};
+
+// Helper function to add a new feature
+const addFeature = (features: string, descriptions: string): { newFeatures: string; newDescriptions: string } => {
+  const featureList = features.split('|').map(f => f.trim()).filter(f => f);
+  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
+
+  // Add new feature with default content
+  featureList.push('New Security Feature');
+  descriptionList.push('Describe this security feature and how it protects your users.');
+
+  return {
+    newFeatures: featureList.join('|'),
+    newDescriptions: descriptionList.join('|')
+  };
+};
+
+// Helper function to remove a feature
+const removeFeature = (features: string, descriptions: string, indexToRemove: number): { newFeatures: string; newDescriptions: string } => {
+  const featureList = features.split('|').map(f => f.trim()).filter(f => f);
+  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
+
+  // Remove the feature at the specified index
+  if (indexToRemove >= 0 && indexToRemove < featureList.length) {
+    featureList.splice(indexToRemove, 1);
+  }
+  if (indexToRemove >= 0 && indexToRemove < descriptionList.length) {
+    descriptionList.splice(indexToRemove, 1);
+  }
+
+  return {
+    newFeatures: featureList.join('|'),
+    newDescriptions: descriptionList.join('|')
+  };
+};
+
 // Security Feature Card
-const SecurityFeatureCard = React.memo(({ 
+const SecurityFeatureCard = React.memo(({
   feature,
+  index,
+  mode,
+  sectionId,
+  onTitleEdit,
+  onDescriptionEdit,
+  onRemoveFeature,
+  blockContent,
   colorTokens,
-  getTextStyle 
+  handleContentUpdate,
+  canRemove = true
 }: {
   feature: SecurityFeature;
+  index: number;
+  mode: 'edit' | 'preview';
+  sectionId: string;
+  onTitleEdit: (index: number, value: string) => void;
+  onDescriptionEdit: (index: number, value: string) => void;
+  onRemoveFeature?: (index: number) => void;
+  blockContent: SecurityFeatureCardsContent;
   colorTokens: any;
-  getTextStyle: any;
+  handleContentUpdate: (field: keyof SecurityFeatureCardsContent, value: string) => void;
+  canRemove?: boolean;
 }) => {
   return (
-    <div className="group bg-white rounded-xl p-8 border border-gray-200 hover:border-blue-300 hover:shadow-xl transition-all duration-300">
-      
+    <div className="group bg-white rounded-xl p-8 border border-gray-200 hover:border-blue-300 hover:shadow-xl transition-all duration-300 relative">
+
       {/* Icon */}
       <div className={`w-16 h-16 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center text-white mb-6 group-hover:scale-105 transition-transform duration-300 shadow-lg`}>
-        {feature.icon}
+        <IconEditableText
+          mode={mode}
+          value={getFeatureIcon(blockContent, index)}
+          onEdit={(value) => {
+            const iconField = `feature_icon_${index + 1}` as keyof SecurityFeatureCardsContent;
+            handleContentUpdate(iconField, value);
+          }}
+          backgroundType="primary"
+          colorTokens={colorTokens}
+          iconSize="lg"
+          className="text-white text-2xl"
+          sectionId={sectionId}
+          elementKey={`feature_icon_${index + 1}`}
+        />
       </div>
-      
+
       {/* Title */}
-      <h3 className="font-bold text-gray-900 mb-4">
-        {feature.title}
-      </h3>
-      
+      <div className="mb-4">
+        {mode !== 'preview' ? (
+          <div
+            contentEditable
+            suppressContentEditableWarning
+            onBlur={(e) => onTitleEdit(index, e.currentTarget.textContent || '')}
+            className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[28px] cursor-text hover:bg-gray-50 font-bold text-gray-900"
+          >
+            {feature.title}
+          </div>
+        ) : (
+          <h3 className="font-bold text-gray-900">
+            {feature.title}
+          </h3>
+        )}
+      </div>
+
       {/* Description */}
-      <p className="text-gray-600 leading-relaxed mb-6">
-        {feature.description}
-      </p>
-      
+      <div className="mb-6">
+        {mode !== 'preview' ? (
+          <div
+            contentEditable
+            suppressContentEditableWarning
+            onBlur={(e) => onDescriptionEdit(index, e.currentTarget.textContent || '')}
+            className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[60px] cursor-text hover:bg-gray-50 text-gray-600 leading-relaxed"
+          >
+            {feature.description}
+          </div>
+        ) : (
+          <p className="text-gray-600 leading-relaxed">
+            {feature.description}
+          </p>
+        )}
+      </div>
+
       {/* Status Indicator */}
       <div className="flex items-center space-x-2">
         <div className="w-3 h-3 bg-green-500 rounded-full"></div>
         <span className="text-green-600 text-sm font-medium">Active & Monitored</span>
       </div>
+
+      {/* Delete button - only show in edit mode and if can remove */}
+      {mode !== 'preview' && onRemoveFeature && canRemove && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemoveFeature(index);
+          }}
+          className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-200"
+          title="Remove this feature"
+        >
+          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 });
@@ -165,6 +309,7 @@ export default function SecurityFeatureCards(props: LayoutComponentProps) {
     dynamicTextColors,
     getTextStyle,
     sectionBackground,
+    backgroundType,
     handleContentUpdate
   } = useLayoutComponent<SecurityFeatureCardsContent>({
     ...props,
@@ -173,9 +318,51 @@ export default function SecurityFeatureCards(props: LayoutComponentProps) {
 
   // Parse security features
   const securityFeatures = parseSecurityFeatures(
-    blockContent.security_features, 
+    blockContent.security_features,
     blockContent.feature_descriptions
   );
+
+  // Handle individual editing
+  const handleTitleEdit = (index: number, value: string) => {
+    const features = blockContent.security_features.split('|');
+    features[index] = value;
+    handleContentUpdate('security_features', features.join('|'));
+  };
+
+  const handleDescriptionEdit = (index: number, value: string) => {
+    const descriptions = blockContent.feature_descriptions.split('|');
+    descriptions[index] = value;
+    handleContentUpdate('feature_descriptions', descriptions.join('|'));
+  };
+
+  // Handle adding a new feature
+  const handleAddFeature = () => {
+    const { newFeatures, newDescriptions } = addFeature(blockContent.security_features, blockContent.feature_descriptions);
+    handleContentUpdate('security_features', newFeatures);
+    handleContentUpdate('feature_descriptions', newDescriptions);
+
+    // Add a smart icon for the new feature
+    const newFeatureCount = newFeatures.split('|').length;
+    const iconField = `feature_icon_${newFeatureCount}` as keyof SecurityFeatureCardsContent;
+    if (newFeatureCount <= 10) {
+      // Use random icon from security category for new features
+      const defaultIcon = getRandomIconFromCategory('security');
+      handleContentUpdate(iconField, defaultIcon);
+    }
+  };
+
+  // Handle removing a feature
+  const handleRemoveFeature = (indexToRemove: number) => {
+    const { newFeatures, newDescriptions } = removeFeature(blockContent.security_features, blockContent.feature_descriptions, indexToRemove);
+    handleContentUpdate('security_features', newFeatures);
+    handleContentUpdate('feature_descriptions', newDescriptions);
+
+    // Also clear the corresponding icon if it exists
+    const iconField = `feature_icon_${indexToRemove + 1}` as keyof SecurityFeatureCardsContent;
+    if (blockContent[iconField]) {
+      handleContentUpdate(iconField, '');
+    }
+  };
 
   return (
     <LayoutSection
@@ -221,15 +408,38 @@ export default function SecurityFeatureCards(props: LayoutComponentProps) {
 
         {/* Security Features Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-          {securityFeatures.map((feature) => (
+          {securityFeatures.map((feature, index) => (
             <SecurityFeatureCard
               key={feature.id}
               feature={feature}
+              index={index}
+              mode={mode}
+              sectionId={sectionId}
+              onTitleEdit={handleTitleEdit}
+              onDescriptionEdit={handleDescriptionEdit}
+              onRemoveFeature={handleRemoveFeature}
+              blockContent={blockContent}
               colorTokens={colorTokens}
-              getTextStyle={getTextStyle}
+              handleContentUpdate={handleContentUpdate}
+              canRemove={securityFeatures.length > 1}
             />
           ))}
         </div>
+
+        {/* Add Feature Button - only show in edit mode and if under max limit */}
+        {mode !== 'preview' && securityFeatures.length < 10 && (
+          <div className="mb-12 text-center">
+            <button
+              onClick={handleAddFeature}
+              className="flex items-center space-x-2 mx-auto px-6 py-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-xl transition-all duration-200 group"
+            >
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span className="text-blue-700 font-medium">Add Security Feature</span>
+            </button>
+          </div>
+        )}
 
         {/* Security Stats */}
         <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-12 text-white text-center">

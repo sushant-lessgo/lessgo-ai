@@ -4281,60 +4281,41 @@ const elementRules: SectionLayoutRules = {
   }
 ],
 
-// UseCase Section Rules - Add these to elementRules object
+// UseCase Section Rules - Updated to align with unified schemas from elementTransform.md SOP
 
-"UseCase_PersonaGrid": [
+"UseCase_BeforeAfterWorkflow": [
   {
-    element: "use_case_examples",
+    element: "before_title",
     conditions: [
-      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
-      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
-      { variable: "copyIntent", values: ["desire-led"], weight: 2 }
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 4 },
+      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 3 },
+      { variable: "copyIntent", values: ["pain-led"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "after_title",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 4 },
+      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 3 },
+      { variable: "copyIntent", values: ["pain-led"], weight: 2 }
     ],
     minScore: 6
   }
 ],
-
-"UseCase_UseCaseCarousel": [
-  {
-    element: "carousel_navigation",
-    conditions: [
-      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
-      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 3 },
-      { variable: "targetAudience", values: ["founders", "creators"], weight: 2 }
-    ],
-    minScore: 6
-  }
-],
-
-"UseCase_IndustryUseCaseGrid": [
-  {
-    element: "industry_examples",
-    conditions: [
-      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
-      { variable: "targetAudience", values: ["enterprise", "businesses"], weight: 3 },
-      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
-    ],
-    minScore: 6
-  }
-],
-
-"UseCase_RoleBasedScenarios": [
-  {
-    element: "role_scenarios",
-    conditions: [
-      { variable: "copyIntent", values: ["desire-led"], weight: 4 },
-      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 },
-      { variable: "targetAudience", values: ["enterprise", "builders"], weight: 2 }
-    ],
-    minScore: 6
-  }
-],
-
 
 "UseCase_CustomerJourneyFlow": [
   {
-    element: "journey_steps",
+    element: "footer_title",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "copyIntent", values: ["desire-led"], weight: 3 },
+      { variable: "targetAudience", values: ["businesses", "marketers"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "footer_description",
     conditions: [
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
       { variable: "copyIntent", values: ["desire-led"], weight: 3 },
@@ -4344,41 +4325,41 @@ const elementRules: SectionLayoutRules = {
   }
 ],
 
-"UseCase_WorkflowDiagrams": [
+"UseCase_PersonaGrid": [
   {
-    element: "workflow_steps",
+    element: "footer_text",
     conditions: [
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
-      { variable: "targetAudience", values: ["builders", "enterprise"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
       { variable: "copyIntent", values: ["desire-led"], weight: 2 }
     ],
     minScore: 6
+  },
+  {
+    element: "badge_text",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-2", "level-3"], weight: 3 },
+      { variable: "targetAudience", values: ["businesses", "enterprise"], weight: 2 }
+    ],
+    minScore: 5
   }
 ],
 
-// "UseCase_BeforeAfterWorkflow": [
-//   {
-//     element: "before_after_steps",
-//     conditions: [
-//       { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
-//       { variable: "targetAudience", values: ["businesses", "enterprise"], weight: 3 },
-//       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 2 }
-//     ],
-//     minScore: 6
-//   }
-// ],
-
-"UseCase_InteractiveUseCaseMap": [
+"UseCase_UseCaseCarousel": [
   {
-    element: "interactive_elements",
+    element: "use_case_description",
     conditions: [
-      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 4 },
-      { variable: "targetAudience", values: ["enterprise", "builders"], weight: 3 },
-      { variable: "awarenessLevel", values: ["product-aware", "most-aware"], weight: 2 }
+      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 3 },
+      { variable: "targetAudience", values: ["founders", "creators"], weight: 2 }
     ],
     minScore: 6
   }
 ],
+
+// Note: IndustryUseCaseGrid, RoleBasedScenarios, InteractiveUseCaseMap, and WorkflowDiagrams
+// have no optional elements in the unified schema - all elements are mandatory.
 
 // PrimaryCTA Section Rules - Enhanced field selection logic
 "CTA_CenteredHeadlineCTA": [

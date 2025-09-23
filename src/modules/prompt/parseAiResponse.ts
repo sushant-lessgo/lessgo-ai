@@ -1,5 +1,6 @@
 
 import { logger } from '@/lib/logger';
+import { getIconsFromCategories, getIconFromCategory } from '@/utils/iconMapping';
 
 interface ParsedResponse {
   success: boolean
@@ -3021,6 +3022,84 @@ function processStackedHighlightsContent(sectionId: string, content: SectionCont
         result.content[elementKey] = elementValue.filter(item => item && item.trim()).join(' | ');
       } else {
         result.content[elementKey] = String(elementValue || '');
+      }
+    } else if (elementKey === 'highlight_icons') {
+      // Convert icon categories to actual emojis and distribute to individual icon fields
+      if (typeof elementValue === 'string' && elementValue.includes('|')) {
+        const iconCategories = elementValue.split('|').map(cat => cat.trim()).filter(Boolean);
+        const emojis = getIconsFromCategories(iconCategories);
+
+        // Distribute emojis to individual icon fields (highlight_icon_1, highlight_icon_2, etc.)
+        emojis.forEach((emoji, index) => {
+          if (index < 6) { // Max 6 highlights supported
+            result.content[`highlight_icon_${index + 1}`] = emoji;
+          }
+        });
+
+        // Clear any remaining icon fields if fewer categories were provided
+        for (let i = emojis.length; i < 6; i++) {
+          result.content[`highlight_icon_${i + 1}`] = '';
+        }
+
+        logger.debug(`✅ Converted highlight icon categories to emojis:`, {
+          categories: iconCategories,
+          emojis: emojis,
+          fields: Object.fromEntries(
+            emojis.map((emoji, i) => [`highlight_icon_${i + 1}`, emoji])
+          )
+        });
+      } else if (Array.isArray(elementValue)) {
+        const iconCategories = elementValue.filter(item => item && item.trim());
+        const emojis = getIconsFromCategories(iconCategories);
+
+        emojis.forEach((emoji, index) => {
+          if (index < 6) {
+            result.content[`highlight_icon_${index + 1}`] = emoji;
+          }
+        });
+
+        for (let i = emojis.length; i < 6; i++) {
+          result.content[`highlight_icon_${i + 1}`] = '';
+        }
+      } else {
+        // Invalid format, use fallback
+        result.warnings.push(`${sectionId}: highlight_icons should be pipe-separated categories`);
+        result.hasIssues = true;
+
+        // Set default emojis
+        const defaultEmojis = ['🧠', '🔄', '📊', '✅', '⚡', '🎯'];
+        defaultEmojis.forEach((emoji, index) => {
+          result.content[`highlight_icon_${index + 1}`] = emoji;
+        });
+      }
+
+      // Don't include the original highlight_icons field in output
+      // It's only used for parsing, individual icon fields are what the component expects
+    } else if (elementKey.startsWith('highlight_icon_')) {
+      // Handle individual highlight icon fields that may contain category names
+      if (typeof elementValue === 'string' && elementValue.trim()) {
+        const iconValue = elementValue.trim();
+
+        // Check if it's already an emoji (single character or emoji sequence)
+        const isEmoji = /^[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]$/u.test(iconValue) ||
+                       iconValue.length <= 2;
+
+        if (!isEmoji) {
+          // It's a category name, convert it to emoji
+          const emoji = getIconFromCategory(iconValue);
+          result.content[elementKey] = emoji;
+
+          logger.debug(`✅ Converted ${elementKey} category to emoji:`, {
+            category: iconValue,
+            emoji: result.content[elementKey]
+          });
+        } else {
+          // It's already an emoji, use it directly
+          result.content[elementKey] = iconValue;
+        }
+      } else {
+        // Empty or invalid, use default
+        result.content[elementKey] = '✨';
       }
     } else {
       const processedElement = processElement(sectionId, elementKey, elementValue);

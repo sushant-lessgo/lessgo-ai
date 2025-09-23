@@ -12,6 +12,7 @@ import {
 } from '@/components/layout/ComponentRegistry';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { getRandomIconFromCategory } from '@/utils/iconMapping';
 
 interface TimelineContent {
   headline: string;
@@ -33,6 +34,13 @@ interface TimelineContent {
   process_summary_title?: string;
   process_summary_description?: string;
   show_process_summary?: boolean;
+  // Timeline icons
+  timeline_icon_1?: string;
+  timeline_icon_2?: string;
+  timeline_icon_3?: string;
+  timeline_icon_4?: string;
+  timeline_icon_5?: string;
+  timeline_icon_6?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -99,10 +107,90 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: 'Get your automated workflows up and running quickly with our intuitive process' 
   },
-  show_process_summary: { 
-    type: 'boolean' as const, 
-    default: true 
+  show_process_summary: {
+    type: 'boolean' as const,
+    default: true
+  },
+  // Timeline icons with smart defaults
+  timeline_icon_1: { type: 'string' as const, default: '🔗' },
+  timeline_icon_2: { type: 'string' as const, default: '⚙️' },
+  timeline_icon_3: { type: 'string' as const, default: '⚡' },
+  timeline_icon_4: { type: 'string' as const, default: '📊' },
+  timeline_icon_5: { type: 'string' as const, default: '🎯' },
+  timeline_icon_6: { type: 'string' as const, default: '🚀' }
+};
+
+// Helper function to get timeline icon
+const getTimelineIcon = (blockContent: TimelineContent, index: number) => {
+  const iconFields = [
+    blockContent.timeline_icon_1,
+    blockContent.timeline_icon_2,
+    blockContent.timeline_icon_3,
+    blockContent.timeline_icon_4,
+    blockContent.timeline_icon_5,
+    blockContent.timeline_icon_6
+  ];
+  return iconFields[index] || '⭐';
+};
+
+// Helper function to add a new timeline step
+const addTimelineStep = (numbers: string, titles: string, descriptions: string, durations: string): {
+  newNumbers: string;
+  newTitles: string;
+  newDescriptions: string;
+  newDurations: string;
+} => {
+  const numberList = numbers.split('|').map(n => n.trim()).filter(n => n);
+  const titleList = titles.split('|').map(t => t.trim()).filter(t => t);
+  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
+  const durationList = durations.split('|').map(d => d.trim()).filter(d => d);
+
+  // Add new step with default content
+  const nextNumber = String(numberList.length + 1).padStart(2, '0');
+  numberList.push(nextNumber);
+  titleList.push('New Step');
+  descriptionList.push('Describe this step in your process or workflow.');
+  durationList.push('5 mins');
+
+  return {
+    newNumbers: numberList.join('|'),
+    newTitles: titleList.join('|'),
+    newDescriptions: descriptionList.join('|'),
+    newDurations: durationList.join('|')
+  };
+};
+
+// Helper function to remove a timeline step
+const removeTimelineStep = (numbers: string, titles: string, descriptions: string, durations: string, indexToRemove: number): {
+  newNumbers: string;
+  newTitles: string;
+  newDescriptions: string;
+  newDurations: string;
+} => {
+  const numberList = numbers.split('|').map(n => n.trim()).filter(n => n);
+  const titleList = titles.split('|').map(t => t.trim()).filter(t => t);
+  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
+  const durationList = durations.split('|').map(d => d.trim()).filter(d => d);
+
+  // Remove the step at the specified index
+  if (indexToRemove >= 0 && indexToRemove < titleList.length) {
+    numberList.splice(indexToRemove, 1);
+    titleList.splice(indexToRemove, 1);
+    descriptionList.splice(indexToRemove, 1);
+    durationList.splice(indexToRemove, 1);
+
+    // Renumber remaining steps
+    for (let i = 0; i < numberList.length; i++) {
+      numberList[i] = String(i + 1).padStart(2, '0');
+    }
   }
+
+  return {
+    newNumbers: numberList.join('|'),
+    newTitles: titleList.join('|'),
+    newDescriptions: descriptionList.join('|'),
+    newDurations: durationList.join('|')
+  };
 };
 
 const TimelineStep = React.memo(({ 

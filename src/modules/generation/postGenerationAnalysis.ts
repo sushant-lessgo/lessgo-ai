@@ -5,12 +5,12 @@
  * for manual field review and customization.
  */
 
-import { classifyFieldsForSection, generateFieldRecommendations, getGenerationStrategy, type ClassificationResult } from './fieldClassification';
+import { layoutElementSchema, getAllElements } from '../sections/layoutElementSchema';
 
 export interface SectionAnalysis {
   sectionId: string;
   sectionType: string;
-  fieldClassifications: ClassificationResult[];
+  fieldClassifications: { field: string; generation: string; mandatory: boolean }[];
   recommendations: {
     message: string;
     priority: 'low' | 'medium' | 'high';
@@ -30,7 +30,7 @@ export interface PostGenerationReport {
 }
 
 /**
- * Analyzes generated content and provides field classification insights
+ * Analyzes generated content and provides field classification insights using unified schema
  */
 export function analyzeGeneratedContent(elementsMap: any): PostGenerationReport {
   const sectionAnalyses: SectionAnalysis[] = [];
@@ -39,23 +39,38 @@ export function analyzeGeneratedContent(elementsMap: any): PostGenerationReport 
   const highPrioritySections: string[] = [];
 
   Object.entries(elementsMap).forEach(([sectionId, section]: [string, any]) => {
-    const { sectionType, allElements } = section;
+    const { sectionType, layoutName } = section;
+    const schema = layoutElementSchema[layoutName || sectionType];
 
-    const fieldClassifications = classifyFieldsForSection(allElements, sectionType);
-    const recommendations = generateFieldRecommendations(fieldClassifications);
-    const strategy = getGenerationStrategy(fieldClassifications);
+    if (!schema) {
+      // Skip sections without schema
+      return;
+    }
 
-    const manualReviewRequired = strategy.manualFieldsCount > 0;
+    const allElements = getAllElements(schema);
+    const fieldClassifications = allElements.map(element => ({
+      field: element.element,
+      generation: element.generation || 'ai_generated',
+      mandatory: element.mandatory
+    }));
+
+    const manualFieldsCount = fieldClassifications.filter(
+      field => field.generation === 'manual_preferred' || field.generation === 'hybrid'
+    ).length;
+
+    const recommendations = generateRecommendationsFromSchema(fieldClassifications, manualFieldsCount);
+    const manualReviewRequired = manualFieldsCount > 0;
+
     if (manualReviewRequired) {
       sectionsNeedingReview++;
-      totalManualFields += strategy.manualFieldsCount;
+      totalManualFields += manualFieldsCount;
     }
 
     if (recommendations.priority === 'high') {
       highPrioritySections.push(sectionType);
     }
 
-    const estimatedCustomizationTime = getEstimatedCustomizationTime(strategy.manualFieldsCount);
+    const estimatedCustomizationTime = getEstimatedCustomizationTime(manualFieldsCount);
 
     sectionAnalyses.push({
       sectionId,
@@ -123,6 +138,42 @@ function generateOverallRecommendation(
   }
 
   return `📋 Moderate customization needed. ${totalManualFields} fields across ${sectionsNeedingReview} sections require manual input for best results.`;
+}
+
+/**
+ * Generates recommendations based on schema field classifications
+ */
+function generateRecommendationsFromSchema(
+  fieldClassifications: { field: string; generation: string; mandatory: boolean }[],
+  manualFieldsCount: number
+): { message: string; priority: 'low' | 'medium' | 'high'; actions: string[] } {
+  const actions: string[] = [];
+  let priority: 'low' | 'medium' | 'high' = 'low';
+  let message = 'Section is ready to use';
+
+  const manualPreferred = fieldClassifications.filter(f => f.generation === 'manual_preferred');
+  const hybrid = fieldClassifications.filter(f => f.generation === 'hybrid');
+
+  if (manualPreferred.length > 0) {
+    priority = 'high';
+    message = `${manualPreferred.length} fields require real business data`;
+    actions.push(`Update ${manualPreferred.map(f => f.field).join(', ')} with actual business information`);
+  }
+
+  if (hybrid.length > 0) {
+    if (priority === 'low') priority = 'medium';
+    if (message === 'Section is ready to use') {
+      message = `${hybrid.length} fields can be customized for better results`;
+    }
+    actions.push(`Consider customizing ${hybrid.map(f => f.field).join(', ')} for your brand`);
+  }
+
+  if (manualFieldsCount === 0) {
+    message = 'All fields are AI-generated and ready to use';
+    actions.push('Review content for brand alignment');
+  }
+
+  return { message, priority, actions };
 }
 
 /**
