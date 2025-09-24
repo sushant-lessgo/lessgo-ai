@@ -224,12 +224,12 @@ export function getCompleteElementsMap(
         sectionId,
         sectionType: data.sectionType,
         layout: data.layout,
-        mandatoryCount: data.mandatory.length,
-        optionalCount: data.optional.length,
-        totalElements: data.all.length,
-        mandatory: data.mandatory,
-        optional: data.optional,
-        excluded: data.excluded
+        mandatoryCount: data.mandatoryElements.length,
+        optionalCount: data.optionalElements.length,
+        totalElements: data.allElements.length,
+        mandatory: data.mandatoryElements,
+        optional: data.optionalElements,
+        excluded: data.excludedElements
       }));
 
       logger.dev(`🎯 Sections Processed: ${sectionSummary.length}`);

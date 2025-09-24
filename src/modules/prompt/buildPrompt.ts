@@ -6,6 +6,7 @@ import {
 } from '../sections/layoutElementSchema'
 import type { ParsedStrategy } from './parseStrategyResponse'
 import type { CardRequirements } from '@/types/layoutTypes'
+import type { ElementsMap } from '../sections/elementDetermination'
 
 import type {
   InputVariables,
@@ -29,6 +30,23 @@ type SectionInfo = {
   sectionType: string;
   layoutName: string;
 };
+
+/**
+ * Converts ElementsMap to SectionInfo format for backward compatibility
+ */
+function convertElementsMapToSectionInfo(elementsMap: ElementsMap): Record<string, SectionInfo> {
+  const sectionInfoMap: Record<string, SectionInfo> = {};
+
+  Object.entries(elementsMap).forEach(([sectionId, requirements]) => {
+    sectionInfoMap[sectionId] = {
+      sectionId: requirements.sectionId,
+      sectionType: requirements.sectionType,
+      layoutName: requirements.layout
+    };
+  });
+
+  return sectionInfoMap;
+}
 
 
 /**
@@ -1916,20 +1934,24 @@ function getStrategicElementFormatGuidance(element: string, cardCount?: number):
 export function buildStrategicCopyPrompt(
   onboardingStore: OnboardingStore,
   pageStore: PageStore | any,
-  strategy: ParsedStrategy
+  strategy: ParsedStrategy,
+  elementsMap: ElementsMap
 ): string {
-  const elementsMap = buildElementsMap(pageStore);
+  // Use the provided elementsMap that includes element selection logic
   const userFeatureCount = onboardingStore.featuresFromAI?.length;
 
   const businessContext = buildBusinessContext(onboardingStore, pageStore);
   const brandContext = buildBrandContext(onboardingStore);
   const categoryContext = buildCategoryContext(onboardingStore);
   const strategicContext = buildStrategicContext(strategy);
-  const layoutContext = buildLayoutContext(elementsMap);
-  const sectionFlowContext = buildSectionFlowContext(elementsMap, pageStore);
-  const cardCountInstructions = buildCardCountInstructions(strategy.cardCounts, elementsMap, userFeatureCount);
-  const fieldClassificationGuidance = buildFieldClassificationGuidance(elementsMap);
-  const featureMappingInstructions = buildFeatureMappingInstructions(onboardingStore, elementsMap);
+  // Convert ElementsMap to SectionInfo format for compatibility with existing functions
+  const sectionInfoMap = convertElementsMapToSectionInfo(elementsMap);
+
+  const layoutContext = buildLayoutContext(sectionInfoMap);
+  const sectionFlowContext = buildSectionFlowContext(sectionInfoMap, pageStore);
+  const cardCountInstructions = buildCardCountInstructions(strategy.cardCounts, sectionInfoMap, userFeatureCount);
+  const fieldClassificationGuidance = buildFieldClassificationGuidance(sectionInfoMap);
+  const featureMappingInstructions = buildFeatureMappingInstructions(onboardingStore, sectionInfoMap);
   const outputFormat = buildStrategicOutputFormat(elementsMap, strategy.cardCounts, userFeatureCount);
 
   return `You are an expert copywriter executing a strategic copy plan for maximum conversion.
@@ -1966,27 +1988,32 @@ Execute the strategic copy plan and generate conversion-optimized content now.`;
 }
 
 /**
- * Enhanced output format using comprehensive registry and layout schemas
+ * Enhanced output format using filtered elements from element selection logic
  */
 function buildStrategicOutputFormat(
-  elementsMap: Record<string, SectionInfo>,
+  elementsMap: ElementsMap,
   strategyCounts: Record<string, number>,
   userFeatureCount?: number
 ): string {
   const formatExample: Record<string, any> = {};
   const cardCountSummary: string[] = [];
 
-  Object.entries(elementsMap).forEach(([sectionId, section]) => {
+  Object.entries(elementsMap).forEach(([sectionId, requirements]) => {
     const elementFormat: Record<string, any> = {};
-    const { layoutName } = section;
+    const { layout: layoutName, allElements } = requirements;
 
-    // Get only AI-generated elements from schema
-    const aiElements = getAIGeneratedElements(layoutName);
+    // Use the filtered elements from element selection logic instead of all schema elements
+    const filteredElements = allElements;
 
     // Get card count using strategy
     const cardCount = getCardCount(layoutName, sectionId, strategyCounts, userFeatureCount);
 
-    aiElements.forEach(({ element, isCard }) => {
+    filteredElements.forEach(element => {
+      // Check if this is a card element by looking at the schema
+      const schemaElements = getAIGeneratedElements(layoutName);
+      const schemaElement = schemaElements.find(el => el.element === element);
+      const isCard = schemaElement?.isCard || false;
+
       if (isCard && cardCount > 0) {
         // Create array placeholder for card elements
         const placeholders = Array.from({ length: cardCount }, (_, i) => `${element.charAt(0).toUpperCase() + element.slice(1)} ${i + 1}`);

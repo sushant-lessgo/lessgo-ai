@@ -58,8 +58,8 @@ export function useLayoutComponent<T = Record<string, any>>({
   // Get excluded optional elements for this section
   let excludedElements: string[] = [];
   if (layout) {
-    // Get the section type from sectionId (e.g., "Hero" from "Hero-123")
-    const sectionType = sectionId.split('-')[0];
+    // ✅ FIXED: Get the section type with proper capitalization (e.g., "hero" → "Hero")
+    const sectionType = sectionId.charAt(0).toUpperCase() + sectionId.slice(1);
     
     // Get the stores data to compute variables
     const onboardingData = useOnboardingStore.getState();
@@ -80,9 +80,36 @@ export function useLayoutComponent<T = Record<string, any>>({
       }
     };
     const variables = mapStoreToVariables(onboardingData, pageStore as any);
-    
-    // Get excluded elements based on the current variables
-    excludedElements = getExcludedOptionalElements(sectionType, layout, variables);
+
+    // ✅ CRITICAL FIX: Check stored exclusions but validate they're not empty
+    const storedExclusions = sectionContent?.aiMetadata?.excludedElements;
+    const hasValidStoredExclusions = storedExclusions && Array.isArray(storedExclusions) && storedExclusions.length > 0;
+
+    if (hasValidStoredExclusions) {
+      // Use stored exclusions from generation time only if they contain actual data
+      excludedElements = storedExclusions;
+      logger.dev(`💾 [STORED_EXCLUSION] ${sectionId} using ${excludedElements.length} stored exclusions from generation:`, {
+        excludedCount: excludedElements.length,
+        excludedElements: excludedElements,
+        source: 'generation_time'
+      });
+    } else {
+      // ALWAYS compute live exclusions if stored ones are empty/missing
+      excludedElements = getExcludedOptionalElements(sectionType, layout, variables);
+      logger.dev(`🧮 [COMPUTED_EXCLUSION] ${sectionId} computing ${excludedElements.length} live exclusions (stored=${storedExclusions?.length || 0}):`, {
+        excludedCount: excludedElements.length,
+        excludedElements: excludedElements,
+        source: 'live_computation',
+        storedWasEmpty: !hasValidStoredExclusions,
+        storedLength: storedExclusions?.length || 0,
+        variables: {
+          awarenessLevel: variables.awarenessLevel,
+          marketSophisticationLevel: variables.marketSophisticationLevel,
+          copyIntent: variables.copyIntent,
+          targetAudience: variables.targetAudience
+        }
+      });
+    }
   }
 
   // Extract content with type safety and defaults
@@ -93,6 +120,14 @@ export function useLayoutComponent<T = Record<string, any>>({
   //   excludedElements
   // });
   
+  // DEBUG: Log what exclusions are being passed to extractLayoutContent
+  logger.dev(`🔄 [EXTRACT_CONTENT] ${sectionId} passing exclusions to extractLayoutContent:`, {
+    layout,
+    excludedElementsLength: excludedElements.length,
+    excludedElements: excludedElements,
+    hasExclusions: excludedElements.length > 0
+  });
+
   const blockContent = extractLayoutContent(elements, contentSchema, layout, excludedElements) as T;
   
   //   blockContent,

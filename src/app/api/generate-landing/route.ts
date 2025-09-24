@@ -416,7 +416,7 @@ async function generateLandingHandler(req: NextRequest) {
 
         // Phase 2: Strategic Copy Generation
         logger.dev("✍️ Phase 2: Strategic Copy Generation")
-        const copyPrompt = buildStrategicCopyPrompt(onboardingStore, pageStore, constrainedStrategy)
+        const copyPrompt = buildStrategicCopyPrompt(onboardingStore, pageStore, constrainedStrategy, elementsMap)
 
         // Log copy prompt
         logAIPrompt("Copy", copyPrompt, {
@@ -515,9 +515,29 @@ async function generateLandingHandler(req: NextRequest) {
           finalSections: Object.keys(parsed.content).length,
           hasStrategy: !!parsed.strategy,
           totalWarnings: parsed.warnings.length,
-          totalErrors: parsed.errors.length
+          totalErrors: parsed.errors.length,
+          elementsMapSections: Object.keys(elementsMap).length
         });
-        return NextResponse.json(parsed)
+
+        // Include elementsMap in response for client-side exclusion handling
+        // Debug logging to verify elementsMap structure
+        logger.dev("📦 Elements map being sent to client:", {
+          hasElementsMap: !!elementsMap,
+          sections: elementsMap ? Object.keys(elementsMap) : [],
+          firstSection: elementsMap && Object.keys(elementsMap)[0] ? {
+            sectionId: Object.keys(elementsMap)[0],
+            data: elementsMap[Object.keys(elementsMap)[0]]
+          } : null,
+          hasExclusions: elementsMap ? Object.values(elementsMap).some((s: any) => s.excludedElements?.length > 0) : false,
+          totalExclusions: elementsMap ? Object.values(elementsMap).reduce((sum: number, s: any) => sum + (s.excludedElements?.length || 0), 0) : 0
+        });
+
+        const responseWithElementsMap = {
+          ...parsed,
+          elementsMap: elementsMap  // ✅ ADDED: Pass elementsMap to client
+        };
+
+        return NextResponse.json(responseWithElementsMap)
 
       } catch (error) {
         // Classify error for better debugging

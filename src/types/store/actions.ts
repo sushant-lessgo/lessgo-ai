@@ -99,7 +99,7 @@ export interface ContentActions {
   regenerateSection: (sectionId: string, userGuidance?: string) => Promise<void>;
   regenerateElement: (sectionId: string, elementKey: string, variationCount?: number) => Promise<void>;
   regenerateAllContent: () => Promise<void>;
-  updateFromAIResponse: (aiResponse: any) => void;
+  updateFromAIResponse: (aiResponse: any, elementsMap?: any) => void;
   clearAIErrors: () => void;
   
   // Element Variations
@@ -455,7 +455,7 @@ export interface GenerationActions {
   initializeSections: (sectionIds: string[], sectionLayouts: Record<string, string>) => void;
   
   // AI Response Processing
-  updateFromAIResponse: (aiResponse: any) => void;
+  updateFromAIResponse: (aiResponse: any, elementsMap?: any) => void;
   setAIGenerationStatus: (status: Partial<{
     isGenerating: boolean;
     lastGenerated?: number;

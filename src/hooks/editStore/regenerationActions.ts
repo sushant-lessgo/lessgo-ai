@@ -2,6 +2,7 @@
 
 import { useOnboardingStore } from '../useOnboardingStore';
 import { buildFullPrompt } from '@/modules/prompt/buildPrompt';
+import { getCompleteElementsMap } from '@/modules/sections/elementDetermination';
 import type { EditStore, APIRequest } from '@/types/store';
 import type { RegenerationActions } from '@/types/store/actions';
 import type { CanonicalFieldName, InputVariables, HiddenInferredFields } from '@/types/core/index';
@@ -95,12 +96,23 @@ CONTENT-ONLY REGENERATION:
     }
 
     const aiResponse = await response.json();
-    
-    // Apply the AI response to update the store content
-    // Call updateFromAIResponse directly via set/get pattern
+
+    // Compute elements map for regenerated content
     const state = getState();
+    const elementsMap = getCompleteElementsMap(
+      state.onboardingData as any,
+      createPageStoreView(state) as any
+    );
+
+    logger.debug('🔄 [REGENERATION] Computed elementsMap for regeneration:', {
+      sections: Object.keys(elementsMap),
+      totalExclusions: Object.values(elementsMap).reduce((sum: number, s: any) =>
+        sum + (s.excludedElements?.length || 0), 0)
+    });
+
+    // Apply the AI response to update the store content
     if (state.updateFromAIResponse) {
-      state.updateFromAIResponse(aiResponse);
+      state.updateFromAIResponse(aiResponse, elementsMap);
     } else {
       console.error('updateFromAIResponse method not available - regeneration may not complete properly');
     }
@@ -252,12 +264,23 @@ const handleDesignAndCopyRegeneration = async (
     }
 
     const aiResponse = await response.json();
-    
-    // Apply the AI response to update the store content
-    // Call updateFromAIResponse directly via set/get pattern
+
+    // Compute elements map for regenerated content
     const state = getState();
+    const elementsMap = getCompleteElementsMap(
+      state.onboardingData as any,
+      createPageStoreView(state) as any
+    );
+
+    logger.debug('🔄 [REGENERATION] Computed elementsMap for regeneration:', {
+      sections: Object.keys(elementsMap),
+      totalExclusions: Object.values(elementsMap).reduce((sum: number, s: any) =>
+        sum + (s.excludedElements?.length || 0), 0)
+    });
+
+    // Apply the AI response to update the store content
     if (state.updateFromAIResponse) {
-      state.updateFromAIResponse(aiResponse);
+      state.updateFromAIResponse(aiResponse, elementsMap);
     } else {
       console.error('updateFromAIResponse method not available - regeneration may not complete properly');
     }

@@ -154,6 +154,7 @@ export interface AiGenerationMetadata {
   lastGenerated?: number;
   isCustomized: boolean;
   aiGeneratedElements: string[];
+  excludedElements?: string[]; // Elements that were excluded during AI generation
   originalPrompt?: string;
   generationContext?: AiGenerationContext;
   qualityScore?: number;

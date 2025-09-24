@@ -118,8 +118,22 @@ export function createGenerationActions(set: any, get: any) {
     }),
 
   // ✅ AI Response Processing from PageStore (adapted for EditStore structure)
-  updateFromAIResponse: (aiResponse: any) => {
+  updateFromAIResponse: (aiResponse: any, elementsMap?: any) => {
     logger.debug('🔍 updateFromAIResponse RAW INPUT:', JSON.stringify(aiResponse, null, 2));
+
+    // Debug logging for elementsMap
+    logger.debug('📥 elementsMap received in updateFromAIResponse:', {
+      hasElementsMap: !!elementsMap,
+      sections: elementsMap ? Object.keys(elementsMap) : [],
+      firstSectionExclusions: elementsMap && Object.keys(elementsMap)[0] ? {
+        sectionId: Object.keys(elementsMap)[0],
+        excludedElements: elementsMap[Object.keys(elementsMap)[0]]?.excludedElements || []
+      } : null,
+      totalExclusionsReceived: elementsMap ?
+        Object.values(elementsMap).reduce((sum: number, section: any) =>
+          sum + (section.excludedElements?.length || 0), 0) : 0
+    });
+
     set((state: EditStore) => {
       logger.debug('🤖 EditStore: updateFromAIResponse called with:', {
         success: aiResponse.success,
@@ -342,13 +356,52 @@ export function createGenerationActions(set: any, get: any) {
             }
           });
 
+          // ✅ ADDED: Store excluded elements from generation time for UI rendering
+          let excludedElementsFromGeneration: string[] = [];
+          if (elementsMap && elementsMap[sectionId]) {
+            excludedElementsFromGeneration = elementsMap[sectionId].excludedElements || [];
+
+            // ✅ CRITICAL FIX: Validate that exclusions are actually present
+            if (excludedElementsFromGeneration.length === 0) {
+              logger.warn(`⚠️ [GENERATION_EXCLUSIONS] Empty exclusions for ${sectionId}, checking for fallback data:`, {
+                hasExcludedElements: !!elementsMap[sectionId].excludedElements,
+                excludedElementsValue: elementsMap[sectionId].excludedElements,
+                allElementsCount: elementsMap[sectionId].allElements?.length || 0,
+                mandatoryCount: elementsMap[sectionId].mandatoryElements?.length || 0,
+                optionalCount: elementsMap[sectionId].optionalElements?.length || 0,
+                fullSectionMap: elementsMap[sectionId]
+              });
+            } else {
+              logger.debug(`💾 [GENERATION_EXCLUSIONS] Storing ${excludedElementsFromGeneration.length} exclusions for ${sectionId}:`, {
+                excludedCount: excludedElementsFromGeneration.length,
+                excludedElements: excludedElementsFromGeneration,
+                sourceLayout: elementsMap[sectionId].layout,
+                sampleExclusions: excludedElementsFromGeneration.slice(0, 5)
+              });
+            }
+          } else {
+            logger.warn(`⚠️ [GENERATION_EXCLUSIONS] No elementsMap entry for ${sectionId}:`, {
+              hasElementsMap: !!elementsMap,
+              elementsMapKeys: elementsMap ? Object.keys(elementsMap) : [],
+              sectionId: sectionId
+            });
+          }
+
           // Update section metadata
           section.aiMetadata = {
             lastGenerated: Date.now(),
             aiGenerated: true,
             isCustomized: false,
-            aiGeneratedElements: generatedElements
+            aiGeneratedElements: generatedElements,
+            excludedElements: excludedElementsFromGeneration  // ✅ ADDED: Store exclusions
           };
+
+          // ✅ VALIDATION: Confirm exclusions were actually saved
+          logger.debug(`✅ [EXCLUSIONS_SAVED] Section ${sectionId} metadata updated:`, {
+            savedExclusionsCount: section.aiMetadata.excludedElements?.length || 0,
+            savedExclusions: section.aiMetadata.excludedElements || [],
+            aiGenerated: section.aiMetadata.aiGenerated
+          });
           
           // Ensure background type is set
           if (!section.backgroundType) {

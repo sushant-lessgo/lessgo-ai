@@ -472,16 +472,18 @@ export function usePageGeneration(tokenId: string) {
           contentKeys: Object.keys(result.generatedContent),
           sampleContent: Object.entries(result.generatedContent).slice(0, 2),
           success: result.success,
-          isPartial: result.isPartial
+          isPartial: result.isPartial,
+          hasElementsMap: !!result.elementsMap,
+          elementsMapSections: result.elementsMap ? Object.keys(result.elementsMap).length : 0
         });
-        
+
         storeState.updateFromAIResponse({
           success: result.success,
           content: result.generatedContent,
           isPartial: result.isPartial,
           warnings: result.warnings,
           errors: result.errors
-        });
+        }, result.elementsMap);  // ✅ ADDED: Pass elementsMap as second parameter
       } else {
         logger.warn('⚠️ No generated content found in result:', result);
       }
