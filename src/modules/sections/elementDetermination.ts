@@ -1,7 +1,11 @@
-import { layoutElementSchema } from './layoutElementSchema';
+import { layoutElementSchema, getLayoutElements } from './layoutElementSchema';
 import { selectOptionalElements, getAllLayoutElements } from './selectOptionalElements';
 import { sectionList } from './sectionList';
 import type { InputVariables, HiddenInferredFields } from '@/types/core/index';
+import { logger } from '@/lib/logger';
+
+// Debug mode environment variable
+const DEBUG_ELEMENT_SELECTION = process.env.DEBUG_ELEMENT_SELECTION === 'true';
 
 // ✅ FIXED: Store type definitions using proper store types
 type OnboardingStore = {
@@ -192,11 +196,57 @@ export function getCompleteElementsMap(
   onboardingStore: OnboardingStore,
   pageStore: PageStore
 ): ElementsMap {
+  if (DEBUG_ELEMENT_SELECTION) {
+    logger.group(`🌟 [ELEMENT_MAP] Starting Complete Elements Map Generation`, () => {
+      logger.dev(`📋 Page Layout:`, {
+        sections: pageStore.layout.sections,
+        sectionLayouts: pageStore.layout.sectionLayouts
+      });
+    });
+  }
+
   // Map store data to variables
   const variables = mapStoreToVariables(onboardingStore, pageStore);
-  
+
+  if (DEBUG_ELEMENT_SELECTION) {
+    logger.dev(`🎯 Mapped Variables:`, {
+      variableCount: Object.keys(variables).length,
+      variables: variables
+    });
+  }
+
   // Create complete elements map
-  return createElementsMap(pageStore, variables);
+  const elementsMap = createElementsMap(pageStore, variables);
+
+  if (DEBUG_ELEMENT_SELECTION) {
+    logger.group(`📊 Final Elements Map Summary`, () => {
+      const sectionSummary = Object.entries(elementsMap).map(([sectionId, data]) => ({
+        sectionId,
+        sectionType: data.sectionType,
+        layout: data.layout,
+        mandatoryCount: data.mandatory.length,
+        optionalCount: data.optional.length,
+        totalElements: data.all.length,
+        mandatory: data.mandatory,
+        optional: data.optional,
+        excluded: data.excluded
+      }));
+
+      logger.dev(`🎯 Sections Processed: ${sectionSummary.length}`);
+      sectionSummary.forEach(section => {
+        logger.dev(`  📋 ${section.sectionId} (${section.sectionType}_${section.layout}):`, {
+          total: section.totalElements,
+          mandatory: section.mandatoryCount,
+          optional: section.optionalCount,
+          excludedCount: section.excluded.length,
+          optionalElements: section.optional,
+          excludedElements: section.excluded
+        });
+      });
+    });
+  }
+
+  return elementsMap;
 }
 
 /**
@@ -260,17 +310,17 @@ export function getAllPossibleElements(layout: string): {
   optional: string[];
   all: string[];
 } {
-  const layoutSchema = layoutElementSchema[layout];
-  
-  if (!layoutSchema) {
+  const layoutElements = getLayoutElements(layout);
+
+  if (layoutElements.length === 0) {
     return { mandatory: [], optional: [], all: [] };
   }
 
-  const mandatory = layoutSchema
+  const mandatory = layoutElements
     .filter(element => element.mandatory)
     .map(element => element.element);
 
-  const optional = layoutSchema
+  const optional = layoutElements
     .filter(element => !element.mandatory)
     .map(element => element.element);
 

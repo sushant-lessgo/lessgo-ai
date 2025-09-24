@@ -46,6 +46,15 @@ export function getAllElements(schema: LayoutElement[] | UnifiedLayoutElement): 
   return schema;
 }
 
+// New helper function to get layout elements safely for any schema format
+export function getLayoutElements(layoutName: string): LayoutElement[] {
+  const schema = layoutElementSchema[layoutName];
+  if (!schema) {
+    return [];
+  }
+  return getAllElements(schema);
+}
+
 export function getSectionElements(schema: LayoutElement[] | UnifiedLayoutElement): LayoutElement[] {
   if (isUnifiedSchema(schema)) {
     return schema.sectionElements;

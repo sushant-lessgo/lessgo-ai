@@ -71,7 +71,8 @@
       "Read(//c/c/Users/susha/lessgo-ai/**)",
       "Bash(pkill:*)",
       "Bash(sed:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(git show:*)"
     ],
     "deny": [],
     "ask": [],

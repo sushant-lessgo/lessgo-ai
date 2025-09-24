@@ -11,6 +11,7 @@ import { withAIRateLimit } from '@/lib/rateLimit'
 // Debug mode environment variables
 const DEBUG_AI_PROMPTS = process.env.DEBUG_AI_PROMPTS === 'true';
 const DEBUG_AI_RESPONSES = process.env.DEBUG_AI_RESPONSES === 'true';
+const DEBUG_ELEMENT_SELECTION = process.env.DEBUG_ELEMENT_SELECTION === 'true';
 
 /**
  * Smart truncation for logging large content
@@ -68,6 +69,89 @@ function logAIResponse(responseType: string, response: any, metadata?: any) {
   } else {
     logger.debug(`📤 ${responseType} Response Preview:`, smartTruncate(content, 1000));
   }
+}
+
+/**
+ * Classifies error types to help with debugging and recovery
+ */
+function classifyError(error: any): {
+  type: 'validation' | 'network' | 'parsing' | 'schema' | 'ai_provider' | 'unknown';
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  recoverySuggestion: string;
+  category: string;
+} {
+  const message = error instanceof Error ? error.message : String(error);
+  const stack = error instanceof Error ? error.stack : '';
+
+  // Validation errors
+  if (message.includes('Missing required store data') ||
+      message.includes('missing layout sections') ||
+      message.includes('validation')) {
+    return {
+      type: 'validation',
+      severity: 'high',
+      recoverySuggestion: 'Check onboarding and page store data integrity',
+      category: 'Input Validation'
+    };
+  }
+
+  // Schema/Layout errors
+  if (message.includes('layoutElementSchema') ||
+      message.includes('unified schema') ||
+      message.includes('Elements map generation failed') ||
+      (stack && stack.includes('layoutElementSchema'))) {
+    return {
+      type: 'schema',
+      severity: 'critical',
+      recoverySuggestion: 'Check unified schema migration and element determination logic',
+      category: 'Schema Migration'
+    };
+  }
+
+  // AI Provider errors
+  if (message.includes('AI provider call failed') ||
+      message.includes('OpenAI') ||
+      message.includes('Nebius') ||
+      message.includes('callAIProvider')) {
+    return {
+      type: 'ai_provider',
+      severity: 'medium',
+      recoverySuggestion: 'Check API keys, rate limits, and network connectivity',
+      category: 'AI Provider'
+    };
+  }
+
+  // Strategy/Parsing errors
+  if (message.includes('Strategy prompt building failed') ||
+      message.includes('parsing') ||
+      message.includes('buildStrategyPrompt')) {
+    return {
+      type: 'parsing',
+      severity: 'high',
+      recoverySuggestion: 'Check prompt building logic and data formatting',
+      category: 'Prompt Generation'
+    };
+  }
+
+  // Network errors
+  if (message.includes('fetch') ||
+      message.includes('network') ||
+      message.includes('timeout') ||
+      message.includes('ENOTFOUND')) {
+    return {
+      type: 'network',
+      severity: 'medium',
+      recoverySuggestion: 'Check network connectivity and API endpoints',
+      category: 'Network'
+    };
+  }
+
+  return {
+    type: 'unknown',
+    severity: 'high',
+    recoverySuggestion: 'Review full error details and stack trace',
+    category: 'Unknown'
+  };
 }
 
 async function generateLandingHandler(req: NextRequest) {
@@ -139,8 +223,40 @@ async function generateLandingHandler(req: NextRequest) {
         // Phase 1: Strategic Analysis
         logger.dev("📊 Phase 1: Strategic Analysis")
 
-        // Generate card requirements debug report
-        const elementsMap = getCompleteElementsMap(onboardingStore, pageStore);
+        // Step 1: Validate input data
+        logger.dev("🔍 Step 1: Validating input data...")
+        if (!onboardingStore || !pageStore) {
+          throw new Error("Missing required store data for 2-phase generation");
+        }
+
+        if (!pageStore.layout?.sections) {
+          throw new Error("PageStore missing layout sections data");
+        }
+
+        logger.dev("✅ Input validation passed:", {
+          sections: pageStore.layout.sections.length,
+          hasOnboardingData: !!onboardingStore.oneLiner,
+          hasFeatures: !!onboardingStore.featuresFromAI?.length
+        });
+
+        // Step 2: Generate elements map
+        logger.dev("🗺️ Step 2: Generating complete elements map...");
+        let elementsMap;
+        try {
+          elementsMap = getCompleteElementsMap(onboardingStore, pageStore);
+          logger.dev("✅ Elements map generated successfully:", {
+            sectionsProcessed: Object.keys(elementsMap).length,
+            firstSection: Object.keys(elementsMap)[0]
+          });
+        } catch (mapError) {
+          logger.error("❌ Failed to generate elements map:", {
+            error: mapError instanceof Error ? mapError.message : String(mapError),
+            onboardingStoreKeys: Object.keys(onboardingStore),
+            pageStoreLayout: pageStore.layout
+          });
+          throw new Error(`Elements map generation failed: ${mapError instanceof Error ? mapError.message : String(mapError)}`);
+        }
+
         const userFeatureCount = onboardingStore.featuresFromAI?.length;
 
         // Log card requirements analysis
@@ -153,7 +269,23 @@ async function generateLandingHandler(req: NextRequest) {
           logger.debug("🎯 Card Requirements Analysis:", cardRequirementsReport);
         }
 
-        const strategyPrompt = buildStrategyPrompt(onboardingStore, pageStore, layoutRequirements)
+        // Step 3: Build strategy prompt
+        logger.dev("📝 Step 3: Building strategy prompt...");
+        let strategyPrompt;
+        try {
+          strategyPrompt = buildStrategyPrompt(onboardingStore, pageStore, layoutRequirements);
+          logger.dev("✅ Strategy prompt built successfully:", {
+            promptLength: strategyPrompt.length,
+            hasLayoutRequirements: !!layoutRequirements,
+            sections: layoutRequirements?.sections?.length || 0
+          });
+        } catch (promptError) {
+          logger.error("❌ Failed to build strategy prompt:", {
+            error: promptError instanceof Error ? promptError.message : String(promptError),
+            stackTrace: promptError instanceof Error ? promptError.stack : undefined
+          });
+          throw new Error(`Strategy prompt building failed: ${promptError instanceof Error ? promptError.message : String(promptError)}`);
+        }
 
         // Log strategy prompt
         logAIPrompt("Strategy", strategyPrompt, {
@@ -162,7 +294,27 @@ async function generateLandingHandler(req: NextRequest) {
           sectionsCount: Object.keys(elementsMap).length
         });
 
-        let strategyResult = await callAIProvider(strategyPrompt, useOpenAI, model)
+        // Step 4: Call AI provider for strategy
+        logger.dev("🤖 Step 4: Calling AI provider for strategy generation...");
+        let strategyResult;
+        try {
+          strategyResult = await callAIProvider(strategyPrompt, useOpenAI, model);
+          logger.dev("✅ AI provider call completed:", {
+            success: strategyResult.success,
+            provider: useOpenAI ? 'OpenAI' : 'Nebius',
+            model,
+            hasData: !!strategyResult.data,
+            hasError: !!strategyResult.error
+          });
+        } catch (aiError) {
+          logger.error("❌ AI provider call failed:", {
+            error: aiError instanceof Error ? aiError.message : String(aiError),
+            provider: useOpenAI ? 'OpenAI' : 'Nebius',
+            model,
+            promptLength: strategyPrompt.length
+          });
+          throw new Error(`AI provider call failed: ${aiError instanceof Error ? aiError.message : String(aiError)}`);
+        }
 
         // Log strategy response
         if (strategyResult.success) {
@@ -368,7 +520,33 @@ async function generateLandingHandler(req: NextRequest) {
         return NextResponse.json(parsed)
 
       } catch (error) {
-        logger.error("❌ 2-phase generation failed:", error)
+        // Classify error for better debugging
+        const errorClassification = classifyError(error);
+
+        // Enhanced error logging with full context
+        const errorDetails = {
+          message: error instanceof Error ? error.message : String(error),
+          name: error instanceof Error ? error.name : 'Unknown',
+          stack: error instanceof Error ? error.stack : undefined,
+          type: typeof error,
+          classification: errorClassification,
+          context: {
+            hasOnboardingStore: !!onboardingStore,
+            hasPageStore: !!pageStore,
+            hasLayoutRequirements: !!layoutRequirements,
+            sections: pageStore?.layout?.sections?.length || 0,
+            featuresCount: onboardingStore?.featuresFromAI?.length || 0,
+          },
+          timestamp: new Date().toISOString()
+        };
+
+        logger.error(`❌ 2-phase generation failed [${errorClassification.category} - ${errorClassification.severity.toUpperCase()}]:`, errorDetails);
+        logger.error(`💡 Recovery suggestion: ${errorClassification.recoverySuggestion}`);
+
+        // Log the full error object for debugging
+        if (process.env.NODE_ENV === 'development') {
+          logger.error("🔍 Full error object:", error);
+        }
 
         // Final fallback to single-phase
         try {
@@ -383,7 +561,19 @@ async function generateLandingHandler(req: NextRequest) {
             return NextResponse.json(parsed)
           }
         } catch (fallbackError) {
-          logger.error("❌ Emergency fallback also failed:", fallbackError)
+          const fallbackErrorDetails = {
+            message: fallbackError instanceof Error ? fallbackError.message : String(fallbackError),
+            name: fallbackError instanceof Error ? fallbackError.name : 'Unknown',
+            stack: fallbackError instanceof Error ? fallbackError.stack : undefined,
+            originalError: errorDetails,
+            timestamp: new Date().toISOString()
+          };
+
+          logger.error("❌ Emergency fallback also failed:", fallbackErrorDetails);
+
+          if (process.env.NODE_ENV === 'development') {
+            logger.error("🔍 Full fallback error object:", fallbackError);
+          }
         }
 
         throw error

@@ -31,18 +31,25 @@ For enhanced AI debugging and troubleshooting, set these environment variables i
 
 ```bash
 # AI Debug Controls
-DEBUG_AI_PROMPTS=true     # Log full AI prompts (strategy + copy generation)
-DEBUG_AI_RESPONSES=true   # Log full AI responses with detailed analysis
+DEBUG_AI_PROMPTS=true           # Log full AI prompts (strategy + copy generation)
+DEBUG_AI_RESPONSES=true         # Log full AI responses with detailed analysis
+DEBUG_ELEMENT_SELECTION=true    # Log element selection scoring and decisions
 
 # Default behavior (when not set or false):
 # - Prompts are logged with smart truncation (~800 chars)
 # - Responses are logged with smart truncation (~1000 chars)
 # - All prompt/response metadata is still logged (length, sections, usage, etc.)
+# - Element selection runs silently without detailed scoring logs
 ```
 
 **Debug Output Features:**
 - **Prompt Debugging**: Full strategy and copy generation prompts with metadata
 - **Response Analysis**: Token usage, content length, parsing steps
+- **Element Selection**: Detailed scoring breakdown for optional elements
+  - Rule evaluation with condition matching
+  - Score calculation and threshold comparison
+  - Final included/excluded element decisions
+  - Section-by-section element mapping
 - **Card Requirements**: Detailed reports on UIBlock constraints and mappings
 - **JSON Validation**: Step-by-step parsing and validation with error context
 - **Strategy Mapping**: Card count determination and constraint application

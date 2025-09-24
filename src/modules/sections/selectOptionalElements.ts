@@ -1,5 +1,9 @@
-import { layoutElementSchema, getAllElements } from './layoutElementSchema';
+import { layoutElementSchema, getAllElements, getLayoutElements } from './layoutElementSchema';
 import type { InputVariables, HiddenInferredFields } from '@/types/core/index';
+import { logger } from '@/lib/logger';
+
+// Debug mode environment variable
+const DEBUG_ELEMENT_SELECTION = process.env.DEBUG_ELEMENT_SELECTION === 'true';
 
 type Variables = Partial<InputVariables> & Partial<HiddenInferredFields>;
 
@@ -1776,6 +1780,91 @@ const elementRules: SectionLayoutRules = {
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 }
     ],
     minScore: 5
+  },
+  {
+    element: "trust_item_4",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 4 },
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 },
+      { variable: "copyIntent", values: ["desire-led"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "trust_item_5",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-5"], weight: 4 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "it-decision-makers"], weight: 3 },
+      { variable: "awarenessLevel", values: ["product-aware"], weight: 3 },
+      { variable: "copyIntent", values: ["desire-led"], weight: 2 }
+    ],
+    minScore: 7
+  },
+  {
+    element: "customer_count",
+    conditions: [
+      { variable: "startupStage", values: ["users-500-1k", "users-1k-5k", "mrr-growth", "seed-funded"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
+      { variable: "landingPageGoals", values: ["free-trial", "buy-now", "signup"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "rating_value",
+    conditions: [
+      { variable: "startupStage", values: ["users-250-500", "users-500-1k", "users-1k-5k"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
+      { variable: "landingPageGoals", values: ["free-trial", "buy-now"], weight: 2 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "rating_count",
+    conditions: [
+      { variable: "startupStage", values: ["users-250-500", "users-500-1k", "users-1k-5k"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
+      { variable: "landingPageGoals", values: ["free-trial", "buy-now"], weight: 2 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "show_social_proof",
+    conditions: [
+      { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-2", "level-3", "level-4", "level-5"], weight: 3 },
+      { variable: "awarenessLevel", values: ["unaware", "problem-aware", "solution-aware"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "show_customer_avatars",
+    conditions: [
+      { variable: "startupStage", values: ["users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4"], weight: 3 },
+      { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 2 },
+      { variable: "targetAudience", values: ["solopreneurs", "small-business-owners", "content-creators"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "customer_names",
+    conditions: [
+      { variable: "startupStage", values: ["users-1k-5k", "mrr-growth", "seed-funded"], weight: 4 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 3 },
+      { variable: "copyIntent", values: ["desire-led"], weight: 2 }
+    ],
+    minScore: 7
+  },
+  {
+    element: "avatar_urls",
+    conditions: [
+      { variable: "startupStage", values: ["users-1k-5k", "mrr-growth", "seed-funded"], weight: 4 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 3 },
+      { variable: "copyIntent", values: ["desire-led"], weight: 2 }
+    ],
+    minScore: 7
   }
 ],
 
@@ -4724,9 +4813,26 @@ export function selectOptionalElements(
   layoutName: string,
   variables: Variables
 ): string[] {
+  const ruleKey = `${sectionType}_${layoutName}`;
+
+  // Debug logging setup
+  if (DEBUG_ELEMENT_SELECTION) {
+    logger.group(`🎯 [ELEMENT_SELECTION] Processing ${ruleKey}`, () => {
+      logger.dev(`📋 Input Variables:`, {
+        sectionType,
+        layoutName,
+        variableKeys: Object.keys(variables),
+        variables: variables
+      });
+    });
+  }
+
   // Get the layout schema to identify optional elements
   const layoutSchema = layoutElementSchema[layoutName];
   if (!layoutSchema) {
+    if (DEBUG_ELEMENT_SELECTION) {
+      logger.debug(`❌ Layout "${layoutName}" not found in schema`);
+    }
     console.warn(`Layout "${layoutName}" not found in schema`);
     return [];
   }
@@ -4736,38 +4842,106 @@ export function selectOptionalElements(
     .filter(element => !element.mandatory)
     .map(element => element.element);
 
+  if (DEBUG_ELEMENT_SELECTION) {
+    logger.dev(`📋 Found ${optionalElements.length} optional elements:`, optionalElements);
+  }
+
   // Get rules for this section+layout combination
-  const ruleKey = `${sectionType}_${layoutName}`;
   const rules = elementRules[ruleKey];
-  
+
   if (!rules) {
+    if (DEBUG_ELEMENT_SELECTION) {
+      logger.dev(`⚠️ No rules found for ${ruleKey} - returning empty array`);
+    }
     // No specific rules found, return empty array (only mandatory elements)
     return [];
   }
 
+  if (DEBUG_ELEMENT_SELECTION) {
+    logger.dev(`📊 Found ${rules.length} rules to evaluate`);
+  }
+
   const selectedElements: string[] = [];
+  const evaluationResults: Array<{element: string, score: number, minScore: number, included: boolean, matchedConditions: string[]}> = [];
 
   // Process each rule to determine if element should be included
   for (const rule of rules) {
     // Only consider elements that are actually optional for this layout
     if (!optionalElements.includes(rule.element)) {
+      if (DEBUG_ELEMENT_SELECTION) {
+        logger.dev(`⏭️ Skipping ${rule.element} - not an optional element for this layout`);
+      }
       continue;
     }
 
     let totalScore = 0;
+    const matchedConditions: string[] = [];
 
-    // Calculate score based on matching conditions
-    for (const condition of rule.conditions) {
-      const variableValue = variables[condition.variable];
-      if (variableValue && condition.values.includes(variableValue)) {
-        totalScore += condition.weight;
+    if (DEBUG_ELEMENT_SELECTION) {
+      logger.group(`🔍 Evaluating: ${rule.element}`, () => {
+        // Calculate score based on matching conditions
+        for (const condition of rule.conditions) {
+          const variableValue = variables[condition.variable];
+          const isMatch = variableValue && condition.values.includes(variableValue);
+
+          if (isMatch) {
+            totalScore += condition.weight;
+            matchedConditions.push(`${condition.variable}: ${variableValue} (weight: ${condition.weight})`);
+            logger.dev(`  ✅ ${condition.variable}: ${variableValue} (weight: ${condition.weight}) ✓`);
+          } else {
+            logger.dev(`  ❌ ${condition.variable}: ${variableValue || 'undefined'} (needs: ${condition.values.join(' or ')}) ✗`);
+          }
+        }
+
+        const included = totalScore >= rule.minScore;
+        logger.dev(`  📊 Score: ${totalScore}/${rule.minScore} → ${included ? '✅ INCLUDED' : '❌ EXCLUDED'}`);
+      });
+    } else {
+      // Non-debug calculation (same logic, no logging)
+      for (const condition of rule.conditions) {
+        const variableValue = variables[condition.variable];
+        if (variableValue && condition.values.includes(variableValue)) {
+          totalScore += condition.weight;
+          matchedConditions.push(`${condition.variable}: ${variableValue}`);
+        }
       }
     }
 
+    const included = totalScore >= rule.minScore;
+
+    // Store evaluation result for final summary
+    evaluationResults.push({
+      element: rule.element,
+      score: totalScore,
+      minScore: rule.minScore,
+      included,
+      matchedConditions
+    });
+
     // Include element if score meets threshold
-    if (totalScore >= rule.minScore) {
+    if (included) {
       selectedElements.push(rule.element);
     }
+  }
+
+  // Final debug summary
+  if (DEBUG_ELEMENT_SELECTION) {
+    const includedElements = evaluationResults.filter(r => r.included).map(r => r.element);
+    const excludedElements = evaluationResults.filter(r => !r.included).map(r => r.element);
+
+    logger.group(`✅ Final Selection Summary for ${ruleKey}`, () => {
+      logger.dev(`🎯 INCLUDED (${includedElements.length}):`, includedElements);
+      logger.dev(`🚫 EXCLUDED (${excludedElements.length}):`, excludedElements);
+
+      if (evaluationResults.length > 0) {
+        logger.dev(`📈 Detailed Results:`, evaluationResults.map(r => ({
+          element: r.element,
+          score: `${r.score}/${r.minScore}`,
+          result: r.included ? 'INCLUDED' : 'EXCLUDED',
+          matches: r.matchedConditions.length
+        })));
+      }
+    });
   }
 
   return selectedElements;
@@ -4820,12 +4994,12 @@ export function getAllLayoutElements(
   all: string[];
   excluded: string[];
 } {
-  const layoutSchema = layoutElementSchema[layoutName];
-  if (!layoutSchema) {
+  const layoutElements = getLayoutElements(layoutName);
+  if (layoutElements.length === 0) {
     return { mandatory: [], optional: [], all: [], excluded: [] };
   }
 
-  const mandatory = layoutSchema
+  const mandatory = layoutElements
     .filter(element => element.mandatory)
     .map(element => element.element);
 
