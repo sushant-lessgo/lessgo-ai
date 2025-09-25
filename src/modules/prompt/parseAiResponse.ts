@@ -1150,7 +1150,8 @@ function processSectionContent(
 function isPipeSeparatedField(elementKey: string): boolean {
   const pipeSeparatedPatterns = [
     'titles', 'descriptions', 'quotes', 'names',
-    'items', 'labels', 'steps', 'list'
+    'items', 'labels', 'steps', 'list', 'types',
+    'points', 'features', 'benefits', 'metrics'
   ];
   return pipeSeparatedPatterns.some(pattern => elementKey.includes(pattern));
 }
