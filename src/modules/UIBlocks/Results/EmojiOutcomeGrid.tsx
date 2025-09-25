@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
-import { 
-  EditableAdaptiveHeadline, 
-  EditableAdaptiveText 
+import {
+  EditableAdaptiveHeadline,
+  EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
@@ -40,16 +40,55 @@ const CONTENT_SCHEMA = {
 
 // Parse emoji outcome data from pipe-separated strings
 const parseOutcomeData = (emojis: string, outcomes: string, descriptions: string): EmojiOutcome[] => {
+  // 🎯 [UIBLOCK_DEBUG] Log raw input data
+  console.log('🎯 [UIBLOCK_DEBUG] EmojiOutcomeGrid parseOutcomeData raw input:', {
+    emojis,
+    outcomes,
+    descriptions,
+    inputLengths: {
+      emojis: emojis?.length || 0,
+      outcomes: outcomes?.length || 0,
+      descriptions: descriptions?.length || 0
+    },
+    inputTypes: {
+      emojis: typeof emojis,
+      outcomes: typeof outcomes,
+      descriptions: typeof descriptions
+    }
+  });
+
   const emojiList = emojis.split('|').map(e => e.trim()).filter(e => e);
   const outcomeList = outcomes.split('|').map(o => o.trim()).filter(o => o);
   const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
 
-  return emojiList.map((emoji, index) => ({
+  // 🎯 [UIBLOCK_DEBUG] Log parsed arrays
+  console.log('🎯 [UIBLOCK_DEBUG] EmojiOutcomeGrid parsed arrays:', {
+    emojiList,
+    outcomeList,
+    descriptionList,
+    counts: {
+      emojis: emojiList.length,
+      outcomes: outcomeList.length,
+      descriptions: descriptionList.length
+    }
+  });
+
+  const finalOutcomes = emojiList.map((emoji, index) => ({
     id: `outcome-${index}`,
     emoji,
     outcome: outcomeList[index] || 'Great Result',
     description: descriptionList[index] || 'Amazing outcomes await you'
   }));
+
+  // 🎯 [UIBLOCK_DEBUG] Log final parsed outcomes
+  console.log('🎯 [UIBLOCK_DEBUG] EmojiOutcomeGrid final outcomes:', {
+    finalOutcomes,
+    outcomeCount: finalOutcomes.length,
+    firstOutcome: finalOutcomes[0],
+    lastOutcome: finalOutcomes[finalOutcomes.length - 1]
+  });
+
+  return finalOutcomes;
 };
 
 // Helper function to add a new outcome
@@ -219,6 +258,22 @@ export default function EmojiOutcomeGrid(props: EmojiOutcomeGridProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
+  // 🎯 [UIBLOCK_DEBUG] Log what blockContent the component receives
+  useEffect(() => {
+    console.log('🎯 [UIBLOCK_DEBUG] EmojiOutcomeGrid received blockContent:', {
+      blockContent,
+      contentKeys: Object.keys(blockContent || {}),
+      emojisValue: blockContent?.emojis,
+      outcomesValue: blockContent?.outcomes,
+      descriptionsValue: blockContent?.descriptions,
+      contentTypes: {
+        emojis: typeof blockContent?.emojis,
+        outcomes: typeof blockContent?.outcomes,
+        descriptions: typeof blockContent?.descriptions
+      }
+    });
+  }, [blockContent]);
+
   // Parse outcome data
   const outcomes = parseOutcomeData(
     blockContent.emojis,
@@ -230,19 +285,52 @@ export default function EmojiOutcomeGrid(props: EmojiOutcomeGridProps) {
   const handleEmojiEdit = (index: number, value: string) => {
     const emojiList = blockContent.emojis.split('|');
     emojiList[index] = value;
-    handleContentUpdate('emojis', emojiList.join('|'));
+    const newValue = emojiList.join('|');
+
+    // 🎯 [CONTENT_UPDATE_DEBUG] Log emoji updates
+    console.log('🎯 [CONTENT_UPDATE_DEBUG] EmojiOutcomeGrid emoji update:', {
+      index,
+      newValue,
+      oldValue: blockContent.emojis,
+      emojiList,
+      listLength: emojiList.length
+    });
+
+    handleContentUpdate('emojis', newValue);
   };
 
   const handleOutcomeEdit = (index: number, value: string) => {
     const outcomeList = blockContent.outcomes.split('|');
     outcomeList[index] = value;
-    handleContentUpdate('outcomes', outcomeList.join('|'));
+    const newValue = outcomeList.join('|');
+
+    // 🎯 [CONTENT_UPDATE_DEBUG] Log outcome updates
+    console.log('🎯 [CONTENT_UPDATE_DEBUG] EmojiOutcomeGrid outcome update:', {
+      index,
+      newValue,
+      oldValue: blockContent.outcomes,
+      outcomeList,
+      listLength: outcomeList.length
+    });
+
+    handleContentUpdate('outcomes', newValue);
   };
 
   const handleDescriptionEdit = (index: number, value: string) => {
     const descriptionList = blockContent.descriptions.split('|');
     descriptionList[index] = value;
-    handleContentUpdate('descriptions', descriptionList.join('|'));
+    const newValue = descriptionList.join('|');
+
+    // 🎯 [CONTENT_UPDATE_DEBUG] Log description updates
+    console.log('🎯 [CONTENT_UPDATE_DEBUG] EmojiOutcomeGrid description update:', {
+      index,
+      newValue,
+      oldValue: blockContent.descriptions,
+      descriptionList,
+      listLength: descriptionList.length
+    });
+
+    handleContentUpdate('descriptions', newValue);
   };
 
   // Handle adding a new outcome
