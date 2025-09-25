@@ -730,7 +730,7 @@ export default function InteractiveTestimonialMap(props: LayoutComponentProps) {
           <div className="text-center">
             <EditableAdaptiveText
               mode={mode}
-              value={blockContent.community_features_title || ''}
+              value={blockContent.community_features_title || CONTENT_SCHEMA.community_features_title.default}
               onEdit={(value) => handleContentUpdate('community_features_title', value)}
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
@@ -760,7 +760,7 @@ export default function InteractiveTestimonialMap(props: LayoutComponentProps) {
                 </div>
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.global_reach_title || ''}
+                  value={blockContent.global_reach_title || CONTENT_SCHEMA.global_reach_title.default}
                   onEdit={(value) => handleContentUpdate('global_reach_title', value)}
                   backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
@@ -773,7 +773,7 @@ export default function InteractiveTestimonialMap(props: LayoutComponentProps) {
                 />
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.global_reach_stat || ''}
+                  value={blockContent.global_reach_stat || CONTENT_SCHEMA.global_reach_stat.default}
                   onEdit={(value) => handleContentUpdate('global_reach_stat', value)}
                   backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
@@ -802,7 +802,7 @@ export default function InteractiveTestimonialMap(props: LayoutComponentProps) {
                 </div>
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.currency_title || ''}
+                  value={blockContent.currency_title || CONTENT_SCHEMA.currency_title.default}
                   onEdit={(value) => handleContentUpdate('currency_title', value)}
                   backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
@@ -815,7 +815,7 @@ export default function InteractiveTestimonialMap(props: LayoutComponentProps) {
                 />
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.currency_description || ''}
+                  value={blockContent.currency_description || CONTENT_SCHEMA.currency_description.default}
                   onEdit={(value) => handleContentUpdate('currency_description', value)}
                   backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
@@ -844,7 +844,7 @@ export default function InteractiveTestimonialMap(props: LayoutComponentProps) {
                 </div>
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.support_title || ''}
+                  value={blockContent.support_title || CONTENT_SCHEMA.support_title.default}
                   onEdit={(value) => handleContentUpdate('support_title', value)}
                   backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
@@ -857,7 +857,7 @@ export default function InteractiveTestimonialMap(props: LayoutComponentProps) {
                 />
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.support_description || ''}
+                  value={blockContent.support_description || CONTENT_SCHEMA.support_description.default}
                   onEdit={(value) => handleContentUpdate('support_description', value)}
                   backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
@@ -886,7 +886,7 @@ export default function InteractiveTestimonialMap(props: LayoutComponentProps) {
                 </div>
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.collaboration_title || ''}
+                  value={blockContent.collaboration_title || CONTENT_SCHEMA.collaboration_title.default}
                   onEdit={(value) => handleContentUpdate('collaboration_title', value)}
                   backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
@@ -899,7 +899,7 @@ export default function InteractiveTestimonialMap(props: LayoutComponentProps) {
                 />
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.collaboration_description || ''}
+                  value={blockContent.collaboration_description || CONTENT_SCHEMA.collaboration_description.default}
                   onEdit={(value) => handleContentUpdate('collaboration_description', value)}
                   backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}

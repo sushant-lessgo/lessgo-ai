@@ -1194,6 +1194,61 @@ function processElement(sectionId: string, elementKey: string, value: any): {
     return result
   }
 
+  // Special handling: prevent arrays from being assigned to ANY singular fields
+  if (Array.isArray(value) && !isPipeSeparatedField(elementKey)) {
+    // Any non-pipe-separated field that receives an array should use the first element
+    result.warnings.push(`${sectionId}.${elementKey}: Singular field received array, using first element`)
+
+    if (elementKey.includes('icon')) {
+      // Icon fields get emoji fallback if empty
+      result.value = value[0] || '❓'
+    } else {
+      // Other singular fields use first element or empty string
+      result.value = value[0] || ''
+    }
+    return result
+  }
+
+  // Special handling: clean up placeholder text in icon fields
+  if (typeof value === 'string' && elementKey.includes('icon')) {
+    const stringValue = value.trim()
+    // Expanded placeholder detection patterns
+    const invalidPatterns = [
+      'url_to_', '.jpg', '.png', '.svg', '.gif', '.webp',
+      'image', 'placeholder', 'icon_', 'path_to',
+      'assets/', 'src/', 'http', 'https', 'www.',
+      'default', 'generic', 'template'
+    ]
+
+    const isInvalidIcon = invalidPatterns.some(pattern => stringValue.toLowerCase().includes(pattern)) ||
+                         stringValue.length > 10 || // Icons should be short (1-4 characters typically)
+                         (stringValue.length > 4 && !/^[\p{Emoji}]+$/u.test(stringValue)) // Non-emoji text longer than 4 chars
+
+    if (isInvalidIcon) {
+      result.warnings.push(`${sectionId}.${elementKey}: Invalid icon value "${stringValue}", using contextual emoji`)
+
+      // Enhanced contextual default emojis based on field name
+      if (elementKey.includes('success')) result.value = '🎉'
+      else if (elementKey.includes('metric')) result.value = '📊'
+      else if (elementKey.includes('timeline')) result.value = '📅'
+      else if (elementKey.includes('feature')) result.value = '⭐'
+      else if (elementKey.includes('benefit')) result.value = '✅'
+      else if (elementKey.includes('highlight')) result.value = '💡'
+      else if (elementKey.includes('mechanism')) result.value = '⚙️'
+      else if (elementKey.includes('process')) result.value = '🔄'
+      else if (elementKey.includes('step')) result.value = '👣'
+      else if (elementKey.includes('security')) result.value = '🔒'
+      else if (elementKey.includes('performance')) result.value = '⚡'
+      else if (elementKey.includes('analytics')) result.value = '📈'
+      else if (elementKey.includes('integration')) result.value = '🔗'
+      else if (elementKey.includes('user')) result.value = '👤'
+      else if (elementKey.includes('goal')) result.value = '🎯'
+      else result.value = '❓'
+
+      return result
+    }
+  }
+
   // Convert JSON arrays to pipe-separated strings for appropriate fields
   if (Array.isArray(value) && isPipeSeparatedField(elementKey)) {
     // Validate array items before conversion
@@ -4501,34 +4556,60 @@ function processVisualObjectionTilesContent(sectionId: string, content: SectionC
     hasIssues: false
   };
 
-  // Check for individual tile fields (preferred format)
   let validTiles = 0;
-  for (let i = 1; i <= 6; i++) {
-    const objectionField = `tile_objection_${i}`;
-    const responseField = `tile_response_${i}`;
 
-    const hasObjection = content[objectionField];
-    const hasResponse = content[responseField];
+  // First check for new pipe-separated format (preferred)
+  if (content.objection_questions && content.objection_responses) {
+    const questions = typeof content.objection_questions === 'string'
+      ? content.objection_questions.split('|').filter(q => q.trim())
+      : [];
+    const responses = typeof content.objection_responses === 'string'
+      ? content.objection_responses.split('|').filter(r => r.trim())
+      : [];
 
-    if (hasObjection || hasResponse) {
-      if (!hasObjection) {
-        result.warnings.push(`${sectionId}: Missing ${objectionField} for tile ${i}`);
-        result.hasIssues = true;
-      }
-      if (!hasResponse) {
-        result.warnings.push(`${sectionId}: Missing ${responseField} for tile ${i}`);
-        result.hasIssues = true;
-      }
+    validTiles = Math.min(questions.length, responses.length);
 
-      if (hasObjection && hasResponse) {
-        validTiles++;
-      }
+    if (questions.length !== responses.length) {
+      result.warnings.push(`${sectionId}: Objection questions (${questions.length}) and responses (${responses.length}) count mismatch`);
+      result.hasIssues = true;
+    }
+
+    if (validTiles < 3) {
+      result.warnings.push(`${sectionId}: VisualObjectionTiles needs at least 3 objection pairs, found ${validTiles}`);
+      result.hasIssues = true;
+    } else if (validTiles > 8) {
+      result.warnings.push(`${sectionId}: Too many objection pairs (${validTiles}), consider focusing on 4-6 key objections`);
     }
   }
+  // Fallback to individual tile fields validation
+  else {
+    for (let i = 1; i <= 6; i++) {
+      const objectionField = `tile_objection_${i}`;
+      const responseField = `tile_response_${i}`;
 
-  if (validTiles > 0 && validTiles < 3) {
-    result.warnings.push(`${sectionId}: VisualObjectionTiles should have at least 3 tiles for visual impact, found ${validTiles}`);
-    result.hasIssues = true;
+      const hasObjection = content[objectionField];
+      const hasResponse = content[responseField];
+
+      if (hasObjection || hasResponse) {
+        if (!hasObjection) {
+          result.warnings.push(`${sectionId}: Missing ${objectionField} for tile ${i}`);
+          result.hasIssues = true;
+        }
+        if (!hasResponse) {
+          result.warnings.push(`${sectionId}: Missing ${responseField} for tile ${i}`);
+          result.hasIssues = true;
+        }
+
+        if (hasObjection && hasResponse) {
+          validTiles++;
+        }
+      }
+    }
+
+    if (validTiles > 0 && validTiles < 3) {
+      result.warnings.push(`${sectionId}: VisualObjectionTiles should have at least 3 tiles for visual impact, found ${validTiles}`);
+      result.hasIssues = true;
+    }
   }
 
   return result;
