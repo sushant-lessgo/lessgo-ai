@@ -22,19 +22,22 @@ interface ReframeBlock {
 interface ProblemToReframeBlocksContent {
   headline: string;
   subheadline?: string;
-  // Individual problem/reframe pairs (up to 6 pairs)
-  problem_1: string;
-  reframe_1: string;
-  problem_2: string;
-  reframe_2: string;
-  problem_3: string;
-  reframe_3: string;
-  problem_4: string;
-  reframe_4: string;
-  problem_5: string;
-  reframe_5: string;
-  problem_6: string;
-  reframe_6: string;
+  // Pipe-separated fields for cards
+  problem_statements?: string;
+  reframe_statements?: string;
+  // Individual problem/reframe pairs (up to 6 pairs) - for backward compatibility
+  problem_1?: string;
+  reframe_1?: string;
+  problem_2?: string;
+  reframe_2?: string;
+  problem_3?: string;
+  reframe_3?: string;
+  problem_4?: string;
+  reframe_4?: string;
+  problem_5?: string;
+  reframe_5?: string;
+  problem_6?: string;
+  reframe_6?: string;
   // Transition and styling
   transition_text?: string;
   problem_icon?: string;
@@ -51,8 +54,6 @@ interface ProblemToReframeBlocksContent {
   benefit_label_3?: string;
   // Legacy fields for backward compatibility
   reframe_blocks?: string;
-  problem_statements?: string;
-  reframe_statements?: string;
 }
 
 // Content schema - defines structure and defaults
@@ -151,28 +152,44 @@ export default function ProblemToReframeBlocks(props: LayoutComponentProps) {
   const parseReframeBlocks = (content: ProblemToReframeBlocksContent): ReframeBlock[] => {
     const blocks: ReframeBlock[] = [];
 
-    // Check for individual fields first (preferred format)
-    const individualPairs = [
-      { problem: content.problem_1, reframe: content.reframe_1 },
-      { problem: content.problem_2, reframe: content.reframe_2 },
-      { problem: content.problem_3, reframe: content.reframe_3 },
-      { problem: content.problem_4, reframe: content.reframe_4 },
-      { problem: content.problem_5, reframe: content.reframe_5 },
-      { problem: content.problem_6, reframe: content.reframe_6 }
-    ];
+    // First check for new pipe-separated format (preferred)
+    if (content.problem_statements && content.reframe_statements) {
+      const problems = content.problem_statements.split('|').map(p => p.trim()).filter(p => p);
+      const reframes = content.reframe_statements.split('|').map(r => r.trim()).filter(r => r);
 
-    // Process individual fields
-    individualPairs.forEach((pair, index) => {
-      if (pair.problem && pair.problem.trim() && pair.reframe && pair.reframe.trim()) {
+      const maxLength = Math.min(problems.length, reframes.length);
+      for (let i = 0; i < maxLength; i++) {
         blocks.push({
-          id: `reframe-${index}`,
-          problem: pair.problem.trim().replace(/"/g, ''),
-          reframe: pair.reframe.trim()
+          id: `reframe-${i}`,
+          problem: problems[i].replace(/"/g, ''),
+          reframe: reframes[i]
         });
       }
-    });
+    }
+    // Check for individual fields (backward compatibility)
+    else {
+      const individualPairs = [
+        { problem: content.problem_1, reframe: content.reframe_1 },
+        { problem: content.problem_2, reframe: content.reframe_2 },
+        { problem: content.problem_3, reframe: content.reframe_3 },
+        { problem: content.problem_4, reframe: content.reframe_4 },
+        { problem: content.problem_5, reframe: content.reframe_5 },
+        { problem: content.problem_6, reframe: content.reframe_6 }
+      ];
 
-    // Fallback to legacy pipe-separated format if no individual fields
+      // Process individual fields
+      individualPairs.forEach((pair, index) => {
+        if (pair.problem && pair.problem.trim() && pair.reframe && pair.reframe.trim()) {
+          blocks.push({
+            id: `reframe-${index}`,
+            problem: pair.problem.trim().replace(/"/g, ''),
+            reframe: pair.reframe.trim()
+          });
+        }
+      });
+    }
+
+    // Fallback to legacy pipe-separated format if no blocks found
     if (blocks.length === 0 && content.reframe_blocks) {
       const legacyBlocks = content.reframe_blocks.split('|');
       for (let i = 0; i < legacyBlocks.length; i += 2) {

@@ -1165,7 +1165,8 @@ function isPipeSeparatedField(elementKey: string): boolean {
     'pairs', 'headers', 'columns', 'tiers',
     'prices', 'ctas', 'highlights', 'details',
     'solutions', 'scenarios', 'journeys', 'stages',
-    'icons', 'questions', 'responses', 'answers'
+    'icons', 'questions', 'responses', 'answers',
+    'blocks', 'statements', 'problems', 'reframes'
   ];
   return pipeSeparatedPatterns.some(pattern => elementKey.includes(pattern));
 }

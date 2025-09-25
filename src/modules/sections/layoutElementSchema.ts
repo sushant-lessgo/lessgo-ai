@@ -3208,7 +3208,7 @@ export const layoutElementSchema: LayoutSchema = {
 
     cardStructure: {
       type: "pairs",
-      elements: ["reframe_blocks"],
+      elements: ["problem_statements", "reframe_statements"],
       generation: "ai_generated"
     },
 
