@@ -1227,7 +1227,10 @@ function processElement(sectionId: string, elementKey: string, value: any): {
     if (isInvalidIcon) {
       result.warnings.push(`${sectionId}.${elementKey}: Invalid icon value "${stringValue}", using contextual emoji`)
 
-      // Enhanced contextual default emojis based on field name
+      // Enhanced contextual default emojis based on field name and content
+      const lowerValue = stringValue.toLowerCase()
+
+      // First check field name patterns
       if (elementKey.includes('success')) result.value = '🎉'
       else if (elementKey.includes('metric')) result.value = '📊'
       else if (elementKey.includes('timeline')) result.value = '📅'
@@ -1243,9 +1246,58 @@ function processElement(sectionId: string, elementKey: string, value: any): {
       else if (elementKey.includes('integration')) result.value = '🔗'
       else if (elementKey.includes('user')) result.value = '👤'
       else if (elementKey.includes('goal')) result.value = '🎯'
+      // Then check content patterns for common outcome text
+      else if (lowerValue.includes('time') && (lowerValue.includes('save') || lowerValue.includes('faster') || lowerValue.includes('quick'))) result.value = '⚡'
+      else if (lowerValue.includes('revenue') || lowerValue.includes('profit') || lowerValue.includes('money') || lowerValue.includes('income')) result.value = '💰'
+      else if (lowerValue.includes('growth') || lowerValue.includes('increase') || lowerValue.includes('scale') || lowerValue.includes('expand')) result.value = '📈'
+      else if (lowerValue.includes('efficiency') || lowerValue.includes('optimize') || lowerValue.includes('streamline') || lowerValue.includes('productivity')) result.value = '⚡'
+      else if (lowerValue.includes('cost') && (lowerValue.includes('reduc') || lowerValue.includes('save') || lowerValue.includes('lower'))) result.value = '💰'
+      else if (lowerValue.includes('customer') || lowerValue.includes('client') || lowerValue.includes('satisfaction')) result.value = '👥'
+      else if (lowerValue.includes('security') || lowerValue.includes('protect') || lowerValue.includes('safe') || lowerValue.includes('secure')) result.value = '🔒'
+      else if (lowerValue.includes('automat') || lowerValue.includes('smart') || lowerValue.includes('ai') || lowerValue.includes('intelligent')) result.value = '🤖'
+      else if (lowerValue.includes('innovation') || lowerValue.includes('modern') || lowerValue.includes('cutting') || lowerValue.includes('advanced')) result.value = '💡'
+      else if (lowerValue.includes('collaboration') || lowerValue.includes('teamwork') || lowerValue.includes('together') || lowerValue.includes('connect')) result.value = '👥'
+      else if (lowerValue.includes('quality') || lowerValue.includes('excellence') || lowerValue.includes('superior') || lowerValue.includes('premium')) result.value = '⭐'
+      else if (lowerValue.includes('insight') || lowerValue.includes('analytics') || lowerValue.includes('data') || lowerValue.includes('report')) result.value = '📊'
+      else if (lowerValue.includes('engagement') || lowerValue.includes('interaction') || lowerValue.includes('active') || lowerValue.includes('participation')) result.value = '🎯'
+      else if (lowerValue.includes('conversion') || lowerValue.includes('sales') || lowerValue.includes('lead') || lowerValue.includes('acquisition')) result.value = '🎯'
+      else if (lowerValue.includes('retention') || lowerValue.includes('loyalty') || lowerValue.includes('repeat') || lowerValue.includes('return')) result.value = '❤️'
+      else if (lowerValue.includes('compliance') || lowerValue.includes('regulation') || lowerValue.includes('standard') || lowerValue.includes('audit')) result.value = '✅'
       else result.value = '❓'
 
       return result
+    } else {
+      // Final safety check: ensure ALL icon fields contain actual emojis
+      const emojiRegex = /[\p{Emoji_Presentation}\p{Emoji}\u200D]/gu
+      if (!emojiRegex.test(stringValue)) {
+        // Text detected in icon field - force emoji conversion
+        result.warnings.push(`${sectionId}.${elementKey}: Text detected in icon field "${stringValue}", converting to emoji`)
+
+        const lowerValue = stringValue.toLowerCase()
+        if (lowerValue.includes('time') && (lowerValue.includes('save') || lowerValue.includes('faster') || lowerValue.includes('quick'))) result.value = '⚡'
+        else if (lowerValue.includes('revenue') || lowerValue.includes('profit') || lowerValue.includes('money') || lowerValue.includes('income')) result.value = '💰'
+        else if (lowerValue.includes('growth') || lowerValue.includes('increase') || lowerValue.includes('scale') || lowerValue.includes('expand')) result.value = '📈'
+        else if (lowerValue.includes('efficiency') || lowerValue.includes('optimize') || lowerValue.includes('streamline') || lowerValue.includes('productivity')) result.value = '⚡'
+        else if (lowerValue.includes('cost') && (lowerValue.includes('reduc') || lowerValue.includes('save') || lowerValue.includes('lower'))) result.value = '💰'
+        else if (lowerValue.includes('customer') || lowerValue.includes('client') || lowerValue.includes('satisfaction')) result.value = '👥'
+        else if (lowerValue.includes('security') || lowerValue.includes('protect') || lowerValue.includes('safe') || lowerValue.includes('secure')) result.value = '🔒'
+        else if (lowerValue.includes('automat') || lowerValue.includes('smart') || lowerValue.includes('ai') || lowerValue.includes('intelligent')) result.value = '🤖'
+        else if (lowerValue.includes('innovation') || lowerValue.includes('modern') || lowerValue.includes('cutting') || lowerValue.includes('advanced')) result.value = '💡'
+        else if (lowerValue.includes('collaboration') || lowerValue.includes('teamwork') || lowerValue.includes('together') || lowerValue.includes('connect')) result.value = '👥'
+        else if (lowerValue.includes('quality') || lowerValue.includes('excellence') || lowerValue.includes('superior') || lowerValue.includes('premium')) result.value = '⭐'
+        else if (lowerValue.includes('insight') || lowerValue.includes('analytics') || lowerValue.includes('data') || lowerValue.includes('report')) result.value = '📊'
+        else if (lowerValue.includes('engagement') || lowerValue.includes('interaction') || lowerValue.includes('active') || lowerValue.includes('participation')) result.value = '🎯'
+        else if (lowerValue.includes('conversion') || lowerValue.includes('sales') || lowerValue.includes('lead') || lowerValue.includes('acquisition')) result.value = '🎯'
+        else if (lowerValue.includes('retention') || lowerValue.includes('loyalty') || lowerValue.includes('repeat') || lowerValue.includes('return')) result.value = '❤️'
+        else if (lowerValue.includes('compliance') || lowerValue.includes('regulation') || lowerValue.includes('standard') || lowerValue.includes('audit')) result.value = '✅'
+        else if (lowerValue.includes('success')) result.value = '🎉'
+        else if (lowerValue.includes('feature')) result.value = '⭐'
+        else if (lowerValue.includes('benefit')) result.value = '✅'
+        else if (lowerValue.includes('goal')) result.value = '🎯'
+        else result.value = '❓' // Ultimate fallback
+
+        return result
+      }
     }
   }
 
@@ -1926,11 +1978,11 @@ function processChatBubbleFAQContent(sectionId: string, content: SectionContent)
     hasIssues: false
   };
 
-  // Check for legacy format conversion
-  const hasLegacyFormat = content.questions && content.answers;
+  // Check for legacy format conversion (both singular and plural forms)
+  const hasLegacyFormat = (content.questions && content.answers) || (content.question && content.answer);
   if (hasLegacyFormat) {
     const convertedContent = convertChatBubbleLegacyFormat(content);
-    result.warnings.push(`${sectionId}: Converted legacy format to individual chat Q&A fields`);
+    result.warnings.push(`${sectionId}: Converted pipe-separated format to individual chat Q&A fields`);
     Object.assign(result.content, convertedContent);
   }
 
@@ -2108,9 +2160,13 @@ function convertTestimonialFAQLegacyFormat(content: SectionContent): SectionCont
 function convertChatBubbleLegacyFormat(content: SectionContent): SectionContent {
   const converted: SectionContent = {};
 
-  if (typeof content.questions === 'string' && typeof content.answers === 'string') {
-    const questions = content.questions.split('|').map(q => q.trim()).filter(Boolean);
-    const answers = content.answers.split('|').map(a => a.trim()).filter(Boolean);
+  // Check both singular and plural forms (AI might generate either based on schema)
+  const questionsData = content.questions || content.question;
+  const answersData = content.answers || content.answer;
+
+  if (typeof questionsData === 'string' && typeof answersData === 'string') {
+    const questions = questionsData.split('|').map(q => q.trim()).filter(Boolean);
+    const answers = answersData.split('|').map(a => a.trim()).filter(Boolean);
     const personas = typeof content.chat_personas === 'string'
       ? content.chat_personas.split('|').map(p => p.trim()).filter(Boolean)
       : [];
