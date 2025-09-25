@@ -15,24 +15,29 @@ import { LayoutComponentProps } from '@/types/storeTypes';
 interface VisualObjectionTilesContent {
   headline: string;
   subheadline?: string;
-  // Individual tile fields (up to 6 tiles)
-  tile_objection_1: string;
-  tile_response_1: string;
+  // Pipe-separated fields for cards
+  objection_questions?: string;
+  objection_responses?: string;
+  objection_labels?: string;
+  objection_icons?: string;
+  // Individual tile fields (up to 6 tiles) - for backward compatibility
+  tile_objection_1?: string;
+  tile_response_1?: string;
   tile_label_1?: string;
-  tile_objection_2: string;
-  tile_response_2: string;
+  tile_objection_2?: string;
+  tile_response_2?: string;
   tile_label_2?: string;
-  tile_objection_3: string;
-  tile_response_3: string;
+  tile_objection_3?: string;
+  tile_response_3?: string;
   tile_label_3?: string;
-  tile_objection_4: string;
-  tile_response_4: string;
+  tile_objection_4?: string;
+  tile_response_4?: string;
   tile_label_4?: string;
-  tile_objection_5: string;
-  tile_response_5: string;
+  tile_objection_5?: string;
+  tile_response_5?: string;
   tile_label_5?: string;
-  tile_objection_6: string;
-  tile_response_6: string;
+  tile_objection_6?: string;
+  tile_response_6?: string;
   tile_label_6?: string;
   // Tile icons
   tile_icon_1?: string;
@@ -44,7 +49,6 @@ interface VisualObjectionTilesContent {
   // Legacy fields for backward compatibility
   objection_tiles?: string;
   objection_titles?: string;
-  objection_responses?: string;
   tile_labels?: string;
 }
 
@@ -112,30 +116,50 @@ export default function VisualObjectionTiles(props: LayoutComponentProps) {
   const parseObjectionTiles = (content: VisualObjectionTilesContent): Array<{icon: string, objection: string, answer: string, label?: string, index: number}> => {
     const tiles: Array<{icon: string, objection: string, answer: string, label?: string, index: number}> = [];
 
-    // Check for individual fields first (preferred format)
-    const individualTiles = [
-      { objection: content.tile_objection_1, response: content.tile_response_1, label: content.tile_label_1, icon: content.tile_icon_1 },
-      { objection: content.tile_objection_2, response: content.tile_response_2, label: content.tile_label_2, icon: content.tile_icon_2 },
-      { objection: content.tile_objection_3, response: content.tile_response_3, label: content.tile_label_3, icon: content.tile_icon_3 },
-      { objection: content.tile_objection_4, response: content.tile_response_4, label: content.tile_label_4, icon: content.tile_icon_4 },
-      { objection: content.tile_objection_5, response: content.tile_response_5, label: content.tile_label_5, icon: content.tile_icon_5 },
-      { objection: content.tile_objection_6, response: content.tile_response_6, label: content.tile_label_6, icon: content.tile_icon_6 }
-    ];
+    // First check for new pipe-separated format (preferred)
+    if (content.objection_questions && content.objection_responses) {
+      const questions = content.objection_questions.split('|').map(q => q.trim()).filter(q => q);
+      const responses = content.objection_responses.split('|').map(r => r.trim()).filter(r => r);
+      const labels = content.objection_labels ? content.objection_labels.split('|').map(l => l.trim()) : [];
+      const icons = content.objection_icons ? content.objection_icons.split('|').map(i => i.trim()) : [];
 
-    // Process individual fields
-    individualTiles.forEach((tile, index) => {
-      if (tile.objection && tile.objection.trim() && tile.response && tile.response.trim()) {
+      const maxLength = Math.min(questions.length, responses.length);
+      for (let i = 0; i < maxLength; i++) {
         tiles.push({
-          icon: tile.icon || getDefaultTileIcon(tile.objection),
-          objection: tile.objection.trim().replace(/"/g, ''),
-          answer: tile.response.trim(),
-          label: tile.label?.trim(),
-          index
+          icon: icons[i] || getDefaultTileIcon(questions[i]),
+          objection: questions[i].replace(/"/g, ''),
+          answer: responses[i],
+          label: labels[i] || undefined,
+          index: i
         });
       }
-    });
+    }
+    // Check for individual fields (backward compatibility)
+    else {
+      const individualTiles = [
+        { objection: content.tile_objection_1, response: content.tile_response_1, label: content.tile_label_1, icon: content.tile_icon_1 },
+        { objection: content.tile_objection_2, response: content.tile_response_2, label: content.tile_label_2, icon: content.tile_icon_2 },
+        { objection: content.tile_objection_3, response: content.tile_response_3, label: content.tile_label_3, icon: content.tile_icon_3 },
+        { objection: content.tile_objection_4, response: content.tile_response_4, label: content.tile_label_4, icon: content.tile_icon_4 },
+        { objection: content.tile_objection_5, response: content.tile_response_5, label: content.tile_label_5, icon: content.tile_icon_5 },
+        { objection: content.tile_objection_6, response: content.tile_response_6, label: content.tile_label_6, icon: content.tile_icon_6 }
+      ];
 
-    // Fallback to legacy pipe-separated format if no individual fields
+      // Process individual fields
+      individualTiles.forEach((tile, index) => {
+        if (tile.objection && tile.objection.trim() && tile.response && tile.response.trim()) {
+          tiles.push({
+            icon: tile.icon || getDefaultTileIcon(tile.objection),
+            objection: tile.objection.trim().replace(/"/g, ''),
+            answer: tile.response.trim(),
+            label: tile.label?.trim(),
+            index
+          });
+        }
+      });
+    }
+
+    // Fallback to legacy pipe-separated format if no tiles found
     if (tiles.length === 0 && content.objection_tiles) {
       const legacyTiles = content.objection_tiles.split('|').reduce((acc, item, index) => {
         if (index % 3 === 0) {

@@ -3174,7 +3174,7 @@ export const layoutElementSchema: LayoutSchema = {
 
     cardStructure: {
       type: "cards",
-      elements: ["objection_tiles"],
+      elements: ["objection_questions", "objection_responses", "objection_labels", "objection_icons"],
       generation: "ai_generated"
     },
 

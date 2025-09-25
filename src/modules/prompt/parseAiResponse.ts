@@ -1149,9 +1149,23 @@ function processSectionContent(
  */
 function isPipeSeparatedField(elementKey: string): boolean {
   const pipeSeparatedPatterns = [
+    // Original patterns
     'titles', 'descriptions', 'quotes', 'names',
     'items', 'labels', 'steps', 'list', 'types',
-    'points', 'features', 'benefits', 'metrics'
+    'points', 'features', 'benefits', 'metrics',
+    // Additional patterns for UIBlocks
+    'values', 'before', 'after', 'improvements',
+    'authors', 'companies', 'roles', 'emojis',
+    'outcomes', 'timeframes', 'wins', 'personas',
+    'categories', 'badges', 'awards', 'standards',
+    'reviews', 'ratings', 'stats', 'indicators',
+    'guarantees', 'outlets', 'options', 'durations',
+    'visuals', 'actions', 'keywords', 'tags',
+    'technologies', 'connections', 'triggers',
+    'pairs', 'headers', 'columns', 'tiers',
+    'prices', 'ctas', 'highlights', 'details',
+    'solutions', 'scenarios', 'journeys', 'stages',
+    'icons', 'questions', 'responses', 'answers'
   ];
   return pipeSeparatedPatterns.some(pattern => elementKey.includes(pattern));
 }
