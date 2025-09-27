@@ -89,8 +89,8 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "after_label", mandatory: true, generation: "ai_generated" },
       { element: "before_description", mandatory: true, generation: "ai_generated" },
       { element: "after_description", mandatory: true, generation: "ai_generated" },
-      { element: "before_icon", mandatory: false, generation: "hybrid" },
-      { element: "after_icon", mandatory: false, generation: "hybrid" },
+      { element: "before_icon", mandatory: false, generation: "ai_generated" },
+      { element: "after_icon", mandatory: false, generation: "ai_generated" },
       { element: "subheadline", mandatory: false, generation: "ai_generated" },
       { element: "supporting_text", mandatory: false, generation: "ai_generated" },
       { element: "cta_text", mandatory: false, generation: "ai_generated" },
@@ -113,11 +113,11 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "before_label", mandatory: true, generation: "ai_generated" },
       { element: "after_label", mandatory: true, generation: "ai_generated" },
       { element: "transition_text", mandatory: false, generation: "ai_generated" },
-      { element: "before_icon", mandatory: false, generation: "hybrid" },
-      { element: "after_icon", mandatory: false, generation: "hybrid" },
-      { element: "transition_icon", mandatory: false, generation: "hybrid" },
+      { element: "before_icon", mandatory: false, generation: "ai_generated" },
+      { element: "after_icon", mandatory: false, generation: "ai_generated" },
+      { element: "transition_icon", mandatory: false, generation: "ai_generated" },
       { element: "summary_text", mandatory: false, generation: "ai_generated" },
-      { element: "show_summary_box", mandatory: false, generation: "hybrid" },
+      { element: "show_summary_box", mandatory: false, generation: "ai_generated" },
       { element: "subheadline", mandatory: false, generation: "ai_generated" },
       { element: "supporting_text", mandatory: false, generation: "ai_generated" },
       { element: "cta_text", mandatory: false, generation: "ai_generated" },
@@ -144,10 +144,10 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "before_placeholder_text", mandatory: false, generation: "ai_generated" },
       { element: "after_placeholder_text", mandatory: false, generation: "ai_generated" },
       { element: "interaction_hint_text", mandatory: false, generation: "ai_generated" },
-      { element: "show_interaction_hint", mandatory: false, generation: "hybrid" },
-      { element: "before_icon", mandatory: false, generation: "hybrid" },
-      { element: "after_icon", mandatory: false, generation: "hybrid" },
-      { element: "hint_icon", mandatory: false, generation: "hybrid" },
+      { element: "show_interaction_hint", mandatory: false, generation: "ai_generated" },
+      { element: "before_icon", mandatory: false, generation: "ai_generated" },
+      { element: "after_icon", mandatory: false, generation: "ai_generated" },
+      { element: "hint_icon", mandatory: false, generation: "ai_generated" },
       { element: "slider_instruction", mandatory: false, generation: "ai_generated" },
       { element: "subheadline", mandatory: false, generation: "ai_generated" },
       { element: "supporting_text", mandatory: false, generation: "ai_generated" },
@@ -177,10 +177,10 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "before_placeholder_text", mandatory: false, generation: "ai_generated" },
       { element: "after_placeholder_text", mandatory: false, generation: "ai_generated" },
       { element: "premium_badge_text", mandatory: false, generation: "ai_generated" },
-      { element: "before_icon", mandatory: false, generation: "hybrid" },
-      { element: "after_icon", mandatory: false, generation: "hybrid" },
-      { element: "upgrade_icon", mandatory: false, generation: "hybrid" },
-      { element: "premium_feature_icon", mandatory: false, generation: "hybrid" },
+      { element: "before_icon", mandatory: false, generation: "ai_generated" },
+      { element: "after_icon", mandatory: false, generation: "ai_generated" },
+      { element: "upgrade_icon", mandatory: false, generation: "ai_generated" },
+      { element: "premium_feature_icon", mandatory: false, generation: "ai_generated" },
       { element: "subheadline", mandatory: false, generation: "ai_generated" },
       { element: "supporting_text", mandatory: false, generation: "ai_generated" },
       { element: "cta_text", mandatory: false, generation: "ai_generated" },
@@ -201,9 +201,9 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "before_label", mandatory: true, generation: "ai_generated" },
       { element: "after_label", mandatory: true, generation: "ai_generated" },
       { element: "transformation_text", mandatory: false, generation: "ai_generated" },
-      { element: "before_icon", mandatory: false, generation: "hybrid" },
-      { element: "after_icon", mandatory: false, generation: "hybrid" },
-      { element: "transformation_icon", mandatory: false, generation: "hybrid" },
+      { element: "before_icon", mandatory: false, generation: "ai_generated" },
+      { element: "after_icon", mandatory: false, generation: "ai_generated" },
+      { element: "transformation_icon", mandatory: false, generation: "ai_generated" },
       { element: "subheadline", mandatory: false, generation: "ai_generated" },
       { element: "supporting_text", mandatory: false, generation: "ai_generated" },
       { element: "cta_text", mandatory: false, generation: "ai_generated" },
@@ -237,11 +237,11 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "step3_visual", mandatory: false, generation: "manual_preferred" },
       { element: "journey_summary_title", mandatory: false, generation: "ai_generated" },
       { element: "journey_summary_description", mandatory: false, generation: "ai_generated" },
-      { element: "show_journey_summary", mandatory: false, generation: "hybrid" },
-      { element: "step_connector_icon", mandatory: false, generation: "hybrid" },
-      { element: "summary_icon_1", mandatory: false, generation: "hybrid" },
-      { element: "summary_icon_2", mandatory: false, generation: "hybrid" },
-      { element: "summary_icon_3", mandatory: false, generation: "hybrid" },
+      { element: "show_journey_summary", mandatory: false, generation: "ai_generated" },
+      { element: "step_connector_icon", mandatory: false, generation: "ai_generated" },
+      { element: "summary_icon_1", mandatory: false, generation: "ai_generated" },
+      { element: "summary_icon_2", mandatory: false, generation: "ai_generated" },
+      { element: "summary_icon_3", mandatory: false, generation: "ai_generated" },
       { element: "subheadline", mandatory: false, generation: "ai_generated" },
       { element: "supporting_text", mandatory: false, generation: "ai_generated" },
       { element: "cta_text", mandatory: false, generation: "ai_generated" },
@@ -364,9 +364,9 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "timeline_period", mandatory: false, generation: "ai_generated" },
       { element: "success_title", mandatory: false, generation: "ai_generated" },
       { element: "success_subtitle", mandatory: false, generation: "ai_generated" },
-      { element: "metric_icon", mandatory: true, generation: "manual_preferred" },
-      { element: "timeline_icon", mandatory: true, generation: "manual_preferred" },
-      { element: "success_icon", mandatory: true, generation: "manual_preferred" }
+      { element: "metric_icon", mandatory: true, generation: "ai_generated" },
+      { element: "timeline_icon", mandatory: true, generation: "ai_generated" },
+      { element: "success_icon", mandatory: true, generation: "ai_generated" }
     ],
 
     cardStructure: {
@@ -592,7 +592,7 @@ export const layoutElementSchema: LayoutSchema = {
     sectionElements: [
       { element: "headline", mandatory: true, generation: "ai_generated" },
       { element: "subheadline", mandatory: false, generation: "ai_generated" },
-      { element: "testimonial_quotes", mandatory: false, generation: "hybrid" },
+      { element: "testimonial_quotes", mandatory: false, generation: "ai_generated" },
       { element: "logo_urls", mandatory: false, generation: "manual_preferred" }
     ],
     cardStructure: {
@@ -614,7 +614,7 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "headline", mandatory: true, generation: "ai_generated" },
       { element: "subheadline", mandatory: false, generation: "ai_generated" },
       { element: "users_joined_text", mandatory: false, generation: "ai_generated" },
-      { element: "rating_value", mandatory: false, generation: "hybrid" },
+      { element: "rating_value", mandatory: false, generation: "ai_generated" },
       { element: "rating_text", mandatory: false, generation: "ai_generated" },
       { element: "trust_item_1", mandatory: false, generation: "ai_generated" },
       { element: "trust_item_2", mandatory: false, generation: "ai_generated" },
@@ -640,9 +640,9 @@ export const layoutElementSchema: LayoutSchema = {
     sectionElements: [
       { element: "headline", mandatory: true, generation: "ai_generated" },
       { element: "subheadline", mandatory: false, generation: "ai_generated" },
-      { element: "cert_icon_override", mandatory: false, generation: "manual_preferred" },
-      { element: "award_icon_override", mandatory: false, generation: "manual_preferred" },
-      { element: "compliance_icon_override", mandatory: false, generation: "manual_preferred" },
+      { element: "cert_icon_override", mandatory: false, generation: "ai_generated" },
+      { element: "award_icon_override", mandatory: false, generation: "ai_generated" },
+      { element: "compliance_icon_override", mandatory: false, generation: "ai_generated" },
       { element: "cert_section_title", mandatory: false, generation: "ai_generated" },
       { element: "award_section_title", mandatory: false, generation: "ai_generated" },
       { element: "compliance_section_title", mandatory: false, generation: "ai_generated" },
@@ -731,11 +731,11 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "reviewer_title_2", mandatory: false, generation: "ai_generated" },
       { element: "reviewer_title_3", mandatory: false, generation: "ai_generated" },
       { element: "reviewer_title_4", mandatory: false, generation: "ai_generated" },
-      { element: "rating_1", mandatory: false, generation: "hybrid" },
-      { element: "rating_2", mandatory: false, generation: "hybrid" },
-      { element: "rating_3", mandatory: false, generation: "hybrid" },
-      { element: "rating_4", mandatory: false, generation: "hybrid" },
-      { element: "overall_rating_value", mandatory: false, generation: "hybrid" },
+      { element: "rating_1", mandatory: false, generation: "ai_generated" },
+      { element: "rating_2", mandatory: false, generation: "ai_generated" },
+      { element: "rating_3", mandatory: false, generation: "ai_generated" },
+      { element: "rating_4", mandatory: false, generation: "ai_generated" },
+      { element: "overall_rating_value", mandatory: false, generation: "ai_generated" },
       { element: "overall_rating_text", mandatory: false, generation: "ai_generated" },
       { element: "total_reviews_text", mandatory: false, generation: "ai_generated" },
       { element: "trust_indicator_1", mandatory: false, generation: "ai_generated" },
@@ -771,7 +771,7 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "trust_badge_1", mandatory: false, generation: "ai_generated" },
       { element: "trust_badge_2", mandatory: false, generation: "ai_generated" },
       { element: "trust_badge_3", mandatory: false, generation: "ai_generated" },
-      { element: "rating_display", mandatory: false, generation: "hybrid" }
+      { element: "rating_display", mandatory: false, generation: "ai_generated" }
     ],
     cardStructure: {
       type: "items",
@@ -793,14 +793,14 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "headline", mandatory: true, generation: "ai_generated" },
       { element: "verification_message", mandatory: false, generation: "ai_generated" },
       { element: "rating_value", mandatory: false, generation: "manual_preferred" },
-      { element: "quote_mark_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "verification_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "testimonial_icon_1", mandatory: true, generation: "manual_preferred" },
-      { element: "testimonial_icon_2", mandatory: true, generation: "manual_preferred" },
-      { element: "testimonial_icon_3", mandatory: true, generation: "manual_preferred" },
-      { element: "testimonial_icon_4", mandatory: true, generation: "manual_preferred" },
-      { element: "testimonial_icon_5", mandatory: true, generation: "manual_preferred" },
-      { element: "testimonial_icon_6", mandatory: true, generation: "manual_preferred" }
+      { element: "quote_mark_icon", mandatory: false, generation: "ai_generated" },
+      { element: "verification_icon", mandatory: false, generation: "ai_generated" },
+      { element: "testimonial_icon_1", mandatory: true, generation: "ai_generated" },
+      { element: "testimonial_icon_2", mandatory: true, generation: "ai_generated" },
+      { element: "testimonial_icon_3", mandatory: true, generation: "ai_generated" },
+      { element: "testimonial_icon_4", mandatory: true, generation: "ai_generated" },
+      { element: "testimonial_icon_5", mandatory: true, generation: "ai_generated" },
+      { element: "testimonial_icon_6", mandatory: true, generation: "ai_generated" }
     ],
     cardStructure: {
       type: "cards",
@@ -881,16 +881,16 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "headline", mandatory: true, generation: "ai_generated" },
       { element: "subheadline", mandatory: false, generation: "ai_generated" },
       { element: "cta_text", mandatory: false, generation: "ai_generated" },
-      { element: "before_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "after_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "before_icon_1", mandatory: true, generation: "manual_preferred" },
-      { element: "before_icon_2", mandatory: true, generation: "manual_preferred" },
-      { element: "before_icon_3", mandatory: true, generation: "manual_preferred" },
-      { element: "before_icon_4", mandatory: true, generation: "manual_preferred" },
-      { element: "after_icon_1", mandatory: true, generation: "manual_preferred" },
-      { element: "after_icon_2", mandatory: true, generation: "manual_preferred" },
-      { element: "after_icon_3", mandatory: true, generation: "manual_preferred" },
-      { element: "after_icon_4", mandatory: true, generation: "manual_preferred" },
+      { element: "before_icon", mandatory: false, generation: "ai_generated" },
+      { element: "after_icon", mandatory: false, generation: "ai_generated" },
+      { element: "before_icon_1", mandatory: true, generation: "ai_generated" },
+      { element: "before_icon_2", mandatory: true, generation: "ai_generated" },
+      { element: "before_icon_3", mandatory: true, generation: "ai_generated" },
+      { element: "before_icon_4", mandatory: true, generation: "ai_generated" },
+      { element: "after_icon_1", mandatory: true, generation: "ai_generated" },
+      { element: "after_icon_2", mandatory: true, generation: "ai_generated" },
+      { element: "after_icon_3", mandatory: true, generation: "ai_generated" },
+      { element: "after_icon_4", mandatory: true, generation: "ai_generated" },
       { element: "avatar_urls", mandatory: false, generation: "manual_preferred" }
     ],
     cardStructure: {
@@ -923,10 +923,10 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "small_business_label", mandatory: false, generation: "ai_generated" },
       { element: "dev_teams_stat", mandatory: false, generation: "manual_preferred" },
       { element: "dev_teams_label", mandatory: false, generation: "ai_generated" },
-      { element: "segment_icon_1", mandatory: true, generation: "manual_preferred" },
-      { element: "segment_icon_2", mandatory: true, generation: "manual_preferred" },
-      { element: "segment_icon_3", mandatory: true, generation: "manual_preferred" },
-      { element: "segment_icon_4", mandatory: true, generation: "manual_preferred" }
+      { element: "segment_icon_1", mandatory: true, generation: "ai_generated" },
+      { element: "segment_icon_2", mandatory: true, generation: "ai_generated" },
+      { element: "segment_icon_3", mandatory: true, generation: "ai_generated" },
+      { element: "segment_icon_4", mandatory: true, generation: "ai_generated" }
     ],
     cardStructure: {
       type: "cards",
@@ -972,12 +972,12 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "supporting_text", mandatory: false, generation: "ai_generated" },
       { element: "cta_text", mandatory: false, generation: "ai_generated" },
       { element: "trust_items", mandatory: false, generation: "ai_generated" },
-      { element: "context_icon_1", mandatory: true, generation: "manual_preferred" },
-      { element: "context_icon_2", mandatory: true, generation: "manual_preferred" },
-      { element: "context_icon_3", mandatory: true, generation: "manual_preferred" },
-      { element: "context_icon_4", mandatory: true, generation: "manual_preferred" },
-      { element: "context_icon_5", mandatory: true, generation: "manual_preferred" },
-      { element: "context_icon_6", mandatory: true, generation: "manual_preferred" },
+      { element: "context_icon_1", mandatory: true, generation: "ai_generated" },
+      { element: "context_icon_2", mandatory: true, generation: "ai_generated" },
+      { element: "context_icon_3", mandatory: true, generation: "ai_generated" },
+      { element: "context_icon_4", mandatory: true, generation: "ai_generated" },
+      { element: "context_icon_5", mandatory: true, generation: "ai_generated" },
+      { element: "context_icon_6", mandatory: true, generation: "ai_generated" },
       { element: "avatar_1", mandatory: false, generation: "manual_preferred" },
       { element: "avatar_2", mandatory: false, generation: "manual_preferred" },
       { element: "avatar_3", mandatory: false, generation: "manual_preferred" },
@@ -1015,10 +1015,10 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "support_description", mandatory: false, generation: "ai_generated" },
       { element: "collaboration_title", mandatory: false, generation: "ai_generated" },
       { element: "collaboration_description", mandatory: false, generation: "ai_generated" },
-      { element: "global_reach_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "currency_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "support_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "collaboration_icon", mandatory: false, generation: "manual_preferred" }
+      { element: "global_reach_icon", mandatory: false, generation: "ai_generated" },
+      { element: "currency_icon", mandatory: false, generation: "ai_generated" },
+      { element: "support_icon", mandatory: false, generation: "ai_generated" },
+      { element: "collaboration_icon", mandatory: false, generation: "ai_generated" }
     ],
     cardStructure: {
       type: "cards",
@@ -1080,7 +1080,7 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "methodology_name", mandatory: true, generation: "manual_preferred" },
       { element: "methodology_description", mandatory: true, generation: "ai_generated" },
       { element: "results_title", mandatory: false, generation: "ai_generated" },
-      { element: "methodology_icon", mandatory: false, generation: "manual_preferred" }
+      { element: "methodology_icon", mandatory: false, generation: "ai_generated" }
     ],
     cardStructure: {
       type: "cards",
@@ -1390,9 +1390,9 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "after_label", mandatory: true, generation: "ai_generated" },
       { element: "improvement_text", mandatory: false, generation: "ai_generated" },
       { element: "summary_title", mandatory: false, generation: "ai_generated" },
-      { element: "show_summary_section", mandatory: false, generation: "hybrid" },
-      { element: "improvement_icon", mandatory: false, generation: "hybrid" },
-      { element: "flow_icon", mandatory: false, generation: "hybrid" },
+      { element: "show_summary_section", mandatory: false, generation: "ai_generated" },
+      { element: "improvement_icon", mandatory: false, generation: "ai_generated" },
+      { element: "flow_icon", mandatory: false, generation: "ai_generated" },
       { element: "subheadline", mandatory: false, generation: "ai_generated" },
       { element: "supporting_text", mandatory: false, generation: "ai_generated" },
       { element: "cta_text", mandatory: false, generation: "ai_generated" },
@@ -1432,11 +1432,11 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "after_benefits", mandatory: false, generation: "ai_generated" },
       { element: "summary_title", mandatory: false, generation: "ai_generated" },
       { element: "summary_description", mandatory: false, generation: "ai_generated" },
-      { element: "show_summary_section", mandatory: false, generation: "hybrid" },
+      { element: "show_summary_section", mandatory: false, generation: "ai_generated" },
       { element: "persona_avatar", mandatory: false, generation: "manual_preferred" },
-      { element: "before_icon", mandatory: false, generation: "hybrid" },
-      { element: "journey_icon", mandatory: false, generation: "hybrid" },
-      { element: "after_icon", mandatory: false, generation: "hybrid" },
+      { element: "before_icon", mandatory: false, generation: "ai_generated" },
+      { element: "journey_icon", mandatory: false, generation: "ai_generated" },
+      { element: "after_icon", mandatory: false, generation: "ai_generated" },
       { element: "subheadline", mandatory: false, generation: "ai_generated" },
       { element: "supporting_text", mandatory: false, generation: "ai_generated" },
       { element: "cta_text", mandatory: false, generation: "ai_generated" },
@@ -1493,10 +1493,10 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "final_cta_title", mandatory: false, generation: "ai_generated" },
       { element: "final_cta_description", mandatory: false, generation: "ai_generated" },
       { element: "social_proof_footer_text", mandatory: false, generation: "ai_generated" },
-      { element: "bonus_check_icon", mandatory: true, generation: "manual_preferred" },
-      { element: "urgency_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "scarcity_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "guarantee_icon", mandatory: false, generation: "manual_preferred" }
+      { element: "bonus_check_icon", mandatory: true, generation: "ai_generated" },
+      { element: "urgency_icon", mandatory: false, generation: "ai_generated" },
+      { element: "scarcity_icon", mandatory: false, generation: "ai_generated" },
+      { element: "guarantee_icon", mandatory: false, generation: "ai_generated" }
     ],
 
     cardStructure: {
@@ -1538,14 +1538,14 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "subheadline", mandatory: false, generation: "ai_generated" },
       { element: "supporting_text", mandatory: false, generation: "ai_generated" },
       { element: "trust_items", mandatory: false, generation: "ai_generated" },
-      { element: "calendar_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "demo_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "quote_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "download_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "response_time_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "enterprise_check_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "qualification_check_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "social_proof_icon", mandatory: false, generation: "manual_preferred" }
+      { element: "calendar_icon", mandatory: false, generation: "ai_generated" },
+      { element: "demo_icon", mandatory: false, generation: "ai_generated" },
+      { element: "quote_icon", mandatory: false, generation: "ai_generated" },
+      { element: "download_icon", mandatory: false, generation: "ai_generated" },
+      { element: "response_time_icon", mandatory: false, generation: "ai_generated" },
+      { element: "enterprise_check_icon", mandatory: false, generation: "ai_generated" },
+      { element: "qualification_check_icon", mandatory: false, generation: "ai_generated" },
+      { element: "social_proof_icon", mandatory: false, generation: "ai_generated" }
     ],
 
     cardStructure: {
@@ -1581,17 +1581,17 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "trust_item_3", mandatory: false, generation: "ai_generated" },
       { element: "trust_item_4", mandatory: false, generation: "ai_generated" },
       { element: "trust_item_5", mandatory: false, generation: "ai_generated" },
-      { element: "trending_up_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "dollar_sign_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "automation_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "users_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "chart_bar_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "integration_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "before_cross_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "after_check_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "arrow_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "urgency_clock_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "guarantee_shield_icon", mandatory: false, generation: "manual_preferred" }
+      { element: "trending_up_icon", mandatory: false, generation: "ai_generated" },
+      { element: "dollar_sign_icon", mandatory: false, generation: "ai_generated" },
+      { element: "automation_icon", mandatory: false, generation: "ai_generated" },
+      { element: "users_icon", mandatory: false, generation: "ai_generated" },
+      { element: "chart_bar_icon", mandatory: false, generation: "ai_generated" },
+      { element: "integration_icon", mandatory: false, generation: "ai_generated" },
+      { element: "before_cross_icon", mandatory: false, generation: "ai_generated" },
+      { element: "after_check_icon", mandatory: false, generation: "ai_generated" },
+      { element: "arrow_icon", mandatory: false, generation: "ai_generated" },
+      { element: "urgency_clock_icon", mandatory: false, generation: "ai_generated" },
+      { element: "guarantee_shield_icon", mandatory: false, generation: "ai_generated" }
     ],
 
     cardStructure: {
@@ -1628,14 +1628,14 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "guarantee_text", mandatory: false, generation: "ai_generated" },
       { element: "supporting_text", mandatory: false, generation: "ai_generated" },
       { element: "trust_items", mandatory: false, generation: "ai_generated" },
-      { element: "feature_check_icon", mandatory: true, generation: "manual_preferred" },
-      { element: "feature_unavailable_icon", mandatory: true, generation: "manual_preferred" },
-      { element: "info_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "guarantee_shield_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "proven_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "setup_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "support_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "security_icon", mandatory: false, generation: "manual_preferred" }
+      { element: "feature_check_icon", mandatory: true, generation: "ai_generated" },
+      { element: "feature_unavailable_icon", mandatory: true, generation: "ai_generated" },
+      { element: "info_icon", mandatory: false, generation: "ai_generated" },
+      { element: "guarantee_shield_icon", mandatory: false, generation: "ai_generated" },
+      { element: "proven_icon", mandatory: false, generation: "ai_generated" },
+      { element: "setup_icon", mandatory: false, generation: "ai_generated" },
+      { element: "support_icon", mandatory: false, generation: "ai_generated" },
+      { element: "security_icon", mandatory: false, generation: "ai_generated" }
     ],
 
     cardStructure: {
@@ -1662,18 +1662,18 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "guarantee_text", mandatory: false, generation: "ai_generated" },
       { element: "supporting_text", mandatory: false, generation: "ai_generated" },
       { element: "trust_items", mandatory: false, generation: "ai_generated" },
-      { element: "step_1_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "step_2_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "step_3_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "time_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "detail_check_icon", mandatory: true, generation: "manual_preferred" },
-      { element: "benefit_check_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "quick_setup_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "guided_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "user_friendly_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "support_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "info_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "guarantee_icon", mandatory: false, generation: "manual_preferred" }
+      { element: "step_1_icon", mandatory: false, generation: "ai_generated" },
+      { element: "step_2_icon", mandatory: false, generation: "ai_generated" },
+      { element: "step_3_icon", mandatory: false, generation: "ai_generated" },
+      { element: "time_icon", mandatory: false, generation: "ai_generated" },
+      { element: "detail_check_icon", mandatory: true, generation: "ai_generated" },
+      { element: "benefit_check_icon", mandatory: false, generation: "ai_generated" },
+      { element: "quick_setup_icon", mandatory: false, generation: "ai_generated" },
+      { element: "guided_icon", mandatory: false, generation: "ai_generated" },
+      { element: "user_friendly_icon", mandatory: false, generation: "ai_generated" },
+      { element: "support_icon", mandatory: false, generation: "ai_generated" },
+      { element: "info_icon", mandatory: false, generation: "ai_generated" },
+      { element: "guarantee_icon", mandatory: false, generation: "ai_generated" }
     ],
 
     cardStructure: {
@@ -1737,12 +1737,12 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "headline", mandatory: true, generation: "ai_generated" },
       { element: "subheadline", mandatory: false, generation: "ai_generated" },
       { element: "trust_badge", mandatory: false, generation: "manual_preferred" },
-      { element: "issue_icon_1", mandatory: false, generation: "manual_preferred" },
-      { element: "issue_icon_2", mandatory: false, generation: "manual_preferred" },
-      { element: "issue_icon_3", mandatory: false, generation: "manual_preferred" },
-      { element: "solution_icon_1", mandatory: false, generation: "manual_preferred" },
-      { element: "solution_icon_2", mandatory: false, generation: "manual_preferred" },
-      { element: "solution_icon_3", mandatory: false, generation: "manual_preferred" }
+      { element: "issue_icon_1", mandatory: false, generation: "ai_generated" },
+      { element: "issue_icon_2", mandatory: false, generation: "ai_generated" },
+      { element: "issue_icon_3", mandatory: false, generation: "ai_generated" },
+      { element: "solution_icon_1", mandatory: false, generation: "ai_generated" },
+      { element: "solution_icon_2", mandatory: false, generation: "ai_generated" },
+      { element: "solution_icon_3", mandatory: false, generation: "ai_generated" }
     ],
     cardStructure: {
       type: "cards",
@@ -1786,10 +1786,10 @@ export const layoutElementSchema: LayoutSchema = {
     sectionElements: [
       { element: "headline", mandatory: true, generation: "ai_generated" },
       { element: "subheadline", mandatory: false, generation: "ai_generated" },
-      { element: "persona_icon_1", mandatory: false, generation: "manual_preferred" },
-      { element: "persona_icon_2", mandatory: false, generation: "manual_preferred" },
-      { element: "persona_icon_3", mandatory: false, generation: "manual_preferred" },
-      { element: "persona_icon_4", mandatory: false, generation: "manual_preferred" }
+      { element: "persona_icon_1", mandatory: false, generation: "ai_generated" },
+      { element: "persona_icon_2", mandatory: false, generation: "ai_generated" },
+      { element: "persona_icon_3", mandatory: false, generation: "ai_generated" },
+      { element: "persona_icon_4", mandatory: false, generation: "ai_generated" }
     ],
     cardStructure: {
       type: "cards",
@@ -1829,10 +1829,10 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "headline", mandatory: true, generation: "ai_generated" },
       { element: "subheadline", mandatory: false, generation: "ai_generated" },
       { element: "cta_text", mandatory: false, generation: "ai_generated" },
-      { element: "stage_icons", mandatory: false, generation: "manual_preferred" },
-      { element: "stage_icon_1", mandatory: false, generation: "manual_preferred" },
-      { element: "stage_icon_2", mandatory: false, generation: "manual_preferred" },
-      { element: "stage_icon_3", mandatory: false, generation: "manual_preferred" }
+      { element: "stage_icons", mandatory: false, generation: "ai_generated" },
+      { element: "stage_icon_1", mandatory: false, generation: "ai_generated" },
+      { element: "stage_icon_2", mandatory: false, generation: "ai_generated" },
+      { element: "stage_icon_3", mandatory: false, generation: "ai_generated" }
     ],
     cardStructure: {
       type: "cards",
@@ -1973,7 +1973,7 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "headline", mandatory: true, generation: "ai_generated" },
       { element: "subheadline", mandatory: false, generation: "ai_generated" },
       { element: "show_quote_mark", mandatory: false, generation: "manual_preferred" },
-      { element: "quote_icon", mandatory: false, generation: "manual_preferred" }
+      { element: "quote_icon", mandatory: false, generation: "ai_generated" }
     ],
 
     cardStructure: {
@@ -2022,8 +2022,8 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "overall_rating", mandatory: false, generation: "ai_generated" },
       { element: "satisfaction_text", mandatory: false, generation: "ai_generated" },
       { element: "show_trust_section", mandatory: false, generation: "manual_preferred" },
-      { element: "star_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "overall_rating_star_icon", mandatory: false, generation: "manual_preferred" }
+      { element: "star_icon", mandatory: false, generation: "ai_generated" },
+      { element: "overall_rating_star_icon", mandatory: false, generation: "ai_generated" }
     ],
 
     cardStructure: {
@@ -2054,9 +2054,9 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "button_text", mandatory: false, generation: "ai_generated" },
       { element: "show_typing_indicator", mandatory: false, generation: "manual_preferred" },
       { element: "show_cta_section", mandatory: false, generation: "manual_preferred" },
-      { element: "status_indicator_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "send_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "support_avatar_icon", mandatory: false, generation: "manual_preferred" }
+      { element: "status_indicator_icon", mandatory: false, generation: "ai_generated" },
+      { element: "send_icon", mandatory: false, generation: "ai_generated" },
+      { element: "support_avatar_icon", mandatory: false, generation: "ai_generated" }
     ],
 
     cardStructure: {
@@ -2079,12 +2079,12 @@ export const layoutElementSchema: LayoutSchema = {
     sectionElements: [
       { element: "headline", mandatory: true, generation: "ai_generated" },
       { element: "subheadline", mandatory: false, generation: "ai_generated" },
-      { element: "icon_1", mandatory: true, generation: "manual_preferred" },
-      { element: "icon_2", mandatory: true, generation: "manual_preferred" },
-      { element: "icon_3", mandatory: true, generation: "manual_preferred" },
-      { element: "icon_4", mandatory: true, generation: "manual_preferred" },
-      { element: "icon_5", mandatory: true, generation: "manual_preferred" },
-      { element: "icon_6", mandatory: true, generation: "manual_preferred" }
+      { element: "icon_1", mandatory: true, generation: "ai_generated" },
+      { element: "icon_2", mandatory: true, generation: "ai_generated" },
+      { element: "icon_3", mandatory: true, generation: "ai_generated" },
+      { element: "icon_4", mandatory: true, generation: "ai_generated" },
+      { element: "icon_5", mandatory: true, generation: "ai_generated" },
+      { element: "icon_6", mandatory: true, generation: "ai_generated" }
     ],
     cardStructure: {
       type: "cards",
@@ -2104,12 +2104,12 @@ export const layoutElementSchema: LayoutSchema = {
   SplitAlternating: {
     sectionElements: [
       { element: "headline", mandatory: true, generation: "ai_generated" },
-      { element: "feature_icon_1", mandatory: true, generation: "manual_preferred" },
-      { element: "feature_icon_2", mandatory: true, generation: "manual_preferred" },
-      { element: "feature_icon_3", mandatory: true, generation: "manual_preferred" },
-      { element: "feature_icon_4", mandatory: true, generation: "manual_preferred" },
-      { element: "feature_icon_5", mandatory: true, generation: "manual_preferred" },
-      { element: "feature_icon_6", mandatory: true, generation: "manual_preferred" }
+      { element: "feature_icon_1", mandatory: true, generation: "ai_generated" },
+      { element: "feature_icon_2", mandatory: true, generation: "ai_generated" },
+      { element: "feature_icon_3", mandatory: true, generation: "ai_generated" },
+      { element: "feature_icon_4", mandatory: true, generation: "ai_generated" },
+      { element: "feature_icon_5", mandatory: true, generation: "ai_generated" },
+      { element: "feature_icon_6", mandatory: true, generation: "ai_generated" }
     ],
     cardStructure: {
       type: "cards",
@@ -2130,12 +2130,12 @@ export const layoutElementSchema: LayoutSchema = {
     sectionElements: [
       { element: "headline", mandatory: true, generation: "ai_generated" },
       { element: "subheadline", mandatory: false, generation: "ai_generated" },
-      { element: "tab_icon_1", mandatory: true, generation: "manual_preferred" },
-      { element: "tab_icon_2", mandatory: true, generation: "manual_preferred" },
-      { element: "tab_icon_3", mandatory: true, generation: "manual_preferred" },
-      { element: "tab_icon_4", mandatory: true, generation: "manual_preferred" },
-      { element: "tab_icon_5", mandatory: true, generation: "manual_preferred" },
-      { element: "tab_icon_6", mandatory: true, generation: "manual_preferred" }
+      { element: "tab_icon_1", mandatory: true, generation: "ai_generated" },
+      { element: "tab_icon_2", mandatory: true, generation: "ai_generated" },
+      { element: "tab_icon_3", mandatory: true, generation: "ai_generated" },
+      { element: "tab_icon_4", mandatory: true, generation: "ai_generated" },
+      { element: "tab_icon_5", mandatory: true, generation: "ai_generated" },
+      { element: "tab_icon_6", mandatory: true, generation: "ai_generated" }
     ],
     cardStructure: {
       type: "cards",
@@ -2161,17 +2161,17 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "trust_items", mandatory: false, generation: "ai_generated" },
       { element: "step_benefit_1", mandatory: false, generation: "ai_generated" },
       { element: "step_benefit_2", mandatory: false, generation: "ai_generated" },
-      { element: "step_benefit_icon_1", mandatory: true, generation: "manual_preferred" },
-      { element: "step_benefit_icon_2", mandatory: true, generation: "manual_preferred" },
+      { element: "step_benefit_icon_1", mandatory: true, generation: "ai_generated" },
+      { element: "step_benefit_icon_2", mandatory: true, generation: "ai_generated" },
       { element: "process_summary_title", mandatory: false, generation: "ai_generated" },
       { element: "process_summary_description", mandatory: false, generation: "ai_generated" },
       { element: "show_process_summary", mandatory: false, generation: "manual_preferred" },
-      { element: "timeline_icon_1", mandatory: true, generation: "manual_preferred" },
-      { element: "timeline_icon_2", mandatory: true, generation: "manual_preferred" },
-      { element: "timeline_icon_3", mandatory: true, generation: "manual_preferred" },
-      { element: "timeline_icon_4", mandatory: true, generation: "manual_preferred" },
-      { element: "timeline_icon_5", mandatory: true, generation: "manual_preferred" },
-      { element: "timeline_icon_6", mandatory: true, generation: "manual_preferred" }
+      { element: "timeline_icon_1", mandatory: true, generation: "ai_generated" },
+      { element: "timeline_icon_2", mandatory: true, generation: "ai_generated" },
+      { element: "timeline_icon_3", mandatory: true, generation: "ai_generated" },
+      { element: "timeline_icon_4", mandatory: true, generation: "ai_generated" },
+      { element: "timeline_icon_5", mandatory: true, generation: "ai_generated" },
+      { element: "timeline_icon_6", mandatory: true, generation: "ai_generated" }
     ],
     cardStructure: {
       type: "cards",
@@ -2191,10 +2191,10 @@ export const layoutElementSchema: LayoutSchema = {
   FeatureTestimonial: {
     sectionElements: [
       { element: "headline", mandatory: true, generation: "ai_generated" },
-      { element: "feature_icon_1", mandatory: true, generation: "manual_preferred" },
-      { element: "feature_icon_2", mandatory: true, generation: "manual_preferred" },
-      { element: "feature_icon_3", mandatory: true, generation: "manual_preferred" },
-      { element: "feature_icon_4", mandatory: true, generation: "manual_preferred" }
+      { element: "feature_icon_1", mandatory: true, generation: "ai_generated" },
+      { element: "feature_icon_2", mandatory: true, generation: "ai_generated" },
+      { element: "feature_icon_3", mandatory: true, generation: "ai_generated" },
+      { element: "feature_icon_4", mandatory: true, generation: "ai_generated" }
     ],
     cardStructure: {
       type: "cards",
@@ -2215,14 +2215,14 @@ export const layoutElementSchema: LayoutSchema = {
     sectionElements: [
       { element: "headline", mandatory: true, generation: "ai_generated" },
       { element: "subheadline", mandatory: false, generation: "ai_generated" },
-      { element: "metric_icon_1", mandatory: true, generation: "manual_preferred" },
-      { element: "metric_icon_2", mandatory: true, generation: "manual_preferred" },
-      { element: "metric_icon_3", mandatory: true, generation: "manual_preferred" },
-      { element: "metric_icon_4", mandatory: true, generation: "manual_preferred" },
-      { element: "metric_icon_5", mandatory: true, generation: "manual_preferred" },
-      { element: "metric_icon_6", mandatory: true, generation: "manual_preferred" },
-      { element: "metric_icon_7", mandatory: true, generation: "manual_preferred" },
-      { element: "metric_icon_8", mandatory: true, generation: "manual_preferred" }
+      { element: "metric_icon_1", mandatory: true, generation: "ai_generated" },
+      { element: "metric_icon_2", mandatory: true, generation: "ai_generated" },
+      { element: "metric_icon_3", mandatory: true, generation: "ai_generated" },
+      { element: "metric_icon_4", mandatory: true, generation: "ai_generated" },
+      { element: "metric_icon_5", mandatory: true, generation: "ai_generated" },
+      { element: "metric_icon_6", mandatory: true, generation: "ai_generated" },
+      { element: "metric_icon_7", mandatory: true, generation: "ai_generated" },
+      { element: "metric_icon_8", mandatory: true, generation: "ai_generated" }
     ],
     cardStructure: {
       type: "cards",
@@ -2250,18 +2250,18 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "summary_item_2", mandatory: false, generation: "ai_generated" },
       { element: "summary_item_3", mandatory: false, generation: "ai_generated" },
       { element: "show_feature_summary", mandatory: false, generation: "manual_preferred" },
-      { element: "feature_icon_1", mandatory: true, generation: "manual_preferred" },
-      { element: "feature_icon_2", mandatory: true, generation: "manual_preferred" },
-      { element: "feature_icon_3", mandatory: true, generation: "manual_preferred" },
-      { element: "feature_icon_4", mandatory: true, generation: "manual_preferred" },
-      { element: "feature_icon_5", mandatory: true, generation: "manual_preferred" },
-      { element: "feature_icon_6", mandatory: true, generation: "manual_preferred" },
-      { element: "feature_icon_7", mandatory: true, generation: "manual_preferred" },
-      { element: "feature_icon_8", mandatory: true, generation: "manual_preferred" },
-      { element: "feature_icon_9", mandatory: true, generation: "manual_preferred" },
-      { element: "feature_icon_10", mandatory: true, generation: "manual_preferred" },
-      { element: "feature_icon_11", mandatory: true, generation: "manual_preferred" },
-      { element: "feature_icon_12", mandatory: true, generation: "manual_preferred" }
+      { element: "feature_icon_1", mandatory: true, generation: "ai_generated" },
+      { element: "feature_icon_2", mandatory: true, generation: "ai_generated" },
+      { element: "feature_icon_3", mandatory: true, generation: "ai_generated" },
+      { element: "feature_icon_4", mandatory: true, generation: "ai_generated" },
+      { element: "feature_icon_5", mandatory: true, generation: "ai_generated" },
+      { element: "feature_icon_6", mandatory: true, generation: "ai_generated" },
+      { element: "feature_icon_7", mandatory: true, generation: "ai_generated" },
+      { element: "feature_icon_8", mandatory: true, generation: "ai_generated" },
+      { element: "feature_icon_9", mandatory: true, generation: "ai_generated" },
+      { element: "feature_icon_10", mandatory: true, generation: "ai_generated" },
+      { element: "feature_icon_11", mandatory: true, generation: "ai_generated" },
+      { element: "feature_icon_12", mandatory: true, generation: "ai_generated" }
     ],
     cardStructure: {
       type: "cards",
@@ -2288,16 +2288,16 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "auto_play", mandatory: false, generation: "manual_preferred" },
       { element: "benefit_1", mandatory: false, generation: "ai_generated" },
       { element: "benefit_2", mandatory: false, generation: "ai_generated" },
-      { element: "benefit_icon_1", mandatory: true, generation: "manual_preferred" },
-      { element: "benefit_icon_2", mandatory: true, generation: "manual_preferred" },
-      { element: "feature_icon_1", mandatory: true, generation: "manual_preferred" },
-      { element: "feature_icon_2", mandatory: true, generation: "manual_preferred" },
-      { element: "feature_icon_3", mandatory: true, generation: "manual_preferred" },
-      { element: "feature_icon_4", mandatory: true, generation: "manual_preferred" },
-      { element: "feature_icon_5", mandatory: true, generation: "manual_preferred" },
-      { element: "feature_icon_6", mandatory: true, generation: "manual_preferred" },
-      { element: "feature_icon_7", mandatory: true, generation: "manual_preferred" },
-      { element: "feature_icon_8", mandatory: true, generation: "manual_preferred" }
+      { element: "benefit_icon_1", mandatory: true, generation: "ai_generated" },
+      { element: "benefit_icon_2", mandatory: true, generation: "ai_generated" },
+      { element: "feature_icon_1", mandatory: true, generation: "ai_generated" },
+      { element: "feature_icon_2", mandatory: true, generation: "ai_generated" },
+      { element: "feature_icon_3", mandatory: true, generation: "ai_generated" },
+      { element: "feature_icon_4", mandatory: true, generation: "ai_generated" },
+      { element: "feature_icon_5", mandatory: true, generation: "ai_generated" },
+      { element: "feature_icon_6", mandatory: true, generation: "ai_generated" },
+      { element: "feature_icon_7", mandatory: true, generation: "ai_generated" },
+      { element: "feature_icon_8", mandatory: true, generation: "ai_generated" }
     ],
     cardStructure: {
       type: "cards",
@@ -2368,7 +2368,7 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "cta_text", mandatory: true, generation: "ai_generated" },
       { element: "founder_title", mandatory: false, generation: "ai_generated" },
       { element: "badge_text", mandatory: false, generation: "ai_generated" },
-      { element: "badge_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "badge_icon", mandatory: false, generation: "ai_generated" },
       { element: "mission_year", mandatory: false, generation: "ai_generated" },
       { element: "background_image", mandatory: false, generation: "manual_preferred" }
     ],
@@ -2401,13 +2401,13 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "trust_item_4", mandatory: false, generation: "ai_generated" },
       { element: "trust_item_5", mandatory: false, generation: "ai_generated" },
       { element: "current_state_heading", mandatory: false, generation: "ai_generated" },
-      { element: "current_state_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "timeline_icon_1", mandatory: false, generation: "manual_preferred" },
-      { element: "timeline_icon_2", mandatory: false, generation: "manual_preferred" },
-      { element: "timeline_icon_3", mandatory: false, generation: "manual_preferred" },
-      { element: "timeline_icon_4", mandatory: false, generation: "manual_preferred" },
-      { element: "timeline_icon_5", mandatory: false, generation: "manual_preferred" },
-      { element: "timeline_icon_6", mandatory: false, generation: "manual_preferred" }
+      { element: "current_state_icon", mandatory: false, generation: "ai_generated" },
+      { element: "timeline_icon_1", mandatory: false, generation: "ai_generated" },
+      { element: "timeline_icon_2", mandatory: false, generation: "ai_generated" },
+      { element: "timeline_icon_3", mandatory: false, generation: "ai_generated" },
+      { element: "timeline_icon_4", mandatory: false, generation: "ai_generated" },
+      { element: "timeline_icon_5", mandatory: false, generation: "ai_generated" },
+      { element: "timeline_icon_6", mandatory: false, generation: "ai_generated" }
     ],
     cardStructure: {
       type: "cards",
@@ -2431,7 +2431,7 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "cta_text", mandatory: true, generation: "ai_generated" },
       { element: "founder_name", mandatory: false, generation: "ai_generated" },
       { element: "badge_text", mandatory: false, generation: "ai_generated" },
-      { element: "badge_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "badge_icon", mandatory: false, generation: "ai_generated" },
       { element: "trust_items", mandatory: false, generation: "ai_generated" },
       { element: "trust_item_1", mandatory: false, generation: "ai_generated" },
       { element: "trust_item_2", mandatory: false, generation: "ai_generated" },
@@ -2440,8 +2440,8 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "trust_item_5", mandatory: false, generation: "ai_generated" },
       { element: "story_image", mandatory: false, generation: "manual_preferred" },
       { element: "secondary_image", mandatory: false, generation: "manual_preferred" },
-      { element: "placeholder_icon_1", mandatory: false, generation: "manual_preferred" },
-      { element: "placeholder_icon_2", mandatory: false, generation: "manual_preferred" }
+      { element: "placeholder_icon_1", mandatory: false, generation: "ai_generated" },
+      { element: "placeholder_icon_2", mandatory: false, generation: "ai_generated" }
     ],
     cardStructure: {
       type: "cards",
@@ -2478,7 +2478,7 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "trust_item_4", mandatory: false, generation: "ai_generated" },
       { element: "trust_item_5", mandatory: false, generation: "ai_generated" },
       { element: "founder_image", mandatory: false, generation: "manual_preferred" },
-      { element: "quote_icon", mandatory: false, generation: "manual_preferred" }
+      { element: "quote_icon", mandatory: false, generation: "ai_generated" }
     ],
     cardStructure: null,
     cardRequirements: null
@@ -2507,12 +2507,12 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "trust_item_4", mandatory: false, generation: "ai_generated" },
       { element: "trust_item_5", mandatory: false, generation: "ai_generated" },
       { element: "founder_image", mandatory: false, generation: "manual_preferred" },
-      { element: "belief_icon_1", mandatory: false, generation: "manual_preferred" },
-      { element: "belief_icon_2", mandatory: false, generation: "manual_preferred" },
-      { element: "belief_icon_3", mandatory: false, generation: "manual_preferred" },
-      { element: "belief_icon_4", mandatory: false, generation: "manual_preferred" },
-      { element: "belief_icon_5", mandatory: false, generation: "manual_preferred" },
-      { element: "belief_icon_6", mandatory: false, generation: "manual_preferred" }
+      { element: "belief_icon_1", mandatory: false, generation: "ai_generated" },
+      { element: "belief_icon_2", mandatory: false, generation: "ai_generated" },
+      { element: "belief_icon_3", mandatory: false, generation: "ai_generated" },
+      { element: "belief_icon_4", mandatory: false, generation: "ai_generated" },
+      { element: "belief_icon_5", mandatory: false, generation: "ai_generated" },
+      { element: "belief_icon_6", mandatory: false, generation: "ai_generated" }
     ],
     cardStructure: {
       type: "cards",
@@ -2645,9 +2645,9 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "cta_text", mandatory: false, generation: "ai_generated" },
       { element: "trust_items", mandatory: false, generation: "ai_generated" },
       { element: "step_numbers", mandatory: false, generation: "manual_preferred" },
-      { element: "step_icon_1", mandatory: false, generation: "manual_preferred" },
-      { element: "step_icon_2", mandatory: false, generation: "manual_preferred" },
-      { element: "step_icon_3", mandatory: false, generation: "manual_preferred" }
+      { element: "step_icon_1", mandatory: false, generation: "ai_generated" },
+      { element: "step_icon_2", mandatory: false, generation: "ai_generated" },
+      { element: "step_icon_3", mandatory: false, generation: "ai_generated" }
     ],
     cardStructure: {
       type: "cards",
@@ -2675,11 +2675,11 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "process_summary_description", mandatory: false, generation: "ai_generated" },
       { element: "process_time_label", mandatory: false, generation: "ai_generated" },
       { element: "timeline_connector_text", mandatory: false, generation: "ai_generated" },
-      { element: "use_step_icons", mandatory: false, generation: "manual_preferred" },
-      { element: "step_icon_1", mandatory: false, generation: "manual_preferred" },
-      { element: "step_icon_2", mandatory: false, generation: "manual_preferred" },
-      { element: "step_icon_3", mandatory: false, generation: "manual_preferred" },
-      { element: "step_icon_4", mandatory: false, generation: "manual_preferred" }
+      { element: "use_step_icons", mandatory: false, generation: "ai_generated" },
+      { element: "step_icon_1", mandatory: false, generation: "ai_generated" },
+      { element: "step_icon_2", mandatory: false, generation: "ai_generated" },
+      { element: "step_icon_3", mandatory: false, generation: "ai_generated" },
+      { element: "step_icon_4", mandatory: false, generation: "ai_generated" }
     ],
     cardStructure: {
       type: "cards",
@@ -2713,12 +2713,12 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "summary_stat_3_text", mandatory: false, generation: "ai_generated" },
       { element: "show_circle_features", mandatory: false, generation: "manual_preferred" },
       { element: "show_summary_card", mandatory: false, generation: "manual_preferred" },
-      { element: "step_icon_1", mandatory: false, generation: "manual_preferred" },
-      { element: "step_icon_2", mandatory: false, generation: "manual_preferred" },
-      { element: "step_icon_3", mandatory: false, generation: "manual_preferred" },
-      { element: "step_icon_4", mandatory: false, generation: "manual_preferred" },
-      { element: "step_icon_5", mandatory: false, generation: "manual_preferred" },
-      { element: "step_icon_6", mandatory: false, generation: "manual_preferred" }
+      { element: "step_icon_1", mandatory: false, generation: "ai_generated" },
+      { element: "step_icon_2", mandatory: false, generation: "ai_generated" },
+      { element: "step_icon_3", mandatory: false, generation: "ai_generated" },
+      { element: "step_icon_4", mandatory: false, generation: "ai_generated" },
+      { element: "step_icon_5", mandatory: false, generation: "ai_generated" },
+      { element: "step_icon_6", mandatory: false, generation: "ai_generated" }
     ],
     cardStructure: {
       type: "cards",
@@ -2783,11 +2783,11 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "guide_indicator_3_text", mandatory: false, generation: "ai_generated" },
       { element: "show_flip_features", mandatory: false, generation: "manual_preferred" },
       { element: "show_interactive_guide", mandatory: false, generation: "manual_preferred" },
-      { element: "flip_feature_1_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "flip_feature_2_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "guide_indicator_1_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "guide_indicator_2_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "guide_indicator_3_icon", mandatory: false, generation: "manual_preferred" }
+      { element: "flip_feature_1_icon", mandatory: false, generation: "ai_generated" },
+      { element: "flip_feature_2_icon", mandatory: false, generation: "ai_generated" },
+      { element: "guide_indicator_1_icon", mandatory: false, generation: "ai_generated" },
+      { element: "guide_indicator_2_icon", mandatory: false, generation: "ai_generated" },
+      { element: "guide_indicator_3_icon", mandatory: false, generation: "ai_generated" }
     ],
     cardStructure: {
       type: "cards",
@@ -2854,9 +2854,9 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "flow_feature_3_text", mandatory: false, generation: "ai_generated" },
       { element: "flow_summary_description", mandatory: false, generation: "ai_generated" },
       { element: "show_flow_summary", mandatory: false, generation: "manual_preferred" },
-      { element: "flow_feature_1_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "flow_feature_2_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "flow_feature_3_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "flow_feature_1_icon", mandatory: false, generation: "ai_generated" },
+      { element: "flow_feature_2_icon", mandatory: false, generation: "ai_generated" },
+      { element: "flow_feature_3_icon", mandatory: false, generation: "ai_generated" },
       { element: "step_visual_0", mandatory: false, generation: "manual_preferred" },
       { element: "step_visual_1", mandatory: false, generation: "manual_preferred" },
       { element: "step_visual_2", mandatory: false, generation: "manual_preferred" },
@@ -2891,13 +2891,13 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "process_indicator_3_text", mandatory: false, generation: "ai_generated" },
       { element: "auto_animate", mandatory: false, generation: "manual_preferred" },
       { element: "show_process_indicators", mandatory: false, generation: "manual_preferred" },
-      { element: "step_icon_1", mandatory: false, generation: "manual_preferred" },
-      { element: "step_icon_2", mandatory: false, generation: "manual_preferred" },
-      { element: "step_icon_3", mandatory: false, generation: "manual_preferred" },
-      { element: "step_icon_4", mandatory: false, generation: "manual_preferred" },
-      { element: "process_indicator_1_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "process_indicator_2_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "process_indicator_3_icon", mandatory: false, generation: "manual_preferred" }
+      { element: "step_icon_1", mandatory: false, generation: "ai_generated" },
+      { element: "step_icon_2", mandatory: false, generation: "ai_generated" },
+      { element: "step_icon_3", mandatory: false, generation: "ai_generated" },
+      { element: "step_icon_4", mandatory: false, generation: "ai_generated" },
+      { element: "process_indicator_1_icon", mandatory: false, generation: "ai_generated" },
+      { element: "process_indicator_2_icon", mandatory: false, generation: "ai_generated" },
+      { element: "process_indicator_3_icon", mandatory: false, generation: "ai_generated" }
     ],
     cardStructure: {
       type: "cards",
@@ -2918,7 +2918,7 @@ export const layoutElementSchema: LayoutSchema = {
     sectionElements: [
       { element: "headline", mandatory: true, generation: "ai_generated" },
       { element: "subheadline", mandatory: false, generation: "ai_generated" },
-      { element: "default_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "default_icon", mandatory: false, generation: "ai_generated" },
       { element: "logo_urls", mandatory: false, generation: "manual_preferred" }
     ],
 
@@ -3091,8 +3091,8 @@ export const layoutElementSchema: LayoutSchema = {
     sectionElements: [
       { element: "headline", mandatory: true, generation: "ai_generated" },
       { element: "subheadline", mandatory: false, generation: "ai_generated" },
-      { element: "response_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "trust_icon", mandatory: false, generation: "manual_preferred" },
+      { element: "response_icon", mandatory: false, generation: "ai_generated" },
+      { element: "trust_icon", mandatory: false, generation: "ai_generated" },
       { element: "help_text", mandatory: false, generation: "ai_generated" }
     ],
 
@@ -3115,8 +3115,8 @@ export const layoutElementSchema: LayoutSchema = {
     sectionElements: [
       { element: "headline", mandatory: true, generation: "ai_generated" },
       { element: "subheadline", mandatory: false, generation: "ai_generated" },
-      { element: "myth_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "reality_icon", mandatory: false, generation: "manual_preferred" }
+      { element: "myth_icon", mandatory: false, generation: "ai_generated" },
+      { element: "reality_icon", mandatory: false, generation: "ai_generated" }
     ],
 
     cardStructure: {
@@ -3144,11 +3144,11 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "trust_indicator_1", mandatory: false, generation: "ai_generated" },
       { element: "trust_indicator_2", mandatory: false, generation: "ai_generated" },
       { element: "trust_indicator_3", mandatory: false, generation: "ai_generated" },
-      { element: "quote_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "verification_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "trust_icon_1", mandatory: false, generation: "manual_preferred" },
-      { element: "trust_icon_2", mandatory: false, generation: "manual_preferred" },
-      { element: "trust_icon_3", mandatory: false, generation: "manual_preferred" }
+      { element: "quote_icon", mandatory: false, generation: "ai_generated" },
+      { element: "verification_icon", mandatory: false, generation: "ai_generated" },
+      { element: "trust_icon_1", mandatory: false, generation: "ai_generated" },
+      { element: "trust_icon_2", mandatory: false, generation: "ai_generated" },
+      { element: "trust_icon_3", mandatory: false, generation: "ai_generated" }
     ],
 
     cardStructure: {
@@ -3192,13 +3192,13 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "headline", mandatory: true, generation: "ai_generated" },
       { element: "subheadline", mandatory: false, generation: "ai_generated" },
       { element: "transition_text", mandatory: false, generation: "ai_generated" },
-      { element: "problem_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "reframe_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "transition_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "arrow_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "benefit_icon_1", mandatory: false, generation: "manual_preferred" },
-      { element: "benefit_icon_2", mandatory: false, generation: "manual_preferred" },
-      { element: "benefit_icon_3", mandatory: false, generation: "manual_preferred" },
+      { element: "problem_icon", mandatory: false, generation: "ai_generated" },
+      { element: "reframe_icon", mandatory: false, generation: "ai_generated" },
+      { element: "transition_icon", mandatory: false, generation: "ai_generated" },
+      { element: "arrow_icon", mandatory: false, generation: "ai_generated" },
+      { element: "benefit_icon_1", mandatory: false, generation: "ai_generated" },
+      { element: "benefit_icon_2", mandatory: false, generation: "ai_generated" },
+      { element: "benefit_icon_3", mandatory: false, generation: "ai_generated" },
       { element: "bottom_headline", mandatory: false, generation: "ai_generated" },
       { element: "bottom_description", mandatory: false, generation: "ai_generated" },
       { element: "benefit_label_1", mandatory: false, generation: "ai_generated" },
@@ -3328,9 +3328,9 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "trust_item_3", mandatory: false, generation: "ai_generated" },
       { element: "show_trust_footer", mandatory: false, generation: "manual_preferred" },
       // Tier icons
-      { element: "tier_icon_1", mandatory: false, generation: "manual_preferred" },
-      { element: "tier_icon_2", mandatory: false, generation: "manual_preferred" },
-      { element: "tier_icon_3", mandatory: false, generation: "manual_preferred" }
+      { element: "tier_icon_1", mandatory: false, generation: "ai_generated" },
+      { element: "tier_icon_2", mandatory: false, generation: "ai_generated" },
+      { element: "tier_icon_3", mandatory: false, generation: "ai_generated" }
     ],
 
     cardStructure: {
@@ -3449,14 +3449,14 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "pricing_note", mandatory: false, generation: "ai_generated" },
       { element: "trust_items", mandatory: false, generation: "ai_generated" },
       // Feature icons
-      { element: "feature_icon_1", mandatory: false, generation: "manual_preferred" },
-      { element: "feature_icon_2", mandatory: false, generation: "manual_preferred" },
-      { element: "feature_icon_3", mandatory: false, generation: "manual_preferred" },
-      { element: "feature_icon_4", mandatory: false, generation: "manual_preferred" },
-      { element: "feature_icon_5", mandatory: false, generation: "manual_preferred" },
-      { element: "feature_icon_6", mandatory: false, generation: "manual_preferred" },
+      { element: "feature_icon_1", mandatory: false, generation: "ai_generated" },
+      { element: "feature_icon_2", mandatory: false, generation: "ai_generated" },
+      { element: "feature_icon_3", mandatory: false, generation: "ai_generated" },
+      { element: "feature_icon_4", mandatory: false, generation: "ai_generated" },
+      { element: "feature_icon_5", mandatory: false, generation: "ai_generated" },
+      { element: "feature_icon_6", mandatory: false, generation: "ai_generated" },
       // Pricing icon
-      { element: "pricing_icon", mandatory: false, generation: "manual_preferred" }
+      { element: "pricing_icon", mandatory: false, generation: "ai_generated" }
     ],
 
     cardStructure: {
@@ -3520,15 +3520,15 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "guarantee_description", mandatory: false, generation: "ai_generated" },
       { element: "show_guarantee", mandatory: false, generation: "manual_preferred" },
       // Tier icons
-      { element: "tier_icon_1", mandatory: false, generation: "manual_preferred" },
-      { element: "tier_icon_2", mandatory: false, generation: "manual_preferred" },
-      { element: "tier_icon_3", mandatory: false, generation: "manual_preferred" },
-      { element: "tier_icon_4", mandatory: false, generation: "manual_preferred" },
+      { element: "tier_icon_1", mandatory: false, generation: "ai_generated" },
+      { element: "tier_icon_2", mandatory: false, generation: "ai_generated" },
+      { element: "tier_icon_3", mandatory: false, generation: "ai_generated" },
+      { element: "tier_icon_4", mandatory: false, generation: "ai_generated" },
       // Social proof icons
-      { element: "social_icon_1", mandatory: false, generation: "manual_preferred" },
-      { element: "social_icon_2", mandatory: false, generation: "manual_preferred" },
-      { element: "social_icon_3", mandatory: false, generation: "manual_preferred" },
-      { element: "social_icon_4", mandatory: false, generation: "manual_preferred" }
+      { element: "social_icon_1", mandatory: false, generation: "ai_generated" },
+      { element: "social_icon_2", mandatory: false, generation: "ai_generated" },
+      { element: "social_icon_3", mandatory: false, generation: "ai_generated" },
+      { element: "social_icon_4", mandatory: false, generation: "ai_generated" }
     ],
 
     cardStructure: {
@@ -3608,7 +3608,7 @@ export const layoutElementSchema: LayoutSchema = {
     cardStructure: {
       type: "items",
       elements: ["trust_item_1", "trust_item_2", "trust_item_3", "trust_item_4", "trust_item_5"],
-      generation: "hybrid"
+      generation: "ai_generated"
     },
 
     cardRequirements: {
@@ -3638,7 +3638,7 @@ export const layoutElementSchema: LayoutSchema = {
     cardStructure: {
       type: "items",
       elements: ["trust_item_1", "trust_item_2", "trust_item_3", "trust_item_4", "trust_item_5"],
-      generation: "hybrid"
+      generation: "ai_generated"
     },
 
     cardRequirements: {
@@ -3662,7 +3662,7 @@ export const layoutElementSchema: LayoutSchema = {
     cardStructure: {
       type: "items",
       elements: ["trust_item_1", "trust_item_2", "trust_item_3", "trust_item_4", "trust_item_5"],
-      generation: "hybrid"
+      generation: "ai_generated"
     },
 
     cardRequirements: {
@@ -3686,7 +3686,7 @@ export const layoutElementSchema: LayoutSchema = {
     cardStructure: {
       type: "items",
       elements: ["benefit_list", "trust_item_1", "trust_item_2", "trust_item_3", "trust_item_4", "trust_item_5"],
-      generation: "hybrid"
+      generation: "ai_generated"
     },
 
     cardRequirements: {
@@ -3716,7 +3716,7 @@ export const layoutElementSchema: LayoutSchema = {
     cardStructure: {
       type: "items",
       elements: ["trust_item_1", "trust_item_2", "trust_item_3", "trust_item_4", "trust_item_5"],
-      generation: "hybrid"
+      generation: "ai_generated"
     },
 
     cardRequirements: {
@@ -3744,7 +3744,7 @@ export const layoutElementSchema: LayoutSchema = {
     cardStructure: {
       type: "items",
       elements: ["benefit_1", "benefit_2", "benefit_3", "benefit_4", "benefit_5", "trust_item_1", "trust_item_2", "trust_item_3", "trust_item_4", "trust_item_5"],
-      generation: "hybrid"
+      generation: "ai_generated"
     },
 
     cardRequirements: {
@@ -3834,9 +3834,9 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "subheadline", mandatory: false, generation: "ai_generated" },
       { element: "supporting_text", mandatory: false, generation: "ai_generated" },
       { element: "trust_items", mandatory: false, generation: "ai_generated" },
-      { element: "transformation_icon_1", mandatory: false, generation: "manual_preferred" },
-      { element: "transformation_icon_2", mandatory: false, generation: "manual_preferred" },
-      { element: "transformation_icon_3", mandatory: false, generation: "manual_preferred" }
+      { element: "transformation_icon_1", mandatory: false, generation: "ai_generated" },
+      { element: "transformation_icon_2", mandatory: false, generation: "ai_generated" },
+      { element: "transformation_icon_3", mandatory: false, generation: "ai_generated" }
     ],
     cardRequirements: null
   },
@@ -3859,8 +3859,8 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "bottom_stat_3", mandatory: false, generation: "ai_generated" },
       { element: "bottom_stat_3_label", mandatory: false, generation: "ai_generated" },
       { element: "cta_section_message", mandatory: false, generation: "ai_generated" },
-      { element: "path_1_icon", mandatory: false, generation: "manual_preferred" },
-      { element: "path_2_icon", mandatory: false, generation: "manual_preferred" }
+      { element: "path_1_icon", mandatory: false, generation: "ai_generated" },
+      { element: "path_2_icon", mandatory: false, generation: "ai_generated" }
     ],
     cardStructure: {
       type: "pairs",
