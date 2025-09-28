@@ -364,7 +364,47 @@ export default function StatBlocks(props: StatBlocksProps) {
   const getStatIcon = (index: number): string => {
     const iconFields = ['stat_icon_1', 'stat_icon_2', 'stat_icon_3', 'stat_icon_4', 'stat_icon_5', 'stat_icon_6'];
     const iconField = iconFields[index] as keyof StatBlocksContent;
-    return blockContent[iconField] || ['👥', '❤️', '📈', '⏰', '⚡', '🏆'][index] || '📊';
+    const iconValue = blockContent[iconField];
+
+    // If the icon value looks like text/numbers (not an emoji), use contextual icon based on stat label
+    if (iconValue && !isValidIcon(iconValue)) {
+      return getContextualIcon(statItems[index]?.label || '', index);
+    }
+
+    return iconValue || getContextualIcon(statItems[index]?.label || '', index);
+  };
+
+  // Helper function to check if a value is a valid icon (emoji or simple icon character)
+  const isValidIcon = (value: string): boolean => {
+    // Check if it's an emoji (basic check) or common icon characters
+    const iconPattern = /^[\u{1F300}-\u{1F9FF}]|^[👥❤️📈⏰⚡🏆📊💰🎯✨🔥💡🚀🎉🔔⭐💎🎪🎨🎮🎯⚽🏀🎾🎳🎲🎭🎪🎨🎬🎤🎧🎼🎹🥁🎺🎸🎻🎯]|^[⭐✅✨🔔🔥🚀💡💎]$/u;
+    return iconPattern.test(value) || value.length <= 2;
+  };
+
+  // Helper function to get contextual icon based on stat label
+  const getContextualIcon = (label: string, index: number): string => {
+    const lower = label.toLowerCase();
+
+    if (lower.includes('customer') || lower.includes('user') || lower.includes('client')) {
+      return '👥';
+    } else if (lower.includes('satisfaction') || lower.includes('rating') || lower.includes('score') || lower.includes('love')) {
+      return '❤️';
+    } else if (lower.includes('revenue') || lower.includes('growth') || lower.includes('sales') || lower.includes('profit') || lower.includes('increase')) {
+      return '📈';
+    } else if (lower.includes('time') || lower.includes('speed') || lower.includes('fast') || lower.includes('support') || lower.includes('24')) {
+      return '⏰';
+    } else if (lower.includes('efficiency') || lower.includes('productivity') || lower.includes('performance') || lower.includes('boost')) {
+      return '⚡';
+    } else if (lower.includes('award') || lower.includes('achievement') || lower.includes('success') || lower.includes('winner')) {
+      return '🏆';
+    } else if (lower.includes('money') || lower.includes('cost') || lower.includes('save') || lower.includes('dollar')) {
+      return '💰';
+    } else if (lower.includes('goal') || lower.includes('target') || lower.includes('hit') || lower.includes('reach')) {
+      return '🎯';
+    }
+
+    // Default icons based on position
+    return ['📊', '✨', '🔥', '💡', '🚀', '🎉'][index] || '📊';
   };
 
   const handleLabelEdit = (index: number, value: string) => {

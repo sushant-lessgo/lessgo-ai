@@ -10,6 +10,33 @@ import { LayoutComponentProps } from '@/types/storeTypes';
 
 interface StackedWinsListProps extends LayoutComponentProps {}
 
+// Helper function to check if a value is a valid icon (emoji or simple icon character)
+const isValidIcon = (value: string): boolean => {
+  // Check if it's an emoji (basic check) or common icon characters
+  const iconPattern = /^[\u{1F300}-\u{1F9FF}]|^[✅📈🏆⭐🎯💡🔥💎🌟💪🎪⚽🏀🎾🎳🎲🎭🎪🎨🎬🎤🎧🎼🎹🥁🎺🎸🎻💰🎉🔔✨🚀⚡]|^[⭐✅✨🔔🔥🚀💡💎🌟⚙️🔧]$/u;
+  return iconPattern.test(value) || value.length <= 2;
+};
+
+// Helper function to get validated icon with contextual fallback
+const getValidatedIcon = (iconValue: string | undefined, defaultIcon: string, iconType: 'win' | 'badge' | 'momentum'): string => {
+  // If we have an icon value and it's valid, use it
+  if (iconValue && isValidIcon(iconValue)) {
+    return iconValue;
+  }
+
+  // Get contextual icon based on type
+  switch (iconType) {
+    case 'win':
+      return '✅'; // Checkmark for wins/achievements
+    case 'badge':
+      return '🏆'; // Trophy for badges/social proof
+    case 'momentum':
+      return '📈'; // Growth chart for momentum
+    default:
+      return defaultIcon;
+  }
+};
+
 // Win item structure
 interface WinItem {
   win: string;
@@ -163,7 +190,7 @@ const WinItem = ({
         <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
           <IconEditableText
             mode={mode}
-            value={blockContent.win_icon || '✅'}
+            value={getValidatedIcon(blockContent.win_icon, '✅', 'win')}
             onEdit={(value) => handleContentUpdate('win_icon', value)}
             backgroundType="neutral"
             colorTokens={{}}
@@ -371,7 +398,7 @@ export default function StackedWinsList(props: StackedWinsListProps) {
             <div className="inline-flex items-center px-4 py-2 bg-green-50 border border-green-200 rounded-full text-green-800">
               <IconEditableText
                 mode={mode}
-                value={blockContent.badge_icon || '🏆'}
+                value={getValidatedIcon(blockContent.badge_icon, '🏆', 'badge')}
                 onEdit={(value) => handleContentUpdate('badge_icon', value)}
                 backgroundType="neutral"
                 colorTokens={{}}
@@ -440,7 +467,7 @@ export default function StackedWinsList(props: StackedWinsListProps) {
               <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mr-4">
                 <IconEditableText
                   mode={mode}
-                  value={blockContent.momentum_icon || '📈'}
+                  value={getValidatedIcon(blockContent.momentum_icon, '📈', 'momentum')}
                   onEdit={(value) => handleContentUpdate('momentum_icon', value)}
                   backgroundType="neutral"
                   colorTokens={{}}

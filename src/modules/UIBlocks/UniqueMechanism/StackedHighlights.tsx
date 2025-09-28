@@ -69,7 +69,7 @@ const parseHighlightData = (titles: string, descriptions: string): HighlightItem
 
 
 // Helper function to get highlight icon
-const getHighlightIcon = (blockContent: StackedHighlightsContent, index: number) => {
+const getHighlightIcon = (blockContent: StackedHighlightsContent, index: number, highlightItems: HighlightItem[]) => {
   const iconFields = [
     blockContent.highlight_icon_1,
     blockContent.highlight_icon_2,
@@ -78,7 +78,62 @@ const getHighlightIcon = (blockContent: StackedHighlightsContent, index: number)
     blockContent.highlight_icon_5,
     blockContent.highlight_icon_6
   ];
-  return iconFields[index] || '✨';
+
+  const iconValue = iconFields[index];
+
+  // If the icon value looks like text/numbers (not an emoji), use contextual icon based on highlight title
+  if (iconValue && !isValidIcon(iconValue)) {
+    return getContextualHighlightIcon(highlightItems[index]?.title || '', index);
+  }
+
+  return iconValue || getContextualHighlightIcon(highlightItems[index]?.title || '', index);
+};
+
+// Helper function to check if a value is a valid icon (emoji or simple icon character)
+const isValidIcon = (value: string): boolean => {
+  // Check if it's an emoji (basic check) or common icon characters
+  const iconPattern = /^[\u{1F300}-\u{1F9FF}]|^[🧠🔄📊✅⚡🎯💡🚀🔥💎⭐🏆🎨🔧⚙️🌟💪🎪⚽🏀🎾🎳🎲🎭🎪🎨🎬🎤🎧🎼🎹🥁🎺🎸🎻]|^[⭐✅✨🔔🔥🚀💡💎🌟⚙️🔧]$/u;
+  return iconPattern.test(value) || value.length <= 2;
+};
+
+// Helper function to get contextual icon based on highlight title
+const getContextualHighlightIcon = (title: string, index: number): string => {
+  const lower = title.toLowerCase();
+
+  if (lower.includes('intelligent') || lower.includes('smart') || lower.includes('ai') || lower.includes('brain') || lower.includes('analysis')) {
+    return '🧠';
+  } else if (lower.includes('auto') || lower.includes('dynamic') || lower.includes('switching') || lower.includes('context') || lower.includes('adapt')) {
+    return '🔄';
+  } else if (lower.includes('predict') || lower.includes('resource') || lower.includes('allocation') || lower.includes('data') || lower.includes('analytics')) {
+    return '📊';
+  } else if (lower.includes('quality') || lower.includes('assurance') || lower.includes('check') || lower.includes('verify') || lower.includes('validation')) {
+    return '✅';
+  } else if (lower.includes('speed') || lower.includes('fast') || lower.includes('quick') || lower.includes('performance') || lower.includes('boost')) {
+    return '⚡';
+  } else if (lower.includes('target') || lower.includes('goal') || lower.includes('focus') || lower.includes('precision') || lower.includes('accurate')) {
+    return '🎯';
+  } else if (lower.includes('innovation') || lower.includes('creative') || lower.includes('idea') || lower.includes('solution') || lower.includes('breakthrough')) {
+    return '💡';
+  } else if (lower.includes('growth') || lower.includes('scale') || lower.includes('expand') || lower.includes('launch') || lower.includes('rocket')) {
+    return '🚀';
+  } else if (lower.includes('popular') || lower.includes('trending') || lower.includes('hot') || lower.includes('demand') || lower.includes('fire')) {
+    return '🔥';
+  } else if (lower.includes('premium') || lower.includes('valuable') || lower.includes('diamond') || lower.includes('exclusive') || lower.includes('luxury')) {
+    return '💎';
+  } else if (lower.includes('rating') || lower.includes('award') || lower.includes('best') || lower.includes('top') || lower.includes('star')) {
+    return '⭐';
+  } else if (lower.includes('winner') || lower.includes('champion') || lower.includes('success') || lower.includes('achievement') || lower.includes('trophy')) {
+    return '🏆';
+  } else if (lower.includes('design') || lower.includes('creative') || lower.includes('visual') || lower.includes('art') || lower.includes('aesthetic')) {
+    return '🎨';
+  } else if (lower.includes('tool') || lower.includes('build') || lower.includes('construct') || lower.includes('develop') || lower.includes('wrench')) {
+    return '🔧';
+  } else if (lower.includes('system') || lower.includes('process') || lower.includes('workflow') || lower.includes('automation') || lower.includes('mechanism')) {
+    return '⚙️';
+  }
+
+  // Default innovation-themed icons based on position for unique mechanisms
+  return ['🚀', '💡', '⚡', '🎯', '🔥', '⭐'][index] || '✨';
 };
 
 // Helper function to add a new highlight
@@ -116,10 +171,10 @@ const removeHighlight = (titles: string, descriptions: string, indexToRemove: nu
 };
 
 // Individual Highlight Card
-const HighlightCard = ({ 
-  highlight, 
-  index, 
-  mode, 
+const HighlightCard = ({
+  highlight,
+  index,
+  mode,
   sectionId,
   onTitleEdit,
   onDescriptionEdit,
@@ -127,6 +182,7 @@ const HighlightCard = ({
   blockContent,
   colorTokens,
   handleContentUpdate,
+  highlightItems,
   canRemove = true
 }: {
   highlight: HighlightItem;
@@ -139,6 +195,7 @@ const HighlightCard = ({
   blockContent: StackedHighlightsContent;
   colorTokens: any;
   handleContentUpdate: (field: keyof StackedHighlightsContent, value: string) => void;
+  highlightItems: HighlightItem[];
   canRemove?: boolean;
 }) => {
   const { getTextStyle } = useTypography();
@@ -155,7 +212,7 @@ const HighlightCard = ({
         <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300">
           <IconEditableText
             mode={mode}
-            value={getHighlightIcon(blockContent, index)}
+            value={getHighlightIcon(blockContent, index, highlightItems)}
             onEdit={(value) => {
               const iconField = `highlight_icon_${index + 1}` as keyof StackedHighlightsContent;
               handleContentUpdate(iconField, value);
@@ -370,6 +427,7 @@ export default function StackedHighlights(props: StackedHighlightsProps) {
               blockContent={blockContent}
               colorTokens={colorTokens}
               handleContentUpdate={handleContentUpdate}
+              highlightItems={highlightItems}
               canRemove={highlightItems.length > 1}
             />
           ))}
