@@ -390,10 +390,21 @@ export default function ImageFirst(props: LayoutComponentProps) {
         <div className="flex flex-col space-y-12 min-h-[700px]">
           
           <div className="w-full">
-            {blockContent.image_first_hero_image && blockContent.image_first_hero_image !== '' ? (
-              <div className="relative w-full h-full min-h-[500px] lg:min-h-[600px]">
-                <img
-                  src={blockContent.image_first_hero_image}
+            {(() => {
+              // Check if image_first_hero_image is a valid URL or path
+              const imageValue = blockContent.image_first_hero_image || '';
+              const isValidImagePath = imageValue.startsWith('/') ||
+                                      imageValue.startsWith('http://') ||
+                                      imageValue.startsWith('https://') ||
+                                      imageValue === '';
+
+              // Use placeholder if it's descriptive text from AI or empty
+              const imageSrc = isValidImagePath && imageValue !== '' ? imageValue : '/hero-placeholder.jpg';
+
+              return imageSrc ? (
+                <div className="relative w-full h-full min-h-[500px] lg:min-h-[600px]">
+                  <img
+                    src={imageSrc}
                   alt="Hero"
                   className="w-full h-full object-cover rounded-2xl shadow-2xl cursor-pointer"
                   data-image-id={`${sectionId}-image-first-hero-image`}
@@ -412,7 +423,8 @@ export default function ImageFirst(props: LayoutComponentProps) {
               </div>
             ) : (
               <HeroImagePlaceholder />
-            )}
+            );
+          })()}
           </div>
 
           <div className="max-w-4xl mx-auto text-center space-y-8">

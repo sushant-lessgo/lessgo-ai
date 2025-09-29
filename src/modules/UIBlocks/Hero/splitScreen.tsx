@@ -388,8 +388,16 @@ export default function SplitScreen(props: LayoutComponentProps) {
   const store = useEditStore();
   const heroImageUrl = store.content[sectionId]?.elements?.split_hero_image?.content;
   logger.debug('🔄 Store selector called for split hero image:', { sectionId, url: heroImageUrl, timestamp: Date.now() });
-  
-  const reactiveHeroImage = heroImageUrl || blockContent.split_hero_image;  
+
+  // Check if the image value is a valid URL or path
+  const imageValue = heroImageUrl || blockContent.split_hero_image || '';
+  const isValidImagePath = imageValue.startsWith('/') ||
+                          imageValue.startsWith('http://') ||
+                          imageValue.startsWith('https://') ||
+                          imageValue === '';
+
+  // Use placeholder if it's descriptive text from AI or empty
+  const reactiveHeroImage = isValidImagePath && imageValue !== '' ? imageValue : '/hero-placeholder.jpg';
   logger.debug('🎨 Final hero image URL:', reactiveHeroImage);
   
   // Use robust image toolbar hook
@@ -640,7 +648,7 @@ export default function SplitScreen(props: LayoutComponentProps) {
           </div>
 
           <div className="flex items-center justify-center p-4 md:p-6 lg:p-8">
-            {reactiveHeroImage && reactiveHeroImage !== '' ? (
+            {reactiveHeroImage ? (
               <div className="relative w-full h-full min-h-[600px]">
                 <img
                   src={String(reactiveHeroImage)}

@@ -638,13 +638,24 @@ export default function CenterStacked(props: LayoutComponentProps) {
           )}
 
           <div className="w-full pt-8">
-            {blockContent.center_hero_image && blockContent.center_hero_image !== '' ? (
-              <div className="relative w-full h-full min-h-[400px] max-w-3xl mx-auto">
-                <img
-                  src={blockContent.center_hero_image}
-                  alt="Hero"
-                  className="w-full h-full object-cover rounded-2xl shadow-2xl cursor-pointer"
-                  data-image-id={`${sectionId}-center-hero-image`}
+            {(() => {
+              // Check if center_hero_image is a valid URL or path
+              const imageValue = blockContent.center_hero_image || '';
+              const isValidImagePath = imageValue.startsWith('/') ||
+                                      imageValue.startsWith('http://') ||
+                                      imageValue.startsWith('https://') ||
+                                      imageValue === '';
+
+              // Use placeholder if it's descriptive text from AI or empty
+              const imageSrc = isValidImagePath && imageValue !== '' ? imageValue : '/hero-placeholder.jpg';
+
+              return imageSrc ? (
+                <div className="relative w-full h-full min-h-[400px] max-w-3xl mx-auto">
+                  <img
+                    src={imageSrc}
+                    alt="Hero"
+                    className="w-full h-full object-cover rounded-2xl shadow-2xl cursor-pointer"
+                    data-image-id={`${sectionId}-center-hero-image`}
                   onMouseUp={(e) => {
                     if (mode !== 'preview') {
                       e.stopPropagation();
@@ -660,7 +671,8 @@ export default function CenterStacked(props: LayoutComponentProps) {
               </div>
             ) : (
               <HeroImagePlaceholder />
-            )}
+            );
+          })()}
           </div>
         </div>
       </div>

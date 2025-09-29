@@ -662,10 +662,21 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
           {/* Right Column - Hero Image */}
           <div className="order-1 lg:order-2">
             {/* Show actual image (either uploaded or default) */}
-            {blockContent.hero_image && blockContent.hero_image !== '' ? (
-              <div className="relative w-full h-full min-h-[500px] lg:min-h-[600px]">
-                <img
-                  src={blockContent.hero_image}
+            {(() => {
+              // Check if hero_image is a valid URL or path
+              const imageValue = blockContent.hero_image || '';
+              const isValidImagePath = imageValue.startsWith('/') ||
+                                      imageValue.startsWith('http://') ||
+                                      imageValue.startsWith('https://') ||
+                                      imageValue === '';
+
+              // Use placeholder if it's descriptive text from AI or empty
+              const imageSrc = isValidImagePath && imageValue !== '' ? imageValue : '/hero-placeholder.jpg';
+
+              return imageSrc ? (
+                <div className="relative w-full h-full min-h-[500px] lg:min-h-[600px]">
+                  <img
+                    src={imageSrc}
                   alt="Hero"
                   className="w-full h-full object-cover rounded-2xl shadow-2xl cursor-pointer"
                   data-image-id={`${sectionId}-hero-image`}
@@ -690,7 +701,8 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
               </div>
             ) : (
               <HeroImagePlaceholder />
-            )}
+            );
+          })()}
           </div>
         </div>
       </div>
