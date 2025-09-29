@@ -146,7 +146,7 @@ export default function LandingPageRenderer({ className = '', tokenId }: Landing
    // Generating background system
     const backgroundSystem = generateCompleteBackgroundSystem({
   // Required InputVariables fields with defaults
-  marketCategory: validatedFields.marketCategory || 'Work & Productivity Tools',
+  marketCategory: validatedFields.marketCategory || 'Business Productivity Tools',
   marketSubcategory: validatedFields.marketSubcategory || 'Project & Task Management',
   targetAudience: validatedFields.targetAudience || 'early-stage-founders',
   keyProblem: validatedFields.keyProblem || '',
@@ -243,7 +243,7 @@ export default function LandingPageRenderer({ className = '', tokenId }: Landing
 const allSectionIds = processedSections.map((s: any) => s.id);
 const backgroundAssignments = assignEnhancedBackgroundsToAllSections(allSectionIds, {
   // Required InputVariables fields with defaults
-  marketCategory: validatedFields.marketCategory || 'Work & Productivity Tools',
+  marketCategory: validatedFields.marketCategory || 'Business Productivity Tools',
   marketSubcategory: validatedFields.marketSubcategory || 'Project & Task Management',
   targetAudience: validatedFields.targetAudience || 'early-stage-founders',
   keyProblem: validatedFields.keyProblem || '',

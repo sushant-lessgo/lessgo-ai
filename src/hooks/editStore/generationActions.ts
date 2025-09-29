@@ -249,7 +249,9 @@ export function createGenerationActions(set: any, get: any) {
                     validationStatus: {
                       isValid: true,
                       errors: [],
-                      warnings: []
+                      warnings: [],
+                      missingRequired: [],
+                      lastValidated: Date.now()
                     }
                   }
                 };

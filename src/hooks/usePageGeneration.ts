@@ -123,14 +123,14 @@ export function usePageGeneration(tokenId: string) {
     // Prepare onboarding data for background generation
     const onboardingInput = {
       // Required InputVariables fields with defaults
-      marketCategory: onboardingStore.validatedFields.marketCategory || 'Work & Productivity Tools',
+      marketCategory: (onboardingStore.validatedFields.marketCategory || 'Business Productivity Tools') as any,
       marketSubcategory: onboardingStore.validatedFields.marketSubcategory || 'Project & Task Management',
       targetAudience: onboardingStore.validatedFields.targetAudience || 'early-stage-founders',
       keyProblem: onboardingStore.validatedFields.keyProblem || '',
       startupStage: onboardingStore.validatedFields.startupStage || 'mvp-development',
       landingPageGoals: onboardingStore.validatedFields.landingPageGoals || 'signup',
       pricingModel: onboardingStore.validatedFields.pricingModel || 'freemium',
-      
+
       // Optional HiddenInferredFields (spread as-is since they're optional)
       ...onboardingStore.hiddenInferredFields
     };
@@ -472,9 +472,7 @@ export function usePageGeneration(tokenId: string) {
           contentKeys: Object.keys(result.generatedContent),
           sampleContent: Object.entries(result.generatedContent).slice(0, 2),
           success: result.success,
-          isPartial: result.isPartial,
-          hasElementsMap: !!result.elementsMap,
-          elementsMapSections: result.elementsMap ? Object.keys(result.elementsMap).length : 0
+          isPartial: result.isPartial
         });
 
         storeState.updateFromAIResponse({
@@ -483,7 +481,7 @@ export function usePageGeneration(tokenId: string) {
           isPartial: result.isPartial,
           warnings: result.warnings,
           errors: result.errors
-        }, result.elementsMap);  // ✅ ADDED: Pass elementsMap as second parameter
+        });
       } else {
         logger.warn('⚠️ No generated content found in result:', result);
       }

@@ -877,7 +877,7 @@ function buildOutputFormat(elementsMap: Record<string, SectionInfo>): string {
   const formatExample: Record<string, any> = {};
 
   Object.entries(elementsMap).forEach(([sectionId, section]) => {
-    const elementFormat: Record<string, string> = {};
+    const elementFormat: Record<string, string | string[]> = {};
     const { layoutName } = section;
 
     // Get only AI-generated elements from schema
@@ -927,7 +927,7 @@ function isUnifiedSchemaObject(schema: any): schema is { sectionElements: any[],
 function getAllElements(schema: any) {
   if (isUnifiedSchemaObject(schema)) {
     const sectionElements = schema.sectionElements || [];
-    const cardElements = schema.cardStructure?.elements?.map(name => ({
+    const cardElements = schema.cardStructure?.elements?.map((name: string) => ({
       element: name,
       mandatory: true
     })) || [];
@@ -955,9 +955,10 @@ function getEnhancedCardRequirements(sectionId: string, layoutName: string) {
 // Type for section card info
 type SectionCardInfo = {
   sectionId: string;
+  sectionType: string;
   layoutName: string;
   cardRequirements: any;
-  currentCount: number;
+  recommendedCount: number;
 };
 
 // Mock strategy mapping - this would be imported from another module
@@ -2316,7 +2317,7 @@ export function debugCardCountDetermination(
   strategyCounts: Record<string, number>
 ): {
   sectionType: string;
-  cardRequirements: CardRequirements | null;
+  cardRequirements: any;
   strategyCount: number | undefined;
   finalCount: number;
   reasoning: string[];

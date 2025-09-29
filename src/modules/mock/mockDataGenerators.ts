@@ -74,7 +74,7 @@ export function generateMockInferredFields(input: string): MockInferredFields {
   } else if (inputLower.includes('marketing') || inputLower.includes('sales')) {
     category = 'Marketing & Sales Tools';
   } else if (inputLower.includes('productivity') || inputLower.includes('task') || inputLower.includes('project')) {
-    category = 'Work & Productivity Tools';
+    category = 'Business Productivity Tools';
   } else if (inputLower.includes('developer') || inputLower.includes('code')) {
     category = 'Engineering & Development Tools';
   }

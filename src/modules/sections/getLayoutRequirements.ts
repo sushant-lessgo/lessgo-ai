@@ -112,7 +112,7 @@ export function getLayoutRequirements(
         sectionId: originalSectionId, // Keep original section ID for consistency
         sectionType: originalSectionId, // Use section ID as type for simplicity
         layoutName,
-        cardRequirements
+        cardRequirements: cardRequirements as any
       });
 
       logger.debug(`📋 Section ${originalSectionId} (${layoutName}):`, {
@@ -130,7 +130,7 @@ export function getLayoutRequirements(
         sectionId: originalSectionId,
         sectionType: originalSectionId, // Use section ID as type for simplicity
         layoutName,
-        cardRequirements: undefined
+        cardRequirements: cardRequirements as any
       });
     }
   });

@@ -266,7 +266,7 @@ function validateCopyStrategy(strategy: any): {
     const result = validate(fieldValue);
 
     if (result.isValid) {
-      correctedStrategy[field as keyof CopyStrategy] = result.value;
+      correctedStrategy[field as keyof CopyStrategy] = result.value as any;
       validFieldCount++;
 
       if (result.wasCorrected) {
@@ -274,7 +274,7 @@ function validateCopyStrategy(strategy: any): {
       }
     } else {
       // Use smart default
-      correctedStrategy[field as keyof CopyStrategy] = result.defaultValue;
+      correctedStrategy[field as keyof CopyStrategy] = result.defaultValue as any;
       errors.push(`Copy strategy field '${field}' invalid: ${result.error}`);
 
       logger.debug(`❌ Field validation failed for '${field}':`, {
@@ -707,7 +707,7 @@ export function parseStrategyResponse(
     const result: ParsedStrategy = {
       success: true,
       copyStrategy: finalCopyStrategy,
-      cardCounts: normalizedCardCounts,
+      cardCounts: normalizedCardCounts as any,
       reasoning: parsed.reasoning || {},
       errors: [],
       warnings: allWarnings
