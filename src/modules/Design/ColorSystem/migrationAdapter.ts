@@ -3,6 +3,7 @@
 
 import { backgroundPatternAnalyzer, BackgroundPatternAnalyzer } from './BackgroundPatternAnalyzer';
 import type { BackgroundSystem } from './colorTokens';
+import { logger } from '@/lib/logger';
 
 // Type definitions for migration
 export interface LegacyBackgroundVariation {
@@ -196,7 +197,7 @@ export class BackgroundSystemAdapter {
           });
 
         } catch (error) {
-          console.warn(`Could not convert ${key}:`, error);
+          logger.warn(`Could not convert ${key}:`, error);
           structuralClasses[key] = value; // Keep original as fallback
         }
       }
@@ -228,7 +229,7 @@ export class BackgroundSystemAdapter {
       };
 
     } catch (error) {
-      console.warn(`Failed to convert background ${backgroundType}:`, error);
+      logger.warn(`Failed to convert background ${backgroundType}:`, error);
       
       return {
         structuralClass: 'bg-pattern-neutral',

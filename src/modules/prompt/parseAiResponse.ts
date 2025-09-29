@@ -2769,22 +2769,6 @@ function processEmojiOutcomeGridContent(sectionId: string, content: SectionConte
     hasIssues: false
   };
 
-  // 🎯 [AI_GENERATION_DEBUG] Log raw input content for EmojiOutcomeGrid
-  console.log('🎯 [AI_GENERATION_DEBUG] EmojiOutcomeGrid raw AI content:', {
-    sectionId,
-    contentKeys: Object.keys(content),
-    emojis: content.emojis,
-    outcomes: content.outcomes,
-    descriptions: content.descriptions,
-    rawCounts: {
-      emojis: typeof content.emojis === 'string' ? content.emojis.split('|').length :
-              Array.isArray(content.emojis) ? content.emojis.length : 0,
-      outcomes: typeof content.outcomes === 'string' ? content.outcomes.split('|').length :
-                Array.isArray(content.outcomes) ? content.outcomes.length : 0,
-      descriptions: typeof content.descriptions === 'string' ? content.descriptions.split('|').length :
-                    Array.isArray(content.descriptions) ? content.descriptions.length : 0
-    }
-  });
 
   // Process all fields normally
   Object.entries(content).forEach(([elementKey, elementValue]) => {
@@ -2832,19 +2816,6 @@ function processEmojiOutcomeGridContent(sectionId: string, content: SectionConte
       result.warnings.push(`${sectionId}: Applied automatic correction to match emoji/outcome/description counts`);
     }
   }
-
-  // 🎯 [AI_GENERATION_DEBUG] Log final processed content for EmojiOutcomeGrid
-  console.log('🎯 [AI_GENERATION_DEBUG] EmojiOutcomeGrid processed result:', {
-    sectionId,
-    finalContent: result.content,
-    processedCounts: {
-      emojis: typeof result.content.emojis === 'string' ? result.content.emojis.split('|').length : 0,
-      outcomes: typeof result.content.outcomes === 'string' ? result.content.outcomes.split('|').length : 0,
-      descriptions: typeof result.content.descriptions === 'string' ? result.content.descriptions.split('|').length : 0
-    },
-    warnings: result.warnings,
-    hasIssues: result.hasIssues
-  });
 
   return result;
 }

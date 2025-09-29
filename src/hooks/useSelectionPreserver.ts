@@ -173,8 +173,6 @@ export function useSelectionPreserver(): SelectionPreserver {
    * Hard cleanup function (Fix #4: Hard Cleanup on Mode Switch)
    */
   const cleanup = useCallback(() => {
-    // DISABLED to prevent log spam: console.log('🎯 Performing hard cleanup');
-    
     // Clear saved range
     savedRangeRef.current = null;
     

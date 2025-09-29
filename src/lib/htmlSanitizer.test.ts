@@ -9,8 +9,13 @@ import {
 
 // Manual test function (since we don't have a test runner configured)
 export const runSanitizationTests = () => {
-  console.log('🧪 Running HTML Sanitization Security Tests...\n');
-  
+  // Only log in test/development environments
+  const isTestEnvironment = process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development';
+  const log = isTestEnvironment ? console.log : () => {};
+  const logError = isTestEnvironment ? console.error : () => {};
+
+  log('🧪 Running HTML Sanitization Security Tests...\n');
+
   const tests = [
     // XSS Attack Tests
     {
@@ -69,20 +74,20 @@ export const runSanitizationTests = () => {
   let failed = 0;
 
   tests.forEach((test, index) => {
-    console.log(`Test ${index + 1}: ${test.name}`);
-    console.log(`Input: ${test.input}`);
+    log(`Test ${index + 1}: ${test.name}`);
+    log(`Input: ${test.input}`);
     
     try {
       // Test with published content profile (strictest)
       const sanitized = sanitizePublishedContent(test.input);
-      console.log(`Sanitized: ${sanitized}`);
+      log(`Sanitized: ${sanitized}`);
       
       // Check if dangerous content was blocked
       const safety = validateHTMLSafety(test.input);
-      console.log(`Safety: ${safety.isSafe ? '✅ Safe' : '⚠️  Unsafe'}`);
-      
+      log(`Safety: ${safety.isSafe ? '✅ Safe' : '⚠️  Unsafe'}`);
+
       if (safety.issues.length > 0) {
-        console.log(`Issues found: ${safety.issues.join(', ')}`);
+        log(`Issues found: ${safety.issues.join(', ')}`);
       }
       
       // Basic test: ensure no scripts remain
@@ -92,40 +97,40 @@ export const runSanitizationTests = () => {
                        sanitized.includes('onerror=');
       
       if (test.shouldBlock && hasScript) {
-        console.log('❌ FAILED - Dangerous content not blocked!');
+        log('❌ FAILED - Dangerous content not blocked!');
         failed++;
       } else if (!test.shouldBlock && sanitized.trim() === '') {
-        console.log('❌ FAILED - Legitimate content was blocked!');
+        log('❌ FAILED - Legitimate content was blocked!');
         failed++;
       } else {
-        console.log('✅ PASSED');
+        log('✅ PASSED');
         passed++;
       }
       
     } catch (error) {
-      console.log(`❌ FAILED - Error: ${error}`);
+      logError(`❌ FAILED - Error: ${error}`);
       failed++;
     }
-    
-    console.log('---');
+
+    log('---');
   });
 
   // Test different profiles
-  console.log('\n🔍 Testing Different Security Profiles...');
-  
-  const testHtml = '<p>Paragraph</p><script>alert("xss")</script><a href="https://example.com">Link</a>';
-  
-  console.log('Published Content (Strict):', sanitizePublishedContent(testHtml));
-  console.log('Editor Content (Permissive):', sanitizeEditorContent(testHtml));
-  console.log('Formatting Only:', sanitizeFormattingContent(testHtml));
-  console.log('Strip All HTML:', stripAllHTML(testHtml));
+  log('\n🔍 Testing Different Security Profiles...');
 
-  console.log(`\n📊 Test Results: ${passed} passed, ${failed} failed`);
-  
+  const testHtml = '<p>Paragraph</p><script>alert("xss")</script><a href="https://example.com">Link</a>';
+
+  log('Published Content (Strict):', sanitizePublishedContent(testHtml));
+  log('Editor Content (Permissive):', sanitizeEditorContent(testHtml));
+  log('Formatting Only:', sanitizeFormattingContent(testHtml));
+  log('Strip All HTML:', stripAllHTML(testHtml));
+
+  log(`\n📊 Test Results: ${passed} passed, ${failed} failed`);
+
   if (failed === 0) {
-    console.log('🎉 All security tests passed!');
+    log('🎉 All security tests passed!');
   } else {
-    console.log('⚠️  Some tests failed - review security implementation');
+    log('⚠️  Some tests failed - review security implementation');
   }
   
   return { passed, failed };

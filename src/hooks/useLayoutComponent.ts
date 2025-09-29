@@ -129,23 +129,6 @@ export function useLayoutComponent<T = Record<string, any>>({
   });
 
   const blockContent = extractLayoutContent(elements, contentSchema, layout, excludedElements) as T;
-
-  // 🎯 [STORAGE_DEBUG] Log content extraction for results sections
-  if (sectionId === 'results') {
-    console.log('🎯 [STORAGE_DEBUG] Results section content extraction:', {
-      sectionId,
-      layout,
-      rawElements: elements,
-      extractedContent: blockContent,
-      contentKeys: Object.keys(blockContent || {}),
-      emojisRaw: elements.emojis,
-      outcomesRaw: elements.outcomes,
-      descriptionsRaw: elements.descriptions,
-      emojisExtracted: (blockContent as any)?.emojis,
-      outcomesExtracted: (blockContent as any)?.outcomes,
-      descriptionsExtracted: (blockContent as any)?.descriptions
-    });
-  }
   
   //   blockContent,
   //   headlineType: typeof blockContent.headline,

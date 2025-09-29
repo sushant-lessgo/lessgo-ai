@@ -1,12 +1,13 @@
 // modules/mock/mockDataGenerators.ts - ✅ PHASE 4: API Layer Migration Complete
 import { taxonomy } from '@/modules/inference/taxonomy';
-import type { 
-  AwarenessLevel, 
-  CopyIntent, 
-  ToneProfile, 
-  MarketSophisticationLevel, 
-  ProblemType 
+import type {
+  AwarenessLevel,
+  CopyIntent,
+  ToneProfile,
+  MarketSophisticationLevel,
+  ProblemType
 } from '@/modules/inference/taxonomy';
+import { logger } from '@/lib/logger';
 
 import type {
   InputVariables,
@@ -121,7 +122,7 @@ export function generateMockValidationResults(fields: MockInferredFields): Recor
     // ✅ FIXED: Get display name from canonical mapping
     const displayName = FIELD_DISPLAY_NAMES[canonicalFieldName as CanonicalFieldName];
     if (!displayName) {
-      console.warn(`No display name found for canonical field: ${canonicalFieldName}`);
+      logger.warn(`No display name found for canonical field: ${canonicalFieldName}`);
       return;
     }
     

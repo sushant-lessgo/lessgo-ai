@@ -7,6 +7,7 @@ import {
 import type { ParsedStrategy } from './parseStrategyResponse'
 import type { CardRequirements } from '@/types/layoutTypes'
 import type { ElementsMap } from '../sections/elementDetermination'
+import { logger } from '@/lib/logger';
 
 import type {
   InputVariables,
@@ -962,13 +963,6 @@ type SectionCardInfo = {
 // Mock strategy mapping - this would be imported from another module
 const strategyToSectionMapping: Record<string, string[]> = {};
 
-// Simple logger replacement
-const logger = {
-  debug: (msg: string, data?: any) => console.log(`[DEBUG] ${msg}`, data || ''),
-  info: (msg: string, data?: any) => console.log(`[INFO] ${msg}`, data || ''),
-  warn: (msg: string, data?: any) => console.warn(`[WARN] ${msg}`, data || ''),
-  error: (msg: string, data?: any) => console.error(`[ERROR] ${msg}`, data || '')
-};
 
 /**
  * Gets AI-generated elements from unified or legacy schema

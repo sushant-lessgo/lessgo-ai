@@ -4833,7 +4833,7 @@ export function selectOptionalElements(
     if (DEBUG_ELEMENT_SELECTION) {
       logger.debug(`❌ Layout "${layoutName}" not found in schema`);
     }
-    console.warn(`Layout "${layoutName}" not found in schema`);
+    logger.warn(`Layout "${layoutName}" not found in schema`);
     return [];
   }
 

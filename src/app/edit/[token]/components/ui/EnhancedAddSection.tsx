@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { SectionTypeSelector } from './SectionTypeSelector';
 import { LayoutSelector } from './LayoutSelector';
 import { layoutElementSchema, getAllElements } from '@/modules/sections/layoutElementSchema';
+import { logger } from '@/lib/logger';
 import { sectionList } from '@/modules/sections/sectionList';
 import type { EditableElement } from '@/types/core/content';
 
@@ -78,7 +79,7 @@ export function EnhancedAddSection({
     const schema = layoutElementSchema[schemaKey];
 
     if (!schema) {
-      console.warn(`No schema found for ${schemaKey}`);
+      logger.warn(`No schema found for ${schemaKey}`);
       return;
     }
 

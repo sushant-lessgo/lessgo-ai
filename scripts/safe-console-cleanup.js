@@ -46,6 +46,15 @@ const SAFE_REMOVE_PATTERNS = [
   /console\.log\(['"].*clicked['"]\)/g,
   // State change logs
   /console\.log\(['"].*state.*changed/gi,
+  // New patterns found in sprint-6.2
+  /console\.log\(['"].*\[UIBLOCK_DEBUG\]/gi,
+  /console\.log\(['"].*\[CONTENT_UPDATE_DEBUG\]/gi,
+  /console\.log\(['"].*\[AI_GENERATION_DEBUG\]/gi,
+  /console\.log\(['"].*\[STORAGE_DEBUG\]/gi,
+  // Commented out console logs
+  /\/\/.*console\.log/gi,
+  // Simple console.warn patterns that should use logger
+  /console\.warn\(['"][^'"]*['"]\)/g,
 ];
 
 function shouldSkipFile(filePath) {

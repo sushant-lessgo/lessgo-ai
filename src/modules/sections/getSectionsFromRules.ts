@@ -1,8 +1,9 @@
 // getSectionsFromRules.ts - ✅ FIXED: Uses centralized type structure and objection flow engine
 import { getSectionsFromObjectionFlows } from './objectionFlowEngine';
-import type { 
-  InputVariables, 
-  HiddenInferredFields, 
+import { logger } from '@/lib/logger';
+import type {
+  InputVariables,
+  HiddenInferredFields,
   FeatureItem,
   AwarenessLevel,
   MarketSophisticationLevel,
@@ -10,7 +11,6 @@ import type {
   StartupStage,
   MarketCategory
 } from '@/types/core/index';
-import { logger } from '@/lib/logger';
 
 // ✅ FIXED: Use centralized type interfaces instead of generic Record types
 type RuleInput = {
@@ -101,7 +101,7 @@ function mapToStartupStage(stage: string): StartupStage {
 
   const mappedStage = stageMapping[stage];
   if (!mappedStage) {
-    console.warn(`⚠️ Unknown startup stage: ${stage}, using fallback: early-feedback`);
+    logger.warn(`⚠️ Unknown startup stage: ${stage}, using fallback: early-feedback`);
     return 'early-feedback';
   }
 

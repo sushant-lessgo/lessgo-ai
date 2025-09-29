@@ -65,7 +65,7 @@ export function getSectionType(sectionId: string): string {
   // Find section in sectionList
   const section = sectionList.find(s => s.id === sectionId);
   if (!section) {
-    console.warn(`Section "${sectionId}" not found in sectionList`);
+    logger.warn(`Section "${sectionId}" not found in sectionList`);
     return sectionId; // Fallback to original ID
   }
 
@@ -171,7 +171,7 @@ export function createElementsMap(
     const layout = pageStore.layout.sectionLayouts[sectionId];
     
     if (!layout) {
-      console.warn(`No layout found for section "${sectionId}"`);
+      logger.warn(`No layout found for section "${sectionId}"`);
       continue;
     }
 
