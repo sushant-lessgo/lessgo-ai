@@ -41,7 +41,7 @@ export function pickFeatureLayout(input: LayoutPickerInput): FeatureLayout {
 
   // 2. Process-oriented or workflow products - Timeline temporarily retired
   // if (
-  //   (marketCategory === "Work & Productivity Tools" || marketCategory === "No-Code & Low-Code Platforms") &&
+  //   (marketCategory === "Business Productivity Tools" || marketCategory === "No-Code & Development Platforms") &&
   //   (problemType === "manual-repetition" || problemType === "time-freedom-or-automation") &&
   //   marketSophisticationLevel >= "level-3"
   // ) {
@@ -221,13 +221,13 @@ export function pickFeatureLayout(input: LayoutPickerInput): FeatureLayout {
   } else if (marketCategory === "Design & Creative Tools") {
     scores.Carousel += 3;
     scores.MiniCards += 2;
-  } else if (marketCategory === "Work & Productivity Tools") {
+  } else if (marketCategory === "Business Productivity Tools") {
     scores.IconGrid += 3;
     scores.SplitAlternating += 2;
   } else if (marketCategory === "Data & Analytics Tools") {
     scores.MetricTiles += 2;
     scores.SplitAlternating += 1;
-  } else if (marketCategory === "No-Code & Low-Code Platforms") {
+  } else if (marketCategory === "No-Code & Development Platforms") {
     scores.Carousel += 3;
   }
 

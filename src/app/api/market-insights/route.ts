@@ -185,7 +185,7 @@ export async function POST(req: Request) {
 // Keep your existing mock features logic
 function generateMockFeatures(category: string, subcategory: string, problem: string): FeatureItem[] {
   const baseFeatures: Record<string, FeatureItem[]> = {
-    'Work & Productivity Tools': [
+    'Business Productivity Tools': [
       { feature: "Smart Task Automation", benefit: "Save 5+ hours per week on repetitive work" },
       { feature: "Real-time Team Sync", benefit: "Never miss important updates or deadlines" },
       { feature: "AI-Powered Insights", benefit: "Make data-driven decisions faster" },
@@ -211,7 +211,7 @@ function generateMockFeatures(category: string, subcategory: string, problem: st
     ],
   };
 
-  let features = baseFeatures[category] || baseFeatures['Work & Productivity Tools'];
+  let features = baseFeatures[category] || baseFeatures['Business Productivity Tools'];
   
   if (problem.toLowerCase().includes('time') || problem.toLowerCase().includes('manual')) {
     features = features.map(f => ({

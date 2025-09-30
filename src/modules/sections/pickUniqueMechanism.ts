@@ -45,7 +45,7 @@ export function pickUniqueMechanismLayout(input: LayoutPickerInput): UniqueMecha
 
   // 2. Complex system/platform products with interconnected components
   if (
-    (marketCategory === "Engineering & Development Tools" || marketCategory === "Work & Productivity Tools" || marketCategory === "Data & Analytics Tools") &&
+    (marketCategory === "Engineering & Development Tools" || marketCategory === "Business Productivity Tools" || marketCategory === "Data & Analytics Tools") &&
     (targetAudience === "builders" || targetAudience === "enterprise") &&
     (awarenessLevel === "solution-aware" || awarenessLevel === "product-aware") &&
     marketSophisticationLevel >= "level-3"
@@ -58,7 +58,7 @@ export function pickUniqueMechanismLayout(input: LayoutPickerInput): UniqueMecha
     marketSophisticationLevel >= "level-4" &&
     (awarenessLevel === "solution-aware" || awarenessLevel === "product-aware") &&
     (targetAudience === "enterprise" || targetAudience === "businesses") &&
-    (marketCategory === "Marketing & Sales Tools" || marketCategory === "Work & Productivity Tools")
+    (marketCategory === "Marketing & Sales Tools" || marketCategory === "Business Productivity Tools")
   ) {
     return "PropertyComparisonMatrix";
   }
@@ -185,7 +185,7 @@ export function pickUniqueMechanismLayout(input: LayoutPickerInput): UniqueMecha
     scores.PropertyComparisonMatrix += 3;
     scores.StackedHighlights += 3;
     scores.StackedHighlights += 2;
-  } else if (marketCategory === "Work & Productivity Tools") {
+  } else if (marketCategory === "Business Productivity Tools") {
     scores.StackedHighlights += 3;
     scores.StackedHighlights += 2;
     scores.ProcessFlowDiagram += 2;
@@ -193,7 +193,7 @@ export function pickUniqueMechanismLayout(input: LayoutPickerInput): UniqueMecha
     scores.SystemArchitecture += 3;
     scores.StackedHighlights += 2;
     scores.TechnicalAdvantage += 2;
-  } else if (marketCategory === "No-Code & Low-Code Platforms") {
+  } else if (marketCategory === "No-Code & Development Platforms") {
     scores.ProcessFlowDiagram += 3;
     scores.MethodologyBreakdown += 2;
     scores.StackedHighlights += 2;

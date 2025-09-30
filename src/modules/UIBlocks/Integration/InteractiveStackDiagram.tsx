@@ -164,13 +164,14 @@ const parseLayerData = (titles: string, descriptions: string, technologies: stri
 
 export default function InteractiveStackDiagram(props: InteractiveStackDiagramProps) {
   const { getTextStyle: getTypographyStyle } = useTypography();
-  const { blockContent: storeContent, setBlockContent, getBusinessContext } = useEditStore();
-  const { getOnboardingFieldValue } = useOnboardingStore();
+  const store = useEditStore();
+  const onboardingStore = useOnboardingStore();
 
   // Extract content using the extractLayoutContent helper
+  const sectionContent = store.content[props.sectionId];
+  const elements = sectionContent?.elements || {};
   const blockContent = extractLayoutContent<InteractiveStackDiagramContent>(
-    storeContent,
-    props.sectionId,
+    elements,
     CONTENT_SCHEMA
   );
 

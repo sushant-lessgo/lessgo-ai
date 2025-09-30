@@ -61,7 +61,7 @@ export function pickSocialProofLayout(input: LayoutPickerInput): SocialProofLayo
   // 4. Review-heavy products with ratings focus
   if (
     (startupStage === "traction" || startupStage === "growth") &&
-    (marketCategory === "Marketing & Sales Tools" || marketCategory === "Work & Productivity Tools" || marketCategory === "Design & Creative Tools") &&
+    (marketCategory === "Marketing & Sales Tools" || marketCategory === "Business Productivity Tools" || marketCategory === "Design & Creative Tools") &&
     marketSophisticationLevel >= "level-3"
   ) {
     return "StripWithReviews";
@@ -252,7 +252,7 @@ export function pickSocialProofLayout(input: LayoutPickerInput): SocialProofLayo
   if (marketCategory === "Marketing & Sales Tools") {
     scores.StripWithReviews += 2;
     scores.LogoWall += 1;
-  } else if (marketCategory === "Work & Productivity Tools") {
+  } else if (marketCategory === "Business Productivity Tools") {
     scores.LogoWall += 2;
     scores.UserCountBar += 1;
   } else if (marketCategory === "Design & Creative Tools") {

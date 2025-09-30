@@ -247,7 +247,7 @@ export function pickFAQLayout(input: LayoutPickerInput): FAQLayout {
   } else if (marketCategory === "Design & Creative Tools") {
     scores.IconWithAnswers += 2;
     scores.ChatBubbleFAQ += 1;
-  } else if (marketCategory === "Work & Productivity Tools") {
+  } else if (marketCategory === "Business Productivity Tools") {
     scores.AccordionFAQ += 2;
     scores.InlineQnAList += 1;
   } else if (marketCategory === "Data & Analytics Tools") {

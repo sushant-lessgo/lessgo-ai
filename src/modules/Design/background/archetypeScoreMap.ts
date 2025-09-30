@@ -2,7 +2,7 @@ export const backgroundScoreMap: Record<string, Record<string, 0 | 1 | 2 | 3>> =
   
     //market categories
   
-    "Work & Productivity Tools": {
+    "Business Productivity Tools": {
     "soft-gradient-blur": 1,
     "frosted-glass-light": 0,
     "code-matrix-mesh": 1,
@@ -112,7 +112,7 @@ export const backgroundScoreMap: Record<string, Record<string, 0 | 1 | 2 | 3>> =
     "monochrome-hero-zone": 0,
     "blurred-spotlight": 2,
   },
-  "No-Code & Low-Code Platforms": {
+  "No-Code & Development Platforms": {
     "soft-gradient-blur": 1,
     "frosted-glass-light": 3,
     "code-matrix-mesh": 1,

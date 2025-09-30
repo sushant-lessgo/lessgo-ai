@@ -30,7 +30,7 @@ export function pickHeroLayout(input: LayoutPickerInput): HeroLayout {
   
   // 1. Visual-first products that need to show the product immediately
   if (
-    (marketCategory === "Design & Creative Tools" || marketCategory === "AI Tools" || marketCategory === "No-Code & Low-Code Platforms") &&
+    (marketCategory === "Design & Creative Tools" || marketCategory === "AI Tools" || marketCategory === "No-Code & Development Platforms") &&
     (awarenessLevel === "product-aware" || awarenessLevel === "most-aware") &&
     (landingPageGoals === "demo" || landingPageGoals === "free-trial")
   ) {
@@ -260,7 +260,7 @@ export function pickHeroLayout(input: LayoutPickerInput): HeroLayout {
   } else if (marketCategory === "Marketing & Sales Tools") {
     scores.splitScreen += 2;
     scores.leftCopyRightImage += 1;
-  } else if (marketCategory === "Work & Productivity Tools") {
+  } else if (marketCategory === "Business Productivity Tools") {
     scores.leftCopyRightImage += 2;
     scores.centerStacked += 1;
   } else if (marketCategory === "Data & Analytics Tools") {

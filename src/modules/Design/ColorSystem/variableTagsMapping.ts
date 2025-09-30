@@ -1,11 +1,11 @@
 export const variableTagsMapping = {
   marketCategories: {
-    "Work & Productivity Tools": ["warm", "innovative", "professional", "medium-contrast", "solid", "moderate"],
+    "Business Productivity Tools": ["warm", "innovative", "professional", "medium-contrast", "solid", "moderate"],
     "Marketing & Sales Tools": ["complementary", "bold", "high-contrast", "consumer", "gradient", "strong"],
     "Engineering & Development Tools": ["cool", "technical", "minimal", "low-contrast", "solid", "subtle"],
     "AI Tools": ["triadic", "innovative", "technical", "high-contrast", "gradient", "dramatic"],
     "Design & Creative Tools": ["analogous", "creative", "playful", "medium-contrast", "gradient", "strong"],
-    "No-Code & Low-Code Platforms": ["split-complementary", "friendly", "innovative", "medium-contrast", "dual-tone", "moderate"],
+    "No-Code & Development Platforms": ["split-complementary", "friendly", "innovative", "medium-contrast", "dual-tone", "moderate"],
     "Customer Support & Service Tools": ["warm", "trustworthy", "friendly", "low-contrast", "solid", "subtle"],
     "Data & Analytics Tools": ["cool", "professional", "technical", "high-contrast", "solid", "strong"],
     "HR & People Operations Tools": ["warm", "friendly", "trustworthy", "medium-contrast", "solid", "moderate"],

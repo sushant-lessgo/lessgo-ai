@@ -60,7 +60,7 @@ export function pickHowItWorksLayout(input: LayoutPickerInput): HowItWorksLayout
 
   // 4. Interactive products needing hands-on explanation - using alternative layout
   if (
-    (marketCategory === "Design & Creative Tools" || marketCategory === "No-Code & Low-Code Platforms") &&
+    (marketCategory === "Design & Creative Tools" || marketCategory === "No-Code & Development Platforms") &&
     (landingPageGoals === "free-trial" || landingPageGoals === "demo") &&
     (awarenessLevel === "solution-aware" || awarenessLevel === "product-aware")
   ) {
@@ -70,7 +70,7 @@ export function pickHowItWorksLayout(input: LayoutPickerInput): HowItWorksLayout
   // 5. Workflow/automation products showing process flow
   if (
     (problemType === "manual-repetition" || problemType === "time-freedom-or-automation") &&
-    (marketCategory === "Work & Productivity Tools" || marketCategory === "Marketing & Sales Tools") &&
+    (marketCategory === "Business Productivity Tools" || marketCategory === "Marketing & Sales Tools") &&
     copyIntent === "desire-led"
   ) {
     return "VerticalTimeline";
@@ -236,7 +236,7 @@ export function pickHowItWorksLayout(input: LayoutPickerInput): HowItWorksLayout
   }
 
   // Market Category Scoring (Low Weight: 1-2 points)
-  if (marketCategory === "Work & Productivity Tools") {
+  if (marketCategory === "Business Productivity Tools") {
     scores.VerticalTimeline += 2;
     scores.ThreeStepHorizontal += 1;
   } else if (marketCategory === "Design & Creative Tools") {
@@ -248,7 +248,7 @@ export function pickHowItWorksLayout(input: LayoutPickerInput): HowItWorksLayout
   } else if (marketCategory === "Marketing & Sales Tools") {
     scores.VerticalTimeline += 2;
     scores.ZigzagImageSteps += 1;
-  } else if (marketCategory === "No-Code & Low-Code Platforms") {
+  } else if (marketCategory === "No-Code & Development Platforms") {
     scores.AnimatedProcessLine += 1;
   } else if (marketCategory === "Data & Analytics Tools") {
     scores.AccordionSteps += 2;

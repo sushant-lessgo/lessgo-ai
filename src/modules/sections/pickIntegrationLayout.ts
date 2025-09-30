@@ -43,7 +43,7 @@ export function pickIntegrationLayout(input: LayoutPickerInput): IntegrationLayo
 
   // 2. No-code/automation platforms showing builder interface
   if (
-    (marketCategory === "No-Code & Low-Code Platforms" || marketCategory === "Marketing & Sales Tools") &&
+    (marketCategory === "No-Code & Development Platforms" || marketCategory === "Marketing & Sales Tools") &&
     (targetAudience === "builders" || targetAudience === "marketers") &&
     (landingPageGoals === "demo" || landingPageGoals === "free-trial")
   ) {
@@ -159,7 +159,7 @@ export function pickIntegrationLayout(input: LayoutPickerInput): IntegrationLayo
     scores.InteractiveStackDiagram += 4;
     scores.TabbyIntegrationCards += 3;
     scores.LogoWithQuoteUse += 2;
-  } else if (marketCategory === "No-Code & Low-Code Platforms") {
+  } else if (marketCategory === "No-Code & Development Platforms") {
     scores.ZapierLikeBuilderPreview += 4;
     scores.TabbyIntegrationCards += 3;
     scores.BadgeCarousel += 2;
@@ -167,7 +167,7 @@ export function pickIntegrationLayout(input: LayoutPickerInput): IntegrationLayo
     scores.ZapierLikeBuilderPreview += 4;
     scores.UseCaseTiles += 3;
     scores.CategoryAccordion += 2;
-  } else if (marketCategory === "Work & Productivity Tools") {
+  } else if (marketCategory === "Business Productivity Tools") {
     scores.CategoryAccordion += 4;
     scores.LogoGrid += 3;
     scores.UseCaseTiles += 2;

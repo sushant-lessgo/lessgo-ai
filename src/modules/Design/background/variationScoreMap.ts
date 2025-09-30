@@ -1,12 +1,12 @@
 export const variationScoreMap: Record<string, Record<string, Record<string, 0 | 1 | 2 | 3>>> = {
   "soft-gradient-blur::modern-blue::soft-blur-modern-blue-gradient-tr": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -66,12 +66,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::modern-blue::soft-blur-modern-blue-gradient-tl": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -131,12 +131,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::modern-blue::soft-blur-modern-blue-radial-center": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -196,12 +196,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::modern-blue::soft-blur-modern-blue-radial-top": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -261,12 +261,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::modern-blue::soft-blur-modern-blue-diagonal-soft": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -326,12 +326,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::modern-blue::soft-blur-modern-blue-light-overlay": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -391,12 +391,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::modern-blue::soft-blur-modern-blue-solid-sky": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -456,12 +456,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::modern-blue::soft-blur-modern-blue-solid-blue-light": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -521,12 +521,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::sunset-ember::soft-blur-sunset-ember-gradient-tr": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -586,12 +586,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::sunset-ember::soft-blur-sunset-ember-gradient-br": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -651,12 +651,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::sunset-ember::soft-blur-sunset-ember-radial-center-blur": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -716,12 +716,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::sunset-ember::soft-blur-sunset-ember-radial-top-blur": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -781,12 +781,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::sunset-ember::soft-blur-sunset-ember-diagonal-soft": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -846,12 +846,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::sunset-ember::soft-blur-sunset-ember-overlay-light": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -911,12 +911,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::sunset-ember::soft-blur-sunset-ember-solid-warm": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -976,12 +976,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::sunset-ember::soft-blur-sunset-ember-solid-pink": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -1041,12 +1041,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::mint-frost::soft-blur-mint-frost-gradient-tr": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -1106,12 +1106,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::mint-frost::soft-blur-mint-frost-gradient-br": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -1171,12 +1171,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::mint-frost::soft-blur-mint-frost-radial-center-blur": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -1236,12 +1236,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::mint-frost::soft-blur-mint-frost-radial-top-blur": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -1301,12 +1301,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::mint-frost::soft-blur-mint-frost-overlay-light": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -1366,12 +1366,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::mint-frost::soft-blur-mint-frost-solid-ice": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -1431,12 +1431,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::mint-frost::soft-blur-mint-frost-solid-teal": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -1496,12 +1496,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::trust-blue-white::soft-blur-trust-blue-white-gradient-tr": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -1561,12 +1561,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::trust-blue-white::soft-blur-trust-blue-white-gradient-bl": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -1626,12 +1626,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::trust-blue-white::soft-blur-trust-blue-white-radial-center-blur": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -1691,12 +1691,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::trust-blue-white::soft-blur-trust-blue-white-radial-bottom-blur": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -1756,12 +1756,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::trust-blue-white::soft-blur-trust-blue-white-overlay-glass": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -1821,12 +1821,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::trust-blue-white::soft-blur-trust-blue-white-solid-sky": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -1886,12 +1886,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::trust-blue-white::soft-blur-trust-blue-white-solid-white": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -1951,12 +1951,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::teal-energy::soft-blur-teal-energy-gradient-tr": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -2016,12 +2016,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::teal-energy::soft-blur-teal-energy-gradient-bl": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -2081,12 +2081,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::teal-energy::soft-blur-teal-energy-radial-center-blur": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -2146,12 +2146,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::teal-energy::soft-blur-teal-energy-radial-top-blur": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -2211,12 +2211,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::teal-energy::soft-blur-teal-energy-overlay-light": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -2276,12 +2276,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::teal-energy::soft-blur-teal-energy-solid-emerald": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -2341,12 +2341,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::teal-energy::soft-blur-teal-energy-solid-teal": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -2406,12 +2406,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::soft-peach::soft-blur-soft-peach-gradient-tr": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -2471,12 +2471,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::soft-peach::soft-blur-soft-peach-gradient-bl": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -2536,12 +2536,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::soft-peach::soft-blur-soft-peach-radial-center-blur": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -2601,12 +2601,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::soft-peach::soft-blur-soft-peach-radial-bottom-blur": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -2666,12 +2666,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::soft-peach::soft-blur-soft-peach-overlay-light": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -2731,12 +2731,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::soft-peach::soft-blur-soft-peach-solid-peach": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -2796,12 +2796,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::soft-peach::soft-blur-soft-peach-solid-rose": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -2861,12 +2861,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::vibrant-coral::soft-blur-vibrant-coral-gradient-tr": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -2926,12 +2926,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::vibrant-coral::soft-blur-vibrant-coral-gradient-br": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -2991,12 +2991,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::vibrant-coral::soft-blur-vibrant-coral-radial-center-blur": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -3056,12 +3056,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::vibrant-coral::soft-blur-vibrant-coral-radial-top-blur": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -3121,12 +3121,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::vibrant-coral::soft-blur-vibrant-coral-overlay-soft": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -3186,12 +3186,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::vibrant-coral::soft-blur-vibrant-coral-solid-coral": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -3251,12 +3251,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "soft-gradient-blur::vibrant-coral::soft-blur-vibrant-coral-solid-rose": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 2,
@@ -3316,12 +3316,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "frosted-glass-light::mint-frost::frosted-mint-solid-mint-50": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 2,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -3381,12 +3381,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "frosted-glass-light::mint-frost::frosted-mint-gradient-tr": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 2,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -3446,12 +3446,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "frosted-glass-light::mint-frost::frosted-mint-gradient-blur-tl": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 2,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -3511,12 +3511,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "frosted-glass-light::mint-frost::frosted-mint-blur-overlay": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 2,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -3576,12 +3576,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "frosted-glass-light::mint-frost::frosted-mint-ring-glow": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 2,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -3641,12 +3641,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "frosted-glass-light::mint-frost::frosted-mint-subtle-halo": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 2,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -3706,12 +3706,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "frosted-glass-light::trust-blue-white::frosted-trustblue-solid-white": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 2,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -3771,12 +3771,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "frosted-glass-light::trust-blue-white::frosted-trustblue-gradient-tr": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 2,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -3836,12 +3836,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "frosted-glass-light::trust-blue-white::frosted-trustblue-gradient-bl": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 2,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -3901,12 +3901,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "frosted-glass-light::trust-blue-white::frosted-trustblue-blur-overlay": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 2,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -3966,12 +3966,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "frosted-glass-light::trust-blue-white::frosted-trustblue-soft-halo": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 2,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -4031,12 +4031,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "frosted-glass-light::modern-blue::frosted-modernblue-solid-blue-50": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 2,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -4096,12 +4096,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "frosted-glass-light::modern-blue::frosted-modernblue-gradient-tr": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 2,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -4161,12 +4161,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "frosted-glass-light::modern-blue::frosted-modernblue-gradient-bl": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 2,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -4226,12 +4226,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "frosted-glass-light::modern-blue::frosted-modernblue-blur-overlay": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 2,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -4291,12 +4291,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "frosted-glass-light::modern-blue::frosted-modernblue-soft-halo": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 2,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -4356,12 +4356,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "frosted-glass-light::default-light::frosted-defaultlight-solid-white": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 2,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -4421,12 +4421,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "frosted-glass-light::default-light::frosted-defaultlight-gradient-tr": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 2,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -4486,12 +4486,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "frosted-glass-light::default-light::frosted-defaultlight-gradient-bl": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 2,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -4551,12 +4551,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "frosted-glass-light::default-light::frosted-defaultlight-blur-overlay": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 2,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -4616,12 +4616,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "frosted-glass-light::default-light::frosted-defaultlight-subtle-glow": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 2,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -4681,12 +4681,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "frosted-glass-light::steel-gray::frosted-steelgray-solid-gray-100": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 2,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -4746,12 +4746,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "frosted-glass-light::steel-gray::frosted-steelgray-gradient-tr": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 2,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -4811,12 +4811,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "frosted-glass-light::steel-gray::frosted-steelgray-gradient-bl": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 2,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -4876,12 +4876,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "frosted-glass-light::steel-gray::frosted-steelgray-blur-overlay": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 2,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -4941,12 +4941,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "frosted-glass-light::steel-gray::frosted-steelgray-soft-halo": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 2,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -5006,12 +5006,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "code-matrix-mesh::neon-tech::matrix-neontech-solid-black": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -5071,12 +5071,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "code-matrix-mesh::neon-tech::matrix-neontech-gradient-green-to-blue": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -5136,12 +5136,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "code-matrix-mesh::neon-tech::matrix-neontech-grid-overlay": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -5201,12 +5201,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "code-matrix-mesh::neon-tech::matrix-neontech-blur-glow": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -5266,12 +5266,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "code-matrix-mesh::neon-tech::matrix-neontech-mesh-glow": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -5331,12 +5331,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "code-matrix-mesh::midnight-dark::matrix-midnightdark-solid-black": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -5396,12 +5396,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "code-matrix-mesh::midnight-dark::matrix-midnightdark-gradient-purple-to-black": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -5461,12 +5461,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "code-matrix-mesh::midnight-dark::matrix-midnightdark-subtle-grid": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -5526,12 +5526,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "code-matrix-mesh::midnight-dark::matrix-midnightdark-faint-glow": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -5591,12 +5591,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "code-matrix-mesh::midnight-dark::matrix-midnightdark-mesh-glow": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -5656,12 +5656,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "code-matrix-mesh::graphite-code::matrix-graphitecode-solid-gray-800": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -5721,12 +5721,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "code-matrix-mesh::graphite-code::matrix-graphitecode-gradient-gray-to-black": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -5786,12 +5786,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "code-matrix-mesh::graphite-code::matrix-graphitecode-grid-overlay": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -5851,12 +5851,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "code-matrix-mesh::graphite-code::matrix-graphitecode-soft-glow": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -5916,12 +5916,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "code-matrix-mesh::graphite-code::matrix-graphitecode-mesh-glow": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -5981,12 +5981,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "code-matrix-mesh::retro-terminal::matrix-retroterminal-solid-black": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -6046,12 +6046,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "code-matrix-mesh::retro-terminal::matrix-retroterminal-green-gradient": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -6111,12 +6111,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "code-matrix-mesh::retro-terminal::matrix-retroterminal-grid-overlay": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -6176,12 +6176,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "code-matrix-mesh::retro-terminal::matrix-retroterminal-scanline-overlay": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -6241,12 +6241,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "code-matrix-mesh::retro-terminal::matrix-retroterminal-green-glow": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -6306,12 +6306,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "editorial-split::default-light::editorial-defaultlight-solid-white": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -6371,12 +6371,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "editorial-split::default-light::editorial-defaultlight-gradient-lr": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -6436,12 +6436,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "editorial-split::default-light::editorial-defaultlight-gradient-rl": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -6501,12 +6501,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "editorial-split::default-light::editorial-defaultlight-split-left": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -6566,12 +6566,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "editorial-split::default-light::editorial-defaultlight-split-right": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -6631,12 +6631,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "editorial-split::paper-canvas::editorial-papercanvas-solid-offwhite": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -6696,12 +6696,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "editorial-split::paper-canvas::editorial-papercanvas-gradient-lr": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -6761,12 +6761,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "editorial-split::paper-canvas::editorial-papercanvas-gradient-rl": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -6826,12 +6826,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "editorial-split::paper-canvas::editorial-papercanvas-split-left": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -6891,12 +6891,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "editorial-split::paper-canvas::editorial-papercanvas-split-right": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -6956,12 +6956,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "editorial-split::steel-gray::editorial-steelgray-solid-gray-200": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -7021,12 +7021,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "editorial-split::steel-gray::editorial-steelgray-gradient-lr": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -7086,12 +7086,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "editorial-split::steel-gray::editorial-steelgray-gradient-rl": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -7151,12 +7151,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "editorial-split::steel-gray::editorial-steelgray-split-left": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -7216,12 +7216,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "editorial-split::steel-gray::editorial-steelgray-split-right": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -7281,12 +7281,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "luxury-blur::royal-indigo::luxury-royalindigo-solid-indigo-700": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 0,
@@ -7346,12 +7346,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "luxury-blur::royal-indigo::luxury-royalindigo-gradient-tr": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 0,
@@ -7411,12 +7411,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "luxury-blur::royal-indigo::luxury-royalindigo-gradient-blur": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 0,
@@ -7476,12 +7476,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "luxury-blur::royal-indigo::luxury-royalindigo-blur-overlay": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 0,
@@ -7541,12 +7541,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "luxury-blur::royal-indigo::luxury-royalindigo-glow-ring": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 0,
@@ -7606,12 +7606,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "luxury-blur::sunset-ember::luxury-sunsetember-solid-amber-600": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 0,
@@ -7671,12 +7671,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "luxury-blur::sunset-ember::luxury-sunsetember-gradient-tr": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 0,
@@ -7736,12 +7736,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "luxury-blur::sunset-ember::luxury-sunsetember-gradient-blur": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 0,
@@ -7801,12 +7801,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "luxury-blur::sunset-ember::luxury-sunsetember-blur-overlay": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 0,
@@ -7866,12 +7866,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "luxury-blur::sunset-ember::luxury-sunsetember-glow-ring": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 0,
@@ -7931,12 +7931,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "luxury-blur::modern-blue::luxury-modernblue-solid-blue-600": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 0,
@@ -7996,12 +7996,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "luxury-blur::modern-blue::luxury-modernblue-gradient-tr": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 0,
@@ -8061,12 +8061,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "luxury-blur::modern-blue::luxury-modernblue-gradient-blur": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 0,
@@ -8126,12 +8126,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "luxury-blur::modern-blue::luxury-modernblue-blur-overlay": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 0,
@@ -8191,12 +8191,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "luxury-blur::modern-blue::luxury-modernblue-glow-ring": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 0,
@@ -8256,12 +8256,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "energetic-diagonals::sunset-ember::energetic-sunsetember-solid-amber-500": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 0,
@@ -8321,12 +8321,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "energetic-diagonals::sunset-ember::energetic-sunsetember-gradient-tr": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 0,
@@ -8386,12 +8386,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "energetic-diagonals::sunset-ember::energetic-sunsetember-gradient-bl": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 0,
@@ -8451,12 +8451,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "energetic-diagonals::sunset-ember::energetic-sunsetember-soft-glow": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 0,
@@ -8516,12 +8516,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "energetic-diagonals::sunset-ember::energetic-sunsetember-bold-diagonal": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 0,
@@ -8581,12 +8581,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "energetic-diagonals::vibrant-coral::energetic-vibrantcoral-solid-coral-400": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 0,
@@ -8646,12 +8646,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "energetic-diagonals::vibrant-coral::energetic-vibrantcoral-gradient-tr": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 0,
@@ -8711,12 +8711,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "energetic-diagonals::vibrant-coral::energetic-vibrantcoral-gradient-bl": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 0,
@@ -8776,12 +8776,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "energetic-diagonals::vibrant-coral::energetic-vibrantcoral-soft-glow": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 0,
@@ -8841,12 +8841,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "energetic-diagonals::vibrant-coral::energetic-vibrantcoral-bold-diagonal": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 0,
@@ -8906,12 +8906,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "energetic-diagonals::modern-blue::energetic-modernblue-solid-blue-500": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 0,
@@ -8971,12 +8971,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "energetic-diagonals::modern-blue::energetic-modernblue-gradient-tr": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 0,
@@ -9036,12 +9036,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "energetic-diagonals::modern-blue::energetic-modernblue-gradient-bl": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 0,
@@ -9101,12 +9101,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "energetic-diagonals::modern-blue::energetic-modernblue-soft-glow": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 0,
@@ -9166,12 +9166,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "energetic-diagonals::modern-blue::energetic-modernblue-bold-diagonal": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 0,
@@ -9231,12 +9231,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "energetic-diagonals::neon-tech::energetic-neontech-solid-black": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 0,
@@ -9296,12 +9296,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "energetic-diagonals::neon-tech::energetic-neontech-gradient-tr": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 0,
@@ -9361,12 +9361,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "energetic-diagonals::neon-tech::energetic-neontech-gradient-bl": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 0,
@@ -9426,12 +9426,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "energetic-diagonals::neon-tech::energetic-neontech-soft-glow": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 0,
@@ -9491,12 +9491,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "energetic-diagonals::neon-tech::energetic-neontech-bold-diagonal": {
     "market": {
-      "Work & Productivity Tools": 1,
+      "Business Productivity Tools": 1,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 0,
@@ -9556,12 +9556,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "paper-texture-light::paper-canvas::papertexture-papercanvas-solid-offwhite": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 1,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 3,
@@ -9621,12 +9621,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "paper-texture-light::paper-canvas::papertexture-papercanvas-gradient-lr": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 1,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 3,
@@ -9686,12 +9686,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "paper-texture-light::paper-canvas::papertexture-papercanvas-gradient-rl": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 1,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 3,
@@ -9751,12 +9751,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "paper-texture-light::paper-canvas::papertexture-papercanvas-subtle-texture": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 1,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 3,
@@ -9816,12 +9816,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "paper-texture-light::paper-canvas::papertexture-papercanvas-split-gradient": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 1,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 3,
@@ -9881,12 +9881,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "paper-texture-light::default-light::papertexture-defaultlight-solid-white": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 1,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 3,
@@ -9946,12 +9946,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "paper-texture-light::default-light::papertexture-defaultlight-gradient-tr": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 1,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 3,
@@ -10011,12 +10011,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "paper-texture-light::default-light::papertexture-defaultlight-gradient-bl": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 1,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 3,
@@ -10076,12 +10076,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "paper-texture-light::default-light::papertexture-defaultlight-subtle-texture": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 1,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 3,
@@ -10141,12 +10141,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "paper-texture-light::default-light::papertexture-defaultlight-split-gradient": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 1,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 3,
@@ -10206,12 +10206,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "paper-texture-light::mint-frost::papertexture-mintfrost-solid-mint-50": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 1,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 3,
@@ -10271,12 +10271,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "paper-texture-light::mint-frost::papertexture-mintfrost-gradient-tr": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 1,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 3,
@@ -10336,12 +10336,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "paper-texture-light::mint-frost::papertexture-mintfrost-gradient-bl": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 1,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 3,
@@ -10401,12 +10401,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "paper-texture-light::mint-frost::papertexture-mintfrost-subtle-texture": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 1,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 3,
@@ -10466,12 +10466,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "paper-texture-light::mint-frost::papertexture-mintfrost-split-gradient": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 1,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 3,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 3,
@@ -10531,12 +10531,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "noise-fade-dark::midnight-dark::noise-midnight-solid-dark": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 0,
@@ -10596,12 +10596,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "noise-fade-dark::midnight-dark::noise-midnight-gradient-bl": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 0,
@@ -10661,12 +10661,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "noise-fade-dark::midnight-dark::noise-midnight-radial-center": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 0,
@@ -10726,12 +10726,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "noise-fade-dark::midnight-dark::noise-midnight-gradient-tr-fade": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 0,
@@ -10791,12 +10791,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "noise-fade-dark::midnight-dark::noise-midnight-vignette": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 0,
@@ -10856,12 +10856,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "noise-fade-dark::graphite-code::noise-graphite-solid-core": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 0,
@@ -10921,12 +10921,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "noise-fade-dark::graphite-code::noise-graphite-gradient-ltr": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 0,
@@ -10986,12 +10986,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "noise-fade-dark::graphite-code::noise-graphite-radial-top": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 0,
@@ -11051,12 +11051,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "noise-fade-dark::graphite-code::noise-graphite-angular-glow": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 0,
@@ -11116,12 +11116,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "noise-fade-dark::graphite-code::noise-graphite-vignette-fade": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 0,
@@ -11181,12 +11181,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "noise-fade-dark::royal-indigo::noise-indigo-solid-rich": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 0,
@@ -11246,12 +11246,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "noise-fade-dark::royal-indigo::noise-indigo-gradient-diagonal": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 0,
@@ -11311,12 +11311,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "noise-fade-dark::royal-indigo::noise-indigo-radial-soft": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 0,
@@ -11376,12 +11376,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "noise-fade-dark::royal-indigo::noise-indigo-fade-top": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 0,
@@ -11441,12 +11441,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "noise-fade-dark::royal-indigo::noise-indigo-glow-corners": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 0,
@@ -11506,12 +11506,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "noise-fade-dark::royal-indigo::noise-indigo-vignette-soft": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 0,
@@ -11571,12 +11571,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "startup-skybox::modern-blue::skybox-modern-blue-solid-sky": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 3,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -11636,12 +11636,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "startup-skybox::modern-blue::skybox-modern-blue-gradient-tr": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 3,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -11701,12 +11701,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "startup-skybox::modern-blue::skybox-modern-blue-radial-center": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 3,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -11766,12 +11766,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "startup-skybox::modern-blue::skybox-modern-blue-halo-bottom": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 3,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -11831,12 +11831,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "startup-skybox::modern-blue::skybox-modern-blue-soft-diagonal": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 3,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -11896,12 +11896,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "startup-skybox::modern-blue::skybox-modern-blue-glow-stripes": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 3,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -11961,12 +11961,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "startup-skybox::trust-blue-white::skybox-trust-bluewhite-solid-white": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 3,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -12026,12 +12026,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "startup-skybox::trust-blue-white::skybox-trust-bluewhite-solid-softblue": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 3,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -12091,12 +12091,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "startup-skybox::trust-blue-white::skybox-trust-bluewhite-gradient-tr": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 3,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -12156,12 +12156,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "startup-skybox::trust-blue-white::skybox-trust-bluewhite-radial-top": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 3,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -12221,12 +12221,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "startup-skybox::trust-blue-white::skybox-trust-bluewhite-halo-bottom-fade": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 3,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -12286,12 +12286,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "startup-skybox::trust-blue-white::skybox-trust-bluewhite-fade-v": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 3,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -12351,12 +12351,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "startup-skybox::mint-frost::skybox-mintfrost-solid-frost": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 3,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -12416,12 +12416,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "startup-skybox::mint-frost::skybox-mintfrost-gradient-tr": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 3,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -12481,12 +12481,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "startup-skybox::mint-frost::skybox-mintfrost-radial-soft": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 3,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -12546,12 +12546,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "startup-skybox::mint-frost::skybox-mintfrost-halo-bottom": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 3,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -12611,12 +12611,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "startup-skybox::mint-frost::skybox-mintfrost-fade-v": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 3,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -12676,12 +12676,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "startup-skybox::mint-frost::skybox-mintfrost-blur-haze": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 3,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -12741,12 +12741,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "startup-skybox::sunset-ember::skybox-sunsetember-solid-glow": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 3,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -12806,12 +12806,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "startup-skybox::sunset-ember::skybox-sunsetember-gradient-diagonal": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 3,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -12871,12 +12871,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "startup-skybox::sunset-ember::skybox-sunsetember-radial-burst": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 3,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -12936,12 +12936,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "startup-skybox::sunset-ember::skybox-sunsetember-halo-top": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 3,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -13001,12 +13001,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "startup-skybox::sunset-ember::skybox-sunsetember-soft-stripes": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 3,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -13066,12 +13066,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "startup-skybox::sunset-ember::skybox-sunsetember-blur-overlay": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 3,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -13131,12 +13131,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "high-friction-grid::steel-gray::grid-steelgray-solid-core": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 0,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -13196,12 +13196,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "high-friction-grid::steel-gray::grid-steelgray-gridlines-overlay": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 0,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -13261,12 +13261,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "high-friction-grid::steel-gray::grid-steelgray-gradient-br": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 0,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -13326,12 +13326,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "high-friction-grid::steel-gray::grid-steelgray-radial-core": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 0,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -13391,12 +13391,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "high-friction-grid::steel-gray::grid-steelgray-angular-vignette": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 0,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -13456,12 +13456,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "high-friction-grid::steel-gray::grid-steelgray-grid-deepfade": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 0,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -13521,12 +13521,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "high-friction-grid::midnight-dark::grid-midnight-solid-core": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 0,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -13586,12 +13586,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "high-friction-grid::midnight-dark::grid-midnight-gridlines-subtle": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 0,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -13651,12 +13651,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "high-friction-grid::midnight-dark::grid-midnight-gradient-inset": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 0,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -13716,12 +13716,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "high-friction-grid::midnight-dark::grid-midnight-radial-core": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 0,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -13781,12 +13781,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "high-friction-grid::midnight-dark::grid-midnight-diagonal-vignette": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 0,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -13846,12 +13846,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "high-friction-grid::midnight-dark::grid-midnight-grid-deep-fade": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 0,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -13911,12 +13911,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "high-friction-grid::graphite-code::grid-graphite-solid-core": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 0,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -13976,12 +13976,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "high-friction-grid::graphite-code::grid-graphite-grid-overlay": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 0,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -14041,12 +14041,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "high-friction-grid::graphite-code::grid-graphite-gradient-hl": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 0,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -14106,12 +14106,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "high-friction-grid::graphite-code::grid-graphite-radial-focus": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 0,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -14171,12 +14171,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "high-friction-grid::graphite-code::grid-graphite-glow-bottom": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 0,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -14236,12 +14236,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "high-friction-grid::graphite-code::grid-graphite-grid-vignette": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 0,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -14301,12 +14301,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "comic-burst::vibrant-coral::comic-coral-solid-base": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 1,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -14366,12 +14366,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "comic-burst::vibrant-coral::comic-coral-radial-explode": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 1,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -14431,12 +14431,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "comic-burst::vibrant-coral::comic-coral-burst-lines": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 1,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -14496,12 +14496,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "comic-burst::vibrant-coral::comic-coral-diagonal-flare": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 1,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -14561,12 +14561,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "comic-burst::vibrant-coral::comic-coral-halo-bottom": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 1,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -14626,12 +14626,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "comic-burst::vibrant-coral::comic-coral-splash-fade": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 1,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -14691,12 +14691,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "comic-burst::sunset-ember::comic-sunset-solid-base": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 1,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -14756,12 +14756,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "comic-burst::sunset-ember::comic-sunset-burst-center": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 1,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -14821,12 +14821,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "comic-burst::sunset-ember::comic-sunset-lines-overlay": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 1,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -14886,12 +14886,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "comic-burst::sunset-ember::comic-sunset-halo-top-glow": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 1,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -14951,12 +14951,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "comic-burst::sunset-ember::comic-sunset-explode-diagonal": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 1,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -15016,12 +15016,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "comic-burst::sunset-ember::comic-sunset-texture-blast": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 1,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -15081,12 +15081,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "comic-burst::soft-peach::comic-peach-solid-base": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 1,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -15146,12 +15146,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "comic-burst::soft-peach::comic-peach-radial-burst": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 1,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -15211,12 +15211,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "comic-burst::soft-peach::comic-peach-lines-topright": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 1,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -15276,12 +15276,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "comic-burst::soft-peach::comic-peach-diagonal-fade": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 1,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -15341,12 +15341,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "comic-burst::soft-peach::comic-peach-halo-bottom": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 1,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -15406,12 +15406,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "comic-burst::soft-peach::comic-peach-texture-pop": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 1,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -15471,12 +15471,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "zen-calm-wave::mint-frost::zen-mint-solid-frost": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 2,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 3,
@@ -15536,12 +15536,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "zen-calm-wave::mint-frost::zen-mint-gradient-top": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 2,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 3,
@@ -15601,12 +15601,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "zen-calm-wave::mint-frost::zen-mint-radial-center-glow": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 2,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 3,
@@ -15666,12 +15666,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "zen-calm-wave::mint-frost::zen-mint-wave-overlay": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 2,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 3,
@@ -15731,12 +15731,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "zen-calm-wave::mint-frost::zen-mint-soft-diagonal": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 2,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 3,
@@ -15796,12 +15796,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "zen-calm-wave::mint-frost::zen-mint-bottom-halo": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 2,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 3,
@@ -15861,12 +15861,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "zen-calm-wave::teal-energy::zen-teal-solid-base": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 2,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 3,
@@ -15926,12 +15926,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "zen-calm-wave::teal-energy::zen-teal-gradient-tranquil": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 2,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 3,
@@ -15991,12 +15991,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "zen-calm-wave::teal-energy::zen-teal-radial-center": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 2,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 3,
@@ -16056,12 +16056,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "zen-calm-wave::teal-energy::zen-teal-wave-top": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 2,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 3,
@@ -16121,12 +16121,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "zen-calm-wave::teal-energy::zen-teal-diagonal-wash": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 2,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 3,
@@ -16186,12 +16186,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "zen-calm-wave::teal-energy::zen-teal-halo-bottom": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 2,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 3,
@@ -16251,12 +16251,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "zen-calm-wave::default-light::zen-defaultlight-solid-white": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 2,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 3,
@@ -16316,12 +16316,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "zen-calm-wave::default-light::zen-defaultlight-gradient-subtle": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 2,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 3,
@@ -16381,12 +16381,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "zen-calm-wave::default-light::zen-defaultlight-radial-center-soft": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 2,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 3,
@@ -16446,12 +16446,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "zen-calm-wave::default-light::zen-defaultlight-wave-lines-top": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 2,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 3,
@@ -16511,12 +16511,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "zen-calm-wave::default-light::zen-defaultlight-fade-bottom": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 2,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 3,
@@ -16576,12 +16576,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "zen-calm-wave::default-light::zen-defaultlight-halo-soft-bottom": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 1,
       "AI Tools": 2,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 3,
@@ -16641,12 +16641,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "deep-night-space::midnight-dark::space-midnight-solid-core": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 1,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 0,
@@ -16706,12 +16706,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "deep-night-space::midnight-dark::space-midnight-gradient-galaxy": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 1,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 0,
@@ -16771,12 +16771,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "deep-night-space::midnight-dark::space-midnight-radial-coreglow": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 1,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 0,
@@ -16836,12 +16836,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "deep-night-space::midnight-dark::space-midnight-starscape": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 1,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 0,
@@ -16901,12 +16901,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "deep-night-space::midnight-dark::space-midnight-aurora-halo": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 1,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 0,
@@ -16966,12 +16966,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "deep-night-space::midnight-dark::space-midnight-diagonal-fade": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 1,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 0,
@@ -17031,12 +17031,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "deep-night-space::neon-tech::space-neon-solid-base": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 1,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 0,
@@ -17096,12 +17096,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "deep-night-space::neon-tech::space-neon-gradient-cyberglow": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 1,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 0,
@@ -17161,12 +17161,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "deep-night-space::neon-tech::space-neon-radial-glowcenter": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 1,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 0,
@@ -17226,12 +17226,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "deep-night-space::neon-tech::space-neon-gridlines-overlay": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 1,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 0,
@@ -17291,12 +17291,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "deep-night-space::neon-tech::space-neon-bottom-aurora": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 1,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 0,
@@ -17356,12 +17356,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "deep-night-space::neon-tech::space-neon-pulse-diagonal": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 1,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 0,
@@ -17421,12 +17421,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "deep-night-space::graphite-code::space-graphite-solid-base": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 1,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 0,
@@ -17486,12 +17486,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "deep-night-space::graphite-code::space-graphite-gradient-depth": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 1,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 0,
@@ -17551,12 +17551,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "deep-night-space::graphite-code::space-graphite-radial-glow": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 1,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 0,
@@ -17616,12 +17616,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "deep-night-space::graphite-code::space-graphite-matrix-overlay": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 1,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 0,
@@ -17681,12 +17681,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "deep-night-space::graphite-code::space-graphite-vignette-bottom": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 1,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 0,
@@ -17746,12 +17746,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "deep-night-space::graphite-code::space-graphite-diagonal-fade": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 1,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 0,
@@ -17811,12 +17811,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "trusty-brick-toneProfile::steel-gray::steel-gray-solid-slate-800": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 3,
@@ -17876,12 +17876,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "trusty-brick-toneProfile::steel-gray::steel-gray-gradient-tr-slate": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 3,
@@ -17941,12 +17941,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "trusty-brick-toneProfile::steel-gray::steel-gray-gradient-bl-slate-blue": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 3,
@@ -18006,12 +18006,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "trusty-brick-toneProfile::steel-gray::steel-gray-soft-blur-center": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 3,
@@ -18071,12 +18071,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "trusty-brick-toneProfile::steel-gray::steel-gray-angled-light-strip": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 3,
@@ -18136,12 +18136,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "trusty-brick-toneProfile::steel-gray::steel-gray-bottom-glow": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 3,
@@ -18201,12 +18201,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "trusty-brick-toneProfile::trust-blue-white::trust-blue-white-solid-sky-50": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 3,
@@ -18266,12 +18266,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "trusty-brick-toneProfile::trust-blue-white::trust-blue-white-gradient-tr": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 3,
@@ -18331,12 +18331,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "trusty-brick-toneProfile::trust-blue-white::trust-blue-white-gradient-b": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 3,
@@ -18396,12 +18396,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "trusty-brick-toneProfile::trust-blue-white::trust-blue-white-subtle-radial-center": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 3,
@@ -18461,12 +18461,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "trusty-brick-toneProfile::trust-blue-white::trust-blue-white-soft-halo": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 3,
@@ -18526,12 +18526,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "trusty-brick-toneProfile::trust-blue-white::trust-blue-white-horizontal-light-fade": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 2,
       "Data & Analytics Tools": 2,
       "HR & People Operations Tools": 3,
@@ -18591,12 +18591,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "wireframe-blueprint::graphite-code::graphite-code-solid-zinc-900": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 2,
@@ -18656,12 +18656,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "wireframe-blueprint::graphite-code::graphite-code-gradient-tr-charcoal": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 2,
@@ -18721,12 +18721,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "wireframe-blueprint::graphite-code::graphite-code-gradient-b-coolgray": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 2,
@@ -18786,12 +18786,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "wireframe-blueprint::graphite-code::graphite-code-soft-grid-overlay": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 2,
@@ -18851,12 +18851,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "wireframe-blueprint::graphite-code::graphite-code-diagonal-glow-corner": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 2,
@@ -18916,12 +18916,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "wireframe-blueprint::graphite-code::graphite-code-code-pane-light": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 2,
@@ -18981,12 +18981,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "wireframe-blueprint::graphite-code::graphite-code-spotlight-radial": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 2,
@@ -19046,12 +19046,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "wireframe-blueprint::default-light::default-light-solid-white": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 2,
@@ -19111,12 +19111,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "wireframe-blueprint::default-light::default-light-gradient-b-gray": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 2,
@@ -19176,12 +19176,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "wireframe-blueprint::default-light::default-light-subtle-diagonal-fade": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 2,
@@ -19241,12 +19241,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "wireframe-blueprint::default-light::default-light-glow-center-white-blue": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 2,
@@ -19306,12 +19306,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "wireframe-blueprint::default-light::default-light-horizontal-fade": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 2,
@@ -19371,12 +19371,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "wireframe-blueprint::default-light::default-light-surface-soft-top": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 2,
@@ -19436,12 +19436,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "wireframe-blueprint::default-light::default-light-subtle-grid-overlay": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 2,
@@ -19501,12 +19501,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "wireframe-blueprint::trust-blue-white::trust-blue-white-solid-white": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 2,
@@ -19566,12 +19566,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "wireframe-blueprint::trust-blue-white::trust-blue-white-gradient-tr-blue-sky": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 2,
@@ -19631,12 +19631,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "wireframe-blueprint::trust-blue-white::trust-blue-white-gradient-b-sky": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 2,
@@ -19696,12 +19696,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "wireframe-blueprint::trust-blue-white::trust-blue-white-subtle-center-radial": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 2,
@@ -19761,12 +19761,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "wireframe-blueprint::trust-blue-white::trust-blue-white-faint-grid-overlay": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 2,
@@ -19826,12 +19826,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "wireframe-blueprint::trust-blue-white::trust-blue-white-horizontal-soft-blur": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 2,
@@ -19891,12 +19891,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "wireframe-blueprint::trust-blue-white::trust-blue-white-bottom-glow": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 3,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 2,
+      "No-Code & Development Platforms": 2,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 3,
       "HR & People Operations Tools": 2,
@@ -19956,12 +19956,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "glass-morph-with-pop::mint-frost::mint-frost-solid-mint-50": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -20021,12 +20021,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "glass-morph-with-pop::mint-frost::mint-frost-gradient-tl-green-mint": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -20086,12 +20086,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "glass-morph-with-pop::mint-frost::mint-frost-subtle-radial-center-glow": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -20151,12 +20151,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "glass-morph-with-pop::mint-frost::mint-frost-soft-halo-bottom": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -20216,12 +20216,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "glass-morph-with-pop::mint-frost::mint-frost-frosted-blur-light": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -20281,12 +20281,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "glass-morph-with-pop::mint-frost::mint-frost-diagonal-glow-lines": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -20346,12 +20346,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "glass-morph-with-pop::mint-frost::mint-frost-blur-glow-mix": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -20411,12 +20411,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "glass-morph-with-pop::sunset-ember::sunset-ember-solid-rose-50": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -20476,12 +20476,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "glass-morph-with-pop::sunset-ember::sunset-ember-gradient-br-orange-rose": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -20541,12 +20541,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "glass-morph-with-pop::sunset-ember::sunset-ember-soft-center-radial-glow": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -20606,12 +20606,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "glass-morph-with-pop::sunset-ember::sunset-ember-frosted-blur-light-warm": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -20671,12 +20671,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "glass-morph-with-pop::sunset-ember::sunset-ember-diagonal-blend-orange-pink": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -20736,12 +20736,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "glass-morph-with-pop::sunset-ember::sunset-ember-bottom-glow-peach": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -20801,12 +20801,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "glass-morph-with-pop::sunset-ember::sunset-ember-mixed-glow-blur-halo": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -20866,12 +20866,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "glass-morph-with-pop::soft-peach::soft-peach-solid-peach-50": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -20931,12 +20931,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "glass-morph-with-pop::soft-peach::soft-peach-gradient-bl-peach-rose": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -20996,12 +20996,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "glass-morph-with-pop::soft-peach::soft-peach-soft-center-glow": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -21061,12 +21061,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "glass-morph-with-pop::soft-peach::soft-peach-frosted-white-blur": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -21126,12 +21126,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "glass-morph-with-pop::soft-peach::soft-peach-diagonal-honey-gradient": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -21191,12 +21191,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "glass-morph-with-pop::soft-peach::soft-peach-bottom-fade-glow": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -21256,12 +21256,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "glass-morph-with-pop::soft-peach::soft-peach-blur-blend-overlay": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -21321,12 +21321,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "glass-morph-with-pop::modern-blue::modern-blue-solid-blue-50": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -21386,12 +21386,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "glass-morph-with-pop::modern-blue::modern-blue-gradient-tr-blue-sky": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -21451,12 +21451,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "glass-morph-with-pop::modern-blue::modern-blue-subtle-radial-glow": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -21516,12 +21516,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "glass-morph-with-pop::modern-blue::modern-blue-frosted-glass-blur": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -21581,12 +21581,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "glass-morph-with-pop::modern-blue::modern-blue-horizontal-light-fade": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -21646,12 +21646,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "glass-morph-with-pop::modern-blue::modern-blue-bottom-glow-sky": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -21711,12 +21711,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "glass-morph-with-pop::modern-blue::modern-blue-blur-halo-overlay": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 3,
+      "No-Code & Development Platforms": 3,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -21776,12 +21776,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "retro-pixel-noise::retro-terminal::retro-terminal-solid-terminal-green": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -21841,12 +21841,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "retro-pixel-noise::retro-terminal::retro-terminal-gradient-vintage-crt": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -21906,12 +21906,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "retro-pixel-noise::retro-terminal::retro-terminal-horizontal-glow-green": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -21971,12 +21971,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "retro-pixel-noise::retro-terminal::retro-terminal-crt-noise-overlay": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -22036,12 +22036,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "retro-pixel-noise::retro-terminal::retro-terminal-diagonal-glow-amber": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -22101,12 +22101,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "retro-pixel-noise::retro-terminal::retro-terminal-pixel-grid-subtle": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -22166,12 +22166,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "retro-pixel-noise::retro-terminal::retro-terminal-bottom-glow-crt-green": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -22231,12 +22231,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "retro-pixel-noise::neon-tech::neon-tech-solid-void-purple": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -22296,12 +22296,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "retro-pixel-noise::neon-tech::neon-tech-gradient-br-magenta-cyan": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -22361,12 +22361,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "retro-pixel-noise::neon-tech::neon-tech-soft-center-radial-glow": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -22426,12 +22426,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "retro-pixel-noise::neon-tech::neon-tech-crt-noise-overlay": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -22491,12 +22491,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "retro-pixel-noise::neon-tech::neon-tech-horizontal-neon-fade": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -22556,12 +22556,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "retro-pixel-noise::neon-tech::neon-tech-grid-overlay-cyber": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -22621,12 +22621,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "retro-pixel-noise::neon-tech::neon-tech-bottom-glow-cyan": {
     "market": {
-      "Work & Productivity Tools": 2,
+      "Business Productivity Tools": 2,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 1,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 2,
@@ -22686,12 +22686,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "vibrant-rings::vibrant-coral::vibrant-coral-solid-coral-50": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 2,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -22751,12 +22751,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "vibrant-rings::vibrant-coral::vibrant-coral-radial-rings-center-glow": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 2,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -22816,12 +22816,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "vibrant-rings::vibrant-coral::vibrant-coral-gradient-tr-peach-rose": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 2,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -22881,12 +22881,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "vibrant-rings::vibrant-coral::vibrant-coral-bottom-glow-vibrant": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 2,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -22946,12 +22946,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "vibrant-rings::vibrant-coral::vibrant-coral-rings-overlay-sunburst": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 2,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -23011,12 +23011,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "vibrant-rings::vibrant-coral::vibrant-coral-diagonal-vibrant-fade": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 2,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -23076,12 +23076,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "vibrant-rings::vibrant-coral::vibrant-coral-halo-ring-glow": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 2,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -23141,12 +23141,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "vibrant-rings::sunset-ember::sunset-ember-solid-rose-100": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 2,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -23206,12 +23206,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "vibrant-rings::sunset-ember::sunset-ember-radial-rings-soft-burst": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 2,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -23271,12 +23271,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "vibrant-rings::sunset-ember::sunset-ember-gradient-tr-orange-pink": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 2,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -23336,12 +23336,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "vibrant-rings::sunset-ember::sunset-ember-diagonal-fade-glow": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 2,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -23401,12 +23401,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "vibrant-rings::sunset-ember::sunset-ember-bottom-glow-hue": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 2,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -23466,12 +23466,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "vibrant-rings::sunset-ember::sunset-ember-rings-overlay-vivid": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 2,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -23531,12 +23531,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "vibrant-rings::sunset-ember::sunset-ember-halo-pulse-center": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 2,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -23596,12 +23596,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "vibrant-rings::modern-blue::modern-blue-solid-sky-50": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 2,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -23661,12 +23661,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "vibrant-rings::modern-blue::modern-blue-radial-rings-soft-blue": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 2,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -23726,12 +23726,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "vibrant-rings::modern-blue::modern-blue-gradient-tr-sky-indigo": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 2,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -23791,12 +23791,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "vibrant-rings::modern-blue::modern-blue-diagonal-fade-calm-blue": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 2,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -23856,12 +23856,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "vibrant-rings::modern-blue::modern-blue-bottom-glow-soft-cyan": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 2,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -23921,12 +23921,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "vibrant-rings::modern-blue::modern-blue-rings-overlay-digital": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 2,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -23986,12 +23986,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "vibrant-rings::modern-blue::modern-blue-center-halo-bluelight": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 3,
       "Engineering & Development Tools": 2,
       "AI Tools": 3,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 0,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -24051,12 +24051,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "monochrome-hero-zone::default-light::default-light-solid-white": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -24116,12 +24116,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "monochrome-hero-zone::default-light::default-light-gradient-b-gray-fade": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -24181,12 +24181,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "monochrome-hero-zone::default-light::default-light-horizontal-subtle-fade": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -24246,12 +24246,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "monochrome-hero-zone::default-light::default-light-soft-center-radial": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -24311,12 +24311,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "monochrome-hero-zone::default-light::default-light-minimal-grid-overlay": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -24376,12 +24376,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "monochrome-hero-zone::default-light::default-light-top-glow-fade": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -24441,12 +24441,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "monochrome-hero-zone::default-light::default-light-center-halo-whisper": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -24506,12 +24506,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "monochrome-hero-zone::steel-gray::steel-gray-solid-slate-900": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -24571,12 +24571,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "monochrome-hero-zone::steel-gray::steel-gray-gradient-tr-dark-slate": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -24636,12 +24636,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "monochrome-hero-zone::steel-gray::steel-gray-subtle-radial-glow": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -24701,12 +24701,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "monochrome-hero-zone::steel-gray::steel-gray-horizontal-fade-slate": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -24766,12 +24766,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "monochrome-hero-zone::steel-gray::steel-gray-top-glow-dark-fade": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -24831,12 +24831,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "monochrome-hero-zone::steel-gray::steel-gray-minimal-grid-overlay": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -24896,12 +24896,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "monochrome-hero-zone::steel-gray::steel-gray-center-halo-muted": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -24961,12 +24961,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "monochrome-hero-zone::graphite-code::graphite-code-solid-zinc-900": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -25026,12 +25026,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "monochrome-hero-zone::graphite-code::graphite-code-gradient-br-zinc-slate": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -25091,12 +25091,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "monochrome-hero-zone::graphite-code::graphite-code-subtle-center-radial": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -25156,12 +25156,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "monochrome-hero-zone::graphite-code::graphite-code-horizontal-fade-neutral": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -25221,12 +25221,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "monochrome-hero-zone::graphite-code::graphite-code-dark-top-glow-fade": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -25286,12 +25286,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "monochrome-hero-zone::graphite-code::graphite-code-minimal-pixel-grid": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -25351,12 +25351,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "monochrome-hero-zone::graphite-code::graphite-code-center-glow-muted": {
     "market": {
-      "Work & Productivity Tools": 3,
+      "Business Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 0,
-      "No-Code & Low-Code Platforms": 1,
+      "No-Code & Development Platforms": 1,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -25416,12 +25416,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "blurred-spotlight::midnight-dark::midnight-dark-solid-black": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -25481,12 +25481,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "blurred-spotlight::midnight-dark::midnight-dark-radial-spotlight-center": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -25546,12 +25546,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "blurred-spotlight::midnight-dark::midnight-dark-radial-spotlight-offset-right": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -25611,12 +25611,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "blurred-spotlight::midnight-dark::midnight-dark-diagonal-light-blur": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -25676,12 +25676,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "blurred-spotlight::midnight-dark::midnight-dark-bottom-spotlight-glow": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -25741,12 +25741,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "blurred-spotlight::midnight-dark::midnight-dark-soft-glow-fade-center": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -25806,12 +25806,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "blurred-spotlight::midnight-dark::midnight-dark-multi-spot-halo-fx": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -25871,12 +25871,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "blurred-spotlight::sunset-ember::sunset-ember-solid-rose-100": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -25936,12 +25936,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "blurred-spotlight::sunset-ember::sunset-ember-radial-center-spotlight": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -26001,12 +26001,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "blurred-spotlight::sunset-ember::sunset-ember-radial-spot-offset-top-left": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -26066,12 +26066,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "blurred-spotlight::sunset-ember::sunset-ember-diagonal-soft-blur": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -26131,12 +26131,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "blurred-spotlight::sunset-ember::sunset-ember-bottom-glow-burnt-orange": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -26196,12 +26196,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "blurred-spotlight::sunset-ember::sunset-ember-soft-halo-flare": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -26261,12 +26261,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "blurred-spotlight::sunset-ember::sunset-ember-dual-glow-layers": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -26326,12 +26326,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "blurred-spotlight::modern-blue::modern-blue-solid-sky-100": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -26391,12 +26391,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "blurred-spotlight::modern-blue::modern-blue-radial-center-spotlight": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -26456,12 +26456,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "blurred-spotlight::modern-blue::modern-blue-radial-offset-left-glow": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -26521,12 +26521,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "blurred-spotlight::modern-blue::modern-blue-diagonal-blue-fade": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -26586,12 +26586,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "blurred-spotlight::modern-blue::modern-blue-bottom-glow-sky": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -26651,12 +26651,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "blurred-spotlight::modern-blue::modern-blue-halo-glow-center": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,
@@ -26716,12 +26716,12 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
   },
   "blurred-spotlight::modern-blue::modern-blue-dual-spot-blue-light": {
     "market": {
-      "Work & Productivity Tools": 0,
+      "Business Productivity Tools": 0,
       "Marketing & Sales Tools": 0,
       "Engineering & Development Tools": 0,
       "AI Tools": 0,
       "Design & Creative Tools": 2,
-      "No-Code & Low-Code Platforms": 0,
+      "No-Code & Development Platforms": 0,
       "Customer Support & Service Tools": 3,
       "Data & Analytics Tools": 0,
       "HR & People Operations Tools": 0,

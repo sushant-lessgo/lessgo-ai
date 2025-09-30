@@ -251,7 +251,7 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
     // TODO: Disabled for MVP - scores.PainMeterChart += 2;
     scores.BeforeImageAfterText += 2;
     scores.PersonaPanels += 1;
-  } else if (marketCategory === "Work & Productivity Tools") {
+  } else if (marketCategory === "Business Productivity Tools") {
     scores.StackedPainBullets += 2;
     // TODO: Temporarily disabled - scores.ProblemChecklist += 1;
   } else if (marketCategory === "AI Tools" || marketCategory === "Engineering & Development Tools") {

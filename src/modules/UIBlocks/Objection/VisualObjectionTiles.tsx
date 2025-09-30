@@ -204,7 +204,8 @@ export default function VisualObjectionTiles(props: LayoutComponentProps) {
     ];
 
     for (let i = 0; i < tiles.length; i++) {
-      if (!tiles[i] || tiles[i].trim() === '') {
+      const tile = tiles[i];
+      if (!tile || tile.trim() === '') {
         return i + 1;
       }
     }

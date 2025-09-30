@@ -52,7 +52,7 @@ export function pickPrimaryCTALayout(input: LayoutPickerInput): PrimaryCTALayout
 
   // 3. Product demonstration with visual proof
   if (
-    (marketCategory === "Design & Creative Tools" || marketCategory === "AI Tools" || marketCategory === "No-Code & Low-Code Platforms") &&
+    (marketCategory === "Design & Creative Tools" || marketCategory === "AI Tools" || marketCategory === "No-Code & Development Platforms") &&
     (landingPageGoals === "demo" || landingPageGoals === "free-trial") &&
     (awarenessLevel === "solution-aware" || awarenessLevel === "product-aware")
   ) {
@@ -272,7 +272,7 @@ export function pickPrimaryCTALayout(input: LayoutPickerInput): PrimaryCTALayout
   } else if (marketCategory === "Marketing & Sales Tools") {
     scores.ValueStackCTA += 2;
     scores.TestimonialCTACombo += 1;
-  } else if (marketCategory === "Work & Productivity Tools") {
+  } else if (marketCategory === "Business Productivity Tools") {
     scores.SideBySideCTA += 2;
     scores.CenteredHeadlineCTA += 1;
   }

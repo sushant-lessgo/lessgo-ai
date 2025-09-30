@@ -273,9 +273,12 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
     ? blockContent.testimonial_images.split('|').map(item => item.trim()).filter(Boolean)
     : [];
 
-  const popularTiers = blockContent.popular_tiers 
+  const popularTiers = blockContent.popular_tiers
     ? blockContent.popular_tiers.split('|').map(item => item.trim().toLowerCase() === 'true')
     : [];
+
+  // Get tier count (default to 3 for backward compatibility)
+  const tierCount = parseInt(blockContent.tier_count || '3') || 3;
 
   const pricingTiers = tierNames.slice(0, tierCount).map((name, index) => ({
     id: `tier-${index}`,
@@ -297,9 +300,6 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
   const trustItems = blockContent.trust_items
     ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
     : [];
-
-  // Get tier count (default to 3 for backward compatibility)
-  const tierCount = parseInt(blockContent.tier_count || '3') || 3;
 
   // Helper function to get tier icon
   const getTierIcon = (index: number) => {
@@ -425,7 +425,8 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
 
     const contentField = fieldMap[field];
     if (contentField) {
-      const items = blockContent[contentField]?.split('|') || [];
+      const fieldValue = blockContent[contentField];
+      const items = typeof fieldValue === 'string' ? fieldValue.split('|') : [];
       items[index] = value;
       handleContentUpdate(contentField, items.join('|'));
     }

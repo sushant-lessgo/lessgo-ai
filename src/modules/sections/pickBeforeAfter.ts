@@ -198,7 +198,7 @@ export function pickBeforeAfterLayout(input: LayoutPickerInput): BeforeAfterLayo
   } else if (marketCategory === "Marketing & Sales Tools") {
     scores.StatComparison += 2;
     scores.PersonaJourney += 1;
-  } else if (marketCategory === "Work & Productivity Tools") {
+  } else if (marketCategory === "Business Productivity Tools") {
     scores.TextListTransformation += 1;
     scores.StackedTextVisual += 1;
   }

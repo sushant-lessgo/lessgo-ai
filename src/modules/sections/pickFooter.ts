@@ -27,7 +27,7 @@ export function pickFooterLayout(input: LayoutPickerInput): string {
   }
 
   // Industry-specific SaaS needs comprehensive footer
-  if (marketCategory === 'Industry-Specific SaaS') {
+  if (marketCategory === 'Healthcare Technology') {
     return 'MultiColumnFooter';
   }
 

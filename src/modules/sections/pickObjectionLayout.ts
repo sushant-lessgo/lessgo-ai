@@ -257,7 +257,7 @@ export function pickObjectionLayout(input: LayoutPickerInput): ObjectionLayout {
   } else if (marketCategory === "Marketing & Sales Tools") {
     scores.SkepticToBelieverSteps += 2;
     scores.ProblemToReframeBlocks += 1;
-  } else if (marketCategory === "Work & Productivity Tools") {
+  } else if (marketCategory === "Business Productivity Tools") {
     scores.ObjectionAccordion += 2;
     scores.VisualObjectionTiles += 1;
   } else if (marketCategory === "Design & Creative Tools") {

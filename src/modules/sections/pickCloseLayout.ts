@@ -45,7 +45,7 @@ export function pickCloseLayout(input: LayoutPickerInput): CloseLayout {
   if (
     (targetAudience === "builders" || targetAudience === "enterprise") &&
     (landingPageGoals === "demo" || landingPageGoals === "free-trial") &&
-    (marketCategory === "Engineering & Development Tools" || marketCategory === "AI Tools" || marketCategory === "No-Code & Low-Code Platforms")
+    (marketCategory === "Engineering & Development Tools" || marketCategory === "AI Tools" || marketCategory === "No-Code & Development Platforms")
   ) {
     return "LivePreviewEmbed";
   }

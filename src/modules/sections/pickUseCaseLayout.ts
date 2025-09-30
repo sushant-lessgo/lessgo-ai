@@ -35,7 +35,7 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
   if (
     targetAudience === "enterprise" &&
     marketSophisticationLevel >= "level-4" &&
-    (marketCategory === "Work & Productivity Tools" || marketCategory === "Data & Analytics Tools" || marketCategory === "HR & People Operations Tools")
+    (marketCategory === "Business Productivity Tools" || marketCategory === "Data & Analytics Tools" || marketCategory === "HR & People Operations Tools")
   ) {
     return "RoleBasedScenarios";
   }
@@ -160,7 +160,7 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
   }
 
   // Market Category Scoring (Medium Weight: 2-3 points)
-  if (marketCategory === "Work & Productivity Tools") {
+  if (marketCategory === "Business Productivity Tools") {
     scores.RoleBasedScenarios += 3;
     scores.PersonaGrid += 2;
   } else if (marketCategory === "Marketing & Sales Tools") {

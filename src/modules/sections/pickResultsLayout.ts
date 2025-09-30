@@ -54,7 +54,7 @@ export function pickResultsLayout(input: LayoutPickerInput): ResultsLayout {
   if (
     (problemType === "manual-repetition" || problemType === "time-freedom-or-automation") &&
     marketSophisticationLevel >= "level-3" &&
-    (marketCategory === "Work & Productivity Tools" || marketCategory === "Marketing & Sales Tools")
+    (marketCategory === "Business Productivity Tools" || marketCategory === "Marketing & Sales Tools")
   ) {
     return "TimelineResults";
   }
@@ -265,7 +265,7 @@ export function pickResultsLayout(input: LayoutPickerInput): ResultsLayout {
   if (marketCategory === "Marketing & Sales Tools") {
     scores.BeforeAfterStats += 2;
     scores.PersonaResultPanels += 1;
-  } else if (marketCategory === "Work & Productivity Tools") {
+  } else if (marketCategory === "Business Productivity Tools") {
     scores.TimelineResults += 2;
     scores.StackedWinsList += 1;
   } else if (marketCategory === "Design & Creative Tools") {

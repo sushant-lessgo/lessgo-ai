@@ -61,7 +61,7 @@ export function pickTestimonialLayout(input: LayoutPickerInput): TestimonialLayo
 
   // 4. Review-heavy products with rating focus
   if (
-    (marketCategory === "Marketing & Sales Tools" || marketCategory === "Design & Creative Tools" || marketCategory === "Work & Productivity Tools") &&
+    (marketCategory === "Marketing & Sales Tools" || marketCategory === "Design & Creative Tools" || marketCategory === "Business Productivity Tools") &&
     (startupStage === "traction" || startupStage === "growth") &&
     marketSophisticationLevel >= "level-3"
   ) {
@@ -264,7 +264,7 @@ export function pickTestimonialLayout(input: LayoutPickerInput): TestimonialLayo
   if (marketCategory === "Marketing & Sales Tools") {
     scores.RatingCards += 2;
     scores.SegmentedTestimonials += 1;
-  } else if (marketCategory === "Work & Productivity Tools") {
+  } else if (marketCategory === "Business Productivity Tools") {
     scores.BeforeAfterQuote += 2;
     scores.QuoteGrid += 1;
   } else if (marketCategory === "Design & Creative Tools") {

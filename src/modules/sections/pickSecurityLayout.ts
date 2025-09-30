@@ -153,7 +153,7 @@ export function pickSecurityLayout(input: LayoutPickerInput): SecurityLayout {
     scores.SecurityChecklist += 3;
     scores.TrustSealCollection += 3;
     scores.SecurityGuaranteePanel += 2;
-  } else if (marketCategory === "Work & Productivity Tools") {
+  } else if (marketCategory === "Business Productivity Tools") {
     scores.SecurityChecklist += 3;
     scores.SecurityGuaranteePanel += 3;
     scores.TrustSealCollection += 2;

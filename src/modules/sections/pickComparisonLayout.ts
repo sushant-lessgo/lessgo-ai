@@ -53,7 +53,7 @@ export function pickComparisonLayout(input: LayoutPickerInput): ComparisonLayout
   // 3. Highly competitive markets need aggressive positioning
   if (
     marketSophisticationLevel >= "level-4" &&
-    (marketCategory === "Marketing & Sales Tools" || marketCategory === "Work & Productivity Tools") &&
+    (marketCategory === "Marketing & Sales Tools" || marketCategory === "Business Productivity Tools") &&
     toneProfile === "bold-persuasive"
   ) {
     return "CompetitorCallouts";
@@ -257,7 +257,7 @@ export function pickComparisonLayout(input: LayoutPickerInput): ComparisonLayout
     scores.CompetitorCallouts += 2;
     scores.YouVsThemHighlight += 2;
     scores.PersonaUseCaseCompare += 1;
-  } else if (marketCategory === "Work & Productivity Tools") {
+  } else if (marketCategory === "Business Productivity Tools") {
     scores.CheckmarkComparison += 2;
     scores.LiteVsProVsEnterprise += 1;
   } else if (marketCategory === "Design & Creative Tools") {

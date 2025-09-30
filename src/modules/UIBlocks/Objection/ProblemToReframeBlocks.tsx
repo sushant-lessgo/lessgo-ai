@@ -220,7 +220,8 @@ export default function ProblemToReframeBlocks(props: LayoutComponentProps) {
     ];
 
     for (let i = 0; i < pairs.length; i++) {
-      if (!pairs[i] || pairs[i].trim() === '') {
+      const pair = pairs[i];
+      if (!pair || pair.trim() === '') {
         return i + 1;
       }
     }

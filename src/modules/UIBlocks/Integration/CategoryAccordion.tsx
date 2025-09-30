@@ -150,13 +150,14 @@ const parseCategoryData = (titles: string, integrations: string, icons?: string)
 
 export default function CategoryAccordion(props: CategoryAccordionProps) {
   const { getTextStyle: getTypographyStyle } = useTypography();
-  const { blockContent: storeContent, setBlockContent, getBusinessContext } = useEditStore();
-  const { getOnboardingFieldValue } = useOnboardingStore();
+  const store = useEditStore();
+  const onboardingStore = useOnboardingStore();
 
   // Extract content using the extractLayoutContent helper
+  const sectionContent = store.content[props.sectionId];
+  const elements = sectionContent?.elements || {};
   const blockContent = extractLayoutContent<CategoryAccordionContent>(
-    storeContent,
-    props.sectionId,
+    elements,
     CONTENT_SCHEMA
   );
 
@@ -189,8 +190,6 @@ export default function CategoryAccordion(props: CategoryAccordionProps) {
       blockContent.category_icons
     );
 
-    const businessContext = getBusinessContext();
-
     // Auto-generate icons if missing or insufficient
     if (!blockContent.category_icons || blockContent.category_icons.split('|').length < categoryData.length) {
       const generatedIcons = categoryData.map((category, index) => {
@@ -198,12 +197,12 @@ export default function CategoryAccordion(props: CategoryAccordionProps) {
         if (existingIcon) return existingIcon;
 
         // Generate appropriate icon based on category title
-        return getIconFromCategory(category.title, businessContext?.category) || getRandomIconFromCategory('integration');
+        return getIconFromCategory(category.title, index) || getRandomIconFromCategory('integration');
       });
 
       handleContentUpdate('category_icons', generatedIcons.join('|'));
     }
-  }, [blockContent.category_titles, blockContent.category_integrations, blockContent.category_icons, getBusinessContext, handleContentUpdate]);
+  }, [blockContent.category_titles, blockContent.category_integrations, blockContent.category_icons, handleContentUpdate]);
 
   // Parse category data
   const categories = parseCategoryData(

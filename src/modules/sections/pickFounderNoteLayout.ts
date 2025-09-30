@@ -243,7 +243,7 @@ export function pickFounderNoteLayout(input: LayoutPickerInput): FounderNoteLayo
   } else if (marketCategory === "Marketing & Sales Tools") {
     scores.StoryBlockWithPullquote += 2;
     scores.TimelineToToday += 1;
-  } else if (marketCategory === "Work & Productivity Tools") {
+  } else if (marketCategory === "Business Productivity Tools") {
     scores.FounderCardWithQuote += 2;
     scores.MissionQuoteOverlay += 1;
   } else if (marketCategory === "AI Tools" || marketCategory === "Engineering & Development Tools") {

@@ -72,7 +72,8 @@
       "Bash(pkill:*)",
       "Bash(sed:*)",
       "Bash(node:*)",
-      "Bash(git show:*)"
+      "Bash(git show:*)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": [],

@@ -5,7 +5,7 @@ interface LayoutElement {
 }
 
 interface CardStructure {
-  type: 'cards' | 'pairs' | 'items' | 'blocks' | 'steps' | 'triplets' | 'quadruplets' | 'sextuplets' | 'tabbed_pairs';
+  type: 'cards' | 'pairs' | 'items' | 'blocks' | 'steps' | 'triplets' | 'quadruplets' | 'sextuplets' | 'tabbed_pairs' | 'rows' | 'usage_based';
   elements: string[];  // All card elements are mandatory by default
   generation: 'ai_generated' | 'manual_preferred' | 'hybrid';
 }
@@ -1080,16 +1080,13 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "methodology_name", mandatory: true, generation: "manual_preferred" },
       { element: "methodology_description", mandatory: true, generation: "ai_generated" },
       { element: "results_title", mandatory: false, generation: "ai_generated" },
-      { element: "methodology_icon", mandatory: false, generation: "ai_generated" }
+      { element: "methodology_icon", mandatory: false, generation: "ai_generated" },
+      { element: "result_metrics", mandatory: false, generation: "ai_generated" },
+      { element: "result_labels", mandatory: false, generation: "ai_generated" }
     ],
     cardStructure: {
       type: "cards",
       elements: ["principles", "principle_details", "principle_icons"],
-      generation: "ai_generated"
-    },
-    resultStructure: {
-      type: "metrics",
-      elements: ["result_metrics", "result_labels"],
       generation: "ai_generated"
     },
     cardRequirements: {
@@ -1105,18 +1102,13 @@ export const layoutElementSchema: LayoutSchema = {
     sectionElements: [
       { element: "headline", mandatory: true, generation: "ai_generated" },
       { element: "subheadline", mandatory: false, generation: "ai_generated" },
-      { element: "benefits_title", mandatory: false, generation: "ai_generated" }
+      { element: "benefits_title", mandatory: false, generation: "ai_generated" },
+      { element: "process_steps", mandatory: true, generation: "ai_generated" },
+      { element: "step_descriptions", mandatory: true, generation: "ai_generated" },
+      { element: "benefit_titles", mandatory: false, generation: "ai_generated" },
+      { element: "benefit_descriptions", mandatory: false, generation: "ai_generated" },
+      { element: "benefit_icons", mandatory: false, generation: "ai_generated" }
     ],
-    processStructure: {
-      type: "steps",
-      elements: ["process_steps", "step_descriptions"],
-      generation: "ai_generated"
-    },
-    benefitStructure: {
-      type: "benefits",
-      elements: ["benefit_titles", "benefit_descriptions", "benefit_icons"],
-      generation: "ai_generated"
-    },
     cardRequirements: {
       type: 'blocks',
       min: 1,
@@ -1189,13 +1181,11 @@ export const layoutElementSchema: LayoutSchema = {
   SystemArchitecture: {
     sectionElements: [
       { element: "headline", mandatory: true, generation: "ai_generated" },
-      { element: "architecture_description", mandatory: false, generation: "ai_generated" }
+      { element: "architecture_description", mandatory: false, generation: "ai_generated" },
+      { element: "component_names", mandatory: true, generation: "ai_generated" },
+      { element: "component_descriptions", mandatory: true, generation: "ai_generated" },
+      { element: "component_icons", mandatory: false, generation: "ai_generated" }
     ],
-    componentStructure: {
-      type: "components",
-      elements: ["component_names", "component_descriptions", "component_icons"],
-      generation: "ai_generated"
-    },
     cardRequirements: {
       type: 'blocks',
       min: 1,
@@ -1396,16 +1386,14 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "subheadline", mandatory: false, generation: "ai_generated" },
       { element: "supporting_text", mandatory: false, generation: "ai_generated" },
       { element: "cta_text", mandatory: false, generation: "ai_generated" },
-      { element: "trust_items", mandatory: false, generation: "ai_generated" }
+      { element: "trust_items", mandatory: false, generation: "ai_generated" },
+      { element: "summary_stat_values", mandatory: false, generation: "ai_generated" },
+      { element: "summary_stat_labels", mandatory: false, generation: "ai_generated" },
+      { element: "stat_icons", mandatory: false, generation: "ai_generated" }
     ],
     cardStructure: {
       type: "cards",
       elements: ["before_stats", "after_stats"],
-      generation: "ai_generated"
-    },
-    summaryCardStructure: {
-      type: "cards",
-      elements: ["summary_stat_values", "summary_stat_labels", "stat_icons"],
       generation: "ai_generated"
     },
     cardRequirements: {
@@ -1465,7 +1453,8 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "urgency_text", mandatory: false, generation: "ai_generated" },
       { element: "guarantee_text", mandatory: false, generation: "ai_generated" },
       { element: "supporting_text", mandatory: false, generation: "ai_generated" }
-    ]
+    ],
+    cardRequirements: null
   },
 
   BonusStackCTA: {
@@ -1524,7 +1513,8 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "privacy_text", mandatory: false, generation: "ai_generated" },
       { element: "subheadline", mandatory: false, generation: "ai_generated" },
       { element: "supporting_text", mandatory: false, generation: "ai_generated" }
-    ]
+    ],
+    cardRequirements: null
   },
 
   EnterpriseContactBox: {
@@ -1617,7 +1607,8 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "instruction_text", mandatory: false, generation: "ai_generated" },
       { element: "subheadline", mandatory: false, generation: "ai_generated" },
       { element: "supporting_text", mandatory: false, generation: "ai_generated" }
-    ]
+    ],
+    cardRequirements: null
   },
 
   SideBySideOfferCards: {
@@ -1761,16 +1752,14 @@ export const layoutElementSchema: LayoutSchema = {
   LiteVsProVsEnterprise: {
     sectionElements: [
       { element: "headline", mandatory: true, generation: "ai_generated" },
-      { element: "subheadline", mandatory: false, generation: "ai_generated" }
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "feature_categories", mandatory: false, generation: "ai_generated" },
+      { element: "feature_items", mandatory: false, generation: "ai_generated" },
+      { element: "tier_features", mandatory: false, generation: "ai_generated" }
     ],
     cardStructure: {
       type: "cards",
       elements: ["tier_names", "tier_prices", "tier_descriptions", "tier_ctas"],
-      generation: "ai_generated"
-    },
-    featureStructure: {
-      type: "rows",
-      elements: ["feature_categories", "feature_items", "tier_features"],
       generation: "ai_generated"
     },
     cardRequirements: {
@@ -2325,7 +2314,6 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "cta_text", mandatory: false, generation: "ai_generated" },
       { element: "founder_image", mandatory: false, generation: "manual_preferred" }
     ],
-    cardStructure: null,
     cardRequirements: null
   },
 
@@ -2343,7 +2331,6 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "ps_text", mandatory: false, generation: "ai_generated" },
       { element: "founder_image", mandatory: false, generation: "manual_preferred" }
     ],
-    cardStructure: null,
     cardRequirements: null
   },
 
@@ -2357,7 +2344,6 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "video_url", mandatory: false, generation: "manual_preferred" },
       { element: "trust_items", mandatory: false, generation: "ai_generated" }
     ],
-    cardStructure: null,
     cardRequirements: null
   },
 
@@ -2480,7 +2466,6 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "founder_image", mandatory: false, generation: "manual_preferred" },
       { element: "quote_icon", mandatory: false, generation: "ai_generated" }
     ],
-    cardStructure: null,
     cardRequirements: null
   },
 

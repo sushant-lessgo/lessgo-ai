@@ -64,7 +64,7 @@ export function pickPricingLayout(input: LayoutPickerInput): PricingLayout {
   if (
     marketSophisticationLevel >= "level-3" &&
     (targetAudience === "businesses" || targetAudience === "enterprise") &&
-    (marketCategory === "Marketing & Sales Tools" || marketCategory === "Work & Productivity Tools" || marketCategory === "HR & People Operations Tools")
+    (marketCategory === "Marketing & Sales Tools" || marketCategory === "Business Productivity Tools" || marketCategory === "HR & People Operations Tools")
   ) {
     return "SegmentBasedPricing";
   }
@@ -286,7 +286,7 @@ export function pickPricingLayout(input: LayoutPickerInput): PricingLayout {
   } else if (marketCategory === "Engineering & Development Tools" || marketCategory === "AI Tools") {
     scores.SliderPricing += 2;
     scores.FeatureMatrix += 1;
-  } else if (marketCategory === "Work & Productivity Tools") {
+  } else if (marketCategory === "Business Productivity Tools") {
     scores.TierCards += 2;
     scores.SegmentBasedPricing += 1;
   } else if (marketCategory === "Design & Creative Tools") {
