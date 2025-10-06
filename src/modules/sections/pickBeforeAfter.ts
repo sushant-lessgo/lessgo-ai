@@ -28,6 +28,7 @@ export function pickBeforeAfterLayout(input: LayoutPickerInput): BeforeAfterLayo
   marketSophisticationLevel,
   copyIntent,
   problemType,
+  assetAvailability,        // Sprint 7: Asset-aware layout selection
 } = input;
 
   // High-Priority Rules (Return immediately if matched)
@@ -222,6 +223,16 @@ export function pickBeforeAfterLayout(input: LayoutPickerInput): BeforeAfterLayo
   } else if (landingPageGoals === "buy-now" || landingPageGoals === "subscribe") {
     scores.StatComparison += 1;
     scores.PersonaJourney += 1;
+  }
+
+  // Sprint 7: Asset-Aware Scoring Adjustments
+  if (assetAvailability && !assetAvailability.productImages) {
+    // Penalize visual layouts without product images
+    scores.BeforeAfterSlider -= 100;
+    scores.VisualStoryline -= 100;
+    // Boost text-based fallbacks
+    scores.TextListTransformation += 50;
+    scores.StatComparison += 30;
   }
 
   // Find the highest scoring layout

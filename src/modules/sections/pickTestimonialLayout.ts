@@ -20,7 +20,7 @@ export function pickTestimonialLayout(input: LayoutPickerInput): TestimonialLayo
   toneProfile,
   startupStage,             // ✅ FIXED
   marketCategory,
-  landingPageGoals,         // ✅ FIXED  
+  landingPageGoals,         // ✅ FIXED
   targetAudience,           // ✅ FIXED
   pricingModel,
   pricingModifier,
@@ -28,6 +28,7 @@ export function pickTestimonialLayout(input: LayoutPickerInput): TestimonialLayo
   marketSophisticationLevel,
   copyIntent,
   problemType,
+  assetAvailability,        // Sprint 7: Asset-aware layout selection
 } = input;
   // High-Priority Rules (Return immediately if matched)
   
@@ -288,6 +289,14 @@ export function pickTestimonialLayout(input: LayoutPickerInput): TestimonialLayo
   } else if (pricingModel === "tiered") {
     scores.SegmentedTestimonials += 2;
     scores.RatingCards += 1;
+  }
+
+  // Sprint 7: Asset-Aware Scoring Adjustments
+  if (assetAvailability) {
+    // Penalize video testimonials without demo video
+    if (!assetAvailability.demoVideo) {
+      scores.VideoTestimonials -= 100;
+    }
   }
 
   // Find the highest scoring layout

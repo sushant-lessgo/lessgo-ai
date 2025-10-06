@@ -28,6 +28,7 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
   marketSophisticationLevel,
   copyIntent,
   problemType,
+  assetAvailability,        // Sprint 7: Asset-aware layout selection
 } = input;
 
   // High-Priority Rules (Return immediately if matched)
@@ -288,6 +289,12 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
   } else if (pricingModel === "tiered") {
     scores.PersonaPanels += 2;
     // TODO: Disabled for MVP - scores.PainMeterChart += 1;
+  }
+
+  // Sprint 7: Asset-Aware Scoring Adjustments
+  if (assetAvailability && !assetAvailability.productImages) {
+    // Penalize image-based problem layouts without product images
+    scores.BeforeImageAfterText -= 100;
   }
 
   // Find the highest scoring layout

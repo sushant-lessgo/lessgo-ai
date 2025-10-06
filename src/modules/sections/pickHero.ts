@@ -16,7 +16,7 @@ export function pickHeroLayout(input: LayoutPickerInput): HeroLayout {
   toneProfile,
   startupStage,             // ✅ FIXED
   marketCategory,
-  landingPageGoals,         // ✅ FIXED  
+  landingPageGoals,         // ✅ FIXED
   targetAudience,           // ✅ FIXED
   pricingModel,
   pricingModifier,
@@ -24,6 +24,7 @@ export function pickHeroLayout(input: LayoutPickerInput): HeroLayout {
   marketSophisticationLevel,
   copyIntent,
   problemType,
+  assetAvailability,        // Sprint 7: Asset-aware layout selection
 } = input;
 
   // High-Priority Rules (Return immediately if matched)
@@ -290,6 +291,17 @@ export function pickHeroLayout(input: LayoutPickerInput): HeroLayout {
   } else if (pricingModifier === "money-back") {
     scores.leftCopyRightImage += 1;
     scores.centerStacked += 1;
+  }
+
+  // Sprint 7: Asset-Aware Scoring Adjustments
+  if (assetAvailability && !assetAvailability.productImages) {
+    // Heavily penalize image-dependent layouts without product images
+    scores.imageFirst -= 100;
+    scores.leftCopyRightImage -= 50;
+    scores.splitScreen -= 50;
+
+    // Boost text-focused layout
+    scores.centerStacked += 30;
   }
 
   // Find the highest scoring layout

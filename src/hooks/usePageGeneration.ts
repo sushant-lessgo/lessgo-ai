@@ -74,8 +74,8 @@ export function usePageGeneration(tokenId: string) {
   // Step 1: Analyze business and generate sections
   const generateSections = async (): Promise<{ sections: string[], errors: string[] }> => {
     try {
-      const { validatedFields, hiddenInferredFields, featuresFromAI } = onboardingStore;
-      
+      const { validatedFields, hiddenInferredFields, featuresFromAI, assetAvailability } = onboardingStore;
+
       // Fix: Filter out undefined values from hiddenInferredFields with proper typing
       const cleanHiddenFields: Record<string, string> = {};
       Object.entries(hiddenInferredFields).forEach(([key, value]) => {
@@ -83,11 +83,12 @@ export function usePageGeneration(tokenId: string) {
           cleanHiddenFields[key] = value;
         }
       });
-      
+
       const sections = getSectionsFromRules({
         validatedFields,
         hiddenInferredFields: cleanHiddenFields,
-        featuresFromAI
+        featuresFromAI,
+        assetAvailability,  // Sprint 7: Pass asset availability for section exclusions
       });
 
       if (!sections || sections.length === 0) {

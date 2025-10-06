@@ -20,7 +20,7 @@ export function pickCloseLayout(input: LayoutPickerInput): CloseLayout {
   toneProfile,
   startupStage,             // ✅ FIXED
   marketCategory,
-  landingPageGoals,         // ✅ FIXED  
+  landingPageGoals,         // ✅ FIXED
   targetAudience,           // ✅ FIXED
   pricingModel,
   pricingModifier,
@@ -28,6 +28,7 @@ export function pickCloseLayout(input: LayoutPickerInput): CloseLayout {
   marketSophisticationLevel,
   copyIntent,
   problemType,
+  assetAvailability,        // Sprint 7: Asset-aware layout selection
 } = input;
 
   // High-Priority Rules (Return immediately if matched)
@@ -275,6 +276,15 @@ export function pickCloseLayout(input: LayoutPickerInput): CloseLayout {
     scores.MockupWithCTA += 1;
   } else if (pricingCommitmentOption === "talk-to-sales") {
     scores.EnterpriseContactBox += 2;
+  }
+
+  // Sprint 7: Asset-Aware Scoring Adjustments
+  if (assetAvailability) {
+    if (!assetAvailability.productImages) {
+      // Penalize mockup-heavy CTAs without product images
+      scores.MockupWithCTA -= 100;
+      scores.LivePreviewEmbed -= 80;
+    }
   }
 
   // Find the highest scoring layout

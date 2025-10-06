@@ -5,6 +5,7 @@ import type {
   InputVariables,
   HiddenInferredFields,
   FeatureItem,
+  AssetAvailability,
   AwarenessLevel,
   MarketSophisticationLevel,
   LandingGoalType,
@@ -17,12 +18,14 @@ type RuleInput = {
   validatedFields: Partial<InputVariables>;
   hiddenInferredFields: Partial<HiddenInferredFields>;
   featuresFromAI: FeatureItem[];
+  assetAvailability?: AssetAvailability | null; // Sprint 7: Asset-aware section selection
 };
 
 export function getSectionsFromRules({
   validatedFields,
   hiddenInferredFields,
   featuresFromAI,
+  assetAvailability,
 }: RuleInput): string[] {
   logger.dev('🔍 Section Rules Debug - Input:', () => ({
     validatedFields,
@@ -70,9 +73,39 @@ export function getSectionsFromRules({
 
 
   // ✅ Use objection flow engine
-  const selectedSections = getSectionsFromObjectionFlows(flowInput);
+  let selectedSections = getSectionsFromObjectionFlows(flowInput);
 
-  
+  // Sprint 7: HARD EXCLUSIONS - Remove sections that are meaningless without required assets
+  if (assetAvailability) {
+    logger.dev('🎨 Asset-Aware Section Selection - Applying hard exclusions', () => ({
+      assetAvailability,
+      sectionsBeforeExclusion: selectedSections
+    }));
+
+    // Testimonial section is meaningless without testimonials
+    if (!assetAvailability.testimonials) {
+      selectedSections = selectedSections.filter(s => s !== 'testimonial');
+      logger.dev('❌ Excluded testimonial section (no testimonials available)');
+    }
+
+    // Social proof needs either logos OR testimonials to be effective
+    if (!assetAvailability.customerLogos && !assetAvailability.testimonials) {
+      selectedSections = selectedSections.filter(s => s !== 'socialProof');
+      logger.dev('❌ Excluded socialProof section (no logos AND no testimonials)');
+    }
+
+    // Integration section only makes sense with partner logos
+    if (!assetAvailability.integrationLogos) {
+      selectedSections = selectedSections.filter(s => s !== 'integration');
+      logger.dev('❌ Excluded integration section (no integration logos)');
+    }
+
+    logger.dev('✅ Asset-Aware Section Selection Complete', () => ({
+      sectionsAfterExclusion: selectedSections,
+      excluded: getSectionsFromObjectionFlows(flowInput).filter(s => !selectedSections.includes(s))
+    }));
+  }
+
   return selectedSections;
 }
 

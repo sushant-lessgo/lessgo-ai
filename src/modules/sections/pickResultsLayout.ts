@@ -28,6 +28,7 @@ export function pickResultsLayout(input: LayoutPickerInput): ResultsLayout {
   marketSophisticationLevel,
   copyIntent,
   problemType,
+  assetAvailability,        // Sprint 7: Asset-aware layout selection
 } = input;
 
   // High-Priority Rules (Return immediately if matched)
@@ -292,6 +293,12 @@ export function pickResultsLayout(input: LayoutPickerInput): ResultsLayout {
   } else if (pricingModel === "usage-based") {
     scores.StatBlocks += 2;
     scores.BeforeAfterStats += 1;
+  }
+
+  // Sprint 7: Asset-Aware Scoring Adjustments
+  if (assetAvailability && !assetAvailability.testimonials) {
+    // Penalize quote-based layouts without testimonials
+    scores.QuoteWithMetric -= 100;
   }
 
   // Find the highest scoring layout

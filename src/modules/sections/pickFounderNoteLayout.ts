@@ -20,7 +20,7 @@ export function pickFounderNoteLayout(input: LayoutPickerInput): FounderNoteLayo
   toneProfile,
   startupStage,             // ✅ FIXED
   marketCategory,
-  landingPageGoals,         // ✅ FIXED  
+  landingPageGoals,         // ✅ FIXED
   targetAudience,           // ✅ FIXED
   pricingModel,
   pricingModifier,
@@ -28,6 +28,7 @@ export function pickFounderNoteLayout(input: LayoutPickerInput): FounderNoteLayo
   marketSophisticationLevel,
   copyIntent,
   problemType,
+  assetAvailability,        // Sprint 7: Asset-aware layout selection
 } = input;
 
   // High-Priority Rules (Return immediately if matched)
@@ -264,6 +265,17 @@ export function pickFounderNoteLayout(input: LayoutPickerInput): FounderNoteLayo
   } else if (pricingModel === "tiered") {
     scores.TimelineToToday += 2;
     scores.StoryBlockWithPullquote += 1;
+  }
+
+  // Sprint 7: Asset-Aware Scoring Adjustments
+  if (assetAvailability && !assetAvailability.founderPhoto) {
+    // Penalize photo/video-based layouts without founder photo
+    scores.SideBySidePhotoStory -= 100;
+    scores.VideoNoteWithTranscript -= 100;
+
+    // Boost text-based layouts as fallback
+    scores.LetterStyleBlock += 50;
+    scores.FoundersBeliefStack += 30;
   }
 
   // Find the highest scoring layout

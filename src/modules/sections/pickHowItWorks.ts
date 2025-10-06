@@ -19,7 +19,7 @@ export function pickHowItWorksLayout(input: LayoutPickerInput): HowItWorksLayout
   toneProfile,
   startupStage,             // ✅ FIXED
   marketCategory,
-  landingPageGoals,         // ✅ FIXED  
+  landingPageGoals,         // ✅ FIXED
   targetAudience,           // ✅ FIXED
   pricingModel,
   pricingModifier,
@@ -27,6 +27,7 @@ export function pickHowItWorksLayout(input: LayoutPickerInput): HowItWorksLayout
   marketSophisticationLevel,
   copyIntent,
   problemType,
+  assetAvailability,        // Sprint 7: Asset-aware layout selection
 } = input;
 
   // High-Priority Rules (Return immediately if matched)
@@ -267,6 +268,16 @@ export function pickHowItWorksLayout(input: LayoutPickerInput): HowItWorksLayout
   } else if (pricingModel === "tiered") {
     scores.VerticalTimeline += 2;
     scores.ZigzagImageSteps += 1;
+  }
+
+  // Sprint 7: Asset-Aware Scoring Adjustments
+  if (assetAvailability) {
+    if (!assetAvailability.demoVideo) {
+      scores.VideoWalkthrough -= 100;
+    }
+    if (!assetAvailability.productImages) {
+      scores.ZigzagImageSteps -= 50;
+    }
   }
 
   // Find the highest scoring layout

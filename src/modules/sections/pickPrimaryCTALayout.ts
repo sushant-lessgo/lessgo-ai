@@ -20,7 +20,7 @@ export function pickPrimaryCTALayout(input: LayoutPickerInput): PrimaryCTALayout
   toneProfile,
   startupStage,             // ✅ FIXED
   marketCategory,
-  landingPageGoals,         // ✅ FIXED  
+  landingPageGoals,         // ✅ FIXED
   targetAudience,           // ✅ FIXED
   pricingModel,
   pricingModifier,
@@ -28,6 +28,7 @@ export function pickPrimaryCTALayout(input: LayoutPickerInput): PrimaryCTALayout
   marketSophisticationLevel,
   copyIntent,
   problemType,
+  assetAvailability,        // Sprint 7: Asset-aware layout selection
 } = input;
 
   // High-Priority Rules (Return immediately if matched)
@@ -299,6 +300,17 @@ export function pickPrimaryCTALayout(input: LayoutPickerInput): PrimaryCTALayout
   } else if (pricingCommitmentOption === "upfront-payment") {
     scores.CountdownLimitedCTA += 2;
     scores.ValueStackCTA += 1;
+  }
+
+  // Sprint 7: Asset-Aware Scoring Adjustments
+  if (assetAvailability) {
+    if (!assetAvailability.productImages) {
+      // Penalize mockup/visual-heavy CTAs without product images
+      scores.VisualCTAWithMockup -= 100;
+    }
+    if (!assetAvailability.testimonials) {
+      scores.TestimonialCTACombo -= 100;
+    }
   }
 
   // Find the highest scoring layout

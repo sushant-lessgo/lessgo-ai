@@ -20,7 +20,7 @@ export function pickSocialProofLayout(input: LayoutPickerInput): SocialProofLayo
   toneProfile,
   startupStage,             // ✅ FIXED
   marketCategory,
-  landingPageGoals,         // ✅ FIXED  
+  landingPageGoals,         // ✅ FIXED
   targetAudience,           // ✅ FIXED
   pricingModel,
   pricingModifier,
@@ -28,6 +28,7 @@ export function pickSocialProofLayout(input: LayoutPickerInput): SocialProofLayo
   marketSophisticationLevel,
   copyIntent,
   problemType,
+  assetAvailability,        // Sprint 7: Asset-aware layout selection
 } = input;
   // High-Priority Rules (Return immediately if matched)
   
@@ -276,6 +277,17 @@ export function pickSocialProofLayout(input: LayoutPickerInput): SocialProofLayo
   } else if (pricingModel === "tiered") {
     scores.StripWithReviews += 2;
     scores.LogoWall += 1;
+  }
+
+  // Sprint 7: Asset-Aware Scoring Adjustments
+  if (assetAvailability && !assetAvailability.customerLogos) {
+    // Penalize logo-based layouts without customer logos
+    scores.LogoWall -= 100;
+    scores.MediaMentions -= 100;
+
+    // Boost stat-based proof as fallback
+    scores.StackedStats += 50;
+    scores.UserCountBar += 30;
   }
 
   // Find the highest scoring layout

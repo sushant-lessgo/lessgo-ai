@@ -20,7 +20,7 @@ export function pickIntegrationLayout(input: LayoutPickerInput): IntegrationLayo
   toneProfile,
   startupStage,             // ✅ FIXED
   marketCategory,
-  landingPageGoals,         // ✅ FIXED  
+  landingPageGoals,         // ✅ FIXED
   targetAudience,           // ✅ FIXED
   pricingModel,
   pricingModifier,
@@ -28,6 +28,7 @@ export function pickIntegrationLayout(input: LayoutPickerInput): IntegrationLayo
   marketSophisticationLevel,
   copyIntent,
   problemType,
+  assetAvailability,        // Sprint 7: Asset-aware layout selection
 } = input;
 
   // High-Priority Rules (Return immediately if matched)
@@ -278,6 +279,18 @@ export function pickIntegrationLayout(input: LayoutPickerInput): IntegrationLayo
   } else if (pricingModel === "tiered") {
     scores.UseCaseTiles += 2;
     scores.CategoryAccordion += 1;
+  }
+
+  // Sprint 7: Asset-Aware Scoring Adjustments
+  if (assetAvailability && !assetAvailability.integrationLogos) {
+    // Penalize logo-based layouts without integration logos
+    scores.LogoGrid -= 100;
+    scores.LogoWithQuoteUse -= 100;
+    scores.BadgeCarousel -= 80;
+
+    // Boost text-based integration displays as fallback
+    scores.CategoryAccordion += 50;
+    scores.TabbyIntegrationCards += 30;
   }
 
   // Find the highest scoring layout

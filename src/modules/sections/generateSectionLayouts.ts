@@ -62,18 +62,21 @@ export function generateSectionLayouts(sectionIds: string[], editStore?: EditSto
     marketSophisticationLevel: onboarding.hiddenInferredFields.marketSophisticationLevel as LayoutPickerInput["marketSophisticationLevel"],
     copyIntent: onboarding.hiddenInferredFields.copyIntent as LayoutPickerInput["copyIntent"],
     problemType: onboarding.hiddenInferredFields.problemType as LayoutPickerInput["problemType"],
-    
+
     // ===== CORE FIELDS FROM VALIDATED FIELDS (✅ FIXED: Use canonical field names) =====
     marketCategory: onboarding.validatedFields.marketCategory as LayoutPickerInput["marketCategory"],
     startupStage: getStageGroupForStage(onboarding.validatedFields.startupStage ?? '') ?? 'idea',
     landingPageGoals: onboarding.validatedFields.landingPageGoals as LayoutPickerInput["landingPageGoals"], // ✅ FIXED: was 'landingGoal'
    targetAudience: getAudienceGroupForAudience(onboarding.validatedFields.targetAudience ?? '') ?? 'founders',
     pricingModel: onboarding.validatedFields.pricingModel as LayoutPickerInput["pricingModel"],
-    
+
     // ===== OPTIONAL PRICING FIELDS =====
     // These might not be in the current onboarding store, but interface supports them
     pricingModifier: undefined, // Can be added when this data becomes available
     pricingCommitmentOption: undefined, // Can be added when this data becomes available
+
+    // ===== ASSET AVAILABILITY =====
+    assetAvailability: onboarding.assetAvailability ?? undefined, // Sprint 7: Asset-aware layout selection
   };
 
   logger.debug('🎯 Layout picker input prepared:', input);

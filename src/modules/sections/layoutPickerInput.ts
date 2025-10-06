@@ -12,6 +12,7 @@ import type {
   CopyIntent,
   ProblemType,
 } from "@/modules/inference/taxonomy";
+import type { AssetAvailability } from "@/types/core/index";
 
 /**
  * ✅ FIXED: Layout picker input interface using canonical field names
@@ -24,15 +25,18 @@ export interface LayoutPickerInput {
   marketSophisticationLevel: MarketSophisticationLevel;
   copyIntent: CopyIntent;
   problemType: ProblemType;
-  
+
   // ===== CORE FIELDS FROM INPUT VARIABLES =====
   marketCategory: MarketCategory;
   startupStage: StartupStageGroup;                    // ✅ FIXED: was 'startupStageGroup'
-  landingPageGoals: LandingGoalType;             // ✅ FIXED: was 'landingGoalType'  
+  landingPageGoals: LandingGoalType;             // ✅ FIXED: was 'landingGoalType'
   targetAudience: TargetAudienceGroup;               // ✅ FIXED: was 'targetAudienceGroup'
   pricingModel: PricingModel;
-  
+
   // ===== OPTIONAL PRICING FIELDS =====
   pricingModifier?: PricingModifier;
   pricingCommitmentOption?: PricingCommitmentOption;
+
+  // ===== ASSET AVAILABILITY =====
+  assetAvailability?: AssetAvailability;              // Sprint 7: Asset-aware layout selection
 }

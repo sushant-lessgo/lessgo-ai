@@ -74,7 +74,13 @@
       "Bash(node:*)",
       "Bash(git show:*)",
       "Bash(grep:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(xargs:*)",
+      "Bash(for file in pickProblemLayout.ts pickBeforeAfter.ts pickFeature.ts pickResultsLayout.ts pickObjectionLayout.ts)",
+      "Bash(do echo \"=== $file ===\")",
+      "Bash(done)",
+      "Bash(for file in pickBeforeAfter.ts pickFeature.ts pickResultsLayout.ts pickObjectionLayout.ts)",
+      "Bash(do grep -n \"Find the highest scoring layout\" src/modules/sections/$file)"
     ],
     "deny": [],
     "ask": [],

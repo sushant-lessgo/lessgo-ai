@@ -54,6 +54,7 @@ export type {
   InputVariables,
   HiddenInferredFields,
   FeatureItem,
+  AssetAvailability,
   LandingPageContent,
   SectionData,
   EditableElement,

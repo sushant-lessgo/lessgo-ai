@@ -43,6 +43,19 @@ export interface FeatureItem {
 }
 
 /**
+ * Asset Availability - Tracks which assets user has ready for layout selection
+ * Used to intelligently select layouts that match available assets
+ */
+export interface AssetAvailability {
+  productImages: boolean;        // Product screenshots, mockups, or product photos
+  customerLogos: boolean;         // Company/customer logos for social proof
+  testimonials: boolean;          // Customer testimonials, reviews, or quotes
+  founderPhoto: boolean;          // Founder or team photos
+  integrationLogos: boolean;      // Integration partner logos
+  demoVideo: boolean;             // Product demo or walkthrough video
+}
+
+/**
  * ===== CONTENT HIERARCHY =====
  */
 

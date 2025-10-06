@@ -15,6 +15,7 @@ import { usePageGeneration } from '@/hooks/usePageGeneration';
 import GenerationAnimation from './GenerationAnimation';
 import { CANONICAL_FIELD_NAMES, FIELD_DISPLAY_NAMES, type CanonicalFieldName } from "@/types/core/index";
 import LoadingState from './LoadingState';
+import AssetAvailabilityModal from './AssetAvailabilityModal';
 
 import { logger } from '@/lib/logger';
 // ===== TYPE DEFINITIONS =====
@@ -45,6 +46,7 @@ export default function RightPanel() {
     setFeaturesFromAI,
     setHiddenInferredFields, // ✅ ADD: Store hidden inferred fields
     isFieldForceManual, // ✅ ADD: Check if field should be forced manual
+    setAssetAvailability, // Sprint 7: Set asset availability
   } = useOnboardingStore();
 
   const params = useParams();
@@ -56,19 +58,37 @@ export default function RightPanel() {
 
   const isStep1 = !oneLiner;
   const isFinalStep = stepIndex >= CANONICAL_FIELD_NAMES.length;
-  
+
   // ✅ FIXED: Use canonical field names consistently
   const currentCanonicalField: CanonicalFieldName | undefined = CANONICAL_FIELD_NAMES[stepIndex];
   const currentDisplayField = currentCanonicalField ? FIELD_DISPLAY_NAMES[currentCanonicalField] : undefined;
   const currentFieldData = currentCanonicalField ? confirmedFields[currentCanonicalField] : undefined;
-  
+
   // ✅ BUG FIX: aiGuess should always be the original AI prediction, not the current validated value
   const aiGuess = currentFieldData?.value || "";
   const confidence = currentFieldData?.confidence || 0;
   const alternatives = currentFieldData?.alternatives || [];
-  
+
   const [showFeatureEditor, setShowFeatureEditor] = useState(false);
   const [isProcessingInput, setIsProcessingInput] = useState(false);
+
+  // Sprint 7: Asset availability modal state
+  const [showAssetModal, setShowAssetModal] = useState(false);
+
+  // Sprint 7: Handle asset modal completion - directly trigger generation
+  const handleAssetModalComplete = (availability: any) => {
+    logger.debug('Asset availability confirmed:', availability);
+    setAssetAvailability(availability);
+    setShowAssetModal(false);
+
+    // Directly trigger page generation instead of going back to features
+    if (generatePage && typeof generatePage === 'function') {
+      logger.debug('🎨 [ASSET-MODAL] Starting page generation...');
+      generatePage();
+    } else {
+      logger.error('🎨 [ASSET-MODAL] generatePage is not available!', generatePage);
+    }
+  };
 
   // ✅ UPDATED: Auto-advance logic for high confidence fields (with force manual check)
   useEffect(() => {
@@ -173,10 +193,12 @@ export default function RightPanel() {
             logger.warn('⚠️ No hiddenInferredFields received from API');
           }
 
-          setTimeout(() => setShowFeatureEditor(true), 2000);
+          // Sprint 7: Show asset modal instead of going directly to feature editor
+          setTimeout(() => setShowAssetModal(true), 2000);
         } catch (error) {
           logger.error('Error fetching features:', error);
-          setTimeout(() => setShowFeatureEditor(true), 500);
+          // Even on error, show asset modal
+          setTimeout(() => setShowAssetModal(true), 500);
         }
       };
 
@@ -265,51 +287,29 @@ export default function RightPanel() {
 
             <section className="w-full space-y-6">
               {isFinalStep ? (
-                showFeatureEditor ? (
+                showFeatureEditor && !isGenerating ? (
                   <>
                     <FeatureEditor
                       initialFeatures={featuresFromAI}
                       onChange={setFeaturesFromAI}
                     />
-                    
+
                     <div className="flex justify-end mt-8">
                       <Button
                         onClick={() => {
-                          logger.debug('🔴 [GENERATE-BUTTON] Button clicked!', {
-                            generatePage: typeof generatePage,
-                            isGenerating,
-                            tokenId,
-                            featuresCount: featuresFromAI.length,
-                            validatedFieldsCount: Object.keys(validatedFields).length
-                          });
-                          if (generatePage && typeof generatePage === 'function') {
-                            logger.debug('🔴 [GENERATE-BUTTON] Calling generatePage...');
-                            generatePage();
-                          } else {
-                            logger.error('🔴 [GENERATE-BUTTON] generatePage is not a function!', generatePage);
-                          }
+                          // Sprint 7: Show asset modal instead of directly generating
+                          setShowAssetModal(true);
                         }}
                         disabled={isGenerating}
-                        className={`
-                          text-base font-semibold py-3 px-6 rounded-lg shadow transition-all duration-200
-                          ${isGenerating 
-                            ? 'bg-gray-400 text-gray-700 cursor-not-allowed' 
-                            : 'bg-brand-accentPrimary text-white hover:bg-orange-500 hover:shadow-lg transform hover:scale-105'
-                          }
-                        `}
+                        className="text-base font-semibold py-3 px-6 rounded-lg shadow transition-all duration-200 bg-brand-accentPrimary text-white hover:bg-orange-500 hover:shadow-lg transform hover:scale-105"
                       >
-                        {isGenerating ? (
-                          <div className="flex items-center space-x-2">
-                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                            <span>Generating...</span>
-                          </div>
-                        ) : (
-                          'Generate My Page'
-                        )}
+                        Continue
                       </Button>
                     </div>
-
-                    {/* Generation Animation */}
+                  </>
+                ) : isGenerating || generationState.isNavigating ? (
+                  <>
+                    {/* Generation Animation - Show when generating */}
                     <GenerationAnimation
                       currentStep={generationState.currentStep}
                       currentLabel={generationState.currentLabel}
@@ -421,6 +421,13 @@ export default function RightPanel() {
             </section>
           </div>
         )}
+
+        {/* Sprint 7: Asset Availability Modal */}
+        <AssetAvailabilityModal
+          isOpen={showAssetModal}
+          startupStage={validatedFields.startupStage}
+          onComplete={handleAssetModalComplete}
+        />
       </div>
     </div>
   );

@@ -26,6 +26,7 @@ export function pickFeatureLayout(input: LayoutPickerInput): FeatureLayout {
   marketSophisticationLevel,
   copyIntent,
   problemType,
+  assetAvailability,        // Sprint 7: Asset-aware layout selection
 } = input;
 
   // High-Priority Rules (Return immediately if matched)
@@ -261,6 +262,20 @@ export function pickFeatureLayout(input: LayoutPickerInput): FeatureLayout {
     scores.SplitAlternating += 1;
   } else if (pricingModel === "usage-based") {
     scores.MetricTiles += 3;
+  }
+
+  // Sprint 7: Asset-Aware Scoring Adjustments
+  if (assetAvailability) {
+    if (!assetAvailability.productImages) {
+      scores.SplitAlternating -= 50;
+      scores.Carousel -= 50;
+      // Boost icon-based layouts
+      scores.IconGrid += 30;
+      scores.MiniCards += 20;
+    }
+    if (!assetAvailability.testimonials) {
+      scores.FeatureTestimonial -= 100;
+    }
   }
 
   // Find the highest scoring layout

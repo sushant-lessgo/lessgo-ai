@@ -1,9 +1,10 @@
 import { create } from "zustand";
-import type { 
+import type {
   InputVariables,
   HiddenInferredFields,
   FeatureItem,
-  CanonicalFieldName
+  CanonicalFieldName,
+  AssetAvailability
 } from "@/types/core/index";
 
 // ✅ Import as values (not types) for runtime usage
@@ -30,6 +31,7 @@ type OnboardingStore = {
   featuresFromAI: FeatureItem[]; // ✅ Already properly typed
   forceManualFields: CanonicalFieldName[]; // ✅ Track fields that should bypass auto-confirmation
   pendingRevalidationFields: CanonicalFieldName[]; // ✅ Track fields needing revalidation due to dependencies
+  assetAvailability: AssetAvailability | null; // Sprint 7: Asset availability for layout selection
 
   setOneLiner: (input: string) => void;
   setConfirmedFields: (fields: Partial<Record<CanonicalFieldName, ConfirmedFieldData>>) => void; // ✅ Type-safe
@@ -44,6 +46,7 @@ type OnboardingStore = {
   addPendingRevalidationField: (canonicalField: CanonicalFieldName) => void; // ✅ Add field to pending revalidation
   removePendingRevalidationField: (canonicalField: CanonicalFieldName) => void; // ✅ Remove field from pending revalidation
   isFieldPendingRevalidation: (canonicalField: CanonicalFieldName) => boolean; // ✅ Check if field needs revalidation
+  setAssetAvailability: (availability: AssetAvailability) => void; // Sprint 7: Set asset availability
   reset: () => void;
 };
 
@@ -67,6 +70,7 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
   featuresFromAI: [],
   forceManualFields: [], // ✅ Initialize empty array for force manual fields
   pendingRevalidationFields: [], // ✅ Initialize empty array for pending revalidation fields
+  assetAvailability: null, // Sprint 7: Initialize as null
 
   setOneLiner: (input) => set({ oneLiner: input }),
   
@@ -209,6 +213,12 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
   setStepIndex: (index) => set({ stepIndex: index }),
   setFeaturesFromAI: (features) => set({ featuresFromAI: features }),
 
+  // Sprint 7: Set asset availability
+  setAssetAvailability: (availability) => {
+    logger.debug('Setting asset availability:', availability);
+    set({ assetAvailability: availability });
+  },
+
   reset: () =>
     set({
       oneLiner: "",
@@ -219,6 +229,7 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
       featuresFromAI: [],
       forceManualFields: [], // ✅ Reset force manual fields
       pendingRevalidationFields: [], // ✅ Reset pending revalidation fields
+      assetAvailability: null, // Sprint 7: Reset asset availability
     }),
 }));
 

@@ -28,6 +28,7 @@ export function pickObjectionLayout(input: LayoutPickerInput): ObjectionLayout {
   marketSophisticationLevel,
   copyIntent,
   problemType,
+  assetAvailability,        // Sprint 7: Asset-aware layout selection
 } = input;
 
   // High-Priority Rules (Return immediately if matched)
@@ -287,6 +288,12 @@ export function pickObjectionLayout(input: LayoutPickerInput): ObjectionLayout {
   } else if (pricingModel === "tiered") {
     scores.ObjectionAccordion += 2;
     scores.MythVsRealityGrid += 1;
+  }
+
+  // Sprint 7: Asset-Aware Scoring Adjustments
+  if (assetAvailability && !assetAvailability.testimonials) {
+    // Penalize testimonial-based objection handling
+    scores.QuoteBackedAnswers -= 80;
   }
 
   // Find the highest scoring layout
