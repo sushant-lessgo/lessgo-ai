@@ -2114,7 +2114,7 @@ function getEnhancedSingleElementGuidance(element: string, sectionType: string, 
 
   // Icons and visuals
   if (element.includes('icon')) {
-    return "Icon identifier or description";
+    return "Semantic category name that best represents the concept. Choose from: analytics, insights, data, metrics, dashboard, reporting, speed, performance, fast, instant, quick, rocket, automation, ai, intelligence, smart, robot, magic, security, protection, safe, privacy, shield, lock, integration, connection, sync, link, api, network, communication, message, chat, notification, bell, alert, collaboration, team, users, people, group, community, growth, success, achievement, winner, trophy, star, results, efficiency, productivity, optimize, streamline, workflow, process, quality, premium, excellence, professional, diamond, innovation, creative, idea, lightbulb, breakthrough, money, savings, profit, pricing, finance, time, schedule, calendar, deadline, reminder, support, help, assistance, service, tools, utility, feature, design, custom, visual, theme, target, goal, objective, focus, verified, check, warning, error, progress, location, global, document, file, image, video. Analyze the associated title/description and select the MOST semantically relevant category. Use specific over generic (e.g., 'analytics' for data/reporting features, 'speed' for performance features, 'security' for safety features, 'automation' for AI/smart features). Examples: 'Real-Time Analytics Dashboard' → 'analytics', 'Lightning Fast Performance' → 'speed', 'Bank-Grade Security' → 'security', 'Smart Automation' → 'automation', 'Team Collaboration' → 'collaboration'.";
   }
 
   // Labels

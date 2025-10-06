@@ -1,17 +1,18 @@
 // components/layout/IconGrid.tsx - ENHANCED with Dynamic Text Colors
-// Production-ready feature grid with icons using abstraction system with background-aware text colors
+// Production-ready feature grid with icons using unified icon system with background-aware text colors
 
 import React, { useEffect } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
-  EditableAdaptiveText 
+import {
+  EditableAdaptiveHeadline,
+  EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
 import { getRandomIconFromCategory } from '@/utils/iconMapping';
+import { getIcon } from '@/lib/getIcon';
 
 // Content interface for type safety
 interface IconGridContent {
@@ -71,113 +72,31 @@ const CONTENT_SCHEMA = {
   icon_9: { type: 'string' as const, default: '🚀' }
 };
 
-// Helper function to check if a value is a valid icon (emoji or simple icon character)
-const isValidIcon = (value: string): boolean => {
-  // Check if it's an emoji (basic check) or common icon characters
-  const iconPattern = /^[\u{1F300}-\u{1F9FF}]|^[🤝📊⚡🔒🔗💬⭐🎯✨🚀💡🔥💎🏆🎨🔧⚙️🌟💪🎪⚽🏀🎾🎳🎲🎭🎪🎨🎬🎤🎧🎼🎹🥁🎺🎸🎻💰🎉🔔✅]|^[⭐✅✨🔔🔥🚀💡💎🌟⚙️🔧]$/u;
-  return iconPattern.test(value) || value.length <= 2;
-};
+// NOTE: Icon validation and contextual selection now handled by unified icon system
+// See: src/lib/getIcon.ts and src/lib/iconCategoryMap.ts
 
-// Auto-select emoji icon based on feature title - Enhanced with more categories
-const getContextualIcon = (title: string): string => {
-  const lower = title.toLowerCase();
-
-  // Collaboration & Team
-  if (lower.includes('collaboration') || lower.includes('team') || lower.includes('together') || lower.includes('shared')) return '🤝';
-
-  // Analytics & Data
-  if (lower.includes('analytics') || lower.includes('reporting') || lower.includes('data') || lower.includes('insights') || lower.includes('metrics')) return '📊';
-
-  // Automation & AI
-  if (lower.includes('automation') || lower.includes('smart') || lower.includes('ai') || lower.includes('intelligent') || lower.includes('auto')) return '⚡';
-
-  // Security & Protection
-  if (lower.includes('security') || lower.includes('secure') || lower.includes('protection') || lower.includes('safe') || lower.includes('encrypt')) return '🔒';
-
-  // Integration & Connectivity
-  if (lower.includes('integration') || lower.includes('connect') || lower.includes('api') || lower.includes('sync') || lower.includes('link')) return '🔗';
-
-  // Support & Help
-  if (lower.includes('support') || lower.includes('help') || lower.includes('assistance') || lower.includes('service') || lower.includes('care')) return '💬';
-
-  // Performance & Speed
-  if (lower.includes('fast') || lower.includes('speed') || lower.includes('performance') || lower.includes('boost') || lower.includes('quick')) return '🚀';
-
-  // Innovation & Ideas
-  if (lower.includes('innovation') || lower.includes('creative') || lower.includes('idea') || lower.includes('solution') || lower.includes('breakthrough')) return '💡';
-
-  // Success & Achievement
-  if (lower.includes('success') || lower.includes('achievement') || lower.includes('winner') || lower.includes('award') || lower.includes('best')) return '🏆';
-
-  // Growth & Scale
-  if (lower.includes('growth') || lower.includes('scale') || lower.includes('expand') || lower.includes('increase') || lower.includes('revenue')) return '📈';
-
-  // Quality & Excellence
-  if (lower.includes('quality') || lower.includes('premium') || lower.includes('excellence') || lower.includes('professional') || lower.includes('enterprise')) return '💎';
-
-  // Efficiency & Productivity
-  if (lower.includes('efficiency') || lower.includes('productivity') || lower.includes('optimize') || lower.includes('streamline') || lower.includes('workflow')) return '⚙️';
-
-  // Communication & Messaging
-  if (lower.includes('communication') || lower.includes('message') || lower.includes('chat') || lower.includes('notify') || lower.includes('alert')) return '💬';
-
-  // Money & Finance
-  if (lower.includes('money') || lower.includes('cost') || lower.includes('save') || lower.includes('profit') || lower.includes('pricing')) return '💰';
-
-  // Time & Schedule
-  if (lower.includes('time') || lower.includes('schedule') || lower.includes('calendar') || lower.includes('deadline') || lower.includes('reminder')) return '⏰';
-
-  // Design & Customization
-  if (lower.includes('design') || lower.includes('custom') || lower.includes('visual') || lower.includes('interface') || lower.includes('theme')) return '🎨';
-
-  // Tools & Utilities
-  if (lower.includes('tool') || lower.includes('utility') || lower.includes('feature') || lower.includes('function') || lower.includes('capability')) return '🔧';
-
-  return '⭐'; // Default fallback
-};
-
-// Legacy function for backwards compatibility
-const getDefaultIcon = (title: string): string => {
-  return getContextualIcon(title);
-};
-
-// Parse feature data from pipe-separated strings with icon support
+// Parse feature data from pipe-separated strings with unified icon system
 const parseFeatureData = (titles: string, descriptions: string, blockContent: IconGridContent): FeatureItem[] => {
   const titleList = parsePipeData(titles);
   const descriptionList = parsePipeData(descriptions);
 
-  // Get saved icons or use smart defaults
-  const icons = [
-    blockContent.icon_1,
-    blockContent.icon_2,
-    blockContent.icon_3,
-    blockContent.icon_4,
-    blockContent.icon_5,
-    blockContent.icon_6,
-    blockContent.icon_7,
-    blockContent.icon_8,
-    blockContent.icon_9
-  ];
+  return titleList.map((title, index) => {
+    // Get AI-provided category from blockContent
+    const iconCategory = blockContent[`icon_${index + 1}` as keyof IconGridContent] as string | undefined;
+    const description = descriptionList[index] || 'Feature description not provided.';
 
-  return titleList.map((title, index) => ({
-    id: `feature-${index}`,
-    index,
-    title,
-    description: descriptionList[index] || 'Feature description not provided.',
-    iconType: '', // No longer needed
-    icon: getValidatedIcon(icons[index], title) // Use validated icon or contextual fallback
-  }));
-};
+    // Use unified icon system with intelligent fallback
+    const finalIcon = getIcon(iconCategory, { title, description });
 
-// Helper function to get validated icon or contextual fallback
-const getValidatedIcon = (iconValue: string | undefined, title: string): string => {
-  // If we have an icon value and it's valid, use it
-  if (iconValue && isValidIcon(iconValue)) {
-    return iconValue;
-  }
-
-  // Otherwise, get contextual icon based on title
-  return getContextualIcon(title);
+    return {
+      id: `feature-${index}`,
+      index,
+      title,
+      description,
+      iconType: '',
+      icon: finalIcon
+    };
+  });
 };
 
 // Helper function to add a new feature

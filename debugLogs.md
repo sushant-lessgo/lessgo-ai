@@ -1,982 +1,183 @@
-main-app.js:1836 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
-logger.ts:84 [2025-10-06T10:00:38.351Z] DEBUG: 🔧 Enhanced AutoSaveDraft debug utilities available at window.__autoSaveDraftDebug
-logger.ts:84 [2025-10-06T10:00:38.485Z] DEBUG: RightPanel Debug: {
-  "currentCanonicalField": "marketCategory",
-  "currentDisplayField": "Market Category",
-  "hasFieldData": false,
-  "confirmedFieldsKeys": [],
-  "validatedFieldsKeys": []
-}
-logger.ts:84 [2025-10-06T10:00:38.485Z] DEBUG: RightPanel Debug: {
-  "currentCanonicalField": "marketCategory",
-  "currentDisplayField": "Market Category",
-  "hasFieldData": false,
-  "confirmedFieldsKeys": [],
-  "validatedFieldsKeys": []
-}
-logger.ts:84 [2025-10-06T10:00:39.425Z] DEBUG: Setting confirmed fields: {
-  "keyProblem": {
-    "value": "Individuals find it challenging to maintain consistent habits and need a dynamic system that adapts goals based on their progress and behavior patterns.",
-    "confidence": 1,
-    "alternatives": []
-  },
-  "pricingModel": {
-    "value": "Freemium (limited features)",
-    "confidence": 0.8297536452016154,
-    "alternatives": [
-      "Paid Trial ($1 or more)",
-      "Free Forever",
-      "Free Trial"
-    ]
-  },
-  "startupStage": {
-    "value": "MVP in development",
-    "confidence": 0.8400281543218835,
-    "alternatives": [
-      "MVP launched, 0 users",
-      "Pre-MVP (wireframes or prototype only)",
-      "Consistent MRR growth"
-    ]
-  },
-  "marketCategory": {
-    "value": "Personal Productivity Tools",
-    "confidence": 1,
-    "alternatives": [
-      "Business Productivity Tools",
-      "Work & Productivity Tools",
-      "AI Tools"
-    ]
-  },
-  "targetAudience": {
-    "value": "Fitness Enthusiasts",
-    "confidence": 0.5922182849807771,
-    "alternatives": [
-      "Growth Hackers",
-      "Hobbyists",
-      "Young Professionals"
-    ]
-  },
-  "landingPageGoals": {
-    "value": "Start Free Trial",
-    "confidence": 0.3351910527862915,
-    "alternatives": [
-      "Subscribe to a Plan",
-      "Get Early Access",
-      "Book a Strategy Call"
-    ]
-  },
-  "marketSubcategory": {
-    "value": "Habit & Routine Tracking",
-    "confidence": 0.8082029180713092,
-    "alternatives": [
-      "Individual Task & Goal Management",
-      "Personal Time Tracking",
-      "Personal Automation Tools"
-    ]
-  }
-}
-logger.ts:84 [2025-10-06T10:00:39.426Z] DEBUG: ✅ Store populated from draft: {
-  "inputText": "HabitSync – A cross-device habit tracker that uses AI to adjust goals based on your actual progress and patterns.",
-  "stepIndex": 999,
-  "confirmedFieldsCount": 7,
-  "validatedFieldsCount": 7,
-  "featuresCount": 5
-}
-logger.ts:84 [2025-10-06T10:00:39.428Z] DEBUG: RightPanel Debug: {
-  "hasFieldData": false,
-  "confirmedFieldsKeys": [
-    "keyProblem",
-    "pricingModel",
-    "startupStage",
-    "marketCategory",
-    "targetAudience",
-    "landingPageGoals",
-    "marketSubcategory"
-  ],
-  "validatedFieldsKeys": [
-    "keyProblem",
-    "pricingModel",
-    "startupStage",
-    "marketCategory",
-    "targetAudience",
-    "landingPageGoals",
-    "marketSubcategory"
-  ]
-}
-logger.ts:84 [2025-10-06T10:00:39.428Z] DEBUG: RightPanel Debug: {
-  "hasFieldData": false,
-  "confirmedFieldsKeys": [
-    "keyProblem",
-    "pricingModel",
-    "startupStage",
-    "marketCategory",
-    "targetAudience",
-    "landingPageGoals",
-    "marketSubcategory"
-  ],
-  "validatedFieldsKeys": [
-    "keyProblem",
-    "pricingModel",
-    "startupStage",
-    "marketCategory",
-    "targetAudience",
-    "landingPageGoals",
-    "marketSubcategory"
-  ]
-}
-logger.ts:84 [2025-10-06T10:00:39.435Z] DEBUG: Generation already completed, redirecting to generated page
-logger.ts:84 [2025-10-06T10:00:39.630Z] DEBUG: Setting confirmed fields: {
-  "keyProblem": {
-    "value": "Individuals find it challenging to maintain consistent habits and need a dynamic system that adapts goals based on their progress and behavior patterns.",
-    "confidence": 1,
-    "alternatives": []
-  },
-  "pricingModel": {
-    "value": "Freemium (limited features)",
-    "confidence": 0.8297536452016154,
-    "alternatives": [
-      "Paid Trial ($1 or more)",
-      "Free Forever",
-      "Free Trial"
-    ]
-  },
-  "startupStage": {
-    "value": "MVP in development",
-    "confidence": 0.8400281543218835,
-    "alternatives": [
-      "MVP launched, 0 users",
-      "Pre-MVP (wireframes or prototype only)",
-      "Consistent MRR growth"
-    ]
-  },
-  "marketCategory": {
-    "value": "Personal Productivity Tools",
-    "confidence": 1,
-    "alternatives": [
-      "Business Productivity Tools",
-      "Work & Productivity Tools",
-      "AI Tools"
-    ]
-  },
-  "targetAudience": {
-    "value": "Fitness Enthusiasts",
-    "confidence": 0.5922182849807771,
-    "alternatives": [
-      "Growth Hackers",
-      "Hobbyists",
-      "Young Professionals"
-    ]
-  },
-  "landingPageGoals": {
-    "value": "Start Free Trial",
-    "confidence": 0.3351910527862915,
-    "alternatives": [
-      "Subscribe to a Plan",
-      "Get Early Access",
-      "Book a Strategy Call"
-    ]
-  },
-  "marketSubcategory": {
-    "value": "Habit & Routine Tracking",
-    "confidence": 0.8082029180713092,
-    "alternatives": [
-      "Individual Task & Goal Management",
-      "Personal Time Tracking",
-      "Personal Automation Tools"
-    ]
-  }
-}
-logger.ts:84 [2025-10-06T10:00:39.630Z] DEBUG: ✅ Store populated from draft: {
-  "inputText": "HabitSync – A cross-device habit tracker that uses AI to adjust goals based on your actual progress and patterns.",
-  "stepIndex": 999,
-  "confirmedFieldsCount": 7,
-  "validatedFieldsCount": 7,
-  "featuresCount": 5
-}
-logger.ts:84 [2025-10-06T10:00:39.631Z] DEBUG: RightPanel Debug: {
-  "hasFieldData": false,
-  "confirmedFieldsKeys": [
-    "keyProblem",
-    "pricingModel",
-    "startupStage",
-    "marketCategory",
-    "targetAudience",
-    "landingPageGoals",
-    "marketSubcategory"
-  ],
-  "validatedFieldsKeys": [
-    "keyProblem",
-    "pricingModel",
-    "startupStage",
-    "marketCategory",
-    "targetAudience",
-    "landingPageGoals",
-    "marketSubcategory"
-  ]
-}
-logger.ts:84 [2025-10-06T10:00:39.632Z] DEBUG: RightPanel Debug: {
-  "hasFieldData": false,
-  "confirmedFieldsKeys": [
-    "keyProblem",
-    "pricingModel",
-    "startupStage",
-    "marketCategory",
-    "targetAudience",
-    "landingPageGoals",
-    "marketSubcategory"
-  ],
-  "validatedFieldsKeys": [
-    "keyProblem",
-    "pricingModel",
-    "startupStage",
-    "marketCategory",
-    "targetAudience",
-    "landingPageGoals",
-    "marketSubcategory"
-  ]
-}
-logger.ts:84 [2025-10-06T10:00:40.512Z] DEBUG: 🔧 useEditStore debug utilities available at window.__useEditStoreDebug
-logger.ts:84 [2025-10-06T10:00:40.514Z] DEBUG: 🔧 EditProvider debug utilities available at window.__editProviderDebug
-logger.ts:84 [2025-10-06T10:00:40.869Z] DEBUG: 🔄 Switching token: none → GrJs7aXqIjyI
-logger.ts:84 [2025-10-06T10:00:41.879Z] DEBUG: 📥 [EDIT-DEBUG] EditProvider: Loading project data for token GrJs7aXqIjyI
- [2025-10-06T10:00:41.985Z] DEBUG: 🔍 Generate page checking store state: {
-  "sections": 8,
-  "content": 8,
-  "hasElements": true
-}
- [2025-10-06T10:00:41.986Z] DEBUG: 🔍 Generate page checking store state: {
-  "sections": 8,
-  "content": 8,
-  "hasElements": true
-}
- [2025-10-06T10:00:41.989Z] DEBUG: 🎨 [VARIETY-DEBUG] Background selection improvements: {
-  "totalVariations": 37,
-  "topVariationsCount": 15,
-  "selectedVariation": "soft-gradient-blur::sunset-ember::soft-blur-sunset-ember-solid-warm",
-  "scoreRange": {
-    "highest": "0.340",
-    "lowest": "-0.234",
-    "top15Range": "0.340 - 0.067"
-  }
-}
- [2025-10-06T10:00:41.990Z] DEBUG: 🔍 Funnel result debug: {
-  "inputData": {
-    "marketCategoryId": "Personal Productivity Tools",
-    "targetAudienceId": "Fitness Enthusiasts",
-    "landingPageGoalsId": "Start Free Trial",
-    "startupStageId": "MVP in development",
-    "pricingModelId": "Freemium (limited features)",
-    "toneProfileId": "friendly-helpful"
-  },
-  "primaryVariationKey": "soft-gradient-blur::sunset-ember::soft-blur-sunset-ember-solid-warm",
-  "topVariations": [
-    "soft-gradient-blur::teal-energy::soft-blur-teal-energy-radial-center-blur",
-    "soft-gradient-blur::sunset-ember::soft-blur-sunset-ember-radial-top-blur",
-    "soft-gradient-blur::mint-frost::soft-blur-mint-frost-gradient-tr",
-    "soft-gradient-blur::teal-energy::soft-blur-teal-energy-overlay-light",
-    "soft-gradient-blur::mint-frost::soft-blur-mint-frost-solid-ice",
-    "soft-gradient-blur::mint-frost::soft-blur-mint-frost-overlay-light",
-    "soft-gradient-blur::teal-energy::soft-blur-teal-energy-radial-top-blur",
-    "soft-gradient-blur::trust-blue-white::soft-blur-trust-blue-white-solid-white",
-    "soft-gradient-blur::mint-frost::soft-blur-mint-frost-solid-teal",
-    "soft-gradient-blur::sunset-ember::soft-blur-sunset-ember-solid-warm",
-    "soft-gradient-blur::modern-blue::soft-blur-modern-blue-radial-top",
-    "soft-gradient-blur::teal-energy::soft-blur-teal-energy-solid-teal",
-    "soft-gradient-blur::trust-blue-white::soft-blur-trust-blue-white-radial-bottom-blur",
-    "soft-gradient-blur::mint-frost::soft-blur-mint-frost-radial-top-blur",
-    "soft-gradient-blur::modern-blue::soft-blur-modern-blue-solid-sky"
-  ]
-}
- [2025-10-06T10:00:41.990Z] DEBUG: 🔍 Looking for variation: {
-  "archetypeId": "soft-gradient-blur",
-  "themeId": "sunset-ember"
-}
- [2025-10-06T10:00:41.990Z] DEBUG: 🔍 Found matching variations: [
-  {
-    "id": "soft-blur-sunset-ember-gradient-tr",
-    "class": "bg-gradient-to-tr from-orange-400 via-pink-400 to-purple-400"
-  },
-  {
-    "id": "soft-blur-sunset-ember-gradient-br",
-    "class": "bg-gradient-to-br from-orange-300 via-pink-300 to-white"
-  },
-  {
-    "id": "soft-blur-sunset-ember-radial-center-blur",
-    "class": "bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-orange-300 via-pink-300 to-transparent blur-[160px]"
-  },
-  {
-    "id": "soft-blur-sunset-ember-radial-top-blur",
-    "class": "bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-pink-400 via-orange-300 to-transparent blur-[120px]"
-  },
-  {
-    "id": "soft-blur-sunset-ember-diagonal-soft",
-    "class": "bg-gradient-to-bl from-orange-200 via-pink-100 to-white"
-  },
-  {
-    "id": "soft-blur-sunset-ember-overlay-light",
-    "class": "bg-white bg-opacity-60 backdrop-blur-md blur-[80px]"
-  },
-  {
-    "id": "soft-blur-sunset-ember-solid-warm",
-    "class": "bg-orange-50"
-  },
-  {
-    "id": "soft-blur-sunset-ember-solid-pink",
-    "class": "bg-pink-50"
-  }
-]
- [2025-10-06T10:00:41.991Z] DEBUG: ✅ Selected primary variation: {
-  "variationId": "soft-blur-sunset-ember-gradient-tr",
-  "tailwindClass": "bg-gradient-to-tr from-orange-400 via-pink-400 to-purple-400",
-  "baseColor": "orange"
-}
- [2025-10-06T10:00:41.991Z] DEBUG: 🎨 Using smart color harmony accent selection system
- [2025-10-06T10:00:41.992Z] DEBUG: ✅ Smart accent selection successful: {
-  "accentColor": "emerald",
-  "accentCSS": "bg-emerald-500",
-  "confidence": 1
-}
- [2025-10-06T10:00:41.993Z] DEBUG: 🎨 [VARIETY-DEBUG] Background selection improvements: {
-  "totalVariations": 37,
-  "topVariationsCount": 15,
-  "selectedVariation": "soft-gradient-blur::modern-blue::soft-blur-modern-blue-radial-center",
-  "scoreRange": {
-    "highest": "0.319",
-    "lowest": "-0.236",
-    "top15Range": "0.319 - 0.113"
-  }
-}
- [2025-10-06T10:00:41.993Z] DEBUG: 🔍 Funnel result debug: {
-  "inputData": {
-    "marketCategoryId": "Personal Productivity Tools",
-    "targetAudienceId": "Fitness Enthusiasts",
-    "landingPageGoalsId": "Start Free Trial",
-    "startupStageId": "MVP in development",
-    "pricingModelId": "Freemium (limited features)",
-    "toneProfileId": "friendly-helpful"
-  },
-  "primaryVariationKey": "soft-gradient-blur::modern-blue::soft-blur-modern-blue-radial-center",
-  "topVariations": [
-    "soft-gradient-blur::trust-blue-white::soft-blur-trust-blue-white-gradient-bl",
-    "soft-gradient-blur::sunset-ember::soft-blur-sunset-ember-solid-warm",
-    "soft-gradient-blur::modern-blue::soft-blur-modern-blue-radial-center",
-    "soft-gradient-blur::sunset-ember::soft-blur-sunset-ember-radial-center-blur",
-    "soft-gradient-blur::mint-frost::soft-blur-mint-frost-solid-ice",
-    "soft-gradient-blur::modern-blue::soft-blur-modern-blue-radial-top",
-    "soft-gradient-blur::teal-energy::soft-blur-teal-energy-overlay-light",
-    "soft-gradient-blur::sunset-ember::soft-blur-sunset-ember-gradient-tr",
-    "soft-gradient-blur::teal-energy::soft-blur-teal-energy-solid-teal",
-    "soft-gradient-blur::modern-blue::soft-blur-modern-blue-solid-sky",
-    "soft-gradient-blur::trust-blue-white::soft-blur-trust-blue-white-solid-white",
-    "soft-gradient-blur::sunset-ember::soft-blur-sunset-ember-radial-top-blur",
-    "soft-gradient-blur::mint-frost::soft-blur-mint-frost-solid-teal",
-    "soft-gradient-blur::teal-energy::soft-blur-teal-energy-radial-center-blur",
-    "soft-gradient-blur::teal-energy::soft-blur-teal-energy-gradient-bl"
-  ]
-}
- [2025-10-06T10:00:41.993Z] DEBUG: 🔍 Looking for variation: {
-  "archetypeId": "soft-gradient-blur",
-  "themeId": "modern-blue"
-}
- [2025-10-06T10:00:41.993Z] DEBUG: 🔍 Found matching variations: [
-  {
-    "id": "soft-blur-modern-blue-gradient-tr",
-    "class": "bg-gradient-to-tr from-blue-500 via-blue-400 to-sky-300"
-  },
-  {
-    "id": "soft-blur-modern-blue-gradient-tl",
-    "class": "bg-gradient-to-tl from-sky-400 via-blue-500 to-indigo-400"
-  },
-  {
-    "id": "soft-blur-modern-blue-radial-center",
-    "class": "bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-400 via-blue-200 to-transparent blur-[160px]"
-  },
-  {
-    "id": "soft-blur-modern-blue-radial-top",
-    "class": "bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-sky-300 via-blue-200 to-transparent"
-  },
-  {
-    "id": "soft-blur-modern-blue-diagonal-soft",
-    "class": "bg-gradient-to-br from-blue-300 via-blue-100 to-white"
-  },
-  {
-    "id": "soft-blur-modern-blue-light-overlay",
-    "class": "bg-white bg-opacity-60 backdrop-blur-sm blur-[100px]"
-  },
-  {
-    "id": "soft-blur-modern-blue-solid-sky",
-    "class": "bg-sky-100"
-  },
-  {
-    "id": "soft-blur-modern-blue-solid-blue-light",
-    "class": "bg-blue-100"
-  }
-]
- [2025-10-06T10:00:41.994Z] DEBUG: ✅ Selected primary variation: {
-  "variationId": "soft-blur-modern-blue-gradient-tr",
-  "tailwindClass": "bg-gradient-to-tr from-blue-500 via-blue-400 to-sky-300",
-  "baseColor": "blue"
-}
- [2025-10-06T10:00:41.994Z] DEBUG: 🎨 Using smart color harmony accent selection system
-logger.ts:84 [2025-10-06T10:00:41.994Z] DEBUG: ✅ Smart accent selection successful: {
-  "accentColor": "orange",
-  "accentCSS": "bg-orange-500",
-  "confidence": 1
-}
-logger.ts:84 [2025-10-06T10:00:41.994Z] DEBUG: ✅ Color tokens generated: {
-  "accent": "bg-amber-500",
-  "bgSecondary": "bg-teal-50/70",
-  "hasSophisticatedSecondary": false
-}
-logger.ts:84 [2025-10-06T10:00:41.994Z] DEBUG: ✅ Color tokens generated: {
-  "accent": "bg-amber-500",
-  "bgSecondary": "bg-teal-50/70",
-  "hasSophisticatedSecondary": false
-}
-logger.ts:84 [2025-10-06T10:00:41.995Z] DEBUG: 🔍 LandingPageRenderer Debug: {
-  "sectionsFromStore": [
-    "header",
-    "hero",
-    "features",
-    "uniqueMechanism",
-    "results",
-    "comparisonTable",
-    "cta",
-    "footer"
-  ],
-  "sectionsCount": 8,
-  "sectionLayoutsFromStore": {
-    "cta": "CenteredHeadlineCTA",
-    "hero": "centerStacked",
-    "footer": "LinksAndSocialFooter",
-    "header": "NavWithCTAHeader",
-    "results": "OutcomeIcons",
-    "features": "IconGrid",
-    "comparisonTable": "BasicFeatureGrid",
-    "uniqueMechanism": "StackedHighlights"
-  },
-  "layoutsCount": 8,
-  "sectionLayouts": {
-    "cta": "CenteredHeadlineCTA",
-    "hero": "centerStacked",
-    "footer": "LinksAndSocialFooter",
-    "header": "NavWithCTAHeader",
-    "results": "OutcomeIcons",
-    "features": "IconGrid",
-    "comparisonTable": "BasicFeatureGrid",
-    "uniqueMechanism": "StackedHighlights"
-  }
-}
-logger.ts:84 [2025-10-06T10:00:41.995Z] DEBUG: 🔄 Processing sections with EDIT MODE ORDER preserved: {
-  "hasDynamicSystem": true,
-  "totalSections": 8,
-  "editModeOrder": [
-    "header",
-    "hero",
-    "features",
-    "uniqueMechanism",
-    "results",
-    "comparisonTable",
-    "cta",
-    "footer"
-  ],
-  "preservedOrder": "Using edit mode positions instead of sectionList metadata order"
-}
-logger.ts:84 [2025-10-06T10:00:41.995Z] DEBUG: 📊 Enhanced Pattern Metrics: {
-  "totalSections": 8,
-  "highlights": 3,
-  "neutrals": 5,
-  "dividers": 0,
-  "highlightRatio": "38%",
-  "maxConsecutive": 2,
-  "upgrades": 0,
-  "downgrades": 1,
-  "violations": 0
-}
-logger.ts:84 [2025-10-06T10:00:41.996Z] DEBUG: 🎨 Final alternating background pattern: header: neutral → hero: primary-highlight → features: secondary-highlight → uniqueMechanism: neutral → results: neutral → comparisonTable: neutral → cta: primary-highlight → footer: neutral
-logger.ts:84 [2025-10-06T10:00:41.996Z] DEBUG: 🔄 Processing sections with EDIT MODE ORDER preserved: {
-  "hasDynamicSystem": true,
-  "totalSections": 8,
-  "editModeOrder": [
-    "header",
-    "hero",
-    "features",
-    "uniqueMechanism",
-    "results",
-    "comparisonTable",
-    "cta",
-    "footer"
-  ],
-  "preservedOrder": "Using edit mode positions instead of sectionList metadata order"
-}
-logger.ts:84 [2025-10-06T10:00:41.996Z] DEBUG: 📊 Enhanced Pattern Metrics: {
-  "totalSections": 8,
-  "highlights": 3,
-  "neutrals": 5,
-  "dividers": 0,
-  "highlightRatio": "38%",
-  "maxConsecutive": 2,
-  "upgrades": 0,
-  "downgrades": 1,
-  "violations": 0
-}
-logger.ts:84 [2025-10-06T10:00:41.996Z] DEBUG: 🎨 Final alternating background pattern: header: neutral → hero: primary-highlight → features: secondary-highlight → uniqueMechanism: neutral → results: neutral → comparisonTable: neutral → cta: primary-highlight → footer: neutral
-logger.ts:84 [2025-10-06T10:00:41.997Z] DEBUG: 🎨 Section header CSS class: bg-white
-logger.ts:84 [2025-10-06T10:00:41.997Z] DEBUG: 🎨 Section hero CSS class: bg-gradient-to-tr from-teal-300 via-emerald-200 to-white
-logger.ts:84 [2025-10-06T10:00:41.998Z] DEBUG: 🎯 Rendering hero section with data: {
-  "mode": "preview",
-  "isEditable": false,
-  "data": {
-    "id": "hero",
-    "layout": "centerStacked",
-    "elements": {
-      "cta_text": "Start Free Trial",
-      "headline": "Transform Your Habits with AI-Powered Tracking",
-      "subheadline": "Achieve your fitness goals with personalized support.",
-      "trust_item_1": "Trusted by thousands of fitness enthusiasts.",
-      "trust_item_2": "Rated 4.8/5 by users.",
-      "center_hero_image": "Image of a fitness enthusiast using HabitSync on multiple devices."
-    },
-    "aiMetadata": {
-      "aiGenerated": true,
-      "isCustomized": false,
-      "lastGenerated": 1759744831370,
-      "excludedElements": [],
-      "aiGeneratedElements": [
-        "headline",
-        "cta_text",
-        "subheadline",
-        "center_hero_image",
-        "trust_item_1",
-        "trust_item_2"
-      ]
-    },
-    "editMetadata": {
-      "isEditing": false,
-      "isMovable": true,
-      "isSelected": false,
-      "isDeletable": true,
-      "isDuplicable": true,
-      "lastModified": 1759744831364,
-      "validationStatus": {
-        "errors": [],
-        "isValid": true,
-        "warnings": [],
-        "lastValidated": 1759744831364,
-        "missingRequired": []
-      },
-      "completionPercentage": 0
-    },
-    "backgroundType": "primary"
-  },
-  "elements": {
-    "cta_text": "Start Free Trial",
-    "headline": "Transform Your Habits with AI-Powered Tracking",
-    "subheadline": "Achieve your fitness goals with personalized support.",
-    "trust_item_1": "Trusted by thousands of fitness enthusiasts.",
-    "trust_item_2": "Rated 4.8/5 by users.",
-    "center_hero_image": "Image of a fitness enthusiast using HabitSync on multiple devices."
-  }
-}
-logger.ts:84 [2025-10-06T10:00:41.998Z] DEBUG: 🎨 Rendering secondary section features: {
-  "backgroundCSS": "bg-teal-50/70",
-  "themeSecondary": "bg-teal-50/70",
-  "isFromAccentOptions": false,
-  "accentColor": "amber",
-  "baseColor": "teal"
-}
-logger.ts:84 [2025-10-06T10:00:41.998Z] DEBUG: 🎨 Section features CSS class: bg-teal-50/70
-logger.ts:84 [2025-10-06T10:00:41.998Z] DEBUG: 🎨 Section uniqueMechanism CSS class: bg-white
-logger.ts:84 [2025-10-06T10:00:41.998Z] DEBUG: 🎨 Section results CSS class: bg-white
-logger.ts:84 [2025-10-06T10:00:41.999Z] DEBUG: 🎨 Section comparisonTable CSS class: bg-white
-logger.ts:84 [2025-10-06T10:00:41.999Z] DEBUG: 🎨 Section cta CSS class: bg-gradient-to-tr from-teal-300 via-emerald-200 to-white
-logger.ts:84 [2025-10-06T10:00:41.999Z] DEBUG: 🎨 Section footer CSS class: bg-white
-logger.ts:84 [2025-10-06T10:00:41.999Z] DEBUG: 🔍 LandingPageRenderer Debug: {
-  "sectionsFromStore": [
-    "header",
-    "hero",
-    "features",
-    "uniqueMechanism",
-    "results",
-    "comparisonTable",
-    "cta",
-    "footer"
-  ],
-  "sectionsCount": 8,
-  "sectionLayoutsFromStore": {
-    "cta": "CenteredHeadlineCTA",
-    "hero": "centerStacked",
-    "footer": "LinksAndSocialFooter",
-    "header": "NavWithCTAHeader",
-    "results": "OutcomeIcons",
-    "features": "IconGrid",
-    "comparisonTable": "BasicFeatureGrid",
-    "uniqueMechanism": "StackedHighlights"
-  },
-  "layoutsCount": 8,
-  "sectionLayouts": {
-    "cta": "CenteredHeadlineCTA",
-    "hero": "centerStacked",
-    "footer": "LinksAndSocialFooter",
-    "header": "NavWithCTAHeader",
-    "results": "OutcomeIcons",
-    "features": "IconGrid",
-    "comparisonTable": "BasicFeatureGrid",
-    "uniqueMechanism": "StackedHighlights"
-  }
-}
-logger.ts:84 [2025-10-06T10:00:41.999Z] DEBUG: 🎨 Section header CSS class: bg-white
-logger.ts:84 [2025-10-06T10:00:42.000Z] DEBUG: 🎨 Section hero CSS class: bg-gradient-to-tr from-teal-300 via-emerald-200 to-white
-logger.ts:84 [2025-10-06T10:00:42.000Z] DEBUG: 🎯 Rendering hero section with data: {
-  "mode": "preview",
-  "isEditable": false,
-  "data": {
-    "id": "hero",
-    "layout": "centerStacked",
-    "elements": {
-      "cta_text": "Start Free Trial",
-      "headline": "Transform Your Habits with AI-Powered Tracking",
-      "subheadline": "Achieve your fitness goals with personalized support.",
-      "trust_item_1": "Trusted by thousands of fitness enthusiasts.",
-      "trust_item_2": "Rated 4.8/5 by users.",
-      "center_hero_image": "Image of a fitness enthusiast using HabitSync on multiple devices."
-    },
-    "aiMetadata": {
-      "aiGenerated": true,
-      "isCustomized": false,
-      "lastGenerated": 1759744831370,
-      "excludedElements": [],
-      "aiGeneratedElements": [
-        "headline",
-        "cta_text",
-        "subheadline",
-        "center_hero_image",
-        "trust_item_1",
-        "trust_item_2"
-      ]
-    },
-    "editMetadata": {
-      "isEditing": false,
-      "isMovable": true,
-      "isSelected": false,
-      "isDeletable": true,
-      "isDuplicable": true,
-      "lastModified": 1759744831364,
-      "validationStatus": {
-        "errors": [],
-        "isValid": true,
-        "warnings": [],
-        "lastValidated": 1759744831364,
-        "missingRequired": []
-      },
-      "completionPercentage": 0
-    },
-    "backgroundType": "primary"
-  },
-  "elements": {
-    "cta_text": "Start Free Trial",
-    "headline": "Transform Your Habits with AI-Powered Tracking",
-    "subheadline": "Achieve your fitness goals with personalized support.",
-    "trust_item_1": "Trusted by thousands of fitness enthusiasts.",
-    "trust_item_2": "Rated 4.8/5 by users.",
-    "center_hero_image": "Image of a fitness enthusiast using HabitSync on multiple devices."
-  }
-}
-logger.ts:84 [2025-10-06T10:00:42.000Z] DEBUG: 🎨 Rendering secondary section features: {
-  "backgroundCSS": "bg-teal-50/70",
-  "themeSecondary": "bg-teal-50/70",
-  "isFromAccentOptions": false,
-  "accentColor": "amber",
-  "baseColor": "teal"
-}
-logger.ts:84 [2025-10-06T10:00:42.000Z] DEBUG: 🎨 Section features CSS class: bg-teal-50/70
-logger.ts:84 [2025-10-06T10:00:42.000Z] DEBUG: 🎨 Section uniqueMechanism CSS class: bg-white
-logger.ts:84 [2025-10-06T10:00:42.000Z] DEBUG: 🎨 Section results CSS class: bg-white
-logger.ts:84 [2025-10-06T10:00:42.001Z] DEBUG: 🎨 Section comparisonTable CSS class: bg-white
-logger.ts:84 [2025-10-06T10:00:42.001Z] DEBUG: 🎨 Section cta CSS class: bg-gradient-to-tr from-teal-300 via-emerald-200 to-white
-logger.ts:84 [2025-10-06T10:00:42.001Z] DEBUG: 🎨 Section footer CSS class: bg-white
-logger.ts:95 [DEV] 🧮 [COMPUTED_EXCLUSION] header computing 7 live exclusions (stored=0): {excludedCount: 7, excludedElements: Array(7), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
-logger.ts:95 [DEV] 🔄 [EXTRACT_CONTENT] header passing exclusions to extractLayoutContent: {layout: 'NavWithCTAHeader', excludedElementsLength: 7, excludedElements: Array(7), hasExclusions: true}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🚫 SKIPPED: Element "nav_item_5" not in schema or excluded - will not appear in UI 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🚫 SKIPPED: Element "nav_item_6" not in schema or excluded - will not appear in UI 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "nav_link_1" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "nav_link_2" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "nav_link_3" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "nav_link_4" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🚫 SKIPPED: Element "nav_link_5" not in schema or excluded - will not appear in UI 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🚫 SKIPPED: Element "nav_link_6" not in schema or excluded - will not appear in UI 
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🧮 [COMPUTED_EXCLUSION] header computing 7 live exclusions (stored=0): {excludedCount: 7, excludedElements: Array(7), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
-logger.ts:95 [DEV] 🔄 [EXTRACT_CONTENT] header passing exclusions to extractLayoutContent: {layout: 'NavWithCTAHeader', excludedElementsLength: 7, excludedElements: Array(7), hasExclusions: true}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🚫 SKIPPED: Element "nav_item_5" not in schema or excluded - will not appear in UI 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🚫 SKIPPED: Element "nav_item_6" not in schema or excluded - will not appear in UI 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "nav_link_1" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "nav_link_2" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "nav_link_3" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "nav_link_4" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🚫 SKIPPED: Element "nav_link_5" not in schema or excluded - will not appear in UI 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🚫 SKIPPED: Element "nav_link_6" not in schema or excluded - will not appear in UI 
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🧮 [COMPUTED_EXCLUSION] hero computing 15 live exclusions (stored=0): {excludedCount: 15, excludedElements: Array(15), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
- [DEV] 🔄 [EXTRACT_CONTENT] hero passing exclusions to extractLayoutContent: {layout: 'centerStacked', excludedElementsLength: 15, excludedElements: Array(15), hasExclusions: true}
- [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ EXCLUDED: Skipping element "supporting_text" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ EXCLUDED: Skipping element "badge_text" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ EXCLUDED: Skipping element "trust_items" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ EXCLUDED: Skipping element "trust_item_3" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ EXCLUDED: Skipping element "trust_item_4" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ EXCLUDED: Skipping element "trust_item_5" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ EXCLUDED: Skipping element "customer_count" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ EXCLUDED: Skipping element "rating_value" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ EXCLUDED: Skipping element "rating_count" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ EXCLUDED: Skipping element "show_social_proof" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ EXCLUDED: Skipping element "show_customer_avatars" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ EXCLUDED: Skipping element "avatar_count" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ EXCLUDED: Skipping element "customer_names" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ EXCLUDED: Skipping element "avatar_urls" - will not appear in UI (exclusion enforced) 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🧮 [COMPUTED_EXCLUSION] hero computing 15 live exclusions (stored=0): {excludedCount: 15, excludedElements: Array(15), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
- [DEV] 🔄 [EXTRACT_CONTENT] hero passing exclusions to extractLayoutContent: {layout: 'centerStacked', excludedElementsLength: 15, excludedElements: Array(15), hasExclusions: true}
- [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ EXCLUDED: Skipping element "supporting_text" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ EXCLUDED: Skipping element "badge_text" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ EXCLUDED: Skipping element "trust_items" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ EXCLUDED: Skipping element "trust_item_3" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ EXCLUDED: Skipping element "trust_item_4" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ EXCLUDED: Skipping element "trust_item_5" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ EXCLUDED: Skipping element "customer_count" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ EXCLUDED: Skipping element "rating_value" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ EXCLUDED: Skipping element "rating_count" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ EXCLUDED: Skipping element "show_social_proof" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ EXCLUDED: Skipping element "show_customer_avatars" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ EXCLUDED: Skipping element "avatar_count" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ EXCLUDED: Skipping element "customer_names" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ EXCLUDED: Skipping element "avatar_urls" - will not appear in UI (exclusion enforced) 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🧮 [COMPUTED_EXCLUSION] features computing 0 live exclusions (stored=0): {excludedCount: 0, excludedElements: Array(0), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
- [DEV] 🔄 [EXTRACT_CONTENT] features passing exclusions to extractLayoutContent: {layout: 'IconGrid', excludedElementsLength: 0, excludedElements: Array(0), hasExclusions: false}
- [DEV] 🔍 extractLayoutContent DEBUG: element "icon_6" is undefined {layout: 'IconGrid', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ MANDATORY: Using default for mandatory element "icon_6": 💬
- [DEV] 🔍 extractLayoutContent DEBUG: element "icon_7" is undefined {layout: 'IconGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🚫 SKIPPED: Element "icon_7" not in schema or excluded - will not appear in UI 
- [DEV] 🔍 extractLayoutContent DEBUG: element "icon_8" is undefined {layout: 'IconGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🚫 SKIPPED: Element "icon_8" not in schema or excluded - will not appear in UI 
- [DEV] 🔍 extractLayoutContent DEBUG: element "icon_9" is undefined {layout: 'IconGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🚫 SKIPPED: Element "icon_9" not in schema or excluded - will not appear in UI 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f0fdfa]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f0fdfa]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f0fdfa]'}
- [DEV] 🧮 [COMPUTED_EXCLUSION] features computing 0 live exclusions (stored=0): {excludedCount: 0, excludedElements: Array(0), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
- [DEV] 🔄 [EXTRACT_CONTENT] features passing exclusions to extractLayoutContent: {layout: 'IconGrid', excludedElementsLength: 0, excludedElements: Array(0), hasExclusions: false}
- [DEV] 🔍 extractLayoutContent DEBUG: element "icon_6" is undefined {layout: 'IconGrid', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ MANDATORY: Using default for mandatory element "icon_6": 💬
- [DEV] 🔍 extractLayoutContent DEBUG: element "icon_7" is undefined {layout: 'IconGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🚫 SKIPPED: Element "icon_7" not in schema or excluded - will not appear in UI 
- [DEV] 🔍 extractLayoutContent DEBUG: element "icon_8" is undefined {layout: 'IconGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🚫 SKIPPED: Element "icon_8" not in schema or excluded - will not appear in UI 
- [DEV] 🔍 extractLayoutContent DEBUG: element "icon_9" is undefined {layout: 'IconGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🚫 SKIPPED: Element "icon_9" not in schema or excluded - will not appear in UI 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f0fdfa]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f0fdfa]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f0fdfa]'}
- [DEV] 🧮 [COMPUTED_EXCLUSION] uniqueMechanism computing 2 live exclusions (stored=0): {excludedCount: 2, excludedElements: Array(2), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
- [DEV] 🔄 [EXTRACT_CONTENT] uniqueMechanism passing exclusions to extractLayoutContent: {layout: 'StackedHighlights', excludedElementsLength: 2, excludedElements: Array(2), hasExclusions: true}
- [DEV] 🔍 extractLayoutContent DEBUG: element "mechanism_name" is undefined {layout: 'StackedHighlights', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ 🎯 [ICON] IconGrid - Feature 2 (Customizable Habit Goals):
+   rawIcon: "❓"
+   isValid: true
+   finalIcon: ❓
+   usedFallback: false
+ 🎯 [ICON] IconGrid - Feature 3 (Daily Reminders):
+   rawIcon: "❓"
+   isValid: true
+   finalIcon: ❓
+   usedFallback: false
+ 🎯 [ICON] IconGrid - Feature 4 (Progress Insights):
+   rawIcon: "❓"
+   isValid: true
+   finalIcon: ❓
+   usedFallback: false
+ 🎯 [ICON] IconGrid - Feature 5 (Community Support):
+   rawIcon: "❓"
+   isValid: true
+   finalIcon: ❓
+   usedFallback: false
+ [DEV] 🧮 [COMPUTED_EXCLUSION] uniqueMechanism computing 2 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] uniqueMechanism passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "mechanism_name" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "mechanism_name" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "footer_text" is undefined {layout: 'StackedHighlights', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "footer_text" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "footer_text" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_1" is undefined {layout: 'StackedHighlights', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_1" is undefined Object
  [DEV] 🚫 SKIPPED: Element "highlight_icon_1" not in schema or excluded - will not appear in UI 
- [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_2" is undefined {layout: 'StackedHighlights', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_2" is undefined Object
  [DEV] 🚫 SKIPPED: Element "highlight_icon_2" not in schema or excluded - will not appear in UI 
- [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_3" is undefined {layout: 'StackedHighlights', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_3" is undefined Object
  [DEV] 🚫 SKIPPED: Element "highlight_icon_3" not in schema or excluded - will not appear in UI 
- [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_4" is undefined {layout: 'StackedHighlights', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_4" is undefined Object
  [DEV] 🚫 SKIPPED: Element "highlight_icon_4" not in schema or excluded - will not appear in UI 
- [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_5" is undefined {layout: 'StackedHighlights', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_5" is undefined Object
  [DEV] 🚫 SKIPPED: Element "highlight_icon_5" not in schema or excluded - will not appear in UI 
- [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_6" is undefined {layout: 'StackedHighlights', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_6" is undefined Object
  [DEV] 🚫 SKIPPED: Element "highlight_icon_6" not in schema or excluded - will not appear in UI 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🧮 [COMPUTED_EXCLUSION] uniqueMechanism computing 2 live exclusions (stored=0): {excludedCount: 2, excludedElements: Array(2), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
- [DEV] 🔄 [EXTRACT_CONTENT] uniqueMechanism passing exclusions to extractLayoutContent: {layout: 'StackedHighlights', excludedElementsLength: 2, excludedElements: Array(2), hasExclusions: true}
- [DEV] 🔍 extractLayoutContent DEBUG: element "mechanism_name" is undefined {layout: 'StackedHighlights', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🧮 [COMPUTED_EXCLUSION] uniqueMechanism computing 2 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] uniqueMechanism passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "mechanism_name" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "mechanism_name" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "footer_text" is undefined {layout: 'StackedHighlights', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "footer_text" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "footer_text" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_1" is undefined {layout: 'StackedHighlights', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_1" is undefined Object
  [DEV] 🚫 SKIPPED: Element "highlight_icon_1" not in schema or excluded - will not appear in UI 
- [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_2" is undefined {layout: 'StackedHighlights', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_2" is undefined Object
  [DEV] 🚫 SKIPPED: Element "highlight_icon_2" not in schema or excluded - will not appear in UI 
- [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_3" is undefined {layout: 'StackedHighlights', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_3" is undefined Object
  [DEV] 🚫 SKIPPED: Element "highlight_icon_3" not in schema or excluded - will not appear in UI 
- [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_4" is undefined {layout: 'StackedHighlights', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_4" is undefined Object
  [DEV] 🚫 SKIPPED: Element "highlight_icon_4" not in schema or excluded - will not appear in UI 
- [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_5" is undefined {layout: 'StackedHighlights', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_5" is undefined Object
  [DEV] 🚫 SKIPPED: Element "highlight_icon_5" not in schema or excluded - will not appear in UI 
- [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_6" is undefined {layout: 'StackedHighlights', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_6" is undefined Object
  [DEV] 🚫 SKIPPED: Element "highlight_icon_6" not in schema or excluded - will not appear in UI 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🧮 [COMPUTED_EXCLUSION] results computing 2 live exclusions (stored=0): {excludedCount: 2, excludedElements: Array(2), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
- [DEV] 🔄 [EXTRACT_CONTENT] results passing exclusions to extractLayoutContent: {layout: 'OutcomeIcons', excludedElementsLength: 2, excludedElements: Array(2), hasExclusions: true}
- [DEV] 🔍 extractLayoutContent DEBUG: element "layout_style" is undefined {layout: 'OutcomeIcons', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🧮 [COMPUTED_EXCLUSION] results computing 2 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] results passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "layout_style" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "layout_style" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "footer_text" is undefined {layout: 'OutcomeIcons', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "footer_text" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "footer_text" - will not appear in UI (exclusion enforced) 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🧮 [COMPUTED_EXCLUSION] results computing 2 live exclusions (stored=0): {excludedCount: 2, excludedElements: Array(2), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
- [DEV] 🔄 [EXTRACT_CONTENT] results passing exclusions to extractLayoutContent: {layout: 'OutcomeIcons', excludedElementsLength: 2, excludedElements: Array(2), hasExclusions: true}
- [DEV] 🔍 extractLayoutContent DEBUG: element "layout_style" is undefined {layout: 'OutcomeIcons', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ 🎯 [ICON] OutcomeIcons - Raw data: Object
+ 🎯 [ICON] OutcomeIcons - Item 1: Object
+ 🎯 [ICON] OutcomeIcons - Item 2: Object
+ 🎯 [ICON] OutcomeIcons - Item 3: Object
+ 🎯 [ICON] OutcomeIcons - Item 4: Object
+ 🎯 [ICON] OutcomeIcons - Item 5: Object
+ [DEV] 🧮 [COMPUTED_EXCLUSION] results computing 2 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] results passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "layout_style" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "layout_style" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "footer_text" is undefined {layout: 'OutcomeIcons', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "footer_text" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "footer_text" - will not appear in UI (exclusion enforced) 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🧮 [COMPUTED_EXCLUSION] comparisonTable computing 1 live exclusions (stored=0): {excludedCount: 1, excludedElements: Array(1), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
-logger.ts:95 [DEV] 🔄 [EXTRACT_CONTENT] comparisonTable passing exclusions to extractLayoutContent: {layout: 'BasicFeatureGrid', excludedElementsLength: 1, excludedElements: Array(1), hasExclusions: true}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'BasicFeatureGrid', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "subheadline" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🧮 [COMPUTED_EXCLUSION] comparisonTable computing 1 live exclusions (stored=0): {excludedCount: 1, excludedElements: Array(1), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
-logger.ts:95 [DEV] 🔄 [EXTRACT_CONTENT] comparisonTable passing exclusions to extractLayoutContent: {layout: 'BasicFeatureGrid', excludedElementsLength: 1, excludedElements: Array(1), hasExclusions: true}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'BasicFeatureGrid', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "subheadline" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🧮 [COMPUTED_EXCLUSION] cta computing 7 live exclusions (stored=0): {excludedCount: 7, excludedElements: Array(7), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
-logger.ts:95 [DEV] 🔄 [EXTRACT_CONTENT] cta passing exclusions to extractLayoutContent: {layout: 'CenteredHeadlineCTA', excludedElementsLength: 7, excludedElements: Array(7), hasExclusions: true}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "subheadline" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "urgency_text" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "urgency_text" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🚫 SKIPPED: Element "trust_items" not in schema or excluded - will not appear in UI 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "customer_count" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "customer_label" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "rating_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "rating_stat" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "uptime_stat" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "uptime_label" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🧮 [COMPUTED_EXCLUSION] cta computing 7 live exclusions (stored=0): {excludedCount: 7, excludedElements: Array(7), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
-logger.ts:95 [DEV] 🔄 [EXTRACT_CONTENT] cta passing exclusions to extractLayoutContent: {layout: 'CenteredHeadlineCTA', excludedElementsLength: 7, excludedElements: Array(7), hasExclusions: true}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "subheadline" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "urgency_text" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "urgency_text" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🚫 SKIPPED: Element "trust_items" not in schema or excluded - will not appear in UI 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "customer_count" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "customer_label" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "rating_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "rating_stat" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "uptime_stat" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "uptime_label" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🧮 [COMPUTED_EXCLUSION] footer computing 14 live exclusions (stored=0): {excludedCount: 14, excludedElements: Array(14), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
-logger.ts:95 [DEV] 🔄 [EXTRACT_CONTENT] footer passing exclusions to extractLayoutContent: {layout: 'LinksAndSocialFooter', excludedElementsLength: 14, excludedElements: Array(14), hasExclusions: true}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "company_name" is undefined {layout: 'LinksAndSocialFooter', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "company_name" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "tagline" is undefined {layout: 'LinksAndSocialFooter', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "tagline" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🧮 [COMPUTED_EXCLUSION] footer computing 14 live exclusions (stored=0): {excludedCount: 14, excludedElements: Array(14), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
-logger.ts:95 [DEV] 🔄 [EXTRACT_CONTENT] footer passing exclusions to extractLayoutContent: {layout: 'LinksAndSocialFooter', excludedElementsLength: 14, excludedElements: Array(14), hasExclusions: true}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "company_name" is undefined {layout: 'LinksAndSocialFooter', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "company_name" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "tagline" is undefined {layout: 'LinksAndSocialFooter', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "tagline" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [2025-10-06T10:00:42.132Z] DEBUG: 🧭 [NAV-DEBUG] initializeNavigation action called
- [2025-10-06T10:00:42.134Z] DEBUG: 🧭 [NAV-DEBUG] Current store state: {
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ 🎯 [ICON] OutcomeIcons - Raw data: Object
+ 🎯 [ICON] OutcomeIcons - Item 1: Object
+ 🎯 [ICON] OutcomeIcons - Item 2: Object
+ 🎯 [ICON] OutcomeIcons - Item 3: Object
+ 🎯 [ICON] OutcomeIcons - Item 4: Object
+ 🎯 [ICON] OutcomeIcons - Item 5: Object
+ [DEV] 🧮 [COMPUTED_EXCLUSION] comparisonTable computing 1 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] comparisonTable passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "subheadline" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🧮 [COMPUTED_EXCLUSION] comparisonTable computing 1 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] comparisonTable passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "subheadline" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🧮 [COMPUTED_EXCLUSION] cta computing 7 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] cta passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "subheadline" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "urgency_text" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "urgency_text" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined Object
+ [DEV] 🚫 SKIPPED: Element "trust_items" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "customer_count" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_label" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "customer_label" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_stat" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "rating_stat" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_stat" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "uptime_stat" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_label" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "uptime_label" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🧮 [COMPUTED_EXCLUSION] cta computing 7 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] cta passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "subheadline" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "urgency_text" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "urgency_text" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined Object
+ [DEV] 🚫 SKIPPED: Element "trust_items" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "customer_count" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_label" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "customer_label" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_stat" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "rating_stat" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_stat" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "uptime_stat" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_label" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "uptime_label" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🧮 [COMPUTED_EXCLUSION] footer computing 14 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] footer passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "company_name" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "company_name" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tagline" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "tagline" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🧮 [COMPUTED_EXCLUSION] footer computing 14 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] footer passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "company_name" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "company_name" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tagline" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "tagline" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [2025-10-06T12:05:12.622Z] DEBUG: 🧭 [NAV-DEBUG] initializeNavigation action called
+ [2025-10-06T12:05:12.623Z] DEBUG: 🧭 [NAV-DEBUG] Current store state: {
   "hasSections": true,
   "sectionsLength": 8,
   "hasNavigationConfig": false
 }
- [2025-10-06T10:00:42.135Z] DEBUG: 🧭 [NAV-DEBUG] Setting navigation config in store
- [2025-10-06T10:00:42.140Z] DEBUG: 🧭 [NAV-DEBUG] Creating navigation config: {
+ [2025-10-06T12:05:12.624Z] DEBUG: 🧭 [NAV-DEBUG] Setting navigation config in store
+ [2025-10-06T12:05:12.625Z] DEBUG: 🧭 [NAV-DEBUG] Creating navigation config: {
   "navItemsCount": 5,
   "maxItems": 6,
   "headerSection": "header",
   "headerLayout": "NavWithCTAHeader"
 }
- [2025-10-06T10:00:42.141Z] DEBUG: 🧭 [NAV-DEBUG] Navigation config set: {
+ [2025-10-06T12:05:12.625Z] DEBUG: 🧭 [NAV-DEBUG] Navigation config set: {
   "items": [
     {
       "id": "nav-home",
@@ -1020,16 +221,16 @@ logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {or
   ],
   "autoConfigured": true,
   "maxItems": 6,
-  "lastUpdated": 1759744842141
+  "lastUpdated": 1759752312625
 }
- [2025-10-06T10:00:42.144Z] DEBUG: 🔗 [FOOTER-DEBUG] LinksAndSocialFooter render: {
+ [2025-10-06T12:05:12.632Z] DEBUG: 🔗 [FOOTER-DEBUG] LinksAndSocialFooter render: {
   "mode": "preview",
   "socialLinksCount": 0,
   "socialLinks": [],
   "sectionId": "footer"
 }
- [2025-10-06T10:00:42.148Z] DEBUG: 🚩 Feature Flags Status: {
-  "tokenId": "GrJs7aXqIjyI",
+ [2025-10-06T12:05:12.634Z] DEBUG: 🚩 Feature Flags Status: {
+  "tokenId": "Umz2y80PAphz",
   "enableVariableMode": true,
   "enableHybridMode": true,
   "enableLegacyFallbacks": true,
@@ -1037,21 +238,21 @@ logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {or
   "rolloutPercentage": 100,
   "staffAccess": true
 }
- [2025-10-06T10:00:42.152Z] DEBUG: 🧭 [NAV-DEBUG] initializeNavigation action called
- [2025-10-06T10:00:42.152Z] DEBUG: 🧭 [NAV-DEBUG] Current store state: {
+ [2025-10-06T12:05:12.635Z] DEBUG: 🧭 [NAV-DEBUG] initializeNavigation action called
+ [2025-10-06T12:05:12.636Z] DEBUG: 🧭 [NAV-DEBUG] Current store state: {
   "hasSections": true,
   "sectionsLength": 8,
   "hasNavigationConfig": true
 }
- [2025-10-06T10:00:42.152Z] DEBUG: 🧭 [NAV-DEBUG] Navigation already configured, skipping
- [2025-10-06T10:00:42.155Z] DEBUG: 🔗 [FOOTER-DEBUG] LinksAndSocialFooter render: {
+ [2025-10-06T12:05:12.636Z] DEBUG: 🧭 [NAV-DEBUG] Navigation already configured, skipping
+ [2025-10-06T12:05:12.638Z] DEBUG: 🔗 [FOOTER-DEBUG] LinksAndSocialFooter render: {
   "mode": "preview",
   "socialLinksCount": 0,
   "socialLinks": [],
   "sectionId": "footer"
 }
- [2025-10-06T10:00:42.156Z] DEBUG: 🚩 Feature Flags Status: {
-  "tokenId": "GrJs7aXqIjyI",
+ [2025-10-06T12:05:12.639Z] DEBUG: 🚩 Feature Flags Status: {
+  "tokenId": "Umz2y80PAphz",
   "enableVariableMode": true,
   "enableHybridMode": true,
   "enableLegacyFallbacks": true,
@@ -1059,7 +260,7 @@ logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {or
   "rolloutPercentage": 100,
   "staffAccess": true
 }
- [2025-10-06T10:00:42.157Z] DEBUG: 🔍 LandingPageRenderer Debug: {
+ [2025-10-06T12:05:12.640Z] DEBUG: 🔍 LandingPageRenderer Debug: {
   "sectionsFromStore": [
     "header",
     "hero",
@@ -1072,102 +273,48 @@ logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {or
   ],
   "sectionsCount": 8,
   "sectionLayoutsFromStore": {
-    "cta": "CenteredHeadlineCTA",
-    "hero": "centerStacked",
-    "footer": "LinksAndSocialFooter",
     "header": "NavWithCTAHeader",
-    "results": "OutcomeIcons",
+    "hero": "centerStacked",
     "features": "IconGrid",
+    "uniqueMechanism": "StackedHighlights",
+    "results": "OutcomeIcons",
     "comparisonTable": "BasicFeatureGrid",
-    "uniqueMechanism": "StackedHighlights"
+    "cta": "CenteredHeadlineCTA",
+    "footer": "LinksAndSocialFooter"
   },
   "layoutsCount": 8,
   "sectionLayouts": {
-    "cta": "CenteredHeadlineCTA",
-    "hero": "centerStacked",
-    "footer": "LinksAndSocialFooter",
     "header": "NavWithCTAHeader",
-    "results": "OutcomeIcons",
+    "hero": "centerStacked",
     "features": "IconGrid",
+    "uniqueMechanism": "StackedHighlights",
+    "results": "OutcomeIcons",
     "comparisonTable": "BasicFeatureGrid",
-    "uniqueMechanism": "StackedHighlights"
+    "cta": "CenteredHeadlineCTA",
+    "footer": "LinksAndSocialFooter"
   }
 }
- [2025-10-06T10:00:42.157Z] DEBUG: 🔄 Processing sections with EDIT MODE ORDER preserved: {
-  "hasDynamicSystem": true,
-  "totalSections": 8,
-  "editModeOrder": [
-    "header",
-    "hero",
-    "features",
-    "uniqueMechanism",
-    "results",
-    "comparisonTable",
-    "cta",
-    "footer"
-  ],
-  "preservedOrder": "Using edit mode positions instead of sectionList metadata order"
-}
- [2025-10-06T10:00:42.157Z] DEBUG: 📊 Enhanced Pattern Metrics: {
-  "totalSections": 8,
-  "highlights": 3,
-  "neutrals": 5,
-  "dividers": 0,
-  "highlightRatio": "38%",
-  "maxConsecutive": 2,
-  "upgrades": 0,
-  "downgrades": 1,
-  "violations": 0
-}
- [2025-10-06T10:00:42.157Z] DEBUG: 🎨 Final alternating background pattern: header: neutral → hero: primary-highlight → features: secondary-highlight → uniqueMechanism: neutral → results: neutral → comparisonTable: neutral → cta: primary-highlight → footer: neutral
- [2025-10-06T10:00:42.158Z] DEBUG: 🔄 Processing sections with EDIT MODE ORDER preserved: {
-  "hasDynamicSystem": true,
-  "totalSections": 8,
-  "editModeOrder": [
-    "header",
-    "hero",
-    "features",
-    "uniqueMechanism",
-    "results",
-    "comparisonTable",
-    "cta",
-    "footer"
-  ],
-  "preservedOrder": "Using edit mode positions instead of sectionList metadata order"
-}
- [2025-10-06T10:00:42.158Z] DEBUG: 📊 Enhanced Pattern Metrics: {
-  "totalSections": 8,
-  "highlights": 3,
-  "neutrals": 5,
-  "dividers": 0,
-  "highlightRatio": "38%",
-  "maxConsecutive": 2,
-  "upgrades": 0,
-  "downgrades": 1,
-  "violations": 0
-}
- [2025-10-06T10:00:42.158Z] DEBUG: 🎨 Final alternating background pattern: header: neutral → hero: primary-highlight → features: secondary-highlight → uniqueMechanism: neutral → results: neutral → comparisonTable: neutral → cta: primary-highlight → footer: neutral
- [2025-10-06T10:00:42.158Z] DEBUG: 🎨 Section header CSS class: bg-white
- [2025-10-06T10:00:42.159Z] DEBUG: 🎨 Section hero CSS class: bg-gradient-to-tr from-orange-400 via-pink-400 to-purple-400
- [2025-10-06T10:00:42.159Z] DEBUG: 🎯 Rendering hero section with data: {
+ [2025-10-06T12:05:12.640Z] DEBUG: 🎨 Section header CSS class: bg-white
+ [2025-10-06T12:05:12.640Z] DEBUG: 🎨 Section hero CSS class: bg-gradient-to-tr from-orange-400 via-pink-400 to-purple-400
+ [2025-10-06T12:05:12.640Z] DEBUG: 🎯 Rendering hero section with data: {
   "mode": "preview",
   "isEditable": false,
   "data": {
     "id": "hero",
     "layout": "centerStacked",
     "elements": {
+      "headline": "Transform Your Fitness Journey with HabitSync",
       "cta_text": "Start Free Trial",
-      "headline": "Transform Your Habits with AI-Powered Tracking",
-      "subheadline": "Achieve your fitness goals with personalized support.",
-      "trust_item_1": "Trusted by thousands of fitness enthusiasts.",
-      "trust_item_2": "Rated 4.8/5 by users.",
-      "center_hero_image": "Image of a fitness enthusiast using HabitSync on multiple devices."
+      "subheadline": "Streamline your habits and boost productivity effortlessly.",
+      "center_hero_image": "path/to/hero-image.jpg",
+      "trust_item_1": "Trusted by thousands of fitness enthusiasts",
+      "trust_item_2": "Proven results in habit formation"
     },
+    "backgroundType": "primary",
     "aiMetadata": {
+      "lastGenerated": 1759752303647,
       "aiGenerated": true,
       "isCustomized": false,
-      "lastGenerated": 1759744831370,
-      "excludedElements": [],
       "aiGeneratedElements": [
         "headline",
         "cta_text",
@@ -1175,49 +322,49 @@ logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {or
         "center_hero_image",
         "trust_item_1",
         "trust_item_2"
-      ]
+      ],
+      "excludedElements": []
     },
     "editMetadata": {
-      "isEditing": false,
-      "isMovable": true,
       "isSelected": false,
+      "lastModified": 1759752303641,
+      "completionPercentage": 0,
+      "isEditing": false,
       "isDeletable": true,
+      "isMovable": true,
       "isDuplicable": true,
-      "lastModified": 1759744831364,
       "validationStatus": {
-        "errors": [],
         "isValid": true,
+        "errors": [],
         "warnings": [],
-        "lastValidated": 1759744831364,
-        "missingRequired": []
-      },
-      "completionPercentage": 0
-    },
-    "backgroundType": "primary"
+        "missingRequired": [],
+        "lastValidated": 1759752303641
+      }
+    }
   },
   "elements": {
+    "headline": "Transform Your Fitness Journey with HabitSync",
     "cta_text": "Start Free Trial",
-    "headline": "Transform Your Habits with AI-Powered Tracking",
-    "subheadline": "Achieve your fitness goals with personalized support.",
-    "trust_item_1": "Trusted by thousands of fitness enthusiasts.",
-    "trust_item_2": "Rated 4.8/5 by users.",
-    "center_hero_image": "Image of a fitness enthusiast using HabitSync on multiple devices."
+    "subheadline": "Streamline your habits and boost productivity effortlessly.",
+    "center_hero_image": "path/to/hero-image.jpg",
+    "trust_item_1": "Trusted by thousands of fitness enthusiasts",
+    "trust_item_2": "Proven results in habit formation"
   }
 }
- [2025-10-06T10:00:42.159Z] DEBUG: 🎨 Rendering secondary section features: {
+ [2025-10-06T12:05:12.641Z] DEBUG: 🎨 Rendering secondary section features: {
   "backgroundCSS": "bg-orange-50/70",
   "themeSecondary": "bg-orange-50/70",
   "isFromAccentOptions": false,
   "accentColor": "emerald",
   "baseColor": "orange"
 }
- [2025-10-06T10:00:42.159Z] DEBUG: 🎨 Section features CSS class: bg-orange-50/70
- [2025-10-06T10:00:42.159Z] DEBUG: 🎨 Section uniqueMechanism CSS class: bg-white
- [2025-10-06T10:00:42.159Z] DEBUG: 🎨 Section results CSS class: bg-white
- [2025-10-06T10:00:42.160Z] DEBUG: 🎨 Section comparisonTable CSS class: bg-white
- [2025-10-06T10:00:42.160Z] DEBUG: 🎨 Section cta CSS class: bg-gradient-to-tr from-orange-400 via-pink-400 to-purple-400
- [2025-10-06T10:00:42.160Z] DEBUG: 🎨 Section footer CSS class: bg-white
- [2025-10-06T10:00:42.160Z] DEBUG: 🔍 LandingPageRenderer Debug: {
+ [2025-10-06T12:05:12.641Z] DEBUG: 🎨 Section features CSS class: bg-orange-50/70
+ [2025-10-06T12:05:12.641Z] DEBUG: 🎨 Section uniqueMechanism CSS class: bg-white
+ [2025-10-06T12:05:12.641Z] DEBUG: 🎨 Section results CSS class: bg-white
+ [2025-10-06T12:05:12.641Z] DEBUG: 🎨 Section comparisonTable CSS class: bg-white
+ [2025-10-06T12:05:12.641Z] DEBUG: 🎨 Section cta CSS class: bg-gradient-to-tr from-orange-400 via-pink-400 to-purple-400
+ [2025-10-06T12:05:12.642Z] DEBUG: 🎨 Section footer CSS class: bg-white
+ [2025-10-06T12:05:12.642Z] DEBUG: 🔍 LandingPageRenderer Debug: {
   "sectionsFromStore": [
     "header",
     "hero",
@@ -1230,48 +377,48 @@ logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {or
   ],
   "sectionsCount": 8,
   "sectionLayoutsFromStore": {
-    "cta": "CenteredHeadlineCTA",
-    "hero": "centerStacked",
-    "footer": "LinksAndSocialFooter",
     "header": "NavWithCTAHeader",
-    "results": "OutcomeIcons",
+    "hero": "centerStacked",
     "features": "IconGrid",
+    "uniqueMechanism": "StackedHighlights",
+    "results": "OutcomeIcons",
     "comparisonTable": "BasicFeatureGrid",
-    "uniqueMechanism": "StackedHighlights"
+    "cta": "CenteredHeadlineCTA",
+    "footer": "LinksAndSocialFooter"
   },
   "layoutsCount": 8,
   "sectionLayouts": {
-    "cta": "CenteredHeadlineCTA",
-    "hero": "centerStacked",
-    "footer": "LinksAndSocialFooter",
     "header": "NavWithCTAHeader",
-    "results": "OutcomeIcons",
+    "hero": "centerStacked",
     "features": "IconGrid",
+    "uniqueMechanism": "StackedHighlights",
+    "results": "OutcomeIcons",
     "comparisonTable": "BasicFeatureGrid",
-    "uniqueMechanism": "StackedHighlights"
+    "cta": "CenteredHeadlineCTA",
+    "footer": "LinksAndSocialFooter"
   }
 }
- [2025-10-06T10:00:42.160Z] DEBUG: 🎨 Section header CSS class: bg-white
- [2025-10-06T10:00:42.161Z] DEBUG: 🎨 Section hero CSS class: bg-gradient-to-tr from-orange-400 via-pink-400 to-purple-400
- [2025-10-06T10:00:42.161Z] DEBUG: 🎯 Rendering hero section with data: {
+ [2025-10-06T12:05:12.642Z] DEBUG: 🎨 Section header CSS class: bg-white
+ [2025-10-06T12:05:12.642Z] DEBUG: 🎨 Section hero CSS class: bg-gradient-to-tr from-orange-400 via-pink-400 to-purple-400
+ [2025-10-06T12:05:12.643Z] DEBUG: 🎯 Rendering hero section with data: {
   "mode": "preview",
   "isEditable": false,
   "data": {
     "id": "hero",
     "layout": "centerStacked",
     "elements": {
+      "headline": "Transform Your Fitness Journey with HabitSync",
       "cta_text": "Start Free Trial",
-      "headline": "Transform Your Habits with AI-Powered Tracking",
-      "subheadline": "Achieve your fitness goals with personalized support.",
-      "trust_item_1": "Trusted by thousands of fitness enthusiasts.",
-      "trust_item_2": "Rated 4.8/5 by users.",
-      "center_hero_image": "Image of a fitness enthusiast using HabitSync on multiple devices."
+      "subheadline": "Streamline your habits and boost productivity effortlessly.",
+      "center_hero_image": "path/to/hero-image.jpg",
+      "trust_item_1": "Trusted by thousands of fitness enthusiasts",
+      "trust_item_2": "Proven results in habit formation"
     },
+    "backgroundType": "primary",
     "aiMetadata": {
+      "lastGenerated": 1759752303647,
       "aiGenerated": true,
       "isCustomized": false,
-      "lastGenerated": 1759744831370,
-      "excludedElements": [],
       "aiGeneratedElements": [
         "headline",
         "cta_text",
@@ -1279,329 +426,401 @@ logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {or
         "center_hero_image",
         "trust_item_1",
         "trust_item_2"
-      ]
+      ],
+      "excludedElements": []
     },
     "editMetadata": {
-      "isEditing": false,
-      "isMovable": true,
       "isSelected": false,
+      "lastModified": 1759752303641,
+      "completionPercentage": 0,
+      "isEditing": false,
       "isDeletable": true,
+      "isMovable": true,
       "isDuplicable": true,
-      "lastModified": 1759744831364,
       "validationStatus": {
-        "errors": [],
         "isValid": true,
+        "errors": [],
         "warnings": [],
-        "lastValidated": 1759744831364,
-        "missingRequired": []
-      },
-      "completionPercentage": 0
-    },
-    "backgroundType": "primary"
+        "missingRequired": [],
+        "lastValidated": 1759752303641
+      }
+    }
   },
   "elements": {
+    "headline": "Transform Your Fitness Journey with HabitSync",
     "cta_text": "Start Free Trial",
-    "headline": "Transform Your Habits with AI-Powered Tracking",
-    "subheadline": "Achieve your fitness goals with personalized support.",
-    "trust_item_1": "Trusted by thousands of fitness enthusiasts.",
-    "trust_item_2": "Rated 4.8/5 by users.",
-    "center_hero_image": "Image of a fitness enthusiast using HabitSync on multiple devices."
+    "subheadline": "Streamline your habits and boost productivity effortlessly.",
+    "center_hero_image": "path/to/hero-image.jpg",
+    "trust_item_1": "Trusted by thousands of fitness enthusiasts",
+    "trust_item_2": "Proven results in habit formation"
   }
 }
- [2025-10-06T10:00:42.161Z] DEBUG: 🎨 Rendering secondary section features: {
+ [2025-10-06T12:05:12.643Z] DEBUG: 🎨 Rendering secondary section features: {
   "backgroundCSS": "bg-orange-50/70",
   "themeSecondary": "bg-orange-50/70",
   "isFromAccentOptions": false,
   "accentColor": "emerald",
   "baseColor": "orange"
 }
- [2025-10-06T10:00:42.161Z] DEBUG: 🎨 Section features CSS class: bg-orange-50/70
- [2025-10-06T10:00:42.161Z] DEBUG: 🎨 Section uniqueMechanism CSS class: bg-white
- [2025-10-06T10:00:42.161Z] DEBUG: 🎨 Section results CSS class: bg-white
- [2025-10-06T10:00:42.162Z] DEBUG: 🎨 Section comparisonTable CSS class: bg-white
- [2025-10-06T10:00:42.162Z] DEBUG: 🎨 Section cta CSS class: bg-gradient-to-tr from-orange-400 via-pink-400 to-purple-400
- [2025-10-06T10:00:42.162Z] DEBUG: 🎨 Section footer CSS class: bg-white
- [DEV] 🧮 [COMPUTED_EXCLUSION] header computing 7 live exclusions (stored=0): {excludedCount: 7, excludedElements: Array(7), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
- [DEV] 🔄 [EXTRACT_CONTENT] header passing exclusions to extractLayoutContent: {layout: 'NavWithCTAHeader', excludedElementsLength: 7, excludedElements: Array(7), hasExclusions: true}
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [2025-10-06T12:05:12.643Z] DEBUG: 🎨 Section features CSS class: bg-orange-50/70
+ [2025-10-06T12:05:12.644Z] DEBUG: 🎨 Section uniqueMechanism CSS class: bg-white
+ [2025-10-06T12:05:12.644Z] DEBUG: 🎨 Section results CSS class: bg-white
+ [2025-10-06T12:05:12.644Z] DEBUG: 🎨 Section comparisonTable CSS class: bg-white
+ [2025-10-06T12:05:12.644Z] DEBUG: 🎨 Section cta CSS class: bg-gradient-to-tr from-orange-400 via-pink-400 to-purple-400
+ [2025-10-06T12:05:12.644Z] DEBUG: 🎨 Section footer CSS class: bg-white
+ [DEV] 🧮 [COMPUTED_EXCLUSION] header computing 7 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] header passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined Object
  [DEV] 🚫 SKIPPED: Element "nav_item_5" not in schema or excluded - will not appear in UI 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined Object
  [DEV] 🚫 SKIPPED: Element "nav_item_6" not in schema or excluded - will not appear in UI 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "nav_link_1" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "nav_link_2" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "nav_link_3" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "nav_link_4" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined Object
  [DEV] 🚫 SKIPPED: Element "nav_link_5" not in schema or excluded - will not appear in UI 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined Object
  [DEV] 🚫 SKIPPED: Element "nav_link_6" not in schema or excluded - will not appear in UI 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🧮 [COMPUTED_EXCLUSION] header computing 7 live exclusions (stored=0): {excludedCount: 7, excludedElements: Array(7), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
- [DEV] 🔄 [EXTRACT_CONTENT] header passing exclusions to extractLayoutContent: {layout: 'NavWithCTAHeader', excludedElementsLength: 7, excludedElements: Array(7), hasExclusions: true}
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🧮 [COMPUTED_EXCLUSION] header computing 7 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] header passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined Object
  [DEV] 🚫 SKIPPED: Element "nav_item_5" not in schema or excluded - will not appear in UI 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined Object
  [DEV] 🚫 SKIPPED: Element "nav_item_6" not in schema or excluded - will not appear in UI 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "nav_link_1" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "nav_link_2" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "nav_link_3" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "nav_link_4" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined Object
  [DEV] 🚫 SKIPPED: Element "nav_link_5" not in schema or excluded - will not appear in UI 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined Object
  [DEV] 🚫 SKIPPED: Element "nav_link_6" not in schema or excluded - will not appear in UI 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🧮 [COMPUTED_EXCLUSION] hero computing 15 live exclusions (stored=0): {excludedCount: 15, excludedElements: Array(15), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
- [DEV] 🔄 [EXTRACT_CONTENT] hero passing exclusions to extractLayoutContent: {layout: 'centerStacked', excludedElementsLength: 15, excludedElements: Array(15), hasExclusions: true}
- [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🧮 [COMPUTED_EXCLUSION] hero computing 15 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] hero passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "supporting_text" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "badge_text" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "trust_items" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "trust_item_3" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "trust_item_4" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "trust_item_5" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "customer_count" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "rating_value" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "rating_count" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "show_social_proof" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "show_customer_avatars" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "avatar_count" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "customer_names" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "avatar_urls" - will not appear in UI (exclusion enforced) 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f8fafc]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f8fafc]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f8fafc]'}
- [DEV] 🧮 [COMPUTED_EXCLUSION] hero computing 15 live exclusions (stored=0): {excludedCount: 15, excludedElements: Array(15), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
- [DEV] 🔄 [EXTRACT_CONTENT] hero passing exclusions to extractLayoutContent: {layout: 'centerStacked', excludedElementsLength: 15, excludedElements: Array(15), hasExclusions: true}
- [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🧮 [COMPUTED_EXCLUSION] hero computing 15 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] hero passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "supporting_text" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "badge_text" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "trust_items" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "trust_item_3" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "trust_item_4" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "trust_item_5" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "customer_count" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "rating_value" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "rating_count" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "show_social_proof" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "show_customer_avatars" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "avatar_count" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "customer_names" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "avatar_urls" - will not appear in UI (exclusion enforced) 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f8fafc]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f8fafc]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f8fafc]'}
- [DEV] 🧮 [COMPUTED_EXCLUSION] features computing 0 live exclusions (stored=0): {excludedCount: 0, excludedElements: Array(0), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
- [DEV] 🔄 [EXTRACT_CONTENT] features passing exclusions to extractLayoutContent: {layout: 'IconGrid', excludedElementsLength: 0, excludedElements: Array(0), hasExclusions: false}
- [DEV] 🔍 extractLayoutContent DEBUG: element "icon_6" is undefined {layout: 'IconGrid', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ MANDATORY: Using default for mandatory element "icon_6": 💬
- [DEV] 🔍 extractLayoutContent DEBUG: element "icon_7" is undefined {layout: 'IconGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🧮 [COMPUTED_EXCLUSION] features computing 0 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] features passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "icon_7" is undefined Object
  [DEV] 🚫 SKIPPED: Element "icon_7" not in schema or excluded - will not appear in UI 
- [DEV] 🔍 extractLayoutContent DEBUG: element "icon_8" is undefined {layout: 'IconGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "icon_8" is undefined Object
  [DEV] 🚫 SKIPPED: Element "icon_8" not in schema or excluded - will not appear in UI 
- [DEV] 🔍 extractLayoutContent DEBUG: element "icon_9" is undefined {layout: 'IconGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "icon_9" is undefined Object
  [DEV] 🚫 SKIPPED: Element "icon_9" not in schema or excluded - will not appear in UI 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#fff7ed]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#fff7ed]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#fff7ed]'}
- [DEV] 🧮 [COMPUTED_EXCLUSION] features computing 0 live exclusions (stored=0): {excludedCount: 0, excludedElements: Array(0), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
- [DEV] 🔄 [EXTRACT_CONTENT] features passing exclusions to extractLayoutContent: {layout: 'IconGrid', excludedElementsLength: 0, excludedElements: Array(0), hasExclusions: false}
- [DEV] 🔍 extractLayoutContent DEBUG: element "icon_6" is undefined {layout: 'IconGrid', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ MANDATORY: Using default for mandatory element "icon_6": 💬
- [DEV] 🔍 extractLayoutContent DEBUG: element "icon_7" is undefined {layout: 'IconGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ 🎯 [ICON] IconGrid - Raw icons from blockContent:
+   icon_1: "❓"
+   icon_2: "❓"
+   icon_3: "❓"
+   icon_4: "❓"
+   icon_5: "❓"
+ 🎯 [ICON] IconGrid - Titles: ["Real-Time Progress Tracking","Customizable Habit Goals","Daily Reminders","Progress Insights","Community Support"]
+ 🎯 [ICON] IconGrid - Feature 1 (Real-Time Progress Tracking):
+   rawIcon: "❓"
+   isValid: true
+   finalIcon: ❓
+   usedFallback: false
+ 🎯 [ICON] IconGrid - Feature 2 (Customizable Habit Goals):
+   rawIcon: "❓"
+   isValid: true
+   finalIcon: ❓
+   usedFallback: false
+ 🎯 [ICON] IconGrid - Feature 3 (Daily Reminders):
+   rawIcon: "❓"
+   isValid: true
+   finalIcon: ❓
+   usedFallback: false
+ 🎯 [ICON] IconGrid - Feature 4 (Progress Insights):
+   rawIcon: "❓"
+   isValid: true
+   finalIcon: ❓
+   usedFallback: false
+ 🎯 [ICON] IconGrid - Feature 5 (Community Support):
+   rawIcon: "❓"
+   isValid: true
+   finalIcon: ❓
+   usedFallback: false
+ [DEV] 🧮 [COMPUTED_EXCLUSION] features computing 0 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] features passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "icon_7" is undefined Object
  [DEV] 🚫 SKIPPED: Element "icon_7" not in schema or excluded - will not appear in UI 
- [DEV] 🔍 extractLayoutContent DEBUG: element "icon_8" is undefined {layout: 'IconGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "icon_8" is undefined Object
  [DEV] 🚫 SKIPPED: Element "icon_8" not in schema or excluded - will not appear in UI 
- [DEV] 🔍 extractLayoutContent DEBUG: element "icon_9" is undefined {layout: 'IconGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "icon_9" is undefined Object
  [DEV] 🚫 SKIPPED: Element "icon_9" not in schema or excluded - will not appear in UI 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#fff7ed]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#fff7ed]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#fff7ed]'}
- [DEV] 🧮 [COMPUTED_EXCLUSION] uniqueMechanism computing 2 live exclusions (stored=0): {excludedCount: 2, excludedElements: Array(2), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
- [DEV] 🔄 [EXTRACT_CONTENT] uniqueMechanism passing exclusions to extractLayoutContent: {layout: 'StackedHighlights', excludedElementsLength: 2, excludedElements: Array(2), hasExclusions: true}
- [DEV] 🔍 extractLayoutContent DEBUG: element "mechanism_name" is undefined {layout: 'StackedHighlights', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ 🎯 [ICON] IconGrid - Raw icons from blockContent:
+   icon_1: "❓"
+   icon_2: "❓"
+   icon_3: "❓"
+   icon_4: "❓"
+   icon_5: "❓"
+ 🎯 [ICON] IconGrid - Titles: ["Real-Time Progress Tracking","Customizable Habit Goals","Daily Reminders","Progress Insights","Community Support"]
+ 🎯 [ICON] IconGrid - Feature 1 (Real-Time Progress Tracking):
+   rawIcon: "❓"
+   isValid: true
+   finalIcon: ❓
+   usedFallback: false
+ 🎯 [ICON] IconGrid - Feature 2 (Customizable Habit Goals):
+   rawIcon: "❓"
+   isValid: true
+   finalIcon: ❓
+   usedFallback: false
+ 🎯 [ICON] IconGrid - Feature 3 (Daily Reminders):
+   rawIcon: "❓"
+   isValid: true
+   finalIcon: ❓
+   usedFallback: false
+ 🎯 [ICON] IconGrid - Feature 4 (Progress Insights):
+   rawIcon: "❓"
+   isValid: true
+   finalIcon: ❓
+   usedFallback: false
+ 🎯 [ICON] IconGrid - Feature 5 (Community Support):
+   rawIcon: "❓"
+   isValid: true
+   finalIcon: ❓
+   usedFallback: false
+ [DEV] 🧮 [COMPUTED_EXCLUSION] uniqueMechanism computing 2 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] uniqueMechanism passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "mechanism_name" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "mechanism_name" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "footer_text" is undefined {layout: 'StackedHighlights', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "footer_text" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "footer_text" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_1" is undefined {layout: 'StackedHighlights', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_1" is undefined Object
  [DEV] 🚫 SKIPPED: Element "highlight_icon_1" not in schema or excluded - will not appear in UI 
- [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_2" is undefined {layout: 'StackedHighlights', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_2" is undefined Object
  [DEV] 🚫 SKIPPED: Element "highlight_icon_2" not in schema or excluded - will not appear in UI 
- [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_3" is undefined {layout: 'StackedHighlights', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_3" is undefined Object
  [DEV] 🚫 SKIPPED: Element "highlight_icon_3" not in schema or excluded - will not appear in UI 
- [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_4" is undefined {layout: 'StackedHighlights', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_4" is undefined Object
  [DEV] 🚫 SKIPPED: Element "highlight_icon_4" not in schema or excluded - will not appear in UI 
- [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_5" is undefined {layout: 'StackedHighlights', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_5" is undefined Object
  [DEV] 🚫 SKIPPED: Element "highlight_icon_5" not in schema or excluded - will not appear in UI 
- [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_6" is undefined {layout: 'StackedHighlights', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_6" is undefined Object
  [DEV] 🚫 SKIPPED: Element "highlight_icon_6" not in schema or excluded - will not appear in UI 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🧮 [COMPUTED_EXCLUSION] uniqueMechanism computing 2 live exclusions (stored=0): {excludedCount: 2, excludedElements: Array(2), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
- [DEV] 🔄 [EXTRACT_CONTENT] uniqueMechanism passing exclusions to extractLayoutContent: {layout: 'StackedHighlights', excludedElementsLength: 2, excludedElements: Array(2), hasExclusions: true}
- [DEV] 🔍 extractLayoutContent DEBUG: element "mechanism_name" is undefined {layout: 'StackedHighlights', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🧮 [COMPUTED_EXCLUSION] uniqueMechanism computing 2 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] uniqueMechanism passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "mechanism_name" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "mechanism_name" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "footer_text" is undefined {layout: 'StackedHighlights', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "footer_text" is undefined Object
  [DEV] ❌ EXCLUDED: Skipping element "footer_text" - will not appear in UI (exclusion enforced) 
- [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_1" is undefined {layout: 'StackedHighlights', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_1" is undefined Object
  [DEV] 🚫 SKIPPED: Element "highlight_icon_1" not in schema or excluded - will not appear in UI 
- [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_2" is undefined {layout: 'StackedHighlights', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_2" is undefined Object
  [DEV] 🚫 SKIPPED: Element "highlight_icon_2" not in schema or excluded - will not appear in UI 
- [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_3" is undefined {layout: 'StackedHighlights', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_3" is undefined Object
  [DEV] 🚫 SKIPPED: Element "highlight_icon_3" not in schema or excluded - will not appear in UI 
- [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_4" is undefined {layout: 'StackedHighlights', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_4" is undefined Object
  [DEV] 🚫 SKIPPED: Element "highlight_icon_4" not in schema or excluded - will not appear in UI 
- [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_5" is undefined {layout: 'StackedHighlights', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_5" is undefined Object
  [DEV] 🚫 SKIPPED: Element "highlight_icon_5" not in schema or excluded - will not appear in UI 
- [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_6" is undefined {layout: 'StackedHighlights', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_6" is undefined Object
  [DEV] 🚫 SKIPPED: Element "highlight_icon_6" not in schema or excluded - will not appear in UI 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🧮 [COMPUTED_EXCLUSION] results computing 2 live exclusions (stored=0): {excludedCount: 2, excludedElements: Array(2), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
-logger.ts:95 [DEV] 🔄 [EXTRACT_CONTENT] results passing exclusions to extractLayoutContent: {layout: 'OutcomeIcons', excludedElementsLength: 2, excludedElements: Array(2), hasExclusions: true}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "layout_style" is undefined {layout: 'OutcomeIcons', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "layout_style" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "footer_text" is undefined {layout: 'OutcomeIcons', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "footer_text" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🧮 [COMPUTED_EXCLUSION] results computing 2 live exclusions (stored=0): {excludedCount: 2, excludedElements: Array(2), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
-logger.ts:95 [DEV] 🔄 [EXTRACT_CONTENT] results passing exclusions to extractLayoutContent: {layout: 'OutcomeIcons', excludedElementsLength: 2, excludedElements: Array(2), hasExclusions: true}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "layout_style" is undefined {layout: 'OutcomeIcons', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "layout_style" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "footer_text" is undefined {layout: 'OutcomeIcons', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "footer_text" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🧮 [COMPUTED_EXCLUSION] comparisonTable computing 1 live exclusions (stored=0): {excludedCount: 1, excludedElements: Array(1), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
-logger.ts:95 [DEV] 🔄 [EXTRACT_CONTENT] comparisonTable passing exclusions to extractLayoutContent: {layout: 'BasicFeatureGrid', excludedElementsLength: 1, excludedElements: Array(1), hasExclusions: true}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'BasicFeatureGrid', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "subheadline" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🧮 [COMPUTED_EXCLUSION] comparisonTable computing 1 live exclusions (stored=0): {excludedCount: 1, excludedElements: Array(1), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
-logger.ts:95 [DEV] 🔄 [EXTRACT_CONTENT] comparisonTable passing exclusions to extractLayoutContent: {layout: 'BasicFeatureGrid', excludedElementsLength: 1, excludedElements: Array(1), hasExclusions: true}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'BasicFeatureGrid', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "subheadline" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🧮 [COMPUTED_EXCLUSION] cta computing 7 live exclusions (stored=0): {excludedCount: 7, excludedElements: Array(7), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
-logger.ts:95 [DEV] 🔄 [EXTRACT_CONTENT] cta passing exclusions to extractLayoutContent: {layout: 'CenteredHeadlineCTA', excludedElementsLength: 7, excludedElements: Array(7), hasExclusions: true}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "subheadline" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "urgency_text" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "urgency_text" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🚫 SKIPPED: Element "trust_items" not in schema or excluded - will not appear in UI 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "customer_count" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "customer_label" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "rating_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "rating_stat" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "uptime_stat" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "uptime_label" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f8fafc]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f8fafc]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f8fafc]'}
-logger.ts:95 [DEV] 🧮 [COMPUTED_EXCLUSION] cta computing 7 live exclusions (stored=0): {excludedCount: 7, excludedElements: Array(7), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
-logger.ts:95 [DEV] 🔄 [EXTRACT_CONTENT] cta passing exclusions to extractLayoutContent: {layout: 'CenteredHeadlineCTA', excludedElementsLength: 7, excludedElements: Array(7), hasExclusions: true}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "subheadline" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "urgency_text" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "urgency_text" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🚫 SKIPPED: Element "trust_items" not in schema or excluded - will not appear in UI 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "customer_count" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "customer_label" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "rating_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "rating_stat" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "uptime_stat" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "uptime_label" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f8fafc]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f8fafc]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f8fafc]'}
-logger.ts:95 [DEV] 🧮 [COMPUTED_EXCLUSION] footer computing 14 live exclusions (stored=0): {excludedCount: 14, excludedElements: Array(14), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
-logger.ts:95 [DEV] 🔄 [EXTRACT_CONTENT] footer passing exclusions to extractLayoutContent: {layout: 'LinksAndSocialFooter', excludedElementsLength: 14, excludedElements: Array(14), hasExclusions: true}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "company_name" is undefined {layout: 'LinksAndSocialFooter', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "company_name" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "tagline" is undefined {layout: 'LinksAndSocialFooter', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "tagline" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🧮 [COMPUTED_EXCLUSION] footer computing 14 live exclusions (stored=0): {excludedCount: 14, excludedElements: Array(14), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
-logger.ts:95 [DEV] 🔄 [EXTRACT_CONTENT] footer passing exclusions to extractLayoutContent: {layout: 'LinksAndSocialFooter', excludedElementsLength: 14, excludedElements: Array(14), hasExclusions: true}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "company_name" is undefined {layout: 'LinksAndSocialFooter', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "company_name" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "tagline" is undefined {layout: 'LinksAndSocialFooter', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "tagline" - will not appear in UI (exclusion enforced) 
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:84 [2025-10-06T10:00:42.229Z] DEBUG: 🔗 [FOOTER-DEBUG] LinksAndSocialFooter render: {
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🧮 [COMPUTED_EXCLUSION] results computing 2 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] results passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "layout_style" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "layout_style" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "footer_text" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "footer_text" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ 🎯 [ICON] OutcomeIcons - Raw data: Object
+ 🎯 [ICON] OutcomeIcons - Item 1: Object
+ 🎯 [ICON] OutcomeIcons - Item 2: Object
+ 🎯 [ICON] OutcomeIcons - Item 3: Object
+ 🎯 [ICON] OutcomeIcons - Item 4: Object
+ 🎯 [ICON] OutcomeIcons - Item 5: Object
+ [DEV] 🧮 [COMPUTED_EXCLUSION] results computing 2 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] results passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "layout_style" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "layout_style" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "footer_text" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "footer_text" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ 🎯 [ICON] OutcomeIcons - Raw data: Object
+ 🎯 [ICON] OutcomeIcons - Item 1: Object
+ 🎯 [ICON] OutcomeIcons - Item 2: Object
+ 🎯 [ICON] OutcomeIcons - Item 3: Object
+ 🎯 [ICON] OutcomeIcons - Item 4: Object
+ 🎯 [ICON] OutcomeIcons - Item 5: Object
+ [DEV] 🧮 [COMPUTED_EXCLUSION] comparisonTable computing 1 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] comparisonTable passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "subheadline" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🧮 [COMPUTED_EXCLUSION] comparisonTable computing 1 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] comparisonTable passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "subheadline" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🧮 [COMPUTED_EXCLUSION] cta computing 7 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] cta passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "subheadline" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "urgency_text" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "urgency_text" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined Object
+ [DEV] 🚫 SKIPPED: Element "trust_items" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "customer_count" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_label" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "customer_label" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_stat" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "rating_stat" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_stat" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "uptime_stat" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_label" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "uptime_label" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🧮 [COMPUTED_EXCLUSION] cta computing 7 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] cta passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "subheadline" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "urgency_text" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "urgency_text" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined Object
+ [DEV] 🚫 SKIPPED: Element "trust_items" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "customer_count" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_label" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "customer_label" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_stat" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "rating_stat" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_stat" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "uptime_stat" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_label" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "uptime_label" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🧮 [COMPUTED_EXCLUSION] footer computing 14 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] footer passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "company_name" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "company_name" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tagline" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "tagline" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🧮 [COMPUTED_EXCLUSION] footer computing 14 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] footer passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "company_name" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "company_name" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tagline" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "tagline" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [2025-10-06T12:05:12.700Z] DEBUG: 🔗 [FOOTER-DEBUG] LinksAndSocialFooter render: {
   "mode": "preview",
   "socialMediaConfig": {
     "items": [],
     "maxItems": 8,
-    "lastUpdated": 1759744842144
+    "lastUpdated": 1759752312632
   },
   "socialLinksCount": 0,
   "socialLinks": [],
   "sectionId": "footer"
 }
-logger.ts:84 [2025-10-06T10:00:42.230Z] DEBUG: 🚩 Feature Flags Status: {
-  "tokenId": "GrJs7aXqIjyI",
+ [2025-10-06T12:05:12.700Z] DEBUG: 🚩 Feature Flags Status: {
+  "tokenId": "Umz2y80PAphz",
   "enableVariableMode": true,
   "enableHybridMode": true,
   "enableLegacyFallbacks": true,
@@ -1609,51 +828,1691 @@ logger.ts:84 [2025-10-06T10:00:42.230Z] DEBUG: 🚩 Feature Flags Status: {
   "rolloutPercentage": 100,
   "staffAccess": true
 }
-logger.ts:84 [2025-10-06T10:00:42.263Z] DEBUG: 🔍 Starting CSS variable validation...
-logger.ts:84 [2025-10-06T10:00:42.264Z] DEBUG: 🔍 Starting CSS variable validation...
-logger.ts:84 [2025-10-06T10:00:42.264Z] DEBUG: 🔍 Starting CSS variable validation...
-logger.ts:102 🎨 CSS Variable System Validation
-logger.ts:84 [2025-10-06T10:00:42.371Z] DEBUG: ✅ Phase: hybrid
-logger.ts:84 [2025-10-06T10:00:42.371Z] DEBUG: 🎯 Success: true
-logger.ts:102 ⚠️ Warnings:
-logger.ts:102 ❌ Errors:
-logger.ts:102 💡 Recommendations:
-logger.ts:78 [2025-10-06T10:00:42.373Z] INFO: Check VariableThemeInjector integration
-logger.ts:78 [2025-10-06T10:00:42.373Z] INFO: Check VariableThemeInjector integration
-logger.ts:84 [2025-10-06T10:00:42.373Z] DEBUG: 📊 CSS Variables found: 0
-logger.ts:84 [2025-10-06T10:00:42.373Z] DEBUG: 🌐 Browser support: {
+ [2025-10-06T12:05:12.763Z] DEBUG: 🔍 Starting CSS variable validation...
+ [2025-10-06T12:05:12.764Z] DEBUG: 🔍 Starting CSS variable validation...
+ [2025-10-06T12:05:12.764Z] DEBUG: 🔍 Starting CSS variable validation...
+ [2025-10-06T12:05:12.768Z] DEBUG: 🔍 LandingPageRenderer Debug: {
+  "sectionsFromStore": [
+    "header",
+    "hero",
+    "features",
+    "uniqueMechanism",
+    "results",
+    "comparisonTable",
+    "cta",
+    "footer"
+  ],
+  "sectionsCount": 8,
+  "sectionLayoutsFromStore": {
+    "cta": "CenteredHeadlineCTA",
+    "hero": "centerStacked",
+    "footer": "LinksAndSocialFooter",
+    "header": "NavWithCTAHeader",
+    "results": "OutcomeIcons",
+    "features": "IconGrid",
+    "comparisonTable": "BasicFeatureGrid",
+    "uniqueMechanism": "StackedHighlights"
+  },
+  "layoutsCount": 8,
+  "sectionLayouts": {
+    "cta": "CenteredHeadlineCTA",
+    "hero": "centerStacked",
+    "footer": "LinksAndSocialFooter",
+    "header": "NavWithCTAHeader",
+    "results": "OutcomeIcons",
+    "features": "IconGrid",
+    "comparisonTable": "BasicFeatureGrid",
+    "uniqueMechanism": "StackedHighlights"
+  }
+}
+ [2025-10-06T12:05:12.769Z] DEBUG: 🔄 Processing sections with EDIT MODE ORDER preserved: {
+  "hasDynamicSystem": true,
+  "totalSections": 8,
+  "editModeOrder": [
+    "header",
+    "hero",
+    "features",
+    "uniqueMechanism",
+    "results",
+    "comparisonTable",
+    "cta",
+    "footer"
+  ],
+  "preservedOrder": "Using edit mode positions instead of sectionList metadata order"
+}
+ [2025-10-06T12:05:12.769Z] DEBUG: 📊 Enhanced Pattern Metrics: {
+  "totalSections": 8,
+  "highlights": 3,
+  "neutrals": 5,
+  "dividers": 0,
+  "highlightRatio": "38%",
+  "maxConsecutive": 2,
+  "upgrades": 0,
+  "downgrades": 1,
+  "violations": 0
+}
+ [2025-10-06T12:05:12.769Z] DEBUG: 🎨 Final alternating background pattern: header: neutral → hero: primary-highlight → features: secondary-highlight → uniqueMechanism: neutral → results: neutral → comparisonTable: neutral → cta: primary-highlight → footer: neutral
+ [2025-10-06T12:05:12.769Z] DEBUG: 🔄 Processing sections with EDIT MODE ORDER preserved: {
+  "hasDynamicSystem": true,
+  "totalSections": 8,
+  "editModeOrder": [
+    "header",
+    "hero",
+    "features",
+    "uniqueMechanism",
+    "results",
+    "comparisonTable",
+    "cta",
+    "footer"
+  ],
+  "preservedOrder": "Using edit mode positions instead of sectionList metadata order"
+}
+ [2025-10-06T12:05:12.769Z] DEBUG: 📊 Enhanced Pattern Metrics: {
+  "totalSections": 8,
+  "highlights": 3,
+  "neutrals": 5,
+  "dividers": 0,
+  "highlightRatio": "38%",
+  "maxConsecutive": 2,
+  "upgrades": 0,
+  "downgrades": 1,
+  "violations": 0
+}
+ [2025-10-06T12:05:12.769Z] DEBUG: 🎨 Final alternating background pattern: header: neutral → hero: primary-highlight → features: secondary-highlight → uniqueMechanism: neutral → results: neutral → comparisonTable: neutral → cta: primary-highlight → footer: neutral
+ [2025-10-06T12:05:12.769Z] DEBUG: 🎨 Section header CSS class: bg-white
+ [2025-10-06T12:05:12.769Z] DEBUG: 🎨 Section hero CSS class: bg-gradient-to-tr from-orange-400 via-pink-400 to-purple-400
+ [2025-10-06T12:05:12.769Z] DEBUG: 🎯 Rendering hero section with data: {
+  "mode": "preview",
+  "isEditable": false,
+  "data": {
+    "id": "hero",
+    "layout": "centerStacked",
+    "elements": {
+      "cta_text": "Start Free Trial",
+      "headline": "Transform Your Fitness Journey with HabitSync",
+      "subheadline": "Streamline your habits and boost productivity effortlessly.",
+      "trust_item_1": "Trusted by thousands of fitness enthusiasts",
+      "trust_item_2": "Proven results in habit formation",
+      "center_hero_image": "path/to/hero-image.jpg"
+    },
+    "aiMetadata": {
+      "aiGenerated": true,
+      "isCustomized": false,
+      "lastGenerated": 1759752303647,
+      "excludedElements": [],
+      "aiGeneratedElements": [
+        "headline",
+        "cta_text",
+        "subheadline",
+        "center_hero_image",
+        "trust_item_1",
+        "trust_item_2"
+      ]
+    },
+    "editMetadata": {
+      "isEditing": false,
+      "isMovable": true,
+      "isSelected": false,
+      "isDeletable": true,
+      "isDuplicable": true,
+      "lastModified": 1759752303641,
+      "validationStatus": {
+        "errors": [],
+        "isValid": true,
+        "warnings": [],
+        "lastValidated": 1759752303641,
+        "missingRequired": []
+      },
+      "completionPercentage": 0
+    },
+    "backgroundType": "primary"
+  },
+  "elements": {
+    "cta_text": "Start Free Trial",
+    "headline": "Transform Your Fitness Journey with HabitSync",
+    "subheadline": "Streamline your habits and boost productivity effortlessly.",
+    "trust_item_1": "Trusted by thousands of fitness enthusiasts",
+    "trust_item_2": "Proven results in habit formation",
+    "center_hero_image": "path/to/hero-image.jpg"
+  }
+}
+ [2025-10-06T12:05:12.770Z] DEBUG: 🎨 Rendering secondary section features: {
+  "backgroundCSS": "bg-orange-50/70",
+  "themeSecondary": "bg-orange-50/70",
+  "isFromAccentOptions": false,
+  "accentColor": "emerald",
+  "baseColor": "orange"
+}
+ [2025-10-06T12:05:12.770Z] DEBUG: 🎨 Section features CSS class: bg-orange-50/70
+ [2025-10-06T12:05:12.770Z] DEBUG: 🎨 Section uniqueMechanism CSS class: bg-white
+ [2025-10-06T12:05:12.770Z] DEBUG: 🎨 Section results CSS class: bg-white
+ [2025-10-06T12:05:12.770Z] DEBUG: 🎨 Section comparisonTable CSS class: bg-white
+ [2025-10-06T12:05:12.770Z] DEBUG: 🎨 Section cta CSS class: bg-gradient-to-tr from-orange-400 via-pink-400 to-purple-400
+ [2025-10-06T12:05:12.770Z] DEBUG: 🎨 Section footer CSS class: bg-white
+ [2025-10-06T12:05:12.770Z] DEBUG: 🔍 LandingPageRenderer Debug: {
+  "sectionsFromStore": [
+    "header",
+    "hero",
+    "features",
+    "uniqueMechanism",
+    "results",
+    "comparisonTable",
+    "cta",
+    "footer"
+  ],
+  "sectionsCount": 8,
+  "sectionLayoutsFromStore": {
+    "cta": "CenteredHeadlineCTA",
+    "hero": "centerStacked",
+    "footer": "LinksAndSocialFooter",
+    "header": "NavWithCTAHeader",
+    "results": "OutcomeIcons",
+    "features": "IconGrid",
+    "comparisonTable": "BasicFeatureGrid",
+    "uniqueMechanism": "StackedHighlights"
+  },
+  "layoutsCount": 8,
+  "sectionLayouts": {
+    "cta": "CenteredHeadlineCTA",
+    "hero": "centerStacked",
+    "footer": "LinksAndSocialFooter",
+    "header": "NavWithCTAHeader",
+    "results": "OutcomeIcons",
+    "features": "IconGrid",
+    "comparisonTable": "BasicFeatureGrid",
+    "uniqueMechanism": "StackedHighlights"
+  }
+}
+ [2025-10-06T12:05:12.770Z] DEBUG: 🎨 Section header CSS class: bg-white
+ [2025-10-06T12:05:12.770Z] DEBUG: 🎨 Section hero CSS class: bg-gradient-to-tr from-orange-400 via-pink-400 to-purple-400
+ [2025-10-06T12:05:12.771Z] DEBUG: 🎯 Rendering hero section with data: {
+  "mode": "preview",
+  "isEditable": false,
+  "data": {
+    "id": "hero",
+    "layout": "centerStacked",
+    "elements": {
+      "cta_text": "Start Free Trial",
+      "headline": "Transform Your Fitness Journey with HabitSync",
+      "subheadline": "Streamline your habits and boost productivity effortlessly.",
+      "trust_item_1": "Trusted by thousands of fitness enthusiasts",
+      "trust_item_2": "Proven results in habit formation",
+      "center_hero_image": "path/to/hero-image.jpg"
+    },
+    "aiMetadata": {
+      "aiGenerated": true,
+      "isCustomized": false,
+      "lastGenerated": 1759752303647,
+      "excludedElements": [],
+      "aiGeneratedElements": [
+        "headline",
+        "cta_text",
+        "subheadline",
+        "center_hero_image",
+        "trust_item_1",
+        "trust_item_2"
+      ]
+    },
+    "editMetadata": {
+      "isEditing": false,
+      "isMovable": true,
+      "isSelected": false,
+      "isDeletable": true,
+      "isDuplicable": true,
+      "lastModified": 1759752303641,
+      "validationStatus": {
+        "errors": [],
+        "isValid": true,
+        "warnings": [],
+        "lastValidated": 1759752303641,
+        "missingRequired": []
+      },
+      "completionPercentage": 0
+    },
+    "backgroundType": "primary"
+  },
+  "elements": {
+    "cta_text": "Start Free Trial",
+    "headline": "Transform Your Fitness Journey with HabitSync",
+    "subheadline": "Streamline your habits and boost productivity effortlessly.",
+    "trust_item_1": "Trusted by thousands of fitness enthusiasts",
+    "trust_item_2": "Proven results in habit formation",
+    "center_hero_image": "path/to/hero-image.jpg"
+  }
+}
+ [2025-10-06T12:05:12.771Z] DEBUG: 🎨 Rendering secondary section features: {
+  "backgroundCSS": "bg-orange-50/70",
+  "themeSecondary": "bg-orange-50/70",
+  "isFromAccentOptions": false,
+  "accentColor": "emerald",
+  "baseColor": "orange"
+}
+ [2025-10-06T12:05:12.772Z] DEBUG: 🎨 Section features CSS class: bg-orange-50/70
+ [2025-10-06T12:05:12.772Z] DEBUG: 🎨 Section uniqueMechanism CSS class: bg-white
+ [2025-10-06T12:05:12.772Z] DEBUG: 🎨 Section results CSS class: bg-white
+ [2025-10-06T12:05:12.772Z] DEBUG: 🎨 Section comparisonTable CSS class: bg-white
+ [2025-10-06T12:05:12.772Z] DEBUG: 🎨 Section cta CSS class: bg-gradient-to-tr from-orange-400 via-pink-400 to-purple-400
+ [2025-10-06T12:05:12.772Z] DEBUG: 🎨 Section footer CSS class: bg-white
+ [DEV] 🧮 [COMPUTED_EXCLUSION] header computing 7 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] header passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined Object
+ [DEV] 🚫 SKIPPED: Element "nav_item_5" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined Object
+ [DEV] 🚫 SKIPPED: Element "nav_item_6" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "nav_link_1" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "nav_link_2" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "nav_link_3" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "nav_link_4" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined Object
+ [DEV] 🚫 SKIPPED: Element "nav_link_5" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined Object
+ [DEV] 🚫 SKIPPED: Element "nav_link_6" not in schema or excluded - will not appear in UI 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🧮 [COMPUTED_EXCLUSION] header computing 7 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] header passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined Object
+ [DEV] 🚫 SKIPPED: Element "nav_item_5" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined Object
+ [DEV] 🚫 SKIPPED: Element "nav_item_6" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "nav_link_1" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "nav_link_2" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "nav_link_3" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "nav_link_4" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined Object
+ [DEV] 🚫 SKIPPED: Element "nav_link_5" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined Object
+ [DEV] 🚫 SKIPPED: Element "nav_link_6" not in schema or excluded - will not appear in UI 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🧮 [COMPUTED_EXCLUSION] hero computing 15 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] hero passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "supporting_text" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "badge_text" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "trust_items" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_3" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_4" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_5" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "customer_count" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "rating_value" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "rating_count" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "show_social_proof" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "show_customer_avatars" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "avatar_count" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "customer_names" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "avatar_urls" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🧮 [COMPUTED_EXCLUSION] hero computing 15 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] hero passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "supporting_text" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "badge_text" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "trust_items" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_3" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_4" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_5" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "customer_count" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "rating_value" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "rating_count" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "show_social_proof" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "show_customer_avatars" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "avatar_count" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "customer_names" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "avatar_urls" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🧮 [COMPUTED_EXCLUSION] features computing 0 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] features passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "icon_7" is undefined Object
+ [DEV] 🚫 SKIPPED: Element "icon_7" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "icon_8" is undefined Object
+ [DEV] 🚫 SKIPPED: Element "icon_8" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "icon_9" is undefined Object
+ [DEV] 🚫 SKIPPED: Element "icon_9" not in schema or excluded - will not appear in UI 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ 🎯 [ICON] IconGrid - Raw icons from blockContent:
+   icon_1: "❓"
+   icon_2: "❓"
+   icon_3: "❓"
+   icon_4: "❓"
+   icon_5: "❓"
+ 🎯 [ICON] IconGrid - Titles: ["Real-Time Progress Tracking","Customizable Habit Goals","Daily Reminders","Progress Insights","Community Support"]
+ 🎯 [ICON] IconGrid - Feature 1 (Real-Time Progress Tracking):
+   rawIcon: "❓"
+   isValid: true
+   finalIcon: ❓
+   usedFallback: false
+ 🎯 [ICON] IconGrid - Feature 2 (Customizable Habit Goals):
+   rawIcon: "❓"
+   isValid: true
+   finalIcon: ❓
+   usedFallback: false
+ 🎯 [ICON] IconGrid - Feature 3 (Daily Reminders):
+   rawIcon: "❓"
+   isValid: true
+   finalIcon: ❓
+   usedFallback: false
+ 🎯 [ICON] IconGrid - Feature 4 (Progress Insights):
+   rawIcon: "❓"
+   isValid: true
+   finalIcon: ❓
+   usedFallback: false
+ 🎯 [ICON] IconGrid - Feature 5 (Community Support):
+   rawIcon: "❓"
+   isValid: true
+   finalIcon: ❓
+   usedFallback: false
+ [DEV] 🧮 [COMPUTED_EXCLUSION] features computing 0 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] features passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "icon_7" is undefined Object
+ [DEV] 🚫 SKIPPED: Element "icon_7" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "icon_8" is undefined Object
+ [DEV] 🚫 SKIPPED: Element "icon_8" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "icon_9" is undefined Object
+ [DEV] 🚫 SKIPPED: Element "icon_9" not in schema or excluded - will not appear in UI 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ 🎯 [ICON] IconGrid - Raw icons from blockContent:
+   icon_1: "❓"
+   icon_2: "❓"
+   icon_3: "❓"
+   icon_4: "❓"
+   icon_5: "❓"
+ 🎯 [ICON] IconGrid - Titles: ["Real-Time Progress Tracking","Customizable Habit Goals","Daily Reminders","Progress Insights","Community Support"]
+ 🎯 [ICON] IconGrid - Feature 1 (Real-Time Progress Tracking):
+   rawIcon: "❓"
+   isValid: true
+   finalIcon: ❓
+   usedFallback: false
+ 🎯 [ICON] IconGrid - Feature 2 (Customizable Habit Goals):
+   rawIcon: "❓"
+   isValid: true
+   finalIcon: ❓
+   usedFallback: false
+ 🎯 [ICON] IconGrid - Feature 3 (Daily Reminders):
+   rawIcon: "❓"
+   isValid: true
+   finalIcon: ❓
+   usedFallback: false
+ 🎯 [ICON] IconGrid - Feature 4 (Progress Insights):
+   rawIcon: "❓"
+   isValid: true
+   finalIcon: ❓
+   usedFallback: false
+ 🎯 [ICON] IconGrid - Feature 5 (Community Support):
+   rawIcon: "❓"
+   isValid: true
+   finalIcon: ❓
+   usedFallback: false
+ [DEV] 🧮 [COMPUTED_EXCLUSION] uniqueMechanism computing 2 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] uniqueMechanism passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "mechanism_name" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "mechanism_name" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "footer_text" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "footer_text" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_1" is undefined Object
+ [DEV] 🚫 SKIPPED: Element "highlight_icon_1" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_2" is undefined Object
+ [DEV] 🚫 SKIPPED: Element "highlight_icon_2" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_3" is undefined Object
+ [DEV] 🚫 SKIPPED: Element "highlight_icon_3" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_4" is undefined Object
+ [DEV] 🚫 SKIPPED: Element "highlight_icon_4" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_5" is undefined Object
+ [DEV] 🚫 SKIPPED: Element "highlight_icon_5" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_6" is undefined Object
+ [DEV] 🚫 SKIPPED: Element "highlight_icon_6" not in schema or excluded - will not appear in UI 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🧮 [COMPUTED_EXCLUSION] uniqueMechanism computing 2 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] uniqueMechanism passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "mechanism_name" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "mechanism_name" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "footer_text" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "footer_text" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_1" is undefined Object
+ [DEV] 🚫 SKIPPED: Element "highlight_icon_1" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_2" is undefined Object
+ [DEV] 🚫 SKIPPED: Element "highlight_icon_2" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_3" is undefined Object
+ [DEV] 🚫 SKIPPED: Element "highlight_icon_3" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_4" is undefined Object
+ [DEV] 🚫 SKIPPED: Element "highlight_icon_4" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_5" is undefined Object
+ [DEV] 🚫 SKIPPED: Element "highlight_icon_5" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "highlight_icon_6" is undefined Object
+ [DEV] 🚫 SKIPPED: Element "highlight_icon_6" not in schema or excluded - will not appear in UI 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🧮 [COMPUTED_EXCLUSION] results computing 2 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] results passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "layout_style" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "layout_style" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "footer_text" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "footer_text" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ 🎯 [ICON] OutcomeIcons - Raw data: Object
+ 🎯 [ICON] OutcomeIcons - Item 1: Object
+ 🎯 [ICON] OutcomeIcons - Item 2: Object
+ 🎯 [ICON] OutcomeIcons - Item 3: Object
+ 🎯 [ICON] OutcomeIcons - Item 4: Object
+ 🎯 [ICON] OutcomeIcons - Item 5: Object
+ [DEV] 🧮 [COMPUTED_EXCLUSION] results computing 2 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] results passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "layout_style" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "layout_style" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "footer_text" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "footer_text" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ 🎯 [ICON] OutcomeIcons - Raw data: Object
+ 🎯 [ICON] OutcomeIcons - Item 1: Object
+ 🎯 [ICON] OutcomeIcons - Item 2: Object
+ 🎯 [ICON] OutcomeIcons - Item 3: Object
+ 🎯 [ICON] OutcomeIcons - Item 4: Object
+ 🎯 [ICON] OutcomeIcons - Item 5: Object
+ [DEV] 🧮 [COMPUTED_EXCLUSION] comparisonTable computing 1 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] comparisonTable passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "subheadline" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🧮 [COMPUTED_EXCLUSION] comparisonTable computing 1 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] comparisonTable passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "subheadline" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🧮 [COMPUTED_EXCLUSION] cta computing 7 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] cta passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "subheadline" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "urgency_text" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "urgency_text" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined Object
+ [DEV] 🚫 SKIPPED: Element "trust_items" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "customer_count" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_label" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "customer_label" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_stat" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "rating_stat" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_stat" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "uptime_stat" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_label" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "uptime_label" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+ [DEV] 🧮 [COMPUTED_EXCLUSION] cta computing 7 live exclusions (stored=0): Object
+ [DEV] 🔄 [EXTRACT_CONTENT] cta passing exclusions to extractLayoutContent: Object
+ [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined Object
+ [DEV] ❌ EXCLUDED: Skipping element "subheadline" - will not appear in UI (exclusion enforced) 
+rrweb-plugin-console-record.js:2447 [DEV] 🔍 extractLayoutContent DEBUG: element "urgency_text" is undefined Object
+rrweb-plugin-console-record.js:2447 [DEV] ❌ EXCLUDED: Skipping element "urgency_text" - will not appear in UI (exclusion enforced) 
+rrweb-plugin-console-record.js:2447 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined Object
+rrweb-plugin-console-record.js:2447 [DEV] 🚫 SKIPPED: Element "trust_items" not in schema or excluded - will not appear in UI 
+rrweb-plugin-console-record.js:2447 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined Object
+rrweb-plugin-console-record.js:2447 [DEV] ❌ EXCLUDED: Skipping element "customer_count" - will not appear in UI (exclusion enforced) 
+rrweb-plugin-console-record.js:2447 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_label" is undefined Object
+rrweb-plugin-console-record.js:2447 [DEV] ❌ EXCLUDED: Skipping element "customer_label" - will not appear in UI (exclusion enforced) 
+rrweb-plugin-console-record.js:2447 [DEV] 🔍 extractLayoutContent DEBUG: element "rating_stat" is undefined Object
+rrweb-plugin-console-record.js:2447 [DEV] ❌ EXCLUDED: Skipping element "rating_stat" - will not appear in UI (exclusion enforced) 
+rrweb-plugin-console-record.js:2447 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_stat" is undefined Object
+rrweb-plugin-console-record.js:2447 [DEV] ❌ EXCLUDED: Skipping element "uptime_stat" - will not appear in UI (exclusion enforced) 
+rrweb-plugin-console-record.js:2447 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_label" is undefined Object
+rrweb-plugin-console-record.js:2447 [DEV] ❌ EXCLUDED: Skipping element "uptime_label" - will not appear in UI (exclusion enforced) 
+rrweb-plugin-console-record.js:2447 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+rrweb-plugin-console-record.js:2447 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+rrweb-plugin-console-record.js:2447 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+rrweb-plugin-console-record.js:2447 [DEV] 🧮 [COMPUTED_EXCLUSION] footer computing 14 live exclusions (stored=0): Object
+rrweb-plugin-console-record.js:2447 [DEV] 🔄 [EXTRACT_CONTENT] footer passing exclusions to extractLayoutContent: Object
+rrweb-plugin-console-record.js:2447 [DEV] 🔍 extractLayoutContent DEBUG: element "company_name" is undefined Object
+rrweb-plugin-console-record.js:2447 [DEV] ❌ EXCLUDED: Skipping element "company_name" - will not appear in UI (exclusion enforced) 
+rrweb-plugin-console-record.js:2447 [DEV] 🔍 extractLayoutContent DEBUG: element "tagline" is undefined Object
+rrweb-plugin-console-record.js:2447 [DEV] ❌ EXCLUDED: Skipping element "tagline" - will not appear in UI (exclusion enforced) 
+rrweb-plugin-console-record.js:2447 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+rrweb-plugin-console-record.js:2447 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+rrweb-plugin-console-record.js:2447 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+rrweb-plugin-console-record.js:2447 [DEV] 🧮 [COMPUTED_EXCLUSION] footer computing 14 live exclusions (stored=0): Object
+rrweb-plugin-console-record.js:2447 [DEV] 🔄 [EXTRACT_CONTENT] footer passing exclusions to extractLayoutContent: Object
+rrweb-plugin-console-record.js:2447 [DEV] 🔍 extractLayoutContent DEBUG: element "company_name" is undefined Object
+rrweb-plugin-console-record.js:2447 [DEV] ❌ EXCLUDED: Skipping element "company_name" - will not appear in UI (exclusion enforced) 
+rrweb-plugin-console-record.js:2447 [DEV] 🔍 extractLayoutContent DEBUG: element "tagline" is undefined Object
+rrweb-plugin-console-record.js:2447 [DEV] ❌ EXCLUDED: Skipping element "tagline" - will not appear in UI (exclusion enforced) 
+rrweb-plugin-console-record.js:2447 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+rrweb-plugin-console-record.js:2447 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+rrweb-plugin-console-record.js:2447 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: Object
+rrweb-plugin-console-record.js:2447 [2025-10-06T12:05:12.808Z] DEBUG: 🚩 Feature Flags Status: {
+  "tokenId": "Umz2y80PAphz",
+  "enableVariableMode": true,
+  "enableHybridMode": true,
+  "enableLegacyFallbacks": true,
+  "shouldUseVariableSystem": true,
+  "rolloutPercentage": 100,
+  "staffAccess": true
+}
+rrweb-plugin-console-record.js:2447 [2025-10-06T12:05:12.810Z] DEBUG: 🔍 Starting CSS variable validation...
+rrweb-plugin-console-record.js:2447 🎨 CSS Variable System Validation
+rrweb-plugin-console-record.js:2447 [2025-10-06T12:05:12.866Z] DEBUG: ✅ Phase: hybrid
+rrweb-plugin-console-record.js:2447 [2025-10-06T12:05:12.866Z] DEBUG: 🎯 Success: true
+rrweb-plugin-console-record.js:2447 ⚠️ Warnings:
+rrweb-plugin-console-record.js:2447 ❌ Errors:
+rrweb-plugin-console-record.js:2447 💡 Recommendations:
+rrweb-plugin-console-record.js:2447 [2025-10-06T12:05:12.867Z] INFO: Check VariableThemeInjector integration
+rrweb-plugin-console-record.js:2447 [2025-10-06T12:05:12.867Z] INFO: Check VariableThemeInjector integration
+rrweb-plugin-console-record.js:2447 [2025-10-06T12:05:12.867Z] DEBUG: 📊 CSS Variables found: 0
+rrweb-plugin-console-record.js:2447 [2025-10-06T12:05:12.867Z] DEBUG: 🌐 Browser support: {
   "supportsCSSVariables": true,
   "supportsBackdropFilter": true,
   "supportsGridLayout": true,
   "recommendsLegacyMode": false
 }
-logger.ts:102 🎨 CSS Variable System Validation
-logger.ts:84 [2025-10-06T10:00:42.374Z] DEBUG: ✅ Phase: hybrid
-logger.ts:84 [2025-10-06T10:00:42.374Z] DEBUG: 🎯 Success: true
-logger.ts:102 ⚠️ Warnings:
-logger.ts:102 ❌ Errors:
-logger.ts:102 💡 Recommendations:
-logger.ts:78 [2025-10-06T10:00:42.375Z] INFO: Check VariableThemeInjector integration
-logger.ts:78 [2025-10-06T10:00:42.375Z] INFO: Check VariableThemeInjector integration
-logger.ts:84 [2025-10-06T10:00:42.376Z] DEBUG: 📊 CSS Variables found: 0
-logger.ts:84 [2025-10-06T10:00:42.376Z] DEBUG: 🌐 Browser support: {
+rrweb-plugin-console-record.js:2447 🎨 CSS Variable System Validation
+rrweb-plugin-console-record.js:2447 [2025-10-06T12:05:12.867Z] DEBUG: ✅ Phase: hybrid
+rrweb-plugin-console-record.js:2447 [2025-10-06T12:05:12.867Z] DEBUG: 🎯 Success: true
+rrweb-plugin-console-record.js:2447 ⚠️ Warnings:
+rrweb-plugin-console-record.js:2447 ❌ Errors:
+rrweb-plugin-console-record.js:2447 💡 Recommendations:
+rrweb-plugin-console-record.js:2447 [2025-10-06T12:05:12.867Z] INFO: Check VariableThemeInjector integration
+rrweb-plugin-console-record.js:2447 [2025-10-06T12:05:12.867Z] INFO: Check VariableThemeInjector integration
+rrweb-plugin-console-record.js:2447 [2025-10-06T12:05:12.868Z] DEBUG: 📊 CSS Variables found: 0
+rrweb-plugin-console-record.js:2447 [2025-10-06T12:05:12.868Z] DEBUG: 🌐 Browser support: {
   "supportsCSSVariables": true,
   "supportsBackdropFilter": true,
   "supportsGridLayout": true,
   "recommendsLegacyMode": false
 }
-logger.ts:102 🎨 CSS Variable System Validation
-logger.ts:84 [2025-10-06T10:00:42.376Z] DEBUG: ✅ Phase: hybrid
-logger.ts:84 [2025-10-06T10:00:42.376Z] DEBUG: 🎯 Success: true
-logger.ts:102 ⚠️ Warnings:
-logger.ts:102 ❌ Errors:
-logger.ts:102 💡 Recommendations:
-logger.ts:78 [2025-10-06T10:00:42.378Z] INFO: Check VariableThemeInjector integration
-logger.ts:78 [2025-10-06T10:00:42.378Z] INFO: Check VariableThemeInjector integration
-logger.ts:84 [2025-10-06T10:00:42.378Z] DEBUG: 📊 CSS Variables found: 0
-logger.ts:84 [2025-10-06T10:00:42.378Z] DEBUG: 🌐 Browser support: {
+rrweb-plugin-console-record.js:2447 🎨 CSS Variable System Validation
+rrweb-plugin-console-record.js:2447 [2025-10-06T12:05:12.868Z] DEBUG: ✅ Phase: hybrid
+rrweb-plugin-console-record.js:2447 [2025-10-06T12:05:12.868Z] DEBUG: 🎯 Success: true
+rrweb-plugin-console-record.js:2447 ⚠️ Warnings:
+rrweb-plugin-console-record.js:2447 ❌ Errors:
+rrweb-plugin-console-record.js:2447 💡 Recommendations:
+rrweb-plugin-console-record.js:2447 [2025-10-06T12:05:12.868Z] INFO: Check VariableThemeInjector integration
+rrweb-plugin-console-record.js:2447 [2025-10-06T12:05:12.868Z] INFO: Check VariableThemeInjector integration
+rrweb-plugin-console-record.js:2447 [2025-10-06T12:05:12.868Z] DEBUG: 📊 CSS Variables found: 0
+rrweb-plugin-console-record.js:2447 [2025-10-06T12:05:12.868Z] DEBUG: 🌐 Browser support: {
   "supportsCSSVariables": true,
   "supportsBackdropFilter": true,
   "supportsGridLayout": true,
   "recommendsLegacyMode": false
 }
+rrweb-plugin-console-record.js:2447 🎨 CSS Variable System Validation
+rrweb-plugin-console-record.js:2447 [2025-10-06T12:05:12.913Z] DEBUG: ✅ Phase: hybrid
+rrweb-plugin-console-record.js:2447 [2025-10-06T12:05:12.913Z] DEBUG: 🎯 Success: true
+rrweb-plugin-console-record.js:2447 ⚠️ Warnings:
+rrweb-plugin-console-record.js:2447 ❌ Errors:
+rrweb-plugin-console-record.js:2447 💡 Recommendations:
+rrweb-plugin-console-record.js:2447 [2025-10-06T12:05:12.913Z] INFO: Check VariableThemeInjector integration
+rrweb-plugin-console-record.js:2447 [2025-10-06T12:05:12.913Z] INFO: Check VariableThemeInjector integration
+rrweb-plugin-console-record.js:2447 [2025-10-06T12:05:12.913Z] DEBUG: 📊 CSS Variables found: 0
+rrweb-plugin-console-record.js:2447 [2025-10-06T12:05:12.913Z] DEBUG: 🌐 Browser support: {
+  "supportsCSSVariables": true,
+  "supportsBackdropFilter": true,
+  "supportsGridLayout": true,
+  "recommendsLegacyMode": false
+}
+rrweb-plugin-console-record.js:2447 [Fast Refresh] rebuilding
+rrweb-plugin-console-record.js:2447 [Fast Refresh] done in 51ms
+
+
+BAckedn logs:
+
+[2025-10-06T12:03:37.984Z] DEBUG: 🚀 Starting inference for: HabitSync – A cross-device habit tracker that uses AI to adjust goals based on your actual progress ...
+[2025-10-06T12:03:40.799Z] DEBUG: ✅ AI inference completed
+[2025-10-06T12:03:40.800Z] INFO: 📤 Raw AI Output: {
+  "marketCategory": "Personal Productivity Tools",
+  "marketSubcategory": "Habit Tracking & Goal Setting",
+  "keyProblem": "Individuals want to develop and maintain good habits but struggle to adjust their goals based on real-time progress and patterns.",
+  "targetAudience": "Individuals looking to improve their habits",
+  "startupStage": "MVP",
+  "pricingModel": "Freemium",
+  "landingPageGoals": "Start Tracking Habits"
+}
+[2025-10-06T12:03:40.800Z] DEBUG: 🔍 Starting semantic validation...
+[2025-10-06T12:03:40.800Z] INFO: 🔄 Sending to embedding validation: {
+  "marketCategory": "Personal Productivity Tools",
+  "marketSubcategory": "Habit Tracking & Goal Setting",
+  "targetAudience": "Individuals looking to improve their habits"
+}
+[2025-10-06T12:03:40.800Z] DEBUG: 🔍 Starting semantic validation...
+[DEV] 🔑 Generating embedding for: Personal Productivity Tools...
+[2025-10-06T12:03:42.395Z] DEBUG: ✅ Embedding generated successfully
+[DEV] 🔑 Generating embedding for: Personal Productivity Tools...
+[2025-10-06T12:03:44.340Z] DEBUG: ✅ Embedding generated successfully
+[DEV] 🔑 Generating embedding for: Habit Tracking & Goal Setting...
+[DEV] 🔑 Generating embedding for: Individuals looking to improve their habits...
+[DEV] 🔑 Generating embedding for: MVP...
+[DEV] 🔑 Generating embedding for: Freemium...
+[DEV] 🔑 Generating embedding for: Start Tracking Habits...
+[2025-10-06T12:03:45.258Z] DEBUG: ✅ Embedding generated successfully
+[2025-10-06T12:03:45.305Z] DEBUG: ✅ Embedding generated successfully
+[2025-10-06T12:03:45.326Z] DEBUG: ✅ Embedding generated successfully
+[2025-10-06T12:03:45.552Z] DEBUG: ✅ Embedding generated successfully
+[DEV] 🔑 Generating embedding for: Start Tracking Habits...
+[DEV] 🔑 Generating embedding for: MVP...
+[2025-10-06T12:03:45.774Z] DEBUG: ✅ Embedding generated successfully
+[DEV] 🔑 Generating embedding for: Freemium...
+[2025-10-06T12:03:45.878Z] DEBUG: ✅ Embedding generated successfully
+[2025-10-06T12:03:45.882Z] DEBUG: ✅ Embedding generated successfully
+[DEV] 🔑 Generating embedding for: Individuals looking to improve their habits...
+[2025-10-06T12:03:46.271Z] DEBUG: ✅ Embedding generated successfully
+[2025-10-06T12:03:46.272Z] DEBUG: ✅ Embedding generated successfully
+[2025-10-06T12:03:46.454Z] DEBUG: 🔍 Market Category: "Personal Productivity Tools" (HIGH - 100.0%)
+[2025-10-06T12:03:46.455Z] DEBUG: 🔍 Market Subcategory: "Habit & Routine Tracking" (MEDIUM - 80.8%)
+[2025-10-06T12:03:46.455Z] DEBUG: 🔍 Target Audience: "Fitness Enthusiasts" (LOW - 46.5%)
+[2025-10-06T12:03:46.455Z] DEBUG: 🔍 Key Problem Getting Solved: "Individuals want to develop and maintain good habits but struggle to adjust their goals based on real-time progress and patterns." (HIGH - 100.0%)
+[2025-10-06T12:03:46.455Z] DEBUG: 🔍 Startup Stage: "MVP in development" (MEDIUM - 84.0%)
+[2025-10-06T12:03:46.455Z] DEBUG: 🔍 Landing Page Goals: "Start Free Trial" (LOW - 33.5%)
+[2025-10-06T12:03:46.456Z] DEBUG: 🔍 Pricing Category and Model: "Freemium (limited features)" (HIGH - 83.0%)
+[2025-10-06T12:03:46.456Z] DEBUG: ✅ Semantic validation completed
+[2025-10-06T12:03:46.456Z] INFO: 📊 Validation Results Comparison: {
+  "marketCategory": {
+    "ai": "Personal Productivity Tools",
+    "validated": "Personal Productivity Tools",
+    "confidence": 1
+  },
+  "marketSubcategory": {
+    "ai": "Habit Tracking & Goal Setting",
+    "validated": "Habit & Routine Tracking",
+    "confidence": 0.8082029180713092
+  },
+  "targetAudience": {
+    "ai": "Individuals looking to improve their habits",
+    "validated": "Fitness Enthusiasts",
+    "confidence": 0.46469595341067743
+  }
+}
+ POST /api/infer-fields 200 in 8971ms
+ ✓ Compiled /api/saveDraft in 129ms (962 modules)
+[DEV] Rate limit check - Key: user:user_2xd9rxqOOyXmfy1JhrFtKOmD1yw, Requests: 1/30, Remaining: 29 
+ POST /api/saveDraft 200 in 464ms
+[DEV] Rate limit check - Key: user:user_2xd9rxqOOyXmfy1JhrFtKOmD1yw, Requests: 2/30, Remaining: 28 
+ POST /api/saveDraft 200 in 176ms
+[DEV] Rate limit check - Key: user:user_2xd9rxqOOyXmfy1JhrFtKOmD1yw, Requests: 3/30, Remaining: 27 
+ POST /api/saveDraft 200 in 175ms
+[DEV] Rate limit check - Key: user:user_2xd9rxqOOyXmfy1JhrFtKOmD1yw, Requests: 4/30, Remaining: 26 
+ POST /api/saveDraft 200 in 806ms
+[DEV] Rate limit check - Key: user:user_2xd9rxqOOyXmfy1JhrFtKOmD1yw, Requests: 5/30, Remaining: 25 
+ POST /api/saveDraft 200 in 696ms
+[DEV] Rate limit check - Key: user:user_2xd9rxqOOyXmfy1JhrFtKOmD1yw, Requests: 6/30, Remaining: 24 
+ POST /api/saveDraft 200 in 916ms
+ ✓ Compiled /api/market-insights in 232ms (966 modules)
+[DEV] Rate limit check - Key: user:user_2xd9rxqOOyXmfy1JhrFtKOmD1yw, Requests: 1/30, Remaining: 29 
+[2025-10-06T12:03:58.055Z] DEBUG: 🔍 Market insights request received
+[2025-10-06T12:03:58.056Z] DEBUG: 🔍 Request fields validated
+[2025-10-06T12:03:58.056Z] DEBUG: 🚀 Starting market insights generation
+[2025-10-06T12:03:58.056Z] DEBUG: 🤖 Generating features with AI...
+ POST /api/saveDraft 200 in 864ms
+[2025-10-06T12:04:02.104Z] DEBUG: ✅ Generated 5 features successfully
+[2025-10-06T12:04:02.104Z] DEBUG: 📊 AI-Generated Features: {
+  "count": 5,
+  "features": [
+    {
+      "index": 1,
+      "feature": "Real-Time Progress Tracking",
+      "benefit": "Monitor your habits instantly to adjust goals effectively.",
+      "featureLength": 27,
+      "benefitLength": 58
+    },
+    {
+      "index": 2,
+      "feature": "Customizable Habit Goals",
+      "benefit": "Set personalized targets that fit your fitness journey.",
+      "featureLength": 24,
+      "benefitLength": 55
+    },
+    {
+      "index": 3,
+      "feature": "Daily Reminders",
+      "benefit": "Stay on track with timely prompts to reinforce habits.",
+      "featureLength": 15,
+      "benefitLength": 54
+    },
+    {
+      "index": 4,
+      "feature": "Progress Insights",
+      "benefit": "Analyze patterns to optimize your routine and improve results.",
+      "featureLength": 17,
+      "benefitLength": 62
+    },
+    {
+      "index": 5,
+      "feature": "Community Support",
+      "benefit": "Connect with peers for motivation and accountability in your journey.",
+      "featureLength": 17,
+      "benefitLength": 69
+    }
+  ],
+  "rawFeatures": [
+    {
+      "feature": "Real-Time Progress Tracking",
+      "benefit": "Monitor your habits instantly to adjust goals effectively."
+    },
+    {
+      "feature": "Customizable Habit Goals",
+      "benefit": "Set personalized targets that fit your fitness journey."
+    },
+    {
+      "feature": "Daily Reminders",
+      "benefit": "Stay on track with timely prompts to reinforce habits."
+    },
+    {
+      "feature": "Progress Insights",
+      "benefit": "Analyze patterns to optimize your routine and improve results."
+    },
+    {
+      "feature": "Community Support",
+      "benefit": "Connect with peers for motivation and accountability in your journey."
+    }
+  ]
+}
+[2025-10-06T12:04:02.105Z] DEBUG: 🔍 Performing AI market research for hidden copywriting fields...
+[2025-10-06T12:04:02.105Z] DEBUG: 🧠 Starting AI inference for hidden copywriting fields...
+[2025-10-06T12:04:02.105Z] DEBUG: 📊 Input context: {
+  "category": "Personal Productivity Tools",
+  "audience": "Fitness Enthusiasts",
+  "problem": "Individuals want to develop and maintain good habits but struggle to adjust their goals based on rea..."
+}
+[2025-10-06T12:04:03.897Z] DEBUG: 🤖 Raw AI response for hidden fields: {
+  "awarenessLevel": "problem-aware",
+  "copyIntent": "pain-led",
+  "toneProfile": "friendly-helpful",
+  "marketSophisticationLevel": "level-3",
+  "problemType": "personal-growth-or-productivity"
+}
+[2025-10-06T12:04:03.898Z] INFO: ✅ Hidden fields inferred successfully: {
+  "awarenessLevel": "problem-aware",
+  "copyIntent": "pain-led",
+  "toneProfile": "friendly-helpful",
+  "marketSophisticationLevel": "level-3",
+  "problemType": "personal-growth-or-productivity"
+}
+[2025-10-06T12:04:03.898Z] DEBUG: 🧠 Hidden Inferred Fields (AI Analysis): {
+  "awarenessLevel": "problem-aware",
+  "copyIntent": "pain-led",
+  "toneProfile": "friendly-helpful",
+  "marketSophisticationLevel": "level-3",
+  "problemType": "personal-growth-or-productivity",
+  "fieldCount": 5,
+  "rawHiddenFields": {
+    "awarenessLevel": "problem-aware",
+    "copyIntent": "pain-led",
+    "toneProfile": "friendly-helpful",
+    "marketSophisticationLevel": "level-3",
+    "problemType": "personal-growth-or-productivity"
+  }
+}
+[2025-10-06T12:04:03.898Z] DEBUG: 📝 Copywriting Strategy Mapping: {
+  "audience": "Fitness Enthusiasts → Awareness: problem-aware",
+  "messaging": "pain-led copy with friendly-helpful tone",
+  "market": "Sophistication Level level-3",
+  "problem": "Individuals want to develop and maintain good habits but struggle to adjust their goals based on real-time progress and patterns. → Type: personal-growth-or-productivity", 
+  "approach": "Focus on problem agitation and pain points"
+}
+[2025-10-06T12:04:03.898Z] DEBUG: ✅ Market insights generation completed
+[2025-10-06T12:04:03.898Z] DEBUG: 📤 Sending Market Insights Response: {
+  "featureCount": 5,
+  "hiddenFieldCount": 5,
+  "hasAwarenessLevel": true,
+  "hasCopyIntent": true,
+  "hasToneProfile": true,
+  "summary": {
+    "features": "Real-Time Progress Tracking, Customizable Habit Goals, Daily Reminders, Progress Insights, Community Support",
+    "tone": "friendly-helpful",
+    "intent": "pain-led"
+  }
+}
+ POST /api/market-insights 200 in 6375ms
+ ○ Compiling /api/generate-landing ...
+ ✓ Compiled /api/generate-landing in 613ms (950 modules)
+[DEV] Rate limit check - Key: ip:::1, Requests: 1/5, Remaining: 4 
+[DEV] 🚀 /api/generate-landing route called 
+[DEV] 📝 Request received: {
+  hasPrompt: false,
+  promptLength: 0,
+  hasOnboardingStore: true,
+  hasPageStore: true,
+  hasLayoutRequirements: true,
+  use2Phase: true
+}
+[DEV] 🔍 Environment check: {
+  NEXT_PUBLIC_USE_MOCK_GPT: 'false',
+  token: 'Umz2y80PAp...',
+  isDemoToken: false
+}
+[DEV] 🧠 Starting 2-phase strategic copy generation
+[DEV] 📊 Phase 1: Strategic Analysis
+[DEV] 🔍 Step 1: Validating input data...
+[DEV] ✅ Input validation passed: { sections: 8, hasOnboardingData: true, hasFeatures: true }
+[DEV] 🗺️ Step 2: Generating complete elements map...
+[DEV] ✅ Elements map generated successfully: { sectionsProcessed: 8, firstSection: 'header' }
+[2025-10-06T12:04:23.098Z] DEBUG: 🎯 Using optimal midpoint for header: 3 (range: 2-3)
+[2025-10-06T12:04:23.098Z] DEBUG: ✅ Final card count for header: 3 (source: default, constraints: 1-3)
+[2025-10-06T12:04:23.099Z] DEBUG: 🎯 Using optimal midpoint for hero: 3 (range: 2-3)
+[2025-10-06T12:04:23.099Z] DEBUG: ✅ Final card count for hero: 3 (source: default, constraints: 1-3)
+[2025-10-06T12:04:23.099Z] DEBUG: 🎯 Using optimal midpoint for features: 5 (range: 4-6)
+[2025-10-06T12:04:23.099Z] DEBUG: ✅ Final card count for features: 5 (source: default, constraints: 3-9)
+[2025-10-06T12:04:23.099Z] DEBUG: 🎯 Using optimal midpoint for uniqueMechanism: 4 (range: 3-4)
+[2025-10-06T12:04:23.099Z] DEBUG: ✅ Final card count for uniqueMechanism: 4 (source: default, constraints: 2-6)
+[2025-10-06T12:04:23.099Z] DEBUG: 🎯 Using optimal midpoint for results: 5 (range: 4-6)
+[2025-10-06T12:04:23.099Z] DEBUG: ✅ Final card count for results: 5 (source: default, constraints: 3-8)
+[2025-10-06T12:04:23.100Z] DEBUG: 🎯 Using optimal midpoint for comparisonTable: 6 (range: 5-7)
+[2025-10-06T12:04:23.100Z] DEBUG: ✅ Final card count for comparisonTable: 6 (source: default, constraints: 4-10)
+[2025-10-06T12:04:23.100Z] DEBUG: 🎯 Using optimal midpoint for cta: 4 (range: 3-4)
+[2025-10-06T12:04:23.100Z] DEBUG: ✅ Final card count for cta: 4 (source: default, constraints: 2-5)
+[2025-10-06T12:04:23.100Z] DEBUG: 🎯 Using optimal midpoint for footer: 3 (range: 2-3)
+[2025-10-06T12:04:23.100Z] DEBUG: ✅ Final card count for footer: 3 (source: default, constraints: 1-3)
+[2025-10-06T12:04:23.101Z] DEBUG: 🎯 Card Requirements Analysis: === CARD REQUIREMENTS DEBUG REPORT ===
+
+COVERAGE: 8/8 sections have card requirements
+
+SECTION DETAILS:
+
+header (Header.NavWithCTAHeader):
+  Card Requirements: 1-3 cards
+  Optimal Range: 2-3
+  Recommended Count: 3
+  Description: undefined
+
+hero (Hero.centerStacked):
+  Card Requirements: 1-3 cards
+  Optimal Range: 2-3
+  Recommended Count: 3
+  Description: undefined
+
+features (Features.IconGrid):
+  Card Requirements: 3-9 cards
+  Optimal Range: 4-6
+  Recommended Count: 5
+  Description: Feature cards with icons
+
+uniqueMechanism (UniqueMechanism.StackedHighlights):
+  Card Requirements: 2-6 cards
+  Optimal Range: 3-4
+  Recommended Count: 4
+  Description: Unique mechanism highlight cards
+
+results (Results.OutcomeIcons):
+  Card Requirements: 3-8 cards
+  Optimal Range: 4-6
+  Recommended Count: 5
+  Description: Outcome icons with descriptions
+
+comparisonTable (ComparisonTable.BasicFeatureGrid):
+  Card Requirements: 4-10 rows
+  Optimal Range: 5-7
+  Recommended Count: 6
+  Description: Feature comparison rows
+
+cta (Cta.CenteredHeadlineCTA):
+  Card Requirements: 2-5 items
+  Optimal Range: 3-4
+  Recommended Count: 4
+  Description: Trust indicators and benefit statements
+
+footer (Footer.LinksAndSocialFooter):
+  Card Requirements: 1-3 cards
+  Optimal Range: 2-3
+  Recommended Count: 3
+  Description: undefined
+
+
+STRATEGY MAPPING:
+
+
+USER FEATURES: 5 features provided
+  Features section recommended count: 5
+  ✅ User content priority enabled
+
+=== END REPORT ===
+[DEV] 📝 Step 3: Building strategy prompt...
+[DEV] ✅ Strategy prompt built successfully: { promptLength: 6338, hasLayoutRequirements: true, sections: 8 }
+[2025-10-06T12:04:23.103Z] DEBUG: 🤖 Strategy Prompt Generated: {
+  "length": 6338,
+  "sections": 19,
+  "hasLayoutRequirements": true,
+  "userFeatureCount": 5,
+  "sectionsCount": 8
+}
+[2025-10-06T12:04:23.103Z] DEBUG: 📝 Strategy Prompt Preview: You are an expert copywriter and conversion strategist analyzing a business for high-converting landing page copy.
+
+Your task: Perform strategic analysis to determine the optimal copy approach and exact card counts needed for maximum conversion.
+
+BUSINESS CONTEXT:
+Product/Service: HabitSync – A cross-device habit tracker that uses AI to adjust goals based on your actual progress and patterns.
+Target Audience: Fitness Enthusiasts
+Business Type: Personal Productivity Tools
+Market Category: Habit & Routine Tracking
+Startup Stage: MVP in development
+Landing Goal: Start Free Trial
+
+KEY FEATURES & BENEFITS:
+• Real-Time Progress Tracking: Monitor your habits instantly to adjust goals effectively.
+• Customizable Habit Goals: Set personalized targets that fit your fitness journey.
+• Daily... [truncated, total: 6338 chars]
+[DEV] 🤖 Step 4: Calling AI provider for strategy generation...
+[DEV] ✅ AI provider call completed: {
+  success: true,
+  provider: 'OpenAI',
+  model: 'gpt-4o-mini',
+  hasData: true,
+  hasError: false
+}
+[2025-10-06T12:04:31.882Z] DEBUG: 🔄 Strategy AI Response Received: {
+  "contentLength": 2246,
+  "usage": {
+    "promptTokens": 1315,
+    "completionTokens": 426,
+    "totalTokens": 1741
+  },
+  "hasChoices": true,
+  "provider": "OpenAI",
+  "model": "gpt-4o-mini"
+}
+[2025-10-06T12:04:31.883Z] DEBUG: 📤 Strategy Response Preview: ```json
+{
+  "copyStrategy": {
+    "bigIdea": "Transform your fitness journey with personalized AI-driven habit tracking that adapts to you.",
+    "corePromise": "From inconsistent habits and unmet goals to a streamlined, effective routine that evolves with your progress.",
+    "uniqueMechanism": "HabitSync's AI analyzes your real-time data to dynamically adjust your habit goals, ensuring they are always relevant and achievable.",
+    "primaryEmotion": "Desire for improvement and success in personal fitness goals.",
+    "objectionPriority": [
+      "Skepticism about the effectiveness of AI-driven habit tracking.",
+      "Concerns about the usability and integration across devices.",
+      "Fear of not achieving personal fitness goals despite using a new tool."
+    ]
+  },
+  "cardCounts": {
+    "features": 5,
+    "uniqueMechanism": 4,
+    "results": 5,
+    "comparison": 6
+  },
+  "reasoning": {
+    "features": "Five feature cards provide a comprehensive overview of HabitSync's... [truncated, total: 2246 chars]
+[2025-10-06T12:04:31.883Z] DEBUG: 🧠 Parsing strategy response from AI... {
+  "contentLength": 2246,
+  "hasLayoutRequirements": true,
+  "sectionsCount": 8
+}
+[2025-10-06T12:04:31.884Z] DEBUG: 🔍 Starting enhanced JSON extraction from AI response: {
+  "contentLength": 2246,
+  "hasCodeBlocks": true,
+  "hasJsonKeyword": true,
+  "startsWithBrace": false,
+  "contentPreview": "```json\n{\n  \"copyStrategy\": {\n    \"bigIdea\": \"Transform your fitness journey with personalized AI-dr..."
+}
+[2025-10-06T12:04:31.884Z] DEBUG: 📝 Content cleaned for extraction: {
+  "originalLength": 2246,
+  "cleanedLength": 2246,
+  "significantChange": false
+}
+[2025-10-06T12:04:31.884Z] DEBUG: ✅ JSON extracted from standard code block: {
+  "extractedLength": 2234,
+  "startsWithBrace": true,
+  "endsWithBrace": true
+}
+[2025-10-06T12:04:31.884Z] DEBUG: 🔍 Attempting to parse extracted JSON... {
+  "jsonLength": 2234,
+  "firstChars": "{\n  \"copyStrategy\": {\n    \"bigIdea\": \"Transform your fitness journey with personalized AI-driven hab..."
+}
+[2025-10-06T12:04:31.885Z] DEBUG: ✅ JSON parsing successful: {
+  "topLevelKeys": [
+    "copyStrategy",
+    "cardCounts",
+    "reasoning"
+  ],
+  "hasCopyStrategy": true,
+  "hasCardCounts": true,
+  "hasReasoning": true
+}
+[2025-10-06T12:04:31.885Z] DEBUG: 🔍 Validating copy strategy...
+[2025-10-06T12:04:31.885Z] DEBUG: 🔍 Validating copy strategy fields: {
+  "availableFields": [
+    "bigIdea",
+    "corePromise",
+    "uniqueMechanism",
+    "primaryEmotion",
+    "objectionPriority"
+  ],
+  "fieldCount": 5
+}
+[2025-10-06T12:04:31.885Z] DEBUG: ✅ Copy strategy validation completed: {
+  "validFields": 5,
+  "totalFields": 5,
+  "successRate": "100%",
+  "isValid": true,
+  "warningCount": 0,
+  "errorCount": 0
+}
+[2025-10-06T12:04:31.885Z] DEBUG: ✅ Copy strategy validation completed: {
+  "isValid": true,
+  "wasCorrected": true,
+  "warningCount": 0
+}
+[2025-10-06T12:04:31.886Z] DEBUG: 🔍 Validating card counts...
+[2025-10-06T12:04:31.886Z] DEBUG: 🔄 Section key normalization: {
+  "originalKeys": [
+    "features",
+    "uniqueMechanism",
+    "results",
+    "comparison"
+  ],
+  "normalizedKeys": [
+    "features",
+    "uniqueMechanism",
+    "results",
+    "comparison"
+  ],
+  "mappingsApplied": []
+}
+[2025-10-06T12:04:31.886Z] ERROR: ❌ Card counts validation failed: {
+  "errors": [
+    "Card count for 'cta' must be a positive integer"
+  ],
+  "receivedCounts": {
+    "features": 5,
+    "uniqueMechanism": 4,
+    "results": 5,
+    "comparison": 6
+  },
+  "expectedSections": [
+    "header",
+    "hero",
+    "features",
+    "uniqueMechanism",
+    "results",
+    "comparisonTable",
+    "cta",
+    "footer"
+  ]
+}
+[2025-10-06T12:04:31.887Z] WARN: ⚠️ Using intelligent strategy defaults due to AI parsing failure
+[DEV] ✅ Strategy parsed successfully: {
+  bigIdea: 'Streamline your workflow and boost productivity',
+  cardCounts: {
+    features: 5,
+    testimonials: 3,
+    faq: 5,
+    results: 5,
+    social_proof: 4,
+    pricing: 3,
+    problem: 2,
+    comparison: 6,
+    uniqueMechanism: 4,
+    cta: 4
+  },
+  errors: [],
+  warnings: [ 'Using intelligent defaults due to strategy parsing failure' ]
+}
+[2025-10-06T12:04:31.888Z] DEBUG: 🎯 Mapping strategy counts to UIBlocks: {
+  "strategyCounts": {
+    "features": 5,
+    "testimonials": 3,
+    "faq": 5,
+    "results": 5,
+    "social_proof": 4,
+    "pricing": 3,
+    "problem": 2,
+    "comparison": 6,
+    "uniqueMechanism": 4,
+    "cta": 4
+  },
+  "sectionsCount": 8
+}
+[2025-10-06T12:04:31.888Z] DEBUG: ℹ️ Skipping card count for layout section: header
+[2025-10-06T12:04:31.888Z] DEBUG: ℹ️ Skipping card count for layout section: hero
+[2025-10-06T12:04:31.888Z] DEBUG: Applied feature priority: user=5, strategy=5, final=5
+[2025-10-06T12:04:31.888Z] DEBUG: Mapped features: strategy=5 → constrained=5
+[2025-10-06T12:04:31.888Z] DEBUG: Mapped uniqueMechanism: strategy=4 → constrained=4
+[2025-10-06T12:04:31.889Z] DEBUG: Mapped results: strategy=5 → constrained=5
+[2025-10-06T12:04:31.889Z] DEBUG: Mapped comparisonTable: strategy=6 → constrained=6
+[2025-10-06T12:04:31.889Z] DEBUG: ℹ️ Skipping card count for layout section: cta
+[2025-10-06T12:04:31.889Z] DEBUG: ℹ️ Skipping card count for layout section: footer
+[2025-10-06T12:04:31.889Z] DEBUG: ✅ Strategy mapping completed: {
+  "mappedSections": 4,
+  "mappedCounts": {
+    "features_IconGrid": 5,
+    "uniqueMechanism_StackedHighlights": 4,
+    "results_OutcomeIcons": 5,
+    "comparisonTable_BasicFeatureGrid": 6
+  }
+}
+[DEV] 📊 Mapped card counts to UIBlocks: {
+  originalCounts: {
+    features: 5,
+    testimonials: 3,
+    faq: 5,
+    results: 5,
+    social_proof: 4,
+    pricing: 3,
+    problem: 2,
+    comparison: 6,
+    uniqueMechanism: 4,
+    cta: 4
+  },
+  mappedCounts: {
+    features_IconGrid: 5,
+    uniqueMechanism_StackedHighlights: 4,
+    results_OutcomeIcons: 5,
+    comparisonTable_BasicFeatureGrid: 6
+  },
+  sectionsCount: 8
+}
+[2025-10-06T12:04:31.890Z] DEBUG: 🎯 Using optimal midpoint for header: 3 (range: 2-3)
+[2025-10-06T12:04:31.890Z] DEBUG: ✅ Final card count for header: 3 (source: default, constraints: 1-3)
+[2025-10-06T12:04:31.890Z] DEBUG: 🎯 Using optimal midpoint for hero: 3 (range: 2-3)
+[2025-10-06T12:04:31.890Z] DEBUG: ✅ Final card count for hero: 3 (source: default, constraints: 1-3)
+[2025-10-06T12:04:31.890Z] DEBUG: 🎯 Using optimal midpoint for features: 5 (range: 4-6)
+[2025-10-06T12:04:31.890Z] DEBUG: ✅ Final card count for features: 5 (source: default, constraints: 3-9)
+[2025-10-06T12:04:31.890Z] DEBUG: 🎯 Using optimal midpoint for uniqueMechanism: 4 (range: 3-4)
+[2025-10-06T12:04:31.891Z] DEBUG: ✅ Final card count for uniqueMechanism: 4 (source: default, constraints: 2-6)
+[2025-10-06T12:04:31.891Z] DEBUG: 🎯 Using optimal midpoint for results: 5 (range: 4-6)
+[2025-10-06T12:04:31.891Z] DEBUG: ✅ Final card count for results: 5 (source: default, constraints: 3-8)
+[2025-10-06T12:04:31.891Z] DEBUG: 🎯 Using optimal midpoint for comparisonTable: 6 (range: 5-7)
+[2025-10-06T12:04:31.891Z] DEBUG: ✅ Final card count for comparisonTable: 6 (source: default, constraints: 4-10)
+[2025-10-06T12:04:31.891Z] DEBUG: 🎯 Using optimal midpoint for cta: 4 (range: 3-4)
+[2025-10-06T12:04:31.891Z] DEBUG: ✅ Final card count for cta: 4 (source: default, constraints: 2-5)
+[2025-10-06T12:04:31.891Z] DEBUG: 🎯 Using optimal midpoint for footer: 3 (range: 2-3)
+[2025-10-06T12:04:31.891Z] DEBUG: ✅ Final card count for footer: 3 (source: default, constraints: 1-3)
+[2025-10-06T12:04:31.892Z] DEBUG: 🎯 Post-Mapping Card Requirements Analysis: === CARD REQUIREMENTS DEBUG REPORT ===
+
+COVERAGE: 8/8 sections have card requirements
+
+SECTION DETAILS:
+
+header (Header.NavWithCTAHeader):
+  Card Requirements: 1-3 cards
+  Optimal Range: 2-3
+  Recommended Count: 3
+  Description: undefined
+
+hero (Hero.centerStacked):
+  Card Requirements: 1-3 cards
+  Optimal Range: 2-3
+  Recommended Count: 3
+  Description: undefined
+
+features (Features.IconGrid):
+  Card Requirements: 3-9 cards
+  Optimal Range: 4-6
+  Recommended Count: 5
+  Description: Feature cards with icons
+
+uniqueMechanism (UniqueMechanism.StackedHighlights):
+  Card Requirements: 2-6 cards
+  Optimal Range: 3-4
+  Recommended Count: 4
+  Description: Unique mechanism highlight cards
+
+results (Results.OutcomeIcons):
+  Card Requirements: 3-8 cards
+  Optimal Range: 4-6
+  Recommended Count: 5
+  Description: Outcome icons with descriptions
+
+comparisonTable (ComparisonTable.BasicFeatureGrid):
+  Card Requirements: 4-10 rows
+  Optimal Range: 5-7
+  Recommended Count: 6
+  Description: Feature comparison rows
+
+cta (Cta.CenteredHeadlineCTA):
+  Card Requirements: 2-5 items
+  Optimal Range: 3-4
+  Recommended Count: 4
+  Description: Trust indicators and benefit statements
+
+footer (Footer.LinksAndSocialFooter):
+  Card Requirements: 1-3 cards
+  Optimal Range: 2-3
+  Recommended Count: 3
+  Description: undefined
+
+
+STRATEGY MAPPING:
+  features_IconGrid: 5 → mapped to
+  uniqueMechanism_StackedHighlights: 4 → mapped to
+  results_OutcomeIcons: 5 → mapped to
+  comparisonTable_BasicFeatureGrid: 6 → mapped to
+
+
+USER FEATURES: 5 features provided
+  Features section recommended count: 5
+  ✅ User content priority enabled
+
+=== END REPORT ===
+[DEV] ✍️ Phase 2: Strategic Copy Generation
+[2025-10-06T12:04:31.897Z] DEBUG: 🤖 Copy Prompt Generated: {
+  "length": 14923,
+  "sections": 24,
+  "constrainedCardCounts": {
+    "features_IconGrid": 5,
+    "uniqueMechanism_StackedHighlights": 4,
+    "results_OutcomeIcons": 5,
+    "comparisonTable_BasicFeatureGrid": 6
+  },
+  "totalCards": 20,
+  "sectionsWithCards": 4
+}
+[2025-10-06T12:04:31.897Z] DEBUG: 📝 Copy Prompt Preview: You are an expert copywriter executing a strategic copy plan for maximum conversion.
+
+BUSINESS CONTEXT:
+Product/Service: HabitSync – A cross-device habit tracker that uses AI to adjust goals based on your actual progress and patterns.
+Target Audience: Fitness Enthusiasts
+Business Type: Personal Productivity Tools
+Market Category: Habit & Routine Tracking
+Startup Stage: MVP in development
+Landing Goal: Start Free Trial
+
+KEY FEATURES & BENEFITS:
+• Real-Time Progress Tracking: Monitor your habits instantly to adjust goals effectively.
+• Customizable Habit Goals: Set personalized targets that fit your fitness journey.
+• Daily Reminders: Stay on track with timely prompts to reinforce habits.
+• Progress Insights: Analyze patterns to optimize your routine and improve results.
+• Community... [truncated, total: 14923 chars]
+[2025-10-06T12:05:03.597Z] DEBUG: 🔄 Copy AI Response Received: {
+  "contentLength": 4564,
+  "usage": {
+    "promptTokens": 3358,
+    "completionTokens": 1075,
+    "totalTokens": 4433
+  },
+  "hasChoices": true,
+  "provider": "OpenAI",
+  "model": "gpt-4o-mini",
+  "expectedCards": 20
+}
+[2025-10-06T12:05:03.598Z] DEBUG: 📤 Copy Response Preview: ```json
+{
+  "header": {
+    "nav_item_1": "Features",
+    "nav_item_2": "Pricing",
+    "nav_item_3": "Testimonials",
+    "nav_item_4": "FAQ",
+    "cta_text": "Start Free Trial"
+  },
+  "hero": {
+    "headline": "Transform Your Fitness Journey with HabitSync",
+    "cta_text": "Start Free Trial",
+    "subheadline": "Streamline your habits and boost productivity effortlessly.",
+    "center_hero_image": "path/to/hero-image.jpg",
+    "trust_item_1": "Trusted by thousands of fitness enthusiasts",
+    "trust_item_2": "Proven results in habit formation"
+  },
+  "features": {
+    "headline": "Powerful Features to Elevate Your Routine",
+    "icon_1": "path/to/icon1.png",
+    "icon_2": "path/to/icon2.png",
+    "icon_3": "path/to/icon3.png",
+    "icon_4": "path/to/icon4.png",
+    "icon_5": "path/to/icon5.png",
+    "icon_6": "path/to/icon6.png",
+    "feature_titles": [
+      "Real-Time Progress Tracking",
+      "Customizable Habit Goals",
+      "Daily Reminders",
+      "Progress Insights",
+     ... [truncated, total: 4564 chars]
+[2025-10-06T12:05:03.598Z] DEBUG: 🔍 Starting copy content parsing and validation
+[2025-10-06T12:05:03.598Z] DEBUG: 🔍 Starting AI response parsing: {
+  "contentLength": 4564,
+  "hasExpectedCounts": true,
+  "expectedCountsKeys": [
+    "features",
+    "testimonials",
+    "faq",
+    "results",
+    "social_proof",
+    "pricing",
+    "problem",
+    "comparison",
+    "uniqueMechanism",
+    "cta",
+    "features_IconGrid",
+    "uniqueMechanism_StackedHighlights",
+    "results_OutcomeIcons",
+    "comparisonTable_BasicFeatureGrid"
+  ],
+  "contentPreview": "```json\n{\n  \"header\": {\n    \"nav_item_1\": \"Features\",\n    \"nav_item_2\": \"Pricing\",\n    \"nav_item_3\": \"Testimonials\",\n    \"nav_item_4\": \"FAQ\",\n    \"cta..."
+}
+[2025-10-06T12:05:03.599Z] DEBUG: 🔍 Extracting JSON from AI response...
+[2025-10-06T12:05:03.599Z] DEBUG: 🔍 Starting enhanced JSON extraction from AI response: {
+  "contentLength": 4564,
+  "hasCodeBlocks": true,
+  "hasJsonKeyword": true,
+  "startsWithBrace": false,
+  "firstLine": "```json",
+  "contentPreview": "```json\n{\n  \"header\": {\n    \"nav_item_1\": \"Features\",\n    \"nav_item_2\": \"Pricing\",\n    \"nav_item_3\":..."
+}
+[2025-10-06T12:05:03.599Z] DEBUG: 📝 Content cleaned for extraction: {
+  "originalLength": 4564,
+  "cleanedLength": 4564,
+  "significantChange": false
+}
+[2025-10-06T12:05:03.600Z] DEBUG: ✅ JSON extracted from standard code block: {
+  "extractedLength": 4552,
+  "startsWithBrace": true,
+  "endsWithBrace": true,
+  "firstChars": "{\n  \"header\": {\n    \"nav_item_1\": \"Features\",\n    ..."
+}
+[2025-10-06T12:05:03.601Z] DEBUG: ✅ JSON extracted successfully: {
+  "extractedLength": 4552,
+  "startsWithBrace": true,
+  "endsWithBrace": true
+}
+[2025-10-06T12:05:03.601Z] DEBUG: 🔍 Parsing extracted JSON...
+[2025-10-06T12:05:03.601Z] DEBUG: ✅ JSON parsed successfully: {
+  "topLevelKeys": [
+    "header",
+    "hero",
+    "features",
+    "uniqueMechanism",
+    "results",
+    "comparisonTable",
+    "cta",
+    "footer"
+  ],
+  "sectionCount": 8
+}
+[2025-10-06T12:05:03.601Z] DEBUG: 🔍 Validating parsed content structure...
+[2025-10-06T12:05:03.601Z] DEBUG: 🔍 Starting content validation: {
+  "contentType": "object",
+  "isArray": false,
+  "hasExpectedCounts": true,
+  "expectedCountKeys": [
+    "features",
+    "testimonials",
+    "faq",
+    "results",
+    "social_proof",
+    "pricing",
+    "problem",
+    "comparison",
+    "uniqueMechanism",
+    "cta",
+    "features_IconGrid",
+    "uniqueMechanism_StackedHighlights",
+    "results_OutcomeIcons",
+    "comparisonTable_BasicFeatureGrid"
+  ]
+}
+[2025-10-06T12:05:03.602Z] DEBUG: 📊 Available sections analysis: {
+  "totalSections": 8,
+  "sectionList": [
+    "header",
+    "hero",
+    "features",
+    "uniqueMechanism",
+    "results",
+    "comparisonTable",
+    "cta",
+    "footer"
+  ],
+  "hasExpectedCounts": true,
+  "expectedSections": [
+    "features",
+    "testimonials",
+    "faq",
+    "results",
+    "social_proof",
+    "pricing",
+    "problem",
+    "comparison",
+    "uniqueMechanism",
+    "cta",
+    "features_IconGrid",
+    "uniqueMechanism_StackedHighlights",
+    "results_OutcomeIcons",
+    "comparisonTable_BasicFeatureGrid"
+  ]
+}
+[2025-10-06T12:05:03.602Z] DEBUG: 🔍 Processing section: header {
+  "sectionType": "object",
+  "isObject": true,
+  "isNull": false,
+  "keys": [
+    "nav_item_1",
+    "nav_item_2",
+    "nav_item_3",
+    "nav_item_4",
+    "cta_text"
+  ]
+}
+[2025-10-06T12:05:03.604Z] DEBUG: ✅ Section header processed successfully
+[2025-10-06T12:05:03.604Z] DEBUG: 🔍 Processing section: hero {
+  "sectionType": "object",
+  "isObject": true,
+  "isNull": false,
+  "keys": [
+    "headline",
+    "cta_text",
+    "subheadline",
+    "center_hero_image",
+    "trust_item_1",
+    "trust_item_2"
+  ]
+}
+[2025-10-06T12:05:03.605Z] DEBUG: ✅ Section hero processed successfully
+[2025-10-06T12:05:03.605Z] DEBUG: 🔍 Processing section: features {
+  "sectionType": "object",
+  "isObject": true,
+  "isNull": false,
+  "keys": [
+    "headline",
+    "icon_1",
+    "icon_2",
+    "icon_3",
+    "icon_4",
+    "icon_5",
+    "icon_6",
+    "feature_titles",
+    "feature_descriptions",
+    "subheadline"
+  ]
+}
+[2025-10-06T12:05:03.605Z] DEBUG: ✅ Section features processed successfully
+[2025-10-06T12:05:03.606Z] DEBUG: 🔍 Processing section: uniqueMechanism {
+  "sectionType": "object",
+  "isObject": true,
+  "isNull": false,
+  "keys": [
+    "headline",
+    "highlight_titles",
+    "highlight_descriptions",
+    "highlight_icons"
+  ]
+}
+[2025-10-06T12:05:03.606Z] DEBUG: ✅ Section uniqueMechanism processed successfully
+[2025-10-06T12:05:03.606Z] DEBUG: 🔍 Processing section: results {
+  "sectionType": "object",
+  "isObject": true,
+  "isNull": false,
+  "keys": [
+    "headline",
+    "icon_types",
+    "titles",
+    "descriptions",
+    "subheadline"
+  ]
+}
+[2025-10-06T12:05:03.607Z] DEBUG: ✅ Section results processed successfully
+[2025-10-06T12:05:03.607Z] DEBUG: 🔍 Processing section: comparisonTable {
+  "sectionType": "object",
+  "isObject": true,
+  "isNull": false,
+  "keys": [
+    "headline",
+    "your_product_name",
+    "feature_names",
+    "competitor_names"
+  ]
+}
+[2025-10-06T12:05:03.607Z] DEBUG: ✅ Section comparisonTable processed successfully
+[2025-10-06T12:05:03.607Z] DEBUG: 🔍 Processing section: cta {
+  "sectionType": "object",
+  "isObject": true,
+  "isNull": false,
+  "keys": [
+    "headline",
+    "cta_text",
+    "trust_item_1",
+    "trust_item_2",
+    "trust_item_3",
+    "trust_item_4",
+    "trust_item_5"
+  ]
+}
+[2025-10-06T12:05:03.607Z] DEBUG: ✅ Section cta processed successfully
+[2025-10-06T12:05:03.607Z] DEBUG: 🔍 Processing section: footer {
+  "sectionType": "object",
+  "isObject": true,
+  "isNull": false,
+  "keys": [
+    "copyright"
+  ]
+}
+[2025-10-06T12:05:03.608Z] DEBUG: ✅ Section footer processed successfully
+[2025-10-06T12:05:03.608Z] DEBUG: ✅ Content validation completed: {
+  "totalSections": 8,
+  "processedSuccessfully": 8,
+  "successRate": "100%",
+  "finalSectionCount": 8,
+  "isPartial": false,
+  "warningCount": 0,
+  "errorCount": 0
+}
+[2025-10-06T12:05:03.608Z] DEBUG: ✅ Content validation completed: {
+  "success": true,
+  "finalSectionCount": 8,
+  "errorCount": 0,
+  "warningCount": 0,
+  "isPartial": false
+}
+[2025-10-06T12:05:03.608Z] DEBUG: ✅ Copy parsing completed: {
+  "success": true,
+  "contentSections": 8,
+  "errors": [],
+  "warnings": [],
+  "isPartial": false
+}
+[2025-10-06T12:05:03.608Z] DEBUG: 🎯 Using optimal midpoint for header: 3 (range: 2-3)
+[2025-10-06T12:05:03.608Z] DEBUG: ✅ Final card count for header: 3 (source: default, constraints: 1-3)
+[2025-10-06T12:05:03.609Z] DEBUG: 🎯 Using optimal midpoint for hero: 3 (range: 2-3)
+[2025-10-06T12:05:03.609Z] DEBUG: ✅ Final card count for hero: 3 (source: default, constraints: 1-3)
+[2025-10-06T12:05:03.609Z] DEBUG: ✅ Final card count for features: 5 (source: direct:features, constraints: 3-9)
+[2025-10-06T12:05:03.609Z] DEBUG: ✅ Final card count for uniqueMechanism: 4 (source: direct:uniqueMechanism, constraints: 2-6)
+[2025-10-06T12:05:03.609Z] DEBUG: ✅ Final card count for results: 5 (source: direct:results, constraints: 3-8)
+[2025-10-06T12:05:03.609Z] DEBUG: 🎯 Using optimal midpoint for comparisonTable: 6 (range: 5-7)
+[2025-10-06T12:05:03.609Z] DEBUG: ✅ Final card count for comparisonTable: 6 (source: default, constraints: 4-10)
+[2025-10-06T12:05:03.609Z] DEBUG: ✅ Final card count for cta: 4 (source: direct:cta, constraints: 2-5)
+[2025-10-06T12:05:03.609Z] DEBUG: 🎯 Using optimal midpoint for footer: 3 (range: 2-3)
+[2025-10-06T12:05:03.609Z] DEBUG: ✅ Final card count for footer: 3 (source: default, constraints: 1-3)
+[2025-10-06T12:05:03.609Z] DEBUG: 🎯 JSON Validation Results: {
+  "isValid": false,
+  "errors": [
+    "cta.trust_item_1: Expected 4 cards, got 1",
+    "cta.trust_item_2: Expected 4 cards, got 1",
+    "cta.trust_item_3: Expected 4 cards, got 1",
+    "cta.trust_item_4: Expected 4 cards, got 1",
+    "cta.trust_item_5: Expected 4 cards, got 1"
+  ],
+  "warnings": [],
+  "summary": "Validation Summary: 5 errors, 0 warnings. Expected 33 total cards across 8 sections."
+}
+[DEV] ✅ 2-phase generation completed successfully: {
+  finalSections: 8,
+  hasStrategy: true,
+  totalWarnings: 7,
+  totalErrors: 0,
+  elementsMapSections: 8
+}
+[DEV] 📦 Elements map being sent to client: {
+  hasElementsMap: true,
+  sections: [
+    'header',
+    'hero',
+    'features',
+    'uniqueMechanism',
+    'results',
+    'comparisonTable',
+    'cta',
+    'footer'
+  ],
+  firstSection: {
+    sectionId: 'header',
+    data: {
+      sectionId: 'header',
+      sectionType: 'Header',
+      layout: 'NavWithCTAHeader',
+      mandatoryElements: [Array],
+      optionalElements: [],
+      allElements: [Array],
+      excludedElements: [Array]
+    }
+  },
+  hasExclusions: true,
+  totalExclusions: 48
+}
+ POST /api/generate-landing 200 in 41284ms
+[DEV] Rate limit check - Key: user:user_2xd9rxqOOyXmfy1JhrFtKOmD1yw, Requests: 1/30, Remaining: 29 
+ POST /api/saveDraft 200 in 1054ms
+ ○ Compiling /generate/[token] ...
+ ✓ Compiled /generate/[token] in 3.6s (1958 modules)
+ ✓ Compiled /api/loadDraft in 275ms (1117 modules)
+ GET /api/loadDraft?tokenId=Umz2y80PAphz 200 in 423ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 1077ms (1963 modules)
+ GET /.well-known/appspecific/com.chrome.devtools.json 404 in 1244ms

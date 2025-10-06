@@ -46,12 +46,31 @@ const parseOutcomeData = (iconTypes: string, titles: string, descriptions: strin
   const titleList = titles.split('|').map(t => t.trim()).filter(t => t);
   const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
 
-  return iconList.map((iconType, index) => ({
-    id: `outcome-${index}`,
-    iconType,
-    title: titleList[index] || 'Great Outcome',
-    description: descriptionList[index] || 'Amazing results await'
-  }));
+  // Debug logging for OutcomeIcons
+  if (process.env.NEXT_PUBLIC_DEBUG_ICON_SELECTION === 'true') {
+    console.log('🎯 [ICON] OutcomeIcons - Raw data:', {
+      iconTypes,
+      titles,
+      iconList,
+      titleList
+    });
+  }
+
+  return iconList.map((iconType, index) => {
+    if (process.env.NEXT_PUBLIC_DEBUG_ICON_SELECTION === 'true') {
+      console.log(`🎯 [ICON] OutcomeIcons - Item ${index + 1}:`, {
+        iconType,
+        title: titleList[index]
+      });
+    }
+
+    return {
+      id: `outcome-${index}`,
+      iconType,
+      title: titleList[index] || 'Great Outcome',
+      description: descriptionList[index] || 'Amazing results await'
+    };
+  });
 };
 
 // Helper function to add a new outcome

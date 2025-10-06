@@ -119,6 +119,16 @@ export const logger = {
     }
     return fn();
   },
+
+  // Icon selection debugging
+  icon: (message: LogValue, meta?: MetaValue) => {
+    if (process.env.DEBUG_ICON_SELECTION === 'true' && process.env.NODE_ENV !== 'production') {
+      const evaluatedMessage = typeof message === 'function' ? safeEvaluate(message) : message;
+      const evaluatedMeta = meta !== undefined ?
+        (typeof meta === 'function' ? safeEvaluate(meta) : meta) : '';
+      console.log(`🎯 [ICON] ${evaluatedMessage}`, evaluatedMeta);
+    }
+  },
 };
 
 export default logger;
