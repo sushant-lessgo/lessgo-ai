@@ -303,6 +303,32 @@ const SECTION_PRIORITIES: Record<string, { tier: number, profiles: string[] }> =
   [SECTION_IDS.beforeAfter]: { tier: 4, profiles: ["visual-focused"] }
 };
 
+// ===== GOAL-BASED SECTION CAPS =====
+/**
+ * Dynamic section caps based on landing page goal conversion friction
+ * Lower friction goals (waitlist) = fewer sections needed
+ * Higher friction goals (enterprise) = more comprehensive proof needed
+ */
+const GOAL_BASED_SECTION_CAPS: Record<LandingGoalType, number> = {
+  // Low friction goals (5-6 sections)
+  'waitlist': 6,           // Just email signup - minimal convincing needed
+  'early-access': 6,       // Similar low commitment
+  'join-community': 6,     // Soft engagement
+  'watch-video': 5,        // Minimal friction - just viewing content
+
+  // Medium friction goals (7 sections)
+  'signup': 7,             // Account creation - moderate proof needed
+  'free-trial': 7,         // Trial signup - balanced approach
+  'download': 7,           // App installation - moderate commitment
+
+  // High friction goals (8 sections)
+  'demo': 8,               // Demo request - needs comprehensive case
+  'book-call': 8,          // Call booking - high commitment barrier
+  'contact-sales': 8,      // Enterprise sales - maximum proof stack
+  'buy-now': 8,            // Purchase decision - full justification
+  'subscribe': 8,          // Recurring payment - strong proof needed
+};
+
 // ===== MAIN FUNCTION =====
 export function getSectionsFromObjectionFlows(input: FlowInput): string[] {
   
@@ -453,23 +479,28 @@ function addFAQSection(sections: string[]): string[] {
 }
 
 function applySectionCap(sections: string[], input: FlowInput): string[] {
-  if (sections.length <= 8) return sections;
-  
-  
+  // Get dynamic section cap based on landing goal conversion friction
+  const sectionCap = GOAL_BASED_SECTION_CAPS[input.landingGoal] || 7; // Default to 7 for unmapped goals
+
+  if (sections.length <= sectionCap) return sections;
+
+  logger.dev(`📊 Applying goal-based section cap: ${input.landingGoal} → ${sectionCap} sections (from ${sections.length})`);
+
   // Determine user profile for prioritization
   const userProfile = determineUserProfile(input);
-  
+
   // Score each section based on priority for this profile
   const sectionScores = sections.map(section => ({
     section,
     score: calculateSectionScore(section, userProfile)
   }));
-  
-  // Sort by score (highest first) and take top 8
+
+  // Sort by score (highest first) and take top N based on goal
   sectionScores.sort((a, b) => b.score - a.score);
-  const cappedSections = sectionScores.slice(0, 8).map(item => item.section);
-  
-  
+  const cappedSections = sectionScores.slice(0, sectionCap).map(item => item.section);
+
+  logger.dev(`✂️ Sections after cap: ${cappedSections.join(', ')}`);
+
   return cappedSections;
 }
 
