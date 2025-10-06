@@ -1,12 +1,11 @@
-// backgroundIntegration.ts - MIGRATED: Phase 5.2 - Canonical Type System Integration
-import { getTopVariationWithFunnel } from './getTopVariations';
-import { bgVariations } from './bgVariations';
+// backgroundIntegration.ts - MIGRATED: Phase 5.2 + Phase 2 - Simplified Background System
+import { selectPrimaryBackground } from './backgroundSelection';
 import { accentOptions } from '../ColorSystem/accentOptions';
 import { selectAccentOption } from '../ColorSystem/selectAccentFromTags';
 import { getSecondaryBackground } from './simpleSecondaryBackgrounds';
 import { logger } from '@/lib/logger';
-import { 
-  assignEnhancedBackgroundsToSections, 
+import {
+  assignEnhancedBackgroundsToSections,
   getEnhancedSectionBackground
 } from './enhancedBackgroundLogic';
 
@@ -29,143 +28,31 @@ export interface BackgroundSystem {
   accentCSS: string;    
 }
 
-// ===== EXISTING FUNCTIONS (Updated with canonical field names) =====
+// ===== SIMPLIFIED FUNCTIONS (Phase 2 - New Background System) =====
 
+/**
+ * Select primary background variation using simplified category-based system
+ * Replaces complex funnel system with simple category mapping
+ */
 export function selectPrimaryVariation(onboardingData: OnboardingDataInput): {
   variationId: string;
-  tailwindClass: string;
+  css: string;
   baseColor: string;
 } {
-  // ✅ PHASE 5.2: Map canonical field names to funnel input
- const funnelInput = {
-  marketCategoryId: onboardingData.marketCategory,
-  targetAudienceId: onboardingData.targetAudience,
-  landingPageGoalsId: onboardingData.landingPageGoals,        // ✅ goalId → landingPageGoalsId
-  startupStageId: onboardingData.startupStage,               // ✅ stageId → startupStageId
-  pricingModelId: onboardingData.pricingModel,               // ✅ pricingId → pricingModelId
-  toneProfileId: onboardingData.toneProfile || 'friendly-helpful', // ✅ toneId → toneProfileId
-};
-  
-  try {
-    const funnelResult = getTopVariationWithFunnel(funnelInput);
-    const primaryVariationKey = funnelResult?.primaryVariation;
-    
-    logger.debug('🔍 Funnel result debug:', {
-      inputData: funnelInput,
-      primaryVariationKey,
-      topVariations: funnelResult?.trace?.topVariations
-    });
-    
-    if (!primaryVariationKey || typeof primaryVariationKey !== 'string' || !primaryVariationKey.includes('::')) {
-      logger.warn('Invalid or missing primaryVariationKey from funnel, using smart fallback');
-      return getSmartFallbackVariation(onboardingData);
-    }
-    
-    const [archetypeId, themeId] = primaryVariationKey.split("::");
-    
-    logger.debug('🔍 Looking for variation:', { archetypeId, themeId });
-    
-    const matchingVariation = bgVariations.find(
-      variation => 
-        variation.archetypeId === archetypeId && 
-        variation.themeId === themeId
-    );
+  // Use new simplified selection system
+  const selected = selectPrimaryBackground(onboardingData);
 
-    logger.debug('🔍 Found matching variations:', bgVariations.filter(v => 
-      v.archetypeId === archetypeId && v.themeId === themeId
-    ).map(v => ({ id: v.variationId, class: v.tailwindClass })));
+  logger.debug('✅ Selected primary background:', {
+    id: selected.id,
+    label: selected.label,
+    baseColor: selected.baseColor,
+    category: selected.category,
+  });
 
-    if (!matchingVariation) {
-      logger.warn(`No matching variation found for ${primaryVariationKey}, using fallback`);
-      return getSmartFallbackVariation(onboardingData);
-    }
-
-    // Fix for missing assets: remove problematic bg-url classes temporarily
-    let cleanTailwindClass = matchingVariation.tailwindClass;
-    if (cleanTailwindClass.includes("bg-[url('/noise.svg')]")) {
-      cleanTailwindClass = cleanTailwindClass.replace("bg-[url('/noise.svg')] ", "").replace(" bg-blend-overlay", "");
-      logger.debug('🔧 Removed missing noise.svg from background class');
-    }
-
-    logger.debug('✅ Selected primary variation:', {
-      variationId: matchingVariation.variationId,
-      tailwindClass: cleanTailwindClass,
-      baseColor: matchingVariation.baseColor,
-    });
-
-    return {
-      variationId: matchingVariation.variationId,
-      tailwindClass: cleanTailwindClass,
-      baseColor: matchingVariation.baseColor,
-    };
-    
-  } catch (error) {
-    logger.error('Error in funnel system:', error);
-    return getSmartFallbackVariation(onboardingData);
-  }
-}
-
-function getSmartFallbackVariation(onboardingData: OnboardingDataInput): {
-  variationId: string;
-  tailwindClass: string;
-  baseColor: string;
-} {
-  let selectedVariation;
-  
-  // Enhanced fallback logic with more variety
-  const audienceVariations = [
-    { key: 'enterprise', colors: ['slate', 'blue', 'gray'] },
-    { key: 'educator', colors: ['emerald', 'teal', 'green'] },
-    { key: 'creator', colors: ['purple', 'indigo', 'violet'] },
-    { key: 'business', colors: ['blue', 'cyan', 'sky'] }
-  ];
-  
-  const stageVariations = [
-    { key: 'early', colors: ['purple', 'indigo', 'violet'] },
-    { key: 'mvp', colors: ['orange', 'amber', 'yellow'] },
-    { key: 'growth', colors: ['green', 'emerald', 'teal'] }
-  ];
-
-  // Try audience-based selection
-  for (const audienceVar of audienceVariations) {
-    if (onboardingData.targetAudience?.includes(audienceVar.key)) {
-      for (const color of audienceVar.colors) {
-        selectedVariation = bgVariations.find(v => v.baseColor === color);
-        if (selectedVariation) break;
-      }
-      if (selectedVariation) break;
-    }
-  }
-  
-  // Try stage-based selection if no audience match
-  if (!selectedVariation) {
-    for (const stageVar of stageVariations) {
-      if (onboardingData.startupStage?.includes(stageVar.key)) {
-        for (const color of stageVar.colors) {
-          selectedVariation = bgVariations.find(v => v.baseColor === color);
-          if (selectedVariation) break;
-        }
-        if (selectedVariation) break;
-      }
-    }
-  }
-  
-  // Random selection if no matches
-  if (!selectedVariation) {
-    const randomIndex = Math.floor(Math.random() * bgVariations.length); // Use all 412 variations
-    selectedVariation = bgVariations[randomIndex];
-    logger.debug('🎨 [FALLBACK-DEBUG] Using improved fallback selection:', {
-      totalVariationsAvailable: bgVariations.length,
-      selectedIndex: randomIndex,
-      selectedVariation: selectedVariation.variationId
-    });
-  }
-  
-  
   return {
-    variationId: selectedVariation.variationId,
-    tailwindClass: selectedVariation.tailwindClass,
-    baseColor: selectedVariation.baseColor,
+    variationId: selected.id,
+    css: selected.css,
+    baseColor: selected.baseColor,
   };
 }
 
@@ -243,18 +130,32 @@ export function calculateOtherBackgrounds(baseColor: string): {
   neutral: string;
   divider: string;
 } {
-  const colorMap: Record<string, string> = {
-    blue: "blue", sky: "sky", indigo: "indigo", purple: "purple", pink: "pink",
-    red: "red", orange: "orange", amber: "amber", yellow: "yellow", lime: "lime",
-    green: "green", emerald: "emerald", teal: "teal", cyan: "cyan",
-    gray: "gray", slate: "slate", zinc: "zinc", neutral: "neutral", stone: "stone",
+  // ✅ Map base colors to their light tint CSS values (100 shade with 50% opacity)
+  const dividerColorMap: Record<string, string> = {
+    blue: "rgba(219, 234, 254, 0.5)",
+    sky: "rgba(224, 242, 254, 0.5)",
+    indigo: "rgba(224, 231, 255, 0.5)",
+    purple: "rgba(243, 232, 255, 0.5)",
+    pink: "rgba(252, 231, 243, 0.5)",
+    red: "rgba(254, 226, 226, 0.5)",
+    orange: "rgba(255, 237, 213, 0.5)",
+    amber: "rgba(254, 243, 199, 0.5)",
+    yellow: "rgba(254, 249, 195, 0.5)",
+    lime: "rgba(236, 252, 203, 0.5)",
+    green: "rgba(220, 252, 231, 0.5)",
+    emerald: "rgba(209, 250, 229, 0.5)",
+    teal: "rgba(204, 251, 241, 0.5)",
+    cyan: "rgba(207, 250, 254, 0.5)",
+    gray: "rgba(243, 244, 246, 0.5)",
+    slate: "rgba(241, 245, 249, 0.5)",
+    zinc: "rgba(244, 244, 245, 0.5)",
+    neutral: "rgba(245, 245, 245, 0.5)",
+    stone: "rgba(245, 245, 244, 0.5)",
   };
 
-  const tailwindColor = colorMap[baseColor] || "gray";
-
   return {
-    neutral: "bg-white",
-    divider: `bg-${tailwindColor}-100/50`,
+    neutral: "#ffffff",
+    divider: dividerColorMap[baseColor] || "rgba(243, 244, 246, 0.5)",
   };
 }
 
@@ -274,7 +175,7 @@ export function generateCompleteBackgroundSystem(onboardingData: OnboardingDataI
     const otherBackgrounds = calculateOtherBackgrounds(primaryVariation.baseColor);
 
     const result = {
-      primary: primaryVariation.tailwindClass,          // From bgVariations (bold gradients)
+      primary: primaryVariation.css,                   // ✅ CSS value from new system
       secondary: secondaryBackground,                   // Simple one-to-one mapping (subtle tints)
       neutral: otherBackgrounds.neutral,               // Clean white
       divider: otherBackgrounds.divider,               // Light separator
@@ -289,10 +190,10 @@ export function generateCompleteBackgroundSystem(onboardingData: OnboardingDataI
     logger.error('❌ Failed to generate background system:', error);
     
     const safeDefaults = {
-      primary: "bg-gradient-to-br from-blue-500 to-blue-600",
-      secondary: "bg-blue-50/70",
-      neutral: "bg-white", 
-      divider: "bg-gray-100/50",
+      primary: "linear-gradient(to bottom right, #3b82f6, #2563eb)",
+      secondary: "rgba(239, 246, 255, 0.7)",
+      neutral: "#ffffff",
+      divider: "rgba(243, 244, 246, 0.5)",
       baseColor: "blue",
       accentColor: "purple",
       accentCSS: "bg-purple-500", // ✅ Use 500 shade for safe defaults

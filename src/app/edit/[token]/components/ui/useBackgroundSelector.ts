@@ -199,17 +199,20 @@ export function useBackgroundSelector(tokenId: string) {
         errors.push('Primary and secondary backgrounds should be different for better visual hierarchy');
       }
 
-      // CSS class validation (only for recommended mode)
-      if (mode === 'recommended' && background.primary && !background.primary.startsWith('bg-')) {
-        errors.push('Invalid background CSS class format');
-      }
-      
-      // Custom mode validation
-      if (mode === 'custom' && background.primary) {
-        // Custom mode uses raw CSS, not Tailwind classes
-        // Just ensure it's not empty
-        if (!background.primary.trim()) {
-          errors.push('Custom background cannot be empty');
+      // CSS value validation for both modes
+      if (background.primary) {
+        const trimmedPrimary = background.primary.trim();
+
+        // Validate it's a valid CSS value (hex color, rgb, rgba, linear-gradient, radial-gradient, etc.)
+        const isValidCSSValue =
+          trimmedPrimary.startsWith('#') || // Hex color
+          trimmedPrimary.startsWith('rgb') || // RGB/RGBA color
+          trimmedPrimary.startsWith('hsl') || // HSL/HSLA color
+          trimmedPrimary.includes('gradient') || // Gradient
+          trimmedPrimary.startsWith('bg-'); // Legacy Tailwind class (for backward compatibility)
+
+        if (!isValidCSSValue) {
+          errors.push('Invalid background format. Expected CSS color or gradient value.');
         }
       }
 

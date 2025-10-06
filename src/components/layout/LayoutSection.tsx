@@ -53,46 +53,25 @@ export const LayoutSection = forwardRef<HTMLElement, LayoutSectionProps>(({
   };
   
   const spacingClass = getSpacingClass(spacingValue);
-  
-  // ✅ CRITICAL FIX: Extract inline style for complex gradients that Tailwind may not process
-  const getInlineStyleFromTailwind = (cssClass: string): React.CSSProperties | undefined => {
-    // Check if it's a complex gradient in bracket notation
-    const gradientMatch = cssClass.match(/bg-\[(linear-gradient\([^)]+\))\]/);
-    if (gradientMatch) {
-      const gradientCSS = gradientMatch[1];
-      logger.dev('🎨 [LayoutSection] Converting complex gradient to inline style:', () => ({
-        sectionId,
-        originalClass: cssClass,
-        extractedGradient: gradientCSS
-      }));
-      return { background: gradientCSS };
-    }
-    
-    // Also handle radial gradients
-    const radialMatch = cssClass.match(/bg-\[(radial-gradient\([^)]+\))\]/);
-    if (radialMatch) {
-      const gradientCSS = radialMatch[1];
-      logger.dev('🎨 [LayoutSection] Converting radial gradient to inline style:', () => ({
-        sectionId,
-        originalClass: cssClass,
-        extractedGradient: gradientCSS
-      }));
-      return { background: gradientCSS };
-    }
-    
-    // For simple classes, let Tailwind handle it
-    return undefined;
+
+  // ✅ SIMPLIFIED: Always apply background as inline style (sectionBackground is now always a CSS value)
+  const inlineStyle: React.CSSProperties = {
+    background: sectionBackground
   };
 
-  const inlineStyle = getInlineStyleFromTailwind(sectionBackground);
-  const finalClassName = inlineStyle ? '' : sectionBackground; // Use empty class if inline style is used
+  logger.dev('🎨 [LayoutSection] Applying background as inline style:', () => ({
+    sectionId,
+    sectionType,
+    backgroundType,
+    backgroundValue: sectionBackground
+  }));
   
   return (
     <>
-      <section 
+      <section
         ref={ref}
         id={sectionId}
-        className={`${spacingClass} px-4 ${finalClassName} ${className}`}
+        className={`${spacingClass} px-4 ${className}`}
         style={inlineStyle}
         data-section-id={sectionId}
         data-section-type={sectionType}

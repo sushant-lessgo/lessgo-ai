@@ -568,14 +568,13 @@ module.exports = {
   
   // ✅ CSS variable usage
   'var(--tw-gradient-stops)',
-  
-  // ✅ Arbitrary background colors for custom color picker
-  { pattern: /bg-\[#[0-9a-fA-F]{6}\]/ },
-  { pattern: /bg-\[#[0-9a-fA-F]{3}\]/ },
-  { pattern: /bg-\[linear-gradient\([^\]]+\)\]/ },
-  { pattern: /bg-\[radial-gradient\([^\]]+\)\]/ },
-  { pattern: /bg-\[[a-zA-Z0-9#,%()\s-]+\]/ },
-  
+
+  // ❌ REMOVED: Arbitrary background patterns (now using inline styles instead of Tailwind classes)
+  // These patterns were causing build warnings and are no longer needed:
+  // - { pattern: /bg-\[#[0-9a-fA-F]{6}\]/ }
+  // - { pattern: /bg-\[linear-gradient\([^\]]+\)\]/ }
+  // - { pattern: /bg-\[radial-gradient\([^\]]+\)\]/ }
+
   // ✅ Arbitrary sizing patterns for UIBlocks
   { pattern: /min-h-\[\d+px\]/ },
   { pattern: /min-w-\[\d+px\]/ },

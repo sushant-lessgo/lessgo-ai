@@ -77,8 +77,8 @@ export function VariableBackgroundModal({
     if (isOpen && !hasInitialized) {
       // Find the currently applied background variation from compatibleOptions
       const currentVariation = compatibleOptions.find(option => {
-        if ('tailwindClass' in option) {
-          return option.tailwindClass === currentBackgroundSystem?.primary;
+        if ('css' in option) {
+          return option.css === currentBackgroundSystem?.primary;
         }
         return false;
       });
@@ -102,8 +102,8 @@ export function VariableBackgroundModal({
     const modes: Array<{ value: BackgroundSelectorMode; label: string; description: string; icon: React.ReactNode }> = [
       {
         value: 'recommended',
-        label: 'AI Generated',
-        description: 'Smart backgrounds based on your business',
+        label: 'Background Presets',
+        description: 'Curated backgrounds optimized for your brand',
         icon: <Sparkles className="w-4 h-4" />
       }
     ];
@@ -313,7 +313,7 @@ export function VariableBackgroundModal({
         {mode === 'recommended' && (
           <div className="space-y-4">
             <div className="text-sm text-gray-600 dark:text-gray-400">
-              AI-generated backgrounds optimized for your {currentBackgroundSystem?.baseColor || 'brand'}
+              Curated backgrounds optimized for your {currentBackgroundSystem?.baseColor || 'brand'}
             </div>
             
             <StyleGrid
@@ -325,19 +325,18 @@ export function VariableBackgroundModal({
               selectedVariation={selectedVariation}
               onVariationSelect={(variation) => {
                 logger.debug('🎯 [DEBUG] Variation selected:', {
-                  variationId: variation.variationId,
-                  tailwindClass: variation.tailwindClass,
+                  id: variation.id,
+                  css: variation.css,
                   baseColor: variation.baseColor,
                   timestamp: new Date().toISOString()
                 });
-                
+
                 setSelectedVariation(variation);
-                
-                // Since we're not converting variations anymore,
-                // we can directly use the tailwindClass
+
+                // Use the CSS value directly from the variation
                 const newBackground = {
                   ...currentBackgroundSystem,
-                  primary: variation.tailwindClass,
+                  primary: variation.css,
                   // Use the variation's base color or keep current
                   baseColor: variation.baseColor || currentBackgroundSystem.baseColor,
                 };

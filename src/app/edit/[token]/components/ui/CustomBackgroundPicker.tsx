@@ -88,19 +88,15 @@ export function CustomBackgroundPicker({
           customBackground
         });
         
-        // Helper to format color for Tailwind
-        const formatColorForTailwind = (color: string) => {
-          return `bg-[${color}]`;
-        };
-        
+        // ✅ Return CSS values directly (no Tailwind arbitrary value syntax)
         const backgroundSystem: BackgroundSystem = {
           primary: primaryCSS,
-          secondary: formatColorForTailwind(localColors.secondary),
-          neutral: formatColorForTailwind(localColors.neutral),
-          divider: formatColorForTailwind(localColors.divider),
+          secondary: localColors.secondary,
+          neutral: localColors.neutral,
+          divider: localColors.divider,
           baseColor: baseColor,
           accentColor: baseColor,
-          accentCSS: `bg-[${localColors.primary}]` // Use proper Tailwind format for accent
+          accentCSS: localColors.primary // Direct CSS value for accent
         };
         
         logger.debug('🎨 [CustomBackgroundPicker] Sending background system:', backgroundSystem);
@@ -143,48 +139,47 @@ export function CustomBackgroundPicker({
     setLocalColors(updatedScheme);
   }, [localColors]);
 
-  // Generate CSS for the background
+  // ✅ Generate CSS value (not Tailwind class) for the background
   const generateBackgroundCSS = (custom: CustomBackground, mode: BackgroundPickerMode): string => {
     logger.debug('🎨 [CustomBackgroundPicker] generateBackgroundCSS called:', {
       mode,
       custom,
       localColors
     });
-    
+
     if (mode === 'solid' && custom.solid) {
-      // Extract color value - handle both string and object formats
+      // Return direct color value (hex/rgb)
       const colorValue = custom.solid || localColors.primary;
-      const cssClass = `bg-[${colorValue}]`;
-      logger.debug('🎨 [CustomBackgroundPicker] Generated solid CSS:', cssClass);
-      return cssClass;
+      logger.debug('🎨 [CustomBackgroundPicker] Generated solid CSS:', colorValue);
+      return colorValue;
     } else if (mode === 'gradient' && custom.gradient) {
       const { type, stops } = custom.gradient;
       const gradientStops = stops.map((s: any) => `${s.color} ${s.position}%`).join(', ');
-      
-      let cssClass;
+
+      let cssValue;
       if (type === 'linear') {
         const angle = (custom.gradient as any).angle || 45; // Type guard with fallback
-        cssClass = `bg-[linear-gradient(${angle}deg, ${gradientStops})]`;
+        cssValue = `linear-gradient(${angle}deg, ${gradientStops})`;
       } else if (type === 'radial') {
-        cssClass = `bg-[radial-gradient(circle, ${gradientStops})]`;
+        cssValue = `radial-gradient(circle, ${gradientStops})`;
       } else {
-        cssClass = `bg-[${localColors.primary}]`; // Fallback
+        cssValue = localColors.primary; // Fallback to solid color
       }
-      
+
       logger.debug('🎨 [CustomBackgroundPicker] Generated gradient CSS:', {
         type,
         stops,
         gradientStops,
         angle: type === 'linear' ? (custom.gradient as any).angle || 45 : 'N/A',
-        cssClass
+        cssValue
       });
-      return cssClass;
+      return cssValue;
     }
-    
-    // Fallback with proper format
-    const fallbackClass = `bg-[${localColors.primary}]`;
-    logger.debug('🎨 [CustomBackgroundPicker] Using fallback CSS:', fallbackClass);
-    return fallbackClass;
+
+    // Fallback to primary color
+    const fallbackValue = localColors.primary;
+    logger.debug('🎨 [CustomBackgroundPicker] Using fallback CSS:', fallbackValue);
+    return fallbackValue;
   };
 
   // Extract base color name from hex

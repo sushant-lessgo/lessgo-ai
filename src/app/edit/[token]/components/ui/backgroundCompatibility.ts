@@ -1,5 +1,6 @@
 // /app/edit/[token]/components/ui/backgroundCompatibility.ts
-import { bgVariations } from '@/modules/Design/background/bgVariations';
+import { primaryBackgrounds } from '@/modules/Design/background/primaryBackgrounds';
+import { getCategoryForUser } from '@/modules/Design/background/categoryMapping';
 
 interface BackgroundSystem {
   primary: string;
@@ -16,13 +17,13 @@ interface BrandColors {
   secondary?: string;
 }
 
+// ✅ Updated to match PrimaryBackground structure
 interface BackgroundVariation {
-  variationId: string;
-  variationLabel: string;
-  archetypeId: string;
-  themeId: string;
-  tailwindClass: string;
+  id: string;           // Previously variationId
+  label: string;        // Previously variationLabel
+  css: string;          // Previously tailwindClass - now CSS values
   baseColor: string;
+  category: 'technical' | 'professional' | 'friendly';
 }
 
 type CompatibilityMode = 'recommended' | 'custom';
@@ -61,78 +62,32 @@ export function getCompatibleBackgrounds(
 }
 
 /**
- * Get variations of the current generated background (same archetype, different intensities)
+ * ✅ SIMPLIFIED: Get variations using category-based filtering
  */
 function getGeneratedVariations(currentBackground: BackgroundSystem): BackgroundVariation[] {
   const { baseColor } = currentBackground;
-  
-  // Find variations that match the current base color and are suitable for generated mode
-  const variations = bgVariations.filter(variation => {
-    // Match base color
-    if (variation.baseColor !== baseColor) return false;
-    
-    // Prefer soft, professional archetypes for generated mode
-    const preferredArchetypes = [
-      'soft-gradient-blur',
-      'startup-skybox', 
-      'glass-morph-with-pop',
-      'zen-calm-wave'
-    ];
-    
-    return preferredArchetypes.includes(variation.archetypeId);
-  });
 
-  // Sort by preference - soft gradients first, then others
-  variations.sort((a, b) => {
-    const archetypeOrder = {
-      'soft-gradient-blur': 1,
-      'startup-skybox': 2,
-      'glass-morph-with-pop': 3,
-      'zen-calm-wave': 4,
-    };
-    
-    const aOrder = archetypeOrder[a.archetypeId as keyof typeof archetypeOrder] || 5;
-    const bOrder = archetypeOrder[b.archetypeId as keyof typeof archetypeOrder] || 5;
-    
-    return aOrder - bOrder;
-  });
+  // Find variations that match the current base color
+  let variations = primaryBackgrounds.filter(variation => variation.baseColor === baseColor);
 
-  
-  // If no variations found with preferred archetypes, expand search
+  // If no exact color matches, try harmonious colors
   if (variations.length === 0) {
-    
-    // Try all variations with the same base color
-    const allColorVariations = bgVariations.filter(v => v.baseColor === baseColor);
-    
-    if (allColorVariations.length > 0) {
-      return allColorVariations.slice(0, 8);
-    }
-    
-    // If still no matches, try harmonious colors
     const harmoniousColors = getHarmoniousColors(baseColor);
-    const harmoniousVariations = bgVariations.filter(v => 
-      harmoniousColors.includes(v.baseColor) && 
-      ['soft-gradient-blur', 'startup-skybox', 'glass-morph-with-pop'].includes(v.archetypeId)
-    );
-    
-    if (harmoniousVariations.length > 0) {
-      return harmoniousVariations.slice(0, 8);
-    }
-    
-    // Final fallback: return some default professional variations
-    const fallbackVariations = bgVariations.filter(v => 
-      ['blue', 'gray', 'slate'].includes(v.baseColor) &&
-      ['soft-gradient-blur', 'startup-skybox'].includes(v.archetypeId)
-    );
-    
-    return fallbackVariations.slice(0, 8);
+    variations = primaryBackgrounds.filter(v => harmoniousColors.includes(v.baseColor));
   }
-  
+
+  // If still no matches, use all backgrounds as fallback
+  if (variations.length === 0) {
+    variations = primaryBackgrounds.filter(v =>
+      ['blue', 'gray', 'slate'].includes(v.baseColor)
+    );
+  }
+
   return variations.slice(0, 8); // Limit to 8 options
 }
 
 /**
- * Get backgrounds compatible with brand colors
+ * ✅ SIMPLIFIED: Get backgrounds compatible with brand colors
  */
 function getBrandCompatibleBackgrounds(
   brandColors: BrandColors | null,
@@ -147,33 +102,20 @@ function getBrandCompatibleBackgrounds(
     const brandBaseColor = extractBaseColorFromHex(brandColors.primary);
 
     // Find backgrounds that work well with the brand color
-    let compatibleVariations = bgVariations.filter(variation => {
+    let compatibleVariations = primaryBackgrounds.filter(variation => {
       // Direct base color match
       if (variation.baseColor === brandBaseColor) return true;
-      
+
       // Color harmony matches
       const harmonious = getHarmoniousColors(brandBaseColor);
       if (harmonious.includes(variation.baseColor)) return true;
-      
+
       // Neutral backgrounds work with any brand color
-      const neutralColors = ['unknown', 'opacity', 'custom'];
+      const neutralColors = ['gray', 'slate', 'zinc'];
       if (neutralColors.includes(variation.baseColor)) return true;
-      
+
       return false;
     });
-
-    // Prioritize certain archetypes for brand mode
-    const brandFriendlyArchetypes = [
-      'soft-gradient-blur',
-      'frosted-glass-light',
-      'startup-skybox',
-      'trusty-brick-tone',
-      'wireframe-blueprint'
-    ];
-
-    compatibleVariations = compatibleVariations.filter(variation => 
-      brandFriendlyArchetypes.includes(variation.archetypeId)
-    );
 
     // Sort by brand compatibility score
     compatibleVariations.sort((a, b) => {
@@ -191,61 +133,18 @@ function getBrandCompatibleBackgrounds(
 }
 
 /**
- * Get all custom background options (curated selection)
+ * ✅ SIMPLIFIED: Get all custom background options (show all curated backgrounds)
  */
 function getCustomBackgroundOptions(): BackgroundVariation[] {
-  // For custom mode, show a curated selection of diverse archetypes
-  const customArchetypes = [
-    'soft-gradient-blur',
-    'frosted-glass-light', 
-    'code-matrix-mesh',
-    'editorial-split',
-    'luxury-blur',
-    'energetic-diagonals',
-    'paper-texture-light',
-    'noise-fade-dark',
-    'high-friction-grid',
-    'comic-burst',
-    'zen-calm-wave',
-    'deep-night-space',
-    'vibrant-rings',
-    'monochrome-hero-zone',
-    'blurred-spotlight'
-  ];
-
-  // Get representative variations from each archetype
-  const customVariations: BackgroundVariation[] = [];
-  
-  customArchetypes.forEach(archetype => {
-    const archetypeVariations = bgVariations.filter(v => v.archetypeId === archetype);
-    
-    // Take up to 2 variations per archetype
-    customVariations.push(...archetypeVariations.slice(0, 2));
-  });
-
-  // Sort by visual appeal and diversity
-  customVariations.sort((a, b) => {
-    // Prioritize visually distinct archetypes
-    const visualAppealOrder = {
-      'soft-gradient-blur': 1,
-      'luxury-blur': 2,
-      'energetic-diagonals': 3,
-      'frosted-glass-light': 4,
-      'comic-burst': 5,
-      'deep-night-space': 6,
-      'vibrant-rings': 7,
-      'code-matrix-mesh': 8,
-      'zen-calm-wave': 9,
-      'blurred-spotlight': 10,
-    };
-    
-    const aOrder = visualAppealOrder[a.archetypeId as keyof typeof visualAppealOrder] || 11;
-    const bOrder = visualAppealOrder[b.archetypeId as keyof typeof visualAppealOrder] || 11;
-    
+  // Return all backgrounds, sorted by category
+  const sorted = [...primaryBackgrounds].sort((a, b) => {
+    const categoryOrder = { friendly: 1, professional: 2, technical: 3 };
+    const aOrder = categoryOrder[a.category];
+    const bOrder = categoryOrder[b.category];
     return aOrder - bOrder;
   });
 
-  return customVariations.slice(0, 20); // More options for custom mode
+  return sorted.slice(0, 20); // Show up to 20 options
 }
 
 /**
@@ -357,10 +256,10 @@ function getHarmoniousColors(baseColor: string): string[] {
 }
 
 /**
- * Calculate brand compatibility score
+ * ✅ SIMPLIFIED: Calculate brand compatibility score
  */
 function calculateBrandCompatibilityScore(
-  variation: BackgroundVariation, 
+  variation: BackgroundVariation,
   brandColors: BrandColors
 ): number {
   let score = 0;
@@ -378,22 +277,17 @@ function calculateBrandCompatibilityScore(
   }
 
   // Neutral backgrounds get medium score (work with anything)
-  const neutrals = ['unknown', 'opacity', 'custom', 'gray', 'slate', 'zinc'];
+  const neutrals = ['gray', 'slate', 'zinc'];
   if (neutrals.includes(variation.baseColor)) {
     score += 5;
   }
 
-  // Archetype bonus for brand-friendly designs
-  const brandFriendlyBonus: Record<string, number> = {
-    'soft-gradient-blur': 3,
-    'startup-skybox': 3,
-    'trusty-brick-tone': 4,
-    'wireframe-blueprint': 2,
-    'frosted-glass-light': 2,
-    'glass-morph-with-pop': 1,
-  };
-
-  score += brandFriendlyBonus[variation.archetypeId] || 0;
+  // Category bonus: professional/friendly better for brand mode
+  if (variation.category === 'professional') {
+    score += 3;
+  } else if (variation.category === 'friendly') {
+    score += 2;
+  }
 
   // Secondary brand color bonus
   if (brandColors.secondary) {
@@ -453,22 +347,59 @@ export function validateBrandColor(color: string): { isValid: boolean; error?: s
 }
 
 /**
- * Get background preview data for a variation
+ * ✅ Get background preview data for a variation (returns CSS values)
  */
 export function getBackgroundPreview(variation: BackgroundVariation): {
-  primaryClass: string;
-  secondaryClass: string;
-  neutralClass: string;
-  dividerClass: string;
+  primaryCSS: string;
+  secondaryCSS: string;
+  neutralCSS: string;
+  dividerCSS: string;
 } {
-  const baseColor = variation.baseColor === 'unknown' || variation.baseColor === 'opacity' || variation.baseColor === 'custom'
-    ? 'gray'
-    : variation.baseColor;
+  // Map baseColor to actual CSS values
+  const secondaryColorMap: Record<string, string> = {
+    blue: 'rgba(239, 246, 255, 0.7)',
+    sky: 'rgba(240, 249, 255, 0.7)',
+    indigo: 'rgba(238, 242, 255, 0.7)',
+    purple: 'rgba(250, 245, 255, 0.7)',
+    pink: 'rgba(253, 242, 248, 0.7)',
+    red: 'rgba(254, 242, 242, 0.7)',
+    orange: 'rgba(255, 247, 237, 0.7)',
+    amber: 'rgba(255, 251, 235, 0.7)',
+    yellow: 'rgba(254, 252, 232, 0.7)',
+    lime: 'rgba(247, 254, 231, 0.7)',
+    green: 'rgba(240, 253, 244, 0.7)',
+    emerald: 'rgba(236, 253, 245, 0.7)',
+    teal: 'rgba(240, 253, 250, 0.7)',
+    cyan: 'rgba(236, 254, 255, 0.7)',
+    gray: 'rgba(249, 250, 251, 0.7)',
+    slate: 'rgba(248, 250, 252, 0.7)',
+    zinc: 'rgba(250, 250, 250, 0.7)',
+  };
+
+  const dividerColorMap: Record<string, string> = {
+    blue: 'rgba(219, 234, 254, 0.5)',
+    sky: 'rgba(224, 242, 254, 0.5)',
+    indigo: 'rgba(224, 231, 255, 0.5)',
+    purple: 'rgba(243, 232, 255, 0.5)',
+    pink: 'rgba(252, 231, 243, 0.5)',
+    red: 'rgba(254, 226, 226, 0.5)',
+    orange: 'rgba(255, 237, 213, 0.5)',
+    amber: 'rgba(254, 243, 199, 0.5)',
+    yellow: 'rgba(254, 249, 195, 0.5)',
+    lime: 'rgba(236, 252, 203, 0.5)',
+    green: 'rgba(220, 252, 231, 0.5)',
+    emerald: 'rgba(209, 250, 229, 0.5)',
+    teal: 'rgba(204, 251, 241, 0.5)',
+    cyan: 'rgba(207, 250, 254, 0.5)',
+    gray: 'rgba(243, 244, 246, 0.5)',
+    slate: 'rgba(241, 245, 249, 0.5)',
+    zinc: 'rgba(244, 244, 245, 0.5)',
+  };
 
   return {
-    primaryClass: variation.tailwindClass,
-    secondaryClass: `bg-${baseColor}-50`,
-    neutralClass: 'bg-white',
-    dividerClass: `bg-${baseColor}-100/50`,
+    primaryCSS: variation.css,
+    secondaryCSS: secondaryColorMap[variation.baseColor] || 'rgba(249, 250, 251, 0.7)',
+    neutralCSS: '#ffffff',
+    dividerCSS: dividerColorMap[variation.baseColor] || 'rgba(243, 244, 246, 0.5)',
   };
 }

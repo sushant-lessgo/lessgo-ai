@@ -36,10 +36,9 @@ export function StyleOption({
 }: StyleOptionProps) {
   // Debug log at the top level to ensure it runs
   logger.debug('🔎 TOP LEVEL StyleOption called with variation:', variation);
-  logger.debug('🔎 TOP LEVEL variation.tailwindClass:', variation.tailwindClass);
-  logger.debug('🔎 TOP LEVEL variation.fallbackClass:', (variation as any).fallbackClass);
-  logger.debug('🔎 TOP LEVEL variation.variationLabel:', variation.variationLabel);
-  logger.debug('🔎 TOP LEVEL variation.archetypeId:', variation.archetypeId);
+  logger.debug('🔎 TOP LEVEL variation.css:', variation.css);
+  logger.debug('🔎 TOP LEVEL variation.label:', variation.label);
+  logger.debug('🔎 TOP LEVEL variation.category:', variation.category);
   
   const [isHovered, setIsHovered] = useState(false);
   const [validationResult, setValidationResult] = useState<any>(null);
@@ -537,14 +536,6 @@ export function StyleOption({
     return { backgroundColor: '#f3f4f6' };
   };
 
-  // Format archetype name for display
-  const formatArchetypeName = (archetypeId: string) => {
-    return archetypeId
-      .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-  };
-
   // Container classes
   const containerClasses = `
     group relative cursor-pointer transition-all duration-200 rounded-lg border-2 overflow-hidden
@@ -568,8 +559,8 @@ export function StyleOption({
         {/* Preview Section */}
         <div className="w-24 h-16 flex-shrink-0">
           <div
-            className="w-full h-full"
-            style={getBackgroundStyle((variation as any).fallbackClass || variation.tailwindClass)}
+            className="w-full h-full rounded"
+            style={{ background: variation.css }}
           />
         </div>
 
@@ -578,18 +569,18 @@ export function StyleOption({
           <div className="flex items-start justify-between">
             <div className="min-w-0 flex-1">
               <h3 className="font-medium text-gray-900 truncate text-sm">
-                {variation.variationLabel}
+                {variation.label}
               </h3>
               <p className="text-xs text-gray-500 truncate mt-0.5">
-                {formatArchetypeName(variation.archetypeId)}
+                {variation.category.charAt(0).toUpperCase() + variation.category.slice(1)}
               </p>
-              
+
               {showDetails && (
                 <div className="flex items-center space-x-2 mt-1">
                   <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600">
                     {variation.baseColor}
                   </span>
-                  {((variation as any).fallbackClass || variation.tailwindClass)?.includes('gradient') && (
+                  {variation.css?.includes('gradient') && (
                     <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-purple-100 text-purple-600">
                       Gradient
                     </span>
@@ -635,15 +626,8 @@ export function StyleOption({
       {/* Background Preview */}
       <div className={`relative ${config.preview} w-full`}>
         <div
-          className="w-full h-full"
-          style={(() => {
-            logger.debug('🔎 StyleOption variation object:', variation);
-            logger.debug('🔎 variation.tailwindClass:', variation.tailwindClass);
-            logger.debug('🔎 variation.fallbackClass:', (variation as any).fallbackClass);
-            // Use fallbackClass instead of tailwindClass for the new variation structure
-            const bgClass = (variation as any).fallbackClass || variation.tailwindClass;
-            return getBackgroundStyle(bgClass);
-          })()}
+          className="w-full h-full rounded"
+          style={{ background: variation.css }}
         />
         
         {/* Hover overlay */}
@@ -681,20 +665,20 @@ export function StyleOption({
       {showDetails && (
         <div className={config.padding}>
           <h3 className={`font-medium text-gray-900 truncate ${config.text}`}>
-            {variation.variationLabel}
+            {variation.label}
           </h3>
-          
+
           {size !== 'small' && (
             <>
               <p className="text-xs text-gray-500 truncate mt-0.5">
-                {formatArchetypeName(variation.archetypeId)}
+                {variation.category.charAt(0).toUpperCase() + variation.category.slice(1)}
               </p>
-              
+
               <div className="flex items-center space-x-1 mt-1.5">
                 <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-gray-100 text-gray-600">
                   {variation.baseColor}
                 </span>
-                {((variation as any).fallbackClass || variation.tailwindClass)?.includes('gradient') && (
+                {variation.css?.includes('gradient') && (
                   <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-purple-100 text-purple-600">
                     Gradient
                   </span>
@@ -709,7 +693,7 @@ export function StyleOption({
       {!showDetails && size === 'small' && (
         <div className="px-2 py-1 text-center">
           <div className="text-xs font-medium text-gray-700 truncate">
-            {variation.variationLabel.split(' ')[0]}
+            {variation.label.split(' ')[0]}
           </div>
         </div>
       )}
@@ -773,11 +757,10 @@ export function DetailedStyleOption({
           <div>
             <h4 className="text-xs font-medium text-gray-700 mb-1">Technical Details</h4>
             <div className="text-xs text-gray-600 space-y-0.5">
-              <div>Archetype: {formatArchetypeName(variation.archetypeId)}</div>
-              <div>Theme: {variation.themeId}</div>
+              <div>Category: {variation.category.charAt(0).toUpperCase() + variation.category.slice(1)}</div>
               <div>Base Color: {variation.baseColor}</div>
-              <div className="font-mono text-xs bg-gray-100 p-1 rounded">
-                {(variation as any).fallbackClass || variation.tailwindClass}
+              <div className="font-mono text-xs bg-gray-100 p-1 rounded overflow-x-auto">
+                {variation.css}
               </div>
             </div>
           </div>
@@ -814,11 +797,11 @@ export function DetailedStyleOption({
               <h4 className="text-xs font-medium text-gray-700 mb-1">Section Preview</h4>
               <div className="grid grid-cols-3 gap-1">
                 <div className="text-center">
-                  <div className="h-6 rounded mb-1" style={getBackgroundStyle((variation as any).fallbackClass || variation.tailwindClass)} />
+                  <div className="h-6 rounded mb-1" style={{ background: variation.css }} />
                   <div className="text-xs text-gray-500">Hero</div>
                 </div>
                 <div className="text-center">
-                  <div className="h-6 rounded mb-1" style={getBackgroundStyle(`bg-${variation.baseColor}-50`)} />
+                  <div className="h-6 rounded mb-1" style={{ background: previewData.secondaryCSS }} />
                   <div className="text-xs text-gray-500">Features</div>
                 </div>
                 <div className="text-center">
@@ -832,13 +815,6 @@ export function DetailedStyleOption({
       )}
     </div>
   );
-}
-
-function formatArchetypeName(archetypeId: string): string {
-  return archetypeId
-    .split('-')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
 }
 
 function getBackgroundStyle(bgClass: string) {

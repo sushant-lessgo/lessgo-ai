@@ -35,7 +35,7 @@ export function StyleGrid({
   filterBy = 'all',
 }: StyleGridProps) {
   logger.debug('📋 StyleGrid received variations:', { count: variations?.length || 0, variations });
-  const [sortBy, setSortBy] = useState<'default' | 'name' | 'archetype' | 'color'>('default');
+  const [sortBy, setSortBy] = useState<'default' | 'name' | 'category' | 'color'>('default');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   // Filter and sort variations
@@ -49,8 +49,8 @@ export function StyleGrid({
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(variation =>
-        variation.variationLabel.toLowerCase().includes(query) ||
-        variation.archetypeId.toLowerCase().includes(query) ||
+        variation.label.toLowerCase().includes(query) ||
+        variation.category.toLowerCase().includes(query) ||
         variation.baseColor.toLowerCase().includes(query)
       );
     }
@@ -60,15 +60,15 @@ export function StyleGrid({
       filtered = filtered.filter(variation => {
         switch (filterBy) {
           case 'gradients':
-            return variation.tailwindClass?.includes('gradient');
+            return variation.css?.includes('gradient');
           case 'solid':
-            return variation.tailwindClass && !variation.tailwindClass.includes('gradient');
-          case 'soft':
-            return variation.archetypeId?.includes('soft') || variation.archetypeId?.includes('blur');
-          case 'bold':
-            return variation.archetypeId?.includes('energetic') || variation.archetypeId?.includes('vibrant');
+            return variation.css && !variation.css.includes('gradient');
+          case 'technical':
+            return variation.category === 'technical';
           case 'professional':
-            return variation.archetypeId?.includes('startup') || variation.archetypeId?.includes('trusty');
+            return variation.category === 'professional';
+          case 'friendly':
+            return variation.category === 'friendly';
           default:
             return true;
         }
@@ -79,9 +79,9 @@ export function StyleGrid({
     filtered.sort((a, b) => {
       switch (sortBy) {
         case 'name':
-          return a.variationLabel.localeCompare(b.variationLabel);
-        case 'archetype':
-          return a.archetypeId.localeCompare(b.archetypeId);
+          return a.label.localeCompare(b.label);
+        case 'category':
+          return a.category.localeCompare(b.category);
         case 'color':
           return a.baseColor.localeCompare(b.baseColor);
         default:
@@ -99,35 +99,35 @@ export function StyleGrid({
     }
     const options = [
       { id: 'all', label: 'All Styles', count: variations.length },
-      { 
-        id: 'gradients', 
-        label: 'Gradients', 
-        count: variations.filter(v => v.tailwindClass?.includes('gradient')).length 
+      {
+        id: 'gradients',
+        label: 'Gradients',
+        count: variations.filter(v => v.css?.includes('gradient')).length
       },
-      { 
-        id: 'solid', 
-        label: 'Solid Colors', 
-        count: variations.filter(v => v.tailwindClass && !v.tailwindClass.includes('gradient')).length 
+      {
+        id: 'solid',
+        label: 'Solid Colors',
+        count: variations.filter(v => v.css && !v.css.includes('gradient')).length
       },
     ];
 
-    // Mode-specific filters
-    if (mode === 'custom') {
+    // Category-based filters
+    if (mode === 'custom' || mode === 'recommended') {
       options.push(
-        { 
-          id: 'soft', 
-          label: 'Soft & Subtle', 
-          count: variations.filter(v => v.archetypeId.includes('soft') || v.archetypeId.includes('blur')).length 
+        {
+          id: 'technical',
+          label: 'Technical',
+          count: variations.filter(v => v.category === 'technical').length
         },
-        { 
-          id: 'bold', 
-          label: 'Bold & Vibrant', 
-          count: variations.filter(v => v.archetypeId.includes('energetic') || v.archetypeId.includes('vibrant')).length 
+        {
+          id: 'professional',
+          label: 'Professional',
+          count: variations.filter(v => v.category === 'professional').length
         },
-        { 
-          id: 'professional', 
-          label: 'Professional', 
-          count: variations.filter(v => v.archetypeId.includes('startup') || v.archetypeId.includes('trusty')).length 
+        {
+          id: 'friendly',
+          label: 'Friendly',
+          count: variations.filter(v => v.category === 'friendly').length
         }
       );
     }
@@ -137,11 +137,11 @@ export function StyleGrid({
 
   const handleVariationClick = (variation: BackgroundVariation) => {
     logger.debug('🕹️ [STYLEGRID DEBUG] handleVariationClick called with:', {
-      variationId: variation.variationId,
-      variationLabel: variation.variationLabel,
-      tailwindClass: variation.tailwindClass,
+      id: variation.id,
+      label: variation.label,
+      css: variation.css,
       baseColor: variation.baseColor,
-      archetypeId: variation.archetypeId,
+      category: variation.category,
       timestamp: new Date().toISOString()
     });
     onVariationSelect(variation);
@@ -196,7 +196,7 @@ export function StyleGrid({
           >
             <option value="default">Default Order</option>
             <option value="name">Sort by Name</option>
-            <option value="archetype">Sort by Style</option>
+            <option value="category">Sort by Category</option>
             <option value="color">Sort by Color</option>
           </select>
 
@@ -279,9 +279,9 @@ export function StyleGrid({
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
               {processedVariations.map((variation) => (
                 <StyleOption
-                  key={variation.variationId}
+                  key={variation.id}
                   variation={variation}
-                  isSelected={selectedVariation?.variationId === variation.variationId}
+                  isSelected={selectedVariation?.id === variation.id}
                   onClick={() => handleVariationClick(variation)}
                   onHover={() => handleVariationHover(variation)}
                   onHoverEnd={() => handleVariationHover(null)}
@@ -297,9 +297,9 @@ export function StyleGrid({
             <div className="space-y-2">
               {processedVariations.map((variation) => (
                 <StyleOption
-                  key={variation.variationId}
+                  key={variation.id}
                   variation={variation}
-                  isSelected={selectedVariation?.variationId === variation.variationId}
+                  isSelected={selectedVariation?.id === variation.id}
                   onClick={() => handleVariationClick(variation)}
                   onHover={() => handleVariationHover(variation)}
                   onHoverEnd={() => handleVariationHover(null)}
@@ -350,9 +350,9 @@ export function CompactStyleGrid({
     <div className="grid grid-cols-3 gap-2">
       {displayVariations.map((variation) => (
         <StyleOption
-          key={variation.variationId}
+          key={variation.id}
           variation={variation}
-          isSelected={selectedVariation?.variationId === variation.variationId}
+          isSelected={selectedVariation?.id === variation.id}
           onClick={() => onVariationSelect(variation)}
           showDetails={false}
           size="small"
@@ -377,7 +377,7 @@ interface CategorizedStyleGridProps {
   variations: BackgroundVariation[];
   selectedVariation?: BackgroundVariation | null;
   onVariationSelect: (variation: BackgroundVariation) => void;
-  groupBy: 'archetype' | 'color' | 'theme';
+  groupBy: 'category' | 'color';
 }
 
 export function CategorizedStyleGrid({
@@ -391,27 +391,24 @@ export function CategorizedStyleGrid({
       return {};
     }
     const groups: Record<string, BackgroundVariation[]> = {};
-    
+
     variations.forEach((variation) => {
       let key: string;
       switch (groupBy) {
-        case 'archetype':
-          key = variation.archetypeId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        case 'category':
+          key = variation.category.charAt(0).toUpperCase() + variation.category.slice(1);
           break;
         case 'color':
           key = variation.baseColor.charAt(0).toUpperCase() + variation.baseColor.slice(1);
           break;
-        case 'theme':
-          key = variation.themeId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-          break;
         default:
           key = 'Other';
       }
-      
+
       if (!groups[key]) groups[key] = [];
       groups[key].push(variation);
     });
-    
+
     return groups;
   }, [variations, groupBy]);
 
@@ -431,9 +428,9 @@ export function CategorizedStyleGrid({
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {groupedVariations[groupKey].map((variation) => (
               <StyleOption
-                key={variation.variationId}
+                key={variation.id}
                 variation={variation}
-                isSelected={selectedVariation?.variationId === variation.variationId}
+                isSelected={selectedVariation?.id === variation.id}
                 onClick={() => onVariationSelect(variation)}
                 showDetails={false}
                 size="medium"
