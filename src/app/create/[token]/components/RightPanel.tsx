@@ -193,12 +193,12 @@ export default function RightPanel() {
             logger.warn('⚠️ No hiddenInferredFields received from API');
           }
 
-          // Sprint 7: Show asset modal instead of going directly to feature editor
-          setTimeout(() => setShowAssetModal(true), 2000);
+          // Show feature editor first, asset modal comes later when user clicks "Continue"
+          setTimeout(() => setShowFeatureEditor(true), 2000);
         } catch (error) {
           logger.error('Error fetching features:', error);
-          // Even on error, show asset modal
-          setTimeout(() => setShowAssetModal(true), 500);
+          // Even on error, show feature editor
+          setTimeout(() => setShowFeatureEditor(true), 500);
         }
       };
 
