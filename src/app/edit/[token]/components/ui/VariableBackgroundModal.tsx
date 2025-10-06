@@ -274,23 +274,6 @@ export function VariableBackgroundModal({
       size="large"
     >
       <div className="space-y-6">
-        {/* Migration Phase Indicator */}
-        {enableVariableMode && (
-          <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-            <div className="flex items-center gap-2">
-              <Info className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-              <span className="text-sm text-blue-800 dark:text-blue-200">
-                Migration Mode: {phase}
-              </span>
-            </div>
-            {isVariableMode && (
-              <Badge variant="secondary" className="text-xs">
-                CSS Variables Enabled
-              </Badge>
-            )}
-          </div>
-        )}
-
         {/* Mode Selection Buttons */}
         <div className="grid w-full border rounded-lg overflow-hidden" style={{ gridTemplateColumns: `repeat(${availableModes.length}, 1fr)` }}>
           {availableModes.map(({ value, label, icon }) => (
@@ -313,7 +296,7 @@ export function VariableBackgroundModal({
         {mode === 'recommended' && (
           <div className="space-y-4">
             <div className="text-sm text-gray-600 dark:text-gray-400">
-              Curated backgrounds optimized for your {currentBackgroundSystem?.baseColor || 'brand'}
+              Curated backgrounds optimized for your target audience
             </div>
             
             <StyleGrid
@@ -475,14 +458,6 @@ export function VariableBackgroundModal({
                 }}
               />
           </div>
-        )}
-
-
-        {/* Validation Warnings */}
-        {validationResult && (
-          <ValidationWarnings
-            validationResult={validationResult}
-          />
         )}
 
         {/* Actions */}

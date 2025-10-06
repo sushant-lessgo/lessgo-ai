@@ -35,105 +35,15 @@ export function StyleGrid({
   filterBy = 'all',
 }: StyleGridProps) {
   logger.debug('📋 StyleGrid received variations:', { count: variations?.length || 0, variations });
-  const [sortBy, setSortBy] = useState<'default' | 'name' | 'category' | 'color'>('default');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-  // Filter and sort variations
+  // Simplified: just limit to 6 variations
   const processedVariations = useMemo(() => {
     if (!variations || !Array.isArray(variations)) {
       return [];
     }
-    let filtered = [...variations];
-
-    // Apply search filter
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(variation =>
-        variation.label.toLowerCase().includes(query) ||
-        variation.category.toLowerCase().includes(query) ||
-        variation.baseColor.toLowerCase().includes(query)
-      );
-    }
-
-    // Apply category filter
-    if (filterBy !== 'all') {
-      filtered = filtered.filter(variation => {
-        switch (filterBy) {
-          case 'gradients':
-            return variation.css?.includes('gradient');
-          case 'solid':
-            return variation.css && !variation.css.includes('gradient');
-          case 'technical':
-            return variation.category === 'technical';
-          case 'professional':
-            return variation.category === 'professional';
-          case 'friendly':
-            return variation.category === 'friendly';
-          default:
-            return true;
-        }
-      });
-    }
-
-    // Apply sorting
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case 'name':
-          return a.label.localeCompare(b.label);
-        case 'category':
-          return a.category.localeCompare(b.category);
-        case 'color':
-          return a.baseColor.localeCompare(b.baseColor);
-        default:
-          return 0; // Keep original order
-      }
-    });
-
-    return filtered;
-  }, [variations, searchQuery, filterBy, sortBy]);
-
-  // Generate filter options
-  const filterOptions: FilterOption[] = useMemo(() => {
-    if (!variations || !Array.isArray(variations)) {
-      return [{ id: 'all', label: 'All Styles', count: 0 }];
-    }
-    const options = [
-      { id: 'all', label: 'All Styles', count: variations.length },
-      {
-        id: 'gradients',
-        label: 'Gradients',
-        count: variations.filter(v => v.css?.includes('gradient')).length
-      },
-      {
-        id: 'solid',
-        label: 'Solid Colors',
-        count: variations.filter(v => v.css && !v.css.includes('gradient')).length
-      },
-    ];
-
-    // Category-based filters
-    if (mode === 'custom' || mode === 'recommended') {
-      options.push(
-        {
-          id: 'technical',
-          label: 'Technical',
-          count: variations.filter(v => v.category === 'technical').length
-        },
-        {
-          id: 'professional',
-          label: 'Professional',
-          count: variations.filter(v => v.category === 'professional').length
-        },
-        {
-          id: 'friendly',
-          label: 'Friendly',
-          count: variations.filter(v => v.category === 'friendly').length
-        }
-      );
-    }
-
-    return options.filter(option => option.count > 0);
-  }, [variations, mode]);
+    // Return first 6 variations only
+    return variations.slice(0, 6);
+  }, [variations]);
 
   const handleVariationClick = (variation: BackgroundVariation) => {
     logger.debug('🕹️ [STYLEGRID DEBUG] handleVariationClick called with:', {
@@ -154,173 +64,39 @@ export function StyleGrid({
   // Loading skeleton
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="h-4 bg-gray-200 rounded w-24 animate-pulse"></div>
-          <div className="h-8 bg-gray-200 rounded w-32 animate-pulse"></div>
-        </div>
-        
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-          {Array.from({ length: 8 }).map((_, index) => (
-            <div key={index} className="space-y-2">
-              <div className="h-20 bg-gray-200 rounded-lg animate-pulse"></div>
-              <div className="h-3 bg-gray-200 rounded w-3/4 animate-pulse"></div>
-            </div>
-          ))}
-        </div>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div key={index} className="space-y-2">
+            <div className="h-20 bg-gray-200 rounded-lg animate-pulse"></div>
+            <div className="h-3 bg-gray-200 rounded w-3/4 animate-pulse"></div>
+          </div>
+        ))}
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      {/* Header Controls */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <span className="text-sm font-medium text-gray-700">
-            {processedVariations.length} style{processedVariations.length !== 1 ? 's' : ''}
-          </span>
-          {searchQuery && (
-            <span className="text-xs text-gray-500">
-              for "{searchQuery}"
-            </span>
-          )}
-        </div>
-
-        <div className="flex items-center space-x-2">
-          {/* Sort dropdown */}
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-            className="text-xs border border-gray-300 rounded px-2 py-1 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="default">Default Order</option>
-            <option value="name">Sort by Name</option>
-            <option value="category">Sort by Category</option>
-            <option value="color">Sort by Color</option>
-          </select>
-
-          {/* View mode toggle */}
-          <div className="flex items-center bg-gray-100 rounded p-0.5">
-            <button
-              onClick={() => setViewMode('grid')}
-              className={`p-1 rounded text-xs ${
-                viewMode === 'grid'
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-              title="Grid view"
-            >
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-              </svg>
-            </button>
-            <button
-              onClick={() => setViewMode('list')}
-              className={`p-1 rounded text-xs ${
-                viewMode === 'list'
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-              title="List view"
-            >
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-          </div>
-        </div>
+    <div>
+      {/* Simple header showing count */}
+      <div className="text-sm text-gray-500 mb-4">
+        {processedVariations.length} curated style{processedVariations.length !== 1 ? 's' : ''}
       </div>
 
-      {/* Filter tabs */}
-      {filterOptions.length > 1 && (
-        <div className="flex items-center space-x-1 overflow-x-auto pb-1">
-          {filterOptions.map((option) => (
-            <button
-              key={option.id}
-              onClick={() => {
-                // This would be passed up to parent component
-                // setFilterBy(option.id)
-              }}
-              className={`
-                inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors
-                ${filterBy === option.id
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }
-              `}
-            >
-              {option.label}
-              <span className="ml-1 text-xs opacity-75">
-                {option.count}
-              </span>
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* Results */}
-      {processedVariations.length === 0 ? (
-        <div className="text-center py-12">
-          <div className="text-gray-400 mb-2">
-            <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M9.172 16.172a4 4 0 015.656 0M9 12l6 6m-6-6l6-6" />
-            </svg>
-          </div>
-          <div className="text-gray-500 text-sm mb-1">No backgrounds found</div>
-          <div className="text-gray-400 text-xs">
-            {searchQuery ? `No results for "${searchQuery}"` : 'Try adjusting your filters'}
-          </div>
-        </div>
-      ) : (
-        <>
-          {/* Grid View */}
-          {viewMode === 'grid' && (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-              {processedVariations.map((variation) => (
-                <StyleOption
-                  key={variation.id}
-                  variation={variation}
-                  isSelected={selectedVariation?.id === variation.id}
-                  onClick={() => handleVariationClick(variation)}
-                  onHover={() => handleVariationHover(variation)}
-                  onHoverEnd={() => handleVariationHover(null)}
-                  showDetails={false}
-                  size="medium"
-                />
-              ))}
-            </div>
-          )}
-
-          {/* List View */}
-          {viewMode === 'list' && (
-            <div className="space-y-2">
-              {processedVariations.map((variation) => (
-                <StyleOption
-                  key={variation.id}
-                  variation={variation}
-                  isSelected={selectedVariation?.id === variation.id}
-                  onClick={() => handleVariationClick(variation)}
-                  onHover={() => handleVariationHover(variation)}
-                  onHoverEnd={() => handleVariationHover(null)}
-                  showDetails={true}
-                  size="large"
-                  layout="horizontal"
-                />
-              ))}
-            </div>
-          )}
-        </>
-      )}
-
-      {/* Load More (for future pagination) */}
-      {processedVariations.length >= 20 && (
-        <div className="text-center pt-4">
-          <button className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 transition-colors">
-            Load More Styles
-          </button>
-        </div>
-      )}
+      {/* Grid View Only */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        {processedVariations.map((variation) => (
+          <StyleOption
+            key={variation.id}
+            variation={variation}
+            isSelected={selectedVariation?.id === variation.id}
+            onClick={() => handleVariationClick(variation)}
+            onHover={() => handleVariationHover(variation)}
+            onHoverEnd={() => handleVariationHover(null)}
+            showDetails={false}
+            size="medium"
+          />
+        ))}
+      </div>
     </div>
   );
 }
