@@ -180,17 +180,22 @@ export function GradientPicker({ value, onChange }: GradientPickerProps) {
 
   return (
     <div className="space-y-6">
-      {/* Gradient Type Selector */}
+      {/* Main Heading */}
       <div>
-        <h4 className="text-sm font-medium text-gray-900 mb-3">Gradient Type</h4>
+        <h3 className="text-base font-semibold text-gray-900 mb-4">Gradient Configuration</h3>
+      </div>
+
+      {/* Gradient Type Selector */}
+      <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+        <label className="block text-sm font-medium text-gray-700 mb-3">Type</label>
         <div className="flex space-x-2">
           {['linear', 'radial'].map((type) => (
             <button
               key={type}
               onClick={() => handleTypeChange(type as 'linear' | 'radial')}
-              className={`px-4 py-2 text-sm font-medium rounded-md border transition-colors ${
+              className={`flex-1 px-4 py-2.5 text-sm font-medium rounded-md border transition-colors ${
                 gradientType === type
-                  ? 'bg-blue-50 border-blue-200 text-blue-700'
+                  ? 'bg-blue-600 border-blue-600 text-white'
                   : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
               }`}
             >
@@ -202,9 +207,9 @@ export function GradientPicker({ value, onChange }: GradientPickerProps) {
 
       {/* Direction Control (Linear only) */}
       {gradientType === 'linear' && (
-        <div>
-          <h4 className="text-sm font-medium text-gray-900 mb-3">Direction</h4>
-          <div className="space-y-3">
+        <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+          <label className="block text-sm font-medium text-gray-700 mb-3">Direction</label>
+          <div className="space-y-4">
             <div className="flex items-center space-x-4">
               <input
                 type="range"
@@ -212,9 +217,9 @@ export function GradientPicker({ value, onChange }: GradientPickerProps) {
                 max="360"
                 value={direction}
                 onChange={(e) => handleDirectionChange(parseInt(e.target.value))}
-                className="flex-1"
+                className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
               />
-              <div className="text-sm font-medium text-gray-900 w-12">
+              <div className="text-base font-semibold text-gray-900 w-14">
                 {direction}°
               </div>
             </div>
@@ -228,9 +233,9 @@ export function GradientPicker({ value, onChange }: GradientPickerProps) {
                 <button
                   key={label}
                   onClick={() => handleDirectionChange(value)}
-                  className={`px-3 py-2 text-xs font-medium rounded border transition-colors ${
+                  className={`px-3 py-2 text-sm font-medium rounded-md border transition-colors ${
                     direction === value
-                      ? 'bg-blue-50 border-blue-200 text-blue-700'
+                      ? 'bg-blue-600 border-blue-600 text-white'
                       : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
                   }`}
                 >
@@ -245,84 +250,47 @@ export function GradientPicker({ value, onChange }: GradientPickerProps) {
       {/* Gradient Stops */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h4 className="text-sm font-medium text-gray-900">Color Stops</h4>
+          <h4 className="text-sm font-medium text-gray-700">Color Stops</h4>
           <button
             onClick={addStop}
-            className="text-sm text-blue-600 hover:text-blue-700 transition-colors"
+            className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
           >
             + Add Stop
           </button>
         </div>
         <div className="space-y-3">
           {stops.map((stop, index) => (
-            <div key={index} className="flex items-center space-x-3">
+            <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
               <input
                 type="color"
                 value={stop.color}
                 onChange={(e) => updateStop(index, { color: e.target.value })}
-                className="w-8 h-8 rounded border border-gray-300 cursor-pointer"
+                className="w-10 h-10 rounded-md border-2 border-gray-300 cursor-pointer"
               />
-              <div className="flex-1">
+              <div className="flex-1 space-y-1">
                 <input
                   type="range"
                   min="0"
                   max="100"
                   value={stop.position}
                   onChange={(e) => updateStop(index, { position: parseInt(e.target.value) })}
-                  className="w-full"
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                 />
-              </div>
-              <div className="text-sm font-medium text-gray-900 w-12">
-                {stop.position}%
+                <div className="text-xs text-gray-500">Position: {stop.position}%</div>
               </div>
               {stops.length > 2 && (
                 <button
                   onClick={() => removeStop(index)}
-                  className="text-red-600 hover:text-red-700 transition-colors p-1"
+                  className="text-red-600 hover:text-red-700 transition-colors p-2"
+                  title="Remove stop"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               )}
             </div>
           ))}
-        </div>
-      </div>
-
-      {/* Preset Gradients */}
-      <div>
-        <h4 className="text-sm font-medium text-gray-900 mb-3">Preset Gradients</h4>
-        <div className="grid grid-cols-2 gap-3">
-          {presetGradients.map((preset) => (
-            <button
-              key={preset.id}
-              onClick={() => applyPreset(preset)}
-              className="relative p-3 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors text-left group"
-            >
-              <div
-                className="w-full h-12 rounded-md mb-2"
-                style={{ background: preset.thumbnail }}
-              />
-              <div className="text-sm font-medium text-gray-900">{preset.name}</div>
-              <div className="text-xs text-gray-500 capitalize">{preset.category}</div>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Preview */}
-      <div>
-        <h4 className="text-sm font-medium text-gray-900 mb-3">Preview</h4>
-        <div
-          className="w-full h-16 rounded-lg border border-gray-200"
-          style={{ background: generatePreviewCSS() }}
-        >
-          <div className="w-full h-full rounded-lg flex items-center justify-center">
-            <div className="bg-white/90 px-3 py-1 rounded text-sm font-medium text-gray-800">
-              Sample Text
-            </div>
-          </div>
         </div>
       </div>
     </div>

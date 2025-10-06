@@ -326,12 +326,12 @@ export function CustomBackgroundPicker({
         </div>
       </div>
 
-      {/* Live Preview */}
+      {/* Hero Section Preview */}
       <div className="mt-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Preview
+          Hero Section Preview
         </label>
-        <div 
+        <div
           className="rounded-lg border border-gray-200 overflow-hidden"
           style={previewStyle}
         >

@@ -95,46 +95,40 @@ export function SolidColorPicker({ value, onChange }: SolidColorPickerProps) {
 
   return (
     <div className="space-y-6">
-      {/* Brand Colors Section */}
-      {brandColors.length > 0 && (
-        <div>
-          <h4 className="text-sm font-medium text-gray-900 mb-3">Brand Colors</h4>
-          <div className="grid grid-cols-4 gap-2">
-            {brandColors.map((brandColor) => (
-              <button
-                key={brandColor.name}
-                onClick={() => handleColorChange(brandColor.color)}
-                className={`group relative w-12 h-12 rounded-lg border-2 transition-all ${
-                  selectedColor === brandColor.color
-                    ? 'border-gray-900 ring-2 ring-gray-900 ring-offset-2'
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
-                style={{ backgroundColor: brandColor.color }}
-                title={brandColor.name}
-              >
-                {brandColor.recommended && (
-                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border border-white">
-                    <div className="sr-only">Recommended</div>
-                  </div>
-                )}
-              </button>
-            ))}
+      {/* Main Heading */}
+      <div>
+        <h3 className="text-base font-semibold text-gray-900 mb-4">Choose a Color</h3>
+      </div>
+
+      {/* Primary: Color Picker Input */}
+      <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+        <label className="block text-sm font-medium text-gray-700 mb-3">Color Picker</label>
+        <div className="flex items-center space-x-4">
+          <input
+            type="color"
+            value={selectedColor}
+            onChange={(e) => handleColorChange(e.target.value)}
+            className="w-16 h-16 rounded-lg border-2 border-gray-300 cursor-pointer"
+          />
+          <div className="flex-1">
+            <div className="text-base font-semibold text-gray-900">{selectedColor}</div>
+            <div className="text-sm text-gray-500">Selected color</div>
           </div>
         </div>
-      )}
+      </div>
 
-      {/* Preset Color Palette */}
+      {/* Secondary: Quick Colors */}
       <div>
-        <h4 className="text-sm font-medium text-gray-900 mb-3">Color Palette</h4>
+        <h4 className="text-sm font-medium text-gray-700 mb-3">Quick Colors</h4>
         <div className="grid grid-cols-8 gap-2">
           {presetColors.map((color) => (
             <button
               key={color}
               onClick={() => handleColorChange(color)}
-              className={`w-8 h-8 rounded-md border-2 transition-all ${
+              className={`w-10 h-10 rounded-md border-2 transition-all ${
                 selectedColor === color
                   ? 'border-gray-900 ring-2 ring-gray-900 ring-offset-1'
-                  : 'border-gray-200 hover:border-gray-300'
+                  : 'border-gray-200 hover:border-gray-400'
               }`}
               style={{ backgroundColor: color }}
               title={color}
@@ -143,26 +137,31 @@ export function SolidColorPicker({ value, onChange }: SolidColorPickerProps) {
         </div>
       </div>
 
-      {/* Custom Color Input */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h4 className="text-sm font-medium text-gray-900">Custom Color</h4>
-          <button
-            onClick={() => setShowCustomInput(!showCustomInput)}
-            className="text-sm text-blue-600 hover:text-blue-700 transition-colors"
+      {/* Tertiary: Custom Hex Input (Collapsible) */}
+      <div className="pt-4 border-t border-gray-200">
+        <button
+          onClick={() => setShowCustomInput(!showCustomInput)}
+          className="flex items-center justify-between w-full text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+        >
+          <span>Or enter custom hex code</span>
+          <svg
+            className={`w-4 h-4 transition-transform ${showCustomInput ? 'rotate-180' : ''}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
           >
-            {showCustomInput ? 'Hide' : 'Enter hex code'}
-          </button>
-        </div>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
 
         {showCustomInput && (
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 mt-3">
             <div className="flex-1">
               <input
                 type="text"
                 value={customColor}
                 onChange={(e) => setCustomColor(e.target.value)}
-                placeholder="#FF5733 or rgb(255, 87, 51)"
+                placeholder="#FF5733"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -175,38 +174,6 @@ export function SolidColorPicker({ value, onChange }: SolidColorPickerProps) {
             </button>
           </div>
         )}
-
-        {/* HTML5 Color Input */}
-        <div className="mt-3">
-          <label className="block text-sm text-gray-600 mb-2">Or use color picker:</label>
-          <div className="flex items-center space-x-3">
-            <input
-              type="color"
-              value={selectedColor}
-              onChange={(e) => handleColorChange(e.target.value)}
-              className="w-12 h-12 rounded-md border border-gray-300 cursor-pointer"
-            />
-            <div className="flex-1">
-              <div className="text-sm font-medium text-gray-900">{selectedColor}</div>
-              <div className="text-xs text-gray-500">Selected color</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Color Preview */}
-      <div>
-        <h4 className="text-sm font-medium text-gray-900 mb-3">Preview</h4>
-        <div
-          className="w-full h-16 rounded-lg border border-gray-200"
-          style={{ backgroundColor: selectedColor }}
-        >
-          <div className="w-full h-full rounded-lg flex items-center justify-center">
-            <div className="bg-white/90 px-3 py-1 rounded text-sm font-medium text-gray-800">
-              Sample Text
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

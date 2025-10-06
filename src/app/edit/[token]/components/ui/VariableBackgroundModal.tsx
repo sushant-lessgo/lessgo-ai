@@ -323,13 +323,13 @@ export function VariableBackgroundModal({
                   // Use the variation's base color or keep current
                   baseColor: variation.baseColor || currentBackgroundSystem.baseColor,
                 };
-                
+
                 logger.debug('🎯 [DEBUG] Setting background:', {
                   newBackground,
                   primary: newBackground.primary,
                   baseColor: newBackground.baseColor
                 });
-                
+
                 // Only set selectedBackground, not previewBackground
                 // This avoids confusion in the apply handler
                 setSelectedBackground(newBackground);
@@ -338,6 +338,65 @@ export function VariableBackgroundModal({
               isLoading={isLoading}
               mode={mode}
             />
+
+            {/* Supporting Colors Section */}
+            {selectedVariation && selectedBackground && (
+              <div className="mt-6 pt-6 border-t border-gray-200">
+                <div className="mb-4">
+                  <h4 className="text-sm font-medium text-gray-700 mb-1">
+                    Supporting Colors
+                    <span className="ml-2 text-xs text-green-600 font-normal">✨ Auto-calculated</span>
+                  </h4>
+                  <p className="text-xs text-gray-500">
+                    These colors are automatically generated to complement your background
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  {/* Secondary Color */}
+                  <div className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                    <div
+                      className="w-10 h-10 rounded-md border border-gray-300 flex-shrink-0"
+                      style={{ background: selectedBackground.secondary }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium text-gray-900">Secondary</div>
+                      <div className="text-xs text-gray-500 mt-0.5">
+                        Lighter tint used for alternating sections to create visual rhythm
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Neutral Color */}
+                  <div className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                    <div
+                      className="w-10 h-10 rounded-md border border-gray-300 flex-shrink-0"
+                      style={{ background: selectedBackground.neutral }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium text-gray-900">Neutral</div>
+                      <div className="text-xs text-gray-500 mt-0.5">
+                        Clean white background for content-heavy sections
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Divider Color */}
+                  <div className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                    <div
+                      className="w-10 h-10 rounded-md border border-gray-300 flex-shrink-0"
+                      style={{ background: selectedBackground.divider }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium text-gray-900">Divider</div>
+                      <div className="text-xs text-gray-500 mt-0.5">
+                        Subtle color for separators and borders between sections
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
