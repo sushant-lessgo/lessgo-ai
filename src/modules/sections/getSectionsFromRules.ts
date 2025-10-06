@@ -77,33 +77,99 @@ export function getSectionsFromRules({
 
   // Sprint 7: HARD EXCLUSIONS - Remove sections that are meaningless without required assets
   if (assetAvailability) {
+    console.log('🎨 [ASSET-DEBUG] Asset-Aware Section Selection - Starting', {
+      assetAvailability,
+      sectionsBeforeExclusion: selectedSections,
+      hasTestimonials: assetAvailability.testimonials,
+      hasCustomerLogos: assetAvailability.customerLogos,
+      hasIntegrationLogos: assetAvailability.integrationLogos,
+      hasProductImages: assetAvailability.productImages,
+      hasFounderPhoto: assetAvailability.founderPhoto,
+      hasDemoVideo: assetAvailability.demoVideo
+    });
+
     logger.dev('🎨 Asset-Aware Section Selection - Applying hard exclusions', () => ({
       assetAvailability,
       sectionsBeforeExclusion: selectedSections
     }));
 
+    const beforeLength = selectedSections.length;
+
     // Testimonial section is meaningless without testimonials
     if (!assetAvailability.testimonials) {
-      selectedSections = selectedSections.filter(s => s !== 'testimonial');
-      logger.dev('❌ Excluded testimonial section (no testimonials available)');
+      const beforeFilter = [...selectedSections];
+      selectedSections = selectedSections.filter(s => s !== 'testimonials');
+      const wasFiltered = beforeFilter.length !== selectedSections.length;
+
+      console.log('❌ [ASSET-DEBUG] Testimonial exclusion check:', {
+        hasTestimonials: assetAvailability.testimonials,
+        beforeFilter,
+        afterFilter: selectedSections,
+        wasFiltered,
+        shouldHaveFiltered: beforeFilter.includes('testimonials')
+      });
+
+      logger.dev('❌ Excluded testimonials section (no testimonials available)');
+    } else {
+      console.log('✅ [ASSET-DEBUG] Testimonials available, keeping section if present');
     }
 
     // Social proof needs either logos OR testimonials to be effective
     if (!assetAvailability.customerLogos && !assetAvailability.testimonials) {
+      const beforeFilter = [...selectedSections];
       selectedSections = selectedSections.filter(s => s !== 'socialProof');
+      const wasFiltered = beforeFilter.length !== selectedSections.length;
+
+      console.log('❌ [ASSET-DEBUG] Social proof exclusion check:', {
+        hasCustomerLogos: assetAvailability.customerLogos,
+        hasTestimonials: assetAvailability.testimonials,
+        beforeFilter,
+        afterFilter: selectedSections,
+        wasFiltered,
+        shouldHaveFiltered: beforeFilter.includes('socialProof')
+      });
+
       logger.dev('❌ Excluded socialProof section (no logos AND no testimonials)');
+    } else {
+      console.log('✅ [ASSET-DEBUG] Social proof has assets (logos or testimonials), keeping section if present');
     }
 
     // Integration section only makes sense with partner logos
     if (!assetAvailability.integrationLogos) {
-      selectedSections = selectedSections.filter(s => s !== 'integration');
-      logger.dev('❌ Excluded integration section (no integration logos)');
+      const beforeFilter = [...selectedSections];
+      selectedSections = selectedSections.filter(s => s !== 'integrations');
+      const wasFiltered = beforeFilter.length !== selectedSections.length;
+
+      console.log('❌ [ASSET-DEBUG] Integration exclusion check:', {
+        hasIntegrationLogos: assetAvailability.integrationLogos,
+        beforeFilter,
+        afterFilter: selectedSections,
+        wasFiltered,
+        shouldHaveFiltered: beforeFilter.includes('integrations')
+      });
+
+      logger.dev('❌ Excluded integrations section (no integration logos)');
+    } else {
+      console.log('✅ [ASSET-DEBUG] Integration logos available, keeping section if present');
     }
+
+    const afterLength = selectedSections.length;
+    const excludedCount = beforeLength - afterLength;
+
+    console.log('✅ [ASSET-DEBUG] Asset-Aware Section Selection Complete', {
+      sectionsAfterExclusion: selectedSections,
+      excluded: getSectionsFromObjectionFlows(flowInput).filter(s => !selectedSections.includes(s)),
+      excludedCount,
+      beforeLength,
+      afterLength
+    });
 
     logger.dev('✅ Asset-Aware Section Selection Complete', () => ({
       sectionsAfterExclusion: selectedSections,
       excluded: getSectionsFromObjectionFlows(flowInput).filter(s => !selectedSections.includes(s))
     }));
+  } else {
+    console.log('⚠️ [ASSET-DEBUG] No assetAvailability provided, skipping asset-based exclusions');
   }
 
   return selectedSections;

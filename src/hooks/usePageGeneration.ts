@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation';
 import { useOnboardingStore } from '@/hooks/useOnboardingStore';
 import { storeManager } from '@/stores/storeManager';
 import type { EditStoreInstance } from '@/stores/editStore';
+import type { AssetAvailability } from '@/types/core/index';
 import { getSectionsFromRules } from '@/modules/sections/getSectionsFromRules';
 import { generateSectionLayouts } from '@/modules/sections/generateSectionLayouts';
 import { getCompleteElementsMap } from '@/modules/sections/elementDetermination';
@@ -72,9 +73,26 @@ export function usePageGeneration(tokenId: string) {
   });
 
   // Step 1: Analyze business and generate sections
-  const generateSections = async (): Promise<{ sections: string[], errors: string[] }> => {
+  const generateSections = async (directAssetAvailability?: AssetAvailability | null): Promise<{ sections: string[], errors: string[] }> => {
     try {
-      const { validatedFields, hiddenInferredFields, featuresFromAI, assetAvailability } = onboardingStore;
+      const { validatedFields, hiddenInferredFields, featuresFromAI } = onboardingStore;
+
+      // Use direct parameter if provided, otherwise read from store
+      // This fixes timing issues where store update hasn't propagated yet
+      const assetAvailability = directAssetAvailability !== undefined
+        ? directAssetAvailability
+        : useOnboardingStore.getState().assetAvailability;
+
+      console.log('🎨 [ASSET-DEBUG] generateSections - Asset availability source:', {
+        wasPassedDirectly: directAssetAvailability !== undefined,
+        assetAvailability,
+        hasAssetAvailability: !!assetAvailability,
+        assetAvailabilityType: typeof assetAvailability,
+        assetAvailabilityKeys: assetAvailability ? Object.keys(assetAvailability) : null,
+        testimonials: assetAvailability?.testimonials,
+        customerLogos: assetAvailability?.customerLogos,
+        integrationLogos: assetAvailability?.integrationLogos
+      });
 
       // Fix: Filter out undefined values from hiddenInferredFields with proper typing
       const cleanHiddenFields: Record<string, string> = {};
@@ -84,11 +102,21 @@ export function usePageGeneration(tokenId: string) {
         }
       });
 
+      console.log('🎨 [ASSET-DEBUG] Calling getSectionsFromRules with assetAvailability:', assetAvailability);
+
       const sections = getSectionsFromRules({
         validatedFields,
         hiddenInferredFields: cleanHiddenFields,
         featuresFromAI,
         assetAvailability,  // Sprint 7: Pass asset availability for section exclusions
+      });
+
+      console.log('🎨 [ASSET-DEBUG] getSectionsFromRules returned sections:', {
+        sections,
+        sectionCount: sections.length,
+        hasTestimonials: sections.includes('testimonials'),
+        hasSocialProof: sections.includes('socialProof'),
+        hasIntegrations: sections.includes('integrations')
       });
 
       if (!sections || sections.length === 0) {
@@ -516,10 +544,12 @@ export function usePageGeneration(tokenId: string) {
   };
 
   // Main generation function with animation
-  const handleGeneratePage = async () => {
+  const handleGeneratePage = async (directAssetAvailability?: AssetAvailability | null) => {
     logger.debug('🚀 [GENERATE-DEBUG] handleGeneratePage called!', {
       tokenId,
       timestamp: new Date().toISOString(),
+      directAssetAvailability,
+      hasDirectAssetAvailability: directAssetAvailability !== undefined,
       onboardingData: {
         oneLiner: onboardingStore.oneLiner,
         validatedFieldsCount: Object.keys(onboardingStore.validatedFields).length,
@@ -527,7 +557,7 @@ export function usePageGeneration(tokenId: string) {
       }
     });
     logger.debug('Starting page generation for token:', tokenId);
-    
+
     setGenerationState(prev => ({
       ...prev,
       isGenerating: true,
@@ -540,19 +570,19 @@ export function usePageGeneration(tokenId: string) {
 
     const allErrors: string[] = [];
     const allWarnings: string[] = [];
-    
+
     try {
       // Step 1: Analyze business (show wireframe)
       await new Promise(resolve => setTimeout(resolve, PROGRESS_STEPS[0].duration));
-      
+
       // Step 2: Generate sections
       setGenerationState(prev => ({
         ...prev,
         currentStep: 2,
         currentLabel: PROGRESS_STEPS[1].label
       }));
-      
-      const { sections, errors: sectionErrors } = await generateSections();
+
+      const { sections, errors: sectionErrors } = await generateSections(directAssetAvailability);
       allErrors.push(...sectionErrors);
       logger.debug('Generated sections:', sections);
       
