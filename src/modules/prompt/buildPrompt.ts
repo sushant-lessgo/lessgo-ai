@@ -1809,6 +1809,10 @@ function buildStrategicContext(strategy: ParsedStrategy): string {
 BIG IDEA: ${copyStrategy.bigIdea}
 CORE PROMISE: ${copyStrategy.corePromise}
 UNIQUE MECHANISM: ${copyStrategy.uniqueMechanism}
+
+WRITE ALL COPY TO THIS ONE SPECIFIC PERSON:
+${copyStrategy.idealCustomerProfile}
+
 PRIMARY EMOTIONAL TRIGGER: ${copyStrategy.primaryEmotion}
 OBJECTION PRIORITY: ${copyStrategy.objectionPriority.join(' → ')}
 
@@ -1818,6 +1822,9 @@ ${Object.entries(cardCounts).map(([section, count]) =>
 ).join('\n')}
 
 EXECUTION REQUIREMENTS:
+- Write as if speaking directly to this ONE specific person described above
+- Use their specific pain points, current situation, and desired outcomes
+- Use language and references this person would relate to
 - Every section must reinforce the big idea: "${copyStrategy.bigIdea}"
 - All copy must serve the core promise: "${copyStrategy.corePromise}"
 - Features and mechanisms must prove: "${copyStrategy.uniqueMechanism}"
@@ -1938,7 +1945,12 @@ export function buildStrategicCopyPrompt(
   const businessContext = buildBusinessContext(onboardingStore, pageStore);
   const brandContext = buildBrandContext(onboardingStore);
   const categoryContext = buildCategoryContext(onboardingStore);
-  const strategicContext = buildStrategicContext(strategy);
+
+  // Only include strategic context if strategy is valid (not null)
+  const strategicContext = strategy.copyStrategy
+    ? buildStrategicContext(strategy)
+    : ''; // Omit strategy section entirely if null
+
   // Convert ElementsMap to SectionInfo format for compatibility with existing functions
   const sectionInfoMap = convertElementsMapToSectionInfo(elementsMap);
 
@@ -1948,6 +1960,26 @@ export function buildStrategicCopyPrompt(
   const fieldClassificationGuidance = buildFieldClassificationGuidance(sectionInfoMap);
   const featureMappingInstructions = buildFeatureMappingInstructions(onboardingStore, sectionInfoMap);
   const outputFormat = buildStrategicOutputFormat(elementsMap, strategy.cardCounts, userFeatureCount);
+
+  // Build copywriting requirements based on whether strategy is available
+  const copywritingRequirements = strategy.copyStrategy
+    ? `COPYWRITING EXECUTION REQUIREMENTS:
+- Execute the strategic plan with absolute precision
+- Generate EXACTLY the specified number of cards for each section
+- Every piece of copy must reinforce the big idea and core promise
+- Address objections in the specified priority order
+- Maintain the strategic emotional trigger throughout
+- Create cohesive flow that serves the conversion goal
+- Use layout context to optimize copy for visual presentation
+- For manual-preferred fields, use realistic placeholder data`
+    : `COPYWRITING REQUIREMENTS:
+- Generate conversion-focused copy based on business context
+- Generate EXACTLY the specified number of cards for each section
+- Create compelling, benefit-focused copy for each section
+- Address common objections and build trust
+- Maintain consistent tone and messaging throughout
+- Use layout context to optimize copy for visual presentation
+- For manual-preferred fields, use realistic placeholder data`;
 
   return `You are an expert copywriter executing a strategic copy plan for maximum conversion.
 
@@ -1967,15 +1999,7 @@ ${cardCountInstructions}
 ${fieldClassificationGuidance}
 ${featureMappingInstructions}
 
-COPYWRITING EXECUTION REQUIREMENTS:
-- Execute the strategic plan with absolute precision
-- Generate EXACTLY the specified number of cards for each section
-- Every piece of copy must reinforce the big idea and core promise
-- Address objections in the specified priority order
-- Maintain the strategic emotional trigger throughout
-- Create cohesive flow that serves the conversion goal
-- Use layout context to optimize copy for visual presentation
-- For manual-preferred fields, use realistic placeholder data
+${copywritingRequirements}
 
 ${outputFormat}
 

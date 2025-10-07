@@ -56,10 +56,10 @@ function buildBusinessContext(onboardingStore: OnboardingStore, pageStore: PageS
   return `BUSINESS CONTEXT:
 Product/Service: ${oneLiner}
 Target Audience: ${targetAudience || validatedFields.targetAudience || 'Not specified'}
-Business Type: ${businessType || validatedFields.marketCategory || 'Not specified'}
-Market Category: ${validatedFields.marketSubcategory || 'Not specified'}
+Market Category: ${businessType || validatedFields.marketCategory || 'Not specified'}
+Market Subcategory: ${validatedFields.marketSubcategory || 'Not specified'}
 Startup Stage: ${validatedFields.startupStage || 'Not specified'}
-Landing Goal: ${validatedFields.landingPageGoals || 'Not specified'}
+Goal of the landing page: ${validatedFields.landingPageGoals || 'Not specified'}
 
 KEY FEATURES & BENEFITS:
 ${features || 'Features not available'}`;
@@ -89,47 +89,47 @@ Pricing Model: ${validatedFields.pricingModel || 'Not specified'}`;
 /**
  * Builds competitive and market context for strategic analysis
  */
-function buildMarketContext(onboardingStore: OnboardingStore): string {
-  const { validatedFields, hiddenInferredFields } = onboardingStore;
-  const category = validatedFields.marketCategory || 'Not specified';
-  const audience = validatedFields.targetAudience || 'Not specified';
-  const sophistication = hiddenInferredFields.marketSophisticationLevel || 'level-3';
+// function buildMarketContext(onboardingStore: OnboardingStore): string {
+//   const { validatedFields, hiddenInferredFields } = onboardingStore;
+//   const category = validatedFields.marketCategory || 'Not specified';
+//   const audience = validatedFields.targetAudience || 'Not specified';
+//   const sophistication = hiddenInferredFields.marketSophisticationLevel || 'level-3';
 
-  let marketInsights = '';
+//   let marketInsights = '';
 
-  // Market sophistication insights
-  switch (sophistication) {
-    case 'level-1':
-      marketInsights = 'New category, little competition, basic claims work';
-      break;
-    case 'level-2':
-      marketInsights = 'Few competitors, simple differentiation sufficient';
-      break;
-    case 'level-3':
-      marketInsights = 'Growing competition, need clear differentiation';
-      break;
-    case 'level-4':
-      marketInsights = 'Saturated market, need unique mechanisms and extensive proof';
-      break;
-    case 'level-5':
-      marketInsights = 'Hyper-saturated, need contrarian positioning and breakthrough ideas';
-      break;
-    default:
-      marketInsights = 'Moderate competition, standard differentiation approach';
-  }
+//   // Market sophistication insights
+//   switch (sophistication) {
+//     case 'level-1':
+//       marketInsights = 'New category, little competition, basic claims work';
+//       break;
+//     case 'level-2':
+//       marketInsights = 'Few competitors, simple differentiation sufficient';
+//       break;
+//     case 'level-3':
+//       marketInsights = 'Growing competition, need clear differentiation';
+//       break;
+//     case 'level-4':
+//       marketInsights = 'Saturated market, need unique mechanisms and extensive proof';
+//       break;
+//     case 'level-5':
+//       marketInsights = 'Hyper-saturated, need contrarian positioning and breakthrough ideas';
+//       break;
+//     default:
+//       marketInsights = 'Moderate competition, standard differentiation approach';
+//   }
 
-  return `MARKET COMPETITIVE CONTEXT:
-Category: ${category}
-Target Audience: ${audience}
-Market Sophistication: ${sophistication}
-Market Insights: ${marketInsights}
+//   return `MARKET COMPETITIVE CONTEXT:
+// Category: ${category}
+// Target Audience: ${audience}
+// Market Sophistication: ${sophistication}
+// Market Insights: ${marketInsights}
 
-COMPETITIVE STRATEGY NEEDS:
-- Level of proof required for this market
-- Differentiation intensity needed
-- Objection handling depth required
-- Trust-building approach for this audience`;
-}
+// COMPETITIVE STRATEGY NEEDS:
+// - Level of proof required for this market
+// - Differentiation intensity needed
+// - Objection handling depth required
+// - Trust-building approach for this audience`;
+// }
 
 /**
  * Extracts sections that require card count strategy from layout requirements
@@ -175,6 +175,7 @@ function mapSectionToStrategyKey(sectionId: string): string | null {
     'beforeAfter': 'before_after',
     'howItWorks': 'how_it_works',
     'close': 'close',
+    'cta': 'cta', // Include CTA sections that have cardRequirements (e.g., BonusStackCTA)
     'security': 'security',
     'integration': 'integration',
     'useCase': 'use_case',
@@ -331,8 +332,9 @@ function createExampleWithConstraints(
       bigIdea: "The central compelling hook that drives everything",
       corePromise: "Specific transformation from current state to desired outcome",
       uniqueMechanism: "Why this works when alternatives fail",
-      primaryEmotion: "Main emotional driver for this audience",
-      objectionPriority: ["primary_objection", "secondary_objection", "tertiary_objection"]
+      idealCustomerProfile: "Sarah, 35, marketing agency owner who podcasts weekly. Records Tuesday mornings, dreads 3-hour Thursday post-production sessions. Currently writes show notes manually in Google Docs, often skips blog posts due to time constraints. Dreams of publishing full episode package (notes, blog, clips) in under 20 minutes so she can focus on client work.",
+      primaryEmotion: "Main emotional driver for THIS specific person",
+      objectionPriority: ["primary_objection_for_this_person", "secondary_objection", "tertiary_objection"]
     },
     cardCounts: cardCountsExample,
     reasoning: {
@@ -398,7 +400,7 @@ export function buildStrategyPrompt(
 ): string {
   const businessContext = buildBusinessContext(onboardingStore, pageStore);
   const brandContext = buildBrandContext(onboardingStore);
-  const marketContext = buildMarketContext(onboardingStore);
+  // const marketContext = buildMarketContext(onboardingStore);
 
   // Get dynamic section list based on actual page layout
   const strategySections = getStrategySections(layoutRequirements);
@@ -432,7 +434,7 @@ ${businessContext}
 
 ${brandContext}
 
-${marketContext}${layoutConstraints}
+${layoutConstraints}
 
 STRATEGIC ANALYSIS REQUIRED:
 
@@ -440,8 +442,14 @@ STRATEGIC ANALYSIS REQUIRED:
    - Big Idea/Hook: What's the one compelling concept that stops the scroll and drives everything?
    - Core Promise: What transformation are we selling? (from pain state to desired outcome)
    - Unique Mechanism: Why does this work when alternatives fail? What's the "secret sauce"?
-   - Primary Emotional Trigger: What emotion drives this audience to action? (fear, desire, status, etc.)
-   - Objection Priority: What are the top 3 barriers to conversion in order of importance?
+   - Ideal Customer Profile (One True Fan): Create ONE specific person this copy speaks to directly:
+     * Name, age, role (e.g., "Sarah, 35, podcast host & marketing agency owner")
+     * Specific current struggle (e.g., "Records every Tuesday, dreads 3-hour Thursday post-production sessions")
+     * Current broken solution (e.g., "Manually writes show notes in Google Docs, often skips blogs due to time")
+     * Exact desired outcome (e.g., "Publish complete episode package in under 20 minutes")
+     Write ALL subsequent copy as if speaking directly to THIS ONE specific person. Be detailed and specific.
+   - Primary Emotional Trigger: What emotion drives THIS specific person to action? (fear, desire, relief, status, etc.)
+   - Objection Priority: What are THIS person's top 3 barriers to conversion in order of importance?
 
 ${cardCountStrategy}
 

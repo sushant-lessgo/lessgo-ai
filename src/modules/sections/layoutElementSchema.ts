@@ -389,12 +389,20 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "headline", mandatory: true, generation: "ai_generated" },
       { element: "subheadline", mandatory: false, generation: "ai_generated" },
       { element: "layout_style", mandatory: false, generation: "ai_generated" },
-      { element: "footer_text", mandatory: false, generation: "ai_generated" }
+      { element: "footer_text", mandatory: false, generation: "ai_generated" },
+      { element: "icon_1", mandatory: true, generation: "ai_generated" },
+      { element: "icon_2", mandatory: true, generation: "ai_generated" },
+      { element: "icon_3", mandatory: true, generation: "ai_generated" },
+      { element: "icon_4", mandatory: true, generation: "ai_generated" },
+      { element: "icon_5", mandatory: true, generation: "ai_generated" },
+      { element: "icon_6", mandatory: true, generation: "ai_generated" },
+      { element: "icon_7", mandatory: true, generation: "ai_generated" },
+      { element: "icon_8", mandatory: true, generation: "ai_generated" }
     ],
 
     cardStructure: {
       type: "cards",
-      elements: ["icon_types", "titles", "descriptions"],
+      elements: ["titles", "descriptions"],
       generation: "ai_generated"
     },
 

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useOnboardingStore, getCanonicalFieldOrder, getCanonicalFieldForDisplayName } from "@/hooks/useOnboardingStore";
 import { getOptionsForField, getGroupedOptionsForField } from "@/utils/getOptionsForField";
+import { getDisplayLabelForId, getIdForDisplayLabel, fieldUsesIds } from "@/utils/taxonomyDisplayUtils";
 
 type FieldConfirmationCardProps = {
   fieldName: string;
@@ -29,6 +30,25 @@ export default function FieldConfirmationCard({
   const setStepIndex = onboardingStore.setStepIndex;
   const isFieldForceManual = onboardingStore.isFieldForceManual;
   const validatedFields = onboardingStore.validatedFields; // ✅ Get current validated values
+
+  // ✅ Get canonical field name for ID/label conversion
+  const canonicalField = getCanonicalFieldForDisplayName(fieldName);
+  const usesIds = canonicalField ? fieldUsesIds(canonicalField) : false;
+
+  // ✅ Convert ID to label for display (if field uses IDs)
+  const getDisplayValue = (value: string) => {
+    if (!value || !usesIds || !canonicalField) return value;
+    return getDisplayLabelForId(canonicalField, value);
+  };
+
+  // ✅ Convert label to ID for storage (if field uses IDs)
+  const getStorageValue = (value: string) => {
+    if (!value || !usesIds || !canonicalField) return value;
+    return getIdForDisplayLabel(canonicalField, value);
+  };
+
+  // ✅ Display label for aiGuess
+  const aiGuessDisplay = getDisplayValue(aiGuess);
 
   useEffect(() => {
     // ✅ BUG FIX 1: Check if field is force manual (user clicked edit) - go directly to edit mode
@@ -84,13 +104,16 @@ export default function FieldConfirmationCard({
   }, [aiGuess, fieldName, isFieldForceManual, validatedFields]);
 
   const handleConfirmAIGuess = () => {
+    // ✅ aiGuess is already an ID (from validation), pass as-is
     onConfirm(aiGuess);
     confirmField(fieldName, aiGuess);
   };
 
   const handleConfirmSelected = () => {
-    onConfirm(selected);
-    confirmField(fieldName, selected);
+    // ✅ selected might be a label (from UI), convert to ID if needed
+    const valueToStore = getStorageValue(selected);
+    onConfirm(valueToStore);
+    confirmField(fieldName, valueToStore);
     setMode("confirm");
   };
 
@@ -139,7 +162,7 @@ export default function FieldConfirmationCard({
         <>
           <p className="text-base text-gray-800">
             Our AI suggests:&nbsp;
-            <span className="font-semibold text-brand-accentPrimary">{aiGuess}</span>
+            <span className="font-semibold text-brand-accentPrimary">{aiGuessDisplay}</span>
           </p>
 
           <div className="flex gap-3 mt-2">
@@ -172,7 +195,7 @@ export default function FieldConfirmationCard({
       {mode === "edit" && isLowConfidence && alternatives.length > 0 && (
         <>
           <p className="text-sm text-gray-600">
-            We found <span className="font-semibold">{aiGuess}</span> with {Math.round(confidence * 100)}% confidence.
+            We found <span className="font-semibold">{aiGuessDisplay}</span> with {Math.round(confidence * 100)}% confidence.
             Select the best match for your use case:
           </p>
           <div className="grid grid-cols-1 gap-3">
@@ -186,7 +209,7 @@ export default function FieldConfirmationCard({
               }`}
             >
               <div className="flex items-center justify-between">
-                <span>{aiGuess}</span>
+                <span>{aiGuessDisplay}</span>
                 <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">
                   ⭐ AI Recommended ({Math.round(confidence * 100)}%)
                 </span>
@@ -204,7 +227,7 @@ export default function FieldConfirmationCard({
                     : "border-gray-300 hover:border-brand-accentPrimary"
                 }`}
               >
-                {alternative}
+                {getDisplayValue(alternative)}
               </button>
             ))}
           </div>
@@ -221,7 +244,7 @@ export default function FieldConfirmationCard({
             disabled={!selected}
             className="mt-4 w-full px-4 py-2 bg-brand-accentPrimary text-white text-sm font-medium rounded-md hover:bg-orange-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            ✅ Confirm {selected ? `"${selected}"` : "Selection"}
+            ✅ Confirm {selected ? `"${getDisplayValue(selected)}"` : "Selection"}
           </button>
         </>
       )}
@@ -246,19 +269,22 @@ export default function FieldConfirmationCard({
                     </span>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    {items.map((option) => (
-                      <button
-                        key={option}
-                        onClick={() => setSelected(option)}
-                        className={`p-3 border rounded-lg text-sm transition-all duration-200 text-left hover:shadow-md ${
-                          selected === option
-                            ? "border-brand-accentPrimary bg-white shadow-md ring-2 ring-brand-accentPrimary ring-opacity-20 font-semibold"
-                            : "border-gray-300 bg-white hover:border-brand-accentPrimary hover:bg-gray-50"
-                        }`}
-                      >
-                        {option}
-                      </button>
-                    ))}
+                    {items.map((option) => {
+                      const optionId = getStorageValue(option);
+                      return (
+                        <button
+                          key={option}
+                          onClick={() => setSelected(optionId)}
+                          className={`p-3 border rounded-lg text-sm transition-all duration-200 text-left hover:shadow-md ${
+                            selected === optionId
+                              ? "border-brand-accentPrimary bg-white shadow-md ring-2 ring-brand-accentPrimary ring-opacity-20 font-semibold"
+                              : "border-gray-300 bg-white hover:border-brand-accentPrimary hover:bg-gray-50"
+                          }`}
+                        >
+                          {option}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               ))}
@@ -266,19 +292,22 @@ export default function FieldConfirmationCard({
           ) : (
             // Regular grid for ungrouped fields
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {availableOptions.map((option) => (
-                <button
-                  key={option}
-                  onClick={() => setSelected(option)}
-                  className={`p-3 border rounded-md text-sm transition text-left ${
-                    selected === option
-                      ? "border-brand-accentPrimary bg-brand-highlightBG font-semibold"
-                      : "border-gray-300 hover:border-brand-accentPrimary"
-                  }`}
-                >
-                  {option}
-                </button>
-              ))}
+              {availableOptions.map((option) => {
+                const optionId = getStorageValue(option);
+                return (
+                  <button
+                    key={option}
+                    onClick={() => setSelected(optionId)}
+                    className={`p-3 border rounded-md text-sm transition text-left ${
+                      selected === optionId
+                        ? "border-brand-accentPrimary bg-brand-highlightBG font-semibold"
+                        : "border-gray-300 hover:border-brand-accentPrimary"
+                    }`}
+                  >
+                    {option}
+                  </button>
+                );
+              })}
             </div>
           )}
 
@@ -287,7 +316,7 @@ export default function FieldConfirmationCard({
             disabled={!selected}
             className="mt-4 w-full px-4 py-2 bg-brand-accentPrimary text-white text-sm font-medium rounded-md hover:bg-orange-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            ✅ Confirm {selected ? `"${selected}"` : "Selection"}
+            ✅ Confirm {selected ? `"${getDisplayValue(selected)}"` : "Selection"}
           </button>
         </>
       )}
@@ -320,19 +349,22 @@ export default function FieldConfirmationCard({
                     </span>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    {items.map((option) => (
-                      <button
-                        key={option}
-                        onClick={() => setSelected(option)}
-                        className={`p-3 border rounded-lg text-sm transition-all duration-200 text-left hover:shadow-md ${
-                          selected === option
-                            ? "border-brand-accentPrimary bg-white shadow-md ring-2 ring-brand-accentPrimary ring-opacity-20 font-semibold"
-                            : "border-gray-300 bg-white hover:border-brand-accentPrimary hover:bg-gray-50"
-                        }`}
-                      >
-                        {option}
-                      </button>
-                    ))}
+                    {items.map((option) => {
+                      const optionId = getStorageValue(option);
+                      return (
+                        <button
+                          key={option}
+                          onClick={() => setSelected(optionId)}
+                          className={`p-3 border rounded-lg text-sm transition-all duration-200 text-left hover:shadow-md ${
+                            selected === optionId
+                              ? "border-brand-accentPrimary bg-white shadow-md ring-2 ring-brand-accentPrimary ring-opacity-20 font-semibold"
+                              : "border-gray-300 bg-white hover:border-brand-accentPrimary hover:bg-gray-50"
+                          }`}
+                        >
+                          {option}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               ))}
@@ -340,19 +372,22 @@ export default function FieldConfirmationCard({
           ) : (
             // Regular grid for ungrouped fields
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {availableOptions.map((option) => (
-                <button
-                  key={option}
-                  onClick={() => setSelected(option)}
-                  className={`p-3 border rounded-md text-sm transition text-left ${
-                    selected === option
-                      ? "border-brand-accentPrimary bg-brand-highlightBG font-semibold"
-                      : "border-gray-300 hover:border-brand-accentPrimary"
-                  }`}
-                >
-                  {option}
-                </button>
-              ))}
+              {availableOptions.map((option) => {
+                const optionId = getStorageValue(option);
+                return (
+                  <button
+                    key={option}
+                    onClick={() => setSelected(optionId)}
+                    className={`p-3 border rounded-md text-sm transition text-left ${
+                      selected === optionId
+                        ? "border-brand-accentPrimary bg-brand-highlightBG font-semibold"
+                        : "border-gray-300 hover:border-brand-accentPrimary"
+                    }`}
+                  >
+                    {option}
+                  </button>
+                );
+              })}
             </div>
           )}
 
@@ -361,7 +396,7 @@ export default function FieldConfirmationCard({
             disabled={!selected}
             className="mt-4 w-full px-4 py-2 bg-brand-accentPrimary text-white text-sm font-medium rounded-md hover:bg-orange-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            ✅ Confirm {selected ? `"${selected}"` : "Selection"}
+            ✅ Confirm {selected ? `"${getDisplayValue(selected)}"` : "Selection"}
           </button>
         </>
       )}

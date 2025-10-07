@@ -79,7 +79,7 @@ async function validateField(
       );
       
       const bestMatch = filteredMatches[0];
-      const alternatives = filteredMatches.slice(1, 4).map(m => m.value);
+      const alternatives = filteredMatches.slice(1, 4).map(m => m.metadata?.id || m.value);
 
       // Apply confidence boost for exact matches
       let confidence = bestMatch?.confidence || 0;
@@ -87,9 +87,12 @@ async function validateField(
         confidence = Math.min(1.0, confidence + 0.1); // Boost by 10% for exact matches
       }
 
+      // ✅ FIX: Return ID from metadata if it exists (for subcategory, ID not typically used, but keep consistent)
+      const matchedValue = bestMatch?.metadata?.id || bestMatch?.value || null;
+
       return {
         field: displayName,
-        value: bestMatch?.value || null,
+        value: matchedValue,
         confidence,
         alternatives: alternatives.length > 0 ? alternatives : allowedSubcategories.slice(0, 3)
       };
@@ -105,11 +108,16 @@ async function validateField(
       confidence = Math.min(1.0, confidence + 0.1); // Boost by 10% for exact matches
     }
 
+    // ✅ FIX: Return ID from metadata if it exists, otherwise return the value
+    // This ensures taxonomy IDs (e.g., "mvp-development") are returned instead of labels (e.g., "MVP in development")
+    const matchedValue = bestMatch?.metadata?.id || bestMatch?.value || null;
+    const matchedAlternatives = alternatives.slice(1, 4).map(m => m.metadata?.id || m.value);
+
     return {
       field: displayName,
-      value: bestMatch?.value || null,
+      value: matchedValue,
       confidence,
-      alternatives: alternatives.slice(1, 4).map(m => m.value) // Skip the best match
+      alternatives: matchedAlternatives
     };
     
   } catch (error) {

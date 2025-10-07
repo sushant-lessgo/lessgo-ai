@@ -1,18 +1,19 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
-import { 
-  EditableAdaptiveHeadline, 
-  EditableAdaptiveText 
+import {
+  EditableAdaptiveHeadline,
+  EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { getIcon } from '@/lib/getIcon';
 
 interface OutcomeIconsProps extends LayoutComponentProps {}
 
 // Outcome icon item structure
 interface OutcomeIcon {
-  iconType: string;
+  icon: string;
   title: string;
   description: string;
   id: string;
@@ -21,86 +22,82 @@ interface OutcomeIcon {
 // Content interface for OutcomeIcons layout
 interface OutcomeIconsContent {
   headline: string;
-  icon_types: string;
   titles: string;
   descriptions: string;
   subheadline?: string;
   layout_style?: string;
   footer_text?: string;
+  icon_1?: string;
+  icon_2?: string;
+  icon_3?: string;
+  icon_4?: string;
+  icon_5?: string;
+  icon_6?: string;
+  icon_7?: string;
+  icon_8?: string;
 }
 
 // Content schema for OutcomeIcons layout
 const CONTENT_SCHEMA = {
   headline: { type: 'string' as const, default: 'Powerful Outcomes You Can Expect' },
-  icon_types: { type: 'string' as const, default: '📈|⚡|🔒|👥|🤖|💡' },
   titles: { type: 'string' as const, default: 'Accelerated Growth|Maximum Efficiency|Enterprise Security|Seamless Collaboration|Smart Automation|Continuous Innovation' },
   descriptions: { type: 'string' as const, default: 'Scale your business faster with proven strategies and tools|Optimize workflows and eliminate bottlenecks for peak performance|Bank-level security protecting your data and operations|Unite your team with powerful collaboration features|Automate repetitive tasks and focus on what matters most|Stay ahead with cutting-edge features and regular updates' },
   subheadline: { type: 'string' as const, default: 'Transform your business with these proven outcome drivers' },
   layout_style: { type: 'string' as const, default: 'grid' },
-  footer_text: { type: 'string' as const, default: 'These outcomes are built into every solution we deliver' }
+  footer_text: { type: 'string' as const, default: 'These outcomes are built into every solution we deliver' },
+  icon_1: { type: 'string' as const, default: '📈' },
+  icon_2: { type: 'string' as const, default: '⚡' },
+  icon_3: { type: 'string' as const, default: '🔒' },
+  icon_4: { type: 'string' as const, default: '👥' },
+  icon_5: { type: 'string' as const, default: '🤖' },
+  icon_6: { type: 'string' as const, default: '💡' },
+  icon_7: { type: 'string' as const, default: '🎯' },
+  icon_8: { type: 'string' as const, default: '⭐' }
 };
 
-// Parse outcome data from pipe-separated strings
-const parseOutcomeData = (iconTypes: string, titles: string, descriptions: string): OutcomeIcon[] => {
-  const iconList = iconTypes.split('|').map(i => i.trim()).filter(i => i);
+// Parse outcome data with unified icon system
+const parseOutcomeData = (titles: string, descriptions: string, blockContent: OutcomeIconsContent): OutcomeIcon[] => {
   const titleList = titles.split('|').map(t => t.trim()).filter(t => t);
   const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
 
-  // Debug logging for OutcomeIcons
-  if (process.env.NEXT_PUBLIC_DEBUG_ICON_SELECTION === 'true') {
-    console.log('🎯 [ICON] OutcomeIcons - Raw data:', {
-      iconTypes,
-      titles,
-      iconList,
-      titleList
-    });
-  }
+  return titleList.map((title, index) => {
+    // Get AI-provided category from numbered icon fields
+    const iconCategory = blockContent[`icon_${index + 1}` as keyof OutcomeIconsContent] as string | undefined;
+    const description = descriptionList[index] || 'Amazing results await';
 
-  return iconList.map((iconType, index) => {
-    if (process.env.NEXT_PUBLIC_DEBUG_ICON_SELECTION === 'true') {
-      console.log(`🎯 [ICON] OutcomeIcons - Item ${index + 1}:`, {
-        iconType,
-        title: titleList[index]
-      });
-    }
+    // Use unified icon system with intelligent fallback
+    const icon = getIcon(iconCategory, { title, description });
 
     return {
       id: `outcome-${index}`,
-      iconType,
-      title: titleList[index] || 'Great Outcome',
-      description: descriptionList[index] || 'Amazing results await'
+      icon,
+      title,
+      description
     };
   });
 };
 
 // Helper function to add a new outcome
-const addOutcome = (iconTypes: string, titles: string, descriptions: string): { newIconTypes: string; newTitles: string; newDescriptions: string } => {
-  const iconList = iconTypes.split('|').map(i => i.trim()).filter(i => i);
+const addOutcome = (titles: string, descriptions: string): { newTitles: string; newDescriptions: string } => {
   const titleList = titles.split('|').map(t => t.trim()).filter(t => t);
   const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
 
   // Add new outcome with default content
-  iconList.push('✨');
   titleList.push('New Outcome');
   descriptionList.push('Describe this amazing result your customers will achieve.');
 
   return {
-    newIconTypes: iconList.join('|'),
     newTitles: titleList.join('|'),
     newDescriptions: descriptionList.join('|')
   };
 };
 
 // Helper function to remove an outcome
-const removeOutcome = (iconTypes: string, titles: string, descriptions: string, indexToRemove: number): { newIconTypes: string; newTitles: string; newDescriptions: string } => {
-  const iconList = iconTypes.split('|').map(i => i.trim()).filter(i => i);
+const removeOutcome = (titles: string, descriptions: string, indexToRemove: number): { newTitles: string; newDescriptions: string } => {
   const titleList = titles.split('|').map(t => t.trim()).filter(t => t);
   const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
 
   // Remove the outcome at the specified index
-  if (indexToRemove >= 0 && indexToRemove < iconList.length) {
-    iconList.splice(indexToRemove, 1);
-  }
   if (indexToRemove >= 0 && indexToRemove < titleList.length) {
     titleList.splice(indexToRemove, 1);
   }
@@ -109,91 +106,9 @@ const removeOutcome = (iconTypes: string, titles: string, descriptions: string, 
   }
 
   return {
-    newIconTypes: iconList.join('|'),
     newTitles: titleList.join('|'),
     newDescriptions: descriptionList.join('|')
   };
-};
-
-// Icon Component
-const OutcomeIconSvg = ({ iconType }: { iconType: string }) => {
-  const getIcon = (type: string) => {
-    switch (type.toLowerCase()) {
-      case 'growth':
-        return (
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-          </svg>
-        );
-      case 'efficiency':
-        return (
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-        );
-      case 'security':
-        return (
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.25-7a4.5 4.5 0 11-6.364 6.364L12 5.636l-1.318-1.318A4.5 4.5 0 015.318 10.5L12 17.182l6.682-6.682a4.5 4.5 0 000-6.364z" />
-          </svg>
-        );
-      case 'collaboration':
-        return (
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-          </svg>
-        );
-      case 'automation':
-        return (
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-        );
-      case 'innovation':
-        return (
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-          </svg>
-        );
-      case 'analytics':
-        return (
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-          </svg>
-        );
-      case 'support':
-        return (
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 2.25a2.25 2.25 0 012.25 2.25v1.372c.516.235.997.52 1.43.848l.97-.97a2.25 2.25 0 013.182 3.182l-.97.97c.328.433.613.914.848 1.43h1.372a2.25 2.25 0 010 4.5h-1.372c-.235.516-.52.997-.848 1.43l.97.97a2.25 2.25 0 01-3.182 3.182l-.97-.97c-.433.328-.914.613-1.43.848v1.372a2.25 2.25 0 01-4.5 0v-1.372c-.516-.235-.997-.52-1.43-.848l-.97.97a2.25 2.25 0 01-3.182-3.182l.97-.97c-.328-.433-.613-.914-.848-1.43H2.25a2.25 2.25 0 010-4.5h1.372c.235-.516.52-.997.848-1.43l-.97-.97a2.25 2.25 0 013.182-3.182l.97.97c.433-.328.914-.613 1.43-.848V4.5A2.25 2.25 0 0112 2.25z" />
-          </svg>
-        );
-      default:
-        return (
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-          </svg>
-        );
-    }
-  };
-
-  return getIcon(iconType);
-};
-
-// Get color scheme based on icon type
-const getColorScheme = (iconType: string): { bg: string; icon: string; border: string } => {
-  const schemes = {
-    growth: { bg: 'bg-emerald-50', icon: 'text-emerald-600', border: 'border-emerald-200' },
-    efficiency: { bg: 'bg-blue-50', icon: 'text-blue-600', border: 'border-blue-200' },
-    security: { bg: 'bg-red-50', icon: 'text-red-600', border: 'border-red-200' },
-    collaboration: { bg: 'bg-purple-50', icon: 'text-purple-600', border: 'border-purple-200' },
-    automation: { bg: 'bg-orange-50', icon: 'text-orange-600', border: 'border-orange-200' },
-    innovation: { bg: 'bg-yellow-50', icon: 'text-yellow-600', border: 'border-yellow-200' },
-    analytics: { bg: 'bg-indigo-50', icon: 'text-indigo-600', border: 'border-indigo-200' },
-    support: { bg: 'bg-pink-50', icon: 'text-pink-600', border: 'border-pink-200' }
-  };
-  
-  return schemes[iconType.toLowerCase() as keyof typeof schemes] || schemes.efficiency;
 };
 
 // Individual Outcome Card Component
@@ -219,23 +134,22 @@ const OutcomeCard = ({
   canRemove?: boolean;
 }) => {
   const { getTextStyle } = useTypography();
-  const colorScheme = getColorScheme(outcome.iconType);
 
   return (
     <div className={`group/outcome-card-${index} relative text-center p-6 bg-white rounded-2xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300`}>
-      
+
       {/* Icon */}
       <div className="mb-6">
-        <div className={`w-16 h-16 ${colorScheme.bg} rounded-2xl border ${colorScheme.border} flex items-center justify-center ${colorScheme.icon} mx-auto group-hover:scale-110 transition-transform duration-300`}>
+        <div className="w-16 h-16 bg-blue-50 rounded-2xl border border-blue-200 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300">
           <IconEditableText
             mode={mode}
-            value={outcome.iconType}
+            value={outcome.icon}
             onEdit={(value) => onIconEdit(index, value)}
             backgroundType="primary"
             colorTokens={{}}
             iconSize="lg"
-            className="text-2xl"
-            placeholder="📊"
+            className="text-3xl"
+            placeholder="⭐"
             sectionId={sectionId}
             elementKey={`outcome_icon_${index}`}
           />
@@ -319,16 +233,15 @@ export default function OutcomeIcons(props: OutcomeIconsProps) {
 
   // Parse outcome data
   const outcomes = parseOutcomeData(
-    blockContent.icon_types,
     blockContent.titles,
-    blockContent.descriptions
+    blockContent.descriptions,
+    blockContent
   );
 
   // Handle individual editing
   const handleIconEdit = (index: number, value: string) => {
-    const iconList = blockContent.icon_types.split('|');
-    iconList[index] = value;
-    handleContentUpdate('icon_types', iconList.join('|'));
+    const iconField = `icon_${index + 1}` as keyof OutcomeIconsContent;
+    handleContentUpdate(iconField, value);
   };
 
   const handleTitleEdit = (index: number, value: string) => {
@@ -345,25 +258,21 @@ export default function OutcomeIcons(props: OutcomeIconsProps) {
 
   // Handle adding a new outcome
   const handleAddOutcome = () => {
-    const { newIconTypes, newTitles, newDescriptions } = addOutcome(
-      blockContent.icon_types,
+    const { newTitles, newDescriptions } = addOutcome(
       blockContent.titles,
       blockContent.descriptions
     );
-    handleContentUpdate('icon_types', newIconTypes);
     handleContentUpdate('titles', newTitles);
     handleContentUpdate('descriptions', newDescriptions);
   };
 
   // Handle removing an outcome
   const handleRemoveOutcome = (indexToRemove: number) => {
-    const { newIconTypes, newTitles, newDescriptions } = removeOutcome(
-      blockContent.icon_types,
+    const { newTitles, newDescriptions } = removeOutcome(
       blockContent.titles,
       blockContent.descriptions,
       indexToRemove
     );
-    handleContentUpdate('icon_types', newIconTypes);
     handleContentUpdate('titles', newTitles);
     handleContentUpdate('descriptions', newDescriptions);
   };

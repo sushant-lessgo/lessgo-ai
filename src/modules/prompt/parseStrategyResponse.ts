@@ -6,6 +6,7 @@ export interface CopyStrategy {
   bigIdea: string;
   corePromise: string;
   uniqueMechanism: string;
+  idealCustomerProfile: string; // One specific persona to write all copy to
   primaryEmotion: string;
   objectionPriority: string[];
 }
@@ -34,7 +35,7 @@ export interface StrategyReasoning {
 
 export interface ParsedStrategy {
   success: boolean;
-  copyStrategy: CopyStrategy;
+  copyStrategy: CopyStrategy | null; // Allow null when strategy parsing fails
   cardCounts: CardCounts;
   reasoning: StrategyReasoning;
   errors: string[];
@@ -225,6 +226,7 @@ function validateCopyStrategy(strategy: any): {
     bigIdea: '',
     corePromise: '',
     uniqueMechanism: '',
+    idealCustomerProfile: '',
     primaryEmotion: '',
     objectionPriority: []
   };
@@ -245,6 +247,11 @@ function validateCopyStrategy(strategy: any): {
       field: 'uniqueMechanism',
       validate: (value: any) => validateAndCorrectStringField(value, 10, 'The unique approach that makes this work when others fail'),
       description: 'Unique differentiation mechanism'
+    },
+    {
+      field: 'idealCustomerProfile',
+      validate: (value: any) => validateAndCorrectStringField(value, 20, 'One specific customer persona with name, role, specific pain, and desired outcome'),
+      description: 'Ideal customer profile (one true fan)'
     },
     {
       field: 'primaryEmotion',
@@ -513,38 +520,19 @@ function getDefaultSectionRules() {
 }
 
 /**
- * Creates intelligent defaults based on market sophistication and awareness
+ * Creates failure state when strategy parsing fails completely
  */
-function createIntelligentDefaults(layoutRequirements?: PageLayoutRequirements): ParsedStrategy {
-  // Generate card counts based on actual layout requirements if available
-  const cardCounts = layoutRequirements
-    ? generateDefaultsFromLayout(layoutRequirements)
-    : getGenericDefaultCounts();
+function createStrategyFailure(reason: string): ParsedStrategy {
+  logger.warn('⚠️ Strategy parsing failed:', reason);
 
-  const defaults: ParsedStrategy = {
-    success: true,
-    copyStrategy: {
-      bigIdea: "Streamline your workflow and boost productivity",
-      corePromise: "Transform from chaotic work management to organized, efficient productivity",
-      uniqueMechanism: "Intelligent automation that adapts to your working style",
-      primaryEmotion: "relief from overwhelm",
-      objectionPriority: ["too_complex", "too_expensive", "integration_concerns"]
-    },
-    cardCounts,
-    reasoning: {
-      features: "Moderate complexity product needs comprehensive capability demonstration",
-      testimonials: "Standard trust-building requires multiple success stories",
-      faq: "Address common concerns without overwhelming prospect",
-      results: "Key metrics provide sufficient proof of value",
-      social_proof: "Establish market credibility with moderate volume",
-      overall: "Balanced approach for mainstream B2B audience with moderate sophistication"
-    },
-    errors: [],
-    warnings: ["Using intelligent defaults due to strategy parsing failure"]
+  return {
+    success: false,
+    copyStrategy: null, // Signal failure - let route.ts handle fallback
+    cardCounts: {},
+    reasoning: {},
+    errors: [reason],
+    warnings: []
   };
-
-  logger.warn('⚠️ Using intelligent strategy defaults due to AI parsing failure');
-  return defaults;
 }
 
 /**
@@ -614,7 +602,7 @@ export function parseStrategyResponse(
     const jsonContent = extractJSON(aiContent);
     if (!jsonContent) {
       logger.error('❌ No valid JSON found in strategy response');
-      return createIntelligentDefaults(layoutRequirements);
+      return createStrategyFailure('No valid JSON found in AI response');
     }
 
     logger.debug('🔍 Attempting to parse extracted JSON...', {
@@ -636,7 +624,7 @@ export function parseStrategyResponse(
         error: parseError,
         jsonPreview: jsonContent.substring(0, 300) + '...'
       });
-      return createIntelligentDefaults(layoutRequirements);
+      return createStrategyFailure('JSON parsing failed: ' + String(parseError));
     }
 
     // Validate structure
@@ -648,7 +636,7 @@ export function parseStrategyResponse(
         copyStrategyType: typeof parsed.copyStrategy,
         cardCountsType: typeof parsed.cardCounts
       });
-      return createIntelligentDefaults(layoutRequirements);
+      return createStrategyFailure('Strategy response missing required sections (copyStrategy or cardCounts)');
     }
 
     // Validate copy strategy with enhanced flexibility
@@ -661,7 +649,7 @@ export function parseStrategyResponse(
         receivedFields: Object.keys(parsed.copyStrategy || {}),
         bigIdeaPreview: parsed.copyStrategy?.bigIdea?.substring(0, 50) || 'undefined'
       });
-      return createIntelligentDefaults(layoutRequirements);
+      return createStrategyFailure('Copy strategy validation failed: ' + strategyValidation.errors.join(', '));
     }
 
     // Use corrected strategy if available, otherwise original
@@ -681,12 +669,29 @@ export function parseStrategyResponse(
     logger.debug('🔍 Validating card counts...');
     const cardCountValidation = validateCardCounts(parsed.cardCounts, layoutRequirements);
     if (!cardCountValidation.isValid) {
-      logger.error('❌ Card counts validation failed:', {
+      logger.warn('⚠️ Card count validation failed, preserving strategy and using default counts:', {
         errors: cardCountValidation.errors,
         receivedCounts: parsed.cardCounts,
         expectedSections: layoutRequirements?.sections?.map(s => s.sectionId) || 'none'
       });
-      return createIntelligentDefaults(layoutRequirements);
+
+      // Use default card counts but KEEP the validated strategy
+      const defaultCardCounts = layoutRequirements
+        ? generateDefaultsFromLayout(layoutRequirements)
+        : getGenericDefaultCounts();
+
+      return {
+        success: true,
+        copyStrategy: finalCopyStrategy, // ✅ Keep validated strategy
+        cardCounts: defaultCardCounts,   // ✅ Only counts fall back to defaults
+        reasoning: parsed.reasoning || {},
+        errors: [],
+        warnings: [
+          ...strategyValidation.warnings,
+          'Card count validation failed - using intelligent defaults for counts only',
+          ...cardCountValidation.errors
+        ]
+      };
     }
 
     // Get normalized card counts for final result
@@ -731,7 +736,7 @@ export function parseStrategyResponse(
       errorStack: error instanceof Error ? error.stack : undefined,
       contentPreview: aiContent.substring(0, 200) + '...'
     });
-    return createIntelligentDefaults(layoutRequirements);
+    return createStrategyFailure('Unexpected error during strategy parsing: ' + String(error));
   }
 }
 
