@@ -2,8 +2,9 @@ import type { LayoutPickerInput } from "./layoutPickerInput";
 
 export type FooterLayout =
   | "SimpleFooter"
-  | "ComprehensiveFooter"
-  | "TrustFooter";
+  | "MultiColumnFooter"
+  | "LinksAndSocialFooter"
+  | "ContactFooter";
 
 /**
  * Selects the optimal Footer layout based on trust and navigation needs
@@ -31,7 +32,7 @@ export function pickFooterLayout(input: LayoutPickerInput): FooterLayout {
     targetAudience === 'enterprise'
   ) {
     // Regulated/enterprise needs trust signals in footer
-    return "TrustFooter";  // Security badges, certifications, trust seals
+    return "ContactFooter";  // Professional footer with contact info for trust
   }
 
   // HR-4.21.2: Simple Landing Page = Simple Footer
@@ -55,7 +56,7 @@ export function pickFooterLayout(input: LayoutPickerInput): FooterLayout {
 
   // Marketing tools benefit from social links
   if (marketCategory === 'Marketing & Sales Tools') {
-    return "ComprehensiveFooter";  // Sitemap-style with categories
+    return "LinksAndSocialFooter";  // Includes social media integration
   }
 
   // Industry-specific SaaS needs comprehensive footer
@@ -64,22 +65,22 @@ export function pickFooterLayout(input: LayoutPickerInput): FooterLayout {
     marketCategory === 'Data & Analytics Tools' ||
     marketCategory === 'HR & People Operations Tools'
   ) {
-    return "ComprehensiveFooter";  // Multi-column footer
+    return "MultiColumnFooter";  // Multi-column sitemap footer
   }
 
   // Confident/playful brands prefer social integration
   if (toneProfile === 'confident-playful') {
-    return "ComprehensiveFooter";  // Includes social links
+    return "LinksAndSocialFooter";  // Includes social links
   }
 
   // Luxury/expert needs structured footer
   if (toneProfile === 'luxury-expert') {
-    return "ComprehensiveFooter";  // Professional multi-column
+    return "MultiColumnFooter";  // Professional multi-column
   }
 
   // Growth/scale companies need comprehensive footer
   if (startupStage === 'growth' || startupStage === 'scale') {
-    return "ComprehensiveFooter";  // Full footer with all sections
+    return "MultiColumnFooter";  // Full footer with all sections
   }
 
   // Default to simple footer for balance

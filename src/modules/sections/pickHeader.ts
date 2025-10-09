@@ -1,9 +1,10 @@
 import type { LayoutPickerInput } from "./layoutPickerInput";
 
 export type HeaderLayout =
-  | "SimpleHeader"
-  | "NavigationHeader"
-  | "MinimalHeader";
+  | "NavWithCTAHeader"
+  | "FullNavHeader"
+  | "MinimalNavHeader"
+  | "CenteredLogoHeader";
 
 /**
  * Selects the optimal Header layout based on landing page context
@@ -32,41 +33,41 @@ export function pickHeaderLayout(input: LayoutPickerInput): HeaderLayout {
     landingPageGoals === 'free-trial'
   ) {
     // High-conversion goals need focused header
-    return "SimpleHeader";  // Logo + CTA only
+    return "NavWithCTAHeader";  // Logo + nav + CTA
   }
 
   // HR-4.20.2: Luxury/Professional = Navigation
   if (toneProfile === 'luxury-expert') {
-    return "NavigationHeader";  // Full nav with links
+    return "FullNavHeader";  // Full nav with dual CTAs
   }
 
   // ===== EXISTING: Simple Header Selection =====
 
   // Early stage startups benefit from focused CTAs
   if (startupStage === 'mvp' || startupStage === 'idea') {
-    return "SimpleHeader";  // Logo + CTA
+    return "NavWithCTAHeader";  // Logo + nav + CTA
   }
 
   // SaaS typically needs more navigation options
   if (pricingModel === 'tiered') {
-    return "NavigationHeader";  // Full nav
+    return "FullNavHeader";  // Full nav with dual CTAs
   }
 
   // Confident/playful brands might prefer centered logo
   if (toneProfile === 'confident-playful') {
-    return "MinimalHeader";  // Logo only
+    return "MinimalNavHeader";  // Logo + minimal nav
   }
 
   // Simple/minimal approach for technical products
   if (toneProfile === 'minimal-technical') {
-    return "MinimalHeader";  // Logo only
+    return "MinimalNavHeader";  // Logo + minimal nav
   }
 
   // Enterprise audiences expect professional navigation
   if (targetAudience === 'enterprise') {
-    return "NavigationHeader";  // Full nav
+    return "FullNavHeader";  // Full nav with dual CTAs
   }
 
   // Default to simple header for balanced approach
-  return "SimpleHeader";  // Logo + CTA
+  return "NavWithCTAHeader";  // Logo + nav + CTA
 }
