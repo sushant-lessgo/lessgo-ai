@@ -18,7 +18,7 @@ export function pickSecurityLayout(input: LayoutPickerInput): SecurityLayout {
   toneProfile,
   startupStage,             // ✅ FIXED
   marketCategory,
-  landingPageGoals,         // ✅ FIXED  
+  landingPageGoals,         // ✅ FIXED
   targetAudience,           // ✅ FIXED
   pricingModel,
   pricingModifier,
@@ -26,9 +26,37 @@ export function pickSecurityLayout(input: LayoutPickerInput): SecurityLayout {
   marketSophisticationLevel,
   copyIntent,
   problemType,
+
+  // PHASE 2.5: Flow-aware context fields
+  positionInFlow,
+  previousSection,
+  nextSection,
 } = input;
 
-  // High-Priority Rules (Return immediately if matched)
+  // ===== PHASE 2.5: FLOW-AWARE HARD RULES (HIGHEST PRIORITY) =====
+
+  // HR-4.15.1: Healthcare/Legal/Financial = Required (position 5-6)
+  if (
+    (marketCategory === 'Healthcare Technology' ||
+     marketCategory === 'Legal Technology' ||
+     marketCategory === 'Finance & Accounting Tools') &&
+    positionInFlow !== undefined &&
+    positionInFlow >= 5 && positionInFlow <= 6
+  ) {
+    // Regulated industries need compliance validation
+    return "TrustSealCollection";  // Certifications/compliance badges
+  }
+
+  // HR-4.15.2: Enterprise + Contact Sales = Required
+  if (
+    targetAudience === 'enterprise' &&
+    landingPageGoals === 'contact-sales'
+  ) {
+    // Enterprise needs visible trust signals
+    return "TrustSealCollection";  // SOC2, GDPR, etc.
+  }
+
+  // ===== EXISTING: High-Priority Rules (Return immediately if matched)
   
   // 1. Regulated industries need compliance badges
   if (
@@ -77,7 +105,7 @@ export function pickSecurityLayout(input: LayoutPickerInput): SecurityLayout {
   }
 
   // Medium-Priority Rules (Scoring system)
-  
+
   const scores: Record<SecurityLayout, number> = {
     AuditResultsPanel: 0,
     PenetrationTestResults: 0,
@@ -86,6 +114,48 @@ export function pickSecurityLayout(input: LayoutPickerInput): SecurityLayout {
     SecurityGuaranteePanel: 0,
     TrustSealCollection: 0,
   };
+
+  // ===== PHASE 2.5: FLOW-AWARE SCORING =====
+
+  // Position in Flow (4 points) - Optimal 5-7 (middle flow)
+  if (positionInFlow !== undefined) {
+    if (positionInFlow >= 5 && positionInFlow <= 7) {
+      // Optimal: After features, before pricing
+      scores.TrustSealCollection += 4;
+      scores.SecurityGuaranteePanel += 4;
+      scores.SecurityChecklist += 3;
+    } else if (positionInFlow <= 4) {
+      // Early flow: Too early for trust signals
+      scores.SecurityGuaranteePanel += 2;  // If needed early, keep it simple
+      scores.TrustSealCollection -= 2;
+    } else if (positionInFlow >= 8) {
+      // Late flow: Quick security summary
+      scores.SecurityGuaranteePanel += 2;
+      scores.TrustSealCollection += 2;
+    }
+  }
+
+  // Previous Section Context (3 points)
+  if (previousSection?.type === 'features' || previousSection?.type === 'integration') {
+    // After features/integration: Validate it's secure
+    scores.SecurityChecklist += 3;  // "Here's how it's protected"
+    scores.SecurityGuaranteePanel += 3;
+    scores.TrustSealCollection += 2;
+  }
+
+  // Next Section Context (4 points) - CRITICAL for pricing
+  if (nextSection?.type === 'pricing') {
+    // Before pricing: Justify enterprise value
+    scores.TrustSealCollection += 4;  // Build trust before asking for payment
+    scores.AuditResultsPanel += 3;
+    scores.PrivacyCommitmentBlock += 3;
+  } else if (nextSection?.type === 'testimonial' || nextSection?.type === 'results') {
+    // Before social proof: Technical credibility first
+    scores.SecurityGuaranteePanel += 3;
+    scores.SecurityChecklist += 2;
+  }
+
+  // ===== EXISTING SCORING (PRESERVED) =====
 
   // Target Audience Scoring (Highest Weight: 4-5 points)
   if (targetAudience === "enterprise") {

@@ -20,7 +20,7 @@ export function pickFAQLayout(input: LayoutPickerInput): FAQLayout {
   toneProfile,
   startupStage,             // ✅ FIXED
   marketCategory,
-  landingPageGoals,         // ✅ FIXED  
+  landingPageGoals,         // ✅ FIXED
   targetAudience,           // ✅ FIXED
   pricingModel,
   pricingModifier,
@@ -28,9 +28,31 @@ export function pickFAQLayout(input: LayoutPickerInput): FAQLayout {
   marketSophisticationLevel,
   copyIntent,
   problemType,
+
+  // PHASE 2.3: Flow-aware context fields
+  positionInFlow,
+  previousSection,
+  nextSection,
+  flowComplexity,
 } = input;
 
-  // High-Priority Rules (Return immediately if matched)
+  // ===== PHASE 2.3: FLOW-AWARE HARD RULES (HIGHEST PRIORITY) =====
+
+  // HR-4.12.2: Late Positioning Required
+  if (
+    positionInFlow !== undefined &&
+    positionInFlow < 6
+  ) {
+    // FAQ should be late in flow (7-9, before CTA)
+    // If forced early, use simplest layout
+    return "InlineQnAList";  // Minimal friction for early placement
+  }
+
+  // HR-4.12.1: FAQ OR ObjectionHandling, Not Both
+  // Note: This check would ideally be done at section selection level
+  // Here we optimize FAQ layout assuming objection handling might exist
+
+  // ===== EXISTING: High-Priority Rules (Return immediately if matched)
   
   // 1. Enterprise audiences with complex, segmented questions
   if (
@@ -78,7 +100,7 @@ export function pickFAQLayout(input: LayoutPickerInput): FAQLayout {
   }
 
   // Medium-Priority Rules (Scoring system)
-  
+
   const scores: Record<FAQLayout, number> = {
     AccordionFAQ: 0,
     TwoColumnFAQ: 0,
@@ -89,6 +111,49 @@ export function pickFAQLayout(input: LayoutPickerInput): FAQLayout {
     TestimonialFAQs: 0,
     ChatBubbleFAQ: 0,
   };
+
+  // ===== PHASE 2.3: FLOW-AWARE SCORING =====
+
+  // Flow Complexity Adjustments (4 points)
+  if (flowComplexity === 'simple') {
+    scores.AccordionFAQ += 4;  // Clean, expandable, brief answers
+    scores.InlineQnAList += 3;
+    scores.IconWithAnswers += 3;
+    scores.SegmentedFAQTabs -= 3;  // Too complex
+  } else if (flowComplexity === 'detailed') {
+    scores.SegmentedFAQTabs += 4;  // Organized by topic, comprehensive
+    scores.TwoColumnFAQ += 4;
+    scores.QuoteStyleAnswers += 3;
+    scores.ChatBubbleFAQ -= 2;  // Too casual
+  }
+
+  // Position in Flow (3 points)
+  if (positionInFlow !== undefined) {
+    if (positionInFlow >= 7) {
+      // Late flow: Optimal FAQ positioning
+      scores.AccordionFAQ += 3;
+      scores.TwoColumnFAQ += 3;
+      scores.TestimonialFAQs += 2;
+    }
+    // Early positioning handled by hard rule (returns immediately)
+  }
+
+  // Previous Section Context (3 points)
+  if (previousSection?.type === 'features' || previousSection?.type === 'pricing') {
+    // After features/pricing: Address specific concerns
+    scores.SegmentedFAQTabs += 3;
+    scores.AccordionFAQ += 3;
+    scores.TestimonialFAQs += 2;
+  }
+
+  // Next Section Context (2 points)
+  if (nextSection?.type === 'cta' || nextSection?.type === 'close') {
+    // Before CTA: Keep it simple, remove final friction
+    scores.AccordionFAQ += 3;
+    scores.InlineQnAList += 2;
+  }
+
+  // ===== EXISTING SCORING (PRESERVED) =====
 
   // Market Sophistication Scoring (Highest Weight: 4-5 points)
   if (marketSophisticationLevel === "level-1" || marketSophisticationLevel === "level-2") {

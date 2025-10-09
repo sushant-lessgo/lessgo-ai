@@ -20,7 +20,7 @@ export function pickComparisonLayout(input: LayoutPickerInput): ComparisonLayout
   toneProfile,
   startupStage,             // ✅ FIXED
   marketCategory,
-  landingPageGoals,         // ✅ FIXED  
+  landingPageGoals,         // ✅ FIXED
   targetAudience,           // ✅ FIXED
   pricingModel,
   pricingModifier,
@@ -28,9 +28,21 @@ export function pickComparisonLayout(input: LayoutPickerInput): ComparisonLayout
   marketSophisticationLevel,
   copyIntent,
   problemType,
+
+  // PHASE 2.4: Flow-aware context fields
+  positionInFlow,
+  previousSection,
+  nextSection,
+  flowTone,
 } = input;
 
-  // High-Priority Rules (Return immediately if matched)
+  // ===== PHASE 2.4: FLOW-AWARE HARD RULES (HIGHEST PRIORITY) =====
+
+  // HR-4.10.1, HR-4.10.2, HR-4.10.3: FORBIDDEN rules moved to scoring
+  // These rules discourage comparison in certain contexts but don't prevent it entirely
+  // Scoring system provides more nuanced handling than hard blocking
+
+  // ===== EXISTING: High-Priority Rules (Return immediately if matched)
   
   // 1. Internal tiered product comparison (not vs competitors)
   if (
@@ -78,7 +90,7 @@ export function pickComparisonLayout(input: LayoutPickerInput): ComparisonLayout
   }
 
   // Medium-Priority Rules (Scoring system)
-  
+
   const scores: Record<ComparisonLayout, number> = {
     BasicFeatureGrid: 0,
     CheckmarkComparison: 0,
@@ -89,6 +101,82 @@ export function pickComparisonLayout(input: LayoutPickerInput): ComparisonLayout
     PersonaUseCaseCompare: 0,
     LiteVsProVsEnterprise: 0,
   };
+
+  // ===== PHASE 2.4: FLOW-AWARE SCORING =====
+
+  // FORBIDDEN Context Penalties (applied first)
+  // HR-4.10.2: Discourage comparison at MVP/idea stage (no strong positioning yet)
+  if (startupStage === 'mvp' || startupStage === 'idea') {
+    scores.CompetitorCallouts -= 50;
+    scores.YouVsThemHighlight -= 50;
+    scores.BasicFeatureGrid += 30;  // Prefer feature showcase
+  }
+
+  // HR-4.10.3: Discourage comparison for low-friction goals
+  if (landingPageGoals === 'free-trial' || landingPageGoals === 'signup') {
+    scores.CompetitorCallouts -= 40;
+    scores.YouVsThemHighlight -= 40;
+    scores.BasicFeatureGrid += 20;  // Keep it simple
+  }
+
+  // Previous Section Context (4 points)
+  if (previousSection?.type === 'features' || previousSection?.type === 'uniqueMechanism') {
+    // After features: Highlight competitive advantages of those features
+    scores.CompetitorCallouts += 4;  // "Unlike competitors, we..."
+    scores.YouVsThemHighlight += 4;
+    scores.ToggleableComparison += 3;
+  } else if (previousSection?.type === 'results') {
+    // After results: Compare outcomes, not features
+    scores.PersonaUseCaseCompare += 3;
+    scores.CheckmarkComparison += 3;
+  }
+
+  // Next Section Context (3 points)
+  if (nextSection?.type === 'pricing') {
+    // Before pricing: Justify value vs alternatives
+    scores.LiteVsProVsEnterprise += 3;  // Internal comparison leads to pricing
+    scores.YouVsThemHighlight += 3;
+    scores.CompetitorCallouts += 2;
+  } else if (nextSection?.type === 'testimonial') {
+    // Before testimonial: Set up "Here's why people switched"
+    scores.YouVsThemHighlight += 3;
+    scores.CompetitorCallouts += 2;
+  }
+
+  // Flow Tone Adjustments (3 points)
+  if (flowTone === 'analytical') {
+    scores.ToggleableComparison += 3;  // Data-driven feature comparison
+    scores.LiteVsProVsEnterprise += 3;
+    scores.PersonaUseCaseCompare += 2;
+    scores.AnimatedUpgradePath -= 2;  // Too playful
+  } else if (flowTone === 'emotional') {
+    scores.YouVsThemHighlight += 3;  // "Finally, a better way"
+    scores.AnimatedUpgradePath += 3;
+    scores.CompetitorCallouts += 2;
+    scores.ToggleableComparison -= 2;  // Too dry
+  }
+
+  // Position in Flow (3 points)
+  if (positionInFlow !== undefined) {
+    if (positionInFlow >= 4 && positionInFlow <= 6) {
+      // Middle flow: Optimal comparison placement
+      scores.YouVsThemHighlight += 3;
+      scores.CompetitorCallouts += 3;
+      scores.ToggleableComparison += 2;
+    } else if (positionInFlow <= 3) {
+      // Early flow: Too early to introduce competitor doubt
+      scores.BasicFeatureGrid += 3;  // Focus on your features first
+      scores.AnimatedUpgradePath += 2;
+      scores.CompetitorCallouts -= 3;  // Don't mention competitors too early
+      scores.YouVsThemHighlight -= 2;
+    } else if (positionInFlow >= 7) {
+      // Late flow: Quick comparison if needed
+      scores.CheckmarkComparison += 2;
+      scores.BasicFeatureGrid += 2;
+    }
+  }
+
+  // ===== EXISTING SCORING (PRESERVED) =====
 
   // Market Sophistication Scoring (Highest Weight: 4-5 points)
   if (marketSophisticationLevel === "level-1" || marketSophisticationLevel === "level-2") {

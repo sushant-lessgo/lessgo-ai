@@ -1533,8 +1533,8 @@ function processInlineQnAListContent(sectionId: string, content: SectionContent)
     hasIssues: false
   };
 
-  // Check if content uses legacy pipe-separated format
-  const hasLegacyFormat = content.questions && content.answers;
+  // Check if content uses legacy pipe-separated format (check both singular and plural)
+  const hasLegacyFormat = (content.questions && content.answers) || (content.question && content.answer);
   const hasIndividualFields = Object.keys(content).some(key =>
     key.startsWith('question_') || key.startsWith('answer_')
   );
@@ -1575,17 +1575,32 @@ function processInlineQnAListContent(sectionId: string, content: SectionContent)
 function convertLegacyToIndividualFields(content: SectionContent): SectionContent {
   const converted: SectionContent = {};
 
-  if (typeof content.questions === 'string' && typeof content.answers === 'string') {
-    const questions = content.questions.split('|').map(q => q.trim()).filter(Boolean);
-    const answers = content.answers.split('|').map(a => a.trim()).filter(Boolean);
+  // Check both singular and plural forms (AI might generate either)
+  const questionsData = content.questions || content.question;
+  const answersData = content.answers || content.answer;
 
-    // Convert up to 6 Q&A pairs
-    const maxPairs = Math.min(questions.length, answers.length, 6);
+  // Handle both string (pipe-separated) and array formats
+  let questions: string[] = [];
+  let answers: string[] = [];
 
-    for (let i = 0; i < maxPairs; i++) {
-      converted[`question_${i + 1}`] = questions[i];
-      converted[`answer_${i + 1}`] = answers[i] || '';
-    }
+  if (typeof questionsData === 'string') {
+    questions = questionsData.split('|').map(q => q.trim()).filter(Boolean);
+  } else if (Array.isArray(questionsData)) {
+    questions = questionsData.map(q => String(q).trim()).filter(Boolean);
+  }
+
+  if (typeof answersData === 'string') {
+    answers = answersData.split('|').map(a => a.trim()).filter(Boolean);
+  } else if (Array.isArray(answersData)) {
+    answers = answersData.map(a => String(a).trim()).filter(Boolean);
+  }
+
+  // Convert up to 6 Q&A pairs
+  const maxPairs = Math.min(questions.length, answers.length, 6);
+
+  for (let i = 0; i < maxPairs; i++) {
+    converted[`question_${i + 1}`] = questions[i];
+    converted[`answer_${i + 1}`] = answers[i] || '';
   }
 
   return converted;
@@ -1711,15 +1726,15 @@ function processAccordionFAQContent(sectionId: string, content: SectionContent):
     hasIssues: false
   };
 
-  // Check for legacy format and convert
-  const hasLegacyFormat = content.questions && content.answers;
+  // Check for legacy format and convert (check both singular and plural)
+  const hasLegacyFormat = (content.questions && content.answers) || (content.question && content.answer);
   const hasIndividualFields = Object.keys(content).some(key =>
     key.startsWith('question_') || key.startsWith('answer_')
   );
 
   if (hasLegacyFormat && !hasIndividualFields) {
     const convertedContent = convertLegacyToIndividualFields(content);
-    result.warnings.push(`${sectionId}: Converted legacy pipe-separated format to individual Q&A fields`);
+    result.warnings.push(`${sectionId}: Converted legacy format to individual Q&A fields`);
     Object.assign(result.content, convertedContent);
   }
 
@@ -1759,8 +1774,8 @@ function processTwoColumnFAQContent(sectionId: string, content: SectionContent):
     hasIssues: false
   };
 
-  // Check for legacy format conversion
-  const hasLegacyFormat = content.questions && content.answers;
+  // Check for legacy format conversion (check both singular and plural)
+  const hasLegacyFormat = (content.questions && content.answers) || (content.question && content.answer);
   if (hasLegacyFormat) {
     const convertedContent = convertTwoColumnLegacyFormat(content);
     result.warnings.push(`${sectionId}: Converted legacy format to two-column Q&A fields`);
@@ -1803,8 +1818,8 @@ function processSegmentedFAQTabsContent(sectionId: string, content: SectionConte
     hasIssues: false
   };
 
-  // Check for legacy format conversion
-  const hasLegacyFormat = content.tab_labels || content.questions;
+  // Check for legacy format conversion (check both singular and plural)
+  const hasLegacyFormat = content.tab_labels || content.tab_label || content.questions || content.question;
   if (hasLegacyFormat) {
     const convertedContent = convertSegmentedTabsLegacyFormat(content);
     result.warnings.push(`${sectionId}: Converted legacy format to tab-specific Q&A fields`);
@@ -1847,8 +1862,8 @@ function processQuoteStyleAnswersContent(sectionId: string, content: SectionCont
     hasIssues: false
   };
 
-  // Check for legacy format conversion
-  const hasLegacyFormat = content.questions && content.quote_answers;
+  // Check for legacy format conversion (check both singular and plural)
+  const hasLegacyFormat = (content.questions && content.quote_answers) || (content.question && content.quote_answer);
   if (hasLegacyFormat) {
     const convertedContent = convertQuoteStyleLegacyFormat(content);
     result.warnings.push(`${sectionId}: Converted legacy format to individual quote Q&A fields`);
@@ -1891,8 +1906,8 @@ function processIconWithAnswersContent(sectionId: string, content: SectionConten
     hasIssues: false
   };
 
-  // Check for legacy format conversion
-  const hasLegacyFormat = content.questions && content.answers;
+  // Check for legacy format conversion (check both singular and plural)
+  const hasLegacyFormat = (content.questions && content.answers) || (content.question && content.answer);
   if (hasLegacyFormat) {
     const convertedContent = convertIconFAQLegacyFormat(content);
     result.warnings.push(`${sectionId}: Converted legacy format to individual icon Q&A fields`);
@@ -1935,8 +1950,8 @@ function processTestimonialFAQsContent(sectionId: string, content: SectionConten
     hasIssues: false
   };
 
-  // Check for legacy format conversion
-  const hasLegacyFormat = content.questions && content.testimonial_answers;
+  // Check for legacy format conversion (check both singular and plural)
+  const hasLegacyFormat = (content.questions && content.testimonial_answers) || (content.question && content.testimonial_answer);
   if (hasLegacyFormat) {
     const convertedContent = convertTestimonialFAQLegacyFormat(content);
     result.warnings.push(`${sectionId}: Converted legacy format to individual testimonial Q&A fields`);
@@ -2017,27 +2032,42 @@ function processChatBubbleFAQContent(sectionId: string, content: SectionContent)
 function convertTwoColumnLegacyFormat(content: SectionContent): SectionContent {
   const converted: SectionContent = {};
 
-  if (typeof content.questions === 'string' && typeof content.answers === 'string') {
-    const questions = content.questions.split('|').map(q => q.trim()).filter(Boolean);
-    const answers = content.answers.split('|').map(a => a.trim()).filter(Boolean);
+  // Check both singular and plural forms (AI might generate either)
+  const questionsData = content.questions || content.question;
+  const answersData = content.answers || content.answer;
 
-    // Split into left and right columns (3 items each)
-    const leftQuestions = questions.slice(0, 3);
-    const leftAnswers = answers.slice(0, 3);
-    const rightQuestions = questions.slice(3, 6);
-    const rightAnswers = answers.slice(3, 6);
+  // Handle both string (pipe-separated) and array formats
+  let questions: string[] = [];
+  let answers: string[] = [];
 
-    // Convert left column
-    for (let i = 0; i < Math.min(leftQuestions.length, 3); i++) {
-      converted[`left_question_${i + 1}`] = leftQuestions[i];
-      converted[`left_answer_${i + 1}`] = leftAnswers[i] || '';
-    }
+  if (typeof questionsData === 'string') {
+    questions = questionsData.split('|').map(q => q.trim()).filter(Boolean);
+  } else if (Array.isArray(questionsData)) {
+    questions = questionsData.map(q => String(q).trim()).filter(Boolean);
+  }
 
-    // Convert right column
-    for (let i = 0; i < Math.min(rightQuestions.length, 3); i++) {
-      converted[`right_question_${i + 1}`] = rightQuestions[i];
-      converted[`right_answer_${i + 1}`] = rightAnswers[i] || '';
-    }
+  if (typeof answersData === 'string') {
+    answers = answersData.split('|').map(a => a.trim()).filter(Boolean);
+  } else if (Array.isArray(answersData)) {
+    answers = answersData.map(a => String(a).trim()).filter(Boolean);
+  }
+
+  // Split into left and right columns (3 items each)
+  const leftQuestions = questions.slice(0, 3);
+  const leftAnswers = answers.slice(0, 3);
+  const rightQuestions = questions.slice(3, 6);
+  const rightAnswers = answers.slice(3, 6);
+
+  // Convert left column
+  for (let i = 0; i < Math.min(leftQuestions.length, 3); i++) {
+    converted[`left_question_${i + 1}`] = leftQuestions[i];
+    converted[`left_answer_${i + 1}`] = leftAnswers[i] || '';
+  }
+
+  // Convert right column
+  for (let i = 0; i < Math.min(rightQuestions.length, 3); i++) {
+    converted[`right_question_${i + 1}`] = rightQuestions[i];
+    converted[`right_answer_${i + 1}`] = rightAnswers[i] || '';
   }
 
   return converted;
@@ -2049,28 +2079,50 @@ function convertTwoColumnLegacyFormat(content: SectionContent): SectionContent {
 function convertSegmentedTabsLegacyFormat(content: SectionContent): SectionContent {
   const converted: SectionContent = {};
 
-  if (typeof content.tab_labels === 'string') {
-    const labels = content.tab_labels.split('|').map(l => l.trim()).filter(Boolean);
+  // Handle tab labels (both string and array)
+  const tabLabelsData = content.tab_labels || content.tab_label;
+  if (typeof tabLabelsData === 'string') {
+    const labels = tabLabelsData.split('|').map(l => l.trim()).filter(Boolean);
+    for (let i = 0; i < Math.min(labels.length, 3); i++) {
+      converted[`tab_${i + 1}_label`] = labels[i];
+    }
+  } else if (Array.isArray(tabLabelsData)) {
+    const labels = tabLabelsData.map(l => String(l).trim()).filter(Boolean);
     for (let i = 0; i < Math.min(labels.length, 3); i++) {
       converted[`tab_${i + 1}_label`] = labels[i];
     }
   }
 
-  if (typeof content.questions === 'string' && typeof content.answers === 'string') {
-    const questions = content.questions.split('|').map(q => q.trim()).filter(Boolean);
-    const answers = content.answers.split('|').map(a => a.trim()).filter(Boolean);
+  // Check both singular and plural forms (AI might generate either)
+  const questionsData = content.questions || content.question;
+  const answersData = content.answers || content.answer;
 
-    // Distribute Q&A across tabs (assume 3 questions per tab)
-    const questionsPerTab = 3;
-    for (let tab = 1; tab <= 3; tab++) {
-      const startIdx = (tab - 1) * questionsPerTab;
-      const tabQuestions = questions.slice(startIdx, startIdx + questionsPerTab);
-      const tabAnswers = answers.slice(startIdx, startIdx + questionsPerTab);
+  // Handle both string (pipe-separated) and array formats
+  let questions: string[] = [];
+  let answers: string[] = [];
 
-      for (let i = 0; i < Math.min(tabQuestions.length, questionsPerTab); i++) {
-        converted[`tab_${tab}_question_${i + 1}`] = tabQuestions[i];
-        converted[`tab_${tab}_answer_${i + 1}`] = tabAnswers[i] || '';
-      }
+  if (typeof questionsData === 'string') {
+    questions = questionsData.split('|').map(q => q.trim()).filter(Boolean);
+  } else if (Array.isArray(questionsData)) {
+    questions = questionsData.map(q => String(q).trim()).filter(Boolean);
+  }
+
+  if (typeof answersData === 'string') {
+    answers = answersData.split('|').map(a => a.trim()).filter(Boolean);
+  } else if (Array.isArray(answersData)) {
+    answers = answersData.map(a => String(a).trim()).filter(Boolean);
+  }
+
+  // Distribute Q&A across tabs (assume 3 questions per tab)
+  const questionsPerTab = 3;
+  for (let tab = 1; tab <= 3; tab++) {
+    const startIdx = (tab - 1) * questionsPerTab;
+    const tabQuestions = questions.slice(startIdx, startIdx + questionsPerTab);
+    const tabAnswers = answers.slice(startIdx, startIdx + questionsPerTab);
+
+    for (let i = 0; i < Math.min(tabQuestions.length, questionsPerTab); i++) {
+      converted[`tab_${tab}_question_${i + 1}`] = tabQuestions[i];
+      converted[`tab_${tab}_answer_${i + 1}`] = tabAnswers[i] || '';
     }
   }
 
@@ -2083,19 +2135,39 @@ function convertSegmentedTabsLegacyFormat(content: SectionContent): SectionConte
 function convertQuoteStyleLegacyFormat(content: SectionContent): SectionContent {
   const converted: SectionContent = {};
 
-  if (typeof content.questions === 'string' && typeof content.quote_answers === 'string') {
-    const questions = content.questions.split('|').map(q => q.trim()).filter(Boolean);
-    const quotes = content.quote_answers.split('|').map(q => q.trim()).filter(Boolean);
-    const attributions = typeof content.quote_attributions === 'string'
-      ? content.quote_attributions.split('|').map(a => a.trim()).filter(Boolean)
-      : [];
+  // Check both singular and plural forms (AI might generate either)
+  const questionsData = content.questions || content.question;
+  const quoteAnswersData = content.quote_answers || content.quote_answer;
 
-    const maxItems = Math.min(questions.length, quotes.length, 5);
-    for (let i = 0; i < maxItems; i++) {
-      converted[`question_${i + 1}`] = questions[i];
-      converted[`quote_answer_${i + 1}`] = quotes[i];
-      converted[`attribution_${i + 1}`] = attributions[i] || 'Anonymous';
-    }
+  // Handle both string (pipe-separated) and array formats
+  let questions: string[] = [];
+  let quotes: string[] = [];
+  let attributions: string[] = [];
+
+  if (typeof questionsData === 'string') {
+    questions = questionsData.split('|').map(q => q.trim()).filter(Boolean);
+  } else if (Array.isArray(questionsData)) {
+    questions = questionsData.map(q => String(q).trim()).filter(Boolean);
+  }
+
+  if (typeof quoteAnswersData === 'string') {
+    quotes = quoteAnswersData.split('|').map(q => q.trim()).filter(Boolean);
+  } else if (Array.isArray(quoteAnswersData)) {
+    quotes = quoteAnswersData.map(q => String(q).trim()).filter(Boolean);
+  }
+
+  const attributionsData = content.quote_attributions || content.quote_attribution;
+  if (typeof attributionsData === 'string') {
+    attributions = attributionsData.split('|').map(a => a.trim()).filter(Boolean);
+  } else if (Array.isArray(attributionsData)) {
+    attributions = attributionsData.map(a => String(a).trim()).filter(Boolean);
+  }
+
+  const maxItems = Math.min(questions.length, quotes.length, 5);
+  for (let i = 0; i < maxItems; i++) {
+    converted[`question_${i + 1}`] = questions[i];
+    converted[`quote_answer_${i + 1}`] = quotes[i];
+    converted[`attribution_${i + 1}`] = attributions[i] || 'Anonymous';
   }
 
   return converted;
@@ -2107,19 +2179,39 @@ function convertQuoteStyleLegacyFormat(content: SectionContent): SectionContent 
 function convertIconFAQLegacyFormat(content: SectionContent): SectionContent {
   const converted: SectionContent = {};
 
-  if (typeof content.questions === 'string' && typeof content.answers === 'string') {
-    const questions = content.questions.split('|').map(q => q.trim()).filter(Boolean);
-    const answers = content.answers.split('|').map(a => a.trim()).filter(Boolean);
-    const icons = typeof content.icon_labels === 'string'
-      ? content.icon_labels.split('|').map(i => i.trim()).filter(Boolean)
-      : [];
+  // Check both singular and plural forms (AI might generate either)
+  const questionsData = content.questions || content.question;
+  const answersData = content.answers || content.answer;
 
-    const maxItems = Math.min(questions.length, answers.length, 6);
-    for (let i = 0; i < maxItems; i++) {
-      converted[`question_${i + 1}`] = questions[i];
-      converted[`answer_${i + 1}`] = answers[i];
-      converted[`icon_${i + 1}`] = icons[i] || '❓';
-    }
+  // Handle both string (pipe-separated) and array formats
+  let questions: string[] = [];
+  let answers: string[] = [];
+  let icons: string[] = [];
+
+  if (typeof questionsData === 'string') {
+    questions = questionsData.split('|').map(q => q.trim()).filter(Boolean);
+  } else if (Array.isArray(questionsData)) {
+    questions = questionsData.map(q => String(q).trim()).filter(Boolean);
+  }
+
+  if (typeof answersData === 'string') {
+    answers = answersData.split('|').map(a => a.trim()).filter(Boolean);
+  } else if (Array.isArray(answersData)) {
+    answers = answersData.map(a => String(a).trim()).filter(Boolean);
+  }
+
+  const iconLabelsData = content.icon_labels || content.icon_label;
+  if (typeof iconLabelsData === 'string') {
+    icons = iconLabelsData.split('|').map(i => i.trim()).filter(Boolean);
+  } else if (Array.isArray(iconLabelsData)) {
+    icons = iconLabelsData.map(i => String(i).trim()).filter(Boolean);
+  }
+
+  const maxItems = Math.min(questions.length, answers.length, 6);
+  for (let i = 0; i < maxItems; i++) {
+    converted[`question_${i + 1}`] = questions[i];
+    converted[`answer_${i + 1}`] = answers[i];
+    converted[`icon_${i + 1}`] = icons[i] || '❓';
   }
 
   return converted;
@@ -2131,24 +2223,49 @@ function convertIconFAQLegacyFormat(content: SectionContent): SectionContent {
 function convertTestimonialFAQLegacyFormat(content: SectionContent): SectionContent {
   const converted: SectionContent = {};
 
-  if (typeof content.questions === 'string' && typeof content.testimonial_answers === 'string') {
-    const questions = content.questions.split('|').map(q => q.trim()).filter(Boolean);
-    const testimonials = content.testimonial_answers.split('|').map(t => t.trim()).filter(Boolean);
-    const names = typeof content.customer_names === 'string'
-      ? content.customer_names.split('|').map(n => n.trim()).filter(Boolean)
-      : [];
-    const titles = typeof content.customer_titles === 'string'
-      ? content.customer_titles.split('|').map(t => t.trim()).filter(Boolean)
-      : [];
+  // Check both singular and plural forms (AI might generate either)
+  const questionsData = content.questions || content.question;
+  const testimonialAnswersData = content.testimonial_answers || content.testimonial_answer;
 
-    const maxItems = Math.min(questions.length, testimonials.length, 5);
-    for (let i = 0; i < maxItems; i++) {
-      converted[`question_${i + 1}`] = questions[i];
-      converted[`testimonial_answer_${i + 1}`] = testimonials[i];
-      converted[`customer_name_${i + 1}`] = names[i] || 'Anonymous Customer';
-      if (titles[i]) {
-        converted[`customer_title_${i + 1}`] = titles[i];
-      }
+  // Handle both string (pipe-separated) and array formats
+  let questions: string[] = [];
+  let testimonials: string[] = [];
+  let names: string[] = [];
+  let titles: string[] = [];
+
+  if (typeof questionsData === 'string') {
+    questions = questionsData.split('|').map(q => q.trim()).filter(Boolean);
+  } else if (Array.isArray(questionsData)) {
+    questions = questionsData.map(q => String(q).trim()).filter(Boolean);
+  }
+
+  if (typeof testimonialAnswersData === 'string') {
+    testimonials = testimonialAnswersData.split('|').map(t => t.trim()).filter(Boolean);
+  } else if (Array.isArray(testimonialAnswersData)) {
+    testimonials = testimonialAnswersData.map(t => String(t).trim()).filter(Boolean);
+  }
+
+  const namesData = content.customer_names || content.customer_name;
+  if (typeof namesData === 'string') {
+    names = namesData.split('|').map(n => n.trim()).filter(Boolean);
+  } else if (Array.isArray(namesData)) {
+    names = namesData.map(n => String(n).trim()).filter(Boolean);
+  }
+
+  const titlesData = content.customer_titles || content.customer_title;
+  if (typeof titlesData === 'string') {
+    titles = titlesData.split('|').map(t => t.trim()).filter(Boolean);
+  } else if (Array.isArray(titlesData)) {
+    titles = titlesData.map(t => String(t).trim()).filter(Boolean);
+  }
+
+  const maxItems = Math.min(questions.length, testimonials.length, 5);
+  for (let i = 0; i < maxItems; i++) {
+    converted[`question_${i + 1}`] = questions[i];
+    converted[`testimonial_answer_${i + 1}`] = testimonials[i];
+    converted[`customer_name_${i + 1}`] = names[i] || 'Anonymous Customer';
+    if (titles[i]) {
+      converted[`customer_title_${i + 1}`] = titles[i];
     }
   }
 
@@ -2165,20 +2282,36 @@ function convertChatBubbleLegacyFormat(content: SectionContent): SectionContent 
   const questionsData = content.questions || content.question;
   const answersData = content.answers || content.answer;
 
-  if (typeof questionsData === 'string' && typeof answersData === 'string') {
-    const questions = questionsData.split('|').map(q => q.trim()).filter(Boolean);
-    const answers = answersData.split('|').map(a => a.trim()).filter(Boolean);
-    const personas = typeof content.chat_personas === 'string'
-      ? content.chat_personas.split('|').map(p => p.trim()).filter(Boolean)
-      : [];
+  // Handle both string (pipe-separated) and array formats
+  let questions: string[] = [];
+  let answers: string[] = [];
+  let personas: string[] = [];
 
-    const maxItems = Math.min(questions.length, answers.length, 5);
-    for (let i = 0; i < maxItems; i++) {
-      converted[`question_${i + 1}`] = questions[i];
-      converted[`answer_${i + 1}`] = answers[i];
-      if (personas[i]) {
-        converted[`persona_${i + 1}`] = personas[i];
-      }
+  if (typeof questionsData === 'string') {
+    questions = questionsData.split('|').map(q => q.trim()).filter(Boolean);
+  } else if (Array.isArray(questionsData)) {
+    questions = questionsData.map(q => String(q).trim()).filter(Boolean);
+  }
+
+  if (typeof answersData === 'string') {
+    answers = answersData.split('|').map(a => a.trim()).filter(Boolean);
+  } else if (Array.isArray(answersData)) {
+    answers = answersData.map(a => String(a).trim()).filter(Boolean);
+  }
+
+  const personasData = content.chat_personas || content.chat_persona;
+  if (typeof personasData === 'string') {
+    personas = personasData.split('|').map(p => p.trim()).filter(Boolean);
+  } else if (Array.isArray(personasData)) {
+    personas = personasData.map(p => String(p).trim()).filter(Boolean);
+  }
+
+  const maxItems = Math.min(questions.length, answers.length, 5);
+  for (let i = 0; i < maxItems; i++) {
+    converted[`question_${i + 1}`] = questions[i];
+    converted[`answer_${i + 1}`] = answers[i];
+    if (personas[i]) {
+      converted[`persona_${i + 1}`] = personas[i];
     }
   }
 

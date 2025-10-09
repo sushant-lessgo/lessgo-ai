@@ -29,8 +29,36 @@ export function pickTestimonialLayout(input: LayoutPickerInput): TestimonialLayo
   copyIntent,
   problemType,
   assetAvailability,        // Sprint 7: Asset-aware layout selection
+
+  // PHASE 2.2: Flow-aware context fields
+  nextSection,
+  previousSection,
+  flowTone,
 } = input;
-  // High-Priority Rules (Return immediately if matched)
+
+  // ===== PHASE 2.2: FLOW-AWARE HARD RULES (HIGHEST PRIORITY) =====
+
+  // HR-4.8.2: Before Pricing = JUSTIFY VALUE
+  if (
+    nextSection?.type === 'pricing' &&
+    startupStage !== 'idea' && startupStage !== 'mvp'
+  ) {
+    // Need ROI-focused testimonials before pricing
+    if (targetAudience === 'enterprise') {
+      return "VideoTestimonials";  // Highest credibility
+    }
+    return "BeforeAfterQuote";  // Show tangible value
+  }
+
+  // HR-4.8.4: Video Available + High-Friction Goal = USE VIDEO
+  if (
+    assetAvailability?.demoVideo &&
+    (landingPageGoals === 'buy-now' || landingPageGoals === 'contact-sales' || landingPageGoals === 'subscribe')
+  ) {
+    return "VideoTestimonials";  // Highest trust builder for purchases
+  }
+
+  // ===== EXISTING: High-Priority Rules (Return immediately if matched) =====
   
   // 1. High-touch enterprise sales need video testimonials
   if (
@@ -79,7 +107,7 @@ export function pickTestimonialLayout(input: LayoutPickerInput): TestimonialLayo
   }
 
   // Medium-Priority Rules (Scoring system)
-  
+
   const scores: Record<TestimonialLayout, number> = {
     QuoteGrid: 0,
     VideoTestimonials: 0,
@@ -90,6 +118,46 @@ export function pickTestimonialLayout(input: LayoutPickerInput): TestimonialLayo
     PullQuoteStack: 0,
     InteractiveTestimonialMap: 0,
   };
+
+  // ===== PHASE 2.2: FLOW-AWARE SCORING =====
+
+  // Next Section Context Scoring (5 points)
+  if (nextSection?.type === 'pricing') {
+    // Before pricing: Justify value
+    scores.BeforeAfterQuote += 5;
+    scores.VideoTestimonials += 5;
+    scores.QuoteGrid += 4;
+    scores.RatingCards += 3;
+    scores.AvatarCarousel -= 2;  // Too casual before pricing
+  } else if (nextSection?.type === 'cta') {
+    // Before CTA: Final confidence boost
+    scores.VideoTestimonials += 5;
+    scores.RatingCards += 4;
+    scores.SegmentedTestimonials -= 3;  // Too detailed before close
+  }
+
+  // Previous Section Context Scoring (4 points)
+  if (previousSection?.type === 'results') {
+    // Results showed numbers → Testimonials humanize them
+    scores.BeforeAfterQuote += 4;
+    scores.QuoteGrid += 4;
+    scores.RatingCards += 3;
+  }
+
+  // Flow Tone Adjustments (4 points)
+  if (flowTone === 'emotional') {
+    scores.PullQuoteStack += 4;
+    scores.AvatarCarousel += 3;
+    scores.InteractiveTestimonialMap += 3;
+    scores.VideoTestimonials -= 2;  // Too formal
+  } else if (flowTone === 'analytical') {
+    scores.VideoTestimonials += 4;
+    scores.SegmentedTestimonials += 4;
+    scores.RatingCards += 3;
+    scores.InteractiveTestimonialMap -= 2;  // Too casual
+  }
+
+  // ===== EXISTING SCORING (PRESERVED) =====
 
   // Startup Stage Scoring (Highest Weight: 4-5 points)
   if (startupStage === "idea" || startupStage === "mvp") {

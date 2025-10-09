@@ -18,7 +18,7 @@ export function pickFeatureLayout(input: LayoutPickerInput): FeatureLayout {
   toneProfile,
   startupStage,             // ✅ FIXED
   marketCategory,
-  landingPageGoals,         // ✅ FIXED  
+  landingPageGoals,         // ✅ FIXED
   targetAudience,           // ✅ FIXED
   pricingModel,
   pricingModifier,
@@ -27,9 +27,27 @@ export function pickFeatureLayout(input: LayoutPickerInput): FeatureLayout {
   copyIntent,
   problemType,
   assetAvailability,        // Sprint 7: Asset-aware layout selection
+
+  // PHASE 2.1: Flow-aware context fields
+  flowTone,
+  flowComplexity,
 } = input;
 
-  // High-Priority Rules (Return immediately if matched)
+  // ===== PHASE 2.1: FLOW-AWARE HARD RULES (HIGHEST PRIORITY) =====
+
+  // HR-4.4.1: Free-Trial/Signup = SCANNABLE REQUIRED
+  if (
+    landingPageGoals === 'free-trial' || landingPageGoals === 'signup'
+  ) {
+    // Quick comprehension is CRITICAL for low-friction goals
+    // NEVER use detailed layouts that slow decision-making
+    if (flowComplexity === 'simple') {
+      return "IconGrid";  // Maintain simple flow
+    }
+    return "MiniCards";  // Scannable alternative
+  }
+
+  // ===== EXISTING: High-Priority Rules (Return immediately if matched) =====
   
   // 1. Complex technical products need detailed explanations
   if (
@@ -77,7 +95,7 @@ export function pickFeatureLayout(input: LayoutPickerInput): FeatureLayout {
   }
 
   // Medium-Priority Rules (Scoring system)
-  
+
   const scores: Record<FeatureLayout, number> = {
     IconGrid: 0,
     SplitAlternating: 0,
@@ -86,6 +104,36 @@ export function pickFeatureLayout(input: LayoutPickerInput): FeatureLayout {
     MiniCards: 0,
     Carousel: 0,
   };
+
+  // ===== PHASE 2.1: FLOW-AWARE SCORING =====
+
+  // NOTE: Free-trial/signup handled by hard rule above (early return)
+  // No need for scoring adjustment here
+
+  // Flow Tone Adjustments (4 points)
+  if (flowTone === 'emotional') {
+    scores.IconGrid += 4;
+    scores.Carousel += 3;
+    scores.MiniCards += 3;
+    scores.SplitAlternating -= 3;  // Too technical for emotional flow
+  } else if (flowTone === 'analytical') {
+    scores.MetricTiles += 4;
+    scores.SplitAlternating += 3;
+    scores.Carousel -= 2;  // Too casual
+  }
+
+  // Flow Complexity Alignment (4 points)
+  if (flowComplexity === 'simple') {
+    scores.IconGrid += 4;
+    scores.MiniCards += 3;
+    scores.SplitAlternating -= 3;  // Avoid complexity creep
+    scores.FeatureTestimonial -= 2;
+  } else if (flowComplexity === 'detailed') {
+    scores.SplitAlternating += 4;
+    scores.FeatureTestimonial += 3;
+  }
+
+  // ===== EXISTING SCORING (PRESERVED) =====
 
   // Awareness Level Scoring (Highest Weight: 4-5 points)
   if (awarenessLevel === "unaware" || awarenessLevel === "problem-aware") {
@@ -233,18 +281,16 @@ export function pickFeatureLayout(input: LayoutPickerInput): FeatureLayout {
   }
 
   // Landing Goal Scoring (Low Weight: 1-2 points)
+  // NOTE: free-trial and signup handled by hard rule (early return)
   if (landingPageGoals === "buy-now" || landingPageGoals === "subscribe") {
     scores.FeatureTestimonial += 2;
     scores.MetricTiles += 2;
     scores.SplitAlternating += 1;
-  } else if (landingPageGoals === "free-trial" || landingPageGoals === "demo") {
+  } else if (landingPageGoals === "demo") {
     scores.SplitAlternating += 3;
   } else if (landingPageGoals === "contact-sales") {
     scores.FeatureTestimonial += 2;
     scores.SplitAlternating += 1;
-  } else if (landingPageGoals === "signup") {
-    scores.IconGrid += 2;
-    scores.Carousel += 1;
   } else if (landingPageGoals === "download" || landingPageGoals === "waitlist") {
     scores.Carousel += 2;
     scores.MiniCards += 1;

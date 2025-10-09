@@ -27,7 +27,42 @@ export function pickHeroLayout(input: LayoutPickerInput): HeroLayout {
   assetAvailability,        // Sprint 7: Asset-aware layout selection
 } = input;
 
-  // High-Priority Rules (Return immediately if matched)
+  // NOTE: Hero is position 1 - no flow context received
+  // BUT: Hero ESTABLISHES flowTone and flowComplexity for subsequent sections:
+  // - centerStacked → flowTone: 'balanced', flowComplexity: 'simple'
+  // - imageFirst → flowTone: 'moderate', flowComplexity: 'moderate'
+  // - splitScreen → flowTone: 'analytical', flowComplexity: 'moderate'
+  // - leftCopyRightImage → flowTone: 'balanced', flowComplexity: 'detailed'
+
+  // ===== PHASE 2.2: FLOW-AWARE HARD RULES (HIGHEST PRIORITY) =====
+
+  // HR-4.1.1: MVP Stage + Unaware Audience = SIMPLE VALUE PROP
+  if (
+    (startupStage === 'idea' || startupStage === 'mvp') &&
+    awarenessLevel === 'unaware'
+  ) {
+    return "centerStacked";  // Clear, simple value prop
+  }
+
+  // HR-4.1.2: Product-Aware + Visual Product = SHOW IMMEDIATELY
+  if (
+    (awarenessLevel === 'product-aware' || awarenessLevel === 'most-aware') &&
+    marketCategory === 'Design & Creative Tools' &&
+    assetAvailability?.productImages
+  ) {
+    return "imageFirst";  // Show product immediately
+  }
+
+  // HR-4.1.3: Technical Product + Sophisticated + Demo Available
+  if (
+    marketSophisticationLevel >= 'level-4' &&
+    (targetAudience === 'builders' || targetAudience === 'enterprise') &&
+    assetAvailability?.demoVideo
+  ) {
+    return "imageFirst";  // Show, don't tell (video hero)
+  }
+
+  // ===== EXISTING: High-Priority Rules (Return immediately if matched) =====
   
   // 1. Visual-first products that need to show the product immediately
   if (
@@ -75,13 +110,38 @@ export function pickHeroLayout(input: LayoutPickerInput): HeroLayout {
   }
 
   // Medium-Priority Rules (Scoring system)
-  
+
   const scores: Record<HeroLayout, number> = {
     leftCopyRightImage: 0,
     centerStacked: 0,
     splitScreen: 0,
     imageFirst: 0,
   };
+
+  // ===== PHASE 2.2: FLOW-AWARE SCORING =====
+
+  // NOTE: Hero establishes the initial tone for entire page
+  // Layout choice influences flowTone and flowComplexity:
+  // - centerStacked → 'balanced', 'simple'
+  // - imageFirst → 'moderate', 'moderate'
+  // - splitScreen → 'analytical', 'moderate'
+  // - leftCopyRightImage → 'balanced', 'detailed'
+
+  // Market Sophistication + Awareness Combo (5 points)
+  if (marketSophisticationLevel >= 'level-4' && (awarenessLevel === 'product-aware' || awarenessLevel === 'most-aware')) {
+    scores.imageFirst += 5;  // They know what they want - show it
+    scores.splitScreen += 4;
+  } else if (marketSophisticationLevel <= 'level-2' && awarenessLevel === 'unaware') {
+    scores.centerStacked += 5;  // Keep it simple and clear
+  }
+
+  // MVP Stage Special Handling (5 points)
+  if (startupStage === 'idea' || startupStage === 'mvp') {
+    scores.centerStacked += 5;  // Simple, focused messaging
+    scores.imageFirst -= 3;     // May not have polished product images
+  }
+
+  // ===== EXISTING SCORING (PRESERVED) =====
 
   // Landing Goal Scoring (Highest Weight: 4-5 points)
   if (landingPageGoals === "contact-sales" || landingPageGoals === "demo" || landingPageGoals === "book-call") {

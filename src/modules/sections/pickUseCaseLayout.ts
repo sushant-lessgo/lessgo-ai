@@ -19,7 +19,7 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
   toneProfile,
   startupStage,             // ✅ FIXED
   marketCategory,
-  landingPageGoals,         // ✅ FIXED  
+  landingPageGoals,         // ✅ FIXED
   targetAudience,           // ✅ FIXED
   pricingModel,
   pricingModifier,
@@ -27,9 +27,20 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
   marketSophisticationLevel,
   copyIntent,
   problemType,
+
+  // PHASE 2.4: Flow-aware context fields
+  positionInFlow,
+  previousSection,
+  nextSection,
 } = input;
 
-  // High-Priority Rules (Return immediately if matched)
+  // ===== PHASE 2.4: FLOW-AWARE HARD RULES (HIGHEST PRIORITY) =====
+
+  // HR-4.8.1: Position 5-7 Optimal (Mid-to-Late Placement)
+  // Use case sections work best after features are established
+  // No hard rule needed - scoring will handle optimal positioning
+
+  // ===== EXISTING: High-Priority Rules (Return immediately if matched)
   
   // 1. Enterprise with complex role-based applications
   if (
@@ -77,7 +88,7 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
   }
 
   // Medium-Priority Rules (Scoring system)
-  
+
   const scores: Record<UseCaseLayout, number> = {
     CustomerJourneyFlow: 0,
     IndustryUseCaseGrid: 0,
@@ -87,6 +98,53 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
     UseCaseCarousel: 0,
     WorkflowDiagrams: 0,
   };
+
+  // ===== PHASE 2.4: FLOW-AWARE SCORING =====
+
+  // Position in Flow (4 points) - CRITICAL: Optimal 5-7
+  if (positionInFlow !== undefined) {
+    if (positionInFlow >= 5 && positionInFlow <= 7) {
+      // Optimal positioning: After features, before pricing/objections
+      scores.PersonaGrid += 4;
+      scores.RoleBasedScenarios += 4;
+      scores.IndustryUseCaseGrid += 3;
+    } else if (positionInFlow <= 4) {
+      // Early flow: Too early, users don't know what it does yet
+      scores.UseCaseCarousel += 2;  // If needed early, keep it simple
+      scores.PersonaGrid -= 2;  // Don't show use cases before features
+      scores.RoleBasedScenarios -= 3;  // Too detailed for early placement
+    } else if (positionInFlow >= 8) {
+      // Late flow: Quick use case recap if needed
+      scores.UseCaseCarousel += 2;
+      scores.WorkflowDiagrams += 2;
+    }
+  }
+
+  // Previous Section Context (3 points)
+  if (previousSection?.type === 'features' || previousSection?.type === 'uniqueMechanism') {
+    // After features: Show real-world applications of those features
+    scores.RoleBasedScenarios += 3;  // "Here's how different roles use it"
+    scores.PersonaGrid += 3;
+    scores.IndustryUseCaseGrid += 2;
+  } else if (previousSection?.type === 'howItWorks') {
+    // After how it works: Show who uses it
+    scores.PersonaGrid += 3;
+    scores.UseCaseCarousel += 2;
+  }
+
+  // Next Section Context (3 points)
+  if (nextSection?.type === 'testimonial' || nextSection?.type === 'results') {
+    // Before testimonial: Set up "Here's how customers like you use it"
+    scores.PersonaGrid += 3;  // Persona-based transitions to customer stories
+    scores.RoleBasedScenarios += 3;
+    scores.IndustryUseCaseGrid += 2;
+  } else if (nextSection?.type === 'pricing') {
+    // Before pricing: Show value through applications
+    scores.RoleBasedScenarios += 2;
+    scores.IndustryUseCaseGrid += 2;
+  }
+
+  // ===== EXISTING SCORING (PRESERVED) =====
 
   // Target Audience Scoring (Highest Weight: 4-5 points)
   if (targetAudience === "enterprise") {

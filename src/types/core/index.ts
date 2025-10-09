@@ -18,6 +18,25 @@ export type {
 } from '@/modules/inference/taxonomy';
 
 /**
+ * ===== FLOW-AWARE CONTEXT TYPES =====
+ * Phase 1: UIBlock Business Rules Implementation
+ */
+export type {
+  SectionPurpose,
+  FlowTone,
+  FlowComplexity,
+  LayoutDensity,
+  PreviousSectionContext,
+  NextSectionContext
+} from '@/modules/sections/flowContextTypes';
+
+export {
+  getLayoutDensity,
+  getLayoutTone,
+  getLayoutComplexity
+} from '@/modules/sections/flowContextTypes';
+
+/**
  * ===== TYPE GUARDS =====
  */
 export {

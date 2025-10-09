@@ -29,9 +29,25 @@ export function pickCloseLayout(input: LayoutPickerInput): CloseLayout {
   copyIntent,
   problemType,
   assetAvailability,        // Sprint 7: Asset-aware layout selection
+
+  // PHASE 2.4: Flow-aware context fields
+  positionInFlow,
+  totalSectionsInFlow,
+  previousSection,
 } = input;
 
-  // High-Priority Rules (Return immediately if matched)
+  // ===== PHASE 2.4: FLOW-AWARE HARD RULES (HIGHEST PRIORITY) =====
+
+  // HR-4.19.1: Long Flows (8+) = Value Recap
+  if (
+    totalSectionsInFlow !== undefined &&
+    totalSectionsInFlow >= 8
+  ) {
+    // After a long flow, recap the value proposition
+    return "ValueReinforcementBlock";  // "Here's everything you get..."
+  }
+
+  // ===== EXISTING: High-Priority Rules (Return immediately if matched)
   
   // 1. Enterprise sales process - needs professional contact flow
   if (
@@ -78,7 +94,7 @@ export function pickCloseLayout(input: LayoutPickerInput): CloseLayout {
   }
 
   // Medium-Priority Rules (Scoring system)
-  
+
   const scores: Record<CloseLayout, number> = {
     MockupWithCTA: 0,
     BonusStackCTA: 0,
@@ -89,6 +105,50 @@ export function pickCloseLayout(input: LayoutPickerInput): CloseLayout {
     SideBySideOfferCards: 0,
     MultistepCTAStack: 0,
   };
+
+  // ===== PHASE 2.4: FLOW-AWARE SCORING =====
+
+  // Total Sections in Flow (4 points) - Long flows need recap
+  if (totalSectionsInFlow !== undefined) {
+    if (totalSectionsInFlow >= 8) {
+      // Long flow: Recap everything before final CTA
+      scores.ValueReinforcementBlock += 4;
+      scores.BonusStackCTA += 3;  // Value stack works too
+      scores.MockupWithCTA += 2;
+    } else if (totalSectionsInFlow <= 5) {
+      // Short flow: Direct close
+      scores.MockupWithCTA += 3;
+      scores.LeadMagnetCard += 3;
+      scores.ValueReinforcementBlock -= 2;  // No need for recap
+    }
+  }
+
+  // Previous Section Context (3 points)
+  if (previousSection?.type === 'objectionHandling' || previousSection?.type === 'faq') {
+    // After objection handling: Simple, direct close - no need to re-explain
+    scores.MockupWithCTA += 3;
+    scores.LeadMagnetCard += 3;
+    scores.LivePreviewEmbed += 2;
+    scores.ValueReinforcementBlock -= 2;  // Don't recap after answering objections
+  } else if (previousSection?.type === 'pricing') {
+    // After pricing: Value-focused close
+    scores.BonusStackCTA += 3;
+    scores.ValueReinforcementBlock += 3;
+    scores.SideBySideOfferCards += 2;
+  }
+
+  // Position in Flow (2 points) - Should be last/second-to-last
+  if (positionInFlow !== undefined && totalSectionsInFlow !== undefined) {
+    const distanceFromEnd = totalSectionsInFlow - positionInFlow;
+    if (distanceFromEnd <= 1) {
+      // Last or second-to-last section: Perfect close positioning
+      scores.MockupWithCTA += 2;
+      scores.BonusStackCTA += 2;
+      scores.EnterpriseContactBox += 2;
+    }
+  }
+
+  // ===== EXISTING SCORING (PRESERVED) =====
 
   // Landing Goal Scoring (Highest Weight: 4-5 points)
   if (landingPageGoals === "buy-now" || landingPageGoals === "subscribe") {

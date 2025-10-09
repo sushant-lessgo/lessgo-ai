@@ -20,7 +20,7 @@ export function pickPricingLayout(input: LayoutPickerInput): PricingLayout {
   toneProfile,
   startupStage,             // ✅ FIXED
   marketCategory,
-  landingPageGoals,         // ✅ FIXED  
+  landingPageGoals,         // ✅ FIXED
   targetAudience,           // ✅ FIXED
   pricingModel,
   pricingModifier,
@@ -28,9 +28,44 @@ export function pickPricingLayout(input: LayoutPickerInput): PricingLayout {
   marketSophisticationLevel,
   copyIntent,
   problemType,
+
+  // PHASE 2.2: Flow-aware context fields
+  positionInFlow,
+  previousSection,
+  nextSection,
+  flowTone,
 } = input;
 
-  // High-Priority Rules (Return immediately if matched)
+  // ===== PHASE 2.2: FLOW-AWARE HARD RULES (HIGHEST PRIORITY) =====
+
+  // HR-4.13.2: Most-Aware + Early Positioning = OFFER IMMEDIATELY
+  if (
+    awarenessLevel === 'most-aware' &&
+    positionInFlow !== undefined && positionInFlow <= 4
+  ) {
+    // They want the offer immediately
+    if (pricingModel === 'tiered') {
+      return "TierCards";  // Clear, upfront pricing
+    }
+    return "MiniStackedCards";  // Simple pricing display
+  }
+
+  // NOTE: HR-4.13.3 (Custom Quote for Enterprise) removed - already handled by existing rule at line 76-82
+  // which is more specific (requires enterprise + custom-quote + sales goal combination)
+
+  // HR-4.13.4: Before Objection Handling = JUSTIFY VALUE
+  if (
+    nextSection?.type === 'objectionHandling' &&
+    positionInFlow !== undefined && positionInFlow >= 6
+  ) {
+    // Pricing sets up price objections
+    if (startupStage === 'growth' || startupStage === 'scale') {
+      return "CardWithTestimonial";  // Pre-emptive justification
+    }
+    return "TierCards";  // Clear value per tier
+  }
+
+  // ===== EXISTING: High-Priority Rules (Return immediately if matched) =====
   
   // 1. Enterprise custom pricing always needs sales contact
   if (
@@ -79,7 +114,7 @@ export function pickPricingLayout(input: LayoutPickerInput): PricingLayout {
   }
 
   // Medium-Priority Rules (Scoring system)
-  
+
   const scores: Record<PricingLayout, number> = {
     TierCards: 0,
     ToggleableMonthlyYearly: 0,
@@ -90,6 +125,50 @@ export function pickPricingLayout(input: LayoutPickerInput): PricingLayout {
     CardWithTestimonial: 0,
     MiniStackedCards: 0,
   };
+
+  // ===== PHASE 2.2: FLOW-AWARE SCORING =====
+
+  // Awareness + Position Combo (5 points)
+  if (awarenessLevel === 'most-aware') {
+    if (positionInFlow !== undefined && positionInFlow <= 4) {
+      // Early positioning: They want it NOW
+      scores.TierCards += 5;
+      scores.MiniStackedCards += 5;
+      scores.FeatureMatrix -= 3;  // Too detailed for eager buyers
+    }
+  }
+
+  // Previous Section Context (4 points)
+  if (previousSection?.type === 'features' || previousSection?.type === 'results') {
+    // After value sections: Now justify the price
+    scores.CardWithTestimonial += 4;
+    scores.FeatureMatrix += 4;
+    scores.TierCards += 3;
+  }
+
+  // Next Section Context (4 points)
+  if (nextSection?.type === 'objectionHandling') {
+    // Pricing → Objection handling
+    scores.CardWithTestimonial += 4;  // Pre-emptive value justification
+    scores.TierCards += 3;
+  } else if (nextSection?.type === 'cta') {
+    // Pricing → CTA (unusual, but direct)
+    scores.MiniStackedCards += 4;  // Keep it simple
+    scores.TierCards += 3;
+  }
+
+  // Flow Tone Adjustments (3 points)
+  if (flowTone === 'emotional') {
+    scores.CardWithTestimonial += 3;
+    scores.MiniStackedCards += 3;
+    scores.FeatureMatrix -= 2;  // Too analytical
+  } else if (flowTone === 'analytical') {
+    scores.FeatureMatrix += 3;
+    scores.SliderPricing += 3;
+    scores.MiniStackedCards -= 2;
+  }
+
+  // ===== EXISTING SCORING (PRESERVED) =====
 
   // Pricing Model Scoring (Highest Weight: 4-5 points)
   if (pricingModel === "tiered") {

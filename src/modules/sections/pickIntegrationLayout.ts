@@ -29,9 +29,39 @@ export function pickIntegrationLayout(input: LayoutPickerInput): IntegrationLayo
   copyIntent,
   problemType,
   assetAvailability,        // Sprint 7: Asset-aware layout selection
+
+  // PHASE 2.5: Flow-aware context fields
+  positionInFlow,
+  previousSection,
+  nextSection,
+  flowTone,
 } = input;
 
-  // High-Priority Rules (Return immediately if matched)
+  // ===== PHASE 2.5: FLOW-AWARE HARD RULES (HIGHEST PRIORITY) =====
+
+  // HR-4.14.2: Developer Tools = Required (position 5-6)
+  if (
+    (marketCategory === 'Engineering & Development Tools' || marketCategory === 'AI Tools') &&
+    (targetAudience === 'builders' || targetAudience === 'enterprise') &&
+    positionInFlow !== undefined &&
+    positionInFlow >= 5 && positionInFlow <= 6
+  ) {
+    // Technical audiences need integration validation
+    return assetAvailability?.integrationLogos
+      ? "InteractiveStackDiagram"  // Visual tech stack
+      : "TabbyIntegrationCards";   // API-first approach
+  }
+
+  // HR-4.14.3: Enterprise + Contact Sales = Comprehensive Ecosystem
+  if (
+    targetAudience === 'enterprise' &&
+    landingPageGoals === 'contact-sales'
+  ) {
+    // Show complete integration story
+    return "LogoWithQuoteUse";  // Enterprise-grade integration proof
+  }
+
+  // ===== EXISTING: High-Priority Rules (Return immediately if matched)
   
   // 1. Complex technical products for developers/enterprise
   if (
@@ -79,7 +109,7 @@ export function pickIntegrationLayout(input: LayoutPickerInput): IntegrationLayo
   }
 
   // Medium-Priority Rules (Scoring system)
-  
+
   const scores: Record<IntegrationLayout, number> = {
     LogoGrid: 0,
     CategoryAccordion: 0,
@@ -90,6 +120,59 @@ export function pickIntegrationLayout(input: LayoutPickerInput): IntegrationLayo
     ZapierLikeBuilderPreview: 0,
     LogoWithQuoteUse: 0,
   };
+
+  // ===== PHASE 2.5: FLOW-AWARE SCORING =====
+
+  // Position in Flow (4 points) - Optimal 5-7
+  if (positionInFlow !== undefined) {
+    if (positionInFlow >= 5 && positionInFlow <= 7) {
+      // Optimal: Middle flow, after features established
+      scores.InteractiveStackDiagram += 4;
+      scores.TabbyIntegrationCards += 4;
+      scores.CategoryAccordion += 3;
+    } else if (positionInFlow <= 4) {
+      // Early flow: Too early, users don't know what integrates yet
+      scores.LogoGrid += 2;  // Simple logo grid if needed early
+      scores.InteractiveStackDiagram -= 3;  // Don't show complex integrations before features
+    } else if (positionInFlow >= 8) {
+      // Late flow: Quick integration summary if needed
+      scores.BadgeCarousel += 2;
+      scores.LogoGrid += 2;
+    }
+  }
+
+  // Previous Section Context (3 points)
+  if (previousSection?.type === 'features' || previousSection?.type === 'uniqueMechanism') {
+    // After features: Show ecosystem fit
+    scores.CategoryAccordion += 3;  // "Here's what it connects to"
+    scores.InteractiveStackDiagram += 3;
+    scores.TabbyIntegrationCards += 2;
+  } else if (previousSection?.type === 'howItWorks') {
+    // After how it works: Show technical connectivity
+    scores.InteractiveStackDiagram += 3;
+    scores.TabbyIntegrationCards += 2;
+  }
+
+  // Next Section Context (3 points)
+  if (nextSection?.type === 'security' || nextSection?.type === 'testimonial') {
+    // Before trust sections: Build technical credibility
+    scores.LogoWithQuoteUse += 3;  // Integration + social proof combo
+    scores.InteractiveStackDiagram += 2;
+  }
+
+  // Flow Tone Adjustments (3 points)
+  if (flowTone === 'analytical') {
+    scores.CategoryAccordion += 3;  // Organized, comprehensive
+    scores.InteractiveStackDiagram += 3;
+    scores.TabbyIntegrationCards += 2;
+    scores.BadgeCarousel -= 2;  // Too casual
+  } else if (flowTone === 'emotional') {
+    scores.LogoGrid += 3;  // Visual trust signals
+    scores.BadgeCarousel += 3;
+    scores.InteractiveStackDiagram -= 2;  // Too technical
+  }
+
+  // ===== EXISTING SCORING (PRESERVED) =====
 
   // Target Audience Scoring (Highest Weight: 4-5 points)
   if (targetAudience === "builders") {

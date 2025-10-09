@@ -29,9 +29,30 @@ export function pickPrimaryCTALayout(input: LayoutPickerInput): PrimaryCTALayout
   copyIntent,
   problemType,
   assetAvailability,        // Sprint 7: Asset-aware layout selection
+
+  // PHASE 2.3: Flow-aware context fields
+  positionInFlow,
+  totalSectionsInFlow,
+  previousSection,
+  flowTone,
 } = input;
 
-  // High-Priority Rules (Return immediately if matched)
+  // ===== PHASE 2.3: FLOW-AWARE HARD RULES (HIGHEST PRIORITY) =====
+
+  // HR-4.18.2: Buy-Now + Level-3+ + Guarantees = Risk Reversal
+  if (
+    (landingPageGoals === 'buy-now' || landingPageGoals === 'subscribe') &&
+    marketSophisticationLevel >= 'level-3' &&
+    (pricingModifier === 'money-back' || pricingCommitmentOption === 'upfront-payment')
+  ) {
+    // Reduce purchase anxiety with stacked value + guarantees
+    return "ValueStackCTA";
+  }
+
+  // NOTE: HR-4.18.3 & HR-4.18.4 removed to avoid making existing rules unreachable
+  // Lead capture and simple goal logic handled by existing rules with more nuance
+
+  // ===== EXISTING: High-Priority Rules (Return immediately if matched)
   
   // 1. Urgent sales with time-sensitive offers
   if (
@@ -79,7 +100,7 @@ export function pickPrimaryCTALayout(input: LayoutPickerInput): PrimaryCTALayout
   }
 
   // Medium-Priority Rules (Scoring system)
-  
+
   const scores: Record<PrimaryCTALayout, number> = {
     CenteredHeadlineCTA: 0,
     CTAWithBadgeRow: 0,
@@ -90,6 +111,38 @@ export function pickPrimaryCTALayout(input: LayoutPickerInput): PrimaryCTALayout
     ValueStackCTA: 0,
     TestimonialCTACombo: 0,
   };
+
+  // ===== PHASE 2.3: FLOW-AWARE SCORING =====
+
+  // Flow Tone Adjustments (4 points)
+  if (flowTone === 'emotional') {
+    scores.CenteredHeadlineCTA += 4;  // Encouraging copy: "Start your journey"
+    scores.CTAWithBadgeRow += 3;
+    scores.TestimonialCTACombo += 3;
+    scores.ValueStackCTA -= 2;  // Too analytical
+  } else if (flowTone === 'analytical') {
+    scores.ValueStackCTA += 4;  // Value-focused: "Get started - 14 day free trial"
+    scores.SideBySideCTA += 4;
+    scores.TestimonialCTACombo += 3;
+    scores.CTAWithBadgeRow -= 2;  // Too casual
+  }
+
+  // Previous Section Context (3 points)
+  if (previousSection?.type === 'objectionHandling' || previousSection?.type === 'faq') {
+    // After objections handled: Use clear, direct CTA
+    scores.CenteredHeadlineCTA += 4;
+    scores.SideBySideCTA += 3;
+    scores.ValueStackCTA -= 2;  // Don't re-explain, they're ready
+  }
+
+  // Total Sections in Flow (3 points) - Long flows need recap
+  if (totalSectionsInFlow !== undefined && totalSectionsInFlow >= 8) {
+    // Long flow: Remind them why they're here
+    scores.ValueStackCTA += 3;
+    scores.TestimonialCTACombo += 3;
+  }
+
+  // ===== EXISTING SCORING (PRESERVED) =====
 
   // Landing Goal Scoring (Highest Weight: 4-5 points)
   if (landingPageGoals === "buy-now") {

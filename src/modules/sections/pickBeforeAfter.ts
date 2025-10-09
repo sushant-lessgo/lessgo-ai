@@ -20,7 +20,7 @@ export function pickBeforeAfterLayout(input: LayoutPickerInput): BeforeAfterLayo
   toneProfile,
   startupStage,             // ✅ FIXED
   marketCategory,
-  landingPageGoals,         // ✅ FIXED  
+  landingPageGoals,         // ✅ FIXED
   targetAudience,           // ✅ FIXED
   pricingModel,
   pricingModifier,
@@ -29,9 +29,47 @@ export function pickBeforeAfterLayout(input: LayoutPickerInput): BeforeAfterLayo
   copyIntent,
   problemType,
   assetAvailability,        // Sprint 7: Asset-aware layout selection
+
+  // PHASE 2.1: Flow-aware context fields
+  previousSection,
+  flowTone,
+  positionInFlow,
 } = input;
 
-  // High-Priority Rules (Return immediately if matched)
+  // ===== PHASE 2.1: FLOW-AWARE HARD RULES (HIGHEST PRIORITY) =====
+
+  // HR-4.3.1: MVP STAGE = VISION-BASED ONLY
+  if (startupStage === 'idea' || startupStage === 'mvp') {
+    // No product screenshots exist - use text-based vision
+    return "TextListTransformation";
+  }
+
+  // HR-4.3.2: After Emotional Problem = RELATABLE TRANSFORMATION
+  if (
+    previousSection?.type === 'problem' &&
+    previousSection?.tone === 'emotional'
+  ) {
+    // Problem agitated emotionally → BeforeAfter soothes
+    // Maintain emotional accessibility
+    if (assetAvailability?.productImages) {
+      return "VisualStoryline";  // Relatable visual transformation
+    }
+    return "TextListTransformation";  // Text-based relief
+  }
+
+  // HR-4.3.3: After Analytical Problem = STRUCTURED COMPARISON
+  if (
+    previousSection?.type === 'problem' &&
+    previousSection?.tone === 'analytical'
+  ) {
+    // Analytical problem → Structured transformation
+    if (assetAvailability?.productImages) {
+      return "StatComparison";  // Data-driven before/after
+    }
+    return "SideBySideBlocks";  // Structured text comparison
+  }
+
+  // ===== EXISTING: High-Priority Rules (Return immediately if matched) =====
   
   // 1. Visual/Interactive layouts for product-aware technical audiences
   if (
@@ -74,7 +112,7 @@ export function pickBeforeAfterLayout(input: LayoutPickerInput): BeforeAfterLayo
   }
 
   // Medium-Priority Rules (Scoring system)
-  
+
   const scores: Record<BeforeAfterLayout, number> = {
     SideBySideBlocks: 0,
     StackedTextVisual: 0,
@@ -85,6 +123,44 @@ export function pickBeforeAfterLayout(input: LayoutPickerInput): BeforeAfterLayo
     StatComparison: 0,
     PersonaJourney: 0,
   };
+
+  // ===== PHASE 2.1: FLOW-AWARE SCORING =====
+
+  // Previous Section Context Scoring (5 points - HIGHEST)
+  if (previousSection?.type === 'problem') {
+    // Problem → BeforeAfter pairing rule
+    if (previousSection.tone === 'emotional') {
+      scores.TextListTransformation += 5;
+      scores.VisualStoryline += 5;
+      scores.StackedTextVisual += 4;
+      scores.StatComparison -= 3;  // Too cold after emotional pain
+    } else if (previousSection.tone === 'analytical') {
+      scores.StatComparison += 5;
+      scores.SideBySideBlocks += 4;
+      scores.SplitCard += 4;
+    }
+  }
+
+  // Flow Tone Adjustments (4 points)
+  if (flowTone === 'emotional') {
+    scores.TextListTransformation += 4;
+    scores.StackedTextVisual += 3;
+    scores.VisualStoryline += 3;
+    scores.StatComparison -= 2;
+  } else if (flowTone === 'analytical') {
+    scores.StatComparison += 4;
+    scores.PersonaJourney += 3;
+    scores.SplitCard += 3;
+  }
+
+  // Position in Flow Context (3 points)
+  if (positionInFlow !== undefined && positionInFlow <= 4) {
+    // Early in flow - sets expectation for proof level
+    scores.TextListTransformation += 3;
+    scores.SideBySideBlocks += 2;
+  }
+
+  // ===== EXISTING SCORING (PRESERVED) =====
 
   // Awareness Level Scoring (High Weight: 3-4 points)
   if (awarenessLevel === "unaware" || awarenessLevel === "problem-aware") {
@@ -205,10 +281,9 @@ export function pickBeforeAfterLayout(input: LayoutPickerInput): BeforeAfterLayo
   }
 
   // Startup Stage Scoring (Low Weight: 1-2 points)
-  if (startupStage === "idea" || startupStage === "mvp") {
-    scores.StackedTextVisual += 2;
-    scores.SideBySideBlocks += 1;
-  } else if (startupStage === "traction" || startupStage === "growth") {
+  // NOTE: MVP stage handled by hard rule above (early return)
+  // Scoring now only applies to traction/growth/scale
+  if (startupStage === "traction" || startupStage === "growth") {
     scores.StatComparison += 2;
     scores.PersonaJourney += 1;
   } else if (startupStage === "scale") {

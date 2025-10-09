@@ -20,7 +20,7 @@ export function pickObjectionLayout(input: LayoutPickerInput): ObjectionLayout {
   toneProfile,
   startupStage,             // ✅ FIXED
   marketCategory,
-  landingPageGoals,         // ✅ FIXED  
+  landingPageGoals,         // ✅ FIXED
   targetAudience,           // ✅ FIXED
   pricingModel,
   pricingModifier,
@@ -29,9 +29,50 @@ export function pickObjectionLayout(input: LayoutPickerInput): ObjectionLayout {
   copyIntent,
   problemType,
   assetAvailability,        // Sprint 7: Asset-aware layout selection
+
+  // PHASE 2.3: Flow-aware context fields
+  positionInFlow,
+  totalSectionsInFlow,
+  previousSection,
+  nextSection,
+  flowTone,
 } = input;
 
-  // High-Priority Rules (Return immediately if matched)
+  // ===== PHASE 2.3: FLOW-AWARE HARD RULES (HIGHEST PRIORITY) =====
+
+  // HR-4.11.1: Late Positioning Required
+  // Objection handling MUST come late (position 7-8, before CTA)
+  // Early objections create doubt too soon
+  if (
+    positionInFlow !== undefined &&
+    positionInFlow < 6
+  ) {
+    // If forced into early position, use lightest layout
+    return "VisualObjectionTiles";  // Minimal friction for early placement
+  }
+
+  // HR-4.11.2: Level-4+ High-Friction = Required
+  if (
+    marketSophisticationLevel >= 'level-4' &&
+    (landingPageGoals === 'buy-now' || landingPageGoals === 'subscribe' || landingPageGoals === 'contact-sales')
+  ) {
+    // Sophisticated markets NEED explicit skepticism handling
+    if (flowTone === 'analytical') {
+      return "MythVsRealityGrid";  // Systematic objection reframing
+    }
+    return "QuoteBackedAnswers";  // Authority-backed answers
+  }
+
+  // HR-4.11.3: Buy-Now = Risk Reversal Focus
+  if (
+    (landingPageGoals === 'buy-now' || landingPageGoals === 'subscribe') &&
+    marketSophisticationLevel >= 'level-3' &&
+    (pricingModifier === 'money-back' || pricingCommitmentOption === 'upfront-payment')
+  ) {
+    return "BoldGuaranteePanel";  // Reduce purchase anxiety
+  }
+
+  // ===== EXISTING: High-Priority Rules (Return immediately if matched)
   
   // 1. High-stakes enterprise decisions need authoritative proof
   if (
@@ -81,7 +122,7 @@ export function pickObjectionLayout(input: LayoutPickerInput): ObjectionLayout {
   }
 
   // Medium-Priority Rules (Scoring system)
-  
+
   const scores: Record<ObjectionLayout, number> = {
     ObjectionAccordion: 0,
     MythVsRealityGrid: 0,
@@ -92,6 +133,55 @@ export function pickObjectionLayout(input: LayoutPickerInput): ObjectionLayout {
     BoldGuaranteePanel: 0,
     // ObjectionCarousel: 0, // Temporarily disabled
   };
+
+  // ===== PHASE 2.3: FLOW-AWARE SCORING =====
+
+  // Position in Flow Scoring (5 points) - CRITICAL: Must be late
+  if (positionInFlow !== undefined) {
+    if (positionInFlow >= 7) {
+      // Optimal late positioning
+      scores.QuoteBackedAnswers += 5;
+      scores.MythVsRealityGrid += 5;
+      scores.BoldGuaranteePanel += 4;
+      scores.SkepticToBelieverSteps += 4;
+    } else if (positionInFlow >= 5) {
+      // Acceptable middle positioning
+      scores.ObjectionAccordion += 4;
+      scores.ProblemToReframeBlocks += 4;
+    }
+    // Early positioning handled by hard rule (returns immediately)
+  }
+
+  // Flow Tone Adjustments (4 points)
+  if (flowTone === 'emotional') {
+    scores.VisualObjectionTiles += 4;
+    scores.ProblemToReframeBlocks += 4;
+    scores.SkepticToBelieverSteps += 3;
+    scores.MythVsRealityGrid -= 2;  // Too analytical
+  } else if (flowTone === 'analytical') {
+    scores.MythVsRealityGrid += 4;
+    scores.QuoteBackedAnswers += 4;
+    scores.ObjectionAccordion += 3;
+    scores.VisualObjectionTiles -= 2;  // Too casual
+  }
+
+  // Previous Section Context (3 points)
+  if (previousSection?.type === 'pricing') {
+    // After pricing: Address price objections, justify value
+    scores.BoldGuaranteePanel += 4;
+    scores.QuoteBackedAnswers += 3;
+    scores.SkepticToBelieverSteps += 3;
+  }
+
+  // Next Section Context (3 points)
+  if (nextSection?.type === 'cta' || nextSection?.type === 'close') {
+    // Before CTA: Remove final barriers
+    scores.BoldGuaranteePanel += 3;
+    scores.QuoteBackedAnswers += 3;
+    scores.ObjectionAccordion += 2;
+  }
+
+  // ===== EXISTING SCORING (PRESERVED) =====
 
   // Market Sophistication Scoring (Highest Weight: 4-5 points)
   if (marketSophisticationLevel === "level-1" || marketSophisticationLevel === "level-2") {

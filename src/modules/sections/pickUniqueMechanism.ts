@@ -21,7 +21,7 @@ export function pickUniqueMechanismLayout(input: LayoutPickerInput): UniqueMecha
   toneProfile,
   startupStage,             // ✅ FIXED
   marketCategory,
-  landingPageGoals,         // ✅ FIXED  
+  landingPageGoals,         // ✅ FIXED
   targetAudience,           // ✅ FIXED
   pricingModel,
   pricingModifier,
@@ -29,9 +29,42 @@ export function pickUniqueMechanismLayout(input: LayoutPickerInput): UniqueMecha
   marketSophisticationLevel,
   copyIntent,
   problemType,
+
+  // PHASE 2.2: Flow-aware context fields
+  positionInFlow,
+  nextSection,
+  previousSection,
+  flowTone,
 } = input;
 
-  // High-Priority Rules (Return immediately if matched)
+  // ===== PHASE 2.2: FLOW-AWARE HARD RULES (HIGHEST PRIORITY) =====
+
+  // HR-4.5.2: Technical Audience + Established Stage = DETAILED REQUIRED
+  if (
+    (targetAudience === 'builders' || targetAudience === 'enterprise') &&
+    (marketCategory === 'Engineering & Development Tools' || marketCategory === 'AI Tools') &&
+    (startupStage === 'growth' || startupStage === 'scale')
+  ) {
+    return "MethodologyBreakdown";  // Technical credibility
+  }
+
+  // HR-4.5.3: Non-Technical + Early Stage = SIMPLE APPROACH
+  if (
+    (targetAudience === 'founders' || targetAudience === 'creators' || targetAudience === 'marketers') &&
+    (startupStage === 'idea' || startupStage === 'mvp' || startupStage === 'traction')
+  ) {
+    return "TechnicalAdvantage";  // Simple, accessible
+  }
+
+  // HR-4.5.4: Level-3+ Competitive Market = COMPARISON FOCUS
+  if (
+    (marketSophisticationLevel === 'level-3' || marketSophisticationLevel === 'level-4' || marketSophisticationLevel === 'level-5') &&
+    copyIntent === 'desire-led'
+  ) {
+    return "PropertyComparisonMatrix";  // "Old way" vs "our way"
+  }
+
+  // ===== EXISTING: High-Priority Rules (Return immediately if matched) =====
   
   // 1. Technical products with patent/IP protection
   if (
@@ -83,7 +116,7 @@ export function pickUniqueMechanismLayout(input: LayoutPickerInput): UniqueMecha
   }
 
   // Medium-Priority Rules (Scoring system)
-  
+
   const scores: Record<UniqueMechanismLayout, number> = {
     AlgorithmExplainer: 0,
     InnovationTimeline: 0,
@@ -95,6 +128,50 @@ export function pickUniqueMechanismLayout(input: LayoutPickerInput): UniqueMecha
     SystemArchitecture: 0,
     TechnicalAdvantage: 0,
   };
+
+  // ===== PHASE 2.2: FLOW-AWARE SCORING =====
+
+  // Position in Flow Context (5 points)
+  if (positionInFlow !== undefined && positionInFlow <= 4) {
+    // Early in flow: Mechanism IS the hook
+    scores.TechnicalAdvantage += 5;
+    scores.SystemArchitecture += 4;
+    scores.StackedHighlights += 4;
+    scores.MethodologyBreakdown -= 3;  // Too detailed too early
+  } else if (positionInFlow !== undefined && positionInFlow >= 5) {
+    // Middle flow: Can provide depth
+    scores.MethodologyBreakdown += 5;
+    scores.ProcessFlowDiagram += 4;
+    scores.SecretSauceReveal += 3;
+  }
+
+  // Next Section Context (4 points)
+  if (nextSection?.type === 'results' || nextSection?.type === 'testimonials') {
+    // Mechanism claims uniqueness → Next validates it
+    scores.PropertyComparisonMatrix += 4;
+    scores.SecretSauceReveal += 4;
+    scores.MethodologyBreakdown += 3;
+  }
+
+  // Previous Section Context (3 points)
+  if (previousSection?.type === 'problem') {
+    // Problem showed pain → Mechanism shows unique relief
+    scores.TechnicalAdvantage += 3;
+    scores.ProcessFlowDiagram += 3;
+  }
+
+  // Flow Tone Adjustments (4 points)
+  if (flowTone === 'emotional') {
+    scores.SystemArchitecture += 4;
+    scores.TechnicalAdvantage += 3;
+    scores.PropertyComparisonMatrix -= 2;  // Too analytical
+  } else if (flowTone === 'analytical') {
+    scores.MethodologyBreakdown += 4;
+    scores.SecretSauceReveal += 4;
+    scores.ProcessFlowDiagram += 3;
+  }
+
+  // ===== EXISTING SCORING (PRESERVED) =====
 
   // Market Sophistication Scoring (Highest Weight: 4-5 points)
   if (marketSophisticationLevel === "level-1" || marketSophisticationLevel === "level-2") {

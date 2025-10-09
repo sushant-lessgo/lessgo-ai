@@ -20,7 +20,7 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
   toneProfile,
   startupStage,             // ✅ FIXED
   marketCategory,
-  landingPageGoals,         // ✅ FIXED  
+  landingPageGoals,         // ✅ FIXED
   targetAudience,           // ✅ FIXED
   pricingModel,
   pricingModifier,
@@ -29,9 +29,34 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
   copyIntent,
   problemType,
   assetAvailability,        // Sprint 7: Asset-aware layout selection
+
+  // PHASE 2.1: Flow-aware context fields
+  sectionPurpose,
+  positionInFlow,
+  flowTone,
 } = input;
 
-  // High-Priority Rules (Return immediately if matched)
+  // ===== PHASE 2.1: FLOW-AWARE HARD RULES (HIGHEST PRIORITY) =====
+
+  // HR-4.2.1: Problem-Aware Early Flow = AGITATION REQUIRED
+  if (
+    sectionPurpose === 'agitate-pain' &&
+    awarenessLevel === "problem-aware" &&
+    positionInFlow !== undefined && positionInFlow <= 3
+  ) {
+    return "EmotionalQuotes";  // Emotional validation is CRITICAL here
+  }
+
+  // HR-4.2.2: Unaware Early Flow = IDENTIFICATION REQUIRED
+  if (
+    sectionPurpose === 'identify-problem' &&
+    awarenessLevel === "unaware" &&
+    positionInFlow !== undefined && positionInFlow <= 3
+  ) {
+    return "StackedPainBullets";  // Clarity over emotion for problem identification
+  }
+
+  // ===== EXISTING: High-Priority Rules (Return immediately if matched) =====
   
   // 1. Emotional, personal problems need human connection
   if (
@@ -79,7 +104,7 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
   }
 
   // Medium-Priority Rules (Scoring system)
-  
+
   const scores: Record<ProblemLayout, number> = {
     StackedPainBullets: 0,
     BeforeImageAfterText: 0,
@@ -90,6 +115,32 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
     PersonaPanels: 0,
     // TODO: Temporarily disabled - not useful currently - ProblemChecklist: 0,
   };
+
+  // ===== PHASE 2.1: FLOW-AWARE SCORING =====
+
+  // Section Purpose Scoring (HIGHEST WEIGHT: 6 points)
+  if (sectionPurpose === 'agitate-pain') {
+    scores.EmotionalQuotes += 6;
+    scores.StackedPainBullets += 5;
+    scores.BeforeImageAfterText += 4;
+  } else if (sectionPurpose === 'identify-problem') {
+    scores.StackedPainBullets += 6;
+    scores.PersonaPanels += 5;
+    scores.CollapsedCards += 4;
+  }
+
+  // Flow Tone Adjustments (5 points)
+  if (flowTone === 'emotional') {
+    scores.EmotionalQuotes += 5;
+    scores.StackedPainBullets += 3;
+    scores.CollapsedCards -= 3;  // Penalize analytical in emotional flow
+  } else if (flowTone === 'analytical') {
+    scores.CollapsedCards += 5;
+    scores.PersonaPanels += 4;
+    scores.EmotionalQuotes -= 2;  // Penalize overly emotional
+  }
+
+  // ===== EXISTING SCORING (PRESERVED) =====
 
   // Copy Intent Scoring (Highest Weight: 4-5 points)
   if (copyIntent === "pain-led") {

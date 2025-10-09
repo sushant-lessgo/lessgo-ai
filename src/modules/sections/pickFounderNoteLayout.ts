@@ -29,9 +29,39 @@ export function pickFounderNoteLayout(input: LayoutPickerInput): FounderNoteLayo
   copyIntent,
   problemType,
   assetAvailability,        // Sprint 7: Asset-aware layout selection
+
+  // PHASE 2.5: Flow-aware context fields
+  positionInFlow,
+  previousSection,
+  flowTone,
 } = input;
 
-  // High-Priority Rules (Return immediately if matched)
+  // ===== PHASE 2.5: FLOW-AWARE HARD RULES (HIGHEST PRIORITY) =====
+
+  // HR-4.17.1: MVP Substitution for Testimonials (position 6-7)
+  if (
+    startupStage === 'mvp' &&
+    assetAvailability &&
+    !assetAvailability.testimonials &&
+    positionInFlow !== undefined &&
+    positionInFlow >= 6 && positionInFlow <= 7
+  ) {
+    // Use founder credibility when no customer proof
+    return assetAvailability.founderPhoto
+      ? "FounderCardWithQuote"  // Personal trust signal
+      : "LetterStyleBlock";  // Text-based fallback
+  }
+
+  // HR-4.17.2: Founder Audience + Pain-Led = Recommended
+  if (
+    (targetAudience === 'founders' || targetAudience === 'creators') &&
+    copyIntent === 'pain-led'
+  ) {
+    // Relatable founder journey
+    return "SideBySidePhotoStory";  // Personal story format
+  }
+
+  // ===== EXISTING: High-Priority Rules (Return immediately if matched)
   
   // 1. Early-stage founders connecting with fellow entrepreneurs
   if (
@@ -79,7 +109,7 @@ export function pickFounderNoteLayout(input: LayoutPickerInput): FounderNoteLayo
   }
 
   // Medium-Priority Rules (Scoring system)
-  
+
   const scores: Record<FounderNoteLayout, number> = {
     FounderCardWithQuote: 0,
     LetterStyleBlock: 0,
@@ -90,6 +120,53 @@ export function pickFounderNoteLayout(input: LayoutPickerInput): FounderNoteLayo
     StoryBlockWithPullquote: 0,
     FoundersBeliefStack: 0,
   };
+
+  // ===== PHASE 2.5: FLOW-AWARE SCORING =====
+
+  // Flow Tone Adjustments (4 points) - CRITICAL for emotional connection
+  if (flowTone === 'emotional') {
+    scores.SideBySidePhotoStory += 4;  // Personal, relatable journey
+    scores.FounderCardWithQuote += 4;
+    scores.StoryBlockWithPullquote += 3;
+    scores.VideoNoteWithTranscript -= 2;  // Too formal
+  } else if (flowTone === 'analytical') {
+    scores.VideoNoteWithTranscript += 3;
+    scores.LetterStyleBlock += 3;
+    scores.TimelineToToday += 2;
+    scores.SideBySidePhotoStory -= 2;  // Too casual
+  }
+
+  // Position in Flow (3 points) - Optimal 6-7 (testimonial position)
+  if (positionInFlow !== undefined) {
+    if (positionInFlow >= 6 && positionInFlow <= 7) {
+      // Optimal: Where testimonials would be
+      scores.FounderCardWithQuote += 3;
+      scores.SideBySidePhotoStory += 3;
+      scores.StoryBlockWithPullquote += 2;
+    } else if (positionInFlow <= 5) {
+      // Early flow: Brief founder credibility
+      scores.FounderCardWithQuote += 2;
+      scores.MissionQuoteOverlay += 2;
+    } else if (positionInFlow >= 8) {
+      // Late flow: Quick founder mention
+      scores.FounderCardWithQuote += 2;
+      scores.LetterStyleBlock += 2;
+    }
+  }
+
+  // Previous Section Context (3 points)
+  if (previousSection?.type === 'features' || previousSection?.type === 'results') {
+    // After features/results: Personal validation of outcomes
+    scores.SideBySidePhotoStory += 3;  // "Here's why I built this"
+    scores.StoryBlockWithPullquote += 3;
+    scores.FounderCardWithQuote += 2;
+  } else if (previousSection?.type === 'problem') {
+    // After problem: Founder experienced the same pain
+    scores.FounderCardWithQuote += 3;
+    scores.MissionQuoteOverlay += 2;
+  }
+
+  // ===== EXISTING SCORING (PRESERVED) =====
 
   // Target Audience Scoring (Highest Weight: 4-5 points)
   if (targetAudience === "founders") {

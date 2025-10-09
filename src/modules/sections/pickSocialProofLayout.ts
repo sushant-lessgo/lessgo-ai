@@ -29,8 +29,47 @@ export function pickSocialProofLayout(input: LayoutPickerInput): SocialProofLayo
   copyIntent,
   problemType,
   assetAvailability,        // Sprint 7: Asset-aware layout selection
+
+  // PHASE 2.3: Flow-aware context fields
+  positionInFlow,
+  previousSection,
+  nextSection,
+  flowTone,
 } = input;
-  // High-Priority Rules (Return immediately if matched)
+
+  // ===== PHASE 2.3: FLOW-AWARE HARD RULES (HIGHEST PRIORITY) =====
+
+  // HR-4.9.2: Level-4+ Early Positioning = Credibility Gate
+  if (
+    marketSophisticationLevel >= 'level-4' &&
+    positionInFlow !== undefined &&
+    positionInFlow <= 3
+  ) {
+    // Sophisticated markets need upfront proof (credibility gate)
+    // Use comprehensive layout with everything
+    return "SocialProofStrip";  // Mixed social proof (logos + stats + awards)
+  }
+
+  // HR-4.9.3: Enterprise + Logos = LogoGrid
+  if (
+    targetAudience === 'enterprise' &&
+    assetAvailability?.customerLogos
+  ) {
+    // Peer validation through recognizable brands
+    return "LogoWall";  // Focus on enterprise logo credibility
+  }
+
+  // HR-4.9.4: Consumer + User Count = UserCountBar
+  if (
+    (targetAudience === 'founders' || targetAudience === 'creators') &&
+    assetAvailability?.customerLogos === false &&
+    (startupStage === 'growth' || startupStage === 'scale')
+  ) {
+    // "Join 50,000+ users" more effective than missing logos
+    return "UserCountBar";  // Popularity signals
+  }
+
+  // ===== EXISTING: High-Priority Rules (Return immediately if matched)
   
   // 1. Enterprise audiences need established customer logos
   if (
@@ -78,7 +117,7 @@ export function pickSocialProofLayout(input: LayoutPickerInput): SocialProofLayo
   }
 
   // Medium-Priority Rules (Scoring system)
-  
+
   const scores: Record<SocialProofLayout, number> = {
     LogoWall: 0,
     MediaMentions: 0,
@@ -89,6 +128,52 @@ export function pickSocialProofLayout(input: LayoutPickerInput): SocialProofLayo
     StripWithReviews: 0,
     SocialProofStrip: 0,
   };
+
+  // ===== PHASE 2.3: FLOW-AWARE SCORING =====
+
+  // Position in Flow (5 points)
+  if (positionInFlow !== undefined) {
+    if (positionInFlow <= 3) {
+      // Early flow: Comprehensive credibility baseline
+      scores.SocialProofStrip += 5;  // Everything upfront
+      scores.StackedStats += 4;
+      scores.LogoWall += 3;
+      scores.MapHeatSpots -= 2;  // Too casual for credibility gate
+    } else if (positionInFlow >= 4 && positionInFlow <= 6) {
+      // Middle flow: Simple validation
+      scores.LogoWall += 4;
+      scores.UserCountBar += 4;
+      scores.StripWithReviews += 3;
+    }
+  }
+
+  // Previous Section Context (4 points)
+  if (previousSection?.type === 'problem' || previousSection?.type === 'beforeAfter') {
+    // After problem/beforeAfter: Validate the solution exists
+    scores.LogoWall += 4;  // Simple validation, not overwhelming
+    scores.UserCountBar += 3;
+  }
+
+  // Next Section Context (4 points)
+  if (nextSection?.type === 'features' || nextSection?.type === 'pricing') {
+    // Before features/pricing: Build trust before asking for commitment
+    scores.SocialProofStrip += 4;  // Make case before details
+    scores.StackedStats += 3;
+    scores.MediaMentions += 3;
+  }
+
+  // Flow Tone Adjustment (3 points)
+  if (flowTone === 'analytical') {
+    scores.StackedStats += 3;
+    scores.SocialProofStrip += 3;
+    scores.MapHeatSpots -= 2;  // Too visual/casual
+  } else if (flowTone === 'emotional') {
+    scores.UserCountBar += 3;
+    scores.MapHeatSpots += 3;
+    scores.MediaMentions -= 2;  // Too formal
+  }
+
+  // ===== EXISTING SCORING (PRESERVED) =====
 
   // Startup Stage Scoring (Highest Weight: 4-5 points)
   if (startupStage === "idea" || startupStage === "mvp") {

@@ -20,7 +20,7 @@ export function pickResultsLayout(input: LayoutPickerInput): ResultsLayout {
   toneProfile,
   startupStage,             // ✅ FIXED
   marketCategory,
-  landingPageGoals,         // ✅ FIXED  
+  landingPageGoals,         // ✅ FIXED
   targetAudience,           // ✅ FIXED
   pricingModel,
   pricingModifier,
@@ -29,9 +29,53 @@ export function pickResultsLayout(input: LayoutPickerInput): ResultsLayout {
   copyIntent,
   problemType,
   assetAvailability,        // Sprint 7: Asset-aware layout selection
+
+  // PHASE 2.1: Flow-aware context fields
+  previousSection,
+  nextSection,
+  positionInFlow,
+  totalSectionsInFlow,
+  flowTone,
 } = input;
 
-  // High-Priority Rules (Return immediately if matched)
+  // ===== PHASE 2.1: FLOW-AWARE HARD RULES (HIGHEST PRIORITY) =====
+
+  // HR-4.7.4: Before CTA = DECISIVE PROOF REQUIRED (Check first - special case for MVP)
+  if (
+    nextSection?.type === 'cta' &&
+    positionInFlow !== undefined &&
+    totalSectionsInFlow !== undefined &&
+    positionInFlow >= totalSectionsInFlow - 2
+  ) {
+    // Near end of flow, must be punchy and decisive
+    if (startupStage === 'idea' || startupStage === 'mvp') {
+      return "StackedWinsList";  // Quick, credible wins for MVP (vision-based)
+    }
+    return "BeforeAfterStats";  // Clear transformation for established
+  }
+
+  // HR-4.7.1: MVP STAGE = NEVER METRIC-HEAVY LAYOUTS (CRITICAL!)
+  if (
+    startupStage === 'idea' || startupStage === 'mvp'
+  ) {
+    // NO customer metrics exist yet - vision-based proof ONLY
+    // This overrides all remaining rules
+    if (flowTone === 'emotional') {
+      return "EmojiOutcomeGrid";  // Relatable, aspirational
+    }
+    return "OutcomeIcons";  // Clean, vision-based
+  }
+
+  // HR-4.7.3: After UniqueMechanism = VALIDATE MECHANISM
+  if (previousSection?.type === 'uniqueMechanism') {
+    // Results must validate the unique approach claimed
+    if (startupStage === 'growth' || startupStage === 'scale') {
+      return "BeforeAfterStats";  // Quantify mechanism impact
+    }
+    return "StackedWinsList";  // Qualitative validation
+  }
+
+  // ===== EXISTING: High-Priority Rules (Return immediately if matched) =====
   
   // 1. Enterprise needs credible customer proof with metrics
   if (
@@ -79,7 +123,7 @@ export function pickResultsLayout(input: LayoutPickerInput): ResultsLayout {
   }
 
   // Medium-Priority Rules (Scoring system)
-  
+
   const scores: Record<ResultsLayout, number> = {
     StatBlocks: 0,
     BeforeAfterStats: 0,
@@ -91,13 +135,50 @@ export function pickResultsLayout(input: LayoutPickerInput): ResultsLayout {
     PersonaResultPanels: 0,
   };
 
+  // ===== PHASE 2.1: FLOW-AWARE SCORING =====
+
+  // Previous Section Context Scoring (5 points)
+  if (previousSection?.type === 'features') {
+    // Features showed capabilities → Results proves outcomes
+    scores.BeforeAfterStats += 5;
+    scores.PersonaResultPanels += 4;
+    scores.QuoteWithMetric += 3;
+  } else if (previousSection?.type === 'uniqueMechanism') {
+    // Validate the mechanism
+    scores.BeforeAfterStats += 5;
+    scores.TimelineResults += 4;
+  }
+
+  // Next Section Context Scoring (4 points)
+  if (nextSection?.type === 'cta') {
+    // Make it decisive, not detailed
+    scores.StackedWinsList += 4;
+    scores.BeforeAfterStats += 4;
+    scores.StatBlocks += 3;
+    scores.TimelineResults -= 3;  // Too lengthy before CTA
+    scores.PersonaResultPanels -= 3;
+  }
+
+  // Flow Tone Adjustments (5 points)
+  if (flowTone === 'emotional') {
+    scores.EmojiOutcomeGrid += 5;
+    scores.StackedWinsList += 4;
+    scores.OutcomeIcons += 3;
+    scores.StatBlocks -= 3;  // Too cold for emotional flow
+  } else if (flowTone === 'analytical') {
+    scores.StatBlocks += 5;
+    scores.BeforeAfterStats += 5;
+    scores.QuoteWithMetric += 4;
+    scores.EmojiOutcomeGrid -= 3;  // Too casual
+  }
+
+  // ===== EXISTING SCORING (PRESERVED) =====
+
+  // NOTE: MVP stage handled by hard rule above (early return)
+  // Startup Stage Scoring now only applies to traction/growth/scale
+
   // Startup Stage Scoring (Highest Weight: 4-5 points)
-  if (startupStage === "idea" || startupStage === "mvp") {
-    scores.OutcomeIcons += 4;
-    scores.EmojiOutcomeGrid += 4;
-    scores.StackedWinsList += 3;
-    scores.StatBlocks += 2;
-  } else if (startupStage === "traction") {
+  if (startupStage === "traction") {
     scores.StatBlocks += 4;
     scores.BeforeAfterStats += 3;
     scores.StackedWinsList += 3;

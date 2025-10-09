@@ -28,9 +28,46 @@ export function pickHowItWorksLayout(input: LayoutPickerInput): HowItWorksLayout
   copyIntent,
   problemType,
   assetAvailability,        // Sprint 7: Asset-aware layout selection
+
+  // PHASE 2.4: Flow-aware context fields
+  sectionPurpose,
+  positionInFlow,
+  previousSection,
+  nextSection,
+  flowComplexity,
 } = input;
 
-  // High-Priority Rules (Return immediately if matched)
+  // ===== PHASE 2.4: FLOW-AWARE HARD RULES (HIGHEST PRIORITY) =====
+
+  // HR-4.6.1: Unaware + Education = Simple Steps
+  if (
+    awarenessLevel === 'unaware' &&
+    sectionPurpose === 'educate'
+  ) {
+    // Keep it simple - max 3-5 steps for education
+    return "IconCircleSteps";  // Simple 3-step approach
+  }
+
+  // HR-4.6.2: Developer Tools = Technical Depth
+  if (
+    (marketCategory === 'Engineering & Development Tools' || marketCategory === 'AI Tools') &&
+    (targetAudience === 'builders' || targetAudience === 'enterprise') &&
+    marketSophisticationLevel >= 'level-3'
+  ) {
+    // Technical audiences need expandable depth
+    return "AccordionSteps";  // Expandable technical details
+  }
+
+  // HR-4.6.3: Complex Process = Visual Flow
+  if (
+    (problemType === 'manual-repetition' || problemType === 'time-freedom-or-automation') &&
+    flowComplexity === 'detailed'
+  ) {
+    // Show the full workflow visually
+    return "VerticalTimeline";  // Step-by-step process visualization
+  }
+
+  // ===== EXISTING: High-Priority Rules (Return immediately if matched)
   
   // 1. Complex technical products needing detailed explanations
   if (
@@ -78,7 +115,7 @@ export function pickHowItWorksLayout(input: LayoutPickerInput): HowItWorksLayout
   }
 
   // Medium-Priority Rules (Scoring system)
-  
+
   const scores: Record<HowItWorksLayout, number> = {
     ThreeStepHorizontal: 0,
     VerticalTimeline: 0,
@@ -88,6 +125,68 @@ export function pickHowItWorksLayout(input: LayoutPickerInput): HowItWorksLayout
     ZigzagImageSteps: 0,
     AnimatedProcessLine: 0,
   };
+
+  // ===== PHASE 2.4: FLOW-AWARE SCORING =====
+
+  // Flow Complexity Adjustments (4 points)
+  if (flowComplexity === 'simple') {
+    scores.IconCircleSteps += 4;  // Max 3 steps, clear and simple
+    scores.ThreeStepHorizontal += 4;
+    scores.AnimatedProcessLine += 3;
+    scores.AccordionSteps -= 3;  // Too detailed for simple flows
+    scores.VideoWalkthrough -= 2;  // Overkill for simple processes
+  } else if (flowComplexity === 'detailed') {
+    scores.AccordionSteps += 4;  // Expandable depth for complex processes
+    scores.VerticalTimeline += 4;  // Multi-step detailed flow
+    scores.VideoWalkthrough += 3;
+    scores.IconCircleSteps -= 2;  // Too simple for detailed flows
+  }
+
+  // Previous Section Context (4 points)
+  if (previousSection?.type === 'uniqueMechanism') {
+    // After unique mechanism: Show how the unique approach works in practice
+    scores.VerticalTimeline += 4;  // Sequential breakdown of unique process
+    scores.AccordionSteps += 3;  // Detailed steps of unique mechanism
+    scores.ZigzagImageSteps += 3;
+  } else if (previousSection?.type === 'features') {
+    // After features: Tie features into practical workflow
+    scores.ThreeStepHorizontal += 3;
+    scores.IconCircleSteps += 3;
+  }
+
+  // Next Section Context (3 points)
+  if (nextSection?.type === 'cta' || nextSection?.type === 'close') {
+    // Before CTA: Keep it simple, don't overwhelm before asking for action
+    scores.ThreeStepHorizontal += 3;  // Simple 3-step summary
+    scores.IconCircleSteps += 3;
+    scores.AnimatedProcessLine += 2;
+    scores.AccordionSteps -= 2;  // Too detailed right before CTA
+  } else if (nextSection?.type === 'testimonial' || nextSection?.type === 'results') {
+    // Before social proof: Set up for "Here's how it worked for them"
+    scores.VerticalTimeline += 3;
+    scores.ZigzagImageSteps += 2;
+  }
+
+  // Position in Flow (3 points)
+  if (positionInFlow !== undefined) {
+    if (positionInFlow <= 3) {
+      // Early flow: Simple education, build understanding
+      scores.IconCircleSteps += 3;
+      scores.ThreeStepHorizontal += 3;
+      scores.AnimatedProcessLine += 2;
+    } else if (positionInFlow >= 4 && positionInFlow <= 6) {
+      // Middle flow: Detailed explanation after interest is established
+      scores.VerticalTimeline += 3;
+      scores.AccordionSteps += 3;
+      scores.ZigzagImageSteps += 2;
+    } else if (positionInFlow >= 7) {
+      // Late flow: Quick recap if needed, or skip section
+      scores.ThreeStepHorizontal += 2;
+      scores.IconCircleSteps += 2;
+    }
+  }
+
+  // ===== EXISTING SCORING (PRESERVED) =====
 
   // Awareness Level Scoring (Highest Weight: 4-5 points)
   if (awarenessLevel === "unaware" || awarenessLevel === "problem-aware") {

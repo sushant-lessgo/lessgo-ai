@@ -3,6 +3,7 @@ import { useOnboardingStore } from "@/hooks/useOnboardingStore";
 import type { LayoutPickerInput } from "./layoutPickerInput";
 import { getAudienceGroupForAudience, getStageGroupForStage } from '@/modules/inference/taxonomy';
 import type { EditStoreInstance } from '@/stores/editStore';
+import { generateFlowContext } from './generateFlowContext';
 
 import { logger } from '@/lib/logger';
 // Helper function to get fallback layouts for sections
@@ -81,16 +82,47 @@ export function generateSectionLayouts(sectionIds: string[], editStore?: EditSto
 
   logger.debug('🎯 Layout picker input prepared:', input);
 
+  // ===== PHASE 3: PREPARE BUSINESS CONTEXT FOR FLOW GENERATION =====
+  const businessContext = {
+    awarenessLevel: input.awarenessLevel,
+    toneProfile: input.toneProfile,
+    marketSophisticationLevel: input.marketSophisticationLevel,
+    copyIntent: input.copyIntent,
+    targetAudience: input.targetAudience,
+  };
+
   const layouts: Record<string, string> = {};
 
-  sectionIds.forEach((sectionId) => {
-    logger.debug(`🔍 Processing section: "${sectionId}" (type: ${typeof sectionId})`);
-    
+  sectionIds.forEach((sectionId, index) => {
+    logger.debug(`🔍 Processing section: "${sectionId}" (position ${index + 1}/${sectionIds.length})`);
+
+    // ===== PHASE 3: GENERATE FLOW CONTEXT FOR THIS SECTION =====
+    const flowContext = generateFlowContext({
+      sections: sectionIds,
+      sectionIndex: index,
+      businessContext,
+    });
+
+    logger.debug(`🌊 Flow context for ${sectionId}:`, {
+      position: `${flowContext.positionInFlow}/${flowContext.totalSectionsInFlow}`,
+      purpose: flowContext.sectionPurpose,
+      tone: flowContext.flowTone,
+      complexity: flowContext.flowComplexity,
+      previousType: flowContext.previousSection?.type,
+      nextType: flowContext.nextSection?.type,
+    });
+
+    // ===== PHASE 3: MERGE FLOW CONTEXT WITH BASE INPUT =====
+    const flowAwareInput: LayoutPickerInput = {
+      ...input,
+      ...flowContext, // Spread flow context fields into input
+    };
+
     // Use intelligent layout picker functions that select from all 148+ available layouts
     const picker = layoutPickers[sectionId];
     if (picker) {
       try {
-        const selectedLayout = picker(input);
+        const selectedLayout = picker(flowAwareInput); // Pass flow-aware input
         if (selectedLayout && selectedLayout !== 'default') {
           layouts[sectionId] = selectedLayout;
           logger.debug(`✅ Smart layout selected for ${sectionId}:`, layouts[sectionId]);
