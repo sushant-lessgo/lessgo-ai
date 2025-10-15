@@ -1366,7 +1366,7 @@ function buildFieldClassificationGuidance(elementsMap: Record<string, SectionInf
   });
 
   if (guidance.length > 0) {
-    return `FIELD CLASSIFICATION GUIDANCE:\n${guidance.join('\n')}\n- AI fields: Generate high-quality content\n- Manual-preferred: Use realistic placeholders users can replace\n- Hybrid: Use AI but prioritize user customization\n\nFocus on conversion-optimized content that aligns with strategic objectives.`;
+    return `FIELD CLASSIFICATION GUIDANCE:\n${guidance.join('\n')}\n- AI fields: Generate high-quality content\n- Manual-preferred: Excluded from generation (system applies default placeholders)\n- Hybrid: Use AI but keep content generic for easy customization\n\nFocus on conversion-optimized content that aligns with strategic objectives.`;
   }
 
   return `FIELD CLASSIFICATION: All requested fields are AI-generatable. Focus on high-quality, conversion-optimized content that aligns with the strategic objectives.`;
@@ -1971,7 +1971,7 @@ export function buildStrategicCopyPrompt(
 - Maintain the strategic emotional trigger throughout
 - Create cohesive flow that serves the conversion goal
 - Use layout context to optimize copy for visual presentation
-- For manual-preferred fields, use realistic placeholder data`
+- ONLY generate content for the fields listed in the output format (manual-preferred fields are excluded)`
     : `COPYWRITING REQUIREMENTS:
 - Generate conversion-focused copy based on business context
 - Generate EXACTLY the specified number of cards for each section
@@ -1979,7 +1979,7 @@ export function buildStrategicCopyPrompt(
 - Address common objections and build trust
 - Maintain consistent tone and messaging throughout
 - Use layout context to optimize copy for visual presentation
-- For manual-preferred fields, use realistic placeholder data`;
+- ONLY generate content for the fields listed in the output format (manual-preferred fields are excluded)`;
 
   return `You are an expert copywriter executing a strategic copy plan for maximum conversion.
 
@@ -2021,16 +2021,17 @@ function buildStrategicOutputFormat(
     const elementFormat: Record<string, any> = {};
     const { layout: layoutName, allElements } = requirements;
 
-    // Use the filtered elements from element selection logic instead of all schema elements
-    const filteredElements = allElements;
+    // CRITICAL FIX: Filter to only AI-generated elements (exclude manual_preferred)
+    const aiGeneratedElements = getAIGeneratedElements(layoutName);
+    const aiElementNames = aiGeneratedElements.map(el => el.element);
+    const filteredElements = allElements.filter(element => aiElementNames.includes(element));
 
     // Get card count using strategy
     const cardCount = getCardCount(layoutName, sectionId, strategyCounts, userFeatureCount);
 
     filteredElements.forEach(element => {
       // Check if this is a card element by looking at the schema
-      const schemaElements = getAIGeneratedElements(layoutName);
-      const schemaElement = schemaElements.find(el => el.element === element);
+      const schemaElement = aiGeneratedElements.find(el => el.element === element);
       const isCard = schemaElement?.isCard || false;
 
       if (isCard && cardCount > 0) {

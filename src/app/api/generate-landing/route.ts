@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { parseAiResponse } from "@/modules/prompt/parseAiResponse"
+import { parseAiResponse, applyManualPreferredDefaults } from "@/modules/prompt/parseAiResponse"
 import { generateMockResponse } from "@/modules/prompt/mockResponseGenerator"
 import { buildStrategyPrompt } from "@/modules/prompt/buildStrategyPrompt"
 import { buildStrategicCopyPrompt, buildFullPrompt, generateCardRequirementsReport } from "@/modules/prompt/buildPrompt"
@@ -201,6 +201,12 @@ async function generateLandingHandler(req: NextRequest) {
       const mockResponse = generateMockResponse(mockPrompt)
       logger.dev("📦 Mock response content:", mockResponse.choices[0].message.content.substring(0, 500) + '...')
       const parsed = parseAiResponse(mockResponse.choices[0].message.content)
+
+      // Apply default placeholders to manual_preferred fields (for mock responses too)
+      if (use2Phase && pageStore) {
+        parsed.content = applyManualPreferredDefaults(parsed.content, pageStore);
+      }
+
       logger.dev("📊 Parsed result:", {
         success: parsed.success,
         contentKeys: Object.keys(parsed.content),
@@ -338,6 +344,7 @@ async function generateLandingHandler(req: NextRequest) {
 
           if (fallbackResult.success) {
             const parsed = parseAiResponse(fallbackResult.data.choices[0]?.message?.content || "")
+            parsed.content = applyManualPreferredDefaults(parsed.content, pageStore);
             parsed.warnings = parsed.warnings || []
             parsed.warnings.push("Strategy phase failed, used single-phase fallback")
             return NextResponse.json(parsed)
@@ -364,6 +371,7 @@ async function generateLandingHandler(req: NextRequest) {
 
           if (fallbackResult.success) {
             const parsed = parseAiResponse(fallbackResult.data.choices[0]?.message?.content || "")
+            parsed.content = applyManualPreferredDefaults(parsed.content, pageStore);
             parsed.warnings = parsed.warnings || []
             parsed.warnings.push("Strategy parsing failed, used single-phase fallback")
             return NextResponse.json(parsed)
@@ -373,7 +381,7 @@ async function generateLandingHandler(req: NextRequest) {
         }
 
         logger.dev("✅ Strategy parsed successfully:", {
-          bigIdea: strategy.copyStrategy.bigIdea,
+          bigIdea: strategy.copyStrategy?.bigIdea,
           cardCounts: strategy.cardCounts,
           errors: strategy.errors,
           warnings: strategy.warnings
@@ -450,6 +458,7 @@ async function generateLandingHandler(req: NextRequest) {
 
           if (fallbackResult.success) {
             const parsed = parseAiResponse(fallbackResult.data.choices[0]?.message?.content || "")
+            parsed.content = applyManualPreferredDefaults(parsed.content, pageStore);
             parsed.warnings = parsed.warnings || []
             parsed.warnings.push("Copy phase failed, used single-phase fallback")
             return NextResponse.json(parsed)
@@ -469,6 +478,9 @@ async function generateLandingHandler(req: NextRequest) {
           copyContent,
           constrainedStrategy.cardCounts
         )
+
+        // Apply default placeholders to manual_preferred fields
+        parsed.content = applyManualPreferredDefaults(parsed.content, pageStore);
 
         // Log parsing results
         logger.debug("✅ Copy parsing completed:", {
@@ -576,6 +588,7 @@ async function generateLandingHandler(req: NextRequest) {
 
           if (fallbackResult.success) {
             const parsed = parseAiResponse(fallbackResult.data.choices[0]?.message?.content || "")
+            parsed.content = applyManualPreferredDefaults(parsed.content, pageStore);
             parsed.warnings = parsed.warnings || []
             parsed.warnings.push("2-phase generation failed, used emergency single-phase fallback")
             return NextResponse.json(parsed)
@@ -631,6 +644,10 @@ async function generateLandingHandler(req: NextRequest) {
         logger.error("Both AI providers failed, returning mock response")
         const mockResponse = generateMockResponse(prompt)
         const parsed = parseAiResponse(mockResponse.choices[0].message.content)
+        // Apply defaults if we have pageStore (for single-phase with 2-phase fallback)
+        if (pageStore) {
+          parsed.content = applyManualPreferredDefaults(parsed.content, pageStore);
+        }
         parsed.isPartial = true
         parsed.warnings = parsed.warnings || []
         parsed.warnings.push("AI providers unavailable, using template content")
@@ -644,6 +661,10 @@ async function generateLandingHandler(req: NextRequest) {
       }
 
       const parsed = parseAiResponse(aiContent)
+      // Apply defaults if we have pageStore (for single-phase with 2-phase fallback)
+      if (pageStore) {
+        parsed.content = applyManualPreferredDefaults(parsed.content, pageStore);
+      }
       return NextResponse.json(parsed)
     }
 
@@ -660,6 +681,10 @@ async function generateLandingHandler(req: NextRequest) {
 
       const mockResponse = generateMockResponse(fallbackPrompt)
       const parsed = parseAiResponse(mockResponse.choices[0].message.content)
+      // Apply defaults if we have pageStore
+      if (pageStore) {
+        parsed.content = applyManualPreferredDefaults(parsed.content, pageStore);
+      }
       parsed.isPartial = true
       parsed.warnings = ["Server error occurred, using fallback content"]
       return NextResponse.json(parsed)
