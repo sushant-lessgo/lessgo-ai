@@ -2263,9 +2263,10 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "supporting_text", mandatory: false, generation: "ai_generated" },
       { element: "cta_text", mandatory: false, generation: "ai_generated" },
       { element: "trust_items", mandatory: false, generation: "ai_generated" },
-      { element: "summary_item_1", mandatory: false, generation: "ai_generated" },
-      { element: "summary_item_2", mandatory: false, generation: "ai_generated" },
-      { element: "summary_item_3", mandatory: false, generation: "ai_generated" },
+      // Feature summary bar - 3 key value props to reinforce after showing features
+      { element: "summary_item_1", mandatory: true, generation: "ai_generated", description: "First key benefit/value prop (e.g., 'Zero Setup Required', 'Production Ready')" },
+      { element: "summary_item_2", mandatory: true, generation: "ai_generated", description: "Second key benefit/value prop (e.g., 'Works Out-of-the-Box', 'Enterprise Grade')" },
+      { element: "summary_item_3", mandatory: true, generation: "ai_generated", description: "Third key benefit/value prop (e.g., 'Always Up-to-Date', 'Fully Customizable')" },
       { element: "show_feature_summary", mandatory: false, generation: "manual_preferred" },
       { element: "feature_icon_1", mandatory: true, generation: "manual_preferred" },
       { element: "feature_icon_2", mandatory: true, generation: "manual_preferred" },

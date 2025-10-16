@@ -1077,6 +1077,19 @@ function getElementFormatGuidance(element: string): string {
     return "Results stat emphasizing immediate value, 2-4 words (e.g., \"Instant results\", \"Works immediately\", \"Ready to use\")";
   }
 
+  // Summary item patterns (MiniCards - key value props)
+  if (element === 'summary_item_1') {
+    return "First key benefit/value prop, 2-4 words (e.g., \"Zero Setup Required\", \"Production Ready\", \"Enterprise Grade\")";
+  }
+
+  if (element === 'summary_item_2') {
+    return "Second key benefit/value prop, 2-4 words (e.g., \"Works Out-of-the-Box\", \"Fully Managed\", \"Always Updated\")";
+  }
+
+  if (element === 'summary_item_3') {
+    return "Third key benefit/value prop, 2-4 words (e.g., \"Fully Customizable\", \"99.9% Uptime\", \"24/7 Support\")";
+  }
+
   // IMPORTANT: Check PLURAL patterns FIRST before singular patterns
   // to avoid false matches (e.g., customer_titles should match 'titles' not '_title')
 

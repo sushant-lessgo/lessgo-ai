@@ -127,17 +127,17 @@ const CONTENT_SCHEMA = {
     default: '' 
   },
   // Feature Summary Schema
-  summary_item_1: { 
-    type: 'string' as const, 
-    default: 'Zero Setup Required' 
+  summary_item_1: {
+    type: 'string' as const,
+    default: 'Zero Setup Required'
   },
-  summary_item_2: { 
-    type: 'string' as const, 
-    default: 'Works Out-of-the-Box' 
+  summary_item_2: {
+    type: 'string' as const,
+    default: 'Works Out-of-the-Box'
   },
-  summary_item_3: { 
-    type: 'string' as const, 
-    default: '' 
+  summary_item_3: {
+    type: 'string' as const,
+    default: 'Always Up-to-Date'
   },
   show_feature_summary: { 
     type: 'boolean' as const, 
@@ -603,7 +603,7 @@ export default function MiniCards(props: LayoutComponentProps) {
                   </div>
                 </>
               )}
-              {(blockContent.summary_item_3 || mode === 'edit') && blockContent.summary_item_3 !== '___REMOVED___' && blockContent.summary_item_3?.trim() !== '' && (
+              {(blockContent.summary_item_3 || mode === 'edit') && blockContent.summary_item_3 !== '___REMOVED___' && (
                 <>
                   <div className="w-px h-6 bg-gray-200" />
                   <div className="flex items-center space-x-2 group/summary-item relative">
@@ -617,7 +617,7 @@ export default function MiniCards(props: LayoutComponentProps) {
                         colorTokens={colorTokens}
                         variant="body"
                         className="text-sm font-medium text-gray-700"
-                        placeholder="Summary item 3 (optional)"
+                        placeholder="Summary item 3"
                         sectionBackground={sectionBackground}
                         data-section-id={sectionId}
                         data-element-key="summary_item_3"
