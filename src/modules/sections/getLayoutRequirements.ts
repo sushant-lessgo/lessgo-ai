@@ -209,8 +209,8 @@ export function mapStrategyToUIBlocks(
       // Map before/after to results or testimonials
       strategyCount = strategyCounts.before_after || strategyCounts.results || strategyCounts.testimonials || 3;
     } else if (sectionId === 'howItWorks') {
-      // Map how it works to process explanations
-      strategyCount = strategyCounts.how_it_works || strategyCounts.features || 3;
+      // Map how it works to process explanations - check both camelCase and snake_case
+      strategyCount = strategyCounts.howItWorks || strategyCounts.how_it_works || strategyCounts.features || 3;
     } else if (sectionId === 'close') {
       // Map close sections to CTA-related strategy
       strategyCount = strategyCounts.close || strategyCounts.cta || 1;

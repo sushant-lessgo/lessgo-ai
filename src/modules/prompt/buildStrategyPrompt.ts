@@ -273,6 +273,18 @@ function buildDynamicCardCountsRequest(
     cardCountsSection += `\n   - ${sectionName}: ${guidance}`;
   });
 
+  // Add explicit output format instruction
+  cardCountsSection += `\n\n   OUTPUT FORMAT FOR CARD COUNTS:
+   Return ONLY the sections listed above as a JSON object where:
+   - Keys are section names (exactly as listed above: ${strategySections.join(', ')})
+   - Values are INTEGERS (whole numbers) representing the optimal card count
+   - Example: "problem": 3, "features": 5, "testimonials": 4
+
+   CRITICAL FORMAT RULES:
+   - Do NOT include sections that are not listed above
+   - Do NOT use strings or decimals for counts - use integers only (e.g., 3, not "3" or 3.5)
+   - Each count must be a plain integer within the constraints specified in LAYOUT CONSTRAINTS`;
+
   return cardCountsSection;
 }
 
@@ -475,6 +487,14 @@ IMPORTANT GUIDELINES:
 - When layout constraints conflict with strategy, find the optimal balance within bounds
 - Remember: the goal is conversion within technical feasibility
 - ONLY provide card counts for sections that are present on this page: [${strategySections.join(', ')}]
+
+CRITICAL JSON FORMAT REQUIREMENTS:
+- The "cardCounts" object must contain ONLY sections from this list: [${strategySections.join(', ')}]
+- Each value in "cardCounts" MUST be a plain INTEGER (whole number), not a string or decimal
+- Correct format: "cardCounts": { "problem": 3, "features": 5 }
+- Incorrect formats: "cardCounts": { "problem": "3" } ← NO (string)
+- Incorrect formats: "cardCounts": { "problem": 3.5 } ← NO (decimal)
+- Incorrect formats: "cardCounts": { "header": 2 } ← NO (not in allowed sections list)
 
 Analyze this business and return the strategic foundation for high-converting copy generation.`;
 }

@@ -1868,57 +1868,77 @@ export const layoutElementSchema: LayoutSchema = {
   },
 
   // FAQ Section
-  AccordionFAQ: [
-    { element: "headline", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    // Individual Q&A fields (up to 5 items)
-    { element: "question_1", mandatory: true },
-    { element: "answer_1", mandatory: true },
-    { element: "question_2", mandatory: true },
-    { element: "answer_2", mandatory: true },
-    { element: "question_3", mandatory: true },
-    { element: "answer_3", mandatory: true },
-    { element: "question_4", mandatory: false },
-    { element: "answer_4", mandatory: false },
-    { element: "question_5", mandatory: false },
-    { element: "answer_5", mandatory: false },
-    // Icon fields
-    { element: "expand_icon", mandatory: false },
-    { element: "collapse_icon", mandatory: false },
-    // Legacy fields for backward compatibility
-    { element: "questions", mandatory: false },
-    { element: "answers", mandatory: false },
-  ],
+  AccordionFAQ: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      // Individual Q&A fields (support up to 10 items based on cardRequirements max)
+      { element: "question_1", mandatory: true, generation: "ai_generated", isCard: true },
+      { element: "answer_1", mandatory: true, generation: "ai_generated", isCard: true },
+      { element: "question_2", mandatory: true, generation: "ai_generated", isCard: true },
+      { element: "answer_2", mandatory: true, generation: "ai_generated", isCard: true },
+      { element: "question_3", mandatory: true, generation: "ai_generated", isCard: true },
+      { element: "answer_3", mandatory: true, generation: "ai_generated", isCard: true },
+      { element: "question_4", mandatory: false, generation: "ai_generated", isCard: true },
+      { element: "answer_4", mandatory: false, generation: "ai_generated", isCard: true },
+      { element: "question_5", mandatory: false, generation: "ai_generated", isCard: true },
+      { element: "answer_5", mandatory: false, generation: "ai_generated", isCard: true },
+      { element: "question_6", mandatory: false, generation: "ai_generated", isCard: true },
+      { element: "answer_6", mandatory: false, generation: "ai_generated", isCard: true },
+      { element: "question_7", mandatory: false, generation: "ai_generated", isCard: true },
+      { element: "answer_7", mandatory: false, generation: "ai_generated", isCard: true },
+      { element: "question_8", mandatory: false, generation: "ai_generated", isCard: true },
+      { element: "answer_8", mandatory: false, generation: "ai_generated", isCard: true },
+      { element: "question_9", mandatory: false, generation: "ai_generated", isCard: true },
+      { element: "answer_9", mandatory: false, generation: "ai_generated", isCard: true },
+      { element: "question_10", mandatory: false, generation: "ai_generated", isCard: true },
+      { element: "answer_10", mandatory: false, generation: "ai_generated", isCard: true },
+      { element: "expand_icon", mandatory: false, generation: "ai_generated" },
+      { element: "collapse_icon", mandatory: false, generation: "ai_generated" },
+      // Legacy fields for backward compatibility
+      { element: "questions", mandatory: false, generation: "ai_generated" },
+      { element: "answers", mandatory: false, generation: "ai_generated" }
+    ],
 
-  TwoColumnFAQ: [
-    { element: "headline", mandatory: true },
-    { element: "subheadline", mandatory: false },
-    // Left column Q&A (up to 3 items)
-    { element: "left_question_1", mandatory: true },
-    { element: "left_answer_1", mandatory: true },
-    { element: "left_question_2", mandatory: true },
-    { element: "left_answer_2", mandatory: true },
-    { element: "left_question_3", mandatory: false },
-    { element: "left_answer_3", mandatory: false },
-    // Right column Q&A (up to 3 items)
-    { element: "right_question_1", mandatory: true },
-    { element: "right_answer_1", mandatory: true },
-    { element: "right_question_2", mandatory: true },
-    { element: "right_answer_2", mandatory: true },
-    { element: "right_question_3", mandatory: false },
-    { element: "right_answer_3", mandatory: false },
-    // Column configuration
-    { element: "left_column_title", mandatory: false },
-    { element: "right_column_title", mandatory: false },
-    // Legacy fields for backward compatibility
-    { element: "questions", mandatory: false },
-    { element: "answers", mandatory: false },
-    { element: "column_titles", mandatory: false },
-    { element: "questions_left", mandatory: false },
-    { element: "answers_left", mandatory: false },
-    { element: "questions_right", mandatory: false },
-    { element: "answers_right", mandatory: false },
-  ],
+    cardRequirements: {
+      type: 'items',
+      min: 3,
+      max: 10,
+      optimal: [4, 6],
+      description: 'Accordion FAQ items'
+    }
+  },
+
+  TwoColumnFAQ: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "left_column_title", mandatory: false, generation: "ai_generated" },
+      { element: "right_column_title", mandatory: false, generation: "ai_generated" },
+      // Legacy fields for backward compatibility
+      { element: "questions", mandatory: false, generation: "ai_generated" },
+      { element: "answers", mandatory: false, generation: "ai_generated" },
+      { element: "column_titles", mandatory: false, generation: "ai_generated" },
+      { element: "questions_left", mandatory: false, generation: "ai_generated" },
+      { element: "answers_left", mandatory: false, generation: "ai_generated" },
+      { element: "questions_right", mandatory: false, generation: "ai_generated" },
+      { element: "answers_right", mandatory: false, generation: "ai_generated" }
+    ],
+
+    cardStructure: {
+      type: "column_pairs",
+      elements: ["left_question", "left_answer", "right_question", "right_answer"],
+      generation: "ai_generated"
+    },
+
+    cardRequirements: {
+      type: 'items',
+      min: 4,
+      max: 10,
+      optimal: [6, 8],
+      description: 'Two-column FAQ items (split between left and right)'
+    }
+  },
 
   InlineQnAList: {
     sectionElements: [
@@ -2699,11 +2719,12 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "circle_feature_1_text", mandatory: false, generation: "ai_generated" },
       { element: "circle_feature_2_text", mandatory: false, generation: "ai_generated" },
       { element: "circle_feature_3_text", mandatory: false, generation: "ai_generated" },
-      { element: "summary_card_heading", mandatory: false, generation: "ai_generated" },
-      { element: "summary_card_description", mandatory: false, generation: "ai_generated" },
-      { element: "summary_stat_1_text", mandatory: false, generation: "ai_generated" },
-      { element: "summary_stat_2_text", mandatory: false, generation: "ai_generated" },
-      { element: "summary_stat_3_text", mandatory: false, generation: "ai_generated" },
+      // Summary card - reinforces ease of use with compelling copy
+      { element: "summary_card_heading", mandatory: true, generation: "ai_generated", description: "Compelling headline reinforcing how easy/fast the process is (e.g., 'Start seeing results in minutes')" },
+      { element: "summary_card_description", mandatory: true, generation: "ai_generated", description: "Supporting copy emphasizing simplicity and zero complexity" },
+      { element: "summary_stat_1_text", mandatory: true, generation: "ai_generated", description: "Time-related stat (e.g., 'Under 10 minutes', '2-minute setup')" },
+      { element: "summary_stat_2_text", mandatory: true, generation: "ai_generated", description: "Simplicity stat (e.g., 'No setup required', 'Zero coding')" },
+      { element: "summary_stat_3_text", mandatory: true, generation: "ai_generated", description: "Results stat (e.g., 'Instant results', 'Works immediately')" },
       { element: "show_circle_features", mandatory: false, generation: "manual_preferred" },
       { element: "show_summary_card", mandatory: false, generation: "manual_preferred" },
       { element: "step_icon_1", mandatory: false, generation: "manual_preferred" },

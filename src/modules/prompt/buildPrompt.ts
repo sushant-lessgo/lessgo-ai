@@ -104,10 +104,9 @@ function determineOptimalCardCount(
   }
 
   if (!cardRequirements) {
-    // No card requirements - return strategy count or default
-    const result = strategyCount || 1;
-    logger.debug(`🎯 Card count for ${sectionId}: ${result} (no constraints, source: ${strategySource || 'default'})`);
-    return result;
+    // No card requirements - this layout doesn't use cards
+    logger.debug(`🎯 Card count for ${sectionId}: 0 (no card requirements for this layout)`);
+    return 0;
   }
 
   // Apply constraints intelligently
@@ -160,6 +159,11 @@ function getCardCount(
     return 0;
   }
 
+  // If schema has no card requirements, return 0
+  if (!schema.cardRequirements) {
+    return 0;
+  }
+
   // Try to get count from strategy first
   let count = strategyCounts?.[sectionId];
 
@@ -169,19 +173,17 @@ function getCardCount(
   }
 
   // If no strategy count, use optimal average from schema
-  if (!count && schema.cardRequirements) {
+  if (!count) {
     const optimal = schema.cardRequirements.optimal;
     // Calculate average of optimal range
     count = Math.round(optimal.reduce((a, b) => a + b, 0) / optimal.length);
   }
 
-  // Apply min/max constraints if available
-  if (count && schema.cardRequirements) {
-    const { min, max } = schema.cardRequirements;
-    count = Math.max(min, Math.min(max, count));
-  }
+  // Apply min/max constraints
+  const { min, max } = schema.cardRequirements;
+  count = Math.max(min, Math.min(max, count));
 
-  return count || 0;
+  return count;
 }
 
 /**
@@ -408,13 +410,31 @@ Pricing Model: ${validatedFields.pricingModel || 'Not specified'}`;
 
 /**
  * Builds layout context for copy-layout harmony
+ * Now includes feature count instructions merged into Features guidance
  */
-function buildLayoutContext(elementsMap: Record<string, SectionInfo>): string {
+function buildLayoutContext(elementsMap: Record<string, SectionInfo>, onboardingStore: OnboardingStore): string {
   const layoutContexts: string[] = [];
+  const { featuresFromAI } = onboardingStore;
+  const featureCount = featuresFromAI.length;
 
   Object.values(elementsMap).forEach((section) => {
     const { sectionId, sectionType, layoutName } = section;
-    layoutContexts.push(`${sectionType} (${layoutName}): ${getSectionLayoutGuidance(sectionType, layoutName)}`);
+    // Skip Header and Footer - we don't generate copy for them
+    if (sectionType === 'Header' || sectionType === 'Footer') {
+      return;
+    }
+
+    let guidance = getSectionLayoutGuidance(sectionType, layoutName);
+
+    // Merge feature count instructions directly into Features guidance
+    if (sectionType === 'Features' && featureCount > 0) {
+      const featureTitles = featuresFromAI.map(f => f.feature).join('|');
+      const featureDescriptions = featuresFromAI.map(f => f.benefit).join('|');
+
+      guidance += ` CRITICAL: You have ${featureCount} features from KEY FEATURES & BENEFITS. feature_titles MUST contain exactly ${featureCount} pipe-separated titles. feature_descriptions MUST contain exactly ${featureCount} pipe-separated descriptions. Expected format: feature_titles: "${featureTitles}" (adapt to 2-4 words each), feature_descriptions: "${featureDescriptions}" (expand benefits). Use ALL ${featureCount} features - if you generate fewer, users won't see all their features.`;
+    }
+
+    layoutContexts.push(`${sectionType} (${layoutName}): ${guidance}`);
   });
 
   return `LAYOUT CONTEXT FOR COPY OPTIMIZATION:
@@ -684,6 +704,11 @@ function buildSectionFlowContext(elementsMap: Record<string, SectionInfo>, pageS
     const section = elementsMap[sectionId];
     if (!section) return;
 
+    // Skip Header and Footer - we don't generate copy for them
+    if (section.sectionType === 'Header' || section.sectionType === 'Footer') {
+      return;
+    }
+
     const position = index === 0 ? 'OPENING' :
                     index === sectionOrder.length - 1 ? 'CLOSING' :
                     'MIDDLE';
@@ -837,6 +862,7 @@ function getSectionFlowGuidance(sectionType: string, position: string, previousS
 }
 
 /**
+ * @deprecated - Feature instructions now merged into buildLayoutContext
  * Builds explicit feature mapping instructions for Features section
  */
 function buildFeatureMappingInstructions(onboardingStore: OnboardingStore, elementsMap: Record<string, SectionInfo>): string {
@@ -942,7 +968,8 @@ function getAllElements(schema: any) {
  */
 function getCardRequirements(layoutName: string) {
   const schema = layoutElementSchema[layoutName];
-  return getSchemaCardRequirements(schema) || { type: 'cards', min: 1, max: 3, optimal: [2, 3] } as CardRequirements;
+  if (!schema) return null; // Schema doesn't exist
+  return getSchemaCardRequirements(schema); // Returns null if cardRequirements: null in schema
 }
 
 /**
@@ -975,7 +1002,7 @@ function getAIGeneratedElements(layoutName: string) {
     // Get section elements where generation = 'ai_generated'
     const aiSectionElements = schema.sectionElements
       .filter(el => el.generation === 'ai_generated')
-      .map(el => ({ ...el, isCard: false }));
+      .map(el => ({ ...el, isCard: el.isCard || false })); // Preserve isCard from schema
 
     // Get card elements if cardStructure.generation = 'ai_generated'
     const aiCardElements = schema.cardStructure && schema.cardStructure.generation === 'ai_generated'
@@ -1014,19 +1041,46 @@ function isCardElement(element: string, layoutName: string): boolean {
 
 /**
  * Provides format guidance for specific elements
+ * NOTE: This should only be called for non-card elements (isCard: false)
+ * Card elements are handled separately with array generation
  */
 function getElementFormatGuidance(element: string): string {
   // Core headline patterns
   if (element.includes('headline') || element === 'headline') {
     return "One powerful sentence, 5-12 words";
   }
-  
+
   // CTA patterns
   if (element.includes('cta') || element.includes('_cta')) {
     return "Action phrase, 2-4 words (e.g., \"Get Started Now\", \"Try Free\")";
   }
-  
-  // Special handling for feature_titles and feature_descriptions
+
+  // Summary card patterns (IconCircleSteps - reinforcing ease of use)
+  if (element === 'summary_card_heading') {
+    return "Compelling headline reinforcing how easy/fast the process is, 4-8 words (e.g., \"Start seeing results in minutes\", \"Get up and running instantly\")";
+  }
+
+  if (element === 'summary_card_description') {
+    return "Supporting copy emphasizing simplicity, speed, and zero complexity, 10-20 words (e.g., \"Our streamlined process gets you up and running quickly with zero technical knowledge required\")";
+  }
+
+  // Summary stat patterns (IconCircleSteps - time/simplicity/results)
+  if (element === 'summary_stat_1_text') {
+    return "Time-related stat emphasizing speed, 2-4 words (e.g., \"Under 10 minutes\", \"2-minute setup\", \"5 min onboarding\")";
+  }
+
+  if (element === 'summary_stat_2_text') {
+    return "Simplicity stat emphasizing ease, 2-4 words (e.g., \"No setup required\", \"Zero coding\", \"No training needed\")";
+  }
+
+  if (element === 'summary_stat_3_text') {
+    return "Results stat emphasizing immediate value, 2-4 words (e.g., \"Instant results\", \"Works immediately\", \"Ready to use\")";
+  }
+
+  // IMPORTANT: Check PLURAL patterns FIRST before singular patterns
+  // to avoid false matches (e.g., customer_titles should match 'titles' not '_title')
+
+  // Special handling for feature_titles and feature_descriptions (these ARE arrays)
   if (element === 'feature_titles') {
     return "[\"Use ALL features from KEY FEATURES & BENEFITS - generate exactly as many titles as features provided\"]";
   }
@@ -1035,37 +1089,45 @@ function getElementFormatGuidance(element: string): string {
     return "[\"Use ALL features from KEY FEATURES & BENEFITS - generate exactly as many descriptions as features provided\"]";
   }
 
-  // List patterns for titles
-  if (element.includes('titles') || element.endsWith('_titles') ||
-      element.includes('_title') || element === 'title') {
+  // List patterns for PLURAL titles/descriptions (these ARE arrays)
+  if (element.includes('titles') || element.endsWith('_titles')) {
     return "[\"Title 1\", \"Title 2\", \"Title 3\"]";
   }
 
-  // List patterns for descriptions
-  if (element.includes('descriptions') || element.endsWith('_descriptions') ||
-      element.includes('_description') || element === 'description') {
+  if (element.includes('descriptions') || element.endsWith('_descriptions')) {
     return "[\"Brief description 1\", \"Brief description 2\"]";
   }
-  
-  // Question patterns
+
+  // Name PLURAL patterns (these ARE arrays)
+  if (element.includes('names') || element.endsWith('_names')) {
+    return "[\"Name 1\", \"Name 2\", \"Name 3\"]";
+  }
+
+  // Question/Answer PLURAL patterns (these ARE arrays)
   if (element.includes('questions') || element.endsWith('_questions')) {
     return "[\"Question 1?\", \"Question 2?\", \"Question 3?\"]";
   }
-  
-  // Answer patterns
+
   if (element.includes('answers') || element.endsWith('_answers')) {
     return "[\"Answer 1\", \"Answer 2\", \"Answer 3\"]";
   }
-  
-  // Name patterns
-  if (element.includes('names') || element.endsWith('_names') ||
-      element.includes('_name') || element === 'name') {
-    return "[\"Name 1\", \"Name 2\", \"Name 3\"]";
-  }
-  
-  // Quote patterns
-  if (element.includes('quote') || element.includes('quotes')) {
+
+  // Quote PLURAL patterns (these ARE arrays)
+  if (element.includes('quotes') || element.endsWith('_quotes')) {
     return "[\"Quote text 1\", \"Quote text 2\"]";
+  }
+
+  // NOW check SINGULAR patterns (after all plural checks)
+
+  // Name/Title patterns - Single value (not arrays)
+  if (element.includes('_name') || element === 'name' ||
+      element.includes('_title') || element === 'title') {
+    return "Appropriate content for element type";
+  }
+
+  // Quote patterns - Single value (not arrays)
+  if (element.includes('quote')) {
+    return "Appropriate content for element type";
   }
   
   // List/items patterns
@@ -1342,7 +1404,9 @@ function getElementFormatGuidance(element: string): string {
 
 
 /**
- * Builds field classification guidance for AI generation
+ * @deprecated - REMOVED: This function generated redundant metadata.
+ * Field classification is implicit in the OUTPUT FORMAT (only AI fields are shown).
+ * Manual-preferred fields are already excluded via getAIGeneratedElements().
  */
 function buildFieldClassificationGuidance(elementsMap: Record<string, SectionInfo>): string {
   // Generate field classification guidance from unified schema
@@ -1384,10 +1448,8 @@ export function buildFullPrompt(
   const businessContext = buildBusinessContext(onboardingStore, pageStore);
   const brandContext = buildBrandContext(onboardingStore);
   const categoryContext = buildCategoryContext(onboardingStore);
-  const layoutContext = buildLayoutContext(elementsMap);
+  const layoutContext = buildLayoutContext(elementsMap, onboardingStore);
   const sectionFlowContext = buildSectionFlowContext(elementsMap, pageStore);
-  const fieldClassificationGuidance = buildFieldClassificationGuidance(elementsMap);
-  const featureMappingInstructions = buildFeatureMappingInstructions(onboardingStore, elementsMap);
   const outputFormat = buildOutputFormat(elementsMap);
 
   return `You are an expert copywriter specializing in high-converting SaaS landing pages. Generate compelling, conversion-focused copy for a complete landing page.
@@ -1400,9 +1462,6 @@ ${categoryContext}
 ${layoutContext}
 
 ${sectionFlowContext}
-
-${fieldClassificationGuidance}
-${featureMappingInstructions}
 
 COPYWRITING REQUIREMENTS:
 - Write copy that flows cohesively from section to section
@@ -1800,9 +1859,10 @@ function getSpecificElementGuidance(elementName: string, sectionType: string): s
 
 /**
  * Builds strategic context section for copy execution
+ * Note: Card counts are not included here - they're implicit in the OUTPUT FORMAT via array lengths
  */
 function buildStrategicContext(strategy: ParsedStrategy): string {
-  const { copyStrategy, cardCounts, reasoning } = strategy;
+  const { copyStrategy } = strategy;
 
   return `STRATEGIC FOUNDATION FOR COPY EXECUTION:
 
@@ -1815,11 +1875,6 @@ ${copyStrategy.idealCustomerProfile}
 
 PRIMARY EMOTIONAL TRIGGER: ${copyStrategy.primaryEmotion}
 OBJECTION PRIORITY: ${copyStrategy.objectionPriority.join(' → ')}
-
-STRATEGIC CARD COUNT SPECIFICATIONS:
-${Object.entries(cardCounts).map(([section, count]) =>
-  `- ${section}: ${count} cards (${reasoning[section] || 'Strategic requirement'})`
-).join('\n')}
 
 EXECUTION REQUIREMENTS:
 - Write as if speaking directly to this ONE specific person described above
@@ -1835,7 +1890,9 @@ EXECUTION REQUIREMENTS:
 }
 
 /**
- * Enhanced card count instructions using comprehensive registry
+ * @deprecated - REMOVED: This function generated redundant card count "instructions".
+ * Card counts are implicit in the OUTPUT FORMAT via array lengths.
+ * The JSON structure itself shows how many cards to generate (array with N elements = generate N cards).
  */
 function buildCardCountInstructions(
   strategyCounts: Record<string, number>,
@@ -1954,11 +2011,8 @@ export function buildStrategicCopyPrompt(
   // Convert ElementsMap to SectionInfo format for compatibility with existing functions
   const sectionInfoMap = convertElementsMapToSectionInfo(elementsMap);
 
-  const layoutContext = buildLayoutContext(sectionInfoMap);
+  const layoutContext = buildLayoutContext(sectionInfoMap, onboardingStore);
   const sectionFlowContext = buildSectionFlowContext(sectionInfoMap, pageStore);
-  const cardCountInstructions = buildCardCountInstructions(strategy.cardCounts, sectionInfoMap, userFeatureCount);
-  const fieldClassificationGuidance = buildFieldClassificationGuidance(sectionInfoMap);
-  const featureMappingInstructions = buildFeatureMappingInstructions(onboardingStore, sectionInfoMap);
   const outputFormat = buildStrategicOutputFormat(elementsMap, strategy.cardCounts, userFeatureCount);
 
   // Build copywriting requirements based on whether strategy is available
@@ -1993,11 +2047,6 @@ ${strategicContext}
 ${layoutContext}
 
 ${sectionFlowContext}
-
-${cardCountInstructions}
-
-${fieldClassificationGuidance}
-${featureMappingInstructions}
 
 ${copywritingRequirements}
 
@@ -2035,9 +2084,23 @@ function buildStrategicOutputFormat(
       const isCard = schemaElement?.isCard || false;
 
       if (isCard && cardCount > 0) {
-        // Create array placeholder for card elements
-        const placeholders = Array.from({ length: cardCount }, (_, i) => `${element.charAt(0).toUpperCase() + element.slice(1)} ${i + 1}`);
-        elementFormat[element] = placeholders;
+        // Check if this is a numbered field (e.g., question_1, answer_1)
+        const numberedMatch = element.match(/^(.+)_(\d+)$/);
+
+        if (numberedMatch) {
+          const [, baseName, numberStr] = numberedMatch;
+          const number = parseInt(numberStr, 10);
+
+          // Only include numbered fields up to cardCount
+          if (number <= cardCount) {
+            elementFormat[element] = getElementFormatGuidance(element);
+          }
+          // Skip numbered fields beyond cardCount
+        } else {
+          // Regular array-based card element
+          const placeholders = Array.from({ length: cardCount }, (_, i) => `${element.charAt(0).toUpperCase() + element.slice(1)} ${i + 1}`);
+          elementFormat[element] = placeholders;
+        }
       } else if (!isCard) {
         // Single element format guidance
         elementFormat[element] = getElementFormatGuidance(element);
