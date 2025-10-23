@@ -129,17 +129,17 @@ export function testCategoryMapping() {
     },
   ];
 
-  console.log('🧪 Testing Category Mapping...\n');
+  // console.log('🧪 Testing Category Mapping...\n');
 
-  testProfiles.forEach(profile => {
-    const { category, reason } = getCategoryWithReason(profile.data);
-    const passed = category === profile.expectedCategory;
-    const emoji = passed ? '✅' : '❌';
+  // testProfiles.forEach(profile => {
+  //   const { category, reason } = getCategoryWithReason(profile.data);
+  //   const passed = category === profile.expectedCategory;
+  //   const emoji = passed ? '✅' : '❌';
 
-    console.log(`${emoji} ${profile.name}:`);
-    console.log(`   Expected: ${profile.expectedCategory}`);
-    console.log(`   Got: ${category}`);
-    console.log(`   Reason: ${reason}`);
-    console.log('');
-  });
+  //   console.log(`${emoji} ${profile.name}:`);
+  //   console.log(`   Expected: ${profile.expectedCategory}`);
+  //   console.log(`   Got: ${category}`);
+  //   console.log(`   Reason: ${reason}`);
+  //   console.log('');
+  // });
 }

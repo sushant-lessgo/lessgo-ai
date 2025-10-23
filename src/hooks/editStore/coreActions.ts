@@ -258,7 +258,7 @@ export function createCoreActions(set: any, get: any) {
           try {
             await state.save();
           } catch (error) {
-            console.error('Auto-save failed:', error);
+            // console.error('Auto-save failed:', error);
           }
         }, 2000);
       }

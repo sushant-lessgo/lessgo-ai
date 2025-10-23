@@ -12,13 +12,13 @@ interface BackgroundSystem {
   accentCSS: string;
 }
 
-interface BrandColors {
+export interface BrandColors {
   primary: string;
   secondary?: string;
 }
 
 // ✅ Updated to match PrimaryBackground structure
-interface BackgroundVariation {
+export interface BackgroundVariation {
   id: string;           // Previously variationId
   label: string;        // Previously variationLabel
   css: string;          // Previously tailwindClass - now CSS values
@@ -56,7 +56,7 @@ export function getCompatibleBackgrounds(
         return [];
     }
   } catch (error) {
-    console.error('Error finding compatible backgrounds:', error);
+    // console.error('Error finding compatible backgrounds:', error);
     return [];
   }
 }
@@ -127,7 +127,7 @@ function getBrandCompatibleBackgrounds(
     return compatibleVariations.slice(0, 12); // More options for brand mode
 
   } catch (error) {
-    console.error('Error finding brand-compatible backgrounds:', error);
+    // console.error('Error finding brand-compatible backgrounds:', error);
     return [];
   }
 }

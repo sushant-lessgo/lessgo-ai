@@ -98,19 +98,19 @@ export interface PreviousSectionContext {
    * Selected layout for the previous section
    * @example 'EmotionalQuotes', 'IconGrid', 'StatBlocks'
    */
-  layout: string;
+  layout?: string;
 
   /**
    * Tone set by the previous section
    * Used to maintain tonal coherence
    */
-  tone: FlowTone;
+  tone?: FlowTone;
 
   /**
    * Content density of the previous section
    * Used for visual rhythm (alternate dense and light)
    */
-  density: LayoutDensity;
+  density?: LayoutDensity;
 }
 
 /**
@@ -142,7 +142,7 @@ export interface NextSectionContext {
    * Purpose the next section will serve
    * Helps current section prepare the user
    */
-  purpose: SectionPurpose;
+  purpose?: SectionPurpose;
 }
 
 /**

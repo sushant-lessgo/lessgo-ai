@@ -42,7 +42,7 @@ export default function PromptForm({ onSuccess }: PromptFormProps) {
       onSuccess(data as GPTOutput, input) // <-- pass both GPT output and raw user input
     } catch (err) {
       setError("Something went wrong. Try again.")
-      console.error(err)
+      // console.error(err)
     } finally {
       setLoading(false)
     }

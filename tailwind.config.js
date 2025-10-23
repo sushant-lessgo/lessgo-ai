@@ -575,13 +575,15 @@ module.exports = {
   // - { pattern: /bg-\[linear-gradient\([^\]]+\)\]/ }
   // - { pattern: /bg-\[radial-gradient\([^\]]+\)\]/ }
 
-  // ✅ Arbitrary sizing patterns for UIBlocks
-  { pattern: /min-h-\[\d+px\]/ },
-  { pattern: /min-w-\[\d+px\]/ },
-  { pattern: /max-h-\[\d+px\]/ },
-  { pattern: /max-w-\[\d+px\]/ },
-  { pattern: /w-\[\d+px\]/ },
-  { pattern: /h-\[\d+px\]/ },
+  // ❌ REMOVED: Arbitrary sizing patterns (JIT mode auto-detects these from content files)
+  // Tailwind's JIT engine automatically scans content and generates arbitrary values like min-h-[400px]
+  // No need to safelist them explicitly - they're detected from your JSX/TSX files
+  // - { pattern: /min-h-\[(\d+)px\]/ }
+  // - { pattern: /min-w-\[(\d+)px\]/ }
+  // - { pattern: /max-h-\[(\d+)px\]/ }
+  // - { pattern: /max-w-\[(\d+)px\]/ }
+  // - { pattern: /w-\[(\d+)px\]/ }
+  // - { pattern: /h-\[(\d+)px\]/ }
 ],
   theme: {
   	extend: {

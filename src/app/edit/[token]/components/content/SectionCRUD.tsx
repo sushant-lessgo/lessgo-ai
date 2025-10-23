@@ -32,12 +32,12 @@ export function AddSectionButton({ position, className = '', onSectionAdded }: A
         sectionType,
         position,
       };
-      
+
       const newSectionId = await addSection(options);
       setShowOptions(false);
       onSectionAdded?.(newSectionId);
     } catch (error) {
-      console.error('Failed to add section:', error);
+      // console.error('Failed to add section:', error);
     }
   }, [addSection, position, onSectionAdded]);
 
@@ -301,7 +301,7 @@ export function BulkSectionActions({ selectedSectionIds, onSelectionChange, onAc
       onSelectionChange([]);
       onActionComplete?.();
     } catch (error) {
-      console.error('Bulk action failed:', error);
+      // console.error('Bulk action failed:', error);
     }
   }, [selectedSectionIds, batchDeleteSections, duplicateSections, onSelectionChange, onActionComplete]);
 
@@ -595,7 +595,7 @@ export function SectionTemplatePicker({ onTemplateSelect, onClose }: SectionTemp
         const savedTemplates = JSON.parse(localStorage.getItem('sectionTemplates') || '[]');
         setTemplates(savedTemplates);
       } catch (error) {
-        console.error('Failed to load templates:', error);
+        // console.error('Failed to load templates:', error);
       } finally {
         setLoading(false);
       }

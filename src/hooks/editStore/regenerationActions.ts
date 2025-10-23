@@ -87,11 +87,11 @@ CONTENT-ONLY REGENERATION:
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Content regeneration API error:', {
-        status: response.status,
-        statusText: response.statusText,
-        responseText: errorText,
-      });
+      // console.error('Content regeneration API error:', {
+      //   status: response.status,
+      //   statusText: response.statusText,
+      //   responseText: errorText,
+      // });
       throw new Error(`Content regeneration failed: ${response.status} - ${response.statusText}`);
     }
 
@@ -114,7 +114,7 @@ CONTENT-ONLY REGENERATION:
     if (state.updateFromAIResponse) {
       state.updateFromAIResponse(aiResponse, elementsMap);
     } else {
-      console.error('updateFromAIResponse method not available - regeneration may not complete properly');
+      logger.error('updateFromAIResponse method not available - regeneration may not complete properly');
     }
 
     setState((state: EditStore) => {
@@ -141,7 +141,7 @@ CONTENT-ONLY REGENERATION:
     });
 
   } catch (error) {
-    console.error('Content-only regeneration failed:', error);
+    logger.error('Content-only regeneration failed:', error);
     setState((state: EditStore) => {
       state.aiGeneration.isGenerating = false;
       state.aiGeneration.currentOperation = null;
@@ -255,11 +255,11 @@ const handleDesignAndCopyRegeneration = async (
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Design + copy regeneration API error:', {
-        status: response.status,
-        statusText: response.statusText,
-        responseText: errorText,
-      });
+      // console.error('Design + copy regeneration API error:', {
+      //   status: response.status,
+      //   statusText: response.statusText,
+      //   responseText: errorText,
+      // });
       throw new Error(`Design + copy regeneration failed: ${response.status} - ${response.statusText}`);
     }
 
@@ -282,7 +282,7 @@ const handleDesignAndCopyRegeneration = async (
     if (state.updateFromAIResponse) {
       state.updateFromAIResponse(aiResponse, elementsMap);
     } else {
-      console.error('updateFromAIResponse method not available - regeneration may not complete properly');
+      logger.error('updateFromAIResponse method not available - regeneration may not complete properly');
     }
 
     setState((state: EditStore) => {
@@ -312,7 +312,7 @@ const handleDesignAndCopyRegeneration = async (
     });
 
   } catch (error) {
-    console.error('Design + copy regeneration failed:', error);
+    logger.error('Design + copy regeneration failed:', error);
     setState((state: EditStore) => {
       state.aiGeneration.isGenerating = false;
       state.aiGeneration.currentOperation = null;

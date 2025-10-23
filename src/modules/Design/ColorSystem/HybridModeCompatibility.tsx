@@ -222,8 +222,8 @@ export function HybridModeCompatibility({
   // Error handling
   const handleCompatibilityError = useMemo(() => {
     return (error: Error, context: string) => {
-      console.error(`Hybrid compatibility error in ${context}:`, error);
-      
+      // console.error(`Hybrid compatibility error in ${context}:`, error);
+
       setErrorLog(prev => [...prev.slice(-9), { // Keep last 10 errors
         error,
         context,

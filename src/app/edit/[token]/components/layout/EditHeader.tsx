@@ -18,12 +18,12 @@ export function EditHeader({ tokenId }: EditHeaderProps) {
   
   const { theme, getColorTokens } = useEditStore();
   
-  
+
   let colorTokens;
   try {
     colorTokens = getColorTokens();
   } catch (error) {
-    console.error('❌ getColorTokens error:', error);
+    // console.error('❌ getColorTokens error:', error);
     colorTokens = { accent: 'bg-blue-500' };
   }
 

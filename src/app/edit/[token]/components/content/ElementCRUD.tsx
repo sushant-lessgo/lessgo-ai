@@ -122,7 +122,7 @@ export function ElementManager({ sectionId, className = '', showValidation = tru
           }
           announceLiveRegion?.(`Duplicated ${selectedElements.length} elements`);
           break;
-        
+
         case 'delete':
           for (const elementKey of selectedElements) {
             await removeElement?.(sectionId, elementKey);
@@ -130,10 +130,10 @@ export function ElementManager({ sectionId, className = '', showValidation = tru
           announceLiveRegion?.(`Deleted ${selectedElements.length} elements`);
           break;
       }
-      
+
       setSelectedElements([]);
     } catch (error) {
-      console.error('Bulk action failed:', error);
+      // console.error('Bulk action failed:', error);
     }
   }, [selectedElements, sectionId, duplicateElement, removeElement, announceLiveRegion]);
 

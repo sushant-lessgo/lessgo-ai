@@ -32,7 +32,7 @@ export function selectPrimaryBackground(
 
   // Fallback: if pool too small (< 5), use all backgrounds
   if (pool.length < 5) {
-    logger.warn(`Background pool for category "${category}" has only ${pool.length} items. Using all backgrounds.`);
+    // logger.warn(`Background pool for category "${category}" has only ${pool.length} items. Using all backgrounds.`);
     pool = primaryBackgrounds;
   }
 
@@ -82,10 +82,10 @@ export function getBackgroundOrFallback(
   if (backgroundId) {
     const found = primaryBackgrounds.find(bg => bg.id === backgroundId);
     if (found) {
-      logger.debug('🎨 [Background Selection] Using specific background:', backgroundId);
+      // logger.debug('🎨 [Background Selection] Using specific background:', backgroundId);
       return found;
     }
-    logger.warn(`Background ID "${backgroundId}" not found, selecting random.`);
+    // logger.warn(`Background ID "${backgroundId}" not found, selecting random.`);
   }
 
   return selectPrimaryBackground(onboardingData);
@@ -97,14 +97,14 @@ export function getBackgroundOrFallback(
 export function previewCategoryBackgrounds(category: 'technical' | 'professional' | 'friendly') {
   const backgrounds = getBackgroundsByCategory(category);
 
-  console.log(`\n📊 ${category.toUpperCase()} Backgrounds (${backgrounds.length} total):\n`);
+  // console.log(`\n📊 ${category.toUpperCase()} Backgrounds (${backgrounds.length} total):\n`);
 
-  backgrounds.forEach((bg, index) => {
-    console.log(`${index + 1}. ${bg.label}`);
-    console.log(`   ID: ${bg.id}`);
-    console.log(`   CSS: ${bg.css.substring(0, 60)}${bg.css.length > 60 ? '...' : ''}`);
-    console.log(`   Base Color: ${bg.baseColor}\n`);
-  });
+  // backgrounds.forEach((bg, index) => {
+  //   console.log(`${index + 1}. ${bg.label}`);
+  //   console.log(`   ID: ${bg.id}`);
+  //   console.log(`   CSS: ${bg.css.substring(0, 60)}${bg.css.length > 60 ? '...' : ''}`);
+  //   console.log(`   Base Color: ${bg.baseColor}\n`);
+  // });
 }
 
 /**
@@ -130,21 +130,21 @@ export function testBackgroundSelection() {
     },
   ];
 
-  console.log('🧪 Testing Background Selection...\n');
+  // console.log('🧪 Testing Background Selection...\n');
 
-  testProfiles.forEach(profile => {
-    console.log(`\n📝 Testing: ${profile.name}`);
-    console.log(`   Audience: ${profile.data.targetAudience}`);
-    console.log(`   Market: ${profile.data.marketCategory}`);
+  // testProfiles.forEach(profile => {
+  //   console.log(`\n📝 Testing: ${profile.name}`);
+  //   console.log(`   Audience: ${profile.data.targetAudience}`);
+  //   console.log(`   Market: ${profile.data.marketCategory}`);
 
-    // Select 3 backgrounds to show variety
-    const selections = selectMultipleBackgrounds(profile.data, 3);
+  //   // Select 3 backgrounds to show variety
+  //   const selections = selectMultipleBackgrounds(profile.data, 3);
 
-    console.log(`\n   Selected Backgrounds:`);
-    selections.forEach((bg, i) => {
-      console.log(`   ${i + 1}. ${bg.label} (${bg.category})`);
-    });
-  });
+  //   console.log(`\n   Selected Backgrounds:`);
+  //   selections.forEach((bg, i) => {
+  //     console.log(`   ${i + 1}. ${bg.label} (${bg.category})`);
+  //   });
+  // });
 
-  console.log('\n✅ Background selection test complete.\n');
+  // console.log('\n✅ Background selection test complete.\n');
 }

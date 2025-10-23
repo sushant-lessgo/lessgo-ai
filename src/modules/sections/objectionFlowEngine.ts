@@ -766,7 +766,7 @@ function enforceProblemAwareRule(sections: string[], awarenessLevel: AwarenessLe
   if (problemIndex === -1) {
     const insertPosition = heroIndex !== -1 ? heroIndex + 1 : 0;
     sections.splice(insertPosition, 0, SECTION_IDS.problem);
-    logger.dev('✅ RULE 7.1: Added problem section for problem-aware flow at position', insertPosition);
+    logger.dev(`✅ RULE 7.1: Added problem section for problem-aware flow at position ${insertPosition}`);
     return sections;
   }
 
@@ -775,7 +775,7 @@ function enforceProblemAwareRule(sections: string[], awarenessLevel: AwarenessLe
     const movedSection = sections.splice(problemIndex, 1)[0];
     const insertPosition = heroIndex !== -1 ? heroIndex + 1 : 0;
     sections.splice(insertPosition, 0, movedSection);
-    logger.dev('✅ RULE 7.1: Moved problem section earlier for problem-aware flow (was at', problemIndex, 'now at', insertPosition + ')');
+    logger.dev(`✅ RULE 7.1: Moved problem section earlier for problem-aware flow (was at ${problemIndex}, now at ${insertPosition})`);
   }
 
   return sections;
@@ -1518,16 +1518,16 @@ function orderSections(sections: string[]): string[] {
   logger.dev('📐 Applying flow-aware section ordering...');
 
   // RULE 8.1: Fixed positions - hero always first, cta always last (after header/footer added)
-  const fixedSections = [SECTION_IDS.hero, SECTION_IDS.cta];
+  const fixedSections: string[] = [SECTION_IDS.hero, SECTION_IDS.cta];
   const remainingSections = sections.filter(s => !fixedSections.includes(s));
 
   // RULE 8.2: Position 3-4 (Early sections) - sets flow tone
-  const earlySections = [SECTION_IDS.problem, SECTION_IDS.socialProof, SECTION_IDS.uniqueMechanism];
+  const earlySections: string[] = [SECTION_IDS.problem, SECTION_IDS.socialProof, SECTION_IDS.uniqueMechanism];
   const early = remainingSections.filter(s => earlySections.includes(s));
   const afterEarly = remainingSections.filter(s => !earlySections.includes(s));
 
   // RULE 8.3: Positions 5-7 (Middle sections) - educate → differentiate → prove
-  const middleSections = [
+  const middleSections: string[] = [
     SECTION_IDS.beforeAfter,
     SECTION_IDS.features,
     SECTION_IDS.howItWorks,
@@ -1541,7 +1541,7 @@ function orderSections(sections: string[]): string[] {
   const afterMiddle = afterEarly.filter(s => !middleSections.includes(s));
 
   // RULE 8.4: Positions 8-9 (Late sections) - objection handling and final proof
-  const lateSections = [
+  const lateSections: string[] = [
     SECTION_IDS.testimonials,
     SECTION_IDS.pricing,
     SECTION_IDS.objectionHandling,
@@ -1574,7 +1574,7 @@ function orderSections(sections: string[]): string[] {
  */
 function sortEarlySections(sections: string[]): string[] {
   // Priority: socialProof > problem > uniqueMechanism
-  const order = [SECTION_IDS.socialProof, SECTION_IDS.problem, SECTION_IDS.uniqueMechanism];
+  const order: string[] = [SECTION_IDS.socialProof, SECTION_IDS.problem, SECTION_IDS.uniqueMechanism];
   return sections.sort((a, b) => {
     const indexA = order.indexOf(a);
     const indexB = order.indexOf(b);
@@ -1590,7 +1590,7 @@ function sortEarlySections(sections: string[]): string[] {
  */
 function sortMiddleSections(sections: string[]): string[] {
   // Order: educate (beforeAfter, howItWorks) → differentiate (features, uniqueMechanism, comparison) → prove (results, integrations, security)
-  const order = [
+  const order: string[] = [
     SECTION_IDS.beforeAfter,
     SECTION_IDS.howItWorks,
     SECTION_IDS.features,
@@ -1615,7 +1615,7 @@ function sortMiddleSections(sections: string[]): string[] {
  */
 function sortLateSections(sections: string[]): string[] {
   // Order: testimonials → pricing → objectionHandling → faq → founderNote
-  const order = [
+  const order: string[] = [
     SECTION_IDS.testimonials,
     SECTION_IDS.pricing,
     SECTION_IDS.objectionHandling,

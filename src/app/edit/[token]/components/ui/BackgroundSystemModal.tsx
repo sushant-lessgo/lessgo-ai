@@ -73,7 +73,7 @@ export function BackgroundSystemModal({ isOpen, onClose, tokenId }: BackgroundSy
         );
         setValidationResult(result);
       } catch (error) {
-        console.error('Validation failed:', error);
+        // console.error('Validation failed:', error);
         setValidationResult(null);
       } finally {
         setIsValidating(false);
@@ -119,7 +119,7 @@ export function BackgroundSystemModal({ isOpen, onClose, tokenId }: BackgroundSy
   // Handle background option selection
   const handleOptionSelect = (variation: any) => {
     const backgroundSystem = {
-      primary: variation.tailwindClass,
+      primary: variation.css,
       secondary: `bg-${variation.baseColor}-50`,
       neutral: 'bg-white',
       divider: `bg-${variation.baseColor}-100/50`,
@@ -137,7 +137,7 @@ export function BackgroundSystemModal({ isOpen, onClose, tokenId }: BackgroundSy
   const handleOptionHover = (variation: any | null) => {
     if (variation) {
       const backgroundSystem = {
-        primary: variation.tailwindClass,
+        primary: variation.css,
         secondary: `bg-${variation.baseColor}-50`,
         neutral: 'bg-white',
         divider: `bg-${variation.baseColor}-100/50`,

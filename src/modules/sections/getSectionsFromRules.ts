@@ -81,7 +81,7 @@ export function getSectionsFromRules({
   // Replace hard exclusions with intelligent substitution that preserves objection coverage
   selectedSections = applyAssetAwareSubstitutions(
     selectedSections,
-    assetAvailability,
+    assetAvailability ?? null, // Convert undefined to null
     mapToStartupStage(validStartupStage)
   );
 

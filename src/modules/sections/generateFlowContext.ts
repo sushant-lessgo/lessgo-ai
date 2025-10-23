@@ -93,8 +93,8 @@ export function determineFlowComplexity(
     return 'detailed';
   }
 
-  // Default: balanced
-  return 'balanced';
+  // Default: moderate (balanced complexity)
+  return 'moderate';
 }
 
 /**
@@ -103,25 +103,25 @@ export function determineFlowComplexity(
  */
 export function inferSectionPurpose(sectionId: string): SectionPurpose | undefined {
   const purposeMap: Record<string, SectionPurpose> = {
-    'hero': 'hook',
-    'problem': 'agitate',
-    'beforeAfter': 'contrast',
-    'features': 'demonstrate',
+    'hero': 'identify-problem',
+    'problem': 'agitate-pain',
+    'beforeAfter': 'show-solution',
+    'features': 'show-solution',
     'howItWorks': 'educate',
     'uniqueMechanism': 'differentiate',
     'results': 'prove',
-    'testimonials': 'validate',
-    'socialProof': 'validate',
+    'testimonials': 'prove',
+    'socialProof': 'prove',
     'comparison': 'differentiate',
-    'useCases': 'demonstrate',
-    'pricing': 'offer',
-    'objectionHandling': 'reassure',
-    'faq': 'reassure',
-    'integrations': 'demonstrate',
-    'security': 'reassure',
-    'founderNote': 'validate',
-    'cta': 'convert',
-    'closeSection': 'convert',
+    'useCases': 'show-solution',
+    'pricing': 'close',
+    'objectionHandling': 'close',
+    'faq': 'educate',
+    'integrations': 'show-solution',
+    'security': 'prove',
+    'founderNote': 'prove',
+    'cta': 'close',
+    'closeSection': 'close',
   };
 
   return purposeMap[sectionId];

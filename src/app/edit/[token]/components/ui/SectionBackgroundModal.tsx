@@ -180,7 +180,7 @@ export function SectionBackgroundModal({ isOpen, onClose, sectionId }: SectionBa
       if (setBackgroundType) {
         setBackgroundType(sectionId, localBackground.themeColor as any);
       } else {
-        console.error('❌ setBackgroundType function not available');
+        // console.error('❌ setBackgroundType function not available');
       }
     } else if (localBackground.type === 'custom' && localBackground.custom) {
       // ✅ NEW: Handle custom backgrounds

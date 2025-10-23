@@ -271,7 +271,7 @@ export function useEnhancedToolbarActions() {
       
       return true;
     } catch (error) {
-      console.error('Failed to generate variations:', error);
+      // console.error('Failed to generate variations:', error);
       announceLiveRegion('Failed to generate variations');
       return false;
     }

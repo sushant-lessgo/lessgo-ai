@@ -62,6 +62,11 @@ const CONTENT_SCHEMA = {
     type: 'string' as const,
     default: 'Here are the questions we hear most often and why they shouldn\'t hold you back.'
   },
+  // Pipe-separated fields (preferred format for AI generation)
+  objection_questions: { type: 'string' as const, default: '' },
+  objection_responses: { type: 'string' as const, default: '' },
+  objection_labels: { type: 'string' as const, default: '' },
+  objection_icons: { type: 'string' as const, default: '' },
   // Individual tile fields
   tile_objection_1: { type: 'string' as const, default: 'Too expensive for small teams' },
   tile_response_1: { type: 'string' as const, default: 'Actually starts at just $10/month with no hidden fees' },

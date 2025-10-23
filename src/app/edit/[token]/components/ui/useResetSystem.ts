@@ -22,9 +22,9 @@ export function useResetSystem() {
         : 'Reset everything to LessGo-generated';
       
       showToast(message, 'success');
-      
+
     } catch (error) {
-      console.error('Reset failed:', error);
+      // console.error('Reset failed:', error);
       showToast('Reset failed. Please try again.', 'error');
     }
   }, [resetToGenerated, triggerAutoSave, showToast]);

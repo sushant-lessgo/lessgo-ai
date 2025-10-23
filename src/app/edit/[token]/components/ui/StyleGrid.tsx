@@ -3,8 +3,8 @@
 
 import React, { useMemo, useState } from 'react';
 import { StyleOption } from './StyleOption';
-import { getBackgroundPreview } from './backgroundCompatibility';
-import type { BackgroundVariation, BackgroundSelectorMode } from '@/types/core';
+import { getBackgroundPreview, type BackgroundVariation } from './backgroundCompatibility';
+import type { BackgroundSelectorMode } from '@/types/core';
 
 import { logger } from '@/lib/logger';
 interface StyleGridProps {
@@ -34,7 +34,7 @@ export function StyleGrid({
   searchQuery = '',
   filterBy = 'all',
 }: StyleGridProps) {
-  logger.debug('📋 StyleGrid received variations:', { count: variations?.length || 0, variations });
+  // logger.debug('📋 StyleGrid received variations:', { count: variations?.length || 0, variations });
 
   // Simplified: just limit to 6 variations
   const processedVariations = useMemo(() => {
@@ -46,14 +46,13 @@ export function StyleGrid({
   }, [variations]);
 
   const handleVariationClick = (variation: BackgroundVariation) => {
-    logger.debug('🕹️ [STYLEGRID DEBUG] handleVariationClick called with:', {
-      id: variation.id,
-      label: variation.label,
-      css: variation.css,
-      baseColor: variation.baseColor,
-      category: variation.category,
-      timestamp: new Date().toISOString()
-    });
+    // logger.debug('🕹️ [STYLEGRID DEBUG] handleVariationClick called with:', {
+    //   variationId: variation.variationId,
+    //   variationLabel: variation.variationLabel,
+    //   archetypeId: variation.archetypeId,
+    //   themeId: variation.themeId,
+    //   timestamp: new Date().toISOString()
+    // });
     onVariationSelect(variation);
   };
 

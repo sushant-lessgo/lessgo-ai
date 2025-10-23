@@ -129,10 +129,10 @@ export const DEFAULT_PLACEHOLDERS: Record<string, DefaultValue> = {
   min_units: 1,
   max_units: 100,
   default_units: 10,
-  tier_breakpoints: [10, 50, 100],
-  tier_discounts: [0, 10, 20],
+  tier_breakpoints: '10,50,100',
+  tier_discounts: '0,10,20',
   popular_labels: ['Most Popular', 'Best Value'],
-  popular_tiers: [1],
+  popular_tiers: '1',
 
   // === TEXT LABELS & NAMES ===
   customer_label: 'Happy Customers',
@@ -154,7 +154,7 @@ export const DEFAULT_PLACEHOLDERS: Record<string, DefaultValue> = {
   video_url: '',
   video_duration: '2:30',
   testimonial_date: '2 weeks ago',
-  testimonial_ratings: [5, 5, 4, 5],
+  testimonial_ratings: '5,5,4,5',
   countdown_end_date: '2024-12-31',
   countdown_end_time: '23:59:59',
 };

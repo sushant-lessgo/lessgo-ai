@@ -219,12 +219,12 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
           if (targetInfo) {
             updateElementContent(targetInfo.sectionId, targetInfo.elementKey, previewUrl);
           } else {
-            console.error('❌ Could not parse targetId:', targetId);
+            // console.error('❌ Could not parse targetId:', targetId);
           }
 
           setIsUploading(false);
         } catch (error) {
-          console.error('Error updating image:', error);
+          // console.error('Error updating image:', error);
           setUploadError('Failed to update image. Please try again.');
           setIsUploading(false);
         }
@@ -265,9 +265,9 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
     if (targetInfo) {
       updateElementContent(targetInfo.sectionId, targetInfo.elementKey, editedImageUrl);
     } else {
-      console.error('❌ Could not parse targetId for edited image:', targetId);
+      // console.error('❌ Could not parse targetId for edited image:', targetId);
     }
-    
+
     setShowEditor(false);
   };
 
@@ -436,9 +436,9 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
             if (targetInfo) {
               updateElementContent(targetInfo.sectionId, targetInfo.elementKey, stockPhoto.url);
             } else {
-              console.error('❌ Could not parse targetId for stock photo:', targetId);
+              // console.error('❌ Could not parse targetId for stock photo:', targetId);
             }
-            
+
             setShowStockPhotos(false);
           }}
         />,
@@ -550,10 +550,10 @@ function StockPhotosPanel({ position, onClose, onSelectImage }: {
       if (!data.success) {
         throw new Error(data.error || 'Failed to load photos');
       }
-      
+
       setSearchResults(data.photos);
     } catch (err) {
-      console.error('Error loading featured photos:', err);
+      // console.error('Error loading featured photos:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to load photos. Please check your API key.';
       setError(errorMessage);
     } finally {
@@ -591,11 +591,11 @@ function StockPhotosPanel({ position, onClose, onSelectImage }: {
       if (!data.success) {
         throw new Error(data.error || 'Search failed');
       }
-      
+
       setSearchResults(data.photos);
     } catch (err) {
       setError('Search failed. Please try again.');
-      console.error('Error searching photos:', err);
+      // console.error('Error searching photos:', err);
     } finally {
       setIsSearching(false);
     }
@@ -634,11 +634,11 @@ function StockPhotosPanel({ position, onClose, onSelectImage }: {
       if (!data.success) {
         throw new Error(data.error || 'Failed to load category photos');
       }
-      
+
       setSearchResults(data.photos);
     } catch (err) {
       setError('Failed to load category photos.');
-      console.error('Error loading category photos:', err);
+      // console.error('Error loading category photos:', err);
     } finally {
       setIsSearching(false);
     }

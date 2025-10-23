@@ -1002,7 +1002,7 @@ function getAIGeneratedElements(layoutName: string) {
     // Get section elements where generation = 'ai_generated'
     const aiSectionElements = schema.sectionElements
       .filter(el => el.generation === 'ai_generated')
-      .map(el => ({ ...el, isCard: el.isCard || false })); // Preserve isCard from schema
+      .map(el => ({ ...el, isCard: (el as any).isCard || false })); // Preserve isCard from schema if exists
 
     // Get card elements if cardStructure.generation = 'ai_generated'
     const aiCardElements = schema.cardStructure && schema.cardStructure.generation === 'ai_generated'
@@ -1876,6 +1876,11 @@ function getSpecificElementGuidance(elementName: string, sectionType: string): s
  */
 function buildStrategicContext(strategy: ParsedStrategy): string {
   const { copyStrategy } = strategy;
+
+  // Guard against null copyStrategy (should not happen if called correctly)
+  if (!copyStrategy) {
+    return '';
+  }
 
   return `STRATEGIC FOUNDATION FOR COPY EXECUTION:
 

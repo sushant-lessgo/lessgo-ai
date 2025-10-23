@@ -69,11 +69,6 @@ const parseHighlightData = (titles: string, descriptions: string): HighlightItem
 
 
 // Helper function to get highlight icon
-// Debug logging for StackedHighlights
-  if (process.env.NEXT_PUBLIC_DEBUG_ICON_SELECTION === 'true') {
-    console.log('🎯 [ICON] StackedHighlights - Processing highlight icons');
-  }
-
   const getHighlightIcon = (blockContent: StackedHighlightsContent, index: number, highlightItems: HighlightItem[]) => {
   const iconFields = [
     blockContent.highlight_icon_1,

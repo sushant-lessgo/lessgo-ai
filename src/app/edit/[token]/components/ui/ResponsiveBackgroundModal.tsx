@@ -60,7 +60,7 @@ export function ResponsiveBackgroundModal({ isOpen, onClose, tokenId }: Responsi
 
   const handleOptionSelect = (variation: any) => {
     const backgroundSystem = {
-      primary: variation.tailwindClass,
+      primary: variation.css,
       secondary: `bg-${variation.baseColor}-50`,
       neutral: 'bg-white',
       divider: `bg-${variation.baseColor}-100/50`,
@@ -203,16 +203,16 @@ export function ResponsiveBackgroundModal({ isOpen, onClose, tokenId }: Responsi
                         onClick={() => handleOptionSelect(option)}
                         className={`
                           p-3 border rounded-lg transition-all duration-200
-                          ${previewBackground?.primary === option.tailwindClass
+                          ${previewBackground?.primary === option.css
                             ? 'border-blue-500 ring-2 ring-blue-200'
                             : 'border-gray-200 hover:border-gray-300'
                           }
                         `}
                         disabled={isLoading}
                       >
-                        <div className={`w-full h-16 ${option.tailwindClass} rounded mb-2`}></div>
+                        <div className="w-full h-16 rounded mb-2" style={{ background: option.css }}></div>
                         <div className="text-xs text-gray-600 truncate font-medium">
-                          {option.variationLabel}
+                          {option.label}
                         </div>
                         <div className="text-xs text-gray-500 capitalize">
                           {option.baseColor}

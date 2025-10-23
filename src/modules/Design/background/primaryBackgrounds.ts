@@ -596,4 +596,4 @@ export const backgroundStats = {
 };
 
 // Log stats for debugging
-console.log('📊 Primary Backgrounds loaded:', backgroundStats);
+// console.log('📊 Primary Backgrounds loaded:', backgroundStats);

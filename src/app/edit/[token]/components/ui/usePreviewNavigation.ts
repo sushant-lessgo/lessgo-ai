@@ -39,10 +39,10 @@ export function usePreviewNavigation(tokenId: string) {
       }
       
       const newWindow = window.open(previewUrl, '_blank');
-      
+
       setIsNavigating(false);
     } catch (error) {
-      console.error('❌ Preview navigation failed:', error);
+      // console.error('❌ Preview navigation failed:', error);
       showToast('Failed to save changes. Please try again.', 'error');
       setIsNavigating(false);
     }

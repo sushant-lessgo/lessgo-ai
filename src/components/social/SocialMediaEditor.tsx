@@ -97,7 +97,7 @@ const SocialMediaEditor: React.FC<SocialMediaEditorProps> = ({
 
     if (!isValid) {
       // You could show an error message here if needed
-      console.error('Invalid URL:', error);
+      // console.error('Invalid URL:', error);
       return;
     }
 

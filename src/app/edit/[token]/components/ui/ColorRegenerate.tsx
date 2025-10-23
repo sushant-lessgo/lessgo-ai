@@ -90,10 +90,10 @@ export function ColorRegenerate({
           hex: candidate.hex
         };
       });
-      
+
       setCandidates(colorOptions);
     } catch (error) {
-      console.error('Error generating color candidates:', error);
+      // console.error('Error generating color candidates:', error);
       // Fallback candidates
       setCandidates([
         { name: 'Complementary Purple', value: 'purple', tailwindClass: 'bg-purple-600', hex: '#9333ea' },

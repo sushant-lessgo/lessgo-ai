@@ -45,14 +45,14 @@ export function getIcon(
     // Check if we got a valid match (not fallback)
     const isValidMatch = isValidCategory(category) || icon !== '⭐';
 
-    if (debugMode) {
-      console.log('🎯 [ICON] getIcon - AI category:', {
-        category,
-        isValid: isValidMatch,
-        resolvedIcon: icon,
-        usedFallback: !isValidMatch
-      });
-    }
+    // if (debugMode) {
+    //   console.log('🎯 [ICON] getIcon - AI category:', {
+    //     category,
+    //     isValid: isValidMatch,
+    //     resolvedIcon: icon,
+    //     usedFallback: !isValidMatch
+    //   });
+    // }
 
     // If we got a valid match, return it
     if (isValidMatch) {
@@ -73,21 +73,21 @@ export function getIcon(
     const inferredCategory = inferCategoryFromText(context.title, context.description);
     const icon = getIconForCategory(inferredCategory);
 
-    if (debugMode) {
-      console.log('🎯 [ICON] getIcon - Inferred from context:', {
-        title: context.title,
-        inferredCategory,
-        resolvedIcon: icon
-      });
-    }
+    // if (debugMode) {
+    //   console.log('🎯 [ICON] getIcon - Inferred from context:', {
+    //     title: context.title,
+    //     inferredCategory,
+    //     resolvedIcon: icon
+    //   });
+    // }
 
     return icon;
   }
 
   // Priority 3: Default fallback
-  if (debugMode) {
-    console.log('🎯 [ICON] getIcon - Using default fallback: ⭐');
-  }
+  // if (debugMode) {
+  //   console.log('🎯 [ICON] getIcon - Using default fallback: ⭐');
+  // }
 
   return '⭐';
 }

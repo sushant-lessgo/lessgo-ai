@@ -77,15 +77,15 @@ export default function RightPanel() {
 
   // Sprint 7: Handle asset modal completion - directly trigger generation
   const handleAssetModalComplete = (availability: any) => {
-    console.log('🎨 [ASSET-DEBUG] Asset availability confirmed in modal:', {
-      availability,
-      productImages: availability.productImages,
-      customerLogos: availability.customerLogos,
-      testimonials: availability.testimonials,
-      founderPhoto: availability.founderPhoto,
-      integrationLogos: availability.integrationLogos,
-      demoVideo: availability.demoVideo
-    });
+    // console.log('🎨 [ASSET-DEBUG] Asset availability confirmed in modal:', {
+    //   availability,
+    //   productImages: availability.productImages,
+    //   customerLogos: availability.customerLogos,
+    //   testimonials: availability.testimonials,
+    //   founderPhoto: availability.founderPhoto,
+    //   integrationLogos: availability.integrationLogos,
+    //   demoVideo: availability.demoVideo
+    // });
 
     logger.debug('Asset availability confirmed:', availability);
 
@@ -97,7 +97,7 @@ export default function RightPanel() {
     // Pass assetAvailability DIRECTLY to generatePage to avoid timing issues
     // This ensures the asset data is available immediately, not relying on store propagation
     if (generatePage && typeof generatePage === 'function') {
-      console.log('🎨 [ASSET-DEBUG] Calling generatePage with direct asset availability:', availability);
+      // console.log('🎨 [ASSET-DEBUG] Calling generatePage with direct asset availability:', availability);
       logger.debug('🎨 [ASSET-MODAL] Starting page generation with direct asset data...');
       generatePage(availability);
     } else {

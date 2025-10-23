@@ -531,7 +531,7 @@ const finalSections: OrderedSection[] = processedSections
       
       // Run CSS variable validation in development
       import('@/utils/cssVariableValidation').then(({ runCSSVariableValidation }) => {
-        runCSSVariableValidation(effectiveTokenId).catch(console.error);
+        runCSSVariableValidation(effectiveTokenId).catch((error) => logger.error('CSS variable validation failed:', error));
       });
     }
   }, [featureFlags, shouldUseVariableSystem, effectiveTokenId]);

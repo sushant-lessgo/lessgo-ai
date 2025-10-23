@@ -528,8 +528,15 @@ function createStrategyFailure(reason: string): ParsedStrategy {
   return {
     success: false,
     copyStrategy: null, // Signal failure - let route.ts handle fallback
-    cardCounts: {},
-    reasoning: {},
+    cardCounts: getGenericDefaultCounts(), // Use proper default counts
+    reasoning: {
+      features: '',
+      testimonials: '',
+      faq: '',
+      results: '',
+      social_proof: '',
+      overall: ''
+    },
     errors: [reason],
     warnings: []
   };
@@ -720,7 +727,7 @@ export function parseStrategyResponse(
 
     // Log successful parsing
     logger.info('✅ Strategy parsed successfully:', {
-      bigIdea: result.copyStrategy.bigIdea?.substring(0, 60) + '...' || 'undefined',
+      bigIdea: result.copyStrategy?.bigIdea?.substring(0, 60) + '...' || 'undefined',
       cardCountKeys: Object.keys(result.cardCounts),
       totalCards: Object.values(result.cardCounts).reduce((sum, count) => sum + count, 0),
       warningCount: result.warnings.length,

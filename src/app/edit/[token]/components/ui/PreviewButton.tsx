@@ -45,7 +45,7 @@ export function PreviewButton({ tokenId }: PreviewButtonProps) {
     try {
       handlePreviewClick();
     } catch (error) {
-      console.error('❌ Preview click error:', error);
+      // console.error('❌ Preview click error:', error);
     }
   };
 

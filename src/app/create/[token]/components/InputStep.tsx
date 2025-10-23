@@ -55,12 +55,12 @@ export default function InputStep({ onSuccess, onProcessingStart }: InputStepPro
     
     // Validation
     if (!input.trim()) {
-      setError("Please enter your startup idea");
+      setError("Please enter your product description");
       return;
     }
 
     if (input.trim().length < 10) {
-      setError("Please provide more details about your startup idea");
+      setError("Please provide more details about your product");
       return;
     }
 
@@ -226,11 +226,11 @@ export default function InputStep({ onSuccess, onProcessingStart }: InputStepPro
       className="space-y-4 p-6 bg-white rounded-lg shadow-md border border-gray-200"
       noValidate
     >
-      <label 
-        htmlFor="startup-idea" 
+      <label
+        htmlFor="startup-idea"
         className="block text-lg font-semibold text-brand-text"
       >
-        Step 1 of 2: What's your startup idea?
+        Step 1 of 2: What's your product description?
       </label>
 
       <div className="relative">
@@ -248,13 +248,12 @@ export default function InputStep({ onSuccess, onProcessingStart }: InputStepPro
           rows={3}
           maxLength={500}
           className={`
-            w-full px-4 py-3 min-h-[96px] bg-transparent text-black caret-black 
+            w-full px-4 py-3 min-h-[96px] bg-transparent text-black caret-black
             focus:outline-none focus:ring-2 border rounded-md transition-all duration-200
-            ${error 
-              ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
+            ${error
+              ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
               : 'border-gray-300 focus:ring-brand-accentPrimary focus:border-brand-accentPrimary'
             }
-            ${input.length === 0 ? 'animate-pulse-border' : ''}
           `}
           disabled={loading}
           aria-describedby={error ? "input-error" : "input-help"}
@@ -269,7 +268,7 @@ export default function InputStep({ onSuccess, onProcessingStart }: InputStepPro
       {/* Help text */}
       {!error && (
         <p id="input-help" className="text-sm text-gray-500">
-          Describe your startup idea in 1-2 sentences. We'll analyze it and guide you through building your landing page step by step.
+          Describe your product in 1-2 sentences. We'll analyze it and guide you through building your landing page step by step.
         </p>
       )}
 

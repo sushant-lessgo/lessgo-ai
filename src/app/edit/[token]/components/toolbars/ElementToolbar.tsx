@@ -109,7 +109,7 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
       await regenerateElementWithVariations(elementSelection.sectionId, elementSelection.elementKey, 5);
       announceLiveRegion('Generated variations');
     } catch (error) {
-      console.error('Failed to generate variations:', error);
+      // console.error('Failed to generate variations:', error);
       announceLiveRegion('Failed to generate variations');
     }
   };

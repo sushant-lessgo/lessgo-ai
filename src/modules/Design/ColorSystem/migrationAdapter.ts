@@ -92,8 +92,8 @@ export class BackgroundSystemAdapter {
       };
 
     } catch (error) {
-      console.error(`Failed to convert variation ${variation.variationId}:`, error);
-      
+      // console.error(`Failed to convert variation ${variation.variationId}:`, error);
+
       // Return legacy-only variation
       return {
         variationId: variation.variationId,

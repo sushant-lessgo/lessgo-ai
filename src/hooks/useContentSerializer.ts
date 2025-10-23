@@ -58,7 +58,7 @@ export const useContentSerializer = (): UseContentSerializerReturn => {
     const validation = validateContentStructure(data);
     
     if (!validation.isValid) {
-      console.error('Content validation failed:', validation.errors);
+      // console.error('Content validation failed:', validation.errors);
       throw new Error(`Invalid content structure: ${validation.errors.join(', ')}`);
     }
 

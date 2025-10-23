@@ -4,8 +4,8 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { generateCompleteBackgroundSystem } from '@/modules/Design/background/backgroundIntegration';
-import { getCompatibleBackgrounds } from './backgroundCompatibility';
-import type { BackgroundSystem, BackgroundVariation, BackgroundSelectorMode } from '@/types/core';
+import { getCompatibleBackgrounds, type BackgroundVariation } from './backgroundCompatibility';
+import type { BackgroundSystem, BackgroundSelectorMode } from '@/types/core';
 
 import { logger } from '@/lib/logger';
 export function useBackgroundSelector(tokenId: string) {

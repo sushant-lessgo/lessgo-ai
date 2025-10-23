@@ -257,10 +257,10 @@ export default function CTAWithFormField(props: LayoutComponentProps) {
         throw new Error(result.error || 'Submission failed');
       }
     } catch (error) {
-      console.error('Form submission error:', error);
+      // console.error('Form submission error:', error);
       setSubmitError(
-        error instanceof Error 
-          ? error.message 
+        error instanceof Error
+          ? error.message
           : 'Something went wrong. Please try again.'
       );
       // Auto-hide error message after 10 seconds

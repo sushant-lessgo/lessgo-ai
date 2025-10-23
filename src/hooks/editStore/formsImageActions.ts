@@ -534,7 +534,7 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
         return optimizedUrl;
         
       } catch (error) {
-        console.error('❌ Image optimization failed:', error);
+        logger.error('❌ Image optimization failed:', error);
         throw error;
       }
     },

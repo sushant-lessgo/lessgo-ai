@@ -2,10 +2,12 @@ interface LayoutElement {
   element: string;
   mandatory: boolean;
   generation?: 'ai_generated' | 'manual_preferred' | 'hybrid';
+  isCard?: boolean; // Indicates if this element is part of a card structure
+  description?: string; // Optional description or guidance for the element
 }
 
 interface CardStructure {
-  type: 'cards' | 'pairs' | 'items' | 'blocks' | 'steps' | 'triplets' | 'quadruplets' | 'sextuplets' | 'tabbed_pairs' | 'rows' | 'usage_based';
+  type: 'cards' | 'pairs' | 'items' | 'blocks' | 'steps' | 'triplets' | 'quadruplets' | 'sextuplets' | 'tabbed_pairs' | 'rows' | 'usage_based' | 'column_pairs';
   elements: string[];  // All card elements are mandatory by default
   generation: 'ai_generated' | 'manual_preferred' | 'hybrid';
 }

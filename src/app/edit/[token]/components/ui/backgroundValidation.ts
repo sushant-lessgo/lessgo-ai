@@ -132,8 +132,8 @@ export function validateBackgroundSystem(
     };
 
   } catch (error) {
-    console.error('Background validation error:', error);
-    
+    // console.error('Background validation error:', error);
+
     return {
       isValid: false,
       score: 0,

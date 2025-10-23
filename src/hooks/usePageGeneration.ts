@@ -83,16 +83,16 @@ export function usePageGeneration(tokenId: string) {
         ? directAssetAvailability
         : useOnboardingStore.getState().assetAvailability;
 
-      console.log('🎨 [ASSET-DEBUG] generateSections - Asset availability source:', {
-        wasPassedDirectly: directAssetAvailability !== undefined,
-        assetAvailability,
-        hasAssetAvailability: !!assetAvailability,
-        assetAvailabilityType: typeof assetAvailability,
-        assetAvailabilityKeys: assetAvailability ? Object.keys(assetAvailability) : null,
-        testimonials: assetAvailability?.testimonials,
-        customerLogos: assetAvailability?.customerLogos,
-        integrationLogos: assetAvailability?.integrationLogos
-      });
+      // console.log('🎨 [ASSET-DEBUG] generateSections - Asset availability source:', {
+      //   wasPassedDirectly: directAssetAvailability !== undefined,
+      //   assetAvailability,
+      //   hasAssetAvailability: !!assetAvailability,
+      //   assetAvailabilityType: typeof assetAvailability,
+      //   assetAvailabilityKeys: assetAvailability ? Object.keys(assetAvailability) : null,
+      //   testimonials: assetAvailability?.testimonials,
+      //   customerLogos: assetAvailability?.customerLogos,
+      //   integrationLogos: assetAvailability?.integrationLogos
+      // });
 
       // Fix: Filter out undefined values from hiddenInferredFields with proper typing
       const cleanHiddenFields: Record<string, string> = {};
@@ -102,7 +102,7 @@ export function usePageGeneration(tokenId: string) {
         }
       });
 
-      console.log('🎨 [ASSET-DEBUG] Calling getSectionsFromRules with assetAvailability:', assetAvailability);
+      // console.log('🎨 [ASSET-DEBUG] Calling getSectionsFromRules with assetAvailability:', assetAvailability);
 
       const sections = getSectionsFromRules({
         validatedFields,
@@ -111,13 +111,13 @@ export function usePageGeneration(tokenId: string) {
         assetAvailability,  // Sprint 7: Pass asset availability for section exclusions
       });
 
-      console.log('🎨 [ASSET-DEBUG] getSectionsFromRules returned sections:', {
-        sections,
-        sectionCount: sections.length,
-        hasTestimonials: sections.includes('testimonials'),
-        hasSocialProof: sections.includes('socialProof'),
-        hasIntegrations: sections.includes('integrations')
-      });
+      // console.log('🎨 [ASSET-DEBUG] getSectionsFromRules returned sections:', {
+      //   sections,
+      //   sectionCount: sections.length,
+      //   hasTestimonials: sections.includes('testimonials'),
+      //   hasSocialProof: sections.includes('socialProof'),
+      //   hasIntegrations: sections.includes('integrations')
+      // });
 
       if (!sections || sections.length === 0) {
         throw new Error('No sections could be generated from your business data');
