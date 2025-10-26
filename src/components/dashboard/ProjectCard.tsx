@@ -109,6 +109,12 @@ export default function ProjectCard({ project, onEdit, onPreview }: Props) {
               Preview
             </button>
             <button
+              onClick={() => router.push(`/dashboard/analytics/${project.slug}`)}
+              className="border border-purple-200 bg-purple-50 text-purple-600 text-sm px-3 py-1 rounded-md hover:bg-purple-100 transition"
+            >
+              📊 Analytics
+            </button>
+            <button
               onClick={() => router.push(`/dashboard/forms/${project.slug}`)}
               className="border border-blue-200 bg-blue-50 text-blue-600 text-sm px-3 py-1 rounded-md hover:bg-blue-100 transition"
             >

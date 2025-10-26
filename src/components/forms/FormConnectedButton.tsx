@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { FormRenderer } from './FormRenderer';
 import { logger } from '@/lib/logger';
+import { useAnalytics } from '@/app/p/[slug]/components/AnalyticsContext';
 
 interface ButtonConfig {
   type: 'link' | 'form';
@@ -21,14 +22,32 @@ interface FormConnectedButtonProps {
   onClick?: () => void;
   userId?: string;
   publishedPageId?: string;
+  pageSlug?: string; // For analytics tracking
 }
 
-export function FormConnectedButton({ buttonConfig, className, children, onClick, userId, publishedPageId }: FormConnectedButtonProps) {
+export function FormConnectedButton({ buttonConfig, className, children, onClick, userId, publishedPageId, pageSlug }: FormConnectedButtonProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { getFormById } = useEditStore();
+  const analytics = useAnalytics();
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
+
+    // Track CTA click analytics
+    const slug = pageSlug || analytics.pageSlug;
+    if (slug && children) {
+      analytics.trackEvent('landing_page_cta_click', {
+        cta_text: typeof children === 'string' ? children : 'Button',
+        cta_action: buttonConfig?.type || 'unknown',
+        cta_behavior: buttonConfig?.behavior || null,
+      });
+
+      logger.debug('📊 Analytics: CTA click tracked', {
+        slug,
+        ctaText: children,
+        action: buttonConfig?.type,
+      });
+    }
 
     // If there's a custom onClick handler, use it
     if (onClick) {
@@ -44,7 +63,7 @@ export function FormConnectedButton({ buttonConfig, className, children, onClick
           window.open(buttonConfig.url, '_blank');
         }
         break;
-        
+
       case 'form':
         if (buttonConfig.formId) {
           const form = getFormById(buttonConfig.formId);
@@ -82,10 +101,11 @@ export function FormConnectedButton({ buttonConfig, className, children, onClick
               <DialogTitle>{form.name}</DialogTitle>
             </DialogHeader>
             <div className="mt-4">
-              <FormRenderer 
-                form={form} 
+              <FormRenderer
+                form={form}
                 userId={userId}
                 publishedPageId={publishedPageId}
+                pageSlug={pageSlug}
                 mode="modal"
               />
             </div>

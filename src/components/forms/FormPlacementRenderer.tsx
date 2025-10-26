@@ -9,9 +9,10 @@ interface FormPlacementRendererProps {
   className?: string;
   userId?: string;
   publishedPageId?: string;
+  pageSlug?: string; // For analytics tracking
 }
 
-export function FormPlacementRenderer({ sectionId, className, userId, publishedPageId }: FormPlacementRendererProps) {
+export function FormPlacementRenderer({ sectionId, className, userId, publishedPageId, pageSlug }: FormPlacementRendererProps) {
   const { content, getAllForms } = useEditStore();
   
   // Get all forms that should be rendered inline in this section
@@ -43,10 +44,11 @@ export function FormPlacementRenderer({ sectionId, className, userId, publishedP
     <div className={className}>
       {formsToRender.map((form) => (
         <div key={form.id} id={`form-${form.id}`} className="mb-8">
-          <FormRenderer 
-            form={form} 
+          <FormRenderer
+            form={form}
             userId={userId}
             publishedPageId={publishedPageId}
+            pageSlug={pageSlug}
             mode="inline"
           />
         </div>

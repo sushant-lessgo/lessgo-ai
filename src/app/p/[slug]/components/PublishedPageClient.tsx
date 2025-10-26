@@ -1,9 +1,12 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { EditProvider, useEditStoreContext } from '@/components/EditProvider';
 import { useOnboardingStore } from '@/hooks/useOnboardingStore';
 import LandingPageRenderer from '@/modules/generatedLanding/LandingPageRenderer';
+import posthog from 'posthog-js';
+import { AnalyticsProvider } from './AnalyticsContext';
 
 import { logger } from '@/lib/logger';
 interface PublishedPageData {
@@ -24,8 +27,53 @@ interface PublishedPageClientProps {
 function PublishedPageContent({ pageData }: { pageData: PublishedPageData }) {
   const { store } = useEditStoreContext();
   const onboardingStore = useOnboardingStore();
+  const searchParams = useSearchParams();
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Analytics: Track page view and exit
+  useEffect(() => {
+    const startTime = Date.now();
+
+    // Track page view
+    posthog.capture('landing_page_view', {
+      page_slug: pageData.slug,
+      page_type: 'published',
+      referrer: typeof document !== 'undefined' ? document.referrer : null,
+      utm_source: searchParams?.get('utm_source') || null,
+      utm_medium: searchParams?.get('utm_medium') || null,
+      utm_campaign: searchParams?.get('utm_campaign') || null,
+    });
+
+    logger.debug('📊 Analytics: Page view tracked', {
+      slug: pageData.slug,
+      utm_source: searchParams?.get('utm_source'),
+      utm_medium: searchParams?.get('utm_medium'),
+    });
+
+    // Track page exit with time on page
+    const handleExit = () => {
+      const timeOnPage = Date.now() - startTime;
+      posthog.capture('landing_page_exit', {
+        page_slug: pageData.slug,
+        time_on_page: timeOnPage,
+      });
+
+      logger.debug('📊 Analytics: Page exit tracked', {
+        slug: pageData.slug,
+        timeOnPage: Math.round(timeOnPage / 1000) + 's',
+      });
+    };
+
+    // Listen for page unload
+    window.addEventListener('beforeunload', handleExit);
+
+    // Cleanup
+    return () => {
+      handleExit();
+      window.removeEventListener('beforeunload', handleExit);
+    };
+  }, [pageData.slug, searchParams]);
 
   useEffect(() => {
     const loadPublishedData = async () => {
@@ -140,11 +188,13 @@ function PublishedPageContent({ pageData }: { pageData: PublishedPageData }) {
     );
   }
 
-  // Render with LandingPageRenderer
+  // Render with LandingPageRenderer wrapped in AnalyticsProvider
   return (
-    <div className="min-h-screen bg-white">
-      <LandingPageRenderer tokenId={`published-${pageData.slug}`} />
-    </div>
+    <AnalyticsProvider pageSlug={pageData.slug}>
+      <div className="min-h-screen bg-white">
+        <LandingPageRenderer tokenId={`published-${pageData.slug}`} />
+      </div>
+    </AnalyticsProvider>
   );
 }
 

@@ -80,7 +80,9 @@
       "Bash(do echo \"=== $file ===\")",
       "Bash(done)",
       "Bash(for file in pickBeforeAfter.ts pickFeature.ts pickResultsLayout.ts pickObjectionLayout.ts)",
-      "Bash(do grep -n \"Find the highest scoring layout\" src/modules/sections/$file)"
+      "Bash(do grep -n \"Find the highest scoring layout\" src/modules/sections/$file)",
+      "Bash(npx prisma migrate:*)",
+      "Bash(npx prisma db push:*)"
     ],
     "deny": [],
     "ask": [],

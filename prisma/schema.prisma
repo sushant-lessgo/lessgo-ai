@@ -25,12 +25,13 @@ model Project {
   title       String   @default("Untitled Project")
   status      String   @default("draft")
   content     Json?
-  
-  themeValues Json?        
+
+  themeValues Json?
+  computedDesign Json?
   inputText   String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
+
 }
 
 model Token {
@@ -49,6 +50,7 @@ model PublishedPage {
   htmlContent String
   content     Json?
   themeValues Json?
+  computedDesign Json?
   projectId   String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -103,4 +105,44 @@ model UserIntegration {
 
   @@unique([userId, type, name])
   @@index([userId])
+}
+
+model PageAnalytics {
+  id              String   @id @default(cuid())
+  slug            String   // Published page slug
+  date            DateTime @db.Date
+
+  // Core metrics (aggregated from PostHog)
+  views           Int      @default(0)
+  uniqueVisitors  Int      @default(0)
+  formSubmissions Int      @default(0)
+  conversionRate  Float    @default(0) // Calculated: submissions/views
+
+  // Engagement metrics
+  avgTimeOnPage   Int?     // Seconds
+  medianTimeOnPage Int?    // Seconds
+  bounceRate      Float?   // % who left without action
+  ctaClicks       Int      @default(0)
+
+  // Traffic sources (top 5 per day, JSON format)
+  topReferrers    Json?    // {"google.com": 234, "twitter.com": 156, ...}
+  topUtmSources   Json?    // {"producthunt": 189, "twitter": 145, ...}
+
+  // Device breakdown
+  desktopViews    Int      @default(0)
+  mobileViews     Int      @default(0)
+  tabletViews     Int      @default(0)
+
+  // Conversion by device
+  desktopConversions Int   @default(0)
+  mobileConversions  Int   @default(0)
+  tabletConversions  Int   @default(0)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([slug, date])
+  @@index([slug, date])
+  @@index([date])
+  @@index([slug])
 }

@@ -4,8 +4,8 @@ import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useOnboardingStore } from '@/hooks/useOnboardingStore';
 import { sectionList } from '@/modules/sections/sectionList';
 import { getComponent } from '@/modules/generatedLanding/componentRegistry';
-import { 
-  generateCompleteBackgroundSystem, 
+import {
+  generateCompleteBackgroundSystem,
   getSectionBackgroundTypeWithContext,
   assignEnhancedBackgroundsToAllSections
 } from '@/modules/Design/background/backgroundIntegration';
@@ -14,6 +14,7 @@ import { VariableThemeInjector } from '@/modules/Design/ColorSystem/VariableThem
 // import { VariableBackgroundRenderer } from '@/modules/Design/ColorSystem/VariableBackgroundRenderer'; // Disabled
 import { CSSVariableErrorBoundary } from '@/components/CSSVariableErrorBoundary';
 import { useFeatureFlags } from '@/utils/featureFlags';
+import { SectionTracker } from '@/app/p/[slug]/components/SectionTracker';
 
 import { logger } from '@/lib/logger';
 // ... (font loading utility remains the same)
@@ -385,39 +386,47 @@ const finalSections: OrderedSection[] = processedSections
       // Choose rendering method based on feature flags
       if (shouldUseVariableSystem) {
         return (
-          <div
+          <SectionTracker
             key={sectionId}
-            className="relative"
+            sectionId={sectionId}
+            sectionType={layout}
           >
-            <LayoutComponent
-              sectionId={sectionId}
-              backgroundType={backgroundType}
-              sectionBackgroundCSS={sectionBackgroundCSS}
-              className=""
-              isEditable={mode !== 'preview'}
-              {...(data || {})}
-            />
-          </div>
+            <div className="relative">
+              <LayoutComponent
+                sectionId={sectionId}
+                backgroundType={backgroundType}
+                sectionBackgroundCSS={sectionBackgroundCSS}
+                className=""
+                isEditable={mode !== 'preview'}
+                {...(data || {})}
+              />
+            </div>
+          </SectionTracker>
         );
       } else {
         // Legacy rendering with SmartTextSection
         return (
-          <SmartTextSection
+          <SectionTracker
             key={sectionId}
-            backgroundType={backgroundType}
             sectionId={sectionId}
-            sectionBackgroundCSS={sectionBackgroundCSS}
-            className=""
+            sectionType={layout}
           >
-            <LayoutComponent
-              sectionId={sectionId}
+            <SmartTextSection
               backgroundType={backgroundType}
+              sectionId={sectionId}
               sectionBackgroundCSS={sectionBackgroundCSS}
               className=""
-              isEditable={mode !== 'preview'}
-              {...(data || {})}
-            />
-          </SmartTextSection>
+            >
+              <LayoutComponent
+                sectionId={sectionId}
+                backgroundType={backgroundType}
+                sectionBackgroundCSS={sectionBackgroundCSS}
+                className=""
+                isEditable={mode !== 'preview'}
+                {...(data || {})}
+              />
+            </SmartTextSection>
+          </SectionTracker>
         );
       }
     } catch (error) {
