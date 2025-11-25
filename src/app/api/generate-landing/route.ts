@@ -7,6 +7,8 @@ import { parseStrategyResponse, applyCardCountConstraints } from "@/modules/prom
 import { getCompleteElementsMap } from "@/modules/sections/elementDetermination"
 import { logger } from '@/lib/logger'
 import { withAIRateLimit } from '@/lib/rateLimit'
+import { requireAICredits } from '@/lib/middleware/planCheck'
+import { consumeCredits, UsageEventType, CREDIT_COSTS } from '@/lib/creditSystem'
 
 // Debug mode environment variables
 const DEBUG_AI_PROMPTS = process.env.DEBUG_AI_PROMPTS === 'true';
@@ -156,11 +158,22 @@ function classifyError(error: any): {
 
 async function generateLandingHandler(req: NextRequest) {
   logger.dev("🚀 /api/generate-landing route called")
+  const startTime = Date.now();
+
   try {
+    // Check authentication and credits (10 credits for full page generation)
+    const creditCheck = await requireAICredits(req, UsageEventType.PAGE_GENERATION, CREDIT_COSTS.FULL_PAGE_GENERATION);
+    if (!creditCheck.allowed) {
+      return creditCheck.response!;
+    }
+
+    const userId = creditCheck.userId!;
+
     const body = await req.json()
     const { prompt, onboardingStore, pageStore, layoutRequirements, use2Phase = true } = body
 
     logger.dev("📝 Request received:", {
+      userId,
       hasPrompt: !!prompt,
       promptLength: prompt?.length || 0,
       hasOnboardingStore: !!onboardingStore,
@@ -544,9 +557,23 @@ async function generateLandingHandler(req: NextRequest) {
           totalExclusions: elementsMap ? Object.values(elementsMap).reduce((sum: number, s: any) => sum + (s.excludedElements?.length || 0), 0) : 0
         });
 
+        // Consume credits for successful page generation
+        const consumption = await consumeCredits(userId, UsageEventType.PAGE_GENERATION, CREDIT_COSTS.FULL_PAGE_GENERATION, {
+          endpoint: '/api/generate-landing',
+          duration: Date.now() - startTime,
+          metadata: { use2Phase: true, sections: Object.keys(parsed.content).length }
+        });
+
+        if (!consumption.success) {
+          logger.error('Credit consumption failed after generation:', consumption.error);
+          // Still return the generated content but log the error
+        }
+
         const responseWithElementsMap = {
           ...parsed,
-          elementsMap: elementsMap  // ✅ ADDED: Pass elementsMap to client
+          elementsMap: elementsMap,  // ✅ ADDED: Pass elementsMap to client
+          creditsUsed: CREDIT_COSTS.FULL_PAGE_GENERATION,
+          creditsRemaining: consumption.remaining
         };
 
         return NextResponse.json(responseWithElementsMap)
@@ -665,7 +692,21 @@ async function generateLandingHandler(req: NextRequest) {
       if (pageStore) {
         parsed.content = applyManualPreferredDefaults(parsed.content, pageStore);
       }
-      return NextResponse.json(parsed)
+
+      // Consume credits for successful page generation
+      const consumption = await consumeCredits(userId, UsageEventType.PAGE_GENERATION, CREDIT_COSTS.FULL_PAGE_GENERATION, {
+        endpoint: '/api/generate-landing',
+        duration: Date.now() - startTime,
+        metadata: { use2Phase: false }
+      });
+
+      const response = {
+        ...parsed,
+        creditsUsed: CREDIT_COSTS.FULL_PAGE_GENERATION,
+        creditsRemaining: consumption.remaining
+      };
+
+      return NextResponse.json(response)
     }
 
   } catch (err) {

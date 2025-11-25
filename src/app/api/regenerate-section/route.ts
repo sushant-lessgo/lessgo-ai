@@ -1,12 +1,25 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { buildSectionPrompt } from "@/modules/prompt/buildPrompt";
 import { parseAiResponse } from "@/modules/prompt/parseAiResponse";
 import { generateMockResponse } from "@/modules/prompt/mockResponseGenerator";
 import { logger } from '@/lib/logger';
 import { prisma } from '@/lib/prisma';
+import { withAIRateLimit } from '@/lib/rateLimit';
+import { requireAICredits } from '@/lib/middleware/planCheck';
+import { consumeCredits, UsageEventType, CREDIT_COSTS } from '@/lib/creditSystem';
 
-export async function POST(req: Request) {
+async function handler(req: NextRequest) {
+  const startTime = Date.now();
+
   try {
+    // Check authentication and credits (2 credits for section regeneration)
+    const creditCheck = await requireAICredits(req, UsageEventType.SECTION_REGEN, CREDIT_COSTS.SECTION_REGENERATION);
+    if (!creditCheck.allowed) {
+      return creditCheck.response!;
+    }
+
+    const userId = creditCheck.userId!;
+
     const body = await req.json();
     const { sectionId, tokenId, userGuidance, currentContent, sectionType, layout } = body;
     
@@ -202,11 +215,21 @@ ${prompt}`;
       }
     }
 
+    // Consume credits for successful section regeneration
+    const consumption = await consumeCredits(userId, UsageEventType.SECTION_REGEN, CREDIT_COSTS.SECTION_REGENERATION, {
+      endpoint: '/api/regenerate-section',
+      duration: Date.now() - startTime,
+      sectionId,
+      metadata: { sectionType, hasUserGuidance: !!userGuidance }
+    });
+
     return NextResponse.json({
       content: sectionContent,
       sectionId,
       originalContent: currentContent,
-      regenerationType: 'section'
+      regenerationType: 'section',
+      creditsUsed: CREDIT_COSTS.SECTION_REGENERATION,
+      creditsRemaining: consumption.remaining
     });
 
   } catch (err) {
@@ -428,3 +451,6 @@ async function callAIProvider(prompt: string, useOpenAI: boolean, model: string)
     return { success: false, error };
   }
 }
+
+// Export with rate limiting
+export const POST = withAIRateLimit(handler);

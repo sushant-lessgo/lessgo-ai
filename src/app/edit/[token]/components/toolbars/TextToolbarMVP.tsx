@@ -37,7 +37,7 @@ interface MVPFormatState {
   color: string;
 }
 
-// Font size presets (5-6 options)
+// Font size presets (10 options - including large headline sizes)
 const FONT_SIZE_PRESETS = [
   { value: '14px', label: 'Small', shortLabel: 'S' },
   { value: '16px', label: 'Default', shortLabel: 'M' },
@@ -45,6 +45,10 @@ const FONT_SIZE_PRESETS = [
   { value: '24px', label: 'Large', shortLabel: 'XL' },
   { value: '32px', label: 'X-Large', shortLabel: '2XL' },
   { value: '40px', label: 'XX-Large', shortLabel: '3XL' },
+  { value: '48px', label: 'Hero', shortLabel: '4XL' },
+  { value: '60px', label: 'Display', shortLabel: '5XL' },
+  { value: '72px', label: 'Jumbo', shortLabel: '6XL' },
+  { value: '96px', label: 'Massive', shortLabel: '8XL' },
 ];
 
 // Basic color palette + accent colors for highlighting

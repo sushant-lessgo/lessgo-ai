@@ -6,6 +6,8 @@ import { validateInferredFields, ValidationResult } from '@/modules/inference/va
 import { generateMockInferredFields, generateMockValidationResults } from '@/modules/mock/mockDataGenerators';
 import { logger } from '@/lib/logger';
 import { withAIRateLimit } from '@/lib/rateLimit';
+import { requireAICredits } from '@/lib/middleware/planCheck';
+import { consumeCredits, UsageEventType, CREDIT_COSTS } from '@/lib/creditSystem';
 
 const RequestSchema = z.object({
   input: z.string().min(1),
@@ -13,7 +15,17 @@ const RequestSchema = z.object({
 });
 
 async function inferFieldsHandler(req: NextRequest) {
+  const startTime = Date.now();
+
   try {
+    // Check authentication and credits (1 credit for field inference)
+    const creditCheck = await requireAICredits(req, UsageEventType.FIELD_INFERENCE, CREDIT_COSTS.FIELD_INFERENCE);
+    if (!creditCheck.allowed) {
+      return creditCheck.response!;
+    }
+
+    const userId = creditCheck.userId!;
+
     const body = await req.json();
     const { input, includeValidation } = RequestSchema.parse(body);
 
@@ -104,12 +116,21 @@ async function inferFieldsHandler(req: NextRequest) {
       });
     }
 
-    return Response.json({ 
-      success: true, 
+    // Consume credits for successful field inference
+    const consumption = await consumeCredits(userId, UsageEventType.FIELD_INFERENCE, CREDIT_COSTS.FIELD_INFERENCE, {
+      endpoint: '/api/infer-fields',
+      duration: Date.now() - startTime,
+      metadata: { includeValidation, inputLength: input.length }
+    });
+
+    return Response.json({
+      success: true,
       data: {
         raw: inferredFields,
         validated: validationResults,
-      }
+      },
+      creditsUsed: CREDIT_COSTS.FIELD_INFERENCE,
+      creditsRemaining: consumption.remaining
     });
     
   } catch (err: any) {

@@ -695,7 +695,16 @@ export function InlineTextEditor({
         element.style.color = formatState.color;
       }
       if (formatState.fontSize) {
-        element.style.fontSize = formatState.fontSize;
+        // ✅ FIX: Use !important for custom px sizes to override typography clamp()
+        const isCustomSize = formatState.fontSize.includes('px') &&
+                             !formatState.fontSize.includes('clamp');
+
+        if (isCustomSize) {
+          // Use setProperty with priority for custom sizes
+          element.style.setProperty('font-size', formatState.fontSize, 'important');
+        } else {
+          element.style.fontSize = formatState.fontSize;
+        }
       }
       if (formatState.fontFamily) {
         element.style.fontFamily = formatState.fontFamily;

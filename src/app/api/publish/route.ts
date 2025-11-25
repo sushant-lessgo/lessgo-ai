@@ -6,6 +6,7 @@ import { prisma } from '@/lib/prisma';
 import { PublishSchema, sanitizeForLogging } from '@/lib/validation';
 import { createSecureResponse, validateSlug, sanitizeHtmlContent, verifyProjectAccess } from '@/lib/security';
 import { withPublishRateLimit } from '@/lib/rateLimit';
+import { getUserPlan, checkLimit } from '@/lib/planManager';
 
 
 
@@ -58,29 +59,44 @@ async function publishHandler(req: NextRequest) {
 
       // A03: Injection Prevention - Sanitize HTML before update
       const sanitizedHtml = sanitizeHtmlContent(htmlContent);
-      
+
       await prisma.publishedPage.update({
         where: { slug },
-        data: { 
-          htmlContent: sanitizedHtml, 
-          title, 
-          content: content as any, 
-          themeValues: themeValues as any, 
+        data: {
+          htmlContent: sanitizedHtml,
+          title,
+          content: content as any,
+          themeValues: themeValues as any,
           projectId: project?.id || null,
-          updatedAt: new Date() 
+          updatedAt: new Date()
         }
       });
     } else {
+      // Check published pages limit before creating new page
+      const currentPublishedCount = await prisma.publishedPage.count({
+        where: { userId, isPublished: true }
+      });
+
+      const limitCheck = await checkLimit(userId, 'publishedPages', currentPublishedCount);
+      if (!limitCheck.allowed) {
+        return createSecureResponse({
+          error: 'Published pages limit reached',
+          message: `Your plan allows up to ${limitCheck.limit} published page(s). Upgrade to publish more.`,
+          limit: limitCheck.limit,
+          current: currentPublishedCount
+        }, 403);
+      }
+
       // A03: Injection Prevention - Sanitize HTML before creation
       const sanitizedHtml = sanitizeHtmlContent(htmlContent);
-      
+
       await prisma.publishedPage.create({
-        data: { 
-          userId, 
-          slug, 
-          htmlContent: sanitizedHtml, 
-          title, 
-          content: content as any, 
+        data: {
+          userId,
+          slug,
+          htmlContent: sanitizedHtml,
+          title,
+          content: content as any,
           themeValues: themeValues as any,
           projectId: project?.id || null
         }

@@ -46,46 +46,44 @@ Transform Lessgo from a free tool to a sustainable SaaS business by implementing
 **Price:** $0/month
 
 **Limits:**
-- 30 AI credits/month
+- 30 AI credits lifetime
 - 1 published page
 - 3 draft projects
-- 100 form submissions/month
-- Basic color themes (5 presets)
-- Standard fonts (10 themes)
+
 
 **Features:**
 - All core generation features
 - Visual editor access
 - Device preview
-- Form builder (basic)
+- Form builder
 - Lessgo.ai branding on published pages
-- Community support
+- Lessgo.ai sub domain
+- gpt-4o-mini model
+
+- **Form integrations** 
+- **Analytics dashboard** (views, submissions, conversions)
 
 **Cost to Serve:** ~$0.10 (AI) + $1.00 (infrastructure) = $1.10/user/month
 **Goal:** User acquisition, product validation, conversion funnel entry point
 
 ---
 
-### Pro Tier - "Grow"
+### Pro Tier -
 **Price:** $39/month (or $29/month billed annually)
 
 **Limits:**
 - 200 AI credits/month
 - 10 published pages
 - Unlimited drafts
-- 1,000 form submissions/month
 - 3 custom domains
 
 **Features:**
 - All Free tier features +
 - **Remove Lessgo.ai branding**
 - **Custom domain support**
-- Full color system (unlimited custom colors)
-- All font themes (40+ combinations)
-- **Form integrations** (ConvertKit, Mailchimp, Webhooks)
-- **Analytics dashboard** (views, submissions, conversions)
 - Priority email support (24-hour response)
 - Export analytics data
+- gpt-4o model
 
 **Cost to Serve:** ~$0.70 (AI) + $1.00 (infra) + $3.00 (support) = $4.70/user/month
 **Margin:** $34.30/user (88% margin at $39)
@@ -100,7 +98,6 @@ Transform Lessgo from a free tool to a sustainable SaaS business by implementing
 - 1,000 AI credits/month
 - Unlimited published pages
 - Unlimited drafts
-- 10,000 form submissions/month
 - Unlimited custom domains
 
 **Features:**

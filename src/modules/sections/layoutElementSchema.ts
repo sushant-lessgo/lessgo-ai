@@ -2651,6 +2651,30 @@ export const layoutElementSchema: LayoutSchema = {
     cardRequirements: null
   },
 
+  heroBeforeAfter: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "cta_text", mandatory: true, generation: "ai_generated" },
+      { element: "before_label", mandatory: true, generation: "ai_generated" },
+      { element: "after_label", mandatory: true, generation: "ai_generated" },
+      { element: "before_description", mandatory: true, generation: "ai_generated" },
+      { element: "after_description", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
+      { element: "badge_text", mandatory: false, generation: "ai_generated" },
+      { element: "trust_items", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_1", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_2", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_3", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_4", mandatory: false, generation: "ai_generated" },
+      { element: "trust_item_5", mandatory: false, generation: "ai_generated" },
+      { element: "before_image", mandatory: false, generation: "manual_preferred" },
+      { element: "after_image", mandatory: false, generation: "manual_preferred" },
+      { element: "slider_position", mandatory: false, generation: "manual_preferred" }
+    ],
+    cardRequirements: null
+  },
+
   // HowItWorks Section
   ThreeStepHorizontal: {
     sectionElements: [

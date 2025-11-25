@@ -146,3 +146,117 @@ model PageAnalytics {
   @@index([date])
   @@index([slug])
 }
+
+model UserPlan {
+  id              String   @id @default(cuid())
+  userId          String   @unique // Clerk User ID
+
+  // Plan details
+  tier            String   @default("FREE") // FREE, PRO, AGENCY, ENTERPRISE
+  status          String   @default("active") // active, trialing, cancelled, past_due, incomplete
+
+  // Billing
+  stripeCustomerId     String?  @unique
+  stripeSubscriptionId String?  @unique
+  currentPeriodStart   DateTime?
+  currentPeriodEnd     DateTime?
+
+  // Trial tracking
+  trialStart           DateTime?
+  trialEnd             DateTime?
+  isTrialing           Boolean  @default(false)
+
+  // Credit limits
+  creditsLimit    Int      @default(30)
+
+  // Feature limits
+  publishedPagesLimit Int   @default(1)
+  draftProjectsLimit  Int   @default(3)
+  customDomainsLimit  Int   @default(0)
+  formSubmissionsLimit Int  @default(100)
+  teamMembersLimit    Int   @default(1)
+
+  // Features enabled
+  removeBranding  Boolean  @default(false)
+  customDomains   Boolean  @default(false)
+  formIntegrations Boolean @default(false)
+  exportHTML      Boolean  @default(false)
+  whiteLabel      Boolean  @default(false)
+  analytics       String   @default("none") // none, basic, full
+  prioritySupport Boolean  @default(false)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+  @@index([stripeCustomerId])
+  @@index([tier])
+  @@index([status])
+}
+
+model UserUsage {
+  id            String   @id @default(cuid())
+  userId        String
+  period        String   // "2025-01" (YYYY-MM)
+
+  // AI operation counts
+  fullPageGens  Int      @default(0)
+  sectionRegens Int      @default(0)
+  elementRegens Int      @default(0)
+  fieldInference Int     @default(0)
+
+  // Token tracking (for analytics)
+  totalTokens   Int      @default(0)
+  inputTokens   Int      @default(0)
+  outputTokens  Int      @default(0)
+
+  // Credit system
+  creditsUsed   Int      @default(0)
+  creditsLimit  Int      @default(30)
+  creditsRemaining Int   @default(30)
+
+  // Cost tracking (internal analytics)
+  estimatedCost Float    @default(0)
+
+  // Published resource counts
+  publishedPages Int     @default(0)
+  draftProjects  Int     @default(0)
+  formSubmissions Int    @default(0)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([userId, period])
+  @@index([userId])
+  @@index([period])
+}
+
+model UsageEvent {
+  id          String   @id @default(cuid())
+  userId      String
+
+  // Event details
+  eventType   String   // "page_generation", "section_regen", "element_regen", "field_inference"
+  creditsUsed Int
+  tokensUsed  Int?
+  estimatedCost Float?
+
+  // Context
+  projectId   String?
+  sectionId   String?
+  elementKey  String?
+  metadata    Json?    // Store additional context
+
+  // Request tracking
+  endpoint    String?
+  duration    Int?     // milliseconds
+  success     Boolean  @default(true)
+  errorMessage String?
+
+  createdAt   DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([eventType])
+  @@index([createdAt])
+  @@index([userId])
+}

@@ -2,6 +2,7 @@
 import { NextRequest } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { logger } from '@/lib/logger';
+import { getUserPlan, PlanTier } from './planManager';
 
 // Rate limit configuration types
 export interface RateLimitConfig {
@@ -10,6 +11,7 @@ export interface RateLimitConfig {
   keyGenerator?: (req: NextRequest) => Promise<string>;
   skipSuccessfulRequests?: boolean;
   skipFailedRequests?: boolean;
+  tierBased?: boolean; // Enable tier-based rate limiting
 }
 
 // Rate limit store entry
@@ -23,35 +25,56 @@ const rateLimitStore = new Map<string, RateLimitEntry>();
 
 // Rate limit presets for different endpoint types
 export const RATE_LIMIT_PRESETS = {
-  // AI generation endpoints - expensive operations
+  // AI generation endpoints - expensive operations (tier-based)
   AI_GENERATION: {
-    maxRequests: 5,
+    maxRequests: 5, // Default for FREE tier
     windowMs: 60 * 1000, // 1 minute
+    tierBased: true,
   } as RateLimitConfig,
-  
+
   // Form submissions - prevent spam
   FORM_SUBMISSION: {
     maxRequests: 10,
     windowMs: 60 * 1000, // 1 minute
   } as RateLimitConfig,
-  
+
   // Draft operations - frequent but less expensive
   DRAFT_OPERATIONS: {
     maxRequests: 30,
     windowMs: 60 * 1000, // 1 minute
   } as RateLimitConfig,
-  
+
   // Publishing - critical business operation
   PUBLISHING: {
     maxRequests: 5,
     windowMs: 60 * 1000, // 1 minute
   } as RateLimitConfig,
-  
+
   // General API endpoints
   GENERAL: {
     maxRequests: 100,
     windowMs: 60 * 1000, // 1 minute
   } as RateLimitConfig,
+};
+
+// Tier-based rate limit multipliers
+const TIER_RATE_LIMITS: Record<PlanTier, { maxRequests: number; windowMs: number }> = {
+  [PlanTier.FREE]: {
+    maxRequests: 5,
+    windowMs: 60 * 1000,
+  },
+  [PlanTier.PRO]: {
+    maxRequests: 10,
+    windowMs: 60 * 1000,
+  },
+  [PlanTier.AGENCY]: {
+    maxRequests: 20,
+    windowMs: 60 * 1000,
+  },
+  [PlanTier.ENTERPRISE]: {
+    maxRequests: 50,
+    windowMs: 60 * 1000,
+  },
 };
 
 // Default key generator - combines IP and user ID for better accuracy
@@ -99,15 +122,32 @@ export const rateLimit = async (
     if (Math.random() < 0.01) { // 1% chance to clean on each request
       cleanExpiredEntries();
     }
-    
-    const keyGenerator = config.keyGenerator || defaultKeyGenerator;
+
+    // Apply tier-based limits if enabled
+    let effectiveConfig = { ...config };
+    if (config.tierBased) {
+      try {
+        const { userId } = await auth();
+        if (userId) {
+          const userPlan = await getUserPlan(userId);
+          const tierLimits = TIER_RATE_LIMITS[userPlan.tier as PlanTier] || TIER_RATE_LIMITS[PlanTier.FREE];
+          effectiveConfig.maxRequests = tierLimits.maxRequests;
+          effectiveConfig.windowMs = tierLimits.windowMs;
+        }
+      } catch (error) {
+        // If can't get user plan, use default limits
+        logger.warn('Could not apply tier-based rate limit, using defaults:', error);
+      }
+    }
+
+    const keyGenerator = effectiveConfig.keyGenerator || defaultKeyGenerator;
     const key = await keyGenerator(req);
     const now = Date.now();
-    const resetTime = now + config.windowMs;
-    
+    const resetTime = now + effectiveConfig.windowMs;
+
     // Get or create rate limit entry
     let entry = rateLimitStore.get(key);
-    
+
     if (!entry || now > entry.resetTime) {
       // Create new entry or reset expired entry
       entry = {
@@ -116,15 +156,15 @@ export const rateLimit = async (
       };
       rateLimitStore.set(key, entry);
     }
-    
+
     // Check if limit exceeded
-    if (entry.requests >= config.maxRequests) {
+    if (entry.requests >= effectiveConfig.maxRequests) {
       logger.warn(`Rate limit exceeded for key: ${key}`, {
         requests: entry.requests,
-        limit: config.maxRequests,
+        limit: effectiveConfig.maxRequests,
         resetTime: entry.resetTime,
       });
-      
+
       return {
         allowed: false,
         remaining: 0,
@@ -132,18 +172,18 @@ export const rateLimit = async (
         error: 'Rate limit exceeded',
       };
     }
-    
+
     // Increment request count
     entry.requests++;
     rateLimitStore.set(key, entry);
-    
-    const remaining = config.maxRequests - entry.requests;
-    
+
+    const remaining = effectiveConfig.maxRequests - entry.requests;
+
     // Log for debugging in development
     if (process.env.NODE_ENV !== 'production') {
-      logger.dev(`Rate limit check - Key: ${key}, Requests: ${entry.requests}/${config.maxRequests}, Remaining: ${remaining}`);
+      logger.dev(`Rate limit check - Key: ${key}, Requests: ${entry.requests}/${effectiveConfig.maxRequests}, Remaining: ${remaining}`);
     }
-    
+
     return {
       allowed: true,
       remaining,
@@ -151,7 +191,7 @@ export const rateLimit = async (
     };
   } catch (error) {
     logger.error('Rate limiting error:', error);
-    
+
     // Fail open - allow request if rate limiting fails
     return {
       allowed: true,

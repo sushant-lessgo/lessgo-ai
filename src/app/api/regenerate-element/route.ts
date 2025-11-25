@@ -1,8 +1,21 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { logger } from '@/lib/logger';
+import { withAIRateLimit } from '@/lib/rateLimit';
+import { requireAICredits } from '@/lib/middleware/planCheck';
+import { consumeCredits, UsageEventType, CREDIT_COSTS } from '@/lib/creditSystem';
 
-export async function POST(req: Request) {
+async function handler(req: NextRequest) {
+  const startTime = Date.now();
+
   try {
+    // Check authentication and credits (1 credit for element regeneration)
+    const creditCheck = await requireAICredits(req, UsageEventType.ELEMENT_REGEN, CREDIT_COSTS.ELEMENT_REGENERATION);
+    if (!creditCheck.allowed) {
+      return creditCheck.response!;
+    }
+
+    const userId = creditCheck.userId!;
+
     const body = await req.json();
     const { sectionId, elementKey, currentContent, variationCount = 5 } = body;
     
@@ -113,11 +126,22 @@ Example format:
         .slice(0, variationCount);
     }
 
+    // Consume credits for successful element regeneration
+    const consumption = await consumeCredits(userId, UsageEventType.ELEMENT_REGEN, CREDIT_COSTS.ELEMENT_REGENERATION, {
+      endpoint: '/api/regenerate-element',
+      duration: Date.now() - startTime,
+      sectionId,
+      elementKey,
+      metadata: { variationCount }
+    });
+
     return NextResponse.json({
       variations,
       originalContent: currentContent,
       elementKey,
-      sectionId
+      sectionId,
+      creditsUsed: CREDIT_COSTS.ELEMENT_REGENERATION,
+      creditsRemaining: consumption.remaining
     });
 
   } catch (err) {
@@ -212,3 +236,6 @@ async function callAIProvider(prompt: string, useOpenAI: boolean, model: string)
     return { success: false, error };
   }
 }
+
+// Export with rate limiting
+export const POST = withAIRateLimit(handler);

@@ -68,6 +68,7 @@ export const layoutRegistry = {
     "centerStacked",
     "splitScreen",
     "imageFirst",
+    "heroBeforeAfter",
   ] as const,
 
   HowItWorks: [

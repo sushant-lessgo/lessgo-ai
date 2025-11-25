@@ -76,42 +76,42 @@ export function EditableContent({
 }: EditableContentProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [currentFormatState, setCurrentFormatState] = useState(formatState);
-  
+
   // Get showTextToolbar from the store
   const { showTextToolbar } = useEditStore();
-  
+
   // Determine if content should be shown
-  const shouldShow = mode === 'preview' || value || required;
-  
+  const shouldShow = mode === 'edit' || value || required;
+
   // Create final configurations
   const finalEditorConfig: InlineEditorConfig = useMemo(() => ({
     ...defaultEditorConfig,
     ...editorConfig,
   }), [editorConfig]);
-  
+
   const finalAutoSaveConfig: AutoSaveConfig = useMemo(() => ({
     enabled: true,
     debounceMs: 1000,
     onSave: onEdit,
     ...autoSave,
   }), [autoSave, onEdit]);
-  
+
   // Handle format changes
   const handleFormatChange = useCallback((newFormat: TextFormatState) => {
     setCurrentFormatState(newFormat);
     onFormatChange?.(newFormat);
   }, [onFormatChange]);
-  
+
   // Handle focus and blur
   const handleFocus = useCallback(() => {
     setIsEditing(true);
   }, []);
-  
+
   const handleBlur = useCallback(() => {
     setIsEditing(false);
   }, []);
-  
-  // Handle selection changes
+
+  // Handle selection changes - toolbar buttons handle selection preservation via onMouseDown
   const handleSelectionChange = useCallback((selection: TextSelection | null) => {
     if (selection && !selection.isCollapsed) {
       // Calculate position for the text toolbar
@@ -120,8 +120,8 @@ export function EditableContent({
         x: rect.left + rect.width / 2,
         y: rect.top - 10
       };
-      
-      // Show the text toolbar
+
+      // Show the text toolbar - buttons will preserve selection via their onMouseDown handlers
       showTextToolbar(position);
     }
   }, [showTextToolbar]);
@@ -270,25 +270,33 @@ export function EditableHeadline({
     // ✅ FIX: Don't set inline color if we're using CSS classes for adaptive colors
     // Only use inline color if explicitly provided in formatState, not for adaptive colors
     const shouldUseInlineColor = formatState?.color && !colorClass;
-    
+
     // Get typography styles from landingTypography system
     const typographyStyle = getTextStyle(level);
-    
+
+    // ✅ FIX: Check if formatState has a custom px fontSize (not clamp)
+    // This prevents typography system from overriding user-selected toolbar sizes
+    const hasCustomFontSize = formatState?.fontSize &&
+      !formatState.fontSize.includes('clamp') &&
+      formatState.fontSize.includes('px');
+
     const baseState = {
-      bold: typographyStyle.fontWeight === '700',
-      italic: false,
-      underline: false,
+      bold: formatState?.bold ?? (typographyStyle.fontWeight === '700'),
+      italic: formatState?.italic ?? false,
+      underline: formatState?.underline ?? false,
       color: shouldUseInlineColor ? formatState.color : undefined,
-      fontSize: typographyStyle.fontSize,
-      fontFamily: typographyStyle.fontFamily || 'inherit',
-      textAlign: (textStyle?.textAlign as any) || 'left' as const,
-      lineHeight: typographyStyle.lineHeight,
-      letterSpacing: typographyStyle.letterSpacing,
-      textTransform: 'none' as const,
-      ...formatState,
+      // ✅ FIX: Use custom fontSize if provided, otherwise typography system
+      // Don't apply typography fontSize when user has set a custom px size
+      fontSize: hasCustomFontSize ? formatState.fontSize :
+                (formatState?.fontSize || typographyStyle.fontSize),
+      fontFamily: formatState?.fontFamily || typographyStyle.fontFamily || 'inherit',
+      textAlign: formatState?.textAlign || (textStyle?.textAlign as any) || 'left' as const,
+      lineHeight: formatState?.lineHeight || typographyStyle.lineHeight,
+      letterSpacing: formatState?.letterSpacing || typographyStyle.letterSpacing,
+      textTransform: (formatState?.textTransform || 'none') as const,
     };
-    
-    
+
+
     return baseState;
   }, [level, colorClass, formatState, textStyle?.textAlign, getTextStyle]);
   
@@ -548,6 +556,31 @@ export function AccentBadge({
 }
 
 // Enhanced adaptive components with drag-drop support
+// Helper function to extract inline styles from HTML content
+const extractInlineStyles = (htmlContent: string): Partial<TextFormatState> => {
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = htmlContent;
+
+  const styledElement = tempDiv.querySelector('[style]') as HTMLElement;
+  if (!styledElement) return {};
+
+  const computedStyle = styledElement.style;
+  const extracted: Partial<TextFormatState> = {};
+
+  if (computedStyle.fontSize) extracted.fontSize = computedStyle.fontSize;
+  if (computedStyle.fontWeight) extracted.bold = parseInt(computedStyle.fontWeight) >= 600;
+  if (computedStyle.fontStyle) extracted.italic = computedStyle.fontStyle === 'italic';
+  if (computedStyle.textDecoration) extracted.underline = computedStyle.textDecoration.includes('underline');
+  if (computedStyle.color) extracted.color = computedStyle.color;
+  if (computedStyle.fontFamily) extracted.fontFamily = computedStyle.fontFamily;
+  if (computedStyle.textAlign) extracted.textAlign = computedStyle.textAlign as any;
+  if (computedStyle.lineHeight) extracted.lineHeight = computedStyle.lineHeight;
+  if (computedStyle.letterSpacing) extracted.letterSpacing = computedStyle.letterSpacing;
+  if (computedStyle.textTransform) extracted.textTransform = computedStyle.textTransform as any;
+
+  return extracted;
+};
+
 export function EditableAdaptiveHeadline({
   mode,
   value,
@@ -573,7 +606,15 @@ export function EditableAdaptiveHeadline({
   editorConfig?: Partial<InlineEditorConfig>,
   autoSave?: Partial<AutoSaveConfig>,
 }) {
-  
+
+  // Extract inline styles from HTML content if present
+  const extractedStyles = useMemo(() => {
+    if (typeof value === 'string' && /<[^>]*>/g.test(value)) {
+      return extractInlineStyles(value);
+    }
+    return {};
+  }, [value]);
+
   // Debug logging (reduced)
   
   const getAdaptiveTextColor = () => {
@@ -644,8 +685,15 @@ export function EditableAdaptiveHeadline({
   };
   
   const adaptiveColor = getAdaptiveTextColor();
-  
-  
+
+  // Merge extracted styles with provided formatState
+  const mergedFormatState = useMemo(() => {
+    return {
+      ...formatState,
+      ...extractedStyles, // Extracted styles take precedence
+    };
+  }, [formatState, extractedStyles]);
+
   return (
     <EditableHeadline
       mode={mode}
@@ -656,7 +704,7 @@ export function EditableAdaptiveHeadline({
       textStyle={textStyle}
       sectionId={sectionId}
       elementKey={elementKey}
-      formatState={formatState}
+      formatState={mergedFormatState}  // ✅ FIX: Pass merged formatState with extracted styles
       onFormatChange={onFormatChange}
       editorConfig={editorConfig}
       autoSave={autoSave}
@@ -692,7 +740,15 @@ export function EditableAdaptiveText({
   editorConfig?: Partial<InlineEditorConfig>,
   autoSave?: Partial<AutoSaveConfig>,
 }) {
-  
+
+  // Extract inline styles from HTML content if present
+  const extractedStyles = useMemo(() => {
+    if (typeof value === 'string' && /<[^>]*>/g.test(value)) {
+      return extractInlineStyles(value);
+    }
+    return {};
+  }, [value]);
+
   const getAdaptiveTextColor = () => {
     // ✅ PRIORITY: Check for stored text colors from colorTokens first
     const textType = variant === 'muted' ? 'muted' : 'body';
@@ -763,7 +819,15 @@ export function EditableAdaptiveText({
   };
   
   const adaptiveColor = getAdaptiveTextColor();
-  
+
+  // Merge extracted styles with provided formatState
+  const mergedFormatState = useMemo(() => {
+    return {
+      ...formatState,
+      ...extractedStyles, // Extracted styles take precedence
+    };
+  }, [formatState, extractedStyles]);
+
   return (
     <EditableText
       mode={mode}
@@ -773,7 +837,7 @@ export function EditableAdaptiveText({
       textStyle={textStyle}
       sectionId={sectionId}
       elementKey={elementKey}
-      formatState={formatState}
+      formatState={mergedFormatState}  // ✅ FIX: Pass merged formatState with extracted styles
       onFormatChange={onFormatChange}
       editorConfig={editorConfig}
       autoSave={autoSave}

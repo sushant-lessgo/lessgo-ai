@@ -34,6 +34,7 @@ import CardWithTestimonial from '@/modules/UIBlocks/Pricing/CardWithTestimonial'
 import Carousel from '@/modules/UIBlocks/Features/Carousel';
 import CategoryAccordion from '@/modules/UIBlocks/Integration/CategoryAccordion';
 import CenterStacked from '@/modules/UIBlocks/Hero/centerStacked';
+import HeroBeforeAfter from '@/modules/UIBlocks/Hero/heroBeforeAfter';
 import CenteredHeadlineCTA from '@/modules/UIBlocks/PrimaryCTA/CenteredHeadlineCTA';
 import ChatBubbleFAQ from '@/modules/UIBlocks/FAQ/ChatBubbleFAQ';
 import CheckmarkComparison from '@/modules/UIBlocks/Comparison/CheckmarkComparison';
@@ -191,6 +192,7 @@ export const componentRegistry: ComponentRegistry = {
     centerStacked: CenterStacked,
     splitScreen: SplitScreen,
     imageFirst: ImageFirst,
+    heroBeforeAfter: HeroBeforeAfter,
   },
   
   features: {

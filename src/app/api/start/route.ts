@@ -4,6 +4,8 @@ import { auth } from '@clerk/nextjs/server'
 
 import { prisma } from '@/lib/prisma'
 import { nanoid } from 'nanoid'
+import { createDefaultPlan } from '@/lib/planManager'
+import { logger } from '@/lib/logger'
 
 export async function GET() {
   const { userId } = await auth()
@@ -28,6 +30,21 @@ export async function GET() {
         clerkId: userId,
       },
     })
+
+    // Create default plan for new users
+    try {
+      const existingPlan = await prisma.userPlan.findUnique({
+        where: { userId },
+      })
+
+      if (!existingPlan) {
+        await createDefaultPlan(userId)
+        logger.info(`Created default plan for new user ${userId}`)
+      }
+    } catch (error) {
+      logger.error('Error creating default plan:', error)
+      // Don't fail the request if plan creation fails
+    }
   }
 
   // Create project linked to token and (optionally) user
