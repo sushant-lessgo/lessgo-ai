@@ -399,11 +399,11 @@ export default function CenterStacked(props: LayoutComponentProps) {
       <div className="max-w-4xl mx-auto text-center">
         <div className="flex flex-col items-center space-y-8 min-h-[600px] justify-center">
           
-          {(blockContent.badge_text || mode === 'edit') && (
+          {((blockContent.badge_text && blockContent.badge_text !== '___REMOVED___') || mode === 'edit') && (
             <div>
               <AccentBadge
                 mode={mode}
-                value={blockContent.badge_text || ''}
+                value={(blockContent.badge_text === '___REMOVED___' || !blockContent.badge_text) ? '' : blockContent.badge_text}
                 onEdit={(value) => handleContentUpdate('badge_text', value)}
                 colorTokens={colorTokens}
                 placeholder="🎉 New Feature Launch"
@@ -421,7 +421,7 @@ export default function CenterStacked(props: LayoutComponentProps) {
             level="h1"
             backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
             colorTokens={colorTokens}
-            className="leading-tight max-w-3xl"
+            className="text-center leading-tight max-w-6xl mx-auto"
             sectionId={sectionId}
             elementKey="headline"
             sectionBackground={sectionBackground}
@@ -444,12 +444,12 @@ export default function CenterStacked(props: LayoutComponentProps) {
             />
           )}
 
-          <div className="flex flex-col sm:flex-row items-center gap-6">
-            
+          <div className="flex flex-col items-center gap-6">
+
             <CTAButton
               text={blockContent.cta_text}
               colorTokens={colorTokens}
-              className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
+              className="w-full sm:w-auto sm:min-w-[240px] shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
               variant="primary"
               sectionId={sectionId}
               elementKey="cta_text"
@@ -458,9 +458,9 @@ export default function CenterStacked(props: LayoutComponentProps) {
                 const { content } = useEditStore.getState();
                 const sectionData = content[sectionId];
                 const ctaConfig = (sectionData as any)?.ctaConfig;
-                
+
                 logger.debug('🔗 CTA Button clicked:', () => ({ ctaConfig, sectionId }));
-                
+
                 if (ctaConfig?.type === 'link' && ctaConfig.url) {
                   window.open(ctaConfig.url, '_blank', 'noopener,noreferrer');
                 } else {
@@ -517,10 +517,10 @@ export default function CenterStacked(props: LayoutComponentProps) {
             )}
           </div>
 
-          {(blockContent.supporting_text || mode === 'edit') && (
+          {((blockContent.supporting_text && blockContent.supporting_text !== '___REMOVED___') || mode === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
-              value={blockContent.supporting_text || ''}
+              value={(blockContent.supporting_text === '___REMOVED___' || !blockContent.supporting_text) ? '' : blockContent.supporting_text}
               onEdit={(value) => handleContentUpdate('supporting_text', value)}
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
@@ -644,6 +644,8 @@ export default function CenterStacked(props: LayoutComponentProps) {
               const isValidImagePath = imageValue.startsWith('/') ||
                                       imageValue.startsWith('http://') ||
                                       imageValue.startsWith('https://') ||
+                                      imageValue.startsWith('blob:') ||
+                                      imageValue.startsWith('data:') ||
                                       imageValue === '';
 
               // Use placeholder if it's descriptive text from AI or empty

@@ -396,6 +396,8 @@ export default function ImageFirst(props: LayoutComponentProps) {
               const isValidImagePath = imageValue.startsWith('/') ||
                                       imageValue.startsWith('http://') ||
                                       imageValue.startsWith('https://') ||
+                                      imageValue.startsWith('blob:') ||
+                                      imageValue.startsWith('data:') ||
                                       imageValue === '';
 
               // Use placeholder if it's descriptive text from AI or empty
