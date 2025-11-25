@@ -81,7 +81,7 @@ export function EditableContent({
   const { showTextToolbar } = useEditStore();
 
   // Determine if content should be shown
-  const shouldShow = mode === 'edit' || value || required;
+  const shouldShow = mode === 'preview' || value || required;
 
   // Create final configurations
   const finalEditorConfig: InlineEditorConfig = useMemo(() => ({

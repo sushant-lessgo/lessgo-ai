@@ -20,20 +20,6 @@ body {
   transition: all 0.2s ease;
 }
 
-/* Override cursor for interactive before/after sliders - must be more specific */
-.before-after-slider-container {
-  cursor: grab !important;
-}
-
-.before-after-slider-container:active {
-  cursor: grabbing !important;
-}
-
-/* Ensure children inherit the grab cursor */
-.before-after-slider-container * {
-  cursor: inherit !important;
-}
-
 /* Hover state for elements - only when NOT in edit mode */
 [data-element-key]:hover:not([contenteditable="true"][data-editing="true"]) {
   background-color: rgba(59, 130, 246, 0.05);
