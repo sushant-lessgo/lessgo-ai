@@ -367,8 +367,7 @@ export function usePageGeneration(tokenId: string) {
       const response = await fetch('/api/generate-landing', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${tokenId}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           onboardingStore,
