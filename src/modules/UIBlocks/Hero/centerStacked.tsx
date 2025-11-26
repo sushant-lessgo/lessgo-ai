@@ -422,6 +422,7 @@ export default function CenterStacked(props: LayoutComponentProps) {
             backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
             colorTokens={colorTokens}
             className="text-center leading-tight max-w-6xl mx-auto"
+            textStyle={{ textAlign: 'center' }}
             sectionId={sectionId}
             elementKey="headline"
             sectionBackground={sectionBackground}
@@ -437,6 +438,7 @@ export default function CenterStacked(props: LayoutComponentProps) {
               variant="body"
               className="leading-relaxed max-w-2xl"
               style={bodyLgStyle}
+              textStyle={{ ...bodyLgStyle, textAlign: 'center' }}
               placeholder="Add a compelling subheadline that supports your main message and explains the key benefit..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -526,6 +528,7 @@ export default function CenterStacked(props: LayoutComponentProps) {
               colorTokens={colorTokens}
               variant="body"
               className="leading-relaxed max-w-xl"
+              textStyle={{ textAlign: 'center' }}
               placeholder="Add supporting text with social proof, customer count, or key metrics..."
               sectionId={sectionId}
               elementKey="supporting_text"
@@ -560,6 +563,7 @@ export default function CenterStacked(props: LayoutComponentProps) {
                     colorTokens={colorTokens}
                     variant="body"
                     className="text-sm"
+                    textStyle={{ textAlign: 'center' }}
                     placeholder="500+ happy customers"
                     sectionBackground={sectionBackground}
                     data-section-id={sectionId}
@@ -596,6 +600,7 @@ export default function CenterStacked(props: LayoutComponentProps) {
                       colorTokens={colorTokens}
                       variant="body"
                       className="text-sm"
+                      textStyle={{ textAlign: 'center' }}
                       placeholder="4.9/5"
                       sectionBackground={sectionBackground}
                       data-section-id={sectionId}
@@ -609,6 +614,7 @@ export default function CenterStacked(props: LayoutComponentProps) {
                       colorTokens={colorTokens}
                       variant="body"
                       className="text-sm"
+                      textStyle={{ textAlign: 'center' }}
                       placeholder="from 127 reviews"
                       sectionBackground={sectionBackground}
                       data-section-id={sectionId}
