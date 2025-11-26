@@ -1,6 +1,7 @@
 // app/edit/[token]/components/toolbars/SectionToolbar.tsx - Priority-Resolved Section Toolbar
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useOnboardingStore } from '@/hooks/useOnboardingStore';
 import { useToolbarActions } from '@/hooks/useToolbarActions';
 import { useElementPicker } from '@/hooks/useElementPicker';
 import { useSectionCRUD } from '@/hooks/useSectionCRUD';
@@ -12,7 +13,7 @@ import { showBackgroundModal } from '../ui/GlobalModals';
 import LoadingButtonBar from '@/components/shared/LoadingButtonBar';
 import type { SectionType } from '@/types/core/content';
 import { logger } from '@/lib/logger';
-// import { getRestrictionSummary } from '@/utils/elementRestrictions'; // Preserved for future use
+import { getSectionElementRequirements, mapStoreToVariables } from '@/modules/sections/elementDetermination';
 
 interface SectionToolbarProps {
   sectionId: string;
@@ -53,9 +54,12 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
   const {
     content,
     sections,
+    sectionLayouts,
     announceLiveRegion,
     aiGeneration,
   } = useEditStore();
+
+  const onboardingStore = useOnboardingStore();
 
   const { executeAction } = useToolbarActions();
   const { showElementPicker } = useElementPicker();
@@ -69,16 +73,40 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
 
   const section = content[sectionId];
   const sectionIndex = sections.indexOf(sectionId);
-  
-  // TEMPORARY: Disable Add Element feature (coming soon)
-  const canAddElements = false; // Will be enabled in future release
-  
-  // Preserved for future use:
-  // const sectionData = content[sectionId];
-  // const sectionType = sectionId || 'content';
-  // const layoutType = sectionData?.layout;
-  // const restrictionSummary = getRestrictionSummary(sectionType, layoutType);
-  // const canAddElements = restrictionSummary.allowedCount > 0;
+
+  // Calculate if section has optional elements that can be added
+  const canAddElements = useMemo(() => {
+    try {
+      const sectionData = content[sectionId];
+      const layoutType = sectionData?.layout;
+
+      if (!layoutType) return false;
+
+      // Map store data to variables for element determination
+      const variables = mapStoreToVariables(onboardingStore, {
+        layout: { sections, sectionLayouts },
+        meta: { onboardingData: {
+          oneLiner: onboardingStore.oneLiner,
+          validatedFields: onboardingStore.validatedFields,
+          featuresFromAI: onboardingStore.featuresFromAI,
+        } }
+      });
+
+      // Get element requirements including excluded elements
+      const requirements = getSectionElementRequirements(sectionId, layoutType, variables);
+
+      // Filter out elements already in section
+      const existingElementKeys = Object.keys(sectionData?.elements || {});
+      const availableElements = requirements.excludedElements.filter(elementName =>
+        !existingElementKeys.includes(elementName)
+      );
+
+      return availableElements.length > 0;
+    } catch (error) {
+      logger.error('Error calculating canAddElements:', error);
+      return false;
+    }
+  }, [sectionId, content, sections, sectionLayouts, onboardingStore]);
   
   // Get validation status from existing metadata (read-only)
   const validation = useMemo(() => {
@@ -172,8 +200,8 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
       label: 'Add Element',
       icon: 'plus',
       handler: handleAddElement,
-      disabled: true, // Always disabled for now
-      tooltip: 'Add custom elements - Coming soon',
+      disabled: !canAddElements,
+      tooltip: canAddElements ? 'Add optional elements' : 'No optional elements available',
     },
     {
       id: 'move-up',

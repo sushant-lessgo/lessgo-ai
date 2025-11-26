@@ -11,13 +11,16 @@ interface ElementPickerProps {
   sectionId: string;
   isVisible: boolean;
   position: { x: number; y: number };
-  onElementSelect: (elementType: UniversalElementType) => void;
+  onElementSelect: (elementType: string) => void; // Changed to accept string for optional elements
   onClose: () => void;
   options?: ElementPickerOptions & {
     position?: number;
     insertMode?: 'append' | 'prepend' | 'after' | 'before';
     referenceElementKey?: string;
     autoFocus?: boolean;
+    optionalElements?: string[]; // NEW: list of optional element names
+    sectionType?: string;
+    layoutType?: string;
   };
 }
 
@@ -38,26 +41,64 @@ export function ElementPicker({
   const sectionType = sectionId || 'content';
   const layoutType = sectionData?.layout;
 
-  // Get available elements (filtered by restrictions)
+  // Format element names for display
+  const formatElementLabel = (elementName: string): string => {
+    return elementName
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+
+  // Get description for optional element
+  const getElementDescription = (elementName: string): string => {
+    return `Optional element for this section layout`;
+  };
+
+  // Map element names to appropriate icons
+  const getElementIcon = (elementName: string): string => {
+    if (elementName.includes('icon')) return 'image';
+    if (elementName.includes('trust')) return 'star';
+    if (elementName.includes('cta') || elementName.includes('button')) return 'mouse-pointer';
+    if (elementName.includes('text') || elementName.includes('label') || elementName.includes('badge') || elementName.includes('eyebrow')) return 'type';
+    if (elementName.includes('list') || elementName.includes('items')) return 'list';
+    if (elementName.includes('headline')) return 'heading';
+    return 'box'; // default
+  };
+
+  // Get available elements (either optional elements or universal elements)
   const availableElements = useMemo(() => {
+    // If optionalElements provided, show ONLY those
+    if (options?.optionalElements && options.optionalElements.length > 0) {
+      return options.optionalElements.map(elementName => ({
+        type: elementName,
+        label: formatElementLabel(elementName),
+        description: getElementDescription(elementName),
+        icon: getElementIcon(elementName),
+        category: 'optional' as const,
+      }));
+    }
+
+    // Fallback: show universal elements with restrictions
     let elements = Object.values(elementConfigs);
-    
+
     // Apply restriction filtering based on section/layout
     elements = filterElementsByRestrictions(elements, sectionType, layoutType);
-    
+
     // Apply additional filters from options
     if (options?.excludeTypes && options.excludeTypes.length > 0) {
       elements = elements.filter(el => !options.excludeTypes!.includes(el.type));
     }
-    
+
     return elements;
-  }, [elementConfigs, sectionType, layoutType, options?.excludeTypes]);
+  }, [elementConfigs, sectionType, layoutType, options?.excludeTypes, options?.optionalElements]);
 
 
   // Handle element selection
-  const handleElementSelect = useCallback((elementType: UniversalElementType) => {
+  const handleElementSelect = useCallback((elementType: string) => {
     onElementSelect(elementType);
-    announceLiveRegion(`Added ${elementConfigs[elementType].label} element`);
+    // Try to get label from element configs, otherwise format the element name
+    const label = elementConfigs[elementType as UniversalElementType]?.label || formatElementLabel(elementType);
+    announceLiveRegion(`Added ${label} element`);
   }, [onElementSelect, elementConfigs, announceLiveRegion]);
 
   if (!isVisible) return null;

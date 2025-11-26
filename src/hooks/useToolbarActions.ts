@@ -1,6 +1,7 @@
 // hooks/useToolbarActions.ts - Enhanced toolbar action handlers with inline editor integration
 import { useCallback } from 'react';
 import { useEditStoreLegacy as useEditStore } from './useEditStoreLegacy';
+import { useOnboardingStore } from './useOnboardingStore';
 import { useInlineEditorActions } from './useInlineEditorActions';
 import { useTextToolbarIntegration } from './useTextToolbarIntegration';
 import { getSectionTypeFromLayout } from '@/utils/layoutSectionTypeMapping';
@@ -13,13 +14,16 @@ import { useElementCRUD } from './useElementCRUD';
 import type { UniversalElementType } from '@/types/universalElements';
 import { UNIVERSAL_ELEMENTS } from '@/types/universalElements';
 import { logger } from '@/lib/logger';
-import { 
-  validateElementAddition, 
+import {
+  validateElementAddition,
   getElementRestrictions,
-  getRestrictionSummary 
+  getRestrictionSummary
 } from '@/utils/elementRestrictions';
+import { getSectionElementRequirements, mapStoreToVariables } from '@/modules/sections/elementDetermination';
 export function useToolbarActions() {
   const store = useEditStore();
+  const onboardingStore = useOnboardingStore();
+
   const {
     // Content actions
     updateElementContent,
@@ -30,17 +34,17 @@ export function useToolbarActions() {
     setBackgroundType,
     markAsCustomized,
     setSection,
-    
+
     // Layout actions
     updateSectionLayout,
     moveSection,
     reorderSections,
-    
+
     // Form actions
     addFormField,
     removeFormField,
     updateFormField,
-    
+
     // UI actions
     showSectionToolbar,
     showElementToolbar,
@@ -49,7 +53,7 @@ export function useToolbarActions() {
     setActiveSection,
     showElementVariations,
     hideElementVariations,
-    
+
     // State
     content,
     sections,
@@ -58,10 +62,10 @@ export function useToolbarActions() {
     selectedSection,
     forms,
     images,
-    
+
     // UI Modal actions
     showLayoutChangeModal,
-    
+
     // Auto-save
     trackChange,
     triggerAutoSave,
@@ -354,134 +358,124 @@ const { addElement } = useElementCRUD();
     return true;
   }, [content, sectionLayouts, showLayoutChangeModal]);
 
-  const handleAddElement = useCallback(async (params: { 
-  sectionId: string; 
+  const handleAddElement = useCallback(async (params: {
+  sectionId: string;
   elementType?: UniversalElementType;
   position?: { x: number; y: number };
 }) => {
   logger.debug('🎯 handleAddElement called:', params);
   const { sectionId, elementType, position } = params;
-  
-  // Get section information for restriction checking
+
+  // Get section information
   const sectionData = content[sectionId];
-  // Use the sectionId itself as the section type since that's where the type is stored
   const sectionType = sectionId || 'content';
   const layoutType = sectionData?.layout;
-  
-  logger.debug('🎯 Section data:', { 
-    sectionType, 
-    layoutType, 
+
+  logger.debug('🎯 Section data:', {
+    sectionType,
+    layoutType,
     sectionData,
     sectionDataKeys: sectionData ? Object.keys(sectionData) : [],
     possibleSectionType: (sectionData as any)?.type || (sectionData as any)?.sectionType || sectionId
   });
-  
+
   // If elementType is specified, validate and add element directly
   if (elementType) {
-    // Validate element addition against restrictions
-    const validation = validateElementAddition(elementType, sectionType, layoutType);
-    
-    if (!validation.allowed) {
-      logger.warn(`Element addition blocked: ${validation.reason}`);
-      // Could show user-friendly notification here
-      if (validation.suggestion) {
-        logger.info(`Suggestion: ${validation.suggestion}`);
+    // Check if it's a universal element or optional element
+    const isUniversalElement = !!UNIVERSAL_ELEMENTS[elementType];
+
+    if (isUniversalElement) {
+      // Validate universal element addition against restrictions
+      const validation = validateElementAddition(elementType, sectionType, layoutType);
+
+      if (!validation.allowed) {
+        logger.warn(`Element addition blocked: ${validation.reason}`);
+        if (validation.suggestion) {
+          logger.info(`Suggestion: ${validation.suggestion}`);
+        }
+        return false;
       }
-      return false;
     }
-    
+
     try {
       const elementKey = await addElement(sectionId, elementType, {
         autoFocus: true,
         position: Object.keys(content[sectionId]?.elements || {}).length,
       });
-      
+
       // Announce success
-      const elementConfig = UNIVERSAL_ELEMENTS[elementType];
-      logger.debug(`Added ${elementConfig.label} element`);
-      
+      if (isUniversalElement) {
+        const elementConfig = UNIVERSAL_ELEMENTS[elementType];
+        logger.debug(`Added ${elementConfig.label} element`);
+      } else {
+        logger.debug(`Added optional element: ${elementType}`);
+      }
+
       return true;
     } catch (error) {
       logger.error('Failed to add element:', error);
       return false;
     }
   }
-  
-  // Otherwise, show ElementPicker with restriction context
-  const buttonElement = document.querySelector('[data-action="add-element"]');
-  let pickerPosition = position;
-  
-  if (!pickerPosition && buttonElement) {
-    const rect = buttonElement.getBoundingClientRect();
-    pickerPosition = {
-      x: rect.left,
-      y: rect.bottom + 8,
-    };
-  }
-  
-  if (pickerPosition) {
-    // Get restriction information to pass to ElementPicker
-    const restrictions = getElementRestrictions(sectionType, layoutType);
-    const restrictionSummary = getRestrictionSummary(sectionType, layoutType);
-    
-    logger.debug('🎯 About to call showElementPicker with restrictions:', {
-      restrictions,
-      restrictionSummary,
-      pickerPosition
+
+  // Get optional elements that can be added
+  try {
+    // Map store data to variables for element determination
+    const variables = mapStoreToVariables(onboardingStore, {
+      layout: { sections, sectionLayouts },
+      meta: {
+        onboardingData: {
+          oneLiner: onboardingStore.oneLiner,
+          validatedFields: onboardingStore.validatedFields,
+          featuresFromAI: onboardingStore.featuresFromAI,
+        }
+      }
     });
-    
-    showElementPicker(sectionId, pickerPosition, {
-      autoFocus: true,
-      categories: ['text', 'interactive', 'media', 'layout'],
-      restrictedTypes: restrictions.restrictedElements,
-      restrictionReason: restrictions.restriction.reason,
-      restrictionContext: {
+
+    // Get element requirements including excluded elements
+    const requirements = getSectionElementRequirements(sectionId, layoutType, variables);
+
+    // Filter out elements already in section
+    const existingElementKeys = Object.keys(content[sectionId]?.elements || {});
+    const availableOptionalElements = requirements.excludedElements.filter(elementName =>
+      !existingElementKeys.includes(elementName)
+    );
+
+    logger.debug('🎯 Available optional elements:', {
+      allExcluded: requirements.excludedElements,
+      existingKeys: existingElementKeys,
+      available: availableOptionalElements
+    });
+
+    // Show ElementPicker with optional elements
+    const buttonElement = document.querySelector('[data-action="add-element"]');
+    let pickerPosition = position;
+
+    if (!pickerPosition && buttonElement) {
+      const rect = buttonElement.getBoundingClientRect();
+      pickerPosition = {
+        x: rect.left,
+        y: rect.bottom + 8,
+      };
+    }
+
+    if (pickerPosition) {
+      showElementPicker(sectionId, pickerPosition, {
+        autoFocus: true,
+        optionalElements: availableOptionalElements,
         sectionType,
         layoutType,
         sectionId,
-      },
-    });
-    return true;
-  }
-  
-  // Fallback to original prompt-based selection
-  const elements = [
-    { id: 'text', name: 'Text Block', key: 'text' },
-    { id: 'headline', name: 'Headline', key: 'headline' },
-    { id: 'subheadline', name: 'Subheadline', key: 'subheadline' },
-    { id: 'button', name: 'Button', key: 'cta' },
-    { id: 'image', name: 'Image', key: 'image' },
-    { id: 'video', name: 'Video', key: 'video' },
-    { id: 'form', name: 'Form', key: 'form' },
-    { id: 'list', name: 'List', key: 'list' },
-  ];
-
-  const selectedElement = prompt(`Add element:\n${elements.map((e, i) => `${i + 1}. ${e.name}`).join('\n')}`);
-  const elementIndex = parseInt(selectedElement || '0') - 1;
-  
-  if (elementIndex >= 0 && elementIndex < elements.length) {
-    const element = elements[elementIndex];
-    
-    const newElementKey = `${element.key}-${Date.now()}`;
-    const currentSection = content[sectionId];
-    
-    if (currentSection) {
-      const updatedElements = {
-        ...currentSection.elements,
-        [newElementKey]: {
-          content: getDefaultContent(element.id),
-          type: element.id as ElementType,
-          isEditable: true,
-          editMode: 'inline' as const,
-        }
-      };
-      
-      setSection(sectionId, { elements: updatedElements });
+      });
       return true;
     }
+
+    return false;
+  } catch (error) {
+    logger.error('Error getting optional elements:', error);
+    return false;
   }
-  return false;
-}, [content, setSection, showElementPicker, addElement]);
+}, [content, sections, sectionLayouts, setSection, showElementPicker, addElement, onboardingStore]);
 
 
   const handleMoveSection = useCallback(async (params: { sectionId: string; direction: 'up' | 'down' }) => {

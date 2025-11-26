@@ -30,6 +30,11 @@ interface ElementPickerOptions {
     layoutType?: string;
     sectionId: string;
   };
+  // NEW: Optional element support
+  optionalElements?: string[];
+  sectionType?: string;
+  layoutType?: string;
+  sectionId?: string;
 }
 
 interface ElementPickerState {
@@ -96,7 +101,7 @@ export function useElementPicker() {
   }, []);
 
   // Handle element selection
-  const handleElementSelect = useCallback(async (elementType: UniversalElementType) => {
+  const handleElementSelect = useCallback(async (elementType: string) => {
     if (!state.sectionId) return;
 
     try {

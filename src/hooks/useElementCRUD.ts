@@ -3,9 +3,10 @@
 import { useCallback } from 'react';
 import { useEditStoreLegacy as useEditStore } from './useEditStoreLegacy';
 import { UNIVERSAL_ELEMENTS } from '@/types/universalElements';
-import type { 
-  UniversalElementType, 
-  UniversalElementInstance, 
+import { getLayoutElements } from '@/modules/sections/layoutElementSchema';
+import type {
+  UniversalElementType,
+  UniversalElementInstance,
   AddElementOptions,
   RemoveElementOptions,
   DuplicateElementOptions,
@@ -14,6 +15,7 @@ import type {
   ElementValidationResult,
   ElementTemplate
 } from '@/types/universalElements';
+import type { ElementType } from '@/types/core/index';
 
 const generateElementKey = (type: UniversalElementType, position: number = 0) => {
   const timestamp = Date.now().toString(36);
@@ -23,11 +25,38 @@ const generateElementKey = (type: UniversalElementType, position: number = 0) =>
 
 const generateId = () => `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
+// Helper to format element names for display
+const formatElementLabel = (elementName: string): string => {
+  return elementName
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};
+
+// Helper to infer type from element name
+const inferElementType = (elementName: string): ElementType => {
+  if (elementName.includes('icon')) return 'image';
+  if (elementName.includes('cta') || elementName.includes('button')) return 'button';
+  if (elementName.includes('headline')) return 'headline';
+  if (elementName.includes('badge') || elementName.includes('eyebrow')) return 'text';
+  if (elementName.includes('list') || elementName.includes('items')) return 'list';
+  return 'text'; // default
+};
+
+// Default content for optional elements
+const getDefaultOptionalContent = (elementName: string): string | string[] => {
+  if (elementName.includes('icon')) return '/placeholder-icon.svg';
+  if (elementName.includes('trust_item')) return 'Trust indicator text';
+  if (elementName.includes('cta')) return 'Click here';
+  if (elementName.includes('badge') || elementName.includes('eyebrow')) return 'NEW';
+  return `${formatElementLabel(elementName)} content`;
+};
+
 export function useElementCRUD() {
-  const { 
-    content, 
+  const {
+    content,
     setSection,
-    trackChange, 
+    trackChange,
     announceLiveRegion,
     triggerAutoSave,
     history
@@ -71,10 +100,83 @@ export function useElementCRUD() {
     };
   }, []);
 
+  // Create optional element from layout schema
+  const createOptionalElement = useCallback((
+    sectionId: string,
+    elementName: string,
+    options?: AddElementOptions
+  ) => {
+    const section = content[sectionId];
+    const layoutType = section?.layout;
+
+    // Get element position from layout schema
+    const getElementPositionInSchema = (elementName: string, layoutType: string): number => {
+      try {
+        const layoutElements = getLayoutElements(layoutType);
+        const index = layoutElements.findIndex(el => el.element === elementName);
+        return index >= 0 ? index : 999; // Default to end if not found
+      } catch (error) {
+        return 999;
+      }
+    };
+
+    // Calculate actual position considering existing elements
+    const calculateInsertPosition = (sectionId: string, schemaPosition: number): number => {
+      const section = content[sectionId];
+      const existingElements = Object.entries(section?.elements || {});
+
+      // Find elements with position >= schemaPosition
+      const elementsAfter = existingElements.filter(([key, el]) =>
+        (el.metadata?.position || 0) >= schemaPosition
+      );
+
+      // If no elements after, use schemaPosition
+      if (elementsAfter.length === 0) return schemaPosition;
+
+      // Otherwise insert before first element after
+      const firstAfterPosition = Math.min(...elementsAfter.map(([k, el]) => el.metadata?.position || 0));
+      return firstAfterPosition;
+    };
+
+    const schemaPosition = getElementPositionInSchema(elementName, layoutType || '');
+    const actualPosition = calculateInsertPosition(sectionId, schemaPosition);
+    const elementKey = elementName; // Use schema name as key
+    const now = Date.now();
+
+    return {
+      id: generateId(),
+      elementKey,
+      sectionId,
+      type: inferElementType(elementName),
+      content: options?.content || getDefaultOptionalContent(elementName),
+      props: options?.props || {},
+      metadata: {
+        addedManually: true,
+        addedAt: now,
+        lastModified: now,
+        position: actualPosition,
+        version: 1,
+        isOptional: true,
+        optionalElementName: elementName,
+      },
+      editState: {
+        isSelected: false,
+        isEditing: false,
+        isDirty: false,
+        hasErrors: false,
+      },
+      validation: {
+        isValid: true,
+        errors: [],
+        warnings: [],
+      },
+    };
+  }, [content]);
+
   // Add element to section
   const addElement = useCallback(async (
-    sectionId: string, 
-    elementType: UniversalElementType, 
+    sectionId: string,
+    elementType: string, // Changed to accept string for optional elements
     options?: AddElementOptions
   ): Promise<string> => {
     const section = content[sectionId];
@@ -82,7 +184,13 @@ export function useElementCRUD() {
       throw new Error(`Section ${sectionId} not found`);
     }
 
-    const element = createElement(sectionId, elementType, options);
+    // Check if elementType is a universal element or optional element
+    const isOptionalElement = !UNIVERSAL_ELEMENTS[elementType as UniversalElementType];
+
+    // Create the appropriate element
+    const element = isOptionalElement
+      ? createOptionalElement(sectionId, elementType, options)
+      : createElement(sectionId, elementType as UniversalElementType, options);
     
     // Insert at specified position
     if (options?.insertMode && options?.referenceElementKey) {
@@ -139,8 +247,13 @@ export function useElementCRUD() {
     });
 
     triggerAutoSave();
-    announceLiveRegion(`Added ${elementType} element`);
-    
+
+    // Announce with appropriate label
+    const elementLabel = isOptionalElement
+      ? formatElementLabel(elementType)
+      : UNIVERSAL_ELEMENTS[elementType as UniversalElementType]?.label || elementType;
+    announceLiveRegion(`Added ${elementLabel} element`);
+
     // Auto-focus if requested
     if (options?.autoFocus) {
       setTimeout(() => {
@@ -152,7 +265,7 @@ export function useElementCRUD() {
     }
 
     return element.elementKey;
-  }, [content, setSection, createElement, trackChange, triggerAutoSave, announceLiveRegion]);
+  }, [content, setSection, createElement, createOptionalElement, trackChange, triggerAutoSave, announceLiveRegion]);
 
   // Remove element from section
   const removeElement = useCallback(async (
