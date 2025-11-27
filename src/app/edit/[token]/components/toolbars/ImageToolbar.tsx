@@ -38,6 +38,7 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
 
   const {
     updateElementContent,
+    uploadImage,
     hideElementToolbar,
   } = useEditStore();
 
@@ -196,46 +197,19 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
     setIsUploading(true);
 
     try {
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        throw new Error('Please select a valid image file (JPEG, PNG, GIF, WebP)');
+      // Parse target info
+      const targetInfo = parseTargetId(targetId);
+      if (!targetInfo) {
+        throw new Error('Invalid target element');
       }
 
-      // Validate file size (10MB limit)
-      if (file.size > 10 * 1024 * 1024) {
-        throw new Error('Image file must be smaller than 10MB');
-      }
+      // Upload to server via store action
+      await uploadImage(file, {
+        sectionId: targetInfo.sectionId,
+        elementKey: targetInfo.elementKey,
+      });
 
-      // Create preview URL
-      const previewUrl = URL.createObjectURL(file);
-      
-      // Load image to get dimensions
-      const img = new Image();
-      
-      img.onload = () => {
-        try {
-          // Update the element content so the image actually displays
-          const targetInfo = parseTargetId(targetId);
-          if (targetInfo) {
-            updateElementContent(targetInfo.sectionId, targetInfo.elementKey, previewUrl);
-          } else {
-            // console.error('❌ Could not parse targetId:', targetId);
-          }
-
-          setIsUploading(false);
-        } catch (error) {
-          // console.error('Error updating image:', error);
-          setUploadError('Failed to update image. Please try again.');
-          setIsUploading(false);
-        }
-      };
-
-      img.onerror = () => {
-        setUploadError('Invalid image file. Please select a different image.');
-        setIsUploading(false);
-      };
-
-      img.src = previewUrl;
+      setIsUploading(false);
     } catch (error) {
       setUploadError(error instanceof Error ? error.message : 'Upload failed. Please try again.');
       setIsUploading(false);

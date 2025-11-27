@@ -78,16 +78,38 @@ export function createPersistenceActions(set: any, get: any) {
         set((state: EditStore) => {
           // Restore core content if available
           if (contentToLoad && contentToLoad.sections && Array.isArray(contentToLoad.sections)) {
-            
+
             state.sections = contentToLoad.sections;
             state.sectionLayouts = contentToLoad.sectionLayouts || {};
             state.sectionSpacing = contentToLoad.sectionSpacing || {};
             state.content = contentToLoad.content || {};
-            
+
+            // Migrate blob URLs to placeholders
+            let blobUrlsFound = 0;
+            for (const sectionId in state.content) {
+              const section = state.content[sectionId];
+              if (section?.elements) {
+                for (const elementKey in section.elements) {
+                  const element = section.elements[elementKey];
+                  if (element?.type === 'image' && typeof element.content === 'string') {
+                    if (element.content.startsWith('blob:')) {
+                      element.content = '/hero-placeholder.jpg';
+                      blobUrlsFound++;
+                      logger.warn(`⚠️ Migrated blob URL in ${sectionId}.${elementKey} to placeholder`);
+                    }
+                  }
+                }
+              }
+            }
+
+            if (blobUrlsFound > 0) {
+              logger.warn(`⚠️ Found and migrated ${blobUrlsFound} blob URL(s) to placeholders. Please re-upload affected images.`);
+            }
+
             // Log section/content match for debugging
             const sectionsInContent = Object.keys(state.content).length;
             const sectionsInLayout = state.sections.length;
-            
+
             if (sectionsInContent !== sectionsInLayout) {
               logger.warn('⚠️ Section/Content mismatch detected:', {
                 sectionsInLayout,

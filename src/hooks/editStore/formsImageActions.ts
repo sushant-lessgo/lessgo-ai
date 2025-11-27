@@ -297,37 +297,55 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
     
     uploadImage: async (file: File, targetElement?: { sectionId: string; elementKey: string }) => {
       const imageId = generateId();
-      
+
       // Validate file
       if (!isValidImageType(file)) {
         throw new Error('Invalid file type. Please upload a valid image file.');
       }
-      
+
       if (getFileSizeMB(file) > 10) {
         throw new Error('File too large. Please upload an image smaller than 10MB.');
       }
-      
+
       set((state: EditStore) => {
         state.images.uploadProgress[imageId] = 0;
       });
-      
+
       try {
-        // Simulate upload progress
-        const uploadSteps = [10, 25, 50, 75, 90, 100];
-        for (const progress of uploadSteps) {
-          await new Promise(resolve => setTimeout(resolve, 200));
-          set((state: EditStore) => {
-            state.images.uploadProgress[imageId] = progress;
-          });
+        // Upload to server
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('tokenId', get().tokenId || '');
+
+        // Update progress during upload
+        set((state: EditStore) => {
+          state.images.uploadProgress[imageId] = 25;
+        });
+
+        const response = await fetch('/api/upload-image', {
+          method: 'POST',
+          body: formData,
+        });
+
+        set((state: EditStore) => {
+          state.images.uploadProgress[imageId] = 75;
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Upload failed');
         }
-        
-        // Create object URL for immediate use
-        const imageUrl = URL.createObjectURL(file);
-        
+
+        const { url: permanentUrl, metadata } = await response.json();
+
+        set((state: EditStore) => {
+          state.images.uploadProgress[imageId] = 100;
+        });
+
         // Update target element if specified
         if (targetElement) {
-          get().updateElementContent(targetElement.sectionId, targetElement.elementKey, imageUrl);
-          
+          get().updateElementContent(targetElement.sectionId, targetElement.elementKey, permanentUrl);
+
           // Track change
           set((state: EditStore) => {
             state.history.undoStack.push({
@@ -335,30 +353,30 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
               description: `Uploaded image to ${targetElement.elementKey}`,
               timestamp: Date.now(),
               beforeState: { sectionId: targetElement.sectionId, elementKey: targetElement.elementKey },
-              afterState: { sectionId: targetElement.sectionId, elementKey: targetElement.elementKey, imageUrl },
+              afterState: { sectionId: targetElement.sectionId, elementKey: targetElement.elementKey, imageUrl: permanentUrl },
               sectionId: targetElement.sectionId,
             });
-            
+
             state.history.redoStack = [];
           });
         }
-        
+
         // Clean up progress tracking
         setTimeout(() => {
           set((state: EditStore) => {
             delete state.images.uploadProgress[imageId];
           });
         }, 1000);
-        
-        logger.debug('✅ Image uploaded successfully:', imageUrl);
-        return imageUrl;
-        
+
+        logger.debug('✅ Image uploaded successfully:', { url: permanentUrl, metadata });
+        return permanentUrl;
+
       } catch (error) {
         set((state: EditStore) => {
           delete state.images.uploadProgress[imageId];
           state.errors['image-upload'] = error instanceof Error ? error.message : 'Upload failed';
         });
-        
+
         logger.error('❌ Image upload failed:', error);
         throw error;
       }

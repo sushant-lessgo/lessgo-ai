@@ -46,3 +46,7 @@ _Archived
 
 # test background
 src/app/TestBackground/
+
+# user uploaded images
+public/uploads/**
+!public/uploads/.gitkeep
