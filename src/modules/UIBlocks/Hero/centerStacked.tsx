@@ -132,7 +132,7 @@ const CONTENT_SCHEMA = {
 };
 
 const HeroImagePlaceholder = React.memo(() => (
-  <div className="relative w-full h-full min-h-[400px] max-w-3xl mx-auto">
+  <div className="relative w-[70%] lg:w-[80%] aspect-[16/9] mx-auto">
     <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 rounded-2xl shadow-2xl overflow-hidden transform rotate-1 hover:rotate-0 transition-transform duration-500">
       
       <div className="absolute top-6 left-6 right-6 bottom-6 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden transform -rotate-1">
@@ -396,11 +396,11 @@ export default function CenterStacked(props: LayoutComponentProps) {
       mode={mode}
       className={props.className}
     >
-      <div className="max-w-4xl mx-auto text-center">
-        <div className="flex flex-col items-center space-y-8 min-h-[600px] justify-center">
-          
+      <div className="flex flex-col items-center space-y-8 min-h-[600px] justify-center">
+        <div className="max-w-4xl mx-auto text-center w-full flex flex-col items-center">
+
           {((blockContent.badge_text && blockContent.badge_text !== '___REMOVED___') || mode === 'edit') && (
-            <div>
+            <div className="mb-4">
               <AccentBadge
                 mode={mode}
                 value={(blockContent.badge_text === '___REMOVED___' || !blockContent.badge_text) ? '' : blockContent.badge_text}
@@ -421,7 +421,7 @@ export default function CenterStacked(props: LayoutComponentProps) {
             level="h1"
             backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
             colorTokens={colorTokens}
-            className="text-center leading-tight max-w-6xl mx-auto"
+            className="text-center leading-tight max-w-6xl mx-auto mb-6"
             textStyle={{ textAlign: 'center' }}
             sectionId={sectionId}
             elementKey="headline"
@@ -436,7 +436,7 @@ export default function CenterStacked(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              className="leading-relaxed max-w-2xl"
+              className="leading-relaxed max-w-2xl mb-6"
               style={bodyLgStyle}
               textStyle={{ ...bodyLgStyle, textAlign: 'center' }}
               placeholder="Add a compelling subheadline that supports your main message and explains the key benefit..."
@@ -446,12 +446,29 @@ export default function CenterStacked(props: LayoutComponentProps) {
             />
           )}
 
+          {((blockContent.supporting_text && blockContent.supporting_text !== '___REMOVED___') || mode === 'edit') && (
+            <EditableAdaptiveText
+              mode={mode}
+              value={(blockContent.supporting_text === '___REMOVED___' || !blockContent.supporting_text) ? '' : blockContent.supporting_text}
+              onEdit={(value) => handleContentUpdate('supporting_text', value)}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+              colorTokens={colorTokens}
+              variant="body"
+              className="leading-relaxed max-w-xl mb-8"
+              textStyle={{ textAlign: 'center' }}
+              placeholder="Add supporting text with social proof, customer count, or key metrics..."
+              sectionId={sectionId}
+              elementKey="supporting_text"
+              sectionBackground={sectionBackground}
+            />
+          )}
+
           <div className="flex flex-col items-center gap-6">
 
             <CTAButton
               text={blockContent.cta_text}
               colorTokens={colorTokens}
-              className="w-full sm:w-auto sm:min-w-[240px] shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
+              className="px-12 py-4 shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
               variant="primary"
               sectionId={sectionId}
               elementKey="cta_text"
@@ -518,23 +535,6 @@ export default function CenterStacked(props: LayoutComponentProps) {
               />
             )}
           </div>
-
-          {((blockContent.supporting_text && blockContent.supporting_text !== '___REMOVED___') || mode === 'edit') && (
-            <EditableAdaptiveText
-              mode={mode}
-              value={(blockContent.supporting_text === '___REMOVED___' || !blockContent.supporting_text) ? '' : blockContent.supporting_text}
-              onEdit={(value) => handleContentUpdate('supporting_text', value)}
-              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
-              colorTokens={colorTokens}
-              variant="body"
-              className="leading-relaxed max-w-xl"
-              textStyle={{ textAlign: 'center' }}
-              placeholder="Add supporting text with social proof, customer count, or key metrics..."
-              sectionId={sectionId}
-              elementKey="supporting_text"
-              sectionBackground={sectionBackground}
-            />
-          )}
 
           {(blockContent.show_social_proof !== false) && (
             <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-8 pt-4">
@@ -642,8 +642,9 @@ export default function CenterStacked(props: LayoutComponentProps) {
               )}
             </div>
           )}
+        </div>
 
-          <div className="w-full pt-8">
+        <div className="w-full pt-8">
             {(() => {
               // Check if center_hero_image is a valid URL or path
               const imageValue = blockContent.center_hero_image || '';
@@ -658,7 +659,7 @@ export default function CenterStacked(props: LayoutComponentProps) {
               const imageSrc = isValidImagePath && imageValue !== '' ? imageValue : '/hero-placeholder.jpg';
 
               return imageSrc ? (
-                <div className="relative w-full h-full min-h-[400px] max-w-3xl mx-auto">
+                <div className="relative w-[70%] lg:w-[80%] aspect-video mx-auto">
                   <img
                     src={imageSrc}
                     alt="Hero"
@@ -681,7 +682,6 @@ export default function CenterStacked(props: LayoutComponentProps) {
               <HeroImagePlaceholder />
             );
           })()}
-          </div>
         </div>
       </div>
     </LayoutSection>
