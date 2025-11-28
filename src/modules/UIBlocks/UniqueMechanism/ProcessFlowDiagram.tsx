@@ -158,7 +158,7 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg max-w-3xl mx-auto"
+              className="text-lg"
               sectionId={sectionId}
               elementKey="subheadline"
               sectionBackground={sectionBackground}
@@ -168,21 +168,14 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
 
         <div className="relative">
           {/* Process Flow */}
-          <div className={`grid grid-cols-1 md:grid-cols-2 ${getGridCols(steps.length)} gap-8`}>
+          <div className={`grid grid-cols-1 md:grid-cols-2 ${getGridCols(steps.length)} gap-12`}>
             {steps.map((step, index) => (
               <div key={index} className={`relative group/process-step-${index}`}>
                 {/* Step Circle */}
                 <div className="relative z-10 w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-lg mx-auto mb-4 shadow-lg">
                   {index + 1}
                 </div>
-                
-                {/* Arrow (except for last step) */}
-                {index < steps.length - 1 && (
-                  <div className="hidden lg:block absolute top-12 left-full w-8 h-1 bg-blue-300 transform -translate-y-1/2 z-0">
-                    <div className="absolute right-0 top-1/2 w-0 h-0 border-l-4 border-l-blue-300 border-t-2 border-b-2 border-t-transparent border-b-transparent transform -translate-y-1/2"></div>
-                  </div>
-                )}
-                
+
                 {/* Delete Button */}
                 {mode === 'edit' && steps.length > 2 && (
                   <button
@@ -212,7 +205,8 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
                     backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                     colorTokens={colorTokens}
                     variant="body"
-                    className="font-bold mb-3"
+                    className="text-base font-bold mb-3"
+                    formatState={{ bold: true, fontSize: '18px', textAlign: 'center' }}
                     placeholder={`Step ${index + 1} Name`}
                     sectionId={sectionId}
                     elementKey={`process_step_${index + 1}`}
@@ -232,6 +226,7 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
                     colorTokens={colorTokens}
                     variant="body"
                     className="text-sm"
+                    formatState={{ fontSize: '14px', textAlign: 'center' }}
                     placeholder={`Step ${index + 1} description`}
                     sectionId={sectionId}
                     elementKey={`step_description_${index + 1}`}
@@ -312,6 +307,7 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
                       colorTokens={{ ...colorTokens, textPrimary: 'text-blue-900' }}
                       variant="body"
                       className="font-semibold mb-2"
+                      formatState={{ textAlign: 'center' }}
                       placeholder={`Benefit ${index + 1} title`}
                       sectionId={sectionId}
                       elementKey={`benefit_title_${index + 1}`}
@@ -332,6 +328,7 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
                       colorTokens={{ ...colorTokens, textSecondary: 'text-blue-700' }}
                       variant="body"
                       className="text-sm"
+                      formatState={{ textAlign: 'center' }}
                       placeholder={`Benefit ${index + 1} description`}
                       sectionId={sectionId}
                       elementKey={`benefit_description_${index + 1}`}
