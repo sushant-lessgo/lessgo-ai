@@ -147,9 +147,24 @@ export function EditProvider({ children, tokenId, options = {} }: EditProviderPr
           const storeState = store.getState();
           if (typeof storeState.loadFromDraft === 'function') {
             storeState.loadFromDraft(data, tokenId);
-            
-            // Log theme after loading
+
+            // Verify image data loaded correctly
             const updatedState = store.getState();
+            const heroSection = updatedState.sections?.find(id => id.includes('hero'));
+            if (heroSection && data.finalContent?.content?.[heroSection]) {
+              const imageContent = data.finalContent.content[heroSection].elements?.center_hero_image;
+              const imageUrl = typeof imageContent === 'string'
+                ? imageContent
+                : imageContent?.content;
+
+              logger.debug('📥 Image loaded from draft:', {
+                sectionId: heroSection,
+                imageUrl,
+                isPlaceholder: imageUrl?.includes('placeholder'),
+              });
+            }
+
+            // Log theme after loading
             
             // Log color tokens if available
             try {

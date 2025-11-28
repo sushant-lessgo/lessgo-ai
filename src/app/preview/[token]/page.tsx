@@ -44,7 +44,7 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
   const router = useRouter();
 
   // Edit store state (after migration)
-  const { 
+  const {
     sections,
     content,
     theme,
@@ -52,6 +52,22 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
     onboardingData,
     setMode
   } = useEditStore();
+
+  // Validate preview data loaded correctly
+  useEffect(() => {
+    const heroSectionId = sections.find(id => id.includes('hero'));
+    if (heroSectionId) {
+      const imageUrl = content[heroSectionId]?.elements?.center_hero_image?.content;
+      const imageUrlStr = typeof imageUrl === 'string' ? imageUrl : '';
+
+      if (!imageUrlStr || imageUrlStr.includes('placeholder')) {
+        logger.warn('👁️ Preview showing placeholder - save may not have completed', {
+          sectionId: heroSectionId,
+          imageUrl: imageUrlStr,
+        });
+      }
+    }
+  }, [sections, content]);
 
   // UI state
   const [publishing, setPublishing] = useState(false);

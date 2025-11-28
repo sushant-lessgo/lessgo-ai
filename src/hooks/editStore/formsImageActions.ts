@@ -346,6 +346,44 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
         if (targetElement) {
           get().updateElementContent(targetElement.sectionId, targetElement.elementKey, permanentUrl);
 
+          // Force immediate save for preview consistency
+          try {
+            const currentState = get();
+            const tokenId = currentState.tokenId;
+
+            if (tokenId) {
+              const savePayload = {
+                tokenId,
+                finalContent: {
+                  layout: {
+                    sections: currentState.sections,
+                    theme: currentState.theme,
+                  },
+                  content: currentState.content,
+                },
+              };
+
+              const saveResponse = await fetch('/api/saveDraft', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(savePayload),
+              });
+
+              if (saveResponse.ok) {
+                set((state: EditStore) => {
+                  state.persistence.isDirty = false;
+                  state.persistence.lastSaved = Date.now();
+                });
+                logger.debug('💾 Immediate save after image upload succeeded');
+              } else {
+                logger.warn('⚠️ Immediate save after image upload failed - auto-save will retry');
+              }
+            }
+          } catch (error) {
+            // Non-blocking - auto-save will retry
+            logger.warn('❌ Immediate save failed after upload:', error);
+          }
+
           // Track change
           set((state: EditStore) => {
             state.history.undoStack.push({
