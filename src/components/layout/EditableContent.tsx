@@ -1,18 +1,83 @@
 import React, { useCallback, useState, useMemo } from 'react';
-import { InlineTextEditor, defaultEditorConfig } from '@/app/edit/[token]/components/editor/InlineTextEditor';
-import { useTextToolbarIntegration } from '@/hooks/useTextToolbarIntegration';
-import { useAutoSave } from '@/hooks/useAutoSave';
+import { InlineTextEditorV2 } from '@/app/edit/[token]/components/editor/InlineTextEditorV2';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useTypography } from '@/hooks/useTypography';
 import { generateAccessibleBadgeColors } from '@/utils/textContrastUtils';
 import { getTextColorForBackground } from '@/modules/Design/background/enhancedBackgroundLogic';
 import { getSmartTextColor } from '@/utils/improvedTextColors';
 import { analyzeBackground } from '@/utils/backgroundAnalysis';
-import type { TextFormatState, AutoSaveConfig, InlineEditorConfig, TextSelection } from '@/app/edit/[token]/components/editor/InlineTextEditor';
 import type { BackgroundType } from '@/types/sectionBackground';
 
 import { logger } from '@/lib/logger';
 import { sanitizeFormattingContent } from '@/lib/htmlSanitizer';
+
+// Type definitions for backward compatibility
+export interface TextFormatState {
+  bold: boolean;
+  italic: boolean;
+  underline: boolean;
+  color: string;
+  fontSize: string;
+  fontFamily: string;
+  textAlign: 'left' | 'center' | 'right' | 'justify';
+  lineHeight: string;
+  letterSpacing: string;
+  textTransform: 'none' | 'uppercase' | 'lowercase' | 'capitalize';
+}
+
+export interface TextSelection {
+  start: number;
+  end: number;
+  text: string;
+  isCollapsed: boolean;
+  containerElement: HTMLElement;
+  range: Range;
+}
+
+export interface InlineEditorConfig {
+  enterKeyBehavior: 'new-line' | 'save' | 'ignore';
+  escapeKeyBehavior: 'cancel' | 'save' | 'ignore';
+  allowedFormats: (keyof TextFormatState)[];
+  restrictedFormats: (keyof TextFormatState)[];
+  autoFormatting: {
+    enabled: boolean;
+    rules: any[];
+  };
+  validation: {
+    minLength?: number;
+    maxLength?: number;
+    pattern?: RegExp;
+    customValidator?: (content: string) => boolean;
+  };
+  accessibility: {
+    announceChanges: boolean;
+    keyboardNavigation: boolean;
+    screenReaderSupport: boolean;
+  };
+}
+
+export interface AutoSaveConfig {
+  enabled: boolean;
+  debounceMs: number;
+  onSave: (content: string) => void;
+}
+
+export const defaultEditorConfig: InlineEditorConfig = {
+  enterKeyBehavior: 'new-line',
+  escapeKeyBehavior: 'save',
+  allowedFormats: ['bold', 'italic', 'underline', 'color', 'fontSize', 'textAlign'],
+  restrictedFormats: [],
+  autoFormatting: {
+    enabled: false,
+    rules: [],
+  },
+  validation: {},
+  accessibility: {
+    announceChanges: false,
+    keyboardNavigation: true,
+    screenReaderSupport: true,
+  },
+};
 
 interface EditableContentProps {
   mode: 'edit' | 'preview';
@@ -151,29 +216,23 @@ export function EditableContent({
 
   // Use inline editor in edit mode if enabled and required props are provided
   if (
-    mode !== 'preview' && 
-    enableInlineEditor && 
-    sectionId && 
+    mode !== 'preview' &&
+    enableInlineEditor &&
+    sectionId &&
     elementKey
   ) {
+    // Determine enter behavior from config
+    const enterBehavior = finalEditorConfig.enterKeyBehavior === 'save' ? 'save' : 'newline';
+
     return (
-      <InlineTextEditor
+      <InlineTextEditorV2
         content={value}
         onContentChange={onEdit}
         element={Element}
         elementKey={elementKey}
         sectionId={sectionId}
-        formatState={currentFormatState}
-        onFormatChange={handleFormatChange}
-        autoSave={finalAutoSaveConfig}
-        config={finalEditorConfig}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        onSelectionChange={handleSelectionChange}
-        className={`
-          ${className}
-          ${isEditing ? 'editing' : ''}
-        `}
+        enterBehavior={enterBehavior}
+        className={className}
         style={style}
         placeholder={placeholder}
         backgroundType={backgroundType}
@@ -290,10 +349,10 @@ export function EditableHeadline({
       fontSize: hasCustomFontSize ? formatState.fontSize :
                 (formatState?.fontSize || typographyStyle.fontSize),
       fontFamily: formatState?.fontFamily || typographyStyle.fontFamily || 'inherit',
-      textAlign: formatState?.textAlign || (textStyle?.textAlign as any) || 'left' as const,
+      textAlign: (formatState?.textAlign || (textStyle?.textAlign as any) || 'left') as 'left' | 'center' | 'right' | 'justify',
       lineHeight: formatState?.lineHeight || typographyStyle.lineHeight,
       letterSpacing: formatState?.letterSpacing || typographyStyle.letterSpacing,
-      textTransform: (formatState?.textTransform || 'none') as const,
+      textTransform: (formatState?.textTransform || 'none') as 'none' | 'uppercase' | 'lowercase' | 'capitalize',
     };
 
 
