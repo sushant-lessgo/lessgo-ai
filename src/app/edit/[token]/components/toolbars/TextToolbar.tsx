@@ -2,7 +2,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useEditor } from '@/hooks/useEditor';
-import { useToolbarActions } from '@/hooks/useToolbarActions';
 import { useToolbarVisibility } from '@/hooks/useSelectionPriority';
 import { calculateArrowPosition } from '@/utils/toolbarPositioning';
 import { AdvancedActionsMenu } from './AdvancedActionsMenu';
@@ -73,8 +72,12 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
     [updateElementContent]
   );
 
-  const { executeAction } = useToolbarActions();
   const { exitTextEditMode } = useEditor();
+
+  // Stub executeAction for advanced features (not implemented in V2)
+  const executeAction = (action: string, params?: any) => {
+    logger.warn('Advanced action not implemented in V2:', action);
+  };
 
   // STEP 1: Priority-based early returns
   if (!isVisible) {
@@ -283,15 +286,15 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
 
     const newActiveFormats = new Set(activeFormats);
     const isActive = newActiveFormats.has(format);
-    
+
     if (isActive) {
       newActiveFormats.delete(format);
     } else {
       newActiveFormats.add(format);
     }
     setActiveFormats(newActiveFormats);
-    
-    // Apply formatting directly to the element
+
+    // Apply formatting directly to the element (simple, no wrapping)
     switch (format) {
       case 'bold':
         targetElement.style.fontWeight = isActive ? 'normal' : 'bold';
@@ -303,14 +306,14 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
         targetElement.style.textDecoration = isActive ? 'none' : 'underline';
         break;
     }
-    
+
     // Save content to store with HTML preserved
     updateElementContent(
       elementSelection.sectionId,
       elementSelection.elementKey,
       targetElement.innerHTML || targetElement.textContent || ''
     );
-    
+
     announceLiveRegion(`${format} ${!isActive ? 'applied' : 'removed'}`);
   };
 

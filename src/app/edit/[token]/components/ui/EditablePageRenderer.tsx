@@ -3,9 +3,17 @@ import React from 'react';
 import { getComponent } from '@/modules/generatedLanding/componentRegistry';
 import { sectionList } from '@/modules/sections/sectionList';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
-import { InlineTextEditor, defaultEditorConfig } from '@/app/edit/[token]/components/editor/InlineTextEditor';
+import { InlineTextEditorV2 } from '@/app/edit/[token]/components/editor/InlineTextEditorV2';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
-import type { TextFormatState, AutoSaveConfig, InlineEditorConfig, TextSelection } from '@/app/edit/[token]/components/editor/InlineTextEditor';
+import type { TextFormatState } from '@/utils/textFormatting';
+
+// Simple TextSelection type (was from old InlineTextEditor)
+interface TextSelection {
+  isCollapsed: boolean;
+  start: number;
+  end: number;
+  containerElement: HTMLElement;
+}
 
 import { logger } from '@/lib/logger';
 interface EditablePageRendererProps {

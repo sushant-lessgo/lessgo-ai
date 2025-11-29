@@ -6,20 +6,13 @@ import { logger } from '@/lib/logger';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useToolbarVisibility } from '@/hooks/useSelectionPriority';
 import { useSelectionPreserver } from '@/hooks/useSelectionPreserver';
-import { withSelectionGuard } from '@/utils/selectionGuard';
-import { 
-  formatSelectedText, 
-  toggleFormatOnSelection, 
-  getSelectionFormatting, 
+import {
+  formatSelectedText,
+  toggleFormatOnSelection,
+  getSelectionFormatting,
   removeFormattingFromSelection,
-  type PartialFormatResult 
+  type PartialFormatResult
 } from '@/utils/textFormatting';
-import { 
-  setInteractionSource, 
-  clearInteractionSource, 
-  withInteractionSource,
-  logInteractionTimeline 
-} from '@/utils/interactionTracking';
 
 interface TextToolbarMVPProps {
   elementSelection: any;
@@ -312,25 +305,19 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
     [elementSelection, formatState, hasTextSelection, setFormattingInProgress, updateElementContent]
   );
 
-  // Apply format with interaction tracking (for pointerDown)
+  // Apply format immediately (simplified without interaction tracking)
   const applyFormatImmediate = (formatOptions: Partial<MVPFormatState>) => {
-    logInteractionTimeline('format:start', { formatOptions });
-    
     // Set formatting in progress
     setFormattingInProgress(true);
-    
+
     // Apply format immediately
     applyFormatInternal(formatOptions);
-    
+
     // Clear formatting flag after a delay
     setTimeout(() => {
       setFormattingInProgress(false);
-      logInteractionTimeline('format:end');
     }, 100);
   };
-  
-  // Keep debounced version for backward compatibility
-  const applyFormat = withSelectionGuard(debouncedFormat, 75);
 
   // Simple format functions
   const toggleBold = (e?: React.MouseEvent) => {
@@ -360,15 +347,11 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
       e.preventDefault();
       e.stopPropagation();
     }
-    
-    withInteractionSource('toolbar', () => {
-      withSelectionGuard(() => {
-        if (hasTextSelection) {
-          restoreSelection();
-        }
-        applyFormatImmediate({ textAlign: align });
-      });
-    });
+
+    if (hasTextSelection) {
+      restoreSelection();
+    }
+    applyFormatImmediate({ textAlign: align });
   };
   
   const setFontSize = (size: string, e?: React.PointerEvent) => {
@@ -376,14 +359,12 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
       e.preventDefault();
       e.stopPropagation();
     }
-    
-    withInteractionSource('toolbar', () => {
-      if (hasTextSelection) {
-        restoreSelection();
-      }
-      applyFormatImmediate({ fontSize: size });
-      setShowFontSizePicker(false);
-    });
+
+    if (hasTextSelection) {
+      restoreSelection();
+    }
+    applyFormatImmediate({ fontSize: size });
+    setShowFontSizePicker(false);
   };
   
   const setColor = (color: string, e?: React.PointerEvent) => {
@@ -391,14 +372,12 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
       e.preventDefault();
       e.stopPropagation();
     }
-    
-    withInteractionSource('toolbar', () => {
-      if (hasTextSelection) {
-        restoreSelection();
-      }
-      applyFormatImmediate({ color });
-      setShowColorPicker(false);
-    });
+
+    if (hasTextSelection) {
+      restoreSelection();
+    }
+    applyFormatImmediate({ color });
+    setShowColorPicker(false);
   };
 
   // Close dropdowns when clicking outside

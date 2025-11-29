@@ -750,7 +750,7 @@ export function EditableAdaptiveHeadline({
     return {
       ...formatState,
       ...extractedStyles, // Extracted styles take precedence
-    };
+    } as TextFormatState;
   }, [formatState, extractedStyles]);
 
   return (
@@ -884,7 +884,7 @@ export function EditableAdaptiveText({
     return {
       ...formatState,
       ...extractedStyles, // Extracted styles take precedence
-    };
+    } as TextFormatState;
   }, [formatState, extractedStyles]);
 
   return (

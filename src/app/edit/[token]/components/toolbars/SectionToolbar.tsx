@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useOnboardingStore } from '@/hooks/useOnboardingStore';
-import { useToolbarActions } from '@/hooks/useToolbarActions';
+
 import { useElementPicker } from '@/hooks/useElementPicker';
 import { useSectionCRUD } from '@/hooks/useSectionCRUD';
 import { useToolbarVisibility } from '@/hooks/useSelectionPriority';
@@ -61,7 +61,10 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
 
   const onboardingStore = useOnboardingStore();
 
-  const { executeAction } = useToolbarActions();
+  // Stub executeAction (removed in V2 refactor)
+  const executeAction = (action: string, params: any) => {
+    console.warn('Advanced action not implemented in V2:', action);
+  };
   const { showElementPicker } = useElementPicker();
 
   const {

@@ -1,5 +1,18 @@
 // utils/textFormatting.ts - Text formatting utilities
-import type { TextFormatState } from '@/app/edit/[token]/components/editor/InlineTextEditor';
+
+// Simplified TextFormatState type (was from old InlineTextEditor)
+export interface TextFormatState {
+  bold?: boolean;
+  italic?: boolean;
+  underline?: boolean;
+  color?: string;
+  fontSize?: string;
+  fontFamily?: string;
+  textAlign?: 'left' | 'center' | 'right' | 'justify';
+  lineHeight?: string;
+  letterSpacing?: string;
+  textTransform?: 'none' | 'uppercase' | 'lowercase' | 'capitalize';
+}
 
 export interface FormatRule {
   property: keyof TextFormatState;

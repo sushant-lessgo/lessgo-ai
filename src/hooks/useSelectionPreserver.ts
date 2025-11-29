@@ -9,8 +9,6 @@
 
 import { useRef, useEffect, useCallback } from 'react';
 import { debounce } from 'lodash';
-import { suppressSelectionEvents, useSelectionGuard } from '@/utils/selectionGuard';
-
 import { logger } from '@/lib/logger';
 export interface SelectionPreserver {
   saveSelection: () => void;
@@ -41,7 +39,6 @@ export interface SelectionPreserver {
  */
 export function useSelectionPreserver(): SelectionPreserver {
   const savedRangeRef = useRef<Range | null>(null);
-  const { createGuardedHandler } = useSelectionGuard();
   const debouncedSaveRef = useRef<ReturnType<typeof debounce> | null>(null);
 
   /**
@@ -124,18 +121,15 @@ export function useSelectionPreserver(): SelectionPreserver {
       logger.warn('🎯 Cannot restore - invalid selection');
       return;
     }
-    
+
     const sel = window.getSelection();
     const range = savedRangeRef.current;
-    
+
     if (sel && range) {
       try {
-        // Temporarily suppress selection events during restore
-        suppressSelectionEvents(25);
-        
         sel.removeAllRanges();
         sel.addRange(range);
-        
+
         logger.debug('🎯 Selection restored:', {
           text: range.toString().substring(0, 50),
           isValid: true,
@@ -175,22 +169,19 @@ export function useSelectionPreserver(): SelectionPreserver {
   const cleanup = useCallback(() => {
     // Clear saved range
     savedRangeRef.current = null;
-    
+
     // Cancel any pending debounced operations
     if (debouncedSaveRef.current) {
       debouncedSaveRef.current.cancel();
       debouncedSaveRef.current = null;
     }
-    
-    // Force restore selection events
-    suppressSelectionEvents(0); // Reset immediately
   }, []);
 
   /**
-   * Auto-save selection on selectionchange events with guard
+   * Auto-save selection on selectionchange events
    */
   useEffect(() => {
-    const handleSelectionChange = createGuardedHandler(() => {
+    const handleSelectionChange = () => {
       // Only auto-save if we don't already have a saved selection
       if (!savedRangeRef.current) {
         const sel = window.getSelection();
@@ -206,15 +197,15 @@ export function useSelectionPreserver(): SelectionPreserver {
           }
         }
       }
-    });
+    };
 
-    // Add guarded selectionchange listener
+    // Add selectionchange listener
     document.addEventListener('selectionchange', handleSelectionChange);
-    
+
     return () => {
       document.removeEventListener('selectionchange', handleSelectionChange);
     };
-  }, [createGuardedHandler]);
+  }, []);
 
   /**
    * Cleanup on unmount (Fix #4: Hard Cleanup)

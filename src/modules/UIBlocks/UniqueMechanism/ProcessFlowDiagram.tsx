@@ -206,7 +206,7 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
                     colorTokens={colorTokens}
                     variant="body"
                     className="text-base font-bold mb-3"
-                    formatState={{ bold: true, fontSize: '18px', textAlign: 'center' }}
+                    formatState={{ bold: true, fontSize: '18px', textAlign: 'center' } as any}
                     placeholder={`Step ${index + 1} Name`}
                     sectionId={sectionId}
                     elementKey={`process_step_${index + 1}`}
@@ -226,7 +226,7 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
                     colorTokens={colorTokens}
                     variant="body"
                     className="text-sm"
-                    formatState={{ fontSize: '14px', textAlign: 'center' }}
+                    formatState={{ fontSize: '14px', textAlign: 'center' } as any}
                     placeholder={`Step ${index + 1} description`}
                     sectionId={sectionId}
                     elementKey={`step_description_${index + 1}`}
@@ -307,7 +307,7 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
                       colorTokens={{ ...colorTokens, textPrimary: 'text-blue-900' }}
                       variant="body"
                       className="font-semibold mb-2"
-                      formatState={{ textAlign: 'center' }}
+                      formatState={{ textAlign: 'center' } as any}
                       placeholder={`Benefit ${index + 1} title`}
                       sectionId={sectionId}
                       elementKey={`benefit_title_${index + 1}`}
@@ -328,7 +328,7 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
                       colorTokens={{ ...colorTokens, textSecondary: 'text-blue-700' }}
                       variant="body"
                       className="text-sm"
-                      formatState={{ textAlign: 'center' }}
+                      formatState={{ textAlign: 'center' } as any}
                       placeholder={`Benefit ${index + 1} description`}
                       sectionId={sectionId}
                       elementKey={`benefit_description_${index + 1}`}

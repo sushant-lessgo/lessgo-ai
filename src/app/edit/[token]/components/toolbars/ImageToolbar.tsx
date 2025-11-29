@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactDOM, { createPortal } from 'react-dom';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
-import { useToolbarActions } from '@/hooks/useToolbarActions';
+
 import { calculateArrowPosition } from '@/utils/toolbarPositioning';
 import { AdvancedActionsMenu } from './AdvancedActionsMenu';
 import type { StockPhoto } from '@/services/pexelsApi';
@@ -42,7 +42,10 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
     hideElementToolbar,
   } = useEditStore();
 
-  const { executeAction } = useToolbarActions();
+  // Stub executeAction (removed in V2 refactor)
+  const executeAction = (action: string, params: any) => {
+    console.warn('Advanced action not implemented in V2:', action);
+  };
 
   // Helper function to parse targetId and extract section/element info
   const parseTargetId = (targetId: string) => {

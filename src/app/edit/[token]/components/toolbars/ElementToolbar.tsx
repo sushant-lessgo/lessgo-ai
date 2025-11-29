@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useEditor } from '@/hooks/useEditor';
-import { useToolbarActions } from '@/hooks/useToolbarActions';
+
 import { useToolbarVisibility } from '@/hooks/useSelectionPriority';
 import { calculateArrowPosition } from '@/utils/toolbarPositioning';
 import { useButtonConfigModal } from '@/hooks/useButtonConfigModal';
@@ -39,8 +39,12 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
     announceLiveRegion,
   } = useEditStore();
 
-  const { executeAction } = useToolbarActions();
   const { enterTextEditMode } = useEditor();
+
+  // Stub executeAction (removed in V2 refactor)
+  const executeAction = (action: string, params: any) => {
+    console.warn('Advanced action not implemented in V2:', action);
+  };
 
   // Close menus when clicking outside - MOVED UP WITH OTHER HOOKS
   useEffect(() => {

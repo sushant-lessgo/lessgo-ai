@@ -1,7 +1,7 @@
 // app/edit/[token]/components/toolbars/FormToolbar.tsx - Complete Form Toolbar
 import React, { useState, useRef, useEffect } from 'react';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
-import { useToolbarActions } from '@/hooks/useToolbarActions';
+
 import { calculateArrowPosition } from '@/utils/toolbarPositioning';
 import { AdvancedActionsMenu } from './AdvancedActionsMenu';
 
@@ -30,7 +30,10 @@ export function FormToolbar({ targetId, position, contextActions }: FormToolbarP
     announceLiveRegion,
   } = useEditStore();
 
-  const { executeAction } = useToolbarActions();
+  // Stub executeAction (removed in V2 refactor)
+  const executeAction = (action: string, params: any) => {
+    console.warn('Advanced action not implemented in V2:', action);
+  };
 
   // Calculate arrow position
   const targetElement = document.querySelector(`[data-form-id="${targetId}"]`);
