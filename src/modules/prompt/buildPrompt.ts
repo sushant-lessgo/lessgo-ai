@@ -531,7 +531,7 @@ function getSectionLayoutGuidance(sectionType: string, layout: string): string {
 
     HowItWorks: {
       ThreeStepHorizontal: "Three-step process overview. Use parallel structure across steps. Keep steps simple and actionable.",
-      VerticalTimeline: "Sequential step presentation. Use connecting language between steps. Show clear progression and momentum.",
+      VerticalTimeline: "Sequential step presentation. Use connecting language between steps. Show clear progression and momentum. PROCESS SUMMARY: Create compelling reinforcement of process benefits.",
       IconCircleSteps: "Icon-enhanced step guide. Step titles should be clear actions. Icons should support comprehension.",
       AccordionSteps: "Expandable step details. Step titles should be compelling. Details should provide necessary depth.",
       CardFlipSteps: "Interactive step exploration. Front should intrigue, back should satisfy. Use curiosity-driven language.",
@@ -1053,6 +1053,11 @@ function getElementFormatGuidance(element: string): string {
   // CTA patterns
   if (element.includes('cta') || element.includes('_cta')) {
     return "Action phrase, 2-4 words (e.g., \"Get Started Now\", \"Try Free\")";
+  }
+
+  // Process summary patterns (VerticalTimeline)
+  if (element === 'process_summary_text') {
+    return "Creative reinforcement of process benefits and ease, 10-20 words (e.g., \"Our proven process gets you results faster than you thought possible\")";
   }
 
   // Summary card patterns (IconCircleSteps - reinforcing ease of use)
@@ -1748,6 +1753,7 @@ function getSpecificElementGuidance(elementName: string, sectionType: string): s
     result_label_4: "Description of fourth metric. Complete label set.",
     results_title: "Section header for results. Emphasize proven outcomes.",
 
+    process_summary_text: "Reinforce process simplicity, speed, and confidence. Creative benefit-focused summary. NOT derived from step data - standalone compelling statement.",
     process_steps: "Pipe-separated process steps. Clear sequence of actions.",
     step_descriptions: "Pipe-separated step explanations. Match step order exactly.",
     benefits_title: "Benefits section header. Why this process is superior.",

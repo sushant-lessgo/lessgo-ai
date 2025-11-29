@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
@@ -23,16 +23,18 @@ interface VerticalTimelineContent {
   supporting_text?: string;
   cta_text?: string;
   trust_items?: string;
-  process_steps_label?: string;
-  process_summary_heading?: string;
-  process_summary_description?: string;
-  process_time_label?: string;
+  process_summary_text?: string;
   // Optional step icon overrides
   step_icon_1?: string;
   step_icon_2?: string;
   step_icon_3?: string;
   step_icon_4?: string;
   use_step_icons?: boolean;
+  // Legacy fields for migration
+  process_steps_label?: string;
+  process_summary_heading?: string;
+  process_summary_description?: string;
+  process_time_label?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -64,25 +66,13 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: '' 
   },
-  trust_items: { 
-    type: 'string' as const, 
-    default: '' 
+  trust_items: {
+    type: 'string' as const,
+    default: ''
   },
-  process_steps_label: { 
-    type: 'string' as const, 
-    default: 'simple steps' 
-  },
-  process_summary_heading: { 
-    type: 'string' as const, 
-    default: 'Get started in minutes, not hours' 
-  },
-  process_summary_description: { 
-    type: 'string' as const, 
-    default: 'Our streamlined process is designed to get you up and running quickly with maximum efficiency.' 
-  },
-  process_time_label: { 
-    type: 'string' as const, 
-    default: 'Total time: 30 minutes' 
+  process_summary_text: {
+    type: 'string' as const,
+    default: 'Our streamlined process gets you results faster than you thought possible'
   },
   // Optional step icon overrides
   step_icon_1: { type: 'string' as const, default: '' },
@@ -311,13 +301,35 @@ export default function VerticalTimeline(props: LayoutComponentProps) {
     duration: stepDurations[index] || ''
   })).filter(step => step.title.trim() !== '' || mode === 'edit'); // Show empty steps in edit mode
 
-  const trustItems = blockContent.trust_items 
+  const trustItems = blockContent.trust_items
     ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
     : [];
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
-  
+
   const totalDuration = stepDurations.length > 0 ? '30 minutes' : 'Quick setup';
+
+  // Migration: Convert old fields to new process_summary_text (only once)
+  const hasMigrated = useRef(false);
+
+  useEffect(() => {
+    // Silent migration: convert old fields to process_summary_text
+    if (!hasMigrated.current &&
+        !blockContent.process_summary_text &&
+        (blockContent.process_time_label || blockContent.process_summary_heading)) {
+
+      const parts: string[] = [];
+
+      if (blockContent.process_summary_heading) parts.push(blockContent.process_summary_heading);
+      if (blockContent.process_summary_description) parts.push(blockContent.process_summary_description);
+
+      const migratedText = parts.join('. ') || 'Our streamlined process gets you results quickly and efficiently';
+
+      // Silent migration - no toast notification
+      handleContentUpdate('process_summary_text', migratedText);
+      hasMigrated.current = true;
+    }
+  }, [blockContent.process_summary_text, blockContent.process_time_label, blockContent.process_summary_heading, blockContent.process_summary_description, handleContentUpdate]);
   
   return (
     <LayoutSection
@@ -464,144 +476,23 @@ export default function VerticalTimeline(props: LayoutComponentProps) {
         </div>
 
         {/* Process Summary */}
-        {(
-          <div className="mt-16 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-8 border border-blue-100">
-            <div className="text-center">
-              <div className="flex justify-center items-center space-x-4 mb-6">
-                <div className="relative group/time-label flex items-center space-x-2">
-                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <EditableAdaptiveText
-                    mode={mode}
-                    value={blockContent.process_time_label || ''}
-                    onEdit={(value) => handleContentUpdate('process_time_label', value)}
-                    backgroundType={backgroundType}
-                    colorTokens={colorTokens}
-                    variant="body"
-                    className="text-lg font-semibold text-gray-900"
-                    placeholder="Time to complete"
-                    sectionBackground={sectionBackground}
-                    sectionId={sectionId}
-                    elementKey="process_time_label"
-                  />
-                  {mode !== 'preview' && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleContentUpdate('process_time_label', '___REMOVED___');
-                      }}
-                      className="opacity-0 group-hover/time-label:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
-                      title="Remove time label"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  )}
-                </div>
-                <div className="w-px h-6 bg-gray-300" />
-                <div className="relative group/steps-label flex items-center space-x-2">
-                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span className="text-lg font-semibold text-gray-900">{steps.length} </span>
-                  <EditableAdaptiveText
-                    mode={mode}
-                    value={blockContent.process_steps_label || ''}
-                    onEdit={(value) => handleContentUpdate('process_steps_label', value)}
-                    backgroundType={backgroundType}
-                    colorTokens={colorTokens}
-                    variant="body"
-                    className="text-lg font-semibold text-gray-900"
-                    placeholder="steps description"
-                    sectionBackground={sectionBackground}
-                    data-section-id={sectionId}
-                    data-element-key="process_steps_label"
-                  />
-                  {mode !== 'preview' && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleContentUpdate('process_steps_label', '___REMOVED___');
-                      }}
-                      className="opacity-0 group-hover/steps-label:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
-                      title="Remove steps label"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  )}
-                </div>
-              </div>
-              
-              {(blockContent.process_summary_heading || mode === 'edit') && (
-                <div className="relative group/summary-heading">
-                  <EditableAdaptiveText
-                    mode={mode}
-                    value={blockContent.process_summary_heading || ''}
-                    onEdit={(value) => handleContentUpdate('process_summary_heading', value)}
-                    backgroundType={backgroundType}
-                    colorTokens={colorTokens}
-                    variant="body"
-                    className="text-xl font-semibold text-gray-900 mb-2"
-                    placeholder="Process summary heading"
-                    sectionBackground={sectionBackground}
-                    data-section-id={sectionId}
-                    data-element-key="process_summary_heading"
-                  />
-                  {mode !== 'preview' && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleContentUpdate('process_summary_heading', '___REMOVED___');
-                      }}
-                      className="opacity-0 group-hover/summary-heading:opacity-100 ml-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200"
-                      title="Remove summary heading"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  )}
-                </div>
-              )}
-              
-              {(blockContent.process_summary_description || mode === 'edit') && (
-                <div className="relative group/summary-desc">
-                  <EditableAdaptiveText
-                    mode={mode}
-                    value={blockContent.process_summary_description || ''}
-                    onEdit={(value) => handleContentUpdate('process_summary_description', value)}
-                    backgroundType={backgroundType}
-                    colorTokens={colorTokens}
-                    variant="body"
-                    className={`${mutedTextColor} max-w-2xl mx-auto`}
-                    placeholder="Process summary description"
-                    sectionBackground={sectionBackground}
-                    data-section-id={sectionId}
-                    data-element-key="process_summary_description"
-                  />
-                  {mode !== 'preview' && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleContentUpdate('process_summary_description', '___REMOVED___');
-                      }}
-                      className="opacity-0 group-hover/summary-desc:opacity-100 ml-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200"
-                      title="Remove summary description"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
+        <div className="mt-16 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-8 border border-blue-100">
+          <div className="text-center">
+            <EditableAdaptiveText
+              mode={mode}
+              value={blockContent.process_summary_text || ''}
+              onEdit={(value) => handleContentUpdate('process_summary_text', value)}
+              backgroundType={backgroundType}
+              colorTokens={colorTokens}
+              variant="body"
+              className="text-lg font-semibold text-gray-900"
+              placeholder="Add process summary..."
+              sectionBackground={sectionBackground}
+              sectionId={sectionId}
+              elementKey="process_summary_text"
+            />
           </div>
-        )}
+        </div>
 
         {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
           <div className="text-center space-y-6 mt-16">
@@ -668,12 +559,9 @@ export const componentMeta = {
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: false },
     { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
+    { key: 'process_summary_text', label: 'Process Summary Text', type: 'text', required: false },
     { key: 'step_feature_1_text', label: 'Step Feature 1', type: 'text', required: false },
     { key: 'step_feature_2_text', label: 'Step Feature 2', type: 'text', required: false },
-    { key: 'process_summary_heading', label: 'Process Summary Heading', type: 'text', required: false },
-    { key: 'process_summary_description', label: 'Process Summary Description', type: 'textarea', required: false },
-    { key: 'process_time_label', label: 'Process Time Label', type: 'text', required: false },
-    { key: 'process_steps_label', label: 'Process Steps Label', type: 'text', required: false },
     { key: 'step_icon_1', label: 'Step 1 Icon', type: 'text', required: false },
     { key: 'step_icon_2', label: 'Step 2 Icon', type: 'text', required: false },
     { key: 'step_icon_3', label: 'Step 3 Icon', type: 'text', required: false },

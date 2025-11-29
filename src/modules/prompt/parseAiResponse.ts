@@ -4086,6 +4086,23 @@ function processVerticalTimelineContent(sectionId: string, content: SectionConte
     }
   }
 
+  // Validate process_summary_text if present
+  if (content.process_summary_text) {
+    const summaryText = typeof content.process_summary_text === 'string'
+      ? content.process_summary_text
+      : '';
+
+    if (summaryText.length < 10) {
+      result.warnings.push(`${sectionId}: process_summary_text too short (${summaryText.length} chars, minimum 10)`);
+      result.hasIssues = true;
+    }
+
+    if (summaryText.length > 200) {
+      result.warnings.push(`${sectionId}: process_summary_text too long (${summaryText.length} chars, maximum 200)`);
+      result.hasIssues = true;
+    }
+  }
+
   return result;
 }
 
