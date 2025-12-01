@@ -326,9 +326,8 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
                         mode={mode}
                         value={step.title || ''}
                         onEdit={(value) => {
-                          const updatedSteps = (blockContent.conversion_steps || '').split('|');
-                          updatedSteps[index * 3] = value;
-                          handleContentUpdate('conversion_steps', updatedSteps.join('|'));
+                          const fieldNum = index + 1;
+                          handleContentUpdate(`step_name_${fieldNum}` as keyof SkepticToBelieverStepsContent, value);
                         }}
                         backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                         colorTokens={colorTokens}
@@ -347,9 +346,8 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
                             mode={mode}
                             value={step.thought || ''}
                             onEdit={(value) => {
-                              const updatedSteps = (blockContent.conversion_steps || '').split('|');
-                              updatedSteps[index * 3 + 1] = `"${value}"`;
-                              handleContentUpdate('conversion_steps', updatedSteps.join('|'));
+                              const fieldNum = index + 1;
+                              handleContentUpdate(`step_quote_${fieldNum}` as keyof SkepticToBelieverStepsContent, value);
                             }}
                             backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                             colorTokens={colorTokens}
@@ -368,9 +366,8 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
                         mode={mode}
                         value={step.description || ''}
                         onEdit={(value) => {
-                          const updatedSteps = (blockContent.conversion_steps || '').split('|');
-                          updatedSteps[index * 3 + 2] = value;
-                          handleContentUpdate('conversion_steps', updatedSteps.join('|'));
+                          const fieldNum = index + 1;
+                          handleContentUpdate(`step_result_${fieldNum}` as keyof SkepticToBelieverStepsContent, value);
                         }}
                         backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                         colorTokens={colorTokens}
