@@ -250,32 +250,36 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
 
         setFormatState(updatedFormat);
         
-        // Update store for persistence - create span with styles if element has styling applied
-        const hasFormattedContent = targetElement.querySelector('span[style]');
-        const elementHasDirectStyles = !!(targetElement.style.color || targetElement.style.fontSize || targetElement.style.fontWeight || targetElement.style.fontStyle || targetElement.style.textDecoration);
-        
+        // Update store for persistence - ALWAYS extract from parent element styles
+        // This prevents nested spans and ensures all formatting persists correctly
+        const elementHasDirectStyles = !!(
+          targetElement.style.color ||
+          targetElement.style.fontSize ||
+          targetElement.style.fontWeight ||
+          targetElement.style.fontStyle ||
+          targetElement.style.textDecoration
+        );
+
         let contentToSave: string;
-        if (hasFormattedContent) {
-          // Element already has formatted spans
-          contentToSave = targetElement.innerHTML;
-        } else if (elementHasDirectStyles) {
-          // Element has direct styles - wrap content in a span to preserve them
-          const textContent = targetElement.textContent || '';
+        if (elementHasDirectStyles) {
+          // Build styles array from parent element (ignoring any inner spans)
           const styles: string[] = [];
-          
+
           if (targetElement.style.color) styles.push(`color: ${targetElement.style.color}`);
           if (targetElement.style.fontSize) styles.push(`font-size: ${targetElement.style.fontSize}`);
-          if (targetElement.style.fontWeight && targetElement.style.fontWeight !== 'normal') styles.push(`font-weight: ${targetElement.style.fontWeight}`);
-          if (targetElement.style.fontStyle && targetElement.style.fontStyle !== 'normal') styles.push(`font-style: ${targetElement.style.fontStyle}`);
-          if (targetElement.style.textDecoration && targetElement.style.textDecoration !== 'none') styles.push(`text-decoration: ${targetElement.style.textDecoration}`);
-          
-          if (styles.length > 0) {
-            contentToSave = `<span style="${styles.join('; ')}">${textContent}</span>`;
-          } else {
-            contentToSave = textContent;
-          }
+          // CRITICAL: Save font-weight even if 'normal' to override h1/h2 defaults
+          if (targetElement.style.fontWeight) styles.push(`font-weight: ${targetElement.style.fontWeight}`);
+          if (targetElement.style.fontStyle) styles.push(`font-style: ${targetElement.style.fontStyle}`);
+          // CRITICAL: Save text-decoration even if 'none' to persist un-underline
+          if (targetElement.style.textDecoration) styles.push(`text-decoration: ${targetElement.style.textDecoration}`);
+
+          // Use textContent to strip any existing spans and avoid nesting
+          const textContent = targetElement.textContent || '';
+
+          // Create clean span with all merged styles
+          contentToSave = `<span style="${styles.join('; ')}">${textContent}</span>`;
         } else {
-          // No formatting
+          // No formatting - save plain text
           contentToSave = targetElement.textContent || '';
         }
         
