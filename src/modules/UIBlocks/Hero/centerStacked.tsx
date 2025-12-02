@@ -394,10 +394,10 @@ export default function CenterStacked(props: LayoutComponentProps) {
       backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
       sectionBackground={sectionBackground}
       mode={mode}
-      className={props.className}
+      className={`!pt-0 ${props.className || ''}`}
     >
-      <div className="flex flex-col items-center space-y-8 min-h-[600px] justify-center">
-        <div className="max-w-4xl mx-auto text-center w-full flex flex-col items-center">
+      <div className="flex flex-col items-center space-y-8 min-h-[600px] justify-start">
+        <div className="max-w-5xl mx-auto text-center w-full flex flex-col items-center">
 
           {blockContent.badge_text &&
            blockContent.badge_text !== '___REMOVED___' &&
@@ -423,7 +423,7 @@ export default function CenterStacked(props: LayoutComponentProps) {
             level="h1"
             backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
             colorTokens={colorTokens}
-            className="text-center leading-tight max-w-6xl mx-auto mb-6"
+            className="text-center leading-tight max-w-7xl mx-auto mb-6"
             textStyle={{ textAlign: 'center' }}
             sectionId={sectionId}
             elementKey="headline"
@@ -438,7 +438,7 @@ export default function CenterStacked(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              className="leading-relaxed max-w-2xl mb-6"
+              className="leading-relaxed max-w-7xl mb-6"
               style={bodyLgStyle}
               textStyle={{ ...bodyLgStyle, textAlign: 'center' }}
               placeholder="Add a compelling subheadline that supports your main message and explains the key benefit..."
@@ -456,7 +456,7 @@ export default function CenterStacked(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              className="leading-relaxed max-w-xl mb-8"
+              className="leading-relaxed max-w-7xl mb-8"
               textStyle={{ textAlign: 'center' }}
               placeholder="Add supporting text with social proof, customer count, or key metrics..."
               sectionId={sectionId}
@@ -646,7 +646,7 @@ export default function CenterStacked(props: LayoutComponentProps) {
           )}
         </div>
 
-        <div className="w-full pt-8">
+        <div className="w-full">
             {(() => {
               // Check if center_hero_image is a valid URL or path
               const imageValue = blockContent.center_hero_image || '';

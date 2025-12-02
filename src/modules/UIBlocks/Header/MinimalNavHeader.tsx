@@ -128,18 +128,18 @@ const MinimalNavHeader: React.FC<LayoutComponentProps> = (props) => {
       mode={mode}
       className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b"
     >
-      <nav className="flex items-center justify-between py-4">
+      <nav className="flex items-center justify-between py-2 md:py-3">
         <div className="flex items-center">
-          <HeaderLogo 
+          <HeaderLogo
             mode={mode}
-            className="h-12 w-auto object-contain mr-8"
+            className="h-8 md:h-10 w-auto object-contain mr-8"
           />
         </div>
         
         <div className="flex items-center gap-4">
           {mode === 'preview' ? (
             // Preview Mode: Simple clickable navigation
-            <ul className="flex items-center gap-6">
+            <ul className="flex items-center gap-4 md:gap-5">
               {navItems.map((navItem, index) => (
                 <li key={navItem.id}>
                   <a 

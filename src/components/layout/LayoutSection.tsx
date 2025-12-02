@@ -41,9 +41,9 @@ export const LayoutSection = forwardRef<HTMLElement, LayoutSectionProps>(({
   const getSpacingClass = (spacing?: string): string => {
     switch (spacing) {
       case 'compact':
-        return 'py-8 md:py-10 lg:py-12'; // 32px -> 40px -> 48px
+        return 'py-4 md:py-4 lg:py-4'; // 32px -> 40px -> 48px
       case 'spacious':
-        return 'py-16 md:py-20 lg:py-24'; // 64px -> 80px -> 96px
+        return 'py-8 md:py-12 lg:py-12'; // 64px -> 80px -> 96px
       case 'extra':
         return 'py-20 md:py-24 lg:py-32'; // 80px -> 96px -> 128px
       case 'normal':

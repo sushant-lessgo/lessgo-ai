@@ -99,7 +99,7 @@ const CenteredLogoHeader: React.FC<LayoutComponentProps> = (props) => {
       const element = document.querySelector(link);
       if (element) {
         // Account for sticky header height
-        const headerHeight = 80;
+        const headerHeight = 60;
         const elementPosition = element.getBoundingClientRect().top + window.pageYOffset - headerHeight;
         
         window.scrollTo({
@@ -121,11 +121,11 @@ const CenteredLogoHeader: React.FC<LayoutComponentProps> = (props) => {
       mode={mode}
       className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b"
     >
-      <nav className="flex items-center justify-between py-4">
+      <nav className="flex items-center justify-between py-2 md:py-3">
         {mode === 'preview' ? (
           // Preview Mode: Clickable navigation
           <>
-            <ul className="flex items-center gap-6 flex-1">
+            <ul className="flex items-center gap-4 md:gap-5 flex-1">
               {leftNavItems.map((navItem, index) => (
                 <li key={navItem.id}>
                   <a 
@@ -139,14 +139,14 @@ const CenteredLogoHeader: React.FC<LayoutComponentProps> = (props) => {
               ))}
             </ul>
             
-            <div className="px-8">
-              <HeaderLogo 
+            <div className="px-4 md:px-6">
+              <HeaderLogo
                 mode={mode}
-                className="h-12 w-auto object-contain"
+                className="h-8 md:h-10 w-auto object-contain"
               />
             </div>
-            
-            <ul className="flex items-center gap-6 flex-1 justify-end">
+
+            <ul className="flex items-center gap-4 md:gap-5 flex-1 justify-end">
               {rightNavItems.map((navItem, index) => (
                 <li key={navItem.id}>
                   <a 
@@ -177,10 +177,10 @@ const CenteredLogoHeader: React.FC<LayoutComponentProps> = (props) => {
               </div>
             </div>
             
-            <div className="px-8">
-              <HeaderLogo 
+            <div className="px-4 md:px-6">
+              <HeaderLogo
                 mode={mode}
-                className="h-12 w-auto object-contain"
+                className="h-8 md:h-10 w-auto object-contain"
               />
             </div>
             

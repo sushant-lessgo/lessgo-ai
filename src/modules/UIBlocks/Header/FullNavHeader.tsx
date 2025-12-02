@@ -123,7 +123,7 @@ const FullNavHeader: React.FC<LayoutComponentProps> = (props) => {
       const element = document.querySelector(link);
       if (element) {
         // Account for sticky header height
-        const headerHeight = 80; // Approximate height of sticky header
+        const headerHeight = 60; // Approximate height of sticky header
         const elementPosition = element.getBoundingClientRect().top + window.pageYOffset - headerHeight;
         
         window.scrollTo({
@@ -148,16 +148,16 @@ const FullNavHeader: React.FC<LayoutComponentProps> = (props) => {
       mode={mode}
       className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b"
     >
-      <nav className="flex items-center justify-between py-4">
-        <HeaderLogo 
+      <nav className="flex items-center justify-between py-2 md:py-3">
+        <HeaderLogo
           mode={mode}
-          className="h-12 w-auto object-contain"
+          className="h-8 md:h-10 w-auto object-contain"
         />
         
         <div className="flex items-center justify-center flex-1">
           {mode === 'preview' ? (
             // Preview Mode: Simple clickable navigation
-            <ul className="flex items-center gap-8">
+            <ul className="flex items-center gap-4 md:gap-6">
               {navItems.map((navItem, index) => (
                 <li key={navItem.id}>
                   <a 
