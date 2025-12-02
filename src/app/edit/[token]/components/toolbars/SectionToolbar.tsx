@@ -14,6 +14,7 @@ import LoadingButtonBar from '@/components/shared/LoadingButtonBar';
 import type { SectionType } from '@/types/core/content';
 import { logger } from '@/lib/logger';
 import { getSectionElementRequirements, mapStoreToVariables } from '@/modules/sections/elementDetermination';
+import { getSectionTypeFromLayout } from '@/utils/layoutSectionTypeMapping';
 
 interface SectionToolbarProps {
   sectionId: string;
@@ -57,15 +58,40 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
     sectionLayouts,
     announceLiveRegion,
     aiGeneration,
+    showLayoutChangeModal,
   } = useEditStore();
 
   const onboardingStore = useOnboardingStore();
 
-  // Stub executeAction (removed in V2 refactor)
-  const executeAction = (action: string, params: any) => {
-    console.warn('Advanced action not implemented in V2:', action);
-  };
   const { showElementPicker } = useElementPicker();
+
+  // Handle layout change action
+  const handleChangeLayout = (sectionId: string) => {
+    const section = content[sectionId];
+    const currentLayout = sectionLayouts[sectionId];
+
+    if (!section || !currentLayout) {
+      logger.error('Section or layout not found:', { sectionId, section, currentLayout });
+      return;
+    }
+
+    // Get section type from layout name
+    let sectionType = getSectionTypeFromLayout(currentLayout);
+
+    // If couldn't determine from layout, try parsing section ID
+    if (sectionType === 'hero') {
+      const sectionIdMatch = sectionId.match(/^(header|footer|hero|features|pricing|testimonials|faq|cta|problem|results|security|socialProof|founderNote|integrations|objectionHandling|useCases|comparisonTable|closeSection|beforeAfter|howItWorks|uniqueMechanism)-/);
+
+      if (sectionIdMatch) {
+        sectionType = sectionIdMatch[1];
+      }
+    }
+
+    logger.debug('Layout change:', { sectionId, currentLayout, sectionType });
+
+    // Show the layout change modal
+    showLayoutChangeModal(sectionId, sectionType, currentLayout, section.elements);
+  };
 
   const {
     duplicateSection,
@@ -167,27 +193,65 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
     }
   }, [showAdvanced]);
 
-  // Handle Add Element action - Use the enhanced action with restrictions
+  // Handle Add Element action - Show element picker with optional elements
   const handleAddElement = () => {
-    
-    const buttonElement = document.querySelector('[data-action="add-element"]');
-    let pickerPosition = { x: 0, y: 0 };
-    
-    if (buttonElement) {
-      const rect = buttonElement.getBoundingClientRect();
-      pickerPosition = {
-        x: rect.left,
-        y: rect.bottom + 8, // Position below the button
-      };
-    } else {
+    try {
+      // Get section information
+      const sectionData = content[sectionId];
+      const sectionType = sectionId;
+      const layoutType = sectionData?.layout;
+
+      // Calculate picker position
+      const buttonElement = document.querySelector('[data-action="add-element"]');
+      let pickerPosition = { x: 0, y: 0 };
+
+      if (buttonElement) {
+        const rect = buttonElement.getBoundingClientRect();
+        pickerPosition = {
+          x: rect.left,
+          y: rect.bottom + 8,
+        };
+      }
+
+      // Map store data to variables for element determination
+      const variables = mapStoreToVariables(onboardingStore, {
+        layout: { sections, sectionLayouts },
+        meta: {
+          onboardingData: {
+            oneLiner: onboardingStore.oneLiner,
+            validatedFields: onboardingStore.validatedFields,
+            featuresFromAI: onboardingStore.featuresFromAI,
+          }
+        }
+      });
+
+      // Get element requirements including excluded (optional) elements
+      const requirements = getSectionElementRequirements(sectionId, layoutType, variables);
+
+      // Filter out elements already in section
+      const existingElementKeys = Object.keys(sectionData?.elements || {});
+      const availableOptionalElements = requirements.excludedElements.filter(elementName =>
+        !existingElementKeys.includes(elementName)
+      );
+
+      logger.debug('🎯 Showing element picker:', {
+        sectionId,
+        layoutType,
+        availableOptionalElements,
+        pickerPosition
+      });
+
+      // Show element picker with optional elements
+      showElementPicker(sectionId, pickerPosition, {
+        autoFocus: true,
+        optionalElements: availableOptionalElements,
+        sectionType,
+        layoutType,
+        sectionId,
+      });
+    } catch (error) {
+      logger.error('Error in handleAddElement:', error);
     }
-    
-    // Use the executeAction which includes restriction logic
-    logger.dev('🎯 Calling executeAction with params:', () => ({ sectionId, position: pickerPosition }));
-    executeAction('add-element', { 
-      sectionId, 
-      position: pickerPosition 
-    });
   };
 
   // Primary Actions with enhanced functionality
@@ -196,7 +260,7 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
       id: 'change-layout',
       label: 'Layout',
       icon: 'layout',
-      handler: () => executeAction('change-layout', { sectionId }),
+      handler: () => handleChangeLayout(sectionId),
     },
     {
       id: 'add-element',
@@ -297,7 +361,10 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
       id: 'regenerate-section',
       label: 'Regenerate Content',
       icon: 'refresh',
-      handler: () => executeAction('regenerate-section', { sectionId }),
+      handler: () => {
+        // TODO: Implement regenerate section handler
+        logger.warn('Regenerate section not yet implemented');
+      },
       disabled: isRegenerating,
     },
   ];
