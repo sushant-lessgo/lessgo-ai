@@ -169,9 +169,9 @@ const TimelineStep = React.memo(({
         </div>
         
         {/* Step Details */}
-        <div className="flex-1 pb-12 relative group">
-          <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
-            <div className="flex items-start justify-between mb-4">
+        <div className="flex-1 pb-6 relative group">
+          <div className="bg-white rounded-xl px-6 py-4 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
+            <div className="flex items-start justify-between">
               {/* Editable Step Title */}
               {mode !== 'preview' ? (
                 <div
@@ -224,7 +224,7 @@ const TimelineStep = React.memo(({
                 {description}
               </div>
             ) : (
-              <p className="text-gray-600 leading-relaxed mb-4">
+              <p className="text-gray-600 text-base leading-relaxed">
                 {description}
               </p>
             )}
@@ -340,7 +340,7 @@ export default function VerticalTimeline(props: LayoutComponentProps) {
       mode={mode}
       className={props.className}
     >
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto mt-16">
         
         <div className="text-center mb-16">
           <EditableAdaptiveHeadline
@@ -350,7 +350,7 @@ export default function VerticalTimeline(props: LayoutComponentProps) {
             level="h2"
             backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
             colorTokens={colorTokens}
-            className="mb-4"
+            className=""
             sectionId={sectionId}
             elementKey="headline"
             sectionBackground={sectionBackground}
@@ -476,7 +476,7 @@ export default function VerticalTimeline(props: LayoutComponentProps) {
         </div>
 
         {/* Process Summary */}
-        <div className="mt-16 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-8 border border-blue-100">
+        <div className="mt-6 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-2xl px-8 py-2 border border-blue-100">
           <div className="text-center">
             <EditableAdaptiveText
               mode={mode}
@@ -485,7 +485,7 @@ export default function VerticalTimeline(props: LayoutComponentProps) {
               backgroundType={backgroundType}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg font-semibold text-gray-900"
+              className="text-base font-semibold underline text-gray-900"
               placeholder="Add process summary..."
               sectionBackground={sectionBackground}
               sectionId={sectionId}
