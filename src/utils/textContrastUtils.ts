@@ -202,28 +202,28 @@ export function isLightBackground(backgroundColor: string): boolean {
  * Replaces problematic accent-based generation
  */
 export function generateAccessibleBadgeColors(accentColor: string): string {
-  // High contrast badge combinations that work on most backgrounds
-  const safeBadgeColors = {
-    blue: 'bg-blue-50 text-blue-900 border-blue-200',
-    purple: 'bg-purple-50 text-purple-900 border-purple-200', 
-    green: 'bg-green-50 text-green-900 border-green-200',
-    red: 'bg-red-50 text-red-900 border-red-200',
-    amber: 'bg-amber-50 text-amber-900 border-amber-200',
-    yellow: 'bg-yellow-50 text-yellow-900 border-yellow-200',
-    sky: 'bg-sky-50 text-sky-900 border-sky-200',
-    cyan: 'bg-cyan-50 text-cyan-900 border-cyan-200',
-    teal: 'bg-teal-50 text-teal-900 border-teal-200',
-    indigo: 'bg-indigo-50 text-indigo-900 border-indigo-200',
-    pink: 'bg-pink-50 text-pink-900 border-pink-200',
-    rose: 'bg-rose-50 text-rose-900 border-rose-200',
-    orange: 'bg-orange-50 text-orange-900 border-orange-200',
-    lime: 'bg-lime-50 text-lime-900 border-lime-200',
-    emerald: 'bg-emerald-50 text-emerald-900 border-emerald-200',
-    violet: 'bg-violet-50 text-violet-900 border-violet-200',
-    fuchsia: 'bg-fuchsia-50 text-fuchsia-900 border-fuchsia-200'
+  // Premium badge colors with darker backgrounds and white text
+  const premiumBadgeColors = {
+    blue: 'bg-blue-600 text-white shadow-md',
+    purple: 'bg-purple-600 text-white shadow-md',
+    green: 'bg-green-600 text-white shadow-md',
+    red: 'bg-red-600 text-white shadow-md',
+    amber: 'bg-amber-600 text-white shadow-md',
+    yellow: 'bg-yellow-600 text-white shadow-md',
+    sky: 'bg-sky-600 text-white shadow-md',
+    cyan: 'bg-cyan-600 text-white shadow-md',
+    teal: 'bg-teal-600 text-white shadow-md',
+    indigo: 'bg-indigo-600 text-white shadow-md',
+    pink: 'bg-pink-600 text-white shadow-md',
+    rose: 'bg-rose-600 text-white shadow-md',
+    orange: 'bg-orange-600 text-white shadow-md',
+    lime: 'bg-lime-600 text-white shadow-md',
+    emerald: 'bg-emerald-600 text-white shadow-md',
+    violet: 'bg-violet-600 text-white shadow-md',
+    fuchsia: 'bg-fuchsia-600 text-white shadow-md'
   };
-  
-  return safeBadgeColors[accentColor as keyof typeof safeBadgeColors] || 'bg-gray-50 text-gray-900 border-gray-200';
+
+  return premiumBadgeColors[accentColor as keyof typeof premiumBadgeColors] || 'bg-slate-600 text-white shadow-md';
 }
 
 /**

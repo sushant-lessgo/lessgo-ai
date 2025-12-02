@@ -423,7 +423,7 @@ export default function CenterStacked(props: LayoutComponentProps) {
             level="h1"
             backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
             colorTokens={colorTokens}
-            className="text-center leading-tight max-w-7xl mx-auto mb-6"
+            className="text-center leading-[0.5] max-w-5xl mx-auto mb-4"
             textStyle={{ textAlign: 'center' }}
             sectionId={sectionId}
             elementKey="headline"
@@ -470,7 +470,15 @@ export default function CenterStacked(props: LayoutComponentProps) {
             <CTAButton
               text={blockContent.cta_text}
               colorTokens={colorTokens}
-              className="px-12 py-4 shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
+              className="
+px-12 py-4 
+font-semibold 
+rounded-xl 
+shadow-[0_8px_20px_rgba(249,115,22,0.35)] 
+hover:shadow-[0_12px_28px_rgba(249,115,22,0.45)] 
+transition-all duration-200 
+transform hover:-translate-y-0.5
+"
               variant="primary"
               sectionId={sectionId}
               elementKey="cta_text"

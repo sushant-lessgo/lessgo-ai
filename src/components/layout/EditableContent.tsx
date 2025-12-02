@@ -553,7 +553,7 @@ export function EditableBadge({
       onEdit={onEdit}
       element="span"
       className={`
-        inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
+        inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
         ${badgeClasses}
       `}
       style={textStyle}
