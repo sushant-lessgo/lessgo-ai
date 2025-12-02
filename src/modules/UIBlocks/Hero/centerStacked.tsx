@@ -399,11 +399,13 @@ export default function CenterStacked(props: LayoutComponentProps) {
       <div className="flex flex-col items-center space-y-8 min-h-[600px] justify-center">
         <div className="max-w-4xl mx-auto text-center w-full flex flex-col items-center">
 
-          {((blockContent.badge_text && blockContent.badge_text !== '___REMOVED___') || mode === 'edit') && (
+          {blockContent.badge_text &&
+           blockContent.badge_text !== '___REMOVED___' &&
+           blockContent.badge_text.trim() !== '' && (
             <div className="mb-4">
               <AccentBadge
                 mode={mode}
-                value={(blockContent.badge_text === '___REMOVED___' || !blockContent.badge_text) ? '' : blockContent.badge_text}
+                value={blockContent.badge_text}
                 onEdit={(value) => handleContentUpdate('badge_text', value)}
                 colorTokens={colorTokens}
                 placeholder="🎉 New Feature Launch"

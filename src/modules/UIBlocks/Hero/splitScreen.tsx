@@ -420,11 +420,13 @@ export default function SplitScreen(props: LayoutComponentProps) {
           <div className="flex items-center justify-center p-8 md:p-10 lg:p-16">
             <div className="max-w-lg space-y-8 md:space-y-10 lg:space-y-12">
               
-              {(blockContent.badge_text || mode === 'edit') && (
+              {blockContent.badge_text &&
+               blockContent.badge_text !== '___REMOVED___' &&
+               blockContent.badge_text.trim() !== '' && (
                 <div>
                   <AccentBadge
                     mode={mode}
-                    value={blockContent.badge_text || ''}
+                    value={blockContent.badge_text}
                     onEdit={(value) => handleContentUpdate('badge_text', value)}
                     colorTokens={colorTokens}
                     placeholder="🎉 New Feature Launch"

@@ -427,11 +427,13 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
           <div className="order-2 lg:order-1 space-y-6">
             
             {/* ✅ ENHANCED: Optional Badge with Accent Colors */}
-            {(blockContent.badge_text || mode === 'edit') && (
+            {blockContent.badge_text &&
+             blockContent.badge_text !== '___REMOVED___' &&
+             blockContent.badge_text.trim() !== '' && (
               <div>
                 <AccentBadge
                   mode={mode}
-                  value={blockContent.badge_text || ''}
+                  value={blockContent.badge_text}
                   onEdit={(value) => handleContentUpdate('badge_text', value)}
                   colorTokens={colorTokens}
                   placeholder="🎉 New Feature Launch"

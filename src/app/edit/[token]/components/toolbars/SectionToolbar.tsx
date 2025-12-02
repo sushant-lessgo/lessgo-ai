@@ -228,11 +228,25 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
       // Get element requirements including excluded (optional) elements
       const requirements = getSectionElementRequirements(sectionId, layoutType, variables);
 
-      // Filter out elements already in section
+      // Filter out elements already in section (unless empty/removed)
       const existingElementKeys = Object.keys(sectionData?.elements || {});
-      const availableOptionalElements = requirements.excludedElements.filter(elementName =>
-        !existingElementKeys.includes(elementName)
-      );
+      const availableOptionalElements = requirements.excludedElements.filter(elementName => {
+        // Element not in section → can add
+        if (!existingElementKeys.includes(elementName)) return true;
+
+        // Element exists but is empty/removed → can re-add
+        const elementValue = sectionData.elements[elementName];
+        const isEmpty =
+          !elementValue ||
+          elementValue === '' ||
+          elementValue === '___REMOVED___' ||
+          (typeof elementValue === 'object' &&
+           (!elementValue.content ||
+            elementValue.content === '' ||
+            elementValue.content === '___REMOVED___'));
+
+        return isEmpty;
+      });
 
       logger.debug('🎯 Showing element picker:', {
         sectionId,
