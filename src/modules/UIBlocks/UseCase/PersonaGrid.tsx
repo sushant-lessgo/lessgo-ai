@@ -172,7 +172,7 @@ const PersonaAvatar = React.memo(({
   return (
     <div className="relative mb-4">
       {/* Main Avatar Circle */}
-      <div className={`w-16 h-16 bg-gradient-to-br ${bg} rounded-full flex items-center justify-center text-white shadow-lg mx-auto`}>
+      <div className={`w-16 h-16 bg-gradient-to-br ${bg} rounded-full flex items-center justify-center text-white shadow-[0_6px_18px_rgba(15,23,42,0.18)] ring-1 ring-white/25 backdrop-blur-sm mx-auto transition-all duration-300 group-hover:shadow-[0_12px_32px_rgba(15,23,42,0.22)] group-hover:-translate-y-0.5`}>
         {iconOverride ? (
           <IconEditableText
             mode={mode}
@@ -191,7 +191,7 @@ const PersonaAvatar = React.memo(({
       </div>
       
       {/* Role Badge */}
-      <div className="absolute -top-1 -right-1 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-md border-2 border-gray-100">
+      <div className="absolute -top-1 -right-1 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-lg ring-1 ring-gray-100/50 border border-gray-200">
         <div className="w-3 h-3 bg-green-500 rounded-full"></div>
       </div>
       
@@ -199,7 +199,7 @@ const PersonaAvatar = React.memo(({
       {mode !== 'preview' && !iconOverride && (
         <button
           onClick={() => onIconEdit(index, '👤')}
-          className="absolute top-0 right-0 w-6 h-6 bg-blue-600 text-white rounded-full text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+          className="absolute top-0 right-0 w-6 h-6 bg-blue-600 hover:bg-blue-700 text-white rounded-full text-xs shadow-md opacity-0 group-hover:opacity-100 transition-all duration-200"
           title="Add custom icon"
         >
           +
@@ -244,7 +244,7 @@ const PersonaCard = React.memo(({
 }) => {
   
   return (
-    <div className="group/persona-card relative bg-white p-6 rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300 text-center">
+    <div className="group/persona-card relative bg-white p-6 rounded-2xl border border-gray-200 shadow-lg hover:border-gray-300 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center">
       
       {/* Persona Avatar */}
       <PersonaAvatar 
@@ -292,7 +292,7 @@ const PersonaCard = React.memo(({
       </div>
       
       {/* Persona Badge */}
-      <div className="inline-flex items-center px-3 py-1 bg-gray-100 rounded-full text-xs font-medium">
+      <div className="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-gray-50 to-gray-100 rounded-full text-xs font-medium shadow-sm ring-1 ring-gray-200/50">
         <svg className="w-3 h-3 mr-1 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
           <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
         </svg>
@@ -466,7 +466,7 @@ export default function PersonaGrid(props: LayoutComponentProps) {
           <div className="mt-8 text-center">
             <button
               onClick={handleAddPersona}
-              className="flex items-center space-x-2 mx-auto px-4 py-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-xl transition-all duration-200 group"
+              className="flex items-center space-x-2 mx-auto px-6 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 border-2 border-dashed border-blue-200 hover:border-blue-300 rounded-2xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 group"
             >
               <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -479,7 +479,7 @@ export default function PersonaGrid(props: LayoutComponentProps) {
         {/* Universal Appeal */}
         {(blockContent.footer_text || mode === 'edit') && (
           <div className="mt-16 text-center">
-            <div className="inline-flex items-center px-6 py-3 bg-blue-50 border border-blue-200 rounded-full">
+            <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl shadow-lg ring-1 ring-blue-100/50">
               <svg className="w-5 h-5 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>

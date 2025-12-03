@@ -232,7 +232,12 @@ const MiniCard = React.memo(({
       )}
 
       <div className="flex items-start space-x-4 mb-4">
-        <div className={`flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br ${getColorForIndex(index)} flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-300`}>
+        <div className={`flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br ${getColorForIndex(index)} flex items-center justify-center shadow-[0_6px_18px_rgba(15,23,42,0.18)]
+    ring-1 ring-white/25
+    backdrop-blur-sm
+    transition-all duration-300
+    group-hover:-translate-y-0.5
+    group-hover:shadow-[0_12px_32px_rgba(15,23,42,0.22)]`}>
           <IconEditableText
             mode={mode}
             value={getFeatureIcon(index)}
@@ -267,21 +272,7 @@ const MiniCard = React.memo(({
             elementKey={`feature_title_${index}`}
             sectionBackground={sectionBackground}
           />
-          {(keyword || mode === 'edit') && (
-            <EditableAdaptiveText
-              mode={mode}
-              value={keyword}
-              onEdit={(value) => onKeywordEdit(index, value)}
-              backgroundType={backgroundType as any}
-              colorTokens={colorTokens}
-              variant="body"
-              className={`inline-block text-xs font-medium px-2 py-1 rounded-full bg-gradient-to-r ${getColorForIndex(index)} text-white`}
-              placeholder="Add keyword/badge..."
-              sectionId={sectionId}
-              elementKey={`feature_keyword_${index}`}
-              sectionBackground={sectionBackground}
-            />
-          )}
+      
         </div>
       </div>
 
@@ -293,17 +284,14 @@ const MiniCard = React.memo(({
           backgroundType={backgroundType as any}
           colorTokens={colorTokens}
           variant="body"
-          className="text-gray-600 text-sm leading-relaxed group-hover:text-gray-700 transition-colors duration-300"
+          className="text-gray-500 text-sm leading-relaxed group-hover:text-gray-500 transition-colors duration-300"
           placeholder="Describe this feature..."
           sectionId={sectionId}
           elementKey={`feature_description_${index}`}
           sectionBackground={sectionBackground}
         />
         
-        <div className="mt-3 flex items-center space-x-2">
-          <div className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${getColorForIndex(index)}`} />
-          <span className="text-xs text-gray-500">Ready to use</span>
-        </div>
+        
       </div>
     </div>
   );
