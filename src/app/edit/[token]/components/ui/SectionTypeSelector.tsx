@@ -154,6 +154,7 @@ export function SectionTypeSelector({
                   
                   return (
                     <Button
+                      type="button"
                       key={section.id}
                       variant="outline"
                       className={cn(

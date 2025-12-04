@@ -88,24 +88,56 @@ export function MainContent({ tokenId }: MainContentProps) {
     elements: Record<string, EditableElement>,
     position?: number
   ) => {
-    const newSectionId = addSection?.(sectionType, position);
-    
-    // Set the section with layout and elements
-    if (newSectionId) {
+    console.log('handleEnhancedAddSection called', {
+      sectionType,
+      layoutId,
+      elementKeys: Object.keys(elements),
+      position,
+      hasAddSection: typeof addSection === 'function',
+      hasStoreState: !!storeState
+    });
+
+    try {
+      const newSectionId = addSection?.(sectionType, position);
+
+      if (!newSectionId) {
+        console.error('addSection returned no section ID', { sectionType, position });
+        alert('Failed to create section. Please try again.');
+        return;
+      }
+
+      console.log('Section created:', { newSectionId, sectionType });
+
+      // Set the section with layout and elements
       storeState?.setSection?.(newSectionId, {
         layout: layoutId,
         elements: elements,
       });
-      
+
+      console.log('Section content set', { newSectionId, layoutId });
+
       // Update section layout mapping
       storeState?.setSectionLayouts?.({
         ...sectionLayouts,
         [newSectionId]: layoutId,
       });
-      
+
+      console.log('Section layout mapping updated', { newSectionId, layoutId });
+
       // Auto-select the new section
       setActiveSection?.(newSectionId);
       announceLiveRegion?.(`Added ${sectionType} section`);
+
+      console.log('Section addition completed successfully', { newSectionId });
+
+    } catch (error) {
+      console.error('Error in handleEnhancedAddSection', {
+        error,
+        sectionType,
+        layoutId,
+        stack: error instanceof Error ? error.stack : undefined
+      });
+      alert(`Failed to add section: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }, [addSection, sectionLayouts, setActiveSection, announceLiveRegion, storeState]);
   

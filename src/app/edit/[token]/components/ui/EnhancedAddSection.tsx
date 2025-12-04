@@ -36,6 +36,22 @@ export function EnhancedAddSection({
   const [showLayoutSelector, setShowLayoutSelector] = useState(false);
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
 
+  // Validate props on mount
+  React.useEffect(() => {
+    console.log('EnhancedAddSection mounted', {
+      position,
+      afterSectionId,
+      existingSectionsCount: existingSections.length,
+      hasOnAddSection: typeof onAddSection === 'function'
+    });
+
+    if (typeof onAddSection !== 'function') {
+      console.error('EnhancedAddSection received invalid onAddSection prop', {
+        onAddSectionType: typeof onAddSection
+      });
+    }
+  }, [position, afterSectionId, existingSections.length, onAddSection]);
+
   // Handle section type selection
   const handleSectionSelect = useCallback((sectionType: string) => {
     setSelectedSection(sectionType);
@@ -71,63 +87,83 @@ export function EnhancedAddSection({
 
   // Handle layout selection and create section
   const handleLayoutSelect = useCallback((layoutId: string) => {
-    if (!selectedSection) return;
+    console.log('handleLayoutSelect called', { layoutId, selectedSection });
 
-    // Get elements for this layout using the correct registry key
-    const registryKey = sectionToRegistryKey(selectedSection);
-    const schemaKey = `${registryKey}/${layoutId}` as keyof typeof layoutElementSchema;
-    const schema = layoutElementSchema[schemaKey];
-
-    if (!schema) {
-      logger.warn(`No schema found for ${schemaKey}`);
+    if (!selectedSection) {
+      console.error('No section selected');
       return;
     }
 
-    // Get all elements using helper function
-    const elementDefs = getAllElements(schema);
+    try {
+      // Get elements for this layout
+      const schemaKey = layoutId as keyof typeof layoutElementSchema;
+      const schema = layoutElementSchema[schemaKey];
 
-    // Get section info for default content
-    const sectionInfo = sectionList.find(s => s.id === selectedSection);
+      if (!schema) {
+        logger.warn(`No schema found for ${schemaKey}`);
+        alert(`Layout schema not found for ${schemaKey}. Please try a different layout.`);
+        return;
+      }
 
-    // Create elements object with all mandatory and optional elements
-    const elements: Record<string, EditableElement> = {};
+      // Get all elements using helper function
+      const elementDefs = getAllElements(schema);
 
-    elementDefs.forEach(({ element, mandatory }) => {
-      // Generate default content based on element name
-      const defaultContent = getDefaultContent(selectedSection, element, sectionInfo?.label || '');
-      
-      // Determine element type
-      const elementType = getElementType(element);
-      
-      elements[element] = {
-        content: defaultContent,
-        type: elementType,
-        isEditable: true,
-        editMode: 'inline',
-        validation: mandatory ? {
-          required: true,
-          minLength: elementType === 'headline' ? 10 : 5,
-        } : undefined,
-        aiContext: {
-          generationType: 'creative',
-          contextElements: [element],
-          instructions: `This is the ${element} for the ${sectionInfo?.label} section`,
-          generateVariations: false,
-        },
-      };
-    });
+      // Get section info for default content
+      const sectionInfo = sectionList.find(s => s.id === selectedSection);
 
-    // Calculate position
-    const insertPosition = afterSectionId 
-      ? existingSections.indexOf(afterSectionId) + 1 
-      : existingSections.length;
+      // Create elements object with all mandatory and optional elements
+      const elements: Record<string, EditableElement> = {};
 
-    // Call the add section handler with ORIGINAL section name (not mapped)
-    onAddSection(selectedSection, layoutId, elements, insertPosition);
+      elementDefs.forEach(({ element, mandatory }) => {
+        // Generate default content based on element name
+        const defaultContent = getDefaultContent(selectedSection, element, sectionInfo?.label || '');
 
-    // Reset state
-    setShowLayoutSelector(false);
-    setSelectedSection(null);
+        // Determine element type
+        const elementType = getElementType(element);
+
+        elements[element] = {
+          content: defaultContent,
+          type: elementType,
+          isEditable: true,
+          editMode: 'inline',
+          validation: mandatory ? {
+            required: true,
+            minLength: elementType === 'headline' ? 10 : 5,
+          } : undefined,
+          aiContext: {
+            generationType: 'creative',
+            contextElements: [element],
+            instructions: `This is the ${element} for the ${sectionInfo?.label} section`,
+            generateVariations: false,
+          },
+        };
+      });
+
+      // Calculate position
+      const insertPosition = afterSectionId
+        ? existingSections.indexOf(afterSectionId) + 1
+        : existingSections.length;
+
+      // Call the add section handler with ORIGINAL section name (not mapped)
+      console.log('Calling onAddSection', {
+        selectedSection,
+        layoutId,
+        elementCount: Object.keys(elements).length,
+        insertPosition
+      });
+
+      onAddSection(selectedSection, layoutId, elements, insertPosition);
+
+      console.log('onAddSection completed');
+
+      // Reset state
+      setShowLayoutSelector(false);
+      setSelectedSection(null);
+
+    } catch (error) {
+      console.error('handleLayoutSelect error:', error);
+      alert(`Failed to add section: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   }, [selectedSection, afterSectionId, existingSections, onAddSection]);
 
   // Close handlers

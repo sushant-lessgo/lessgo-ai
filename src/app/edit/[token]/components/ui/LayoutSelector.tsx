@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { layoutRegistry } from '@/modules/sections/layoutRegistry';
 import { layoutElementSchema, getAllElements } from '@/modules/sections/layoutElementSchema';
 import { sectionList } from '@/modules/sections/sectionList';
+import { logger } from '@/lib/logger';
 
 interface LayoutSelectorProps {
   isOpen: boolean;
@@ -30,6 +31,16 @@ export function LayoutSelector({
   userContext 
 }: LayoutSelectorProps) {
   const [hoveredLayout, setHoveredLayout] = useState<string | null>(null);
+
+  // Debug: Verify prop is received
+  React.useEffect(() => {
+    logger.debug('LayoutSelector mounted', {
+      isOpen,
+      sectionType,
+      hasOnLayoutSelect: typeof onLayoutSelect === 'function',
+      layoutCount: layouts.length
+    });
+  }, [isOpen, sectionType, onLayoutSelect]);
 
   // Mapping from sectionList IDs to layoutRegistry keys
   const sectionToRegistryKey = (sectionId: string): string => {
@@ -84,8 +95,7 @@ export function LayoutSelector({
   // Get element counts for each layout
   const getLayoutElementInfo = (layoutId: string) => {
     if (!sectionType) return { mandatory: 0, optional: 0, total: 0 };
-    const registryKey = sectionToRegistryKey(sectionType);
-    const schemaKey = `${registryKey}/${layoutId}` as keyof typeof layoutElementSchema;
+    const schemaKey = layoutId as keyof typeof layoutElementSchema;
     const schema = layoutElementSchema[schemaKey];
 
     if (!schema) return { mandatory: 0, optional: 0, total: 0 };
@@ -148,13 +158,34 @@ export function LayoutSelector({
                 onMouseLeave={() => setHoveredLayout(null)}
               >
                 <Button
+                  type="button"
                   variant="outline"
                   className={cn(
                     "w-full h-full p-0 overflow-hidden transition-all",
                     "hover:ring-2 hover:ring-primary hover:shadow-lg",
                     hoveredLayout === layout.id && "ring-2 ring-primary"
                   )}
-                  onClick={() => onLayoutSelect(layout.id)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    console.log('Layout button clicked', {
+                      layoutId: layout.id,
+                      sectionType,
+                      hasCallback: typeof onLayoutSelect === 'function'
+                    });
+
+                    try {
+                      if (typeof onLayoutSelect !== 'function') {
+                        throw new Error('onLayoutSelect is not a function');
+                      }
+                      onLayoutSelect(layout.id);
+                      console.log('onLayoutSelect called successfully', { layoutId: layout.id });
+                    } catch (error) {
+                      console.error('Failed to call onLayoutSelect', { error, layoutId: layout.id });
+                      alert(`Error selecting layout: ${error instanceof Error ? error.message : 'Unknown error'}`);
+                    }
+                  }}
                 >
                   <div className="w-full">
                     {/* Layout Preview Area */}
