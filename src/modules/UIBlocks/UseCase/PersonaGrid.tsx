@@ -18,7 +18,6 @@ interface PersonaGridContent {
   persona_names: string;
   persona_descriptions: string;
   footer_text?: string;
-  badge_text?: string;
   // Optional persona icon overrides
   persona_icon_1?: string;
   persona_icon_2?: string;
@@ -50,13 +49,9 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: 'Track campaign performance, manage content calendars, and coordinate cross-team marketing initiatives with real-time visibility into ROI and engagement metrics.|Monitor sales pipeline, forecast revenue, and optimize team performance while maintaining clear visibility into customer interactions and deal progression.|Streamline processes, manage resource allocation, and ensure smooth day-to-day operations with automated workflows and performance tracking.|Coordinate product development, manage feature requests, and track user feedback while keeping stakeholders aligned on roadmap priorities.|Manage customer relationships, track satisfaction metrics, and proactively address issues while ensuring seamless onboarding and retention.|Oversee budgets, generate financial reports, and maintain fiscal oversight with real-time spending tracking and automated approval workflows.' 
   },
-  footer_text: { 
-    type: 'string' as const, 
-    default: 'Designed to work seamlessly across all team roles' 
-  },
-  badge_text: { 
-    type: 'string' as const, 
-    default: 'Target User' 
+  footer_text: {
+    type: 'string' as const,
+    default: 'Add a summary statement about your target users and how your product serves them...'
   },
   // Optional persona icon overrides (empty by default to show initials)
   persona_icon_1: { type: 'string' as const, default: '' },
@@ -189,12 +184,7 @@ const PersonaAvatar = React.memo(({
           <span className="font-bold text-lg">{initials}</span>
         )}
       </div>
-      
-      {/* Role Badge */}
-      <div className="absolute -top-1 -right-1 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-lg ring-1 ring-gray-100/50 border border-gray-200">
-        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-      </div>
-      
+
       {/* Icon Override Button for Edit Mode */}
       {mode !== 'preview' && !iconOverride && (
         <button
@@ -218,13 +208,11 @@ const PersonaCard = React.memo(({
   backgroundType,
   sectionBackground,
   sectionId,
-  badgeText,
   iconOverride,
   onNameEdit,
   onDescriptionEdit,
   onIconEdit,
   onRemovePersona,
-  onBadgeEdit,
   canRemove = true
 }: {
   persona: Persona;
@@ -233,13 +221,11 @@ const PersonaCard = React.memo(({
   backgroundType: any;
   sectionBackground: any;
   sectionId: string;
-  badgeText: string;
   iconOverride?: string;
   onNameEdit: (index: number, value: string) => void;
   onDescriptionEdit: (index: number, value: string) => void;
   onIconEdit: (index: number, value: string) => void;
   onRemovePersona?: (index: number) => void;
-  onBadgeEdit: (value: string) => void;
   canRemove?: boolean;
 }) => {
   
@@ -266,11 +252,12 @@ const PersonaCard = React.memo(({
           backgroundType="neutral"
           colorTokens={colorTokens}
           variant="body"
-          className="font-bold"
+          className="font-bold text-center"
           placeholder="Enter persona name..."
           sectionId={sectionId}
           elementKey={`persona_name_${persona.index}`}
           sectionBackground="bg-white"
+          formatState={{ textAlign: 'center', bold: true } as any}
         />
       </div>
       
@@ -283,31 +270,12 @@ const PersonaCard = React.memo(({
           backgroundType="neutral"
           colorTokens={colorTokens}
           variant="body"
-          className="leading-relaxed text-left text-gray-600"
+          className="leading-relaxed text-center text-gray-600"
           placeholder="Enter persona description..."
           sectionId={sectionId}
           elementKey={`persona_description_${persona.index}`}
           sectionBackground="bg-white"
-        />
-      </div>
-      
-      {/* Persona Badge */}
-      <div className="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-gray-50 to-gray-100 rounded-full text-xs font-medium shadow-sm ring-1 ring-gray-200/50">
-        <svg className="w-3 h-3 mr-1 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
-          <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-        </svg>
-        <EditableAdaptiveText
-          mode={mode}
-          value={badgeText}
-          onEdit={onBadgeEdit}
-          backgroundType="neutral"
-          colorTokens={{ ...colorTokens, textPrimary: 'text-gray-700' }}
-          variant="body"
-          className="text-xs font-medium text-gray-700"
-          placeholder="Target User"
-          sectionId={sectionId}
-          elementKey="badge_text"
-          sectionBackground="bg-gray-100"
+          formatState={{ textAlign: 'center', fontSize: '14px' } as any}
         />
       </div>
 
@@ -400,11 +368,6 @@ export default function PersonaGrid(props: LayoutComponentProps) {
     }
   };
 
-  // Handle badge text edit
-  const handleBadgeEdit = (value: string) => {
-    handleContentUpdate('badge_text', value);
-  };
-
   return (
     <LayoutSection
       sectionId={sectionId}
@@ -416,7 +379,7 @@ export default function PersonaGrid(props: LayoutComponentProps) {
     >
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-16 mt-8">
           <EditableAdaptiveHeadline
             mode={mode}
             value={blockContent.headline || ''}
@@ -449,13 +412,11 @@ export default function PersonaGrid(props: LayoutComponentProps) {
               backgroundType={backgroundType}
               sectionBackground={sectionBackground}
               sectionId={sectionId}
-              badgeText={blockContent.badge_text || 'Target User'}
               iconOverride={getPersonaIcon(persona.index)}
               onNameEdit={handleNameEdit}
               onDescriptionEdit={handleDescriptionEdit}
               onIconEdit={handleIconEdit}
               onRemovePersona={handleRemovePersona}
-              onBadgeEdit={handleBadgeEdit}
               canRemove={personas.length > 1}
             />
           ))}
@@ -476,29 +437,23 @@ export default function PersonaGrid(props: LayoutComponentProps) {
           </div>
         )}
 
-        {/* Universal Appeal */}
-        {(blockContent.footer_text || mode === 'edit') && (
-          <div className="mt-16 text-center">
-            <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl shadow-lg ring-1 ring-blue-100/50">
-              <svg className="w-5 h-5 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <EditableAdaptiveText
-                mode={mode}
-                value={blockContent.footer_text || ''}
-                onEdit={(value) => handleContentUpdate('footer_text', value)}
-                backgroundType="neutral"
-                colorTokens={{ ...colorTokens, textPrimary: 'text-blue-800' }}
-                variant="body"
-                className="font-medium text-blue-800"
-                placeholder="Add footer message about team compatibility..."
-                sectionId={sectionId}
-                elementKey="footer_text"
-                sectionBackground="bg-blue-50"
-              />
-            </div>
-          </div>
-        )}
+        {/* Summary Statement */}
+        <div className="mt-16 text-center mb-16">
+          <EditableAdaptiveText
+            mode={mode}
+            value={blockContent.footer_text || ''}
+            onEdit={(value) => handleContentUpdate('footer_text', value)}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+            colorTokens={colorTokens}
+            variant="body"
+            className="text-lg leading-relaxed max-w-5xl mx-auto text-center"
+            placeholder="Add a summary statement about your target users and how your product serves them..."
+            sectionId={sectionId}
+            elementKey="footer_text"
+            sectionBackground={sectionBackground}
+            formatState={{ textAlign: 'center' } as any}
+          />
+        </div>
 
       </div>
     </LayoutSection>
