@@ -25,6 +25,13 @@ export interface TextFormatState {
   textTransform: 'none' | 'uppercase' | 'lowercase' | 'capitalize';
 }
 
+// Enhanced TextFormatState with modification tracking
+// Tracks which properties have been explicitly modified by user vs. defaults
+// Prevents default formatState values from overriding className styles in preview mode
+export interface TextFormatStateWithMetadata extends TextFormatState {
+  __modified?: Set<keyof TextFormatState>; // Track user-modified fields
+}
+
 export interface TextSelection {
   start: number;
   end: number;
@@ -104,7 +111,7 @@ interface EditableContentProps {
   sectionBackground?: string;
 }
 
-const defaultFormatState: TextFormatState = {
+const defaultFormatState: TextFormatStateWithMetadata = {
   bold: false,
   italic: false,
   underline: false,
@@ -115,6 +122,7 @@ const defaultFormatState: TextFormatState = {
   lineHeight: '1.5',
   letterSpacing: 'normal',
   textTransform: 'none',
+  __modified: new Set() // No modifications initially
 };
 
 export function EditableContent({
@@ -191,25 +199,36 @@ export function EditableContent({
     }
   }, [showTextToolbar]);
   
-  // Preview mode styles - merge formatState styles with style prop
+  // Preview mode styles - only apply formatState as inline styles if explicitly modified by user
+  // This allows className to work when formatState is default/unmodified
   const previewStyle = useMemo(() => {
-    if (!formatState || formatState === defaultFormatState) {
-      return style;
+    if (!formatState) {
+      return style; // No formatState, use className
     }
-    
-    return {
-      fontSize: formatState.fontSize,
-      fontWeight: formatState.bold ? 'bold' : 'normal',
-      fontStyle: formatState.italic ? 'italic' : 'normal',
-      textDecoration: formatState.underline ? 'underline' : 'none',
-      color: formatState.color,
-      fontFamily: formatState.fontFamily,
-      textAlign: formatState.textAlign,
-      lineHeight: formatState.lineHeight,
-      letterSpacing: formatState.letterSpacing,
-      textTransform: formatState.textTransform,
-      ...style, // Allow style prop to override formatState
-    };
+
+    // Check if any properties have been explicitly modified by user
+    const modified = (formatState as TextFormatStateWithMetadata).__modified;
+    const hasModifications = modified && modified.size > 0;
+
+    if (!hasModifications) {
+      return style; // No user modifications, let className work
+    }
+
+    // Only apply inline styles for EXPLICITLY modified properties
+    const inlineStyles: React.CSSProperties = {};
+
+    if (modified.has('fontSize')) inlineStyles.fontSize = formatState.fontSize;
+    if (modified.has('bold')) inlineStyles.fontWeight = formatState.bold ? 'bold' : 'normal';
+    if (modified.has('italic')) inlineStyles.fontStyle = formatState.italic ? 'italic' : 'normal';
+    if (modified.has('underline')) inlineStyles.textDecoration = formatState.underline ? 'underline' : 'none';
+    if (modified.has('color')) inlineStyles.color = formatState.color;
+    if (modified.has('fontFamily')) inlineStyles.fontFamily = formatState.fontFamily;
+    if (modified.has('textAlign')) inlineStyles.textAlign = formatState.textAlign;
+    if (modified.has('lineHeight')) inlineStyles.lineHeight = formatState.lineHeight;
+    if (modified.has('letterSpacing')) inlineStyles.letterSpacing = formatState.letterSpacing;
+    if (modified.has('textTransform')) inlineStyles.textTransform = formatState.textTransform;
+
+    return { ...inlineStyles, ...style }; // style prop can still override
   }, [formatState, style]);
   
   if (!shouldShow) return null;
@@ -324,7 +343,7 @@ export function EditableHeadline({
   const finalColorClass = dynamicColor || colorClass || 'text-gray-900';
   
   
-  // Enhanced format state for headlines
+  // Enhanced format state for headlines with modification tracking
   const headlineFormatState = useMemo(() => {
     // ✅ FIX: Don't set inline color if we're using CSS classes for adaptive colors
     // Only use inline color if explicitly provided in formatState, not for adaptive colors
@@ -339,11 +358,29 @@ export function EditableHeadline({
       !formatState.fontSize.includes('clamp') &&
       formatState.fontSize.includes('px');
 
-    const baseState = {
+    // Track which properties have been explicitly modified
+    const modified = new Set<keyof TextFormatState>();
+
+    // Preserve existing modifications from formatState
+    if (formatState) {
+      const existingModified = (formatState as TextFormatStateWithMetadata).__modified;
+      if (existingModified) {
+        existingModified.forEach(key => modified.add(key));
+      }
+    }
+
+    // Mark typography system values as modified (they should override className)
+    if (typographyStyle.fontSize) modified.add('fontSize');
+    if (typographyStyle.fontFamily) modified.add('fontFamily');
+    if (typographyStyle.fontWeight === '700') modified.add('bold');
+    if (typographyStyle.lineHeight) modified.add('lineHeight');
+    if (typographyStyle.letterSpacing) modified.add('letterSpacing');
+
+    const baseState: TextFormatStateWithMetadata = {
       bold: formatState?.bold ?? (typographyStyle.fontWeight === '700'),
       italic: formatState?.italic ?? false,
       underline: formatState?.underline ?? false,
-      color: shouldUseInlineColor ? formatState.color : undefined,
+      color: shouldUseInlineColor ? (formatState.color || '#000000') : '#000000',
       // ✅ FIX: Use custom fontSize if provided, otherwise typography system
       // Don't apply typography fontSize when user has set a custom px size
       fontSize: hasCustomFontSize ? formatState.fontSize :
@@ -353,8 +390,8 @@ export function EditableHeadline({
       lineHeight: formatState?.lineHeight || typographyStyle.lineHeight,
       letterSpacing: formatState?.letterSpacing || typographyStyle.letterSpacing,
       textTransform: (formatState?.textTransform || 'none') as 'none' | 'uppercase' | 'lowercase' | 'capitalize',
+      __modified: modified
     };
-
 
     return baseState;
   }, [level, colorClass, formatState, textStyle?.textAlign, getTextStyle]);
@@ -424,20 +461,29 @@ export function EditableText({
   
   const finalColorClass = dynamicColor || colorClass || 'text-gray-600';
   
-  // Enhanced format state for text
-  const textFormatState = useMemo(() => ({
-    bold: false,
-    italic: false,
-    underline: false,
-    color: dynamicColor || undefined,
-    fontSize: '1rem',
-    fontFamily: 'inherit',
-    textAlign: (textStyle?.textAlign as any) || 'left' as const,
-    lineHeight: '1.6',
-    letterSpacing: 'normal',
-    textTransform: 'none' as const,
-    ...formatState,
-  }), [dynamicColor, formatState, textStyle?.textAlign]);
+  // Enhanced format state for text with modification tracking
+  const textFormatState = useMemo(() => {
+    const baseState: TextFormatStateWithMetadata = {
+      bold: false,
+      italic: false,
+      underline: false,
+      color: dynamicColor || '#000000',
+      fontSize: '1rem',
+      fontFamily: 'inherit',
+      textAlign: (textStyle?.textAlign as any) || 'left' as const,
+      lineHeight: '1.6',
+      letterSpacing: 'normal',
+      textTransform: 'none' as const,
+      __modified: new Set() // Start with no modifications
+    };
+
+    if (formatState) {
+      const modified = (formatState as TextFormatStateWithMetadata).__modified || new Set();
+      return { ...baseState, ...formatState, __modified: modified };
+    }
+
+    return baseState;
+  }, [dynamicColor, formatState, textStyle?.textAlign]);
   
   const textEditorConfig: Partial<InlineEditorConfig> = useMemo(() => ({
     enterKeyBehavior: 'new-line',

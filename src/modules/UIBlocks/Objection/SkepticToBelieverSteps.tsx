@@ -415,7 +415,7 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
                 backgroundType="neutral"
                 colorTokens={{ ...colorTokens, textPrimary: 'text-blue-900' }}
                 variant="body"
-                className="text-2xl font-medium text-blue-900"
+                className="text-2xl font-medium underline text-blue-900"
                 placeholder="Add a summary of how objections have been addressed..."
                 sectionId={sectionId}
                 elementKey="objections_summary"
