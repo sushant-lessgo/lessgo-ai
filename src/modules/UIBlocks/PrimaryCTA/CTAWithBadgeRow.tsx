@@ -292,8 +292,8 @@ export default function CTAWithBadgeRow(props: LayoutComponentProps) {
     >
      
 
-      <div className="flex flex-col items-center space-y-8 min-h-auto mt-20 md:mt-28 mb-20">
-        <div className="max-w-5xl mx-auto text-center w-full flex flex-col items-center">
+      <div className="flex flex-col items-center space-y-8 min-h-auto mt-20 md:mt-28 mb-20 ">
+        <div className="max-w-5xl mx-auto text-center w-full flex flex-col items-center p-8 border border-gray-300 rounded-md shadow-xl">
           {/* Main CTA Content */}
           <div className="flex flex-col items-center gap-6 mb-8">
           <EditableAdaptiveHeadline
