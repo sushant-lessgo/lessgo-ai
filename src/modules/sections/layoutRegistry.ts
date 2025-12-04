@@ -144,6 +144,7 @@ export const layoutRegistry = {
     "OutcomeIcons",
     "StackedWinsList",
     "PersonaResultPanels",
+    "ResultsGallery",
   ] as const,
 
   Security: [

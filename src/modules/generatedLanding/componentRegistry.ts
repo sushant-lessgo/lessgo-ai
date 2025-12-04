@@ -88,6 +88,7 @@ import PersonaGrid from '@/modules/UIBlocks/UseCase/PersonaGrid';
 import PersonaJourney from '@/modules/UIBlocks/BeforeAfter/PersonaJourney';
 import PersonaPanels from '@/modules/UIBlocks/Problem/PersonaPanels';
 import PersonaResultPanels from '@/modules/UIBlocks/Results/PersonaResultPanels';
+import ResultsGallery from '@/modules/UIBlocks/Results/ResultsGallery';
 import PersonaUseCaseCompare from '@/modules/UIBlocks/Comparison/PersonaUseCaseCompare';
 import PrivacyCommitmentBlock from '@/modules/UIBlocks/Security/PrivacyCommitmentBlock';
 import ProcessFlowDiagram from '@/modules/UIBlocks/UniqueMechanism/ProcessFlowDiagram';
@@ -257,6 +258,7 @@ export const componentRegistry: ComponentRegistry = {
     OutcomeIcons: OutcomeIcons,
     StackedWinsList: StackedWinsList,
     PersonaResultPanels: PersonaResultPanels,
+    ResultsGallery: ResultsGallery,
   },
   
   howItWorks: {
