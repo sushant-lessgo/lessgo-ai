@@ -298,20 +298,20 @@ export function assignEnhancedBackgroundsToSections(
   });
   
   
-  // ===== STEP 4: APPLY SMART UPGRADES WITH RHYTHM CHECK =====
+  // ===== STEP 4: APPLY SMART UPGRADES WITH RHYTHM + ADJACENCY CHECK =====
   upgradeCandidates.forEach((candidate, index) => {
     const sectionIndex = sections.indexOf(candidate.sectionId);
-    
+
     // Check recent background pattern for rhythm
     const recentBackgrounds = sections.slice(Math.max(0, sectionIndex - 2), sectionIndex)
       .map(s => backgroundAssignments[s]);
-    
+
     const consecutiveHighlights = countConsecutiveHighlights(recentBackgrounds);
-    
+
     // Determine upgrade path
     const currentBackground = backgroundAssignments[candidate.sectionId];
     let newBackground = currentBackground;
-    
+
     if (candidate.tier === 1) {
       // Tier 1 (Critical): Can override rhythm up to 3 consecutive
       if (consecutiveHighlights < 3) {
@@ -320,44 +320,82 @@ export function assignEnhancedBackgroundsToSections(
         } else if (currentBackground === 'secondary' && candidate.score >= 25) {
           newBackground = 'primary';
         }
-      } else {
       }
     } else if (candidate.tier === 2) {
       // Tier 2 (Important): Respect rhythm at 2 consecutive
       if (consecutiveHighlights < 2 && currentBackground === 'neutral' && candidate.score >= 20) {
         newBackground = 'secondary';
-      } else {
       }
     }
-    
+
+    // ✅ NEW: Check if upgrade would create colored adjacency
+    if (newBackground !== currentBackground && isColoredBackground(newBackground)) {
+      // Check previous section
+      const prevBackground = sectionIndex > 0 ? backgroundAssignments[sections[sectionIndex - 1]] : null;
+
+      // Check next section
+      const nextBackground = sectionIndex < sections.length - 1 ? backgroundAssignments[sections[sectionIndex + 1]] : null;
+
+      // Skip upgrade if would create adjacency (unless this is hero/cta)
+      if (!isProtectedSection(candidate.sectionId)) {
+        if ((prevBackground && isColoredBackground(prevBackground)) ||
+            (nextBackground && isColoredBackground(nextBackground))) {
+          // Would create adjacency - skip upgrade
+          logger.debug(`⚠️ Skipping upgrade for ${candidate.sectionId}: would create adjacency with neighbor`);
+          return;
+        }
+      }
+    }
+
     if (newBackground !== currentBackground) {
       backgroundAssignments[candidate.sectionId] = newBackground;
     }
   });
   
-  // ===== STEP 5: APPLY RHYTHM ENFORCEMENT (DOWNGRADES) =====
+  // ===== STEP 5: RHYTHM ENFORCEMENT + ADJACENCY PREVENTION =====
   sections.forEach((sectionId, index) => {
     const currentBackground = backgroundAssignments[sectionId];
-    
+
     // Skip if not a highlight
-    if (!['primary', 'secondary'].includes(currentBackground)) return;
-    
-    // Check if this creates too many consecutive highlights
+    if (!isColoredBackground(currentBackground)) return;
+
+    // ✅ PROTECTION: Never downgrade hero or CTA
+    if (isProtectedSection(sectionId)) {
+      return;
+    }
+
+    // Check for rhythm violations
     const recentAssignments = sections.slice(Math.max(0, index - 2), index + 1)
       .map(s => backgroundAssignments[s]);
-    
+
     const consecutiveHighlights = countConsecutiveHighlights(recentAssignments);
-    
-    // Get conversion importance for downgrade decision
     const importance = calculateConversionImportance(sectionId, userProfileTags);
-    
-    // Apply rhythm enforcement rules
+
+    // Rhythm enforcement
     if (consecutiveHighlights > 3) {
-      // Hard limit: Never more than 3 consecutive
+      // Hard limit: Never more than 3 consecutive (except protected)
       backgroundAssignments[sectionId] = 'neutral';
+      logger.debug(`✅ Rhythm downgrade: ${sectionId} (${consecutiveHighlights} consecutive)`);
+      return;
     } else if (consecutiveHighlights === 3 && importance.tier > 1) {
-      // Soft limit: Tier 2+ yields at 3 consecutive
+      // Soft limit: Tier 2+ yields at 3 consecutive (except protected)
       backgroundAssignments[sectionId] = 'neutral';
+      logger.debug(`✅ Rhythm downgrade: ${sectionId} (Tier ${importance.tier} at 3 consecutive)`);
+      return;
+    }
+
+    // ✅ NEW: Adjacency check - downgrade if adjacent to colored section
+    const prevBackground = index > 0 ? backgroundAssignments[sections[index - 1]] : null;
+
+    if (prevBackground && isColoredBackground(prevBackground)) {
+      // Adjacency detected - downgrade current section
+      const prevSectionId = sections[index - 1];
+
+      // Always downgrade current if previous is protected OR neither is protected
+      if (isProtectedSection(prevSectionId) || !isProtectedSection(sectionId)) {
+        backgroundAssignments[sectionId] = 'neutral';
+        logger.debug(`✅ Adjacency downgrade: ${prevSectionId}(${prevBackground}) → ${sectionId}(${currentBackground})`);
+      }
     }
   });
   
@@ -384,6 +422,15 @@ function countConsecutiveHighlights(backgrounds: SectionBackgroundType[]): numbe
     }
   }
   return count;
+}
+
+function isProtectedSection(sectionId: string): boolean {
+  // Hero and CTA are ALWAYS protected from downgrade
+  return sectionId === 'hero' || sectionId === 'cta';
+}
+
+function isColoredBackground(backgroundType: SectionBackgroundType): boolean {
+  return backgroundType === 'primary' || backgroundType === 'secondary';
 }
 
 function validateEnhancedPattern(
@@ -422,13 +469,27 @@ function validateEnhancedPattern(
       downgrades++;
     }
   });
-  
+
+  // ✅ NEW: Check for colored adjacency violations
+  let adjacencyViolations: string[] = [];
+  sections.forEach((section, index) => {
+    if (index === 0) return; // Skip first section
+
+    const currentBg = assignments[section];
+    const prevSection = sections[index - 1];
+    const prevBg = assignments[prevSection];
+
+    if (isColoredBackground(currentBg) && isColoredBackground(prevBg)) {
+      adjacencyViolations.push(`${prevSection}(${prevBg}) → ${section}(${currentBg})`);
+    }
+  });
+
   // Calculate metrics
-  const highlightCount = sections.filter(s => ['primary', 'secondary'].includes(assignments[s])).length;
+  const highlightCount = sections.filter(s => isColoredBackground(assignments[s])).length;
   const neutralCount = sections.filter(s => assignments[s] === 'neutral').length;
   const dividerCount = sections.filter(s => assignments[s] === 'divider').length;
   const highlightRatio = Math.round((highlightCount / sections.length) * 100);
-  
+
   logger.debug('📊 Enhanced Pattern Metrics:', {
     totalSections: sections.length,
     highlights: highlightCount,
@@ -438,13 +499,20 @@ function validateEnhancedPattern(
     maxConsecutive,
     upgrades,
     downgrades,
-    violations: violations.length
+    violations: violations.length,
+    adjacencyViolations: adjacencyViolations.length
   });
-  
+
   // Quality assessment
-  if (violations.length === 0) {
+  if (violations.length === 0 && adjacencyViolations.length === 0) {
+    logger.debug('✅ No rhythm or adjacency violations');
   } else {
-    logger.warn('⚠️ Rhythm violations:', violations);
+    if (violations.length > 0) {
+      logger.warn('⚠️ Rhythm violations:', violations);
+    }
+    if (adjacencyViolations.length > 0) {
+      logger.warn('⚠️ CRITICAL: Colored sections adjacent:', adjacencyViolations);
+    }
   }
   
   if (highlightRatio >= 30 && highlightRatio <= 60) {
