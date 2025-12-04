@@ -407,7 +407,7 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
         {/* Objections Summary */}
         {(blockContent.objections_summary || mode === 'edit') && (
           <div className="mt-16 text-center">
-            <div className="max-w-3xl mx-auto p-6 bg-blue-50 border border-blue-200 rounded-xl">
+            <div className="max-w-3xl mx-auto p-6 bg-blue-50">
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.objections_summary || ''}
@@ -415,7 +415,7 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
                 backgroundType="neutral"
                 colorTokens={{ ...colorTokens, textPrimary: 'text-blue-900' }}
                 variant="body"
-                className="text-lg font-medium text-blue-900"
+                className="text-2xl font-medium text-blue-900"
                 placeholder="Add a summary of how objections have been addressed..."
                 sectionId={sectionId}
                 elementKey="objections_summary"

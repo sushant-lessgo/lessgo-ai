@@ -113,9 +113,12 @@ export default function LandingPageRenderer({ className = '', tokenId }: Landing
   // Get tokenId from props or URL params
   const params = useParams();
   const effectiveTokenId = tokenId || (params?.token as string) || 'default';
-  const { 
+
+  // ✅ Get full state from store to ensure reactivity to nested changes
+  const storeState = useEditStore();
+  const {
     sections,
-    sectionLayouts, 
+    sectionLayouts,
     theme,
     content,
     mode,
@@ -123,7 +126,7 @@ export default function LandingPageRenderer({ className = '', tokenId }: Landing
     updateFontsFromTone,
     getColorTokens,
     updateFromBackgroundSystem
-  } = useEditStore();
+  } = storeState;
 
   // Get feature flags for CSS variable system
   const featureFlags = useFeatureFlags(effectiveTokenId);
@@ -260,18 +263,31 @@ const finalSections: OrderedSection[] = processedSections
 .filter((section: any) => section.layout !== undefined && typeof section.layout === 'string')
 .map((section: any, index: number) => {
   const { id: sectionId, order, layout, data } = section;
-  
-  const dynamicBackgroundType = backgroundAssignments[sectionId];
-  
+
+  // ✅ Check for manual user override first
+  const manualBackgroundType = content[sectionId]?.backgroundType;
+
+  // ✅ Use manual override if exists, otherwise use auto-calculated
+  const effectiveBackgroundType = manualBackgroundType || backgroundAssignments[sectionId];
+
+  // ✅ Debug logging for manual overrides
+  if (manualBackgroundType && manualBackgroundType !== backgroundAssignments[sectionId]) {
+    logger.debug(`🎨 ${sectionId} using MANUAL background:`, {
+      manual: manualBackgroundType,
+      wouldBeAuto: backgroundAssignments[sectionId]
+    });
+  }
+
   // Map to SectionBackground format
   let background: SectionBackground;
-  switch(dynamicBackgroundType) {
+  switch(effectiveBackgroundType) {
     case 'primary': background = 'primary-highlight'; break;
     case 'secondary': background = 'secondary-highlight'; break;
     case 'divider': background = 'divider-zone'; break;
+    case 'custom': background = 'neutral'; break; // ✅ Handle custom backgrounds
     default: background = 'neutral';
   }
-  
+
   return { id: sectionId, order, background, layout, data };
 });
     // ✅ Log the final alternating pattern
@@ -280,7 +296,7 @@ const finalSections: OrderedSection[] = processedSections
     );
 
     return finalSections;
-  }, [sections, sectionLayouts, content, dynamicBackgroundSystem, theme.colors.sectionBackgrounds.secondary]);
+  }, [sections, sectionLayouts, content, dynamicBackgroundSystem, theme.colors.sectionBackgrounds.secondary, validatedFields, hiddenInferredFields]);
 
   // ✅ Enhanced render section with alternating debug info
   const renderSection = (section: OrderedSection) => {
@@ -303,9 +319,17 @@ const finalSections: OrderedSection[] = processedSections
 
     // Map background type
     const backgroundType = backgroundTypeMapping[background] || 'neutral';
-    
+
+    // ✅ Check for custom background
+    const customBackground = data?.sectionBackground?.type === 'custom'
+      ? data.sectionBackground.custom
+      : null;
+
     // ✅ SIMPLIFIED: Get the actual CSS value for this background type
     const sectionBackgroundCSS = (() => {
+      // Return empty for custom backgrounds (will use inline style instead)
+      if (customBackground) return '';
+
       const backgrounds = theme?.colors?.sectionBackgrounds;
       if (!backgrounds) return '#ffffff';
 
@@ -320,6 +344,23 @@ const finalSections: OrderedSection[] = processedSections
           return backgrounds.neutral || '#ffffff';
       }
     })();
+
+    // ✅ Generate inline style for custom backgrounds
+    const customBackgroundStyle = customBackground
+      ? {
+          background: customBackground.solid
+            ? customBackground.solid
+            : customBackground.gradient?.type === 'linear'
+            ? `linear-gradient(${customBackground.gradient.angle}deg, ${
+                customBackground.gradient.stops.map((s: any) => `${s.color} ${s.position}%`).join(', ')
+              })`
+            : customBackground.gradient
+            ? `radial-gradient(circle, ${
+                customBackground.gradient.stops.map((s: any) => `${s.color} ${s.position}%`).join(', ')
+              })`
+            : undefined
+        }
+      : undefined;
 
     // Enhanced background logging
     if (backgroundType === 'secondary') {
@@ -415,6 +456,7 @@ const finalSections: OrderedSection[] = processedSections
               backgroundType={backgroundType}
               sectionId={sectionId}
               sectionBackgroundCSS={sectionBackgroundCSS}
+              customBackgroundStyle={customBackgroundStyle}
               className=""
             >
               <LayoutComponent

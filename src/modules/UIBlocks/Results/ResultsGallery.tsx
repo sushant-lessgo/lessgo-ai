@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import {
@@ -6,6 +6,7 @@ import {
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 
 interface ResultsGalleryContent {
   headline: string;
@@ -77,6 +78,13 @@ export default function ResultsGallery(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
+  // Store for image upload
+  const store = useEditStore();
+
+  // Upload state management
+  const [uploadingImages, setUploadingImages] = useState<Record<string, boolean>>({});
+  const [uploadErrors, setUploadErrors] = useState<Record<string, string>>({});
+
   // Refs for file inputs
   const fileInputRef1 = useRef<HTMLInputElement>(null);
   const fileInputRef2 = useRef<HTMLInputElement>(null);
@@ -87,25 +95,54 @@ export default function ResultsGallery(props: LayoutComponentProps) {
   const safeBackgroundType = props.backgroundType === 'custom' ? 'neutral' : (props.backgroundType || 'neutral');
 
   // Handle file upload
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>, imageKey: string) => {
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+    imageKey: string
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      alert('Please select a valid image file');
+      setUploadErrors(prev => ({ ...prev, [imageKey]: 'Please select a valid image file' }));
       return;
     }
 
     // Validate file size (5MB limit)
     if (file.size > 5 * 1024 * 1024) {
-      alert('Image file must be smaller than 5MB');
+      setUploadErrors(prev => ({ ...prev, [imageKey]: 'Image must be smaller than 5MB' }));
       return;
     }
 
-    // Create preview URL
-    const previewUrl = URL.createObjectURL(file);
-    handleContentUpdate(imageKey, previewUrl);
+    // Clear previous error
+    setUploadErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors[imageKey];
+      return newErrors;
+    });
+
+    // Set uploading state
+    setUploadingImages(prev => ({ ...prev, [imageKey]: true }));
+
+    try {
+      // Upload to server and update content
+      await store.uploadImage(file, {
+        sectionId,
+        elementKey: imageKey
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Upload failed. Please try again.';
+      setUploadErrors(prev => ({ ...prev, [imageKey]: errorMessage }));
+    } finally {
+      setUploadingImages(prev => {
+        const newState = { ...prev };
+        delete newState[imageKey];
+        return newState;
+      });
+    }
+
+    // Reset file input
+    event.target.value = '';
   };
 
   // Image placeholder component
@@ -144,9 +181,11 @@ export default function ResultsGallery(props: LayoutComponentProps) {
   ) => {
     const imageUrl = blockContent[imageKey];
     const caption = blockContent[captionKey] || '';
+    const isUploading = uploadingImages[imageKey];
+    const uploadError = uploadErrors[imageKey];
 
     return (
-      <div className="space-y-3">
+      <div className="space-y-3 relative">
         {/* Hidden file input */}
         <input
           ref={fileInputRef}
@@ -154,32 +193,52 @@ export default function ResultsGallery(props: LayoutComponentProps) {
           accept="image/*"
           className="hidden"
           onChange={(e) => handleFileUpload(e, imageKey)}
+          disabled={isUploading}
         />
 
         {/* Image or placeholder */}
-        {imageUrl ? (
-          <div
-            className="relative group cursor-pointer"
-            onClick={() => mode === 'edit' && fileInputRef.current?.click()}
-          >
-            <img
-              src={imageUrl}
-              alt={caption || `Result ${index}`}
-              className="w-full h-64 object-cover rounded-lg shadow-md"
-              data-section-id={sectionId}
-              data-element-key={imageKey}
-            />
-            {mode === 'edit' && (
-              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
-                <div className="text-white text-sm font-medium bg-black bg-opacity-50 px-3 py-1 rounded">
-                  Click to change
+        <div className="relative">
+          {imageUrl ? (
+            <div
+              className="relative group cursor-pointer"
+              onClick={() => mode === 'edit' && !isUploading && fileInputRef.current?.click()}
+            >
+              <img
+                src={imageUrl}
+                alt={caption || `Result ${index}`}
+                className="w-full h-auto object-contain rounded-lg shadow-md"
+                data-section-id={sectionId}
+                data-element-key={imageKey}
+              />
+              {mode === 'edit' && !isUploading && (
+                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
+                  <div className="text-white text-sm font-medium bg-black bg-opacity-50 px-3 py-1 rounded">
+                    Click to change
+                  </div>
                 </div>
+              )}
+            </div>
+          ) : mode === 'edit' ? (
+            <ImagePlaceholder onClick={() => !isUploading && fileInputRef.current?.click()} />
+          ) : null}
+
+          {/* Upload progress overlay */}
+          {isUploading && (
+            <div className="absolute inset-0 bg-white bg-opacity-90 rounded-lg flex items-center justify-center">
+              <div className="text-center">
+                <div className="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                <div className="text-sm font-medium text-gray-700">Uploading...</div>
               </div>
-            )}
+            </div>
+          )}
+        </div>
+
+        {/* Error message */}
+        {uploadError && (
+          <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">
+            {uploadError}
           </div>
-        ) : mode === 'edit' ? (
-          <ImagePlaceholder onClick={() => fileInputRef.current?.click()} />
-        ) : null}
+        )}
 
         {/* Caption */}
         {(caption || mode === 'edit') && (

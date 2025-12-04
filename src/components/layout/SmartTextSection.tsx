@@ -8,6 +8,7 @@ interface SmartTextSectionProps {
   children: React.ReactNode;
   backgroundType: BackgroundType;
   sectionBackgroundCSS: string;
+  customBackgroundStyle?: React.CSSProperties;
   className?: string;
   sectionId?: string;
 }
@@ -15,10 +16,11 @@ interface SmartTextSectionProps {
 /**
  * Wrapper component that automatically applies smart text colors based on background
  */
-export function SmartTextSection({ 
-  children, 
-  backgroundType, 
-  sectionBackgroundCSS, 
+export function SmartTextSection({
+  children,
+  backgroundType,
+  sectionBackgroundCSS,
+  customBackgroundStyle,
   className = '',
   sectionId = ''
 }: SmartTextSectionProps) {
@@ -37,9 +39,11 @@ export function SmartTextSection({
   }));
   
   return (
-    <section 
+    <section
       className={`${sectionBackgroundCSS} ${className}`}
       style={{
+        // Apply custom background first if provided
+        ...customBackgroundStyle,
         // CSS custom properties that children can use
         '--smart-text-heading': smartColors.heading,
         '--smart-text-body': smartColors.body,

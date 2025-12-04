@@ -119,8 +119,11 @@ export function createCoreActions(set: any, get: any) {
       set((state: EditStore) => {
         if (state.content[sectionId]) {
           state.content[sectionId].sectionBackground = sectionBackground;
-          // Also update the legacy backgroundType for backward compatibility
-          state.content[sectionId].backgroundType = sectionBackground.type;
+          // ✅ Update the legacy backgroundType field with the actual background value
+          // For 'theme' type, use themeColor; for 'custom' type, use 'custom'
+          state.content[sectionId].backgroundType = sectionBackground.type === 'theme'
+            ? (sectionBackground.themeColor as any)
+            : sectionBackground.type;
           state.persistence.isDirty = true;
         }
       }),
