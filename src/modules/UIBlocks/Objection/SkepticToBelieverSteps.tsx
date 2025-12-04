@@ -380,10 +380,7 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
                       />
 
                       {/* Subtle Credibility Indicator */}
-                      <div className="mt-6 flex items-center justify-between text-xs text-gray-400">
-                        <span>Real customer experience</span>
-                        <span>Verified result</span>
-                      </div>
+                      
                     </div>
                   </div>
                 </div>

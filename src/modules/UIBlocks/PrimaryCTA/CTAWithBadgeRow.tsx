@@ -9,7 +9,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
-import { CTAButton } from '@/components/layout/ComponentRegistry';
+import { CTAButton, TrustIndicators } from '@/components/layout/ComponentRegistry';
 import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators';
 import AvatarEditableComponent from '@/components/ui/AvatarEditableComponent';
 import { LayoutComponentProps } from '@/types/storeTypes';
@@ -290,10 +290,12 @@ export default function CTAWithBadgeRow(props: LayoutComponentProps) {
       mode={mode}
       className={props.className}
     >
-      <div className="max-w-4xl mx-auto text-center">
-        
-        {/* Main CTA Content */}
-        <div className="mb-12">
+     
+
+      <div className="flex flex-col items-center space-y-8 min-h-auto mt-20 md:mt-28 mb-20">
+        <div className="max-w-5xl mx-auto text-center w-full flex flex-col items-center">
+          {/* Main CTA Content */}
+          <div className="flex flex-col items-center gap-6 mb-8">
           <EditableAdaptiveHeadline
             mode={mode}
             value={blockContent.headline || ''}
@@ -301,7 +303,7 @@ export default function CTAWithBadgeRow(props: LayoutComponentProps) {
             level="h2"
             backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
             colorTokens={colorTokens}
-            className="mb-6"
+            className="mb-0 text-center mx-auto max-w-5xl"
             sectionId={sectionId}
             elementKey="headline"
             sectionBackground={sectionBackground}
@@ -315,7 +317,7 @@ export default function CTAWithBadgeRow(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg mb-8 max-w-2xl mx-auto"
+              className="text-lg mb-0 max-w-4xl mx-auto"
               sectionId={sectionId}
               elementKey="subheadline"
               sectionBackground={sectionBackground}
@@ -334,8 +336,8 @@ export default function CTAWithBadgeRow(props: LayoutComponentProps) {
           />
         </div>
 
-        {/* Trust Indicators */}
-        <div className="mb-8">
+          {/* Trust Indicators */}
+          <div className="flex flex-col items-center mb-0">
           {mode !== 'preview' ? (
             <EditableTrustIndicators
               mode={mode}
@@ -377,16 +379,11 @@ export default function CTAWithBadgeRow(props: LayoutComponentProps) {
               colorClass={mutedTextColor}
             />
           ) : (
-            <div className="flex flex-wrap justify-center gap-4 items-center">
-              {trustItems.map((item, index) => (
-                <div key={index} className="flex items-center space-x-2 px-4 py-2 bg-green-50 border border-green-200 rounded-lg text-green-800">
-                  <svg className="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-sm font-medium whitespace-nowrap">{item}</span>
-                </div>
-              ))}
-            </div>
+            <TrustIndicators
+              items={trustItems}
+              colorClass={mutedTextColor}
+              iconColor="text-green-500"
+            />
           )}
         </div>
 
@@ -495,7 +492,8 @@ export default function CTAWithBadgeRow(props: LayoutComponentProps) {
           </div>
         )}
 
-      </div>
+        </div> {/* max-w-5xl inner wrapper */}
+      </div> {/* flex flex-col outer wrapper */}
     </LayoutSection>
   );
 }
