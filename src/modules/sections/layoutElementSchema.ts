@@ -472,6 +472,35 @@ export const layoutElementSchema: LayoutSchema = {
     }
   },
 
+  ResultsGallery: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "image_1", mandatory: false, generation: "manual_preferred" },
+      { element: "image_2", mandatory: false, generation: "manual_preferred" },
+      { element: "image_3", mandatory: false, generation: "manual_preferred" },
+      { element: "image_4", mandatory: false, generation: "manual_preferred" },
+      { element: "caption_1", mandatory: false, generation: "ai_generated" },
+      { element: "caption_2", mandatory: false, generation: "ai_generated" },
+      { element: "caption_3", mandatory: false, generation: "ai_generated" },
+      { element: "caption_4", mandatory: false, generation: "ai_generated" },
+    ],
+
+    cardStructure: {
+      type: "items",
+      elements: ["images", "captions"],
+      generation: "ai_generated"
+    },
+
+    cardRequirements: {
+      type: 'items',
+      min: 2,
+      max: 4,
+      optimal: [4, 4],
+      description: 'Gallery of result images with captions for visual tools'
+    }
+  },
+
   // Security Section
   // Security Section - Using actual component names
   AuditResultsPanel: [

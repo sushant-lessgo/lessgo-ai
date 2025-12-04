@@ -38,10 +38,10 @@ const SimpleFooter: React.FC<LayoutComponentProps> = (props) => {
       mode={mode}
       className="bg-gray-50 border-t"
     >
-      <div className="flex items-center justify-center gap-4 py-8">
+      <div className="flex items-center justify-center gap-2 py-2">
         <HeaderLogo 
           mode={mode}
-          className="h-8 w-auto object-contain"
+          className="h-2 w-auto object-contain"
         />
         <div className="text-sm text-gray-600">
           <EditableAdaptiveText

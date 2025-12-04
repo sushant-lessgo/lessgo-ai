@@ -8,7 +8,8 @@ export type ResultsLayout =
   | "TimelineResults"
   | "OutcomeIcons"
   | "StackedWinsList"
-  | "PersonaResultPanels";
+  | "PersonaResultPanels"
+  | "ResultsGallery";
 
 /**
  * Selects the optimal Results section layout based on proof credibility and outcome visualization needs
@@ -133,6 +134,7 @@ export function pickResultsLayout(input: LayoutPickerInput): ResultsLayout {
     OutcomeIcons: 0,
     StackedWinsList: 0,
     PersonaResultPanels: 0,
+    ResultsGallery: 0,
   };
 
   // ===== PHASE 2.1: FLOW-AWARE SCORING =====
@@ -353,12 +355,31 @@ export function pickResultsLayout(input: LayoutPickerInput): ResultsLayout {
   } else if (marketCategory === "Design & Creative Tools") {
     scores.EmojiOutcomeGrid += 2;
     scores.OutcomeIcons += 1;
+    scores.ResultsGallery += 3;  // Visual results perfect for creative tools
   } else if (marketCategory === "AI Tools" || marketCategory === "Engineering & Development Tools") {
     scores.StatBlocks += 2;
     scores.BeforeAfterStats += 1;
   } else if (marketCategory === "Data & Analytics Tools") {
     scores.QuoteWithMetric += 2;
     scores.StatBlocks += 1;
+  }
+
+  // Visual outcomes for creators (image generation, design tools)
+  if (
+    targetAudience === "creators" &&
+    (marketCategory === "Design & Creative Tools" || marketCategory === "AI Tools")
+  ) {
+    scores.ResultsGallery += 5;
+    scores.EmojiOutcomeGrid += 3;
+  }
+
+  // Visual/creative outcomes with friendly tone
+  if (
+    (toneProfile === "friendly-helpful" || toneProfile === "confident-playful") &&
+    marketSophisticationLevel <= "level-3" &&
+    (targetAudience === "creators" || targetAudience === "founders")
+  ) {
+    scores.ResultsGallery += 4;
   }
 
   // Pricing Model Scoring (Low Weight: 1-2 points)
