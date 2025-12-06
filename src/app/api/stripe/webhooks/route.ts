@@ -158,8 +158,8 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
 
     const customerId = subscription.customer as string;
     const status = subscription.status;
-    const currentPeriodStart = new Date(subscription.current_period_start * 1000);
-    const currentPeriodEnd = new Date(subscription.current_period_end * 1000);
+    const currentPeriodStart = new Date((subscription as any).current_period_start * 1000);
+    const currentPeriodEnd = new Date((subscription as any).current_period_end * 1000);
     const isTrialing = status === 'trialing';
 
     logger.info(`Subscription created for user ${userId}:`, {
@@ -222,8 +222,8 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     }
 
     const status = subscription.status;
-    const currentPeriodStart = new Date(subscription.current_period_start * 1000);
-    const currentPeriodEnd = new Date(subscription.current_period_end * 1000);
+    const currentPeriodStart = new Date((subscription as any).current_period_start * 1000);
+    const currentPeriodEnd = new Date((subscription as any).current_period_end * 1000);
 
     logger.info(`Subscription updated for user ${userId}:`, {
       subscriptionId: subscription.id,
@@ -302,7 +302,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
  */
 async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
   try {
-    const subscriptionId = invoice.subscription as string;
+    const subscriptionId = (invoice as any).subscription as string;
 
     if (!subscriptionId) {
       // Not a subscription invoice
@@ -340,7 +340,7 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
  */
 async function handlePaymentFailed(invoice: Stripe.Invoice) {
   try {
-    const subscriptionId = invoice.subscription as string;
+    const subscriptionId = (invoice as any).subscription as string;
 
     if (!subscriptionId) {
       return;

@@ -238,10 +238,8 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
         const elementValue = sectionData.elements[elementName];
         const isEmpty =
           !elementValue ||
-          elementValue === '' ||
-          elementValue === '___REMOVED___' ||
           (typeof elementValue === 'object' &&
-           (!elementValue.content ||
+           (elementValue.content === undefined ||
             elementValue.content === '' ||
             elementValue.content === '___REMOVED___'));
 

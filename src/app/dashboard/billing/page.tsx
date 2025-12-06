@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
@@ -37,10 +37,29 @@ interface UsageStats {
   };
 }
 
+function SuccessMessage() {
+  const searchParams = useSearchParams();
+
+  if (searchParams.get('success') !== 'true') {
+    return null;
+  }
+
+  return (
+    <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
+      <div className="flex items-center gap-2 text-green-800">
+        <Check className="w-5 h-5" />
+        <span className="font-semibold">Subscription activated!</span>
+      </div>
+      <p className="text-sm text-green-700 mt-1">
+        Your trial has started. You won't be charged until the trial ends.
+      </p>
+    </div>
+  );
+}
+
 export default function BillingPage() {
   const { isSignedIn } = useAuth();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [plan, setPlan] = useState<PlanInfo | null>(null);
   const [usage, setUsage] = useState<UsageStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -113,17 +132,9 @@ export default function BillingPage() {
   return (
     <div className="max-w-6xl mx-auto p-8">
       {/* Success Message */}
-      {searchParams.get('success') === 'true' && (
-        <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
-          <div className="flex items-center gap-2 text-green-800">
-            <Check className="w-5 h-5" />
-            <span className="font-semibold">Subscription activated!</span>
-          </div>
-          <p className="text-sm text-green-700 mt-1">
-            Your trial has started. You won't be charged until the trial ends.
-          </p>
-        </div>
-      )}
+      <Suspense fallback={null}>
+        <SuccessMessage />
+      </Suspense>
 
       <h1 className="text-3xl font-bold text-gray-900 mb-8">Billing & Usage</h1>
 
