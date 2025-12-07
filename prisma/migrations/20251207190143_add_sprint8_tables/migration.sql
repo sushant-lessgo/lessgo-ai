@@ -1,104 +1,4 @@
 -- CreateTable
-CREATE TABLE "User" (
-    "id" TEXT NOT NULL,
-    "clerkId" TEXT NOT NULL,
-    "email" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "Project" (
-    "id" TEXT NOT NULL,
-    "userId" TEXT,
-    "tokenId" TEXT NOT NULL,
-    "title" TEXT NOT NULL DEFAULT 'Untitled Project',
-    "status" TEXT NOT NULL DEFAULT 'draft',
-    "content" JSONB,
-    "themeValues" JSONB,
-    "computedDesign" JSONB,
-    "inputText" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "Project_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "Token" (
-    "id" TEXT NOT NULL,
-    "value" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "Token_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "PublishedPage" (
-    "id" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
-    "slug" TEXT NOT NULL,
-    "title" TEXT,
-    "htmlContent" TEXT NOT NULL,
-    "content" JSONB,
-    "themeValues" JSONB,
-    "computedDesign" JSONB,
-    "projectId" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-    "isPublished" BOOLEAN NOT NULL DEFAULT true,
-    "previewImage" TEXT,
-    "views" INTEGER NOT NULL DEFAULT 0,
-
-    CONSTRAINT "PublishedPage_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "TaxonomyEmbedding" (
-    "id" TEXT NOT NULL,
-    "fieldType" TEXT NOT NULL,
-    "value" TEXT NOT NULL,
-    "embedding" DOUBLE PRECISION[],
-    "metadata" JSONB,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "TaxonomyEmbedding_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "FormSubmission" (
-    "id" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
-    "publishedPageId" TEXT,
-    "formId" TEXT NOT NULL,
-    "formName" TEXT NOT NULL,
-    "data" JSONB NOT NULL,
-    "ipAddress" TEXT,
-    "userAgent" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "FormSubmission_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "UserIntegration" (
-    "id" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
-    "type" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "apiKey" TEXT NOT NULL,
-    "isActive" BOOLEAN NOT NULL DEFAULT true,
-    "settings" JSONB,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "UserIntegration_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "PageAnalytics" (
     "id" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
@@ -203,41 +103,11 @@ CREATE TABLE "UsageEvent" (
     CONSTRAINT "UsageEvent_pkey" PRIMARY KEY ("id")
 );
 
--- CreateIndex
-CREATE UNIQUE INDEX "User_clerkId_key" ON "User"("clerkId");
+-- AlterTable
+ALTER TABLE "Project" ADD COLUMN IF NOT EXISTS "computedDesign" JSONB;
 
--- CreateIndex
-CREATE UNIQUE INDEX "Project_tokenId_key" ON "Project"("tokenId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Token_value_key" ON "Token"("value");
-
--- CreateIndex
-CREATE UNIQUE INDEX "PublishedPage_slug_key" ON "PublishedPage"("slug");
-
--- CreateIndex
-CREATE INDEX "PublishedPage_userId_idx" ON "PublishedPage"("userId");
-
--- CreateIndex
-CREATE INDEX "TaxonomyEmbedding_fieldType_idx" ON "TaxonomyEmbedding"("fieldType");
-
--- CreateIndex
-CREATE UNIQUE INDEX "TaxonomyEmbedding_fieldType_value_key" ON "TaxonomyEmbedding"("fieldType", "value");
-
--- CreateIndex
-CREATE INDEX "FormSubmission_userId_idx" ON "FormSubmission"("userId");
-
--- CreateIndex
-CREATE INDEX "FormSubmission_formId_idx" ON "FormSubmission"("formId");
-
--- CreateIndex
-CREATE INDEX "FormSubmission_publishedPageId_idx" ON "FormSubmission"("publishedPageId");
-
--- CreateIndex
-CREATE INDEX "UserIntegration_userId_idx" ON "UserIntegration"("userId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "UserIntegration_userId_type_name_key" ON "UserIntegration"("userId", "type", "name");
+-- AlterTable
+ALTER TABLE "PublishedPage" ADD COLUMN IF NOT EXISTS "computedDesign" JSONB;
 
 -- CreateIndex
 CREATE INDEX "PageAnalytics_slug_date_idx" ON "PageAnalytics"("slug", "date");
@@ -292,10 +162,3 @@ CREATE INDEX "UsageEvent_createdAt_idx" ON "UsageEvent"("createdAt");
 
 -- CreateIndex
 CREATE INDEX "UsageEvent_userId_idx" ON "UsageEvent"("userId");
-
--- AddForeignKey
-ALTER TABLE "Project" ADD CONSTRAINT "Project_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Project" ADD CONSTRAINT "Project_tokenId_fkey" FOREIGN KEY ("tokenId") REFERENCES "Token"("value") ON DELETE RESTRICT ON UPDATE CASCADE;
-
