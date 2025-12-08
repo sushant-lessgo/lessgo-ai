@@ -112,6 +112,7 @@ export function createCoreActions(set: any, get: any) {
         if (state.content[sectionId]) {
           state.content[sectionId].backgroundType = backgroundType;
           state.persistence.isDirty = true;
+          state.lastUpdated = Date.now();
         }
       }),
 
@@ -125,6 +126,7 @@ export function createCoreActions(set: any, get: any) {
             ? (sectionBackground.themeColor as any)
             : sectionBackground.type;
           state.persistence.isDirty = true;
+          state.lastUpdated = Date.now();
         }
       }),
 

@@ -332,15 +332,6 @@ export function createContentActions(set: any, get: any): ContentActions {
         logger.debug('Applying selected variation');
       }),
 
-    // These methods are implemented in coreActions.ts but required by ContentActions interface
-    setBackgroundType: (sectionId: string, backgroundType: BackgroundType) => {
-      logger.warn('setBackgroundType should be called from coreActions');
-    },
-
-    markAsCustomized: (sectionId: string) => {
-      logger.warn('markAsCustomized should be called from coreActions');
-    },
-
     // These methods are implemented in aiActions.ts but required by ContentActions interface
     regenerateSection: async (sectionId: string, userGuidance?: string) => {
       logger.warn('regenerateSection should be called from aiActions');
@@ -369,11 +360,6 @@ export function createContentActions(set: any, get: any): ContentActions {
 
     updateFromAIResponse: (aiResponse: any) => {
       logger.warn('updateFromAIResponse should be called from generationActions');
-    },
-
-    // This method is implemented in coreActions.ts but required by ContentActions interface
-    setSectionBackground: (sectionId: string, sectionBackground: any) => {
-      logger.warn('setSectionBackground should be called from coreActions');
     },
 
   };
