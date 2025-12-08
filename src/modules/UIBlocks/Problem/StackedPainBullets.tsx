@@ -50,8 +50,8 @@ const CONTENT_SCHEMA = {
 // Parse pain point data from pipe-separated strings
 const parsePainData = (points: string, descriptions?: string): PainPoint[] => {
   const pointList = points.split('|').map(p => p.trim()).filter(p => p);
-  const descriptionList = descriptions ? descriptions.split('|').map(d => d.trim()).filter(d => d) : [];
-  
+  const descriptionList = descriptions ? descriptions.split('|').map(d => d.trim()) : [];
+
   return pointList.map((point, index) => ({
     id: `pain-${index}`,
     point,
@@ -128,7 +128,7 @@ const PainPointItem = ({
             backgroundType={backgroundType}
             colorTokens={colorTokens}
             variant="body"
-            className="font-semibold text-gray-900 leading-relaxed"
+            className="font-semibold text-xl text-gray-900 leading-relaxed"
             placeholder="Enter pain point..."
             sectionBackground={sectionBackground}
             data-section-id={sectionId}
@@ -146,7 +146,7 @@ const PainPointItem = ({
               backgroundType={backgroundType}
               colorTokens={colorTokens}
               variant="body"
-              className={`text-gray-600 leading-relaxed ${!painPoint.description && mode === 'edit' ? 'opacity-50 italic' : ''}`}
+              className={`text-gray-600 text-base leading-relaxed ${!painPoint.description && mode === 'edit' ? 'opacity-50 italic' : ''}`}
               placeholder="Add optional description to elaborate on this pain point..."
               sectionBackground={sectionBackground}
               data-section-id={sectionId}
@@ -223,6 +223,11 @@ export default function StackedPainBullets(props: LayoutComponentProps) {
 
     // Update pain points
     handleContentUpdate('pain_points', newPoints.join('|'));
+
+    // Update pain descriptions to maintain array alignment
+    const descriptions = blockContent.pain_descriptions ? blockContent.pain_descriptions.split('|') : [];
+    const newDescriptions = [...descriptions, 'new pain description'];
+    handleContentUpdate('pain_descriptions', newDescriptions.join('|'));
 
     // Add a smart icon for the new pain point
     const newPainCount = newPoints.length;

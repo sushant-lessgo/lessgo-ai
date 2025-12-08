@@ -183,7 +183,7 @@ const OutcomeCard = ({
             contentEditable
             suppressContentEditableWarning
             onBlur={(e) => onDescriptionEdit(index, e.currentTarget.textContent || '')}
-            className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[60px] cursor-text hover:bg-gray-50 text-gray-600 leading-relaxed"
+            className="outline-none text-base focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[60px] cursor-text hover:bg-gray-50 text-gray-600 leading-relaxed"
           >
             {outcome.description}
           </div>
@@ -294,7 +294,7 @@ export default function OutcomeIcons(props: OutcomeIconsProps) {
             level="h2"
             backgroundType={backgroundType === 'custom' ? 'secondary' : backgroundType}
             colorTokens={colorTokens}
-            className="mb-4"
+            className="mb-4 text-4xl"
             sectionId={sectionId}
             elementKey="headline"
             sectionBackground={sectionBackground}
