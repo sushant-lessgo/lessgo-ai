@@ -208,7 +208,7 @@ export default function VisualCTAWithMockup(props: LayoutComponentProps) {
               level="h2"
               backgroundType={safeBackgroundType}
               colorTokens={colorTokens}
-              className="mb-6"
+              className="mb-6 text-4xl"
               sectionId={sectionId}
               elementKey="headline"
               sectionBackground={sectionBackground}
@@ -222,7 +222,7 @@ export default function VisualCTAWithMockup(props: LayoutComponentProps) {
                 backgroundType={safeBackgroundType}
                 colorTokens={colorTokens}
                 variant="body"
-                className="mb-8"
+                className="mb-8 text-base"
                 style={bodyLgStyle}
                 sectionId={sectionId}
                 elementKey="subheadline"

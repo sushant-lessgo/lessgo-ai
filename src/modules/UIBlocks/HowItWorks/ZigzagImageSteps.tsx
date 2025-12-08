@@ -263,20 +263,7 @@ const ZigzagStep = React.memo(({
           </div>
         </div>
         
-        <div className="pl-16 space-y-3">
-          <div className="flex items-center space-x-3">
-            <div className="w-2 h-2 rounded-full bg-pink-500" />
-            <span className="text-gray-600 text-sm">Intuitive interface</span>
-          </div>
-          <div className="flex items-center space-x-3">
-            <div className="w-2 h-2 rounded-full bg-purple-500" />
-            <span className="text-gray-600 text-sm">Professional results</span>
-          </div>
-          <div className="flex items-center space-x-3">
-            <div className="w-2 h-2 rounded-full bg-pink-500" />
-            <span className="text-gray-600 text-sm">No experience needed</span>
-          </div>
-        </div>
+        
       </div>
 
       {/* Visual */}
@@ -439,7 +426,7 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
             level="h2"
             backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
             colorTokens={colorTokens}
-            className="mb-4"
+            className="mb-4 text-5xl"
             sectionId={sectionId}
             elementKey="headline"
             sectionBackground={sectionBackground}
