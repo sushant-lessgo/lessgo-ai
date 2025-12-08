@@ -62,10 +62,16 @@ Output: {"marketCategory": "Engineering & Development Tools", "marketSubcategory
 Input: "Social media analytics platform with performance insights"
 Output: {"marketCategory": "Marketing & Sales Tools", "marketSubcategory": "Social Media Management & Scheduling", "keyProblem": "Marketers struggle to understand which social content drives engagement and need actionable insights to improve performance", "targetAudience": "Social Media Marketers", "startupStage": "Growth", "pricingModel": "Tiered", "landingPageGoals": "Request Demo"}
 
+Input: "Recipe organizer app for saving and sharing family recipes"
+Output: {"marketCategory": "Lifestyle & Home Management", "marketSubcategory": "Recipe Management & Meal Planning", "keyProblem": "Home cooks struggle to organize recipes from multiple sources and lose track of family favorites", "targetAudience": "Families", "startupStage": "mvp-launched", "pricingModel": "freemium", "landingPageGoals": "download"}
+
+Input: "Meal planning assistant with grocery list automation"
+Output: {"marketCategory": "Lifestyle & Home Management", "marketSubcategory": "Recipe Management & Meal Planning", "keyProblem": "Busy individuals waste time planning meals and creating shopping lists without proper organization", "targetAudience": "families", "startupStage": "early-feedback", "pricingModel": "freemium", "landingPageGoals": "signup"}
+
 ## CRITICAL CONSTRAINTS:
 
 **VALID marketCategory OPTIONS (use EXACTLY these names):**
-Business Productivity Tools, Marketing & Sales Tools, Engineering & Development Tools, AI Tools, Customer Support & Service Tools, Data & Analytics Tools, HR & People Operations Tools, Finance & Accounting Tools, Personal Productivity Tools, Education & Learning, Health & Wellness, Entertainment & Gaming, Content & Creator Economy, Design & Creative Tools, Healthcare Technology, Legal Technology, Real Estate Technology, No-Code & Development Platforms, Web3 & Crypto Tools, Product Add-ons & Integrations
+Business Productivity Tools, Marketing & Sales Tools, Engineering & Development Tools, AI Tools, Customer Support & Service Tools, Data & Analytics Tools, HR & People Operations Tools, Finance & Accounting Tools, Personal Productivity Tools, Education & Learning, Health & Wellness, Entertainment & Gaming, Content & Creator Economy, Lifestyle & Home Management, Design & Creative Tools, Healthcare Technology, Legal Technology, Real Estate Technology, No-Code & Development Platforms, Web3 & Crypto Tools, Product Add-ons & Integrations
 
 **IMPORTANT**: You MUST use one of the exact category names listed above. DO NOT create new category names or variations.
 

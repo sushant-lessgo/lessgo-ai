@@ -21,6 +21,7 @@ export const marketCategories = [
   'Health & Wellness',
   'Entertainment & Gaming',
   'Content & Creator Economy',
+  'Lifestyle & Home Management',
 
   // Creative & Media Categories
   'Design & Creative Tools',
@@ -236,6 +237,9 @@ export const marketSubcategories: Record<MarketCategory, readonly string[]> = {
     'Live Streaming & Broadcasting',
     'Community Building Platforms',
     'Influencer & Partnership Tools',
+  ],
+  'Lifestyle & Home Management': [
+    'Recipe Management & Meal Planning',
   ],
   'Healthcare Technology': [
     'Electronic Health Records',
