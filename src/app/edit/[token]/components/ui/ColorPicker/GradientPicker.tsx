@@ -30,65 +30,63 @@ export function GradientPicker({ value, onChange }: GradientPickerProps) {
     }
   }, [value]);
 
-  // Generate gradient config
-  const generateGradientConfig = useCallback((): GradientConfig => {
-    if (gradientType === 'linear') {
-      return {
-        type: 'linear',
-        angle: direction,
-        stops: stops.sort((a, b) => a.position - b.position),
-      };
-    } else {
-      return {
-        type: 'radial',
-        stops: stops.sort((a, b) => a.position - b.position),
-      };
-    }
-  }, [gradientType, direction, stops]);
-
-  // Handle changes and notify parent
-  const handleChange = useCallback(() => {
-    const config = generateGradientConfig();
-    onChange(config);
-  }, [generateGradientConfig, onChange]);
+  // Generate gradient config with explicit parameters (avoids stale closure)
+  const generateGradientConfigWith = useCallback((
+    type: 'linear' | 'radial',
+    angle: number,
+    gradientStops: GradientStop[]
+  ): GradientConfig => {
+    const sortedStops = gradientStops.sort((a, b) => a.position - b.position);
+    return type === 'linear'
+      ? { type: 'linear', angle, stops: sortedStops }
+      : { type: 'radial', stops: sortedStops };
+  }, []);
 
   // Update gradient type
   const handleTypeChange = useCallback((type: 'linear' | 'radial') => {
+    const config = generateGradientConfigWith(type, direction, stops);
+    onChange(config); // Send BEFORE state update to avoid stale closure
     setGradientType(type);
-    setTimeout(handleChange, 0);
-  }, [handleChange]);
+  }, [direction, stops, onChange, generateGradientConfigWith]);
 
   // Update direction (for linear gradients)
   const handleDirectionChange = useCallback((newDirection: number) => {
+    if (gradientType === 'linear') {
+      const config = generateGradientConfigWith('linear', newDirection, stops);
+      onChange(config);
+    }
     setDirection(newDirection);
-    setTimeout(handleChange, 0);
-  }, [handleChange]);
+  }, [gradientType, stops, onChange, generateGradientConfigWith]);
 
   // Update gradient stop
   const updateStop = useCallback((index: number, updates: Partial<GradientStop>) => {
     const newStops = [...stops];
     newStops[index] = { ...newStops[index], ...updates };
+    const config = generateGradientConfigWith(gradientType, direction, newStops);
+    onChange(config);
     setStops(newStops);
-    setTimeout(handleChange, 0);
-  }, [stops, handleChange]);
+  }, [stops, gradientType, direction, onChange, generateGradientConfigWith]);
 
   // Add gradient stop
   const addStop = useCallback(() => {
     const newPosition = stops.length > 0 ? Math.max(...stops.map(s => s.position)) + 10 : 50;
     const newColor = stops.length > 0 ? stops[stops.length - 1].color : '#3B82F6';
-    
-    setStops([...stops, { color: newColor, position: Math.min(newPosition, 100) }]);
-    setTimeout(handleChange, 0);
-  }, [stops, handleChange]);
+    const newStops = [...stops, { color: newColor, position: Math.min(newPosition, 100) }];
+
+    const config = generateGradientConfigWith(gradientType, direction, newStops);
+    onChange(config);
+    setStops(newStops);
+  }, [stops, gradientType, direction, onChange, generateGradientConfigWith]);
 
   // Remove gradient stop
   const removeStop = useCallback((index: number) => {
     if (stops.length > 2) {
       const newStops = stops.filter((_, i) => i !== index);
+      const config = generateGradientConfigWith(gradientType, direction, newStops);
+      onChange(config);
       setStops(newStops);
-      setTimeout(handleChange, 0);
     }
-  }, [stops, handleChange]);
+  }, [stops, gradientType, direction, onChange, generateGradientConfigWith]);
 
   // Preset gradients
   const presetGradients: GradientPreset[] = [

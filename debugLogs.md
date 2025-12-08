@@ -1,341 +1,292 @@
-react-dom.development.js:38560 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
-logger.ts:84 [2025-12-08T11:22:35.866Z] DEBUG: 🔧 Enhanced AutoSaveDraft debug utilities available at window.__autoSaveDraftDebug
-logger.ts:84 [2025-12-08T11:22:35.915Z] DEBUG: RightPanel Debug: {
-  "currentCanonicalField": "marketCategory",
-  "currentDisplayField": "Market Category",
-  "hasFieldData": false,
-  "confirmedFieldsKeys": [],
-  "validatedFieldsKeys": []
-}
-logger.ts:84 [2025-12-08T11:22:35.915Z] DEBUG: RightPanel Debug: {
-  "currentCanonicalField": "marketCategory",
-  "currentDisplayField": "Market Category",
-  "hasFieldData": false,
-  "confirmedFieldsKeys": [],
-  "validatedFieldsKeys": []
-}
-rrweb-plugin-console-record.js:2447 [2025-12-08T11:22:36.438Z] DEBUG: Setting confirmed fields: {}
-rrweb-plugin-console-record.js:2447 [2025-12-08T11:22:36.439Z] DEBUG: ✅ Store populated from draft: {
-  "inputText": "",
-  "stepIndex": 0,
-  "confirmedFieldsCount": 0,
-  "validatedFieldsCount": 0,
-  "featuresCount": 0
-}
-rrweb-plugin-console-record.js:2447 [2025-12-08T11:22:36.440Z] DEBUG: RightPanel Debug: {
-  "currentCanonicalField": "marketCategory",
-  "currentDisplayField": "Market Category",
-  "hasFieldData": false,
-  "confirmedFieldsKeys": [],
-  "validatedFieldsKeys": []
-}
-rrweb-plugin-console-record.js:2447 [2025-12-08T11:22:36.441Z] DEBUG: RightPanel Debug: {
-  "currentCanonicalField": "marketCategory",
-  "currentDisplayField": "Market Category",
-  "hasFieldData": false,
-  "confirmedFieldsKeys": [],
-  "validatedFieldsKeys": []
-}
-rrweb-plugin-console-record.js:2447 [2025-12-08T11:22:36.506Z] DEBUG: Setting confirmed fields: {}
-rrweb-plugin-console-record.js:2447 [2025-12-08T11:22:36.506Z] DEBUG: ✅ Store populated from draft: {
-  "inputText": "",
-  "stepIndex": 0,
-  "confirmedFieldsCount": 0,
-  "validatedFieldsCount": 0,
-  "featuresCount": 0
-}
-rrweb-plugin-console-record.js:2447 [2025-12-08T11:22:36.507Z] DEBUG: RightPanel Debug: {
-  "currentCanonicalField": "marketCategory",
-  "currentDisplayField": "Market Category",
-  "hasFieldData": false,
-  "confirmedFieldsKeys": [],
-  "validatedFieldsKeys": []
-}
-rrweb-plugin-console-record.js:2447 [2025-12-08T11:22:36.507Z] DEBUG: RightPanel Debug: {
-  "currentCanonicalField": "marketCategory",
-  "currentDisplayField": "Market Category",
-  "hasFieldData": false,
-  "confirmedFieldsKeys": [],
-  "validatedFieldsKeys": []
-}
-rrweb-plugin-console-record.js:2447 [2025-12-08T11:22:45.843Z] DEBUG: RightPanel Debug: {
-  "currentCanonicalField": "marketCategory",
-  "currentDisplayField": "Market Category",
-  "hasFieldData": false,
-  "confirmedFieldsKeys": [],
-  "validatedFieldsKeys": []
-}
-rrweb-plugin-console-record.js:2447 [2025-12-08T11:22:45.843Z] DEBUG: RightPanel Debug: {
-  "currentCanonicalField": "marketCategory",
-  "currentDisplayField": "Market Category",
-  "hasFieldData": false,
-  "confirmedFieldsKeys": [],
-  "validatedFieldsKeys": []
-}
-rrweb-plugin-console-record.js:2447 [2025-12-08T11:22:52.538Z] DEBUG: ✅ API Response received: {
-  "hasRaw": true,
-  "hasValidated": true,
-  "validatedKeys": [
-    "Market Category",
-    "Market Subcategory",
-    "Target Audience",
-    "Key Problem Getting Solved",
-    "Startup Stage",
-    "Landing Page Goals",
-    "Pricing Category and Model"
+logger.ts:84 [2025-12-08T12:30:09.177Z] DEBUG: 🎨 [CustomBackgroundPicker] handleGradientChange called with: {
+  "type": "linear",
+  "angle": 90,
+  "stops": [
+    {
+      "color": "#3B82F6",
+      "position": 0
+    },
+    {
+      "color": "#dee3ec",
+      "position": 100
+    }
   ]
 }
-rrweb-plugin-console-record.js:2447 [2025-12-08T11:22:52.539Z] DEBUG: 🔄 Switching token: none → VafZiMFSxSqB
-rrweb-plugin-console-record.js:2447 [2025-12-08T11:22:52.994Z] DEBUG: ✅ Auto-save completed
-rrweb-plugin-console-record.js:2447 [2025-12-08T11:22:52.994Z] DEBUG: Setting confirmed fields: {
-  "marketCategory": {
-    "value": "Personal Productivity Tools",
-    "confidence": 1,
-    "alternatives": [
-      "Business Productivity Tools",
-      "Work & Productivity Tools",
-      "AI Tools"
-    ]
+logger.ts:84 [2025-12-08T12:30:09.177Z] DEBUG: 🎨 [CustomBackgroundPicker] Updated color scheme: {
+  "primary": "#3B82F6",
+  "secondary": "#dee3ec",
+  "neutral": "#f7f7f8",
+  "divider": "#e0e4ea",
+  "isSecondaryAuto": true,
+  "isNeutralAuto": true,
+  "isDividerAuto": true
+}
+logger.ts:84 [2025-12-08T12:30:09.247Z] DEBUG: 🎨 [CustomBackgroundPicker] Component rendered with props: {
+  "hasColors": false,
+  "hasOnColorsChange": true,
+  "hasOnBackgroundChange": true,
+  "disabled": false
+}
+logger.ts:84 [2025-12-08T12:30:09.248Z] DEBUG: 🎨 [CustomBackgroundPicker] generateBackgroundCSS called: {
+  "mode": "gradient",
+  "custom": {
+    "gradient": {
+      "type": "linear",
+      "angle": 90,
+      "stops": [
+        {
+          "color": "#3B82F6",
+          "position": 0
+        },
+        {
+          "color": "#dee3ec",
+          "position": 100
+        }
+      ]
+    }
   },
-  "marketSubcategory": {
-    "value": "Personal Calendar & Scheduling",
-    "confidence": 0.4868467411395394,
-    "alternatives": [
-      "Individual Task & Goal Management",
-      "Personal Note-Taking & Knowledge Management"
-    ]
-  },
-  "targetAudience": {
-    "value": "hobbyists",
-    "confidence": 0.40381870741771064,
-    "alternatives": [
-      "families",
-      "content-creators",
-      "fitness-enthusiasts"
-    ]
-  },
-  "keyProblem": {
-    "value": "Home cooks struggle to organize and follow recipes from various online sources in a clear and manageable way.",
-    "confidence": 1,
-    "alternatives": []
-  },
-  "startupStage": {
-    "value": "mvp-development",
-    "confidence": 0.8400030903007472,
-    "alternatives": [
-      "mvp-launched",
-      "pre-mvp",
-      "mrr-growth"
-    ]
-  },
-  "landingPageGoals": {
-    "value": "subscribe",
-    "confidence": 0.28317625888283443,
-    "alternatives": [
-      "free-trial",
-      "signup",
-      "early-access"
-    ]
-  },
-  "pricingModel": {
-    "value": "freemium",
-    "confidence": 0.8297536452016154,
-    "alternatives": [
-      "trial-paid",
-      "free",
-      "trial-free"
-    ]
+  "localColors": {
+    "primary": "#3B82F6",
+    "secondary": "#dee3ec",
+    "neutral": "#f7f7f8",
+    "divider": "#e0e4ea",
+    "isSecondaryAuto": true,
+    "isNeutralAuto": true,
+    "isDividerAuto": true
   }
 }
-rrweb-plugin-console-record.js:2447 [2025-12-08T11:22:52.996Z] DEBUG: RightPanel Debug: {
-  "currentCanonicalField": "marketCategory",
-  "currentDisplayField": "Market Category",
-  "hasFieldData": true,
-  "confirmedFieldsKeys": [
-    "marketCategory",
-    "marketSubcategory",
-    "targetAudience",
-    "keyProblem",
-    "startupStage",
-    "landingPageGoals",
-    "pricingModel"
+logger.ts:84 [2025-12-08T12:30:09.248Z] DEBUG: 🎨 [CustomBackgroundPicker] Generated gradient CSS: {
+  "type": "linear",
+  "stops": [
+    {
+      "color": "#3B82F6",
+      "position": 0
+    },
+    {
+      "color": "#dee3ec",
+      "position": 100
+    }
   ],
-  "validatedFieldsKeys": []
+  "gradientStops": "#3B82F6 0%, #dee3ec 100%",
+  "angle": 90,
+  "cssValue": "linear-gradient(90deg, #3B82F6 0%, #dee3ec 100%)"
 }
-rrweb-plugin-console-record.js:2447 [2025-12-08T11:22:52.996Z] DEBUG: RightPanel Debug: {
-  "currentCanonicalField": "marketCategory",
-  "currentDisplayField": "Market Category",
-  "hasFieldData": true,
-  "confirmedFieldsKeys": [
-    "marketCategory",
-    "marketSubcategory",
-    "targetAudience",
-    "keyProblem",
-    "startupStage",
-    "landingPageGoals",
-    "pricingModel"
+logger.ts:84 [2025-12-08T12:30:09.248Z] DEBUG: 🎨 [CustomBackgroundPicker] generateBackgroundCSS called: {
+  "mode": "gradient",
+  "custom": {
+    "gradient": {
+      "type": "linear",
+      "angle": 90,
+      "stops": [
+        {
+          "color": "#3B82F6",
+          "position": 0
+        },
+        {
+          "color": "#dee3ec",
+          "position": 100
+        }
+      ]
+    }
+  },
+  "localColors": {
+    "primary": "#3B82F6",
+    "secondary": "#dee3ec",
+    "neutral": "#f7f7f8",
+    "divider": "#e0e4ea",
+    "isSecondaryAuto": true,
+    "isNeutralAuto": true,
+    "isDividerAuto": true
+  }
+}
+logger.ts:84 [2025-12-08T12:30:09.248Z] DEBUG: 🎨 [CustomBackgroundPicker] Generated gradient CSS: {
+  "type": "linear",
+  "stops": [
+    {
+      "color": "#3B82F6",
+      "position": 0
+    },
+    {
+      "color": "#dee3ec",
+      "position": 100
+    }
   ],
-  "validatedFieldsKeys": []
+  "gradientStops": "#3B82F6 0%, #dee3ec 100%",
+  "angle": 90,
+  "cssValue": "linear-gradient(90deg, #3B82F6 0%, #dee3ec 100%)"
 }
-rrweb-plugin-console-record.js:2447 [2025-12-08T11:22:52.997Z] DEBUG: Confirming field: Market Category → marketCategory = "Personal Productivity Tools"
-rrweb-plugin-console-record.js:2447 [2025-12-08T11:22:52.998Z] DEBUG: RightPanel Debug: {
-  "currentCanonicalField": "marketCategory",
-  "currentDisplayField": "Market Category",
-  "hasFieldData": true,
-  "confirmedFieldsKeys": [
-    "marketCategory",
-    "marketSubcategory",
-    "targetAudience",
-    "keyProblem",
-    "startupStage",
-    "landingPageGoals",
-    "pricingModel"
+logger.ts:84 [2025-12-08T12:30:09.249Z] DEBUG: 🎨 [CustomBackgroundPicker] Component rendered with props: {
+  "hasColors": false,
+  "hasOnColorsChange": true,
+  "hasOnBackgroundChange": true,
+  "disabled": false
+}
+logger.ts:84 [2025-12-08T12:30:09.250Z] DEBUG: 🔄 [CustomBackgroundPicker] useEffect triggered with: {
+  "pickerMode": "gradient",
+  "customBackground": {
+    "gradient": {
+      "type": "linear",
+      "angle": 90,
+      "stops": [
+        {
+          "color": "#3B82F6",
+          "position": 0
+        },
+        {
+          "color": "#dee3ec",
+          "position": 100
+        }
+      ]
+    }
+  },
+  "localColors": {
+    "primary": "#3B82F6",
+    "secondary": "#dee3ec"
+  }
+}
+logger.ts:84 [2025-12-08T12:30:09.607Z] DEBUG: 🎨 [DEBUG] Custom colors changed: {
+  "primary": "#3B82F6",
+  "secondary": "#dee3ec",
+  "neutral": "#f7f7f8",
+  "divider": "#e0e4ea",
+  "isSecondaryAuto": true,
+  "isNeutralAuto": true,
+  "isDividerAuto": true
+}
+logger.ts:84 [2025-12-08T12:30:09.607Z] DEBUG: 🎨 [CustomBackgroundPicker] generateBackgroundCSS called: {
+  "mode": "gradient",
+  "custom": {
+    "gradient": {
+      "type": "linear",
+      "angle": 90,
+      "stops": [
+        {
+          "color": "#3B82F6",
+          "position": 0
+        },
+        {
+          "color": "#dee3ec",
+          "position": 100
+        }
+      ]
+    }
+  },
+  "localColors": {
+    "primary": "#3B82F6",
+    "secondary": "#dee3ec",
+    "neutral": "#f7f7f8",
+    "divider": "#e0e4ea",
+    "isSecondaryAuto": true,
+    "isNeutralAuto": true,
+    "isDividerAuto": true
+  }
+}
+logger.ts:84 [2025-12-08T12:30:09.607Z] DEBUG: 🎨 [CustomBackgroundPicker] Generated gradient CSS: {
+  "type": "linear",
+  "stops": [
+    {
+      "color": "#3B82F6",
+      "position": 0
+    },
+    {
+      "color": "#dee3ec",
+      "position": 100
+    }
   ],
-  "validatedFieldsKeys": [
-    "marketCategory"
-  ]
+  "gradientStops": "#3B82F6 0%, #dee3ec 100%",
+  "angle": 90,
+  "cssValue": "linear-gradient(90deg, #3B82F6 0%, #dee3ec 100%)"
 }
-rrweb-plugin-console-record.js:2447 [2025-12-08T11:22:52.999Z] DEBUG: RightPanel Debug: {
-  "currentCanonicalField": "marketCategory",
-  "currentDisplayField": "Market Category",
-  "hasFieldData": true,
-  "confirmedFieldsKeys": [
-    "marketCategory",
-    "marketSubcategory",
-    "targetAudience",
-    "keyProblem",
-    "startupStage",
-    "landingPageGoals",
-    "pricingModel"
-  ],
-  "validatedFieldsKeys": [
-    "marketCategory"
-  ]
+logger.ts:84 [2025-12-08T12:30:09.608Z] DEBUG: 🎨 [CustomBackgroundPicker] Generated CSS: {
+  "primaryCSS": "linear-gradient(90deg, #3B82F6 0%, #dee3ec 100%)",
+  "baseColor": "blue",
+  "pickerMode": "gradient",
+  "customBackground": {
+    "gradient": {
+      "type": "linear",
+      "angle": 90,
+      "stops": [
+        {
+          "color": "#3B82F6",
+          "position": 0
+        },
+        {
+          "color": "#dee3ec",
+          "position": 100
+        }
+      ]
+    }
+  }
 }
-rrweb-plugin-console-record.js:2447 [2025-12-08T11:22:54.509Z] DEBUG: RightPanel Debug: {
-  "currentCanonicalField": "marketSubcategory",
-  "currentDisplayField": "Market Subcategory",
-  "hasFieldData": true,
-  "confirmedFieldsKeys": [
-    "marketCategory",
-    "marketSubcategory",
-    "targetAudience",
-    "keyProblem",
-    "startupStage",
-    "landingPageGoals",
-    "pricingModel"
-  ],
-  "validatedFieldsKeys": [
-    "marketCategory"
-  ]
+logger.ts:84 [2025-12-08T12:30:09.608Z] DEBUG: 🎨 [CustomBackgroundPicker] Sending background system: {
+  "primary": "linear-gradient(90deg, #3B82F6 0%, #dee3ec 100%)",
+  "secondary": "#dee3ec",
+  "neutral": "#f7f7f8",
+  "divider": "#e0e4ea",
+  "baseColor": "blue",
+  "accentColor": "blue",
+  "accentCSS": "#3B82F6"
 }
-rrweb-plugin-console-record.js:2447 [getOptionsForField] subcategory options: Object
-rrweb-plugin-console-record.js:2447 [2025-12-08T11:22:54.511Z] DEBUG: RightPanel Debug: {
-  "currentCanonicalField": "marketSubcategory",
-  "currentDisplayField": "Market Subcategory",
-  "hasFieldData": true,
-  "confirmedFieldsKeys": [
-    "marketCategory",
-    "marketSubcategory",
-    "targetAudience",
-    "keyProblem",
-    "startupStage",
-    "landingPageGoals",
-    "pricingModel"
-  ],
-  "validatedFieldsKeys": [
-    "marketCategory"
-  ]
+logger.ts:84 [2025-12-08T12:30:09.608Z] DEBUG: 🎨 [CRITICAL DEBUG] Custom background changed: {
+  "background": {
+    "primary": "linear-gradient(90deg, #3B82F6 0%, #dee3ec 100%)",
+    "secondary": "#dee3ec",
+    "neutral": "#f7f7f8",
+    "divider": "#e0e4ea",
+    "baseColor": "blue",
+    "accentColor": "blue",
+    "accentCSS": "#3B82F6"
+  },
+  "primary": "linear-gradient(90deg, #3B82F6 0%, #dee3ec 100%)",
+  "secondary": "#dee3ec",
+  "neutral": "#f7f7f8",
+  "divider": "#e0e4ea",
+  "baseColor": "blue",
+  "accentColor": "blue",
+  "accentCSS": "#3B82F6",
+  "timestamp": "2025-12-08T12:30:09.608Z"
 }
-rrweb-plugin-console-record.js:2447 [getOptionsForField] subcategory options: Object
-rrweb-plugin-console-record.js:2447 [getOptionsForField] subcategory options: Object
-rrweb-plugin-console-record.js:2447 [getOptionsForField] subcategory options: Object
-rrweb-plugin-console-record.js:2447 [getOptionsForField] subcategory options: Object
-rrweb-plugin-console-record.js:2447 [getOptionsForField] subcategory options: Object
-rrweb-plugin-console-record.js:2447 [2025-12-08T11:22:56.881Z] DEBUG: Reopened field "marketCategory" for editing at step 0 (forced manual)
-rrweb-plugin-console-record.js:2447 [2025-12-08T11:22:56.881Z] DEBUG: RightPanel Debug: {
-  "currentCanonicalField": "marketCategory",
-  "currentDisplayField": "Market Category",
-  "hasFieldData": true,
-  "confirmedFieldsKeys": [
-    "marketCategory",
-    "marketSubcategory",
-    "targetAudience",
-    "keyProblem",
-    "startupStage",
-    "landingPageGoals",
-    "pricingModel"
-  ],
-  "validatedFieldsKeys": [
-    "marketCategory"
-  ]
+logger.ts:84 [2025-12-08T12:30:09.608Z] DEBUG: 🎨 [CRITICAL DEBUG] setSelectedBackground called with: {
+  "selectedBackgroundSet": true,
+  "previewBackgroundCleared": true
 }
-rrweb-plugin-console-record.js:2447 [2025-12-08T11:22:56.882Z] DEBUG: RightPanel Debug: {
-  "currentCanonicalField": "marketCategory",
-  "currentDisplayField": "Market Category",
-  "hasFieldData": true,
-  "confirmedFieldsKeys": [
-    "marketCategory",
-    "marketSubcategory",
-    "targetAudience",
-    "keyProblem",
-    "startupStage",
-    "landingPageGoals",
-    "pricingModel"
-  ],
-  "validatedFieldsKeys": [
-    "marketCategory"
-  ]
+logger.ts:84 [2025-12-08T12:30:09.657Z] DEBUG: 🔍 [DEBUG] canApply check: {
+  "hasSelection": true,
+  "hasNoErrors": true,
+  "isNotLoading": true,
+  "hasValidBackground": "linear-gradient(90deg, #3B82F6 0%, #dee3ec 100%)",
+  "selectedPrimary": "linear-gradient(90deg, #3B82F6 0%, #dee3ec 100%)",
+  "result": "linear-gradient(90deg, #3B82F6 0%, #dee3ec 100%)"
 }
-rrweb-plugin-console-record.js:2447 [2025-12-08T11:22:59.775Z] DEBUG: Confirming field: Market Category → marketCategory = "Health & Wellness"
-rrweb-plugin-console-record.js:2447 [2025-12-08T11:22:59.775Z] DEBUG: Market Category changed to "Health & Wellness" - clearing old subcategory from both stores
-rrweb-plugin-console-record.js:2447 [2025-12-08T11:22:59.775Z] DEBUG: Confirming field: Market Category → marketCategory = "Health & Wellness"
-rrweb-plugin-console-record.js:2447 [2025-12-08T11:22:59.776Z] DEBUG: Market Category changed to "Health & Wellness" - clearing old subcategory from both stores
-rrweb-plugin-console-record.js:2447 [2025-12-08T11:22:59.776Z] DEBUG: RightPanel Debug: {
-  "currentCanonicalField": "marketSubcategory",
-  "currentDisplayField": "Market Subcategory",
-  "hasFieldData": false,
-  "confirmedFieldsKeys": [
-    "marketCategory",
-    "targetAudience",
-    "keyProblem",
-    "startupStage",
-    "landingPageGoals",
-    "pricingModel"
-  ],
-  "validatedFieldsKeys": [
-    "marketCategory"
-  ]
+logger.ts:84 [2025-12-08T12:30:09.658Z] DEBUG: 🔍 [DEBUG] canApply check: {
+  "hasSelection": true,
+  "hasNoErrors": true,
+  "isNotLoading": true,
+  "hasValidBackground": "linear-gradient(90deg, #3B82F6 0%, #dee3ec 100%)",
+  "selectedPrimary": "linear-gradient(90deg, #3B82F6 0%, #dee3ec 100%)",
+  "result": "linear-gradient(90deg, #3B82F6 0%, #dee3ec 100%)"
 }
-rrweb-plugin-console-record.js:2447 [getOptionsForField] subcategory options: Object
-rrweb-plugin-console-record.js:2447 [2025-12-08T11:22:59.777Z] DEBUG: RightPanel Debug: {
-  "currentCanonicalField": "marketSubcategory",
-  "currentDisplayField": "Market Subcategory",
-  "hasFieldData": false,
-  "confirmedFieldsKeys": [
-    "marketCategory",
-    "targetAudience",
-    "keyProblem",
-    "startupStage",
-    "landingPageGoals",
-    "pricingModel"
-  ],
-  "validatedFieldsKeys": [
-    "marketCategory"
-  ]
+logger.ts:84 [2025-12-08T12:30:09.658Z] DEBUG: 🎨 [CustomBackgroundPicker] Component rendered with props: {
+  "hasColors": false,
+  "hasOnColorsChange": true,
+  "hasOnBackgroundChange": true,
+  "disabled": false
 }
-rrweb-plugin-console-record.js:2447 [getOptionsForField] subcategory options: Object
-rrweb-plugin-console-record.js:2447 [getOptionsForField] subcategory options: Object
-rrweb-plugin-console-record.js:2447 [getOptionsForField] subcategory options: Object
-rrweb-plugin-console-record.js:2447 [getOptionsForField] subcategory options: Object
-rrweb-plugin-console-record.js:2447 [getOptionsForField] subcategory options: Object
-rrweb-plugin-console-record.js:2447 [getOptionsForField] subcategory options: Object
-rrweb-plugin-console-record.js:2447 [getOptionsForField] subcategory options: Object
-rrweb-plugin-console-record.js:2447 [Fast Refresh] rebuilding
-rrweb-plugin-console-record.js:2447 [Fast Refresh] done in 41ms
-{
-    "category": "Health & Wellness",
-    "hasCategory": true,
-    "isValidCategory": true,
-    "optionsCount": 8
+logger.ts:84 [2025-12-08T12:30:09.658Z] DEBUG: 🎨 [CustomBackgroundPicker] Component rendered with props: {
+  "hasColors": false,
+  "hasOnColorsChange": true,
+  "hasOnBackgroundChange": true,
+  "disabled": false
+}
+logger.ts:84 [2025-12-08T12:30:10.059Z] DEBUG: 🎨 [CustomBackgroundPicker] Component rendered with props: {
+  "hasColors": false,
+  "hasOnColorsChange": true,
+  "hasOnBackgroundChange": true,
+  "disabled": false
+}
+logger.ts:84 [2025-12-08T12:30:10.059Z] DEBUG: 🎨 [CustomBackgroundPicker] Component rendered with props: {
+  "hasColors": false,
+  "hasOnColorsChange": true,
+  "hasOnBackgroundChange": true,
+  "disabled": false
 }
