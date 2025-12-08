@@ -24,6 +24,18 @@ export function getOptionsForField(displayFieldName: string): readonly string[] 
     case "marketSubcategory": {
       // Look for the category using canonical name (since that's how it's stored)
       const category = validatedFields.marketCategory;
+
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[getOptionsForField] subcategory options:', {
+          category,
+          hasCategory: !!category,
+          isValidCategory: category && category in marketSubcategories,
+          optionsCount: category && category in marketSubcategories
+            ? marketSubcategories[category as ValidCategory].length
+            : 0
+        });
+      }
+
       if (category && category in marketSubcategories) {
         return marketSubcategories[category as ValidCategory];
       }

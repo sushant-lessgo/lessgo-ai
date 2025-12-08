@@ -106,36 +106,30 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
         [canonicalField]: value, // ✅ Add to validated fields with canonical name
       };
 
-      // ✅ BUG FIX: Handle field dependencies - invalidate dependent fields (only if not skipping)
+      // ✅ CRITICAL FIX: Also clear from confirmedFields, not just validatedFields
+      const newConfirmedFields = { ...state.confirmedFields };
       let newForceManualFields = [...state.forceManualFields];
-      let shouldAddPendingRevalidation = false;
-      
+
       if (!skipDependencyValidation && canonicalField === 'marketCategory') {
-        // Market Category changed - mark Market Subcategory as needing update instead of deleting
-        // Keep the subcategory visible but mark it as pending revalidation
+        // Market Category changed - CLEAR old subcategory from BOTH stores
+        if (newValidatedFields['marketSubcategory']) {
+          delete newValidatedFields['marketSubcategory'];
+        }
+        if (newConfirmedFields['marketSubcategory']) {
+          delete newConfirmedFields['marketSubcategory']; // Removes old AI guess, confidence, alternatives
+        }
+        logger.debug(() => `Market Category changed to "${value}" - clearing old subcategory from both stores`);
+
+        // Force manual confirmation for subcategory
         if (!newForceManualFields.includes('marketSubcategory')) {
           newForceManualFields.push('marketSubcategory');
-        }
-        logger.debug(() => `Market Category changed to "${value}" - Market Subcategory needs revalidation`);
-        
-        // Mark subcategory as pending revalidation instead of deleting
-        if (newValidatedFields['marketSubcategory']) {
-          // Keep existing subcategory but mark as needing revalidation
-          logger.debug('Keeping existing subcategory visible for revalidation');
-          shouldAddPendingRevalidation = true;
         }
       }
 
       return {
         validatedFields: newValidatedFields,
+        confirmedFields: newConfirmedFields, // ✅ Update confirmedFields too
         forceManualFields: newForceManualFields,
-        // Add subcategory to pending revalidation if market category changed and dependency validation is enabled
-        ...(shouldAddPendingRevalidation && {
-          pendingRevalidationFields: [
-            ...state.pendingRevalidationFields.filter(f => f !== 'marketSubcategory'),
-            'marketSubcategory'
-          ]
-        })
       };
     });
   },

@@ -49,6 +49,9 @@ export default function RightPanel() {
     setAssetAvailability, // Sprint 7: Set asset availability
   } = useOnboardingStore();
 
+  // Subscribe to category changes to trigger re-render when it updates
+  const marketCategory = useOnboardingStore((s) => s.validatedFields.marketCategory);
+
   const params = useParams();
   const router = useRouter();
   const tokenId = params?.token as string;
@@ -396,7 +399,7 @@ export default function RightPanel() {
                       if (isForceManual || confidence < 0.85) {
                         return (
                           <FieldConfirmationCard
-                            key={`${stepIndex}-${currentCanonicalField}-${isForceManual}`}
+                            key={`${stepIndex}-${currentCanonicalField}-${isForceManual}-${marketCategory || ''}`}
                             fieldName={currentDisplayField}
                             aiGuess={aiGuess}
                             confidence={confidence}

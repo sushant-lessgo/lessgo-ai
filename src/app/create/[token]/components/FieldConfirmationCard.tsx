@@ -54,16 +54,24 @@ export default function FieldConfirmationCard({
     // ✅ BUG FIX 1: Check if field is force manual (user clicked edit) - go directly to edit mode
     const canonicalField = getCanonicalFieldForDisplayName(fieldName);
     const isForceManual = canonicalField ? isFieldForceManual(canonicalField) : false;
-    
+
     if (isForceManual) {
+      const currentValidatedValue = canonicalField ? validatedFields[canonicalField] : null;
+
+      // ✅ NEW: If force manual but no confirmed field data (cleared by dependency), show all options
+      if (!aiGuess && confidence === 0 && alternatives.length === 0) {
+        setMode("show-all");
+        setSelected(currentValidatedValue || "");
+        return;
+      }
+
       // ✅ BUG FIX 2: User explicitly clicked edit - use current validated value if available, otherwise use AI guess
       setMode("edit");
-      const currentValidatedValue = canonicalField ? validatedFields[canonicalField] : null;
       // For force manual fields, start with the previously validated value if it exists
       setSelected(currentValidatedValue || aiGuess || "");
       return;
     }
-    
+
     // Original logic for non-force-manual fields
     if (!aiGuess || confidence < 0.7) {
       // Low confidence - check if we have alternatives
@@ -326,12 +334,15 @@ export default function FieldConfirmationCard({
         <>
           <div className="flex items-center justify-between mb-3">
             <p className="text-sm text-gray-500">All available options:</p>
-            <button
-              onClick={() => setMode("edit")}
-              className="text-sm text-gray-400 hover:text-gray-600"
-            >
-              ← Back to suggestions
-            </button>
+            {/* Only show back button if there are suggestions to go back to */}
+            {(aiGuess || alternatives.length > 0) && (
+              <button
+                onClick={() => setMode("edit")}
+                className="text-sm text-gray-400 hover:text-gray-600"
+              >
+                ← Back to suggestions
+              </button>
+            )}
           </div>
 
           {isGroupedField && groupedOptions ? (
