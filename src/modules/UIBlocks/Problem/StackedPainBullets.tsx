@@ -8,6 +8,8 @@ import {
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { getRandomIconFromCategory } from '@/utils/iconMapping';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 
 // Pain point structure
@@ -67,10 +69,10 @@ const getPainIcon = (index: number, blockContent: StackedPainBulletsContent) => 
 };
 
 // Individual Pain Point Item
-const PainPointItem = ({ 
-  painPoint, 
-  index, 
-  mode, 
+const PainPointItem = ({
+  painPoint,
+  index,
+  mode,
   sectionId,
   colorTokens,
   backgroundType,
@@ -80,7 +82,8 @@ const PainPointItem = ({
   onPointEdit,
   onDescriptionEdit,
   onRemove,
-  canRemove
+  canRemove,
+  painColors
 }: {
   painPoint: PainPoint;
   index: number;
@@ -95,12 +98,23 @@ const PainPointItem = ({
   onDescriptionEdit: (index: number, value: string) => void;
   onRemove: (index: number) => void;
   canRemove: boolean;
+  painColors: {
+    border: string;
+    borderHover: string;
+    iconBg: string;
+    iconBgHover: string;
+    iconText: string;
+    dotColor: string;
+    conclusionBg: string;
+    conclusionBorder: string;
+    conclusionText: string;
+  };
 }) => {
   return (
-    <div className="group flex items-start space-x-4 p-6 bg-white rounded-lg border border-red-200 hover:border-red-300 hover:shadow-md transition-all duration-300">
+    <div className={`group flex items-start space-x-4 p-6 bg-white rounded-lg border ${painColors.border} ${painColors.borderHover} hover:shadow-md transition-all duration-300`}>
       
       {/* Pain Icon */}
-      <div className="flex-shrink-0 w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center text-red-600 group-hover:bg-red-200 transition-colors duration-300 group/icon-edit relative">
+      <div className={`flex-shrink-0 w-12 h-12 ${painColors.iconBg} rounded-lg flex items-center justify-center ${painColors.iconText} ${painColors.iconBgHover} transition-colors duration-300 group/icon-edit relative`}>
         <IconEditableText
           mode={mode}
           value={getPainIcon(index, blockContent)}
@@ -176,7 +190,7 @@ const PainPointItem = ({
       )}
       
       {/* Emphasis Indicator */}
-      <div className="flex-shrink-0 w-2 h-2 bg-red-400 rounded-full group-hover:bg-red-500 transition-colors duration-300"></div>
+      <div className={`flex-shrink-0 w-2 h-2 ${painColors.dotColor} rounded-full group-hover:opacity-80 transition-colors duration-300`}></div>
     </div>
   );
 };
@@ -197,6 +211,54 @@ export default function StackedPainBullets(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Detect theme: manual override > auto-detection > neutral fallback
+  const theme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Pain colors by theme
+  const getPainColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        border: 'border-orange-200',
+        borderHover: 'hover:border-orange-300',
+        iconBg: 'bg-orange-100',
+        iconBgHover: 'group-hover:bg-orange-200',
+        iconText: 'text-orange-600',
+        conclusionBg: 'bg-orange-50',
+        conclusionBorder: 'border-orange-200',
+        conclusionText: 'text-orange-800',
+        dotColor: 'bg-orange-400'
+      },
+      cool: {
+        border: 'border-blue-200',
+        borderHover: 'hover:border-blue-300',
+        iconBg: 'bg-blue-100',
+        iconBgHover: 'group-hover:bg-blue-200',
+        iconText: 'text-blue-600',
+        conclusionBg: 'bg-blue-50',
+        conclusionBorder: 'border-blue-200',
+        conclusionText: 'text-blue-800',
+        dotColor: 'bg-blue-400'
+      },
+      neutral: {
+        border: 'border-amber-200',
+        borderHover: 'hover:border-amber-300',
+        iconBg: 'bg-amber-100',
+        iconBgHover: 'group-hover:bg-amber-200',
+        iconText: 'text-amber-600',
+        conclusionBg: 'bg-amber-50',
+        conclusionBorder: 'border-amber-200',
+        conclusionText: 'text-amber-800',
+        dotColor: 'bg-amber-400'
+      }
+    }[theme];
+  };
+
+  const painColors = getPainColors(theme);
 
   // Parse pain point data
   const painPoints = parsePainData(blockContent.pain_points, blockContent.pain_descriptions);
@@ -330,6 +392,7 @@ export default function StackedPainBullets(props: LayoutComponentProps) {
               onDescriptionEdit={handleDescriptionEdit}
               onRemove={removePainPoint}
               canRemove={painPoints.length > 1}
+              painColors={painColors}
             />
           ))}
         </div>
@@ -339,7 +402,7 @@ export default function StackedPainBullets(props: LayoutComponentProps) {
           <div className="mt-6 flex justify-center">
             <button
               onClick={addPainPoint}
-              className="flex items-center space-x-2 px-4 py-2 text-sm text-red-600 hover:text-red-800 border border-red-200 hover:border-red-300 rounded-lg hover:bg-red-50 transition-all duration-200"
+              className={`flex items-center space-x-2 px-4 py-2 text-sm ${painColors.iconText} hover:opacity-80 border ${painColors.border} ${painColors.borderHover} rounded-lg hover:${painColors.conclusionBg} transition-all duration-200`}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -351,8 +414,8 @@ export default function StackedPainBullets(props: LayoutComponentProps) {
 
         {/* Emotional Conclusion */}
         <div className="mt-12 text-center">
-          <div className="inline-flex items-center px-6 py-3 bg-red-50 border border-red-200 rounded-full text-red-800">
-            <svg className="w-5 h-5 mr-2 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className={`inline-flex items-center px-6 py-3 ${painColors.conclusionBg} border ${painColors.conclusionBorder} rounded-full ${painColors.conclusionText}`}>
+            <svg className={`w-5 h-5 mr-2 ${painColors.iconText}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
             <EditableAdaptiveText

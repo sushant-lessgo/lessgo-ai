@@ -8,6 +8,8 @@ import {
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { getIcon } from '@/lib/getIcon';
+import { shadows, cardEnhancements } from '@/modules/Design/designTokens';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface OutcomeIconsProps extends LayoutComponentProps {}
 
@@ -121,7 +123,8 @@ const OutcomeCard = ({
   onTitleEdit,
   onDescriptionEdit,
   onRemoveOutcome,
-  canRemove = true
+  canRemove = true,
+  theme = 'neutral'
 }: {
   outcome: OutcomeIcon;
   index: number;
@@ -132,15 +135,16 @@ const OutcomeCard = ({
   onDescriptionEdit: (index: number, value: string) => void;
   onRemoveOutcome?: (index: number) => void;
   canRemove?: boolean;
+  theme?: 'warm' | 'cool' | 'neutral';
 }) => {
   const { getTextStyle } = useTypography();
 
   return (
-    <div className={`group/outcome-card-${index} relative text-center p-6 bg-white rounded-2xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300`}>
+    <div className={`group/outcome-card-${index} relative text-center p-6 bg-white rounded-2xl border border-gray-200 ${shadows.card[theme]} ${shadows.cardHover[theme]} ${cardEnhancements.hoverLift} ${cardEnhancements.transition} hover:border-${theme === 'warm' ? 'orange' : theme === 'cool' ? 'blue' : 'slate'}-300`}>
 
       {/* Icon */}
       <div className="mb-6">
-        <div className="w-16 h-16 bg-blue-50 rounded-2xl border border-blue-200 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300">
+        <div className={`w-16 h-16 ${theme === 'warm' ? 'bg-orange-50 border-orange-200' : theme === 'cool' ? 'bg-blue-50 border-blue-200' : 'bg-slate-50 border-slate-200'} rounded-2xl border flex items-center justify-center mx-auto group-hover:scale-110 group-hover:${theme === 'warm' ? 'bg-orange-100' : theme === 'cool' ? 'bg-blue-100' : 'bg-slate-100'} transition-all duration-300`}>
           <IconEditableText
             mode={mode}
             value={outcome.icon}
@@ -230,6 +234,25 @@ export default function OutcomeIcons(props: OutcomeIconsProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Detect theme: manual override > auto-detection > neutral fallback
+  const theme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Debug theme detection
+  React.useEffect(() => {
+    console.log('🎨 OutcomeIcons theme detection:', {
+      sectionId,
+      hasManualOverride: !!props.manualThemeOverride,
+      manualTheme: props.manualThemeOverride,
+      hasUserContext: !!props.userContext,
+      userContext: props.userContext,
+      finalTheme: theme
+    });
+  }, [theme, props.manualThemeOverride, props.userContext, sectionId]);
 
   // Parse outcome data
   const outcomes = parseOutcomeData(
@@ -336,6 +359,7 @@ export default function OutcomeIcons(props: OutcomeIconsProps) {
               onDescriptionEdit={handleDescriptionEdit}
               onRemoveOutcome={handleRemoveOutcome}
               canRemove={outcomes.length > 1}
+              theme={theme}
             />
           ))}
         </div>

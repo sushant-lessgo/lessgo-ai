@@ -10,6 +10,8 @@ import { validateWCAGContrast } from '@/utils/improvedTextColors';
 import type { ThemeColors } from '@/types/storeTypes';
 
 import { logger } from '@/lib/logger';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+
 interface ColorSystemModalMVPProps {
   isOpen: boolean;
   onClose: () => void;
@@ -31,7 +33,7 @@ export interface ValidationStatus {
 }
 
 export function ColorSystemModalMVP({ isOpen, onClose, tokenId }: ColorSystemModalMVPProps) {
-  const { theme, updateTheme, getColorTokens } = useEditStore();
+  const { theme, updateTheme, getColorTokens, meta } = useEditStore();
   const [activeTab, setActiveTab] = useState<'accent'>('accent');
   const [selectedColor, setSelectedColor] = useState<ColorOption | null>(null);
   const [previewColor, setPreviewColor] = useState<ColorOption | null>(null);
@@ -66,6 +68,25 @@ export function ColorSystemModalMVP({ isOpen, onClose, tokenId }: ColorSystemMod
     const primary = theme?.colors?.sectionBackgrounds?.primary || 'bg-white';
     return primary;
   }, [theme?.colors?.sectionBackgrounds?.primary]);
+
+  // Get auto-detected theme from taxonomy data
+  const autoDetectedTheme = useMemo(() => {
+    const validatedFields = meta?.validatedFields;
+    if (!validatedFields) return null;
+
+    return selectUIBlockTheme({
+      marketCategory: validatedFields.marketCategory,
+      targetAudience: validatedFields.targetAudience,
+      landingPageGoals: validatedFields.landingPageGoals,
+      startupStage: validatedFields.startupStage,
+      toneProfile: validatedFields.toneProfile,
+      awarenessLevel: validatedFields.awarenessLevel,
+      pricingModel: validatedFields.pricingModel,
+    });
+  }, [meta?.validatedFields]);
+
+  // Current theme (manual override or auto-detected)
+  const currentTheme = theme?.uiBlockTheme || autoDetectedTheme || 'neutral';
 
   // Fix the hex color extraction from CSS class if needed
   const getHexFromTailwind = (tailwindClass: string): string => {
@@ -303,6 +324,36 @@ export function ColorSystemModalMVP({ isOpen, onClose, tokenId }: ColorSystemMod
     onClose();
   };
 
+  // Handle theme selection
+  const handleThemeSelect = (newTheme: 'warm' | 'cool' | 'neutral') => {
+    updateTheme({
+      ...theme,
+      uiBlockTheme: newTheme
+    });
+
+    // Show success message
+    const message = document.createElement('div');
+    message.className = 'fixed top-4 right-4 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg shadow-lg z-50';
+    message.textContent = `Theme updated to ${newTheme}!`;
+    document.body.appendChild(message);
+    setTimeout(() => message.remove(), 3000);
+  };
+
+  // Handle reset to auto
+  const handleResetTheme = () => {
+    updateTheme({
+      ...theme,
+      uiBlockTheme: undefined
+    });
+
+    // Show success message
+    const message = document.createElement('div');
+    message.className = 'fixed top-4 right-4 bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg shadow-lg z-50';
+    message.textContent = `Theme reset to auto (${autoDetectedTheme})`;
+    document.body.appendChild(message);
+    setTimeout(() => message.remove(), 3000);
+  };
+
   return (
     <BaseModal
       isOpen={isOpen}
@@ -403,6 +454,91 @@ export function ColorSystemModalMVP({ isOpen, onClose, tokenId }: ColorSystemMod
               />
             )}
           </>
+
+        {/* UIBlock Theme Selector */}
+        <div className="border-t pt-6">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h3 className="text-sm font-medium text-gray-700">UIBlock Theme</h3>
+              <p className="text-xs text-gray-500 mt-1">Visual polish for icons, shadows, and hover effects</p>
+            </div>
+            {theme?.uiBlockTheme && (
+              <button
+                onClick={handleResetTheme}
+                className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+              >
+                Reset to Auto
+              </button>
+            )}
+          </div>
+
+          {/* Theme Buttons */}
+          <div className="grid grid-cols-3 gap-3">
+            {/* Warm Theme */}
+            <button
+              onClick={() => handleThemeSelect('warm')}
+              className={`relative p-4 rounded-lg border-2 transition-all ${
+                currentTheme === 'warm'
+                  ? 'border-orange-500 bg-orange-50'
+                  : 'border-gray-200 hover:border-gray-300 bg-white'
+              }`}
+            >
+              <div className="text-2xl mb-2">🔥</div>
+              <div className="text-sm font-medium text-gray-900">Warm</div>
+              <div className="text-xs text-gray-500 mt-1">Energetic, inviting</div>
+              {currentTheme === 'warm' && !theme?.uiBlockTheme && autoDetectedTheme === 'warm' && (
+                <div className="absolute top-2 right-2 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded">
+                  Auto
+                </div>
+              )}
+            </button>
+
+            {/* Cool Theme */}
+            <button
+              onClick={() => handleThemeSelect('cool')}
+              className={`relative p-4 rounded-lg border-2 transition-all ${
+                currentTheme === 'cool'
+                  ? 'border-blue-500 bg-blue-50'
+                  : 'border-gray-200 hover:border-gray-300 bg-white'
+              }`}
+            >
+              <div className="text-2xl mb-2">❄️</div>
+              <div className="text-sm font-medium text-gray-900">Cool</div>
+              <div className="text-xs text-gray-500 mt-1">Professional, calm</div>
+              {currentTheme === 'cool' && !theme?.uiBlockTheme && autoDetectedTheme === 'cool' && (
+                <div className="absolute top-2 right-2 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded">
+                  Auto
+                </div>
+              )}
+            </button>
+
+            {/* Neutral Theme */}
+            <button
+              onClick={() => handleThemeSelect('neutral')}
+              className={`relative p-4 rounded-lg border-2 transition-all ${
+                currentTheme === 'neutral'
+                  ? 'border-gray-500 bg-gray-50'
+                  : 'border-gray-200 hover:border-gray-300 bg-white'
+              }`}
+            >
+              <div className="text-2xl mb-2">⚖️</div>
+              <div className="text-sm font-medium text-gray-900">Neutral</div>
+              <div className="text-xs text-gray-500 mt-1">Balanced, subtle</div>
+              {currentTheme === 'neutral' && !theme?.uiBlockTheme && autoDetectedTheme === 'neutral' && (
+                <div className="absolute top-2 right-2 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded">
+                  Auto
+                </div>
+              )}
+            </button>
+          </div>
+
+          {/* Show what's auto-detected */}
+          {autoDetectedTheme && !theme?.uiBlockTheme && (
+            <div className="mt-3 text-xs text-gray-500">
+              Auto-detected: <span className="font-medium">{autoDetectedTheme}</span> based on your market category
+            </div>
+          )}
+        </div>
 
         {/* Actions */}
         <div className="flex justify-end space-x-3 pt-4 border-t">

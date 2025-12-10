@@ -13,6 +13,9 @@ import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
 import { getRandomIconFromCategory } from '@/utils/iconMapping';
 import { getIcon } from '@/lib/getIcon';
+import { shadows, cardEnhancements } from '@/modules/Design/designTokens';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 // Content interface for type safety
 interface IconGridContent {
@@ -147,7 +150,8 @@ const FeatureCard = React.memo(({
   sectionId,
   backgroundType,
   sectionBackground,
-  canRemove = true
+  canRemove = true,
+  theme = 'neutral'
 }: {
   item: FeatureItem;
   mode: 'edit' | 'preview';
@@ -162,6 +166,7 @@ const FeatureCard = React.memo(({
   backgroundType: string;
   sectionBackground: string;
   canRemove?: boolean;
+  theme?: UIBlockTheme;
 }) => {
   
   // ✅ ENHANCED: Get card background based on section background
@@ -171,10 +176,10 @@ const FeatureCard = React.memo(({
     
   const cardHover = backgroundType === 'primary'
     ? 'hover:bg-white/20 hover:border-white/30'
-    : 'hover:border-blue-300 hover:shadow-lg';
-  
+    : `hover:border-${theme === 'warm' ? 'orange' : theme === 'cool' ? 'blue' : 'slate'}-300`;
+
   return (
-    <div className={`group/feature-${item.index} relative p-6 rounded-xl border ${cardBackground} ${cardHover} transition-all duration-300`}>
+    <div className={`group/feature-${item.index} relative p-6 rounded-xl border ${cardBackground} ${cardHover} ${shadows.card[theme]} ${shadows.cardHover[theme]} ${cardEnhancements.hoverLift} ${cardEnhancements.transition}`}>
       {/* Delete button - only show in edit mode and if can remove */}
       {mode !== 'preview' && onRemoveFeature && canRemove && (
         <button
@@ -193,7 +198,7 @@ const FeatureCard = React.memo(({
 
       {/* ✅ ENHANCED: Fully Editable Icon */}
       <div className="mb-4">
-        <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg ${colorTokens.ctaBg || 'bg-blue-600'} bg-opacity-10 group-hover:bg-opacity-20 transition-all duration-300`}>
+        <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg ${theme === 'warm' ? 'bg-orange-500' : theme === 'cool' ? 'bg-blue-500' : 'bg-slate-500'} bg-opacity-10 group-hover:bg-opacity-20 group-hover:scale-110 transition-all duration-300`}>
           <IconEditableText
             mode={mode}
             value={item.icon || '⭐'}
@@ -265,7 +270,25 @@ export default function IconGrid(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
-  
+
+  // Detect theme: manual override > auto-detection > neutral fallback
+  const theme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Debug theme detection
+  React.useEffect(() => {
+    console.log('🎨 IconGrid theme detection:', {
+      sectionId,
+      hasManualOverride: !!props.manualThemeOverride,
+      manualTheme: props.manualThemeOverride,
+      hasUserContext: !!props.userContext,
+      userContext: props.userContext,
+      finalTheme: theme
+    });
+  }, [theme, props.manualThemeOverride, props.userContext, sectionId]);
 
   // Parse feature data
   const featureItems = parseFeatureData(blockContent.feature_titles, blockContent.feature_descriptions, blockContent);
@@ -431,6 +454,7 @@ export default function IconGrid(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               sectionBackground={sectionBackground}
               canRemove={featureItems.length > 1}
+              theme={theme}
             />
           ))}
         </div>

@@ -178,6 +178,8 @@ export type Theme = {
     muted?: string;
   };
   textContrastLevel?: number; // 0-100, default 50
+  // NEW: UIBlock theme override (warm/cool/neutral)
+  uiBlockTheme?: 'warm' | 'cool' | 'neutral';
 };
 
 // Theme colors subset type for color modal
@@ -321,6 +323,16 @@ export interface LayoutComponentProps {
   className?: string;
   backgroundType?: 'primary' | 'secondary' | 'neutral' | 'divider' | 'custom';
   sectionBackgroundCSS?: string; // ✅ NEW: CSS class calculated in renderer
+  userContext?: {  // ✅ NEW: Full taxonomy context for theme selection
+    marketCategory: import('@/modules/inference/taxonomy').MarketCategory;
+    targetAudience: import('@/modules/inference/taxonomy').TargetAudience;
+    landingPageGoals: import('@/modules/inference/taxonomy').LandingGoalType;
+    startupStage: import('@/modules/inference/taxonomy').StartupStage;
+    toneProfile: import('@/modules/inference/taxonomy').ToneProfile;
+    awarenessLevel: import('@/modules/inference/taxonomy').AwarenessLevel;
+    pricingModel: import('@/modules/inference/taxonomy').PricingModel;
+  };
+  manualThemeOverride?: 'warm' | 'cool' | 'neutral'; // ✅ NEW: Manual theme override from store
 }
 
 /**

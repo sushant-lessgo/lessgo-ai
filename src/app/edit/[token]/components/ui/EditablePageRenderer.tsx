@@ -255,7 +255,45 @@ const EnhancedLayoutWrapper: React.FC<{
   
   // Note: Universal element functions removed as "Add Element" feature is disabled
   // Regular AI-generated elements are handled by their native UIBlock components
-  
+
+  // ✅ NEW: Extract taxonomy data from store for theme detection
+  const meta = useEditStore(state => state.meta);
+  const theme = useEditStore(state => state.theme);
+  const onboardingData = meta?.onboardingData;
+  const validatedFields = onboardingData?.validatedFields;
+
+  // Build userContext from taxonomy data if available
+  const userContext = React.useMemo(() => {
+    if (!validatedFields) {
+      console.log('🔍 EditablePageRenderer: No validatedFields found', {
+        sectionId,
+        hasMeta: !!meta,
+        hasOnboardingData: !!onboardingData,
+        metaKeys: meta ? Object.keys(meta) : [],
+        onboardingDataKeys: onboardingData ? Object.keys(onboardingData) : []
+      });
+      return undefined;
+    }
+
+    const context = {
+      marketCategory: validatedFields.marketCategory,
+      targetAudience: validatedFields.targetAudience,
+      landingPageGoals: validatedFields.landingPageGoals,
+      startupStage: validatedFields.startupStage,
+      toneProfile: validatedFields.toneProfile,
+      awarenessLevel: validatedFields.awarenessLevel,
+      pricingModel: validatedFields.pricingModel,
+    };
+
+    console.log('✅ EditablePageRenderer: Built userContext', {
+      sectionId,
+      context,
+      validatedFieldsKeys: Object.keys(validatedFields)
+    });
+
+    return context;
+  }, [validatedFields, sectionId, meta, onboardingData]);
+
   // The layout component should get its data from the store via useLayoutComponent
   // We only need to pass the essential props
   const originalProps = React.useMemo(() => {
@@ -263,8 +301,10 @@ const EnhancedLayoutWrapper: React.FC<{
       sectionId,
       backgroundType,
       className: '',
+      userContext,  // ✅ NEW: Pass taxonomy context for theme detection
+      manualThemeOverride: theme?.uiBlockTheme,  // ✅ NEW: Pass manual theme override
     };
-  }, [sectionId, backgroundType]);
+  }, [sectionId, backgroundType, userContext, theme?.uiBlockTheme]);
 
   // Debug what props we're passing to the layout component
   //   LayoutComponent: LayoutComponent.name,
