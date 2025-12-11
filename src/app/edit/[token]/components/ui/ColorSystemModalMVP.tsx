@@ -34,6 +34,17 @@ export interface ValidationStatus {
 
 export function ColorSystemModalMVP({ isOpen, onClose, tokenId }: ColorSystemModalMVPProps) {
   const { theme, updateTheme, getColorTokens, meta } = useEditStore();
+
+  // Debug: Verify what updateTheme actually is
+  React.useEffect(() => {
+    console.log('🔍 ColorSystemModalMVP updateTheme check:', {
+      updateThemeType: typeof updateTheme,
+      updateThemeDefined: !!updateTheme,
+      updateThemeName: updateTheme?.name,
+      themeUiBlock: theme?.uiBlockTheme
+    });
+  }, [updateTheme, theme?.uiBlockTheme]);
+
   const [activeTab, setActiveTab] = useState<'accent'>('accent');
   const [selectedColor, setSelectedColor] = useState<ColorOption | null>(null);
   const [previewColor, setPreviewColor] = useState<ColorOption | null>(null);
@@ -267,29 +278,28 @@ export function ColorSystemModalMVP({ isOpen, onClose, tokenId }: ColorSystemMod
       }
     });
 
-    // Update the theme with proper structure
-    const updatedTheme = {
-      ...theme,
-      colors: {
-        ...theme?.colors,
-        accentColor: selectedColor.value,
-        accentCSS: selectedColor.tailwindClass,
-      }
+    // Update the theme colors (updateTheme handles the merge)
+    const updatedColors = {
+      ...theme?.colors,
+      accentColor: selectedColor.value,
+      accentCSS: selectedColor.tailwindClass,
     };
-    
+
     logger.debug('🎨 [EDIT-DEBUG] Applying accent color update:', {
       selectedColor,
-      updatedTheme: updatedTheme.colors,
+      updatedColors: updatedColors,
       beforeUpdate: theme?.colors,
       backgroundsPreserved: {
-        primary: updatedTheme.colors.sectionBackgrounds?.primary,
-        secondary: updatedTheme.colors.sectionBackgrounds?.secondary,
-        neutral: updatedTheme.colors.sectionBackgrounds?.neutral,
-        divider: updatedTheme.colors.sectionBackgrounds?.divider
+        primary: updatedColors.sectionBackgrounds?.primary,
+        secondary: updatedColors.sectionBackgrounds?.secondary,
+        neutral: updatedColors.sectionBackgrounds?.neutral,
+        divider: updatedColors.sectionBackgrounds?.divider
       }
     });
-    
-    updateTheme(updatedTheme);
+
+    updateTheme({
+      colors: updatedColors
+    });
     
     // Log color tokens after update
     setTimeout(() => {
@@ -326,10 +336,13 @@ export function ColorSystemModalMVP({ isOpen, onClose, tokenId }: ColorSystemMod
 
   // Handle theme selection
   const handleThemeSelect = (newTheme: 'warm' | 'cool' | 'neutral') => {
+    console.log('🔧 handleThemeSelect called:', { newTheme, currentTheme: theme?.uiBlockTheme });
+
     updateTheme({
-      ...theme,
       uiBlockTheme: newTheme
     });
+
+    console.log('✅ updateTheme called with:', { uiBlockTheme: newTheme });
 
     // Show success message
     const message = document.createElement('div');
@@ -341,8 +354,9 @@ export function ColorSystemModalMVP({ isOpen, onClose, tokenId }: ColorSystemMod
 
   // Handle reset to auto
   const handleResetTheme = () => {
+    console.log('🔧 handleResetTheme called, clearing manual override');
+
     updateTheme({
-      ...theme,
       uiBlockTheme: undefined
     });
 

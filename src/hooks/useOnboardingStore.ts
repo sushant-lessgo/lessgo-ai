@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { devtools } from "zustand/middleware";
 import type {
   InputVariables,
   HiddenInferredFields,
@@ -61,7 +62,9 @@ const CANONICAL_FIELD_ORDER: readonly CanonicalFieldName[] = [
   'pricingModel'
 ] as const;
 
-export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
+export const useOnboardingStore = create<OnboardingStore>()(
+  devtools(
+    (set, get) => ({
   oneLiner: "",
   confirmedFields: {}, // ✅ Type-safe: Partial<Record<CanonicalFieldName, ConfirmedFieldData>>
   validatedFields: {}, // ✅ Type-safe: Partial<InputVariables>
@@ -225,7 +228,10 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
       pendingRevalidationFields: [], // ✅ Reset pending revalidation fields
       assetAvailability: null, // Sprint 7: Reset asset availability
     }),
-}));
+    }),
+    { name: 'OnboardingStore' }
+  )
+);
 
 // ✅ EXPORT: Helper functions for type-safe field operations
 export const getCanonicalFieldOrder = (): readonly CanonicalFieldName[] => CANONICAL_FIELD_ORDER;

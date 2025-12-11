@@ -1,4628 +1,1867 @@
-logger.ts:84 [2025-12-08T17:05:46.645Z] DEBUG: 🎯 AdvancedActionsMenu rendered with props: {
-  "actions": 2,
-  "actionDetails": [
-    {
-      "id": "background-settings",
-      "label": "Background Settings",
-      "icon": "palette"
-    },
-    {
-      "id": "regenerate-section",
-      "label": "Regenerate Content",
-      "icon": "refresh",
-      "disabled": false
-    }
-  ],
-  "hasTriggerElement": true,
-  "toolbarType": "section",
-  "isVisible": true
-}
-logger.ts:84 [2025-12-08T17:05:46.646Z] DEBUG: 🎯 useAdvancedActionsMenu returning: {
-  "position": {
-    "x": 0,
-    "y": 0
-  },
-  "groupedActionsLength": 0,
-  "groupedActions": []
-}
-logger.ts:84 [2025-12-08T17:05:46.646Z] DEBUG: 🎯 AdvancedActionsMenu received from hook: {
-  "groupedActionsLength": 0,
-  "groupedActions": []
-}
-logger.ts:84 [2025-12-08T17:05:46.646Z] DEBUG: 🎯 AdvancedActionsMenu rendering menu with: {
-  "position": {
-    "x": 0,
-    "y": 0
-  },
-  "groupedActionsCount": 0,
-  "groupedActionsDetails": []
-}
-logger.ts:84 [2025-12-08T17:05:46.647Z] DEBUG: 🎯 AdvancedActionsMenu rendered with props: {
-  "actions": 2,
-  "actionDetails": [
-    {
-      "id": "background-settings",
-      "label": "Background Settings",
-      "icon": "palette"
-    },
-    {
-      "id": "regenerate-section",
-      "label": "Regenerate Content",
-      "icon": "refresh",
-      "disabled": false
-    }
-  ],
-  "hasTriggerElement": true,
-  "toolbarType": "section",
-  "isVisible": true
-}
-logger.ts:84 [2025-12-08T17:05:46.647Z] DEBUG: 🎯 useAdvancedActionsMenu returning: {
-  "position": {
-    "x": 0,
-    "y": 0
-  },
-  "groupedActionsLength": 0,
-  "groupedActions": []
-}
-logger.ts:84 [2025-12-08T17:05:46.647Z] DEBUG: 🎯 AdvancedActionsMenu received from hook: {
-  "groupedActionsLength": 0,
-  "groupedActions": []
-}
-logger.ts:84 [2025-12-08T17:05:46.647Z] DEBUG: 🎯 AdvancedActionsMenu rendering menu with: {
-  "position": {
-    "x": 0,
-    "y": 0
-  },
-  "groupedActionsCount": 0,
-  "groupedActionsDetails": []
-}
-logger.ts:84 [2025-12-08T17:05:46.649Z] DEBUG: 🎯 groupActions called with: [
-  {
-    "id": "background-settings",
-    "label": "Background Settings",
-    "icon": "palette"
-  },
-  {
-    "id": "regenerate-section",
-    "label": "Regenerate Content",
-    "icon": "refresh",
-    "disabled": false
-  }
-]
-logger.ts:84 [2025-12-08T17:05:46.649Z] DEBUG: 🎯 Groups map: [
-  [
-    "default",
-    [
-      {
-        "id": "background-settings",
-        "label": "Background Settings",
-        "icon": "palette"
-      },
-      {
-        "id": "regenerate-section",
-        "label": "Regenerate Content",
-        "icon": "refresh",
-        "disabled": false
-      }
-    ]
-  ]
-]
-logger.ts:84 [2025-12-08T17:05:46.650Z] DEBUG: 🎯 Final grouped actions: [
-  {
-    "id": "default",
-    "actions": [
-      {
-        "id": "background-settings",
-        "label": "Background Settings",
-        "icon": "palette"
-      },
-      {
-        "id": "regenerate-section",
-        "label": "Regenerate Content",
-        "icon": "refresh",
-        "disabled": false
-      }
-    ]
-  }
-]
-logger.ts:84 [2025-12-08T17:05:46.651Z] DEBUG: 🎯 Setting grouped actions: [
-  {
-    "id": "default",
-    "actions": [
-      {
-        "id": "background-settings",
-        "label": "Background Settings",
-        "icon": "palette"
-      },
-      {
-        "id": "regenerate-section",
-        "label": "Regenerate Content",
-        "icon": "refresh",
-        "disabled": false
-      }
-    ]
-  }
-]
-logger.ts:95 [DEV] 🔍 SectionToolbar[y8u1o0wg1] - showAdvanced changed to: true
-logger.ts:84 [2025-12-08T17:05:46.653Z] DEBUG: 🎯 groupActions called with: [
-  {
-    "id": "background-settings",
-    "label": "Background Settings",
-    "icon": "palette"
-  },
-  {
-    "id": "regenerate-section",
-    "label": "Regenerate Content",
-    "icon": "refresh",
-    "disabled": false
-  }
-]
-logger.ts:84 [2025-12-08T17:05:46.653Z] DEBUG: 🎯 Groups map: [
-  [
-    "default",
-    [
-      {
-        "id": "background-settings",
-        "label": "Background Settings",
-        "icon": "palette"
-      },
-      {
-        "id": "regenerate-section",
-        "label": "Regenerate Content",
-        "icon": "refresh",
-        "disabled": false
-      }
-    ]
-  ]
-]
-logger.ts:84 [2025-12-08T17:05:46.653Z] DEBUG: 🎯 Final grouped actions: [
-  {
-    "id": "default",
-    "actions": [
-      {
-        "id": "background-settings",
-        "label": "Background Settings",
-        "icon": "palette"
-      },
-      {
-        "id": "regenerate-section",
-        "label": "Regenerate Content",
-        "icon": "refresh",
-        "disabled": false
-      }
-    ]
-  }
-]
-logger.ts:84 [2025-12-08T17:05:46.653Z] DEBUG: 🎯 Setting grouped actions: [
-  {
-    "id": "default",
-    "actions": [
-      {
-        "id": "background-settings",
-        "label": "Background Settings",
-        "icon": "palette"
-      },
-      {
-        "id": "regenerate-section",
-        "label": "Regenerate Content",
-        "icon": "refresh",
-        "disabled": false
-      }
-    ]
-  }
-]
-logger.ts:84 [2025-12-08T17:05:46.877Z] DEBUG: 🎯 AdvancedActionsMenu rendered with props: {
-  "actions": 2,
-  "actionDetails": [
-    {
-      "id": "background-settings",
-      "label": "Background Settings",
-      "icon": "palette"
-    },
-    {
-      "id": "regenerate-section",
-      "label": "Regenerate Content",
-      "icon": "refresh",
-      "disabled": false
-    }
-  ],
-  "hasTriggerElement": true,
-  "toolbarType": "section",
-  "isVisible": true
-}
-logger.ts:84 [2025-12-08T17:05:46.878Z] DEBUG: 🎯 useAdvancedActionsMenu returning: {
-  "position": {
-    "x": 1415,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 200
-    }
-  },
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:46.878Z] DEBUG: 🎯 AdvancedActionsMenu received from hook: {
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:46.878Z] DEBUG: 🎯 AdvancedActionsMenu rendering menu with: {
-  "position": {
-    "x": 1415,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 200
-    }
-  },
-  "groupedActionsCount": 1,
-  "groupedActionsDetails": [
-    {
-      "id": "default",
-      "actionCount": 2
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:46.878Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "background-settings",
-  "label": "Background Settings"
-}
-logger.ts:84 [2025-12-08T17:05:46.878Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "regenerate-section",
-  "label": "Regenerate Content"
-}
-logger.ts:84 [2025-12-08T17:05:46.878Z] DEBUG: 🎯 AdvancedActionsMenu rendered with props: {
-  "actions": 2,
-  "actionDetails": [
-    {
-      "id": "background-settings",
-      "label": "Background Settings",
-      "icon": "palette"
-    },
-    {
-      "id": "regenerate-section",
-      "label": "Regenerate Content",
-      "icon": "refresh",
-      "disabled": false
-    }
-  ],
-  "hasTriggerElement": true,
-  "toolbarType": "section",
-  "isVisible": true
-}
-logger.ts:84 [2025-12-08T17:05:46.878Z] DEBUG: 🎯 useAdvancedActionsMenu returning: {
-  "position": {
-    "x": 1415,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 200
-    }
-  },
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:46.878Z] DEBUG: 🎯 AdvancedActionsMenu received from hook: {
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:46.879Z] DEBUG: 🎯 AdvancedActionsMenu rendering menu with: {
-  "position": {
-    "x": 1415,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 200
-    }
-  },
-  "groupedActionsCount": 1,
-  "groupedActionsDetails": [
-    {
-      "id": "default",
-      "actionCount": 2
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:46.879Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "background-settings",
-  "label": "Background Settings"
-}
-logger.ts:84 [2025-12-08T17:05:46.879Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "regenerate-section",
-  "label": "Regenerate Content"
-}
-logger.ts:84 [2025-12-08T17:05:46.880Z] DEBUG: 🎯 Combined ref set: {
-  "node": true,
-  "hookMenuRef": true,
-  "internalMenuRef": true
-}
-logger.ts:84 [2025-12-08T17:05:47.064Z] DEBUG: 🎯 AdvancedActionsMenu rendered with props: {
-  "actions": 2,
-  "actionDetails": [
-    {
-      "id": "background-settings",
-      "label": "Background Settings",
-      "icon": "palette"
-    },
-    {
-      "id": "regenerate-section",
-      "label": "Regenerate Content",
-      "icon": "refresh",
-      "disabled": false
-    }
-  ],
-  "hasTriggerElement": true,
-  "toolbarType": "section",
-  "isVisible": true
-}
-logger.ts:84 [2025-12-08T17:05:47.064Z] DEBUG: 🎯 useAdvancedActionsMenu returning: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:47.064Z] DEBUG: 🎯 AdvancedActionsMenu received from hook: {
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:47.065Z] DEBUG: 🎯 AdvancedActionsMenu rendering menu with: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsCount": 1,
-  "groupedActionsDetails": [
-    {
-      "id": "default",
-      "actionCount": 2
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:47.065Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "background-settings",
-  "label": "Background Settings"
-}
-logger.ts:84 [2025-12-08T17:05:47.065Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "regenerate-section",
-  "label": "Regenerate Content"
-}
-logger.ts:84 [2025-12-08T17:05:47.065Z] DEBUG: 🎯 AdvancedActionsMenu rendered with props: {
-  "actions": 2,
-  "actionDetails": [
-    {
-      "id": "background-settings",
-      "label": "Background Settings",
-      "icon": "palette"
-    },
-    {
-      "id": "regenerate-section",
-      "label": "Regenerate Content",
-      "icon": "refresh",
-      "disabled": false
-    }
-  ],
-  "hasTriggerElement": true,
-  "toolbarType": "section",
-  "isVisible": true
-}
-logger.ts:84 [2025-12-08T17:05:47.065Z] DEBUG: 🎯 useAdvancedActionsMenu returning: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:47.066Z] DEBUG: 🎯 AdvancedActionsMenu received from hook: {
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:47.066Z] DEBUG: 🎯 AdvancedActionsMenu rendering menu with: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsCount": 1,
-  "groupedActionsDetails": [
-    {
-      "id": "default",
-      "actionCount": 2
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:47.066Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "background-settings",
-  "label": "Background Settings"
-}
-logger.ts:84 [2025-12-08T17:05:47.066Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "regenerate-section",
-  "label": "Regenerate Content"
-}
-logger.ts:84 [2025-12-08T17:05:47.067Z] DEBUG: 🎯 Combined ref set: {
-  "node": false,
-  "hookMenuRef": false,
-  "internalMenuRef": false
-}
-logger.ts:84 [2025-12-08T17:05:47.068Z] DEBUG: 🎯 Combined ref set: {
-  "node": true,
-  "hookMenuRef": true,
-  "internalMenuRef": true
-}
-logger.ts:84 [2025-12-08T17:05:47.191Z] DEBUG: 🎯 groupActions called with: [
-  {
-    "id": "background-settings",
-    "label": "Background Settings",
-    "icon": "palette"
-  },
-  {
-    "id": "regenerate-section",
-    "label": "Regenerate Content",
-    "icon": "refresh",
-    "disabled": false
-  }
-]
-logger.ts:84 [2025-12-08T17:05:47.192Z] DEBUG: 🎯 Groups map: [
-  [
-    "default",
-    [
-      {
-        "id": "background-settings",
-        "label": "Background Settings",
-        "icon": "palette"
-      },
-      {
-        "id": "regenerate-section",
-        "label": "Regenerate Content",
-        "icon": "refresh",
-        "disabled": false
-      }
-    ]
-  ]
-]
-logger.ts:84 [2025-12-08T17:05:47.193Z] DEBUG: 🎯 Final grouped actions: [
-  {
-    "id": "default",
-    "actions": [
-      {
-        "id": "background-settings",
-        "label": "Background Settings",
-        "icon": "palette"
-      },
-      {
-        "id": "regenerate-section",
-        "label": "Regenerate Content",
-        "icon": "refresh",
-        "disabled": false
-      }
-    ]
-  }
-]
-logger.ts:84 [2025-12-08T17:05:47.193Z] DEBUG: 🎯 Setting grouped actions: [
-  {
-    "id": "default",
-    "actions": [
-      {
-        "id": "background-settings",
-        "label": "Background Settings",
-        "icon": "palette"
-      },
-      {
-        "id": "regenerate-section",
-        "label": "Regenerate Content",
-        "icon": "refresh",
-        "disabled": false
-      }
-    ]
-  }
-]
-logger.ts:84 [2025-12-08T17:05:47.194Z] DEBUG: 🎯 AdvancedActionsMenu rendered with props: {
-  "actions": 2,
-  "actionDetails": [
-    {
-      "id": "background-settings",
-      "label": "Background Settings",
-      "icon": "palette"
-    },
-    {
-      "id": "regenerate-section",
-      "label": "Regenerate Content",
-      "icon": "refresh",
-      "disabled": false
-    }
-  ],
-  "hasTriggerElement": true,
-  "toolbarType": "section",
-  "isVisible": true
-}
-logger.ts:84 [2025-12-08T17:05:47.195Z] DEBUG: 🎯 useAdvancedActionsMenu returning: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:47.195Z] DEBUG: 🎯 AdvancedActionsMenu received from hook: {
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:47.195Z] DEBUG: 🎯 AdvancedActionsMenu rendering menu with: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsCount": 1,
-  "groupedActionsDetails": [
-    {
-      "id": "default",
-      "actionCount": 2
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:47.195Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "background-settings",
-  "label": "Background Settings"
-}
-logger.ts:84 [2025-12-08T17:05:47.195Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "regenerate-section",
-  "label": "Regenerate Content"
-}
-logger.ts:84 [2025-12-08T17:05:47.195Z] DEBUG: 🎯 AdvancedActionsMenu rendered with props: {
-  "actions": 2,
-  "actionDetails": [
-    {
-      "id": "background-settings",
-      "label": "Background Settings",
-      "icon": "palette"
-    },
-    {
-      "id": "regenerate-section",
-      "label": "Regenerate Content",
-      "icon": "refresh",
-      "disabled": false
-    }
-  ],
-  "hasTriggerElement": true,
-  "toolbarType": "section",
-  "isVisible": true
-}
-logger.ts:84 [2025-12-08T17:05:47.195Z] DEBUG: 🎯 useAdvancedActionsMenu returning: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:47.195Z] DEBUG: 🎯 AdvancedActionsMenu received from hook: {
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:47.196Z] DEBUG: 🎯 AdvancedActionsMenu rendering menu with: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsCount": 1,
-  "groupedActionsDetails": [
-    {
-      "id": "default",
-      "actionCount": 2
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:47.196Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "background-settings",
-  "label": "Background Settings"
-}
-logger.ts:84 [2025-12-08T17:05:47.196Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "regenerate-section",
-  "label": "Regenerate Content"
-}
-logger.ts:84 [2025-12-08T17:05:47.196Z] DEBUG: 🎯 Combined ref set: {
-  "node": false,
-  "hookMenuRef": false,
-  "internalMenuRef": false
-}
-logger.ts:84 [2025-12-08T17:05:47.197Z] DEBUG: 🎯 Combined ref set: {
-  "node": true,
-  "hookMenuRef": true,
-  "internalMenuRef": true
-}
-logger.ts:84 [2025-12-08T17:05:47.308Z] DEBUG: 🎯 groupActions called with: [
-  {
-    "id": "background-settings",
-    "label": "Background Settings",
-    "icon": "palette"
-  },
-  {
-    "id": "regenerate-section",
-    "label": "Regenerate Content",
-    "icon": "refresh",
-    "disabled": false
-  }
-]
-logger.ts:84 [2025-12-08T17:05:47.310Z] DEBUG: 🎯 Groups map: [
-  [
-    "default",
-    [
-      {
-        "id": "background-settings",
-        "label": "Background Settings",
-        "icon": "palette"
-      },
-      {
-        "id": "regenerate-section",
-        "label": "Regenerate Content",
-        "icon": "refresh",
-        "disabled": false
-      }
-    ]
-  ]
-]
-logger.ts:84 [2025-12-08T17:05:47.310Z] DEBUG: 🎯 Final grouped actions: [
-  {
-    "id": "default",
-    "actions": [
-      {
-        "id": "background-settings",
-        "label": "Background Settings",
-        "icon": "palette"
-      },
-      {
-        "id": "regenerate-section",
-        "label": "Regenerate Content",
-        "icon": "refresh",
-        "disabled": false
-      }
-    ]
-  }
-]
-logger.ts:84 [2025-12-08T17:05:47.311Z] DEBUG: 🎯 Setting grouped actions: [
-  {
-    "id": "default",
-    "actions": [
-      {
-        "id": "background-settings",
-        "label": "Background Settings",
-        "icon": "palette"
-      },
-      {
-        "id": "regenerate-section",
-        "label": "Regenerate Content",
-        "icon": "refresh",
-        "disabled": false
-      }
-    ]
-  }
-]
-logger.ts:84 [2025-12-08T17:05:47.314Z] DEBUG: 🎯 AdvancedActionsMenu rendered with props: {
-  "actions": 2,
-  "actionDetails": [
-    {
-      "id": "background-settings",
-      "label": "Background Settings",
-      "icon": "palette"
-    },
-    {
-      "id": "regenerate-section",
-      "label": "Regenerate Content",
-      "icon": "refresh",
-      "disabled": false
-    }
-  ],
-  "hasTriggerElement": true,
-  "toolbarType": "section",
-  "isVisible": true
-}
-logger.ts:84 [2025-12-08T17:05:47.315Z] DEBUG: 🎯 useAdvancedActionsMenu returning: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:47.315Z] DEBUG: 🎯 AdvancedActionsMenu received from hook: {
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:47.315Z] DEBUG: 🎯 AdvancedActionsMenu rendering menu with: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsCount": 1,
-  "groupedActionsDetails": [
-    {
-      "id": "default",
-      "actionCount": 2
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:47.315Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "background-settings",
-  "label": "Background Settings"
-}
-logger.ts:84 [2025-12-08T17:05:47.316Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "regenerate-section",
-  "label": "Regenerate Content"
-}
-logger.ts:84 [2025-12-08T17:05:47.316Z] DEBUG: 🎯 AdvancedActionsMenu rendered with props: {
-  "actions": 2,
-  "actionDetails": [
-    {
-      "id": "background-settings",
-      "label": "Background Settings",
-      "icon": "palette"
-    },
-    {
-      "id": "regenerate-section",
-      "label": "Regenerate Content",
-      "icon": "refresh",
-      "disabled": false
-    }
-  ],
-  "hasTriggerElement": true,
-  "toolbarType": "section",
-  "isVisible": true
-}
-logger.ts:84 [2025-12-08T17:05:47.316Z] DEBUG: 🎯 useAdvancedActionsMenu returning: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:47.316Z] DEBUG: 🎯 AdvancedActionsMenu received from hook: {
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:47.316Z] DEBUG: 🎯 AdvancedActionsMenu rendering menu with: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsCount": 1,
-  "groupedActionsDetails": [
-    {
-      "id": "default",
-      "actionCount": 2
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:47.317Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "background-settings",
-  "label": "Background Settings"
-}
-logger.ts:84 [2025-12-08T17:05:47.317Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "regenerate-section",
-  "label": "Regenerate Content"
-}
-logger.ts:84 [2025-12-08T17:05:47.318Z] DEBUG: 🎯 Combined ref set: {
-  "node": false,
-  "hookMenuRef": false,
-  "internalMenuRef": false
-}
-logger.ts:84 [2025-12-08T17:05:47.319Z] DEBUG: 🎯 Combined ref set: {
-  "node": true,
-  "hookMenuRef": true,
-  "internalMenuRef": true
-}
-logger.ts:84 [2025-12-08T17:05:47.507Z] DEBUG: 🎯 AdvancedActionsMenu rendered with props: {
-  "actions": 2,
-  "actionDetails": [
-    {
-      "id": "background-settings",
-      "label": "Background Settings",
-      "icon": "palette"
-    },
-    {
-      "id": "regenerate-section",
-      "label": "Regenerate Content",
-      "icon": "refresh",
-      "disabled": false
-    }
-  ],
-  "hasTriggerElement": true,
-  "toolbarType": "section",
-  "isVisible": true
-}
-logger.ts:84 [2025-12-08T17:05:47.507Z] DEBUG: 🎯 useAdvancedActionsMenu returning: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:47.507Z] DEBUG: 🎯 AdvancedActionsMenu received from hook: {
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:47.507Z] DEBUG: 🎯 AdvancedActionsMenu rendering menu with: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsCount": 1,
-  "groupedActionsDetails": [
-    {
-      "id": "default",
-      "actionCount": 2
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:47.508Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "background-settings",
-  "label": "Background Settings"
-}
-logger.ts:84 [2025-12-08T17:05:47.508Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "regenerate-section",
-  "label": "Regenerate Content"
-}
-logger.ts:84 [2025-12-08T17:05:47.508Z] DEBUG: 🎯 AdvancedActionsMenu rendered with props: {
-  "actions": 2,
-  "actionDetails": [
-    {
-      "id": "background-settings",
-      "label": "Background Settings",
-      "icon": "palette"
-    },
-    {
-      "id": "regenerate-section",
-      "label": "Regenerate Content",
-      "icon": "refresh",
-      "disabled": false
-    }
-  ],
-  "hasTriggerElement": true,
-  "toolbarType": "section",
-  "isVisible": true
-}
-logger.ts:84 [2025-12-08T17:05:47.508Z] DEBUG: 🎯 useAdvancedActionsMenu returning: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:47.508Z] DEBUG: 🎯 AdvancedActionsMenu received from hook: {
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:47.508Z] DEBUG: 🎯 AdvancedActionsMenu rendering menu with: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsCount": 1,
-  "groupedActionsDetails": [
-    {
-      "id": "default",
-      "actionCount": 2
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:47.508Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "background-settings",
-  "label": "Background Settings"
-}
-logger.ts:84 [2025-12-08T17:05:47.508Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "regenerate-section",
-  "label": "Regenerate Content"
-}
-logger.ts:84 [2025-12-08T17:05:47.509Z] DEBUG: 🎯 Combined ref set: {
-  "node": false,
-  "hookMenuRef": false,
-  "internalMenuRef": false
-}
-logger.ts:84 [2025-12-08T17:05:47.509Z] DEBUG: 🎯 Combined ref set: {
-  "node": true,
-  "hookMenuRef": true,
-  "internalMenuRef": true
-}
-logger.ts:84 [2025-12-08T17:05:47.510Z] DEBUG: 🎯 groupActions called with: [
-  {
-    "id": "background-settings",
-    "label": "Background Settings",
-    "icon": "palette"
-  },
-  {
-    "id": "regenerate-section",
-    "label": "Regenerate Content",
-    "icon": "refresh",
-    "disabled": false
-  }
-]
-logger.ts:84 [2025-12-08T17:05:47.511Z] DEBUG: 🎯 Groups map: [
-  [
-    "default",
-    [
-      {
-        "id": "background-settings",
-        "label": "Background Settings",
-        "icon": "palette"
-      },
-      {
-        "id": "regenerate-section",
-        "label": "Regenerate Content",
-        "icon": "refresh",
-        "disabled": false
-      }
-    ]
-  ]
-]
-logger.ts:84 [2025-12-08T17:05:47.511Z] DEBUG: 🎯 Final grouped actions: [
-  {
-    "id": "default",
-    "actions": [
-      {
-        "id": "background-settings",
-        "label": "Background Settings",
-        "icon": "palette"
-      },
-      {
-        "id": "regenerate-section",
-        "label": "Regenerate Content",
-        "icon": "refresh",
-        "disabled": false
-      }
-    ]
-  }
-]
-logger.ts:84 [2025-12-08T17:05:47.511Z] DEBUG: 🎯 Setting grouped actions: [
-  {
-    "id": "default",
-    "actions": [
-      {
-        "id": "background-settings",
-        "label": "Background Settings",
-        "icon": "palette"
-      },
-      {
-        "id": "regenerate-section",
-        "label": "Regenerate Content",
-        "icon": "refresh",
-        "disabled": false
-      }
-    ]
-  }
-]
-logger.ts:84 [2025-12-08T17:05:47.554Z] DEBUG: 🎯 AdvancedActionsMenu rendered with props: {
-  "actions": 2,
-  "actionDetails": [
-    {
-      "id": "background-settings",
-      "label": "Background Settings",
-      "icon": "palette"
-    },
-    {
-      "id": "regenerate-section",
-      "label": "Regenerate Content",
-      "icon": "refresh",
-      "disabled": false
-    }
-  ],
-  "hasTriggerElement": true,
-  "toolbarType": "section",
-  "isVisible": true
-}
-logger.ts:84 [2025-12-08T17:05:47.554Z] DEBUG: 🎯 useAdvancedActionsMenu returning: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:47.554Z] DEBUG: 🎯 AdvancedActionsMenu received from hook: {
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:47.555Z] DEBUG: 🎯 AdvancedActionsMenu rendering menu with: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsCount": 1,
-  "groupedActionsDetails": [
-    {
-      "id": "default",
-      "actionCount": 2
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:47.555Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "background-settings",
-  "label": "Background Settings"
-}
-logger.ts:84 [2025-12-08T17:05:47.555Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "regenerate-section",
-  "label": "Regenerate Content"
-}
-logger.ts:84 [2025-12-08T17:05:47.555Z] DEBUG: 🎯 AdvancedActionsMenu rendered with props: {
-  "actions": 2,
-  "actionDetails": [
-    {
-      "id": "background-settings",
-      "label": "Background Settings",
-      "icon": "palette"
-    },
-    {
-      "id": "regenerate-section",
-      "label": "Regenerate Content",
-      "icon": "refresh",
-      "disabled": false
-    }
-  ],
-  "hasTriggerElement": true,
-  "toolbarType": "section",
-  "isVisible": true
-}
-logger.ts:84 [2025-12-08T17:05:47.555Z] DEBUG: 🎯 useAdvancedActionsMenu returning: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:47.556Z] DEBUG: 🎯 AdvancedActionsMenu received from hook: {
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:47.556Z] DEBUG: 🎯 AdvancedActionsMenu rendering menu with: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsCount": 1,
-  "groupedActionsDetails": [
-    {
-      "id": "default",
-      "actionCount": 2
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:47.556Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "background-settings",
-  "label": "Background Settings"
-}
-logger.ts:84 [2025-12-08T17:05:47.556Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "regenerate-section",
-  "label": "Regenerate Content"
-}
-logger.ts:84 [2025-12-08T17:05:47.557Z] DEBUG: 🎯 Combined ref set: {
-  "node": false,
-  "hookMenuRef": false,
-  "internalMenuRef": false
-}
-logger.ts:84 [2025-12-08T17:05:47.558Z] DEBUG: 🎯 Combined ref set: {
-  "node": true,
-  "hookMenuRef": true,
-  "internalMenuRef": true
-}
-logger.ts:84 [2025-12-08T17:05:48.022Z] DEBUG: 🎯 AdvancedActionsMenu rendered with props: {
-  "actions": 2,
-  "actionDetails": [
-    {
-      "id": "background-settings",
-      "label": "Background Settings",
-      "icon": "palette"
-    },
-    {
-      "id": "regenerate-section",
-      "label": "Regenerate Content",
-      "icon": "refresh",
-      "disabled": false
-    }
-  ],
-  "hasTriggerElement": true,
-  "toolbarType": "section",
-  "isVisible": true
-}
-logger.ts:84 [2025-12-08T17:05:48.022Z] DEBUG: 🎯 useAdvancedActionsMenu returning: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.023Z] DEBUG: 🎯 AdvancedActionsMenu received from hook: {
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.023Z] DEBUG: 🎯 AdvancedActionsMenu rendering menu with: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsCount": 1,
-  "groupedActionsDetails": [
-    {
-      "id": "default",
-      "actionCount": 2
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.023Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "background-settings",
-  "label": "Background Settings"
-}
-logger.ts:84 [2025-12-08T17:05:48.023Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "regenerate-section",
-  "label": "Regenerate Content"
-}
-logger.ts:84 [2025-12-08T17:05:48.023Z] DEBUG: 🎯 AdvancedActionsMenu rendered with props: {
-  "actions": 2,
-  "actionDetails": [
-    {
-      "id": "background-settings",
-      "label": "Background Settings",
-      "icon": "palette"
-    },
-    {
-      "id": "regenerate-section",
-      "label": "Regenerate Content",
-      "icon": "refresh",
-      "disabled": false
-    }
-  ],
-  "hasTriggerElement": true,
-  "toolbarType": "section",
-  "isVisible": true
-}
-logger.ts:84 [2025-12-08T17:05:48.023Z] DEBUG: 🎯 useAdvancedActionsMenu returning: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.023Z] DEBUG: 🎯 AdvancedActionsMenu received from hook: {
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.024Z] DEBUG: 🎯 AdvancedActionsMenu rendering menu with: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsCount": 1,
-  "groupedActionsDetails": [
-    {
-      "id": "default",
-      "actionCount": 2
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.024Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "background-settings",
-  "label": "Background Settings"
-}
-logger.ts:84 [2025-12-08T17:05:48.024Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "regenerate-section",
-  "label": "Regenerate Content"
-}
-logger.ts:84 [2025-12-08T17:05:48.025Z] DEBUG: 🎯 Combined ref set: {
-  "node": false,
-  "hookMenuRef": false,
-  "internalMenuRef": false
-}
-logger.ts:84 [2025-12-08T17:05:48.026Z] DEBUG: 🎯 Combined ref set: {
-  "node": true,
-  "hookMenuRef": true,
-  "internalMenuRef": true
-}
-logger.ts:84 [2025-12-08T17:05:48.149Z] DEBUG: 🎯 groupActions called with: [
-  {
-    "id": "background-settings",
-    "label": "Background Settings",
-    "icon": "palette"
-  },
-  {
-    "id": "regenerate-section",
-    "label": "Regenerate Content",
-    "icon": "refresh",
-    "disabled": false
-  }
-]
-logger.ts:84 [2025-12-08T17:05:48.150Z] DEBUG: 🎯 Groups map: [
-  [
-    "default",
-    [
-      {
-        "id": "background-settings",
-        "label": "Background Settings",
-        "icon": "palette"
-      },
-      {
-        "id": "regenerate-section",
-        "label": "Regenerate Content",
-        "icon": "refresh",
-        "disabled": false
-      }
-    ]
-  ]
-]
-logger.ts:84 [2025-12-08T17:05:48.151Z] DEBUG: 🎯 Final grouped actions: [
-  {
-    "id": "default",
-    "actions": [
-      {
-        "id": "background-settings",
-        "label": "Background Settings",
-        "icon": "palette"
-      },
-      {
-        "id": "regenerate-section",
-        "label": "Regenerate Content",
-        "icon": "refresh",
-        "disabled": false
-      }
-    ]
-  }
-]
-logger.ts:84 [2025-12-08T17:05:48.151Z] DEBUG: 🎯 Setting grouped actions: [
-  {
-    "id": "default",
-    "actions": [
-      {
-        "id": "background-settings",
-        "label": "Background Settings",
-        "icon": "palette"
-      },
-      {
-        "id": "regenerate-section",
-        "label": "Regenerate Content",
-        "icon": "refresh",
-        "disabled": false
-      }
-    ]
-  }
-]
-logger.ts:84 [2025-12-08T17:05:48.153Z] DEBUG: 🎯 AdvancedActionsMenu rendered with props: {
-  "actions": 2,
-  "actionDetails": [
-    {
-      "id": "background-settings",
-      "label": "Background Settings",
-      "icon": "palette"
-    },
-    {
-      "id": "regenerate-section",
-      "label": "Regenerate Content",
-      "icon": "refresh",
-      "disabled": false
-    }
-  ],
-  "hasTriggerElement": true,
-  "toolbarType": "section",
-  "isVisible": true
-}
-logger.ts:84 [2025-12-08T17:05:48.153Z] DEBUG: 🎯 useAdvancedActionsMenu returning: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.153Z] DEBUG: 🎯 AdvancedActionsMenu received from hook: {
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.153Z] DEBUG: 🎯 AdvancedActionsMenu rendering menu with: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsCount": 1,
-  "groupedActionsDetails": [
-    {
-      "id": "default",
-      "actionCount": 2
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.154Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "background-settings",
-  "label": "Background Settings"
-}
-logger.ts:84 [2025-12-08T17:05:48.154Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "regenerate-section",
-  "label": "Regenerate Content"
-}
-logger.ts:84 [2025-12-08T17:05:48.154Z] DEBUG: 🎯 AdvancedActionsMenu rendered with props: {
-  "actions": 2,
-  "actionDetails": [
-    {
-      "id": "background-settings",
-      "label": "Background Settings",
-      "icon": "palette"
-    },
-    {
-      "id": "regenerate-section",
-      "label": "Regenerate Content",
-      "icon": "refresh",
-      "disabled": false
-    }
-  ],
-  "hasTriggerElement": true,
-  "toolbarType": "section",
-  "isVisible": true
-}
-logger.ts:84 [2025-12-08T17:05:48.154Z] DEBUG: 🎯 useAdvancedActionsMenu returning: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.154Z] DEBUG: 🎯 AdvancedActionsMenu received from hook: {
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.155Z] DEBUG: 🎯 AdvancedActionsMenu rendering menu with: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsCount": 1,
-  "groupedActionsDetails": [
-    {
-      "id": "default",
-      "actionCount": 2
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.155Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "background-settings",
-  "label": "Background Settings"
-}
-logger.ts:84 [2025-12-08T17:05:48.155Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "regenerate-section",
-  "label": "Regenerate Content"
-}
-logger.ts:84 [2025-12-08T17:05:48.156Z] DEBUG: 🎯 Combined ref set: {
-  "node": false,
-  "hookMenuRef": false,
-  "internalMenuRef": false
-}
-logger.ts:84 [2025-12-08T17:05:48.157Z] DEBUG: 🎯 Combined ref set: {
-  "node": true,
-  "hookMenuRef": true,
-  "internalMenuRef": true
-}
-logger.ts:84 [2025-12-08T17:05:48.230Z] DEBUG: 🎯 groupActions called with: [
-  {
-    "id": "background-settings",
-    "label": "Background Settings",
-    "icon": "palette"
-  },
-  {
-    "id": "regenerate-section",
-    "label": "Regenerate Content",
-    "icon": "refresh",
-    "disabled": false
-  }
-]
-logger.ts:84 [2025-12-08T17:05:48.231Z] DEBUG: 🎯 Groups map: [
-  [
-    "default",
-    [
-      {
-        "id": "background-settings",
-        "label": "Background Settings",
-        "icon": "palette"
-      },
-      {
-        "id": "regenerate-section",
-        "label": "Regenerate Content",
-        "icon": "refresh",
-        "disabled": false
-      }
-    ]
-  ]
-]
-logger.ts:84 [2025-12-08T17:05:48.231Z] DEBUG: 🎯 Final grouped actions: [
-  {
-    "id": "default",
-    "actions": [
-      {
-        "id": "background-settings",
-        "label": "Background Settings",
-        "icon": "palette"
-      },
-      {
-        "id": "regenerate-section",
-        "label": "Regenerate Content",
-        "icon": "refresh",
-        "disabled": false
-      }
-    ]
-  }
-]
-logger.ts:84 [2025-12-08T17:05:48.232Z] DEBUG: 🎯 Setting grouped actions: [
-  {
-    "id": "default",
-    "actions": [
-      {
-        "id": "background-settings",
-        "label": "Background Settings",
-        "icon": "palette"
-      },
-      {
-        "id": "regenerate-section",
-        "label": "Regenerate Content",
-        "icon": "refresh",
-        "disabled": false
-      }
-    ]
-  }
-]
-logger.ts:84 [2025-12-08T17:05:48.320Z] DEBUG: 🎯 AdvancedActionsMenu rendered with props: {
-  "actions": 2,
-  "actionDetails": [
-    {
-      "id": "background-settings",
-      "label": "Background Settings",
-      "icon": "palette"
-    },
-    {
-      "id": "regenerate-section",
-      "label": "Regenerate Content",
-      "icon": "refresh",
-      "disabled": false
-    }
-  ],
-  "hasTriggerElement": true,
-  "toolbarType": "section",
-  "isVisible": true
-}
-logger.ts:84 [2025-12-08T17:05:48.320Z] DEBUG: 🎯 useAdvancedActionsMenu returning: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.320Z] DEBUG: 🎯 AdvancedActionsMenu received from hook: {
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.320Z] DEBUG: 🎯 AdvancedActionsMenu rendering menu with: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsCount": 1,
-  "groupedActionsDetails": [
-    {
-      "id": "default",
-      "actionCount": 2
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.320Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "background-settings",
-  "label": "Background Settings"
-}
-logger.ts:84 [2025-12-08T17:05:48.320Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "regenerate-section",
-  "label": "Regenerate Content"
-}
-logger.ts:84 [2025-12-08T17:05:48.321Z] DEBUG: 🎯 AdvancedActionsMenu rendered with props: {
-  "actions": 2,
-  "actionDetails": [
-    {
-      "id": "background-settings",
-      "label": "Background Settings",
-      "icon": "palette"
-    },
-    {
-      "id": "regenerate-section",
-      "label": "Regenerate Content",
-      "icon": "refresh",
-      "disabled": false
-    }
-  ],
-  "hasTriggerElement": true,
-  "toolbarType": "section",
-  "isVisible": true
-}
-logger.ts:84 [2025-12-08T17:05:48.321Z] DEBUG: 🎯 useAdvancedActionsMenu returning: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.321Z] DEBUG: 🎯 AdvancedActionsMenu received from hook: {
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.321Z] DEBUG: 🎯 AdvancedActionsMenu rendering menu with: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsCount": 1,
-  "groupedActionsDetails": [
-    {
-      "id": "default",
-      "actionCount": 2
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.321Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "background-settings",
-  "label": "Background Settings"
-}
-logger.ts:84 [2025-12-08T17:05:48.321Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "regenerate-section",
-  "label": "Regenerate Content"
-}
-logger.ts:84 [2025-12-08T17:05:48.322Z] DEBUG: 🎯 Combined ref set: {
-  "node": false,
-  "hookMenuRef": false,
-  "internalMenuRef": false
-}
-logger.ts:84 [2025-12-08T17:05:48.322Z] DEBUG: 🎯 Combined ref set: {
-  "node": true,
-  "hookMenuRef": true,
-  "internalMenuRef": true
-}
-logger.ts:84 [2025-12-08T17:05:48.448Z] DEBUG: 🎯 AdvancedActionsMenu rendered with props: {
-  "actions": 2,
-  "actionDetails": [
-    {
-      "id": "background-settings",
-      "label": "Background Settings",
-      "icon": "palette"
-    },
-    {
-      "id": "regenerate-section",
-      "label": "Regenerate Content",
-      "icon": "refresh",
-      "disabled": false
-    }
-  ],
-  "hasTriggerElement": true,
-  "toolbarType": "section",
-  "isVisible": true
-}
-logger.ts:84 [2025-12-08T17:05:48.449Z] DEBUG: 🎯 useAdvancedActionsMenu returning: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.449Z] DEBUG: 🎯 AdvancedActionsMenu received from hook: {
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.449Z] DEBUG: 🎯 AdvancedActionsMenu rendering menu with: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsCount": 1,
-  "groupedActionsDetails": [
-    {
-      "id": "default",
-      "actionCount": 2
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.449Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "background-settings",
-  "label": "Background Settings"
-}
-logger.ts:84 [2025-12-08T17:05:48.449Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "regenerate-section",
-  "label": "Regenerate Content"
-}
-logger.ts:84 [2025-12-08T17:05:48.449Z] DEBUG: 🎯 AdvancedActionsMenu rendered with props: {
-  "actions": 2,
-  "actionDetails": [
-    {
-      "id": "background-settings",
-      "label": "Background Settings",
-      "icon": "palette"
-    },
-    {
-      "id": "regenerate-section",
-      "label": "Regenerate Content",
-      "icon": "refresh",
-      "disabled": false
-    }
-  ],
-  "hasTriggerElement": true,
-  "toolbarType": "section",
-  "isVisible": true
-}
-logger.ts:84 [2025-12-08T17:05:48.450Z] DEBUG: 🎯 useAdvancedActionsMenu returning: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.450Z] DEBUG: 🎯 AdvancedActionsMenu received from hook: {
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.450Z] DEBUG: 🎯 AdvancedActionsMenu rendering menu with: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsCount": 1,
-  "groupedActionsDetails": [
-    {
-      "id": "default",
-      "actionCount": 2
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.450Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "background-settings",
-  "label": "Background Settings"
-}
-logger.ts:84 [2025-12-08T17:05:48.450Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "regenerate-section",
-  "label": "Regenerate Content"
-}
-logger.ts:84 [2025-12-08T17:05:48.450Z] DEBUG: 🎯 Combined ref set: {
-  "node": false,
-  "hookMenuRef": false,
-  "internalMenuRef": false
-}
-logger.ts:84 [2025-12-08T17:05:48.451Z] DEBUG: 🎯 Combined ref set: {
-  "node": true,
-  "hookMenuRef": true,
-  "internalMenuRef": true
-}
-logger.ts:84 [2025-12-08T17:05:48.452Z] DEBUG: 🎯 groupActions called with: [
-  {
-    "id": "background-settings",
-    "label": "Background Settings",
-    "icon": "palette"
-  },
-  {
-    "id": "regenerate-section",
-    "label": "Regenerate Content",
-    "icon": "refresh",
-    "disabled": false
-  }
-]
-logger.ts:84 [2025-12-08T17:05:48.452Z] DEBUG: 🎯 Groups map: [
-  [
-    "default",
-    [
-      {
-        "id": "background-settings",
-        "label": "Background Settings",
-        "icon": "palette"
-      },
-      {
-        "id": "regenerate-section",
-        "label": "Regenerate Content",
-        "icon": "refresh",
-        "disabled": false
-      }
-    ]
-  ]
-]
-logger.ts:84 [2025-12-08T17:05:48.453Z] DEBUG: 🎯 Final grouped actions: [
-  {
-    "id": "default",
-    "actions": [
-      {
-        "id": "background-settings",
-        "label": "Background Settings",
-        "icon": "palette"
-      },
-      {
-        "id": "regenerate-section",
-        "label": "Regenerate Content",
-        "icon": "refresh",
-        "disabled": false
-      }
-    ]
-  }
-]
-logger.ts:84 [2025-12-08T17:05:48.453Z] DEBUG: 🎯 Setting grouped actions: [
-  {
-    "id": "default",
-    "actions": [
-      {
-        "id": "background-settings",
-        "label": "Background Settings",
-        "icon": "palette"
-      },
-      {
-        "id": "regenerate-section",
-        "label": "Regenerate Content",
-        "icon": "refresh",
-        "disabled": false
-      }
-    ]
-  }
-]
-logger.ts:84 [2025-12-08T17:05:48.504Z] DEBUG: 🎯 AdvancedActionsMenu rendered with props: {
-  "actions": 2,
-  "actionDetails": [
-    {
-      "id": "background-settings",
-      "label": "Background Settings",
-      "icon": "palette"
-    },
-    {
-      "id": "regenerate-section",
-      "label": "Regenerate Content",
-      "icon": "refresh",
-      "disabled": false
-    }
-  ],
-  "hasTriggerElement": true,
-  "toolbarType": "section",
-  "isVisible": true
-}
-logger.ts:84 [2025-12-08T17:05:48.505Z] DEBUG: 🎯 useAdvancedActionsMenu returning: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.505Z] DEBUG: 🎯 AdvancedActionsMenu received from hook: {
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.505Z] DEBUG: 🎯 AdvancedActionsMenu rendering menu with: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsCount": 1,
-  "groupedActionsDetails": [
-    {
-      "id": "default",
-      "actionCount": 2
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.505Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "background-settings",
-  "label": "Background Settings"
-}
-logger.ts:84 [2025-12-08T17:05:48.505Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "regenerate-section",
-  "label": "Regenerate Content"
-}
-logger.ts:84 [2025-12-08T17:05:48.506Z] DEBUG: 🎯 AdvancedActionsMenu rendered with props: {
-  "actions": 2,
-  "actionDetails": [
-    {
-      "id": "background-settings",
-      "label": "Background Settings",
-      "icon": "palette"
-    },
-    {
-      "id": "regenerate-section",
-      "label": "Regenerate Content",
-      "icon": "refresh",
-      "disabled": false
-    }
-  ],
-  "hasTriggerElement": true,
-  "toolbarType": "section",
-  "isVisible": true
-}
-logger.ts:84 [2025-12-08T17:05:48.506Z] DEBUG: 🎯 useAdvancedActionsMenu returning: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.506Z] DEBUG: 🎯 AdvancedActionsMenu received from hook: {
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.506Z] DEBUG: 🎯 AdvancedActionsMenu rendering menu with: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsCount": 1,
-  "groupedActionsDetails": [
-    {
-      "id": "default",
-      "actionCount": 2
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.506Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "background-settings",
-  "label": "Background Settings"
-}
-logger.ts:84 [2025-12-08T17:05:48.506Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "regenerate-section",
-  "label": "Regenerate Content"
-}
-logger.ts:84 [2025-12-08T17:05:48.507Z] DEBUG: 🎯 Combined ref set: {
-  "node": false,
-  "hookMenuRef": false,
-  "internalMenuRef": false
-}
-logger.ts:84 [2025-12-08T17:05:48.507Z] DEBUG: 🎯 Combined ref set: {
-  "node": true,
-  "hookMenuRef": true,
-  "internalMenuRef": true
-}
-logger.ts:84 [2025-12-08T17:05:48.654Z] DEBUG: 🎯 AdvancedActionsMenu rendered with props: {
-  "actions": 2,
-  "actionDetails": [
-    {
-      "id": "background-settings",
-      "label": "Background Settings",
-      "icon": "palette"
-    },
-    {
-      "id": "regenerate-section",
-      "label": "Regenerate Content",
-      "icon": "refresh",
-      "disabled": false
-    }
-  ],
-  "hasTriggerElement": true,
-  "toolbarType": "section",
-  "isVisible": true
-}
-logger.ts:84 [2025-12-08T17:05:48.654Z] DEBUG: 🎯 useAdvancedActionsMenu returning: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.654Z] DEBUG: 🎯 AdvancedActionsMenu received from hook: {
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.654Z] DEBUG: 🎯 AdvancedActionsMenu rendering menu with: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsCount": 1,
-  "groupedActionsDetails": [
-    {
-      "id": "default",
-      "actionCount": 2
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.654Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "background-settings",
-  "label": "Background Settings"
-}
-logger.ts:84 [2025-12-08T17:05:48.655Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "regenerate-section",
-  "label": "Regenerate Content"
-}
-logger.ts:84 [2025-12-08T17:05:48.655Z] DEBUG: 🎯 AdvancedActionsMenu rendered with props: {
-  "actions": 2,
-  "actionDetails": [
-    {
-      "id": "background-settings",
-      "label": "Background Settings",
-      "icon": "palette"
-    },
-    {
-      "id": "regenerate-section",
-      "label": "Regenerate Content",
-      "icon": "refresh",
-      "disabled": false
-    }
-  ],
-  "hasTriggerElement": true,
-  "toolbarType": "section",
-  "isVisible": true
-}
-logger.ts:84 [2025-12-08T17:05:48.655Z] DEBUG: 🎯 useAdvancedActionsMenu returning: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.655Z] DEBUG: 🎯 AdvancedActionsMenu received from hook: {
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.655Z] DEBUG: 🎯 AdvancedActionsMenu rendering menu with: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsCount": 1,
-  "groupedActionsDetails": [
-    {
-      "id": "default",
-      "actionCount": 2
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.655Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "background-settings",
-  "label": "Background Settings"
-}
-logger.ts:84 [2025-12-08T17:05:48.655Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "regenerate-section",
-  "label": "Regenerate Content"
-}
-logger.ts:84 [2025-12-08T17:05:48.656Z] DEBUG: 🎯 Combined ref set: {
-  "node": false,
-  "hookMenuRef": false,
-  "internalMenuRef": false
-}
-logger.ts:84 [2025-12-08T17:05:48.657Z] DEBUG: 🎯 Combined ref set: {
-  "node": true,
-  "hookMenuRef": true,
-  "internalMenuRef": true
-}
-logger.ts:84 [2025-12-08T17:05:48.657Z] DEBUG: 🎯 groupActions called with: [
-  {
-    "id": "background-settings",
-    "label": "Background Settings",
-    "icon": "palette"
-  },
-  {
-    "id": "regenerate-section",
-    "label": "Regenerate Content",
-    "icon": "refresh",
-    "disabled": false
-  }
-]
-logger.ts:84 [2025-12-08T17:05:48.658Z] DEBUG: 🎯 Groups map: [
-  [
-    "default",
-    [
-      {
-        "id": "background-settings",
-        "label": "Background Settings",
-        "icon": "palette"
-      },
-      {
-        "id": "regenerate-section",
-        "label": "Regenerate Content",
-        "icon": "refresh",
-        "disabled": false
-      }
-    ]
-  ]
-]
-logger.ts:84 [2025-12-08T17:05:48.658Z] DEBUG: 🎯 Final grouped actions: [
-  {
-    "id": "default",
-    "actions": [
-      {
-        "id": "background-settings",
-        "label": "Background Settings",
-        "icon": "palette"
-      },
-      {
-        "id": "regenerate-section",
-        "label": "Regenerate Content",
-        "icon": "refresh",
-        "disabled": false
-      }
-    ]
-  }
-]
-logger.ts:84 [2025-12-08T17:05:48.659Z] DEBUG: 🎯 Setting grouped actions: [
-  {
-    "id": "default",
-    "actions": [
-      {
-        "id": "background-settings",
-        "label": "Background Settings",
-        "icon": "palette"
-      },
-      {
-        "id": "regenerate-section",
-        "label": "Regenerate Content",
-        "icon": "refresh",
-        "disabled": false
-      }
-    ]
-  }
-]
-logger.ts:84 [2025-12-08T17:05:48.716Z] DEBUG: 🎯 AdvancedActionsMenu rendered with props: {
-  "actions": 2,
-  "actionDetails": [
-    {
-      "id": "background-settings",
-      "label": "Background Settings",
-      "icon": "palette"
-    },
-    {
-      "id": "regenerate-section",
-      "label": "Regenerate Content",
-      "icon": "refresh",
-      "disabled": false
-    }
-  ],
-  "hasTriggerElement": true,
-  "toolbarType": "section",
-  "isVisible": true
-}
-logger.ts:84 [2025-12-08T17:05:48.716Z] DEBUG: 🎯 useAdvancedActionsMenu returning: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.716Z] DEBUG: 🎯 AdvancedActionsMenu received from hook: {
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.717Z] DEBUG: 🎯 AdvancedActionsMenu rendering menu with: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsCount": 1,
-  "groupedActionsDetails": [
-    {
-      "id": "default",
-      "actionCount": 2
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.717Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "background-settings",
-  "label": "Background Settings"
-}
-logger.ts:84 [2025-12-08T17:05:48.717Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "regenerate-section",
-  "label": "Regenerate Content"
-}
-logger.ts:84 [2025-12-08T17:05:48.717Z] DEBUG: 🎯 AdvancedActionsMenu rendered with props: {
-  "actions": 2,
-  "actionDetails": [
-    {
-      "id": "background-settings",
-      "label": "Background Settings",
-      "icon": "palette"
-    },
-    {
-      "id": "regenerate-section",
-      "label": "Regenerate Content",
-      "icon": "refresh",
-      "disabled": false
-    }
-  ],
-  "hasTriggerElement": true,
-  "toolbarType": "section",
-  "isVisible": true
-}
-logger.ts:84 [2025-12-08T17:05:48.717Z] DEBUG: 🎯 useAdvancedActionsMenu returning: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.717Z] DEBUG: 🎯 AdvancedActionsMenu received from hook: {
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.717Z] DEBUG: 🎯 AdvancedActionsMenu rendering menu with: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsCount": 1,
-  "groupedActionsDetails": [
-    {
-      "id": "default",
-      "actionCount": 2
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.717Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "background-settings",
-  "label": "Background Settings"
-}
-logger.ts:84 [2025-12-08T17:05:48.718Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "regenerate-section",
-  "label": "Regenerate Content"
-}
-logger.ts:84 [2025-12-08T17:05:48.718Z] DEBUG: 🎯 Combined ref set: {
-  "node": false,
-  "hookMenuRef": false,
-  "internalMenuRef": false
-}
-logger.ts:84 [2025-12-08T17:05:48.719Z] DEBUG: 🎯 Combined ref set: {
-  "node": true,
-  "hookMenuRef": true,
-  "internalMenuRef": true
-}
-logger.ts:84 [2025-12-08T17:05:48.879Z] DEBUG: 🎯 AdvancedActionsMenu rendered with props: {
-  "actions": 2,
-  "actionDetails": [
-    {
-      "id": "background-settings",
-      "label": "Background Settings",
-      "icon": "palette"
-    },
-    {
-      "id": "regenerate-section",
-      "label": "Regenerate Content",
-      "icon": "refresh",
-      "disabled": false
-    }
-  ],
-  "hasTriggerElement": true,
-  "toolbarType": "section",
-  "isVisible": true
-}
-logger.ts:84 [2025-12-08T17:05:48.879Z] DEBUG: 🎯 useAdvancedActionsMenu returning: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.880Z] DEBUG: 🎯 AdvancedActionsMenu received from hook: {
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.880Z] DEBUG: 🎯 AdvancedActionsMenu rendering menu with: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsCount": 1,
-  "groupedActionsDetails": [
-    {
-      "id": "default",
-      "actionCount": 2
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.880Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "background-settings",
-  "label": "Background Settings"
-}
-logger.ts:84 [2025-12-08T17:05:48.880Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "regenerate-section",
-  "label": "Regenerate Content"
-}
-logger.ts:84 [2025-12-08T17:05:48.880Z] DEBUG: 🎯 AdvancedActionsMenu rendered with props: {
-  "actions": 2,
-  "actionDetails": [
-    {
-      "id": "background-settings",
-      "label": "Background Settings",
-      "icon": "palette"
-    },
-    {
-      "id": "regenerate-section",
-      "label": "Regenerate Content",
-      "icon": "refresh",
-      "disabled": false
-    }
-  ],
-  "hasTriggerElement": true,
-  "toolbarType": "section",
-  "isVisible": true
-}
-logger.ts:84 [2025-12-08T17:05:48.880Z] DEBUG: 🎯 useAdvancedActionsMenu returning: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.880Z] DEBUG: 🎯 AdvancedActionsMenu received from hook: {
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.880Z] DEBUG: 🎯 AdvancedActionsMenu rendering menu with: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsCount": 1,
-  "groupedActionsDetails": [
-    {
-      "id": "default",
-      "actionCount": 2
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.881Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "background-settings",
-  "label": "Background Settings"
-}
-logger.ts:84 [2025-12-08T17:05:48.881Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "regenerate-section",
-  "label": "Regenerate Content"
-}
-logger.ts:84 [2025-12-08T17:05:48.881Z] DEBUG: 🎯 Combined ref set: {
-  "node": false,
-  "hookMenuRef": false,
-  "internalMenuRef": false
-}
-logger.ts:84 [2025-12-08T17:05:48.882Z] DEBUG: 🎯 Combined ref set: {
-  "node": true,
-  "hookMenuRef": true,
-  "internalMenuRef": true
-}
-logger.ts:84 [2025-12-08T17:05:48.883Z] DEBUG: 🎯 groupActions called with: [
-  {
-    "id": "background-settings",
-    "label": "Background Settings",
-    "icon": "palette"
-  },
-  {
-    "id": "regenerate-section",
-    "label": "Regenerate Content",
-    "icon": "refresh",
-    "disabled": false
-  }
-]
-logger.ts:84 [2025-12-08T17:05:48.883Z] DEBUG: 🎯 Groups map: [
-  [
-    "default",
-    [
-      {
-        "id": "background-settings",
-        "label": "Background Settings",
-        "icon": "palette"
-      },
-      {
-        "id": "regenerate-section",
-        "label": "Regenerate Content",
-        "icon": "refresh",
-        "disabled": false
-      }
-    ]
-  ]
-]
-logger.ts:84 [2025-12-08T17:05:48.884Z] DEBUG: 🎯 Final grouped actions: [
-  {
-    "id": "default",
-    "actions": [
-      {
-        "id": "background-settings",
-        "label": "Background Settings",
-        "icon": "palette"
-      },
-      {
-        "id": "regenerate-section",
-        "label": "Regenerate Content",
-        "icon": "refresh",
-        "disabled": false
-      }
-    ]
-  }
-]
-logger.ts:84 [2025-12-08T17:05:48.884Z] DEBUG: 🎯 Setting grouped actions: [
-  {
-    "id": "default",
-    "actions": [
-      {
-        "id": "background-settings",
-        "label": "Background Settings",
-        "icon": "palette"
-      },
-      {
-        "id": "regenerate-section",
-        "label": "Regenerate Content",
-        "icon": "refresh",
-        "disabled": false
-      }
-    ]
-  }
-]
-logger.ts:84 [2025-12-08T17:05:48.922Z] DEBUG: 🎯 AdvancedActionsMenu rendered with props: {
-  "actions": 2,
-  "actionDetails": [
-    {
-      "id": "background-settings",
-      "label": "Background Settings",
-      "icon": "palette"
-    },
-    {
-      "id": "regenerate-section",
-      "label": "Regenerate Content",
-      "icon": "refresh",
-      "disabled": false
-    }
-  ],
-  "hasTriggerElement": true,
-  "toolbarType": "section",
-  "isVisible": true
-}
-logger.ts:84 [2025-12-08T17:05:48.922Z] DEBUG: 🎯 useAdvancedActionsMenu returning: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.922Z] DEBUG: 🎯 AdvancedActionsMenu received from hook: {
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.923Z] DEBUG: 🎯 AdvancedActionsMenu rendering menu with: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsCount": 1,
-  "groupedActionsDetails": [
-    {
-      "id": "default",
-      "actionCount": 2
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.923Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "background-settings",
-  "label": "Background Settings"
-}
-logger.ts:84 [2025-12-08T17:05:48.923Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "regenerate-section",
-  "label": "Regenerate Content"
-}
-logger.ts:84 [2025-12-08T17:05:48.923Z] DEBUG: 🎯 AdvancedActionsMenu rendered with props: {
-  "actions": 2,
-  "actionDetails": [
-    {
-      "id": "background-settings",
-      "label": "Background Settings",
-      "icon": "palette"
-    },
-    {
-      "id": "regenerate-section",
-      "label": "Regenerate Content",
-      "icon": "refresh",
-      "disabled": false
-    }
-  ],
-  "hasTriggerElement": true,
-  "toolbarType": "section",
-  "isVisible": true
-}
-logger.ts:84 [2025-12-08T17:05:48.923Z] DEBUG: 🎯 useAdvancedActionsMenu returning: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.924Z] DEBUG: 🎯 AdvancedActionsMenu received from hook: {
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.924Z] DEBUG: 🎯 AdvancedActionsMenu rendering menu with: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsCount": 1,
-  "groupedActionsDetails": [
-    {
-      "id": "default",
-      "actionCount": 2
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:48.924Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "background-settings",
-  "label": "Background Settings"
-}
-logger.ts:84 [2025-12-08T17:05:48.924Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "regenerate-section",
-  "label": "Regenerate Content"
-}
-logger.ts:84 [2025-12-08T17:05:48.924Z] DEBUG: 🎯 Combined ref set: {
-  "node": false,
-  "hookMenuRef": false,
-  "internalMenuRef": false
-}
-logger.ts:84 [2025-12-08T17:05:48.925Z] DEBUG: 🎯 Combined ref set: {
-  "node": true,
-  "hookMenuRef": true,
-  "internalMenuRef": true
-}
-logger.ts:84 [2025-12-08T17:05:49.067Z] DEBUG: 🎯 AdvancedActionsMenu rendered with props: {
-  "actions": 2,
-  "actionDetails": [
-    {
-      "id": "background-settings",
-      "label": "Background Settings",
-      "icon": "palette"
-    },
-    {
-      "id": "regenerate-section",
-      "label": "Regenerate Content",
-      "icon": "refresh",
-      "disabled": false
-    }
-  ],
-  "hasTriggerElement": true,
-  "toolbarType": "section",
-  "isVisible": true
-}
-logger.ts:84 [2025-12-08T17:05:49.067Z] DEBUG: 🎯 useAdvancedActionsMenu returning: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:49.067Z] DEBUG: 🎯 AdvancedActionsMenu received from hook: {
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:49.067Z] DEBUG: 🎯 AdvancedActionsMenu rendering menu with: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsCount": 1,
-  "groupedActionsDetails": [
-    {
-      "id": "default",
-      "actionCount": 2
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:49.068Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "background-settings",
-  "label": "Background Settings"
-}
-logger.ts:84 [2025-12-08T17:05:49.068Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "regenerate-section",
-  "label": "Regenerate Content"
-}
-logger.ts:84 [2025-12-08T17:05:49.068Z] DEBUG: 🎯 AdvancedActionsMenu rendered with props: {
-  "actions": 2,
-  "actionDetails": [
-    {
-      "id": "background-settings",
-      "label": "Background Settings",
-      "icon": "palette"
-    },
-    {
-      "id": "regenerate-section",
-      "label": "Regenerate Content",
-      "icon": "refresh",
-      "disabled": false
-    }
-  ],
-  "hasTriggerElement": true,
-  "toolbarType": "section",
-  "isVisible": true
-}
-logger.ts:84 [2025-12-08T17:05:49.068Z] DEBUG: 🎯 useAdvancedActionsMenu returning: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:49.068Z] DEBUG: 🎯 AdvancedActionsMenu received from hook: {
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:49.068Z] DEBUG: 🎯 AdvancedActionsMenu rendering menu with: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsCount": 1,
-  "groupedActionsDetails": [
-    {
-      "id": "default",
-      "actionCount": 2
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:49.068Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "background-settings",
-  "label": "Background Settings"
-}
-logger.ts:84 [2025-12-08T17:05:49.069Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "regenerate-section",
-  "label": "Regenerate Content"
-}
-logger.ts:84 [2025-12-08T17:05:49.069Z] DEBUG: 🎯 Combined ref set: {
-  "node": false,
-  "hookMenuRef": false,
-  "internalMenuRef": false
-}
-logger.ts:84 [2025-12-08T17:05:49.070Z] DEBUG: 🎯 Combined ref set: {
-  "node": true,
-  "hookMenuRef": true,
-  "internalMenuRef": true
-}
-logger.ts:84 [2025-12-08T17:05:49.071Z] DEBUG: 🎯 groupActions called with: [
-  {
-    "id": "background-settings",
-    "label": "Background Settings",
-    "icon": "palette"
-  },
-  {
-    "id": "regenerate-section",
-    "label": "Regenerate Content",
-    "icon": "refresh",
-    "disabled": false
-  }
-]
-logger.ts:84 [2025-12-08T17:05:49.071Z] DEBUG: 🎯 Groups map: [
-  [
-    "default",
-    [
-      {
-        "id": "background-settings",
-        "label": "Background Settings",
-        "icon": "palette"
-      },
-      {
-        "id": "regenerate-section",
-        "label": "Regenerate Content",
-        "icon": "refresh",
-        "disabled": false
-      }
-    ]
-  ]
-]
-logger.ts:84 [2025-12-08T17:05:49.072Z] DEBUG: 🎯 Final grouped actions: [
-  {
-    "id": "default",
-    "actions": [
-      {
-        "id": "background-settings",
-        "label": "Background Settings",
-        "icon": "palette"
-      },
-      {
-        "id": "regenerate-section",
-        "label": "Regenerate Content",
-        "icon": "refresh",
-        "disabled": false
-      }
-    ]
-  }
-]
-logger.ts:84 [2025-12-08T17:05:49.072Z] DEBUG: 🎯 Setting grouped actions: [
-  {
-    "id": "default",
-    "actions": [
-      {
-        "id": "background-settings",
-        "label": "Background Settings",
-        "icon": "palette"
-      },
-      {
-        "id": "regenerate-section",
-        "label": "Regenerate Content",
-        "icon": "refresh",
-        "disabled": false
-      }
-    ]
-  }
-]
-logger.ts:84 [2025-12-08T17:05:49.122Z] DEBUG: 🎯 AdvancedActionsMenu rendered with props: {
-  "actions": 2,
-  "actionDetails": [
-    {
-      "id": "background-settings",
-      "label": "Background Settings",
-      "icon": "palette"
-    },
-    {
-      "id": "regenerate-section",
-      "label": "Regenerate Content",
-      "icon": "refresh",
-      "disabled": false
-    }
-  ],
-  "hasTriggerElement": true,
-  "toolbarType": "section",
-  "isVisible": true
-}
-logger.ts:84 [2025-12-08T17:05:49.122Z] DEBUG: 🎯 useAdvancedActionsMenu returning: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:49.123Z] DEBUG: 🎯 AdvancedActionsMenu received from hook: {
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:49.123Z] DEBUG: 🎯 AdvancedActionsMenu rendering menu with: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsCount": 1,
-  "groupedActionsDetails": [
-    {
-      "id": "default",
-      "actionCount": 2
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:49.123Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "background-settings",
-  "label": "Background Settings"
-}
-logger.ts:84 [2025-12-08T17:05:49.123Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "regenerate-section",
-  "label": "Regenerate Content"
-}
-logger.ts:84 [2025-12-08T17:05:49.123Z] DEBUG: 🎯 AdvancedActionsMenu rendered with props: {
-  "actions": 2,
-  "actionDetails": [
-    {
-      "id": "background-settings",
-      "label": "Background Settings",
-      "icon": "palette"
-    },
-    {
-      "id": "regenerate-section",
-      "label": "Regenerate Content",
-      "icon": "refresh",
-      "disabled": false
-    }
-  ],
-  "hasTriggerElement": true,
-  "toolbarType": "section",
-  "isVisible": true
-}
-logger.ts:84 [2025-12-08T17:05:49.123Z] DEBUG: 🎯 useAdvancedActionsMenu returning: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:49.123Z] DEBUG: 🎯 AdvancedActionsMenu received from hook: {
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:49.123Z] DEBUG: 🎯 AdvancedActionsMenu rendering menu with: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsCount": 1,
-  "groupedActionsDetails": [
-    {
-      "id": "default",
-      "actionCount": 2
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:49.124Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "background-settings",
-  "label": "Background Settings"
-}
-logger.ts:84 [2025-12-08T17:05:49.124Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "regenerate-section",
-  "label": "Regenerate Content"
-}
-logger.ts:84 [2025-12-08T17:05:49.124Z] DEBUG: 🎯 Combined ref set: {
-  "node": false,
-  "hookMenuRef": false,
-  "internalMenuRef": false
-}
-logger.ts:84 [2025-12-08T17:05:49.125Z] DEBUG: 🎯 Combined ref set: {
-  "node": true,
-  "hookMenuRef": true,
-  "internalMenuRef": true
-}
-logger.ts:84 [2025-12-08T17:05:49.273Z] DEBUG: 🎯 handleClickOutside called: {
-  "target": "SPAN",
-  "targetClass": "flex-1 truncate",
-  "isInTrigger": false,
-  "isInMenu": true
-}
-logger.ts:84 [2025-12-08T17:05:49.273Z] DEBUG: 🎯 Click inside menu or trigger, not closing
-logger.ts:84 [2025-12-08T17:05:49.306Z] DEBUG: 🎯 AdvancedActionsMenu rendered with props: {
-  "actions": 2,
-  "actionDetails": [
-    {
-      "id": "background-settings",
-      "label": "Background Settings",
-      "icon": "palette"
-    },
-    {
-      "id": "regenerate-section",
-      "label": "Regenerate Content",
-      "icon": "refresh",
-      "disabled": false
-    }
-  ],
-  "hasTriggerElement": true,
-  "toolbarType": "section",
-  "isVisible": true
-}
-logger.ts:84 [2025-12-08T17:05:49.307Z] DEBUG: 🎯 useAdvancedActionsMenu returning: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:49.307Z] DEBUG: 🎯 AdvancedActionsMenu received from hook: {
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:49.307Z] DEBUG: 🎯 AdvancedActionsMenu rendering menu with: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsCount": 1,
-  "groupedActionsDetails": [
-    {
-      "id": "default",
-      "actionCount": 2
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:49.307Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "background-settings",
-  "label": "Background Settings"
-}
-logger.ts:84 [2025-12-08T17:05:49.307Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "regenerate-section",
-  "label": "Regenerate Content"
-}
-logger.ts:84 [2025-12-08T17:05:49.307Z] DEBUG: 🎯 AdvancedActionsMenu rendered with props: {
-  "actions": 2,
-  "actionDetails": [
-    {
-      "id": "background-settings",
-      "label": "Background Settings",
-      "icon": "palette"
-    },
-    {
-      "id": "regenerate-section",
-      "label": "Regenerate Content",
-      "icon": "refresh",
-      "disabled": false
-    }
-  ],
-  "hasTriggerElement": true,
-  "toolbarType": "section",
-  "isVisible": true
-}
-logger.ts:84 [2025-12-08T17:05:49.307Z] DEBUG: 🎯 useAdvancedActionsMenu returning: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:49.307Z] DEBUG: 🎯 AdvancedActionsMenu received from hook: {
-  "groupedActionsLength": 1,
-  "groupedActions": [
-    {
-      "id": "default",
-      "actions": [
-        {
-          "id": "background-settings",
-          "label": "Background Settings",
-          "icon": "palette"
-        },
-        {
-          "id": "regenerate-section",
-          "label": "Regenerate Content",
-          "icon": "refresh",
-          "disabled": false
-        }
-      ]
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:49.308Z] DEBUG: 🎯 AdvancedActionsMenu rendering menu with: {
-  "position": {
-    "x": 1435,
-    "y": 169.359375,
-    "arrow": {
-      "side": "top",
-      "offset": 180
-    }
-  },
-  "groupedActionsCount": 1,
-  "groupedActionsDetails": [
-    {
-      "id": "default",
-      "actionCount": 2
-    }
-  ]
-}
-logger.ts:84 [2025-12-08T17:05:49.308Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "background-settings",
-  "label": "Background Settings"
-}
-logger.ts:84 [2025-12-08T17:05:49.308Z] DEBUG: 🎨 Rendering action: {
-  "actionId": "regenerate-section",
-  "label": "Regenerate Content"
-}
-logger.ts:84 [2025-12-08T17:05:49.308Z] DEBUG: 🎯 Combined ref set: {
-  "node": false,
-  "hookMenuRef": false,
-  "internalMenuRef": false
-}
-logger.ts:84 [2025-12-08T17:05:49.309Z] DEBUG: 🎯 Combined ref set: {
-  "node": true,
-  "hookMenuRef": true,
-  "internalMenuRef": true
-}
-logger.ts:84 [2025-12-08T17:05:49.310Z] DEBUG: 🎯 groupActions called with: [
-  {
-    "id": "background-settings",
-    "label": "Background Settings",
-    "icon": "palette"
-  },
-  {
-    "id": "regenerate-section",
-    "label": "Regenerate Content",
-    "icon": "refresh",
-    "disabled": false
-  }
-]
-logger.ts:84 [2025-12-08T17:05:49.311Z] DEBUG: 🎯 Groups map: [
-  [
-    "default",
-    [
-      {
-        "id": "background-settings",
-        "label": "Background Settings",
-        "icon": "palette"
-      },
-      {
-        "id": "regenerate-section",
-        "label": "Regenerate Content",
-        "icon": "refresh",
-        "disabled": false
-      }
-    ]
-  ]
-]
-logger.ts:84 [2025-12-08T17:05:49.311Z] DEBUG: 🎯 Final grouped actions: [
-  {
-    "id": "default",
-    "actions": [
-      {
-        "id": "background-settings",
-        "label": "Background Settings",
-        "icon": "palette"
-      },
-      {
-        "id": "regenerate-section",
-        "label": "Regenerate Content",
-        "icon": "refresh",
-        "disabled": false
-      }
-    ]
-  }
-]
-logger.ts:84 [2025-12-08T17:05:49.312Z] DEBUG: 🎯 Setting grouped actions: [
-  {
-    "id": "default",
-    "actions": [
-      {
-        "id": "background-settings",
-        "label": "Background Settings",
-        "icon": "palette"
-      },
-      {
-        "id": "regenerate-section",
-        "label": "Regenerate Content",
-        "icon": "refresh",
-        "disabled": false
-      }
-    ]
-  }
-]
-logger.ts:84 [2025-12-08T17:05:49.350Z] DEBUG: 🎨 Action clicked: background-settings
-logger.ts:84 [2025-12-08T17:05:49.350Z] DEBUG: 🎨 Executing handler for: background-settings
-logger.ts:95 [DEV] 🎯 SectionBackgroundModal render: {isOpen: true, sectionId: 'results-1765205653939'}
-logger.ts:84 [2025-12-08T17:05:49.352Z] DEBUG: 📊 Enhanced Pattern Metrics: {
-  "totalSections": 10,
-  "highlights": 2,
-  "neutrals": 8,
-  "dividers": 0,
-  "highlightRatio": "20%",
-  "maxConsecutive": 1,
-  "upgrades": 0,
-  "downgrades": 0,
-  "violations": 0,
-  "adjacencyViolations": 0
-}
-logger.ts:84 [2025-12-08T17:05:49.353Z] DEBUG: ✅ No rhythm or adjacency violations
-logger.ts:95 [DEV] 🎯 Background comparison: {sectionId: 'results-1765205653939', calculatedBackgroundType: 'neutral', storedBackgroundType: undefined, currentThemeColor: 'neutral', hasOnboardingData: true, …}
-logger.ts:95 [DEV] 🔧 currentBackground calculation: {hasCustomBackground: false, sectionBackgroundType: undefined, sectionBackgroundData: undefined, resultingCurrentBackground: {…}}
-logger.ts:95 [DEV] 🎯 Modal initialized with: {sectionId: 'results-1765205653939', finalThemeColor: 'neutral', localBackground: {…}, themeColors: {…}, sectionBackgroundType: undefined, …}
-logger.ts:95 [DEV] 🎯 SectionBackgroundModal render: {isOpen: true, sectionId: 'results-1765205653939'}
-logger.ts:84 [2025-12-08T17:05:49.354Z] DEBUG: 📊 Enhanced Pattern Metrics: {
-  "totalSections": 10,
-  "highlights": 2,
-  "neutrals": 8,
-  "dividers": 0,
-  "highlightRatio": "20%",
-  "maxConsecutive": 1,
-  "upgrades": 0,
-  "downgrades": 0,
-  "violations": 0,
-  "adjacencyViolations": 0
-}
-logger.ts:84 [2025-12-08T17:05:49.354Z] DEBUG: ✅ No rhythm or adjacency violations
-logger.ts:95 [DEV] 🎯 Background comparison: {sectionId: 'results-1765205653939', calculatedBackgroundType: 'neutral', storedBackgroundType: undefined, currentThemeColor: 'neutral', hasOnboardingData: true, …}
-logger.ts:95 [DEV] 🔧 currentBackground calculation: {hasCustomBackground: false, sectionBackgroundType: undefined, sectionBackgroundData: undefined, resultingCurrentBackground: {…}}
-logger.ts:95 [DEV] 🎯 Modal initialized with: {sectionId: 'results-1765205653939', finalThemeColor: 'neutral', localBackground: {…}, themeColors: {…}, sectionBackgroundType: undefined, …}
-logger.ts:84 [2025-12-08T17:05:49.357Z] DEBUG: 🎯 Combined ref set: {
-  "node": false,
-  "hookMenuRef": false,
-  "internalMenuRef": false
-}
-logger.ts:95 [DEV] 🔍 SectionToolbar[y8u1o0wg1] - showAdvanced changed to: false
-logger.ts:95 [DEV] 🎯 SectionBackgroundModal render: {isOpen: true, sectionId: 'results-1765205653939'}
-logger.ts:84 [2025-12-08T17:05:49.386Z] DEBUG: 📊 Enhanced Pattern Metrics: {
-  "totalSections": 10,
-  "highlights": 2,
-  "neutrals": 8,
-  "dividers": 0,
-  "highlightRatio": "20%",
-  "maxConsecutive": 1,
-  "upgrades": 0,
-  "downgrades": 0,
-  "violations": 0,
-  "adjacencyViolations": 0
-}
-logger.ts:84 [2025-12-08T17:05:49.387Z] DEBUG: ✅ No rhythm or adjacency violations
-logger.ts:95 [DEV] 🎯 Background comparison: {sectionId: 'results-1765205653939', calculatedBackgroundType: 'neutral', storedBackgroundType: undefined, currentThemeColor: 'neutral', hasOnboardingData: true, …}
-logger.ts:95 [DEV] 🔧 currentBackground calculation: {hasCustomBackground: false, sectionBackgroundType: undefined, sectionBackgroundData: undefined, resultingCurrentBackground: {…}}
-logger.ts:95 [DEV] 🎯 Modal initialized with: {sectionId: 'results-1765205653939', finalThemeColor: 'neutral', localBackground: {…}, themeColors: {…}, sectionBackgroundType: undefined, …}
-logger.ts:95 [DEV] 🎯 SectionBackgroundModal render: {isOpen: true, sectionId: 'results-1765205653939'}
-logger.ts:84 [2025-12-08T17:05:49.388Z] DEBUG: 📊 Enhanced Pattern Metrics: {
-  "totalSections": 10,
-  "highlights": 2,
-  "neutrals": 8,
-  "dividers": 0,
-  "highlightRatio": "20%",
-  "maxConsecutive": 1,
-  "upgrades": 0,
-  "downgrades": 0,
-  "violations": 0,
-  "adjacencyViolations": 0
-}
-logger.ts:84 [2025-12-08T17:05:49.388Z] DEBUG: ✅ No rhythm or adjacency violations
-logger.ts:95 [DEV] 🎯 Background comparison: {sectionId: 'results-1765205653939', calculatedBackgroundType: 'neutral', storedBackgroundType: undefined, currentThemeColor: 'neutral', hasOnboardingData: true, …}
-logger.ts:95 [DEV] 🔧 currentBackground calculation: {hasCustomBackground: false, sectionBackgroundType: undefined, sectionBackgroundData: undefined, resultingCurrentBackground: {…}}
-logger.ts:95 [DEV] 🎯 Modal initialized with: {sectionId: 'results-1765205653939', finalThemeColor: 'neutral', localBackground: {…}, themeColors: {…}, sectionBackgroundType: undefined, …}
-logger.ts:95 [DEV] 🎯 SectionBackgroundModal render: {isOpen: true, sectionId: 'results-1765205653939'}
-logger.ts:84 [2025-12-08T17:05:49.508Z] DEBUG: 📊 Enhanced Pattern Metrics: {
-  "totalSections": 10,
-  "highlights": 2,
-  "neutrals": 8,
-  "dividers": 0,
-  "highlightRatio": "20%",
-  "maxConsecutive": 1,
-  "upgrades": 0,
-  "downgrades": 0,
-  "violations": 0,
-  "adjacencyViolations": 0
-}
-logger.ts:84 [2025-12-08T17:05:49.509Z] DEBUG: ✅ No rhythm or adjacency violations
-logger.ts:95 [DEV] 🎯 Background comparison: {sectionId: 'results-1765205653939', calculatedBackgroundType: 'neutral', storedBackgroundType: undefined, currentThemeColor: 'neutral', hasOnboardingData: true, …}
-logger.ts:95 [DEV] 🔧 currentBackground calculation: {hasCustomBackground: false, sectionBackgroundType: undefined, sectionBackgroundData: undefined, resultingCurrentBackground: {…}}
-logger.ts:95 [DEV] 🎯 Modal initialized with: {sectionId: 'results-1765205653939', finalThemeColor: 'neutral', localBackground: {…}, themeColors: {…}, sectionBackgroundType: undefined, …}
-logger.ts:95 [DEV] 🎯 SectionBackgroundModal render: {isOpen: true, sectionId: 'results-1765205653939'}
-logger.ts:84 [2025-12-08T17:05:49.509Z] DEBUG: 📊 Enhanced Pattern Metrics: {
-  "totalSections": 10,
-  "highlights": 2,
-  "neutrals": 8,
-  "dividers": 0,
-  "highlightRatio": "20%",
-  "maxConsecutive": 1,
-  "upgrades": 0,
-  "downgrades": 0,
-  "violations": 0,
-  "adjacencyViolations": 0
-}
-logger.ts:84 [2025-12-08T17:05:49.510Z] DEBUG: ✅ No rhythm or adjacency violations
-logger.ts:95 [DEV] 🎯 Background comparison: {sectionId: 'results-1765205653939', calculatedBackgroundType: 'neutral', storedBackgroundType: undefined, currentThemeColor: 'neutral', hasOnboardingData: true, …}
-logger.ts:95 [DEV] 🔧 currentBackground calculation: {hasCustomBackground: false, sectionBackgroundType: undefined, sectionBackgroundData: undefined, resultingCurrentBackground: {…}}
-logger.ts:95 [DEV] 🎯 Modal initialized with: {sectionId: 'results-1765205653939', finalThemeColor: 'neutral', localBackground: {…}, themeColors: {…}, sectionBackgroundType: undefined, …}
-logger.ts:95 [DEV] 🎯 SectionBackgroundModal render: {isOpen: true, sectionId: 'results-1765205653939'}
-logger.ts:84 [2025-12-08T17:05:50.507Z] DEBUG: 📊 Enhanced Pattern Metrics: {
-  "totalSections": 10,
-  "highlights": 2,
-  "neutrals": 8,
-  "dividers": 0,
-  "highlightRatio": "20%",
-  "maxConsecutive": 1,
-  "upgrades": 0,
-  "downgrades": 0,
-  "violations": 0,
-  "adjacencyViolations": 0
-}
-logger.ts:84 [2025-12-08T17:05:50.507Z] DEBUG: ✅ No rhythm or adjacency violations
-logger.ts:95 [DEV] 🎯 Background comparison: {sectionId: 'results-1765205653939', calculatedBackgroundType: 'neutral', storedBackgroundType: undefined, currentThemeColor: 'neutral', hasOnboardingData: true, …}
-logger.ts:95 [DEV] 🔧 currentBackground calculation: {hasCustomBackground: false, sectionBackgroundType: undefined, sectionBackgroundData: undefined, resultingCurrentBackground: {…}}
-logger.ts:95 [DEV] 🎯 Modal initialized with: {sectionId: 'results-1765205653939', finalThemeColor: 'neutral', localBackground: {…}, themeColors: {…}, sectionBackgroundType: undefined, …}
-logger.ts:95 [DEV] 🎯 SectionBackgroundModal render: {isOpen: true, sectionId: 'results-1765205653939'}
-logger.ts:84 [2025-12-08T17:05:50.509Z] DEBUG: 📊 Enhanced Pattern Metrics: {
-  "totalSections": 10,
-  "highlights": 2,
-  "neutrals": 8,
-  "dividers": 0,
-  "highlightRatio": "20%",
-  "maxConsecutive": 1,
-  "upgrades": 0,
-  "downgrades": 0,
-  "violations": 0,
-  "adjacencyViolations": 0
-}
-logger.ts:84 [2025-12-08T17:05:50.509Z] DEBUG: ✅ No rhythm or adjacency violations
-logger.ts:95 [DEV] 🎯 Background comparison: {sectionId: 'results-1765205653939', calculatedBackgroundType: 'neutral', storedBackgroundType: undefined, currentThemeColor: 'neutral', hasOnboardingData: true, …}
-logger.ts:95 [DEV] 🔧 currentBackground calculation: {hasCustomBackground: false, sectionBackgroundType: undefined, sectionBackgroundData: undefined, resultingCurrentBackground: {…}}
-logger.ts:95 [DEV] 🎯 Modal initialized with: {sectionId: 'results-1765205653939', finalThemeColor: 'neutral', localBackground: {…}, themeColors: {…}, sectionBackgroundType: undefined, …}
-logger.ts:95 [DEV] 🎯 SectionBackgroundModal render: {isOpen: true, sectionId: 'results-1765205653939'}
-logger.ts:84 [2025-12-08T17:05:50.684Z] DEBUG: 📊 Enhanced Pattern Metrics: {
-  "totalSections": 10,
-  "highlights": 2,
-  "neutrals": 8,
-  "dividers": 0,
-  "highlightRatio": "20%",
-  "maxConsecutive": 1,
-  "upgrades": 0,
-  "downgrades": 0,
-  "violations": 0,
-  "adjacencyViolations": 0
-}
-logger.ts:84 [2025-12-08T17:05:50.685Z] DEBUG: ✅ No rhythm or adjacency violations
-logger.ts:95 [DEV] 🎯 Background comparison: {sectionId: 'results-1765205653939', calculatedBackgroundType: 'neutral', storedBackgroundType: undefined, currentThemeColor: 'neutral', hasOnboardingData: true, …}
-logger.ts:95 [DEV] 🔧 currentBackground calculation: {hasCustomBackground: false, sectionBackgroundType: undefined, sectionBackgroundData: undefined, resultingCurrentBackground: {…}}
-logger.ts:95 [DEV] 🎯 Modal initialized with: {sectionId: 'results-1765205653939', finalThemeColor: 'neutral', localBackground: {…}, themeColors: {…}, sectionBackgroundType: undefined, …}
-logger.ts:95 [DEV] 🎯 SectionBackgroundModal render: {isOpen: true, sectionId: 'results-1765205653939'}
-logger.ts:84 [2025-12-08T17:05:50.686Z] DEBUG: 📊 Enhanced Pattern Metrics: {
-  "totalSections": 10,
-  "highlights": 2,
-  "neutrals": 8,
-  "dividers": 0,
-  "highlightRatio": "20%",
-  "maxConsecutive": 1,
-  "upgrades": 0,
-  "downgrades": 0,
-  "violations": 0,
-  "adjacencyViolations": 0
-}
-logger.ts:84 [2025-12-08T17:05:50.686Z] DEBUG: ✅ No rhythm or adjacency violations
-logger.ts:95 [DEV] 🎯 Background comparison: {sectionId: 'results-1765205653939', calculatedBackgroundType: 'neutral', storedBackgroundType: undefined, currentThemeColor: 'neutral', hasOnboardingData: true, …}
-logger.ts:95 [DEV] 🔧 currentBackground calculation: {hasCustomBackground: false, sectionBackgroundType: undefined, sectionBackgroundData: undefined, resultingCurrentBackground: {…}}
-logger.ts:95 [DEV] 🎯 Modal initialized with: {sectionId: 'results-1765205653939', finalThemeColor: 'neutral', localBackground: {…}, themeColors: {…}, sectionBackgroundType: undefined, …}
-logger.ts:95 [DEV] 🔥 Apply clicked! {sectionId: 'results-1765205653939', localBackground: {…}, backgroundType: 'theme', themeColor: 'secondary', customBackground: undefined, …}
+logger.ts:84 [2025-12-11T15:01:54.632Z] DEBUG: 🔍 Validating CTA stand-out: {
+  "ctaColor": "bg-teal-300",
+  "background": "#111827"
+}
+logger.ts:84 [2025-12-11T15:01:54.632Z] DEBUG: ✅ Stand-out result: {
+  "ratio": 0,
+  "score": 0,
+  "level": "poor",
+  "message": "CTAs might blend in ⚠️"
+}
+logger.ts:84 [2025-12-11T15:01:55.043Z] DEBUG: 🔍 Validating CTA stand-out: {
+  "ctaColor": "bg-teal-300",
+  "background": "#111827"
+}
+logger.ts:84 [2025-12-11T15:01:55.043Z] DEBUG: ✅ Stand-out result: {
+  "ratio": 0,
+  "score": 0,
+  "level": "poor",
+  "message": "CTAs might blend in ⚠️"
+}
+ColorSystemModalMVP.tsx:339 🔧 handleThemeSelect called: {newTheme: 'cool', currentTheme: 'neutral'}
+ ✅ updateTheme called with: {uiBlockTheme: 'cool'}
+ [2025-12-11T15:01:57.344Z] DEBUG: 🔍 LeftPanel Store Methods Available: {
+  "regenerateAllContent": true,
+  "hasStore": true,
+  "hasStoreState": true,
+  "storeMethodKeys": [
+    "regenerateSection",
+    "regenerateElement",
+    "regenerateAllContent",
+    "regenerateElementWithVariations",
+    "regenerateVariables",
+    "regenerateContentOnly",
+    "regenerateDesignAndCopy",
+    "regenerateWithInputs"
+  ]
+}
+ [2025-12-11T15:01:57.345Z] DEBUG: 🔍 LeftPanel Store Methods Available: {
+  "regenerateAllContent": true,
+  "hasStore": true,
+  "hasStoreState": true,
+  "storeMethodKeys": [
+    "regenerateSection",
+    "regenerateElement",
+    "regenerateAllContent",
+    "regenerateElementWithVariations",
+    "regenerateVariables",
+    "regenerateContentOnly",
+    "regenerateDesignAndCopy",
+    "regenerateWithInputs"
+  ]
+}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'header', context: {…}, validatedFieldsKeys: Array(7)}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'header', context: {…}, validatedFieldsKeys: Array(7)}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] header computing 7 live exclusions (stored=0): {excludedCount: 7, excludedElements: Array(7), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] header passing exclusions to extractLayoutContent: {layout: 'NavWithCTAHeader', excludedElementsLength: 7, excludedElements: Array(7), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_1" is undefined {layout: 'NavWithCTAHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
+ [DEV] ✅ MANDATORY: Using default for mandatory element "nav_item_1": Home
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_2" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_item_2" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_3" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_item_3" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_4" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_item_4" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "nav_item_5" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "nav_item_6" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_link_1" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_link_2" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_link_3" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_link_4" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "nav_link_5" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "nav_link_6" not in schema or excluded - will not appear in UI 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] header computing 7 live exclusions (stored=0): {excludedCount: 7, excludedElements: Array(7), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] header passing exclusions to extractLayoutContent: {layout: 'NavWithCTAHeader', excludedElementsLength: 7, excludedElements: Array(7), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_1" is undefined {layout: 'NavWithCTAHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
+ [DEV] ✅ MANDATORY: Using default for mandatory element "nav_item_1": Home
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_2" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_item_2" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_3" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_item_3" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_4" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_item_4" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "nav_item_5" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "nav_item_6" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_link_1" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_link_2" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_link_3" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_link_4" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "nav_link_5" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "nav_link_6" not in schema or excluded - will not appear in UI 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'header', sectionType: 'NavWithCTAHeader', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'header', sectionType: 'NavWithCTAHeader', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'hero', context: {…}, validatedFieldsKeys: Array(7)}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'hero', context: {…}, validatedFieldsKeys: Array(7)}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] hero computing 15 live exclusions (stored=0): {excludedCount: 15, excludedElements: Array(15), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] hero passing exclusions to extractLayoutContent: {layout: 'centerStacked', excludedElementsLength: 15, excludedElements: Array(15), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "badge_text" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_items" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_4" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_5" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "customer_count" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "rating_value" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "rating_count" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "show_social_proof" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "show_customer_avatars" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "avatar_count" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "customer_names" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "avatar_urls" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+ ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+ 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+ ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+ [DEV] 🧮 [COMPUTED_EXCLUSION] hero computing 15 live exclusions (stored=0): {excludedCount: 15, excludedElements: Array(15), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] hero passing exclusions to extractLayoutContent: {layout: 'centerStacked', excludedElementsLength: 15, excludedElements: Array(15), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "badge_text" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_items" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_4" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_5" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "customer_count" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "rating_value" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "rating_count" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "show_social_proof" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "show_customer_avatars" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "avatar_count" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "customer_names" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "avatar_urls" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'hero', sectionType: 'CenterStacked', backgroundType: 'primary', backgroundValue: '#111827'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'hero', sectionType: 'CenterStacked', backgroundType: 'primary', backgroundValue: '#111827'}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'problem', context: {…}, validatedFieldsKeys: Array(7)}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'problem', context: {…}, validatedFieldsKeys: Array(7)}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] problem computing 6 live exclusions (stored=0): {excludedCount: 6, excludedElements: Array(6), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] problem passing exclusions to extractLayoutContent: {layout: 'StackedPainBullets', excludedElementsLength: 6, excludedElements: Array(6), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_1" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "pain_icon_1" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_5" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "pain_icon_5" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_6" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "pain_icon_6" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+ ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+ 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+ ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+ [DEV] 🧮 [COMPUTED_EXCLUSION] problem computing 6 live exclusions (stored=0): {excludedCount: 6, excludedElements: Array(6), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] problem passing exclusions to extractLayoutContent: {layout: 'StackedPainBullets', excludedElementsLength: 6, excludedElements: Array(6), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_1" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "pain_icon_1" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_5" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "pain_icon_5" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_6" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "pain_icon_6" - will not appear in UI (exclusion enforced) 
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+logger.ts:95 [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'problem', sectionType: 'StackedPainBullets', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+logger.ts:95 [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'problem', sectionType: 'StackedPainBullets', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+EditablePageRenderer.tsx:288 ✅ EditablePageRenderer: Built userContext {sectionId: 'results-1765205653939', context: {…}, validatedFieldsKeys: Array(7)}
+EditablePageRenderer.tsx:288 ✅ EditablePageRenderer: Built userContext {sectionId: 'results-1765205653939', context: {…}, validatedFieldsKeys: Array(7)}
+logger.ts:95 [DEV] 🧮 [COMPUTED_EXCLUSION] results-1765205653939 computing 3 live exclusions (stored=0): {excludedCount: 3, excludedElements: Array(3), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+logger.ts:95 [DEV] 🔄 [EXTRACT_CONTENT] results-1765205653939 passing exclusions to extractLayoutContent: {layout: 'OutcomeIcons', excludedElementsLength: 3, excludedElements: Array(3), hasExclusions: true}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+selectUIBlockThemeFromTags.ts:38 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+selectUIBlockThemeFromTags.ts:70 ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+selectUIBlockThemeFromTags.ts:38 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+selectUIBlockThemeFromTags.ts:70 ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+logger.ts:95 [DEV] 🧮 [COMPUTED_EXCLUSION] results-1765205653939 computing 3 live exclusions (stored=0): {excludedCount: 3, excludedElements: Array(3), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+logger.ts:95 [DEV] 🔄 [EXTRACT_CONTENT] results-1765205653939 passing exclusions to extractLayoutContent: {layout: 'OutcomeIcons', excludedElementsLength: 3, excludedElements: Array(3), hasExclusions: true}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+EditablePageRenderer.tsx:288 ✅ EditablePageRenderer: Built userContext {sectionId: 'features-1765206233108', context: {…}, validatedFieldsKeys: Array(7)}
+EditablePageRenderer.tsx:288 ✅ EditablePageRenderer: Built userContext {sectionId: 'features-1765206233108', context: {…}, validatedFieldsKeys: Array(7)}
+logger.ts:95 [DEV] 🧮 [COMPUTED_EXCLUSION] features-1765206233108 computing 1 live exclusions (stored=0): {excludedCount: 1, excludedElements: Array(1), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+logger.ts:95 [DEV] 🔄 [EXTRACT_CONTENT] features-1765206233108 passing exclusions to extractLayoutContent: {layout: 'IconGrid', excludedElementsLength: 1, excludedElements: Array(1), hasExclusions: true}
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "icon_7" is undefined {layout: 'IconGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🚫 SKIPPED: Element "icon_7" not in schema or excluded - will not appear in UI 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "icon_8" is undefined {layout: 'IconGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🚫 SKIPPED: Element "icon_8" not in schema or excluded - will not appear in UI 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "icon_9" is undefined {layout: 'IconGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🚫 SKIPPED: Element "icon_9" not in schema or excluded - will not appear in UI 
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+selectUIBlockThemeFromTags.ts:38 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+selectUIBlockThemeFromTags.ts:70 ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+selectUIBlockThemeFromTags.ts:38 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+selectUIBlockThemeFromTags.ts:70 ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+logger.ts:95 [DEV] 🧮 [COMPUTED_EXCLUSION] features-1765206233108 computing 1 live exclusions (stored=0): {excludedCount: 1, excludedElements: Array(1), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+logger.ts:95 [DEV] 🔄 [EXTRACT_CONTENT] features-1765206233108 passing exclusions to extractLayoutContent: {layout: 'IconGrid', excludedElementsLength: 1, excludedElements: Array(1), hasExclusions: true}
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "icon_7" is undefined {layout: 'IconGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🚫 SKIPPED: Element "icon_7" not in schema or excluded - will not appear in UI 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "icon_8" is undefined {layout: 'IconGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🚫 SKIPPED: Element "icon_8" not in schema or excluded - will not appear in UI 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "icon_9" is undefined {layout: 'IconGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🚫 SKIPPED: Element "icon_9" not in schema or excluded - will not appear in UI 
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+logger.ts:95 [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'features-1765206233108', sectionType: 'IconGrid', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+logger.ts:95 [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'features-1765206233108', sectionType: 'IconGrid', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+EditablePageRenderer.tsx:288 ✅ EditablePageRenderer: Built userContext {sectionId: 'howItWorks', context: {…}, validatedFieldsKeys: Array(7)}
+EditablePageRenderer.tsx:288 ✅ EditablePageRenderer: Built userContext {sectionId: 'howItWorks', context: {…}, validatedFieldsKeys: Array(7)}
+logger.ts:95 [DEV] 🧮 [COMPUTED_EXCLUSION] howItWorks computing 14 live exclusions (stored=0): {excludedCount: 14, excludedElements: Array(14), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+logger.ts:95 [DEV] 🔄 [EXTRACT_CONTENT] howItWorks passing exclusions to extractLayoutContent: {layout: 'AccordionSteps', excludedElementsLength: 14, excludedElements: Array(14), hasExclusions: true}
+logger.ts:95 [DEV] 🎯 extractLayoutContent: Found existing "step_titles": {elementValue: {…}, layout: 'AccordionSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'API Integration & Setup|Data Migration & Validation|Custom Configuration|Testing & Deployment'}
+logger.ts:95 [DEV] 🎯 extractLayoutContent: Found existing "step_descriptions": {elementValue: {…}, layout: 'AccordionSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'Seamlessly integrate with your existing systems us…ting and deploy to production with zero downtime.'}
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "supporting_text" - will not appear in UI (exclusion enforced) 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "trust_items" - will not appear in UI (exclusion enforced) 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "tech_specs_heading" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "tech_specs_heading" - will not appear in UI (exclusion enforced) 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_1_value" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "tech_spec_1_value" - will not appear in UI (exclusion enforced) 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_1_label" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "tech_spec_1_label" - will not appear in UI (exclusion enforced) 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_2_value" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "tech_spec_2_value" - will not appear in UI (exclusion enforced) 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_2_label" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "tech_spec_2_label" - will not appear in UI (exclusion enforced) 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_3_value" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "tech_spec_3_value" - will not appear in UI (exclusion enforced) 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_3_label" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "tech_spec_3_label" - will not appear in UI (exclusion enforced) 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "tech_specs_description" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "tech_specs_description" - will not appear in UI (exclusion enforced) 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "show_step_indicators" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "show_step_indicators" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_tech_specs" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "show_tech_specs" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+ ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+ 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+ ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+ [DEV] 🧮 [COMPUTED_EXCLUSION] howItWorks computing 14 live exclusions (stored=0): {excludedCount: 14, excludedElements: Array(14), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] howItWorks passing exclusions to extractLayoutContent: {layout: 'AccordionSteps', excludedElementsLength: 14, excludedElements: Array(14), hasExclusions: true}
+ [DEV] 🎯 extractLayoutContent: Found existing "step_titles": {elementValue: {…}, layout: 'AccordionSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'API Integration & Setup|Data Migration & Validation|Custom Configuration|Testing & Deployment'}
+ [DEV] 🎯 extractLayoutContent: Found existing "step_descriptions": {elementValue: {…}, layout: 'AccordionSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'Seamlessly integrate with your existing systems us…ting and deploy to production with zero downtime.'}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "supporting_text" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_items" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_specs_heading" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_specs_heading" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_1_value" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_1_value" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_1_label" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_1_label" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_2_value" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_2_value" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_2_label" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_2_label" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_3_value" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_3_value" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_3_label" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_3_label" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_specs_description" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_specs_description" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_step_indicators" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "show_step_indicators" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_tech_specs" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "show_tech_specs" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'howItWorks', sectionType: 'AccordionSteps', backgroundType: 'neutral', backgroundValue: '#5c6475'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'howItWorks', sectionType: 'AccordionSteps', backgroundType: 'neutral', backgroundValue: '#5c6475'}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'founderNote', context: {…}, validatedFieldsKeys: Array(7)}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'founderNote', context: {…}, validatedFieldsKeys: Array(7)}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] founderNote computing 2 live exclusions (stored=0): {excludedCount: 2, excludedElements: Array(2), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] founderNote passing exclusions to extractLayoutContent: {layout: 'FounderCardWithQuote', excludedElementsLength: 2, excludedElements: Array(2), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "founder_bio" is undefined {layout: 'FounderCardWithQuote', isMandatory: false, isInSchema: true, isExcluded: false, hasLayout: true, …}
+ [DEV] ✨ OPTIONAL: Using default for included optional element "founder_bio": 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] founderNote computing 2 live exclusions (stored=0): {excludedCount: 2, excludedElements: Array(2), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] founderNote passing exclusions to extractLayoutContent: {layout: 'FounderCardWithQuote', excludedElementsLength: 2, excludedElements: Array(2), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "founder_bio" is undefined {layout: 'FounderCardWithQuote', isMandatory: false, isInSchema: true, isExcluded: false, hasLayout: true, …}
+ [DEV] ✨ OPTIONAL: Using default for included optional element "founder_bio": 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'founderNote', sectionType: 'FounderCardWithQuote', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'founderNote', sectionType: 'FounderCardWithQuote', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'faq-1765207774746', context: {…}, validatedFieldsKeys: Array(7)}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'faq-1765207774746', context: {…}, validatedFieldsKeys: Array(7)}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] faq-1765207774746 computing 19 live exclusions (stored=0): {excludedCount: 19, excludedElements: Array(19), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] faq-1765207774746 passing exclusions to extractLayoutContent: {layout: 'AccordionFAQ', excludedElementsLength: 19, excludedElements: Array(19), hasExclusions: true}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#d5d7dd]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#d5d7dd]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#d5d7dd]'}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] faq-1765207774746 computing 19 live exclusions (stored=0): {excludedCount: 19, excludedElements: Array(19), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] faq-1765207774746 passing exclusions to extractLayoutContent: {layout: 'AccordionFAQ', excludedElementsLength: 19, excludedElements: Array(19), hasExclusions: true}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#d5d7dd]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#d5d7dd]'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#d5d7dd]'}
+logger.ts:95 [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'faq-1765207774746', sectionType: 'AccordionFAQ', backgroundType: 'neutral', backgroundValue: '#d5d7dd'}
+logger.ts:95 [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'faq-1765207774746', sectionType: 'AccordionFAQ', backgroundType: 'neutral', backgroundValue: '#d5d7dd'}
+EditablePageRenderer.tsx:288 ✅ EditablePageRenderer: Built userContext {sectionId: 'cta', context: {…}, validatedFieldsKeys: Array(7)}
+EditablePageRenderer.tsx:288 ✅ EditablePageRenderer: Built userContext {sectionId: 'cta', context: {…}, validatedFieldsKeys: Array(7)}
+logger.ts:95 [DEV] 🧮 [COMPUTED_EXCLUSION] cta computing 6 live exclusions (stored=0): {excludedCount: 6, excludedElements: Array(6), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+logger.ts:95 [DEV] 🔄 [EXTRACT_CONTENT] cta passing exclusions to extractLayoutContent: {layout: 'VisualCTAWithMockup', excludedElementsLength: 6, excludedElements: Array(6), hasExclusions: true}
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "secondary_cta" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "secondary_cta" - will not appear in UI (exclusion enforced) 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "mockup_image" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "mockup_image" - will not appear in UI (exclusion enforced) 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "trust_item_3" - will not appear in UI (exclusion enforced) 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "trust_item_4" - will not appear in UI (exclusion enforced) 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "trust_item_5" - will not appear in UI (exclusion enforced) 
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+logger.ts:95 [DEV] 🧮 [COMPUTED_EXCLUSION] cta computing 6 live exclusions (stored=0): {excludedCount: 6, excludedElements: Array(6), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+logger.ts:95 [DEV] 🔄 [EXTRACT_CONTENT] cta passing exclusions to extractLayoutContent: {layout: 'VisualCTAWithMockup', excludedElementsLength: 6, excludedElements: Array(6), hasExclusions: true}
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "secondary_cta" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "secondary_cta" - will not appear in UI (exclusion enforced) 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "mockup_image" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "mockup_image" - will not appear in UI (exclusion enforced) 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "trust_item_3" - will not appear in UI (exclusion enforced) 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "trust_item_4" - will not appear in UI (exclusion enforced) 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "trust_item_5" - will not appear in UI (exclusion enforced) 
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+logger.ts:95 [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'cta', sectionType: 'VisualCTAWithMockup', backgroundType: 'primary', backgroundValue: '#111827'}
+logger.ts:95 [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'cta', sectionType: 'VisualCTAWithMockup', backgroundType: 'primary', backgroundValue: '#111827'}
+EditablePageRenderer.tsx:288 ✅ EditablePageRenderer: Built userContext {sectionId: 'footer', context: {…}, validatedFieldsKeys: Array(7)}
+EditablePageRenderer.tsx:288 ✅ EditablePageRenderer: Built userContext {sectionId: 'footer', context: {…}, validatedFieldsKeys: Array(7)}
+logger.ts:95 [DEV] 🧮 [COMPUTED_EXCLUSION] footer computing 6 live exclusions (stored=0): {excludedCount: 6, excludedElements: Array(6), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+logger.ts:95 [DEV] 🔄 [EXTRACT_CONTENT] footer passing exclusions to extractLayoutContent: {layout: 'SimpleFooter', excludedElementsLength: 6, excludedElements: Array(6), hasExclusions: true}
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "copyright" is undefined {layout: 'SimpleFooter', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] ✅ MANDATORY: Using default for mandatory element "copyright": © 2025 Your Company. All rights reserved.
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+logger.ts:95 [DEV] 🧮 [COMPUTED_EXCLUSION] footer computing 6 live exclusions (stored=0): {excludedCount: 6, excludedElements: Array(6), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+logger.ts:95 [DEV] 🔄 [EXTRACT_CONTENT] footer passing exclusions to extractLayoutContent: {layout: 'SimpleFooter', excludedElementsLength: 6, excludedElements: Array(6), hasExclusions: true}
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "copyright" is undefined {layout: 'SimpleFooter', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] ✅ MANDATORY: Using default for mandatory element "copyright": © 2025 Your Company. All rights reserved.
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+logger.ts:95 [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'footer', sectionType: 'SimpleFooter', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+logger.ts:95 [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'footer', sectionType: 'SimpleFooter', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+ColorSystemModalMVP.tsx:40 🔍 ColorSystemModalMVP updateTheme check: {updateThemeType: 'function', updateThemeDefined: true, updateThemeName: 'updateTheme', themeUiBlock: 'cool'}
+logger.ts:84 [2025-12-11T15:01:57.435Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+EnhancedAddSection.tsx:41 EnhancedAddSection mounted {position: 'between', afterSectionId: 'header', existingSectionsCount: 10, hasOnAddSection: true}
+logger.ts:84 [2025-12-11T15:01:57.436Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+EnhancedAddSection.tsx:41 EnhancedAddSection mounted {position: 'between', afterSectionId: 'hero', existingSectionsCount: 10, hasOnAddSection: true}
+logger.ts:84 [2025-12-11T15:01:57.438Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+EnhancedAddSection.tsx:41 EnhancedAddSection mounted {position: 'between', afterSectionId: 'problem', existingSectionsCount: 10, hasOnAddSection: true}
+OutcomeIcons.tsx:247 🎨 OutcomeIcons theme detection: {sectionId: 'results-1765205653939', hasManualOverride: false, manualTheme: undefined, hasUserContext: true, userContext: {…}, …}
+logger.ts:84 [2025-12-11T15:01:57.440Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+EnhancedAddSection.tsx:41 EnhancedAddSection mounted {position: 'between', afterSectionId: 'results-1765205653939', existingSectionsCount: 10, hasOnAddSection: true}
+IconGrid.tsx:283 🎨 IconGrid theme detection: {sectionId: 'features-1765206233108', hasManualOverride: false, manualTheme: undefined, hasUserContext: true, userContext: {…}, …}
+logger.ts:84 [2025-12-11T15:01:57.442Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+EnhancedAddSection.tsx:41 EnhancedAddSection mounted {position: 'between', afterSectionId: 'features-1765206233108', existingSectionsCount: 10, hasOnAddSection: true}
+AccordionSteps.tsx:145 🎨 AccordionSteps theme detection: {sectionId: 'howItWorks', hasManualOverride: false, manualTheme: undefined, hasUserContext: true, userContext: {…}, …}
+logger.ts:84 [2025-12-11T15:01:57.443Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+EnhancedAddSection.tsx:41 EnhancedAddSection mounted {position: 'between', afterSectionId: 'howItWorks', existingSectionsCount: 10, hasOnAddSection: true}
+logger.ts:84 [2025-12-11T15:01:57.444Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+EnhancedAddSection.tsx:41 EnhancedAddSection mounted {position: 'between', afterSectionId: 'founderNote', existingSectionsCount: 10, hasOnAddSection: true}
+logger.ts:84 [2025-12-11T15:01:57.446Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+EnhancedAddSection.tsx:41 EnhancedAddSection mounted {position: 'between', afterSectionId: 'faq-1765207774746', existingSectionsCount: 10, hasOnAddSection: true}
+logger.ts:84 [2025-12-11T15:01:57.447Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+EnhancedAddSection.tsx:41 EnhancedAddSection mounted {position: 'between', afterSectionId: 'cta', existingSectionsCount: 10, hasOnAddSection: true}
+logger.ts:84 [2025-12-11T15:01:57.448Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+EnhancedAddSection.tsx:41 EnhancedAddSection mounted {position: 'end', afterSectionId: 'footer', existingSectionsCount: 10, hasOnAddSection: true}
+logger.ts:84 [2025-12-11T15:02:00.458Z] DEBUG: 🔍 LeftPanel Store Methods Available: {
+  "regenerateAllContent": true,
+  "hasStore": true,
+  "hasStoreState": true,
+  "storeMethodKeys": [
+    "regenerateSection",
+    "regenerateElement",
+    "regenerateAllContent",
+    "regenerateElementWithVariations",
+    "regenerateVariables",
+    "regenerateContentOnly",
+    "regenerateDesignAndCopy",
+    "regenerateWithInputs"
+  ]
+}
+logger.ts:84 [2025-12-11T15:02:00.459Z] DEBUG: 🔍 LeftPanel Store Methods Available: {
+  "regenerateAllContent": true,
+  "hasStore": true,
+  "hasStoreState": true,
+  "storeMethodKeys": [
+    "regenerateSection",
+    "regenerateElement",
+    "regenerateAllContent",
+    "regenerateElementWithVariations",
+    "regenerateVariables",
+    "regenerateContentOnly",
+    "regenerateDesignAndCopy",
+    "regenerateWithInputs"
+  ]
+}
+EditablePageRenderer.tsx:288 ✅ EditablePageRenderer: Built userContext {sectionId: 'header', context: {…}, validatedFieldsKeys: Array(7)}
+EditablePageRenderer.tsx:288 ✅ EditablePageRenderer: Built userContext {sectionId: 'header', context: {…}, validatedFieldsKeys: Array(7)}
+logger.ts:95 [DEV] 🧮 [COMPUTED_EXCLUSION] header computing 7 live exclusions (stored=0): {excludedCount: 7, excludedElements: Array(7), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+logger.ts:95 [DEV] 🔄 [EXTRACT_CONTENT] header passing exclusions to extractLayoutContent: {layout: 'NavWithCTAHeader', excludedElementsLength: 7, excludedElements: Array(7), hasExclusions: true}
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_1" is undefined {layout: 'NavWithCTAHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] ✅ MANDATORY: Using default for mandatory element "nav_item_1": Home
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_2" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "nav_item_2" - will not appear in UI (exclusion enforced) 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_3" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "nav_item_3" - will not appear in UI (exclusion enforced) 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_4" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "nav_item_4" - will not appear in UI (exclusion enforced) 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🚫 SKIPPED: Element "nav_item_5" not in schema or excluded - will not appear in UI 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🚫 SKIPPED: Element "nav_item_6" not in schema or excluded - will not appear in UI 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "nav_link_1" - will not appear in UI (exclusion enforced) 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "nav_link_2" - will not appear in UI (exclusion enforced) 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "nav_link_3" - will not appear in UI (exclusion enforced) 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "nav_link_4" - will not appear in UI (exclusion enforced) 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🚫 SKIPPED: Element "nav_link_5" not in schema or excluded - will not appear in UI 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🚫 SKIPPED: Element "nav_link_6" not in schema or excluded - will not appear in UI 
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+logger.ts:95 [DEV] 🧮 [COMPUTED_EXCLUSION] header computing 7 live exclusions (stored=0): {excludedCount: 7, excludedElements: Array(7), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+logger.ts:95 [DEV] 🔄 [EXTRACT_CONTENT] header passing exclusions to extractLayoutContent: {layout: 'NavWithCTAHeader', excludedElementsLength: 7, excludedElements: Array(7), hasExclusions: true}
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_1" is undefined {layout: 'NavWithCTAHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] ✅ MANDATORY: Using default for mandatory element "nav_item_1": Home
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_2" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "nav_item_2" - will not appear in UI (exclusion enforced) 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_3" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "nav_item_3" - will not appear in UI (exclusion enforced) 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_4" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "nav_item_4" - will not appear in UI (exclusion enforced) 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🚫 SKIPPED: Element "nav_item_5" not in schema or excluded - will not appear in UI 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🚫 SKIPPED: Element "nav_item_6" not in schema or excluded - will not appear in UI 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "nav_link_1" - will not appear in UI (exclusion enforced) 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "nav_link_2" - will not appear in UI (exclusion enforced) 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "nav_link_3" - will not appear in UI (exclusion enforced) 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "nav_link_4" - will not appear in UI (exclusion enforced) 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🚫 SKIPPED: Element "nav_link_5" not in schema or excluded - will not appear in UI 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🚫 SKIPPED: Element "nav_link_6" not in schema or excluded - will not appear in UI 
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+logger.ts:95 [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'header', sectionType: 'NavWithCTAHeader', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+logger.ts:95 [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'header', sectionType: 'NavWithCTAHeader', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+EditablePageRenderer.tsx:288 ✅ EditablePageRenderer: Built userContext {sectionId: 'hero', context: {…}, validatedFieldsKeys: Array(7)}
+EditablePageRenderer.tsx:288 ✅ EditablePageRenderer: Built userContext {sectionId: 'hero', context: {…}, validatedFieldsKeys: Array(7)}
+logger.ts:95 [DEV] 🧮 [COMPUTED_EXCLUSION] hero computing 15 live exclusions (stored=0): {excludedCount: 15, excludedElements: Array(15), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+logger.ts:95 [DEV] 🔄 [EXTRACT_CONTENT] hero passing exclusions to extractLayoutContent: {layout: 'centerStacked', excludedElementsLength: 15, excludedElements: Array(15), hasExclusions: true}
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "badge_text" - will not appear in UI (exclusion enforced) 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ EXCLUDED: Skipping element "trust_items" - will not appear in UI (exclusion enforced) 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_4" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_5" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "customer_count" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "rating_value" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "rating_count" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "show_social_proof" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "show_customer_avatars" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "avatar_count" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "customer_names" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "avatar_urls" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+ ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+ 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+ ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+ [DEV] 🧮 [COMPUTED_EXCLUSION] hero computing 15 live exclusions (stored=0): {excludedCount: 15, excludedElements: Array(15), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] hero passing exclusions to extractLayoutContent: {layout: 'centerStacked', excludedElementsLength: 15, excludedElements: Array(15), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "badge_text" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_items" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_4" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_5" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "customer_count" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "rating_value" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "rating_count" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "show_social_proof" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "show_customer_avatars" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "avatar_count" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "customer_names" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "avatar_urls" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'hero', sectionType: 'CenterStacked', backgroundType: 'primary', backgroundValue: '#111827'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'hero', sectionType: 'CenterStacked', backgroundType: 'primary', backgroundValue: '#111827'}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'problem', context: {…}, validatedFieldsKeys: Array(7)}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'problem', context: {…}, validatedFieldsKeys: Array(7)}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] problem computing 6 live exclusions (stored=0): {excludedCount: 6, excludedElements: Array(6), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] problem passing exclusions to extractLayoutContent: {layout: 'StackedPainBullets', excludedElementsLength: 6, excludedElements: Array(6), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_1" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "pain_icon_1" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_5" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "pain_icon_5" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_6" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "pain_icon_6" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+ ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+ 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+ ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+ [DEV] 🧮 [COMPUTED_EXCLUSION] problem computing 6 live exclusions (stored=0): {excludedCount: 6, excludedElements: Array(6), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] problem passing exclusions to extractLayoutContent: {layout: 'StackedPainBullets', excludedElementsLength: 6, excludedElements: Array(6), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_1" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "pain_icon_1" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_5" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "pain_icon_5" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_6" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "pain_icon_6" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'problem', sectionType: 'StackedPainBullets', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'problem', sectionType: 'StackedPainBullets', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'results-1765205653939', context: {…}, validatedFieldsKeys: Array(7)}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'results-1765205653939', context: {…}, validatedFieldsKeys: Array(7)}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] results-1765205653939 computing 3 live exclusions (stored=0): {excludedCount: 3, excludedElements: Array(3), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] results-1765205653939 passing exclusions to extractLayoutContent: {layout: 'OutcomeIcons', excludedElementsLength: 3, excludedElements: Array(3), hasExclusions: true}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+ ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+ 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+ ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+ [DEV] 🧮 [COMPUTED_EXCLUSION] results-1765205653939 computing 3 live exclusions (stored=0): {excludedCount: 3, excludedElements: Array(3), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] results-1765205653939 passing exclusions to extractLayoutContent: {layout: 'OutcomeIcons', excludedElementsLength: 3, excludedElements: Array(3), hasExclusions: true}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'features-1765206233108', context: {…}, validatedFieldsKeys: Array(7)}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'features-1765206233108', context: {…}, validatedFieldsKeys: Array(7)}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] features-1765206233108 computing 1 live exclusions (stored=0): {excludedCount: 1, excludedElements: Array(1), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] features-1765206233108 passing exclusions to extractLayoutContent: {layout: 'IconGrid', excludedElementsLength: 1, excludedElements: Array(1), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "icon_7" is undefined {layout: 'IconGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "icon_7" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "icon_8" is undefined {layout: 'IconGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "icon_8" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "icon_9" is undefined {layout: 'IconGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "icon_9" not in schema or excluded - will not appear in UI 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+ ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+ 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+ ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+ [DEV] 🧮 [COMPUTED_EXCLUSION] features-1765206233108 computing 1 live exclusions (stored=0): {excludedCount: 1, excludedElements: Array(1), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] features-1765206233108 passing exclusions to extractLayoutContent: {layout: 'IconGrid', excludedElementsLength: 1, excludedElements: Array(1), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "icon_7" is undefined {layout: 'IconGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "icon_7" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "icon_8" is undefined {layout: 'IconGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "icon_8" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "icon_9" is undefined {layout: 'IconGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "icon_9" not in schema or excluded - will not appear in UI 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'features-1765206233108', sectionType: 'IconGrid', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'features-1765206233108', sectionType: 'IconGrid', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'howItWorks', context: {…}, validatedFieldsKeys: Array(7)}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'howItWorks', context: {…}, validatedFieldsKeys: Array(7)}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] howItWorks computing 14 live exclusions (stored=0): {excludedCount: 14, excludedElements: Array(14), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] howItWorks passing exclusions to extractLayoutContent: {layout: 'AccordionSteps', excludedElementsLength: 14, excludedElements: Array(14), hasExclusions: true}
+ [DEV] 🎯 extractLayoutContent: Found existing "step_titles": {elementValue: {…}, layout: 'AccordionSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'API Integration & Setup|Data Migration & Validation|Custom Configuration|Testing & Deployment'}
+ [DEV] 🎯 extractLayoutContent: Found existing "step_descriptions": {elementValue: {…}, layout: 'AccordionSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'Seamlessly integrate with your existing systems us…ting and deploy to production with zero downtime.'}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "supporting_text" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_items" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_specs_heading" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_specs_heading" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_1_value" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_1_value" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_1_label" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_1_label" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_2_value" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_2_value" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_2_label" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_2_label" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_3_value" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_3_value" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_3_label" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_3_label" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_specs_description" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_specs_description" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_step_indicators" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "show_step_indicators" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_tech_specs" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "show_tech_specs" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+ ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+ 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+ ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+ [DEV] 🧮 [COMPUTED_EXCLUSION] howItWorks computing 14 live exclusions (stored=0): {excludedCount: 14, excludedElements: Array(14), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] howItWorks passing exclusions to extractLayoutContent: {layout: 'AccordionSteps', excludedElementsLength: 14, excludedElements: Array(14), hasExclusions: true}
+ [DEV] 🎯 extractLayoutContent: Found existing "step_titles": {elementValue: {…}, layout: 'AccordionSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'API Integration & Setup|Data Migration & Validation|Custom Configuration|Testing & Deployment'}
+ [DEV] 🎯 extractLayoutContent: Found existing "step_descriptions": {elementValue: {…}, layout: 'AccordionSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'Seamlessly integrate with your existing systems us…ting and deploy to production with zero downtime.'}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "supporting_text" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_items" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_specs_heading" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_specs_heading" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_1_value" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_1_value" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_1_label" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_1_label" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_2_value" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_2_value" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_2_label" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_2_label" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_3_value" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_3_value" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_3_label" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_3_label" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_specs_description" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_specs_description" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_step_indicators" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "show_step_indicators" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_tech_specs" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "show_tech_specs" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'howItWorks', sectionType: 'AccordionSteps', backgroundType: 'neutral', backgroundValue: '#5c6475'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'howItWorks', sectionType: 'AccordionSteps', backgroundType: 'neutral', backgroundValue: '#5c6475'}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'founderNote', context: {…}, validatedFieldsKeys: Array(7)}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'founderNote', context: {…}, validatedFieldsKeys: Array(7)}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] founderNote computing 2 live exclusions (stored=0): {excludedCount: 2, excludedElements: Array(2), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] founderNote passing exclusions to extractLayoutContent: {layout: 'FounderCardWithQuote', excludedElementsLength: 2, excludedElements: Array(2), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "founder_bio" is undefined {layout: 'FounderCardWithQuote', isMandatory: false, isInSchema: true, isExcluded: false, hasLayout: true, …}
+ [DEV] ✨ OPTIONAL: Using default for included optional element "founder_bio": 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] founderNote computing 2 live exclusions (stored=0): {excludedCount: 2, excludedElements: Array(2), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] founderNote passing exclusions to extractLayoutContent: {layout: 'FounderCardWithQuote', excludedElementsLength: 2, excludedElements: Array(2), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "founder_bio" is undefined {layout: 'FounderCardWithQuote', isMandatory: false, isInSchema: true, isExcluded: false, hasLayout: true, …}
+ [DEV] ✨ OPTIONAL: Using default for included optional element "founder_bio": 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'founderNote', sectionType: 'FounderCardWithQuote', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'founderNote', sectionType: 'FounderCardWithQuote', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'faq-1765207774746', context: {…}, validatedFieldsKeys: Array(7)}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'faq-1765207774746', context: {…}, validatedFieldsKeys: Array(7)}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] faq-1765207774746 computing 19 live exclusions (stored=0): {excludedCount: 19, excludedElements: Array(19), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] faq-1765207774746 passing exclusions to extractLayoutContent: {layout: 'AccordionFAQ', excludedElementsLength: 19, excludedElements: Array(19), hasExclusions: true}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#d5d7dd]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#d5d7dd]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#d5d7dd]'}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] faq-1765207774746 computing 19 live exclusions (stored=0): {excludedCount: 19, excludedElements: Array(19), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] faq-1765207774746 passing exclusions to extractLayoutContent: {layout: 'AccordionFAQ', excludedElementsLength: 19, excludedElements: Array(19), hasExclusions: true}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#d5d7dd]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#d5d7dd]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#d5d7dd]'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'faq-1765207774746', sectionType: 'AccordionFAQ', backgroundType: 'neutral', backgroundValue: '#d5d7dd'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'faq-1765207774746', sectionType: 'AccordionFAQ', backgroundType: 'neutral', backgroundValue: '#d5d7dd'}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'cta', context: {…}, validatedFieldsKeys: Array(7)}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'cta', context: {…}, validatedFieldsKeys: Array(7)}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] cta computing 6 live exclusions (stored=0): {excludedCount: 6, excludedElements: Array(6), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] cta passing exclusions to extractLayoutContent: {layout: 'VisualCTAWithMockup', excludedElementsLength: 6, excludedElements: Array(6), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "secondary_cta" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "secondary_cta" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "mockup_image" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "mockup_image" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_3" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_4" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_5" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] cta computing 6 live exclusions (stored=0): {excludedCount: 6, excludedElements: Array(6), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] cta passing exclusions to extractLayoutContent: {layout: 'VisualCTAWithMockup', excludedElementsLength: 6, excludedElements: Array(6), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "secondary_cta" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "secondary_cta" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "mockup_image" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "mockup_image" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_3" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_4" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_5" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'cta', sectionType: 'VisualCTAWithMockup', backgroundType: 'primary', backgroundValue: '#111827'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'cta', sectionType: 'VisualCTAWithMockup', backgroundType: 'primary', backgroundValue: '#111827'}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'footer', context: {…}, validatedFieldsKeys: Array(7)}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'footer', context: {…}, validatedFieldsKeys: Array(7)}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] footer computing 6 live exclusions (stored=0): {excludedCount: 6, excludedElements: Array(6), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] footer passing exclusions to extractLayoutContent: {layout: 'SimpleFooter', excludedElementsLength: 6, excludedElements: Array(6), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "copyright" is undefined {layout: 'SimpleFooter', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
+ [DEV] ✅ MANDATORY: Using default for mandatory element "copyright": © 2025 Your Company. All rights reserved.
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] footer computing 6 live exclusions (stored=0): {excludedCount: 6, excludedElements: Array(6), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] footer passing exclusions to extractLayoutContent: {layout: 'SimpleFooter', excludedElementsLength: 6, excludedElements: Array(6), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "copyright" is undefined {layout: 'SimpleFooter', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
+ [DEV] ✅ MANDATORY: Using default for mandatory element "copyright": © 2025 Your Company. All rights reserved.
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'footer', sectionType: 'SimpleFooter', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'footer', sectionType: 'SimpleFooter', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+ [2025-12-11T15:02:00.555Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+ EnhancedAddSection mounted {position: 'between', afterSectionId: 'header', existingSectionsCount: 10, hasOnAddSection: true}
+ [2025-12-11T15:02:00.557Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+ EnhancedAddSection mounted {position: 'between', afterSectionId: 'hero', existingSectionsCount: 10, hasOnAddSection: true}
+ [2025-12-11T15:02:00.558Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+ EnhancedAddSection mounted {position: 'between', afterSectionId: 'problem', existingSectionsCount: 10, hasOnAddSection: true}
+ 🎨 OutcomeIcons theme detection: {sectionId: 'results-1765205653939', hasManualOverride: false, manualTheme: undefined, hasUserContext: true, userContext: {…}, …}
+ [2025-12-11T15:02:00.560Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+ EnhancedAddSection mounted {position: 'between', afterSectionId: 'results-1765205653939', existingSectionsCount: 10, hasOnAddSection: true}
+ 🎨 IconGrid theme detection: {sectionId: 'features-1765206233108', hasManualOverride: false, manualTheme: undefined, hasUserContext: true, userContext: {…}, …}
+ [2025-12-11T15:02:00.562Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+ EnhancedAddSection mounted {position: 'between', afterSectionId: 'features-1765206233108', existingSectionsCount: 10, hasOnAddSection: true}
+ 🎨 AccordionSteps theme detection: {sectionId: 'howItWorks', hasManualOverride: false, manualTheme: undefined, hasUserContext: true, userContext: {…}, …}
+ [2025-12-11T15:02:00.564Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+ EnhancedAddSection mounted {position: 'between', afterSectionId: 'howItWorks', existingSectionsCount: 10, hasOnAddSection: true}
+ [2025-12-11T15:02:00.565Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+ EnhancedAddSection mounted {position: 'between', afterSectionId: 'founderNote', existingSectionsCount: 10, hasOnAddSection: true}
+ [2025-12-11T15:02:00.567Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+ EnhancedAddSection mounted {position: 'between', afterSectionId: 'faq-1765207774746', existingSectionsCount: 10, hasOnAddSection: true}
+ [2025-12-11T15:02:00.568Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+ EnhancedAddSection mounted {position: 'between', afterSectionId: 'cta', existingSectionsCount: 10, hasOnAddSection: true}
+ [2025-12-11T15:02:00.569Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+ EnhancedAddSection mounted {position: 'end', afterSectionId: 'footer', existingSectionsCount: 10, hasOnAddSection: true}
+ [2025-12-11T15:02:01.400Z] DEBUG: 🔍 LeftPanel Store Methods Available: {
+  "regenerateAllContent": true,
+  "hasStore": true,
+  "hasStoreState": true,
+  "storeMethodKeys": [
+    "regenerateSection",
+    "regenerateElement",
+    "regenerateAllContent",
+    "regenerateElementWithVariations",
+    "regenerateVariables",
+    "regenerateContentOnly",
+    "regenerateDesignAndCopy",
+    "regenerateWithInputs"
+  ]
+}
+ [2025-12-11T15:02:01.401Z] DEBUG: 🔍 LeftPanel Store Methods Available: {
+  "regenerateAllContent": true,
+  "hasStore": true,
+  "hasStoreState": true,
+  "storeMethodKeys": [
+    "regenerateSection",
+    "regenerateElement",
+    "regenerateAllContent",
+    "regenerateElementWithVariations",
+    "regenerateVariables",
+    "regenerateContentOnly",
+    "regenerateDesignAndCopy",
+    "regenerateWithInputs"
+  ]
+}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'header', context: {…}, validatedFieldsKeys: Array(7)}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'header', context: {…}, validatedFieldsKeys: Array(7)}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] header computing 7 live exclusions (stored=0): {excludedCount: 7, excludedElements: Array(7), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] header passing exclusions to extractLayoutContent: {layout: 'NavWithCTAHeader', excludedElementsLength: 7, excludedElements: Array(7), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_1" is undefined {layout: 'NavWithCTAHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
+ [DEV] ✅ MANDATORY: Using default for mandatory element "nav_item_1": Home
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_2" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_item_2" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_3" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_item_3" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_4" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_item_4" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "nav_item_5" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "nav_item_6" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_link_1" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_link_2" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_link_3" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_link_4" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "nav_link_5" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "nav_link_6" not in schema or excluded - will not appear in UI 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] header computing 7 live exclusions (stored=0): {excludedCount: 7, excludedElements: Array(7), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] header passing exclusions to extractLayoutContent: {layout: 'NavWithCTAHeader', excludedElementsLength: 7, excludedElements: Array(7), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_1" is undefined {layout: 'NavWithCTAHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
+ [DEV] ✅ MANDATORY: Using default for mandatory element "nav_item_1": Home
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_2" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_item_2" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_3" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_item_3" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_4" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_item_4" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "nav_item_5" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "nav_item_6" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_link_1" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_link_2" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_link_3" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_link_4" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "nav_link_5" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "nav_link_6" not in schema or excluded - will not appear in UI 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'header', sectionType: 'NavWithCTAHeader', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'header', sectionType: 'NavWithCTAHeader', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'hero', context: {…}, validatedFieldsKeys: Array(7)}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'hero', context: {…}, validatedFieldsKeys: Array(7)}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] hero computing 15 live exclusions (stored=0): {excludedCount: 15, excludedElements: Array(15), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] hero passing exclusions to extractLayoutContent: {layout: 'centerStacked', excludedElementsLength: 15, excludedElements: Array(15), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "badge_text" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_items" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_4" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_5" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "customer_count" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "rating_value" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "rating_count" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "show_social_proof" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "show_customer_avatars" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "avatar_count" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "customer_names" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "avatar_urls" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+ ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+ 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+ ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+ [DEV] 🧮 [COMPUTED_EXCLUSION] hero computing 15 live exclusions (stored=0): {excludedCount: 15, excludedElements: Array(15), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] hero passing exclusions to extractLayoutContent: {layout: 'centerStacked', excludedElementsLength: 15, excludedElements: Array(15), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "badge_text" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_items" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_4" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_5" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "customer_count" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "rating_value" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "rating_count" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "show_social_proof" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "show_customer_avatars" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "avatar_count" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "customer_names" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "avatar_urls" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'hero', sectionType: 'CenterStacked', backgroundType: 'primary', backgroundValue: '#111827'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'hero', sectionType: 'CenterStacked', backgroundType: 'primary', backgroundValue: '#111827'}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'problem', context: {…}, validatedFieldsKeys: Array(7)}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'problem', context: {…}, validatedFieldsKeys: Array(7)}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] problem computing 6 live exclusions (stored=0): {excludedCount: 6, excludedElements: Array(6), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] problem passing exclusions to extractLayoutContent: {layout: 'StackedPainBullets', excludedElementsLength: 6, excludedElements: Array(6), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_1" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "pain_icon_1" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_5" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "pain_icon_5" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_6" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "pain_icon_6" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+ ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+ 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+ ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+ [DEV] 🧮 [COMPUTED_EXCLUSION] problem computing 6 live exclusions (stored=0): {excludedCount: 6, excludedElements: Array(6), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] problem passing exclusions to extractLayoutContent: {layout: 'StackedPainBullets', excludedElementsLength: 6, excludedElements: Array(6), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_1" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "pain_icon_1" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_5" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "pain_icon_5" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_6" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "pain_icon_6" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'problem', sectionType: 'StackedPainBullets', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'problem', sectionType: 'StackedPainBullets', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'results-1765205653939', context: {…}, validatedFieldsKeys: Array(7)}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'results-1765205653939', context: {…}, validatedFieldsKeys: Array(7)}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] results-1765205653939 computing 3 live exclusions (stored=0): {excludedCount: 3, excludedElements: Array(3), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] results-1765205653939 passing exclusions to extractLayoutContent: {layout: 'OutcomeIcons', excludedElementsLength: 3, excludedElements: Array(3), hasExclusions: true}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+ ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+ 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+ ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+ [DEV] 🧮 [COMPUTED_EXCLUSION] results-1765205653939 computing 3 live exclusions (stored=0): {excludedCount: 3, excludedElements: Array(3), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] results-1765205653939 passing exclusions to extractLayoutContent: {layout: 'OutcomeIcons', excludedElementsLength: 3, excludedElements: Array(3), hasExclusions: true}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'features-1765206233108', context: {…}, validatedFieldsKeys: Array(7)}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'features-1765206233108', context: {…}, validatedFieldsKeys: Array(7)}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] features-1765206233108 computing 1 live exclusions (stored=0): {excludedCount: 1, excludedElements: Array(1), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] features-1765206233108 passing exclusions to extractLayoutContent: {layout: 'IconGrid', excludedElementsLength: 1, excludedElements: Array(1), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "icon_7" is undefined {layout: 'IconGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "icon_7" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "icon_8" is undefined {layout: 'IconGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "icon_8" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "icon_9" is undefined {layout: 'IconGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "icon_9" not in schema or excluded - will not appear in UI 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+ ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+ 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+ ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+ [DEV] 🧮 [COMPUTED_EXCLUSION] features-1765206233108 computing 1 live exclusions (stored=0): {excludedCount: 1, excludedElements: Array(1), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] features-1765206233108 passing exclusions to extractLayoutContent: {layout: 'IconGrid', excludedElementsLength: 1, excludedElements: Array(1), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "icon_7" is undefined {layout: 'IconGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "icon_7" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "icon_8" is undefined {layout: 'IconGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "icon_8" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "icon_9" is undefined {layout: 'IconGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "icon_9" not in schema or excluded - will not appear in UI 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'features-1765206233108', sectionType: 'IconGrid', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'features-1765206233108', sectionType: 'IconGrid', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'howItWorks', context: {…}, validatedFieldsKeys: Array(7)}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'howItWorks', context: {…}, validatedFieldsKeys: Array(7)}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] howItWorks computing 14 live exclusions (stored=0): {excludedCount: 14, excludedElements: Array(14), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] howItWorks passing exclusions to extractLayoutContent: {layout: 'AccordionSteps', excludedElementsLength: 14, excludedElements: Array(14), hasExclusions: true}
+ [DEV] 🎯 extractLayoutContent: Found existing "step_titles": {elementValue: {…}, layout: 'AccordionSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'API Integration & Setup|Data Migration & Validation|Custom Configuration|Testing & Deployment'}
+ [DEV] 🎯 extractLayoutContent: Found existing "step_descriptions": {elementValue: {…}, layout: 'AccordionSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'Seamlessly integrate with your existing systems us…ting and deploy to production with zero downtime.'}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "supporting_text" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_items" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_specs_heading" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_specs_heading" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_1_value" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_1_value" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_1_label" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_1_label" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_2_value" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_2_value" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_2_label" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_2_label" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_3_value" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_3_value" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_3_label" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_3_label" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_specs_description" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_specs_description" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_step_indicators" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "show_step_indicators" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_tech_specs" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "show_tech_specs" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+ ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+ 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+ ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+ [DEV] 🧮 [COMPUTED_EXCLUSION] howItWorks computing 14 live exclusions (stored=0): {excludedCount: 14, excludedElements: Array(14), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] howItWorks passing exclusions to extractLayoutContent: {layout: 'AccordionSteps', excludedElementsLength: 14, excludedElements: Array(14), hasExclusions: true}
+ [DEV] 🎯 extractLayoutContent: Found existing "step_titles": {elementValue: {…}, layout: 'AccordionSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'API Integration & Setup|Data Migration & Validation|Custom Configuration|Testing & Deployment'}
+ [DEV] 🎯 extractLayoutContent: Found existing "step_descriptions": {elementValue: {…}, layout: 'AccordionSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'Seamlessly integrate with your existing systems us…ting and deploy to production with zero downtime.'}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "supporting_text" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_items" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_specs_heading" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_specs_heading" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_1_value" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_1_value" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_1_label" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_1_label" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_2_value" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_2_value" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_2_label" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_2_label" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_3_value" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_3_value" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_3_label" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_3_label" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_specs_description" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_specs_description" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_step_indicators" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "show_step_indicators" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_tech_specs" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "show_tech_specs" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'howItWorks', sectionType: 'AccordionSteps', backgroundType: 'neutral', backgroundValue: '#5c6475'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'howItWorks', sectionType: 'AccordionSteps', backgroundType: 'neutral', backgroundValue: '#5c6475'}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'founderNote', context: {…}, validatedFieldsKeys: Array(7)}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'founderNote', context: {…}, validatedFieldsKeys: Array(7)}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] founderNote computing 2 live exclusions (stored=0): {excludedCount: 2, excludedElements: Array(2), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] founderNote passing exclusions to extractLayoutContent: {layout: 'FounderCardWithQuote', excludedElementsLength: 2, excludedElements: Array(2), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "founder_bio" is undefined {layout: 'FounderCardWithQuote', isMandatory: false, isInSchema: true, isExcluded: false, hasLayout: true, …}
+ [DEV] ✨ OPTIONAL: Using default for included optional element "founder_bio": 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] founderNote computing 2 live exclusions (stored=0): {excludedCount: 2, excludedElements: Array(2), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] founderNote passing exclusions to extractLayoutContent: {layout: 'FounderCardWithQuote', excludedElementsLength: 2, excludedElements: Array(2), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "founder_bio" is undefined {layout: 'FounderCardWithQuote', isMandatory: false, isInSchema: true, isExcluded: false, hasLayout: true, …}
+ [DEV] ✨ OPTIONAL: Using default for included optional element "founder_bio": 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'founderNote', sectionType: 'FounderCardWithQuote', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'founderNote', sectionType: 'FounderCardWithQuote', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'faq-1765207774746', context: {…}, validatedFieldsKeys: Array(7)}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'faq-1765207774746', context: {…}, validatedFieldsKeys: Array(7)}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] faq-1765207774746 computing 19 live exclusions (stored=0): {excludedCount: 19, excludedElements: Array(19), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] faq-1765207774746 passing exclusions to extractLayoutContent: {layout: 'AccordionFAQ', excludedElementsLength: 19, excludedElements: Array(19), hasExclusions: true}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#d5d7dd]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#d5d7dd]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#d5d7dd]'}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] faq-1765207774746 computing 19 live exclusions (stored=0): {excludedCount: 19, excludedElements: Array(19), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] faq-1765207774746 passing exclusions to extractLayoutContent: {layout: 'AccordionFAQ', excludedElementsLength: 19, excludedElements: Array(19), hasExclusions: true}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#d5d7dd]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#d5d7dd]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#d5d7dd]'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'faq-1765207774746', sectionType: 'AccordionFAQ', backgroundType: 'neutral', backgroundValue: '#d5d7dd'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'faq-1765207774746', sectionType: 'AccordionFAQ', backgroundType: 'neutral', backgroundValue: '#d5d7dd'}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'cta', context: {…}, validatedFieldsKeys: Array(7)}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'cta', context: {…}, validatedFieldsKeys: Array(7)}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] cta computing 6 live exclusions (stored=0): {excludedCount: 6, excludedElements: Array(6), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] cta passing exclusions to extractLayoutContent: {layout: 'VisualCTAWithMockup', excludedElementsLength: 6, excludedElements: Array(6), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "secondary_cta" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "secondary_cta" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "mockup_image" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "mockup_image" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_3" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_4" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_5" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] cta computing 6 live exclusions (stored=0): {excludedCount: 6, excludedElements: Array(6), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] cta passing exclusions to extractLayoutContent: {layout: 'VisualCTAWithMockup', excludedElementsLength: 6, excludedElements: Array(6), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "secondary_cta" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "secondary_cta" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "mockup_image" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "mockup_image" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_3" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_4" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_5" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'cta', sectionType: 'VisualCTAWithMockup', backgroundType: 'primary', backgroundValue: '#111827'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'cta', sectionType: 'VisualCTAWithMockup', backgroundType: 'primary', backgroundValue: '#111827'}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'footer', context: {…}, validatedFieldsKeys: Array(7)}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'footer', context: {…}, validatedFieldsKeys: Array(7)}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] footer computing 6 live exclusions (stored=0): {excludedCount: 6, excludedElements: Array(6), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] footer passing exclusions to extractLayoutContent: {layout: 'SimpleFooter', excludedElementsLength: 6, excludedElements: Array(6), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "copyright" is undefined {layout: 'SimpleFooter', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
+ [DEV] ✅ MANDATORY: Using default for mandatory element "copyright": © 2025 Your Company. All rights reserved.
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] footer computing 6 live exclusions (stored=0): {excludedCount: 6, excludedElements: Array(6), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] footer passing exclusions to extractLayoutContent: {layout: 'SimpleFooter', excludedElementsLength: 6, excludedElements: Array(6), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "copyright" is undefined {layout: 'SimpleFooter', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
+ [DEV] ✅ MANDATORY: Using default for mandatory element "copyright": © 2025 Your Company. All rights reserved.
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'footer', sectionType: 'SimpleFooter', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'footer', sectionType: 'SimpleFooter', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+ [2025-12-11T15:02:01.482Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+ EnhancedAddSection mounted {position: 'between', afterSectionId: 'header', existingSectionsCount: 10, hasOnAddSection: true}
+ [2025-12-11T15:02:01.484Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+ EnhancedAddSection mounted {position: 'between', afterSectionId: 'hero', existingSectionsCount: 10, hasOnAddSection: true}
+ [2025-12-11T15:02:01.485Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+ EnhancedAddSection mounted {position: 'between', afterSectionId: 'problem', existingSectionsCount: 10, hasOnAddSection: true}
+ 🎨 OutcomeIcons theme detection: {sectionId: 'results-1765205653939', hasManualOverride: false, manualTheme: undefined, hasUserContext: true, userContext: {…}, …}
+ [2025-12-11T15:02:01.487Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+ EnhancedAddSection mounted {position: 'between', afterSectionId: 'results-1765205653939', existingSectionsCount: 10, hasOnAddSection: true}
+ 🎨 IconGrid theme detection: {sectionId: 'features-1765206233108', hasManualOverride: false, manualTheme: undefined, hasUserContext: true, userContext: {…}, …}
+ [2025-12-11T15:02:01.489Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+ EnhancedAddSection mounted {position: 'between', afterSectionId: 'features-1765206233108', existingSectionsCount: 10, hasOnAddSection: true}
+ 🎨 AccordionSteps theme detection: {sectionId: 'howItWorks', hasManualOverride: false, manualTheme: undefined, hasUserContext: true, userContext: {…}, …}
+ [2025-12-11T15:02:01.491Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+ EnhancedAddSection mounted {position: 'between', afterSectionId: 'howItWorks', existingSectionsCount: 10, hasOnAddSection: true}
+ [2025-12-11T15:02:01.493Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+ EnhancedAddSection mounted {position: 'between', afterSectionId: 'founderNote', existingSectionsCount: 10, hasOnAddSection: true}
+ [2025-12-11T15:02:01.495Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+ EnhancedAddSection mounted {position: 'between', afterSectionId: 'faq-1765207774746', existingSectionsCount: 10, hasOnAddSection: true}
+ [2025-12-11T15:02:01.496Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+ EnhancedAddSection mounted {position: 'between', afterSectionId: 'cta', existingSectionsCount: 10, hasOnAddSection: true}
+ [2025-12-11T15:02:01.497Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+ EnhancedAddSection mounted {position: 'end', afterSectionId: 'footer', existingSectionsCount: 10, hasOnAddSection: true}
+ [2025-12-11T15:02:01.598Z] DEBUG: 🔍 LeftPanel Store Methods Available: {
+  "regenerateAllContent": true,
+  "hasStore": true,
+  "hasStoreState": true,
+  "storeMethodKeys": [
+    "regenerateSection",
+    "regenerateElement",
+    "regenerateAllContent",
+    "regenerateElementWithVariations",
+    "regenerateVariables",
+    "regenerateContentOnly",
+    "regenerateDesignAndCopy",
+    "regenerateWithInputs"
+  ]
+}
+ [2025-12-11T15:02:01.599Z] DEBUG: 🔍 LeftPanel Store Methods Available: {
+  "regenerateAllContent": true,
+  "hasStore": true,
+  "hasStoreState": true,
+  "storeMethodKeys": [
+    "regenerateSection",
+    "regenerateElement",
+    "regenerateAllContent",
+    "regenerateElementWithVariations",
+    "regenerateVariables",
+    "regenerateContentOnly",
+    "regenerateDesignAndCopy",
+    "regenerateWithInputs"
+  ]
+}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'header', context: {…}, validatedFieldsKeys: Array(7)}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'header', context: {…}, validatedFieldsKeys: Array(7)}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] header computing 7 live exclusions (stored=0): {excludedCount: 7, excludedElements: Array(7), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] header passing exclusions to extractLayoutContent: {layout: 'NavWithCTAHeader', excludedElementsLength: 7, excludedElements: Array(7), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_1" is undefined {layout: 'NavWithCTAHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
+ [DEV] ✅ MANDATORY: Using default for mandatory element "nav_item_1": Home
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_2" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_item_2" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_3" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_item_3" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_4" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_item_4" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "nav_item_5" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "nav_item_6" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_link_1" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_link_2" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_link_3" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_link_4" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "nav_link_5" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "nav_link_6" not in schema or excluded - will not appear in UI 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] header computing 7 live exclusions (stored=0): {excludedCount: 7, excludedElements: Array(7), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] header passing exclusions to extractLayoutContent: {layout: 'NavWithCTAHeader', excludedElementsLength: 7, excludedElements: Array(7), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_1" is undefined {layout: 'NavWithCTAHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
+ [DEV] ✅ MANDATORY: Using default for mandatory element "nav_item_1": Home
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_2" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_item_2" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_3" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_item_3" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_4" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_item_4" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "nav_item_5" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "nav_item_6" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_link_1" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_link_2" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_link_3" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "nav_link_4" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "nav_link_5" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined {layout: 'NavWithCTAHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "nav_link_6" not in schema or excluded - will not appear in UI 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'header', sectionType: 'NavWithCTAHeader', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'header', sectionType: 'NavWithCTAHeader', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'hero', context: {…}, validatedFieldsKeys: Array(7)}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'hero', context: {…}, validatedFieldsKeys: Array(7)}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] hero computing 15 live exclusions (stored=0): {excludedCount: 15, excludedElements: Array(15), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] hero passing exclusions to extractLayoutContent: {layout: 'centerStacked', excludedElementsLength: 15, excludedElements: Array(15), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "badge_text" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_items" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_4" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_5" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "customer_count" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "rating_value" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "rating_count" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "show_social_proof" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "show_customer_avatars" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "avatar_count" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "customer_names" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "avatar_urls" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+ ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+ 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+ ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+ [DEV] 🧮 [COMPUTED_EXCLUSION] hero computing 15 live exclusions (stored=0): {excludedCount: 15, excludedElements: Array(15), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] hero passing exclusions to extractLayoutContent: {layout: 'centerStacked', excludedElementsLength: 15, excludedElements: Array(15), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "badge_text" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_items" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_4" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_5" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "customer_count" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "rating_value" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "rating_count" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "show_social_proof" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "show_customer_avatars" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "avatar_count" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "customer_names" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "avatar_urls" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'hero', sectionType: 'CenterStacked', backgroundType: 'primary', backgroundValue: '#111827'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'hero', sectionType: 'CenterStacked', backgroundType: 'primary', backgroundValue: '#111827'}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'problem', context: {…}, validatedFieldsKeys: Array(7)}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'problem', context: {…}, validatedFieldsKeys: Array(7)}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] problem computing 6 live exclusions (stored=0): {excludedCount: 6, excludedElements: Array(6), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] problem passing exclusions to extractLayoutContent: {layout: 'StackedPainBullets', excludedElementsLength: 6, excludedElements: Array(6), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_1" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "pain_icon_1" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_5" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "pain_icon_5" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_6" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "pain_icon_6" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+ ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+ 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+ ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+ [DEV] 🧮 [COMPUTED_EXCLUSION] problem computing 6 live exclusions (stored=0): {excludedCount: 6, excludedElements: Array(6), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] problem passing exclusions to extractLayoutContent: {layout: 'StackedPainBullets', excludedElementsLength: 6, excludedElements: Array(6), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_1" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "pain_icon_1" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_5" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "pain_icon_5" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_6" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "pain_icon_6" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'problem', sectionType: 'StackedPainBullets', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'problem', sectionType: 'StackedPainBullets', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'results-1765205653939', context: {…}, validatedFieldsKeys: Array(7)}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'results-1765205653939', context: {…}, validatedFieldsKeys: Array(7)}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] results-1765205653939 computing 3 live exclusions (stored=0): {excludedCount: 3, excludedElements: Array(3), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] results-1765205653939 passing exclusions to extractLayoutContent: {layout: 'OutcomeIcons', excludedElementsLength: 3, excludedElements: Array(3), hasExclusions: true}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+ ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+ 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+ ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+ [DEV] 🧮 [COMPUTED_EXCLUSION] results-1765205653939 computing 3 live exclusions (stored=0): {excludedCount: 3, excludedElements: Array(3), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] results-1765205653939 passing exclusions to extractLayoutContent: {layout: 'OutcomeIcons', excludedElementsLength: 3, excludedElements: Array(3), hasExclusions: true}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'features-1765206233108', context: {…}, validatedFieldsKeys: Array(7)}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'features-1765206233108', context: {…}, validatedFieldsKeys: Array(7)}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] features-1765206233108 computing 1 live exclusions (stored=0): {excludedCount: 1, excludedElements: Array(1), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] features-1765206233108 passing exclusions to extractLayoutContent: {layout: 'IconGrid', excludedElementsLength: 1, excludedElements: Array(1), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "icon_7" is undefined {layout: 'IconGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "icon_7" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "icon_8" is undefined {layout: 'IconGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "icon_8" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "icon_9" is undefined {layout: 'IconGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "icon_9" not in schema or excluded - will not appear in UI 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+ ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+ 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+ ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+ [DEV] 🧮 [COMPUTED_EXCLUSION] features-1765206233108 computing 1 live exclusions (stored=0): {excludedCount: 1, excludedElements: Array(1), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] features-1765206233108 passing exclusions to extractLayoutContent: {layout: 'IconGrid', excludedElementsLength: 1, excludedElements: Array(1), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "icon_7" is undefined {layout: 'IconGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "icon_7" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "icon_8" is undefined {layout: 'IconGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "icon_8" not in schema or excluded - will not appear in UI 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "icon_9" is undefined {layout: 'IconGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🚫 SKIPPED: Element "icon_9" not in schema or excluded - will not appear in UI 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'features-1765206233108', sectionType: 'IconGrid', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'features-1765206233108', sectionType: 'IconGrid', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'howItWorks', context: {…}, validatedFieldsKeys: Array(7)}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'howItWorks', context: {…}, validatedFieldsKeys: Array(7)}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] howItWorks computing 14 live exclusions (stored=0): {excludedCount: 14, excludedElements: Array(14), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] howItWorks passing exclusions to extractLayoutContent: {layout: 'AccordionSteps', excludedElementsLength: 14, excludedElements: Array(14), hasExclusions: true}
+ [DEV] 🎯 extractLayoutContent: Found existing "step_titles": {elementValue: {…}, layout: 'AccordionSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'API Integration & Setup|Data Migration & Validation|Custom Configuration|Testing & Deployment'}
+ [DEV] 🎯 extractLayoutContent: Found existing "step_descriptions": {elementValue: {…}, layout: 'AccordionSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'Seamlessly integrate with your existing systems us…ting and deploy to production with zero downtime.'}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "supporting_text" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_items" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_specs_heading" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_specs_heading" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_1_value" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_1_value" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_1_label" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_1_label" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_2_value" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_2_value" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_2_label" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_2_label" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_3_value" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_3_value" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_3_label" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_3_label" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_specs_description" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_specs_description" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_step_indicators" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "show_step_indicators" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_tech_specs" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "show_tech_specs" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+ ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+ 🏷️ selectUIBlockTheme: {marketCategory: 'Health & Wellness', targetAudience: 'families', tags: Array(6), hasWarm: false, hasCool: true, …}
+ ✅ Override: Family-focused health app → warm (likely food/lifestyle)
+ [DEV] 🧮 [COMPUTED_EXCLUSION] howItWorks computing 14 live exclusions (stored=0): {excludedCount: 14, excludedElements: Array(14), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] howItWorks passing exclusions to extractLayoutContent: {layout: 'AccordionSteps', excludedElementsLength: 14, excludedElements: Array(14), hasExclusions: true}
+ [DEV] 🎯 extractLayoutContent: Found existing "step_titles": {elementValue: {…}, layout: 'AccordionSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'API Integration & Setup|Data Migration & Validation|Custom Configuration|Testing & Deployment'}
+ [DEV] 🎯 extractLayoutContent: Found existing "step_descriptions": {elementValue: {…}, layout: 'AccordionSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'Seamlessly integrate with your existing systems us…ting and deploy to production with zero downtime.'}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "supporting_text" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_items" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_specs_heading" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_specs_heading" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_1_value" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_1_value" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_1_label" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_1_label" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_2_value" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_2_value" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_2_label" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_2_label" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_3_value" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_3_value" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_spec_3_label" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_spec_3_label" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "tech_specs_description" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "tech_specs_description" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_step_indicators" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "show_step_indicators" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_tech_specs" is undefined {layout: 'AccordionSteps', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "show_tech_specs" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#5c6475]'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'howItWorks', sectionType: 'AccordionSteps', backgroundType: 'neutral', backgroundValue: '#5c6475'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'howItWorks', sectionType: 'AccordionSteps', backgroundType: 'neutral', backgroundValue: '#5c6475'}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'founderNote', context: {…}, validatedFieldsKeys: Array(7)}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'founderNote', context: {…}, validatedFieldsKeys: Array(7)}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] founderNote computing 2 live exclusions (stored=0): {excludedCount: 2, excludedElements: Array(2), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] founderNote passing exclusions to extractLayoutContent: {layout: 'FounderCardWithQuote', excludedElementsLength: 2, excludedElements: Array(2), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "founder_bio" is undefined {layout: 'FounderCardWithQuote', isMandatory: false, isInSchema: true, isExcluded: false, hasLayout: true, …}
+ [DEV] ✨ OPTIONAL: Using default for included optional element "founder_bio": 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] founderNote computing 2 live exclusions (stored=0): {excludedCount: 2, excludedElements: Array(2), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] founderNote passing exclusions to extractLayoutContent: {layout: 'FounderCardWithQuote', excludedElementsLength: 2, excludedElements: Array(2), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "founder_bio" is undefined {layout: 'FounderCardWithQuote', isMandatory: false, isInSchema: true, isExcluded: false, hasLayout: true, …}
+ [DEV] ✨ OPTIONAL: Using default for included optional element "founder_bio": 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'founderNote', sectionType: 'FounderCardWithQuote', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'founderNote', sectionType: 'FounderCardWithQuote', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'faq-1765207774746', context: {…}, validatedFieldsKeys: Array(7)}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'faq-1765207774746', context: {…}, validatedFieldsKeys: Array(7)}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] faq-1765207774746 computing 19 live exclusions (stored=0): {excludedCount: 19, excludedElements: Array(19), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] faq-1765207774746 passing exclusions to extractLayoutContent: {layout: 'AccordionFAQ', excludedElementsLength: 19, excludedElements: Array(19), hasExclusions: true}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#d5d7dd]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#d5d7dd]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#d5d7dd]'}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] faq-1765207774746 computing 19 live exclusions (stored=0): {excludedCount: 19, excludedElements: Array(19), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] faq-1765207774746 passing exclusions to extractLayoutContent: {layout: 'AccordionFAQ', excludedElementsLength: 19, excludedElements: Array(19), hasExclusions: true}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#d5d7dd]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#d5d7dd]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#d5d7dd]'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'faq-1765207774746', sectionType: 'AccordionFAQ', backgroundType: 'neutral', backgroundValue: '#d5d7dd'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'faq-1765207774746', sectionType: 'AccordionFAQ', backgroundType: 'neutral', backgroundValue: '#d5d7dd'}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'cta', context: {…}, validatedFieldsKeys: Array(7)}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'cta', context: {…}, validatedFieldsKeys: Array(7)}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] cta computing 6 live exclusions (stored=0): {excludedCount: 6, excludedElements: Array(6), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] cta passing exclusions to extractLayoutContent: {layout: 'VisualCTAWithMockup', excludedElementsLength: 6, excludedElements: Array(6), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "secondary_cta" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "secondary_cta" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "mockup_image" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "mockup_image" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_3" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_4" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_5" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] cta computing 6 live exclusions (stored=0): {excludedCount: 6, excludedElements: Array(6), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] cta passing exclusions to extractLayoutContent: {layout: 'VisualCTAWithMockup', excludedElementsLength: 6, excludedElements: Array(6), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "secondary_cta" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "secondary_cta" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "mockup_image" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "mockup_image" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_3" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_4" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'VisualCTAWithMockup', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ EXCLUDED: Skipping element "trust_item_5" - will not appear in UI (exclusion enforced) 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#111827]'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'cta', sectionType: 'VisualCTAWithMockup', backgroundType: 'primary', backgroundValue: '#111827'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'cta', sectionType: 'VisualCTAWithMockup', backgroundType: 'primary', backgroundValue: '#111827'}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'footer', context: {…}, validatedFieldsKeys: Array(7)}
+ ✅ EditablePageRenderer: Built userContext {sectionId: 'footer', context: {…}, validatedFieldsKeys: Array(7)}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] footer computing 6 live exclusions (stored=0): {excludedCount: 6, excludedElements: Array(6), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] footer passing exclusions to extractLayoutContent: {layout: 'SimpleFooter', excludedElementsLength: 6, excludedElements: Array(6), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "copyright" is undefined {layout: 'SimpleFooter', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
+ [DEV] ✅ MANDATORY: Using default for mandatory element "copyright": © 2025 Your Company. All rights reserved.
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🧮 [COMPUTED_EXCLUSION] footer computing 6 live exclusions (stored=0): {excludedCount: 6, excludedElements: Array(6), source: 'live_computation', storedWasEmpty: true, storedLength: 0, …}
+ [DEV] 🔄 [EXTRACT_CONTENT] footer passing exclusions to extractLayoutContent: {layout: 'SimpleFooter', excludedElementsLength: 6, excludedElements: Array(6), hasExclusions: true}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "copyright" is undefined {layout: 'SimpleFooter', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
+ [DEV] ✅ MANDATORY: Using default for mandatory element "copyright": © 2025 Your Company. All rights reserved.
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f7f7f8]'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'footer', sectionType: 'SimpleFooter', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+ [DEV] 🎨 [LayoutSection] Applying background as inline style: {sectionId: 'footer', sectionType: 'SimpleFooter', backgroundType: 'neutral', backgroundValue: '#f7f7f8'}
+ [2025-12-11T15:02:01.693Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+ EnhancedAddSection mounted {position: 'between', afterSectionId: 'header', existingSectionsCount: 10, hasOnAddSection: true}
+ [2025-12-11T15:02:01.695Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+ EnhancedAddSection mounted {position: 'between', afterSectionId: 'hero', existingSectionsCount: 10, hasOnAddSection: true}
+ [2025-12-11T15:02:01.696Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+ EnhancedAddSection mounted {position: 'between', afterSectionId: 'problem', existingSectionsCount: 10, hasOnAddSection: true}
+ 🎨 OutcomeIcons theme detection: {sectionId: 'results-1765205653939', hasManualOverride: false, manualTheme: undefined, hasUserContext: true, userContext: {…}, …}
+ [2025-12-11T15:02:01.698Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+ EnhancedAddSection mounted {position: 'between', afterSectionId: 'results-1765205653939', existingSectionsCount: 10, hasOnAddSection: true}
+ 🎨 IconGrid theme detection: {sectionId: 'features-1765206233108', hasManualOverride: false, manualTheme: undefined, hasUserContext: true, userContext: {…}, …}
+ [2025-12-11T15:02:01.700Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+ EnhancedAddSection mounted {position: 'between', afterSectionId: 'features-1765206233108', existingSectionsCount: 10, hasOnAddSection: true}
+ 🎨 AccordionSteps theme detection: {sectionId: 'howItWorks', hasManualOverride: false, manualTheme: undefined, hasUserContext: true, userContext: {…}, …}
+ [2025-12-11T15:02:01.702Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+ EnhancedAddSection mounted {position: 'between', afterSectionId: 'howItWorks', existingSectionsCount: 10, hasOnAddSection: true}
+ [2025-12-11T15:02:01.703Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+ EnhancedAddSection mounted {position: 'between', afterSectionId: 'founderNote', existingSectionsCount: 10, hasOnAddSection: true}
+ [2025-12-11T15:02:01.705Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+ EnhancedAddSection mounted {position: 'between', afterSectionId: 'faq-1765207774746', existingSectionsCount: 10, hasOnAddSection: true}
+ [2025-12-11T15:02:01.706Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+ EnhancedAddSection mounted {position: 'between', afterSectionId: 'cta', existingSectionsCount: 10, hasOnAddSection: true}
+ [2025-12-11T15:02:01.707Z] DEBUG: LayoutSelector mounted {
+  "isOpen": false,
+  "sectionType": null,
+  "hasOnLayoutSelect": true,
+  "layoutCount": 0
+}
+ EnhancedAddSection mounted {position: 'end', afterSectionId: 'footer', existingSectionsCount: 10, hasOnAddSection: true}

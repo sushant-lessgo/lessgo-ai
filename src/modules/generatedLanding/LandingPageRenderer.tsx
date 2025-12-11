@@ -134,6 +134,24 @@ export default function LandingPageRenderer({ className = '', tokenId }: Landing
   // Get onboarding data for dynamic backgrounds
   const { validatedFields, hiddenInferredFields } = useOnboardingStore();
 
+  // Build userContext from taxonomy data for UIBlock theme detection
+  const userContext = React.useMemo(() => {
+    if (!validatedFields) return undefined;
+
+    return {
+      marketCategory: validatedFields.marketCategory,
+      targetAudience: validatedFields.targetAudience,
+      landingPageGoals: validatedFields.landingPageGoals,
+      startupStage: validatedFields.startupStage,
+      toneProfile: validatedFields.toneProfile,
+      awarenessLevel: validatedFields.awarenessLevel,
+      pricingModel: validatedFields.pricingModel,
+    };
+  }, [validatedFields]);
+
+  // Extract manual theme override for UIBlocks
+  const manualThemeOverride = theme?.uiBlockTheme;
+
   // ✅ Generate dynamic background system (unchanged)
  const dynamicBackgroundSystem = useMemo(() => {
   // Background system debug removed
@@ -439,6 +457,8 @@ const finalSections: OrderedSection[] = processedSections
                 sectionBackgroundCSS={sectionBackgroundCSS}
                 className=""
                 isEditable={mode !== 'preview'}
+                userContext={userContext}
+                manualThemeOverride={manualThemeOverride}
                 {...(data || {})}
               />
             </div>
@@ -465,6 +485,8 @@ const finalSections: OrderedSection[] = processedSections
                 sectionBackgroundCSS={sectionBackgroundCSS}
                 className=""
                 isEditable={mode !== 'preview'}
+                userContext={userContext}
+                manualThemeOverride={manualThemeOverride}
                 {...(data || {})}
               />
             </SmartTextSection>

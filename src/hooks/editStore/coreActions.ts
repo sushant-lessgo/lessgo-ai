@@ -130,11 +130,9 @@ export function createCoreActions(set: any, get: any) {
         }
       }),
 
-    updateTheme: (themeUpdates: Partial<Theme>) =>
-      set((state: EditStore) => {
-        state.theme = { ...state.theme, ...themeUpdates };
-        state.persistence.isDirty = true;
-      }),
+    // NOTE: updateTheme is defined in layoutActions.ts (which overwrites this)
+    // Keeping this commented as reference for the expected signature
+    // updateTheme: (themeUpdates: Partial<Theme>) => void
 
     /**
      * ===== CONTENT ACTIONS =====

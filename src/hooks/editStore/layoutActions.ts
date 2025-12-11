@@ -365,8 +365,14 @@ moveSection: (sectionId: string, direction: 'up' | 'down') =>
     
     updateTheme: (theme: Partial<Theme>) => {
       set((state: EditStore) => {
+        console.log('🏪 layoutActions updateTheme:', {
+          before: state.theme?.uiBlockTheme,
+          updates: theme,
+          updateKeys: Object.keys(theme)
+        });
+
         const oldTheme = { ...state.theme };
-        
+
         // Deep merge for nested properties like colors
         if (theme.colors) {
           state.theme.colors = {
@@ -382,10 +388,17 @@ moveSection: (sectionId: string, direction: 'up' | 'down') =>
           };
           // Remove colors from theme object to avoid overwriting
           const { colors, ...otherThemeUpdates } = theme;
-          Object.assign(state.theme, otherThemeUpdates);
+          // FIX: Create new reference instead of Object.assign to trigger Zustand selectors
+          state.theme = { ...state.theme, ...otherThemeUpdates };
         } else {
-          Object.assign(state.theme, theme);
+          // FIX: Create new reference instead of Object.assign to trigger Zustand selectors
+          state.theme = { ...state.theme, ...theme };
         }
+
+        console.log('🏪 layoutActions updateTheme after:', {
+          after: state.theme?.uiBlockTheme,
+          themeKeys: Object.keys(state.theme)
+        });
         
         state.persistence.isDirty = true;
         

@@ -12,6 +12,9 @@ import {
 } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { getIconFromCategory, getRandomIconFromCategory } from '@/utils/iconMapping';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { shadows, cardEnhancements } from '@/modules/Design/designTokens';
 
 interface AccordionStepsContent {
   headline: string;
@@ -130,6 +133,75 @@ export default function AccordionSteps(props: LayoutComponentProps) {
   
   const { getTextStyle: getTypographyStyle } = useTypography();
 
+  // Detect theme: manual override > auto-detection > neutral fallback
+  const theme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Debug theme detection
+  React.useEffect(() => {
+    console.log('🎨 AccordionSteps theme detection:', {
+      sectionId,
+      hasManualOverride: !!props.manualThemeOverride,
+      manualTheme: props.manualThemeOverride,
+      hasUserContext: !!props.userContext,
+      userContext: props.userContext,
+      finalTheme: theme
+    });
+  }, [theme, props.manualThemeOverride, props.userContext, sectionId]);
+
+  const getAccordionColors = (theme: UIBlockTheme) => {
+    const colorMap = {
+      warm: {
+        border: 'border-orange-200',
+        borderHover: 'hover:border-orange-300',
+        contentBorder: 'border-orange-100',
+        techDetailsBg: 'bg-orange-50',
+        techDetailsBorder: 'border-l-4 border-orange-500',
+        techSpecGradient: 'bg-gradient-to-r from-orange-950 to-orange-900',
+        spec1Color: 'text-orange-400',
+        spec2Color: 'text-amber-400',
+        spec3Color: 'text-yellow-400',
+        focusRing: 'focus:ring-orange-500',
+        stepIndicator: 'bg-orange-500',
+        stepIndicatorOpen: 'bg-white/20'
+      },
+      cool: {
+        border: 'border-blue-200',
+        borderHover: 'hover:border-blue-300',
+        contentBorder: 'border-blue-100',
+        techDetailsBg: 'bg-blue-50',
+        techDetailsBorder: 'border-l-4 border-blue-500',
+        techSpecGradient: 'bg-gradient-to-r from-blue-950 to-blue-900',
+        spec1Color: 'text-blue-400',
+        spec2Color: 'text-cyan-400',
+        spec3Color: 'text-indigo-400',
+        focusRing: 'focus:ring-blue-500',
+        stepIndicator: 'bg-blue-500',
+        stepIndicatorOpen: 'bg-white/20'
+      },
+      neutral: {
+        border: 'border-amber-200',
+        borderHover: 'hover:border-amber-300',
+        contentBorder: 'border-amber-100',
+        techDetailsBg: 'bg-amber-50',
+        techDetailsBorder: 'border-l-4 border-amber-500',
+        techSpecGradient: 'bg-gradient-to-r from-slate-900 to-slate-800',
+        spec1Color: 'text-amber-400',
+        spec2Color: 'text-slate-400',
+        spec3Color: 'text-stone-400',
+        focusRing: 'focus:ring-amber-500',
+        stepIndicator: 'bg-slate-500',
+        stepIndicatorOpen: 'bg-white/20'
+      }
+    };
+    return colorMap[theme];
+  };
+
+  const accordionColors = getAccordionColors(theme);
+
   const stepTitles = blockContent.step_titles 
     ? blockContent.step_titles.split('|').map(item => item.trim()).filter(Boolean)
     : [];
@@ -165,7 +237,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
   };
 
 
-  const AccordionStep = ({ step, index, isOpen, onToggle, blockContent, handleContentUpdate, mode, backgroundType, colorTokens, sectionId, onRemove }: {
+  const AccordionStep = ({ step, index, isOpen, onToggle, blockContent, handleContentUpdate, mode, backgroundType, colorTokens, sectionId, onRemove, theme, accordionColors }: {
     step: { title: string; description: string; details: string };
     index: number;
     isOpen: boolean;
@@ -177,8 +249,10 @@ export default function AccordionSteps(props: LayoutComponentProps) {
     colorTokens: any;
     sectionId: string;
     onRemove?: () => void;
+    theme: UIBlockTheme;
+    accordionColors: ReturnType<typeof getAccordionColors>;
   }) => (
-    <div className={`relative border border-gray-200 rounded-lg overflow-hidden transition-all duration-300 ${isOpen ? 'shadow-lg' : 'hover:shadow-md'} group`}>
+    <div className={`relative border ${accordionColors.border} ${accordionColors.borderHover} rounded-lg overflow-hidden ${cardEnhancements.transition} ${isOpen ? 'shadow-lg' : shadows.cardHover[theme]} ${shadows.card[theme]} group`}>
       <button
         onClick={onToggle}
         className={`w-full p-6 text-left transition-all duration-300 ${
@@ -191,9 +265,9 @@ export default function AccordionSteps(props: LayoutComponentProps) {
           <div className="flex items-center space-x-4 flex-1">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
               isOpen && mode === 'preview'
-                ? 'bg-white/20 text-white' 
-                : `${colorTokens.ctaBg} text-white`
-            }`}>
+                ? accordionColors.stepIndicatorOpen
+                : accordionColors.stepIndicator
+            } text-white`}>
               {index + 1}
             </div>
             <div className="flex-1">
@@ -207,7 +281,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
                     stepTitles[index] = e.currentTarget.textContent || '';
                     handleContentUpdate('step_titles', stepTitles.join('|'));
                   }}
-                  className={`text-lg font-semibold outline-none focus:ring-2 focus:ring-opacity-50 rounded px-2 py-1 cursor-text min-h-[32px] text-gray-900 focus:ring-blue-500 hover:bg-gray-100`}
+                  className={`text-lg font-semibold outline-none focus:ring-2 focus:ring-opacity-50 rounded px-2 py-1 cursor-text min-h-[32px] text-gray-900 ${accordionColors.focusRing} hover:bg-gray-100`}
                   data-placeholder="Step title"
                 >
                   {step.title}
@@ -232,7 +306,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
       </button>
       
       {isOpen && (
-        <div className="p-6 bg-white border-t border-gray-100">
+        <div className={`p-6 bg-white border-t ${accordionColors.contentBorder}`}>
           <div className="space-y-4">
             {mode !== 'preview' ? (
               <div
@@ -243,7 +317,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
                   stepDescriptions[index] = e.currentTarget.textContent || '';
                   handleContentUpdate('step_descriptions', stepDescriptions.join('|'));
                 }}
-                className="text-gray-700 leading-relaxed text-lg outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-50 min-h-[48px]"
+                className={`text-gray-700 leading-relaxed text-lg outline-none focus:ring-2 ${accordionColors.focusRing} focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-50 min-h-[48px]`}
                 data-placeholder="Step description"
               >
                 {step.description}
@@ -255,7 +329,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
             )}
             
             {(step.details || mode === 'edit') && (
-              <div className="bg-gray-50 rounded-lg p-4 border-l-4 border-blue-500">
+              <div className={`rounded-lg p-4 ${accordionColors.techDetailsBg} ${accordionColors.techDetailsBorder}`}>
                 <h4 className="font-semibold text-gray-900 mb-2">Technical Details:</h4>
                 {mode !== 'preview' ? (
                   <div
@@ -266,7 +340,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
                       stepDetails[index] = e.currentTarget.textContent || '';
                       handleContentUpdate('step_details', stepDetails.join('|'));
                     }}
-                    className="text-gray-600 text-sm leading-relaxed outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-white min-h-[48px]"
+                    className={`text-gray-600 text-sm leading-relaxed outline-none focus:ring-2 ${accordionColors.focusRing} focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-white min-h-[48px]`}
                     data-placeholder="Technical details for this step"
                   >
                     {step.details}
@@ -359,6 +433,8 @@ export default function AccordionSteps(props: LayoutComponentProps) {
               backgroundType={backgroundType}
               colorTokens={colorTokens}
               sectionId={sectionId}
+              theme={theme}
+              accordionColors={accordionColors}
               onRemove={steps.length > 1 ? () => {
                 const stepTitles = blockContent.step_titles ? blockContent.step_titles.split('|') : [];
                 const stepDescriptions = blockContent.step_descriptions ? blockContent.step_descriptions.split('|') : [];
@@ -416,7 +492,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
 
         {/* Technical Specs Summary */}
         {blockContent.show_tech_specs !== false && (
-          <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-8 text-white mb-12">
+          <div className={`${accordionColors.techSpecGradient} rounded-2xl p-8 text-white mb-12`}>
             <div className="text-center">
               {(blockContent.tech_specs_heading || mode === 'edit') && (
                 <EditableAdaptiveText
@@ -443,7 +519,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
                     backgroundType={props.backgroundType || 'neutral'}
                     colorTokens={colorTokens}
                     variant="body"
-                    className="text-3xl font-bold text-blue-400 mb-2"
+                    className={`text-3xl font-bold ${accordionColors.spec1Color} mb-2`}
                     placeholder="Spec 1 value"
                     sectionBackground={sectionBackground}
                     data-section-id={sectionId}
@@ -471,7 +547,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
                     backgroundType={props.backgroundType || 'neutral'}
                     colorTokens={colorTokens}
                     variant="body"
-                    className="text-3xl font-bold text-green-400 mb-2"
+                    className={`text-3xl font-bold ${accordionColors.spec2Color} mb-2`}
                     placeholder="Spec 2 value"
                     sectionBackground={sectionBackground}
                     data-section-id={sectionId}
@@ -499,7 +575,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
                     backgroundType={props.backgroundType || 'neutral'}
                     colorTokens={colorTokens}
                     variant="body"
-                    className="text-3xl font-bold text-purple-400 mb-2"
+                    className={`text-3xl font-bold ${accordionColors.spec3Color} mb-2`}
                     placeholder="Spec 3 value"
                     sectionBackground={sectionBackground}
                     data-section-id={sectionId}
