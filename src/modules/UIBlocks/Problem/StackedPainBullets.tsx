@@ -340,7 +340,7 @@ export default function StackedPainBullets(props: LayoutComponentProps) {
       mode={mode}
       className={props.className}
     >
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto mt-24">
         {/* Header Section */}
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
@@ -413,7 +413,7 @@ export default function StackedPainBullets(props: LayoutComponentProps) {
         )}
 
         {/* Emotional Conclusion */}
-        <div className="mt-12 text-center">
+        <div className="mt-16 text-center mb-8">
           <div className={`inline-flex items-center px-6 py-3 ${painColors.conclusionBg} border ${painColors.conclusionBorder} rounded-full ${painColors.conclusionText}`}>
             <svg className={`w-5 h-5 mr-2 ${painColors.iconText}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
@@ -425,7 +425,7 @@ export default function StackedPainBullets(props: LayoutComponentProps) {
               backgroundType={backgroundType}
               colorTokens={colorTokens}
               variant="body"
-              className="font-medium"
+              className="font-semibold"
               placeholder="Sound familiar? You're not alone."
               sectionBackground={sectionBackground}
               data-section-id={sectionId}
