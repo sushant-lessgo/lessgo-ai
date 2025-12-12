@@ -60,7 +60,7 @@ export const landingTypography = {
     letterSpacing: '0.01em',
   },
   'body-lg': {
-    fontSize: 'clamp(1.125rem, 2vw, 1.25rem)',
+    fontSize: 'clamp(1.25rem, 2.5vw, 1.5rem)',
     fontWeight: '400',
     lineHeight: '1.6',
     letterSpacing: '0',
@@ -83,6 +83,9 @@ export const landingTypography = {
     lineHeight: '1.4',
     letterSpacing: '0.01em',
   },
+ 
+
+  
 };
 
 export type TypographyVariant = keyof typeof landingTypography;

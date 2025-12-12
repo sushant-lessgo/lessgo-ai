@@ -348,14 +348,14 @@ export const SAFE_COLOR_COMBINATIONS = {
     background: '#ffffff',
     heading: '#111827', // gray-900
     body: '#374151',    // gray-700
-    muted: '#6b7280'    // gray-500
+    muted: '#4b5563'    // gray-600
   },
-  // Dark backgrounds with light text  
+  // Dark backgrounds with light text
   dark: {
     background: '#111827', // gray-900
     heading: '#f9fafb',    // gray-50
-    body: '#e5e7eb',       // gray-200  
-    muted: '#9ca3af'       // gray-400
+    body: '#e5e7eb',       // gray-200
+    muted: '#d1d5db'       // gray-300
   },
   // Medium backgrounds
   medium: {

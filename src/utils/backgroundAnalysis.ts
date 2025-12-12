@@ -377,14 +377,14 @@ function generateFallbackColors(
     return {
       heading: '#111827',  // gray-900 - strongest contrast
       body: '#374151',     // gray-700 - readable body text
-      muted: '#6b7280'     // gray-500 - muted text
+      muted: '#4b5563'     // gray-600 - muted text
     };
   } else {
     // Dark background - use light text
     return {
       heading: '#f9fafb',  // gray-50 - brightest
       body: '#e5e7eb',     // gray-200 - readable light text
-      muted: '#9ca3af'     // gray-400 - muted light text
+      muted: '#d1d5db'     // gray-300 - muted light text
     };
   }
 }
@@ -555,16 +555,16 @@ export function getTextColorsFromBackground(
   
   if (isLight) {
     return {
-      heading: '#111827',  // gray-900 
+      heading: '#111827',  // gray-900
       body: '#374151',     // gray-700
-      muted: '#6b7280',    // gray-500
+      muted: '#4b5563',    // gray-600
       confidence: analysis.confidence
     };
   } else {
     return {
       heading: '#f9fafb',  // gray-50
-      body: '#e5e7eb',     // gray-200  
-      muted: '#9ca3af',    // gray-400
+      body: '#e5e7eb',     // gray-200
+      muted: '#d1d5db',    // gray-300
       confidence: analysis.confidence
     };
   }

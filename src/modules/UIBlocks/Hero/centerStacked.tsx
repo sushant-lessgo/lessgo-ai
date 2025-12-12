@@ -353,7 +353,7 @@ export default function CenterStacked(props: LayoutComponentProps) {
             level="h1"
             backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
             colorTokens={colorTokens}
-            className="text-center leading-[0.5] max-w-5xl mx-auto mb-4"
+            className="text-center leading-[1.1] max-w-5xl mx-auto mb-6"
             textStyle={{ textAlign: 'center' }}
             sectionId={sectionId}
             elementKey="headline"
@@ -395,13 +395,13 @@ export default function CenterStacked(props: LayoutComponentProps) {
             />
           )}
 
-          <div className="flex flex-col items-center gap-6">
+          <div className="flex flex-col items-center gap-4">
 
             <CTAButton
               text={blockContent.cta_text}
               colorTokens={colorTokens}
               className={`
-px-12 py-4
+px-12 py-6
 font-semibold
 rounded-xl
 ${shadows.cta[theme]}
