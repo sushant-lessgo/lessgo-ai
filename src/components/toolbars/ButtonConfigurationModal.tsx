@@ -32,11 +32,10 @@ export function ButtonConfigurationModal({
   onClose, 
   elementSelection 
 }: ButtonConfigurationModalProps) {
-  const { 
-    getAllForms, 
-    showFormBuilder, 
+  const {
+    getAllForms,
+    showFormBuilder,
     content,
-    updateElementContent,
     setSection
   } = useEditStore();
   
@@ -112,27 +111,21 @@ export function ButtonConfigurationModal({
     setIsSaving(true);
 
     try {
-      // Update element content with button text
-      updateElementContent(
-        elementSelection.sectionId,
-        elementSelection.elementKey,
-        config.text
-      );
-
       // Store button configuration in element metadata
       const currentSection = content[elementSelection.sectionId];
       if (currentSection?.elements[elementSelection.elementKey]) {
         const element = currentSection.elements[elementSelection.elementKey];
         const updatedElement = {
           ...element,
+          content: config.text,  // ✅ FIX: Explicitly set fresh content with spaces preserved
           metadata: {
             ...element.metadata,
             buttonConfig: {
               type: config.type,
               ...(config.type === 'link' && { url: config.url }),
-              ...(config.type === 'form' && { 
-                formId: config.formId, 
-                behavior: config.behavior 
+              ...(config.type === 'form' && {
+                formId: config.formId,
+                behavior: config.behavior
               }),
             }
           }
