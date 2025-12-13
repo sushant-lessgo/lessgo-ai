@@ -1924,8 +1924,6 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "answer_9", mandatory: false, generation: "ai_generated", isCard: true },
       { element: "question_10", mandatory: false, generation: "ai_generated", isCard: true },
       { element: "answer_10", mandatory: false, generation: "ai_generated", isCard: true },
-      { element: "expand_icon", mandatory: false, generation: "ai_generated" },
-      { element: "collapse_icon", mandatory: false, generation: "ai_generated" },
       // Legacy fields for backward compatibility
       { element: "questions", mandatory: false, generation: "ai_generated" },
       { element: "answers", mandatory: false, generation: "ai_generated" }

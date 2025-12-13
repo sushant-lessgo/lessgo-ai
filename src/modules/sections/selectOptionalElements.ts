@@ -650,22 +650,6 @@ const elementRules: SectionLayoutRules = {
       { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams"], weight: 3 }
     ],
     minScore: 6
-  },
-  {
-    element: "expand_icon",
-    conditions: [
-      { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 3 },
-      { variable: "targetAudience", values: ["creators", "solopreneurs", "indie-hackers"], weight: 2 }
-    ],
-    minScore: 4
-  },
-  {
-    element: "collapse_icon",
-    conditions: [
-      { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 3 },
-      { variable: "targetAudience", values: ["creators", "solopreneurs", "indie-hackers"], weight: 2 }
-    ],
-    minScore: 4
   }
 ],
 
