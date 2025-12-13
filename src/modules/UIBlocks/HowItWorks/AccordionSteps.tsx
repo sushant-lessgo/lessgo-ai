@@ -24,6 +24,7 @@ interface AccordionStepsContent {
   subheadline?: string;
   supporting_text?: string;
   cta_text?: string;
+  cta_prompt?: string;
   trust_items?: string;
   // Technical Specs Summary
   tech_specs_heading?: string;
@@ -63,13 +64,17 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: '' 
   },
-  cta_text: { 
-    type: 'string' as const, 
-    default: '' 
+  cta_text: {
+    type: 'string' as const,
+    default: ''
   },
-  trust_items: { 
-    type: 'string' as const, 
-    default: '' 
+  cta_prompt: {
+    type: 'string' as const,
+    default: 'Ready to streamline your workflow?'
+  },
+  trust_items: {
+    type: 'string' as const,
+    default: ''
   },
   // Technical Specs Summary
   tech_specs_heading: { 
@@ -330,7 +335,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
             
             {(step.details || mode === 'edit') && (
               <div className={`rounded-lg p-4 ${accordionColors.techDetailsBg} ${accordionColors.techDetailsBorder}`}>
-                <h4 className="font-semibold text-gray-900 mb-2">Technical Details:</h4>
+                
                 {mode !== 'preview' ? (
                   <div
                     contentEditable
@@ -419,7 +424,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
         </div>
 
         {/* Accordion Steps - Always visible in both modes */}
-        <div className="space-y-4 mb-12">
+        <div className="space-y-4">
           {steps.map((step, index) => (
             <AccordionStep
               key={index}
@@ -492,7 +497,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
 
         {/* Technical Specs Summary */}
         {blockContent.show_tech_specs !== false && (
-          <div className={`${accordionColors.techSpecGradient} rounded-2xl p-8 text-white mb-12`}>
+          <div className={`${accordionColors.techSpecGradient} rounded-2xl p-8 text-white mb-8`}>
             <div className="text-center">
               {(blockContent.tech_specs_heading || mode === 'edit') && (
                 <EditableAdaptiveText
@@ -616,49 +621,76 @@ export default function AccordionSteps(props: LayoutComponentProps) {
           </div>
         )}
 
-        {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
-          <div className="text-center space-y-6">
-            {(blockContent.supporting_text || mode === 'edit') && (
-              <EditableAdaptiveText
-                mode={mode}
-                value={blockContent.supporting_text || ''}
-                onEdit={(value) => handleContentUpdate('supporting_text', value)}
-                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                colorTokens={colorTokens}
-                variant="body"
-                className="max-w-3xl mx-auto mb-8"
-                placeholder="Add optional supporting text to reinforce technical capabilities..."
-                sectionId={sectionId}
-                elementKey="supporting_text"
-                sectionBackground={sectionBackground}
-              />
-            )}
+        {/* {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
+          <div className="space-y-8"> */}
+            {/* Divider */}
+            {/* <div className="flex items-center justify-center">
+              <div className="h-px w-32 bg-gradient-to-r from-transparent via-blue-300 to-transparent"></div>
+            </div> */}
 
-            {(blockContent.cta_text || trustItems.length > 0) && (
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-                {blockContent.cta_text && (
-                  <CTAButton
-                    text={blockContent.cta_text}
-                    colorTokens={colorTokens}
-                    className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
-                    variant="primary"
-                    sectionId={sectionId}
-                    elementKey="cta_text"
-                  />
-                )}
+            {/* CTA Container - matches accordion width */}
+            {/* <div className="max-w-4xl mx-auto space-y-6"> */}
 
-                {trustItems.length > 0 && (
-                  <TrustIndicators 
+              {/* CTA Prompt */}
+              {/* {(blockContent.cta_prompt || mode === 'edit') && (
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.cta_prompt || ''}
+                  onEdit={(value) => handleContentUpdate('cta_prompt', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="text-center text-xl font-medium"
+                  placeholder="Ready to try it?"
+                  sectionId={sectionId}
+                  elementKey="cta_prompt"
+                  sectionBackground={sectionBackground}
+                />
+              )} */}
+
+              {/* Full-Width Button */}
+              {/* {blockContent.cta_text && (
+                <CTAButton
+                  text={blockContent.cta_text}
+                  colorTokens={colorTokens}
+                  className="w-full shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
+                  variant="primary"
+                  sectionId={sectionId}
+                  elementKey="cta_text"
+                />
+              )} */}
+
+              {/* Trust Indicators - Below Button */}
+              {/* {trustItems.length > 0 && (
+                <div className="flex justify-center pt-4">
+                  <TrustIndicators
                     items={trustItems}
                     colorClass={mutedTextColor}
                     iconColor="text-green-500"
                   />
-                )}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+                </div>
+              )} */}
+
+              {/* Supporting Text - Optional fine print */}
+              {(blockContent.supporting_text || mode === 'edit') && (
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.supporting_text || ''}
+                  onEdit={(value) => handleContentUpdate('supporting_text', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="text-center text-sm opacity-80"
+                  placeholder="Add optional fine print..."
+                  sectionId={sectionId}
+                  elementKey="supporting_text"
+                  sectionBackground={sectionBackground}
+                />
+              )}
+            </div>
+          {/* </div> */}
+        {/* )} */}
+      {/* </div> */}
     </LayoutSection>
   );
 }
@@ -680,6 +712,7 @@ export const componentMeta = {
     { key: 'step_details', label: 'Technical Details (pipe separated)', type: 'textarea', required: true },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: false },
+    { key: 'cta_prompt', label: 'CTA Prompt', type: 'text', required: false },
     { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
     { key: 'tech_specs_heading', label: 'Technical Specs Heading', type: 'text', required: false },
     { key: 'tech_spec_1_value', label: 'Tech Spec 1 Value', type: 'text', required: false },
