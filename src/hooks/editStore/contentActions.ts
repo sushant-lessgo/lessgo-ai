@@ -349,6 +349,36 @@ export function createContentActions(set: any, get: any): ContentActions {
       logger.warn('hideElementVariations should be called from aiActions');
     },
 
+    // Background management
+    setBackgroundType: (sectionId: string, backgroundType: BackgroundType) =>
+      set((state: EditStore) => {
+        if (state.content[sectionId]) {
+          state.content[sectionId].backgroundType = backgroundType;
+          state.persistence.isDirty = true;
+          state.lastUpdated = Date.now();
+        }
+      }),
+
+    setSectionBackground: (sectionId: string, sectionBackground: any) =>
+      set((state: EditStore) => {
+        if (state.content[sectionId]) {
+          state.content[sectionId].sectionBackground = sectionBackground;
+          state.persistence.isDirty = true;
+          state.lastUpdated = Date.now();
+        }
+      }),
+
+    markAsCustomized: (sectionId: string) =>
+      set((state: EditStore) => {
+        if (state.content[sectionId]) {
+          if (state.content[sectionId].aiMetadata) {
+            state.content[sectionId].aiMetadata.isCustomized = true;
+          }
+          state.persistence.isDirty = true;
+          state.lastUpdated = Date.now();
+        }
+      }),
+
     clearAIErrors: () => {
       logger.warn('clearAIErrors should be called from aiActions');
     },

@@ -257,19 +257,18 @@ const EnhancedLayoutWrapper: React.FC<{
   // Regular AI-generated elements are handled by their native UIBlock components
 
   // ✅ NEW: Extract taxonomy data from store for theme detection
-  const meta = useEditStore(state => state.meta);
-  const theme = useEditStore(state => state.theme);
-  const onboardingData = meta?.onboardingData;
+  const { onboardingData, theme } = useEditStore();
   const validatedFields = onboardingData?.validatedFields;
+  const hiddenFields = onboardingData?.hiddenInferredFields;
 
   // Build userContext from taxonomy data if available
   const userContext = React.useMemo(() => {
-    if (!validatedFields) {
-      console.log('🔍 EditablePageRenderer: No validatedFields found', {
+    if (!validatedFields || !hiddenFields) {
+      console.log('🔍 EditablePageRenderer: No validatedFields or hiddenFields found', {
         sectionId,
-        hasMeta: !!meta,
         hasOnboardingData: !!onboardingData,
-        metaKeys: meta ? Object.keys(meta) : [],
+        hasValidatedFields: !!validatedFields,
+        hasHiddenFields: !!hiddenFields,
         onboardingDataKeys: onboardingData ? Object.keys(onboardingData) : []
       });
       return undefined;
@@ -280,19 +279,20 @@ const EnhancedLayoutWrapper: React.FC<{
       targetAudience: validatedFields.targetAudience,
       landingPageGoals: validatedFields.landingPageGoals,
       startupStage: validatedFields.startupStage,
-      toneProfile: validatedFields.toneProfile,
-      awarenessLevel: validatedFields.awarenessLevel,
+      toneProfile: hiddenFields.toneProfile,
+      awarenessLevel: hiddenFields.awarenessLevel,
       pricingModel: validatedFields.pricingModel,
     };
 
     console.log('✅ EditablePageRenderer: Built userContext', {
       sectionId,
       context,
-      validatedFieldsKeys: Object.keys(validatedFields)
+      validatedFieldsKeys: Object.keys(validatedFields),
+      hiddenFieldsKeys: Object.keys(hiddenFields)
     });
 
     return context;
-  }, [validatedFields, sectionId, meta, onboardingData]);
+  }, [validatedFields, hiddenFields, sectionId, onboardingData]);
 
   // The layout component should get its data from the store via useLayoutComponent
   // We only need to pass the essential props

@@ -287,6 +287,7 @@ export interface Theme {
   spacing: SpacingSystem;
   corners: CornerSettings;
   animations: AnimationSettings;
+  uiBlockTheme?: 'warm' | 'cool' | 'neutral';
 }
 
 export interface TypographySettings {

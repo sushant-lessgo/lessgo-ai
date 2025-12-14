@@ -33,7 +33,7 @@ export interface ValidationStatus {
 }
 
 export function ColorSystemModalMVP({ isOpen, onClose, tokenId }: ColorSystemModalMVPProps) {
-  const { theme, updateTheme, getColorTokens, meta } = useEditStore();
+  const { theme, updateTheme, getColorTokens, onboardingData } = useEditStore();
 
   // Debug: Verify what updateTheme actually is
   React.useEffect(() => {
@@ -82,19 +82,31 @@ export function ColorSystemModalMVP({ isOpen, onClose, tokenId }: ColorSystemMod
 
   // Get auto-detected theme from taxonomy data
   const autoDetectedTheme = useMemo(() => {
-    const validatedFields = meta?.validatedFields;
-    if (!validatedFields) return null;
+    const validatedFields = onboardingData?.validatedFields;
+    const hiddenFields = onboardingData?.hiddenInferredFields;
+    if (!validatedFields || !hiddenFields) return null;
+
+    // Only call selectUIBlockTheme if all required fields are present
+    if (!validatedFields.marketCategory ||
+        !validatedFields.targetAudience ||
+        !validatedFields.landingPageGoals ||
+        !validatedFields.startupStage ||
+        !hiddenFields.toneProfile ||
+        !hiddenFields.awarenessLevel ||
+        !validatedFields.pricingModel) {
+      return null;
+    }
 
     return selectUIBlockTheme({
       marketCategory: validatedFields.marketCategory,
       targetAudience: validatedFields.targetAudience,
       landingPageGoals: validatedFields.landingPageGoals,
       startupStage: validatedFields.startupStage,
-      toneProfile: validatedFields.toneProfile,
-      awarenessLevel: validatedFields.awarenessLevel,
+      toneProfile: hiddenFields.toneProfile,
+      awarenessLevel: hiddenFields.awarenessLevel,
       pricingModel: validatedFields.pricingModel,
     });
-  }, [meta?.validatedFields]);
+  }, [onboardingData?.validatedFields, onboardingData?.hiddenInferredFields]);
 
   // Current theme (manual override or auto-detected)
   const currentTheme = theme?.uiBlockTheme || autoDetectedTheme || 'neutral';

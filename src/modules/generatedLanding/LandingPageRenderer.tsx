@@ -136,18 +136,18 @@ export default function LandingPageRenderer({ className = '', tokenId }: Landing
 
   // Build userContext from taxonomy data for UIBlock theme detection
   const userContext = React.useMemo(() => {
-    if (!validatedFields) return undefined;
+    if (!validatedFields || !hiddenInferredFields) return undefined;
 
     return {
       marketCategory: validatedFields.marketCategory,
       targetAudience: validatedFields.targetAudience,
       landingPageGoals: validatedFields.landingPageGoals,
       startupStage: validatedFields.startupStage,
-      toneProfile: validatedFields.toneProfile,
-      awarenessLevel: validatedFields.awarenessLevel,
+      toneProfile: hiddenInferredFields.toneProfile,
+      awarenessLevel: hiddenInferredFields.awarenessLevel,
       pricingModel: validatedFields.pricingModel,
     };
-  }, [validatedFields]);
+  }, [validatedFields, hiddenInferredFields]);
 
   // Extract manual theme override for UIBlocks
   const manualThemeOverride = theme?.uiBlockTheme;
