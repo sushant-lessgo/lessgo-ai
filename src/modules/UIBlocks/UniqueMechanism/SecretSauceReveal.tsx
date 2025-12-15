@@ -118,28 +118,28 @@ const SecretCard = ({
   canRemove?: boolean;
   sectionBackground?: string;
   secretColors: {
-    cardGradientFrom: string;
-    cardGradientTo: string;
+    cardBg: string;
+    cardBorder: string;
+    cardHoverBorder: string;
     iconBg: string;
+    iconShadow: string;
     iconText: string;
-    titleBadgeBg: string;
-    titleBadgeText: string;
-    descriptionText: string;
+    titleText: string;
+    accentBar: string;
     addButtonBg: string;
     addButtonHover: string;
-    decorativeCircle: string;
     focusRing: string;
-    hoverBg: string;
+    hoverShadow: string;
   };
 }) => {
   const { getTextStyle } = useTypography();
 
   return (
     <div className="group relative">
-      <div className={`bg-gradient-to-br ${secretColors.cardGradientFrom} ${secretColors.cardGradientTo} rounded-2xl p-8 text-white text-center relative overflow-hidden h-full`}>
-        <div className={`absolute top-0 right-0 w-32 h-32 ${secretColors.decorativeCircle} rounded-full -translate-y-16 translate-x-16 opacity-20`}></div>
+      <div className={`${secretColors.cardBg} rounded-2xl p-8 text-center relative overflow-hidden h-full border-2 ${secretColors.cardBorder} ${secretColors.cardHoverBorder} shadow-lg ${secretColors.hoverShadow} transition-all duration-300`}>
+        <div className={`absolute top-0 left-0 right-0 h-1.5 ${secretColors.accentBar} rounded-t-2xl`}></div>
         <div className="relative z-10">
-          <div className={`w-16 h-16 ${secretColors.iconBg} rounded-full flex items-center justify-center mx-auto mb-4`}>
+          <div className={`w-14 h-14 ${secretColors.iconBg} ${secretColors.iconShadow} rounded-full flex items-center justify-center mx-auto mb-4`}>
             <IconEditableText
               mode={mode}
               value={getSecretIcon(blockContent, index)}
@@ -156,7 +156,7 @@ const SecretCard = ({
             />
           </div>
 
-          <div className={`${secretColors.titleBadgeBg} ${secretColors.titleBadgeText} px-4 py-2 rounded-full inline-block font-bold text-lg mb-4`}>
+          <h3 className={`${secretColors.titleText} font-bold text-xl mb-3`}>
             {mode !== 'preview' ? (
               <div
                 contentEditable
@@ -169,15 +169,15 @@ const SecretCard = ({
             ) : (
               <span>{secret.title}</span>
             )}
-          </div>
+          </h3>
 
-          <div className={secretColors.descriptionText}>
+          <div className="text-gray-600">
             {mode !== 'preview' ? (
               <div
                 contentEditable
                 suppressContentEditableWarning
                 onBlur={(e) => onDescriptionEdit(index, e.currentTarget.textContent || '')}
-                className={`outline-none focus:ring-2 ${secretColors.focusRing} focus:ring-opacity-50 rounded px-2 py-1 min-h-[48px] cursor-text ${secretColors.hoverBg} hover:bg-opacity-30 max-w-lg mx-auto`}
+                className={`outline-none focus:ring-2 ${secretColors.focusRing} focus:ring-opacity-50 rounded px-2 py-1 min-h-[48px] cursor-text hover:bg-gray-50 max-w-lg mx-auto`}
               >
                 {secret.description}
               </div>
@@ -235,46 +235,46 @@ export default function SecretSauceReveal(props: LayoutComponentProps) {
   const getSecretColors = (theme: UIBlockTheme) => {
     return {
       warm: {
-        cardGradientFrom: 'from-orange-900',
-        cardGradientTo: 'to-red-900',
-        iconBg: 'bg-amber-300',
-        iconText: 'text-orange-900',
-        titleBadgeBg: 'bg-amber-300',
-        titleBadgeText: 'text-orange-900',
-        descriptionText: 'text-orange-100',
+        cardBg: 'bg-white',
+        cardBorder: 'border-orange-200',
+        cardHoverBorder: 'hover:border-orange-400',
+        iconBg: 'bg-gradient-to-br from-orange-400 to-red-500',
+        iconShadow: 'shadow-lg shadow-orange-200',
+        iconText: 'text-white',
+        titleText: 'text-orange-900',
+        accentBar: 'bg-gradient-to-r from-orange-400 to-red-500',
         addButtonBg: 'bg-orange-600',
         addButtonHover: 'hover:bg-orange-700',
-        decorativeCircle: 'bg-orange-600',
         focusRing: 'focus:ring-orange-300',
-        hoverBg: 'hover:bg-orange-800'
+        hoverShadow: 'hover:shadow-xl'
       },
       cool: {
-        cardGradientFrom: 'from-blue-900',
-        cardGradientTo: 'to-indigo-900',
-        iconBg: 'bg-blue-300',
-        iconText: 'text-blue-900',
-        titleBadgeBg: 'bg-blue-300',
-        titleBadgeText: 'text-blue-900',
-        descriptionText: 'text-blue-100',
+        cardBg: 'bg-white',
+        cardBorder: 'border-blue-200',
+        cardHoverBorder: 'hover:border-blue-400',
+        iconBg: 'bg-gradient-to-br from-blue-400 to-indigo-500',
+        iconShadow: 'shadow-lg shadow-blue-200',
+        iconText: 'text-white',
+        titleText: 'text-blue-900',
+        accentBar: 'bg-gradient-to-r from-blue-400 to-indigo-500',
         addButtonBg: 'bg-blue-600',
         addButtonHover: 'hover:bg-blue-700',
-        decorativeCircle: 'bg-blue-600',
         focusRing: 'focus:ring-blue-300',
-        hoverBg: 'hover:bg-blue-800'
+        hoverShadow: 'hover:shadow-xl'
       },
       neutral: {
-        cardGradientFrom: 'from-purple-900',
-        cardGradientTo: 'to-indigo-900',
-        iconBg: 'bg-yellow-400',
-        iconText: 'text-purple-900',
-        titleBadgeBg: 'bg-yellow-400',
-        titleBadgeText: 'text-purple-900',
-        descriptionText: 'text-purple-100',
+        cardBg: 'bg-white',
+        cardBorder: 'border-purple-200',
+        cardHoverBorder: 'hover:border-purple-400',
+        iconBg: 'bg-gradient-to-br from-purple-400 to-indigo-500',
+        iconShadow: 'shadow-lg shadow-purple-200',
+        iconText: 'text-white',
+        titleText: 'text-purple-900',
+        accentBar: 'bg-gradient-to-r from-purple-400 to-indigo-500',
         addButtonBg: 'bg-purple-600',
         addButtonHover: 'hover:bg-purple-700',
-        decorativeCircle: 'bg-purple-600',
         focusRing: 'focus:ring-purple-300',
-        hoverBg: 'hover:bg-purple-800'
+        hoverShadow: 'hover:shadow-xl'
       }
     }[theme];
   };
