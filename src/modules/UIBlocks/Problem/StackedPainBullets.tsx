@@ -52,12 +52,14 @@ const CONTENT_SCHEMA = {
 // Parse pain point data from pipe-separated strings
 const parsePainData = (points: string, descriptions?: string): PainPoint[] => {
   const pointList = points.split('|').map(p => p.trim()).filter(p => p);
-  const descriptionList = descriptions ? descriptions.split('|').map(d => d.trim()) : [];
+  const descriptionList = descriptions !== undefined && descriptions !== null
+    ? descriptions.split('|').map(d => d.trim())
+    : [];
 
   return pointList.map((point, index) => ({
     id: `pain-${index}`,
     point,
-    description: descriptionList[index] || undefined
+    description: descriptionList[index] || ''
   }));
 };
 
