@@ -8,6 +8,8 @@ import { EditableAdaptiveHeadline, EditableAdaptiveText } from '@/components/lay
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { getIconFromCategory, getRandomIconFromCategory } from '@/utils/iconMapping';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface SecretSauceRevealContent {
   headline: string;
@@ -100,7 +102,8 @@ const SecretCard = ({
   colorTokens,
   handleContentUpdate,
   canRemove = true,
-  sectionBackground
+  sectionBackground,
+  secretColors
 }: {
   secret: SecretItem;
   index: number;
@@ -114,15 +117,29 @@ const SecretCard = ({
   handleContentUpdate: (field: keyof SecretSauceRevealContent, value: string) => void;
   canRemove?: boolean;
   sectionBackground?: string;
+  secretColors: {
+    cardGradientFrom: string;
+    cardGradientTo: string;
+    iconBg: string;
+    iconText: string;
+    titleBadgeBg: string;
+    titleBadgeText: string;
+    descriptionText: string;
+    addButtonBg: string;
+    addButtonHover: string;
+    decorativeCircle: string;
+    focusRing: string;
+    hoverBg: string;
+  };
 }) => {
   const { getTextStyle } = useTypography();
 
   return (
     <div className="group relative">
-      <div className="bg-gradient-to-br from-purple-900 to-indigo-900 rounded-2xl p-8 text-white text-center relative overflow-hidden h-full">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-purple-600 rounded-full -translate-y-16 translate-x-16 opacity-20"></div>
+      <div className={`bg-gradient-to-br ${secretColors.cardGradientFrom} ${secretColors.cardGradientTo} rounded-2xl p-8 text-white text-center relative overflow-hidden h-full`}>
+        <div className={`absolute top-0 right-0 w-32 h-32 ${secretColors.decorativeCircle} rounded-full -translate-y-16 translate-x-16 opacity-20`}></div>
         <div className="relative z-10">
-          <div className="w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className={`w-16 h-16 ${secretColors.iconBg} rounded-full flex items-center justify-center mx-auto mb-4`}>
             <IconEditableText
               mode={mode}
               value={getSecretIcon(blockContent, index)}
@@ -133,19 +150,19 @@ const SecretCard = ({
               backgroundType="neutral"
               colorTokens={colorTokens}
               iconSize="lg"
-              className="text-purple-900 text-2xl"
+              className={`${secretColors.iconText} text-2xl`}
               sectionId={sectionId}
               elementKey={`secret_icon_${index + 1}`}
             />
           </div>
 
-          <div className="bg-yellow-400 text-purple-900 px-4 py-2 rounded-full inline-block font-bold text-lg mb-4">
+          <div className={`${secretColors.titleBadgeBg} ${secretColors.titleBadgeText} px-4 py-2 rounded-full inline-block font-bold text-lg mb-4`}>
             {mode !== 'preview' ? (
               <div
                 contentEditable
                 suppressContentEditableWarning
                 onBlur={(e) => onTitleEdit(index, e.currentTarget.textContent || '')}
-                className="outline-none focus:ring-2 focus:ring-purple-300 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text"
+                className={`outline-none focus:ring-2 ${secretColors.focusRing} focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text`}
               >
                 {secret.title}
               </div>
@@ -154,13 +171,13 @@ const SecretCard = ({
             )}
           </div>
 
-          <div className="text-purple-100">
+          <div className={secretColors.descriptionText}>
             {mode !== 'preview' ? (
               <div
                 contentEditable
                 suppressContentEditableWarning
                 onBlur={(e) => onDescriptionEdit(index, e.currentTarget.textContent || '')}
-                className="outline-none focus:ring-2 focus:ring-purple-300 focus:ring-opacity-50 rounded px-2 py-1 min-h-[48px] cursor-text hover:bg-purple-800 hover:bg-opacity-30 max-w-lg mx-auto"
+                className={`outline-none focus:ring-2 ${secretColors.focusRing} focus:ring-opacity-50 rounded px-2 py-1 min-h-[48px] cursor-text ${secretColors.hoverBg} hover:bg-opacity-30 max-w-lg mx-auto`}
               >
                 {secret.description}
               </div>
@@ -206,6 +223,63 @@ export default function SecretSauceReveal(props: LayoutComponentProps) {
   const { getTextStyle: getTypographyStyle } = useTypography();
   const store = useEditStore();
   const onboardingStore = useOnboardingStore();
+
+  // Detect theme: manual override > auto-detection > neutral fallback
+  const theme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Secret card colors by theme
+  const getSecretColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        cardGradientFrom: 'from-orange-900',
+        cardGradientTo: 'to-red-900',
+        iconBg: 'bg-amber-300',
+        iconText: 'text-orange-900',
+        titleBadgeBg: 'bg-amber-300',
+        titleBadgeText: 'text-orange-900',
+        descriptionText: 'text-orange-100',
+        addButtonBg: 'bg-orange-600',
+        addButtonHover: 'hover:bg-orange-700',
+        decorativeCircle: 'bg-orange-600',
+        focusRing: 'focus:ring-orange-300',
+        hoverBg: 'hover:bg-orange-800'
+      },
+      cool: {
+        cardGradientFrom: 'from-blue-900',
+        cardGradientTo: 'to-indigo-900',
+        iconBg: 'bg-blue-300',
+        iconText: 'text-blue-900',
+        titleBadgeBg: 'bg-blue-300',
+        titleBadgeText: 'text-blue-900',
+        descriptionText: 'text-blue-100',
+        addButtonBg: 'bg-blue-600',
+        addButtonHover: 'hover:bg-blue-700',
+        decorativeCircle: 'bg-blue-600',
+        focusRing: 'focus:ring-blue-300',
+        hoverBg: 'hover:bg-blue-800'
+      },
+      neutral: {
+        cardGradientFrom: 'from-purple-900',
+        cardGradientTo: 'to-indigo-900',
+        iconBg: 'bg-yellow-400',
+        iconText: 'text-purple-900',
+        titleBadgeBg: 'bg-yellow-400',
+        titleBadgeText: 'text-purple-900',
+        descriptionText: 'text-purple-100',
+        addButtonBg: 'bg-purple-600',
+        addButtonHover: 'hover:bg-purple-700',
+        decorativeCircle: 'bg-purple-600',
+        focusRing: 'focus:ring-purple-300',
+        hoverBg: 'hover:bg-purple-800'
+      }
+    }[theme];
+  };
+
+  const secretColors = getSecretColors(theme);
 
   // Auto-populate icons on initial generation
   useEffect(() => {
@@ -315,6 +389,7 @@ export default function SecretSauceReveal(props: LayoutComponentProps) {
               handleContentUpdate={handleContentUpdate}
               canRemove={secrets.length > 2}
               sectionBackground={sectionBackground}
+              secretColors={secretColors}
             />
           ))}
         </div>
@@ -323,7 +398,7 @@ export default function SecretSauceReveal(props: LayoutComponentProps) {
           <div className="mt-8 text-center">
             <button
               onClick={handleAddSecret}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors duration-200"
+              className={`inline-flex items-center gap-2 px-6 py-3 ${secretColors.addButtonBg} ${secretColors.addButtonHover} text-white rounded-lg transition-colors duration-200`}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />

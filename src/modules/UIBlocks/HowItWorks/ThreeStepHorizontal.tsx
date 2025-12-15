@@ -5,13 +5,15 @@ import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useOnboardingStore } from '@/hooks/useOnboardingStore';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  LayoutComponentProps, 
+import {
+  LayoutComponentProps,
   extractLayoutContent,
-  StoreElementTypes 
+  StoreElementTypes
 } from '@/types/storeTypes';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { getIconFromCategory, getRandomIconFromCategory } from '@/utils/iconMapping';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface ThreeStepHorizontalProps extends LayoutComponentProps {}
 
@@ -108,33 +110,35 @@ const removeStep = (titles: string, descriptions: string, indexToRemove: number)
 };
 
 // ModeWrapper component for handling edit/preview modes
-const ModeWrapper = ({ 
-  mode, 
-  children, 
-  sectionId, 
+const ModeWrapper = ({
+  mode,
+  children,
+  sectionId,
   elementKey,
-  onEdit 
+  onEdit,
+  focusRing = 'focus:ring-blue-500'
 }: {
   mode: 'edit' | 'preview';
   children: React.ReactNode;
   sectionId: string;
   elementKey: string;
   onEdit?: (value: string) => void;
+  focusRing?: string;
 }) => {
   if (mode !== 'preview' && onEdit) {
     return (
-      <div 
+      <div
         contentEditable
         suppressContentEditableWarning
         onBlur={(e) => onEdit(e.currentTarget.textContent || '')}
-        className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50"
+        className={`outline-none focus:ring-2 ${focusRing} focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50`}
         data-placeholder={`Edit ${elementKey.replace('_', ' ')}`}
       >
         {children}
       </div>
     );
   }
-  
+
   return <>{children}</>;
 };
 
@@ -153,7 +157,8 @@ const StepCard = ({
   handleContentUpdate,
   backgroundType,
   colorTokens,
-  canRemove = true
+  canRemove = true,
+  stepColors
 }: {
   item: StepItem;
   mode: 'edit' | 'preview';
@@ -168,6 +173,20 @@ const StepCard = ({
   backgroundType: any;
   colorTokens: any;
   canRemove?: boolean;
+  stepColors: {
+    stepCircle: string;
+    stepIconFrom: string;
+    stepIconTo: string;
+    connector: string;
+    connectorLine: string;
+    addButtonBg: string;
+    addButtonHover: string;
+    addButtonBorder: string;
+    addButtonBorderHover: string;
+    addButtonText: string;
+    addButtonIcon: string;
+    focusRing: string;
+  };
 }) => {
   const { getTextStyle } = useTypography();
   
@@ -178,13 +197,13 @@ const StepCard = ({
         
         {/* Step Number Circle */}
         <div className="relative mb-6">
-          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg mx-auto shadow-lg">
+          <div className={`w-12 h-12 ${stepColors.stepCircle} rounded-full flex items-center justify-center text-white font-bold text-lg mx-auto shadow-lg`}>
             {item.number}
           </div>
-          
+
           {/* Step Icon */}
           <div className="mt-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg mx-auto">
+            <div className={`w-16 h-16 bg-gradient-to-br ${stepColors.stepIconFrom} ${stepColors.stepIconTo} rounded-full flex items-center justify-center shadow-lg mx-auto`}>
               <IconEditableText
                 mode={mode}
                 value={getStepIcon(blockContent, index)}
@@ -206,17 +225,17 @@ const StepCard = ({
         {/* Step Title */}
         <div className="mb-4">
           {mode !== 'preview' ? (
-            <div 
+            <div
               contentEditable
               suppressContentEditableWarning
               onBlur={(e) => onTitleEdit(index, e.currentTarget.textContent || '')}
-              className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 font-semibold text-gray-900"
+              className={`outline-none focus:ring-2 ${stepColors.focusRing} focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 font-semibold ${colorTokens.textPrimary}`}
             >
               {item.title}
             </div>
           ) : (
-            <h3 
-              className="font-semibold text-gray-900 mb-3"
+            <h3
+              className={`font-semibold ${colorTokens.textPrimary} mb-3`}
             >
               {item.title}
             </h3>
@@ -226,17 +245,17 @@ const StepCard = ({
         {/* Step Description */}
         <div>
           {mode !== 'preview' ? (
-            <div 
+            <div
               contentEditable
               suppressContentEditableWarning
               onBlur={(e) => onDescriptionEdit(index, e.currentTarget.textContent || '')}
-              className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 text-gray-600 leading-relaxed"
+              className={`outline-none focus:ring-2 ${stepColors.focusRing} focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 ${colorTokens.textSecondary} leading-relaxed`}
             >
               {item.description}
             </div>
           ) : (
-            <p 
-              className="text-gray-600 leading-relaxed"
+            <p
+              className={`${colorTokens.textSecondary} leading-relaxed`}
             >
               {item.description}
             </p>
@@ -263,7 +282,7 @@ const StepCard = ({
       {/* Connecting Arrow (Desktop Only) */}
       {!isLast && (
         <div className="lg:block absolute top-20 -right-8 w-16 h-8 flex items-center justify-center">
-          <svg className="w-8 h-8 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className={`w-8 h-8 ${stepColors.connector}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
           </svg>
         </div>
@@ -272,7 +291,7 @@ const StepCard = ({
       {/* Connecting Line (Mobile) */}
       {!isLast && (
         <div className="lg:hidden flex justify-center mt-8 mb-8">
-          <div className="w-1 h-12 bg-blue-200 rounded-full"></div>
+          <div className={`w-1 h-12 ${stepColors.connectorLine} rounded-full`}></div>
         </div>
       )}
     </div>
@@ -296,6 +315,63 @@ export default function ThreeStepHorizontal(props: ThreeStepHorizontalProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Detect theme: manual override > auto-detection > neutral fallback
+  const uiBlockTheme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Step colors by theme
+  const getStepColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        stepCircle: 'bg-orange-600',
+        stepIconFrom: 'from-orange-500',
+        stepIconTo: 'to-orange-600',
+        connector: 'text-orange-300',
+        connectorLine: 'bg-orange-200',
+        addButtonBg: 'bg-orange-50',
+        addButtonHover: 'hover:bg-orange-100',
+        addButtonBorder: 'border-orange-200',
+        addButtonBorderHover: 'hover:border-orange-300',
+        addButtonText: 'text-orange-700',
+        addButtonIcon: 'text-orange-600',
+        focusRing: 'focus:ring-orange-500'
+      },
+      cool: {
+        stepCircle: 'bg-blue-600',
+        stepIconFrom: 'from-blue-500',
+        stepIconTo: 'to-blue-600',
+        connector: 'text-blue-300',
+        connectorLine: 'bg-blue-200',
+        addButtonBg: 'bg-blue-50',
+        addButtonHover: 'hover:bg-blue-100',
+        addButtonBorder: 'border-blue-200',
+        addButtonBorderHover: 'hover:border-blue-300',
+        addButtonText: 'text-blue-700',
+        addButtonIcon: 'text-blue-600',
+        focusRing: 'focus:ring-blue-500'
+      },
+      neutral: {
+        stepCircle: 'bg-slate-600',
+        stepIconFrom: 'from-slate-500',
+        stepIconTo: 'to-slate-600',
+        connector: 'text-slate-300',
+        connectorLine: 'bg-slate-200',
+        addButtonBg: 'bg-slate-50',
+        addButtonHover: 'hover:bg-slate-100',
+        addButtonBorder: 'border-slate-200',
+        addButtonBorderHover: 'hover:border-slate-300',
+        addButtonText: 'text-slate-700',
+        addButtonIcon: 'text-slate-600',
+        focusRing: 'focus:ring-slate-500'
+      }
+    }[theme];
+  };
+
+  const stepColors = getStepColors(uiBlockTheme);
 
   // Parse step data
   const stepItems = parseStepData(blockContent.step_titles, blockContent.step_descriptions, blockContent.step_numbers);
@@ -359,8 +435,9 @@ export default function ThreeStepHorizontal(props: ThreeStepHorizontalProps) {
             sectionId={sectionId}
             elementKey="headline"
             onEdit={(value) => handleContentUpdate('headline', value)}
+            focusRing={stepColors.focusRing}
           >
-            <h2 
+            <h2
               className={`mb-4 ${colorTokens.textPrimary}`}
             >
               {blockContent.headline}
@@ -386,6 +463,7 @@ export default function ThreeStepHorizontal(props: ThreeStepHorizontalProps) {
               backgroundType={backgroundType}
               colorTokens={colorTokens}
               canRemove={stepItems.length > 1}
+              stepColors={stepColors}
             />
           ))}
         </div>
@@ -395,12 +473,12 @@ export default function ThreeStepHorizontal(props: ThreeStepHorizontalProps) {
           <div className="mt-12 text-center">
             <button
               onClick={handleAddStep}
-              className="flex items-center space-x-2 mx-auto px-4 py-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-xl transition-all duration-200 group"
+              className={`flex items-center space-x-2 mx-auto px-4 py-3 ${stepColors.addButtonBg} ${stepColors.addButtonHover} border-2 ${stepColors.addButtonBorder} ${stepColors.addButtonBorderHover} rounded-xl transition-all duration-200 group`}
             >
-              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className={`w-5 h-5 ${stepColors.addButtonIcon}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              <span className="text-blue-700 font-medium">Add Step</span>
+              <span className={`${stepColors.addButtonText} font-medium`}>Add Step</span>
             </button>
           </div>
         )}
@@ -413,8 +491,9 @@ export default function ThreeStepHorizontal(props: ThreeStepHorizontalProps) {
               sectionId={sectionId}
               elementKey="conclusion_text"
               onEdit={(value) => handleContentUpdate('conclusion_text', value)}
+              focusRing={stepColors.focusRing}
             >
-              <p 
+              <p
                 className={`max-w-2xl mx-auto ${colorTokens.textSecondary} ${!blockContent.conclusion_text && mode === 'edit' ? 'opacity-50' : ''}`}
               >
                 {blockContent.conclusion_text || (mode !== 'preview' ? 'Add optional conclusion text to summarize the process...' : '')}
