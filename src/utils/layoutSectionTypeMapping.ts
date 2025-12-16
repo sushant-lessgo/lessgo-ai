@@ -95,16 +95,20 @@ export const layoutToSectionType: Record<string, string> = {
   'TabsWithEvidence': 'objectionHandling',
   'VideoProofPoints': 'objectionHandling',
   'SecurityBadgesObjection': 'objectionHandling',
+  'VisualObjectionTiles': 'objectionHandling',
+  'ProblemToReframeBlocks': 'objectionHandling',
+  'SkepticToBelieverSteps': 'objectionHandling',
+  'BoldGuaranteePanel': 'objectionHandling',
 
   // Pricing layouts
   'TierCards': 'pricing',
-  'PricingComparisonTable': 'pricing',
   'ToggleableMonthlyYearly': 'pricing',
-  'SinglePlanHighlight': 'pricing',
-  'ROICalculator': 'pricing',
-  'FreemiumToEnterpriseFlow': 'pricing',
   'FeatureMatrix': 'pricing',
-  'SliderBasedQuotes': 'pricing',
+  'SegmentBasedPricing': 'pricing',
+  'SliderPricing': 'pricing',
+  'CallToQuotePlan': 'pricing',
+  'CardWithTestimonial': 'pricing',
+  'MiniStackedCards': 'pricing',
 
   // Problem layouts
   'StackedPainBullets': 'problem',
@@ -125,6 +129,7 @@ export const layoutToSectionType: Record<string, string> = {
   'OutcomeIcons': 'results',
   'StackedWinsList': 'results',
   'PersonaResultPanels': 'results',
+  'ResultsGallery': 'results',
 
   // Security layouts
   'AuditResultsPanel': 'security',
@@ -150,9 +155,9 @@ export const layoutToSectionType: Record<string, string> = {
   'AvatarCarousel': 'testimonials',
   'BeforeAfterQuote': 'testimonials',
   'SegmentedTestimonials': 'testimonials',
-  'StarRatingCards': 'testimonials',
-  'TestimonialSlider': 'testimonials',
-  'ThreadTestimonials': 'testimonials',
+  'RatingCards': 'testimonials',
+  'PullQuoteStack': 'testimonials',
+  'InteractiveTestimonialMap': 'testimonials',
 
   // UniqueMechanism layouts
   'AlgorithmExplainer': 'uniqueMechanism',

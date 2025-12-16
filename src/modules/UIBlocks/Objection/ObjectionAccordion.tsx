@@ -12,6 +12,9 @@ import {
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { shadows, cardEnhancements } from '@/modules/Design/designTokens';
 
 // Content interface for type safety
 interface ObjectionAccordionContent {
@@ -217,6 +220,64 @@ const shiftObjectionsDown = (content: ObjectionAccordionContent, removedIndex: n
   return updates;
 };
 
+// Color mapping function for theme-aware styling
+const getObjectionColors = (theme: UIBlockTheme) => {
+  const colorMap = {
+    warm: {
+      objectionBg: 'bg-orange-100',
+      objectionBorder: 'border-orange-200',
+      objectionIconBg: 'bg-orange-100',
+      objectionIconText: 'text-orange-600',
+      responseBg: 'bg-orange-50',
+      responseBorder: 'border-orange-200',
+      responseIconBg: 'bg-orange-600',
+      responseIconText: 'text-white',
+      responseTextColor: 'text-orange-800',
+      responseHoverBg: 'hover:bg-orange-100',
+      trustBg: 'bg-orange-50',
+      trustText: 'text-orange-700',
+      deleteBg: 'bg-orange-500',
+      deleteBgHover: 'hover:bg-orange-600',
+      focusRing: 'focus:ring-orange-500'
+    },
+    cool: {
+      objectionBg: 'bg-blue-100',
+      objectionBorder: 'border-blue-200',
+      objectionIconBg: 'bg-blue-100',
+      objectionIconText: 'text-blue-600',
+      responseBg: 'bg-blue-50',
+      responseBorder: 'border-blue-200',
+      responseIconBg: 'bg-blue-600',
+      responseIconText: 'text-white',
+      responseTextColor: 'text-blue-800',
+      responseHoverBg: 'hover:bg-blue-100',
+      trustBg: 'bg-blue-50',
+      trustText: 'text-blue-700',
+      deleteBg: 'bg-blue-500',
+      deleteBgHover: 'hover:bg-blue-600',
+      focusRing: 'focus:ring-blue-500'
+    },
+    neutral: {
+      objectionBg: 'bg-amber-100',
+      objectionBorder: 'border-amber-200',
+      objectionIconBg: 'bg-amber-100',
+      objectionIconText: 'text-amber-600',
+      responseBg: 'bg-amber-50',
+      responseBorder: 'border-amber-200',
+      responseIconBg: 'bg-amber-600',
+      responseIconText: 'text-white',
+      responseTextColor: 'text-amber-800',
+      responseHoverBg: 'hover:bg-amber-100',
+      trustBg: 'bg-amber-50',
+      trustText: 'text-amber-700',
+      deleteBg: 'bg-amber-500',
+      deleteBgHover: 'hover:bg-amber-600',
+      focusRing: 'focus:ring-amber-500'
+    }
+  };
+  return colorMap[theme];
+};
+
 // Individual Objection Accordion Item
 const ObjectionAccordionItem = React.memo(({
   item,
@@ -233,7 +294,9 @@ const ObjectionAccordionItem = React.memo(({
   sectionId,
   backgroundType,
   sectionBackground,
-  canRemove = true
+  canRemove = true,
+  theme,
+  objectionColors
 }: {
   item: ObjectionItem;
   isOpen: boolean;
@@ -250,10 +313,12 @@ const ObjectionAccordionItem = React.memo(({
   backgroundType: any;
   sectionBackground: any;
   canRemove?: boolean;
+  theme: UIBlockTheme;
+  objectionColors: ReturnType<typeof getObjectionColors>;
 }) => {
   
   return (
-    <div className={`relative group/objection-item border border-gray-200 rounded-lg overflow-hidden mb-4 bg-white shadow-sm`}>
+    <div className={`relative group/objection-item border ${objectionColors.objectionBorder} rounded-lg overflow-hidden mb-4 bg-white shadow-sm ${cardEnhancements.hoverLift} ${cardEnhancements.transition}`}>
       {/* Delete button - appears on hover in edit mode */}
       {mode === 'edit' && onRemoveObjection && canRemove && (
         <button
@@ -261,7 +326,7 @@ const ObjectionAccordionItem = React.memo(({
             e.stopPropagation();
             onRemoveObjection(item.index);
           }}
-          className="absolute top-4 right-4 z-10 opacity-0 group-hover/objection-item:opacity-100 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-200"
+          className={`absolute top-4 right-4 z-10 opacity-0 group-hover/objection-item:opacity-100 w-6 h-6 ${objectionColors.deleteBg} ${objectionColors.deleteBgHover} rounded-full flex items-center justify-center transition-all duration-200`}
           title="Remove this objection"
         >
           <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -279,13 +344,13 @@ const ObjectionAccordionItem = React.memo(({
         <div className="flex items-center justify-between">
           <div className={`flex items-center space-x-4 flex-1 ${mode === 'edit' && onRemoveObjection && canRemove ? 'pr-12' : 'pr-4'}`}>
             {/* Objection Icon */}
-            <div className="flex-shrink-0 w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center text-red-600">
+            <div className={`flex-shrink-0 w-10 h-10 ${objectionColors.objectionIconBg} rounded-lg flex items-center justify-center ${objectionColors.objectionIconText}`}>
               <IconEditableText
                 mode={mode}
                 value={item.icon || '❓'}
                 onEdit={(value) => onIconEdit(item.index, value)}
                 backgroundType="custom"
-                colorTokens={{...colorTokens, primaryText: 'text-red-600'}}
+                colorTokens={{...colorTokens, primaryText: objectionColors.objectionIconText}}
                 iconSize="sm"
                 className="text-xl"
                 sectionId={sectionId}
@@ -330,21 +395,21 @@ const ObjectionAccordionItem = React.memo(({
       </button>
 
       {/* Response Content */}
-      <div 
+      <div
         className={`overflow-hidden transition-all duration-300 ease-in-out ${
           isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
-        <div className="px-6 py-5 bg-green-50 border-t border-green-200">
+        <div className={`px-6 py-5 ${objectionColors.responseBg} border-t ${objectionColors.responseBorder}`}>
           <div className="flex items-start space-x-4">
             {/* Response Icon */}
-            <div className="flex-shrink-0 w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-white mt-1">
+            <div className={`flex-shrink-0 w-8 h-8 ${objectionColors.responseIconBg} rounded-full flex items-center justify-center ${objectionColors.responseIconText} mt-1`}>
               <IconEditableText
                 mode={mode}
                 value={responseIcon || '✅'}
                 onEdit={onResponseIconEdit}
                 backgroundType="custom"
-                colorTokens={{...colorTokens, primaryText: 'text-white'}}
+                colorTokens={{...colorTokens, primaryText: objectionColors.responseIconText}}
                 iconSize="sm"
                 className="text-base"
                 sectionId={sectionId}
@@ -355,17 +420,17 @@ const ObjectionAccordionItem = React.memo(({
             {/* Response Text */}
             <div className="flex-1">
               {mode !== 'preview' ? (
-                <div 
+                <div
                   contentEditable
                   suppressContentEditableWarning
                   onBlur={(e) => onResponseEdit(item.index, e.currentTarget.textContent || '')}
-                  className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-green-100 text-green-800 leading-relaxed"
+                  className={`outline-none focus:ring-2 ${objectionColors.focusRing} focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text ${objectionColors.responseHoverBg} ${objectionColors.responseTextColor} leading-relaxed`}
                 >
                   {item.response}
                 </div>
               ) : (
-                <p 
-                  className="text-green-800 leading-relaxed"
+                <p
+                  className={`${objectionColors.responseTextColor} leading-relaxed`}
                 >
                   {item.response}
                 </p>
@@ -395,6 +460,28 @@ export default function ObjectionAccordion(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Detect theme: manual override > auto-detection > neutral fallback
+  const theme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Debug theme detection
+  React.useEffect(() => {
+    console.log('🎨 ObjectionAccordion theme detection:', {
+      sectionId,
+      hasManualOverride: !!props.manualThemeOverride,
+      manualTheme: props.manualThemeOverride,
+      hasUserContext: !!props.userContext,
+      userContext: props.userContext,
+      finalTheme: theme
+    });
+  }, [theme, props.manualThemeOverride, props.userContext, sectionId]);
+
+  // Get theme-specific colors
+  const objectionColors = getObjectionColors(theme);
 
   // State for accordion open/closed items
   const [openItems, setOpenItems] = useState<Set<string>>(new Set());
@@ -518,6 +605,8 @@ export default function ObjectionAccordion(props: LayoutComponentProps) {
               backgroundType={backgroundType}
               sectionBackground={sectionBackground}
               canRemove={objectionItems.length > 1}
+              theme={theme}
+              objectionColors={objectionColors}
             />
           ))}
         </div>
@@ -540,13 +629,13 @@ export default function ObjectionAccordion(props: LayoutComponentProps) {
         {/* Trust Reinforcement */}
         {(blockContent.help_text || mode === 'edit') && (
           <div className="mt-12 text-center">
-            <div className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-50 rounded-full text-blue-700 text-sm">
+            <div className={`inline-flex items-center space-x-2 px-4 py-2 ${objectionColors.trustBg} rounded-full ${objectionColors.trustText} text-sm`}>
               <IconEditableText
                 mode={mode}
                 value={blockContent.trust_icon || '✅'}
                 onEdit={(value) => handleContentUpdate('trust_icon', value)}
                 backgroundType="custom"
-                colorTokens={{...colorTokens, primaryText: 'text-blue-700'}}
+                colorTokens={{...colorTokens, primaryText: objectionColors.trustText}}
                 iconSize="sm"
                 className="text-base"
                 sectionId={sectionId}
@@ -557,13 +646,13 @@ export default function ObjectionAccordion(props: LayoutComponentProps) {
                 value={blockContent.help_text || ''}
                 onEdit={(value) => handleContentUpdate('help_text', value)}
                 backgroundType="custom"
-                colorTokens={{...colorTokens, primaryText: 'text-blue-700'}}
+                colorTokens={{...colorTokens, primaryText: objectionColors.trustText}}
                 variant="body"
                 className="text-sm"
                 placeholder="Still have questions? We're here to help."
                 sectionId={sectionId}
                 elementKey="help_text"
-                sectionBackground="bg-blue-50"
+                sectionBackground={objectionColors.trustBg}
               />
             </div>
           </div>

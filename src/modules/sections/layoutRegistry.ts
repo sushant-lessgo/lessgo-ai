@@ -46,6 +46,8 @@ export const layoutRegistry = {
   Features: [
     "IconGrid",
     "SplitAlternating",
+    "Tabbed",
+    "Timeline",
     "FeatureTestimonial",
     "MetricTiles",
     "MiniCards",
@@ -75,6 +77,7 @@ export const layoutRegistry = {
     "VerticalTimeline",
     "IconCircleSteps",
     "AccordionSteps",
+    "CardFlipSteps",
     "VideoWalkthrough",
     "ZigzagImageSteps",
     "AnimatedProcessLine",
@@ -191,6 +194,7 @@ export const layoutRegistry = {
   ] as const,
 
   UseCase: [
+    "BeforeAfterWorkflow",
     "CustomerJourneyFlow",
     "IndustryUseCaseGrid",
     "InteractiveUseCaseMap",
