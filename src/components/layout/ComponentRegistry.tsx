@@ -3,6 +3,7 @@
 import React from 'react';
 
 import { logger } from '@/lib/logger';
+import { Input } from '@/components/ui/input';
 // Enhanced Trust Indicators Component
 export function TrustIndicators({ 
   items = ['Free trial', 'No credit card'], 
@@ -148,6 +149,88 @@ export function CTAButton({
         </svg>
       )}
     </button>
+  );
+}
+
+export function CTAButtonWithInput({
+  text,
+  colorTokens,
+  textStyle,
+  buttonConfig,
+  className = '',
+  size = 'large',
+  variant = 'primary',
+  sectionId,
+  elementKey,
+}: {
+  text: string;
+  colorTokens: any;
+  textStyle?: React.CSSProperties;
+  buttonConfig: any;
+  className?: string;
+  size?: 'small' | 'medium' | 'large';
+  variant?: 'primary' | 'secondary' | 'outline';
+  sectionId: string;
+  elementKey: string;
+}) {
+  const [inputValue, setInputValue] = React.useState('');
+  const [error, setError] = React.useState('');
+
+  const handleClick = () => {
+    if (buttonConfig.url && buttonConfig.inputConfig?.queryParamName) {
+      let url = buttonConfig.url;
+
+      // Ensure protocol
+      if (!url.match(/^https?:\/\//)) {
+        url = `https://${url}`;
+      }
+
+      // Append query param
+      const separator = url.includes('?') ? '&' : '?';
+      const encodedValue = encodeURIComponent(inputValue);
+      const finalUrl = `${url}${separator}${buttonConfig.inputConfig.queryParamName}=${encodedValue}`;
+
+      logger.debug('Opening URL with input:', finalUrl);
+      window.open(finalUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  return (
+    <div className="space-y-3">
+      {/* Input Field */}
+      <div>
+        {buttonConfig.inputConfig?.label && (
+          <label className="block text-sm font-medium mb-2">
+            {buttonConfig.inputConfig.label}
+          </label>
+        )}
+        <Input
+          value={inputValue}
+          onChange={(e) => {
+            setInputValue(e.target.value);
+            setError('');
+          }}
+          placeholder={buttonConfig.inputConfig?.placeholder || 'Enter value...'}
+          className={`w-full ${error ? 'border-red-500' : ''}`}
+        />
+        {error && (
+          <p className="text-sm text-red-500 mt-1">{error}</p>
+        )}
+      </div>
+
+      {/* CTA Button */}
+      <CTAButton
+        text={text}
+        colorTokens={colorTokens}
+        textStyle={textStyle}
+        onClick={handleClick}
+        className={className}
+        size={size}
+        variant={variant}
+        sectionId={sectionId}
+        elementKey={elementKey}
+      />
+    </div>
   );
 }
 

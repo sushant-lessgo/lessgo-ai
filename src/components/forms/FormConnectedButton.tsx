@@ -3,16 +3,22 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { FormRenderer } from './FormRenderer';
 import { logger } from '@/lib/logger';
 import { useAnalytics } from '@/app/p/[slug]/components/AnalyticsContext';
 
 interface ButtonConfig {
-  type: 'link' | 'form';
+  type: 'link' | 'form' | 'link-with-input';
   formId?: string;
   behavior?: 'scrollTo' | 'openModal';
   url?: string;
+  inputConfig?: {
+    label?: string;
+    placeholder?: string;
+    queryParamName?: string;
+  };
 }
 
 interface FormConnectedButtonProps {
@@ -27,6 +33,8 @@ interface FormConnectedButtonProps {
 
 export function FormConnectedButton({ buttonConfig, className, children, onClick, userId, publishedPageId, pageSlug }: FormConnectedButtonProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [inputValue, setInputValue] = useState('');
+  const [inputError, setInputError] = useState('');
   const { getFormById } = useEditStore();
   const analytics = useAnalytics();
 
@@ -64,6 +72,19 @@ export function FormConnectedButton({ buttonConfig, className, children, onClick
         }
         break;
 
+      case 'link-with-input':
+        if (buttonConfig.url && buttonConfig.inputConfig?.queryParamName) {
+          let url = buttonConfig.url;
+          if (!url.match(/^https?:\/\//)) {
+            url = `https://${url}`;
+          }
+          const separator = url.includes('?') ? '&' : '?';
+          const encodedValue = encodeURIComponent(inputValue);
+          const finalUrl = `${url}${separator}${buttonConfig.inputConfig.queryParamName}=${encodedValue}`;
+          window.open(finalUrl, '_blank');
+        }
+        break;
+
       case 'form':
         if (buttonConfig.formId) {
           const form = getFormById(buttonConfig.formId);
@@ -90,10 +111,35 @@ export function FormConnectedButton({ buttonConfig, className, children, onClick
 
   return (
     <>
-      <Button onClick={handleClick} className={className}>
-        {children}
-      </Button>
-      
+      {buttonConfig?.type === 'link-with-input' ? (
+        <div className="space-y-3">
+          {buttonConfig.inputConfig?.label && (
+            <label className="block text-sm font-medium mb-2">
+              {buttonConfig.inputConfig.label}
+            </label>
+          )}
+          <Input
+            value={inputValue}
+            onChange={(e) => {
+              setInputValue(e.target.value);
+              setInputError('');
+            }}
+            placeholder={buttonConfig.inputConfig?.placeholder || 'Enter value...'}
+            className={`w-full ${inputError ? 'border-red-500' : ''}`}
+          />
+          {inputError && (
+            <p className="text-sm text-red-500 mt-1">{inputError}</p>
+          )}
+          <Button onClick={handleClick} className={className}>
+            {children}
+          </Button>
+        </div>
+      ) : (
+        <Button onClick={handleClick} className={className}>
+          {children}
+        </Button>
+      )}
+
       {buttonConfig?.behavior === 'openModal' && form && (
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogContent className="max-w-md">

@@ -10,9 +10,10 @@ import {
   EditableAdaptiveText, 
   AccentBadge 
 } from '@/components/layout/EditableContent';
-import { 
-  CTAButton, 
-  TrustIndicators 
+import {
+  CTAButton,
+  CTAButtonWithInput,
+  TrustIndicators
 } from '@/components/layout/ComponentRegistry';
 import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators';
 import AvatarEditableComponent from '@/components/ui/AvatarEditableComponent';
@@ -270,7 +271,8 @@ HeroImagePlaceholder.displayName = 'HeroImagePlaceholder';
 
 export default function SplitScreen(props: LayoutComponentProps) {
   const { getTextStyle: getTypographyStyle } = useTypography();
-  
+  const { content } = useEditStore();
+
   const {
     sectionId,
     mode,
@@ -485,16 +487,28 @@ export default function SplitScreen(props: LayoutComponentProps) {
               )}
 
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 sm:gap-8 mt-4">
-                
-                <CTAButton
-                  text={blockContent.cta_text}
-                  colorTokens={colorTokens}
-                  className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 text-lg px-8 py-4"
-                  variant="primary"
-                  sectionId={sectionId}
-                  elementKey="cta_text"
-                  onClick={createCTAClickHandler(sectionId, "cta_text")}
-                />
+
+                {content[sectionId]?.elements?.cta_text?.metadata?.buttonConfig?.type === 'link-with-input' ? (
+                  <CTAButtonWithInput
+                    text={blockContent.cta_text}
+                    colorTokens={colorTokens}
+                    buttonConfig={content[sectionId].elements.cta_text.metadata.buttonConfig}
+                    className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 text-lg px-8 py-4"
+                    variant="primary"
+                    sectionId={sectionId}
+                    elementKey="cta_text"
+                  />
+                ) : (
+                  <CTAButton
+                    text={blockContent.cta_text}
+                    colorTokens={colorTokens}
+                    className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 text-lg px-8 py-4"
+                    variant="primary"
+                    sectionId={sectionId}
+                    elementKey="cta_text"
+                    onClick={createCTAClickHandler(sectionId, "cta_text")}
+                  />
+                )}
 
                 {mode !== 'preview' ? (
                   <EditableTrustIndicators

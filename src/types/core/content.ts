@@ -157,9 +157,14 @@ export interface SectionCTA {
   size: 'small' | 'medium' | 'large';
   trackingId?: string;
   testVariant?: string;
-  type?: 'link' | 'form' | 'email-form';
+  type?: 'link' | 'form' | 'email-form' | 'link-with-input';
   formId?: string;
   behavior?: 'scrollTo' | 'openModal';
+  inputConfig?: {
+    label?: string;
+    placeholder?: string;
+    queryParamName?: string;
+  };
 }
 
 export interface AiGenerationMetadata {

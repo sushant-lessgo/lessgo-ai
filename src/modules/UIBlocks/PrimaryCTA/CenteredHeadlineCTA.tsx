@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
@@ -10,10 +11,11 @@ import {
   EditableAdaptiveText,
   EditableBadge 
 } from '@/components/layout/EditableContent';
-import { 
-  CTAButton, 
+import {
+  CTAButton,
+  CTAButtonWithInput,
   TrustIndicators,
-  SocialProofNumber 
+  SocialProofNumber
 } from '@/components/layout/ComponentRegistry';
 import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators';
 import { LayoutComponentProps } from '@/types/storeTypes';
@@ -104,6 +106,8 @@ const CONTENT_SCHEMA = {
 };
 
 export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
+  const { content } = useEditStore();
+
   // Use the abstraction hook for all common functionality
   const {
     sectionId,
@@ -119,7 +123,7 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
-  
+
   const { getTextStyle: getTypographyStyle } = useTypography();
 
   // Handle trust items - support both legacy pipe-separated format and individual fields
@@ -211,15 +215,27 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
 
         {/* Primary CTA Button */}
         <div className="mb-8">
-          <CTAButton
-            text={blockContent.cta_text}
-            colorTokens={colorTokens}
-            size="large"
-            className="text-xl px-12 py-6 shadow-2xl hover:shadow-3xl"
-            sectionId={sectionId}
-            elementKey="cta_text"
-            onClick={createCTAClickHandler(sectionId, "cta_text")}
-          />
+          {content[sectionId]?.elements?.cta_text?.metadata?.buttonConfig?.type === 'link-with-input' ? (
+            <CTAButtonWithInput
+              text={blockContent.cta_text}
+              colorTokens={colorTokens}
+              buttonConfig={content[sectionId].elements.cta_text.metadata.buttonConfig}
+              size="large"
+              className="text-xl px-12 py-6 shadow-2xl hover:shadow-3xl"
+              sectionId={sectionId}
+              elementKey="cta_text"
+            />
+          ) : (
+            <CTAButton
+              text={blockContent.cta_text}
+              colorTokens={colorTokens}
+              size="large"
+              className="text-xl px-12 py-6 shadow-2xl hover:shadow-3xl"
+              sectionId={sectionId}
+              elementKey="cta_text"
+              onClick={createCTAClickHandler(sectionId, "cta_text")}
+            />
+          )}
         </div>
 
         {/* Trust Indicators */}

@@ -13,9 +13,10 @@ import {
   EditableAdaptiveText, 
   AccentBadge 
 } from '@/components/layout/EditableContent';
-import { 
-  CTAButton, 
-  TrustIndicators 
+import {
+  CTAButton,
+  CTAButtonWithInput,
+  TrustIndicators
 } from '@/components/layout/ComponentRegistry';
 import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators';
 import AvatarEditableComponent from '@/components/ui/AvatarEditableComponent';
@@ -191,7 +192,8 @@ HeroImagePlaceholder.displayName = 'HeroImagePlaceholder';
 
 export default function CenterStacked(props: LayoutComponentProps) {
   const { getTextStyle: getTypographyStyle } = useTypography();
-  
+  const { content } = useEditStore();
+
   const {
     sectionId,
     mode,
@@ -397,10 +399,12 @@ export default function CenterStacked(props: LayoutComponentProps) {
 
           <div className="flex flex-col items-center gap-4">
 
-            <CTAButton
-              text={blockContent.cta_text}
-              colorTokens={colorTokens}
-              className={`
+            {content[sectionId]?.elements?.cta_text?.metadata?.buttonConfig?.type === 'link-with-input' ? (
+              <CTAButtonWithInput
+                text={blockContent.cta_text}
+                colorTokens={colorTokens}
+                buttonConfig={content[sectionId].elements.cta_text.metadata.buttonConfig}
+                className={`
 px-12 py-6
 font-semibold
 rounded-xl
@@ -409,23 +413,41 @@ ${shadows.ctaHover[theme]}
 transition-all duration-200
 transform hover:-translate-y-0.5
 `}
-              variant="primary"
-              sectionId={sectionId}
-              elementKey="cta_text"
-              onClick={() => {
-                // Get ctaConfig from section data
-                const { content } = useEditStore.getState();
-                const sectionData = content[sectionId];
-                const ctaConfig = (sectionData as any)?.ctaConfig;
+                variant="primary"
+                sectionId={sectionId}
+                elementKey="cta_text"
+              />
+            ) : (
+              <CTAButton
+                text={blockContent.cta_text}
+                colorTokens={colorTokens}
+                className={`
+px-12 py-6
+font-semibold
+rounded-xl
+${shadows.cta[theme]}
+${shadows.ctaHover[theme]}
+transition-all duration-200
+transform hover:-translate-y-0.5
+`}
+                variant="primary"
+                sectionId={sectionId}
+                elementKey="cta_text"
+                onClick={() => {
+                  // Get ctaConfig from section data
+                  const { content } = useEditStore.getState();
+                  const sectionData = content[sectionId];
+                  const ctaConfig = (sectionData as any)?.ctaConfig;
 
-                logger.debug('🔗 CTA Button clicked:', () => ({ ctaConfig, sectionId }));
+                  logger.debug('🔗 CTA Button clicked:', () => ({ ctaConfig, sectionId }));
 
-                if (ctaConfig?.type === 'link' && ctaConfig.url) {
-                  window.open(ctaConfig.url, '_blank', 'noopener,noreferrer');
-                } else {
-                }
-              }}
-            />
+                  if (ctaConfig?.type === 'link' && ctaConfig.url) {
+                    window.open(ctaConfig.url, '_blank', 'noopener,noreferrer');
+                  } else {
+                  }
+                }}
+              />
+            )}
 
             {mode !== 'preview' ? (
               <EditableTrustIndicators

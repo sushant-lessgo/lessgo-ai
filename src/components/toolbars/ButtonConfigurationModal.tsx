@@ -14,11 +14,16 @@ import { Plus } from 'lucide-react';
 import type { ElementSelection } from '@/types/store/state';
 
 interface ButtonConfig {
-  type: 'link' | 'form';
+  type: 'link' | 'form' | 'link-with-input';
   text: string;
   url?: string;
   formId?: string;
   behavior?: 'scrollTo' | 'openModal';
+  inputConfig?: {
+    label?: string;
+    placeholder?: string;
+    queryParamName?: string;
+  };
 }
 
 interface ButtonConfigurationModalProps {
@@ -95,6 +100,14 @@ export function ButtonConfigurationModal({
       newErrors.url = 'URL is required for external link.';
     }
 
+    if (config.type === 'link-with-input') {
+      if (!config.url?.trim()) {
+        newErrors.url = 'URL is required for link with input.';
+      }
+      if (!config.inputConfig?.queryParamName?.trim()) {
+        newErrors.queryParamName = 'Query parameter name is required.';
+      }
+    }
 
     if (config.type === 'form' && !config.formId) {
       newErrors.form = 'Please select a form or create a new one.';
@@ -123,6 +136,10 @@ export function ButtonConfigurationModal({
             buttonConfig: {
               type: config.type,
               ...(config.type === 'link' && { url: config.url }),
+              ...(config.type === 'link-with-input' && {
+                url: config.url,
+                inputConfig: config.inputConfig
+              }),
               ...(config.type === 'form' && {
                 formId: config.formId,
                 behavior: config.behavior
@@ -133,11 +150,12 @@ export function ButtonConfigurationModal({
 
         // Create ctaConfig for compatibility with HeroSection
         const ctaConfig = {
-          type: config.type === 'link' ? 'link' as const : 'form' as const,
+          type: config.type === 'link-with-input' ? 'link-with-input' as const : (config.type === 'link' ? 'link' as const : 'form' as const),
           cta_text: config.text,
-          url: config.type === 'link' ? config.url : undefined,
+          url: (config.type === 'link' || config.type === 'link-with-input') ? config.url : undefined,
           formId: config.type === 'form' ? config.formId : undefined,
           behavior: config.type === 'form' ? config.behavior : undefined,
+          inputConfig: config.type === 'link-with-input' ? config.inputConfig : undefined,
         };
 
         // Update the element in store using setSection, including ctaConfig
@@ -154,6 +172,14 @@ export function ButtonConfigurationModal({
             isEditable: false,
             editMode: 'inline' as const,
             metadata: {}
+          };
+        } else if (config.type === 'link-with-input' && config.url) {
+          updatedElements.cta_url = {
+            type: 'text' as const,
+            content: config.url,
+            isEditable: false,
+            editMode: 'inline' as const,
+            metadata: { inputConfig: config.inputConfig }
           };
         } else if (config.type === 'form' && config.formId) {
           updatedElements.cta_embed = {
@@ -315,6 +341,16 @@ export function ButtonConfigurationModal({
                   </p>
                 </div>
               </div>
+
+              <div className="flex items-start space-x-2 mt-2">
+                <RadioGroupItem value="link-with-input" id="link-with-input" />
+                <div>
+                  <Label htmlFor="link-with-input">Link with Input Field</Label>
+                  <p className="text-sm text-gray-600">
+                    Collect user input and pass to external URL as query parameter
+                  </p>
+                </div>
+              </div>
             </RadioGroup>
           </div>
 
@@ -395,6 +431,62 @@ export function ButtonConfigurationModal({
             </div>
           )}
 
+          {/* Link with Input Configuration */}
+          {config.type === 'link-with-input' && (
+            <div className="space-y-3">
+              <div>
+                <Label htmlFor="url">URL*</Label>
+                <Input
+                  id="url"
+                  type="url"
+                  value={config.url || ''}
+                  onChange={(e) => setConfig(prev => ({ ...prev, url: e.target.value }))}
+                  placeholder="https://workspace.iley.app/auth"
+                />
+                {errors.url && <p className="text-sm text-red-500 mt-1">{errors.url}</p>}
+              </div>
+
+              <div>
+                <Label htmlFor="queryParamName">Query Parameter Name*</Label>
+                <Input
+                  id="queryParamName"
+                  value={config.inputConfig?.queryParamName || ''}
+                  onChange={(e) => setConfig(prev => ({
+                    ...prev,
+                    inputConfig: { ...prev.inputConfig, queryParamName: e.target.value }
+                  }))}
+                  placeholder="prompt"
+                />
+                {errors.queryParamName && <p className="text-sm text-red-500 mt-1">{errors.queryParamName}</p>}
+              </div>
+
+              <div>
+                <Label htmlFor="inputLabel">Input Label (Optional)</Label>
+                <Input
+                  id="inputLabel"
+                  value={config.inputConfig?.label || ''}
+                  onChange={(e) => setConfig(prev => ({
+                    ...prev,
+                    inputConfig: { ...prev.inputConfig, label: e.target.value }
+                  }))}
+                  placeholder="Describe your creative vision..."
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="inputPlaceholder">Input Placeholder (Optional)</Label>
+                <Input
+                  id="inputPlaceholder"
+                  value={config.inputConfig?.placeholder || ''}
+                  onChange={(e) => setConfig(prev => ({
+                    ...prev,
+                    inputConfig: { ...prev.inputConfig, placeholder: e.target.value }
+                  }))}
+                  placeholder="Try: 'create anime style portrait'"
+                />
+              </div>
+            </div>
+          )}
 
           {/* Actions */}
           <div className="flex justify-end gap-2 pt-4">

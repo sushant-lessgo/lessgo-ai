@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
@@ -10,7 +11,7 @@ import {
   EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
-import { CTAButton } from '@/components/layout/ComponentRegistry';
+import { CTAButton, CTAButtonWithInput } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { createCTAClickHandler } from '@/utils/ctaHandler';
 
@@ -65,7 +66,8 @@ const CONTENT_SCHEMA = {
 
 export default function SideBySideCTA(props: LayoutComponentProps) {
   const { getTextStyle: getTypographyStyle } = useTypography();
-  
+  const { content } = useEditStore();
+
   const {
     sectionId,
     mode,
@@ -143,16 +145,28 @@ export default function SideBySideCTA(props: LayoutComponentProps) {
                 elementKey="left_description"
                 sectionBackground="bg-white"
               />
-              
-              <CTAButton
-                text={blockContent.left_cta_text}
-                colorTokens={colorTokens}
-                className="w-full shadow-lg hover:shadow-xl transition-all duration-200"
-                variant="primary"
-                sectionId={sectionId}
-                elementKey="left_cta_text"
-                onClick={createCTAClickHandler(sectionId, "cta_text")}
-              />
+
+              {content[sectionId]?.elements?.left_cta_text?.metadata?.buttonConfig?.type === 'link-with-input' ? (
+                <CTAButtonWithInput
+                  text={blockContent.left_cta_text}
+                  colorTokens={colorTokens}
+                  buttonConfig={content[sectionId].elements.left_cta_text.metadata.buttonConfig}
+                  className="w-full shadow-lg hover:shadow-xl transition-all duration-200"
+                  variant="primary"
+                  sectionId={sectionId}
+                  elementKey="left_cta_text"
+                />
+              ) : (
+                <CTAButton
+                  text={blockContent.left_cta_text}
+                  colorTokens={colorTokens}
+                  className="w-full shadow-lg hover:shadow-xl transition-all duration-200"
+                  variant="primary"
+                  sectionId={sectionId}
+                  elementKey="left_cta_text"
+                  onClick={createCTAClickHandler(sectionId, "cta_text")}
+                />
+              )}
             </div>
           </div>
 
@@ -203,16 +217,28 @@ export default function SideBySideCTA(props: LayoutComponentProps) {
                 elementKey="right_description"
                 sectionBackground="bg-white"
               />
-              
-              <CTAButton
-                text={blockContent.right_cta_text}
-                colorTokens={colorTokens}
-                className="w-full shadow-lg hover:shadow-xl transition-all duration-200"
-                variant="secondary"
-                sectionId={sectionId}
-                elementKey="right_cta_text"
-                onClick={createCTAClickHandler(sectionId, "cta_text")}
-              />
+
+              {content[sectionId]?.elements?.right_cta_text?.metadata?.buttonConfig?.type === 'link-with-input' ? (
+                <CTAButtonWithInput
+                  text={blockContent.right_cta_text}
+                  colorTokens={colorTokens}
+                  buttonConfig={content[sectionId].elements.right_cta_text.metadata.buttonConfig}
+                  className="w-full shadow-lg hover:shadow-xl transition-all duration-200"
+                  variant="secondary"
+                  sectionId={sectionId}
+                  elementKey="right_cta_text"
+                />
+              ) : (
+                <CTAButton
+                  text={blockContent.right_cta_text}
+                  colorTokens={colorTokens}
+                  className="w-full shadow-lg hover:shadow-xl transition-all duration-200"
+                  variant="secondary"
+                  sectionId={sectionId}
+                  elementKey="right_cta_text"
+                  onClick={createCTAClickHandler(sectionId, "cta_text")}
+                />
+              )}
             </div>
           </div>
         </div>
