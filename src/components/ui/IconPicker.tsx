@@ -1,5 +1,11 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
+import * as LucideIcons from 'lucide-react';
+import { searchIcons, getIconsByCategory, IconSearchEntry } from '@/lib/iconSearchIndex';
+import { ICON_CATEGORIES, getCategoryById } from '@/lib/lucideIconCategories';
+import { trackUsage, getRecentIcons, getPopularIcons, IconUsage } from '@/lib/iconUsageTracker';
+import { encodeIcon } from '@/lib/iconStorage';
+import { lucideNameToPascalCase } from '@/lib/iconStorage';
 
 interface IconPickerProps {
   value: string;
@@ -9,113 +15,24 @@ interface IconPickerProps {
   placeholder?: string;
 }
 
-// Icon categories with emojis and SVG alternatives
-const ICON_CATEGORIES = {
-  common: {
-    name: 'Common',
-    icons: [
-      { emoji: '🎯', name: 'target', svg: 'target' },
-      { emoji: '⚡', name: 'lightning', svg: 'bolt' },
-      { emoji: '🔒', name: 'lock', svg: 'lock-closed' },
-      { emoji: '🎨', name: 'palette', svg: 'color-swatch' },
-      { emoji: '🔗', name: 'link', svg: 'link' },
-      { emoji: '💡', name: 'lightbulb', svg: 'light-bulb' },
-      { emoji: '⭐', name: 'star', svg: 'star' },
-      { emoji: '✅', name: 'check', svg: 'check-circle' },
-      { emoji: '🚀', name: 'rocket', svg: 'rocket' },
-      { emoji: '💰', name: 'money', svg: 'currency-dollar' },
-      { emoji: '📊', name: 'chart', svg: 'chart-bar' },
-      { emoji: '🔧', name: 'wrench', svg: 'wrench' }
-    ]
-  },
-  business: {
-    name: 'Business',
-    icons: [
-      { emoji: '📈', name: 'trending-up', svg: 'trending-up' },
-      { emoji: '📉', name: 'trending-down', svg: 'trending-down' },
-      { emoji: '💼', name: 'briefcase', svg: 'briefcase' },
-      { emoji: '🏢', name: 'building', svg: 'office-building' },
-      { emoji: '👥', name: 'users', svg: 'users' },
-      { emoji: '🎪', name: 'performance', svg: 'sparkles' },
-      { emoji: '🛡️', name: 'shield', svg: 'shield-check' },
-      { emoji: '⚙️', name: 'settings', svg: 'cog' },
-      { emoji: '📋', name: 'clipboard', svg: 'clipboard-list' },
-      { emoji: '📧', name: 'email', svg: 'mail' },
-      { emoji: '🌐', name: 'globe', svg: 'globe' },
-      { emoji: '🔄', name: 'refresh', svg: 'refresh' }
-    ]
-  },
-  tech: {
-    name: 'Technology',
-    icons: [
-      { emoji: '💻', name: 'computer', svg: 'desktop-computer' },
-      { emoji: '📱', name: 'mobile', svg: 'device-mobile' },
-      { emoji: '☁️', name: 'cloud', svg: 'cloud' },
-      { emoji: '🔌', name: 'plug', svg: 'lightning-bolt' },
-      { emoji: '📡', name: 'antenna', svg: 'wifi' },
-      { emoji: '🖥️', name: 'monitor', svg: 'monitor' },
-      { emoji: '⌨️', name: 'keyboard', svg: 'code' },
-      { emoji: '🖱️', name: 'mouse', svg: 'cursor-click' },
-      { emoji: '🗄️', name: 'database', svg: 'database' },
-      { emoji: '🔐', name: 'secure', svg: 'shield-exclamation' },
-      { emoji: '📊', name: 'analytics', svg: 'chart-square-bar' },
-      { emoji: '🤖', name: 'robot', svg: 'cpu-chip' }
-    ]
-  },
-  emotions: {
-    name: 'Emotions',
-    icons: [
-      { emoji: '😊', name: 'happy', svg: 'emoji-happy' },
-      { emoji: '🎉', name: 'celebration', svg: 'gift' },
-      { emoji: '❤️', name: 'heart', svg: 'heart' },
-      { emoji: '👍', name: 'thumbs-up', svg: 'thumb-up' },
-      { emoji: '🌟', name: 'star-glow', svg: 'star' },
-      { emoji: '🔥', name: 'fire', svg: 'fire' },
-      { emoji: '✨', name: 'sparkles', svg: 'sparkles' },
-      { emoji: '🎊', name: 'confetti', svg: 'gift' },
-      { emoji: '💪', name: 'strength', svg: 'hand' },
-      { emoji: '🏆', name: 'trophy', svg: 'trophy' },
-      { emoji: '🎖️', name: 'medal', svg: 'badge-check' },
-      { emoji: '🥇', name: 'first-place', svg: 'star' }
-    ]
-  }
-};
-
-// Heroicon SVG components (simplified versions)
-const HEROICONS: Record<string, React.ReactNode> = {
-  'target': (
-    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-    </svg>
-  ),
-  'bolt': (
-    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-    </svg>
-  ),
-  'lock-closed': (
-    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-    </svg>
-  ),
-  'star': (
-    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-    </svg>
-  ),
-  'check-circle': (
-    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-  ),
-  // Add more as needed...
-};
+const ICONS_PER_PAGE = 80;
 
 export default function IconPicker({ value, onChange, onClose, triggerRect, placeholder }: IconPickerProps) {
-  const [activeCategory, setActiveCategory] = useState('common');
+  const [activeTab, setActiveTab] = useState<string>('popular');
   const [searchTerm, setSearchTerm] = useState('');
-  const [displayMode, setDisplayMode] = useState<'emoji' | 'svg'>('emoji');
+  const [currentPage, setCurrentPage] = useState(0);
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const pickerRef = useRef<HTMLDivElement>(null);
+
+  // Debounce search input (300ms)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+      setCurrentPage(0); // Reset to first page on new search
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   // Close on outside click
   useEffect(() => {
@@ -129,16 +46,47 @@ export default function IconPicker({ value, onChange, onClose, triggerRect, plac
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [onClose]);
 
-  // Filter icons based on search
-  const filteredIcons = React.useMemo(() => {
-    if (!searchTerm) return ICON_CATEGORIES[activeCategory as keyof typeof ICON_CATEGORIES].icons;
-    
-    const allIcons = Object.values(ICON_CATEGORIES).flatMap(cat => cat.icons);
-    return allIcons.filter(icon => 
-      icon.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      icon.emoji.includes(searchTerm)
-    );
-  }, [activeCategory, searchTerm]);
+  // Convert IconUsage[] to IconSearchEntry[] (define before use)
+  const usageToIconEntries = (usage: IconUsage[]): IconSearchEntry[] => {
+    return usage.map(u => ({
+      name: u.iconName,
+      displayName: u.iconName,
+      keywords: [],
+      category: [],
+      type: u.type
+    }));
+  };
+
+  // Get filtered icons based on search or active tab
+  const filteredIcons = useMemo(() => {
+    // If searching, return search results
+    if (debouncedSearch.trim()) {
+      const results = searchIcons(debouncedSearch, 200);
+      return results.map(r => r.icon);
+    }
+
+    // Popular tab
+    if (activeTab === 'popular') {
+      const popular = getPopularIcons();
+      return usageToIconEntries(popular);
+    }
+
+    // Recent tab
+    if (activeTab === 'recent') {
+      const recent = getRecentIcons();
+      return usageToIconEntries(recent);
+    }
+
+    // Category tabs
+    return getIconsByCategory(activeTab);
+  }, [debouncedSearch, activeTab]);
+
+  // Pagination
+  const totalPages = Math.ceil(filteredIcons.length / ICONS_PER_PAGE);
+  const paginatedIcons = useMemo(() => {
+    const start = currentPage * ICONS_PER_PAGE;
+    return filteredIcons.slice(start, start + ICONS_PER_PAGE);
+  }, [filteredIcons, currentPage]);
 
   // Position the picker
   const getPickerStyle = (): React.CSSProperties => {
@@ -154,15 +102,15 @@ export default function IconPicker({ value, onChange, onClose, triggerRect, plac
 
     const viewportHeight = window.innerHeight;
     const viewportWidth = window.innerWidth;
-    const pickerHeight = 400;
-    const pickerWidth = 320;
+    const pickerHeight = 600; // Increased for more content
+    const pickerWidth = 480; // Increased for 8 columns
 
     let top = triggerRect.bottom + 8;
     let left = triggerRect.left;
 
     // Adjust if picker would go off screen
     if (top + pickerHeight > viewportHeight) {
-      top = triggerRect.top - pickerHeight - 8;
+      top = Math.max(16, triggerRect.top - pickerHeight - 8);
     }
     if (left + pickerWidth > viewportWidth) {
       left = viewportWidth - pickerWidth - 16;
@@ -176,76 +124,104 @@ export default function IconPicker({ value, onChange, onClose, triggerRect, plac
     };
   };
 
-  const handleIconSelect = (icon: typeof ICON_CATEGORIES.common.icons[0]) => {
-    const selectedValue = displayMode === 'emoji' ? icon.emoji : `svg:${icon.svg}`;
-    onChange(selectedValue);
+  const handleIconSelect = (icon: IconSearchEntry) => {
+    const iconValue = encodeIcon(icon.name, icon.type);
+
+    // Track usage
+    trackUsage(icon.name, icon.type);
+
+    onChange(iconValue);
     onClose();
   };
 
-  const renderIcon = (icon: typeof ICON_CATEGORIES.common.icons[0]) => {
-    if (displayMode === 'emoji') {
-      return <span className="text-xl">{icon.emoji}</span>;
-    } else {
-      return (
-        <div className="text-blue-600">
-          {HEROICONS[icon.svg] || <span className="text-xs">{icon.name}</span>}
-        </div>
-      );
+  const renderIcon = (icon: IconSearchEntry) => {
+    if (icon.type === 'emoji') {
+      return <span className="text-2xl">{icon.name}</span>;
+    } else if (icon.type === 'lucide') {
+      const componentName = lucideNameToPascalCase(icon.name);
+      const IconComponent = (LucideIcons as any)[componentName];
+
+      if (IconComponent) {
+        return <IconComponent size={24} strokeWidth={2} className="text-gray-700" />;
+      } else {
+        // Fallback for missing icon
+        return <span className="text-xs text-gray-400">?</span>;
+      }
     }
+
+    return null;
+  };
+
+  const handlePrevPage = () => {
+    setCurrentPage(prev => Math.max(0, prev - 1));
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage(prev => Math.min(totalPages - 1, prev + 1));
   };
 
   const pickerContent = (
     <div
       ref={pickerRef}
-      className="bg-white border border-gray-200 rounded-lg shadow-xl w-80 max-h-96 overflow-hidden"
+      className="bg-white border border-gray-200 rounded-lg shadow-xl w-[480px] max-h-[600px] overflow-hidden flex flex-col"
       style={getPickerStyle()}
     >
       {/* Header */}
-      <div className="p-3 border-b border-gray-200">
+      <div className="p-3 border-b border-gray-200 flex-shrink-0">
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-medium text-gray-900">Choose Icon</h3>
-          <div className="flex items-center space-x-1">
-            <button
-              onClick={() => setDisplayMode('emoji')}
-              className={`px-2 py-1 text-xs rounded ${displayMode === 'emoji' ? 'bg-blue-100 text-blue-700' : 'text-gray-600'}`}
-            >
-              😊 Emoji
-            </button>
-            <button
-              onClick={() => setDisplayMode('svg')}
-              className={`px-2 py-1 text-xs rounded ${displayMode === 'svg' ? 'bg-blue-100 text-blue-700' : 'text-gray-600'}`}
-            >
-              ⚡ SVG
-            </button>
-          </div>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 transition-colors"
+            title="Close"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
-        
+
         {/* Search */}
-        <input
-          type="text"
-          placeholder="Search icons..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-          autoFocus
-        />
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search icons..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            autoFocus
+          />
+          <svg
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
       </div>
 
-      {/* Categories */}
+      {/* Category Tabs */}
       {!searchTerm && (
-        <div className="px-3 py-2 border-b border-gray-200">
-          <div className="flex space-x-1">
-            {Object.entries(ICON_CATEGORIES).map(([key, category]) => (
+        <div className="px-3 py-2 border-b border-gray-200 flex-shrink-0 overflow-x-auto">
+          <div className="flex space-x-1 min-w-max">
+            {ICON_CATEGORIES.map((category) => (
               <button
-                key={key}
-                onClick={() => setActiveCategory(key)}
-                className={`px-2 py-1 text-xs rounded transition-colors ${
-                  activeCategory === key 
-                    ? 'bg-blue-100 text-blue-700' 
+                key={category.id}
+                onClick={() => {
+                  setActiveTab(category.id);
+                  setCurrentPage(0);
+                }}
+                className={`px-3 py-1.5 text-xs rounded-md whitespace-nowrap transition-colors flex items-center space-x-1 ${
+                  activeTab === category.id
+                    ? 'bg-blue-100 text-blue-700 font-medium'
                     : 'text-gray-600 hover:bg-gray-100'
                 }`}
+                title={category.name}
               >
-                {category.name}
+                <span>{category.icon}</span>
+                <span>{category.name}</span>
               </button>
             ))}
           </div>
@@ -253,49 +229,94 @@ export default function IconPicker({ value, onChange, onClose, triggerRect, plac
       )}
 
       {/* Icons Grid */}
-      <div className="p-3 max-h-64 overflow-y-auto">
-        <div className="grid grid-cols-6 gap-2">
-          {filteredIcons.map((icon, index) => (
-            <button
-              key={`${icon.name}-${index}`}
-              onClick={() => handleIconSelect(icon)}
-              className="w-10 h-10 flex items-center justify-center rounded hover:bg-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors"
-              title={icon.name}
-            >
-              {renderIcon(icon)}
-            </button>
-          ))}
-        </div>
-        
-        {filteredIcons.length === 0 && (
-          <div className="text-center py-8 text-gray-500 text-sm">
-            No icons found for "{searchTerm}"
+      <div className="p-3 flex-1 overflow-y-auto">
+        {paginatedIcons.length > 0 ? (
+          <div className="grid grid-cols-8 gap-1">
+            {paginatedIcons.map((icon, index) => (
+              <button
+                key={`${icon.type}-${icon.name}-${index}`}
+                onClick={() => handleIconSelect(icon)}
+                className="w-12 h-12 flex items-center justify-center rounded-md hover:bg-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors"
+                title={icon.displayName}
+              >
+                {renderIcon(icon)}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12 text-gray-500 text-sm">
+            {searchTerm ? (
+              <>
+                <div className="text-4xl mb-2">🔍</div>
+                <div>No icons found for "{searchTerm}"</div>
+                <div className="text-xs mt-1">Try a different search term</div>
+              </>
+            ) : (
+              <>
+                <div className="text-4xl mb-2">😊</div>
+                <div>No icons in this category yet</div>
+                {activeTab === 'popular' && (
+                  <div className="text-xs mt-1">Start using icons to see popular ones here</div>
+                )}
+                {activeTab === 'recent' && (
+                  <div className="text-xs mt-1">Recently used icons will appear here</div>
+                )}
+              </>
+            )}
           </div>
         )}
       </div>
 
-      {/* Footer */}
-      <div className="px-3 py-2 border-t border-gray-200 bg-gray-50">
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-gray-500">
-            Current: <span className="font-mono">{value || placeholder}</span>
-          </span>
-          <button
-            onClick={onClose}
-            className="text-xs text-gray-500 hover:text-gray-700"
-          >
-            Cancel
-          </button>
+      {/* Footer with pagination */}
+      <div className="px-3 py-2 border-t border-gray-200 bg-gray-50 flex-shrink-0">
+        <div className="flex items-center justify-between text-xs">
+          <div className="text-gray-500">
+            {filteredIcons.length > 0 ? (
+              <>
+                Showing {currentPage * ICONS_PER_PAGE + 1}-
+                {Math.min((currentPage + 1) * ICONS_PER_PAGE, filteredIcons.length)} of{' '}
+                {filteredIcons.length}
+              </>
+            ) : (
+              'No icons'
+            )}
+          </div>
+
+          {/* Pagination controls */}
+          {totalPages > 1 && (
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={handlePrevPage}
+                disabled={currentPage === 0}
+                className={`px-2 py-1 rounded ${
+                  currentPage === 0
+                    ? 'text-gray-300 cursor-not-allowed'
+                    : 'text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                ← Prev
+              </button>
+              <span className="text-gray-600">
+                Page {currentPage + 1} of {totalPages}
+              </span>
+              <button
+                onClick={handleNextPage}
+                disabled={currentPage >= totalPages - 1}
+                className={`px-2 py-1 rounded ${
+                  currentPage >= totalPages - 1
+                    ? 'text-gray-300 cursor-not-allowed'
+                    : 'text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                Next →
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
 
   // Render in portal to ensure proper z-index
-  return typeof window !== 'undefined' 
-    ? createPortal(pickerContent, document.body)
-    : null;
+  return typeof window !== 'undefined' ? createPortal(pickerContent, document.body) : null;
 }
-
-// Export icon categories for other components to use
-export { ICON_CATEGORIES, HEROICONS };
