@@ -4,6 +4,7 @@ import React from 'react';
 
 import { logger } from '@/lib/logger';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 // Enhanced Trust Indicators Component
 export function TrustIndicators({ 
   items = ['Free trial', 'No credit card'], 
@@ -204,14 +205,15 @@ export function CTAButtonWithInput({
             {buttonConfig.inputConfig.label}
           </label>
         )}
-        <Input
+        <Textarea
           value={inputValue}
           onChange={(e) => {
             setInputValue(e.target.value);
             setError('');
           }}
           placeholder={buttonConfig.inputConfig?.placeholder || 'Enter value...'}
-          className={`w-full ${error ? 'border-red-500' : ''}`}
+          className={`w-full min-h-[100px] ${error ? 'border-red-500' : ''}`}
+          rows={3}
         />
         {error && (
           <p className="text-sm text-red-500 mt-1">{error}</p>

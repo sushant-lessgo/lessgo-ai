@@ -486,9 +486,9 @@ export default function SplitScreen(props: LayoutComponentProps) {
                 />
               )}
 
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 sm:gap-8 mt-4">
-
-                {content[sectionId]?.elements?.cta_text?.metadata?.buttonConfig?.type === 'link-with-input' ? (
+              {content[sectionId]?.elements?.cta_text?.metadata?.buttonConfig?.type === 'link-with-input' ? (
+                // Link-with-input: Vertical layout (input + button, then trust items below)
+                <div className="flex flex-col gap-6 mt-4">
                   <CTAButtonWithInput
                     text={blockContent.cta_text}
                     colorTokens={colorTokens}
@@ -498,7 +498,57 @@ export default function SplitScreen(props: LayoutComponentProps) {
                     sectionId={sectionId}
                     elementKey="cta_text"
                   />
-                ) : (
+
+                  {mode !== 'preview' ? (
+                    <EditableTrustIndicators
+                      mode={mode}
+                      trustItems={[
+                        blockContent.trust_item_1 || '',
+                        blockContent.trust_item_2 || '',
+                        blockContent.trust_item_3 || '',
+                        blockContent.trust_item_4 || '',
+                        blockContent.trust_item_5 || ''
+                      ]}
+                      onTrustItemChange={(index, value) => {
+                        const fieldKey = `trust_item_${index + 1}` as keyof SplitScreenContent;
+                        handleContentUpdate(fieldKey, value);
+                      }}
+                      onAddTrustItem={() => {
+                        const emptyIndex = [
+                          blockContent.trust_item_1,
+                          blockContent.trust_item_2,
+                          blockContent.trust_item_3,
+                          blockContent.trust_item_4,
+                          blockContent.trust_item_5
+                        ].findIndex(item => !item || item.trim() === '' || item === '___REMOVED___');
+
+                        if (emptyIndex !== -1) {
+                          const fieldKey = `trust_item_${emptyIndex + 1}` as keyof SplitScreenContent;
+                          handleContentUpdate(fieldKey, 'New trust item');
+                        }
+                      }}
+                      onRemoveTrustItem={(index) => {
+                        const fieldKey = `trust_item_${index + 1}` as keyof SplitScreenContent;
+                        handleContentUpdate(fieldKey, '___REMOVED___');
+                      }}
+                      colorTokens={colorTokens}
+                      sectionBackground={sectionBackground}
+                      sectionId={sectionId}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                      iconColor="text-green-500"
+                      colorClass={mutedTextColor}
+                    />
+                  ) : (
+                    <TrustIndicators
+                      items={trustItems}
+                      colorClass={mutedTextColor}
+                      iconColor="text-green-500"
+                    />
+                  )}
+                </div>
+              ) : (
+                // Standard button: Keep existing flex-row layout
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 sm:gap-8 mt-4">
                   <CTAButton
                     text={blockContent.cta_text}
                     colorTokens={colorTokens}
@@ -508,56 +558,55 @@ export default function SplitScreen(props: LayoutComponentProps) {
                     elementKey="cta_text"
                     onClick={createCTAClickHandler(sectionId, "cta_text")}
                   />
-                )}
 
-                {mode !== 'preview' ? (
-                  <EditableTrustIndicators
-                    mode={mode}
-                    trustItems={[
-                      blockContent.trust_item_1 || '',
-                      blockContent.trust_item_2 || '',
-                      blockContent.trust_item_3 || '',
-                      blockContent.trust_item_4 || '',
-                      blockContent.trust_item_5 || ''
-                    ]}
-                    onTrustItemChange={(index, value) => {
-                      const fieldKey = `trust_item_${index + 1}` as keyof SplitScreenContent;
-                      handleContentUpdate(fieldKey, value);
-                    }}
-                    onAddTrustItem={() => {
-                      // Find first empty slot and add placeholder
-                      const emptyIndex = [
-                        blockContent.trust_item_1,
-                        blockContent.trust_item_2,
-                        blockContent.trust_item_3,
-                        blockContent.trust_item_4,
-                        blockContent.trust_item_5
-                      ].findIndex(item => !item || item.trim() === '' || item === '___REMOVED___');
-                      
-                      if (emptyIndex !== -1) {
-                        const fieldKey = `trust_item_${emptyIndex + 1}` as keyof SplitScreenContent;
-                        handleContentUpdate(fieldKey, 'New trust item');
-                      }
-                    }}
-                    onRemoveTrustItem={(index) => {
-                      const fieldKey = `trust_item_${index + 1}` as keyof SplitScreenContent;
-                      handleContentUpdate(fieldKey, '___REMOVED___');
-                    }}
-                    colorTokens={colorTokens}
-                    sectionBackground={sectionBackground}
-                    sectionId={sectionId}
-                    backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
-                    iconColor="text-green-500"
-                    colorClass={mutedTextColor}
-                  />
-                ) : (
-                  <TrustIndicators 
-                    items={trustItems}
-                    colorClass={mutedTextColor}
-                    iconColor="text-green-500"
-                  />
-                )}
-              </div>
+                  {mode !== 'preview' ? (
+                    <EditableTrustIndicators
+                      mode={mode}
+                      trustItems={[
+                        blockContent.trust_item_1 || '',
+                        blockContent.trust_item_2 || '',
+                        blockContent.trust_item_3 || '',
+                        blockContent.trust_item_4 || '',
+                        blockContent.trust_item_5 || ''
+                      ]}
+                      onTrustItemChange={(index, value) => {
+                        const fieldKey = `trust_item_${index + 1}` as keyof SplitScreenContent;
+                        handleContentUpdate(fieldKey, value);
+                      }}
+                      onAddTrustItem={() => {
+                        const emptyIndex = [
+                          blockContent.trust_item_1,
+                          blockContent.trust_item_2,
+                          blockContent.trust_item_3,
+                          blockContent.trust_item_4,
+                          blockContent.trust_item_5
+                        ].findIndex(item => !item || item.trim() === '' || item === '___REMOVED___');
+
+                        if (emptyIndex !== -1) {
+                          const fieldKey = `trust_item_${emptyIndex + 1}` as keyof SplitScreenContent;
+                          handleContentUpdate(fieldKey, 'New trust item');
+                        }
+                      }}
+                      onRemoveTrustItem={(index) => {
+                        const fieldKey = `trust_item_${index + 1}` as keyof SplitScreenContent;
+                        handleContentUpdate(fieldKey, '___REMOVED___');
+                      }}
+                      colorTokens={colorTokens}
+                      sectionBackground={sectionBackground}
+                      sectionId={sectionId}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                      iconColor="text-green-500"
+                      colorClass={mutedTextColor}
+                    />
+                  ) : (
+                    <TrustIndicators
+                      items={trustItems}
+                      colorClass={mutedTextColor}
+                      iconColor="text-green-500"
+                    />
+                  )}
+                </div>
+              )}
 
               {(blockContent.show_social_proof !== false) && (
                 <div className="flex flex-col space-y-6 pt-8 md:pt-10">
