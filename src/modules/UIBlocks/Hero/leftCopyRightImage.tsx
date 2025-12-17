@@ -31,6 +31,7 @@ import {
 interface LeftCopyRightImageContent {
   headline: string;
   cta_text: string;
+  secondary_cta_text?: string;
   subheadline?: string;
   supporting_text?: string;
   badge_text?: string;
@@ -58,9 +59,13 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: 'Transform Your Business with Smart Automation' 
   },
-  cta_text: { 
-    type: 'string' as const, 
-    default: 'Start Free Trial' 
+  cta_text: {
+    type: 'string' as const,
+    default: 'Start Free Trial'
+  },
+  secondary_cta_text: {
+    type: 'string' as const,
+    default: 'Watch Demo'
   },
   subheadline: { 
     type: 'string' as const, 
@@ -507,6 +512,19 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
                 onClick={createCTAClickHandler(sectionId, "cta_text")}
               />
 
+              {/* Secondary CTA */}
+              {((blockContent.secondary_cta_text && blockContent.secondary_cta_text !== '___REMOVED___') || mode === 'edit') && (
+                <CTAButton
+                  text={blockContent.secondary_cta_text || 'Watch Demo'}
+                  colorTokens={colorTokens}
+                  className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
+                  variant="outline"
+                  sectionId={sectionId}
+                  elementKey="secondary_cta_text"
+                  onClick={createCTAClickHandler(sectionId, "secondary_cta_text")}
+                />
+              )}
+
               {/* ✅ ENHANCED: Trust Indicators with Dynamic Color */}
               {mode !== 'preview' ? (
                 <EditableTrustIndicators
@@ -730,6 +748,7 @@ export const componentMeta = {
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: true },
+    { key: 'secondary_cta_text', label: 'Secondary CTA Button Text', type: 'text', required: false },
     { key: 'badge_text', label: 'Badge Text (uses accent colors)', type: 'text', required: false },
     { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
     { key: 'trust_item_1', label: 'Trust Item 1', type: 'text', required: false },

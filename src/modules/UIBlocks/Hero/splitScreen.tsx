@@ -30,6 +30,7 @@ import {
 interface SplitScreenContent {
   headline: string;
   cta_text: string;
+  secondary_cta_text?: string;
   subheadline?: string;
   supporting_text?: string;
   badge_text?: string;
@@ -56,9 +57,13 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: 'Transform Your Business with Smart Automation' 
   },
-  cta_text: { 
-    type: 'string' as const, 
-    default: 'Start Free Trial' 
+  cta_text: {
+    type: 'string' as const,
+    default: 'Start Free Trial'
+  },
+  secondary_cta_text: {
+    type: 'string' as const,
+    default: 'Watch Demo'
   },
   subheadline: { 
     type: 'string' as const, 
@@ -499,6 +504,31 @@ export default function SplitScreen(props: LayoutComponentProps) {
                     elementKey="cta_text"
                   />
 
+                  {/* Secondary CTA */}
+                  {((blockContent.secondary_cta_text && blockContent.secondary_cta_text !== '___REMOVED___') || mode === 'edit') && (
+                    content[sectionId]?.elements?.secondary_cta_text?.metadata?.buttonConfig?.type === 'link-with-input' ? (
+                      <CTAButtonWithInput
+                        text={blockContent.secondary_cta_text || 'Watch Demo'}
+                        colorTokens={colorTokens}
+                        buttonConfig={content[sectionId].elements.secondary_cta_text.metadata.buttonConfig}
+                        className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 text-lg px-8 py-4"
+                        variant="outline"
+                        sectionId={sectionId}
+                        elementKey="secondary_cta_text"
+                      />
+                    ) : (
+                      <CTAButton
+                        text={blockContent.secondary_cta_text || 'Watch Demo'}
+                        colorTokens={colorTokens}
+                        className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 text-lg px-8 py-4"
+                        variant="outline"
+                        sectionId={sectionId}
+                        elementKey="secondary_cta_text"
+                        onClick={createCTAClickHandler(sectionId, "secondary_cta_text")}
+                      />
+                    )
+                  )}
+
                   {mode !== 'preview' ? (
                     <EditableTrustIndicators
                       mode={mode}
@@ -558,6 +588,19 @@ export default function SplitScreen(props: LayoutComponentProps) {
                     elementKey="cta_text"
                     onClick={createCTAClickHandler(sectionId, "cta_text")}
                   />
+
+                  {/* Secondary CTA */}
+                  {((blockContent.secondary_cta_text && blockContent.secondary_cta_text !== '___REMOVED___') || mode === 'edit') && (
+                    <CTAButton
+                      text={blockContent.secondary_cta_text || 'Watch Demo'}
+                      colorTokens={colorTokens}
+                      className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 text-lg px-8 py-4"
+                      variant="outline"
+                      sectionId={sectionId}
+                      elementKey="secondary_cta_text"
+                      onClick={createCTAClickHandler(sectionId, "secondary_cta_text")}
+                    />
+                  )}
 
                   {mode !== 'preview' ? (
                     <EditableTrustIndicators
@@ -760,6 +803,7 @@ export const componentMeta = {
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: true },
+    { key: 'secondary_cta_text', label: 'Secondary CTA Button Text', type: 'text', required: false },
     { key: 'badge_text', label: 'Badge Text (uses accent colors)', type: 'text', required: false },
     { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
     { key: 'trust_item_1', label: 'Trust Item 1', type: 'text', required: false },

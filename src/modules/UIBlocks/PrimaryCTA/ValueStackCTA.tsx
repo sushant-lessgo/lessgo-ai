@@ -22,6 +22,7 @@ interface ValueStackCTAContent {
   value_propositions: string;
   value_descriptions: string;
   cta_text: string;
+  secondary_cta_text?: string;
   final_cta_headline: string;
   final_cta_description: string;
   guarantee_text?: string;
@@ -52,9 +53,13 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: 'Eliminate manual work with intelligent automation workflows that handle routine tasks automatically.|Boost your team\'s efficiency with streamlined processes and collaboration tools.|Set up workflows once and let them run automatically, freeing up time for strategic work.|Track performance in real-time with comprehensive dashboards and detailed reports.|Access expert help whenever you need it with our dedicated customer success team.|Connect with 1000+ apps and tools your team already uses.' 
   },
-  cta_text: { 
-    type: 'string' as const, 
-    default: 'Start Your Transformation' 
+  cta_text: {
+    type: 'string' as const,
+    default: 'Start Your Transformation'
+  },
+  secondary_cta_text: {
+    type: 'string' as const,
+    default: 'Watch Demo'
   },
   final_cta_headline: { 
     type: 'string' as const, 
@@ -440,7 +445,21 @@ export default function ValueStackCTA(props: LayoutComponentProps) {
               elementKey="cta_text"
               onClick={createCTAClickHandler(sectionId, "cta_text")}
             />
-            
+
+            {/* Secondary CTA */}
+            {((blockContent.secondary_cta_text && blockContent.secondary_cta_text !== '___REMOVED___') || mode === 'edit') && (
+              <CTAButton
+                text={blockContent.secondary_cta_text || 'Watch Demo'}
+                colorTokens={{ ...colorTokens, ctaBg: 'bg-transparent', ctaText: 'text-white', ctaHover: 'hover:bg-white/10', ctaBorder: 'border-2 border-white' }}
+                className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
+                variant="outline"
+                size="large"
+                sectionId={sectionId}
+                elementKey="secondary_cta_text"
+                onClick={createCTAClickHandler(sectionId, "secondary_cta_text")}
+              />
+            )}
+
             {blockContent.guarantee_text && (
               <div className="flex items-center space-x-2 text-blue-100">
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -499,6 +518,7 @@ export const componentMeta = {
     { key: 'value_icon_5', label: 'Value Icon 5', type: 'text', required: false },
     { key: 'value_icon_6', label: 'Value Icon 6', type: 'text', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: true },
+    { key: 'secondary_cta_text', label: 'Secondary CTA Button Text', type: 'text', required: false },
     { key: 'final_cta_headline', label: 'Final CTA Headline', type: 'text', required: true },
     { key: 'final_cta_description', label: 'Final CTA Description', type: 'textarea', required: true },
     { key: 'guarantee_text', label: 'Guarantee Text', type: 'text', required: false }

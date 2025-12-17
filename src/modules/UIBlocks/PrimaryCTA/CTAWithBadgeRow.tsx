@@ -26,6 +26,7 @@ interface CTAWithBadgeRowContent {
   headline: string;
   subheadline?: string;
   cta_text: string;
+  secondary_cta_text?: string;
   trust_badges: string;
   trust_item_1?: string;
   trust_item_2?: string;
@@ -53,9 +54,13 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: 'Join thousands of companies already saving time and increasing productivity with our platform.' 
   },
-  cta_text: { 
-    type: 'string' as const, 
-    default: 'Start Free Trial' 
+  cta_text: {
+    type: 'string' as const,
+    default: 'Start Free Trial'
+  },
+  secondary_cta_text: {
+    type: 'string' as const,
+    default: 'Watch Demo'
   },
   trust_badges: { 
     type: 'string' as const, 
@@ -324,16 +329,32 @@ export default function CTAWithBadgeRow(props: LayoutComponentProps) {
             />
           )}
 
-          <CTAButton
-            text={blockContent.cta_text}
-            colorTokens={colorTokens}
-            className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
-            variant="primary"
-            size="large"
-            sectionId={sectionId}
-            elementKey="cta_text"
-            onClick={createCTAClickHandler(sectionId, "cta_text")}
-          />
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <CTAButton
+              text={blockContent.cta_text}
+              colorTokens={colorTokens}
+              className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
+              variant="primary"
+              size="large"
+              sectionId={sectionId}
+              elementKey="cta_text"
+              onClick={createCTAClickHandler(sectionId, "cta_text")}
+            />
+
+            {/* Secondary CTA */}
+            {((blockContent.secondary_cta_text && blockContent.secondary_cta_text !== '___REMOVED___') || mode === 'edit') && (
+              <CTAButton
+                text={blockContent.secondary_cta_text || 'Watch Demo'}
+                colorTokens={colorTokens}
+                className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
+                variant="outline"
+                size="large"
+                sectionId={sectionId}
+                elementKey="secondary_cta_text"
+                onClick={createCTAClickHandler(sectionId, "secondary_cta_text")}
+              />
+            )}
+          </div>
         </div>
 
           {/* Trust Indicators */}
@@ -520,6 +541,7 @@ export const componentMeta = {
     { key: 'headline', label: 'CTA Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'cta_text', label: 'Button Text', type: 'text', required: true },
+    { key: 'secondary_cta_text', label: 'Secondary CTA Button Text', type: 'text', required: false },
     { key: 'trust_badges', label: 'Trust Badges (pipe separated)', type: 'textarea', required: false },
     { key: 'trust_item_1', label: 'Trust Badge 1', type: 'text', required: false },
     { key: 'trust_item_2', label: 'Trust Badge 2', type: 'text', required: false },

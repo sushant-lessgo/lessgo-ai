@@ -2576,6 +2576,7 @@ export const layoutElementSchema: LayoutSchema = {
     sectionElements: [
       { element: "headline", mandatory: true, generation: "ai_generated" },
       { element: "cta_text", mandatory: true, generation: "ai_generated" },
+      { element: "secondary_cta_text", mandatory: false, generation: "ai_generated" },
       { element: "subheadline", mandatory: true, generation: "ai_generated" },
       { element: "supporting_text", mandatory: false, generation: "ai_generated" },
       { element: "badge_text", mandatory: false, generation: "ai_generated" },
@@ -2629,6 +2630,7 @@ export const layoutElementSchema: LayoutSchema = {
     sectionElements: [
       { element: "headline", mandatory: true, generation: "ai_generated" },
       { element: "cta_text", mandatory: true, generation: "ai_generated" },
+      { element: "secondary_cta_text", mandatory: false, generation: "ai_generated" },
       { element: "subheadline", mandatory: true, generation: "ai_generated" },
       { element: "supporting_text", mandatory: false, generation: "ai_generated" },
       { element: "badge_text", mandatory: false, generation: "ai_generated" },
@@ -2656,6 +2658,7 @@ export const layoutElementSchema: LayoutSchema = {
     sectionElements: [
       { element: "headline", mandatory: true, generation: "ai_generated" },
       { element: "cta_text", mandatory: true, generation: "ai_generated" },
+      { element: "secondary_cta_text", mandatory: false, generation: "ai_generated" },
       { element: "subheadline", mandatory: true, generation: "ai_generated" },
       { element: "supporting_text", mandatory: false, generation: "ai_generated" },
       { element: "badge_text", mandatory: false, generation: "ai_generated" },
@@ -3638,6 +3641,7 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "headline", mandatory: true, generation: "ai_generated" },
       { element: "subheadline", mandatory: false, generation: "ai_generated" },
       { element: "cta_text", mandatory: true, generation: "ai_generated" },
+      { element: "secondary_cta_text", mandatory: false, generation: "ai_generated" },
       { element: "urgency_text", mandatory: false, generation: "ai_generated" },
       { element: "trust_item_1", mandatory: true, generation: "ai_generated" },
       { element: "trust_item_2", mandatory: true, generation: "ai_generated" },
@@ -3659,6 +3663,7 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "headline", mandatory: true, generation: "ai_generated" },
       { element: "subheadline", mandatory: false, generation: "ai_generated" },
       { element: "cta_text", mandatory: true, generation: "ai_generated" },
+      { element: "secondary_cta_text", mandatory: false, generation: "ai_generated" },
       { element: "trust_item_1", mandatory: true, generation: "ai_generated" },
       { element: "trust_item_2", mandatory: true, generation: "ai_generated" },
       { element: "trust_item_3", mandatory: true, generation: "ai_generated" },
@@ -3766,6 +3771,7 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "headline", mandatory: true, generation: "ai_generated" },
       { element: "subheadline", mandatory: false, generation: "ai_generated" },
       { element: "cta_text", mandatory: true, generation: "ai_generated" },
+      { element: "secondary_cta_text", mandatory: false, generation: "ai_generated" },
       { element: "final_cta_headline", mandatory: true, generation: "ai_generated" },
       { element: "final_cta_description", mandatory: true, generation: "ai_generated" },
       { element: "guarantee_text", mandatory: false, generation: "ai_generated" }
@@ -3791,6 +3797,7 @@ export const layoutElementSchema: LayoutSchema = {
       { element: "headline", mandatory: true, generation: "ai_generated" },
       { element: "subheadline", mandatory: false, generation: "ai_generated" },
       { element: "cta_text", mandatory: true, generation: "ai_generated" },
+      { element: "secondary_cta_text", mandatory: false, generation: "ai_generated" },
       { element: "testimonial_quote", mandatory: true, generation: "ai_generated" },
       { element: "testimonial_author", mandatory: true, generation: "ai_generated" },
       { element: "testimonial_title", mandatory: true, generation: "ai_generated" },

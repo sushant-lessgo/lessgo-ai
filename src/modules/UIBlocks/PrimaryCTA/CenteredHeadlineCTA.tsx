@@ -27,6 +27,7 @@ interface CenteredHeadlineCTAContent {
   headline: string;
   subheadline?: string;
   cta_text: string;
+  secondary_cta_text?: string;
   urgency_text?: string;
   trust_items?: string;
   trust_item_1?: string;
@@ -51,9 +52,13 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: 'Join thousands of companies already using our platform to streamline operations and boost productivity.' 
   },
-  cta_text: { 
-    type: 'string' as const, 
-    default: 'Start Your Free Trial Today' 
+  cta_text: {
+    type: 'string' as const,
+    default: 'Start Your Free Trial Today'
+  },
+  secondary_cta_text: {
+    type: 'string' as const,
+    default: 'Watch Demo'
   },
   urgency_text: { 
     type: 'string' as const, 
@@ -214,7 +219,7 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
         )}
 
         {/* Primary CTA Button */}
-        <div className="mb-8">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
           {content[sectionId]?.elements?.cta_text?.metadata?.buttonConfig?.type === 'link-with-input' ? (
             <CTAButtonWithInput
               text={blockContent.cta_text}
@@ -235,6 +240,33 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
               elementKey="cta_text"
               onClick={createCTAClickHandler(sectionId, "cta_text")}
             />
+          )}
+
+          {/* Secondary CTA */}
+          {((blockContent.secondary_cta_text && blockContent.secondary_cta_text !== '___REMOVED___') || mode === 'edit') && (
+            content[sectionId]?.elements?.secondary_cta_text?.metadata?.buttonConfig?.type === 'link-with-input' ? (
+              <CTAButtonWithInput
+                text={blockContent.secondary_cta_text || 'Watch Demo'}
+                colorTokens={colorTokens}
+                buttonConfig={content[sectionId].elements.secondary_cta_text.metadata.buttonConfig}
+                size="large"
+                className="text-xl px-12 py-6 shadow-2xl hover:shadow-3xl"
+                variant="outline"
+                sectionId={sectionId}
+                elementKey="secondary_cta_text"
+              />
+            ) : (
+              <CTAButton
+                text={blockContent.secondary_cta_text || 'Watch Demo'}
+                colorTokens={colorTokens}
+                size="large"
+                className="text-xl px-12 py-6 shadow-2xl hover:shadow-3xl"
+                variant="outline"
+                sectionId={sectionId}
+                elementKey="secondary_cta_text"
+                onClick={createCTAClickHandler(sectionId, "secondary_cta_text")}
+              />
+            )
           )}
         </div>
 
@@ -471,6 +503,7 @@ export const componentMeta = {
     { key: 'headline', label: 'Main Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: true },
+    { key: 'secondary_cta_text', label: 'Secondary CTA Button Text', type: 'text', required: false },
     { key: 'urgency_text', label: 'Urgency Text', type: 'text', required: false },
     { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
     { key: 'trust_item_1', label: 'Trust Item 1', type: 'text', required: false },

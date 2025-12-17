@@ -242,17 +242,18 @@ export default function VisualCTAWithMockup(props: LayoutComponentProps) {
                 elementKey="cta_text"
                 onClick={createCTAClickHandler(sectionId, "cta_text")}
               />
-              
-              {blockContent.secondary_cta && (
+
+              {/* Secondary CTA */}
+              {((blockContent.secondary_cta && blockContent.secondary_cta !== '___REMOVED___') || mode === 'edit') && (
                 <CTAButton
-                  text={blockContent.secondary_cta}
+                  text={blockContent.secondary_cta || 'Watch Demo'}
                   colorTokens={colorTokens}
-                  className="border-2 hover:shadow-lg transition-all duration-200"
-                  variant="secondary"
+                  className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
+                  variant="outline"
                   size="large"
                   sectionId={sectionId}
                   elementKey="secondary_cta"
-                  onClick={createCTAClickHandler(sectionId, "cta_text")}
+                  onClick={createCTAClickHandler(sectionId, "secondary_cta")}
                 />
               )}
             </div>

@@ -19,6 +19,7 @@ interface TestimonialCTAComboContent {
   headline: string;
   subheadline?: string;
   cta_text: string;
+  secondary_cta_text?: string;
   testimonial_quote: string;
   testimonial_author: string;
   testimonial_title: string;
@@ -43,9 +44,13 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: 'See why businesses trust us to transform their operations and drive growth.' 
   },
-  cta_text: { 
-    type: 'string' as const, 
-    default: 'Start Your Success Story' 
+  cta_text: {
+    type: 'string' as const,
+    default: 'Start Your Success Story'
+  },
+  secondary_cta_text: {
+    type: 'string' as const,
+    default: 'Watch Demo'
   },
   testimonial_quote: { 
     type: 'string' as const, 
@@ -242,16 +247,32 @@ export default function TestimonialCTACombo(props: LayoutComponentProps) {
               />
             )}
 
-            <CTAButton
-              text={blockContent.cta_text}
-              colorTokens={colorTokens}
-              className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
-              variant="primary"
-              size="large"
-              sectionId={sectionId}
-              elementKey="cta_text"
-              onClick={createCTAClickHandler(sectionId, "cta_text")}
-            />
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
+              <CTAButton
+                text={blockContent.cta_text}
+                colorTokens={colorTokens}
+                className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
+                variant="primary"
+                size="large"
+                sectionId={sectionId}
+                elementKey="cta_text"
+                onClick={createCTAClickHandler(sectionId, "cta_text")}
+              />
+
+              {/* Secondary CTA */}
+              {((blockContent.secondary_cta_text && blockContent.secondary_cta_text !== '___REMOVED___') || mode === 'edit') && (
+                <CTAButton
+                  text={blockContent.secondary_cta_text || 'Watch Demo'}
+                  colorTokens={colorTokens}
+                  className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
+                  variant="outline"
+                  size="large"
+                  sectionId={sectionId}
+                  elementKey="secondary_cta_text"
+                  onClick={createCTAClickHandler(sectionId, "secondary_cta_text")}
+                />
+              )}
+            </div>
 
             {/* Social Proof Stats */}
             {(blockContent.show_social_proof !== false) && (
@@ -556,6 +577,7 @@ export const componentMeta = {
     { key: 'headline', label: 'CTA Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: true },
+    { key: 'secondary_cta_text', label: 'Secondary CTA Button Text', type: 'text', required: false },
     { key: 'testimonial_quote', label: 'Testimonial Quote (supports <strong> tags)', type: 'textarea', required: true },
     { key: 'testimonial_author', label: 'Author Name', type: 'text', required: true },
     { key: 'testimonial_title', label: 'Author Title', type: 'text', required: true },
