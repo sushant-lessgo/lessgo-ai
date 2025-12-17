@@ -5,6 +5,8 @@ import React from 'react';
 import { logger } from '@/lib/logger';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { decodeIcon, lucideNameToPascalCase } from '@/lib/iconStorage';
+import * as LucideIcons from 'lucide-react';
 // Enhanced Trust Indicators Component
 export function TrustIndicators({ 
   items = ['Free trial', 'No credit card'], 
@@ -29,10 +31,10 @@ export function TrustIndicators({
   );
 }
 
-export function CTAButton({ 
-  text, 
-  colorTokens, 
-  textStyle, 
+export function CTAButton({
+  text,
+  colorTokens,
+  textStyle,
   onClick,
   className = '',
   size = 'large',
@@ -41,7 +43,11 @@ export function CTAButton({
   loading = false,
   ariaLabel,
   sectionId,
-  elementKey
+  elementKey,
+  leadingIcon,
+  trailingIcon,
+  leadingIconSize,
+  trailingIconSize
 }: {
   text: string | any; // Allow any type but we'll convert to string
   colorTokens: any;
@@ -55,6 +61,10 @@ export function CTAButton({
   ariaLabel?: string;
   sectionId?: string;
   elementKey?: string;
+  leadingIcon?: string;
+  trailingIcon?: string;
+  leadingIconSize?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+  trailingIconSize?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 }) {
   
   // CRITICAL FIX: Ensure text is always a string for React rendering
@@ -77,7 +87,37 @@ export function CTAButton({
       return String(text || 'Get Started');
     }
   }, [text]);
-  
+
+  // Icon size mapping based on button size
+  const iconSizeMap = {
+    small: { xs: 12, sm: 14, md: 16, lg: 18, xl: 20 },
+    medium: { xs: 14, sm: 16, md: 18, lg: 20, xl: 22 },
+    large: { xs: 16, sm: 18, md: 20, lg: 22, xl: 24 }
+  };
+
+  const getIconSize = (iconSize?: 'xs' | 'sm' | 'md' | 'lg' | 'xl') => {
+    const defaultSize = size === 'small' ? 'sm' : 'md';
+    return iconSizeMap[size][iconSize || defaultSize];
+  };
+
+  // Icon rendering helper
+  const renderIcon = (encodedIcon: string, iconSize?: 'xs' | 'sm' | 'md' | 'lg' | 'xl') => {
+    const { name, type } = decodeIcon(encodedIcon);
+    const pixelSize = getIconSize(iconSize);
+
+    if (type === 'emoji') {
+      return <span style={{ fontSize: pixelSize }}>{name}</span>;
+    }
+
+    if (type === 'lucide') {
+      const IconComponent = (LucideIcons as any)[lucideNameToPascalCase(name)];
+      if (IconComponent) {
+        return <IconComponent size={pixelSize} color="currentColor" />;
+      }
+    }
+    return null;
+  };
+
   const sizeClasses = {
     small: 'px-4 py-2 text-sm',
     medium: 'px-6 py-3 text-base',
@@ -143,8 +183,18 @@ export function CTAButton({
           <path className="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
       )}
+      {!loading && leadingIcon && (
+        <span className="mr-2 flex-shrink-0">
+          {renderIcon(leadingIcon, leadingIconSize)}
+        </span>
+      )}
       {safeText}
-      {!loading && (
+      {!loading && trailingIcon && (
+        <span className="ml-2 flex-shrink-0">
+          {renderIcon(trailingIcon, trailingIconSize)}
+        </span>
+      )}
+      {!loading && !trailingIcon && (
         <svg className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
         </svg>
@@ -163,6 +213,10 @@ export function CTAButtonWithInput({
   variant = 'primary',
   sectionId,
   elementKey,
+  leadingIcon,
+  trailingIcon,
+  leadingIconSize,
+  trailingIconSize
 }: {
   text: string;
   colorTokens: any;
@@ -173,6 +227,10 @@ export function CTAButtonWithInput({
   variant?: 'primary' | 'secondary' | 'outline';
   sectionId: string;
   elementKey: string;
+  leadingIcon?: string;
+  trailingIcon?: string;
+  leadingIconSize?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+  trailingIconSize?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 }) {
   const [inputValue, setInputValue] = React.useState('');
   const [error, setError] = React.useState('');
@@ -231,6 +289,10 @@ export function CTAButtonWithInput({
         variant={variant}
         sectionId={sectionId}
         elementKey={elementKey}
+        leadingIcon={leadingIcon}
+        trailingIcon={trailingIcon}
+        leadingIconSize={leadingIconSize}
+        trailingIconSize={trailingIconSize}
       />
     </div>
   );

@@ -10,8 +10,11 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { logger } from '@/lib/logger';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
-import { Plus } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 import type { ElementSelection } from '@/types/store/state';
+import IconPicker from '@/components/ui/IconPicker';
+import { decodeIcon, lucideNameToPascalCase } from '@/lib/iconStorage';
+import * as LucideIcons from 'lucide-react';
 
 interface ButtonConfig {
   type: 'link' | 'form' | 'link-with-input';
@@ -23,6 +26,12 @@ interface ButtonConfig {
     label?: string;
     placeholder?: string;
     queryParamName?: string;
+  };
+  leadingIcon?: string;
+  trailingIcon?: string;
+  iconConfig?: {
+    leadingSize?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+    trailingSize?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   };
 }
 
@@ -50,10 +59,11 @@ export function ButtonConfigurationModal({
     type: 'link',
     text: '',
   });
-  
+
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showSuccess, setShowSuccess] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [iconPickerOpen, setIconPickerOpen] = useState<'leading' | 'trailing' | null>(null);
 
   // Initialize with current element content and saved configuration
   useEffect(() => {
@@ -73,6 +83,9 @@ export function ButtonConfigurationModal({
             url: savedConfig.url || '',
             formId: savedConfig.formId || '',
             behavior: savedConfig.behavior || 'scrollTo',
+            leadingIcon: savedConfig.leadingIcon,
+            trailingIcon: savedConfig.trailingIcon,
+            iconConfig: savedConfig.iconConfig || { leadingSize: 'md', trailingSize: 'md' },
           });
           logger.dev('Loaded saved button config:', () => savedConfig);
         } else {
@@ -144,6 +157,9 @@ export function ButtonConfigurationModal({
                 formId: config.formId,
                 behavior: config.behavior
               }),
+              leadingIcon: config.leadingIcon,
+              trailingIcon: config.trailingIcon,
+              iconConfig: config.iconConfig,
             }
           }
         };
@@ -291,6 +307,23 @@ export function ButtonConfigurationModal({
     // Don't close the button config modal yet - let user create the form first
   };
 
+  // Helper to render icon preview
+  const renderIconPreview = (encodedIcon: string) => {
+    const { name, type } = decodeIcon(encodedIcon);
+
+    if (type === 'emoji') {
+      return <span className="text-lg">{name}</span>;
+    }
+
+    if (type === 'lucide') {
+      const IconComponent = (LucideIcons as any)[lucideNameToPascalCase(name)];
+      if (IconComponent) {
+        return <IconComponent size={18} />;
+      }
+    }
+    return null;
+  };
+
   if (!isOpen) {
     return null;
   }
@@ -313,6 +346,107 @@ export function ButtonConfigurationModal({
               placeholder="Enter button text"
             />
             {errors.text && <p className="text-sm text-red-500 mt-1">{errors.text}</p>}
+          </div>
+
+          {/* Icon Configuration */}
+          <div className="border rounded-lg p-4 space-y-3 bg-gray-50">
+            <Label className="text-sm font-semibold">Button Icons (Optional)</Label>
+
+            {/* Leading Icon */}
+            <div>
+              <Label className="text-sm text-gray-700">Leading Icon</Label>
+              {config.leadingIcon ? (
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="flex items-center gap-2 border rounded px-3 py-2 bg-white">
+                    {renderIconPreview(config.leadingIcon)}
+                    <button
+                      type="button"
+                      onClick={() => setConfig(prev => ({ ...prev, leadingIcon: undefined }))}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                  <Select
+                    value={config.iconConfig?.leadingSize || 'md'}
+                    onValueChange={(val) => setConfig(prev => ({
+                      ...prev,
+                      iconConfig: { ...prev.iconConfig, leadingSize: val as any }
+                    }))}
+                  >
+                    <SelectTrigger className="w-20">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="xs">XS</SelectItem>
+                      <SelectItem value="sm">SM</SelectItem>
+                      <SelectItem value="md">MD</SelectItem>
+                      <SelectItem value="lg">LG</SelectItem>
+                      <SelectItem value="xl">XL</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              ) : (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIconPickerOpen('leading')}
+                  className="mt-1"
+                >
+                  <Plus size={14} className="mr-2" />
+                  Add Leading Icon
+                </Button>
+              )}
+            </div>
+
+            {/* Trailing Icon */}
+            <div>
+              <Label className="text-sm text-gray-700">Trailing Icon</Label>
+              {config.trailingIcon ? (
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="flex items-center gap-2 border rounded px-3 py-2 bg-white">
+                    {renderIconPreview(config.trailingIcon)}
+                    <button
+                      type="button"
+                      onClick={() => setConfig(prev => ({ ...prev, trailingIcon: undefined }))}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                  <Select
+                    value={config.iconConfig?.trailingSize || 'md'}
+                    onValueChange={(val) => setConfig(prev => ({
+                      ...prev,
+                      iconConfig: { ...prev.iconConfig, trailingSize: val as any }
+                    }))}
+                  >
+                    <SelectTrigger className="w-20">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="xs">XS</SelectItem>
+                      <SelectItem value="sm">SM</SelectItem>
+                      <SelectItem value="md">MD</SelectItem>
+                      <SelectItem value="lg">LG</SelectItem>
+                      <SelectItem value="xl">XL</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              ) : (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIconPickerOpen('trailing')}
+                  className="mt-1"
+                >
+                  <Plus size={14} className="mr-2" />
+                  Add Trailing Icon
+                </Button>
+              )}
+            </div>
           </div>
 
           {/* Button Action Type */}
@@ -499,6 +633,22 @@ export function ButtonConfigurationModal({
           </div>
           </div>
       </DialogContent>
+
+      {/* Icon Picker Modal */}
+      {iconPickerOpen && (
+        <IconPicker
+          value={iconPickerOpen === 'leading' ? (config.leadingIcon || '') : (config.trailingIcon || '')}
+          onChange={(icon: string) => {
+            if (iconPickerOpen === 'leading') {
+              setConfig(prev => ({ ...prev, leadingIcon: icon }));
+            } else {
+              setConfig(prev => ({ ...prev, trailingIcon: icon }));
+            }
+            setIconPickerOpen(null);
+          }}
+          onClose={() => setIconPickerOpen(null)}
+        />
+      )}
     </Dialog>
   );
 }

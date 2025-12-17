@@ -404,12 +404,14 @@ export default function CenterStacked(props: LayoutComponentProps) {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
 
-            {content[sectionId]?.elements?.cta_text?.metadata?.buttonConfig?.type === 'link-with-input' ? (
-              <CTAButtonWithInput
-                text={blockContent.cta_text}
-                colorTokens={colorTokens}
-                buttonConfig={content[sectionId].elements.cta_text.metadata.buttonConfig}
-                className={`
+            {(() => {
+              const buttonConfig = content[sectionId]?.elements?.cta_text?.metadata?.buttonConfig;
+              return buttonConfig?.type === 'link-with-input' ? (
+                <CTAButtonWithInput
+                  text={blockContent.cta_text}
+                  colorTokens={colorTokens}
+                  buttonConfig={buttonConfig}
+                  className={`
 px-12 py-6
 font-semibold
 rounded-xl
@@ -418,15 +420,19 @@ ${shadows.ctaHover[theme]}
 transition-all duration-200
 transform hover:-translate-y-0.5
 `}
-                variant="primary"
-                sectionId={sectionId}
-                elementKey="cta_text"
-              />
-            ) : (
-              <CTAButton
-                text={blockContent.cta_text}
-                colorTokens={colorTokens}
-                className={`
+                  variant="primary"
+                  sectionId={sectionId}
+                  elementKey="cta_text"
+                  leadingIcon={buttonConfig?.leadingIcon}
+                  trailingIcon={buttonConfig?.trailingIcon}
+                  leadingIconSize={buttonConfig?.iconConfig?.leadingSize}
+                  trailingIconSize={buttonConfig?.iconConfig?.trailingSize}
+                />
+              ) : (
+                <CTAButton
+                  text={blockContent.cta_text}
+                  colorTokens={colorTokens}
+                  className={`
 px-12 py-6
 font-semibold
 rounded-xl
@@ -435,32 +441,38 @@ ${shadows.ctaHover[theme]}
 transition-all duration-200
 transform hover:-translate-y-0.5
 `}
-                variant="primary"
-                sectionId={sectionId}
-                elementKey="cta_text"
-                onClick={() => {
-                  // Get ctaConfig from section data
-                  const { content } = useEditStore.getState();
-                  const sectionData = content[sectionId];
-                  const ctaConfig = (sectionData as any)?.ctaConfig;
+                  variant="primary"
+                  sectionId={sectionId}
+                  elementKey="cta_text"
+                  leadingIcon={buttonConfig?.leadingIcon}
+                  trailingIcon={buttonConfig?.trailingIcon}
+                  leadingIconSize={buttonConfig?.iconConfig?.leadingSize}
+                  trailingIconSize={buttonConfig?.iconConfig?.trailingSize}
+                  onClick={() => {
+                    // Get ctaConfig from section data
+                    const { content } = useEditStore.getState();
+                    const sectionData = content[sectionId];
+                    const ctaConfig = (sectionData as any)?.ctaConfig;
 
-                  logger.debug('🔗 CTA Button clicked:', () => ({ ctaConfig, sectionId }));
+                    logger.debug('🔗 CTA Button clicked:', () => ({ ctaConfig, sectionId }));
 
-                  if (ctaConfig?.type === 'link' && ctaConfig.url) {
-                    window.open(ctaConfig.url, '_blank', 'noopener,noreferrer');
-                  } else {
-                  }
-                }}
-              />
-            )}
+                    if (ctaConfig?.type === 'link' && ctaConfig.url) {
+                      window.open(ctaConfig.url, '_blank', 'noopener,noreferrer');
+                    } else {
+                    }
+                  }}
+                />
+              );
+            })()}
 
             {/* Secondary CTA */}
-            {((blockContent.secondary_cta_text && blockContent.secondary_cta_text !== '___REMOVED___') || mode === 'edit') && (
-              content[sectionId]?.elements?.secondary_cta_text?.metadata?.buttonConfig?.type === 'link-with-input' ? (
+            {((blockContent.secondary_cta_text && blockContent.secondary_cta_text !== '___REMOVED___') || mode === 'edit') && (() => {
+              const secondaryButtonConfig = content[sectionId]?.elements?.secondary_cta_text?.metadata?.buttonConfig;
+              return secondaryButtonConfig?.type === 'link-with-input' ? (
                 <CTAButtonWithInput
                   text={blockContent.secondary_cta_text || 'Watch Demo'}
                   colorTokens={colorTokens}
-                  buttonConfig={content[sectionId].elements.secondary_cta_text.metadata.buttonConfig}
+                  buttonConfig={secondaryButtonConfig}
                   className={`
                     px-12 py-6
                     font-semibold
@@ -473,6 +485,10 @@ transform hover:-translate-y-0.5
                   variant="outline"
                   sectionId={sectionId}
                   elementKey="secondary_cta_text"
+                  leadingIcon={secondaryButtonConfig?.leadingIcon}
+                  trailingIcon={secondaryButtonConfig?.trailingIcon}
+                  leadingIconSize={secondaryButtonConfig?.iconConfig?.leadingSize}
+                  trailingIconSize={secondaryButtonConfig?.iconConfig?.trailingSize}
                 />
               ) : (
                 <CTAButton
@@ -490,6 +506,10 @@ transform hover:-translate-y-0.5
                   variant="outline"
                   sectionId={sectionId}
                   elementKey="secondary_cta_text"
+                  leadingIcon={secondaryButtonConfig?.leadingIcon}
+                  trailingIcon={secondaryButtonConfig?.trailingIcon}
+                  leadingIconSize={secondaryButtonConfig?.iconConfig?.leadingSize}
+                  trailingIconSize={secondaryButtonConfig?.iconConfig?.trailingSize}
                   onClick={() => {
                     const { content } = useEditStore.getState();
                     const sectionData = content[sectionId];
@@ -502,8 +522,8 @@ transform hover:-translate-y-0.5
                     }
                   }}
                 />
-              )
-            )}
+              );
+            })()}
 
             {mode !== 'preview' ? (
               <EditableTrustIndicators
