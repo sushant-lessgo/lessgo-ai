@@ -31,6 +31,7 @@ import {
 interface CenterStackedContent {
   headline: string;
   cta_text: string;
+  secondary_cta_text?: string;
   subheadline?: string;
   supporting_text?: string;
   badge_text?: string;
@@ -57,9 +58,13 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: 'Transform Your Business with Smart Automation' 
   },
-  cta_text: { 
-    type: 'string' as const, 
-    default: 'Start Free Trial' 
+  cta_text: {
+    type: 'string' as const,
+    default: 'Start Free Trial'
+  },
+  secondary_cta_text: {
+    type: 'string' as const,
+    default: 'Watch Demo'
   },
   subheadline: { 
     type: 'string' as const, 
@@ -397,7 +402,7 @@ export default function CenterStacked(props: LayoutComponentProps) {
             />
           )}
 
-          <div className="flex flex-col items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
 
             {content[sectionId]?.elements?.cta_text?.metadata?.buttonConfig?.type === 'link-with-input' ? (
               <CTAButtonWithInput
@@ -447,6 +452,57 @@ transform hover:-translate-y-0.5
                   }
                 }}
               />
+            )}
+
+            {/* Secondary CTA */}
+            {((blockContent.secondary_cta_text && blockContent.secondary_cta_text !== '___REMOVED___') || mode === 'edit') && (
+              content[sectionId]?.elements?.secondary_cta_text?.metadata?.buttonConfig?.type === 'link-with-input' ? (
+                <CTAButtonWithInput
+                  text={blockContent.secondary_cta_text || 'Watch Demo'}
+                  colorTokens={colorTokens}
+                  buttonConfig={content[sectionId].elements.secondary_cta_text.metadata.buttonConfig}
+                  className={`
+                    px-12 py-6
+                    font-semibold
+                    rounded-xl
+                    ${shadows.cta[theme]}
+                    ${shadows.ctaHover[theme]}
+                    transition-all duration-200
+                    transform hover:-translate-y-0.5
+                  `}
+                  variant="outline"
+                  sectionId={sectionId}
+                  elementKey="secondary_cta_text"
+                />
+              ) : (
+                <CTAButton
+                  text={blockContent.secondary_cta_text || 'Watch Demo'}
+                  colorTokens={colorTokens}
+                  className={`
+                    px-12 py-6
+                    font-semibold
+                    rounded-xl
+                    ${shadows.cta[theme]}
+                    ${shadows.ctaHover[theme]}
+                    transition-all duration-200
+                    transform hover:-translate-y-0.5
+                  `}
+                  variant="outline"
+                  sectionId={sectionId}
+                  elementKey="secondary_cta_text"
+                  onClick={() => {
+                    const { content } = useEditStore.getState();
+                    const sectionData = content[sectionId];
+                    const secondaryCtaConfig = (sectionData as any)?.secondaryCtaConfig;
+
+                    logger.debug('🔗 Secondary CTA Button clicked:', () => ({ secondaryCtaConfig, sectionId }));
+
+                    if (secondaryCtaConfig?.type === 'link' && secondaryCtaConfig.url) {
+                      window.open(secondaryCtaConfig.url, '_blank', 'noopener,noreferrer');
+                    }
+                  }}
+                />
+              )
             )}
 
             {mode !== 'preview' ? (
@@ -677,6 +733,7 @@ export const componentMeta = {
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: true },
+    { key: 'secondary_cta_text', label: 'Secondary CTA Button Text', type: 'text', required: false },
     { key: 'badge_text', label: 'Badge Text (uses accent colors)', type: 'text', required: false },
     { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
     { key: 'trust_item_1', label: 'Trust Item 1', type: 'text', required: false },
