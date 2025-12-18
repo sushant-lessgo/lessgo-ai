@@ -104,8 +104,8 @@ export default function Minimalist(props: LayoutComponentProps) {
         </div>
 
         {/* Headline at Top */}
-        <div className="relative z-30 pt-20 md:pt-24 px-6 md:px-12">
-          <div className="max-w-5xl mx-auto">
+        <div className="relative z-30 p-6 md:p-8 lg:p-12">
+          <div className="max-w-5xl mx-auto pt-10">
             <EditableAdaptiveHeadline
               mode={mode}
               value={blockContent.headline || ''}
@@ -126,8 +126,8 @@ export default function Minimalist(props: LayoutComponentProps) {
         </div>
 
         {/* Subheadline at Bottom */}
-        <div className="relative z-30 pb-20 md:pb-24 px-6 md:px-12">
-          <div className="max-w-3xl mx-auto">
+        <div className="relative z-30 pb-20">
+          <div className="max-w-3xl mx-auto pb-20">
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -135,7 +135,7 @@ export default function Minimalist(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-white text-center text-lg md:text-xl leading-relaxed"
+              className="text-white text-center text-2xl md:text-4xl leading-relaxed"
               textStyle={{
                 textAlign: 'center',
                 color: '#FFFFFF'
