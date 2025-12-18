@@ -2681,6 +2681,15 @@ export const layoutElementSchema: LayoutSchema = {
     cardRequirements: null
   },
 
+  minimalist: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: true, generation: "ai_generated" },
+      { element: "minimalist_hero_image", mandatory: true, generation: "manual_preferred" }
+    ],
+    cardRequirements: null
+  },
+
   // HowItWorks Section
   ThreeStepHorizontal: {
     sectionElements: [

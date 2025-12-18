@@ -27,7 +27,7 @@ const CONTENT_SCHEMA = {
   },
   minimalist_hero_image: {
     type: 'string' as const,
-    default: '/hero-placeholder.jpg'
+    default: '/Dusseldorf-event.jpg'
   }
 };
 
@@ -70,9 +70,9 @@ export default function Minimalist(props: LayoutComponentProps) {
       sectionId={sectionId}
       sectionType="Minimalist"
       backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
-      sectionBackground={sectionBackground}
+      sectionBackground="transparent"
       mode={mode}
-      className={`!pt-0 relative ${props.className || ''}`}
+      className={`!py-0 !px-0 relative overflow-hidden ${props.className || ''}`}
     >
       <div className="relative min-h-screen flex flex-col justify-between">
 
@@ -104,7 +104,7 @@ export default function Minimalist(props: LayoutComponentProps) {
         </div>
 
         {/* Headline at Top */}
-        <div className="relative z-10 pt-20 md:pt-24 px-6 md:px-12">
+        <div className="relative z-30 pt-20 md:pt-24 px-6 md:px-12">
           <div className="max-w-5xl mx-auto">
             <EditableAdaptiveHeadline
               mode={mode}
@@ -126,7 +126,7 @@ export default function Minimalist(props: LayoutComponentProps) {
         </div>
 
         {/* Subheadline at Bottom */}
-        <div className="relative z-10 pb-20 md:pb-24 px-6 md:px-12">
+        <div className="relative z-30 pb-20 md:pb-24 px-6 md:px-12">
           <div className="max-w-3xl mx-auto">
             <EditableAdaptiveText
               mode={mode}
