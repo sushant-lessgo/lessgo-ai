@@ -4,7 +4,8 @@ export type HeroLayout =
   | "leftCopyRightImage"
   | "centerStacked"
   | "splitScreen"
-  | "imageFirst";
+  | "imageFirst"
+  | "minimalist";
 
 /**
  * Selects the optimal Hero section layout based on first impression and conversion goals
@@ -109,6 +110,24 @@ export function pickHeroLayout(input: LayoutPickerInput): HeroLayout {
     return "leftCopyRightImage";
   }
 
+  // 6. Brand-Focused Visual Products with Assets
+  if (
+    (toneProfile === 'luxury-expert' || toneProfile === 'minimal-technical') &&
+    assetAvailability?.productImages &&
+    (startupStage === 'traction' || startupStage === 'growth')
+  ) {
+    return "minimalist";
+  }
+
+  // 7. Unaware Audience + Visual-First Categories
+  if (
+    awarenessLevel === 'unaware' &&
+    (marketCategory === 'Design & Creative Tools' || marketCategory === 'AI Tools') &&
+    assetAvailability?.productImages
+  ) {
+    return "minimalist";
+  }
+
   // Medium-Priority Rules (Scoring system)
 
   const scores: Record<HeroLayout, number> = {
@@ -116,6 +135,7 @@ export function pickHeroLayout(input: LayoutPickerInput): HeroLayout {
     centerStacked: 0,
     splitScreen: 0,
     imageFirst: 0,
+    minimalist: 0,
   };
 
   // ===== PHASE 2.2: FLOW-AWARE SCORING =====
@@ -161,6 +181,7 @@ export function pickHeroLayout(input: LayoutPickerInput): HeroLayout {
     scores.leftCopyRightImage += 3;
     scores.splitScreen += 2;
   } else if (landingPageGoals === "waitlist" || landingPageGoals === "early-access") {
+    scores.minimalist += 2;  // Awareness building
     scores.centerStacked += 5;
     scores.splitScreen += 3;
     scores.imageFirst += 2;
@@ -169,12 +190,14 @@ export function pickHeroLayout(input: LayoutPickerInput): HeroLayout {
     scores.leftCopyRightImage += 3;
     scores.imageFirst += 2;
   } else if (landingPageGoals === "join-community") {
+    scores.minimalist += 2;  // Awareness building
     scores.centerStacked += 4;
     scores.imageFirst += 2;
   }
 
   // Awareness Level Scoring (High Weight: 3-4 points)
   if (awarenessLevel === "unaware") {
+    scores.minimalist += 3;  // Visual hook for awareness
     scores.centerStacked += 4;
     scores.leftCopyRightImage += 3;
     scores.splitScreen += 2;
@@ -255,6 +278,7 @@ export function pickHeroLayout(input: LayoutPickerInput): HeroLayout {
     scores.centerStacked += 2;
     scores.splitScreen += 2;
   } else if (toneProfile === "minimal-technical") {
+    scores.minimalist += 4;  // Minimalist aesthetic
     scores.leftCopyRightImage += 3;
     scores.imageFirst += 2;
     scores.centerStacked += 1;
@@ -263,6 +287,7 @@ export function pickHeroLayout(input: LayoutPickerInput): HeroLayout {
     scores.leftCopyRightImage += 2;
     scores.centerStacked += 1;
   } else if (toneProfile === "luxury-expert") {
+    scores.minimalist += 5;  // Premium minimalist design
     scores.splitScreen += 3;
     scores.leftCopyRightImage += 3;
     scores.imageFirst += 2;
@@ -278,10 +303,12 @@ export function pickHeroLayout(input: LayoutPickerInput): HeroLayout {
     scores.splitScreen += 2;
     scores.centerStacked += 1;
   } else if (startupStage === "growth") {
+    scores.minimalist += 3;  // Established brand
     scores.splitScreen += 3;
     scores.leftCopyRightImage += 2;
     scores.imageFirst += 2;
   } else if (startupStage === "scale") {
+    scores.minimalist += 3;  // Established brand
     scores.leftCopyRightImage += 3;
     scores.splitScreen += 3;
     scores.imageFirst += 1;
@@ -310,9 +337,11 @@ export function pickHeroLayout(input: LayoutPickerInput): HeroLayout {
 
   // Market Category Scoring (Low Weight: 1-2 points)
   if (marketCategory === "Design & Creative Tools") {
+    scores.minimalist += 3;  // Visual-first category
     scores.imageFirst += 2;
     scores.splitScreen += 1;
   } else if (marketCategory === "AI Tools") {
+    scores.minimalist += 3;  // Visual-first category
     scores.imageFirst += 2;
     scores.splitScreen += 1;
   } else if (marketCategory === "Engineering & Development Tools") {
@@ -359,9 +388,13 @@ export function pickHeroLayout(input: LayoutPickerInput): HeroLayout {
     scores.imageFirst -= 100;
     scores.leftCopyRightImage -= 50;
     scores.splitScreen -= 50;
+    scores.minimalist -= 100;  // Minimalist requires background image
 
     // Boost text-focused layout
     scores.centerStacked += 30;
+  } else if (assetAvailability?.productImages) {
+    // Boost minimalist when strong visual assets available
+    scores.minimalist += 4;
   }
 
   // Find the highest scoring layout

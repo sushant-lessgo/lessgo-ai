@@ -54,6 +54,7 @@ import IconCircleSteps from '@/modules/UIBlocks/HowItWorks/IconCircleSteps';
 import IconGrid from '@/modules/UIBlocks/Features/IconGrid';
 import IconWithAnswers from '@/modules/UIBlocks/FAQ/IconWithAnswers';
 import ImageFirst from '@/modules/UIBlocks/Hero/imageFirst';
+import MinimalistComponent from '@/modules/UIBlocks/Hero/minimalist';
 import InnovationTimeline from '@/modules/UIBlocks/UniqueMechanism/InnovationTimeline';
 import IndustryBadgeLine from '@/modules/UIBlocks/SocialProof/IndustryBadgeLine';
 import IndustryUseCaseGrid from '@/modules/UIBlocks/UseCase/IndustryUseCaseGrid';
@@ -192,6 +193,7 @@ export const componentRegistry: ComponentRegistry = {
     centerStacked: CenterStacked,
     splitScreen: SplitScreen,
     imageFirst: ImageFirst,
+    minimalist: MinimalistComponent,
   },
   
   features: {

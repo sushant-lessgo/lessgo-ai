@@ -70,6 +70,7 @@ export const layoutRegistry = {
     "centerStacked",
     "splitScreen",
     "imageFirst",
+    "minimalist",
   ] as const,
 
   HowItWorks: [

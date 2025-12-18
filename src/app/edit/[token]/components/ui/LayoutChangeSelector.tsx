@@ -314,6 +314,14 @@ function LayoutPreview({ layoutId, sectionType }: { layoutId: string; sectionTyp
         <div className="h-1 bg-primary/50 rounded w-6" />
       </div>
     ),
+    'minimalist': (
+      <div className="relative w-16 h-12 bg-gradient-to-b from-black/60 via-black/40 to-black/60 rounded overflow-hidden">
+        {/* Text at top */}
+        <div className="absolute top-1 left-1 right-1 h-2 bg-white/90 rounded-sm" />
+        {/* Text at bottom */}
+        <div className="absolute bottom-1 left-2 right-2 h-1.5 bg-white/80 rounded-sm" />
+      </div>
+    ),
     'IconGrid': (
       <div className="grid grid-cols-3 gap-0.5 w-16 h-12 p-1">
         {[...Array(6)].map((_, i) => (
