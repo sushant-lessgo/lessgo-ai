@@ -135,7 +135,7 @@ export default function Minimalist(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-white text-center text-2xl md:text-4xl leading-relaxed"
+              className="text-white text-justify text-2xl md:text-4xl"
               textStyle={{
                 textAlign: 'center',
                 color: '#FFFFFF'
