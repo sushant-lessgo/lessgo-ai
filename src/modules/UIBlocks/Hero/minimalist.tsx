@@ -72,6 +72,7 @@ export default function Minimalist(props: LayoutComponentProps) {
       backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
       sectionBackground="transparent"
       mode={mode}
+      noPadding={true}
       className={`!py-0 !px-0 relative overflow-hidden ${props.className || ''}`}
     >
       <div className="relative min-h-screen flex flex-col justify-between">

@@ -13,6 +13,7 @@ interface LayoutSectionProps {
   className?: string;
   children: React.ReactNode;
   componentDensity?: ComponentDensity;
+  noPadding?: boolean;
   editModeInfo?: {
     componentName: string;
     description?: string;
@@ -29,6 +30,7 @@ export const LayoutSection = forwardRef<HTMLElement, LayoutSectionProps>(({
   className = '',
   children,
   componentDensity,
+  noPadding,
   editModeInfo,
 }, ref) => {
   
@@ -51,8 +53,8 @@ export const LayoutSection = forwardRef<HTMLElement, LayoutSectionProps>(({
         return 'py-12 md:py-14 lg:py-16'; // 48px -> 56px -> 64px
     }
   };
-  
-  const spacingClass = getSpacingClass(spacingValue);
+
+  const spacingClass = noPadding ? '' : getSpacingClass(spacingValue);
 
   // ✅ SIMPLIFIED: Always apply background as inline style (sectionBackground is now always a CSS value)
   const inlineStyle: React.CSSProperties = {
@@ -71,7 +73,7 @@ export const LayoutSection = forwardRef<HTMLElement, LayoutSectionProps>(({
       <section
         ref={ref}
         id={sectionId}
-        className={`${spacingClass} px-4 ${className}`}
+        className={`${spacingClass} ${!noPadding ? 'px-4' : ''} ${className}`}
         style={inlineStyle}
         data-section-id={sectionId}
         data-section-type={sectionType}
