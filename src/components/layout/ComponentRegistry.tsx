@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { decodeIcon, lucideNameToPascalCase } from '@/lib/iconStorage';
 import * as LucideIcons from 'lucide-react';
+import { scrollToEmailForm } from '@/utils/emailFormDetector';
 // Enhanced Trust Indicators Component
 export function TrustIndicators({ 
   items = ['Free trial', 'No credit card'], 
@@ -156,13 +157,25 @@ export function CTAButton({
   };
 
   // ✅ ENHANCED: Add focus styles using accent colors
-  const focusClass = colorTokens.borderFocus ? 
-    `focus:ring-4 focus:ring-opacity-50 focus:${colorTokens.borderFocus}` : 
+  const focusClass = colorTokens.borderFocus ?
+    `focus:ring-4 focus:ring-opacity-50 focus:${colorTokens.borderFocus}` :
     'focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50';
 
+  // Click handler with auto-scroll to email form
+  const handleClick = () => {
+    // Custom onClick takes precedence
+    if (onClick) {
+      onClick();
+      return;
+    }
+
+    // Auto-scroll to email form if no custom handler
+    scrollToEmailForm();
+  };
+
   return (
-    <button 
-      onClick={onClick}
+    <button
+      onClick={handleClick}
       disabled={disabled || loading}
       aria-label={ariaLabel || safeText}
       data-section-id={sectionId}

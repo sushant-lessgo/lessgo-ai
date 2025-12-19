@@ -43,7 +43,12 @@ export function FormPlacementRenderer({ sectionId, className, userId, publishedP
   return (
     <div className={className}>
       {formsToRender.map((form) => (
-        <div key={form.id} id={`form-${form.id}`} className="mb-8">
+        <div
+          key={form.id}
+          id={`form-${form.id}`}
+          data-has-email-form={form.fields.some(f => f.type === 'email')}
+          className="mb-8"
+        >
           <FormRenderer
             form={form}
             userId={userId}
