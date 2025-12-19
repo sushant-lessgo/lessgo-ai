@@ -119,7 +119,31 @@ export default function Minimalist(props: LayoutComponentProps) {
 
         {/* Headline at Top */}
         <div className="relative z-30 p-6 md:p-8 lg:p-12">
-          <div className="max-w-[43rem] mx-auto pt-10">
+          <div className="max-w-2xl mx-auto pt-10">
+
+
+    {/* Spotlight beam JUST for headline area */}
+    <div className="pointer-events-none absolute left-1/2 top-[-30px] -translate-x-1/2 w-[520px] h-[220px]">
+      {/* soft wide cone */}
+      <div
+        className="absolute inset-0 blur-3xl opacity-70 mix-blend-screen"
+        style={{
+          background:
+            "radial-gradient(ellipse at top, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.25) 35%, transparent 70%)"
+        }}
+      />
+      {/* tighter bright core */}
+      <div
+        className="absolute left-1/2 top-0 -translate-x-1/2 w-[200px] h-[220px] blur-2xl opacity-80 mix-blend-screen"
+        style={{
+          background:
+            "radial-gradient(ellipse at top, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.25) 45%, transparent 75%)"
+        }}
+      />
+    </div>
+
+
+
             <EditableAdaptiveHeadline
               mode={mode}
               value={blockContent.headline || ''}

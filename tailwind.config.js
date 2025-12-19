@@ -13,9 +13,7 @@ module.exports = {
   safelist: [
      "mix-blend-multiply",
     "mix-blend-screen",
-    "bg-emerald-500/20",
-    "bg-emerald-400/12",
-  
+   
     "max-w-[43rem]",
   "max-w-[45rem]",
   "max-w-[50rem]",
