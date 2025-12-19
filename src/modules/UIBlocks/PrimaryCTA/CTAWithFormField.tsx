@@ -18,6 +18,7 @@ import { LayoutComponentProps } from '@/types/storeTypes';
 // Content interface for type safety
 interface CTAWithFormFieldContent {
   headline: string;
+  eyebrow_text?: string;
   subheadline?: string;
   form_label: string;
   placeholder_text: string;
@@ -38,9 +39,13 @@ interface CTAWithFormFieldContent {
 
 // Content schema - defines structure and defaults
 const CONTENT_SCHEMA = {
-  headline: { 
-    type: 'string' as const, 
-    default: 'Get Started Today' 
+  headline: {
+    type: 'string' as const,
+    default: 'Get Started Today'
+  },
+  eyebrow_text: {
+    type: 'string' as const,
+    default: ''
   },
   subheadline: { 
     type: 'string' as const, 
@@ -284,6 +289,22 @@ export default function CTAWithFormField(props: LayoutComponentProps) {
           
           {/* Left Column - Content */}
           <div>
+            {blockContent.eyebrow_text &&
+             blockContent.eyebrow_text !== '___REMOVED___' &&
+             blockContent.eyebrow_text.trim() !== '' && (
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.eyebrow_text}
+                onEdit={(value) => handleContentUpdate('eyebrow_text', value)}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'secondary')}
+                colorTokens={colorTokens}
+                variant="body"
+                className="text-sm font-semibold uppercase tracking-wider mb-3"
+                sectionId={sectionId}
+                elementKey="eyebrow_text"
+                sectionBackground={sectionBackground}
+              />
+            )}
             <EditableAdaptiveHeadline
               mode={mode}
               value={blockContent.headline || ''}
@@ -592,6 +613,7 @@ export const componentMeta = {
   
   contentFields: [
     { key: 'headline', label: 'CTA Headline', type: 'text', required: true },
+    { key: 'eyebrow_text', label: 'Eyebrow', type: 'text', required: false },
     { key: 'subheadline', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'form_label', label: 'Form Field Label', type: 'text', required: true },
     { key: 'placeholder_text', label: 'Input Placeholder', type: 'text', required: true },

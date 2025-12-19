@@ -3752,6 +3752,7 @@ export const layoutElementSchema: LayoutSchema = {
   CTAWithFormField: {
     sectionElements: [
       { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "eyebrow_text", mandatory: false, generation: "ai_generated" },
       { element: "subheadline", mandatory: false, generation: "ai_generated" },
       { element: "cta_text", mandatory: true, generation: "ai_generated" },
       { element: "form_label", mandatory: true, generation: "ai_generated" },
