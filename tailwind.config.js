@@ -11,6 +11,14 @@ module.exports = {
     "./src/utils/tailwind-seed.js", // Include seed file for arbitrary patterns
   ],
   safelist: [
+     "mix-blend-multiply",
+    "mix-blend-screen",
+    "bg-emerald-500/20",
+    "bg-emerald-400/12",
+  
+    "max-w-[43rem]",
+  "max-w-[45rem]",
+  "max-w-[50rem]",
   // ✅ Editor UI classes
   'hover:bg-editable-bg',
   'hover:bg-editable-primaryBg',

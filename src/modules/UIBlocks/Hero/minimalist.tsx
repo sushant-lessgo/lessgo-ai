@@ -102,10 +102,24 @@ export default function Minimalist(props: LayoutComponentProps) {
           {/* Dark gradient overlay for text readability */}
            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/60" />
         </div>
+        
+<div
+  className="absolute inset-0 mix-blend-multiply"
+  style={{ backgroundColor: "rgba(0,255,0,0.12)" }}
+/>
+
+{/* Non-uniform green glow (center-bright, edges-dark) */}
+<div
+  className="absolute inset-0 mix-blend-screen"
+  style={{
+    background:
+      "radial-gradient(ellipse at center, rgba(0,255,0,0.22) 0%, rgba(0,255,0,0.1) 35%, rgba(0,255,0,0.05) 60%, transparent 75%)"
+  }}
+/>
 
         {/* Headline at Top */}
         <div className="relative z-30 p-6 md:p-8 lg:p-12">
-          <div className="max-w-5xl mx-auto pt-10">
+          <div className="max-w-[43rem] mx-auto pt-10">
             <EditableAdaptiveHeadline
               mode={mode}
               value={blockContent.headline || ''}
@@ -127,7 +141,7 @@ export default function Minimalist(props: LayoutComponentProps) {
 
         {/* Subheadline at Bottom */}
         <div className="relative z-30 pb-20">
-          <div className="max-w-3xl mx-auto pb-20">
+          <div className="max-w-[50rem] mx-auto pb-20">
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
