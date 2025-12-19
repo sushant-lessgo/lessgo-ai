@@ -13,10 +13,13 @@ module.exports = {
   safelist: [
      "mix-blend-multiply",
     "mix-blend-screen",
-   
+   'lg:grid-cols-[1.35fr_1fr]',
+    'md:grid-cols-[1.25fr_1fr]',
+    'grid-cols-[1.25fr_1fr]',
     "max-w-[43rem]",
   "max-w-[45rem]",
   "max-w-[50rem]",
+  "max-w-[66rem]",
   // ✅ Editor UI classes
   'hover:bg-editable-bg',
   'hover:bg-editable-primaryBg',
@@ -528,6 +531,8 @@ module.exports = {
   'bg-soft-gradient-blur',
   'bg-startup-skybox',
   'bg-glass-morph',
+  'bg-glass-morph',
+  
   
   // ✅ Variable-based effect classes
   'blur-var-subtle',
