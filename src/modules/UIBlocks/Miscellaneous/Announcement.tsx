@@ -101,9 +101,9 @@ export default function Announcement(props: LayoutComponentProps) {
       mode={mode}
       className={props.className}
     >
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-6xl mx-auto mt-16">
         {/* Top: 2-column grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.35fr_1fr] gap-16 mb-12">
 
           {/* Left Column - Content */}
           <div className="space-y-4">
@@ -128,7 +128,7 @@ export default function Announcement(props: LayoutComponentProps) {
                 backgroundType={props.backgroundType === 'custom' ? 'primary' : (props.backgroundType || 'primary')}
                 colorTokens={colorTokens}
                 variant="body"
-                className="text-xl mb-4"
+                className="text-xl mb-12"
                 sectionId={sectionId}
                 elementKey="subheadline"
                 sectionBackground={sectionBackground}
@@ -146,21 +146,14 @@ export default function Announcement(props: LayoutComponentProps) {
               sectionId={sectionId}
               elementKey="supporting_copy"
               sectionBackground={sectionBackground}
+              multiline={true}
             />
           </div>
 
           {/* Right Column - Logo-Text Pairs */}
-          <div className="space-y-6">
+          <div className="space-y-12">
             {/* Logo 1 + Text 1 */}
-            <div className="flex items-center gap-4">
-              <LogoEditableComponent
-                mode={mode}
-                logoUrl={blockContent.logo_1}
-                onLogoChange={handleLogo1Change}
-                companyName={blockContent.text_1}
-                size="md"
-                className=""
-              />
+            <div className="flex flex-col items-start">
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.text_1 || ''}
@@ -168,23 +161,23 @@ export default function Announcement(props: LayoutComponentProps) {
                 backgroundType={props.backgroundType === 'custom' ? 'primary' : (props.backgroundType || 'primary')}
                 colorTokens={colorTokens}
                 variant="body"
-                className="text-lg font-semibold flex-1"
+                className="text-xl font-semibold mb-2"
                 sectionId={sectionId}
                 elementKey="text_1"
                 sectionBackground={sectionBackground}
               />
+              <LogoEditableComponent
+                mode={mode}
+                logoUrl={blockContent.logo_1}
+                onLogoChange={handleLogo1Change}
+                companyName={blockContent.text_1}
+                size="lg"
+                className="w-48 h-auto"
+              />
             </div>
 
             {/* Logo 2 + Text 2 */}
-            <div className="flex items-center gap-4">
-              <LogoEditableComponent
-                mode={mode}
-                logoUrl={blockContent.logo_2}
-                onLogoChange={handleLogo2Change}
-                companyName={blockContent.text_2}
-                size="md"
-                className=""
-              />
+            <div className="flex flex-col items-start">
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.text_2 || ''}
@@ -192,10 +185,18 @@ export default function Announcement(props: LayoutComponentProps) {
                 backgroundType={props.backgroundType === 'custom' ? 'primary' : (props.backgroundType || 'primary')}
                 colorTokens={colorTokens}
                 variant="body"
-                className="text-lg font-semibold flex-1"
+                className="text-lg font-semibold mb-2"
                 sectionId={sectionId}
                 elementKey="text_2"
                 sectionBackground={sectionBackground}
+              />
+              <LogoEditableComponent
+                mode={mode}
+                logoUrl={blockContent.logo_2}
+                onLogoChange={handleLogo2Change}
+                companyName={blockContent.text_2}
+                size="lg"
+                className="w-64 h-auto"
               />
             </div>
           </div>
