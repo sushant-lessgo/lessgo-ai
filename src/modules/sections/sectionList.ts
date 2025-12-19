@@ -34,5 +34,6 @@ export const sectionList: SectionMeta[] = [
   { id: "testimonials", label: "Testimonials", order: 9, background: "neutral", defaultSpacingAfter: 'spacious', contentDensity: 'medium' },
   { id: "uniqueMechanism", label: "Unique Mechanism / Why Different", order: 6, background: "secondary-highlight", defaultSpacingAfter: 'normal', contentDensity: 'medium' },
   { id: "useCases", label: "Use Cases & Target Users", order: 4, background: "neutral", defaultSpacingAfter: 'normal', contentDensity: 'medium' },
+  { id: "miscellaneous", label: "Miscellaneous / Announcements", order: 21, background: "neutral", defaultSpacingAfter: 'normal', contentDensity: 'light' },
   { id: "footer", label: "Footer", order: 25, background: "neutral", required: true, defaultSpacingAfter: 'normal', contentDensity: 'light' },
 ];

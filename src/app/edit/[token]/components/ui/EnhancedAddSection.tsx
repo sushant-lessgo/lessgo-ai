@@ -81,6 +81,7 @@ export function EnhancedAddSection({
       'testimonials': 'Testimonial',
       'uniqueMechanism': 'UniqueMechanism',
       'useCases': 'UseCase',
+      'miscellaneous': 'Miscellaneous',
     };
     return mapping[sectionId] || sectionId;
   };

@@ -38,6 +38,7 @@ const SECTION_ICONS: Record<string, string> = {
   faq: '❓',
   cta: '🎯',
   closeSection: '🏁',
+  miscellaneous: '📢',
 };
 
 // Description mapping for sections
@@ -61,6 +62,7 @@ const SECTION_DESCRIPTIONS: Record<string, string> = {
   faq: 'Frequently asked questions',
   cta: 'Primary call-to-action section',
   closeSection: 'Final conversion opportunity',
+  miscellaneous: 'Announcements, partnerships, and special notices',
 };
 
 export function SectionTypeSelector({ 
@@ -122,6 +124,7 @@ export function SectionTypeSelector({
         case 'useCases':
         case 'objectionHandling':
         case 'comparisonTable':
+        case 'miscellaneous':
           groups['Information'].push(section);
           break;
       }

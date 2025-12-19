@@ -162,6 +162,7 @@ import WorkflowDiagrams from '@/modules/UIBlocks/UseCase/WorkflowDiagrams';
 import YouVsThemHighlight from '@/modules/UIBlocks/Comparison/YouVsThemHighlight';
 import ZapierLikeBuilderPreview from '@/modules/UIBlocks/Integration/ZapierLikeBuilderPreview';
 import ZigzagImageSteps from '@/modules/UIBlocks/HowItWorks/ZigzagImageSteps';
+import Announcement from '@/modules/UIBlocks/Miscellaneous/Announcement';
 
 
 import { logger } from '@/lib/logger';
@@ -382,7 +383,11 @@ export const componentRegistry: ComponentRegistry = {
     SideBySideOfferCards: SideBySideOfferCards,
     MultistepCTAStack: MultistepCTAStack,
   },
-  
+
+  miscellaneous: {
+    Announcement: Announcement,
+  },
+
   footer: {
     SimpleFooter: SimpleFooter,
     LinksAndSocialFooter: LinksAndSocialFooter,

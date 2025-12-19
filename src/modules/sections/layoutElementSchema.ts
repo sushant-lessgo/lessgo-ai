@@ -4189,4 +4189,21 @@ export const layoutElementSchema: LayoutSchema = {
     ],
     cardRequirements: null
   },
+
+  // Miscellaneous Section
+  Announcement: {
+    sectionElements: [
+      { element: "headline", mandatory: true, generation: "ai_generated" },
+      { element: "subheadline", mandatory: false, generation: "ai_generated" },
+      { element: "supporting_copy", mandatory: true, generation: "ai_generated" },
+      { element: "text_1", mandatory: true, generation: "ai_generated" },
+      { element: "logo_1", mandatory: false, generation: "manual_preferred" },
+      { element: "text_2", mandatory: true, generation: "ai_generated" },
+      { element: "logo_2", mandatory: false, generation: "manual_preferred" },
+      { element: "above_cta_copy", mandatory: true, generation: "ai_generated" },
+      { element: "cta_text", mandatory: true, generation: "ai_generated" }
+    ],
+    cardStructure: undefined,
+    cardRequirements: null
+  },
 }

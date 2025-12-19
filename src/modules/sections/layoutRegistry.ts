@@ -212,6 +212,10 @@ export const layoutRegistry = {
     "NavWithCTAHeader",
   ] as const,
 
+  Miscellaneous: [
+    "Announcement",
+  ] as const,
+
   Footer: [
     "SimpleFooter",
     "LinksAndSocialFooter",
