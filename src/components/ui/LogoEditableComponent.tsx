@@ -2,6 +2,7 @@
 // Basic logo editing component for MVP
 
 import React, { useState, useRef } from 'react';
+import { useEditStoreLegacy } from '@/hooks/useEditStoreLegacy';
 
 interface LogoEditableComponentProps {
   mode: 'edit' | 'preview';
@@ -10,6 +11,8 @@ interface LogoEditableComponentProps {
   companyName: string;
   size?: 'sm' | 'md' | 'lg';
   className?: string;
+  sectionId?: string;
+  elementKey?: string;
 }
 
 const LogoEditableComponent: React.FC<LogoEditableComponentProps> = ({
@@ -18,11 +21,17 @@ const LogoEditableComponent: React.FC<LogoEditableComponentProps> = ({
   onLogoChange,
   companyName,
   size = 'md',
-  className = ''
+  className = '',
+  sectionId,
+  elementKey
 }) => {
   const [showUploadButton, setShowUploadButton] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Conditionally access store for proper image upload
+  const store = sectionId && elementKey ? useEditStoreLegacy() : null;
+  const uploadImage = store?.uploadImage;
 
   // Size classes
   const sizeClasses = {
@@ -73,11 +82,22 @@ const LogoEditableComponent: React.FC<LogoEditableComponentProps> = ({
     setIsUploading(true);
 
     try {
-      // Create preview URL
-      const previewUrl = URL.createObjectURL(file);
-      onLogoChange(previewUrl);
+      // If store integration available, use proper upload
+      if (uploadImage && sectionId && elementKey) {
+        const permanentUrl = await uploadImage(file, {
+          sectionId,
+          elementKey,
+        });
+
+        // Notify parent via callback
+        onLogoChange(permanentUrl);
+      } else {
+        // Legacy fallback: create blob URL (temporary)
+        const previewUrl = URL.createObjectURL(file);
+        onLogoChange(previewUrl);
+      }
     } catch (error) {
-      alert('Failed to upload logo. Please try again.');
+      alert(error instanceof Error ? error.message : 'Failed to upload logo. Please try again.');
     } finally {
       setIsUploading(false);
       event.target.value = ''; // Reset input

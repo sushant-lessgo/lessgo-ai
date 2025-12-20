@@ -173,6 +173,8 @@ export default function Announcement(props: LayoutComponentProps) {
                 companyName={blockContent.text_1}
                 size="lg"
                 className="w-48 h-auto"
+                sectionId={sectionId}
+                elementKey="logo_1"
               />
             </div>
 
@@ -197,6 +199,8 @@ export default function Announcement(props: LayoutComponentProps) {
                 companyName={blockContent.text_2}
                 size="lg"
                 className="w-64 h-auto"
+                sectionId={sectionId}
+                elementKey="logo_2"
               />
             </div>
           </div>
