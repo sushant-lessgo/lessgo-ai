@@ -192,7 +192,11 @@ function PublishedPageContent({ pageData }: { pageData: PublishedPageData }) {
   return (
     <AnalyticsProvider pageSlug={pageData.slug}>
       <div className="min-h-screen bg-white">
-        <LandingPageRenderer tokenId={`published-${pageData.slug}`} />
+        <LandingPageRenderer
+          tokenId={`published-${pageData.slug}`}
+          publishedPageId={pageData.id}
+          pageOwnerId={pageData.userId}
+        />
       </div>
     </AnalyticsProvider>
   );

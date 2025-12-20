@@ -107,9 +107,11 @@ const backgroundTypeMapping: Record<SectionBackground, 'primary' | 'secondary' |
 interface LandingPageRendererProps {
   className?: string;
   tokenId?: string;
+  publishedPageId?: string;
+  pageOwnerId?: string;
 }
 
-export default function LandingPageRenderer({ className = '', tokenId }: LandingPageRendererProps) {
+export default function LandingPageRenderer({ className = '', tokenId, publishedPageId, pageOwnerId }: LandingPageRendererProps) {
   // Get tokenId from props or URL params
   const params = useParams();
   const effectiveTokenId = tokenId || (params?.token as string) || 'default';
@@ -459,6 +461,8 @@ const finalSections: OrderedSection[] = processedSections
                 isEditable={mode !== 'preview'}
                 userContext={userContext}
                 manualThemeOverride={manualThemeOverride}
+                publishedPageId={publishedPageId}
+                pageOwnerId={pageOwnerId}
                 {...(data || {})}
               />
             </div>
@@ -487,6 +491,8 @@ const finalSections: OrderedSection[] = processedSections
                 isEditable={mode !== 'preview'}
                 userContext={userContext}
                 manualThemeOverride={manualThemeOverride}
+                publishedPageId={publishedPageId}
+                pageOwnerId={pageOwnerId}
                 {...(data || {})}
               />
             </SmartTextSection>

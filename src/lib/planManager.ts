@@ -406,6 +406,11 @@ export async function checkLimit(
   limitType: keyof PlanConfig['limits'],
   currentCount: number
 ): Promise<{ allowed: boolean; limit: number; current: number }> {
+  // Dev mode bypass
+  if (process.env.NODE_ENV === 'development' && process.env.DEV_BYPASS_LIMITS === 'true') {
+    return { allowed: true, limit: -1, current: 0 };
+  }
+
   try {
     const userPlan = await getUserPlan(userId);
     const limit = (userPlan as any)[`${limitType}Limit`];

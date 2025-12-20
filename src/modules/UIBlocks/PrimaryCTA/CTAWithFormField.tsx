@@ -1,19 +1,20 @@
 // components/layout/CTAWithFormField.tsx
 // Production-ready lead capture CTA with form field
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
 import { useEditStoreLegacy } from '@/hooks/useEditStoreLegacy';
 import { useUser } from '@clerk/nextjs';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
-  EditableAdaptiveText 
+import {
+  EditableAdaptiveHeadline,
+  EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import { TrustIndicators, CTAButton } from '@/components/layout/ComponentRegistry';
 import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { FormRenderer } from '@/components/forms/FormRenderer';
 
 // Content interface for type safety
 interface CTAWithFormFieldContent {
@@ -114,6 +115,7 @@ const CONTENT_SCHEMA = {
 };
 
 export default function CTAWithFormField(props: LayoutComponentProps) {
+  const { publishedPageId, pageOwnerId, ...layoutProps } = props;
   const {
     sectionId,
     mode,
@@ -124,7 +126,7 @@ export default function CTAWithFormField(props: LayoutComponentProps) {
     sectionBackground,
     handleContentUpdate
   } = useLayoutComponent<CTAWithFormFieldContent>({
-    ...props,
+    ...layoutProps,
     contentSchema: CONTENT_SCHEMA
   });
   
@@ -133,12 +135,7 @@ export default function CTAWithFormField(props: LayoutComponentProps) {
   const { addForm, getFormById } = useEditStoreLegacy();
   
   // Form state
-  const [email, setEmail] = useState('');
-  const [isValid, setIsValid] = useState(true);
   const [formId, setFormId] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
 
   // Auto-create form on mount if needed
   useEffect(() => {
@@ -211,69 +208,6 @@ export default function CTAWithFormField(props: LayoutComponentProps) {
   
   const trustItems = getTrustItems();
 
-  const validateEmail = (email: string) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
-  };
-
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Reset states
-    setSubmitError(null);
-    setSubmitSuccess(false);
-    
-    // Validate email
-    const valid = validateEmail(email);
-    setIsValid(valid);
-    
-    if (!valid || !formId || !email.trim()) {
-      return;
-    }
-    
-    setIsSubmitting(true);
-    
-    try {
-      const response = await fetch('/api/forms/submit', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          formId,
-          data: { email: email.trim() },
-          userId: user?.id || undefined,
-          publishedPageId: undefined // This could be passed as a prop if needed
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const result = await response.json();
-      
-      if (result.success) {
-        setSubmitSuccess(true);
-        setEmail(''); // Clear the form
-        // Auto-hide success message after 5 seconds
-        setTimeout(() => setSubmitSuccess(false), 5000);
-      } else {
-        throw new Error(result.error || 'Submission failed');
-      }
-    } catch (error) {
-      // console.error('Form submission error:', error);
-      setSubmitError(
-        error instanceof Error
-          ? error.message
-          : 'Something went wrong. Please try again.'
-      );
-      // Auto-hide error message after 10 seconds
-      setTimeout(() => setSubmitError(null), 10000);
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [email, formId, user?.id, validateEmail]);
 
   return (
     <LayoutSection
@@ -444,128 +378,44 @@ export default function CTAWithFormField(props: LayoutComponentProps) {
 
           {/* Right Column - Form */}
           <div className="bg-gray-100 rounded-2xl p-8 shadow-xl border border-gray-200">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              
-              {/* Form Label */}
-              <div>
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.form_label || ''}
-                  onEdit={(value) => handleContentUpdate('form_label', value)}
-                  backgroundType="neutral"
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="text-gray-700 font-semibold mb-2 block"
-                  sectionId={sectionId}
-                  elementKey="form_label"
-                  sectionBackground="bg-white"
-                />
+            {/* Form Label */}
+            <EditableAdaptiveText
+              mode={mode}
+              value={blockContent.form_label || ''}
+              onEdit={(value) => handleContentUpdate('form_label', value)}
+              backgroundType="neutral"
+              colorTokens={colorTokens}
+              variant="body"
+              className="text-gray-700 font-semibold mb-4 block"
+              sectionId={sectionId}
+              elementKey="form_label"
+              sectionBackground="bg-white"
+            />
 
-                {mode !== 'preview' ? (
-                  <div className="mb-2">
-                    <EditableAdaptiveText
-                      mode={mode}
-                      value={blockContent.placeholder_text || ''}
-                      onEdit={(value) => handleContentUpdate('placeholder_text', value)}
-                      backgroundType="neutral"
-                      colorTokens={colorTokens}
-                      variant="body"
-                      className="text-gray-400 text-sm italic"
-                      sectionId={sectionId}
-                      elementKey="placeholder_text"
-                      sectionBackground="bg-white"
-                    />
-                  </div>
-                ) : null}
-
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder={blockContent.placeholder_text}
-                  className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-                    isValid
-                      ? 'border-gray-300'
-                      : 'border-red-300 bg-red-50'
-                  } ${
-                    isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
-                  disabled={isSubmitting || submitSuccess}
-                  required
-                />
-
-                {!isValid && (
-                  <p className="text-red-600 text-sm mt-2">Please enter a valid email address</p>
-                )}
-
-                {submitError && (
-                  <p className="text-red-600 text-sm mt-2">{submitError}</p>
-                )}
-
-                {submitSuccess && (
-                  <p className="text-green-600 text-sm mt-2">Thank you! We'll be in touch soon.</p>
-                )}
-              </div>
-
-              {/* Submit Button */}
-              {isSubmitting || submitSuccess ? (
-                <button
-                  type="button"
-                  disabled
-                  className="w-full font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg bg-gray-400 cursor-not-allowed text-white flex items-center justify-center"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Submitting...
-                    </>
-                  ) : (
-                    <>
-                      <svg className="mr-2 h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      Thank You!
-                    </>
-                  )}
-                </button>
-              ) : (
-                <CTAButton
-                  text={blockContent.cta_text || ''}
-                  onClick={(e) => {
-                    e?.preventDefault();
-                    handleSubmit(e as any);
-                  }}
-                  variant="primary"
-                  colorTokens={{
-                    ...colorTokens,
-                    ctaBg: colorTokens.accent || colorTokens.ctaBg,
-                    ctaHover: colorTokens.accentHover || colorTokens.ctaHover,
-                  }}
-                  sectionId={sectionId}
-                  elementKey="cta_text"
-                  mode={mode}
-                  className="w-full"
-                  size="large"
-                />
-              )}
-
-              {/* Privacy Text */}
-              <EditableAdaptiveText
-                mode={mode}
-                value={blockContent.privacy_text || ''}
-                onEdit={(value) => handleContentUpdate('privacy_text', value)}
-                backgroundType="neutral"
-                colorTokens={colorTokens}
-                variant="body"
-                className="text-gray-200 text-center text-xs"
-                sectionId={sectionId}
-                elementKey="privacy_text"
-                sectionBackground="bg-white"
+            {/* FormRenderer handles input, validation, submission */}
+            {formId && getFormById(formId) && (
+              <FormRenderer
+                form={getFormById(formId)!}
+                userId={pageOwnerId}
+                publishedPageId={publishedPageId}
+                mode="inline"
+                className="mb-4"
               />
-            </form>
+            )}
+
+            {/* Privacy Text */}
+            <EditableAdaptiveText
+              mode={mode}
+              value={blockContent.privacy_text || ''}
+              onEdit={(value) => handleContentUpdate('privacy_text', value)}
+              backgroundType="neutral"
+              colorTokens={colorTokens}
+              variant="body"
+              className="text-gray-500 text-center text-xs"
+              sectionId={sectionId}
+              elementKey="privacy_text"
+              sectionBackground="bg-white"
+            />
 
             {/* Trust Indicators */}
             {(trustItems.length > 0 || mode === 'edit') && (

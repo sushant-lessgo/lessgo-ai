@@ -258,7 +258,8 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
   const handlePublishClick = () => {
     if (!isPublishReady) return;
 
-    const headline = content?.hero?.elements?.headline as any;
+    const heroSectionId = sections.find(id => id.includes('hero'));
+    const headline = heroSectionId ? content[heroSectionId]?.elements?.headline : null;
     const headlineText = headline?.content || headline?.text || headline || '';
     
     const defaultSlug = (headlineText || `page-${Date.now()}`)
@@ -293,6 +294,11 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
         textMuted: 'gray-600'
       };
 
+      // Get hero section ID for title
+      const heroSectionId = sections.find(id => id.includes('hero'));
+      const headline = heroSectionId ? content[heroSectionId]?.elements?.headline : null;
+      const headlineText = headline?.content || headline?.text || (typeof headline === 'string' ? headline : '') || '';
+
       // Publish the page
       const response = await fetch('/api/publish', {
         method: 'POST',
@@ -300,7 +306,7 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
         body: JSON.stringify({
           slug: customSlug,
           htmlContent,
-          title: content.hero?.elements?.headline || title || 'Untitled Page',
+          title: headlineText || title || 'Untitled Page',
           content: { 
             layout: { sections, theme },
             content 
@@ -327,7 +333,7 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
       // Analytics
       posthog?.capture("publish_clicked", {
         slug: customSlug,
-        title: content.hero?.elements?.headline || "",
+        title: headlineText || "",
         hasCTA: isPublishReady,
         fromEdit: true,
       });

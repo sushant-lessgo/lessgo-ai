@@ -333,6 +333,8 @@ export interface LayoutComponentProps {
     pricingModel: import('@/modules/inference/taxonomy').PricingModel;
   };
   manualThemeOverride?: 'warm' | 'cool' | 'neutral'; // ✅ NEW: Manual theme override from store
+  publishedPageId?: string; // For form submissions
+  pageOwnerId?: string; // For form submissions
 }
 
 /**
