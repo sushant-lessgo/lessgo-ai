@@ -20,6 +20,7 @@ module.exports = {
   "max-w-[45rem]",
   "max-w-[50rem]",
   "max-w-[66rem]",
+  "bg-black/70",
   // ✅ Editor UI classes
   'hover:bg-editable-bg',
   'hover:bg-editable-primaryBg',

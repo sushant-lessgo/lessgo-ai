@@ -81,7 +81,7 @@ export default function Minimalist(props: LayoutComponentProps) {
 
         {/* Background Image with Overlay */}
         <div
-          className={`absolute inset-0 w-full h-full cursor-pointer ${mode !== 'preview' ? 'hover:ring-2 hover:ring-blue-400' : ''} transition-all`}
+          className={`absolute inset-0 z-0 w-full h-full cursor-pointer ${mode !== 'preview' ? 'hover:ring-2 hover:ring-blue-400' : ''} transition-all`}
           onMouseUp={(e) => {
             if (mode !== 'preview') {
               e.stopPropagation();
@@ -100,25 +100,28 @@ export default function Minimalist(props: LayoutComponentProps) {
             backgroundRepeat: 'no-repeat'
           }}
         >
+          {/* Optional polish: top light source bloom */}
+
+{/* Optional polish: subtle stage mist */}
+<div
+  className="absolute inset-0 z-20 pointer-events-none"
+  style={{
+    background:
+      "radial-gradient(ellipse at 50% 60%, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 42%, transparent 55%)"
+  }}
+/>
+
           {/* Dark gradient overlay for text readability */}
-           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/60" />
+           <div className="absolute inset-0 z-10 pointer-events-none bg-black/70" />
         </div>
         
 
 
-{/* Non-uniform green glow (center-bright, edges-dark) */}
-<div
-  className="absolute inset-0 mix-blend-screen"
-  style={{
-    background:
-      "radial-gradient(ellipse at center, rgba(0,255,0,0.22) 0%, rgba(0,255,0,0.1) 35%, rgba(0,255,0,0.05) 60%, transparent 75%)"
-  }}
-/>
+
 
         {/* Headline at Top */}
         <div className="relative z-30 p-6 md:p-8 lg:p-12">
           <div className="max-w-2xl mx-auto pt-10">
-
 
 
 
