@@ -20,13 +20,15 @@ interface FormRendererProps {
   publishedPageId?: string;
   pageSlug?: string; // For analytics tracking
   onSubmit?: (data: Record<string, any>) => Promise<void>;
+  sectionId?: string; // For element selection in edit mode
+  submitButtonElementKey?: string; // For element selection in edit mode
 }
 
 interface FormErrors {
   [fieldId: string]: string;
 }
 
-export function FormRenderer({ form, mode = 'inline', className = '', userId, publishedPageId, pageSlug, onSubmit }: FormRendererProps) {
+export function FormRenderer({ form, mode = 'inline', className = '', userId, publishedPageId, pageSlug, onSubmit, sectionId, submitButtonElementKey }: FormRendererProps) {
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -287,6 +289,8 @@ export function FormRenderer({ form, mode = 'inline', className = '', userId, pu
           disabled={isSubmitting}
           className="w-full"
           size="lg"
+          data-section-id={sectionId}
+          data-element-key={submitButtonElementKey}
         >
           {isSubmitting ? (
             <>

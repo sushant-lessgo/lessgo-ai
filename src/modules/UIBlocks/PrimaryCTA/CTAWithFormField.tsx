@@ -400,6 +400,8 @@ export default function CTAWithFormField(props: LayoutComponentProps) {
                 publishedPageId={publishedPageId}
                 mode="inline"
                 className="mb-4"
+                sectionId={sectionId}
+                submitButtonElementKey="cta_text"
               />
             )}
 
