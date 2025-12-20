@@ -3,7 +3,6 @@
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
@@ -22,13 +21,14 @@ interface FormRendererProps {
   onSubmit?: (data: Record<string, any>) => Promise<void>;
   sectionId?: string; // For element selection in edit mode
   submitButtonElementKey?: string; // For element selection in edit mode
+  colorTokens?: any; // Color tokens for styling submit button
 }
 
 interface FormErrors {
   [fieldId: string]: string;
 }
 
-export function FormRenderer({ form, mode = 'inline', className = '', userId, publishedPageId, pageSlug, onSubmit, sectionId, submitButtonElementKey }: FormRendererProps) {
+export function FormRenderer({ form, mode = 'inline', className = '', userId, publishedPageId, pageSlug, onSubmit, sectionId, submitButtonElementKey, colorTokens }: FormRendererProps) {
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -259,11 +259,6 @@ export function FormRenderer({ form, mode = 'inline', className = '', userId, pu
       <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
         {form.fields.map((field) => (
           <div key={field.id} className="space-y-2">
-            <Label htmlFor={field.id} className="text-sm font-medium">
-              {field.label}
-              {field.required && <span className="text-red-500 ml-1">*</span>}
-            </Label>
-            
             {renderField(field)}
             
             {errors[field.id] && (
@@ -287,7 +282,7 @@ export function FormRenderer({ form, mode = 'inline', className = '', userId, pu
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="w-full"
+          className={`w-full ${colorTokens?.ctaBg || colorTokens?.accent || 'bg-primary'} ${colorTokens?.ctaText || 'text-white'} hover:${colorTokens?.ctaHover || colorTokens?.accentHover || 'bg-primary/90'}`}
           size="lg"
           data-section-id={sectionId}
           data-element-key={submitButtonElementKey}

@@ -402,6 +402,7 @@ export default function CTAWithFormField(props: LayoutComponentProps) {
                 className="mb-4"
                 sectionId={sectionId}
                 submitButtonElementKey="cta_text"
+                colorTokens={colorTokens}
               />
             )}
 
