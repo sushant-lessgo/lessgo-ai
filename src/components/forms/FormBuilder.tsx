@@ -29,7 +29,7 @@ const FIELD_TYPES: { value: MVPFormFieldType; label: string; description: string
 export function FormBuilder({ isOpen, onClose, editingFormId }: FormBuilderProps) {
   const {
     forms,
-    createForm,
+    addForm,
     updateForm,
     deleteForm,
     addFormField,
@@ -109,7 +109,7 @@ export function FormBuilder({ isOpen, onClose, editingFormId }: FormBuilderProps
         updateForm(editingFormId, formData as Partial<MVPForm>);
       } else {
         // Create new form
-        createForm?.(`form-${Date.now()}`, formData.name || 'Untitled Form');
+        addForm(formData as Omit<MVPForm, 'id' | 'createdAt' | 'updatedAt'>);
       }
       onClose();
     } catch (error) {

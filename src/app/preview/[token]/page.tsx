@@ -95,36 +95,77 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
 
   // Validate publish readiness
   const isPublishReady = useMemo(() => {
-    // Find the hero section (section ID includes 'hero')
+    // Phase 1: Check hero section CTA
     const heroSectionId = sections.find(id => id.includes('hero'));
     if (!heroSectionId) {
       return false; // No hero section found
     }
-    
+
     const heroContent = content[heroSectionId]?.elements;
     if (!heroContent) {
       return false; // No hero content found
     }
-    
-    // Check if CTA is configured properly
+
+    // Check if hero has CTA configured properly
     // Option 1: Check if cta_text exists and has button configuration
     if (heroContent.cta_text) {
       // Check if button config exists in metadata
       const buttonConfig = heroContent.cta_text?.metadata?.buttonConfig;
       if (buttonConfig) {
-        return !!(buttonConfig.type === 'link' ? buttonConfig.url : buttonConfig.formId);
+        if (buttonConfig.type === 'link' ? buttonConfig.url : buttonConfig.formId) {
+          return true;
+        }
       }
-      
+
       // Check legacy format (cta_url or cta_embed directly in elements)
-      return !!(heroContent.cta_url || heroContent.cta_embed);
+      if (heroContent.cta_url || heroContent.cta_embed) {
+        return true;
+      }
     }
-    
-    // Option 2: Check if section has cta configuration
-    const sectionCta = (content[heroSectionId] as any)?.cta;
-    if (sectionCta) {
-      return !!(sectionCta.type === 'link' ? sectionCta.url : sectionCta.formId);
+
+    // Option 2: Check if hero section has cta configuration
+    const heroSectionCta = (content[heroSectionId] as any)?.cta;
+    if (heroSectionCta) {
+      if (heroSectionCta.type === 'link' ? heroSectionCta.url : heroSectionCta.formId) {
+        return true;
+      }
     }
-    
+
+    // Phase 2: If hero has no valid CTA, check CTA section
+    const ctaSectionId = sections.find(id => id.includes('cta'));
+    if (!ctaSectionId) {
+      return false; // No CTA section found
+    }
+
+    const ctaContent = content[ctaSectionId]?.elements;
+    if (!ctaContent) {
+      return false; // No CTA section content found
+    }
+
+    // Check if CTA section has CTA configured (same 3 formats)
+    // Option 1: cta_text with button configuration
+    if (ctaContent.cta_text) {
+      const buttonConfig = ctaContent.cta_text?.metadata?.buttonConfig;
+      if (buttonConfig) {
+        if (buttonConfig.type === 'link' ? buttonConfig.url : buttonConfig.formId) {
+          return true;
+        }
+      }
+
+      // Check legacy format
+      if (ctaContent.cta_url || ctaContent.cta_embed) {
+        return true;
+      }
+    }
+
+    // Option 2: Section-level cta
+    const ctaSectionCta = (content[ctaSectionId] as any)?.cta;
+    if (ctaSectionCta) {
+      if (ctaSectionCta.type === 'link' ? ctaSectionCta.url : ctaSectionCta.formId) {
+        return true;
+      }
+    }
+
     return false;
   }, [sections, content]);
 
@@ -391,7 +432,7 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
                 </TooltipTrigger>
                 {!isPublishReady && (
                   <TooltipContent side="top">
-                    <p>Configure CTA button before publishing</p>
+                    <p>Configure CTA button in hero or CTA section before publishing</p>
                   </TooltipContent>
                 )}
               </Tooltip>
