@@ -227,7 +227,6 @@ export default function Announcement(props: LayoutComponentProps) {
             variant="primary"
             sectionId={sectionId}
             elementKey="cta_text"
-            mode={mode}
             size="large"
           />
         </div>
