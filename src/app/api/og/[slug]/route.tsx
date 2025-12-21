@@ -2,7 +2,7 @@ import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export const runtime = 'edge';
+// Using Node.js runtime instead of edge because Prisma doesn't support edge runtime
 
 const COLOR_MAP: Record<string, string> = {
   blue: '#3b82f6',
