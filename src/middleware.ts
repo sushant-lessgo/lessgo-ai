@@ -17,6 +17,7 @@ const isPublicRoute = createRouteMatcher([
   '/api/upload-image',
   '/api/admin/migrate-project',
   '/api/admin/transfer-ownership',
+  '/api/forms/submit',
   '/p/:slug',
   '/thanks',
   '/privacy',
