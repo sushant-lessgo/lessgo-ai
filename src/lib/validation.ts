@@ -44,6 +44,7 @@ export const PublishSchema = z.object({
   themeValues: z.record(z.string(), z.unknown()).optional(),
   tokenId: z.string().min(1).max(100).regex(/^[a-zA-Z0-9_-]+$/, 'Invalid token format'),
   inputText: z.string().max(5000).optional(),
+  previewImage: z.string().url('Must be a valid URL').optional(),
 });
 
 // A05: Security Misconfiguration - Rate limiting data

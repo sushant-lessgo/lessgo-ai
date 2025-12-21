@@ -35,7 +35,7 @@ async function publishHandler(req: NextRequest) {
       );
     }
     
-    const { slug, htmlContent, title, content, themeValues, tokenId, inputText } = validationResult.data;
+    const { slug, htmlContent, title, content, themeValues, tokenId, inputText, previewImage } = validationResult.data;
     
     // A04: Insecure Design - Validate slug security
     const slugValidation = validateSlug(slug);
@@ -68,6 +68,7 @@ async function publishHandler(req: NextRequest) {
           content: content as any,
           themeValues: themeValues as any,
           projectId: project?.id || null,
+          previewImage: previewImage || null,
           updatedAt: new Date()
         }
       });
@@ -98,7 +99,8 @@ async function publishHandler(req: NextRequest) {
           title,
           content: content as any,
           themeValues: themeValues as any,
-          projectId: project?.id || null
+          projectId: project?.id || null,
+          previewImage: previewImage || null
         }
       });
     }
