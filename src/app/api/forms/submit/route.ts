@@ -29,9 +29,21 @@ async function formSubmitHandler(request: NextRequest) {
     
     const { formId, data, userId, publishedPageId } = validationResult.data;
 
+    // Validate required fields early
+    if (!userId) {
+      console.warn('Form submission missing userId:', {
+        formId,
+        timestamp: new Date().toISOString()
+      });
+      return createSecureResponse(
+        { error: 'Configuration error: User ID required' },
+        400
+      );
+    }
+
     // Get client info
-    const ipAddress = request.headers.get('x-forwarded-for') || 
-                     request.headers.get('x-real-ip') || 
+    const ipAddress = request.headers.get('x-forwarded-for') ||
+                     request.headers.get('x-real-ip') ||
                      'unknown';
     const userAgent = request.headers.get('user-agent') || 'unknown';
 
@@ -137,6 +149,14 @@ async function formSubmitHandler(request: NextRequest) {
           },
         });
 
+        // Log successful saves for debugging (production-safe)
+        console.log('FormSubmission saved:', {
+          submissionId: submission.id,
+          formId,
+          userId: userId.substring(0, 8) + '...', // Anonymized
+          timestamp: new Date().toISOString()
+        });
+
         // A09: Security Logging - Safe success logging
         if (process.env.NODE_ENV !== 'production') {
           // Log success only in development
@@ -150,21 +170,39 @@ async function formSubmitHandler(request: NextRequest) {
         });
 
       } catch (dbError) {
-        // A09: Security Logging - Safe database error handling
-        if (process.env.NODE_ENV !== 'production') {
-          // Log database errors only in development
-        }
-        // Continue without database storage
+        // Production-safe error logging with details
+        console.error('FormSubmission DB Error:', {
+          errorType: dbError instanceof Error ? dbError.constructor.name : 'Unknown',
+          errorMsg: dbError instanceof Error ? dbError.message : 'Unknown error',
+          hasUserId: !!userId,
+          hasPublishedPageId: !!publishedPageId,
+          formId,
+          timestamp: new Date().toISOString()
+        });
+
+        // Return actual error instead of fake success
+        return createSecureResponse(
+          {
+            error: 'Failed to save form submission',
+            message: 'Please try again. If the problem persists, contact support.'
+          },
+          500
+        );
       }
     }
 
-    // Fallback: return success without database storage
-    return createSecureResponse({
-      success: true,
-      message: 'Form submitted successfully',
-      submissionId: `sub_${Date.now()}`,
-      integrations: integrationResults,
+    // Fallback: No userId provided, can't store in database
+    console.warn('Form submission without userId - cannot store in database:', {
+      formId,
+      timestamp: new Date().toISOString()
     });
+    return createSecureResponse(
+      {
+        error: 'Configuration error: Unable to save submission',
+        message: 'Please contact support.'
+      },
+      500
+    );
 
   } catch (error) {
     // A09: Security Logging - Safe error handling
