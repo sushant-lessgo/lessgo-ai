@@ -61,7 +61,7 @@ export const PLAN_CONFIGS: Record<PlanTier, PlanConfig> = {
     },
     credits: 30,
     limits: {
-      publishedPages: 1,
+      publishedPages: 20,
       draftProjects: 3,
       customDomains: 0,
       formSubmissions: 100,

@@ -38,25 +38,40 @@ const SimpleFooter: React.FC<LayoutComponentProps> = (props) => {
       mode={mode}
       className="bg-gray-50 border-t"
     >
-      <div className="flex items-center justify-center gap-2 py-2">
-        <HeaderLogo 
-          mode={mode}
-          className="h-2 w-auto object-contain"
-        />
-        <div className="text-sm text-gray-600">
-          <EditableAdaptiveText
+      <div className="flex flex-col items-center gap-2 py-2">
+        <div className="flex items-center gap-2">
+          <HeaderLogo
             mode={mode}
-            value={blockContent.copyright || ''}
-            onEdit={(value) => handleContentUpdate('copyright', value)}
-            backgroundType={backgroundType}
-            colorTokens={colorTokens}
-            variant="body"
-            className="text-sm"
-            placeholder="Copyright notice"
-            sectionId={sectionId}
-            elementKey="copyright"
-            sectionBackground={sectionBackground}
+            className="h-2 w-auto object-contain"
           />
+          <div className="text-sm text-gray-600">
+            <EditableAdaptiveText
+              mode={mode}
+              value={blockContent.copyright || ''}
+              onEdit={(value) => handleContentUpdate('copyright', value)}
+              backgroundType={backgroundType}
+              colorTokens={colorTokens}
+              variant="body"
+              className="text-sm"
+              placeholder="Copyright notice"
+              sectionId={sectionId}
+              elementKey="copyright"
+              sectionBackground={sectionBackground}
+            />
+          </div>
+        </div>
+
+        <div className="text-lg text-gray-600 pt-2">
+          Built with{' '}
+          <a
+            href="https://lessgo.ai"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:text-blue-700 transition-colors"
+            onClick={(e) => mode !== 'preview' ? e.preventDefault() : undefined}
+          >
+            Lessgo.ai
+          </a>
         </div>
       </div>
     </LayoutSection>

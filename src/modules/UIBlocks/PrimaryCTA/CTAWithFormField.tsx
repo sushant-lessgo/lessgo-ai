@@ -377,7 +377,7 @@ export default function CTAWithFormField(props: LayoutComponentProps) {
           </div>
 
           {/* Right Column - Form */}
-          <div className="bg-gray-100 rounded-2xl p-8 shadow-xl border border-gray-200">
+          <div className="bg-gray-100 rounded-2xl p-8 shadow-xl border border-gray-200 mt-12 lg:mt-0">
             {/* Form Label */}
             <EditableAdaptiveText
               mode={mode}
