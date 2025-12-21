@@ -8,6 +8,7 @@ import { z } from 'zod';
 
 // Force dynamic rendering - prevent caching to avoid 405 errors
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;  // Prevent any caching at any layer
 export const runtime = 'nodejs';
 
 interface FormSubmissionRequest {
@@ -18,8 +19,10 @@ interface FormSubmissionRequest {
 }
 
 // Diagnostic logging to identify failing request types
-function logRequestDetails(request: NextRequest) {
-  console.log('🔍 Form Submit Request:', {
+function logRequestDetails(request: NextRequest): string {
+  const requestId = crypto.randomUUID();
+  console.log('🔍 Form Submit Handler REACHED:', {
+    requestId,
     method: request.method,
     userAgent: request.headers.get('user-agent'),
     referer: request.headers.get('referer'),
@@ -28,11 +31,13 @@ function logRequestDetails(request: NextRequest) {
     contentType: request.headers.get('content-type'),
     timestamp: new Date().toISOString(),
   });
+  return requestId;
 }
 
 async function formSubmitHandler(request: NextRequest) {
   // Log all request details first for diagnosis
-  logRequestDetails(request);
+  const requestId = logRequestDetails(request);
+  console.log(`[${requestId}] Handler executing...`);
 
   try {
     const body = await request.json();

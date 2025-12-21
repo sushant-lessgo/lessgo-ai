@@ -56,23 +56,28 @@ export const sanitizeHtmlContent = (html: string): string => {
 
 // A09: Security Logging - Create secure response with logging
 export const createSecureResponse = (
-  data: any, 
-  status: number = 200, 
+  data: any,
+  status: number = 200,
   logData?: any
 ): NextResponse => {
   const response = NextResponse.json(data, { status });
-  
+
   // Add security headers
   const headers = getSecurityHeaders();
   Object.entries(headers).forEach(([key, value]) => {
     response.headers.set(key, value);
   });
-  
+
+  // Prevent all caching - critical for API routes
+  response.headers.set('Cache-Control', 'no-store, no-cache, max-age=0, must-revalidate, proxy-revalidate');
+  response.headers.set('Pragma', 'no-cache');
+  response.headers.set('Expires', '0');
+
   // Log safely in development
   if (process.env.NODE_ENV !== 'production' && logData) {
     // Only log in development
   }
-  
+
   return response;
 };
 

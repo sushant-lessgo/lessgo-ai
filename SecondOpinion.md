@@ -1,105 +1,95 @@
-I agree with **parts** of it (especially the “GET isn’t exported ⇒ GET returns 405” and “defense-in-depth cache headers”), but a few key claims in the root-cause story are **very likely wrong / unproven**.
+This new log changes the story a lot.
 
-## What I agree with
+### What your failing log proves
 
-### ✅ 1) “GET handler not exported” can absolutely cause 405 for GET
+* The **failed request is POST** `/api/forms/submit` (not GET).
+* On failures, Vercel **does not invoke your function** (no “Function Invocation” block).
+* Instead it returns a **cached 405** very fast (48ms), with a **cache key `/404`**.
 
-In Next.js App Router route handlers, if you define a `GET()` but don’t export it, Next won’t register it. Any GET request to that route will be **405 Method Not Allowed**.
+That means the “GET handler not exported ⇒ mobile POST becomes GET ⇒ 405” explanation **doesn’t fit the evidence**.
 
-So **Fix 1 (export GET)** is valid *if you truly expect GET traffic to that route*.
-
-### ✅ 2) Adding “no-store” on API responses is good hardening
-
-If your endpoint ever receives GET/HEAD (or if you have any config GET endpoint), adding:
-
-* `Cache-Control: no-store` (+ friends)
-* and/or doing it at `vercel.json`
-
-is good “belt & suspenders”. This also helps prevent accidental caching of **error responses**.
+If “GET not exported” were the main issue, you’d see **GET 405**. You’re seeing **POST 405** served from **cache**, with a weird cache key.
 
 ---
 
-## What I *don’t* agree with (or would not treat as root cause)
+## What I think is actually happening (most likely)
 
-### ❌ “Mobile browsers convert POST → GET due to flakiness / availability checks”
+Some subset of requests are being handled by Vercel’s **edge/static cache path** (or a stale routing decision), where Vercel thinks this route resolves to a generic **/404 cache entry** (key `/404`) and returns **405** because POST isn’t allowed for that cached/static response.
 
-Browsers generally **do not** mutate a POST into a GET as a “retry.” That would violate HTTP semantics and break lots of real apps.
+In plain terms:
 
-If you’re seeing cached 405s and the log says “cache,” the more likely reality is:
+> Sometimes the request reaches your serverless function (works).
+> Sometimes it never reaches it and gets answered by an edge cached “not-found/static-ish” response (405).
 
-* the failing request was **actually a GET/HEAD** (or **OPTIONS**), or
-* you have an **intermediate layer** (Service Worker, proxy, prefetcher, link preview, speculative loading) issuing GET/HEAD, or
-* the submission is happening across **origins** in some cases, triggering **OPTIONS preflight**.
+That’s exactly consistent with:
 
-### ⚠️ The “Vercel Edge caches 405 for 30–60 seconds” claim is plausible but needs proof
-
-CDNs can cache unexpected things if headers allow it, but for an **API POST** this is unusual. If Vercel logs show “cache,” that strongly suggests the request method on failures is **GET/HEAD**, not POST.
-
-**Actionable check:** in the failing log entries, confirm the **HTTP method**. If you don’t currently log it, add it.
+* **Success log:** routed to Washington (iad1) → Function Invocation → 200
+* **Failure log:** no routing to iad1 → Cache → 405 with key `/404`
 
 ---
 
-## The #1 thing I think you’re missing
+## So do I agree with your original analysis?
 
-### ✅ OPTIONS (preflight) handling — especially if any cross-origin scenario exists
+### ✅ Agree
 
-If *any* of these are true:
+* Adding **no-store** headers is still a good defensive move.
+* Adding Vercel-level headers for `/api/forms/*` is also good defense-in-depth.
 
-* the form runs on one subdomain and posts to another,
-* you embed the form somewhere else,
-* you do anything that makes the request cross-origin,
+### ❌ Disagree (based on your logs)
 
-then the browser can send an **OPTIONS preflight** first. If your route doesn’t handle `OPTIONS`, you can get **405** on mobile (and desktop too, depending on conditions).
-
-Even if you believe it’s “same origin,” it’s worth verifying from the failing devices.
-
-**Recommendation:** at minimum, ensure OPTIONS is handled cleanly if there’s any chance of CORS/preflight.
+* “Mobile converts POST → GET” — not supported.
+* “GET not exported is the critical issue” — your failures are **POST 405**, so exporting GET won’t fix that.
 
 ---
 
-## Improvements to your fix plan (practical tweaks)
+## What I’d do next (high-signal steps)
 
-### 1) Don’t add GET to `/submit` just to “make Safari happy”
+### 1) Force this route to be treated as dynamic + uncached
 
-If `/api/forms/submit` is truly a submit endpoint, I’d rather:
+In `src/app/api/forms/submit/route.ts`, add:
 
-* keep it POST-only,
-* make sure **GET/HEAD** return a **non-cacheable** 405 with clear body,
-* and investigate why GET/HEAD is hitting it in the first place.
+```ts
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+```
 
-If you actually need a “form configuration endpoint,” give it a clean separate route like:
+And ensure every response includes:
 
-* `/api/forms/config?formId=...` (GET)
-* `/api/forms/submit` (POST)
+* `Cache-Control: no-store` (at minimum)
 
-### 2) Add method + UA logging (this will settle the debate instantly)
+This helps prevent any accidental caching logic around the route.
 
-Inside the handler, log:
+### 2) Log whether the failing requests ever reach your handler
 
-* `request.method`
-* `request.headers.get('user-agent')`
-* `request.headers.get('referer')`
-* maybe a request-id
+Inside `POST` handler, log a unique marker + request id (and user-agent).
 
-Then you’ll know whether failures are GET/HEAD/OPTIONS.
+If you still see failures **with no handler logs**, you’ve confirmed it’s **routing/caching before your function**, not your code.
 
-### 3) `cache: 'no-store'` on fetch is mostly irrelevant for POST
+### 3) Check middleware matcher + behavior for `/api/*`
 
-In browsers, `cache: 'no-store'` mainly affects caching behavior for GET. Your submit is POST, so this isn’t doing much. Not harmful, just not a real lever.
+Since your logs show **Middleware 200** even for failing requests, ensure your middleware isn’t:
 
-### 4) `credentials: 'include'` is only needed cross-site
+* rewriting,
+* returning a response for some edge case,
+* or doing something different for iOS Safari.
 
-For same-origin fetch, cookies are already sent by default (`same-origin`). If you’re cross-origin and need cookies, you must also set server CORS headers correctly (`Access-Control-Allow-Credentials`, specific origin, etc.). Otherwise this won’t fix auth issues.
+Key check: does your middleware run on `/api/:path*`? If yes, consider excluding API routes from middleware completely unless you truly need it.
 
-### 5) Retry-on-405 is a band-aid
+### 4) Capture `x-vercel-cache` and response headers on the failing device
 
-It can improve UX, but it can also hide the true issue (e.g., OPTIONS failing, wrong URL, SW caching). I’d treat it as last resort.
+On a failing iPhone Safari submission, inspect response headers (or temporarily log them client-side) for:
+
+* `x-vercel-cache` (HIT/MISS/BYPASS)
+* `cache-control`
+* any redirect / rewrite headers
+
+This will confirm what layer answered the request.
 
 ---
 
-## My verdict
+## What to change in your fix plan
 
-* **Yes**: Missing exported GET can explain 405s **if** GET is actually arriving.
-* **Yes**: Add `Cache-Control: no-store` as defense-in-depth.
-* **No / not proven**: “mobile converts POST to GET” as the root cause.
-* **Very likely missing**: verify **what method** is failing, and check for **OPTIONS/CORS** and other sources of unexpected GET/HEAD.
+* **Remove “Fix 1: Export GET handler” as “critical.”** It’s not addressing POST 405.
+* Keep **cache-prevention headers** (Fix 2 + vercel.json) ✅
+* Client `cache: 'no-store'` is fine but it’s not the main lever for POST.
+* Retry-on-405 is still a last-resort UX patch, not root-cause.
