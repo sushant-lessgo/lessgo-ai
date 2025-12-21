@@ -27,13 +27,5 @@
         }
       ]
     }
-  ],
-  "routes": [
-    {
-      "src": "/api/forms/.*",
-      "headers": {
-        "Cache-Control": "no-store"
-      }
-    }
   ]
 }
