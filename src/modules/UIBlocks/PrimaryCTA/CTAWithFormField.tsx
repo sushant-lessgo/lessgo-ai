@@ -147,7 +147,7 @@ export default function CTAWithFormField(props: LayoutComponentProps) {
           {
             id: 'email',
             type: 'email',
-            label: blockContent.form_label || 'Work Email Address',
+            label: 'Email',
             placeholder: blockContent.placeholder_text || 'Enter your work email',
             required: true
           }
