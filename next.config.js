@@ -54,6 +54,10 @@ const nextConfig = {
         hostname: '**',
         pathname: '/uploads/**',
       },
+      {
+        protocol: 'https',
+        hostname: '**.public.blob.vercel-storage.com',
+      },
     ],
   },
   // Experimental features disabled for stability

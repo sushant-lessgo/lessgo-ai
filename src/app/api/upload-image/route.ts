@@ -2,10 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
 import sharp from 'sharp';
-import { writeFile, mkdir } from 'fs/promises';
-import { existsSync } from 'fs';
-import path from 'path';
 import { nanoid } from 'nanoid';
+import { put } from '@vercel/blob';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
@@ -96,48 +94,56 @@ export async function POST(request: NextRequest) {
     // Generate unique filename
     const timestamp = Date.now();
     const uniqueId = nanoid(10);
-    const filename = `${timestamp}-${uniqueId}.webp`;
 
-    // Create upload directory if it doesn't exist
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads', tokenId);
-    if (!existsSync(uploadDir)) {
-      await mkdir(uploadDir, { recursive: true });
-    }
+    // Process image based on type
+    let processedBuffer: Buffer;
+    let filename: string;
+    let contentType: string;
 
-    const filePath = path.join(uploadDir, filename);
-
-    // Process image with Sharp (resize + optimize)
-    let processedImage;
     if (file.type === 'image/svg+xml') {
-      // SVG - save as-is (no optimization)
-      await writeFile(filePath.replace('.webp', '.svg'), buffer);
-      const svgUrl = `/uploads/${tokenId}/${timestamp}-${uniqueId}.svg`;
-      return NextResponse.json({
-        success: true,
-        url: svgUrl,
-        metadata: {
-          format: 'svg',
-          size: file.size,
-        },
-      });
+      // SVG - save as-is
+      processedBuffer = buffer;
+      filename = `${timestamp}-${uniqueId}.svg`;
+      contentType = 'image/svg+xml';
     } else {
       // Raster images - resize and convert to WebP
       const image = sharp(buffer);
       const metadata = await image.metadata();
 
-      processedImage = image.resize(MAX_WIDTH, null, {
-        withoutEnlargement: true,
-        fit: 'inside',
-      });
+      const processedImage = image
+        .resize(MAX_WIDTH, null, {
+          withoutEnlargement: true,
+          fit: 'inside',
+        })
+        .webp({ quality: WEBP_QUALITY });
 
-      processedImage = processedImage.webp({ quality: WEBP_QUALITY });
+      processedBuffer = await processedImage.toBuffer();
+      filename = `${timestamp}-${uniqueId}.webp`;
+      contentType = 'image/webp';
+    }
 
-      await processedImage.toFile(filePath);
+    // Check for dev mode without blob token (fallback to filesystem)
+    const isDev = process.env.NODE_ENV === 'development';
+    const hasBlob = !!process.env.BLOB_READ_WRITE_TOKEN;
 
-      // Get final image metadata
-      const finalMetadata = await sharp(filePath).metadata();
+    if (isDev && !hasBlob) {
+      // Fallback to filesystem for local dev
+      const { writeFile, mkdir } = await import('fs/promises');
+      const { existsSync } = await import('fs');
+      const path = await import('path');
 
+      const uploadDir = path.join(process.cwd(), 'public', 'uploads', tokenId);
+      if (!existsSync(uploadDir)) {
+        await mkdir(uploadDir, { recursive: true });
+      }
+
+      const filePath = path.join(uploadDir, filename);
+      await writeFile(filePath, processedBuffer);
+
+      const finalMetadata = await sharp(processedBuffer).metadata();
       const imageUrl = `/uploads/${tokenId}/${filename}`;
+
+      console.log('🔵 [UPLOAD] Dev mode: Saved to filesystem:', imageUrl);
 
       return NextResponse.json({
         success: true,
@@ -145,11 +151,35 @@ export async function POST(request: NextRequest) {
         metadata: {
           width: finalMetadata.width,
           height: finalMetadata.height,
-          size: finalMetadata.size,
-          format: 'webp',
+          size: processedBuffer.length,
+          format: file.type === 'image/svg+xml' ? 'svg' : 'webp',
         },
       });
     }
+
+    // Upload to Vercel Blob (production or dev with token)
+    console.log('🔵 [UPLOAD] Uploading to Vercel Blob...');
+    const blob = await put(`uploads/${tokenId}/${filename}`, processedBuffer, {
+      access: 'public',
+      contentType,
+      addRandomSuffix: false,
+    });
+
+    console.log('🔵 [UPLOAD] Upload successful:', blob.url);
+
+    // Get final metadata
+    const finalMetadata = await sharp(processedBuffer).metadata();
+
+    return NextResponse.json({
+      success: true,
+      url: blob.url,
+      metadata: {
+        width: finalMetadata.width,
+        height: finalMetadata.height,
+        size: processedBuffer.length,
+        format: file.type === 'image/svg+xml' ? 'svg' : 'webp',
+      },
+    });
   } catch (error) {
     console.error('🔴 [UPLOAD] Image upload error:', error);
     console.error('🔴 [UPLOAD] Error stack:', error instanceof Error ? error.stack : 'No stack');
