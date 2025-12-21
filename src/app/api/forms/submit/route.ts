@@ -6,6 +6,10 @@ import { createSecureResponse } from '@/lib/security';
 import { withFormRateLimit } from '@/lib/rateLimit';
 import { z } from 'zod';
 
+// Force dynamic rendering - prevent caching to avoid 405 errors
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 interface FormSubmissionRequest {
   formId: string;
   data: Record<string, any>;
