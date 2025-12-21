@@ -1,151 +1,105 @@
-Perfect — this clarifies it completely.
-Now we can be **100% precise** about what’s wrong and how to fix it **without breaking your global background system**.
+I agree with **parts** of it (especially the “GET isn’t exported ⇒ GET returns 405” and “defense-in-depth cache headers”), but a few key claims in the root-cause story are **very likely wrong / unproven**.
+
+## What I agree with
+
+### ✅ 1) “GET handler not exported” can absolutely cause 405 for GET
+
+In Next.js App Router route handlers, if you define a `GET()` but don’t export it, Next won’t register it. Any GET request to that route will be **405 Method Not Allowed**.
+
+So **Fix 1 (export GET)** is valid *if you truly expect GET traffic to that route*.
+
+### ✅ 2) Adding “no-store” on API responses is good hardening
+
+If your endpoint ever receives GET/HEAD (or if you have any config GET endpoint), adding:
+
+* `Cache-Control: no-store` (+ friends)
+* and/or doing it at `vercel.json`
+
+is good “belt & suspenders”. This also helps prevent accidental caching of **error responses**.
 
 ---
 
-## The real root cause (now confirmed)
+## What I *don’t* agree with (or would not treat as root cause)
 
-Even in **preview mode**, your hero `<section>` **always has a primary background applied**:
+### ❌ “Mobile browsers convert POST → GET due to flakiness / availability checks”
 
-```html
-<section
-  ...
-  data-background-type="primary"
-  style="background: radial-gradient(...)"
->
-```
+Browsers generally **do not** mutate a POST into a GET as a “retry.” That would violate HTTP semantics and break lots of real apps.
 
-Your image is **NOT the section background**.
-It’s just an **absolutely positioned child**.
+If you’re seeing cached 405s and the log says “cache,” the more likely reality is:
 
-👉 Result:
+* the failing request was **actually a GET/HEAD** (or **OPTIONS**), or
+* you have an **intermediate layer** (Service Worker, proxy, prefetcher, link preview, speculative loading) issuing GET/HEAD, or
+* the submission is happening across **origins** in some cases, triggering **OPTIONS preflight**.
 
-* Section background (primary gradient) **always exists**
-* Image sits *on top* of it
-* Any padding / layout / min-height mismatch = visible background
-* On large screens, scrollbars, zoom, editor wrappers → background leaks
+### ⚠️ The “Vercel Edge caches 405 for 30–60 seconds” claim is plausible but needs proof
 
-This is why the issue **cannot be fixed with padding, z-index, or min-h tweaks** anymore.
+CDNs can cache unexpected things if headers allow it, but for an **API POST** this is unusual. If Vercel logs show “cache,” that strongly suggests the request method on failures is **GET/HEAD**, not POST.
+
+**Actionable check:** in the failing log entries, confirm the **HTTP method**. If you don’t currently log it, add it.
 
 ---
 
-## Key architectural rule (important for Lessgo.ai)
+## The #1 thing I think you’re missing
 
-> **If a section uses a full-bleed image hero, the image must become the section background.**
+### ✅ OPTIONS (preflight) handling — especially if any cross-origin scenario exists
 
-A hero **cannot** coexist with a non-transparent background system underneath it.
+If *any* of these are true:
 
----
+* the form runs on one subdomain and posts to another,
+* you embed the form somewhere else,
+* you do anything that makes the request cross-origin,
 
-## ✅ Correct solution (clean, scalable, future-proof)
+then the browser can send an **OPTIONS preflight** first. If your route doesn’t handle `OPTIONS`, you can get **405** on mobile (and desktop too, depending on conditions).
 
-### Step 1: Tell the background system to “stand down” for image heroes
+Even if you believe it’s “same origin,” it’s worth verifying from the failing devices.
 
-You already have:
-
-* `data-section-type="Minimalist"`
-* `data-layout="minimalist"`
-
-Use that.
-
-### In `LayoutSection` (or background resolver)
-
-Add a condition:
-
-```ts
-const shouldDisableBackground =
-  sectionType === "Minimalist" ||
-  layout === "hero" ||
-  backgroundType === "image";
-```
-
-Then:
-
-```tsx
-style={{
-  background: shouldDisableBackground
-    ? "transparent"
-    : resolvedBackgroundGradient
-}}
-```
-
-✅ This keeps **primary/secondary system intact**
-✅ Only heroes opt out
+**Recommendation:** at minimum, ensure OPTIONS is handled cleanly if there’s any chance of CORS/preflight.
 
 ---
 
-## Step 2: Promote image → section background (this is crucial)
+## Improvements to your fix plan (practical tweaks)
 
-Instead of this:
+### 1) Don’t add GET to `/submit` just to “make Safari happy”
 
-```tsx
-<div className="absolute inset-0" style={{ backgroundImage: `url(...)` }} />
-```
+If `/api/forms/submit` is truly a submit endpoint, I’d rather:
 
-Do this:
+* keep it POST-only,
+* make sure **GET/HEAD** return a **non-cacheable** 405 with clear body,
+* and investigate why GET/HEAD is hitting it in the first place.
 
-```tsx
-<LayoutSection
-  ...
-  className="!p-0 min-h-[100svh] overflow-hidden"
-  style={{
-    backgroundImage: `
-      linear-gradient(to bottom,
-        rgba(0,0,0,0.6),
-        rgba(0,0,0,0.4),
-        rgba(0,0,0,0.6)
-      ),
-      url("${encodeURI(imageSrc)}")
-    `,
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    backgroundRepeat: "no-repeat"
-  }}
->
-```
+If you actually need a “form configuration endpoint,” give it a clean separate route like:
 
-Then **delete the absolute image div entirely**.
+* `/api/forms/config?formId=...` (GET)
+* `/api/forms/submit` (POST)
 
----
+### 2) Add method + UA logging (this will settle the debate instantly)
 
-## Why this instantly fixes everything
+Inside the handler, log:
 
-* No background underneath → no color bleed
-* No dependency on inner container height
-* No padding leaks
-* No editor wrapper issues
-* Works in preview, publish, export, mobile, embeds
+* `request.method`
+* `request.headers.get('user-agent')`
+* `request.headers.get('referer')`
+* maybe a request-id
 
-This is how **Webflow, Framer, and high-end CMSes do heroes**.
+Then you’ll know whether failures are GET/HEAD/OPTIONS.
+
+### 3) `cache: 'no-store'` on fetch is mostly irrelevant for POST
+
+In browsers, `cache: 'no-store'` mainly affects caching behavior for GET. Your submit is POST, so this isn’t doing much. Not harmful, just not a real lever.
+
+### 4) `credentials: 'include'` is only needed cross-site
+
+For same-origin fetch, cookies are already sent by default (`same-origin`). If you’re cross-origin and need cookies, you must also set server CORS headers correctly (`Access-Control-Allow-Credentials`, specific origin, etc.). Otherwise this won’t fix auth issues.
+
+### 5) Retry-on-405 is a band-aid
+
+It can improve UX, but it can also hide the true issue (e.g., OPTIONS failing, wrong URL, SW caching). I’d treat it as last resort.
 
 ---
 
-## Step 3 (recommended): codify this as a rule
+## My verdict
 
-In your system:
-
-> **Rule:**
-> Any section that declares `image background ownership` must:
->
-> * Disable base background system
-> * Own the section background fully
-
-This will save you **dozens of future bugs**.
-
----
-
-## TL;DR
-
-You’re fighting the system because:
-
-* The hero image is a *child*
-* The background system is the *parent*
-
-Flip that relationship.
-
-Once the **section owns the image**, the problem disappears permanently.
-
-If you want, next I can:
-
-* Refactor `LayoutSection` to support `backgroundKind: "color" | "image"`
-* Or design a **HeroBase** abstraction so all hero variants behave correctly by default
+* **Yes**: Missing exported GET can explain 405s **if** GET is actually arriving.
+* **Yes**: Add `Cache-Control: no-store` as defense-in-depth.
+* **No / not proven**: “mobile converts POST to GET” as the root cause.
+* **Very likely missing**: verify **what method** is failing, and check for **OPTIONS/CORS** and other sources of unexpected GET/HEAD.

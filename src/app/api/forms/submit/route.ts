@@ -17,8 +17,23 @@ interface FormSubmissionRequest {
   publishedPageId?: string;
 }
 
+// Diagnostic logging to identify failing request types
+function logRequestDetails(request: NextRequest) {
+  console.log('🔍 Form Submit Request:', {
+    method: request.method,
+    userAgent: request.headers.get('user-agent'),
+    referer: request.headers.get('referer'),
+    origin: request.headers.get('origin'),
+    host: request.headers.get('host'),
+    contentType: request.headers.get('content-type'),
+    timestamp: new Date().toISOString(),
+  });
+}
 
 async function formSubmitHandler(request: NextRequest) {
+  // Log all request details first for diagnosis
+  logRequestDetails(request);
+
   try {
     const body = await request.json();
     
