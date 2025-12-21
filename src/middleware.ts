@@ -30,12 +30,15 @@ export default clerkMiddleware(async (auth, req) => {
   // Handle subdomain routing for published pages
   if (host && host.includes('.lessgo.ai')) {
     const subdomain = host.split('.')[0]
-    
+
     // Skip www and main domain
     if (subdomain && subdomain !== 'www' && subdomain !== 'lessgo') {
-      // Rewrite subdomain requests to /p/[slug] route
-      url.pathname = `/p/${subdomain}`
-      return NextResponse.rewrite(url)
+      // Don't rewrite API routes - they need to go through normally
+      if (!url.pathname.startsWith('/api/')) {
+        // Rewrite subdomain requests to /p/[slug] route
+        url.pathname = `/p/${subdomain}`
+        return NextResponse.rewrite(url)
+      }
     }
   }
   
