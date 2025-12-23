@@ -27,7 +27,7 @@ const CONTENT_SCHEMA = {
   },
   minimalist_hero_image: {
     type: 'string' as const,
-    default: '/Dusseldorf-event.jpg'
+    default: '/Dusseldorf-event.avif'
   }
 };
 
@@ -63,7 +63,7 @@ export default function Minimalist(props: LayoutComponentProps) {
     imageValue === '';
   const imageSrc = isValidImagePath && imageValue !== ''
     ? imageValue
-    : '/Dusseldorf-event.jpg';
+    : '/Dusseldorf-event.avif';
 
   return (
     <LayoutSection
