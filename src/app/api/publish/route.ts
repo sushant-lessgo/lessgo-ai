@@ -7,9 +7,26 @@ import { PublishSchema, sanitizeForLogging } from '@/lib/validation';
 import { createSecureResponse, validateSlug, sanitizeHtmlContent, verifyProjectAccess } from '@/lib/security';
 import { withPublishRateLimit } from '@/lib/rateLimit';
 import { getUserPlan, checkLimit } from '@/lib/planManager';
+import { generateThemeCSS } from '@/lib/themeUtils';
 
 
 
+
+// Helper function to inject theme CSS into htmlContent
+function injectThemeCSS(htmlContent: string, themeValues: any, content: any): string {
+  // Extract theme colors from themeValues or content
+  const themeColors = {
+    primary: themeValues?.accentColor || content?.layout?.theme?.colors?.accentColor || '#14B8A6',
+    background: themeValues?.sectionBackgrounds?.primary || content?.layout?.theme?.colors?.sectionBackgrounds?.primary || '#000000',
+    muted: themeValues?.textSecondary || content?.layout?.theme?.colors?.textSecondary || '#6B7280',
+  };
+
+  // Generate theme CSS
+  const themeCSSTag = generateThemeCSS(themeColors);
+
+  // Prepend theme CSS to HTML
+  return themeCSSTag + htmlContent;
+}
 
 async function publishHandler(req: NextRequest) {
   const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
@@ -60,10 +77,13 @@ async function publishHandler(req: NextRequest) {
       // A03: Injection Prevention - Sanitize HTML before update
       const sanitizedHtml = sanitizeHtmlContent(htmlContent);
 
+      // Inject theme CSS into htmlContent
+      const htmlWithTheme = injectThemeCSS(sanitizedHtml, themeValues, content);
+
       await prisma.publishedPage.update({
         where: { slug },
         data: {
-          htmlContent: sanitizedHtml,
+          htmlContent: htmlWithTheme,
           title,
           content: content as any,
           themeValues: themeValues as any,
@@ -91,11 +111,14 @@ async function publishHandler(req: NextRequest) {
       // A03: Injection Prevention - Sanitize HTML before creation
       const sanitizedHtml = sanitizeHtmlContent(htmlContent);
 
+      // Inject theme CSS into htmlContent
+      const htmlWithTheme = injectThemeCSS(sanitizedHtml, themeValues, content);
+
       await prisma.publishedPage.create({
         data: {
           userId,
           slug,
-          htmlContent: sanitizedHtml,
+          htmlContent: htmlWithTheme,
           title,
           content: content as any,
           themeValues: themeValues as any,

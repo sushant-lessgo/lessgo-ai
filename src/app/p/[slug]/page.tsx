@@ -1,11 +1,10 @@
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
-import dynamic from 'next/dynamic';
 import type { Metadata } from 'next';
 
-const PublishedPageClient = dynamic(() => import('./components/PublishedPageClient'), {
-  ssr: false,
-});
+// ISR configuration - revalidate every hour
+export const revalidate = 3600;
+export const dynamicParams = true;
 
 interface PageProps {
   params: { slug: string };
@@ -71,12 +70,32 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function PublishedPage({ params }: PageProps) {
   const page = await prisma.publishedPage.findUnique({
-    where: { slug: params.slug }
+    where: { slug: params.slug },
+    select: {
+      id: true,
+      slug: true,
+      htmlContent: true,
+      title: true,
+    },
   });
 
   if (!page) return notFound();
 
+  if (!page.htmlContent) {
+    // Fallback if htmlContent doesn't exist
+    return (
+      <div className="p-8 text-center">
+        <h1 className="text-2xl font-bold mb-4">Page Not Ready</h1>
+        <p>This page needs to be republished. Please contact the page owner.</p>
+      </div>
+    );
+  }
+
+  // Server-rendered HTML (no client component, zero JS)
   return (
-    <PublishedPageClient pageData={page} />
+    <main
+      className="published-page"
+      dangerouslySetInnerHTML={{ __html: page.htmlContent }}
+    />
   );
 }

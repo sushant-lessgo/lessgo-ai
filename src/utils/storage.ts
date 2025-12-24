@@ -328,7 +328,7 @@ export function clearAllProjects(): void {
 }
 
 // Development utilities (only available in development mode)
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
   (window as any).__storageDebug = {
     getStorageMetadata,
     getStorageStats,

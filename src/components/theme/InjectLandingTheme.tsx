@@ -6,8 +6,9 @@ import { usePathname } from 'next/navigation';
 
 export function InjectLandingTheme() {
   const pathname = usePathname();
-  const isLandingPage =
-  pathname?.startsWith('/p/') || pathname?.startsWith('/create/')
+  // Only inject theme on editor routes (/create)
+  // Published pages (/p/) use embedded CSS from htmlContent
+  const isLandingPage = pathname?.startsWith('/create/');
 
   const { getFullTheme } = useThemeStore();
 

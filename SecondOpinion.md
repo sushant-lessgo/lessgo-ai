@@ -1,95 +1,77 @@
-This new log changes the story a lot.
+## In Option B, will theme be computed on every request?
 
-### What your failing log proves
+It **doesn’t have to**.
 
-* The **failed request is POST** `/api/forms/submit` (not GET).
-* On failures, Vercel **does not invoke your function** (no “Function Invocation” block).
-* Instead it returns a **cached 405** very fast (48ms), with a **cache key `/404`**.
+You have 3 server-first variants:
 
-That means the “GET handler not exported ⇒ mobile POST becomes GET ⇒ 405” explanation **doesn’t fit the evidence**.
+### **B1) Compute on request + inject `<style>`**
 
-If “GET not exported” were the main issue, you’d see **GET 405**. You’re seeing **POST 405** served from **cache**, with a weird cache key.
+* On each request, server reads `themeValues`, computes vars, injects `<style>`
+* Cost is small, but still repeated work
+* With ISR, this may only happen when the page revalidates (not every hit)
 
----
-
-## What I think is actually happening (most likely)
-
-Some subset of requests are being handled by Vercel’s **edge/static cache path** (or a stale routing decision), where Vercel thinks this route resolves to a generic **/404 cache entry** (key `/404`) and returns **405** because POST isn’t allowed for that cached/static response.
-
-In plain terms:
-
-> Sometimes the request reaches your serverless function (works).
-> Sometimes it never reaches it and gets answered by an edge cached “not-found/static-ish” response (405).
-
-That’s exactly consistent with:
-
-* **Success log:** routed to Washington (iad1) → Function Invocation → 200
-* **Failure log:** no routing to iad1 → Cache → 405 with key `/404`
+✅ good for simplicity
+⚠️ still “runtime work” (though light)
 
 ---
 
-## So do I agree with your original analysis?
+### **B2) Store computed CSS vars in DB and inject without computing**
 
-### ✅ Agree
+Store something like:
 
-* Adding **no-store** headers is still a good defensive move.
-* Adding Vercel-level headers for `/api/forms/*` is also good defense-in-depth.
+* `cssVarsText` (string) OR `cssVarsJson` (object)
 
-### ❌ Disagree (based on your logs)
+At request:
 
-* “Mobile converts POST → GET” — not supported.
-* “GET not exported is the critical issue” — your failures are **POST 405**, so exporting GET won’t fix that.
+* Just print `<style>:root { ... }</style>` from DB
+
+✅ no compute at request
+✅ still server-first
+✅ easy to implement
 
 ---
 
-## What I’d do next (high-signal steps)
+### **B3) Best: embed the `<style>` directly inside `htmlContent` at publish**
 
-### 1) Force this route to be treated as dynamic + uncached
+Yes — you can store the CSS vars **inside the saved HTML**.
 
-In `src/app/api/forms/submit/route.ts`, add:
+Example saved HTML (top):
 
-```ts
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+```html
+<style>
+:root{
+  --landing-primary:#14B8A6;
+  --landing-primary-hover:#0f8f81;
+  --landing-muted-bg:#0b0b0b;
+  --landing-text-primary:#ffffff;
+  ...
+}
+</style>
+<div class="flex flex-col ...">...</div>
 ```
 
-And ensure every response includes:
+Then your runtime page becomes ultra-simple:
 
-* `Cache-Control: no-store` (at minimum)
+```tsx
+return <main dangerouslySetInnerHTML={{ __html: page.htmlContent }} />
+```
 
-This helps prevent any accidental caching logic around the route.
-
-### 2) Log whether the failing requests ever reach your handler
-
-Inside `POST` handler, log a unique marker + request id (and user-agent).
-
-If you still see failures **with no handler logs**, you’ve confirmed it’s **routing/caching before your function**, not your code.
-
-### 3) Check middleware matcher + behavior for `/api/*`
-
-Since your logs show **Middleware 200** even for failing requests, ensure your middleware isn’t:
-
-* rewriting,
-* returning a response for some edge case,
-* or doing something different for iOS Safari.
-
-Key check: does your middleware run on `/api/:path*`? If yes, consider excluding API routes from middleware completely unless you truly need it.
-
-### 4) Capture `x-vercel-cache` and response headers on the failing device
-
-On a failing iPhone Safari submission, inspect response headers (or temporarily log them client-side) for:
-
-* `x-vercel-cache` (HIT/MISS/BYPASS)
-* `cache-control`
-* any redirect / rewrite headers
-
-This will confirm what layer answered the request.
+✅ zero compute at request
+✅ no extra injection step
+✅ easiest runtime path
+✅ best for speed + simplicity
+⚠️ you must regenerate `htmlContent` whenever theme changes (which is correct anyway)
 
 ---
 
-## What to change in your fix plan
+## What I recommend for Lessgo.ai
 
-* **Remove “Fix 1: Export GET handler” as “critical.”** It’s not addressing POST 405.
-* Keep **cache-prevention headers** (Fix 2 + vercel.json) ✅
-* Client `cache: 'no-store'` is fine but it’s not the main lever for POST.
-* Retry-on-405 is still a last-resort UX patch, not root-cause.
+Go with **B3** (store final HTML including the `<style>` at publish).
+
+Also optionally store:
+
+* `contentJson` (for editor)
+* `themeValues` (for rebuilds)
+* `htmlContent` (final publish artifact)
+
+This is exactly how a “publish pipeline” should work: **precompute everything at publish time**.
