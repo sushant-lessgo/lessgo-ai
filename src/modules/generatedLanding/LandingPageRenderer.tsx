@@ -452,7 +452,14 @@ const finalSections: OrderedSection[] = processedSections
             sectionId={sectionId}
             sectionType={layout}
           >
-            <div className="relative">
+            <div
+              className="relative"
+              style={{
+                background: customBackgroundStyle?.background || sectionBackgroundCSS,
+                ...customBackgroundStyle
+              }}
+              data-background-type={backgroundType}
+            >
               <LayoutComponent
                 sectionId={sectionId}
                 backgroundType={backgroundType}
