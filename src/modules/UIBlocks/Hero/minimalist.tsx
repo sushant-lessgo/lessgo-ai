@@ -9,6 +9,8 @@ import {
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { getPublishedTypographyStyles } from '@/lib/publishedTextColors';
+import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 
 interface MinimalistContent {
   headline: string;
@@ -31,7 +33,106 @@ const CONTENT_SCHEMA = {
   }
 };
 
+// Published-safe component for server-side rendering
+function MinimalistPublished(props: LayoutComponentProps) {
+  const { sectionId, mode, theme, sectionBackgroundCSS, backgroundType } = props;
+
+  // Extract content directly from props (no hooks)
+  const blockContent = {
+    headline: props.headline || 'Your Vision, Realized',
+    subheadline: props.subheadline || 'Experience clarity in simplicity',
+    minimalist_hero_image: props.minimalist_hero_image || '/Dusseldorf-event.avif'
+  };
+
+  // Image validation - static (no event handlers)
+  const imageValue = blockContent.minimalist_hero_image || '';
+  const isValidImagePath =
+    imageValue.startsWith('/') ||
+    imageValue.startsWith('http://') ||
+    imageValue.startsWith('https://') ||
+    imageValue.startsWith('blob:') ||
+    imageValue.startsWith('data:') ||
+    imageValue === '';
+  const imageSrc = isValidImagePath && imageValue !== ''
+    ? imageValue
+    : '/Dusseldorf-event.avif';
+
+  // Fixed white text (minimalist has dark overlay)
+  const textColor = '#FFFFFF';
+
+  // Typography styles from theme
+  const headlineTypography = getPublishedTypographyStyles('hero', theme);
+  const subheadlineTypography = getPublishedTypographyStyles('body-lg', theme);
+
+  return (
+    <section
+      style={{ background: sectionBackgroundCSS || 'transparent' }}
+      className="!py-0 !px-0 relative overflow-hidden min-h-screen"
+    >
+      <div className="relative min-h-screen flex flex-col justify-between">
+        {/* Background Image with Overlay */}
+        <div
+          className="absolute inset-0 z-0 w-full h-full"
+          style={{
+            backgroundImage: `url(${imageSrc})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat'
+          }}
+        >
+          {/* Mist effect */}
+          <div
+            className="absolute inset-0 z-20 pointer-events-none"
+            style={{
+              background: "radial-gradient(ellipse at 50% 60%, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 42%, transparent 55%)"
+            }}
+          />
+          {/* Dark overlay */}
+          <div className="absolute inset-0 z-10 pointer-events-none bg-black/70" />
+        </div>
+
+        {/* Headline at Top */}
+        <div className="relative z-30 p-6 md:p-8 lg:p-12">
+          <div className="max-w-2xl mx-auto pt-10">
+            <HeadlinePublished
+              value={blockContent.headline}
+              level="h1"
+              className="text-center leading-[1.1]"
+              style={{
+                textAlign: 'center',
+                color: textColor,
+                ...headlineTypography
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Subheadline at Bottom */}
+        <div className="relative z-30 pb-20">
+          <div className="max-w-[50rem] mx-auto pb-20">
+            <TextPublished
+              value={blockContent.subheadline}
+              element="p"
+              className="text-justify text-2xl md:text-4xl"
+              style={{
+                textAlign: 'center',
+                color: textColor,
+                ...subheadlineTypography
+              }}
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function Minimalist(props: LayoutComponentProps) {
+  // PUBLISHED MODE: Use published-safe component
+  if (props.mode === 'published') {
+    return <MinimalistPublished {...props} />;
+  }
+
   const { getTextStyle: getTypographyStyle } = useTypography();
   const { content } = useEditStore();
 

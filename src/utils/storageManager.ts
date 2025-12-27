@@ -35,10 +35,9 @@ class StorageManager {
   };
 
   private constructor() {
-    this.startAutomaticCleanup();
-    
-    // Listen for storage events (other tabs)
+    // Only run browser-only code on client
     if (typeof window !== 'undefined') {
+      this.startAutomaticCleanup();
       window.addEventListener('storage', this.handleStorageEvent.bind(this));
       window.addEventListener('beforeunload', this.handleBeforeUnload.bind(this));
     }
@@ -178,12 +177,13 @@ class StorageManager {
    */
   private async cleanupCorruptedEntries(): Promise<void> {
     if (!isStorageAvailable()) return;
+    if (typeof window === 'undefined') return; // Server guard
 
     logger.dev('🔍 Checking for corrupted storage entries');
-    
+
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      
+
       if (key?.startsWith(STORAGE_CONFIG.PROJECT_KEY_PREFIX)) {
         try {
           const value = localStorage.getItem(key);
@@ -202,8 +202,9 @@ class StorageManager {
    * Handle storage events from other tabs
    */
   private handleStorageEvent(event: StorageEvent): void {
+    if (typeof window === 'undefined') return; // Server guard
     if (!event.key?.startsWith(STORAGE_CONFIG.PROJECT_KEY_PREFIX)) return;
-    
+
     logger.dev('📡 Storage event detected from other tab:', {
       key: event.key,
       oldValue: event.oldValue ? 'exists' : 'null',
@@ -217,6 +218,7 @@ class StorageManager {
    * Handle before unload to ensure cleanup
    */
   private handleBeforeUnload(): void {
+    if (typeof window === 'undefined') return; // Server guard
     // Quick cleanup before page unload
     if (this.state.cleanupInterval) {
       clearInterval(this.state.cleanupInterval);
@@ -327,7 +329,7 @@ export const storageManager = StorageManager.getInstance();
 export { StorageManager };
 
 // Development utilities
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
   (window as any).__storageManagerDebug = {
     getInstance: () => StorageManager.getInstance(),
     forceCleanup: () => storageManager.forceCleanup(),
@@ -335,5 +337,5 @@ if (process.env.NODE_ENV === 'development') {
     getCleanupStatus: () => storageManager.getCleanupStatus(),
     setQuotaThresholds: (w: number, e: number) => storageManager.setQuotaThresholds(w, e),
   };
-  
+
 }

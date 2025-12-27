@@ -12,6 +12,10 @@ import {
 import { CTAButton } from '@/components/layout/ComponentRegistry';
 import LogoEditableComponent from '@/components/ui/LogoEditableComponent';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { LogoPublished } from '@/components/published/LogoPublished';
+import { CTAButtonPublished } from '@/components/published/CTAButtonPublished';
+import { getPublishedTextColors, getPublishedTypographyStyles } from '@/lib/publishedTextColors';
+import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 
 // Content interface for type safety
 interface AnnouncementContent {
@@ -66,7 +70,154 @@ const CONTENT_SCHEMA = {
   }
 };
 
+// Published-safe component for server-side rendering
+function AnnouncementPublished(props: LayoutComponentProps) {
+  const { sectionId, mode, backgroundType, sectionBackgroundCSS, theme } = props;
+
+  // Extract content from props (no hooks)
+  const blockContent = {
+    headline: props.headline || 'Big Announcement',
+    subheadline: props.subheadline || '',
+    supporting_copy: props.supporting_copy || '',
+    text_1: props.text_1 || 'Company One',
+    logo_1: props.logo_1 || '',
+    text_2: props.text_2 || 'Company Two',
+    logo_2: props.logo_2 || '',
+    above_cta_copy: props.above_cta_copy || 'Ready to get started?',
+    cta_text: props.cta_text || 'Learn More'
+  };
+
+  // Get text colors from theme
+  const textColors = getPublishedTextColors(
+    backgroundType || 'primary',
+    theme,
+    sectionBackgroundCSS
+  );
+
+  // Typography styles
+  const h2Typography = getPublishedTypographyStyles('h2', theme);
+
+  // CTA button colors
+  const ctaBg = theme?.colors?.accentColor || '#3B82F6';
+  const ctaText = '#FFFFFF';
+
+  return (
+    <section
+      style={{ background: sectionBackgroundCSS }}
+      className="py-16 px-6"
+    >
+      <div className="max-w-6xl mx-auto mt-16">
+        {/* Top: 2-column grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1.35fr_1fr] gap-16 mb-12">
+
+          {/* Left Column - Content */}
+          <div className="space-y-4">
+            <HeadlinePublished
+              value={blockContent.headline}
+              level="h2"
+              className="mb-4"
+              style={{
+                color: textColors.heading,
+                ...h2Typography
+              }}
+            />
+
+            {blockContent.subheadline && (
+              <TextPublished
+                value={blockContent.subheadline}
+                element="p"
+                className="text-xl mb-12"
+                style={{
+                  color: textColors.body,
+                  fontSize: '1.25rem'
+                }}
+              />
+            )}
+
+            <TextPublished
+              value={blockContent.supporting_copy}
+              element="p"
+              className="text-lg"
+              style={{
+                color: textColors.muted,
+                fontSize: '1.125rem'
+              }}
+            />
+          </div>
+
+          {/* Right Column - Logo-Text Pairs */}
+          <div className="space-y-12">
+            {/* Logo 1 + Text 1 */}
+            <div className="flex flex-col items-start">
+              <TextPublished
+                value={blockContent.text_1}
+                element="p"
+                className="text-xl font-semibold mb-2"
+                style={{
+                  color: textColors.body,
+                  fontSize: '1.25rem',
+                  fontWeight: '600'
+                }}
+              />
+              <LogoPublished
+                logoUrl={blockContent.logo_1}
+                companyName={blockContent.text_1}
+                size="lg"
+                className="w-48 h-auto"
+              />
+            </div>
+
+            {/* Logo 2 + Text 2 */}
+            <div className="flex flex-col items-start">
+              <TextPublished
+                value={blockContent.text_2}
+                element="p"
+                className="text-lg font-semibold mb-2"
+                style={{
+                  color: textColors.body,
+                  fontSize: '1.125rem',
+                  fontWeight: '600'
+                }}
+              />
+              <LogoPublished
+                logoUrl={blockContent.logo_2}
+                companyName={blockContent.text_2}
+                size="lg"
+                className="w-64 h-auto"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom: Centered CTA */}
+        <div className="text-center space-y-6">
+          <TextPublished
+            value={blockContent.above_cta_copy}
+            element="p"
+            className="text-xl"
+            style={{
+              color: textColors.body,
+              fontSize: '1.25rem'
+            }}
+          />
+
+          <CTAButtonPublished
+            text={blockContent.cta_text}
+            backgroundColor={ctaBg}
+            textColor={ctaText}
+          />
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function Announcement(props: LayoutComponentProps) {
+  // PUBLISHED MODE: Use published-safe component
+  if (props.mode === 'published') {
+    return <AnnouncementPublished {...props} />;
+  }
+
   const {
     sectionId,
     mode,

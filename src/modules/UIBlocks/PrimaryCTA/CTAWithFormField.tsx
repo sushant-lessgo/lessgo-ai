@@ -15,6 +15,9 @@ import { TrustIndicators, CTAButton } from '@/components/layout/ComponentRegistr
 import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { FormRenderer } from '@/components/forms/FormRenderer';
+import { CheckmarkIconPublished } from '@/components/published/CheckmarkIconPublished';
+import { getPublishedTextColors, getPublishedTypographyStyles } from '@/lib/publishedTextColors';
+import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 
 // Content interface for type safety
 interface CTAWithFormFieldContent {
@@ -114,8 +117,200 @@ const CONTENT_SCHEMA = {
   }
 };
 
+// Published-safe component for server-side rendering
+function CTAWithFormFieldPublished(props: LayoutComponentProps) {
+  const { sectionId, backgroundType, sectionBackgroundCSS, theme } = props;
+
+  // Extract all content from props (no hooks)
+  const blockContent = {
+    headline: props.headline || 'Get Started Today',
+    eyebrow_text: props.eyebrow_text || '',
+    subheadline: props.subheadline || '',
+    form_label: props.form_label || 'Work Email Address',
+    placeholder_text: props.placeholder_text || 'Enter your work email',
+    cta_text: props.cta_text || 'Start Free Trial',
+    privacy_text: props.privacy_text || 'No spam. Unsubscribe at any time.',
+    benefit_1: props.benefit_1 || 'Free 14-day trial',
+    benefit_2: props.benefit_2 || 'No credit card required',
+    benefit_3: props.benefit_3 || 'Cancel anytime',
+    benefit_4: props.benefit_4 || 'Full feature access',
+    benefit_5: props.benefit_5 || '',
+    trust_item_1: props.trust_item_1 || 'Secure & encrypted',
+    trust_item_2: props.trust_item_2 || 'GDPR compliant',
+    trust_item_3: props.trust_item_3 || 'No spam policy',
+    trust_item_4: props.trust_item_4 || '',
+    trust_item_5: props.trust_item_5 || ''
+  };
+
+  // Get text colors from theme
+  const textColors = getPublishedTextColors(
+    backgroundType || 'secondary',
+    theme,
+    sectionBackgroundCSS
+  );
+
+  // Typography styles
+  const h2Typography = getPublishedTypographyStyles('h2', theme);
+
+  // Benefits list
+  const benefits = [
+    blockContent.benefit_1,
+    blockContent.benefit_2,
+    blockContent.benefit_3,
+    blockContent.benefit_4,
+    blockContent.benefit_5
+  ].filter(b => b && b !== '___REMOVED___' && b.trim() !== '');
+
+  // Trust items
+  const trustItems = [
+    blockContent.trust_item_1,
+    blockContent.trust_item_2,
+    blockContent.trust_item_3,
+    blockContent.trust_item_4,
+    blockContent.trust_item_5
+  ].filter(t => t && t !== '___REMOVED___' && t.trim() !== '');
+
+  // CTA button colors
+  const ctaBg = theme?.colors?.accentColor || '#3B82F6';
+  const ctaText = '#FFFFFF';
+
+  return (
+    <section
+      style={{ background: sectionBackgroundCSS }}
+      className="py-16 px-6"
+    >
+      <div className="max-w-[66rem] mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.35fr_1fr] gap-10 items-center">
+
+          {/* Left Column - Content */}
+          <div>
+            {/* Eyebrow Text */}
+            {blockContent.eyebrow_text && blockContent.eyebrow_text !== '___REMOVED___' && (
+              <TextPublished
+                value={blockContent.eyebrow_text}
+                element="p"
+                className="text-[11px] font-medium uppercase tracking-[0.22em] mb-4"
+                style={{
+                  color: `${textColors.muted}80`,
+                  fontSize: '11px',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.22em'
+                }}
+              />
+            )}
+
+            {/* Headline */}
+            <HeadlinePublished
+              value={blockContent.headline}
+              level="h2"
+              className="mb-6"
+              style={{
+                color: textColors.heading,
+                ...h2Typography
+              }}
+            />
+
+            {/* Subheadline */}
+            {blockContent.subheadline && blockContent.subheadline !== '___REMOVED___' && (
+              <TextPublished
+                value={blockContent.subheadline}
+                element="p"
+                className="text-2xl mb-8"
+                style={{
+                  color: textColors.body,
+                  fontSize: '1.5rem'
+                }}
+              />
+            )}
+
+            {/* Benefits List */}
+            {benefits.length > 0 && (
+              <div className="space-y-3">
+                {benefits.map((benefit, index) => (
+                  <div key={index} className="flex items-center space-x-3">
+                    <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 bg-green-500/15 ring-1 ring-green-500/25">
+                      <CheckmarkIconPublished color="#10b981" size={14} />
+                    </div>
+                    <span style={{ color: textColors.muted }}>
+                      {benefit}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Right Column - Static Form (Phase 1.1.5 - no functionality) */}
+          <div className="bg-gray-100 rounded-2xl p-8 shadow-xl border border-gray-200 mt-12 lg:mt-0">
+
+            {/* Form Label */}
+            <TextPublished
+              value={blockContent.form_label}
+              element="div"
+              className="text-gray-700 font-semibold mb-4 block"
+              style={{ fontSize: '1rem' }}
+            />
+
+            {/* Static Email Input */}
+            <div className="mb-4">
+              <input
+                type="email"
+                placeholder={blockContent.placeholder_text}
+                disabled
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-400 cursor-not-allowed"
+              />
+            </div>
+
+            {/* Static Submit Button */}
+            <button
+              disabled
+              style={{
+                background: ctaBg,
+                color: ctaText,
+                opacity: 0.7
+              }}
+              className="w-full px-6 py-3 rounded-lg font-semibold cursor-not-allowed"
+            >
+              {blockContent.cta_text}
+            </button>
+
+            {/* Privacy Text */}
+            <TextPublished
+              value={blockContent.privacy_text}
+              element="p"
+              className="text-center text-xs mt-4"
+              style={{ color: textColors.muted }}
+            />
+
+            {/* Trust Indicators */}
+            {trustItems.length > 0 && (
+              <div className="mt-6 pt-6 border-t border-gray-200">
+                <div className="flex items-center justify-center space-x-4 text-sm flex-wrap gap-y-2">
+                  {trustItems.map((item, index) => (
+                    <div key={index} className="flex items-center space-x-2">
+                      <CheckmarkIconPublished color="#10b981" size={16} />
+                      <span style={{ color: textColors.muted, fontSize: '0.875rem' }}>
+                        {item}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function CTAWithFormField(props: LayoutComponentProps) {
-  const { publishedPageId, pageOwnerId, ...layoutProps } = props;
+  // PUBLISHED MODE: Use published-safe component
+  if (props.mode === 'published') {
+    return <CTAWithFormFieldPublished {...props} />;
+  }
+
+  const { publishedPageId, pageOwnerId, ...layoutProps} = props;
   const {
     sectionId,
     mode,

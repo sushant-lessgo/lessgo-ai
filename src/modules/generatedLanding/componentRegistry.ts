@@ -397,7 +397,7 @@ export const componentRegistry: ComponentRegistry = {
 };
 
 // Helper function to extract section type from section ID
-function extractSectionType(sectionId: string): string {
+export function extractSectionType(sectionId: string): string {
   // Section IDs are in format: sectionType-timestamp (e.g., "hero-1753195467366")
   // Extract everything before the last dash and numbers
   const match = sectionId.match(/^([a-zA-Z]+)/);

@@ -62,3 +62,35 @@ export function generateThemeCSS(baseColors: {
 
   return `<style>:root{${Object.entries(cssVars).map(([k, v]) => `${k}:${v};`).join('')}}</style>`;
 }
+
+/**
+ * Generate inline styles object for published components
+ * Used by published primitives for dynamic theme values
+ *
+ * @param theme - Full theme object
+ * @returns CSS custom properties object
+ *
+ * @example
+ * ```typescript
+ * const styles = generateInlineStyles(theme);
+ * // { '--landing-primary': '#3B82F6', ... }
+ * ```
+ */
+export function generateInlineStyles(theme: any): Record<string, string> {
+  const accentColor = theme?.colors?.accentColor || '#3B82F6';
+  const bgPrimary = theme?.colors?.sectionBackgrounds?.primary || '#FFFFFF';
+  const textSecondary = theme?.colors?.textSecondary || '#6B7280';
+
+  return {
+    '--landing-primary': accentColor,
+    '--landing-primary-hover': darken(accentColor, 10),
+    '--landing-accent': lighten(accentColor, 10),
+    '--landing-muted-bg': bgPrimary,
+    '--landing-border': isLight(bgPrimary)
+      ? darken(bgPrimary, 10)
+      : lighten(bgPrimary, 10),
+    '--landing-text-primary': isLight(bgPrimary) ? '#111827' : '#F9FAFB',
+    '--landing-text-secondary': isLight(bgPrimary) ? '#6B7280' : '#D1D5DB',
+    '--landing-text-muted': textSecondary,
+  };
+}

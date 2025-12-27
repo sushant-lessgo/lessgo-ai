@@ -8,25 +8,8 @@ import { createSecureResponse, validateSlug, sanitizeHtmlContent, verifyProjectA
 import { withPublishRateLimit } from '@/lib/rateLimit';
 import { getUserPlan, checkLimit } from '@/lib/planManager';
 import { generateThemeCSS } from '@/lib/themeUtils';
-
-
-
-
-// Helper function to inject theme CSS into htmlContent
-function injectThemeCSS(htmlContent: string, themeValues: any, content: any): string {
-  // Extract theme colors from themeValues or content
-  const themeColors = {
-    primary: themeValues?.accentColor || content?.layout?.theme?.colors?.accentColor || '#14B8A6',
-    background: themeValues?.sectionBackgrounds?.primary || content?.layout?.theme?.colors?.sectionBackgrounds?.primary || '#000000',
-    muted: themeValues?.textSecondary || content?.layout?.theme?.colors?.textSecondary || '#6B7280',
-  };
-
-  // Generate theme CSS
-  const themeCSSTag = generateThemeCSS(themeColors);
-
-  // Prepend theme CSS to HTML
-  return themeCSSTag + htmlContent;
-}
+import React from 'react';
+import { LandingPagePublishedRenderer } from '@/modules/generatedLanding/LandingPagePublishedRenderer';
 
 async function publishHandler(req: NextRequest) {
   const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
@@ -52,8 +35,8 @@ async function publishHandler(req: NextRequest) {
       );
     }
     
-    const { slug, htmlContent, title, content, themeValues, tokenId, inputText, previewImage } = validationResult.data;
-    
+    const { slug, title, content, themeValues, tokenId, inputText, previewImage } = validationResult.data;
+
     // A04: Insecure Design - Validate slug security
     const slugValidation = validateSlug(slug);
     if (!slugValidation.valid) {
@@ -66,6 +49,26 @@ async function publishHandler(req: NextRequest) {
       select: { id: true }
     });
 
+    // SERVER-SIDE RENDERING: Generate HTML from content structure
+    // Dynamic import to bypass Next.js build-time module analysis
+    const { renderToString } = await import('react-dom/server');
+
+    const reactHtml = renderToString(
+      React.createElement(LandingPagePublishedRenderer, {
+        sections: content.layout.sections,
+        content: content.content,
+        theme: content.layout.theme,
+      })
+    );
+
+    const themeCSS = generateThemeCSS({
+      primary: content.layout.theme?.colors?.accentColor || '#3B82F6',
+      background: content.layout.theme?.colors?.sectionBackgrounds?.primary || '#FFFFFF',
+      muted: content.layout.theme?.colors?.textSecondary || '#6B7280'
+    });
+
+    const htmlContent = `${themeCSS}${reactHtml}`;
+
     // 🔍 Check for existing published page
     const existing = await prisma.publishedPage.findUnique({ where: { slug } });
 
@@ -74,16 +77,10 @@ async function publishHandler(req: NextRequest) {
         return createSecureResponse({ error: 'Slug already taken' }, 409);
       }
 
-      // A03: Injection Prevention - Sanitize HTML before update
-      const sanitizedHtml = sanitizeHtmlContent(htmlContent);
-
-      // Inject theme CSS into htmlContent
-      const htmlWithTheme = injectThemeCSS(sanitizedHtml, themeValues, content);
-
       await prisma.publishedPage.update({
         where: { slug },
         data: {
-          htmlContent: htmlWithTheme,
+          htmlContent,  // Server-side rendered HTML
           title,
           content: content as any,
           themeValues: themeValues as any,
@@ -108,17 +105,11 @@ async function publishHandler(req: NextRequest) {
         }, 403);
       }
 
-      // A03: Injection Prevention - Sanitize HTML before creation
-      const sanitizedHtml = sanitizeHtmlContent(htmlContent);
-
-      // Inject theme CSS into htmlContent
-      const htmlWithTheme = injectThemeCSS(sanitizedHtml, themeValues, content);
-
       await prisma.publishedPage.create({
         data: {
           userId,
           slug,
-          htmlContent: htmlWithTheme,
+          htmlContent,  // Server-side rendered HTML
           title,
           content: content as any,
           themeValues: themeValues as any,

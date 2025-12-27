@@ -320,9 +320,11 @@ export interface StatBlocksContent {
 // Example of how to use these types in components
 export interface LayoutComponentProps {
   sectionId: string;
+  mode?: 'edit' | 'preview' | 'published'; // ✅ UPDATED (Phase 1.1.5): Rendering mode for UIBlocks
   className?: string;
   backgroundType?: 'primary' | 'secondary' | 'neutral' | 'divider' | 'custom';
   sectionBackgroundCSS?: string; // ✅ NEW: CSS class calculated in renderer
+  theme?: any; // ✅ NEW (Phase 1.1.5): Theme object for published mode
   userContext?: {  // ✅ NEW: Full taxonomy context for theme selection
     marketCategory: import('@/modules/inference/taxonomy').MarketCategory;
     targetAudience: import('@/modules/inference/taxonomy').TargetAudience;

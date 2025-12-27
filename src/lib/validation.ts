@@ -38,7 +38,7 @@ export const PublishSchema = z.object({
     .max(100, 'Slug too long')
     .regex(/^[a-z0-9-]+$/, 'Slug must contain only lowercase letters, numbers, and hyphens')
     .refine((slug) => !slug.startsWith('-') && !slug.endsWith('-'), 'Slug cannot start or end with hyphen'),
-  htmlContent: z.string().min(1).max(500000, 'HTML content too large'),
+  htmlContent: z.string().min(1).max(500000, 'HTML content too large').optional(), // PHASE 1.3: Optional - now generated server-side
   title: z.string().max(200).optional(),
   content: z.unknown().optional(),
   themeValues: z.record(z.string(), z.unknown()).optional(),

@@ -4,6 +4,7 @@ import { LayoutSection } from '@/components/layout/LayoutSection';
 import { EditableAdaptiveText } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import HeaderLogo from '@/components/ui/HeaderLogo';
+import { TextPublished } from '@/components/published/TextPublished';
 
 interface SimpleFooterContent {
   copyright?: string;
@@ -14,7 +15,40 @@ const CONTENT_SCHEMA = {
   copyright: { type: 'string' as const, default: `© ${new Date().getFullYear()} Your Company. All rights reserved.` },
 };
 
+// Published-safe component for server-side rendering
+function SimpleFooterPublished(props: LayoutComponentProps) {
+  const { sectionBackgroundCSS } = props;
+  const copyright = props.copyright || `© ${new Date().getFullYear()} Your Company. All rights reserved.`;
+
+  return (
+    <section style={{ background: sectionBackgroundCSS }} className="py-8 px-6 border-t">
+      <div className="flex flex-col items-center gap-2">
+        <TextPublished
+          value={copyright}
+          element="p"
+          className="text-sm text-gray-600"
+        />
+        <div className="text-sm text-gray-600">
+          Built with{' '}
+          <a
+            href="https://lessgo.ai"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600"
+          >
+            Lessgo.ai
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 const SimpleFooter: React.FC<LayoutComponentProps> = (props) => {
+  // PUBLISHED MODE: Use published-safe component
+  if (props.mode === 'published') {
+    return <SimpleFooterPublished {...props} />;
+  }
   const {
     sectionId,
     mode,

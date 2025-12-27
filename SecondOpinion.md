@@ -1,77 +1,92 @@
-## In Option B, will theme be computed on every request?
+✅ The publish path is still importing editor/client code
 
-It **doesn’t have to**.
+Your server-side publish renderer is still pulling in files that use React hooks (useState/useEffect/useRef/createContext) and browser-only code. Next.js treats the publish renderer as a Server Component, so the moment it imports any hook-using module, you get:
 
-You have 3 server-first variants:
+“needs useState… but none of its parents are marked with ‘use client’ (server by default)”
 
-### **B1) Compute on request + inject `<style>`**
+The smoking gun is here:
 
-* On each request, server reads `themeValues`, computes vars, injects `<style>`
-* Cost is small, but still repeated work
-* With ISR, this may only happen when the page revalidates (not every hit)
+Your LandingPagePublishedRenderer.tsx is importing the normal registry:
+import { getComponent, extractSectionType } from './componentRegistry';
+That means it drags in the entire editable component graph (which includes hook-based stuff).
 
-✅ good for simplicity
-⚠️ still “runtime work” (though light)
+And the errors you see are exactly those hook-based modules:
 
----
+EditableContent.tsx uses useState/useCallback/useMemo
 
-### **B2) Store computed CSS vars in DB and inject without computing**
+HeaderLogo.tsx uses useState/useRef
 
-Store something like:
+LogoEditableComponent.tsx uses useState/useRef
 
-* `cssVarsText` (string) OR `cssVarsJson` (object)
+useEditStoreLegacy.ts uses createContext
 
-At request:
+useLayoutComponent.ts uses useEffect
 
-* Just print `<style>:root { ... }</style>` from DB
+CTAWithFormField.tsx uses useState/useEffect and imports EditableContent
 
-✅ no compute at request
-✅ still server-first
-✅ easy to implement
+So yes: the publish renderer is still wired to the editable world.
 
----
+What Claude should do next (very конкрет steps)
+Step 1 — Fix the wrong registry import (this alone may drop most errors)
 
-### **B3) Best: embed the `<style>` directly inside `htmlContent` at publish**
+In:
+src/modules/generatedLanding/LandingPagePublishedRenderer.tsx
 
-Yes — you can store the CSS vars **inside the saved HTML**.
+Change:
 
-Example saved HTML (top):
+import { getComponent, extractSectionType } from './componentRegistry';
 
-```html
-<style>
-:root{
-  --landing-primary:#14B8A6;
-  --landing-primary-hover:#0f8f81;
-  --landing-muted-bg:#0b0b0b;
-  --landing-text-primary:#ffffff;
-  ...
-}
-</style>
-<div class="flex flex-col ...">...</div>
-```
 
-Then your runtime page becomes ultra-simple:
+To:
 
-```tsx
-return <main dangerouslySetInnerHTML={{ __html: page.htmlContent }} />
-```
+import { getComponent, extractSectionType } from './componentRegistry.published';
 
-✅ zero compute at request
-✅ no extra injection step
-✅ easiest runtime path
-✅ best for speed + simplicity
-⚠️ you must regenerate `htmlContent` whenever theme changes (which is correct anyway)
 
----
+Because right now it’s still using the editable registry.
 
-## What I recommend for Lessgo.ai
+Step 2 — Ensure componentRegistry.published.ts imports ONLY server-safe components
 
-Go with **B3** (store final HTML including the `<style>` at publish).
+This is the part props cannot solve:
 
-Also optionally store:
+Even if you pass different props, the import itself pulls in the module, and Next will statically analyze it.
 
-* `contentJson` (for editor)
-* `themeValues` (for rebuilds)
-* `htmlContent` (final publish artifact)
+So in componentRegistry.published.ts, make sure it does not import any of these:
 
-This is exactly how a “publish pipeline” should work: **precompute everything at publish time**.
+EditableContent.tsx
+
+HeaderLogo.tsx
+
+LogoEditableComponent.tsx
+
+CTAWithFormField.tsx (your current one imports hooks + EditableContent)
+
+Any UIBlock that imports useLayoutComponent, useEditStoreLegacy, etc.
+
+Instead it must import files like:
+
+CTAWithFormField.published.tsx (new)
+
+HeaderLogo.published.tsx (new) or just inline <img/>
+
+etc.
+
+Step 3 — Create “published-only” entry files for the remaining offenders (only where needed)
+
+You do not need to duplicate every UIBlock. Only the ones that currently import hooks/editing stuff at module top-level.
+
+For your remaining errors, the minimum “published” files are likely:
+
+src/modules/UIBlocks/PrimaryCTA/CTAWithFormField.published.tsx
+A pure component: no hooks, no edit store, no EditableContent imports.
+
+Replace HeaderLogo usage in published components with either:
+
+a simple <img src=... />, or
+
+src/components/ui/HeaderLogo.published.tsx (no hooks)
+
+Same for logo:
+
+LogoEditableComponent should never be imported in publish path; use a Logo.published.tsx or plain <img>.
+
+Important: don’t “branch inside the same file” (like if (published) return <Published/>) if the file still imports hooks at the top — because the server build fails before runtime.

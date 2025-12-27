@@ -87,7 +87,7 @@ export const defaultEditorConfig: InlineEditorConfig = {
 };
 
 interface EditableContentProps {
-  mode: 'edit' | 'preview';
+  mode: 'edit' | 'preview' | 'published';
   value: string;
   onEdit: (value: string) => void;
   element: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span' | 'div';
@@ -230,7 +230,31 @@ export function EditableContent({
 
     return { ...inlineStyles, ...style }; // style prop can still override
   }, [formatState, style]);
-  
+
+  // PUBLISHED MODE: Server-safe static rendering
+  // NO hooks, NO contenteditable, NO event handlers
+  if (mode === 'published') {
+    // Check if value contains HTML
+    const isHtmlContent = typeof value === 'string' && /<[^>]*>/g.test(value);
+
+    if (isHtmlContent) {
+      const sanitizedHtml = sanitizeFormattingContent(value);
+      return (
+        <Element
+          className={className}
+          style={style}  // Use style prop directly (inline styles from parent)
+          dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
+        />
+      );
+    }
+
+    return (
+      <Element className={className} style={style}>
+        {value || children}
+      </Element>
+    );
+  }
+
   if (!shouldShow) return null;
 
   // Use inline editor in edit mode if enabled and required props are provided
@@ -712,6 +736,21 @@ export function EditableAdaptiveHeadline({
   autoSave?: Partial<AutoSaveConfig>,
 }) {
 
+  // PUBLISHED MODE: No hooks, use inline styles from parent
+  if (mode === 'published') {
+    return (
+      <EditableContent
+        mode="published"
+        value={value}
+        onEdit={onEdit}
+        element={level}
+        className={`font-bold leading-tight ${props.className || ''}`}
+        style={textStyle}  // Color and typography from parent
+        {...(props as any)}
+      />
+    );
+  }
+
   // Extract inline styles from HTML content if present
   const extractedStyles = useMemo(() => {
     if (typeof value === 'string' && /<[^>]*>/g.test(value)) {
@@ -845,6 +884,21 @@ export function EditableAdaptiveText({
   editorConfig?: Partial<InlineEditorConfig>,
   autoSave?: Partial<AutoSaveConfig>,
 }) {
+
+  // PUBLISHED MODE: No hooks, use inline styles from parent
+  if (mode === 'published') {
+    return (
+      <EditableContent
+        mode="published"
+        value={value}
+        onEdit={onEdit}
+        element="p"
+        className={`leading-relaxed ${props.className || ''}`}
+        style={textStyle}  // Color from parent
+        {...(props as any)}
+      />
+    );
+  }
 
   // Extract inline styles from HTML content if present
   const extractedStyles = useMemo(() => {
