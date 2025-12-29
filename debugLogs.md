@@ -1,36 +1,293 @@
-## id
-
-cmjiy3jme0000ltfcc5l3mzye
-
-## userId
-
-user_2xd9rxqOOyXmfy1JhrFtKOmD1yw
-
-## slug
-
-ticketverz
-
-## title
-
-GLOBAL. INDIAN. <span style="color:rgb(0, 255, 0);">ICON.</span> FIRST TIME IN GERMANY.
-
-## htmlcontent
-
-<style>:root{--landing-primary:pink;--landing-primary-hover:#000000;--landing-accent:#1a1a1a;--landing-muted-bg:#000000;--landing-border:#1a1a1a;--landing-text-primary:#F9FAFB;--landing-text-secondary:#D1D5DB;--landing-text-muted:#6B7280;}</style><div class="landing-page-published "><section style="background:#000000" class="!py-0 !px-0 relative overflow-hidden min-h-screen"><div class="relative min-h-screen flex flex-col justify-between"><div class="absolute inset-0 z-0 w-full h-full" style="background-image:url(/Dusseldorf-event.avif);background-size:cover;background-position:center;background-repeat:no-repeat"><div class="absolute inset-0 z-20 pointer-events-none" style="background:radial-gradient(ellipse at 50% 60%, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 42%, transparent 55%)"></div><div class="absolute inset-0 z-10 pointer-events-none bg-black/70"></div></div><div class="relative z-30 p-6 md:p-8 lg:p-12"><div class="max-w-2xl mx-auto pt-10"><h1 class="text-center leading-[1.1]" style="text-align:center;color:#FFFFFF;font-size:clamp(2.5rem, 6vw, 4rem);line-height:1.1;font-weight:700;letter-spacing:-0.01em;font-family:&#x27;Sora&#x27;, sans-serif, sans-serif">Your Vision, Realized</h1></div></div><div class="relative z-30 pb-20"><div class="max-w-[50rem] mx-auto pb-20"><p class="text-justify text-2xl md:text-4xl" style="text-align:center;color:#FFFFFF;font-size:clamp(1.25rem, 2.5vw, 1.5rem);line-height:1.6;font-weight:400;letter-spacing:0;font-family:&#x27;Inter&#x27;, sans-serif, sans-serif">Experience clarity in simplicity</p></div></div></div></section><section style="background:#000000" class="py-16 px-6"><div class="max-w-6xl mx-auto mt-16"><div class="grid grid-cols-1 lg:grid-cols-[1.35fr_1fr] gap-16 mb-12"><div class="space-y-4"><h2 class="mb-4" style="color:#f9fafb;font-size:clamp(1.5rem, 3.5vw, 2rem);line-height:1.3;font-weight:600;letter-spacing:0;font-family:&#x27;Sora&#x27;, sans-serif, sans-serif">Big Announcement</h2><p class="text-lg" style="color:#d1d5db;font-size:1.125rem"></p></div><div class="space-y-12"><div class="flex flex-col items-start"><p class="text-xl font-semibold mb-2" style="color:#e5e7eb;font-size:1.25rem;font-weight:600">Company One</p><div style="width:80px;height:80px;background:linear-gradient(135deg, #374151 0%, #1f2937 100%);display:flex;align-items:center;justify-content:center;border-radius:12px;color:white;font-weight:bold;box-shadow:0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)" class="w-48 h-auto">CO</div></div><div class="flex flex-col items-start"><p class="text-lg font-semibold mb-2" style="color:#e5e7eb;font-size:1.125rem;font-weight:600">Company Two</p><div style="width:80px;height:80px;background:linear-gradient(135deg, #374151 0%, #1f2937 100%);display:flex;align-items:center;justify-content:center;border-radius:12px;color:white;font-weight:bold;box-shadow:0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)" class="w-64 h-auto">CT</div></div></div></div><div class="text-center space-y-6"><p class="text-xl" style="color:#e5e7eb;font-size:1.25rem">Ready to get started?</p><button style="background:pink;color:#FFFFFF" class="px-6 py-3 rounded-lg font-semibold transition ">Learn More</button></div></div></section><section style="background:#f8f7f7" class="py-8 px-6 border-t"><div class="flex flex-col items-center gap-2"><p class="text-sm text-gray-600">© 2025 Your Company. All rights reserved.</p><div class="text-sm text-gray-600">Built with<!-- --> <a href="https://lessgo.ai" target="_blank" rel="noopener noreferrer" class="text-blue-600">Lessgo.ai</a></div></div></section></div>
-
-## content
-
-{"layout":{"theme":{"colors":{"states":{"focus":{},"hover":{},"active":{},"disabled":{}},"semantic":{"info":"bg-blue-500","error":"bg-red-500","neutral":"bg-gray-500","success":"bg-green-500","warning":"bg-yellow-500"},"accentCSS":"bg-pink-600","baseColor":"gray","textColors":{"divider":{"body":"#374151","muted":"#4b5563","heading":"#111827"},"neutral":{"body":"#374151","muted":"#4b5563","heading":"#111827"},"primary":{"body":"#e5e7eb","muted":"#d1d5db","heading":"#f9fafb"},"secondary":{"body":"#e5e7eb","muted":"#d1d5db","heading":"#f9fafb"}},"accentColor":"pink","sectionBackgrounds":{"divider":"#ddd5d5","neutral":"#f8f7f7","primary":"#000000","secondary":"#544545"}},"corners":{"scale":{"full":9999,"large":16,"small":4,"medium":8},"radius":8},"spacing":{"unit":8,"scale":[0,4,8,12,16,20,24,32,40,48,64,80,96,128],"presets":{"lg":"1.5rem","md":"1rem","sm":"0.75rem","xl":"2rem","xs":"0.5rem","xxl":"3rem"}},"animations":{"easing":{"easeIn":"cubic-bezier(0.4, 0, 1, 1)","easeOut":"cubic-bezier(0, 0, 0.2, 1)","easeInOut":"cubic-bezier(0.4, 0, 0.2, 1)"},"enabled":true,"duration":{"fast":150,"slow":500,"medium":300},"reducedMotion":false},"typography":{"scale":"comfortable","bodyFont":"'Inter', sans-serif","lineHeight":1.5,"fontWeights":{"bold":700,"light":300,"medium":500,"normal":400,"semibold":600},"headingFont":"'Sora', sans-serif"}},"sections":["hero","cta","miscellaneous-1766162124815","footer"]},"content":{"cta":{"id":"cta","cta":{"size":"medium","type":"form","label":"Unlock my Early Access Benefits Now!","formId":"form-1766151206083","variant":"primary","behavior":"scrollTo","cta_text":"Unlock my Early Access Benefits Now!"},"layout":"CTAWithFormField","elements":{"cta_text":{"type":"text","content":"Unlock my Early Access Benefits Now!","editMode":"inline","metadata":{"buttonConfig":{"type":"form","formId":"form-1766151206083","behavior":"scrollTo","iconConfig":{"leadingSize":"md","trailingSize":"md"}}},"isEditable":true},"headline":{"type":"text","content":"<span style=\"font-size: 48px;\">Super Early Bird&nbsp;<span style=\"color:#00FF00;\">Access</span></span>","editMode":"inline","isEditable":true},"benefit_1":{"type":"text","content":"Super Early Bird Ticket Pricing","editMode":"inline","isEditable":true},"benefit_2":{"type":"text","content":"Meet and Greet Opportunity (limited)","editMode":"inline","isEditable":true},"benefit_3":{"type":"text","content":"Welcome drink on arrival","editMode":"inline","isEditable":true},"benefit_4":{"type":"text","content":"Priority Entry","editMode":"inline","isEditable":true},"benefit_5":{"type":"text","content":"Early Artist Reveal & Event Updates","editMode":"inline","isEditable":true},"cta_embed":{"type":"text","content":"form:form-1766151206083","editMode":"inline","metadata":{"behavior":"scrollTo"},"isEditable":false},"form_label":{"type":"text","content":"Available only to a limited early access group","editMode":"inline","isEditable":true},"subheadline":{"type":"text","content":"Lowest ticket pricing before public release","editMode":"inline","isEditable":true},"eyebrow_text":{"type":"text","props":{},"content":"<span class=\"a_GcMg font-feature-liga-off font-feature-clig-off font-feature-calt-off text-decoration-none text-strikethrough-none\" style=\"--Ys-XuQ: none; font-kerning: normal;\"><span style=\"text-align: center;\"><font color=\"rgba(0, 0, 0, 0)\"><span style=\"caret-color: rgb(255, 255, 255);\">10-04-2026. 08:00 PM. </span></font></span></span><font color=\"#ba0000\"><span style=\"font-size: 19.2px; caret-color: rgb(255, 255, 255);\">Turbinenhalle, Oberhausen</span></font>","editMode":"inline","metadata":{"addedAt":1766139954496,"version":1,"position":5,"isOptional":true,"lastModified":1766139954496,"addedManually":true,"optionalElementName":"eyebrow_text"},"isEditable":true},"privacy_text":{"type":"text","props":{},"content":"<span style=\"font-style: italic;\">By signing up, you agree to receive event-related updates .\nYour information will only be used for this event and will not be shared with third parties.</span>","editMode":"inline","metadata":{"addedAt":1766138902127,"version":1,"position":6,"isOptional":true,"lastModified":1766139954496,"addedManually":true,"optionalElementName":"privacy_text"},"isEditable":true},"trust_item_1":{"type":"text","content":"Event updates only","editMode":"inline","isEditable":true},"trust_item_2":{"type":"text","content":"GDPR compliant","editMode":"inline","isEditable":true},"trust_item_3":{"type":"text","content":"No spam. Opt out anytime","editMode":"inline","isEditable":true},"placeholder_text":{"type":"text","content":"Enter your best email","editMode":"inline","isEditable":true}},"aiMetadata":{"aiGenerated":true,"isCustomized":true,"lastGenerated":1766050212648,"excludedElements":[],"aiGeneratedElements":["headline","subheadline","cta_text","description"]},"editMetadata":{"isEditing":false,"isMovable":true,"isSelected":false,"isDeletable":true,"isDuplicable":true,"lastModified":1766050212635,"validationStatus":{"errors":[],"isValid":true,"warnings":[],"lastValidated":1766050212635,"missingRequired":[]},"completionPercentage":0},"backgroundType":"primary","sectionBackground":{"type":"theme","themeColor":"primary"}},"hero":{"id":"hero","layout":"minimalist","elements":{"headline":{"type":"text","content":"GLOBAL. INDIAN. <span style=\"color:rgb(0, 255, 0);\">ICON.</span> FIRST TIME IN GERMANY.","editMode":"inline","isEditable":true},"subheadline":{"type":"text","content":"Join Us for a Premium Bollywood Night at Stadium Scale in Düsseldorf.","editMode":"inline","isEditable":true}},"aiMetadata":{"aiGenerated":true,"isCustomized":true,"lastGenerated":1766050212641,"excludedElements":[],"aiGeneratedElements":["headline","subheadline","cta_text","description"]},"editMetadata":{"isEditing":false,"isMovable":true,"isSelected":false,"isDeletable":true,"isDuplicable":true,"lastModified":1766050212629,"validationStatus":{"errors":[],"isValid":true,"warnings":[],"lastValidated":1766050212629,"missingRequired":[]},"completionPercentage":0},"backgroundType":"primary"},"footer":{"id":"footer","layout":"SimpleFooter","elements":{"cta_text":"Get Started","headline":"Welcome to Entertainment & Gaming","copyright":{"type":"text","content":"© 2025 Ticketverz. All rights reserved.","editMode":"inline","isEditable":true},"description":"Discover how our platform can help you achieve your goals.","subheadline":"Transform your business with our innovative solution"},"aiMetadata":{"aiGenerated":true,"isCustomized":true,"lastGenerated":1766050212650,"excludedElements":[],"aiGeneratedElements":["headline","subheadline","cta_text","description"]},"editMetadata":{"isEditing":false,"isMovable":true,"isSelected":false,"isDeletable":true,"isDuplicable":true,"lastModified":1766050212636,"validationStatus":{"errors":[],"isValid":true,"warnings":[],"lastValidated":1766050212636,"missingRequired":[]},"completionPercentage":0},"backgroundType":"neutral"},"miscellaneous-1766162124815":{"id":"miscellaneous-1766162124815","cta":{"size":"medium","type":"form","label":"Unlock my early access benefits now!","formId":"form-1766171199950","variant":"primary","behavior":"scrollTo","cta_text":"Unlock my early access benefits now!"},"layout":"Announcement","elements":{"logo_1":{"type":"text","content":"/uploads/e205C_rZ8jmP/1766271445851-R7hZLgmoY-.webp","editMode":"inline","aiContext":{"instructions":"This is the logo_1 for the Miscellaneous / Announcements section","generationType":"creative","contextElements":["logo_1"],"generateVariations":false},"isEditable":true},"logo_2":{"type":"text","content":"/uploads/e205C_rZ8jmP/1766271476672-Fm3v3eq87T.webp","editMode":"inline","aiContext":{"instructions":"This is the logo_2 for the Miscellaneous / Announcements section","generationType":"creative","contextElements":["logo_2"],"generateVariations":false},"isEditable":true},"text_1":{"type":"text","content":"<span class=\"a_GcMg font-feature-liga-off font-feature-clig-off font-feature-calt-off text-decoration-none text-strikethrough-none\" style=\"color: rgba(0,255,0,var(--O42jJQ,1)); caret-color: rgb(0, 255, 0); --Ys-XuQ: none; font-kerning: normal;\">LINEUP</span>","editMode":"inline","aiContext":{"instructions":"This is the text_1 for the Miscellaneous / Announcements section","generationType":"creative","contextElements":["text_1"],"generateVariations":false},"isEditable":true,"validation":{"required":true,"minLength":5}},"text_2":{"type":"text","content":"<span class=\"a_GcMg font-feature-liga-off font-feature-clig-off font-feature-calt-off text-decoration-none text-strikethrough-none\" style=\"color: rgba(0,255,0,var(--O42jJQ,1)); caret-color: rgb(0, 255, 0); --Ys-XuQ: none; font-kerning: normal;\">CURATED BY</span>","editMode":"inline","aiContext":{"instructions":"This is the text_2 for the Miscellaneous / Announcements section","generationType":"creative","contextElements":["text_2"],"generateVariations":false},"isEditable":true,"validation":{"required":true,"minLength":5}},"cta_text":{"type":"button","content":"Unlock my early access benefits now!","editMode":"inline","metadata":{"buttonConfig":{"type":"form","formId":"form-1766171199950","behavior":"scrollTo","iconConfig":{"leadingSize":"md","trailingSize":"md"}}},"aiContext":{"instructions":"This is the cta_text for the Miscellaneous / Announcements section","generationType":"creative","contextElements":["cta_text"],"generateVariations":false},"isEditable":true,"validation":{"required":true,"minLength":5}},"headline":{"type":"headline","content":"<span class=\"a_GcMg font-feature-liga-off font-feature-clig-off font-feature-calt-off text-decoration-none text-strikethrough-none\" style=\"color: rgba(0,255,0,var(--O42jJQ,1)); caret-color: rgb(0, 255, 0); --Ys-XuQ: none; font-kerning: normal;\">WHO's PERFORMING?</span>","editMode":"inline","aiContext":{"instructions":"This is the headline for the Miscellaneous / Announcements section","generationType":"creative","contextElements":["headline"],"generateVariations":false},"isEditable":true,"validation":{"required":true,"minLength":10}},"cta_embed":{"type":"text","content":"form:form-1766171199950","editMode":"inline","metadata":{"behavior":"scrollTo"},"isEditable":false},"subheadline":{"type":"headline","content":"Culture. Live Music. Celebrity DJ Performances.","editMode":"inline","aiContext":{"instructions":"This is the subheadline for the Miscellaneous / Announcements section","generationType":"creative","contextElements":["subheadline"],"generateVariations":false},"isEditable":true},"above_cta_copy":{"type":"button","content":"<span class=\"a_GcMg font-feature-liga-off font-feature-clig-off font-feature-calt-off text-decoration-none text-strikethrough-none\" style=\"color: rgba(255,255,255,var(--O42jJQ,1)); caret-color: rgb(255, 255, 255); --Ys-XuQ: none; font-weight: 700; font-kerning: normal;\">Düsseldorf </span><span class=\"a_GcMg font-feature-liga-off font-feature-clig-off font-feature-calt-off text-decoration-none text-strikethrough-none\" style=\"color: rgba(0,255,0,var(--O42jJQ,1)); caret-color: rgb(0, 255, 0); --Ys-XuQ: none; font-weight: 700; font-kerning: normal;\">|</span><span class=\"a_GcMg font-feature-liga-off font-feature-clig-off font-feature-calt-off text-decoration-none text-strikethrough-none\" style=\"color: rgba(255,255,255,var(--O42jJQ,1)); caret-color: rgb(255, 255, 255); --Ys-XuQ: none; font-weight: 700; font-kerning: normal;\"> 10 Apr </span><span class=\"a_GcMg font-feature-liga-off font-feature-clig-off font-feature-calt-off text-decoration-none text-strikethrough-none\" style=\"color: rgba(0,255,0,var(--O42jJQ,1)); caret-color: rgb(0, 255, 0); --Ys-XuQ: none; font-weight: 700; font-kerning: normal;\">|</span><span class=\"a_GcMg font-feature-liga-off font-feature-clig-off font-feature-calt-off text-decoration-none text-strikethrough-none\" style=\"color: rgba(255,255,255,var(--O42jJQ,1)); caret-color: rgb(255, 255, 255); --Ys-XuQ: none; font-weight: 700; font-kerning: normal;\"> 08:00 PM</span>","editMode":"inline","aiContext":{"instructions":"This is the above_cta_copy for the Miscellaneous / Announcements section","generationType":"creative","contextElements":["above_cta_copy"],"generateVariations":false},"isEditable":true,"validation":{"required":true,"minLength":5}},"supporting_copy":{"type":"text","content":"<p class=\"cvGsUA direction-ltr align-start para-style-body\" style=\"--8sD0Kg: none; --cyV3ZQ: 29.3333px; --gJPlXQ: 1.4; --s8NbEA: p; line-height: 41px;\"><span style=\"color: rgba(255,255,255,var(--O42jJQ,1)); font-family: YAFdJvSyp_k_3, _fb_, auto; caret-color: rgb(255, 255, 255); font-size: 1.125rem;\"><br></span><font color=\"#ffffff\" face=\"YAFdJvSyp_k_3, _fb_, auto\"><span style=\"caret-color: rgb(255, 255, 255);\">We’ve curated a carefully selected lineup that blends culture, music, and high-energy performances.<br></span></font><br>The headline performance features a globally recognised Indian celebrity DJ.<br><br>It will be followed by multiple live acts and late-night DJ performances that keep the energy going.</p>","editMode":"inline","aiContext":{"instructions":"This is the supporting_copy for the Miscellaneous / Announcements section","generationType":"creative","contextElements":["supporting_copy"],"generateVariations":false},"isEditable":true,"validation":{"required":true,"minLength":5}}},"aiMetadata":{"aiGenerated":false,"isCustomized":true,"aiGeneratedElements":[]},"editMetadata":{"isEditing":false,"isMovable":true,"isSelected":false,"isDeletable":true,"isDuplicable":true,"validationStatus":{"errors":[],"isValid":true,"warnings":[],"lastValidated":1766162124816,"missingRequired":[]},"completionPercentage":0},"backgroundType":"primary","sectionBackground":{"type":"theme","themeColor":"primary"}}}}
-
-## themeValues
-
-{"muted":"gray-600","primary":"pink","background":"gray"}
-
-## computedDesign
-
-NULL
-
-## projectId
-
-cmjb8n53v0003lt7opxyztigr
-
+app-index.js:33 Warning: Did not expect server HTML to contain a <p> in <div>.
+    at div
+    at div
+    at div
+    at section
+    at AnnouncementPublished (Server)
+    at div
+    at LandingPagePublishedRenderer (Server)
+    at PublishedPage (Server)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at div
+    at PublishedLayout (Server)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at PostHogProvider (webpack-internal:///(app-pages-browser)/./node_modules/posthog-js/react/dist/esm/index.js:51:23)
+    at PostHogProvider (webpack-internal:///(app-pages-browser)/./src/providers/ph-provider.tsx:20:11)
+    at Provider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-context/dist/index.mjs:34:15)
+    at TooltipProvider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-tooltip/dist/index.mjs:58:13)
+    at body
+    at html
+    at __experimental_CheckoutProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/shared/dist/react/index.mjs:117:42)
+    at SWRConfig (webpack-internal:///(app-pages-browser)/./node_modules/swr/dist/_internal/config-context-client-BoS53ST9.mjs:554:13)
+    at OrganizationProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/shared/dist/react/index.mjs:129:3)
+    at ClerkContextProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:1448:11)
+    at ClerkProviderBase (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:1540:11)
+    at Hoc (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/chunk-3664V5SS.mjs:81:5)
+    at ClerkNextOptionsProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/client-boundary/NextOptionsContext.js:17:11)
+    at NextClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:60:13)
+    at ClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:127:13)
+    at ClerkProvider (Server)
+    at RootLayout (Server)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at DevRootNotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/dev-root-not-found-boundary.js:33:11)
+    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
+    at HotReload (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:321:11)
+    at Router (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:207:11)
+    at ErrorBoundaryHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at AppRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:585:13)
+    at ServerRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:112:27)
+    at Root (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:117:11)
+window.console.error @ app-index.js:33
+console.error @ hydration-error-info.js:63
+printWarning @ react-dom.development.js:94
+error @ react-dom.development.js:68
+warnForDeletedHydratableElement @ react-dom.development.js:35133
+didNotHydrateInstance @ react-dom.development.js:36252
+warnUnhydratedInstance @ react-dom.development.js:6795
+warnIfUnhydratedTailNodes @ react-dom.development.js:7414
+popHydrationState @ react-dom.development.js:7383
+completeWork @ react-dom.development.js:19764
+completeUnitOfWork @ react-dom.development.js:25963
+performUnitOfWork @ react-dom.development.js:25759
+workLoopConcurrent @ react-dom.development.js:25734
+renderRootConcurrent @ react-dom.development.js:25690
+performConcurrentWorkOnRoot @ react-dom.development.js:24504
+workLoop @ scheduler.development.js:256
+flushWork @ scheduler.development.js:225
+performWorkUntilDeadline @ scheduler.development.js:534
+app-index.js:33 Warning: An error occurred during hydration. The server HTML was replaced with client content in <#document>.
+window.console.error @ app-index.js:33
+console.error @ hydration-error-info.js:63
+printWarning @ react-dom.development.js:94
+error @ react-dom.development.js:68
+errorHydratingContainer @ react-dom.development.js:36301
+recoverFromConcurrentError @ react-dom.development.js:24593
+performConcurrentWorkOnRoot @ react-dom.development.js:24542
+workLoop @ scheduler.development.js:256
+flushWork @ scheduler.development.js:225
+performWorkUntilDeadline @ scheduler.development.js:534
+on-recoverable-error.js:20 Uncaught Error: Hydration failed because the initial UI does not match what was rendered on the server.
+See more info here: https://nextjs.org/docs/messages/react-hydration-error
+    at throwOnHydrationMismatch (react-dom.development.js:6981:9)
+    at popHydrationState (react-dom.development.js:7384:9)
+    at completeWork (react-dom.development.js:19764:31)
+    at completeUnitOfWork (react-dom.development.js:25963:14)
+    at performUnitOfWork (react-dom.development.js:25759:5)
+    at workLoopConcurrent (react-dom.development.js:25734:5)
+    at renderRootConcurrent (react-dom.development.js:25690:9)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24504:38)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+throwOnHydrationMismatch @ react-dom.development.js:6981
+popHydrationState @ react-dom.development.js:7384
+completeWork @ react-dom.development.js:19764
+completeUnitOfWork @ react-dom.development.js:25963
+performUnitOfWork @ react-dom.development.js:25759
+workLoopConcurrent @ react-dom.development.js:25734
+renderRootConcurrent @ react-dom.development.js:25690
+performConcurrentWorkOnRoot @ react-dom.development.js:24504
+workLoop @ scheduler.development.js:256
+flushWork @ scheduler.development.js:225
+performWorkUntilDeadline @ scheduler.development.js:534
+on-recoverable-error.js:20 Uncaught Error: Hydration failed because the initial UI does not match what was rendered on the server.
+See more info here: https://nextjs.org/docs/messages/react-hydration-error
+    at throwOnHydrationMismatch (react-dom.development.js:6981:9)
+    at popHydrationState (react-dom.development.js:7384:9)
+    at completeWork (react-dom.development.js:19764:31)
+    at completeUnitOfWork (react-dom.development.js:25963:14)
+    at performUnitOfWork (react-dom.development.js:25759:5)
+    at workLoopConcurrent (react-dom.development.js:25734:5)
+    at renderRootConcurrent (react-dom.development.js:25690:9)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24504:38)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+throwOnHydrationMismatch @ react-dom.development.js:6981
+popHydrationState @ react-dom.development.js:7384
+completeWork @ react-dom.development.js:19764
+completeUnitOfWork @ react-dom.development.js:25963
+performUnitOfWork @ react-dom.development.js:25759
+workLoopConcurrent @ react-dom.development.js:25734
+renderRootConcurrent @ react-dom.development.js:25690
+performConcurrentWorkOnRoot @ react-dom.development.js:24504
+workLoop @ scheduler.development.js:256
+flushWork @ scheduler.development.js:225
+performWorkUntilDeadline @ scheduler.development.js:534
+on-recoverable-error.js:20 Uncaught Error: Hydration failed because the initial UI does not match what was rendered on the server.
+See more info here: https://nextjs.org/docs/messages/react-hydration-error
+    at throwOnHydrationMismatch (react-dom.development.js:6981:9)
+    at popHydrationState (react-dom.development.js:7384:9)
+    at completeWork (react-dom.development.js:19764:31)
+    at completeUnitOfWork (react-dom.development.js:25963:14)
+    at performUnitOfWork (react-dom.development.js:25759:5)
+    at workLoopConcurrent (react-dom.development.js:25734:5)
+    at renderRootConcurrent (react-dom.development.js:25690:9)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24504:38)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+throwOnHydrationMismatch @ react-dom.development.js:6981
+popHydrationState @ react-dom.development.js:7384
+completeWork @ react-dom.development.js:19764
+completeUnitOfWork @ react-dom.development.js:25963
+performUnitOfWork @ react-dom.development.js:25759
+workLoopConcurrent @ react-dom.development.js:25734
+renderRootConcurrent @ react-dom.development.js:25690
+performConcurrentWorkOnRoot @ react-dom.development.js:24504
+workLoop @ scheduler.development.js:256
+flushWork @ scheduler.development.js:225
+performWorkUntilDeadline @ scheduler.development.js:534
+on-recoverable-error.js:20 Uncaught Error: Hydration failed because the initial UI does not match what was rendered on the server.
+See more info here: https://nextjs.org/docs/messages/react-hydration-error
+    at throwOnHydrationMismatch (react-dom.development.js:6981:9)
+    at popHydrationState (react-dom.development.js:7384:9)
+    at completeWork (react-dom.development.js:19764:31)
+    at completeUnitOfWork (react-dom.development.js:25963:14)
+    at performUnitOfWork (react-dom.development.js:25759:5)
+    at workLoopConcurrent (react-dom.development.js:25734:5)
+    at renderRootConcurrent (react-dom.development.js:25690:9)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24504:38)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+throwOnHydrationMismatch @ react-dom.development.js:6981
+popHydrationState @ react-dom.development.js:7384
+completeWork @ react-dom.development.js:19764
+completeUnitOfWork @ react-dom.development.js:25963
+performUnitOfWork @ react-dom.development.js:25759
+workLoopConcurrent @ react-dom.development.js:25734
+renderRootConcurrent @ react-dom.development.js:25690
+performConcurrentWorkOnRoot @ react-dom.development.js:24504
+workLoop @ scheduler.development.js:256
+flushWork @ scheduler.development.js:225
+performWorkUntilDeadline @ scheduler.development.js:534
+on-recoverable-error.js:20 Uncaught Error: Hydration failed because the initial UI does not match what was rendered on the server.
+See more info here: https://nextjs.org/docs/messages/react-hydration-error
+    at throwOnHydrationMismatch (react-dom.development.js:6981:9)
+    at popHydrationState (react-dom.development.js:7384:9)
+    at completeWork (react-dom.development.js:19764:31)
+    at completeUnitOfWork (react-dom.development.js:25963:14)
+    at performUnitOfWork (react-dom.development.js:25759:5)
+    at workLoopConcurrent (react-dom.development.js:25734:5)
+    at renderRootConcurrent (react-dom.development.js:25690:9)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24504:38)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+throwOnHydrationMismatch @ react-dom.development.js:6981
+popHydrationState @ react-dom.development.js:7384
+completeWork @ react-dom.development.js:19764
+completeUnitOfWork @ react-dom.development.js:25963
+performUnitOfWork @ react-dom.development.js:25759
+workLoopConcurrent @ react-dom.development.js:25734
+renderRootConcurrent @ react-dom.development.js:25690
+performConcurrentWorkOnRoot @ react-dom.development.js:24504
+workLoop @ scheduler.development.js:256
+flushWork @ scheduler.development.js:225
+performWorkUntilDeadline @ scheduler.development.js:534
+on-recoverable-error.js:20 Uncaught Error: Hydration failed because the initial UI does not match what was rendered on the server.
+See more info here: https://nextjs.org/docs/messages/react-hydration-error
+    at throwOnHydrationMismatch (react-dom.development.js:6981:9)
+    at popHydrationState (react-dom.development.js:7384:9)
+    at completeWork (react-dom.development.js:19764:31)
+    at completeUnitOfWork (react-dom.development.js:25963:14)
+    at performUnitOfWork (react-dom.development.js:25759:5)
+    at workLoopConcurrent (react-dom.development.js:25734:5)
+    at renderRootConcurrent (react-dom.development.js:25690:9)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24504:38)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+throwOnHydrationMismatch @ react-dom.development.js:6981
+popHydrationState @ react-dom.development.js:7384
+completeWork @ react-dom.development.js:19764
+completeUnitOfWork @ react-dom.development.js:25963
+performUnitOfWork @ react-dom.development.js:25759
+workLoopConcurrent @ react-dom.development.js:25734
+renderRootConcurrent @ react-dom.development.js:25690
+performConcurrentWorkOnRoot @ react-dom.development.js:24504
+workLoop @ scheduler.development.js:256
+flushWork @ scheduler.development.js:225
+performWorkUntilDeadline @ scheduler.development.js:534
+on-recoverable-error.js:20 Uncaught Error: Hydration failed because the initial UI does not match what was rendered on the server.
+See more info here: https://nextjs.org/docs/messages/react-hydration-error
+    at throwOnHydrationMismatch (react-dom.development.js:6981:9)
+    at popHydrationState (react-dom.development.js:7384:9)
+    at completeWork (react-dom.development.js:19764:31)
+    at completeUnitOfWork (react-dom.development.js:25963:14)
+    at performUnitOfWork (react-dom.development.js:25759:5)
+    at workLoopConcurrent (react-dom.development.js:25734:5)
+    at renderRootConcurrent (react-dom.development.js:25690:9)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24504:38)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+throwOnHydrationMismatch @ react-dom.development.js:6981
+popHydrationState @ react-dom.development.js:7384
+completeWork @ react-dom.development.js:19764
+completeUnitOfWork @ react-dom.development.js:25963
+performUnitOfWork @ react-dom.development.js:25759
+workLoopConcurrent @ react-dom.development.js:25734
+renderRootConcurrent @ react-dom.development.js:25690
+performConcurrentWorkOnRoot @ react-dom.development.js:24504
+workLoop @ scheduler.development.js:256
+flushWork @ scheduler.development.js:225
+performWorkUntilDeadline @ scheduler.development.js:534
+react-dom.development.js:16571 Uncaught Error: There was an error while hydrating. Because the error happened outside of a Suspense boundary, the entire root will switch to client rendering.
+See more info here: https://nextjs.org/docs/messages/react-hydration-error
+    at updateHostRoot (react-dom.development.js:16571:57)
+    at beginWork$1 (react-dom.development.js:18486:14)
+    at beginWork (react-dom.development.js:26927:14)
+    at performUnitOfWork (react-dom.development.js:25748:12)
+    at workLoopSync (react-dom.development.js:25464:5)
+    at renderRootSync (react-dom.development.js:25419:7)
+    at recoverFromConcurrentError (react-dom.development.js:24597:20)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24542:26)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+updateHostRoot @ react-dom.development.js:16571
+beginWork$1 @ react-dom.development.js:18486
+beginWork @ react-dom.development.js:26927
+performUnitOfWork @ react-dom.development.js:25748
+workLoopSync @ react-dom.development.js:25464
+renderRootSync @ react-dom.development.js:25419
+recoverFromConcurrentError @ react-dom.development.js:24597
+performConcurrentWorkOnRoot @ react-dom.development.js:24542
+workLoop @ scheduler.development.js:256
+flushWork @ scheduler.development.js:225
+performWorkUntilDeadline @ scheduler.development.js:534

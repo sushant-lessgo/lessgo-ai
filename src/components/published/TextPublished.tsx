@@ -30,15 +30,14 @@ export function HeadlinePublished({
   style
 }: HeadlinePublishedProps) {
   const Element = level;
+  const containsHTML = typeof value === 'string' && /<[^>]+>/.test(value);
 
-  // Handle HTML content (from rich text editor)
-  if (typeof value === 'string' && /<[^>]*>/g.test(value)) {
+  // If headline contains block HTML (unusual but possible), wrap in div to prevent invalid nesting
+  if (containsHTML) {
     return (
-      <Element
-        className={className}
-        style={style}
-        dangerouslySetInnerHTML={{ __html: value }}
-      />
+      <div className={className} style={style}>
+        <div dangerouslySetInnerHTML={{ __html: value }} suppressHydrationWarning={true} />
+      </div>
     );
   }
 
@@ -62,15 +61,20 @@ export function TextPublished({
   className = '',
   style
 }: TextPublishedProps) {
-  const Element = element;
+  // Detect if content contains HTML tags
+  const containsHTML = typeof value === 'string' && /<[^>]+>/.test(value);
+
+  // Auto-correct: if content has HTML, use div wrapper (not p) to prevent invalid nesting
+  const Element = containsHTML ? 'div' : element;
 
   // Handle HTML content (from rich text editor)
-  if (typeof value === 'string' && /<[^>]*>/g.test(value)) {
+  if (containsHTML) {
     return (
       <Element
         className={className}
         style={style}
         dangerouslySetInnerHTML={{ __html: value }}
+        suppressHydrationWarning={true}
       />
     );
   }

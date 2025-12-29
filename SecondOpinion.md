@@ -1,92 +1,175 @@
-✅ The publish path is still importing editor/client code
 
-Your server-side publish renderer is still pulling in files that use React hooks (useState/useEffect/useRef/createContext) and browser-only code. Next.js treats the publish renderer as a Server Component, so the moment it imports any hook-using module, you get:
+---
 
-“needs useState… but none of its parents are marked with ‘use client’ (server by default)”
+## TL;DR (what’s *actually* happening)
 
-The smoking gun is here:
+You **did the right thing** with `suppressHydrationWarning`, but the new error is **not the same problem**.
 
-Your LandingPagePublishedRenderer.tsx is importing the normal registry:
-import { getComponent, extractSectionType } from './componentRegistry';
-That means it drags in the entire editable component graph (which includes hook-based stuff).
+### The new error is **NOT** about HTML string mismatch
 
-And the errors you see are exactly those hook-based modules:
+It is about **invalid DOM structure caused by double `<p>` nesting**.
 
-EditableContent.tsx uses useState/useCallback/useMemo
+> **“Did not expect server HTML to contain a `<p>` in `<div>`”**
+> is React’s way of saying:
+> “You rendered a `<p>` tag *inside another `<p>`* (or inside something that becomes `<p>`).”
 
-HeaderLogo.tsx uses useState/useRef
+React **cannot hydrate invalid HTML**, even with `suppressHydrationWarning`.
 
-LogoEditableComponent.tsx uses useState/useRef
+---
 
-useEditStoreLegacy.ts uses createContext
+## Root Cause (very important)
 
-useLayoutComponent.ts uses useEffect
+### This line is the real culprit 👇
 
-CTAWithFormField.tsx uses useState/useEffect and imports EditableContent
+From **`Announcement.published.tsx`**:
 
-So yes: the publish renderer is still wired to the editable world.
+```tsx
+<TextPublished
+  value={supporting_copy}
+  element="p"          // ⛔️ problem
+  className="text-lg"
+  style={{ color: textColors.muted, fontSize: '1.125rem' }}
+/>
+```
 
-What Claude should do next (very конкрет steps)
-Step 1 — Fix the wrong registry import (this alone may drop most errors)
+But `supporting_copy` **already contains HTML** like:
 
-In:
-src/modules/generatedLanding/LandingPagePublishedRenderer.tsx
+```html
+<p class="cvGsUA direction-ltr ...">
+  We’ve curated a carefully selected lineup...
+</p>
+```
 
-Change:
+So the final HTML becomes:
 
-import { getComponent, extractSectionType } from './componentRegistry';
+```html
+<p>                ← TextPublished wrapper
+  <p>...</p>       ← content from editor
+</p>
+```
 
+❌ **Invalid HTML**
+❌ **Hydration is impossible**
+❌ `suppressHydrationWarning` cannot save this
 
-To:
+---
 
-import { getComponent, extractSectionType } from './componentRegistry.published';
+## Why this error appears only now
 
+Before:
 
-Because right now it’s still using the editable registry.
+* HTML was dumped via `dangerouslySetInnerHTML` at page root
+* Browser “fixed” invalid nesting silently
 
-Step 2 — Ensure componentRegistry.published.ts imports ONLY server-safe components
+Now:
 
-This is the part props cannot solve:
+* React Server Components + hydration
+* React enforces DOM correctness strictly
 
-Even if you pass different props, the import itself pulls in the module, and Next will statically analyze it.
+This is expected behavior.
+This is **not a Next.js bug**.
 
-So in componentRegistry.published.ts, make sure it does not import any of these:
+---
 
-EditableContent.tsx
+## The Correct Fix (do this, nothing else)
 
-HeaderLogo.tsx
+### Rule (lock this into your architecture)
 
-LogoEditableComponent.tsx
+> **If content may contain block-level HTML (`<p>`, `<div>`, `<ul>`):
+> NEVER wrap it in a `<p>` or heading element.**
 
-CTAWithFormField.tsx (your current one imports hooks + EditableContent)
+---
 
-Any UIBlock that imports useLayoutComponent, useEditStoreLegacy, etc.
+## Concrete Code Fix ✅
 
-Instead it must import files like:
+### Fix `TextPublished` usage for rich text
 
-CTAWithFormField.published.tsx (new)
+#### ❌ Current (wrong)
 
-HeaderLogo.published.tsx (new) or just inline <img/>
+```tsx
+<TextPublished
+  value={supporting_copy}
+  element="p"
+  className="text-lg"
+/>
+```
 
-etc.
+#### ✅ Correct
 
-Step 3 — Create “published-only” entry files for the remaining offenders (only where needed)
+```tsx
+<TextPublished
+  value={supporting_copy}
+  element="div"        // ✅ wrapper is div
+  className="text-lg"
+/>
+```
 
-You do not need to duplicate every UIBlock. Only the ones that currently import hooks/editing stuff at module top-level.
+This produces valid HTML:
 
-For your remaining errors, the minimum “published” files are likely:
+```html
+<div>
+  <p>...</p>
+</div>
+```
 
-src/modules/UIBlocks/PrimaryCTA/CTAWithFormField.published.tsx
-A pure component: no hooks, no edit store, no EditableContent imports.
+Perfectly hydratable.
 
-Replace HeaderLogo usage in published components with either:
+---
 
-a simple <img src=... />, or
+## Optional but Recommended: make this impossible to misuse
 
-src/components/ui/HeaderLogo.published.tsx (no hooks)
+Inside **`TextPublished.tsx`**, harden it:
 
-Same for logo:
+```tsx
+const containsHTML = typeof value === 'string' && /<[^>]+>/.test(value);
 
-LogoEditableComponent should never be imported in publish path; use a Logo.published.tsx or plain <img>.
+const Tag = containsHTML ? 'div' : element;
+```
 
-Important: don’t “branch inside the same file” (like if (published) return <Published/>) if the file still imports hooks at the top — because the server build fails before runtime.
+So even if someone passes `element="p"`, it auto-corrects.
+
+---
+
+## Why `suppressHydrationWarning` was still correct
+
+You **should keep it**, because:
+
+* Rich text HTML can differ in insignificant ways
+* ISR + editor content = unavoidable mismatch risk
+* This is the documented React pattern
+
+But:
+
+> `suppressHydrationWarning` **does NOT fix invalid DOM structure**
+
+---
+
+## Final Architecture Verdict (important for your confidence)
+
+You are **100% on the right architectural path**:
+
+✅ Server Components for published pages
+✅ JSON → React rendering (not static HTML blobs)
+✅ Client islands only where needed (forms)
+✅ Theme computed server-side
+✅ No client-side theme injection on `/p/*`
+
+What you hit is a **classic rich-text + React hydration trap**, not a design flaw.
+
+Every serious page builder (Webflow, Framer, Notion) has **exactly this rule**:
+
+> “Rich text must be rendered inside neutral containers.”
+
+---
+
+## Checklist to close this issue
+
+1. Change **all rich-text usages** to `element="div"`
+
+   * `supporting_copy`
+   * editor-generated paragraphs
+2. Keep `suppressHydrationWarning`
+3. Hard refresh
+4. Hydration errors disappear permanently
+
+---
