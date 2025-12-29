@@ -76,13 +76,26 @@ export default async function PublishedPage({ params }: PageProps) {
       slug: true,
       htmlContent: true,
       title: true,
+      userId: true,
+      content: true,
     },
   });
 
   if (!page) return notFound();
 
-  if (!page.htmlContent) {
-    // Fallback if htmlContent doesn't exist
+  // Backward compatibility: Use static HTML if exists and no content structure
+  if (page.htmlContent && !page.content) {
+    return (
+      <main
+        className="published-page"
+        dangerouslySetInnerHTML={{ __html: page.htmlContent }}
+      />
+    );
+  }
+
+  // Dynamic rendering with Server Components + Client Islands
+  if (!page.content) {
+    // Fallback if neither htmlContent nor content exists
     return (
       <div className="p-8 text-center">
         <h1 className="text-2xl font-bold mb-4">Page Not Ready</h1>
@@ -91,11 +104,16 @@ export default async function PublishedPage({ params }: PageProps) {
     );
   }
 
-  // Server-rendered HTML (no client component, zero JS)
+  const content = page.content as any;
+  const { LandingPagePublishedRenderer } = await import('@/modules/generatedLanding/LandingPagePublishedRenderer');
+
   return (
-    <main
-      className="published-page"
-      dangerouslySetInnerHTML={{ __html: page.htmlContent }}
+    <LandingPagePublishedRenderer
+      sections={content.layout?.sections || []}
+      content={content.content || {}}
+      theme={content.layout?.theme || {}}
+      publishedPageId={page.id}
+      pageOwnerId={page.userId}
     />
   );
 }

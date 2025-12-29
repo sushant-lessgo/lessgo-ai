@@ -1,9 +1,9 @@
 /**
  * CTAWithFormField - Published Version
  *
- * Server-safe component with ZERO hook imports
+ * Server-safe component with client-side form hydration
  * Used by componentRegistry.published.ts for SSR rendering
- * Form is static (Phase 1) - no functionality, just visual
+ * Phase 2: Interactive forms via FormIsland client component
  */
 
 import React from 'react';
@@ -11,9 +11,10 @@ import { LayoutComponentProps } from '@/types/storeTypes';
 import { CheckmarkIconPublished } from '@/components/published/CheckmarkIconPublished';
 import { getPublishedTextColors, getPublishedTypographyStyles } from '@/lib/publishedTextColors';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
+import { FormIsland } from '@/components/published/FormIsland';
 
 export default function CTAWithFormFieldPublished(props: LayoutComponentProps) {
-  const { sectionId, backgroundType, sectionBackgroundCSS, theme } = props;
+  const { sectionId, backgroundType, sectionBackgroundCSS, theme, publishedPageId, pageOwnerId } = props;
 
   // Extract content
   const headline = props.headline || 'Get Started Today';
@@ -77,16 +78,19 @@ export default function CTAWithFormFieldPublished(props: LayoutComponentProps) {
             )}
           </div>
 
-          {/* Right Column - Static Form */}
+          {/* Right Column - Interactive Form Island */}
           <div className="bg-gray-100 rounded-2xl p-8 shadow-xl border border-gray-200 mt-12 lg:mt-0">
-            <TextPublished value={form_label} element="div" className="text-gray-700 font-semibold mb-4 block" style={{ fontSize: '1rem' }} />
-            <div className="mb-4">
-              <input type="email" placeholder={placeholder_text} disabled className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-400 cursor-not-allowed" />
-            </div>
-            <button disabled style={{ background: ctaBg, color: ctaText, opacity: 0.7 }} className="w-full px-6 py-3 rounded-lg font-semibold cursor-not-allowed">
-              {cta_text}
-            </button>
-            <TextPublished value={privacy_text} element="p" className="text-center text-xs mt-4" style={{ color: textColors.muted }} />
+            <FormIsland
+              formId={`form-${sectionId}`}
+              submitButtonText={cta_text}
+              submitButtonColor={ctaBg}
+              textColor={ctaText}
+              publishedPageId={publishedPageId || ''}
+              pageOwnerId={pageOwnerId || ''}
+              placeholderText={placeholder_text}
+              formLabel={form_label}
+              privacyText={privacy_text}
+            />
 
             {/* Trust Indicators */}
             {trustItems.length > 0 && (

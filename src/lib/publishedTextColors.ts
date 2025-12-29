@@ -74,7 +74,7 @@ export function getPublishedTextColors(
  * @returns React.CSSProperties with fontSize, lineHeight, fontWeight, fontFamily, letterSpacing
  */
 export function getPublishedTypographyStyles(
-  variant: 'h1' | 'h2' | 'h3' | 'h4' | 'hero' | 'display' | 'body' | 'body-lg' | 'body-sm',
+  variant: 'h1' | 'h2' | 'h3' | 'h4' | 'hero' | 'display' | 'body' | 'body-lg' | 'body-sm' | 'button' | 'label',
   theme: any
 ): React.CSSProperties {
 

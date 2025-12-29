@@ -337,6 +337,7 @@ export interface LayoutComponentProps {
   manualThemeOverride?: 'warm' | 'cool' | 'neutral'; // ✅ NEW: Manual theme override from store
   publishedPageId?: string; // For form submissions
   pageOwnerId?: string; // For form submissions
+  [key: string]: any; // ✅ Phase 2: Allow dynamic content props from flattened elements
 }
 
 /**

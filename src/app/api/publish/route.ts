@@ -7,9 +7,6 @@ import { PublishSchema, sanitizeForLogging } from '@/lib/validation';
 import { createSecureResponse, validateSlug, sanitizeHtmlContent, verifyProjectAccess } from '@/lib/security';
 import { withPublishRateLimit } from '@/lib/rateLimit';
 import { getUserPlan, checkLimit } from '@/lib/planManager';
-import { generateThemeCSS } from '@/lib/themeUtils';
-import React from 'react';
-import { LandingPagePublishedRenderer } from '@/modules/generatedLanding/LandingPagePublishedRenderer';
 
 async function publishHandler(req: NextRequest) {
   const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
@@ -49,25 +46,8 @@ async function publishHandler(req: NextRequest) {
       select: { id: true }
     });
 
-    // SERVER-SIDE RENDERING: Generate HTML from content structure
-    // Dynamic import to bypass Next.js build-time module analysis
-    const { renderToString } = await import('react-dom/server');
-
-    const reactHtml = renderToString(
-      React.createElement(LandingPagePublishedRenderer, {
-        sections: content.layout.sections,
-        content: content.content,
-        theme: content.layout.theme,
-      })
-    );
-
-    const themeCSS = generateThemeCSS({
-      primary: content.layout.theme?.colors?.accentColor || '#3B82F6',
-      background: content.layout.theme?.colors?.sectionBackgrounds?.primary || '#FFFFFF',
-      muted: content.layout.theme?.colors?.textSecondary || '#6B7280'
-    });
-
-    const htmlContent = `${themeCSS}${reactHtml}`;
+    // Phase 2: No longer generating htmlContent - using dynamic rendering
+    // Published pages now render on-demand via React Server Components
 
     // 🔍 Check for existing published page
     const existing = await prisma.publishedPage.findUnique({ where: { slug } });
@@ -80,7 +60,7 @@ async function publishHandler(req: NextRequest) {
       await prisma.publishedPage.update({
         where: { slug },
         data: {
-          htmlContent,  // Server-side rendered HTML
+          htmlContent: '',  // Phase 2: Empty for dynamic rendering
           title,
           content: content as any,
           themeValues: themeValues as any,
@@ -109,7 +89,7 @@ async function publishHandler(req: NextRequest) {
         data: {
           userId,
           slug,
-          htmlContent,  // Server-side rendered HTML
+          htmlContent: '',  // Phase 2: Empty for dynamic rendering
           title,
           content: content as any,
           themeValues: themeValues as any,

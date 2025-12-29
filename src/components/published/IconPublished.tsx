@@ -46,10 +46,11 @@ export function IconPublished({ icon, color, size = 24, className }: IconPublish
   // Handle Lucide icons
   if (decoded.type === 'lucide') {
     const iconName = lucideNameToPascalCase(decoded.name);
-    const LucideIcon = LucideIcons[iconName as keyof typeof LucideIcons];
+    const LucideIcon = LucideIcons[iconName as keyof typeof LucideIcons] as React.ComponentType<any>;
 
     if (LucideIcon && typeof LucideIcon !== 'string') {
-      return <LucideIcon size={size} color={color} className={className} />;
+      const IconComponent = LucideIcon;
+      return <IconComponent size={size} color={color} className={className} />;
     }
 
     // Fallback if Lucide icon not found
