@@ -794,7 +794,7 @@ className="px-6 py-3 rounded-lg font-semibold"
 - [x] Convert starter UIBlocks (Minimalist, Announcement, CTAWithFormField, SimpleFooter)
 - [x] Document conversion playbook
 
-### Phase 2 📋 PLANNED
+### Phase 2 📋 complete
 - [ ] Create FormIsland component
 - [ ] Update CTAWithFormField.published.tsx to use FormIsland
 - [ ] Pass publishedPageId and pageOwnerId to sections

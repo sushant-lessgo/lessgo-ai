@@ -19,32 +19,97 @@ import React from 'react';
 
 // Hero
 import MinimalistPublished from '@/modules/UIBlocks/Hero/Minimalist.published';
+import CenterStackedPublished from '@/modules/UIBlocks/Hero/centerStacked.published';
+import ImageFirstPublished from '@/modules/UIBlocks/Hero/imageFirst.published';
+import LeftCopyRightImagePublished from '@/modules/UIBlocks/Hero/leftCopyRightImage.published';
+import SplitScreenPublished from '@/modules/UIBlocks/Hero/splitScreen.published';
+
+// Header
+import CenteredLogoHeaderPublished from '@/modules/UIBlocks/Header/CenteredLogoHeader.published';
+import FullNavHeaderPublished from '@/modules/UIBlocks/Header/FullNavHeader.published';
+import MinimalNavHeaderPublished from '@/modules/UIBlocks/Header/MinimalNavHeader.published';
+import NavWithCTAHeaderPublished from '@/modules/UIBlocks/Header/NavWithCTAHeader.published';
 
 // Miscellaneous
 import AnnouncementPublished from '@/modules/UIBlocks/Miscellaneous/Announcement.published';
 
 // Primary CTA
 import CTAWithFormFieldPublished from '@/modules/UIBlocks/PrimaryCTA/CTAWithFormField.published';
+import VisualCTAWithMockupPublished from '@/modules/UIBlocks/PrimaryCTA/VisualCTAWithMockup.published';
 
 // Footer
 import SimpleFooterPublished from '@/modules/UIBlocks/Footer/SimpleFooter.published';
+import ContactFooterPublished from '@/modules/UIBlocks/Footer/ContactFooter.published';
+import LinksAndSocialFooterPublished from '@/modules/UIBlocks/Footer/LinksAndSocialFooter.published';
+import MultiColumnFooterPublished from '@/modules/UIBlocks/Footer/MultiColumnFooter.published';
+
+// Problem
+import StackedPainBulletsPublished from '@/modules/UIBlocks/Problem/StackedPainBullets.published';
+
+// Results
+import OutcomeIconsPublished from '@/modules/UIBlocks/Results/OutcomeIcons.published';
+
+// Features
+import IconGridPublished from '@/modules/UIBlocks/Features/IconGrid.published';
+
+// HowItWorks
+import AccordionStepsPublished from '@/modules/UIBlocks/HowItWorks/AccordionSteps.published';
+
+// FounderNote
+import FounderCardWithQuotePublished from '@/modules/UIBlocks/FounderNote/FounderCardWithQuote.published';
+
+// FAQ
+import AccordionFAQPublished from '@/modules/UIBlocks/FAQ/AccordionFAQ.published';
 
 // Registry structure - ONLY server-safe published components
 const publishedComponentRegistry: Record<string, Record<string, React.ComponentType<any>>> = {
   hero: {
     minimalist: MinimalistPublished,
+    centerstacked: CenterStackedPublished,
+    imagefirst: ImageFirstPublished,
+    leftcopyrightimage: LeftCopyRightImagePublished,
+    splitscreen: SplitScreenPublished,
+  },
+  header: {
+    centeredlogoheader: CenteredLogoHeaderPublished,
+    fullnavheader: FullNavHeaderPublished,
+    minimalnavheader: MinimalNavHeaderPublished,
+    navwithctaheader: NavWithCTAHeaderPublished,
   },
   miscellaneous: {
     announcement: AnnouncementPublished,
   },
   primarycta: {
     ctawithformfield: CTAWithFormFieldPublished,
+    visualctawithmockup: VisualCTAWithMockupPublished,
   },
   cta: {
     ctawithformfield: CTAWithFormFieldPublished,
+    visualctawithmockup: VisualCTAWithMockupPublished,
   },
   footer: {
     simplefooter: SimpleFooterPublished,
+    contactfooter: ContactFooterPublished,
+    linksandsocialfooter: LinksAndSocialFooterPublished,
+    multicolumnfooter: MultiColumnFooterPublished,
+  },
+  problem: {
+    stackedpainbullets: StackedPainBulletsPublished,
+  },
+  results: {
+    outcomeicons: OutcomeIconsPublished,
+  },
+  features: {
+    icongrid: IconGridPublished,
+  },
+  howitworks: {
+    accordionsteps: AccordionStepsPublished,
+  },
+  foundernote: {
+    foundercardwithquote: FounderCardWithQuotePublished,
+  },
+  faq: {
+    accordionfaq: AccordionFAQPublished,
   },
 };
 
