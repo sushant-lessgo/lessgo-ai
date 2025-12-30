@@ -12,6 +12,7 @@ import { CheckmarkIconPublished } from '@/components/published/CheckmarkIconPubl
 import { getPublishedTextColors, getPublishedTypographyStyles } from '@/lib/publishedTextColors';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { FormIsland } from '@/components/published/FormIsland';
+import { tailwindToHex } from '@/lib/themeUtils';
 
 export default function CTAWithFormFieldPublished(props: LayoutComponentProps) {
   const { sectionId, backgroundType, sectionBackgroundCSS, theme, publishedPageId, pageOwnerId } = props;
@@ -45,7 +46,9 @@ export default function CTAWithFormFieldPublished(props: LayoutComponentProps) {
   // Colors
   const textColors = getPublishedTextColors(backgroundType || 'secondary', theme, sectionBackgroundCSS);
   const h2Typography = getPublishedTypographyStyles('h2', theme);
-  const ctaBg = theme?.colors?.accentColor || '#3B82F6';
+  const ctaBg = theme?.colors?.accentCSS
+    ? tailwindToHex(theme.colors.accentCSS)
+    : theme?.colors?.accentColor || '#DB2777';
   const ctaText = '#FFFFFF';
 
   return (

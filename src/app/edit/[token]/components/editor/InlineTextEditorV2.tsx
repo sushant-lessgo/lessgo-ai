@@ -105,6 +105,29 @@ export function InlineTextEditorV2({
     hideToolbar();
   };
 
+  // Handle paste - strip formatting to plain text
+  const handlePaste = (e: React.ClipboardEvent<HTMLElement>) => {
+    e.preventDefault();
+
+    // Get plain text from clipboard
+    const text = e.clipboardData.getData('text/plain');
+
+    // Insert at cursor position
+    const selection = window.getSelection();
+    if (!selection?.rangeCount) return;
+
+    selection.deleteFromDocument();
+    const range = selection.getRangeAt(0);
+    const textNode = document.createTextNode(text);
+    range.insertNode(textNode);
+
+    // Move cursor to end of inserted text
+    range.setStartAfter(textNode);
+    range.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(range);
+  };
+
   // Handle keyboard shortcuts
   const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
     // Enter key behavior (save for headlines, newline for text)
@@ -148,6 +171,7 @@ export function InlineTextEditorV2({
       suppressContentEditableWarning
       onFocus={handleFocus}
       onBlur={handleBlur}
+      onPaste={handlePaste}
       onKeyDown={handleKeyDown}
       onClick={() => {
         // Make element editable on click if not already editing

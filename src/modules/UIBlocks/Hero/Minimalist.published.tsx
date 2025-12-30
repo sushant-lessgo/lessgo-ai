@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getPublishedTypographyStyles } from '@/lib/publishedTextColors';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 
 export default function MinimalistPublished(props: LayoutComponentProps) {
@@ -17,10 +16,6 @@ export default function MinimalistPublished(props: LayoutComponentProps) {
   const headline = props.headline || 'Your Vision, Realized';
   const subheadline = props.subheadline || 'Experience clarity in simplicity';
   const imageSrc = props.minimalist_hero_image || '/Dusseldorf-event.avif';
-
-  // Typography styles
-  const headlineTypography = getPublishedTypographyStyles('hero', theme);
-  const subheadlineTypography = getPublishedTypographyStyles('body-lg', theme);
 
   const textColor = '#FFFFFF';
 
@@ -59,9 +54,7 @@ export default function MinimalistPublished(props: LayoutComponentProps) {
               level="h1"
               className="text-center leading-[1.1]"
               style={{
-                textAlign: 'center',
-                color: textColor,
-                ...headlineTypography
+                color: textColor
               }}
             />
           </div>
@@ -75,9 +68,7 @@ export default function MinimalistPublished(props: LayoutComponentProps) {
               element="p"
               className="text-justify text-2xl md:text-4xl"
               style={{
-                textAlign: 'center',
-                color: textColor,
-                ...subheadlineTypography
+                color: textColor
               }}
             />
           </div>

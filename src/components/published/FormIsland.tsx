@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { TextPublished } from './TextPublished';
 
 interface FormIslandProps {
   formId: string;
@@ -17,7 +18,7 @@ interface FormIslandProps {
 export function FormIsland({
   formId,
   submitButtonText,
-  submitButtonColor = '#3B82F6',
+  submitButtonColor = '#DB2777',
   textColor = '#FFFFFF',
   publishedPageId,
   pageOwnerId,
@@ -114,9 +115,11 @@ export function FormIsland({
       )}
 
       {privacyText && (
-        <p className="text-center text-xs text-gray-500 mt-2">
-          {privacyText}
-        </p>
+        <TextPublished
+          value={privacyText}
+          element="p"
+          className="text-center text-xs text-gray-500 mt-2"
+        />
       )}
     </form>
   );

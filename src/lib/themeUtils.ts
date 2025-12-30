@@ -94,3 +94,102 @@ export function generateInlineStyles(theme: any): Record<string, string> {
     '--landing-text-muted': textSecondary,
   };
 }
+
+/**
+ * Convert Tailwind color class to hex value
+ * Adapted from BackgroundPatternAnalyzer.ts
+ * Used for published pages where inline styles require hex colors
+ *
+ * @param tailwindClass - Tailwind class like 'bg-pink-600' or 'pink-600'
+ * @returns Hex color value like '#DB2777'
+ *
+ * @example
+ * ```typescript
+ * tailwindToHex('bg-pink-600') // '#DB2777'
+ * tailwindToHex('purple-500')  // '#A855F7'
+ * ```
+ */
+export function tailwindToHex(tailwindClass: string): string {
+  // Strip 'bg-' or 'from-' or 'to-' prefix if present
+  const colorName = tailwindClass.replace(/^(bg-|from-|to-)/, '');
+
+  const colorMap: Record<string, string> = {
+    // Pink (needed for accentCSS)
+    'pink-500': '#EC4899',
+    'pink-600': '#DB2777',
+    'pink-700': '#BE185D',
+    'pink-800': '#9F1239',
+
+    // Rose
+    'rose-500': '#F43F5E',
+    'rose-600': '#E11D48',
+    'rose-700': '#BE123C',
+
+    // Purple (from BackgroundPatternAnalyzer)
+    'purple-500': '#A855F7',
+    'purple-600': '#9333EA',
+    'purple-700': '#7C3AED',
+    'purple-800': '#6B21A8',
+
+    // Blue (from BackgroundPatternAnalyzer)
+    'blue-500': '#3B82F6',
+    'blue-600': '#2563EB',
+    'blue-700': '#1D4ED8',
+    'blue-800': '#1E40AF',
+
+    // Indigo
+    'indigo-500': '#6366F1',
+    'indigo-600': '#4F46E5',
+    'indigo-700': '#4338CA',
+    'indigo-800': '#3730A3',
+
+    // Violet
+    'violet-500': '#8B5CF6',
+    'violet-600': '#7C3AED',
+    'violet-700': '#6D28D9',
+
+    // Teal
+    'teal-500': '#14B8A6',
+    'teal-600': '#0D9488',
+    'teal-700': '#0F766E',
+
+    // Cyan
+    'cyan-500': '#06B6D4',
+    'cyan-600': '#0891B2',
+    'cyan-700': '#0E7490',
+
+    // Emerald
+    'emerald-500': '#10B981',
+    'emerald-600': '#059669',
+    'emerald-700': '#047857',
+
+    // Green
+    'green-500': '#22C55E',
+    'green-600': '#16A34A',
+    'green-700': '#15803D',
+
+    // Amber
+    'amber-500': '#F59E0B',
+    'amber-600': '#D97706',
+    'amber-700': '#B45309',
+
+    // Orange
+    'orange-500': '#F97316',
+    'orange-600': '#EA580C',
+    'orange-700': '#C2410C',
+
+    // Red
+    'red-500': '#EF4444',
+    'red-600': '#DC2626',
+    'red-700': '#B91C1C',
+
+    // Gray
+    'gray-500': '#6B7280',
+    'gray-600': '#4B5563',
+    'gray-700': '#374151',
+    'gray-800': '#1F2937',
+    'gray-900': '#111827',
+  };
+
+  return colorMap[colorName] || '#DB2777'; // Default to pink-600
+}

@@ -27,11 +27,15 @@ interface LogoPublishedProps {
 
 export function LogoPublished({ logoUrl, companyName, size = 'md', className }: LogoPublishedProps) {
   // Size mappings matching LogoEditableComponent pattern
+  // Only use inline sizes if no className provided (className takes precedence)
   const sizeStyles = {
     sm: { width: '48px', height: '48px' },
     md: { width: '64px', height: '64px' },
     lg: { width: '80px', height: '80px' }
   };
+
+  // Use inline styles only if className not provided
+  const inlineSizeStyles = className ? {} : sizeStyles[size];
 
   // Gradient colors matching LogoEditableComponent (lines 50-55)
   const gradients = [
@@ -55,7 +59,7 @@ export function LogoPublished({ logoUrl, companyName, size = 'md', className }: 
     return (
       <div
         style={{
-          ...sizeStyles[size],
+          ...inlineSizeStyles,
           background: gradient,
           display: 'flex',
           alignItems: 'center',
@@ -77,7 +81,7 @@ export function LogoPublished({ logoUrl, companyName, size = 'md', className }: 
       src={logoUrl}
       alt={`${companyName} logo`}
       style={{
-        ...sizeStyles[size],
+        ...inlineSizeStyles,
         objectFit: 'contain'
       }}
       className={className}
