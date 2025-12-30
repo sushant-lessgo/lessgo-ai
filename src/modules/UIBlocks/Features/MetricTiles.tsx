@@ -13,6 +13,8 @@ import {
 } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface MetricTilesContent {
   headline: string;
@@ -128,16 +130,55 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: 'Based on independent analysis of 500+ enterprise implementations' 
   },
-  show_roi_summary: { 
-    type: 'boolean' as const, 
-    default: true 
+  show_roi_summary: {
+    type: 'boolean' as const,
+    default: true
   }
 };
 
-const MetricTile = React.memo(({ 
-  title, 
-  metric, 
-  label, 
+// Theme-based color mappings for all styled elements
+const getMetricTilesThemeColors = (theme: UIBlockTheme) => {
+  return {
+    warm: {
+      metricGradients: [
+        'from-orange-400 to-orange-600',
+        'from-orange-500 to-red-600',
+        'from-orange-600 to-red-700',
+        'from-red-500 to-orange-600'
+      ],
+      roiBgGradient: 'from-orange-50 via-red-50 to-orange-50',
+      roiBorder: 'border-orange-100',
+      roiMetricColors: ['text-orange-600', 'text-red-600', 'text-orange-700']
+    },
+    cool: {
+      metricGradients: [
+        'from-blue-400 to-blue-600',
+        'from-blue-500 to-indigo-600',
+        'from-indigo-500 to-blue-600',
+        'from-blue-600 to-indigo-700'
+      ],
+      roiBgGradient: 'from-blue-50 via-indigo-50 to-blue-50',
+      roiBorder: 'border-blue-100',
+      roiMetricColors: ['text-blue-600', 'text-indigo-600', 'text-blue-700']
+    },
+    neutral: {
+      metricGradients: [
+        'from-gray-400 to-gray-600',
+        'from-slate-500 to-gray-600',
+        'from-gray-500 to-slate-600',
+        'from-slate-600 to-gray-700'
+      ],
+      roiBgGradient: 'from-gray-50 via-slate-50 to-gray-50',
+      roiBorder: 'border-gray-100',
+      roiMetricColors: ['text-gray-600', 'text-slate-600', 'text-gray-700']
+    }
+  }[theme];
+};
+
+const MetricTile = React.memo(({
+  title,
+  metric,
+  label,
   description,
   index,
   colorTokens,
@@ -152,7 +193,8 @@ const MetricTile = React.memo(({
   onTitleEdit,
   onMetricEdit,
   onLabelEdit,
-  onDescriptionEdit
+  onDescriptionEdit,
+  theme
 }: {
   title: string;
   metric: string;
@@ -172,6 +214,7 @@ const MetricTile = React.memo(({
   onMetricEdit: (index: number, value: string) => void;
   onLabelEdit: (index: number, value: string) => void;
   onDescriptionEdit: (index: number, value: string) => void;
+  theme: UIBlockTheme;
 }) => {
   
   // Get metric icon from content fields
@@ -185,14 +228,10 @@ const MetricTile = React.memo(({
     return iconFields[index] || '📊';
   };
 
+  const themeColors = getMetricTilesThemeColors(theme);
+
   const getGradientForIndex = (index: number) => {
-    const gradients = [
-      'from-blue-500 to-indigo-600',
-      'from-green-500 to-emerald-600', 
-      'from-purple-500 to-violet-600',
-      'from-orange-500 to-red-600'
-    ];
-    return gradients[index % gradients.length];
+    return themeColors.metricGradients[index % themeColors.metricGradients.length];
   };
 
   return (
@@ -331,6 +370,27 @@ export default function MetricTiles(props: LayoutComponentProps) {
   const h3Style = getTypographyStyle('h3');
   const bodyLgStyle = getTypographyStyle('body-lg');
 
+  // Detect theme: manual override > auto-detection > neutral fallback
+  const theme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  React.useEffect(() => {
+    console.log('🎨 MetricTiles theme detection:', {
+      sectionId,
+      hasManualOverride: !!props.manualThemeOverride,
+      manualTheme: props.manualThemeOverride,
+      hasUserContext: !!props.userContext,
+      userContext: props.userContext,
+      finalTheme: theme
+    });
+  }, [theme, props.manualThemeOverride, props.userContext, sectionId]);
+
+  // Get theme colors for ROI section
+  const themeColors = getMetricTilesThemeColors(theme);
+
   // Parse feature data using utility functions
   const featureTitles = parsePipeData(blockContent.feature_titles);
   const featureMetrics = parsePipeData(blockContent.feature_metrics);
@@ -450,6 +510,7 @@ export default function MetricTiles(props: LayoutComponentProps) {
               onMetricEdit={handleMetricEdit}
               onLabelEdit={handleLabelEdit}
               onDescriptionEdit={handleDescriptionEdit}
+              theme={theme}
             />
           ))}
           
@@ -496,7 +557,7 @@ export default function MetricTiles(props: LayoutComponentProps) {
 
         {/* ROI Summary - Editable */}
         {blockContent.show_roi_summary !== false && (blockContent.roi_summary_title || mode === 'edit') && (
-          <div className="mt-12 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-8 border border-blue-100">
+          <div className={`mt-12 bg-gradient-to-r ${themeColors.roiBgGradient} rounded-2xl p-8 border ${themeColors.roiBorder}`}>
             <div className="text-center">
               <EditableAdaptiveText
                 mode={mode}
@@ -527,7 +588,7 @@ export default function MetricTiles(props: LayoutComponentProps) {
                       backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                       colorTokens={colorTokens}
                       variant="body"
-                      className="text-4xl font-bold text-blue-600 mb-2"
+                      className={`text-4xl font-bold ${themeColors.roiMetricColors[0]} mb-2`}
                       placeholder="Metric 1"
                       sectionBackground={sectionBackground}
                       data-section-id={sectionId}
@@ -574,7 +635,7 @@ export default function MetricTiles(props: LayoutComponentProps) {
                       backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                       colorTokens={colorTokens}
                       variant="body"
-                      className="text-4xl font-bold text-green-600 mb-2"
+                      className={`text-4xl font-bold ${themeColors.roiMetricColors[1]} mb-2`}
                       placeholder="Metric 2"
                       sectionBackground={sectionBackground}
                       data-section-id={sectionId}
@@ -621,7 +682,7 @@ export default function MetricTiles(props: LayoutComponentProps) {
                       backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                       colorTokens={colorTokens}
                       variant="body"
-                      className="text-4xl font-bold text-purple-600 mb-2"
+                      className={`text-4xl font-bold ${themeColors.roiMetricColors[2]} mb-2`}
                       placeholder="Metric 3"
                       sectionBackground={sectionBackground}
                       data-section-id={sectionId}

@@ -14,6 +14,8 @@ import {
 } from '@/components/layout/ComponentRegistry';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface CarouselContent {
   headline: string;
@@ -145,9 +147,9 @@ const CONTENT_SCHEMA = {
   feature_tag_5: { type: 'string' as const, default: '' }
 };
 
-const CarouselSlide = React.memo(({ 
-  title, 
-  description, 
+const CarouselSlide = React.memo(({
+  title,
+  description,
   visual,
   tag,
   index,
@@ -159,7 +161,8 @@ const CarouselSlide = React.memo(({
   handleImageToolbar,
   h2Style,
   bodyLgStyle,
-  onRemove
+  onRemove,
+  getBenefitColors
 }: {
   title: string;
   description: string;
@@ -175,6 +178,7 @@ const CarouselSlide = React.memo(({
   h2Style: any;
   bodyLgStyle: any;
   onRemove?: () => void;
+  getBenefitColors: (index: number) => { text: string; bg: string };
 }) => {
   
   const VisualPlaceholder = React.memo(({ onClick }: { onClick?: (e: React.MouseEvent) => void }) => (
@@ -305,7 +309,7 @@ const CarouselSlide = React.memo(({
         
         <div className="flex items-center space-x-4">
           {((blockContent.benefit_1 && blockContent.benefit_1 !== '___REMOVED___') || mode === 'edit') && (
-            <div className="flex items-center space-x-2 text-green-600 group/benefit-item relative">
+            <div className={`flex items-center space-x-2 ${getBenefitColors(0).text} group/benefit-item relative`}>
               <IconEditableText
                 mode={mode}
                 value={blockContent.benefit_icon_1 || '✅'}
@@ -313,7 +317,7 @@ const CarouselSlide = React.memo(({
                 backgroundType="neutral"
                 colorTokens={colorTokens}
                 iconSize="sm"
-                className="text-green-600 text-lg"
+                className={`${getBenefitColors(0).text} text-lg`}
                 sectionId={sectionId}
                 elementKey="benefit_icon_1"
               />
@@ -351,7 +355,7 @@ const CarouselSlide = React.memo(({
             </div>
           )}
           {(blockContent.benefit_2 || mode === 'edit') && blockContent.benefit_2 !== '___REMOVED___' && (
-            <div className="flex items-center space-x-2 text-blue-600 group/benefit-item relative">
+            <div className={`flex items-center space-x-2 ${getBenefitColors(1).text} group/benefit-item relative`}>
               <IconEditableText
                 mode={mode}
                 value={blockContent.benefit_icon_2 || '⏱️'}
@@ -359,7 +363,7 @@ const CarouselSlide = React.memo(({
                 backgroundType="neutral"
                 colorTokens={colorTokens}
                 iconSize="sm"
-                className="text-blue-600 text-lg"
+                className={`${getBenefitColors(1).text} text-lg`}
                 sectionId={sectionId}
                 elementKey="benefit_icon_2"
               />
@@ -488,6 +492,32 @@ export default function Carousel(props: LayoutComponentProps) {
   const h2Style = getTypographyStyle('h2');
   const h3Style = getTypographyStyle('h3');
   const bodyLgStyle = getTypographyStyle('body-lg');
+
+  // Detect theme: manual override > auto-detection > neutral fallback
+  const uiBlockTheme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Theme-based benefit colors
+  const getBenefitColors = (index: number) => {
+    const colorSets = {
+      warm: [
+        { text: 'text-orange-600', bg: 'bg-orange-50' },
+        { text: 'text-red-600', bg: 'bg-red-50' }
+      ],
+      cool: [
+        { text: 'text-blue-600', bg: 'bg-blue-50' },
+        { text: 'text-cyan-600', bg: 'bg-cyan-50' }
+      ],
+      neutral: [
+        { text: 'text-gray-600', bg: 'bg-gray-50' },
+        { text: 'text-slate-600', bg: 'bg-slate-50' }
+      ]
+    };
+    return colorSets[uiBlockTheme][index % 2];
+  };
 
   // Helper function to get individual feature field
   const getIndividualFeature = (field: 'title' | 'description' | 'visual' | 'tag', index: number): string => {
@@ -655,6 +685,7 @@ export default function Carousel(props: LayoutComponentProps) {
                 handleImageToolbar={handleImageToolbar}
                 h2Style={h2Style}
                 bodyLgStyle={bodyLgStyle}
+                getBenefitColors={getBenefitColors}
                 onRemove={features.length > 1 ? () => {
                   const currentSlideIndex = features[activeSlide].originalIndex;
                   

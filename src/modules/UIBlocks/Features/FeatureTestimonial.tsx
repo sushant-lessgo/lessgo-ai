@@ -15,6 +15,9 @@ import {
 } from '@/components/layout/ComponentRegistry';
 import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { shadows, cardEnhancements } from '@/modules/Design/designTokens';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface FeatureTestimonialContent {
   headline: string;
@@ -212,10 +215,43 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: 'Compliant' 
   },
-  show_trust_banner: { 
-    type: 'boolean' as const, 
-    default: true 
+  show_trust_banner: {
+    type: 'boolean' as const,
+    default: true
   }
+};
+
+// Theme-based color mappings
+const getFeatureTestimonialThemeColors = (theme: UIBlockTheme) => {
+  return {
+    warm: {
+      iconBg: 'bg-orange-500',
+      iconHoverBg: 'hover:bg-orange-600',
+      avatarGradientFrom: 'from-orange-500',
+      avatarGradientTo: 'to-red-600',
+      avatarHoverFrom: 'hover:from-orange-600',
+      avatarHoverTo: 'hover:to-red-700',
+      cardBorderHover: 'hover:border-orange-200'
+    },
+    cool: {
+      iconBg: 'bg-blue-500',
+      iconHoverBg: 'hover:bg-blue-600',
+      avatarGradientFrom: 'from-blue-500',
+      avatarGradientTo: 'to-indigo-600',
+      avatarHoverFrom: 'hover:from-blue-600',
+      avatarHoverTo: 'hover:to-indigo-700',
+      cardBorderHover: 'hover:border-blue-200'
+    },
+    neutral: {
+      iconBg: 'bg-slate-500',
+      iconHoverBg: 'hover:bg-slate-600',
+      avatarGradientFrom: 'from-slate-500',
+      avatarGradientTo: 'to-gray-600',
+      avatarHoverFrom: 'hover:from-slate-600',
+      avatarHoverTo: 'hover:to-gray-700',
+      cardBorderHover: 'hover:border-gray-200'
+    }
+  }[theme];
 };
 
 const FeatureCard = React.memo(({ 
@@ -258,11 +294,14 @@ const FeatureCard = React.memo(({
   blockContent: FeatureTestimonialContent;
   onRemove?: () => void;
   handleImageToolbar: (imageId: string, position: { x: number; y: number }) => void;
+  theme?: UIBlockTheme;
 }) => {
-  
+
+  const themeColors = getFeatureTestimonialThemeColors(theme || 'neutral');
+
   const AvatarPlaceholder = React.memo(({ onClick }: { onClick?: (e: React.MouseEvent) => void }) => (
-    <div 
-      className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center cursor-pointer hover:bg-gradient-to-br hover:from-blue-600 hover:to-indigo-700 transition-all duration-300"
+    <div
+      className={`w-12 h-12 rounded-full bg-gradient-to-br ${themeColors.avatarGradientFrom} ${themeColors.avatarGradientTo} flex items-center justify-center cursor-pointer ${themeColors.avatarHoverFrom} ${themeColors.avatarHoverTo} transition-all duration-300`}
       onClick={onClick}
     >
       <span className="text-white font-bold text-lg">
@@ -289,11 +328,11 @@ const FeatureCard = React.memo(({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-100 hover:shadow-xl transition-all duration-300 h-full flex flex-col group relative">
+    <div className={`bg-white rounded-xl p-8 border border-gray-100 ${themeColors.cardBorderHover} shadow-lg hover:shadow-xl transition-all duration-300 h-full flex flex-col group relative`}>
       
       <div className="mb-6">
         <div className="flex items-start space-x-4 mb-4">
-          <div className={`flex-shrink-0 w-12 h-12 rounded-xl ${colorTokens.ctaBg} flex items-center justify-center shadow-lg`}>
+          <div className={`flex-shrink-0 w-12 h-12 rounded-xl ${themeColors.iconBg} ${themeColors.iconHoverBg} flex items-center justify-center shadow-lg transition-colors duration-300`}>
             <IconEditableText
               mode={mode as 'edit' | 'preview'}
               value={getFeatureIcon()}
@@ -508,7 +547,25 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
   const h2Style = getTypographyStyle('h2');
   const h3Style = getTypographyStyle('h3');
   const bodyLgStyle = getTypographyStyle('body-lg');
-  
+
+  // Detect theme: manual override > auto-detection > neutral fallback
+  const theme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  React.useEffect(() => {
+    console.log('🎨 FeatureTestimonial theme detection:', {
+      sectionId,
+      hasManualOverride: !!props.manualThemeOverride,
+      manualTheme: props.manualThemeOverride,
+      hasUserContext: !!props.userContext,
+      userContext: props.userContext,
+      finalTheme: theme
+    });
+  }, [theme, props.manualThemeOverride, props.userContext, sectionId]);
+
   // Helper function to get feature icon
   const getFeatureIcon = (index: number) => {
     const iconField = `feature_icon_${index + 1}` as keyof FeatureTestimonialContent;
@@ -707,6 +764,7 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
                 handleContentUpdate('testimonial_names', testimonialNames.join('|'));
                 handleContentUpdate('testimonial_roles', testimonialRoles.join('|'));
               } : undefined}
+              theme={theme}
             />
           ))}
           

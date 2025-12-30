@@ -14,6 +14,8 @@ import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
 import { getRandomIconFromCategory } from '@/utils/iconMapping';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface MiniCardsContent {
   headline: string;
@@ -145,9 +147,9 @@ const CONTENT_SCHEMA = {
   }
 };
 
-const MiniCard = React.memo(({ 
-  title, 
-  description, 
+const MiniCard = React.memo(({
+  title,
+  description,
   keyword,
   index,
   colorTokens,
@@ -161,7 +163,8 @@ const MiniCard = React.memo(({
   onDescriptionEdit,
   onKeywordEdit,
   onRemove,
-  sectionBackground
+  sectionBackground,
+  theme
 }: {
   title: string;
   description: string;
@@ -179,6 +182,7 @@ const MiniCard = React.memo(({
   onKeywordEdit: (index: number, value: string) => void;
   onRemove?: () => void;
   sectionBackground: string;
+  theme: UIBlockTheme;
 }) => {
   
   // Get feature icon from content fields
@@ -200,16 +204,34 @@ const MiniCard = React.memo(({
     return iconFields[index] || '📊';
   };
 
-  const getColorForIndex = (index: number) => {
-    const colors = [
-      'from-blue-500 to-blue-600',
-      'from-green-500 to-green-600',
-      'from-purple-500 to-purple-600',
-      'from-orange-500 to-orange-600',
-      'from-pink-500 to-pink-600',
-      'from-indigo-500 to-indigo-600'
-    ];
-    return colors[index % colors.length];
+  const getColorForIndex = (index: number, theme: UIBlockTheme) => {
+    const colorSets = {
+      warm: [
+        'from-orange-500 to-orange-600',
+        'from-red-500 to-red-600',
+        'from-amber-500 to-amber-600',
+        'from-yellow-500 to-yellow-600',
+        'from-rose-500 to-rose-600',
+        'from-orange-400 to-orange-500'
+      ],
+      cool: [
+        'from-blue-500 to-blue-600',
+        'from-cyan-500 to-cyan-600',
+        'from-indigo-500 to-indigo-600',
+        'from-sky-500 to-sky-600',
+        'from-teal-500 to-teal-600',
+        'from-blue-400 to-blue-500'
+      ],
+      neutral: [
+        'from-gray-500 to-gray-600',
+        'from-slate-500 to-slate-600',
+        'from-zinc-500 to-zinc-600',
+        'from-neutral-500 to-neutral-600',
+        'from-stone-500 to-stone-600',
+        'from-gray-400 to-gray-500'
+      ]
+    };
+    return colorSets[theme][index % 6];
   };
 
   return (
@@ -232,7 +254,7 @@ const MiniCard = React.memo(({
       )}
 
       <div className="flex items-start space-x-4 mb-4">
-        <div className={`flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br ${getColorForIndex(index)} flex items-center justify-center shadow-[0_6px_18px_rgba(15,23,42,0.18)]
+        <div className={`flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br ${getColorForIndex(index, theme)} flex items-center justify-center shadow-[0_6px_18px_rgba(15,23,42,0.18)]
     ring-1 ring-white/25
     backdrop-blur-sm
     transition-all duration-300
@@ -316,6 +338,13 @@ export default function MiniCards(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
   
+  // Detect theme: manual override > auto-detection > neutral fallback
+  const uiBlockTheme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
   // Create typography styles
   const h3Style = getTypographyStyle('h3');
   const bodyLgStyle = getTypographyStyle('body-lg');
@@ -458,6 +487,7 @@ export default function MiniCards(props: LayoutComponentProps) {
               onKeywordEdit={handleKeywordEdit}
               onRemove={features.length > 1 ? () => handleCardRemove(index) : undefined}
               sectionBackground={sectionBackground}
+              theme={uiBlockTheme}
             />
           ))}
         </div>

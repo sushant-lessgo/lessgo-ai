@@ -8,6 +8,8 @@ import { useTypography } from '@/hooks/useTypography';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useImageToolbar } from '@/hooks/useImageToolbar';
 import { LayoutSection } from '@/components/layout/LayoutSection';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import { 
   EditableAdaptiveHeadline, 
   EditableAdaptiveText, 
@@ -70,25 +72,60 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: 'P.S. I personally read every email that comes through our support. If you have any questions, don\'t hesitate to reach out directly.' 
   },
-  founder_image: { 
-    type: 'string' as const, 
-    default: '' 
+  founder_image: {
+    type: 'string' as const,
+    default: ''
   }
 };
 
+// Theme-based color function for all themeable elements
+const getThemeColors = (theme: UIBlockTheme) => {
+  const colorMap = {
+    warm: {
+      avatarGradient: 'from-orange-500 via-red-500 to-pink-600',
+      letterBorder: '#fed7aa',
+      headerBg: '#fff7ed',
+      headerBorder: '#fed7aa',
+      avatarBorder: '#fed7aa',
+      psDivider: '#fed7aa'
+    },
+    cool: {
+      avatarGradient: 'from-blue-500 via-indigo-500 to-violet-600',
+      letterBorder: '#bfdbfe',
+      headerBg: '#eff6ff',
+      headerBorder: '#bfdbfe',
+      avatarBorder: '#bfdbfe',
+      psDivider: '#bfdbfe'
+    },
+    neutral: {
+      avatarGradient: 'from-gray-400 via-slate-500 to-gray-600',
+      letterBorder: '#e5e7eb',
+      headerBg: '#f9fafb',
+      headerBorder: '#e5e7eb',
+      avatarBorder: '#e5e7eb',
+      psDivider: '#e5e7eb'
+    }
+  };
+  return colorMap[theme];
+};
+
 // Founder Image Component
-const FounderImagePlaceholder = React.memo(({ onClick }: { onClick?: (e: React.MouseEvent) => void }) => (
-  <div 
-    className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-400 via-indigo-500 to-purple-600 flex items-center justify-center shadow-lg cursor-pointer hover:shadow-xl transition-shadow duration-200"
-    onClick={onClick}
-  >
-    <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center">
-      <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-      </svg>
+const FounderImagePlaceholder = React.memo(({ onClick, theme }: { onClick?: (e: React.MouseEvent) => void; theme: UIBlockTheme }) => {
+  const themeColors = getThemeColors(theme);
+
+  return (
+    <div
+      className={`w-24 h-24 rounded-full bg-gradient-to-br ${themeColors.avatarGradient} flex items-center justify-center shadow-lg cursor-pointer hover:shadow-xl transition-shadow duration-200`}
+      onClick={onClick}
+    >
+      <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center">
+        <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
+      </div>
     </div>
-  </div>
-));
+  );
+});
 FounderImagePlaceholder.displayName = 'FounderImagePlaceholder';
 
 export default function LetterStyleBlock(props: LayoutComponentProps) {
@@ -108,7 +145,16 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
-  
+
+  // Detect theme: manual override > auto-detection > neutral fallback
+  const uiBlockTheme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  const themeColors = getThemeColors(uiBlockTheme);
+
   const { getTextStyle: getTypographyStyle } = useTypography();
   
   // Get showImageToolbar for handling image clicks
@@ -129,10 +175,10 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
     >
       <div className="max-w-4xl mx-auto">
         {/* Letter Container */}
-        <div className="bg-white shadow-2xl rounded-lg overflow-hidden border border-gray-100">
+        <div className="bg-white shadow-2xl rounded-lg overflow-hidden border" style={{ borderColor: themeColors.letterBorder }}>
           
           {/* Letter Header */}
-          <div className="bg-gray-50 px-8 py-6 border-b border-gray-200">
+          <div className="px-8 py-6 border-b" style={{ backgroundColor: themeColors.headerBg, borderColor: themeColors.headerBorder }}>
             <EditableAdaptiveHeadline
               mode={mode}
               value={blockContent.letter_header || ''}
@@ -208,7 +254,8 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
                   <img
                     src={blockContent.founder_image}
                     alt="Founder"
-                    className="w-16 h-16 rounded-full object-cover cursor-pointer border-2 border-gray-200"
+                    className="w-16 h-16 rounded-full object-cover cursor-pointer border-2"
+                    style={{ borderColor: themeColors.avatarBorder }}
                     data-image-id={`${sectionId}-founder_image`}
                     onMouseUp={(e) => {
                       if (mode === 'edit') {
@@ -232,7 +279,8 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
                   />
                 ) : (
                   <div className="w-16 h-16">
-                    <FounderImagePlaceholder 
+                    <FounderImagePlaceholder
+                      theme={uiBlockTheme}
                       onClick={(e) => {
                         if (mode === 'edit') {
                           e.stopPropagation();
@@ -306,7 +354,7 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
 
             {/* P.S. Section */}
             {(blockContent.ps_text || mode === 'edit') && (
-              <div className="mt-8 pt-6 border-t border-gray-200">
+              <div className="mt-8 pt-6 border-t" style={{ borderColor: themeColors.psDivider }}>
                 <EditableAdaptiveText
                   mode={mode}
                   value={blockContent.ps_text || ''}

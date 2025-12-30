@@ -51,15 +51,28 @@ import OutcomeIconsPublished from '@/modules/UIBlocks/Results/OutcomeIcons.publi
 
 // Features
 import IconGridPublished from '@/modules/UIBlocks/Features/IconGrid.published';
+import CarouselPublished from '@/modules/UIBlocks/Features/Carousel.published';
+import MiniCardsPublished from '@/modules/UIBlocks/Features/MiniCards.published';
+import SplitAlternatingPublished from '@/modules/UIBlocks/Features/SplitAlternating.published';
+import FeatureTestimonialPublished from '@/modules/UIBlocks/Features/FeatureTestimonial.published';
+import MetricTilesPublished from '@/modules/UIBlocks/Features/MetricTiles.published';
 
 // HowItWorks
 import AccordionStepsPublished from '@/modules/UIBlocks/HowItWorks/AccordionSteps.published';
 
 // FounderNote
 import FounderCardWithQuotePublished from '@/modules/UIBlocks/FounderNote/FounderCardWithQuote.published';
+import LetterStyleBlockPublished from '@/modules/UIBlocks/FounderNote/LetterStyleBlock.published';
+import StoryBlockWithPullquotePublished from '@/modules/UIBlocks/FounderNote/StoryBlockWithPullquote.published';
 
 // FAQ
 import AccordionFAQPublished from '@/modules/UIBlocks/FAQ/AccordionFAQ.published';
+import TwoColumnFAQPublished from '@/modules/UIBlocks/FAQ/TwoColumnFAQ.published';
+import InlineQnAListPublished from '@/modules/UIBlocks/FAQ/InlineQnAList.published';
+import QuoteStyleAnswersPublished from '@/modules/UIBlocks/FAQ/QuoteStyleAnswers.published';
+import TestimonialFAQsPublished from '@/modules/UIBlocks/FAQ/TestimonialFAQs.published';
+import SegmentedFAQTabsPublished from '@/modules/UIBlocks/FAQ/SegmentedFAQTabs.published';
+import ChatBubbleFAQPublished from '@/modules/UIBlocks/FAQ/ChatBubbleFAQ.published';
 
 // BeforeAfter
 import SideBySideBlockPublished from '@/modules/UIBlocks/BeforeAfter/SideBySideBlock.published';
@@ -107,15 +120,28 @@ const publishedComponentRegistry: Record<string, Record<string, React.ComponentT
   },
   features: {
     icongrid: IconGridPublished,
+    carousel: CarouselPublished,
+    minicards: MiniCardsPublished,
+    splitalternating: SplitAlternatingPublished,
+    featuretestimonial: FeatureTestimonialPublished,
+    metrictiles: MetricTilesPublished,
   },
   howitworks: {
     accordionsteps: AccordionStepsPublished,
   },
   foundernote: {
     foundercardwithquote: FounderCardWithQuotePublished,
+    letterstyleblock: LetterStyleBlockPublished,
+    storyblockwithpullquote: StoryBlockWithPullquotePublished,
   },
   faq: {
     accordionfaq: AccordionFAQPublished,
+    twocolumnfaq: TwoColumnFAQPublished,
+    inlineqnalist: InlineQnAListPublished,
+    quotestyleanswers: QuoteStyleAnswersPublished,
+    testimonialfaqs: TestimonialFAQsPublished,
+    segmentedfaqtabs: SegmentedFAQTabsPublished,
+    chatbubblefaq: ChatBubbleFAQPublished,
   },
   beforeafter: {
     sidebysideblock: SideBySideBlockPublished,

@@ -14,6 +14,8 @@ import {
 } from '@/components/layout/ComponentRegistry';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface SplitAlternatingContent {
   headline: string;
@@ -137,10 +139,10 @@ const CONTENT_SCHEMA = {
   }
 };
 
-const FeatureRow = React.memo(({ 
-  title, 
-  description, 
-  visual, 
+const FeatureRow = React.memo(({
+  title,
+  description,
+  visual,
   index,
   originalIndex,
   showImageToolbar,
@@ -154,7 +156,8 @@ const FeatureRow = React.memo(({
   sectionBackground,
   props,
   onRemove,
-  handleImageToolbar
+  handleImageToolbar,
+  theme
 }: {
   title: string;
   description: string;
@@ -173,9 +176,38 @@ const FeatureRow = React.memo(({
   props: LayoutComponentProps;
   onRemove?: () => void;
   handleImageToolbar: (imageId: string, position: { x: number; y: number }) => void;
+  theme: UIBlockTheme;
 }) => {
   const isEven = index % 2 === 0;
-  
+
+  // Theme-based gradient functions
+  const getIconGradient = () => {
+    const gradients = {
+      warm: 'from-orange-500 to-red-600',
+      cool: 'from-blue-500 to-indigo-600',
+      neutral: 'from-gray-500 to-slate-600'
+    };
+    return gradients[theme];
+  };
+
+  const getPlaceholderGradient = () => {
+    const gradients = {
+      warm: 'from-orange-50 to-red-100',
+      cool: 'from-blue-50 to-indigo-100',
+      neutral: 'from-gray-50 to-slate-100'
+    };
+    return gradients[theme];
+  };
+
+  const getPlaceholderHoverGradient = () => {
+    const gradients = {
+      warm: 'from-orange-100 to-red-150',
+      cool: 'from-blue-100 to-indigo-150',
+      neutral: 'from-gray-100 to-slate-150'
+    };
+    return gradients[theme];
+  };
+
   // Get feature icon from content fields
   const getFeatureIcon = () => {
     const iconFields = [
@@ -190,14 +222,14 @@ const FeatureRow = React.memo(({
   };
   
   const VisualPlaceholder = React.memo(({ onClick }: { onClick?: (e: React.MouseEvent) => void }) => (
-    <div 
-      className="relative w-full h-80 rounded-xl overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-100 cursor-pointer hover:bg-gradient-to-br hover:from-blue-100 hover:to-indigo-150 transition-all duration-300"
+    <div
+      className={`relative w-full h-80 rounded-xl overflow-hidden bg-gradient-to-br ${getPlaceholderGradient()} cursor-pointer hover:bg-gradient-to-br hover:${getPlaceholderHoverGradient()} transition-all duration-300`}
       onClick={onClick}
     >
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="text-center">
           <div className="w-20 h-20 mx-auto rounded-2xl bg-white/50 flex items-center justify-center mb-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+            <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${getIconGradient()} flex items-center justify-center`}>
               <span className="text-white font-bold text-xl">{originalIndex + 1}</span>
             </div>
           </div>
@@ -220,7 +252,7 @@ const FeatureRow = React.memo(({
       <div className={`${isEven ? 'lg:order-1' : 'lg:order-2'}`}>
         <div className="space-y-6">
           <div className="flex items-start space-x-4 relative">
-            <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
+            <div className={`flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br ${getIconGradient()} flex items-center justify-center shadow-lg`}>
               <IconEditableText
                 mode={mode as 'edit' | 'preview'}
                 value={getFeatureIcon()}
@@ -444,6 +476,13 @@ export default function SplitAlternating(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
   
+  // Detect theme: manual override > auto-detection > neutral fallback
+  const uiBlockTheme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
   // Create typography styles
   const h2Style = getTypographyStyle('h2');
   const bodyLgStyle = getTypographyStyle('body-lg');
@@ -571,6 +610,7 @@ export default function SplitAlternating(props: LayoutComponentProps) {
               sectionBackground={sectionBackground}
               props={props}
               handleImageToolbar={handleImageToolbar}
+              theme={uiBlockTheme}
               onRemove={features.length > 1 ? () => {
                 const featureTitles = blockContent.feature_titles ? blockContent.feature_titles.split('|') : [];
                 const featureDescriptions = blockContent.feature_descriptions ? blockContent.feature_descriptions.split('|') : [];

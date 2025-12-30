@@ -7,14 +7,16 @@ import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
-  EditableAdaptiveText, 
-  AccentBadge 
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import {
+  EditableAdaptiveHeadline,
+  EditableAdaptiveText,
+  AccentBadge
 } from '@/components/layout/EditableContent';
-import { 
-  CTAButton, 
-  TrustIndicators 
+import {
+  CTAButton,
+  TrustIndicators
 } from '@/components/layout/ComponentRegistry';
 import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators';
 import IconEditableText from '@/components/ui/IconEditableText';
@@ -104,9 +106,46 @@ const CONTENT_SCHEMA = {
   quote_icon: { type: 'string' as const, default: '"' }
 };
 
+// Theme-based color function for all themeable elements
+const getThemeColors = (theme: UIBlockTheme) => {
+  const colorMap = {
+    warm: {
+      quoteIconColor: '#f97316',      // orange-500
+      quoteBgGradient: 'from-orange-50 to-red-50',
+      quoteBorder: '#fed7aa',         // orange-200
+      quoteAccentBar: 'from-orange-500 to-red-600',
+      decorativeDots: '#fb923c',      // orange-400
+      trustNumberColor: '#ea580c',    // orange-600
+      ctaSectionBg: 'from-orange-50 to-red-50',
+      avatarGradient: 'from-orange-400 via-red-500 to-pink-600'
+    },
+    cool: {
+      quoteIconColor: '#3b82f6',      // blue-500
+      quoteBgGradient: 'from-blue-50 to-indigo-50',
+      quoteBorder: '#bfdbfe',         // blue-200
+      quoteAccentBar: 'from-blue-500 to-indigo-600',
+      decorativeDots: '#60a5fa',      // blue-400
+      trustNumberColor: '#2563eb',    // blue-600
+      ctaSectionBg: 'from-blue-50 to-indigo-50',
+      avatarGradient: 'from-blue-400 via-indigo-500 to-violet-600'
+    },
+    neutral: {
+      quoteIconColor: '#6b7280',      // gray-500
+      quoteBgGradient: 'from-gray-50 to-slate-50',
+      quoteBorder: '#e5e7eb',         // gray-200
+      quoteAccentBar: 'from-gray-500 to-slate-600',
+      decorativeDots: '#9ca3af',      // gray-400
+      trustNumberColor: '#4b5563',    // gray-600
+      ctaSectionBg: 'from-gray-50 to-slate-50',
+      avatarGradient: 'from-gray-400 via-slate-500 to-gray-600'
+    }
+  };
+  return colorMap[theme];
+};
+
 // Founder Image Placeholder Component
-const FounderImagePlaceholder = React.memo(() => (
-  <div className="w-16 h-16 bg-gradient-to-br from-indigo-400 via-purple-500 to-pink-600 rounded-full flex items-center justify-center shadow-lg">
+const FounderImagePlaceholder = React.memo(({ avatarGradient }: { avatarGradient: string }) => (
+  <div className={`w-16 h-16 bg-gradient-to-br ${avatarGradient} rounded-full flex items-center justify-center shadow-lg`}>
     <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center">
       <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -133,7 +172,16 @@ export default function StoryBlockWithPullquote(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
-  
+
+  // Detect theme: manual override > auto-detection > neutral fallback
+  const uiBlockTheme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  const themeColors = getThemeColors(uiBlockTheme);
+
   const { getTextStyle: getTypographyStyle } = useTypography();
 
   // Helper function to get trust items with individual field support
@@ -208,7 +256,7 @@ export default function StoryBlockWithPullquote(props: LayoutComponentProps) {
                       }}
                 />
               ) : (
-                <FounderImagePlaceholder />
+                <FounderImagePlaceholder avatarGradient={themeColors.avatarGradient} />
               )}
             </div>
 
@@ -299,11 +347,11 @@ export default function StoryBlockWithPullquote(props: LayoutComponentProps) {
           {/* Pull Quote */}
           <div className="relative my-12 py-8">
             {/* Quote background */}
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl transform -rotate-1"></div>
-            <div className="relative bg-white rounded-2xl shadow-lg border border-gray-100 p-8 transform rotate-1">
+            <div className={`absolute inset-0 bg-gradient-to-r ${themeColors.quoteBgGradient} rounded-2xl transform -rotate-1`}></div>
+            <div className="relative bg-white rounded-2xl shadow-lg border p-8 transform rotate-1" style={{ borderColor: themeColors.quoteBorder }}>
               
               {/* Quote mark */}
-              <div className="text-6xl text-blue-500 opacity-20 font-serif leading-none mb-4 relative group/icon-edit">
+              <div className="text-6xl opacity-20 font-serif leading-none mb-4 relative group/icon-edit" style={{ color: themeColors.quoteIconColor }}>
                 {mode !== 'preview' ? (
                   <IconEditableText
                     mode={mode}
@@ -312,7 +360,7 @@ export default function StoryBlockWithPullquote(props: LayoutComponentProps) {
                     backgroundType={'neutral' as any}
                     colorTokens={colorTokens}
                     iconSize="xl"
-                    className="text-6xl text-blue-500 opacity-20 font-serif leading-none"
+                    className="text-6xl opacity-20 font-serif leading-none"
                     sectionId={sectionId}
                     elementKey="quote_icon"
                   />
@@ -338,7 +386,7 @@ export default function StoryBlockWithPullquote(props: LayoutComponentProps) {
               
               {/* Attribution */}
               <div className="mt-6 flex items-center space-x-3">
-                <div className="w-2 h-12 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full"></div>
+                <div className={`w-2 h-12 bg-gradient-to-b ${themeColors.quoteAccentBar} rounded-full`}></div>
                 <div>
                   <div className="font-semibold text-gray-900">
                     {blockContent.founder_name || 'Founder'}
@@ -370,7 +418,7 @@ export default function StoryBlockWithPullquote(props: LayoutComponentProps) {
         </div>
 
         {/* Call to Action Section */}
-        <div className="bg-gradient-to-br from-gray-50 to-blue-50 rounded-2xl p-8 text-center">
+        <div className={`bg-gradient-to-br ${themeColors.ctaSectionBg} rounded-2xl p-8 text-center`}>
           <EditableAdaptiveHeadline
             mode={mode}
             value={blockContent.cta_section_heading || ''}
@@ -455,7 +503,7 @@ export default function StoryBlockWithPullquote(props: LayoutComponentProps) {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                 {trustItems.map((item, index) => (
                   <div key={index} className="text-center">
-                    <div className="text-xl font-bold text-blue-600 mb-1">
+                    <div className="text-xl font-bold mb-1" style={{ color: themeColors.trustNumberColor }}>
                       {item.split(' ')[0]}
                     </div>
                     <div className="text-sm text-gray-600">
@@ -472,7 +520,7 @@ export default function StoryBlockWithPullquote(props: LayoutComponentProps) {
         <div className="mt-12 pt-8 border-t border-gray-200">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold">
+              <div className={`w-12 h-12 bg-gradient-to-br ${themeColors.avatarGradient} rounded-full flex items-center justify-center text-white font-bold`}>
                 {blockContent.founder_name?.charAt(0) || 'F'}
               </div>
               <div>
