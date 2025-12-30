@@ -13,6 +13,8 @@ import {
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { getIconFromCategory, getRandomIconFromCategory } from '@/utils/iconMapping';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface TextListTransformationContent {
   headline: string;
@@ -85,17 +87,18 @@ const CONTENT_SCHEMA = {
   }
 };
 
-const ListItem = React.memo(({ 
-  text, 
+const ListItem = React.memo(({
+  text,
   type,
   mode,
   blockContent,
   handleContentUpdate,
   backgroundType,
   colorTokens,
-  sectionId
-}: { 
-  text: string; 
+  sectionId,
+  themeColors
+}: {
+  text: string;
   type: 'before' | 'after';
   mode: string;
   blockContent: TextListTransformationContent;
@@ -103,33 +106,35 @@ const ListItem = React.memo(({
   backgroundType: any;
   colorTokens: any;
   sectionId: string;
-}) => (
-  <div className="flex items-start space-x-3 group">
-    <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mt-0.5 ${
-      type === 'before' 
-        ? 'bg-red-100 group-hover:bg-red-200' 
-        : 'bg-green-100 group-hover:bg-green-200'
-    } transition-colors duration-200`}>
-      <IconEditableText
-        mode={mode as 'preview' | 'edit'}
-        value={type === 'before' ? 
-          (blockContent.before_icon || '❌') : 
-          (blockContent.after_icon || '✅')
-        }
-        onEdit={(value) => handleContentUpdate(type === 'before' ? 'before_icon' : 'after_icon', value)}
-        backgroundType={backgroundType}
-        colorTokens={colorTokens}
-        iconSize="sm"
-        className="text-sm"
-        sectionId={sectionId}
-        elementKey={type === 'before' ? 'before_icon' : 'after_icon'}
-      />
+  themeColors: any;
+}) => {
+  const colors = type === 'before' ? themeColors.before : themeColors.after;
+
+  return (
+    <div className="flex items-start space-x-3 group">
+      <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mt-0.5 ${colors.iconBg} ${colors.iconBgHover} transition-colors duration-200`}>
+        <IconEditableText
+          mode={mode as 'preview' | 'edit'}
+          value={type === 'before' ?
+            (blockContent.before_icon || '❌') :
+            (blockContent.after_icon || '✅')
+          }
+          onEdit={(value) => handleContentUpdate(type === 'before' ? 'before_icon' : 'after_icon', value)}
+          backgroundType={backgroundType}
+          colorTokens={colorTokens}
+          iconSize="sm"
+          className="text-sm"
+          style={{ color: colors.iconColor }}
+          sectionId={sectionId}
+          elementKey={type === 'before' ? 'before_icon' : 'after_icon'}
+        />
+      </div>
+      <p className="text-gray-700 leading-relaxed group-hover:text-gray-900 transition-colors duration-200">
+        {text}
+      </p>
     </div>
-    <p className="text-gray-700 leading-relaxed group-hover:text-gray-900 transition-colors duration-200">
-      {text}
-    </p>
-  </div>
-));
+  );
+});
 ListItem.displayName = 'ListItem';
 
 export default function TextListTransformation(props: LayoutComponentProps) {
@@ -154,7 +159,79 @@ export default function TextListTransformation(props: LayoutComponentProps) {
   const h3Style = getTypographyStyle('h3');
   const bodyLgStyle = getTypographyStyle('body-lg');
 
-  const beforeItems = blockContent.before_list 
+  // Detect UIBlock theme - warm/cool/neutral
+  const uiTheme: UIBlockTheme = props.manualThemeOverride ||
+    (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+
+  // Debug logging
+  console.log('🎨 TextListTransformation theme:', {
+    manualThemeOverride: props.manualThemeOverride,
+    detectedTheme: uiTheme,
+    marketCategory: props.userContext?.marketCategory,
+    sectionId
+  });
+
+  // Theme-based color system for before/after lists
+  const getListTransformationColors = (theme: UIBlockTheme) => ({
+    warm: {
+      before: {
+        iconBg: 'bg-orange-100',              // Light orange for item icons
+        iconBgHover: 'group-hover:bg-orange-200',
+        labelDot: 'bg-orange-500',            // Dot indicator
+        labelRing: 'ring-orange-100',         // Ring around dot
+        labelColor: '#f97316',                // orange-500 for label text
+        iconColor: '#ea580c'                  // orange-600 for icon
+      },
+      after: {
+        iconBg: 'bg-amber-100',               // Light amber for item icons
+        iconBgHover: 'group-hover:bg-amber-200',
+        labelDot: 'bg-amber-500',             // Dot indicator
+        labelRing: 'ring-amber-100',          // Ring around dot
+        labelColor: '#f59e0b',                // amber-500 for label text
+        iconColor: '#d97706'                  // amber-600 for icon
+      }
+    },
+    cool: {
+      before: {
+        iconBg: 'bg-blue-100',
+        iconBgHover: 'group-hover:bg-blue-200',
+        labelDot: 'bg-blue-500',
+        labelRing: 'ring-blue-100',
+        labelColor: '#3b82f6',                // blue-500
+        iconColor: '#2563eb'                  // blue-600
+      },
+      after: {
+        iconBg: 'bg-green-100',
+        iconBgHover: 'group-hover:bg-green-200',
+        labelDot: 'bg-green-500',
+        labelRing: 'ring-green-100',
+        labelColor: '#10b981',                // green-500
+        iconColor: '#16a34a'                  // green-600
+      }
+    },
+    neutral: {
+      before: {
+        iconBg: 'bg-red-100',                 // Keep red for "before" in neutral
+        iconBgHover: 'group-hover:bg-red-200',
+        labelDot: 'bg-red-500',
+        labelRing: 'ring-red-100',
+        labelColor: '#ef4444',                // red-500
+        iconColor: '#dc2626'                  // red-600
+      },
+      after: {
+        iconBg: 'bg-green-100',               // Keep green for "after" in neutral
+        iconBgHover: 'group-hover:bg-green-200',
+        labelDot: 'bg-green-500',
+        labelRing: 'ring-green-100',
+        labelColor: '#10b981',                // green-500
+        iconColor: '#16a34a'                  // green-600
+      }
+    }
+  }[theme]);
+
+  const themeColors = getListTransformationColors(uiTheme);
+
+  const beforeItems = blockContent.before_list
     ? blockContent.before_list.split('|').map(item => item.trim()).filter(Boolean)
     : [];
 
@@ -219,7 +296,7 @@ export default function TextListTransformation(props: LayoutComponentProps) {
           <div className="space-y-6">
             <div className="text-center lg:text-left">
               <div className="inline-flex items-center mb-6">
-                <div className="w-3 h-3 rounded-full mr-3 bg-red-500 ring-4 ring-red-100" />
+                <div className={`w-3 h-3 rounded-full mr-3 ${themeColors.before.labelDot} ring-4 ${themeColors.before.labelRing}`} />
                 <EditableAdaptiveText
                   mode={mode}
                   value={blockContent.before_label || ''}
@@ -230,9 +307,8 @@ export default function TextListTransformation(props: LayoutComponentProps) {
                   textStyle={{
                     ...getTextStyle('h3'),
                     fontWeight: 600,
-                    color: '#ef4444'
+                    color: themeColors.before.labelColor
                   }}
-                  className="text-red-500"
                   style={h3Style}
                   sectionId={sectionId}
                   elementKey="before_label"
@@ -258,9 +334,9 @@ export default function TextListTransformation(props: LayoutComponentProps) {
                 />
               ) : (
                 beforeItems.map((item, index) => (
-                  <ListItem 
-                    key={index} 
-                    text={item} 
+                  <ListItem
+                    key={index}
+                    text={item}
                     type="before"
                     mode={mode}
                     blockContent={blockContent}
@@ -268,6 +344,7 @@ export default function TextListTransformation(props: LayoutComponentProps) {
                     backgroundType={safeBackgroundType}
                     colorTokens={colorTokens}
                     sectionId={sectionId}
+                    themeColors={themeColors}
                   />
                 ))
               )}
@@ -308,7 +385,7 @@ export default function TextListTransformation(props: LayoutComponentProps) {
           <div className="space-y-6">
             <div className="text-center lg:text-left">
               <div className="inline-flex items-center mb-6">
-                <div className="w-3 h-3 rounded-full mr-3 bg-green-500 ring-4 ring-green-100" />
+                <div className={`w-3 h-3 rounded-full mr-3 ${themeColors.after.labelDot} ring-4 ${themeColors.after.labelRing}`} />
                 <EditableAdaptiveText
                   mode={mode}
                   value={blockContent.after_label || ''}
@@ -319,9 +396,8 @@ export default function TextListTransformation(props: LayoutComponentProps) {
                   textStyle={{
                     ...getTextStyle('h3'),
                     fontWeight: 600,
-                    color: '#10b981'
+                    color: themeColors.after.labelColor
                   }}
-                  className="text-green-500"
                   style={h3Style}
                   sectionId={sectionId}
                   elementKey="after_label"
@@ -347,9 +423,9 @@ export default function TextListTransformation(props: LayoutComponentProps) {
                 />
               ) : (
                 afterItems.map((item, index) => (
-                  <ListItem 
-                    key={index} 
-                    text={item} 
+                  <ListItem
+                    key={index}
+                    text={item}
                     type="after"
                     mode={mode}
                     blockContent={blockContent}
@@ -357,6 +433,7 @@ export default function TextListTransformation(props: LayoutComponentProps) {
                     backgroundType={safeBackgroundType}
                     colorTokens={colorTokens}
                     sectionId={sectionId}
+                    themeColors={themeColors}
                   />
                 ))
               )}

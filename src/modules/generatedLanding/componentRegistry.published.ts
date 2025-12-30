@@ -61,6 +61,12 @@ import FounderCardWithQuotePublished from '@/modules/UIBlocks/FounderNote/Founde
 // FAQ
 import AccordionFAQPublished from '@/modules/UIBlocks/FAQ/AccordionFAQ.published';
 
+// BeforeAfter
+import SideBySideBlockPublished from '@/modules/UIBlocks/BeforeAfter/SideBySideBlock.published';
+import SplitCardPublished from '@/modules/UIBlocks/BeforeAfter/SplitCard.published';
+import StackedTextVisualPublished from '@/modules/UIBlocks/BeforeAfter/StackedTextVisual.published';
+import TextListTransformationPublished from '@/modules/UIBlocks/BeforeAfter/TextListTransformation.published';
+
 // Registry structure - ONLY server-safe published components
 const publishedComponentRegistry: Record<string, Record<string, React.ComponentType<any>>> = {
   hero: {
@@ -110,6 +116,12 @@ const publishedComponentRegistry: Record<string, Record<string, React.ComponentT
   },
   faq: {
     accordionfaq: AccordionFAQPublished,
+  },
+  beforeafter: {
+    sidebysideblock: SideBySideBlockPublished,
+    splitcard: SplitCardPublished,
+    stackedtextvisual: StackedTextVisualPublished,
+    textlisttransformation: TextListTransformationPublished,
   },
 };
 

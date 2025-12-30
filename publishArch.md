@@ -487,9 +487,30 @@ import { LogoPublished } from '@/components/published/LogoPublished';
 **Problem**: Component not rendering in published page
 **Solution**: Verify it's registered in `componentRegistry.published.ts` with correct keys (lowercase)
 
+New: below completed
+
+ create mode 100644 src/modules/UIBlocks/FAQ/AccordionFAQ.published.tsx
+ create mode 100644 src/modules/UIBlocks/Features/IconGrid.published.tsx
+ create mode 100644 src/modules/UIBlocks/Footer/ContactFooter.published.tsx
+ create mode 100644 src/modules/UIBlocks/Footer/LinksAndSocialFooter.published.tsx
+ create mode 100644 src/modules/UIBlocks/Footer/MultiColumnFooter.published.tsx
+ create mode 100644 src/modules/UIBlocks/FounderNote/FounderCardWithQuote.published.tsx
+ create mode 100644 src/modules/UIBlocks/Header/CenteredLogoHeader.published.tsx
+ create mode 100644 src/modules/UIBlocks/Header/FullNavHeader.published.tsx
+ create mode 100644 src/modules/UIBlocks/Header/MinimalNavHeader.published.tsx
+ create mode 100644 src/modules/UIBlocks/Header/NavWithCTAHeader.published.tsx
+ create mode 100644 src/modules/UIBlocks/Hero/centerStacked.published.tsx
+ create mode 100644 src/modules/UIBlocks/Hero/imageFirst.published.tsx
+ create mode 100644 src/modules/UIBlocks/Hero/leftCopyRightImage.published.tsx
+ create mode 100644 src/modules/UIBlocks/Hero/splitScreen.published.tsx
+ create mode 100644 src/modules/UIBlocks/HowItWorks/AccordionSteps.published.tsx
+ create mode 100644 src/modules/UIBlocks/PrimaryCTA/VisualCTAWithMockup.published.tsx
+ create mode 100644 src/modules/UIBlocks/Problem/StackedPainBullets.published.tsx
+ create mode 100644 src/modules/UIBlocks/Results/OutcomeIcons.published.tsx
+
 ---
 
-## Phase 2: Form Injection & Hydration 📋 PLANNED
+## Phase 2: Form Injection & Hydration
 
 ### Problem Context
 

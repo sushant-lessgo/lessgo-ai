@@ -4,16 +4,18 @@ import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useImageToolbar } from '@/hooks/useImageToolbar';
 import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
+import {
+  EditableAdaptiveHeadline,
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
-import { 
+import {
   CTAButton,
-  TrustIndicators 
+  TrustIndicators
 } from '@/components/layout/ComponentRegistry';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface SplitCardContent {
   headline: string;
@@ -121,13 +123,13 @@ const CONTENT_SCHEMA = {
   }
 };
 
-const PremiumCard = React.memo(({ 
-  type, 
-  label, 
-  description, 
-  visual, 
-  showImageToolbar, 
-  sectionId, 
+const PremiumCard = React.memo(({
+  type,
+  label,
+  description,
+  visual,
+  showImageToolbar,
+  sectionId,
   mode,
   bodyLgStyle,
   handleContentUpdate,
@@ -137,7 +139,8 @@ const PremiumCard = React.memo(({
   premiumFeaturesText,
   premiumBadgeText,
   blockContent,
-  handleImageToolbar
+  handleImageToolbar,
+  themeColors
 }: {
   type: 'before' | 'after';
   label: string;
@@ -155,12 +158,42 @@ const PremiumCard = React.memo(({
   premiumBadgeText: string;
   blockContent: SplitCardContent;
   handleImageToolbar: (imageId: string, position: { x: number; y: number }) => void;
+  themeColors: {
+    beforeBorder: string;
+    beforeLabel: string;
+    beforeDot: string;
+    beforeDotRing: string;
+    afterBorder: string;
+    afterRing: string;
+    afterLabel: string;
+    afterDot: string;
+    afterDotRing: string;
+    afterBorderTop: string;
+    badgeGradient: string;
+    beforePlaceholderBg: string;
+    beforePlaceholderIcon: string;
+    afterPlaceholderBg: string;
+    afterPlaceholderIcon: string;
+    featureText: string;
+    featureIcon: string;
+    ctaGradient: string;
+    ctaHover: string;
+    trustIcon: string;
+  };
 }) => {
   
   const VisualPlaceholder = () => (
-    <div className={`relative w-full h-64 rounded-t-xl overflow-hidden ${type === 'before' ? 'bg-gradient-to-br from-slate-100 to-slate-200' : 'bg-gradient-to-br from-amber-50 to-amber-100'}`}>
+    <div className={`relative w-full h-64 rounded-t-xl overflow-hidden bg-gradient-to-br ${
+      type === 'before'
+        ? themeColors.beforePlaceholderBg
+        : themeColors.afterPlaceholderBg
+    }`}>
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className={`w-20 h-20 rounded-full ${type === 'before' ? 'bg-slate-300' : 'bg-amber-200'} flex items-center justify-center`}>
+        <div className={`w-20 h-20 rounded-full ${
+          type === 'before'
+            ? themeColors.beforePlaceholderIcon
+            : themeColors.afterPlaceholderIcon
+        } flex items-center justify-center`}>
           <IconEditableText
             mode={mode}
             value={type === 'before' ? 
@@ -181,15 +214,21 @@ const PremiumCard = React.memo(({
   );
 
   return (
-    <div className={`group relative bg-white rounded-xl shadow-xl border transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 ${
-      type === 'before' 
-        ? 'border-slate-200 hover:border-slate-300' 
-        : 'border-amber-200 hover:border-amber-300 ring-2 ring-amber-100'
-    }`}>
+    <div
+      className={`group relative bg-white rounded-xl shadow-xl border transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 ${
+        type === 'after' ? 'ring-2' : ''
+      }`}
+      style={{
+        borderColor: type === 'before' ? themeColors.beforeBorder : themeColors.afterBorder,
+        ...(type === 'after' && {
+          '--tw-ring-color': themeColors.afterRing
+        } as React.CSSProperties)
+      }}
+    >
       
       {type === 'after' && (
         <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
-          <div className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-4 py-1 rounded-full text-xs font-semibold uppercase tracking-wide shadow-lg">
+          <div className={`bg-gradient-to-r ${themeColors.badgeGradient} text-white px-4 py-1 rounded-full text-xs font-semibold uppercase tracking-wide shadow-lg`}>
             <EditableAdaptiveText
               mode={mode}
               value={premiumBadgeText || ''}
@@ -239,7 +278,13 @@ const PremiumCard = React.memo(({
       
       <div className="p-8">
         <div className="flex items-center mb-4">
-          <div className={`w-3 h-3 rounded-full mr-3 ${type === 'before' ? 'bg-slate-500' : 'bg-amber-500'} ring-4 ${type === 'before' ? 'ring-slate-100' : 'ring-amber-100'}`} />
+          <div
+            className="w-3 h-3 rounded-full mr-3 ring-4"
+            style={{
+              backgroundColor: type === 'before' ? themeColors.beforeDot : themeColors.afterDot,
+              '--tw-ring-color': type === 'before' ? themeColors.beforeDotRing : themeColors.afterDotRing
+            } as React.CSSProperties}
+          />
           <EditableAdaptiveText
             mode={mode}
             value={label || ''}
@@ -249,9 +294,9 @@ const PremiumCard = React.memo(({
             variant="body"
             textStyle={{
               ...bodyLgStyle,
-              color: type === 'before' ? '#334155' : '#d97706'
+              color: type === 'before' ? themeColors.beforeLabel : themeColors.afterLabel
             }}
-            className={type === 'before' ? 'text-slate-700' : 'text-amber-700'}
+            className=""
             sectionId={sectionId}
             elementKey={type === 'before' ? 'before_label' : 'after_label'}
             sectionBackground={sectionBackground}
@@ -272,8 +317,11 @@ const PremiumCard = React.memo(({
         />
         
         {type === 'after' && (
-          <div className="mt-6 pt-4 border-t border-amber-100">
-            <div className="flex items-center text-amber-600">
+          <div
+            className="mt-6 pt-4 border-t"
+            style={{ borderColor: themeColors.afterBorderTop }}
+          >
+            <div className={`flex items-center ${themeColors.featureIcon}`}>
               <IconEditableText
                 mode={mode}
                 value={blockContent.premium_feature_icon || '✅'}
@@ -295,7 +343,7 @@ const PremiumCard = React.memo(({
                 textStyle={{
                   fontSize: '0.875rem',
                   fontWeight: 500,
-                  color: '#d97706'
+                  color: themeColors.featureText
                 }}
                 className="text-sm font-medium"
                 sectionId={sectionId}
@@ -332,7 +380,91 @@ export default function SplitCard(props: LayoutComponentProps) {
   // Create typography styles
   const bodyLgStyle = getTypographyStyle('body-lg');
 
-  const trustItems = blockContent.trust_items 
+  // Detect UIBlock theme - warm/cool/neutral
+  const uiTheme: UIBlockTheme = props.manualThemeOverride ||
+    (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+
+  // Debug logging
+  console.log('🎨 SplitCard theme:', {
+    manualThemeOverride: props.manualThemeOverride,
+    detectedTheme: uiTheme,
+    marketCategory: props.userContext?.marketCategory,
+    sectionId
+  });
+
+  // Theme-based color system for cards
+  const getCardColors = (theme: UIBlockTheme) => ({
+    warm: {
+      beforeBorder: '#fed7aa',           // orange-200
+      beforeLabel: '#c2410c',            // orange-700
+      beforeDot: '#f97316',              // orange-500
+      beforeDotRing: '#ffedd5',          // orange-100
+      afterBorder: '#fed7aa',            // orange-200
+      afterRing: '#ffedd5',              // orange-100
+      afterLabel: '#c2410c',             // orange-700
+      afterDot: '#f97316',               // orange-500
+      afterDotRing: '#ffedd5',           // orange-100
+      afterBorderTop: '#ffedd5',         // orange-100
+      badgeGradient: 'from-orange-500 to-orange-600',
+      beforePlaceholderBg: 'from-orange-100 to-orange-200',
+      beforePlaceholderIcon: 'bg-orange-300',
+      afterPlaceholderBg: 'from-orange-50 to-orange-100',
+      afterPlaceholderIcon: 'bg-orange-200',
+      featureText: '#ea580c',            // orange-600
+      featureIcon: 'text-orange-600',
+      ctaGradient: 'from-orange-500 to-orange-600',
+      ctaHover: 'from-orange-600 to-orange-700',
+      trustIcon: 'text-orange-500'
+    },
+    cool: {
+      beforeBorder: '#bfdbfe',           // blue-200
+      beforeLabel: '#1e40af',            // blue-800
+      beforeDot: '#3b82f6',              // blue-500
+      beforeDotRing: '#dbeafe',          // blue-100
+      afterBorder: '#bfdbfe',            // blue-200
+      afterRing: '#dbeafe',              // blue-100
+      afterLabel: '#1e40af',             // blue-800
+      afterDot: '#3b82f6',               // blue-500
+      afterDotRing: '#dbeafe',           // blue-100
+      afterBorderTop: '#dbeafe',         // blue-100
+      badgeGradient: 'from-blue-500 to-blue-600',
+      beforePlaceholderBg: 'from-blue-100 to-blue-200',
+      beforePlaceholderIcon: 'bg-blue-300',
+      afterPlaceholderBg: 'from-blue-50 to-blue-100',
+      afterPlaceholderIcon: 'bg-blue-200',
+      featureText: '#2563eb',            // blue-600
+      featureIcon: 'text-blue-600',
+      ctaGradient: 'from-blue-500 to-blue-600',
+      ctaHover: 'from-blue-600 to-blue-700',
+      trustIcon: 'text-blue-500'
+    },
+    neutral: {
+      beforeBorder: '#e5e7eb',           // gray-200
+      beforeLabel: '#374151',            // gray-700
+      beforeDot: '#6b7280',              // gray-500
+      beforeDotRing: '#f3f4f6',          // gray-100
+      afterBorder: '#e5e7eb',            // gray-200
+      afterRing: '#f3f4f6',              // gray-100
+      afterLabel: '#374151',             // gray-700
+      afterDot: '#6b7280',               // gray-500
+      afterDotRing: '#f3f4f6',           // gray-100
+      afterBorderTop: '#f3f4f6',         // gray-100
+      badgeGradient: 'from-gray-700 to-gray-800',
+      beforePlaceholderBg: 'from-gray-100 to-gray-200',
+      beforePlaceholderIcon: 'bg-gray-300',
+      afterPlaceholderBg: 'from-gray-50 to-gray-100',
+      afterPlaceholderIcon: 'bg-gray-200',
+      featureText: '#4b5563',            // gray-600
+      featureIcon: 'text-gray-600',
+      ctaGradient: 'from-gray-700 to-gray-800',
+      ctaHover: 'from-gray-800 to-gray-900',
+      trustIcon: 'text-gray-500'
+    }
+  }[theme]);
+
+  const themeColors = getCardColors(uiTheme);
+
+  const trustItems = blockContent.trust_items
     ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
     : [];
 
@@ -408,6 +540,7 @@ export default function SplitCard(props: LayoutComponentProps) {
               premiumBadgeText={blockContent.premium_badge_text}
               blockContent={blockContent}
               handleImageToolbar={handleImageToolbar}
+              themeColors={themeColors}
             />
             
             <div className="text-center lg:hidden">
@@ -485,6 +618,7 @@ export default function SplitCard(props: LayoutComponentProps) {
               premiumBadgeText={blockContent.premium_badge_text}
               blockContent={blockContent}
               handleImageToolbar={handleImageToolbar}
+              themeColors={themeColors}
             />
           </div>
         </div>
@@ -514,7 +648,7 @@ export default function SplitCard(props: LayoutComponentProps) {
                   <CTAButton
                     text={blockContent.cta_text}
                     colorTokens={colorTokens}
-                    className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700"
+                    className={`shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 bg-gradient-to-r ${themeColors.ctaGradient} hover:${themeColors.ctaHover}`}
                     variant="primary"
                     sectionId={sectionId}
                     elementKey="cta_text"
@@ -522,10 +656,10 @@ export default function SplitCard(props: LayoutComponentProps) {
                 )}
 
                 {trustItems.length > 0 && (
-                  <TrustIndicators 
+                  <TrustIndicators
                     items={trustItems}
                     colorClass={mutedTextColor}
-                    iconColor="text-amber-500"
+                    iconColor={themeColors.trustIcon}
                   />
                 )}
               </div>

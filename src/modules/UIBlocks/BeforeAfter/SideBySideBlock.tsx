@@ -3,16 +3,18 @@ import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
+import {
+  EditableAdaptiveHeadline,
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
-import { 
+import {
   CTAButton,
-  TrustIndicators 
+  TrustIndicators
 } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 // Content interface for type safety
 interface SideBySideContent {
@@ -99,8 +101,41 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
   // Create typography styles
   const bodyLgStyle = getTypographyStyle('body-lg');
 
+  // Detect UIBlock theme - warm/cool/neutral
+  const uiTheme: UIBlockTheme = props.manualThemeOverride ||
+    (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+
+  // Debug logging
+  console.log('🎨 SideBySideBlock theme:', {
+    manualThemeOverride: props.manualThemeOverride,
+    detectedTheme: uiTheme,
+    marketCategory: props.userContext?.marketCategory,
+    sectionId
+  });
+
+  // Theme-based color system for before/after visual indicators
+  const getBeforeAfterColors = (theme: UIBlockTheme) => ({
+    warm: {
+      labelColor: '#ea580c',        // orange-600
+      iconRing: '#ffedd5',          // orange-100
+      border: '#fed7aa'             // orange-200
+    },
+    cool: {
+      labelColor: '#2563eb',        // blue-600
+      iconRing: '#dbeafe',          // blue-100
+      border: '#bfdbfe'             // blue-200
+    },
+    neutral: {
+      labelColor: '#4b5563',        // gray-600
+      iconRing: '#f3f4f6',          // gray-100
+      border: '#e5e7eb'             // gray-200
+    }
+  }[theme]);
+
+  const themeColors = getBeforeAfterColors(uiTheme);
+
   // Parse trust indicators from pipe-separated string
-  const trustItems = blockContent.trust_items 
+  const trustItems = blockContent.trust_items
     ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
     : [];
 
@@ -163,7 +198,10 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
         <div className="grid md:grid-cols-2 gap-8 md:gap-12 mb-12">
           {/* Before Block */}
           <div className="group">
-            <div className={`${colorTokens.surfaceCard} rounded-lg shadow-lg p-8 border border-gray-200 hover:shadow-xl transition-shadow duration-300 h-full`}>
+            <div
+              className={`${colorTokens.surfaceCard} rounded-lg shadow-lg p-8 border hover:shadow-xl transition-shadow duration-300 h-full`}
+              style={{ borderColor: themeColors.border }}
+            >
               <div className="flex items-center mb-6">
                 {blockContent.before_icon ? (
                   <IconEditableText
@@ -178,7 +216,13 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
                     elementKey="before_icon"
                   />
                 ) : (
-                  <div className="w-3 h-3 rounded-full mr-3 bg-red-500 ring-4 ring-red-100" />
+                  <div
+                    className="w-3 h-3 rounded-full mr-3"
+                    style={{
+                      backgroundColor: themeColors.labelColor,
+                      boxShadow: `0 0 0 4px ${themeColors.iconRing}`
+                    }}
+                  />
                 )}
                 <EditableAdaptiveText
                   mode={mode}
@@ -192,9 +236,9 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
                     textTransform: 'uppercase',
                     letterSpacing: '0.05em',
                     fontWeight: 600,
-                    color: '#ef4444' // red-500
+                    color: themeColors.labelColor
                   }}
-                  className="text-red-500"
+                  className=""
                   sectionId={sectionId}
                   elementKey="before_label"
                   sectionBackground={sectionBackground}
@@ -238,7 +282,10 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
 
           {/* After Block */}
           <div className="group">
-            <div className={`${colorTokens.surfaceCard} rounded-lg shadow-lg p-8 border border-gray-200 hover:shadow-xl transition-shadow duration-300 h-full`}>
+            <div
+              className={`${colorTokens.surfaceCard} rounded-lg shadow-lg p-8 border hover:shadow-xl transition-shadow duration-300 h-full`}
+              style={{ borderColor: themeColors.border }}
+            >
               <div className="flex items-center mb-6">
                 {blockContent.after_icon ? (
                   <IconEditableText
@@ -253,7 +300,13 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
                     elementKey="after_icon"
                   />
                 ) : (
-                  <div className="w-3 h-3 rounded-full mr-3 bg-green-500 ring-4 ring-green-100" />
+                  <div
+                    className="w-3 h-3 rounded-full mr-3"
+                    style={{
+                      backgroundColor: themeColors.labelColor,
+                      boxShadow: `0 0 0 4px ${themeColors.iconRing}`
+                    }}
+                  />
                 )}
                 <EditableAdaptiveText
                   mode={mode}
@@ -267,9 +320,9 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
                     textTransform: 'uppercase',
                     letterSpacing: '0.05em',
                     fontWeight: 600,
-                    color: '#10b981' // green-500
+                    color: themeColors.labelColor
                   }}
-                  className="text-green-500"
+                  className=""
                   sectionId={sectionId}
                   elementKey="after_label"
                   sectionBackground={sectionBackground}

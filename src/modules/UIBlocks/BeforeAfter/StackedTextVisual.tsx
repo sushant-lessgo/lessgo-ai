@@ -8,6 +8,8 @@ import {
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface StackedTextVisualProps extends LayoutComponentProps {}
 
@@ -72,10 +74,94 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
   });
 
   const { getTextStyle: getTypographyStyle } = useTypography();
-  
+
   // Create typography styles
   const bodyLgStyle = getTypographyStyle('body-lg');
-  
+
+  // Detect UIBlock theme - warm/cool/neutral
+  const uiTheme: UIBlockTheme = props.manualThemeOverride ||
+    (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+
+  // Debug logging
+  console.log('🎨 StackedTextVisual theme:', {
+    manualThemeOverride: props.manualThemeOverride,
+    detectedTheme: uiTheme,
+    marketCategory: props.userContext?.marketCategory,
+    sectionId
+  });
+
+  // Theme-based color system for before/after/transition blocks
+  const getStackedColors = (theme: UIBlockTheme) => ({
+    warm: {
+      before: {
+        bg: '#fff7ed',           // orange-50
+        border: '#fb923c',       // orange-400
+        iconBg: '#fed7aa',       // orange-200
+        iconText: '#ea580c'      // orange-600
+      },
+      transition: {
+        bg: '#ffedd5',           // orange-100
+        text: '#ea580c'          // orange-600
+      },
+      after: {
+        bg: '#fef3c7',           // amber-100
+        border: '#f59e0b',       // amber-500
+        iconBg: '#fde68a',       // amber-200
+        iconText: '#d97706'      // amber-600
+      },
+      summary: {
+        gradient: 'from-orange-50 via-amber-50 to-yellow-50',
+        border: 'border-orange-100'
+      }
+    },
+    cool: {
+      before: {
+        bg: '#eff6ff',           // blue-50
+        border: '#60a5fa',       // blue-400
+        iconBg: '#bfdbfe',       // blue-200
+        iconText: '#2563eb'      // blue-600
+      },
+      transition: {
+        bg: '#dbeafe',           // blue-100
+        text: '#2563eb'          // blue-600
+      },
+      after: {
+        bg: '#dcfce7',           // green-100
+        border: '#22c55e',       // green-500
+        iconBg: '#bbf7d0',       // green-200
+        iconText: '#16a34a'      // green-600
+      },
+      summary: {
+        gradient: 'from-blue-50 via-indigo-50 to-purple-50',
+        border: 'border-blue-100'
+      }
+    },
+    neutral: {
+      before: {
+        bg: '#f9fafb',           // gray-50
+        border: '#9ca3af',       // gray-400
+        iconBg: '#e5e7eb',       // gray-200
+        iconText: '#6b7280'      // gray-600
+      },
+      transition: {
+        bg: '#f3f4f6',           // gray-100
+        text: '#4b5563'          // gray-600
+      },
+      after: {
+        bg: '#f0fdf4',           // green-50
+        border: '#22c55e',       // green-500
+        iconBg: '#bbf7d0',       // green-200
+        iconText: '#16a34a'      // green-600
+      },
+      summary: {
+        gradient: 'from-gray-50 via-slate-50 to-zinc-50',
+        border: 'border-gray-100'
+      }
+    }
+  }[theme]);
+
+  const themeColors = getStackedColors(uiTheme);
+
   // Filter out 'custom' background type as it's not supported by EditableContent components
   const safeBackgroundType = props.backgroundType === 'custom' ? 'neutral' : (props.backgroundType || 'neutral');
 
@@ -127,16 +213,19 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
         <div className="space-y-8">
           {/* Before Block */}
           <div className="relative">
-            <div 
-              className="bg-gray-50 border-l-4 border-gray-400 rounded-lg p-8 shadow-sm"
-              style={{ 
-                backgroundColor: 'var(--surface-muted, #f9fafb)',
-                borderLeftColor: 'var(--border-muted, #9ca3af)'
+            <div
+              className="border-l-4 rounded-lg p-8 shadow-sm"
+              style={{
+                backgroundColor: themeColors.before.bg,
+                borderLeftColor: themeColors.before.border
               }}
             >
               <div className="flex items-start space-x-4">
                 {/* Before Icon */}
-                <div className="flex-shrink-0 w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
+                <div
+                  className="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: themeColors.before.iconBg }}
+                >
                   <IconEditableText
                     mode={mode}
                     value={blockContent.before_icon || '➕'}
@@ -144,7 +233,8 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
                     backgroundType={safeBackgroundType}
                     colorTokens={colorTokens}
                     iconSize="md"
-                    className="text-2xl text-gray-600"
+                    className="text-2xl"
+                    style={{ color: themeColors.before.iconText }}
                     sectionId={sectionId}
                     elementKey="before_icon"
                   />
@@ -191,7 +281,10 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
           <div className="flex items-center justify-center">
             <div className="flex flex-col items-center space-y-2">
               {/* Arrow */}
-              <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+              <div
+                className="w-8 h-8 rounded-full flex items-center justify-center"
+                style={{ backgroundColor: themeColors.transition.bg }}
+              >
                 <IconEditableText
                   mode={mode}
                   value={blockContent.transition_icon || '⬇️'}
@@ -199,7 +292,8 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   iconSize="sm"
-                  className="text-lg text-blue-600"
+                  className="text-lg"
+                  style={{ color: themeColors.transition.text }}
                   sectionId={sectionId}
                   elementKey="transition_icon"
                 />
@@ -214,7 +308,8 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  className="text-sm font-medium text-center px-4 py-2 bg-blue-50 rounded-full"
+                  className="text-sm font-medium text-center px-4 py-2 rounded-full"
+                  style={{ backgroundColor: themeColors.transition.bg }}
                   placeholder="Add transition text..."
                   sectionId={sectionId}
                   elementKey="transition_text"
@@ -226,16 +321,19 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
 
           {/* After Block */}
           <div className="relative">
-            <div 
-              className="bg-green-50 border-l-4 border-green-500 rounded-lg p-8 shadow-sm"
-              style={{ 
-                backgroundColor: 'var(--surface-success, #f0fdf4)',
-                borderLeftColor: 'var(--border-success, #22c55e)'
+            <div
+              className="border-l-4 rounded-lg p-8 shadow-sm"
+              style={{
+                backgroundColor: themeColors.after.bg,
+                borderLeftColor: themeColors.after.border
               }}
             >
               <div className="flex items-start space-x-4">
                 {/* After Icon */}
-                <div className="flex-shrink-0 w-12 h-12 bg-green-200 rounded-full flex items-center justify-center">
+                <div
+                  className="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: themeColors.after.iconBg }}
+                >
                   <IconEditableText
                     mode={mode}
                     value={blockContent.after_icon || '⚡'}
@@ -243,7 +341,8 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
                     backgroundType={safeBackgroundType}
                     colorTokens={colorTokens}
                     iconSize="md"
-                    className="text-2xl text-green-600"
+                    className="text-2xl"
+                    style={{ color: themeColors.after.iconText }}
                     sectionId={sectionId}
                     elementKey="after_icon"
                   />
@@ -290,7 +389,7 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
 
         {/* Optional Summary Box */}
         {(blockContent.show_summary_box !== 'false' && (blockContent.summary_text || mode === 'edit')) && (
-          <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-2xl border border-blue-100 relative group/summary-item">
+          <div className={`mt-8 p-6 bg-gradient-to-r ${themeColors.summary.gradient} rounded-2xl border ${themeColors.summary.border} relative group/summary-item`}>
             <div className="text-center">
               <EditableAdaptiveText
                 mode={mode}
