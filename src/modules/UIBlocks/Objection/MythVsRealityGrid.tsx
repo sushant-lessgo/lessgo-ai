@@ -5,12 +5,14 @@ import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
-  EditableAdaptiveText 
+import {
+  EditableAdaptiveHeadline,
+  EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 // Content interface for type safety
 interface MythVsRealityGridContent {
@@ -90,6 +92,71 @@ export default function MythVsRealityGrid(props: LayoutComponentProps) {
   const { getTextStyle: getTypographyStyle } = useTypography();
   const bodyLgStyle = getTypographyStyle('body-lg');
   const bodyStyle = getTypographyStyle('body');
+
+  // Theme detection: manual override > auto-detection > neutral fallback
+  const theme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Theme-based color mapping
+  const getMythRealityColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        // Myth (left) - lighter orange
+        mythBg: 'bg-orange-50',
+        mythBorder: 'border-orange-200',
+        mythBadgeBg: 'bg-orange-500',
+        mythIconBg: 'bg-orange-500',
+        mythTextColor: 'text-orange-900',
+        mythHoverBg: 'hover:bg-orange-100',
+        mythFocusRing: 'focus:ring-orange-500',
+        // Reality (right) - darker orange
+        realityBg: 'bg-orange-100',
+        realityBorder: 'border-orange-300',
+        realityBadgeBg: 'bg-orange-600',
+        realityIconBg: 'bg-orange-600',
+        realityTextColor: 'text-orange-900',
+        realityHoverBg: 'hover:bg-orange-200',
+        realityFocusRing: 'focus:ring-orange-600'
+      },
+      cool: {
+        mythBg: 'bg-blue-50',
+        mythBorder: 'border-blue-200',
+        mythBadgeBg: 'bg-blue-500',
+        mythIconBg: 'bg-blue-500',
+        mythTextColor: 'text-blue-900',
+        mythHoverBg: 'hover:bg-blue-100',
+        mythFocusRing: 'focus:ring-blue-500',
+        realityBg: 'bg-blue-100',
+        realityBorder: 'border-blue-300',
+        realityBadgeBg: 'bg-blue-600',
+        realityIconBg: 'bg-blue-600',
+        realityTextColor: 'text-blue-900',
+        realityHoverBg: 'hover:bg-blue-200',
+        realityFocusRing: 'focus:ring-blue-600'
+      },
+      neutral: {
+        mythBg: 'bg-gray-50',
+        mythBorder: 'border-gray-200',
+        mythBadgeBg: 'bg-gray-500',
+        mythIconBg: 'bg-gray-500',
+        mythTextColor: 'text-gray-900',
+        mythHoverBg: 'hover:bg-gray-100',
+        mythFocusRing: 'focus:ring-gray-500',
+        realityBg: 'bg-gray-100',
+        realityBorder: 'border-gray-300',
+        realityBadgeBg: 'bg-gray-600',
+        realityIconBg: 'bg-gray-600',
+        realityTextColor: 'text-gray-900',
+        realityHoverBg: 'hover:bg-gray-200',
+        realityFocusRing: 'focus:ring-gray-600'
+      }
+    }[theme];
+  };
+
+  const colors = getMythRealityColors(theme);
 
   // Parse myth/reality pairs from both individual and legacy formats
   const parseMythRealityPairs = (content: MythVsRealityGridContent): Array<{myth: string, reality: string, index: number}> => {
@@ -270,15 +337,15 @@ export default function MythVsRealityGrid(props: LayoutComponentProps) {
             <div key={index} className={`relative group/myth-reality-${index}`}>
               <div className="grid md:grid-cols-2 gap-6 lg:gap-8">
                 {/* Myth Card */}
-                <div className="bg-red-50 border border-red-200 rounded-xl p-6 relative">
+                <div className={`${colors.mythBg} border ${colors.mythBorder} rounded-xl p-6 relative`}>
                   <div className="absolute -top-3 left-6">
-                    <span style={{...bodyStyle, fontSize: '0.875rem', fontWeight: '500'}} className="bg-red-500 text-white px-3 py-1 rounded-full">
+                    <span style={{...bodyStyle, fontSize: '0.875rem', fontWeight: '500'}} className={`${colors.mythBadgeBg} text-white px-3 py-1 rounded-full`}>
                       Myth
                     </span>
                   </div>
                   <div className="pt-4">
                     <div className="flex items-start space-x-3">
-                      <div className="flex-shrink-0 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center mt-1">
+                      <div className={`flex-shrink-0 w-8 h-8 ${colors.mythIconBg} rounded-full flex items-center justify-center mt-1`}>
                         <IconEditableText
                           mode={mode}
                           value={blockContent.myth_icon || '❌'}
@@ -296,27 +363,27 @@ export default function MythVsRealityGrid(props: LayoutComponentProps) {
                           contentEditable
                           suppressContentEditableWarning
                           onBlur={(e) => updateMythAtIndex(index, e.currentTarget.textContent || '')}
-                          className="outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 rounded px-1 min-h-[60px] cursor-text hover:bg-red-100 text-red-900 leading-relaxed flex-1"
+                          className={`outline-none focus:ring-2 ${colors.mythFocusRing} focus:ring-opacity-50 rounded px-1 min-h-[60px] cursor-text ${colors.mythHoverBg} ${colors.mythTextColor} leading-relaxed flex-1`}
                         >
                           {pair.myth}
                         </div>
                       ) : (
-                        <p style={{...bodyStyle}} className="text-red-900 leading-relaxed flex-1">{pair.myth}</p>
+                        <p style={{...bodyStyle}} className={`${colors.mythTextColor} leading-relaxed flex-1`}>{pair.myth}</p>
                       )}
                     </div>
                   </div>
                 </div>
 
                 {/* Reality Card */}
-                <div className="bg-green-50 border border-green-200 rounded-xl p-6 relative">
+                <div className={`${colors.realityBg} border ${colors.realityBorder} rounded-xl p-6 relative`}>
                   <div className="absolute -top-3 left-6">
-                    <span style={{...bodyStyle, fontSize: '0.875rem', fontWeight: '500'}} className="bg-green-500 text-white px-3 py-1 rounded-full">
+                    <span style={{...bodyStyle, fontSize: '0.875rem', fontWeight: '500'}} className={`${colors.realityBadgeBg} text-white px-3 py-1 rounded-full`}>
                       Reality
                     </span>
                   </div>
                   <div className="pt-4">
                     <div className="flex items-start space-x-3">
-                      <div className="flex-shrink-0 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mt-1">
+                      <div className={`flex-shrink-0 w-8 h-8 ${colors.realityIconBg} rounded-full flex items-center justify-center mt-1`}>
                         <IconEditableText
                           mode={mode}
                           value={blockContent.reality_icon || '✅'}
@@ -334,12 +401,12 @@ export default function MythVsRealityGrid(props: LayoutComponentProps) {
                           contentEditable
                           suppressContentEditableWarning
                           onBlur={(e) => updateRealityAtIndex(index, e.currentTarget.textContent || '')}
-                          className="outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 rounded px-1 min-h-[60px] cursor-text hover:bg-green-100 text-green-900 leading-relaxed flex-1"
+                          className={`outline-none focus:ring-2 ${colors.realityFocusRing} focus:ring-opacity-50 rounded px-1 min-h-[60px] cursor-text ${colors.realityHoverBg} ${colors.realityTextColor} leading-relaxed flex-1`}
                         >
                           {pair.reality}
                         </div>
                       ) : (
-                        <p style={{...bodyStyle}} className="text-green-900 leading-relaxed flex-1">{pair.reality}</p>
+                        <p style={{...bodyStyle}} className={`${colors.realityTextColor} leading-relaxed flex-1`}>{pair.reality}</p>
                       )}
                     </div>
                   </div>

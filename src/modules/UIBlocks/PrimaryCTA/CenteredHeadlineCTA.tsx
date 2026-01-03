@@ -21,6 +21,8 @@ import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData } from '@/utils/dataParsingUtils';
 import { createCTAClickHandler } from '@/utils/ctaHandler';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 // Content interface for type safety
 interface CenteredHeadlineCTAContent {
@@ -131,6 +133,37 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
 
   const { getTextStyle: getTypographyStyle } = useTypography();
 
+  // Theme detection with priority: manualThemeOverride > autoDetectedTheme > neutral
+  const uiBlockTheme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Theme-aware color mappings
+  // Note: Trust checkmarks always stay green (universal trust signal)
+  const getThemeColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        urgencyBadgeBg: 'bg-orange-100',
+        urgencyBadgeText: 'text-orange-800',
+        urgencyBadgeBorder: 'border-orange-300'
+      },
+      cool: {
+        urgencyBadgeBg: 'bg-blue-100',
+        urgencyBadgeText: 'text-blue-800',
+        urgencyBadgeBorder: 'border-blue-300'
+      },
+      neutral: {
+        urgencyBadgeBg: 'bg-gray-100',
+        urgencyBadgeText: 'text-gray-800',
+        urgencyBadgeBorder: 'border-gray-300'
+      }
+    }[theme];
+  };
+
+  const themeColors = getThemeColors(uiBlockTheme);
+
   // Handle trust items - support both legacy pipe-separated format and individual fields
   const getTrustItems = (): string[] => {
     const individualItems = [
@@ -170,7 +203,7 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.urgency_text || ''}
               onEdit={(value) => handleContentUpdate('urgency_text', value)}
-              colorTokens={{ accent: 'bg-orange-100 text-orange-800 border-orange-300' }}
+              colorTokens={{ accent: `${themeColors.urgencyBadgeBg} ${themeColors.urgencyBadgeText} ${themeColors.urgencyBadgeBorder}` }}
               placeholder="🔥 Limited Time: 50% Off First Month"
               className="animate-pulse"
               sectionId={sectionId}

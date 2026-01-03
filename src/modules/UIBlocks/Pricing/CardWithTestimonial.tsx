@@ -7,13 +7,15 @@ import {
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
-import { 
+import {
   CTAButton,
   TrustIndicators,
-  StarRating 
+  StarRating
 } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { getIconFromCategory, getRandomIconFromCategory } from '@/utils/iconMapping';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface CardWithTestimonialContent {
   headline: string;
@@ -205,6 +207,69 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Theme detection with priority: manualThemeOverride > autoDetectedTheme > neutral
+  const uiBlockTheme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Theme-aware color mappings
+  const getThemeColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        socialMetric1: 'text-orange-600',
+        socialMetric2: 'text-orange-500',
+        socialMetric3: 'text-orange-700',
+        socialMetric4: 'text-orange-600',
+        socialIconBg: 'bg-orange-100',
+        socialIconText: 'text-orange-600',
+        socialProofBg: 'bg-gradient-to-r from-orange-50 to-red-50 border-orange-100',
+        guaranteeBg: 'bg-orange-50 border-orange-200',
+        guaranteeIconBg: 'bg-orange-500',
+        checkmark: 'text-orange-500',
+        trustIcon: 'text-orange-500',
+        tierControls: 'bg-orange-50 border-orange-200',
+        addTierButton: 'bg-orange-600 hover:bg-orange-700',
+        addFeatureButton: 'text-orange-600 hover:text-orange-800'
+      },
+      cool: {
+        socialMetric1: 'text-blue-600',
+        socialMetric2: 'text-blue-500',
+        socialMetric3: 'text-blue-700',
+        socialMetric4: 'text-blue-600',
+        socialIconBg: 'bg-blue-100',
+        socialIconText: 'text-blue-600',
+        socialProofBg: 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-100',
+        guaranteeBg: 'bg-blue-50 border-blue-200',
+        guaranteeIconBg: 'bg-blue-500',
+        checkmark: 'text-blue-500',
+        trustIcon: 'text-blue-500',
+        tierControls: 'bg-blue-50 border-blue-200',
+        addTierButton: 'bg-blue-600 hover:bg-blue-700',
+        addFeatureButton: 'text-blue-600 hover:text-blue-800'
+      },
+      neutral: {
+        socialMetric1: 'text-gray-700',
+        socialMetric2: 'text-gray-600',
+        socialMetric3: 'text-gray-700',
+        socialMetric4: 'text-gray-600',
+        socialIconBg: 'bg-gray-100',
+        socialIconText: 'text-gray-600',
+        socialProofBg: 'bg-gradient-to-r from-gray-50 to-gray-100 border-gray-200',
+        guaranteeBg: 'bg-green-50 border-green-200',
+        guaranteeIconBg: 'bg-green-500',
+        checkmark: 'text-green-500',
+        trustIcon: 'text-green-500',
+        tierControls: 'bg-gray-50 border-gray-200',
+        addTierButton: 'bg-gray-600 hover:bg-gray-700',
+        addFeatureButton: 'text-gray-600 hover:text-gray-800'
+      }
+    }[theme];
+  };
+
+  const themeColors = getThemeColors(uiBlockTheme);
 
   // LAYER 2: Container guards - Helper function to detect clicks from editable content
   const isFromEditable = (el: EventTarget | null): boolean => {
@@ -440,30 +505,30 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
       {
         value: blockContent.social_metric_1 || '10,000+',
         label: blockContent.social_metric_1_label || 'Happy customers',
-        color: 'text-blue-600'
+        color: themeColors.socialMetric1
       },
       {
         value: blockContent.social_metric_2 || '99.9%',
         label: blockContent.social_metric_2_label || 'Uptime guaranteed',
-        color: 'text-green-600'
+        color: themeColors.socialMetric2
       },
       {
         value: blockContent.social_metric_3 || '4.9/5',
         label: blockContent.social_metric_3_label || 'Customer satisfaction',
-        color: 'text-purple-600'
+        color: themeColors.socialMetric3
       },
       {
         value: blockContent.social_metric_4 || '24/7',
         label: blockContent.social_metric_4_label || 'Expert support',
-        color: 'text-orange-600'
+        color: themeColors.socialMetric4
       }
-    ].filter(metric => 
-      metric.value !== '___REMOVED___' && 
-      metric.label !== '___REMOVED___' && 
-      metric.value.trim() !== '' && 
+    ].filter(metric =>
+      metric.value !== '___REMOVED___' &&
+      metric.label !== '___REMOVED___' &&
+      metric.value.trim() !== '' &&
       metric.label.trim() !== ''
     );
-    
+
     return metrics;
   };
 
@@ -646,7 +711,7 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
         <div className="space-y-3 mb-8">
           {tier.features.map((feature, featureIndex) => (
             <div key={featureIndex} className="flex items-start space-x-3 group/feature relative">
-              <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className={`w-5 h-5 ${themeColors.checkmark} mt-0.5 flex-shrink-0`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
               {mode !== 'preview' ? (
@@ -710,7 +775,7 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
                 featureLists[index] = currentFeatures.join(',');
                 handleContentUpdate('feature_lists', featureLists.join('|'));
               }}
-              className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors duration-200"
+              className={`flex items-center space-x-2 ${themeColors.addFeatureButton} text-sm font-medium transition-colors duration-200`}
               title="Add new feature"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -970,10 +1035,10 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
 
         {/* Tier Management Controls - Only in edit mode */}
         {mode === 'edit' && (
-          <div className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className={`mb-8 p-4 ${themeColors.tierControls} rounded-lg border`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                 </svg>
                 <span className="text-sm font-medium text-gray-700">
@@ -983,7 +1048,7 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
               {tierCount < 4 && (
                 <button
                   onClick={handleAddTier}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition-colors duration-200 flex items-center space-x-2"
+                  className={`px-4 py-2 ${themeColors.addTierButton} text-white rounded-lg font-medium text-sm transition-colors duration-200 flex items-center space-x-2`}
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -1017,7 +1082,7 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
 
         {/* Social Proof Section */}
         {((blockContent.show_social_proof !== false && socialMetrics.length > 0) || (mode === 'edit' && blockContent.social_proof_title !== '___REMOVED___' && socialMetrics.some(m => m.value && m.value !== '___REMOVED___'))) && (
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-100 mb-12 relative group/social-proof-section">
+          <div className={`${themeColors.socialProofBg} rounded-2xl p-8 border mb-12 relative group/social-proof-section`}>
             <div className="text-center">
               <EditableAdaptiveText
                 mode={mode}
@@ -1045,7 +1110,7 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
                         <div key={index} className="text-center relative group/social-metric">
                           <div className="space-y-2">
                             {/* Social Proof Icon */}
-                            <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-blue-100 flex items-center justify-center">
+                            <div className={`w-12 h-12 mx-auto mb-3 rounded-full ${themeColors.socialIconBg} flex items-center justify-center`}>
                               <IconEditableText
                                 mode={mode}
                                 value={getSocialIcon(index - 1)}
@@ -1056,7 +1121,7 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
                                 backgroundType="neutral"
                                 colorTokens={colorTokens}
                                 iconSize="md"
-                                className="text-blue-600 text-xl"
+                                className={`${themeColors.socialIconText} text-xl`}
                                 sectionId={sectionId}
                                 elementKey={`social_icon_${index}`}
                               />
@@ -1115,8 +1180,8 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
                   {socialMetrics.map((metric, index) => (
                     <div key={index} className="text-center">
                       {/* Social Proof Icon */}
-                      <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-blue-100 flex items-center justify-center">
-                        <span className="text-blue-600 text-xl">
+                      <div className={`w-12 h-12 mx-auto mb-3 rounded-full ${themeColors.socialIconBg} flex items-center justify-center`}>
+                        <span className={`${themeColors.socialIconText} text-xl`}>
                           {getSocialIcon(index)}
                         </span>
                       </div>
@@ -1157,9 +1222,9 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
 
         {/* Money-back Guarantee */}
         {((blockContent.show_guarantee !== false && (blockContent.guarantee_title && blockContent.guarantee_title !== '___REMOVED___') || (blockContent.guarantee_description && blockContent.guarantee_description !== '___REMOVED___')) || (mode === 'edit' && (blockContent.guarantee_title !== '___REMOVED___' || blockContent.guarantee_description !== '___REMOVED___'))) && (
-          <div className="bg-green-50 rounded-2xl p-8 border border-green-200 mb-12 relative group/guarantee">
+          <div className={`${themeColors.guaranteeBg} rounded-2xl p-8 border mb-12 relative group/guarantee`}>
             <div className="flex items-center justify-center space-x-4">
-              <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white">
+              <div className={`w-12 h-12 ${themeColors.guaranteeIconBg} rounded-full flex items-center justify-center text-white`}>
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
@@ -1233,10 +1298,10 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
             )}
 
             {trustItems.length > 0 && (
-              <TrustIndicators 
+              <TrustIndicators
                 items={trustItems}
                 colorClass={mutedTextColor}
-                iconColor="text-green-500"
+                iconColor={themeColors.trustIcon}
               />
             )}
           </div>

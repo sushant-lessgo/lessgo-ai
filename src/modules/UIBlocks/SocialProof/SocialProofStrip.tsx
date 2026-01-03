@@ -4,6 +4,8 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -158,8 +160,8 @@ const updateCompanyNames = (oldNames: string, newNames: string, logoUrlsJson: st
 };
 
 // Stat Display Component - Made Editable
-const StatDisplay = React.memo(({ 
-  stat, 
+const StatDisplay = React.memo(({
+  stat,
   mode,
   dynamicTextColors,
   h2Style,
@@ -169,8 +171,9 @@ const StatDisplay = React.memo(({
   colorTokens,
   backgroundType,
   sectionBackground,
-  sectionId
-}: { 
+  sectionId,
+  statNumberColor
+}: {
   stat: ProofStat;
   mode: 'edit' | 'preview';
   dynamicTextColors: any;
@@ -182,6 +185,7 @@ const StatDisplay = React.memo(({
   backgroundType: string;
   sectionBackground: string;
   sectionId: string;
+  statNumberColor: string;
 }) => {
   return (
     <div className="text-center">
@@ -217,7 +221,10 @@ const StatDisplay = React.memo(({
         </>
       ) : (
         <>
-          <div style={{...h2Style, fontSize: 'clamp(1.5rem, 3vw, 2rem)'}} className={`${dynamicTextColors?.heading || 'text-gray-900'} mb-1`}>
+          <div
+            style={{...h2Style, fontSize: 'clamp(1.5rem, 3vw, 2rem)', color: statNumberColor}}
+            className="mb-1"
+          >
             {stat.value}
           </div>
           <div style={{...bodyStyle, fontSize: '0.875rem'}} className={`${dynamicTextColors?.muted || 'text-gray-600'}`}>
@@ -291,6 +298,51 @@ export default function SocialProofStrip(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
+  // Detect theme: manual override > auto-detection > neutral fallback
+  const theme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Theme-based colors for stats, company logos, and trust elements
+  const getSocialProofColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        statNumberColor: '#ea580c',        // orange-600
+        companyLogoBg: '#fed7aa',          // orange-200
+        companyLogoBorder: '#fed7aa',      // orange-200
+        companyLogoHover: '#fdba74',       // orange-300
+        addButtonBorder: '#fed7aa',        // orange-200
+        trustBadgeBg: '#ffedd5',           // orange-50
+        trustBadgeIcon: '#ea580c',         // orange-600
+        ratingStarColor: '#f59e0b'         // amber-500
+      },
+      cool: {
+        statNumberColor: '#2563eb',        // blue-600
+        companyLogoBg: '#bfdbfe',          // blue-200
+        companyLogoBorder: '#bfdbfe',      // blue-200
+        companyLogoHover: '#93c5fd',       // blue-300
+        addButtonBorder: '#bfdbfe',        // blue-200
+        trustBadgeBg: '#dbeafe',           // blue-50
+        trustBadgeIcon: '#2563eb',         // blue-600
+        ratingStarColor: '#3b82f6'         // blue-500
+      },
+      neutral: {
+        statNumberColor: '#374151',        // gray-700
+        companyLogoBg: '#e5e7eb',          // gray-200
+        companyLogoBorder: '#e5e7eb',      // gray-200
+        companyLogoHover: '#d1d5db',       // gray-300
+        addButtonBorder: '#d1d5db',        // gray-300
+        trustBadgeBg: '#f9fafb',           // gray-50
+        trustBadgeIcon: '#374151',         // gray-700
+        ratingStarColor: '#f59e0b'         // amber-500
+      }
+    }[theme];
+  };
+
+  const colors = getSocialProofColors(theme);
+
   // Typography hook
   const { getTextStyle: getTypographyStyle } = useTypography();
   const h2Style = getTypographyStyle('h2');
@@ -343,6 +395,7 @@ export default function SocialProofStrip(props: LayoutComponentProps) {
                 dynamicTextColors={dynamicTextColors}
                 h2Style={h2Style}
                 bodyStyle={bodyStyle}
+                statNumberColor={colors.statNumberColor}
                 onStatEdit={(index, value) => {
                   const currentStats = parsePipeData(blockContent.proof_stats || '');
                   currentStats[index] = value;
@@ -378,7 +431,16 @@ export default function SocialProofStrip(props: LayoutComponentProps) {
                 
                 return (
                   // All companies are now editable with isolated hover
-                  <div key={company.id} className="flex items-center justify-center px-4 py-2 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 hover:bg-white/10 transition-all duration-300">
+                  <div
+                    key={company.id}
+                    className="flex items-center justify-center px-4 py-2 backdrop-blur-sm rounded-lg border transition-all duration-300"
+                    style={{
+                      backgroundColor: `${colors.companyLogoBg}0D`,
+                      borderColor: `${colors.companyLogoBorder}33`
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = `${colors.companyLogoHover}33`}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = `${colors.companyLogoBg}0D`}
+                  >
                     <div className="flex items-center space-x-2">
                       <LogoEditableComponent
                         mode={mode}
@@ -444,7 +506,12 @@ export default function SocialProofStrip(props: LayoutComponentProps) {
               
               {/* Add Company Button (Edit Mode Only) */}
               {mode !== 'preview' && companies.length < 8 && (
-                <div className="flex items-center justify-center px-4 py-2 bg-white/10 backdrop-blur-sm rounded-lg border-2 border-dashed border-white/20 hover:border-white/30 transition-all duration-300">
+                <div
+                  className="flex items-center justify-center px-4 py-2 backdrop-blur-sm rounded-lg border-2 border-dashed transition-all duration-300"
+                  style={{
+                    borderColor: `${colors.addButtonBorder}4D`
+                  }}
+                >
                   <button
                     onClick={(e) => {
                       e.preventDefault();

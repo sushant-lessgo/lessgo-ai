@@ -1,20 +1,24 @@
+'use client';
+
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useImageToolbar } from '@/hooks/useImageToolbar';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
+import {
+  EditableAdaptiveHeadline,
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
-import { 
+import {
   CTAButton,
-  TrustIndicators 
+  TrustIndicators
 } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { getIconFromCategory, getRandomIconFromCategory } from '@/utils/iconMapping';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface ZigzagImageStepsContent {
   headline: string;
@@ -142,9 +146,9 @@ const CONTENT_SCHEMA = {
 };
 
 
-const ZigzagStep = React.memo(({ 
-  title, 
-  description, 
+const ZigzagStep = React.memo(({
+  title,
+  description,
   visual,
   index,
   isEven,
@@ -154,7 +158,8 @@ const ZigzagStep = React.memo(({
   handleContentUpdate,
   blockContent,
   onRemove,
-  handleImageToolbar
+  handleImageToolbar,
+  themeColors
 }: {
   title: string;
   description: string;
@@ -168,17 +173,29 @@ const ZigzagStep = React.memo(({
   blockContent: ZigzagImageStepsContent;
   onRemove?: () => void;
   handleImageToolbar: (imageId: string, position: { x: number; y: number }) => void;
+  themeColors: {
+    stepBadgeGradient: string;
+    placeholderGradient: string;
+    placeholderHoverGradient: string;
+    focusRing: string;
+    flowSummaryBg: string;
+    flowSummaryBorder: string;
+    featureIcon1: string;
+    featureIcon2: string;
+    featureIcon3: string;
+    divider: string;
+  };
 }) => {
   
   const VisualPlaceholder = React.memo(({ onClick }: { onClick?: (e: React.MouseEvent) => void }) => (
-    <div 
-      className="relative w-full h-80 rounded-2xl overflow-hidden bg-gradient-to-br from-pink-50 to-purple-100 cursor-pointer hover:bg-gradient-to-br hover:from-pink-100 hover:to-purple-150 transition-all duration-300"
+    <div
+      className={`relative w-full h-80 rounded-2xl overflow-hidden ${themeColors.placeholderGradient} cursor-pointer ${themeColors.placeholderHoverGradient} transition-all duration-300`}
       onClick={onClick}
     >
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="text-center">
           <div className="w-20 h-20 mx-auto rounded-2xl bg-white/50 flex items-center justify-center mb-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center">
+            <div className={`w-12 h-12 rounded-xl ${themeColors.stepBadgeGradient} flex items-center justify-center`}>
               <span className="text-white font-bold text-xl">{index + 1}</span>
             </div>
           </div>
@@ -201,7 +218,7 @@ const ZigzagStep = React.memo(({
       {/* Content */}
       <div className={`space-y-6 ${isEven ? 'lg:order-1' : 'lg:order-2'} group`}>
         <div className="flex items-start space-x-4">
-          <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-pink-600 bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center shadow-lg">
+          <div className={`flex-shrink-0 w-12 h-12 rounded-2xl ${themeColors.stepBadgeGradient} flex items-center justify-center shadow-lg`}>
             <span className="text-white font-bold text-lg drop-shadow-sm">{index + 1}</span>
           </div>
           <div className="flex-1 relative">
@@ -215,7 +232,7 @@ const ZigzagStep = React.memo(({
                   stepTitles[index] = e.currentTarget.textContent || '';
                   handleContentUpdate('step_titles', stepTitles.join('|'));
                 }}
-                className="text-2xl font-bold text-gray-900 mb-4 outline-none focus:ring-2 focus:ring-pink-500 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-50 min-h-[40px]"
+                className={`text-2xl font-bold text-gray-900 mb-4 outline-none focus:ring-2 ${themeColors.focusRing} focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-50 min-h-[40px]`}
                 data-placeholder="Step title"
               >
                 {title}
@@ -223,7 +240,7 @@ const ZigzagStep = React.memo(({
             ) : (
               <h3 className="text-2xl font-bold text-gray-900 mb-4">{title}</h3>
             )}
-            
+
             {/* Editable Step Description */}
             {mode !== 'preview' ? (
               <div
@@ -234,7 +251,7 @@ const ZigzagStep = React.memo(({
                   stepDescriptions[index] = e.currentTarget.textContent || '';
                   handleContentUpdate('step_descriptions', stepDescriptions.join('|'));
                 }}
-                className="text-gray-600 leading-relaxed text-lg outline-none focus:ring-2 focus:ring-pink-500 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-50 min-h-[60px]"
+                className={`text-gray-600 leading-relaxed text-lg outline-none focus:ring-2 ${themeColors.focusRing} focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-50 min-h-[60px]`}
                 data-placeholder="Step description"
               >
                 {description}
@@ -335,6 +352,69 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
   });
   
   const { getTextStyle: getTypographyStyle } = useTypography();
+
+  // Detect theme: manual override > auto-detection > neutral fallback
+  const theme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Debug theme detection
+  React.useEffect(() => {
+    console.log('🎨 ZigzagImageSteps theme detection:', {
+      sectionId,
+      hasManualOverride: !!props.manualThemeOverride,
+      manualTheme: props.manualThemeOverride,
+      hasUserContext: !!props.userContext,
+      userContext: props.userContext,
+      finalTheme: theme
+    });
+  }, [theme, props.manualThemeOverride, props.userContext, sectionId]);
+
+  // Theme-based color mappings
+  const getThemeColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        stepBadgeGradient: 'bg-gradient-to-br from-orange-500 to-red-600',
+        placeholderGradient: 'bg-gradient-to-br from-orange-50 to-red-100',
+        placeholderHoverGradient: 'hover:bg-gradient-to-br hover:from-orange-100 hover:to-red-150',
+        focusRing: 'focus:ring-orange-500',
+        flowSummaryBg: 'bg-gradient-to-r from-orange-50 via-amber-50 to-red-50',
+        flowSummaryBorder: 'border-orange-100',
+        featureIcon1: 'text-orange-600',
+        featureIcon2: 'text-red-600',
+        featureIcon3: 'text-amber-600',
+        divider: 'bg-orange-300'
+      },
+      cool: {
+        stepBadgeGradient: 'bg-gradient-to-br from-blue-500 to-indigo-600',
+        placeholderGradient: 'bg-gradient-to-br from-blue-50 to-indigo-100',
+        placeholderHoverGradient: 'hover:bg-gradient-to-br hover:from-blue-100 hover:to-indigo-150',
+        focusRing: 'focus:ring-blue-500',
+        flowSummaryBg: 'bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50',
+        flowSummaryBorder: 'border-blue-100',
+        featureIcon1: 'text-blue-600',
+        featureIcon2: 'text-indigo-600',
+        featureIcon3: 'text-purple-600',
+        divider: 'bg-blue-300'
+      },
+      neutral: {
+        stepBadgeGradient: 'bg-gradient-to-br from-gray-500 to-slate-600',
+        placeholderGradient: 'bg-gradient-to-br from-gray-50 to-slate-100',
+        placeholderHoverGradient: 'hover:bg-gradient-to-br hover:from-gray-100 hover:to-slate-150',
+        focusRing: 'focus:ring-gray-500',
+        flowSummaryBg: 'bg-gradient-to-r from-gray-50 via-slate-50 to-zinc-50',
+        flowSummaryBorder: 'border-gray-100',
+        featureIcon1: 'text-gray-600',
+        featureIcon2: 'text-slate-600',
+        featureIcon3: 'text-zinc-600',
+        divider: 'bg-gray-300'
+      }
+    }[theme];
+  };
+
+  const themeColors = getThemeColors(theme);
 
   // Helper function to get individual step visual
   const getStepVisual = (index: number): string => {
@@ -464,6 +544,7 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
               handleContentUpdate={handleContentUpdate}
               blockContent={blockContent}
               handleImageToolbar={handleImageToolbar}
+              themeColors={themeColors}
               onRemove={steps.length > 1 ? () => {
                 const stepTitles = blockContent.step_titles ? blockContent.step_titles.split('|') : [];
                 const stepDescriptions = blockContent.step_descriptions ? blockContent.step_descriptions.split('|') : [];
@@ -539,7 +620,7 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
 
         {/* Creative Flow Summary */}
         {blockContent.show_flow_summary !== false && (
-          <div className="mt-16 bg-gradient-to-r from-pink-50 via-purple-50 to-indigo-50 rounded-2xl p-8 border border-pink-100">
+          <div className={`mt-16 ${themeColors.flowSummaryBg} rounded-2xl p-8 border ${themeColors.flowSummaryBorder}`}>
             <div className="text-center">
               {(blockContent.flow_summary_heading || mode === 'edit') && (
                 <div className="relative group/summary-heading">
@@ -583,7 +664,7 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
                       backgroundType={backgroundType as any}
                       colorTokens={colorTokens}
                       iconSize="sm"
-                      className="text-xl text-pink-600"
+                      className={`text-xl ${themeColors.featureIcon1}`}
                       sectionId={sectionId}
                       elementKey="flow_feature_1_icon"
                     />
@@ -617,11 +698,11 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
                   </div>
                 )}
                 
-                {(blockContent.flow_feature_1_text && blockContent.flow_feature_1_text !== '___REMOVED___') && 
+                {(blockContent.flow_feature_1_text && blockContent.flow_feature_1_text !== '___REMOVED___') &&
                  (blockContent.flow_feature_2_text && blockContent.flow_feature_2_text !== '___REMOVED___') && (
-                  <div className="w-px h-6 bg-gray-300" />
+                  <div className={`w-px h-6 ${themeColors.divider}`} />
                 )}
-                
+
                 {(blockContent.flow_feature_2_text && blockContent.flow_feature_2_text !== '___REMOVED___') && (
                   <div className="relative group/feature-2 flex items-center space-x-2">
                     <IconEditableText
@@ -631,7 +712,7 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
                       backgroundType={backgroundType as any}
                       colorTokens={colorTokens}
                       iconSize="sm"
-                      className="text-xl text-purple-600"
+                      className={`text-xl ${themeColors.featureIcon2}`}
                       sectionId={sectionId}
                       elementKey="flow_feature_2_icon"
                     />
@@ -665,11 +746,11 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
                   </div>
                 )}
                 
-                {(blockContent.flow_feature_2_text && blockContent.flow_feature_2_text !== '___REMOVED___') && 
+                {(blockContent.flow_feature_2_text && blockContent.flow_feature_2_text !== '___REMOVED___') &&
                  (blockContent.flow_feature_3_text && blockContent.flow_feature_3_text !== '___REMOVED___') && (
-                  <div className="w-px h-6 bg-gray-300" />
+                  <div className={`w-px h-6 ${themeColors.divider}`} />
                 )}
-                
+
                 {(blockContent.flow_feature_3_text && blockContent.flow_feature_3_text !== '___REMOVED___') && (
                   <div className="relative group/feature-3 flex items-center space-x-2">
                     <IconEditableText
@@ -679,7 +760,7 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
                       backgroundType={backgroundType as any}
                       colorTokens={colorTokens}
                       iconSize="sm"
-                      className="text-xl text-indigo-600"
+                      className={`text-xl ${themeColors.featureIcon3}`}
                       sectionId={sectionId}
                       elementKey="flow_feature_3_icon"
                     />

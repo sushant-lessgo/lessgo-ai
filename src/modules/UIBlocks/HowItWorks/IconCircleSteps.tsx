@@ -2,17 +2,19 @@ import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
+import {
+  EditableAdaptiveHeadline,
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
-import { 
+import {
   CTAButton,
-  TrustIndicators 
+  TrustIndicators
 } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { getIconFromCategory, getRandomIconFromCategory } from '@/utils/iconMapping';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface IconCircleStepsContent {
   headline: string;
@@ -141,16 +143,17 @@ const CONTENT_SCHEMA = {
   }
 };
 
-const CircleStep = React.memo(({ 
-  title, 
-  description, 
+const CircleStep = React.memo(({
+  title,
+  description,
   index,
   colorTokens,
   mode,
   handleContentUpdate,
   blockContent,
   sectionId,
-  onRemove
+  onRemove,
+  circleColors
 }: {
   title: string;
   description: string;
@@ -161,13 +164,14 @@ const CircleStep = React.memo(({
   blockContent: IconCircleStepsContent;
   sectionId: string;
   onRemove?: () => void;
+  circleColors: { steps: string[]; cardBg: string; cardBorder: string; stat1: string; stat2: string; stat3: string };
 }) => {
-  
+
   // Get step icon from content fields
   const getStepIcon = (index: number) => {
     const iconFields = [
       blockContent.step_icon_1,
-      blockContent.step_icon_2, 
+      blockContent.step_icon_2,
       blockContent.step_icon_3,
       blockContent.step_icon_4,
       blockContent.step_icon_5,
@@ -177,15 +181,7 @@ const CircleStep = React.memo(({
   };
 
   const getColorForIndex = (index: number) => {
-    const colors = [
-      'from-blue-500 to-blue-600',
-      'from-green-500 to-green-600',
-      'from-purple-500 to-purple-600',
-      'from-orange-500 to-orange-600',
-      'from-pink-500 to-pink-600',
-      'from-indigo-500 to-indigo-600'
-    ];
-    return colors[index % colors.length];
+    return circleColors.steps[index % circleColors.steps.length];
   };
 
   return (
@@ -283,7 +279,7 @@ const CircleStep = React.memo(({
 CircleStep.displayName = 'CircleStep';
 
 export default function IconCircleSteps(props: LayoutComponentProps) {
-  
+
   const {
     sectionId,
     mode,
@@ -298,8 +294,68 @@ export default function IconCircleSteps(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
-  
+
   const { getTextStyle: getTypographyStyle } = useTypography();
+
+  // Detect theme: manual override > auto-detection > neutral fallback
+  const uiBlockTheme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Circle colors by theme - progressive theme colors for each step
+  const getCircleColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        steps: [
+          'from-orange-500 to-orange-600',
+          'from-amber-500 to-amber-600',
+          'from-red-500 to-red-600',
+          'from-orange-600 to-orange-700',
+          'from-rose-500 to-rose-600',
+          'from-amber-600 to-amber-700'
+        ],
+        cardBg: 'from-orange-50 via-amber-50 to-red-50',
+        cardBorder: 'border-orange-100',
+        stat1: 'text-orange-600',
+        stat2: 'text-amber-600',
+        stat3: 'text-red-600'
+      },
+      cool: {
+        steps: [
+          'from-blue-500 to-blue-600',
+          'from-cyan-500 to-cyan-600',
+          'from-indigo-500 to-indigo-600',
+          'from-blue-600 to-blue-700',
+          'from-sky-500 to-sky-600',
+          'from-indigo-600 to-indigo-700'
+        ],
+        cardBg: 'from-blue-50 via-cyan-50 to-indigo-50',
+        cardBorder: 'border-blue-100',
+        stat1: 'text-blue-600',
+        stat2: 'text-cyan-600',
+        stat3: 'text-indigo-600'
+      },
+      neutral: {
+        steps: [
+          'from-slate-500 to-slate-600',
+          'from-gray-500 to-gray-600',
+          'from-zinc-500 to-zinc-600',
+          'from-slate-600 to-slate-700',
+          'from-stone-500 to-stone-600',
+          'from-gray-600 to-gray-700'
+        ],
+        cardBg: 'from-slate-50 via-gray-50 to-zinc-50',
+        cardBorder: 'border-slate-100',
+        stat1: 'text-slate-600',
+        stat2: 'text-gray-600',
+        stat3: 'text-zinc-600'
+      }
+    }[theme];
+  };
+
+  const circleColors = getCircleColors(uiBlockTheme);
 
   const stepTitles = blockContent.step_titles 
     ? blockContent.step_titles.split('|').map(item => item.trim())
@@ -377,13 +433,14 @@ export default function IconCircleSteps(props: LayoutComponentProps) {
                 handleContentUpdate={handleContentUpdate}
                 blockContent={blockContent}
                 sectionId={sectionId}
+                circleColors={circleColors}
                 onRemove={steps.length > 1 ? () => {
                   const stepTitles = blockContent.step_titles ? blockContent.step_titles.split('|') : [];
                   const stepDescriptions = blockContent.step_descriptions ? blockContent.step_descriptions.split('|') : [];
-                  
+
                   stepTitles.splice(step.originalIndex, 1);
                   stepDescriptions.splice(step.originalIndex, 1);
-                  
+
                   handleContentUpdate('step_titles', stepTitles.join('|'));
                   handleContentUpdate('step_descriptions', stepDescriptions.join('|'));
                 } : undefined}
@@ -438,12 +495,12 @@ export default function IconCircleSteps(props: LayoutComponentProps) {
 
         {/* Summary Card */}
         {blockContent.show_summary_card !== false && (
-          <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-8 border border-blue-100 mb-12">
+          <div className={`bg-gradient-to-r ${circleColors.cardBg} rounded-2xl p-8 border ${circleColors.cardBorder} mb-12`}>
             <div className="text-center">
               <div className="flex justify-center items-center space-x-6 mb-4">
                 {(blockContent.summary_stat_1_text && blockContent.summary_stat_1_text !== '___REMOVED___') && (
                   <div className="relative group/summary-stat-1 flex items-center space-x-2">
-                    <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className={`w-6 h-6 ${circleColors.stat1}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <EditableAdaptiveText
@@ -481,7 +538,7 @@ export default function IconCircleSteps(props: LayoutComponentProps) {
                 )}
                 {(blockContent.summary_stat_2_text && blockContent.summary_stat_2_text !== '___REMOVED___') && (
                   <div className="relative group/summary-stat-2 flex items-center space-x-2">
-                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className={`w-6 h-6 ${circleColors.stat2}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                     <EditableAdaptiveText
@@ -519,7 +576,7 @@ export default function IconCircleSteps(props: LayoutComponentProps) {
                 )}
                 {(blockContent.summary_stat_3_text && blockContent.summary_stat_3_text !== '___REMOVED___') && (
                   <div className="relative group/summary-stat-3 flex items-center space-x-2">
-                    <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className={`w-6 h-6 ${circleColors.stat3}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <EditableAdaptiveText

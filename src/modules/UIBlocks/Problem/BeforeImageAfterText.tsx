@@ -3,16 +3,18 @@ import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useImageToolbar } from '@/hooks/useImageToolbar';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
+import {
+  EditableAdaptiveHeadline,
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
-import { 
+import {
   CTAButton,
-  TrustIndicators 
+  TrustIndicators
 } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface BeforeImageAfterTextContent {
   headline: string;
@@ -67,7 +69,7 @@ const CONTENT_SCHEMA = {
 };
 
 export default function BeforeImageAfterText(props: LayoutComponentProps) {
-  
+
   const {
     sectionId,
     mode,
@@ -83,6 +85,48 @@ export default function BeforeImageAfterText(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
+  // Theme detection with priority: manual override > auto-detection > neutral
+  const theme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Color mapping based on theme - Before is always red (problem), After varies by theme
+  const getAfterColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        bg: 'bg-orange-50',
+        badgeBg: 'bg-orange-100',
+        badgeText: 'text-orange-800',
+        border: 'border-orange-500',
+        dot: 'bg-orange-500',
+        accent: 'text-orange-600',
+        iconColor: 'text-orange-500'
+      },
+      cool: {
+        bg: 'bg-blue-50',
+        badgeBg: 'bg-blue-100',
+        badgeText: 'text-blue-800',
+        border: 'border-blue-500',
+        dot: 'bg-blue-500',
+        accent: 'text-blue-600',
+        iconColor: 'text-blue-500'
+      },
+      neutral: {
+        bg: 'bg-gray-50',
+        badgeBg: 'bg-gray-100',
+        badgeText: 'text-gray-800',
+        border: 'border-gray-500',
+        dot: 'bg-gray-500',
+        accent: 'text-gray-600',
+        iconColor: 'text-gray-500'
+      }
+    }[theme];
+  };
+
+  const afterColors = getAfterColors(theme);
+
   // Use image toolbar hook for image editing
   const handleImageToolbar = useImageToolbar();
 
@@ -91,7 +135,7 @@ export default function BeforeImageAfterText(props: LayoutComponentProps) {
   const imageUrl = store.content[sectionId]?.elements?.before_after_image?.content;
   const reactiveImage = (typeof imageUrl === 'string' ? imageUrl : blockContent.before_after_image) as string;
 
-  const trustItems = blockContent.trust_items 
+  const trustItems = blockContent.trust_items
     ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
     : [];
 
@@ -168,51 +212,51 @@ export default function BeforeImageAfterText(props: LayoutComponentProps) {
         </div>
         
         {/* After Side - Organized */}
-        <div className="bg-green-50 p-6">
+        <div className={`${afterColors.bg} p-6`}>
           <div className="h-full flex flex-col">
             <div className="text-center mb-6">
-              <div className="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+              <div className={`inline-flex items-center px-3 py-1 ${afterColors.badgeBg} ${afterColors.badgeText} rounded-full text-sm font-medium`}>
                 <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 AFTER
               </div>
             </div>
-            
+
             {/* Organized Elements */}
             <div className="space-y-4 flex-1">
-              <div className="bg-white rounded-lg p-4 border-l-4 border-green-500 shadow-sm">
+              <div className={`bg-white rounded-lg p-4 border-l-4 ${afterColors.border} shadow-sm`}>
                 <div className="flex items-center space-x-2 mb-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <div className={`w-2 h-2 ${afterColors.dot} rounded-full`}></div>
                   <span className="text-sm font-medium text-gray-900">Tasks Completed</span>
-                  <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">87%</span>
+                  <span className={`${afterColors.badgeBg} ${afterColors.badgeText} text-xs px-2 py-1 rounded`}>87%</span>
                 </div>
                 <div className="text-xs text-gray-600">Automated prioritization</div>
               </div>
-              
+
               <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium text-gray-900">Team Productivity</span>
-                  <span className="text-green-600 font-bold">94%</span>
+                  <span className={`${afterColors.accent} font-bold`}>94%</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-green-500 h-2 rounded-full w-11/12"></div>
+                  <div className={`${afterColors.dot} h-2 rounded-full w-11/12`}></div>
                 </div>
               </div>
-              
+
               <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
                 <div className="text-sm font-medium text-gray-900 mb-2">Communication</div>
                 <div className="space-y-1">
                   <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <div className={`w-2 h-2 ${afterColors.dot} rounded-full`}></div>
                     <span className="text-xs text-gray-600">Centralized hub</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <div className={`w-2 h-2 ${afterColors.dot} rounded-full`}></div>
                     <span className="text-xs text-gray-600">Auto notifications</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <div className={`w-2 h-2 ${afterColors.dot} rounded-full`}></div>
                     <span className="text-xs text-gray-600">Clear visibility</span>
                   </div>
                 </div>
@@ -404,10 +448,10 @@ export default function BeforeImageAfterText(props: LayoutComponentProps) {
             )}
 
             {trustItems.length > 0 && (
-              <TrustIndicators 
+              <TrustIndicators
                 items={trustItems}
                 colorClass={mutedTextColor}
-                iconColor="text-green-500"
+                iconColor={afterColors.iconColor}
               />
             )}
           </div>

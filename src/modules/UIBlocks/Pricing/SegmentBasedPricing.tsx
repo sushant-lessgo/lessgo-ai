@@ -2,16 +2,18 @@ import React, { useState } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
+import {
+  EditableAdaptiveHeadline,
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
-import { 
+import {
   CTAButton,
-  TrustIndicators 
+  TrustIndicators
 } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface SegmentBasedPricingContent {
   headline: string;
@@ -119,7 +121,14 @@ export default function SegmentBasedPricing(props: LayoutComponentProps) {
   });
 
   const { getTextStyle: getTypographyStyle } = useTypography();
-  
+
+  // Theme detection: manual override > auto-detection > neutral fallback
+  const theme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
   // Create typography styles
   const h2Style = getTypographyStyle('h2');
   const h3Style = getTypographyStyle('h3');
@@ -221,14 +230,29 @@ export default function SegmentBasedPricing(props: LayoutComponentProps) {
     return icons[iconName as keyof typeof icons] || icons.building;
   };
 
+  // Theme-aware segment colors - each segment gets a shade variation within theme family
   const getSegmentColor = (index: number) => {
-    const colors = [
-      { bg: 'from-blue-500 to-blue-600', light: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-200' },
-      { bg: 'from-green-500 to-green-600', light: 'bg-green-50', text: 'text-green-600', border: 'border-green-200' },
-      { bg: 'from-purple-500 to-purple-600', light: 'bg-purple-50', text: 'text-purple-600', border: 'border-purple-200' },
-      { bg: 'from-orange-500 to-orange-600', light: 'bg-orange-50', text: 'text-orange-600', border: 'border-orange-200' }
-    ];
-    return colors[index % colors.length];
+    const colorSets = {
+      warm: [
+        { bg: 'from-orange-500 to-red-600', light: 'bg-orange-50', text: 'text-orange-600', border: 'border-orange-200', checkmark: 'text-orange-500' },
+        { bg: 'from-orange-600 to-red-700', light: 'bg-orange-100', text: 'text-orange-700', border: 'border-orange-300', checkmark: 'text-orange-600' },
+        { bg: 'from-red-500 to-orange-600', light: 'bg-red-50', text: 'text-red-600', border: 'border-red-200', checkmark: 'text-red-500' },
+        { bg: 'from-amber-500 to-orange-600', light: 'bg-amber-50', text: 'text-amber-600', border: 'border-amber-200', checkmark: 'text-amber-500' }
+      ],
+      cool: [
+        { bg: 'from-blue-500 to-indigo-600', light: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-200', checkmark: 'text-blue-500' },
+        { bg: 'from-blue-600 to-cyan-600', light: 'bg-blue-100', text: 'text-blue-700', border: 'border-blue-300', checkmark: 'text-blue-600' },
+        { bg: 'from-indigo-500 to-blue-600', light: 'bg-indigo-50', text: 'text-indigo-600', border: 'border-indigo-200', checkmark: 'text-indigo-500' },
+        { bg: 'from-cyan-500 to-blue-600', light: 'bg-cyan-50', text: 'text-cyan-600', border: 'border-cyan-200', checkmark: 'text-cyan-500' }
+      ],
+      neutral: [
+        { bg: 'from-gray-600 to-gray-800', light: 'bg-gray-50', text: 'text-gray-600', border: 'border-gray-200', checkmark: 'text-gray-500' },
+        { bg: 'from-gray-700 to-slate-800', light: 'bg-gray-100', text: 'text-gray-700', border: 'border-gray-300', checkmark: 'text-gray-600' },
+        { bg: 'from-slate-600 to-gray-800', light: 'bg-slate-50', text: 'text-slate-600', border: 'border-slate-200', checkmark: 'text-slate-500' },
+        { bg: 'from-zinc-600 to-gray-800', light: 'bg-zinc-50', text: 'text-zinc-600', border: 'border-zinc-200', checkmark: 'text-zinc-500' }
+      ]
+    };
+    return colorSets[theme][index % colorSets[theme].length];
   };
 
   const activeSegmentData = segments[activeSegment] || { tiers: [] };
@@ -487,7 +511,7 @@ export default function SegmentBasedPricing(props: LayoutComponentProps) {
         <div className="space-y-3 mb-8">
           {tier.features.map((feature, featureIndex) => (
             <div key={featureIndex} className="flex items-start space-x-3 group/feature-item relative">
-              <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className={`w-5 h-5 ${activeColor.checkmark} mt-0.5 flex-shrink-0`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
               {mode !== 'preview' ? (

@@ -15,6 +15,8 @@ import {
   StoreElementTypes
 } from '@/types/storeTypes';
 import { getIconFromCategory, getRandomIconFromCategory } from '@/utils/iconMapping';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface TierCardsProps extends LayoutComponentProps {}
 
@@ -257,10 +259,10 @@ const ModeWrapper = ({
 };
 
 // Individual Pricing Card
-const PricingCard = ({ 
-  tier, 
-  mode, 
-  sectionId, 
+const PricingCard = ({
+  tier,
+  mode,
+  sectionId,
   index,
   onNameEdit,
   onPriceEdit,
@@ -274,7 +276,8 @@ const PricingCard = ({
   blockContent,
   handleContentUpdate,
   colorTokens,
-  sectionBackground
+  sectionBackground,
+  themeColors
 }: {
   tier: PricingTier;
   mode: 'edit' | 'preview';
@@ -293,6 +296,7 @@ const PricingCard = ({
   handleContentUpdate: (key: keyof TierCardsContent, value: string) => void;
   colorTokens: any;
   sectionBackground: any;
+  themeColors: any;
 }) => {
   const { getTextStyle } = useTypography();
   
@@ -301,7 +305,7 @@ const PricingCard = ({
       {/* Popular Badge */}
       {tier.isPopular && (
         <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-20">
-          <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-blue-600 text-white shadow-lg">
+          <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold ${themeColors.popularBadgeBg} ${themeColors.popularBadgeText} shadow-lg`}>
             <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
@@ -312,9 +316,9 @@ const PricingCard = ({
       
       {/* Card */}
       <div className={`relative h-full p-8 bg-white rounded-2xl shadow-lg border-2 ${
-        tier.isPopular 
-          ? 'border-blue-500 shadow-blue-100' 
-          : 'border-gray-200 hover:border-blue-300'
+        tier.isPopular
+          ? `${themeColors.cardBorderPopular} ${themeColors.cardShadowPopular}`
+          : `border-gray-200 ${themeColors.cardBorderHover}`
       } transition-all duration-300 hover:shadow-xl`}>
         
         {/* Remove Button - Only in edit mode and when allowed */}
@@ -435,7 +439,7 @@ const PricingCard = ({
                 
                 return features.map((featureData, displayIndex) => (
                   <li key={featureData.index} className="flex items-start group/feature-item relative">
-                    <svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className={`w-5 h-5 ${themeColors.checkmark} mr-3 mt-0.5 flex-shrink-0`} fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                     <div className="flex-1 min-w-0 relative">
@@ -472,10 +476,10 @@ const PricingCard = ({
                 ));
               })()
             ) : (
-              // Preview mode: Show only visible features  
+              // Preview mode: Show only visible features
               tier.features.map((feature, featureIndex) => (
                 <li key={featureIndex} className="flex items-start">
-                  <svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className={`w-5 h-5 ${themeColors.checkmark} mr-3 mt-0.5 flex-shrink-0`} fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                   <span className="text-gray-700">
@@ -547,6 +551,51 @@ export default function TierCards(props: TierCardsProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Theme detection with priority: manualThemeOverride > autoDetectedTheme > neutral
+  const uiBlockTheme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Theme-aware color mappings
+  const getThemeColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        popularBadgeBg: 'bg-orange-600',
+        popularBadgeText: 'text-white',
+        cardBorderPopular: 'border-orange-500',
+        cardBorderHover: 'hover:border-orange-300',
+        cardShadowPopular: 'shadow-orange-100',
+        checkmark: 'text-orange-500',
+        editControls: 'bg-orange-50 border-orange-200',
+        editButtonBg: 'bg-orange-600 hover:bg-orange-700'
+      },
+      cool: {
+        popularBadgeBg: 'bg-blue-600',
+        popularBadgeText: 'text-white',
+        cardBorderPopular: 'border-blue-500',
+        cardBorderHover: 'hover:border-blue-300',
+        cardShadowPopular: 'shadow-blue-100',
+        checkmark: 'text-blue-500',
+        editControls: 'bg-blue-50 border-blue-200',
+        editButtonBg: 'bg-blue-600 hover:bg-blue-700'
+      },
+      neutral: {
+        popularBadgeBg: 'bg-gray-700',
+        popularBadgeText: 'text-white',
+        cardBorderPopular: 'border-gray-500',
+        cardBorderHover: 'hover:border-gray-300',
+        cardShadowPopular: 'shadow-gray-100',
+        checkmark: 'text-green-500',
+        editControls: 'bg-gray-50 border-gray-200',
+        editButtonBg: 'bg-gray-600 hover:bg-gray-700'
+      }
+    }[theme];
+  };
+
+  const themeColors = getThemeColors(uiBlockTheme);
 
   // Get tier count (default to 3 for backward compatibility)
   const tierCount = parseInt(blockContent.tier_count || '3') || 3;
@@ -758,10 +807,10 @@ export default function TierCards(props: TierCardsProps) {
 
         {/* Tier Management Controls - Only in edit mode */}
         {mode === 'edit' && (
-          <div className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className={`mb-8 p-4 ${themeColors.editControls} rounded-lg border`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                 </svg>
                 <span className="text-sm font-medium text-gray-700">
@@ -771,7 +820,7 @@ export default function TierCards(props: TierCardsProps) {
               {tierCount < 3 && (
                 <button
                   onClick={handleAddTier}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition-colors duration-200 flex items-center space-x-2"
+                  className={`px-4 py-2 ${themeColors.editButtonBg} text-white rounded-lg font-medium text-sm transition-colors duration-200 flex items-center space-x-2`}
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -813,6 +862,7 @@ export default function TierCards(props: TierCardsProps) {
               handleContentUpdate={handleContentUpdate}
               colorTokens={colorTokens}
               sectionBackground={sectionBackground}
+              themeColors={themeColors}
             />
           ))}
         </div>
@@ -828,7 +878,7 @@ export default function TierCards(props: TierCardsProps) {
                     
                     return (
                       <div key={index} className="flex items-center space-x-2 relative group/trust-footer-item">
-                        <svg className="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className={`w-4 h-4 ${themeColors.checkmark} flex-shrink-0`} fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
                         <div 
@@ -865,7 +915,7 @@ export default function TierCards(props: TierCardsProps) {
               <div className="flex flex-wrap justify-center items-center gap-20 text-sm text-gray-500">
                 {trustFooterItems.map((item, index) => (
                   <div key={index} className="flex items-center">
-                    <svg className="w-4 h-4 text-green-500 mr-3.5" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className={`w-4 h-4 ${themeColors.checkmark} mr-3.5`} fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                     {item}

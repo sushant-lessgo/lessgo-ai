@@ -6,16 +6,18 @@ import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
-  EditableAdaptiveText 
+import {
+  EditableAdaptiveHeadline,
+  EditableAdaptiveText
 } from '@/components/layout/EditableContent';
-import { 
-  CTAButton, 
-  TrustIndicators 
+import {
+  CTAButton,
+  TrustIndicators
 } from '@/components/layout/ComponentRegistry';
 import { Input } from '@/components/ui/input';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 // Simplified content interface with essential fields only
 interface VideoNoteWithTranscriptContent {
@@ -54,18 +56,63 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: 'Watch Demo' 
   },
-  trust_items: { 
-    type: 'string' as const, 
-    default: 'Used by 10,000+ companies|30-day free trial|No credit card required' 
+  trust_items: {
+    type: 'string' as const,
+    default: 'Used by 10,000+ companies|30-day free trial|No credit card required'
   }
 };
 
+// Theme color mapping function
+const getThemeColors = (theme: UIBlockTheme) => {
+  return {
+    warm: {
+      playIconBg: 'bg-orange-500',
+      playIconText: 'text-orange-600',
+      playIconBgOpacity: 'bg-opacity-20',
+      avatarGradientFrom: 'from-orange-400',
+      avatarGradientVia: 'via-red-500',
+      avatarGradientTo: 'to-pink-600',
+      transcriptBg: 'bg-orange-50',
+      transcriptBorder: 'border-orange-200',
+      trustCheckColor: 'text-orange-500',
+    },
+    cool: {
+      playIconBg: 'bg-blue-500',
+      playIconText: 'text-blue-600',
+      playIconBgOpacity: 'bg-opacity-20',
+      avatarGradientFrom: 'from-blue-400',
+      avatarGradientVia: 'via-indigo-500',
+      avatarGradientTo: 'to-indigo-600',
+      transcriptBg: 'bg-blue-50',
+      transcriptBorder: 'border-blue-200',
+      trustCheckColor: 'text-blue-500',
+    },
+    neutral: {
+      playIconBg: 'bg-gray-500',
+      playIconText: 'text-gray-600',
+      playIconBgOpacity: 'bg-opacity-20',
+      avatarGradientFrom: 'from-gray-400',
+      avatarGradientVia: 'via-gray-500',
+      avatarGradientTo: 'to-gray-600',
+      transcriptBg: 'bg-gray-50',
+      transcriptBorder: 'border-gray-200',
+      trustCheckColor: 'text-gray-500',
+    }
+  }[theme];
+};
+
 // Simple Video Player Placeholder Component
-const VideoPlayerPlaceholder = React.memo(({ founderName }: { founderName: string }) => (
+const VideoPlayerPlaceholder = React.memo(({
+  founderName,
+  themeColors
+}: {
+  founderName: string;
+  themeColors: ReturnType<typeof getThemeColors>;
+}) => (
   <div className="relative w-full aspect-video bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg overflow-hidden border-2 border-dashed border-gray-300 flex items-center justify-center">
     <div className="text-center p-8">
-      <div className="w-16 h-16 bg-blue-500 bg-opacity-20 rounded-full flex items-center justify-center mb-4 mx-auto">
-        <svg className="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+      <div className={`w-16 h-16 ${themeColors.playIconBg} ${themeColors.playIconBgOpacity} rounded-full flex items-center justify-center mb-4 mx-auto`}>
+        <svg className={`w-8 h-8 ${themeColors.playIconText}`} fill="currentColor" viewBox="0 0 24 24">
           <path d="M8 5v14l11-7z"/>
         </svg>
       </div>
@@ -78,7 +125,7 @@ const VideoPlayerPlaceholder = React.memo(({ founderName }: { founderName: strin
 VideoPlayerPlaceholder.displayName = 'VideoPlayerPlaceholder';
 
 export default function VideoNoteWithTranscript(props: LayoutComponentProps) {
-  
+
   // Use the abstraction hook with background type support
   const {
     sectionId,
@@ -92,6 +139,15 @@ export default function VideoNoteWithTranscript(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Theme detection: manual override > auto-detection > neutral fallback
+  const theme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  const colors = getThemeColors(theme);
 
   // Get trust items from single field
   const getTrustItems = (): string[] => {
@@ -203,13 +259,16 @@ export default function VideoNoteWithTranscript(props: LayoutComponentProps) {
                   />
                 </div>
               ) : (
-                <VideoPlayerPlaceholder founderName={blockContent.founder_name || 'the founder'} />
+                <VideoPlayerPlaceholder
+                  founderName={blockContent.founder_name || 'the founder'}
+                  themeColors={colors}
+                />
               )}
               
               {/* Founder Info and CTA */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-indigo-600 rounded-full flex items-center justify-center">
+                  <div className={`w-10 h-10 bg-gradient-to-br ${colors.avatarGradientFrom} ${colors.avatarGradientVia} ${colors.avatarGradientTo} rounded-full flex items-center justify-center`}>
                     <span className="text-white text-sm font-bold">
                       {blockContent.founder_name?.charAt(0) || 'F'}
                     </span>
@@ -254,7 +313,7 @@ export default function VideoNoteWithTranscript(props: LayoutComponentProps) {
             </div>
 
             {/* Transcript Content */}
-            <div className="bg-gray-50 rounded-lg p-6 max-h-80 overflow-y-auto">
+            <div className={`${colors.transcriptBg} rounded-lg p-6 border ${colors.transcriptBorder} max-h-80 overflow-y-auto`}>
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.transcript_text || ''}
@@ -272,10 +331,10 @@ export default function VideoNoteWithTranscript(props: LayoutComponentProps) {
 
             {/* Trust Indicators */}
             <div className="pt-4 border-t border-gray-200">
-              <TrustIndicators 
+              <TrustIndicators
                 items={trustItems}
                 colorClass="text-gray-600"
-                iconColor="text-green-500"
+                iconColor={colors.trustCheckColor}
               />
             </div>
           </div>

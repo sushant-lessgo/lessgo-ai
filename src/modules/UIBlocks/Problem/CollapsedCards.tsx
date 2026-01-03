@@ -12,6 +12,8 @@ import {
 } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { getRandomIconFromCategory } from '@/utils/iconMapping';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface CollapsedCardsContent {
   headline: string;
@@ -82,7 +84,7 @@ const CONTENT_SCHEMA = {
 };
 
 export default function CollapsedCards(props: LayoutComponentProps) {
-  
+
   const {
     sectionId,
     mode,
@@ -97,6 +99,52 @@ export default function CollapsedCards(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Theme detection with priority: manual override > auto-detection > neutral
+  const theme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Color mapping for theme-based styling
+  // Solution colors are theme-based, problem colors stay red
+  const getSolutionColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        bg: 'bg-orange-50',
+        border: 'border-orange-200',
+        iconColor: 'text-orange-500',
+        textPrimary: 'text-orange-900',
+        textSecondary: 'text-orange-800',
+        expandedIconBg: 'bg-orange-500',
+        expandedBorder: 'border-orange-300',
+        trustIconColor: 'text-orange-500'
+      },
+      cool: {
+        bg: 'bg-blue-50',
+        border: 'border-blue-200',
+        iconColor: 'text-blue-500',
+        textPrimary: 'text-blue-900',
+        textSecondary: 'text-blue-800',
+        expandedIconBg: 'bg-blue-500',
+        expandedBorder: 'border-blue-300',
+        trustIconColor: 'text-blue-500'
+      },
+      neutral: {
+        bg: 'bg-gray-50',
+        border: 'border-gray-200',
+        iconColor: 'text-gray-500',
+        textPrimary: 'text-gray-900',
+        textSecondary: 'text-gray-800',
+        expandedIconBg: 'bg-gray-500',
+        expandedBorder: 'border-gray-300',
+        trustIconColor: 'text-gray-500'
+      }
+    }[theme];
+  };
+
+  const solutionColors = getSolutionColors(theme);
 
   const [expandedCard, setExpandedCard] = useState<number | null>(
     mode !== 'preview' ? 0 : null
@@ -284,10 +332,10 @@ export default function CollapsedCards(props: LayoutComponentProps) {
     const isExpanded = expandedCard === index;
     
     return (
-      <div 
+      <div
         className={`group bg-white rounded-xl border-2 transition-all duration-300 overflow-hidden ${
-          isExpanded 
-            ? 'border-red-300 shadow-xl' 
+          isExpanded
+            ? `${solutionColors.expandedBorder} shadow-xl`
             : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
         }`}
       >
@@ -295,7 +343,7 @@ export default function CollapsedCards(props: LayoutComponentProps) {
         <div className="p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4 flex-1">
-              <div className={`w-12 h-12 rounded-lg ${isExpanded ? 'bg-red-500' : 'bg-gray-100'} flex items-center justify-center ${isExpanded ? 'text-white' : 'text-gray-600'} transition-colors duration-300 group/icon-edit relative`}>
+              <div className={`w-12 h-12 rounded-lg ${isExpanded ? solutionColors.expandedIconBg : 'bg-gray-100'} flex items-center justify-center ${isExpanded ? 'text-white' : 'text-gray-600'} transition-colors duration-300 group/icon-edit relative`}>
                 <IconEditableText
                   mode={mode}
                   value={getProblemIcon(index)}
@@ -439,13 +487,13 @@ export default function CollapsedCards(props: LayoutComponentProps) {
 
             {/* Solution Hint */}
             {problem.solutionHint && (
-              <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+              <div className={`${solutionColors.bg} rounded-lg p-4 border ${solutionColors.border}`}>
                 <div className="flex items-start space-x-2">
-                  <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className={`w-5 h-5 ${solutionColors.iconColor} mt-0.5 flex-shrink-0`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <div>
-                    <h4 className="font-semibold text-green-900 mb-2">There's a Solution:</h4>
+                    <h4 className={`font-semibold ${solutionColors.textPrimary} mb-2`}>There's a Solution:</h4>
                     <EditableAdaptiveText
                       mode={mode}
                       value={problem.solutionHint}
@@ -453,7 +501,7 @@ export default function CollapsedCards(props: LayoutComponentProps) {
                       backgroundType={backgroundType as any}
                       colorTokens={colorTokens}
                       variant="body"
-                      className="text-green-800 text-sm"
+                      className={`${solutionColors.textSecondary} text-sm`}
                       placeholder="How our solution helps..."
                       sectionBackground={sectionBackground}
                       sectionId={sectionId}
@@ -644,10 +692,10 @@ export default function CollapsedCards(props: LayoutComponentProps) {
             )}
 
             {trustItems.length > 0 && (
-              <TrustIndicators 
+              <TrustIndicators
                 items={trustItems}
                 colorClass={mutedTextColor}
-                iconColor="text-green-500"
+                iconColor={solutionColors.trustIconColor}
               />
             )}
           </div>

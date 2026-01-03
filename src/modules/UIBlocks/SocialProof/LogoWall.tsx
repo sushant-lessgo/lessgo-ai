@@ -4,6 +4,8 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -225,6 +227,48 @@ export default function LogoWall(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
+  // Detect theme: manual override > auto-detection > neutral fallback
+  const theme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Theme-based colors for logo cards, trust badge, and stats
+  const getLogoWallColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        logoBorder: '#fed7aa',
+        logoBorderHover: '#fdba74',
+        trustBadgeBg: '#ffedd5',
+        trustBadgeBorder: '#fed7aa',
+        trustBadgeText: '#9a3412',
+        addButtonBorder: '#fed7aa',
+        statNumberColor: '#ea580c'
+      },
+      cool: {
+        logoBorder: '#bfdbfe',
+        logoBorderHover: '#93c5fd',
+        trustBadgeBg: '#dbeafe',
+        trustBadgeBorder: '#bfdbfe',
+        trustBadgeText: '#1e40af',
+        addButtonBorder: '#93c5fd',
+        statNumberColor: '#2563eb'
+      },
+      neutral: {
+        logoBorder: '#e5e7eb',
+        logoBorderHover: '#d1d5db',
+        trustBadgeBg: '#f9fafb',
+        trustBadgeBorder: '#e5e7eb',
+        trustBadgeText: '#1f2937',
+        addButtonBorder: '#d1d5db',
+        statNumberColor: '#374151'
+      }
+    }[theme];
+  };
+
+  const colors = getLogoWallColors(theme);
+
   // Create typography styles
   const bodyLgStyle = getTypographyStyle('body-lg');
 
@@ -287,7 +331,13 @@ export default function LogoWall(props: LayoutComponentProps) {
             
             return (
               // All logos are now editable with isolated hover
-              <div key={company.id} className="p-6 bg-white rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all duration-300 flex flex-col items-center justify-center min-h-[120px]">
+              <div
+                key={company.id}
+                className="p-6 bg-white rounded-lg border hover:shadow-md transition-all duration-300 flex flex-col items-center justify-center min-h-[120px]"
+                style={{ borderColor: colors.logoBorder }}
+                onMouseEnter={(e) => e.currentTarget.style.borderColor = colors.logoBorderHover}
+                onMouseLeave={(e) => e.currentTarget.style.borderColor = colors.logoBorder}
+              >
                 <LogoEditableComponent
                   mode={mode}
                   logoUrl={logoUrl}
@@ -342,7 +392,10 @@ export default function LogoWall(props: LayoutComponentProps) {
           
           {/* Add Company Button (Edit Mode Only) */}
           {mode !== 'preview' && (
-            <div className="p-6 bg-white/20 backdrop-blur-sm rounded-lg border-2 border-dashed border-gray-300 hover:border-gray-400 transition-all duration-300 flex flex-col items-center justify-center min-h-[120px]">
+            <div
+              className="p-6 bg-white/20 backdrop-blur-sm rounded-lg border-2 border-dashed transition-all duration-300 flex flex-col items-center justify-center min-h-[120px]"
+              style={{ borderColor: colors.addButtonBorder }}
+            >
               <button
                 onClick={(e) => {
                   e.preventDefault();
@@ -378,19 +431,24 @@ export default function LogoWall(props: LayoutComponentProps) {
               <div className="relative group/stat-item">
                 {mode !== 'preview' ? (
                   <div className="space-y-2">
-                    <EditableAdaptiveText
-                      mode={mode}
-                      value={blockContent.stat_1_number || ''}
-                      onEdit={(value) => handleContentUpdate('stat_1_number', value)}
-                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                      colorTokens={colorTokens}
-                      variant="body"
+                    <div
                       className="text-3xl font-bold"
-                      placeholder="500+"
-                      sectionBackground={sectionBackground}
-                      sectionId={sectionId}
-                      elementKey="stat_1_number"
-                    />
+                      style={{ color: colors.statNumberColor }}
+                    >
+                      <EditableAdaptiveText
+                        mode={mode}
+                        value={blockContent.stat_1_number || ''}
+                        onEdit={(value) => handleContentUpdate('stat_1_number', value)}
+                        backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                        colorTokens={colorTokens}
+                        variant="body"
+                        className="text-3xl font-bold"
+                        placeholder="500+"
+                        sectionBackground={sectionBackground}
+                        sectionId={sectionId}
+                        elementKey="stat_1_number"
+                      />
+                    </div>
                     <EditableAdaptiveText
                       mode={mode}
                       value={blockContent.stat_1_label || ''}
@@ -437,19 +495,24 @@ export default function LogoWall(props: LayoutComponentProps) {
               <div className="relative group/stat-item">
                 {mode !== 'preview' ? (
                   <div className="space-y-2">
-                    <EditableAdaptiveText
-                      mode={mode}
-                      value={blockContent.stat_2_number || ''}
-                      onEdit={(value) => handleContentUpdate('stat_2_number', value)}
-                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                      colorTokens={colorTokens}
-                      variant="body"
+                    <div
                       className="text-3xl font-bold"
-                      placeholder="50+"
-                      sectionBackground={sectionBackground}
-                      sectionId={sectionId}
-                      elementKey="stat_2_number"
-                    />
+                      style={{ color: colors.statNumberColor }}
+                    >
+                      <EditableAdaptiveText
+                        mode={mode}
+                        value={blockContent.stat_2_number || ''}
+                        onEdit={(value) => handleContentUpdate('stat_2_number', value)}
+                        backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                        colorTokens={colorTokens}
+                        variant="body"
+                        className="text-3xl font-bold"
+                        placeholder="50+"
+                        sectionBackground={sectionBackground}
+                        sectionId={sectionId}
+                        elementKey="stat_2_number"
+                      />
+                    </div>
                     <EditableAdaptiveText
                       mode={mode}
                       value={blockContent.stat_2_label || ''}
@@ -495,19 +558,24 @@ export default function LogoWall(props: LayoutComponentProps) {
               <div className="relative group/stat-item">
                 {mode !== 'preview' ? (
                   <div className="space-y-2">
-                    <EditableAdaptiveText
-                      mode={mode}
-                      value={blockContent.stat_3_number || ''}
-                      onEdit={(value) => handleContentUpdate('stat_3_number', value)}
-                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                      colorTokens={colorTokens}
-                      variant="body"
+                    <div
                       className="text-3xl font-bold"
-                      placeholder="15+"
-                      sectionBackground={sectionBackground}
-                      sectionId={sectionId}
-                      elementKey="stat_3_number"
-                    />
+                      style={{ color: colors.statNumberColor }}
+                    >
+                      <EditableAdaptiveText
+                        mode={mode}
+                        value={blockContent.stat_3_number || ''}
+                        onEdit={(value) => handleContentUpdate('stat_3_number', value)}
+                        backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                        colorTokens={colorTokens}
+                        variant="body"
+                        className="text-3xl font-bold"
+                        placeholder="15+"
+                        sectionBackground={sectionBackground}
+                        sectionId={sectionId}
+                        elementKey="stat_3_number"
+                      />
+                    </div>
                     <EditableAdaptiveText
                       mode={mode}
                       value={blockContent.stat_3_label || ''}
@@ -553,25 +621,34 @@ export default function LogoWall(props: LayoutComponentProps) {
         {/* Trust Reinforcement */}
         {blockContent.show_trust_badge !== false && blockContent.trust_badge_text && blockContent.trust_badge_text !== '___REMOVED___' && (
           <div className="mt-12 text-center">
-            <div className="relative group/trust-badge inline-flex items-center px-6 py-3 bg-blue-50 border border-blue-200 rounded-full text-blue-800">
-              <svg className="w-5 h-5 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+            <div
+              className="relative group/trust-badge inline-flex items-center px-6 py-3 rounded-full border"
+              style={{
+                backgroundColor: colors.trustBadgeBg,
+                borderColor: colors.trustBadgeBorder,
+                color: colors.trustBadgeText
+              }}
+            >
+              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" style={{ color: colors.trustBadgeText }}>
                 <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
               
               {mode !== 'preview' ? (
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.trust_badge_text || ''}
-                  onEdit={(value) => handleContentUpdate('trust_badge_text', value)}
-                  backgroundType="neutral" // Force neutral since we're inside a blue badge
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="font-medium text-blue-800"
-                  placeholder="Join thousands of satisfied customers"
-                  sectionBackground={sectionBackground}
-                  sectionId={sectionId}
-                  elementKey="trust_badge_text"
-                />
+                <div style={{ color: colors.trustBadgeText }}>
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.trust_badge_text || ''}
+                    onEdit={(value) => handleContentUpdate('trust_badge_text', value)}
+                    backgroundType="neutral" // Force neutral since we're inside a themed badge
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className="font-medium"
+                    placeholder="Join thousands of satisfied customers"
+                    sectionBackground={sectionBackground}
+                    sectionId={sectionId}
+                    elementKey="trust_badge_text"
+                  />
+                </div>
               ) : (
                 <span className="font-medium">{blockContent.trust_badge_text}</span>
               )}

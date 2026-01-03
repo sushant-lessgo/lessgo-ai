@@ -1,12 +1,15 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
-import { 
-  EditableAdaptiveHeadline, 
-  EditableAdaptiveText 
+import {
+  EditableAdaptiveHeadline,
+  EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { shadows, cardEnhancements } from '@/modules/Design/designTokens';
 
 interface PersonaResultPanelsProps extends LayoutComponentProps {}
 
@@ -226,6 +229,8 @@ const PersonaPanel = ({
   mode,
   sectionId,
   iconValue,
+  theme,
+  getPersonaColorThemed,
   onPersonaEdit,
   onRoleEdit,
   onMetricEdit,
@@ -240,6 +245,8 @@ const PersonaPanel = ({
   mode: 'edit' | 'preview';
   sectionId: string;
   iconValue: string;
+  theme: UIBlockTheme;
+  getPersonaColorThemed: (index: number, theme: UIBlockTheme) => any;
   onPersonaEdit: (index: number, value: string) => void;
   onRoleEdit: (index: number, value: string) => void;
   onMetricEdit: (index: number, value: string) => void;
@@ -250,12 +257,12 @@ const PersonaPanel = ({
   canRemove?: boolean;
 }) => {
   const { getTextStyle } = useTypography();
-  const colors = getPersonaColor(index);
+  const colors = getPersonaColorThemed(index, theme);
   const benefits = panel.key_benefits.split(',').map(b => b.trim()).filter(b => b);
 
   return (
-    <div className={`group/persona-card-${index} relative p-8 ${colors.bg} rounded-2xl border ${colors.border} hover:shadow-xl transition-all duration-300`}>
-      
+    <div className={`group/persona-card-${index} relative p-8 ${colors.bg} rounded-2xl border ${colors.border} ${colors.borderHover} ${colors.shadow} ${cardEnhancements.transition} ${cardEnhancements.hoverLift}`}>
+
       {/* Header */}
       <div className="flex items-center space-x-4 mb-6">
         {/* Icon */}
@@ -417,6 +424,109 @@ export default function PersonaResultPanels(props: PersonaResultPanelsProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
+  // Theme detection: manual override > auto-detection > neutral fallback
+  const theme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Get theme-aware persona colors (2-variant rotation)
+  const getPersonaColorThemed = (index: number, uiTheme: UIBlockTheme) => {
+    const isEven = index % 2 === 0;
+
+    const colorMap = {
+      warm: {
+        primary: {
+          bg: 'bg-orange-50',
+          accent: 'bg-orange-500',
+          border: 'border-orange-200',
+          borderHover: 'hover:border-orange-300',
+          icon: 'text-orange-600',
+          shadow: shadows.card.warm
+        },
+        secondary: {
+          bg: 'bg-amber-50',
+          accent: 'bg-amber-500',
+          border: 'border-amber-200',
+          borderHover: 'hover:border-amber-300',
+          icon: 'text-amber-600',
+          shadow: shadows.card.warm
+        }
+      },
+      cool: {
+        primary: {
+          bg: 'bg-blue-50',
+          accent: 'bg-blue-500',
+          border: 'border-blue-200',
+          borderHover: 'hover:border-blue-300',
+          icon: 'text-blue-600',
+          shadow: shadows.card.cool
+        },
+        secondary: {
+          bg: 'bg-indigo-50',
+          accent: 'bg-indigo-500',
+          border: 'border-indigo-200',
+          borderHover: 'hover:border-indigo-300',
+          icon: 'text-indigo-600',
+          shadow: shadows.card.cool
+        }
+      },
+      neutral: {
+        primary: {
+          bg: 'bg-gray-50',
+          accent: 'bg-gray-500',
+          border: 'border-gray-200',
+          borderHover: 'hover:border-gray-300',
+          icon: 'text-gray-600',
+          shadow: shadows.card.neutral
+        },
+        secondary: {
+          bg: 'bg-slate-50',
+          accent: 'bg-slate-500',
+          border: 'border-slate-200',
+          borderHover: 'hover:border-slate-300',
+          icon: 'text-slate-600',
+          shadow: shadows.card.neutral
+        }
+      }
+    };
+
+    return colorMap[uiTheme][isEven ? 'primary' : 'secondary'];
+  };
+
+  // Get theme-aware add button colors
+  const getAddButtonColors = (uiTheme: UIBlockTheme) => {
+    return {
+      warm: {
+        bg: 'bg-orange-50',
+        bgHover: 'hover:bg-orange-100',
+        border: 'border-orange-200',
+        borderHover: 'hover:border-orange-300',
+        text: 'text-orange-700',
+        iconText: 'text-orange-600'
+      },
+      cool: {
+        bg: 'bg-blue-50',
+        bgHover: 'hover:bg-blue-100',
+        border: 'border-blue-200',
+        borderHover: 'hover:border-blue-300',
+        text: 'text-blue-700',
+        iconText: 'text-blue-600'
+      },
+      neutral: {
+        bg: 'bg-gray-50',
+        bgHover: 'hover:bg-gray-100',
+        border: 'border-gray-200',
+        borderHover: 'hover:border-gray-300',
+        text: 'text-gray-700',
+        iconText: 'text-gray-600'
+      }
+    }[uiTheme];
+  };
+
+  const addButtonColors = getAddButtonColors(theme);
+
   // Parse persona panel data
   const panels = parsePersonaData(
     blockContent.personas,
@@ -563,6 +673,8 @@ export default function PersonaResultPanels(props: PersonaResultPanelsProps) {
               mode={mode}
               sectionId={sectionId}
               iconValue={getPersonaIcon(index)}
+              theme={theme}
+              getPersonaColorThemed={getPersonaColorThemed}
               onPersonaEdit={handlePersonaEdit}
               onRoleEdit={handleRoleEdit}
               onMetricEdit={handleMetricEdit}
@@ -580,12 +692,12 @@ export default function PersonaResultPanels(props: PersonaResultPanelsProps) {
           <div className="mt-12 text-center">
             <button
               onClick={handleAddPersona}
-              className="flex items-center space-x-2 mx-auto px-6 py-4 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-xl transition-all duration-200 group"
+              className={`flex items-center space-x-2 mx-auto px-6 py-4 ${addButtonColors.bg} ${addButtonColors.bgHover} border-2 ${addButtonColors.border} ${addButtonColors.borderHover} rounded-xl ${cardEnhancements.transition} group`}
             >
-              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className={`w-5 h-5 ${addButtonColors.iconText}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              <span className="text-blue-700 font-medium">Add Persona</span>
+              <span className={`${addButtonColors.text} font-medium`}>Add Persona</span>
             </button>
           </div>
         )}

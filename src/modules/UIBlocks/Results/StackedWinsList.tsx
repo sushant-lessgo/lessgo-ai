@@ -7,6 +7,8 @@ import {
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface StackedWinsListProps extends LayoutComponentProps {}
 
@@ -131,22 +133,76 @@ const removeWin = (wins: string, descriptions: string, categories: string, index
   };
 };
 
-// Get category color scheme
-const getCategoryColor = (category?: string): { bg: string; text: string; border: string } => {
-  if (!category) return { bg: 'bg-gray-50', text: 'text-gray-600', border: 'border-gray-200' };
-  
-  const colors = {
-    'time savings': { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
-    'productivity': { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
+// Get category color scheme with theme support
+const getCategoryColor = (category: string | undefined, theme: UIBlockTheme): { bg: string; text: string; border: string } => {
+  if (!category) {
+    // Default colors based on theme
+    const defaults = {
+      warm: { bg: 'bg-orange-50', text: 'text-orange-600', border: 'border-orange-200' },
+      cool: { bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-200' },
+      neutral: { bg: 'bg-gray-50', text: 'text-gray-600', border: 'border-gray-200' }
+    };
+    return defaults[theme];
+  }
+
+  // Theme-based category colors
+  const warmColors = {
+    'time savings': { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200' },
+    'productivity': { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
     'cost reduction': { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200' },
-    'automation': { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200' },
+    'automation': { bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-200' },
     'customer success': { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200' },
-    'scalability': { bg: 'bg-indigo-50', text: 'text-indigo-700', border: 'border-indigo-200' },
-    'workflow': { bg: 'bg-pink-50', text: 'text-pink-700', border: 'border-pink-200' },
+    'scalability': { bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-200' },
+    'workflow': { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
     'analytics': { bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-200' }
   };
-  
-  return colors[category.toLowerCase() as keyof typeof colors] || { bg: 'bg-gray-50', text: 'text-gray-600', border: 'border-gray-200' };
+
+  const coolColors = {
+    'time savings': { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
+    'productivity': { bg: 'bg-cyan-50', text: 'text-cyan-700', border: 'border-cyan-200' },
+    'cost reduction': { bg: 'bg-indigo-50', text: 'text-indigo-700', border: 'border-indigo-200' },
+    'automation': { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200' },
+    'customer success': { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
+    'scalability': { bg: 'bg-sky-50', text: 'text-sky-700', border: 'border-sky-200' },
+    'workflow': { bg: 'bg-cyan-50', text: 'text-cyan-700', border: 'border-cyan-200' },
+    'analytics': { bg: 'bg-teal-50', text: 'text-teal-700', border: 'border-teal-200' }
+  };
+
+  const neutralColors = {
+    'time savings': { bg: 'bg-slate-50', text: 'text-slate-700', border: 'border-slate-200' },
+    'productivity': { bg: 'bg-gray-50', text: 'text-gray-700', border: 'border-gray-200' },
+    'cost reduction': { bg: 'bg-zinc-50', text: 'text-zinc-700', border: 'border-zinc-200' },
+    'automation': { bg: 'bg-stone-50', text: 'text-stone-700', border: 'border-stone-200' },
+    'customer success': { bg: 'bg-slate-50', text: 'text-slate-700', border: 'border-slate-200' },
+    'scalability': { bg: 'bg-gray-50', text: 'text-gray-700', border: 'border-gray-200' },
+    'workflow': { bg: 'bg-zinc-50', text: 'text-zinc-700', border: 'border-zinc-200' },
+    'analytics': { bg: 'bg-stone-50', text: 'text-stone-700', border: 'border-stone-200' }
+  };
+
+  const colorSets = { warm: warmColors, cool: coolColors, neutral: neutralColors };
+  const categoryKey = category.toLowerCase() as keyof typeof warmColors;
+  return colorSets[theme][categoryKey] || colorSets[theme]['productivity'];
+};
+
+// Get theme-based colors for win checkmark/icon
+const getWinIconColors = (theme: UIBlockTheme) => {
+  return {
+    warm: {
+      gradient: 'from-orange-400 to-red-500',
+      border: 'border-orange-200',
+      borderHover: 'hover:border-orange-300'
+    },
+    cool: {
+      gradient: 'from-blue-400 to-cyan-500',
+      border: 'border-blue-200',
+      borderHover: 'hover:border-blue-300'
+    },
+    neutral: {
+      gradient: 'from-gray-400 to-slate-500',
+      border: 'border-gray-200',
+      borderHover: 'hover:border-gray-300'
+    }
+  }[theme];
 };
 
 // Individual Win Item Component
@@ -155,6 +211,7 @@ const WinItem = ({
   index,
   mode,
   sectionId,
+  theme,
   onWinEdit,
   onDescriptionEdit,
   onCategoryEdit,
@@ -169,6 +226,7 @@ const WinItem = ({
   index: number;
   mode: 'edit' | 'preview';
   sectionId: string;
+  theme: UIBlockTheme;
   onWinEdit: (index: number, value: string) => void;
   onDescriptionEdit: (index: number, value: string) => void;
   onCategoryEdit: (index: number, value: string) => void;
@@ -180,14 +238,15 @@ const WinItem = ({
   canRemove?: boolean;
 }) => {
   const { getTextStyle } = useTypography();
-  const categoryColors = getCategoryColor(win.category);
-  
+  const categoryColors = getCategoryColor(win.category, theme);
+  const iconColors = getWinIconColors(theme);
+
   return (
-    <div className={`group/win-item-${index} relative flex items-start space-x-4 p-6 bg-white rounded-xl border border-gray-200 hover:border-green-300 hover:shadow-lg transition-all duration-300`}>
+    <div className={`group/win-item-${index} relative flex items-start space-x-4 p-6 bg-white rounded-xl border ${iconColors.border} ${iconColors.borderHover} hover:shadow-lg transition-all duration-300`}>
       
       {/* Checkmark Icon */}
       <div className="flex-shrink-0 mt-1">
-        <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+        <div className={`w-8 h-8 bg-gradient-to-br ${iconColors.gradient} rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
           <IconEditableText
             mode={mode}
             value={getValidatedIcon(blockContent.win_icon, '✅', 'win')}
@@ -303,6 +362,22 @@ export default function StackedWinsList(props: StackedWinsListProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
+  // Theme detection with priority: manual override > auto-detection > neutral
+  const theme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Get theme-based badge colors
+  const getBadgeColors = (theme: UIBlockTheme) => {
+    return {
+      warm: 'bg-orange-100 text-orange-700 border-orange-200',
+      cool: 'bg-blue-100 text-blue-700 border-blue-200',
+      neutral: 'bg-gray-100 text-gray-700 border-gray-200'
+    }[theme];
+  };
+
   // Parse wins data
   const wins = parseWinsData(
     blockContent.wins,
@@ -395,7 +470,7 @@ export default function StackedWinsList(props: StackedWinsListProps) {
 
           {/* Win Count Badge */}
           {(blockContent.win_count || mode === 'edit') && (
-            <div className="inline-flex items-center px-4 py-2 bg-green-50 border border-green-200 rounded-full text-green-800">
+            <div className={`inline-flex items-center px-4 py-2 ${getBadgeColors(theme)} border rounded-full font-medium text-sm`}>
               <IconEditableText
                 mode={mode}
                 value={getValidatedIcon(blockContent.badge_icon, '🏆', 'badge')}
@@ -432,6 +507,7 @@ export default function StackedWinsList(props: StackedWinsListProps) {
               index={index}
               mode={mode}
               sectionId={sectionId}
+              theme={theme}
               onWinEdit={handleWinEdit}
               onDescriptionEdit={handleDescriptionEdit}
               onCategoryEdit={handleCategoryEdit}

@@ -7,6 +7,8 @@ import {
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface EmojiOutcomeGridProps extends LayoutComponentProps {}
 
@@ -99,12 +101,40 @@ const removeOutcome = (emojis: string, outcomes: string, descriptions: string, i
   };
 };
 
+// Get theme-based colors for outcome cards
+const getThemeColors = (theme: UIBlockTheme) => {
+  return {
+    warm: {
+      cardBorder: 'border-orange-200',
+      cardBorderHover: 'hover:border-orange-300',
+      cardHoverShadow: 'hover:shadow-orange-100',
+      iconBg: 'bg-orange-50',
+      sparkleColor: 'bg-orange-400'
+    },
+    cool: {
+      cardBorder: 'border-blue-200',
+      cardBorderHover: 'hover:border-blue-300',
+      cardHoverShadow: 'hover:shadow-blue-100',
+      iconBg: 'bg-blue-50',
+      sparkleColor: 'bg-blue-400'
+    },
+    neutral: {
+      cardBorder: 'border-gray-200',
+      cardBorderHover: 'hover:border-gray-300',
+      cardHoverShadow: 'hover:shadow-gray-100',
+      iconBg: 'bg-gray-50',
+      sparkleColor: 'bg-gray-400'
+    }
+  }[theme];
+};
+
 // Individual Outcome Card Component
 const OutcomeCard = ({
   outcome,
   index,
   mode,
   sectionId,
+  theme,
   onEmojiEdit,
   onOutcomeEdit,
   onDescriptionEdit,
@@ -115,6 +145,7 @@ const OutcomeCard = ({
   index: number;
   mode: 'edit' | 'preview';
   sectionId: string;
+  theme: UIBlockTheme;
   onEmojiEdit: (index: number, value: string) => void;
   onOutcomeEdit: (index: number, value: string) => void;
   onDescriptionEdit: (index: number, value: string) => void;
@@ -122,9 +153,10 @@ const OutcomeCard = ({
   canRemove?: boolean;
 }) => {
   const { getTextStyle } = useTypography();
-  
+  const themeColors = getThemeColors(theme);
+
   return (
-    <div className={`relative group/outcome-card-${index} text-center p-6 bg-white rounded-2xl border border-gray-200 hover:border-blue-300 hover:shadow-lg hover:-translate-y-1 transition-all duration-300`}>
+    <div className={`relative group/outcome-card-${index} text-center p-6 bg-white rounded-2xl border ${themeColors.cardBorder} ${themeColors.cardBorderHover} ${themeColors.cardHoverShadow} hover:shadow-lg hover:-translate-y-1 transition-all duration-300`}>
 
       {/* Delete button - only show in edit mode and if can remove */}
       {mode !== 'preview' && onRemoveOutcome && canRemove && (
@@ -202,7 +234,7 @@ const OutcomeCard = ({
 
       {/* Sparkle Effect on Hover */}
       <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-        <div className="w-2 h-2 bg-yellow-400 rounded-full animate-ping"></div>
+        <div className={`w-2 h-2 ${themeColors.sparkleColor} rounded-full animate-ping`}></div>
       </div>
     </div>
   );
@@ -224,6 +256,12 @@ export default function EmojiOutcomeGrid(props: EmojiOutcomeGridProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
+  // Theme detection with priority: manual override > auto-detection > neutral
+  const theme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
 
   // Parse outcome data
   const outcomes = parseOutcomeData(
@@ -330,6 +368,7 @@ export default function EmojiOutcomeGrid(props: EmojiOutcomeGridProps) {
                 index={index}
                 mode={mode}
                 sectionId={sectionId}
+                theme={theme}
                 onEmojiEdit={handleEmojiEdit}
                 onOutcomeEdit={handleOutcomeEdit}
                 onDescriptionEdit={handleDescriptionEdit}

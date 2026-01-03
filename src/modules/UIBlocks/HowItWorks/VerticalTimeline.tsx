@@ -1,18 +1,22 @@
+'use client';
+
 import React, { useEffect, useRef } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
+import {
+  EditableAdaptiveHeadline,
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
-import { 
+import {
   CTAButton,
-  TrustIndicators 
+  TrustIndicators
 } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { getIconFromCategory, getRandomIconFromCategory } from '@/utils/iconMapping';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface VerticalTimelineContent {
   headline: string;
@@ -82,9 +86,9 @@ const CONTENT_SCHEMA = {
   use_step_icons: { type: 'boolean' as const, default: false }
 };
 
-const TimelineStep = React.memo(({ 
-  title, 
-  description, 
+const TimelineStep = React.memo(({
+  title,
+  description,
   duration,
   index,
   isLast,
@@ -97,7 +101,8 @@ const TimelineStep = React.memo(({
   sectionId,
   getStepIcon,
   handleStepIconEdit,
-  onRemove
+  onRemove,
+  themeColors
 }: {
   title: string;
   description: string;
@@ -114,25 +119,29 @@ const TimelineStep = React.memo(({
   getStepIcon: (index: number) => string;
   handleStepIconEdit: (index: number, value: string) => void;
   onRemove?: () => void;
+  themeColors: {
+    stepGradients: string[];
+    timelineLine: string;
+    cardBorder: string;
+    cardBg: string;
+    cardShadow: string;
+    durationBg: string;
+    durationText: string;
+    processSummaryBg: string;
+    processSummaryBorder: string;
+  };
 }) => {
-  
+
   const getStepStyle = (index: number) => {
-    const gradients = [
-      { background: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)' }, // blue
-      { background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)' }, // green
-      { background: 'linear-gradient(135deg, #A855F7 0%, #9333EA 100%)' }, // purple
-      { background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)' }, // orange
-      { background: 'linear-gradient(135deg, #EC4899 0%, #DB2777 100%)' }, // pink
-      { background: 'linear-gradient(135deg, #6366F1 0%, #4F46E5 100%)' }  // indigo
-    ];
-    return gradients[index % gradients.length];
+    const gradients = themeColors.stepGradients;
+    return { background: gradients[index % gradients.length] };
   };
 
   return (
     <div className="relative flex items-start">
       {/* Timeline Line */}
       {!isLast && (
-        <div className="absolute left-6 top-16 bottom-0 w-0.5 bg-gradient-to-b from-gray-300 to-gray-200" />
+        <div className={`absolute left-6 top-16 bottom-0 w-0.5 ${themeColors.timelineLine}`} />
       )}
       
       {/* Step Content */}
@@ -170,7 +179,7 @@ const TimelineStep = React.memo(({
         
         {/* Step Details */}
         <div className="flex-1 pb-6 relative group">
-          <div className="bg-white rounded-xl px-6 py-4 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
+          <div className={`${themeColors.cardBg} rounded-xl px-6 py-4 ${themeColors.cardShadow} border ${themeColors.cardBorder} transition-all duration-300`}>
             <div className="flex items-start justify-between">
               {/* Editable Step Title */}
               {mode !== 'preview' ? (
@@ -196,14 +205,14 @@ const TimelineStep = React.memo(({
                   onBlur={(e) => {
                     handleContentUpdate('step_durations', e.currentTarget.textContent || '');
                   }}
-                  className={`text-sm font-medium ${mutedTextColor} bg-gray-100 px-3 py-1 rounded-full ml-4 flex-shrink-0 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 cursor-text hover:bg-gray-200 min-w-[60px] text-center`}
+                  className={`text-sm font-medium ${themeColors.durationText} ${themeColors.durationBg} px-3 py-1 rounded-full ml-4 flex-shrink-0 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 cursor-text min-w-[60px] text-center`}
                   data-placeholder="Duration"
                 >
                   {duration || 'Duration'}
                 </div>
               ) : (
                 duration && (
-                  <span className={`text-sm font-medium ${mutedTextColor} bg-gray-100 px-3 py-1 rounded-full ml-4 flex-shrink-0`}>
+                  <span className={`text-sm font-medium ${themeColors.durationText} ${themeColors.durationBg} px-3 py-1 rounded-full ml-4 flex-shrink-0`}>
                     {duration}
                   </span>
                 )
@@ -271,6 +280,87 @@ export default function VerticalTimeline(props: LayoutComponentProps) {
   });
   
   const { getTextStyle: getTypographyStyle } = useTypography();
+
+  // Detect theme: manual override > auto-detection > neutral fallback
+  const theme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Debug theme detection
+  React.useEffect(() => {
+    console.log('🎨 VerticalTimeline theme detection:', {
+      sectionId,
+      hasManualOverride: !!props.manualThemeOverride,
+      manualTheme: props.manualThemeOverride,
+      hasUserContext: !!props.userContext,
+      userContext: props.userContext,
+      finalTheme: theme
+    });
+  }, [theme, props.manualThemeOverride, props.userContext, sectionId]);
+
+  // Theme-based color mappings
+  const getThemeColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        stepGradients: [
+          'linear-gradient(135deg, #F97316 0%, #EA580C 100%)', // orange
+          'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)', // red
+          'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)', // amber
+          'linear-gradient(135deg, #EC4899 0%, #DB2777 100%)', // pink
+          'linear-gradient(135deg, #FB923C 0%, #F97316 100%)', // orange-lighter
+          'linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%)'  // yellow
+        ],
+        timelineLine: 'bg-gradient-to-b from-orange-300 to-orange-200',
+        cardBorder: 'border-orange-100',
+        cardBg: 'bg-white hover:bg-orange-50/30',
+        cardShadow: 'shadow-lg shadow-orange-100/50 hover:shadow-xl hover:shadow-orange-200/60',
+        durationBg: 'bg-orange-100',
+        durationText: 'text-orange-700',
+        processSummaryBg: 'bg-gradient-to-r from-orange-50 via-amber-50 to-red-50',
+        processSummaryBorder: 'border-orange-100'
+      },
+      cool: {
+        stepGradients: [
+          'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)', // blue
+          'linear-gradient(135deg, #06B6D4 0%, #0891B2 100%)', // cyan
+          'linear-gradient(135deg, #6366F1 0%, #4F46E5 100%)', // indigo
+          'linear-gradient(135deg, #0EA5E9 0%, #0284C7 100%)', // sky
+          'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)', // violet
+          'linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%)'  // blue-lighter
+        ],
+        timelineLine: 'bg-gradient-to-b from-blue-300 to-blue-200',
+        cardBorder: 'border-blue-100',
+        cardBg: 'bg-white hover:bg-blue-50/30',
+        cardShadow: 'shadow-lg shadow-blue-100/50 hover:shadow-xl hover:shadow-blue-200/60',
+        durationBg: 'bg-blue-100',
+        durationText: 'text-blue-700',
+        processSummaryBg: 'bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50',
+        processSummaryBorder: 'border-blue-100'
+      },
+      neutral: {
+        stepGradients: [
+          'linear-gradient(135deg, #64748B 0%, #475569 100%)', // slate
+          'linear-gradient(135deg, #6B7280 0%, #4B5563 100%)', // gray
+          'linear-gradient(135deg, #71717A 0%, #52525B 100%)', // zinc
+          'linear-gradient(135deg, #78716C 0%, #57534E 100%)', // stone
+          'linear-gradient(135deg, #94A3B8 0%, #64748B 100%)', // slate-lighter
+          'linear-gradient(135deg, #9CA3AF 0%, #6B7280 100%)'  // gray-lighter
+        ],
+        timelineLine: 'bg-gradient-to-b from-gray-300 to-gray-200',
+        cardBorder: 'border-gray-100',
+        cardBg: 'bg-white hover:bg-gray-50',
+        cardShadow: 'shadow-lg hover:shadow-xl',
+        durationBg: 'bg-gray-100',
+        durationText: 'text-gray-700',
+        processSummaryBg: 'bg-gradient-to-r from-slate-50 via-gray-50 to-zinc-50',
+        processSummaryBorder: 'border-gray-100'
+      }
+    }[theme];
+  };
+
+  const themeColors = getThemeColors(theme);
 
   const stepTitles = blockContent.step_titles 
     ? blockContent.step_titles.split('|').map(item => item.trim()).filter(Boolean)
@@ -385,6 +475,7 @@ export default function VerticalTimeline(props: LayoutComponentProps) {
               colorTokens={colorTokens}
               mutedTextColor={mutedTextColor}
               blockContent={blockContent}
+              themeColors={themeColors}
               handleContentUpdate={(key, value) => {
                 const stepTitles = blockContent.step_titles ? blockContent.step_titles.split('|') : [];
                 const stepDescriptions = blockContent.step_descriptions ? blockContent.step_descriptions.split('|') : [];
@@ -476,7 +567,7 @@ export default function VerticalTimeline(props: LayoutComponentProps) {
         </div>
 
         {/* Process Summary */}
-        <div className="mt-6 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-2xl px-8 py-2 border border-blue-100">
+        <div className={`mt-6 ${themeColors.processSummaryBg} rounded-2xl px-8 py-2 border ${themeColors.processSummaryBorder}`}>
           <div className="text-center">
             <EditableAdaptiveText
               mode={mode}

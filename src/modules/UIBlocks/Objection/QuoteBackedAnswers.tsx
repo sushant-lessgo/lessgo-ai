@@ -4,12 +4,14 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
-  EditableAdaptiveText 
+import {
+  EditableAdaptiveHeadline,
+  EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 // Content interface for type safety
 interface QuoteBackedAnswersContent {
@@ -202,7 +204,7 @@ const shiftQuotesDown = (content: QuoteBackedAnswersContent, removedIndex: numbe
 };
 
 export default function QuoteBackedAnswers(props: LayoutComponentProps) {
-  
+
   // Use the abstraction hook with background type support
   const {
     sectionId,
@@ -217,6 +219,51 @@ export default function QuoteBackedAnswers(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Theme detection: manual override > auto-detection > neutral fallback
+  const theme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Theme-based color mapping
+  const getQuoteColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        quoteIconBg: 'bg-orange-500',
+        quoteBg: 'bg-white/80',
+        quoteBorder: 'border-orange-200',
+        quoteHoverShadow: 'hover:shadow-orange-200/30',
+        avatarGradient: 'from-orange-400 to-red-500',
+        verificationBg: 'bg-orange-100',
+        verificationText: 'text-orange-700',
+        trustIcons: ['text-orange-500', 'text-orange-600', 'text-orange-500']
+      },
+      cool: {
+        quoteIconBg: 'bg-blue-500',
+        quoteBg: 'bg-white/80',
+        quoteBorder: 'border-blue-200',
+        quoteHoverShadow: 'hover:shadow-blue-200/30',
+        avatarGradient: 'from-blue-400 to-indigo-500',
+        verificationBg: 'bg-blue-100',
+        verificationText: 'text-blue-700',
+        trustIcons: ['text-blue-500', 'text-blue-600', 'text-blue-500']
+      },
+      neutral: {
+        quoteIconBg: 'bg-gray-500',
+        quoteBg: 'bg-white/80',
+        quoteBorder: 'border-gray-200',
+        quoteHoverShadow: 'hover:shadow-gray-200/30',
+        avatarGradient: 'from-gray-400 to-gray-500',
+        verificationBg: 'bg-gray-100',
+        verificationText: 'text-gray-700',
+        trustIcons: ['text-gray-500', 'text-gray-600', 'text-gray-500']
+      }
+    }[theme];
+  };
+
+  const colors = getQuoteColors(theme);
 
   // Parse quote blocks from pipe-separated string
   const quoteBlocks = blockContent.quote_blocks
@@ -297,11 +344,11 @@ export default function QuoteBackedAnswers(props: LayoutComponentProps) {
             <div key={index} className={`relative group/quote-card-${index}`}>
               
               {/* Quote Card */}
-              <div className="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 h-full">
-                
+              <div className={`${colors.quoteBg} backdrop-blur-sm border ${colors.quoteBorder} rounded-2xl p-8 shadow-lg ${colors.quoteHoverShadow} hover:shadow-xl transition-shadow duration-300 h-full`}>
+
                 {/* Quote Icon */}
                 <div className="absolute -top-4 left-8">
-                  <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                  <div className={`w-8 h-8 ${colors.quoteIconBg} rounded-full flex items-center justify-center`}>
                     <IconEditableText
                       mode={mode}
                       value={blockContent.quote_icon || '💬'}
@@ -338,7 +385,7 @@ export default function QuoteBackedAnswers(props: LayoutComponentProps) {
 
                   {/* Author */}
                   <div className="flex items-center">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center text-white font-bold mr-4">
+                    <div className={`w-12 h-12 bg-gradient-to-br ${colors.avatarGradient} rounded-full flex items-center justify-center text-white font-bold mr-4`}>
                       {quoteBlock.author.split(' ').map(name => name[0]).join('').substring(0, 2)}
                     </div>
                     <div>
@@ -394,7 +441,7 @@ export default function QuoteBackedAnswers(props: LayoutComponentProps) {
 
                 {/* Verification Badge */}
                 <div className={`absolute top-4 ${mode === 'edit' && quoteBlocks.length > 1 ? 'right-12' : 'right-4'}`}>
-                  <div className="flex items-center space-x-1 bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium">
+                  <div className={`flex items-center space-x-1 ${colors.verificationBg} ${colors.verificationText} px-2 py-1 rounded-full text-xs font-medium`}>
                     <IconEditableText
                       mode={mode}
                       value={blockContent.verification_icon || '✅'}
@@ -452,7 +499,7 @@ export default function QuoteBackedAnswers(props: LayoutComponentProps) {
                 backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                 colorTokens={colorTokens}
                 iconSize="sm"
-                className="text-xl text-blue-500"
+                className={`text-xl ${colors.trustIcons[0]}`}
                 sectionId={sectionId}
                 elementKey="trust_icon_1"
               />
@@ -478,7 +525,7 @@ export default function QuoteBackedAnswers(props: LayoutComponentProps) {
                 backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                 colorTokens={colorTokens}
                 iconSize="sm"
-                className="text-xl text-green-500"
+                className={`text-xl ${colors.trustIcons[1]}`}
                 sectionId={sectionId}
                 elementKey="trust_icon_2"
               />
@@ -504,7 +551,7 @@ export default function QuoteBackedAnswers(props: LayoutComponentProps) {
                 backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                 colorTokens={colorTokens}
                 iconSize="sm"
-                className="text-xl text-purple-500"
+                className={`text-xl ${colors.trustIcons[2]}`}
                 sectionId={sectionId}
                 elementKey="trust_icon_3"
               />

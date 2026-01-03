@@ -17,6 +17,8 @@ import {
 } from '@/components/layout/ComponentRegistry';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 // Content interface for type safety
 interface MissionQuoteOverlayContent {
@@ -73,15 +75,79 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: 'Est. 2020' 
   },
-  background_image: { 
-    type: 'string' as const, 
-    default: '' 
+  background_image: {
+    type: 'string' as const,
+    default: ''
   }
 };
 
-// Mission Background Component
-const MissionBackgroundPlaceholder = React.memo(() => (
-  <div className="absolute inset-0 bg-gradient-to-br from-blue-900 via-indigo-800 to-purple-900">
+// Theme color mapping for overlay gradients and accents
+const getThemeColors = (theme: UIBlockTheme) => {
+  return {
+    warm: {
+      // Background gradient (warm sunset)
+      bgGradientFrom: 'from-orange-900',
+      bgGradientVia: 'via-red-800',
+      bgGradientTo: 'to-amber-900',
+      // Badge accent
+      badgeBg: 'bg-orange-500',
+      badgeBgOpacity: 'bg-opacity-20',
+      badgeText: 'text-orange-100',
+      // CTA button
+      ctaBg: 'bg-orange-500',
+      ctaHoverBg: 'hover:bg-orange-400',
+      ctaText: 'text-white',
+      // Stats box
+      statsBg: 'bg-orange-900',
+      statsBgOpacity: 'bg-opacity-40',
+      // Floating accents
+      floatingBg: 'bg-orange-500',
+      // Remove/Add buttons
+      removeBtn: 'text-red-300 hover:text-red-200',
+      addBtn: 'text-orange-200 hover:text-orange-100',
+    },
+    cool: {
+      bgGradientFrom: 'from-blue-900',
+      bgGradientVia: 'via-indigo-800',
+      bgGradientTo: 'to-purple-900',
+      badgeBg: 'bg-blue-500',
+      badgeBgOpacity: 'bg-opacity-20',
+      badgeText: 'text-blue-100',
+      ctaBg: 'bg-blue-500',
+      ctaHoverBg: 'hover:bg-blue-400',
+      ctaText: 'text-white',
+      statsBg: 'bg-blue-900',
+      statsBgOpacity: 'bg-opacity-40',
+      floatingBg: 'bg-blue-500',
+      removeBtn: 'text-red-300 hover:text-red-200',
+      addBtn: 'text-blue-200 hover:text-blue-100',
+    },
+    neutral: {
+      bgGradientFrom: 'from-gray-900',
+      bgGradientVia: 'via-slate-800',
+      bgGradientTo: 'to-gray-900',
+      badgeBg: 'bg-gray-500',
+      badgeBgOpacity: 'bg-opacity-20',
+      badgeText: 'text-gray-100',
+      ctaBg: 'bg-gray-600',
+      ctaHoverBg: 'hover:bg-gray-500',
+      ctaText: 'text-white',
+      statsBg: 'bg-gray-900',
+      statsBgOpacity: 'bg-opacity-40',
+      floatingBg: 'bg-gray-500',
+      removeBtn: 'text-red-300 hover:text-red-200',
+      addBtn: 'text-gray-200 hover:text-gray-100',
+    }
+  }[theme];
+};
+
+// Mission Background Component with theme support
+const MissionBackgroundPlaceholder = React.memo(({
+  themeColors
+}: {
+  themeColors: ReturnType<typeof getThemeColors>;
+}) => (
+  <div className={`absolute inset-0 bg-gradient-to-br ${themeColors.bgGradientFrom} ${themeColors.bgGradientVia} ${themeColors.bgGradientTo}`}>
     {/* Overlay pattern */}
     <div className="absolute inset-0 opacity-20">
       <div className="absolute inset-0" style={{
@@ -90,9 +156,9 @@ const MissionBackgroundPlaceholder = React.memo(() => (
     </div>
 
     {/* Floating elements */}
-    <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-white bg-opacity-5 rounded-full blur-xl animate-pulse"></div>
-    <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-white bg-opacity-5 rounded-full blur-xl animate-pulse delay-1000"></div>
-    <div className="absolute top-1/2 right-1/3 w-24 h-24 bg-white bg-opacity-5 rounded-full blur-xl animate-pulse delay-500"></div>
+    <div className={`absolute top-1/4 left-1/4 w-32 h-32 ${themeColors.floatingBg} bg-opacity-5 rounded-full blur-xl animate-pulse`}></div>
+    <div className={`absolute bottom-1/4 right-1/4 w-48 h-48 ${themeColors.floatingBg} bg-opacity-5 rounded-full blur-xl animate-pulse delay-1000`}></div>
+    <div className={`absolute top-1/2 right-1/3 w-24 h-24 ${themeColors.floatingBg} bg-opacity-5 rounded-full blur-xl animate-pulse delay-500`}></div>
 
     {/* Grid overlay */}
     <div className="absolute inset-0 bg-black bg-opacity-40"></div>
@@ -119,6 +185,15 @@ export default function MissionQuoteOverlay(props: LayoutComponentProps) {
   });
   
   const { getTextStyle: getTypographyStyle } = useTypography();
+
+  // Theme detection: manual override > auto-detection > neutral fallback
+  const theme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  const colors = getThemeColors(theme);
 
   // Helper function to get mission stats with individual field support
   const getMissionStats = (): string[] => {
@@ -176,7 +251,7 @@ export default function MissionQuoteOverlay(props: LayoutComponentProps) {
             <div className="absolute inset-0 bg-black bg-opacity-50"></div>
           </div>
         ) : (
-          <MissionBackgroundPlaceholder />
+          <MissionBackgroundPlaceholder themeColors={colors} />
         )}
 
         {/* Content Overlay */}
@@ -214,9 +289,9 @@ export default function MissionQuoteOverlay(props: LayoutComponentProps) {
                     />
                   </div>
                 ) : (
-                  <div className="inline-flex items-center space-x-2 bg-white bg-opacity-10 backdrop-blur-sm rounded-full px-4 py-2 border border-white border-opacity-20">
+                  <div className={`inline-flex items-center space-x-2 ${colors.badgeBg} ${colors.badgeBgOpacity} backdrop-blur-sm rounded-full px-4 py-2 border border-white border-opacity-20`}>
                     <span className="text-lg">{blockContent.badge_icon || '🌟'}</span>
-                    <span className="text-white text-sm font-medium">{blockContent.badge_text || 'Our Mission'}</span>
+                    <span className={`${colors.badgeText} text-sm font-medium`}>{blockContent.badge_text || 'Our Mission'}</span>
                   </div>
                 )}
               </div>
@@ -298,7 +373,7 @@ export default function MissionQuoteOverlay(props: LayoutComponentProps) {
 
             {/* Mission Stats */}
             {mode !== 'preview' ? (
-              <div className="bg-black bg-opacity-30 rounded-lg p-6 max-w-3xl mx-auto">
+              <div className={`${colors.statsBg} ${colors.statsBgOpacity} rounded-lg p-6 max-w-3xl mx-auto`}>
                 <h4 className="text-white font-semibold mb-4 text-center">Mission Statistics</h4>
                 <div className="space-y-3">
                   {[
@@ -330,7 +405,7 @@ export default function MissionQuoteOverlay(props: LayoutComponentProps) {
                               e.stopPropagation();
                               handleContentUpdate(stat.key as keyof MissionQuoteOverlayContent, '___REMOVED___');
                             }}
-                            className="opacity-0 group-hover/stat-item:opacity-100 text-red-400 hover:text-red-300 transition-opacity duration-200"
+                            className={`opacity-0 group-hover/stat-item:opacity-100 ${colors.removeBtn} transition-opacity duration-200`}
                             title="Remove this statistic"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -352,13 +427,13 @@ export default function MissionQuoteOverlay(props: LayoutComponentProps) {
                           blockContent.mission_stat_3,
                           blockContent.mission_stat_4
                         ].findIndex(stat => !stat || stat.trim() === '' || stat === '___REMOVED___');
-                        
+
                         if (emptyIndex !== -1) {
                           const fieldKey = `mission_stat_${emptyIndex + 1}` as keyof MissionQuoteOverlayContent;
                           handleContentUpdate(fieldKey, 'New statistic');
                         }
                       }}
-                      className="flex items-center space-x-1 text-sm text-blue-200 hover:text-blue-100 transition-colors mt-2"
+                      className={`flex items-center space-x-1 text-sm ${colors.addBtn} transition-colors mt-2`}
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -389,7 +464,7 @@ export default function MissionQuoteOverlay(props: LayoutComponentProps) {
                 text={blockContent.cta_text}
                 colorTokens={colorTokens}
                 textStyle={{ fontSize: '1.125rem', fontWeight: '600' }}
-                className="bg-white text-gray-900 hover:bg-gray-100 shadow-2xl hover:shadow-3xl transform hover:-translate-y-1 transition-all duration-300 px-8 py-4"
+                className={`${colors.ctaBg} ${colors.ctaHoverBg} ${colors.ctaText} shadow-2xl hover:shadow-3xl transform hover:-translate-y-1 transition-all duration-300 px-8 py-4`}
                 variant="secondary"
                 sectionId={sectionId}
                 elementKey="cta_text"

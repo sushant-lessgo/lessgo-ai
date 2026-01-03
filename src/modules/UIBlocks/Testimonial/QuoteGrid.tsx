@@ -4,7 +4,7 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
+import {
   EditableAdaptiveHeadline,
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
@@ -14,6 +14,8 @@ import { StarRating } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
 import { getIconFromCategory, getRandomIconFromCategory } from '@/utils/iconMapping';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 // Content interface for type safety
 interface QuoteGridContent {
@@ -281,9 +283,9 @@ const CustomerAvatar = React.memo(({ name }: { name: string }) => {
 CustomerAvatar.displayName = 'CustomerAvatar';
 
 // Individual Testimonial Card
-const TestimonialCard = React.memo(({ 
-  testimonial, 
-  mode, 
+const TestimonialCard = React.memo(({
+  testimonial,
+  mode,
   colorTokens,
   getTextStyle,
   onQuoteEdit,
@@ -298,7 +300,8 @@ const TestimonialCard = React.memo(({
   sectionBackground,
   backgroundType,
   blockContent,
-  handleContentUpdate
+  handleContentUpdate,
+  themeColors
 }: {
   testimonial: Testimonial;
   mode: 'edit' | 'preview';
@@ -317,10 +320,11 @@ const TestimonialCard = React.memo(({
   backgroundType: "custom" | "neutral" | "primary" | "secondary" | "divider" | "theme" | undefined;
   blockContent: any;
   handleContentUpdate: (key: string, value: string) => void;
+  themeColors: ReturnType<typeof getThemeColors>;
 }) => {
-  
+
   return (
-    <div className={`group/quote-card-${testimonial.index} bg-white p-8 rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300 relative`}>
+    <div className={`group/quote-card-${testimonial.index} bg-white p-8 rounded-xl border ${themeColors.border} ${themeColors.borderHover} hover:shadow-lg transition-all duration-300 relative`}>
       
       {/* Quote Mark */}
       <div className="absolute top-6 right-6 opacity-20 group-hover:opacity-30 transition-opacity duration-300 group/icon-edit relative">
@@ -331,7 +335,7 @@ const TestimonialCard = React.memo(({
           backgroundType={backgroundType}
           colorTokens={colorTokens}
           iconSize="xl"
-          className="text-4xl text-blue-500"
+          className={`text-4xl ${themeColors.iconText}`}
           sectionId={sectionId}
           elementKey="quote_mark_icon"
         />
@@ -362,7 +366,7 @@ const TestimonialCard = React.memo(({
           backgroundType={backgroundType}
           colorTokens={colorTokens}
           iconSize="lg"
-          className="text-2xl text-blue-500"
+          className={`text-2xl ${themeColors.iconText}`}
           sectionId={sectionId}
           elementKey={`testimonial_icon_${testimonial.index + 1}`}
         />
@@ -485,6 +489,34 @@ const TestimonialCard = React.memo(({
 });
 TestimonialCard.displayName = 'TestimonialCard';
 
+// Theme color mapping function
+const getThemeColors = (theme: UIBlockTheme) => ({
+  warm: {
+    border: 'border-orange-200',
+    borderHover: 'hover:border-orange-300',
+    iconText: 'text-orange-500',
+    buttonBg: 'bg-orange-50 hover:bg-orange-100',
+    buttonBorder: 'border-orange-200 hover:border-orange-300',
+    buttonText: 'text-orange-700'
+  },
+  cool: {
+    border: 'border-blue-200',
+    borderHover: 'hover:border-blue-300',
+    iconText: 'text-blue-500',
+    buttonBg: 'bg-blue-50 hover:bg-blue-100',
+    buttonBorder: 'border-blue-200 hover:border-blue-300',
+    buttonText: 'text-blue-700'
+  },
+  neutral: {
+    border: 'border-gray-200',
+    borderHover: 'hover:border-gray-300',
+    iconText: 'text-gray-500',
+    buttonBg: 'bg-gray-50 hover:bg-gray-100',
+    buttonBorder: 'border-gray-200 hover:border-gray-300',
+    buttonText: 'text-gray-700'
+  }
+})[theme];
+
 export default function QuoteGrid(props: LayoutComponentProps) {
   // Use the abstraction hook for all common functionality
   const {
@@ -501,6 +533,15 @@ export default function QuoteGrid(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Theme detection: manual override > auto-detection > neutral fallback
+  const uiBlockTheme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  const themeColors = getThemeColors(uiBlockTheme);
 
   // Parse testimonial data
   const testimonials = parseTestimonialData(
@@ -615,6 +656,7 @@ export default function QuoteGrid(props: LayoutComponentProps) {
               backgroundType={backgroundType || "neutral"}
               blockContent={blockContent}
               handleContentUpdate={handleContentUpdate}
+              themeColors={themeColors}
             />
           ))}
         </div>
@@ -624,12 +666,12 @@ export default function QuoteGrid(props: LayoutComponentProps) {
           <div className="mt-8 text-center">
             <button
               onClick={handleAddTestimonial}
-              className="flex items-center space-x-2 mx-auto px-4 py-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-xl transition-all duration-200 group"
+              className={`flex items-center space-x-2 mx-auto px-4 py-3 ${themeColors.buttonBg} border-2 ${themeColors.buttonBorder} rounded-xl transition-all duration-200 group`}
             >
-              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className={`w-5 h-5 ${themeColors.iconText}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              <span className="text-blue-700 font-medium">Add Testimonial</span>
+              <span className={`${themeColors.buttonText} font-medium`}>Add Testimonial</span>
             </button>
           </div>
         )}

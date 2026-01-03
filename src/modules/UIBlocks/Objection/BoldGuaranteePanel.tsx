@@ -5,13 +5,15 @@ import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
-  EditableAdaptiveText 
+import {
+  EditableAdaptiveHeadline,
+  EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { CTAButton } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 // Guarantee item structure
 interface GuaranteeItem {
@@ -154,6 +156,7 @@ const GuaranteeCard = ({
   colorTokens,
   sectionBackground,
   backgroundType,
+  guaranteeColors,
   canRemove = true
 }: {
   guarantee: GuaranteeItem;
@@ -166,6 +169,7 @@ const GuaranteeCard = ({
   colorTokens: any;
   sectionBackground: any;
   backgroundType?: string;
+  guaranteeColors: any;
   canRemove?: boolean;
 }) => {
   const { getTextStyle: getTypographyStyle } = useTypography();
@@ -174,8 +178,8 @@ const GuaranteeCard = ({
 
   return (
     <div className={`group/guarantee-card-${index} text-center p-6 relative`}>
-      <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-        <span className="text-2xl text-green-600">✓</span>
+      <div className={`w-12 h-12 ${guaranteeColors.checkmarkBg} rounded-lg flex items-center justify-center mx-auto mb-4`}>
+        <span className={`text-2xl ${guaranteeColors.checkmarkIcon}`}>✓</span>
       </div>
 
       {/* Guarantee Title */}
@@ -230,7 +234,7 @@ const GuaranteeCard = ({
 };
 
 export default function BoldGuaranteePanel(props: LayoutComponentProps) {
-  
+
   // Use the abstraction hook with background type support
   const {
     sectionId,
@@ -246,6 +250,63 @@ export default function BoldGuaranteePanel(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Theme detection: manual override > auto-detection > neutral fallback
+  const theme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Theme-based color mapping
+  const getGuaranteeColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        mainPanelBg: 'bg-orange-500',
+        mainPanelText: 'text-white',
+        mainPanelMuted: 'text-orange-50',
+        checkmarkBg: 'bg-orange-100',
+        checkmarkIcon: 'text-orange-600',
+        ctaBg: 'bg-white',
+        ctaText: 'text-orange-600',
+        ctaHover: 'hover:bg-gray-100',
+        addButtonBg: 'bg-orange-50 hover:bg-orange-100',
+        addButtonBorder: 'border-orange-200 hover:border-orange-300',
+        addButtonIcon: 'text-orange-600',
+        addButtonText: 'text-orange-700'
+      },
+      cool: {
+        mainPanelBg: 'bg-blue-500',
+        mainPanelText: 'text-white',
+        mainPanelMuted: 'text-blue-50',
+        checkmarkBg: 'bg-blue-100',
+        checkmarkIcon: 'text-blue-600',
+        ctaBg: 'bg-white',
+        ctaText: 'text-blue-600',
+        ctaHover: 'hover:bg-gray-100',
+        addButtonBg: 'bg-blue-50 hover:bg-blue-100',
+        addButtonBorder: 'border-blue-200 hover:border-blue-300',
+        addButtonIcon: 'text-blue-600',
+        addButtonText: 'text-blue-700'
+      },
+      neutral: {
+        mainPanelBg: 'bg-gray-700',
+        mainPanelText: 'text-white',
+        mainPanelMuted: 'text-gray-50',
+        checkmarkBg: 'bg-gray-100',
+        checkmarkIcon: 'text-gray-600',
+        ctaBg: 'bg-white',
+        ctaText: 'text-gray-700',
+        ctaHover: 'hover:bg-gray-100',
+        addButtonBg: 'bg-gray-50 hover:bg-gray-100',
+        addButtonBorder: 'border-gray-200 hover:border-gray-300',
+        addButtonIcon: 'text-gray-600',
+        addButtonText: 'text-gray-700'
+      }
+    }[theme];
+  };
+
+  const colors = getGuaranteeColors(theme);
 
   // Typography hook
   const { getTextStyle: getTypographyStyle } = useTypography();
@@ -347,7 +408,7 @@ export default function BoldGuaranteePanel(props: LayoutComponentProps) {
         </div>
 
         {/* Main Guarantee Panel - Simplified */}
-        <div className="bg-green-500 rounded-2xl p-10 text-center text-white shadow-lg mb-10">
+        <div className={`${colors.mainPanelBg} rounded-2xl p-10 text-center ${colors.mainPanelText} shadow-lg mb-10`}>
           <EditableAdaptiveText
             mode={mode}
             value={blockContent.main_guarantee || ''}
@@ -355,8 +416,8 @@ export default function BoldGuaranteePanel(props: LayoutComponentProps) {
             backgroundType="custom"
             colorTokens={{
               ...colorTokens,
-              primaryText: 'text-white',
-              mutedText: 'text-green-50'
+              primaryText: colors.mainPanelText,
+              mutedText: colors.mainPanelMuted
             }}
             variant="body"
             style={{...h1Style, fontSize: 'clamp(1.75rem, 4vw, 2.25rem)'}}
@@ -374,8 +435,8 @@ export default function BoldGuaranteePanel(props: LayoutComponentProps) {
             backgroundType="custom"
             colorTokens={{
               ...colorTokens,
-              primaryText: 'text-green-50',
-              mutedText: 'text-green-100'
+              primaryText: colors.mainPanelMuted,
+              mutedText: colors.mainPanelMuted
             }}
             variant="body"
             style={{...bodyLgStyle}}
@@ -390,9 +451,9 @@ export default function BoldGuaranteePanel(props: LayoutComponentProps) {
             text={blockContent.cta_text}
             colorTokens={{
               ...colorTokens,
-              ctaBg: 'bg-white',
-              ctaHover: 'hover:bg-gray-100',
-              ctaText: 'text-green-600'
+              ctaBg: colors.ctaBg,
+              ctaHover: colors.ctaHover,
+              ctaText: colors.ctaText
             }}
             className="px-8 py-3 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
             variant="primary"
@@ -417,6 +478,7 @@ export default function BoldGuaranteePanel(props: LayoutComponentProps) {
                 colorTokens={colorTokens}
                 sectionBackground={sectionBackground}
                 backgroundType={backgroundType}
+                guaranteeColors={colors}
                 canRemove={guaranteeItems.length > 1}
               />
             ))}
@@ -428,12 +490,12 @@ export default function BoldGuaranteePanel(props: LayoutComponentProps) {
           <div className="mb-8 text-center">
             <button
               onClick={handleAddGuarantee}
-              className="flex items-center space-x-2 mx-auto px-4 py-3 bg-green-50 hover:bg-green-100 border-2 border-green-200 hover:border-green-300 rounded-xl transition-all duration-200 group"
+              className={`flex items-center space-x-2 mx-auto px-4 py-3 ${colors.addButtonBg} border-2 ${colors.addButtonBorder} rounded-xl transition-all duration-200 group`}
             >
-              <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className={`w-5 h-5 ${colors.addButtonIcon}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              <span className="text-green-700 font-medium">Add Guarantee</span>
+              <span className={`${colors.addButtonText} font-medium`}>Add Guarantee</span>
             </button>
           </div>
         )}

@@ -20,6 +20,8 @@ import {
 import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 // Content interface for type safety
 interface SideBySidePhotoStoryContent {
@@ -113,18 +115,20 @@ const CONTENT_SCHEMA = {
 };
 
 // Founder Photo Placeholder Component
-const FounderPhotoPlaceholder = React.memo(({ 
+const FounderPhotoPlaceholder = React.memo(({
   type = 'primary',
   mode,
   sectionId,
   elementKey,
-  onImageClick
-}: { 
+  onImageClick,
+  themeColors
+}: {
   type?: 'primary' | 'secondary';
   mode?: string;
   sectionId?: string;
   elementKey?: string;
   onImageClick?: () => void;
+  themeColors?: { editIcon: string; decorativeGradient1: string; decorativeGradient2: string };
 }) => (
   <div 
     className="relative w-full h-full min-h-[400px] bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl overflow-hidden shadow-lg cursor-pointer hover:shadow-xl transition-shadow duration-200"
@@ -145,14 +149,14 @@ const FounderPhotoPlaceholder = React.memo(({
           </svg>
         </div>
         {mode === 'edit' && (
-          <div className="absolute -bottom-2 -right-2 bg-blue-500 text-white rounded-full p-2 shadow-lg">
+          <div className={`absolute -bottom-2 -right-2 ${themeColors?.editIcon || 'bg-blue-500'} text-white rounded-full p-2 shadow-lg`}>
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
           </div>
         )}
       </div>
-      
+
       {/* Placeholder text */}
       <div className="text-center">
         <p className="text-gray-600 font-medium mb-1">
@@ -167,8 +171,8 @@ const FounderPhotoPlaceholder = React.memo(({
     </div>
 
     {/* Decorative corner accent */}
-    <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-blue-400 to-indigo-500 opacity-10 rounded-bl-full"></div>
-    <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-400 to-pink-500 opacity-10 rounded-tr-full"></div>
+    <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${themeColors?.decorativeGradient1 || 'from-blue-400 to-indigo-500'} opacity-10 rounded-bl-full`}></div>
+    <div className={`absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr ${themeColors?.decorativeGradient2 || 'from-purple-400 to-pink-500'} opacity-10 rounded-tr-full`}></div>
   </div>
 ));
 FounderPhotoPlaceholder.displayName = 'FounderPhotoPlaceholder';
@@ -238,9 +242,66 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
 
   // Get muted text color for trust indicators
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
-  
+
   // Use robust image toolbar hook
   const handleImageToolbar = useImageToolbar();
+
+  // Theme detection with priority: manual override > auto-detection > neutral fallback
+  const theme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Theme-based color mapping
+  const getThemeColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        badgeBg: 'bg-orange-50',
+        badgeBorder: 'border-orange-200',
+        badgeText: 'text-orange-700',
+        quoteBorder: 'border-orange-500',
+        avatarGradient: 'from-orange-400 to-red-600',
+        editIcon: 'bg-orange-500',
+        decorativeGradient1: 'from-orange-400 to-red-500',
+        decorativeGradient2: 'from-pink-400 to-orange-500',
+        statsBarGradient: 'from-orange-50 to-red-50',
+        statsBarBg: 'bg-orange-50',
+        statsTextColor: 'text-orange-600',
+        addButtonText: 'text-orange-600 hover:text-orange-800'
+      },
+      cool: {
+        badgeBg: 'bg-blue-50',
+        badgeBorder: 'border-blue-200',
+        badgeText: 'text-blue-700',
+        quoteBorder: 'border-blue-500',
+        avatarGradient: 'from-blue-400 to-indigo-600',
+        editIcon: 'bg-blue-500',
+        decorativeGradient1: 'from-blue-400 to-indigo-500',
+        decorativeGradient2: 'from-purple-400 to-pink-500',
+        statsBarGradient: 'from-blue-50 to-indigo-50',
+        statsBarBg: 'bg-blue-50',
+        statsTextColor: 'text-blue-600',
+        addButtonText: 'text-blue-600 hover:text-blue-800'
+      },
+      neutral: {
+        badgeBg: 'bg-gray-50',
+        badgeBorder: 'border-gray-200',
+        badgeText: 'text-gray-700',
+        quoteBorder: 'border-gray-500',
+        avatarGradient: 'from-gray-400 to-gray-600',
+        editIcon: 'bg-gray-500',
+        decorativeGradient1: 'from-gray-400 to-gray-500',
+        decorativeGradient2: 'from-gray-300 to-gray-400',
+        statsBarGradient: 'from-gray-50 to-gray-100',
+        statsBarBg: 'bg-gray-50',
+        statsTextColor: 'text-gray-600',
+        addButtonText: 'text-gray-600 hover:text-gray-800'
+      }
+    }[theme];
+  };
+
+  const colors = getThemeColors(theme);
 
   return (
     <LayoutSection
@@ -284,7 +345,7 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
                   />
                 </div>
               ) : (
-                <div className="inline-flex items-center space-x-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full border border-blue-200">
+                <div className={`inline-flex items-center space-x-2 ${colors.badgeBg} ${colors.badgeText} px-4 py-2 rounded-full border ${colors.badgeBorder}`}>
                   <span>{blockContent.badge_icon || '✨'}</span>
                   <span className="font-medium text-sm">{blockContent.badge_text || 'Creator Story'}</span>
                 </div>
@@ -328,7 +389,7 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
             />
 
             {/* Quote */}
-            <div className="bg-gray-50 border-l-4 border-blue-500 rounded-r-lg p-6">
+            <div className={`bg-gray-50 border-l-4 ${colors.quoteBorder} rounded-r-lg p-6`}>
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.story_quote || ''}
@@ -342,9 +403,9 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
                 elementKey="story_quote"
                 sectionBackground="bg-gray-50"
               />
-              
+
               <div className="mt-4 flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold">
+                <div className={`w-10 h-10 bg-gradient-to-br ${colors.avatarGradient} rounded-full flex items-center justify-center text-white font-bold`}>
                   {blockContent.founder_name?.charAt(0) || 'F'}
                 </div>
                 <EditableAdaptiveText
@@ -446,11 +507,16 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
                   }}
                 />
               ) : (
-                <FounderPhotoPlaceholder 
-                  type="primary" 
+                <FounderPhotoPlaceholder
+                  type="primary"
                   mode={mode}
                   sectionId={sectionId}
                   elementKey="story_image"
+                  themeColors={{
+                    editIcon: colors.editIcon,
+                    decorativeGradient1: colors.decorativeGradient1,
+                    decorativeGradient2: colors.decorativeGradient2
+                  }}
                   onImageClick={() => {
                     if (mode === 'edit') {
                       const element = document.querySelector(`[data-image-id="${sectionId}-story_image"]`);
@@ -488,11 +554,16 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
                   }}
                 />
               ) : (
-                <FounderPhotoPlaceholder 
-                  type="secondary" 
+                <FounderPhotoPlaceholder
+                  type="secondary"
                   mode={mode}
                   sectionId={sectionId}
                   elementKey="secondary_image"
+                  themeColors={{
+                    editIcon: colors.editIcon,
+                    decorativeGradient1: colors.decorativeGradient1,
+                    decorativeGradient2: colors.decorativeGradient2
+                  }}
                   onImageClick={() => {
                     if (mode === 'edit') {
                       const element = document.querySelector(`[data-image-id="${sectionId}-secondary_image"]`);
@@ -512,7 +583,7 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
         </div>
 
         {/* Bottom Stats Bar */}
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-8">
+        <div className={`bg-gradient-to-r ${colors.statsBarGradient} rounded-xl p-8`}>
           {mode === 'edit' ? (
             <div className="space-y-4">
               <h4 className="text-center font-semibold text-gray-900 mb-4">Story Statistics</h4>
@@ -536,7 +607,7 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
                         placeholder={stat.placeholder}
                         sectionId={sectionId}
                         elementKey={stat.key}
-                        sectionBackground="bg-blue-50"
+                        sectionBackground={colors.statsBarBg}
                       />
                       
                       {/* Remove button */}
@@ -570,13 +641,13 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
                         blockContent.story_stat_3,
                         blockContent.story_stat_4
                       ].findIndex(stat => !stat || stat.trim() === '' || stat === '___REMOVED___');
-                      
+
                       if (emptyIndex !== -1) {
                         const fieldKey = `story_stat_${emptyIndex + 1}` as keyof SideBySidePhotoStoryContent;
                         handleContentUpdate(fieldKey, 'New statistic');
                       }
                     }}
-                    className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 transition-colors mx-auto"
+                    className={`flex items-center space-x-1 text-sm ${colors.addButtonText} transition-colors mx-auto`}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -590,7 +661,7 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
               {storyStats.map((stat, index) => (
                 <div key={index}>
-                  <div className="text-2xl lg:text-3xl font-bold text-blue-600 mb-1">
+                  <div className={`text-2xl lg:text-3xl font-bold ${colors.statsTextColor} mb-1`}>
                     {stat.split(' ')[0]}
                   </div>
                   <div className="text-sm text-gray-600">

@@ -13,6 +13,8 @@ import { CTAButton } from '@/components/layout/ComponentRegistry';
 import LogoEditableComponent from '@/components/ui/LogoEditableComponent';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { createCTAClickHandler } from '@/utils/ctaHandler';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 // Content interface for type safety
 interface TestimonialCTAComboContent {
@@ -104,18 +106,22 @@ const CONTENT_SCHEMA = {
 
 
 // Avatar Component
-const TestimonialAvatar = React.memo(({ 
-  name, 
-  company, 
-  mode, 
-  logoUrl, 
-  onLogoChange 
-}: { 
-  name: string, 
+const TestimonialAvatar = React.memo(({
+  name,
+  company,
+  mode,
+  logoUrl,
+  onLogoChange,
+  avatarGradients,
+  logoBorder
+}: {
+  name: string,
   company: string,
   mode: 'edit' | 'preview',
   logoUrl?: string,
-  onLogoChange: (url: string) => void
+  onLogoChange: (url: string) => void,
+  avatarGradients: string[],
+  logoBorder: string
 }) => {
   const initials = name
     .split(' ')
@@ -124,17 +130,8 @@ const TestimonialAvatar = React.memo(({
     .substring(0, 2)
     .toUpperCase();
 
-  // Generate color based on name
-  const colors = [
-    'from-blue-500 to-indigo-600',
-    'from-green-500 to-emerald-600',
-    'from-purple-500 to-pink-600',
-    'from-orange-500 to-red-600',
-    'from-teal-500 to-cyan-600',
-    'from-indigo-500 to-purple-600',
-    'from-pink-500 to-rose-600'
-  ];
-  const colorIndex = name.length % colors.length;
+  // Use theme-specific gradients
+  const colorIndex = name.length % avatarGradients.length;
 
   // Generate company initials if no logo
   const companyInitials = company
@@ -146,11 +143,11 @@ const TestimonialAvatar = React.memo(({
 
   return (
     <div className="relative">
-      <div className={`w-16 h-16 bg-gradient-to-br ${colors[colorIndex]} rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg ring-2 ring-white`}>
+      <div className={`w-16 h-16 bg-gradient-to-br ${avatarGradients[colorIndex]} rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg ring-2 ring-white`}>
         {initials}
       </div>
       {/* Company logo - editable with enhanced styling */}
-      <div className="absolute -bottom-3 -right-3 w-10 h-10 bg-white rounded-full border-2 border-gray-300 shadow-md flex items-center justify-center group hover:shadow-lg transition-shadow duration-200">
+      <div className={`absolute -bottom-3 -right-3 w-10 h-10 bg-white rounded-full border-2 ${logoBorder} shadow-md flex items-center justify-center group hover:shadow-lg transition-shadow duration-200`}>
         {logoUrl ? (
           <LogoEditableComponent
             mode={mode}
@@ -198,6 +195,75 @@ export default function TestimonialCTACombo(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Theme detection: manual override > auto-detection > neutral
+  const uiBlockTheme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral' as const;
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Theme-based color mappings
+  const getThemeColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        cardGradientBg: 'from-orange-50/30',
+        badgeBg: 'bg-orange-100',
+        badgeText: 'text-orange-700',
+        badgeBorder: 'border-orange-200',
+        quoteHighlight: 'text-orange-600',
+        avatarGradients: [
+          'from-orange-500 to-red-600',
+          'from-red-500 to-rose-600',
+          'from-amber-500 to-orange-600',
+          'from-rose-500 to-pink-600',
+          'from-orange-600 to-amber-700',
+          'from-red-600 to-orange-700',
+          'from-yellow-500 to-orange-600',
+        ],
+        logoBorder: 'border-orange-200',
+        iconStroke: 'stroke-orange-500'
+      },
+      cool: {
+        cardGradientBg: 'from-blue-50/30',
+        badgeBg: 'bg-blue-100',
+        badgeText: 'text-blue-700',
+        badgeBorder: 'border-blue-200',
+        quoteHighlight: 'text-blue-600',
+        avatarGradients: [
+          'from-blue-500 to-indigo-600',
+          'from-green-500 to-emerald-600',
+          'from-purple-500 to-pink-600',
+          'from-teal-500 to-cyan-600',
+          'from-indigo-500 to-purple-600',
+          'from-cyan-500 to-blue-600',
+          'from-sky-500 to-blue-600',
+        ],
+        logoBorder: 'border-blue-200',
+        iconStroke: 'stroke-blue-500'
+      },
+      neutral: {
+        cardGradientBg: 'from-gray-50/30',
+        badgeBg: 'bg-gray-100',
+        badgeText: 'text-gray-700',
+        badgeBorder: 'border-gray-200',
+        quoteHighlight: 'text-gray-700',
+        avatarGradients: [
+          'from-gray-500 to-gray-600',
+          'from-slate-500 to-gray-600',
+          'from-zinc-500 to-gray-600',
+          'from-neutral-500 to-gray-600',
+          'from-gray-600 to-slate-700',
+          'from-slate-600 to-zinc-700',
+          'from-stone-500 to-gray-600',
+        ],
+        logoBorder: 'border-gray-300',
+        iconStroke: 'stroke-gray-500'
+      }
+    }[theme];
+  };
+
+  const themeColors = getThemeColors(uiBlockTheme);
 
   // Create typography styles
   const h2Style = getTypographyStyle('h2');
@@ -397,12 +463,12 @@ export default function TestimonialCTACombo(props: LayoutComponentProps) {
           {/* Right Column - Testimonial */}
           <div className="bg-white rounded-2xl p-8 shadow-xl border border-gray-200 relative overflow-hidden">
             {/* Background Pattern */}
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 to-transparent pointer-events-none"></div>
+            <div className={`absolute inset-0 bg-gradient-to-br ${themeColors.cardGradientBg} to-transparent pointer-events-none`}></div>
             
             {/* Case Study Tag */}
             {blockContent.case_study_tag && (
               <div className="absolute top-4 right-4 z-10">
-                <div className="flex items-center space-x-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium border border-blue-200">
+                <div className={`flex items-center space-x-1 px-3 py-1 ${themeColors.badgeBg} ${themeColors.badgeText} rounded-full text-xs font-medium border ${themeColors.badgeBorder}`}>
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -426,12 +492,12 @@ export default function TestimonialCTACombo(props: LayoutComponentProps) {
             {/* Testimonial Quote */}
             <div className="text-gray-700 leading-relaxed mb-8 text-lg pt-4">
               {mode === 'preview' ? (
-                <div 
+                <div
                   className="italic"
-                  dangerouslySetInnerHTML={{ 
+                  dangerouslySetInnerHTML={{
                     __html: (blockContent.testimonial_quote || '').replace(
-                      /<strong>(.*?)<\/strong>/g, 
-                      '<span class="font-bold text-blue-600">$1</span>'
+                      /<strong>(.*?)<\/strong>/g,
+                      `<span class="font-bold ${themeColors.quoteHighlight}">$1</span>`
                     )
                   }}
                 />
@@ -453,12 +519,14 @@ export default function TestimonialCTACombo(props: LayoutComponentProps) {
 
             {/* Author Info */}
             <div className="flex items-center space-x-4">
-              <TestimonialAvatar 
-                name={blockContent.testimonial_author} 
+              <TestimonialAvatar
+                name={blockContent.testimonial_author}
                 company={blockContent.testimonial_company}
                 mode={mode}
                 logoUrl={blockContent.testimonial_company_logo}
                 onLogoChange={(url) => handleContentUpdate('testimonial_company_logo', url)}
+                avatarGradients={themeColors.avatarGradients}
+                logoBorder={themeColors.logoBorder}
               />
               
               <div className="flex-1">
@@ -507,7 +575,7 @@ export default function TestimonialCTACombo(props: LayoutComponentProps) {
                 <div className="flex items-center space-x-3 text-xs text-gray-500 mt-2">
                   {blockContent.testimonial_industry && (
                     <div className="flex items-center space-x-1">
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className={`w-3 h-3 ${themeColors.iconStroke}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                       </svg>
                       <EditableAdaptiveText
@@ -524,10 +592,10 @@ export default function TestimonialCTACombo(props: LayoutComponentProps) {
                       />
                     </div>
                   )}
-                  
+
                   {blockContent.testimonial_date && (
                     <div className="flex items-center space-x-1">
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className={`w-3 h-3 ${themeColors.iconStroke}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
                       <EditableAdaptiveText

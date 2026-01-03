@@ -10,6 +10,8 @@ import {
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 // Reframe block structure
 interface ReframeBlock {
@@ -147,6 +149,84 @@ export default function ProblemToReframeBlocks(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Theme detection: manual override > auto-detection > neutral fallback
+  const theme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Theme-based color mapping
+  const getProblemReframeColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        // Problem (left) - lighter orange
+        problemBg: 'bg-orange-50',
+        problemBorder: 'border-orange-200',
+        problemBadgeBg: 'bg-orange-500',
+        problemIconBg: 'bg-orange-100',
+        problemTextPrimary: 'text-orange-900',
+        problemTextSecondary: 'text-orange-700',
+        problemHoverBg: 'hover:bg-orange-50',
+        problemFocusRing: 'focus:ring-orange-500',
+        // Reframe (right) - darker orange
+        reframeBg: 'from-orange-100 to-orange-50',
+        reframeBorder: 'border-orange-300',
+        reframeBadgeBg: 'bg-orange-600',
+        reframeIconBg: 'bg-orange-200',
+        reframeIconText: 'text-orange-700',
+        reframeTextPrimary: 'text-orange-900',
+        reframeTextSecondary: 'text-orange-800',
+        reframeHoverBg: 'hover:bg-orange-100',
+        reframeFocusRing: 'focus:ring-orange-600',
+        // Arrow indicator
+        arrowBg: 'bg-orange-500'
+      },
+      cool: {
+        problemBg: 'bg-blue-50',
+        problemBorder: 'border-blue-200',
+        problemBadgeBg: 'bg-blue-500',
+        problemIconBg: 'bg-blue-100',
+        problemTextPrimary: 'text-blue-900',
+        problemTextSecondary: 'text-blue-700',
+        problemHoverBg: 'hover:bg-blue-50',
+        problemFocusRing: 'focus:ring-blue-500',
+        reframeBg: 'from-blue-100 to-blue-50',
+        reframeBorder: 'border-blue-300',
+        reframeBadgeBg: 'bg-blue-600',
+        reframeIconBg: 'bg-blue-200',
+        reframeIconText: 'text-blue-700',
+        reframeTextPrimary: 'text-blue-900',
+        reframeTextSecondary: 'text-blue-800',
+        reframeHoverBg: 'hover:bg-blue-100',
+        reframeFocusRing: 'focus:ring-blue-600',
+        arrowBg: 'bg-blue-500'
+      },
+      neutral: {
+        problemBg: 'bg-gray-50',
+        problemBorder: 'border-gray-200',
+        problemBadgeBg: 'bg-gray-500',
+        problemIconBg: 'bg-gray-100',
+        problemTextPrimary: 'text-gray-900',
+        problemTextSecondary: 'text-gray-700',
+        problemHoverBg: 'hover:bg-gray-50',
+        problemFocusRing: 'focus:ring-gray-500',
+        reframeBg: 'from-gray-100 to-gray-50',
+        reframeBorder: 'border-gray-300',
+        reframeBadgeBg: 'bg-gray-600',
+        reframeIconBg: 'bg-gray-200',
+        reframeIconText: 'text-gray-700',
+        reframeTextPrimary: 'text-gray-900',
+        reframeTextSecondary: 'text-gray-800',
+        reframeHoverBg: 'hover:bg-gray-100',
+        reframeFocusRing: 'focus:ring-gray-600',
+        arrowBg: 'bg-gray-500'
+      }
+    }[theme];
+  };
+
+  const colors = getProblemReframeColors(theme);
 
   // Parse reframe blocks from both individual and legacy formats
   const parseReframeBlocks = (content: ProblemToReframeBlocksContent): ReframeBlock[] => {
@@ -305,16 +385,16 @@ export default function ProblemToReframeBlocks(props: LayoutComponentProps) {
             <div key={block.id} className="group/reframe-block relative grid lg:grid-cols-2 gap-8 items-center">
               
               {/* Problem Side */}
-              <div className="bg-gradient-to-br from-orange-50 to-red-50 border border-orange-200 rounded-2xl p-8 relative">
+              <div className={`${colors.problemBg} border ${colors.problemBorder} rounded-2xl p-8 relative`}>
                 <div className="absolute -top-3 left-8">
-                  <span className="bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                  <span className={`${colors.problemBadgeBg} text-white px-3 py-1 rounded-full text-sm font-medium`}>
                     Old Thinking
                   </span>
                 </div>
-                
+
                 <div className="pt-4">
                   <div className="flex items-start space-x-4">
-                    <div className="flex-shrink-0 w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mt-1">
+                    <div className={`flex-shrink-0 w-12 h-12 ${colors.problemIconBg} rounded-full flex items-center justify-center mt-1`}>
                       <IconEditableText
                         mode={mode}
                         value={blockContent.problem_icon || '⚠️'}
@@ -322,7 +402,7 @@ export default function ProblemToReframeBlocks(props: LayoutComponentProps) {
                         backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                         colorTokens={colorTokens}
                         iconSize="md"
-                        className="text-2xl text-orange-600"
+                        className="text-2xl"
                         sectionId={sectionId}
                         elementKey="problem_icon"
                       />
@@ -334,20 +414,20 @@ export default function ProblemToReframeBlocks(props: LayoutComponentProps) {
                             contentEditable
                             suppressContentEditableWarning
                             onBlur={(e) => handleProblemEdit(index, e.currentTarget.textContent || '')}
-                            className="outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 rounded px-1 min-h-[28px] cursor-text hover:bg-orange-50 text-lg font-bold text-orange-900 mb-2"
+                            className={`outline-none focus:ring-2 ${colors.problemFocusRing} focus:ring-opacity-50 rounded px-1 min-h-[28px] cursor-text ${colors.problemHoverBg} text-lg font-bold ${colors.problemTextPrimary} mb-2`}
                           >
                             {block.problem}
                           </div>
-                          <p className="text-orange-700 text-sm">
+                          <p className={`${colors.problemTextSecondary} text-sm`}>
                             This mindset might be limiting your potential
                           </p>
                         </div>
                       ) : (
                         <div>
-                          <h3 className="text-lg font-bold text-orange-900 mb-2">
+                          <h3 className={`text-lg font-bold ${colors.problemTextPrimary} mb-2`}>
                             "{block.problem}"
                           </h3>
-                          <p className="text-orange-700 text-sm">
+                          <p className={`${colors.problemTextSecondary} text-sm`}>
                             This mindset might be limiting your potential
                           </p>
                         </div>
@@ -359,7 +439,7 @@ export default function ProblemToReframeBlocks(props: LayoutComponentProps) {
 
               {/* Arrow/Transform Indicator */}
               <div className="lg:hidden flex justify-center">
-                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
+                <div className={`w-12 h-12 ${colors.arrowBg} rounded-full flex items-center justify-center`}>
                   <IconEditableText
                     mode={mode}
                     value={blockContent.arrow_icon || '⬇️'}
@@ -373,9 +453,9 @@ export default function ProblemToReframeBlocks(props: LayoutComponentProps) {
                   />
                 </div>
               </div>
-              
+
               <div className="hidden lg:flex justify-center">
-                <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center">
+                <div className={`w-16 h-16 ${colors.arrowBg} rounded-full flex items-center justify-center`}>
                   <IconEditableText
                     mode={mode}
                     value={blockContent.arrow_icon || '➡️'}
@@ -391,16 +471,16 @@ export default function ProblemToReframeBlocks(props: LayoutComponentProps) {
               </div>
 
               {/* Reframe Side */}
-              <div className="lg:order-last bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-200 rounded-2xl p-8 relative">
+              <div className={`lg:order-last bg-gradient-to-br ${colors.reframeBg} border ${colors.reframeBorder} rounded-2xl p-8 relative`}>
                 <div className="absolute -top-3 left-8">
-                  <span className="bg-emerald-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                  <span className={`${colors.reframeBadgeBg} text-white px-3 py-1 rounded-full text-sm font-medium`}>
                     New Perspective
                   </span>
                 </div>
-                
+
                 <div className="pt-4">
                   <div className="flex items-start space-x-4">
-                    <div className="flex-shrink-0 w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mt-1">
+                    <div className={`flex-shrink-0 w-12 h-12 ${colors.reframeIconBg} rounded-full flex items-center justify-center mt-1`}>
                       <IconEditableText
                         mode={mode}
                         value={blockContent.reframe_icon || '💡'}
@@ -408,7 +488,7 @@ export default function ProblemToReframeBlocks(props: LayoutComponentProps) {
                         backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                         colorTokens={colorTokens}
                         iconSize="md"
-                        className="text-2xl text-emerald-600"
+                        className={`text-2xl ${colors.reframeIconText}`}
                         sectionId={sectionId}
                         elementKey="reframe_icon"
                       />
@@ -420,20 +500,20 @@ export default function ProblemToReframeBlocks(props: LayoutComponentProps) {
                             contentEditable
                             suppressContentEditableWarning
                             onBlur={(e) => handleReframeEdit(index, e.currentTarget.textContent || '')}
-                            className="outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-opacity-50 rounded px-1 min-h-[60px] cursor-text hover:bg-emerald-50 text-lg text-emerald-900 leading-relaxed font-medium"
+                            className={`outline-none focus:ring-2 ${colors.reframeFocusRing} focus:ring-opacity-50 rounded px-1 min-h-[60px] cursor-text ${colors.reframeHoverBg} text-lg ${colors.reframeTextPrimary} leading-relaxed font-medium`}
                           >
                             {block.reframe}
                           </div>
-                          <p className="text-emerald-700 text-sm mt-2">
+                          <p className={`${colors.reframeTextSecondary} text-sm mt-2`}>
                             A shift in perspective opens new possibilities
                           </p>
                         </div>
                       ) : (
                         <div>
-                          <p className="text-lg text-emerald-900 leading-relaxed font-medium">
+                          <p className={`text-lg ${colors.reframeTextPrimary} leading-relaxed font-medium`}>
                             {block.reframe}
                           </p>
-                          <p className="text-emerald-700 text-sm mt-2">
+                          <p className={`${colors.reframeTextSecondary} text-sm mt-2`}>
                             A shift in perspective opens new possibilities
                           </p>
                         </div>
@@ -545,7 +625,7 @@ export default function ProblemToReframeBlocks(props: LayoutComponentProps) {
                   backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                   colorTokens={colorTokens}
                   iconSize="sm"
-                  className="text-base text-emerald-500"
+                  className={`text-base ${colors.reframeIconText}`}
                   sectionId={sectionId}
                   elementKey="benefit_icon_2"
                 />
@@ -554,7 +634,7 @@ export default function ProblemToReframeBlocks(props: LayoutComponentProps) {
                     contentEditable
                     suppressContentEditableWarning
                     onBlur={(e) => handleContentUpdate('benefit_label_2', e.currentTarget.textContent || '')}
-                    className="outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-white/50"
+                    className={`outline-none focus:ring-2 ${colors.reframeFocusRing} focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-white/50`}
                   >
                     {blockContent.benefit_label_2 || 'Proven approach'}
                   </div>

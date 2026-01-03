@@ -7,16 +7,18 @@ import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
-  EditableAdaptiveText, 
-  AccentBadge 
+import {
+  EditableAdaptiveHeadline,
+  EditableAdaptiveText,
+  AccentBadge
 } from '@/components/layout/EditableContent';
-import { 
-  CTAButton 
+import {
+  CTAButton
 } from '@/components/layout/ComponentRegistry';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 // Content interface for type safety
 interface FoundersBeliefStackContent {
@@ -114,11 +116,44 @@ const CONTENT_SCHEMA = {
   belief_icon_6: { type: 'string' as const, default: '🌍' }
 };
 
+// Theme color mapping function
+const getThemeColors = (theme: UIBlockTheme) => {
+  return {
+    warm: {
+      // Belief card icon container (replaces colorTokens.ctaBg)
+      iconContainerBg: 'bg-orange-600',
+      // Company values badges
+      valueBadgeBg: 'bg-orange-100',
+      valueBadgeText: '#C2410C',
+      valueBadgeBorder: 'border-orange-200',
+      // Commitment section gradient
+      commitmentGradientFrom: 'from-orange-50',
+      commitmentGradientTo: 'to-orange-100',
+    },
+    cool: {
+      iconContainerBg: 'bg-blue-600',
+      valueBadgeBg: 'bg-blue-100',
+      valueBadgeText: '#1D4ED8',
+      valueBadgeBorder: 'border-blue-200',
+      commitmentGradientFrom: 'from-blue-50',
+      commitmentGradientTo: 'to-blue-100',
+    },
+    neutral: {
+      iconContainerBg: 'bg-gray-600',
+      valueBadgeBg: 'bg-gray-100',
+      valueBadgeText: '#374151',
+      valueBadgeBorder: 'border-gray-200',
+      commitmentGradientFrom: 'from-gray-50',
+      commitmentGradientTo: 'to-gray-100',
+    }
+  }[theme];
+};
+
 // Belief Card Component
-const BeliefCard = React.memo(({ 
-  icon, 
-  title, 
-  description, 
+const BeliefCard = React.memo(({
+  icon,
+  title,
+  description,
   index,
   colorTokens,
   dynamicTextColors,
@@ -129,7 +164,8 @@ const BeliefCard = React.memo(({
   onDescriptionEdit,
   onDeleteCard,
   sectionId,
-  backgroundType
+  backgroundType,
+  themeColors
 }: {
   icon: string;
   title: string;
@@ -145,6 +181,7 @@ const BeliefCard = React.memo(({
   onDeleteCard?: (index: number) => void;
   sectionId?: string;
   backgroundType?: string;
+  themeColors: ReturnType<typeof getThemeColors>;
 }) => {
   // Using consistent styling like IconGrid
 
@@ -162,7 +199,7 @@ const BeliefCard = React.memo(({
       
       {/* Icon */}
       <div className="mb-4">
-        <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg ${colorTokens.ctaBg || 'bg-blue-600'} bg-opacity-10 group-hover:bg-opacity-20 transition-all duration-300 relative group/icon-edit`}>
+        <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg ${themeColors.iconContainerBg} bg-opacity-10 group-hover:bg-opacity-20 transition-all duration-300 relative group/icon-edit`}>
           <IconEditableText
             mode={(mode || 'preview') as 'preview' | 'edit'}
             value={icon}
@@ -244,7 +281,7 @@ FounderImagePlaceholder.displayName = 'FounderImagePlaceholder';
 
 export default function FoundersBeliefStack(props: LayoutComponentProps) {
   const { getTextStyle: getTypographyStyle } = useTypography();
-  
+
   // Use the abstraction hook with background type support
   const {
     sectionId,
@@ -260,6 +297,15 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Theme detection: manual override > auto-detection > neutral fallback
+  const theme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  const colors = getThemeColors(theme);
 
   // Create typography styles
   const h3Style = getTypographyStyle('h3');
@@ -496,13 +542,14 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
                 onDeleteCard={handleBeliefCardDelete}
                 sectionId={sectionId}
                 backgroundType={backgroundType}
+                themeColors={colors}
               />
             ))}
           </div>
         </div>
 
         {/* Founder Commitment Section */}
-        <div className="bg-gradient-to-br from-gray-50 to-blue-50 rounded-2xl p-8 lg:p-12 mb-12">
+        <div className={`bg-gradient-to-br ${colors.commitmentGradientFrom} ${colors.commitmentGradientTo} rounded-2xl p-8 lg:p-12 mb-12`}>
           <div className="grid lg:grid-cols-3 gap-8 items-center">
             
             {/* Founder Image */}
@@ -616,7 +663,7 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
               ].map((value, index) => (
                 ((blockContent as any)[value.key] || mode === 'edit') && (blockContent as any)[value.key] !== '___REMOVED___' && (
                   <div key={index} className={`relative group/company-value-${index}`}>
-                    <div className="bg-white rounded-full px-6 py-3 shadow-md border border-gray-100 flex items-center space-x-2">
+                    <div className={`${colors.valueBadgeBg} rounded-full px-6 py-3 shadow-md border ${colors.valueBadgeBorder} flex items-center space-x-2`}>
                       <EditableAdaptiveText
                         mode={mode}
                         value={(blockContent as any)[value.key] || ''}
@@ -624,7 +671,7 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
                         backgroundType="neutral"
                         colorTokens={colorTokens}
                         variant="body"
-                        textStyle={{ fontWeight: '500', color: '#374151' }}
+                        textStyle={{ fontWeight: '500', color: colors.valueBadgeText }}
                         placeholder={value.placeholder}
                         sectionId={sectionId}
                         elementKey={value.key}

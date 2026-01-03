@@ -4,10 +4,12 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
-  EditableAdaptiveText 
+import {
+  EditableAdaptiveHeadline,
+  EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData } from '@/utils/dataParsingUtils';
@@ -180,6 +182,39 @@ export default function MediaMentions(props: LayoutComponentProps) {
   const bodyLgStyle = getTypographyStyle('body-lg');
   const bodyStyle = getTypographyStyle('body');
 
+  // Detect theme: manual override > auto-detection > neutral fallback
+  const theme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Theme-based colors for cards, borders, and icons
+  const getMediaMentionsColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        cardBorder: '#fed7aa',
+        cardBorderHover: '#fdba74',
+        quoteIconColor: '#ea580c',
+        addButtonBorder: '#fed7aa'
+      },
+      cool: {
+        cardBorder: '#bfdbfe',
+        cardBorderHover: '#93c5fd',
+        quoteIconColor: '#2563eb',
+        addButtonBorder: '#93c5fd'
+      },
+      neutral: {
+        cardBorder: '#e5e7eb',
+        cardBorderHover: '#d1d5db',
+        quoteIconColor: '#6b7280',
+        addButtonBorder: '#d1d5db'
+      }
+    }[theme];
+  };
+
+  const colors = getMediaMentionsColors(theme);
+
   // Parse media outlets from pipe-separated string
   const mediaOutlets = parseMediaData(blockContent.media_outlets || '');
   
@@ -239,7 +274,13 @@ export default function MediaMentions(props: LayoutComponentProps) {
             
             return (
               // All outlets are now editable with isolated hover
-              <div key={outlet.id} className="flex flex-col items-center space-y-3 p-6 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/10 transition-all duration-300">
+              <div
+                key={outlet.id}
+                className="flex flex-col items-center space-y-3 p-6 bg-white/5 backdrop-blur-sm rounded-xl border hover:bg-white/10 transition-all duration-300"
+                style={{ borderColor: colors.cardBorder }}
+                onMouseEnter={(e) => e.currentTarget.style.borderColor = colors.cardBorderHover}
+                onMouseLeave={(e) => e.currentTarget.style.borderColor = colors.cardBorder}
+              >
                 <LogoEditableComponent
                   mode={mode}
                   logoUrl={logoUrl}
@@ -299,7 +340,12 @@ export default function MediaMentions(props: LayoutComponentProps) {
           
           {/* Add Outlet Button (Edit Mode Only) */}
           {mode !== 'preview' && mediaOutlets.length < 12 && (
-            <div className="flex flex-col items-center space-y-3 p-6 bg-white/10 backdrop-blur-sm rounded-xl border-2 border-dashed border-white/20 hover:border-white/30 transition-all duration-300">
+            <div
+              className="flex flex-col items-center space-y-3 p-6 bg-white/10 backdrop-blur-sm rounded-xl border-2 border-dashed transition-all duration-300"
+              style={{ borderColor: colors.addButtonBorder }}
+              onMouseEnter={(e) => e.currentTarget.style.borderColor = colors.cardBorderHover}
+              onMouseLeave={(e) => e.currentTarget.style.borderColor = colors.addButtonBorder}
+            >
               <button
                 onClick={(e) => {
                   e.preventDefault();
@@ -325,9 +371,13 @@ export default function MediaMentions(props: LayoutComponentProps) {
         {(quotes.length > 0 || mode === 'edit') && (
           <div className="grid md:grid-cols-3 gap-8">
             {quotes.map((quote, index) => (
-              <div key={index} className="text-center p-6 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 relative group/quote-item">
+              <div
+                key={index}
+                className="text-center p-6 rounded-xl bg-white/5 backdrop-blur-sm border relative group/quote-item"
+                style={{ borderColor: colors.cardBorder }}
+              >
                 <div className="mb-4">
-                  <svg className="w-8 h-8 mx-auto text-blue-500 opacity-60" fill="currentColor" viewBox="0 0 32 32">
+                  <svg className="w-8 h-8 mx-auto opacity-60" fill="currentColor" viewBox="0 0 32 32" style={{ color: colors.quoteIconColor }}>
                     <path d="M10 8c-3.3 0-6 2.7-6 6v10h10V14H8c0-1.1.9-2 2-2V8zm16 0c-3.3 0-6 2.7-6 6v10h10V14h-6c0-1.1.9-2 2-2V8z"/>
                   </svg>
                 </div>

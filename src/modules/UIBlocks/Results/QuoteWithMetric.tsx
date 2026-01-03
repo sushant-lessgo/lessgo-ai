@@ -1,12 +1,15 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
-import { 
-  EditableAdaptiveHeadline, 
-  EditableAdaptiveText 
+import {
+  EditableAdaptiveHeadline,
+  EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { shadows, cardEnhancements } from '@/modules/Design/designTokens';
 
 interface QuoteWithMetricProps extends LayoutComponentProps {}
 
@@ -205,6 +208,9 @@ const QuoteCard = ({
   sectionId,
   blockContent,
   handleContentUpdate,
+  cardColors,
+  metricColors,
+  accentColors,
   onQuoteEdit,
   onAuthorEdit,
   onCompanyEdit,
@@ -220,6 +226,9 @@ const QuoteCard = ({
   sectionId: string;
   blockContent: any;
   handleContentUpdate: (key: string, value: string) => void;
+  cardColors: any;
+  metricColors: any;
+  accentColors: any;
   onQuoteEdit: (index: number, value: string) => void;
   onAuthorEdit: (index: number, value: string) => void;
   onCompanyEdit: (index: number, value: string) => void;
@@ -230,9 +239,9 @@ const QuoteCard = ({
   canRemove?: boolean;
 }) => {
   const { getTextStyle } = useTypography();
-  
+
   return (
-    <div className={`group/quote-card-${index} relative bg-white rounded-2xl border border-gray-200 hover:border-blue-300 hover:shadow-xl transition-all duration-300 overflow-hidden`}>
+    <div className={`group/quote-card-${index} relative bg-white rounded-2xl border ${cardColors.border} ${cardColors.borderHover} ${cardColors.shadow} ${cardEnhancements.transition} ${cardEnhancements.hoverLift} overflow-hidden`}>
       
       {/* Quote Section */}
       <div className="p-8 pb-6">
@@ -245,7 +254,7 @@ const QuoteCard = ({
             backgroundType="neutral"
             colorTokens={{}}
             iconSize="lg"
-            className="text-blue-500 text-4xl opacity-20"
+            className={`${accentColors.quoteIcon} text-4xl opacity-20`}
             sectionId={sectionId}
             elementKey="quote_icon"
           />
@@ -329,21 +338,21 @@ const QuoteCard = ({
       </div>
 
       {/* Metric Section */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-8 py-6 border-t border-gray-100">
+      <div className={`bg-gradient-to-r ${metricColors.gradient} px-8 py-6 border-t border-gray-100`}>
         <div className="text-center">
           {/* Metric Value */}
           {mode !== 'preview' ? (
-            <div 
+            <div
               contentEditable
               suppressContentEditableWarning
               onBlur={(e) => onMetricValueEdit(index, e.currentTarget.textContent || '')}
-              className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[40px] cursor-text hover:bg-gray-50 font-bold text-blue-900 mb-2"
+              className={`outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[40px] cursor-text hover:bg-gray-50 font-bold ${metricColors.value} mb-2`}
             >
               {quote.metric_value}
             </div>
           ) : (
-            <div 
-              className="font-bold text-blue-900 mb-2 text-3xl"
+            <div
+              className={`font-bold ${metricColors.value} mb-2 text-3xl`}
             >
               {quote.metric_value}
             </div>
@@ -351,17 +360,17 @@ const QuoteCard = ({
 
           {/* Metric Label */}
           {mode !== 'preview' ? (
-            <div 
+            <div
               contentEditable
               suppressContentEditableWarning
               onBlur={(e) => onMetricLabelEdit(index, e.currentTarget.textContent || '')}
-              className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[20px] cursor-text hover:bg-gray-50 font-medium text-blue-700"
+              className={`outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[20px] cursor-text hover:bg-gray-50 font-medium ${metricColors.label}`}
             >
               {quote.metric_label}
             </div>
           ) : (
-            <div 
-              className="font-medium text-blue-700"
+            <div
+              className={`font-medium ${metricColors.label}`}
             >
               {quote.metric_label}
             </div>
@@ -403,6 +412,105 @@ export default function QuoteWithMetric(props: QuoteWithMetricProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Theme detection: manual override > auto-detection > neutral fallback
+  const theme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Get theme-aware card colors
+  const getCardColors = (uiTheme: UIBlockTheme) => {
+    return {
+      warm: {
+        border: 'border-orange-200',
+        borderHover: 'hover:border-orange-300',
+        shadow: shadows.card.warm
+      },
+      cool: {
+        border: 'border-blue-200',
+        borderHover: 'hover:border-blue-300',
+        shadow: shadows.card.cool
+      },
+      neutral: {
+        border: 'border-gray-200',
+        borderHover: 'hover:border-gray-300',
+        shadow: shadows.card.neutral
+      }
+    }[uiTheme];
+  };
+
+  // Get theme-aware metric section colors
+  const getMetricColors = (uiTheme: UIBlockTheme) => {
+    return {
+      warm: {
+        gradient: 'from-orange-50 to-amber-50',
+        value: 'text-orange-900',
+        label: 'text-orange-700'
+      },
+      cool: {
+        gradient: 'from-blue-50 to-indigo-50',
+        value: 'text-blue-900',
+        label: 'text-blue-700'
+      },
+      neutral: {
+        gradient: 'from-gray-50 to-slate-50',
+        value: 'text-gray-900',
+        label: 'text-gray-700'
+      }
+    }[uiTheme];
+  };
+
+  // Get theme-aware accent colors
+  const getAccentColors = (uiTheme: UIBlockTheme) => {
+    return {
+      warm: {
+        quoteIcon: 'text-orange-500'
+      },
+      cool: {
+        quoteIcon: 'text-blue-500'
+      },
+      neutral: {
+        quoteIcon: 'text-gray-500'
+      }
+    }[uiTheme];
+  };
+
+  // Get theme-aware add button colors
+  const getAddButtonColors = (uiTheme: UIBlockTheme) => {
+    return {
+      warm: {
+        bg: 'bg-orange-50',
+        bgHover: 'hover:bg-orange-100',
+        border: 'border-orange-200',
+        borderHover: 'hover:border-orange-300',
+        text: 'text-orange-700',
+        icon: 'text-orange-600'
+      },
+      cool: {
+        bg: 'bg-blue-50',
+        bgHover: 'hover:bg-blue-100',
+        border: 'border-blue-200',
+        borderHover: 'hover:border-blue-300',
+        text: 'text-blue-700',
+        icon: 'text-blue-600'
+      },
+      neutral: {
+        bg: 'bg-gray-50',
+        bgHover: 'hover:bg-gray-100',
+        border: 'border-gray-200',
+        borderHover: 'hover:border-gray-300',
+        text: 'text-gray-700',
+        icon: 'text-gray-600'
+      }
+    }[uiTheme];
+  };
+
+  const cardColors = getCardColors(theme);
+  const metricColors = getMetricColors(theme);
+  const accentColors = getAccentColors(theme);
+  const addButtonColors = getAddButtonColors(theme);
 
   // Parse quote data
   const quotes = parseQuoteData(
@@ -546,6 +654,9 @@ export default function QuoteWithMetric(props: QuoteWithMetricProps) {
               sectionId={sectionId}
               blockContent={blockContent}
               handleContentUpdate={handleContentUpdate}
+              cardColors={cardColors}
+              metricColors={metricColors}
+              accentColors={accentColors}
               onQuoteEdit={handleQuoteEdit}
               onAuthorEdit={handleAuthorEdit}
               onCompanyEdit={handleCompanyEdit}
@@ -563,12 +674,12 @@ export default function QuoteWithMetric(props: QuoteWithMetricProps) {
           <div className="mt-12 text-center">
             <button
               onClick={handleAddQuote}
-              className="flex items-center space-x-2 mx-auto px-4 py-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-xl transition-all duration-200 group"
+              className={`flex items-center space-x-2 mx-auto px-4 py-3 ${addButtonColors.bg} ${addButtonColors.bgHover} border-2 ${addButtonColors.border} ${addButtonColors.borderHover} rounded-xl ${cardEnhancements.transition} group`}
             >
-              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className={`w-5 h-5 ${addButtonColors.icon}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              <span className="text-blue-700 font-medium">Add Quote</span>
+              <span className={`${addButtonColors.text} font-medium`}>Add Quote</span>
             </button>
           </div>
         )}

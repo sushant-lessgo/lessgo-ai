@@ -14,6 +14,8 @@ import { LayoutComponentProps } from '@/types/storeTypes';
 import { createCTAClickHandler } from '@/utils/ctaHandler';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { getRandomIconFromCategory } from '@/utils/iconMapping';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 // Content interface for type safety
 interface ValueStackCTAContent {
@@ -162,7 +164,8 @@ const ValuePropCard = React.memo(({
   onTitleEdit,
   onDescriptionEdit,
   onRemoveValueProp,
-  canRemove = true
+  canRemove = true,
+  themeColors
 }: {
   valueProp: ValueProp;
   index: number;
@@ -177,12 +180,13 @@ const ValuePropCard = React.memo(({
   onDescriptionEdit: (index: number, value: string) => void;
   onRemoveValueProp?: (index: number) => void;
   canRemove?: boolean;
+  themeColors: any;
 }) => {
   return (
-    <div className="group relative flex items-start space-x-4 p-6 bg-white rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300">
-      
+    <div className={`group relative flex items-start space-x-4 p-6 bg-white rounded-xl border border-gray-200 ${themeColors.borderHover} hover:shadow-lg transition-all duration-300`}>
+
       {/* Icon */}
-      <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+      <div className={`w-12 h-12 ${themeColors.iconBg} rounded-xl flex items-center justify-center flex-shrink-0`}>
         <IconEditableText
           mode={mode}
           value={valueProp.icon}
@@ -274,6 +278,70 @@ export default function ValueStackCTA(props: LayoutComponentProps) {
   // Create typography styles
   const h2Style = getTypographyStyle('h2');
   const bodyLgStyle = getTypographyStyle('body-lg');
+
+  // Theme detection with priority: manualThemeOverride > autoDetectedTheme > neutral
+  const uiBlockTheme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Theme-aware color mappings
+  // Note: Checkmarks always stay green (universal trust signal)
+  const getThemeColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        // Value prop cards
+        iconBg: 'bg-orange-100',
+        borderHover: 'hover:border-orange-300',
+        // Add button
+        addButtonBg: 'bg-orange-50',
+        addButtonHover: 'hover:bg-orange-100',
+        addButtonBorder: 'border-orange-200',
+        addButtonText: 'text-orange-700',
+        addButtonIcon: 'text-orange-600',
+        // CTA section
+        gradientFrom: 'from-orange-600',
+        gradientTo: 'to-red-700',
+        ctaLightText: 'text-orange-100',
+        ctaButtonText: 'text-orange-600'
+      },
+      cool: {
+        // Value prop cards
+        iconBg: 'bg-blue-100',
+        borderHover: 'hover:border-blue-300',
+        // Add button
+        addButtonBg: 'bg-blue-50',
+        addButtonHover: 'hover:bg-blue-100',
+        addButtonBorder: 'border-blue-200',
+        addButtonText: 'text-blue-700',
+        addButtonIcon: 'text-blue-600',
+        // CTA section
+        gradientFrom: 'from-blue-600',
+        gradientTo: 'to-indigo-700',
+        ctaLightText: 'text-blue-100',
+        ctaButtonText: 'text-blue-600'
+      },
+      neutral: {
+        // Value prop cards
+        iconBg: 'bg-gray-100',
+        borderHover: 'hover:border-gray-300',
+        // Add button
+        addButtonBg: 'bg-gray-50',
+        addButtonHover: 'hover:bg-gray-100',
+        addButtonBorder: 'border-gray-200',
+        addButtonText: 'text-gray-700',
+        addButtonIcon: 'text-gray-600',
+        // CTA section
+        gradientFrom: 'from-gray-600',
+        gradientTo: 'to-gray-800',
+        ctaLightText: 'text-gray-100',
+        ctaButtonText: 'text-gray-600'
+      }
+    }[theme];
+  };
+
+  const themeColors = getThemeColors(uiBlockTheme);
 
   // Parse value propositions
   const valueProps = parseValueProps(blockContent.value_propositions, blockContent.value_descriptions, blockContent);
@@ -386,6 +454,7 @@ export default function ValueStackCTA(props: LayoutComponentProps) {
               onDescriptionEdit={handleDescriptionEdit}
               onRemoveValueProp={handleRemoveValueProp}
               canRemove={valueProps.length > 1}
+              themeColors={themeColors}
             />
           ))}
         </div>
@@ -395,18 +464,18 @@ export default function ValueStackCTA(props: LayoutComponentProps) {
           <div className="mb-12 text-center">
             <button
               onClick={handleAddValueProp}
-              className="flex items-center space-x-2 mx-auto px-4 py-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-xl transition-all duration-200 group"
+              className={`flex items-center space-x-2 mx-auto px-4 py-3 ${themeColors.addButtonBg} ${themeColors.addButtonHover} border-2 ${themeColors.addButtonBorder} rounded-xl transition-all duration-200 group`}
             >
-              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className={`w-5 h-5 ${themeColors.addButtonIcon}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              <span className="text-blue-700 font-medium">Add Value Proposition</span>
+              <span className={`${themeColors.addButtonText} font-medium`}>Add Value Proposition</span>
             </button>
           </div>
         )}
 
         {/* CTA Section */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-12 text-center text-white">
+        <div className={`bg-gradient-to-r ${themeColors.gradientFrom} ${themeColors.gradientTo} rounded-2xl p-12 text-center text-white`}>
           <EditableAdaptiveHeadline
             mode={mode}
             value={blockContent.final_cta_headline || ''}
@@ -425,9 +494,9 @@ export default function ValueStackCTA(props: LayoutComponentProps) {
             value={blockContent.final_cta_description || ''}
             onEdit={(value) => handleContentUpdate('final_cta_description', value)}
             backgroundType="primary"
-            colorTokens={{ ...colorTokens, textSecondary: 'text-blue-100' }}
+            colorTokens={{ ...colorTokens, textSecondary: themeColors.ctaLightText }}
             variant="body"
-            className="text-blue-100 mb-8 max-w-2xl mx-auto"
+            className={`${themeColors.ctaLightText} mb-8 max-w-2xl mx-auto`}
             style={bodyLgStyle}
             sectionId={sectionId}
             elementKey="final_cta_description"
@@ -437,7 +506,7 @@ export default function ValueStackCTA(props: LayoutComponentProps) {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
             <CTAButton
               text={blockContent.cta_text}
-              colorTokens={{ ...colorTokens, ctaBg: 'bg-white', ctaText: 'text-blue-600', ctaHover: 'hover:bg-gray-100' }}
+              colorTokens={{ ...colorTokens, ctaBg: 'bg-white', ctaText: themeColors.ctaButtonText, ctaHover: 'hover:bg-gray-100' }}
               className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
               variant="primary"
               size="large"
@@ -461,7 +530,7 @@ export default function ValueStackCTA(props: LayoutComponentProps) {
             )}
 
             {blockContent.guarantee_text && (
-              <div className="flex items-center space-x-2 text-blue-100">
+              <div className={`flex items-center space-x-2 ${themeColors.ctaLightText}`}>
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
@@ -470,7 +539,7 @@ export default function ValueStackCTA(props: LayoutComponentProps) {
                   value={blockContent.guarantee_text || ''}
                   onEdit={(value) => handleContentUpdate('guarantee_text', value)}
                   backgroundType="primary"
-                  colorTokens={{ ...colorTokens, textSecondary: 'text-blue-100' }}
+                  colorTokens={{ ...colorTokens, textSecondary: themeColors.ctaLightText }}
                   variant="body"
                   className="text-sm font-medium"
                   sectionId={sectionId}

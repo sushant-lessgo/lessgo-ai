@@ -4,15 +4,17 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
-  EditableAdaptiveText 
+import {
+  EditableAdaptiveHeadline,
+  EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import { SocialProofNumber } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { 
-  parsePipeData, 
+import {
+  parsePipeData,
   updateListData,
   parseCustomerAvatarData,
   updateAvatarUrls
@@ -123,8 +125,8 @@ const parseMetricData = (metrics: string, labels: string, growth?: string): User
 };
 
 // Metric Display Component
-const MetricDisplay = React.memo(({ 
-  metric, 
+const MetricDisplay = React.memo(({
+  metric,
   mode,
   dynamicTextColors,
   getTextStyle,
@@ -134,8 +136,9 @@ const MetricDisplay = React.memo(({
   onGrowthEdit,
   sectionId,
   backgroundType,
-  sectionBackground
-}: { 
+  sectionBackground,
+  colors
+}: {
   metric: UserMetric;
   mode: 'edit' | 'preview';
   dynamicTextColors: any;
@@ -147,10 +150,21 @@ const MetricDisplay = React.memo(({
   sectionId: string;
   backgroundType: string;
   sectionBackground: string;
+  colors: {
+    cardBorder: string;
+    growthColor: string;
+    starColor: string;
+    trustCheckColor: string;
+    addButtonColor: string;
+    addButtonHover: string;
+  };
 }) => {
-  
+
   return (
-    <div className="text-center p-6 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-all duration-300">
+    <div
+      className="text-center p-6 rounded-xl backdrop-blur-sm border hover:bg-white/10 transition-all duration-300"
+      style={{ borderColor: colors.cardBorder, background: 'rgba(255,255,255,0.05)' }}
+    >
       <div className="space-y-2">
         {mode === 'edit' ? (
           <EditableAdaptiveText
@@ -182,7 +196,7 @@ const MetricDisplay = React.memo(({
         
         {(metric.growth || mode === 'edit') && (
           <div className="flex items-center justify-center space-x-1">
-            <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: colors.growthColor }}>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
             </svg>
             <EditableAdaptiveText
@@ -192,7 +206,8 @@ const MetricDisplay = React.memo(({
               backgroundType={backgroundType as any}
               colorTokens={colorTokens}
               variant="body"
-              className="text-green-500 text-sm font-medium"
+              className="text-sm font-medium"
+              style={{ color: colors.growthColor }}
               placeholder="+25%"
               sectionId={sectionId}
               elementKey={`metric_growth_${metric.index}`}
@@ -221,7 +236,7 @@ const MetricDisplay = React.memo(({
 MetricDisplay.displayName = 'MetricDisplay';
 
 // User Avatar Component
-const UserAvatarGroup = React.memo(({ 
+const UserAvatarGroup = React.memo(({
   mode,
   dynamicTextColors,
   colorTokens,
@@ -229,8 +244,9 @@ const UserAvatarGroup = React.memo(({
   handleContentUpdate,
   sectionId,
   backgroundType,
-  sectionBackground
-}: { 
+  sectionBackground,
+  colors
+}: {
   mode: 'edit' | 'preview';
   dynamicTextColors: any;
   colorTokens: any;
@@ -239,6 +255,14 @@ const UserAvatarGroup = React.memo(({
   sectionId: string;
   backgroundType: string;
   sectionBackground: string;
+  colors: {
+    cardBorder: string;
+    growthColor: string;
+    starColor: string;
+    trustCheckColor: string;
+    addButtonColor: string;
+    addButtonHover: string;
+  };
 }) => {
   // Parse customer avatars from dynamic system
   const getCustomerAvatars = (): { name: string; avatarUrl: string }[] => {
@@ -299,7 +323,7 @@ const UserAvatarGroup = React.memo(({
         />
         <div className="flex items-center space-x-1">
           {[1,2,3,4,5].map(i => (
-            <svg key={i} className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
+            <svg key={i} className="w-4 h-4 fill-current" viewBox="0 0 20 20" style={{ color: colors.starColor }}>
               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
             </svg>
           ))}
@@ -359,6 +383,45 @@ export default function UserCountBar(props: LayoutComponentProps) {
   // Create typography styles
   const h1Style = getTypographyStyle('h1');
   const bodyLgStyle = getTypographyStyle('body-lg');
+
+  // Detect theme: manual override > auto-detection > neutral fallback
+  const theme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Theme-based colors for cards, borders, and icons
+  const getUserCountBarColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        cardBorder: '#fed7aa',
+        growthColor: '#ea580c',
+        starColor: '#f59e0b',
+        trustCheckColor: '#ea580c',
+        addButtonColor: '#ea580c',
+        addButtonHover: '#c2410c'
+      },
+      cool: {
+        cardBorder: '#bfdbfe',
+        growthColor: '#2563eb',
+        starColor: '#3b82f6',
+        trustCheckColor: '#2563eb',
+        addButtonColor: '#2563eb',
+        addButtonHover: '#1d4ed8'
+      },
+      neutral: {
+        cardBorder: '#e5e7eb',
+        growthColor: '#10b981',
+        starColor: '#fbbf24',
+        trustCheckColor: '#10b981',
+        addButtonColor: '#3b82f6',
+        addButtonHover: '#2563eb'
+      }
+    }[theme];
+  };
+
+  const colors = getUserCountBarColors(theme);
 
   // Parse metrics from pipe-separated strings
   const userMetrics = parseMetricData(
@@ -437,7 +500,7 @@ export default function UserCountBar(props: LayoutComponentProps) {
           )}
 
           {/* User Avatar Group */}
-          <UserAvatarGroup 
+          <UserAvatarGroup
             mode={mode}
             dynamicTextColors={dynamicTextColors}
             colorTokens={colorTokens}
@@ -446,6 +509,7 @@ export default function UserCountBar(props: LayoutComponentProps) {
             sectionId={sectionId}
             backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
             sectionBackground={sectionBackground}
+            colors={colors}
           />
         </div>
 
@@ -465,6 +529,7 @@ export default function UserCountBar(props: LayoutComponentProps) {
               sectionId={sectionId}
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               sectionBackground={sectionBackground}
+              colors={colors}
             />
           ))}
         </div>
@@ -473,7 +538,7 @@ export default function UserCountBar(props: LayoutComponentProps) {
         <div className="flex flex-wrap items-center justify-center gap-8 pt-8 border-t border-white/10">
           {getTrustItems().map((item, index) => (
             <div key={index} className="flex items-center space-x-2 group/trust-item relative">
-              <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: colors.trustCheckColor }}>
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <EditableAdaptiveText
@@ -521,13 +586,16 @@ export default function UserCountBar(props: LayoutComponentProps) {
                   blockContent.trust_item_2,
                   blockContent.trust_item_3
                 ].findIndex(item => !item || item.trim() === '' || item === '___REMOVED___');
-                
+
                 if (emptyIndex !== -1) {
                   const fieldKey = `trust_item_${emptyIndex + 1}` as keyof UserCountBarContent;
                   handleContentUpdate(fieldKey, 'New trust item');
                 }
               }}
-              className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 transition-colors"
+              className="flex items-center space-x-1 text-sm transition-colors"
+              style={{ color: colors.addButtonColor }}
+              onMouseEnter={(e) => e.currentTarget.style.color = colors.addButtonHover}
+              onMouseLeave={(e) => e.currentTarget.style.color = colors.addButtonColor}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />

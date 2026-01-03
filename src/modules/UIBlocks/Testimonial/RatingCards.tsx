@@ -14,12 +14,14 @@ import {
   StarRating 
 } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { 
-  parsePipeData, 
-  updateListData, 
-  parseCustomerAvatarData, 
-  updateAvatarUrls 
+import {
+  parsePipeData,
+  updateListData,
+  parseCustomerAvatarData,
+  updateAvatarUrls
 } from '@/utils/dataParsingUtils';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface RatingCardsContent {
   headline: string;
@@ -92,11 +94,45 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: '' 
   },
-  avatar_urls: { 
-    type: 'string' as const, 
-    default: '{}' 
+  avatar_urls: {
+    type: 'string' as const,
+    default: '{}'
   }
 };
+
+// Theme color mapping function
+const getThemeColors = (theme: UIBlockTheme) => ({
+  warm: {
+    border: 'border-orange-200',
+    borderHover: 'hover:border-orange-300',
+    shadow: 'shadow-orange-100/50',
+    shadowHover: 'hover:shadow-orange-200/40',
+    verifiedBg: 'bg-orange-50',
+    verifiedBorder: 'border-orange-200',
+    verifiedText: 'text-orange-700',
+    starColor: '#f97316'
+  },
+  cool: {
+    border: 'border-blue-200',
+    borderHover: 'hover:border-blue-300',
+    shadow: 'shadow-blue-100/50',
+    shadowHover: 'hover:shadow-blue-200/40',
+    verifiedBg: 'bg-blue-50',
+    verifiedBorder: 'border-blue-200',
+    verifiedText: 'text-blue-700',
+    starColor: '#3b82f6'
+  },
+  neutral: {
+    border: 'border-gray-200',
+    borderHover: 'hover:border-gray-300',
+    shadow: '',
+    shadowHover: 'hover:shadow-xl',
+    verifiedBg: 'bg-green-50',
+    verifiedBorder: 'border-green-200',
+    verifiedText: 'text-green-700',
+    starColor: '#10b981'
+  }
+}[theme]);
 
 export default function RatingCards(props: LayoutComponentProps) {
   const { getTextStyle: getTypographyStyle } = useTypography();
@@ -115,6 +151,15 @@ export default function RatingCards(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Theme detection: manual override > auto-detection > neutral fallback
+  const uiBlockTheme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  const themeColors = getThemeColors(uiBlockTheme);
 
   // Create typography styles
   const h3Style = getTypographyStyle('h3');
@@ -308,7 +353,7 @@ export default function RatingCards(props: LayoutComponentProps) {
     const avatarData = customerAvatars.find(avatar => avatar.name === review.customerName);
 
     return (
-      <div className="group/review-card relative bg-white rounded-xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-shadow duration-300">
+      <div className={`group/review-card relative bg-white rounded-xl shadow-lg border ${themeColors.border} p-6 ${themeColors.shadow} ${themeColors.shadowHover} transition-shadow duration-300`}>
 
         {/* Delete button - only show in edit mode and if can remove */}
         {mode === 'edit' && canRemove && (
@@ -383,11 +428,11 @@ export default function RatingCards(props: LayoutComponentProps) {
           </div>
           
           {review.verified && (
-            <div className="flex items-center space-x-1 bg-green-50 px-2 py-1 rounded-full">
-              <svg className="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className={`flex items-center space-x-1 ${themeColors.verifiedBg} px-2 py-1 rounded-full border ${themeColors.verifiedBorder}`}>
+              <svg className={`w-3 h-3 ${themeColors.verifiedText}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span className="text-xs text-green-700 font-medium">Verified</span>
+              <span className={`text-xs ${themeColors.verifiedText} font-medium`}>Verified</span>
             </div>
           )}
         </div>

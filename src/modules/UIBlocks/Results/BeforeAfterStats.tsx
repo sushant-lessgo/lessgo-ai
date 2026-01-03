@@ -7,6 +7,8 @@ import {
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface BeforeAfterStatsProps extends LayoutComponentProps {}
 
@@ -138,7 +140,10 @@ const StatComparisonCard = ({
   onAfterEdit,
   onImprovementEdit,
   onRemoveStatComparison,
-  canRemove = true
+  canRemove = true,
+  cardBorder,
+  arrowGradient,
+  improvementGradient
 }: {
   stat: StatComparison;
   index: number;
@@ -152,11 +157,14 @@ const StatComparisonCard = ({
   onImprovementEdit: (index: number, value: string) => void;
   onRemoveStatComparison?: (index: number) => void;
   canRemove?: boolean;
+  cardBorder: string;
+  arrowGradient: string;
+  improvementGradient: string;
 }) => {
   const { getTextStyle } = useTypography();
 
   return (
-    <div className={`relative group/stat-card-${index} p-8 bg-white rounded-2xl border border-gray-200 hover:border-blue-300 hover:shadow-xl transition-all duration-300`}>
+    <div className={`relative group/stat-card-${index} p-8 bg-white rounded-2xl border ${cardBorder} hover:shadow-xl transition-all duration-300`}>
       
       {/* Metric Label */}
       <div className="mb-6 text-center">
@@ -220,7 +228,7 @@ const StatComparisonCard = ({
 
         {/* Arrow Indicator */}
         <div className="flex justify-center">
-          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+          <div className={`w-8 h-8 bg-gradient-to-br ${arrowGradient} rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
             <IconEditableText
               mode={mode}
               value="⬇️"
@@ -275,7 +283,7 @@ const StatComparisonCard = ({
 
       {/* Improvement Badge */}
       <div className="mt-6 text-center">
-        <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full text-white font-semibold text-sm">
+        <div className={`inline-flex items-center px-4 py-2 bg-gradient-to-r ${improvementGradient} rounded-full text-white font-semibold text-sm`}>
           <IconEditableText
             mode={mode}
             value={blockContent.improvement_icon || '📈'}
@@ -336,6 +344,66 @@ export default function BeforeAfterStats(props: BeforeAfterStatsProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Detect theme: manual override > auto-detection > neutral fallback
+  const theme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Theme-aware colors for accents (keep before=red, after=green semantic)
+  const getCardBorderColors = (theme: UIBlockTheme) => {
+    return {
+      warm: 'border-gray-200 hover:border-orange-300',
+      cool: 'border-gray-200 hover:border-blue-300',
+      neutral: 'border-gray-200 hover:border-gray-300'
+    }[theme];
+  };
+
+  const getArrowGradient = (theme: UIBlockTheme) => {
+    return {
+      warm: 'from-orange-500 to-red-600',
+      cool: 'from-blue-500 to-indigo-600',
+      neutral: 'from-gray-500 to-slate-600'
+    }[theme];
+  };
+
+  const getImprovementBadgeGradient = (theme: UIBlockTheme) => {
+    return {
+      warm: 'from-orange-500 to-red-600',
+      cool: 'from-blue-500 to-indigo-600',
+      neutral: 'from-gray-600 to-slate-700'
+    }[theme];
+  };
+
+  const getTimePeriodColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        bg: 'bg-orange-50',
+        border: 'border-orange-200',
+        text: 'text-orange-800',
+        icon: 'text-orange-600'
+      },
+      cool: {
+        bg: 'bg-blue-50',
+        border: 'border-blue-200',
+        text: 'text-blue-800',
+        icon: 'text-blue-600'
+      },
+      neutral: {
+        bg: 'bg-gray-50',
+        border: 'border-gray-200',
+        text: 'text-gray-800',
+        icon: 'text-gray-600'
+      }
+    }[theme];
+  };
+
+  const cardBorder = getCardBorderColors(theme);
+  const arrowGradient = getArrowGradient(theme);
+  const improvementGradient = getImprovementBadgeGradient(theme);
+  const timePeriodColors = getTimePeriodColors(theme);
 
   // Parse stat comparison data
   const statComparisons = parseStatData(
@@ -440,8 +508,8 @@ export default function BeforeAfterStats(props: BeforeAfterStatsProps) {
 
           {/* Time Period Badge */}
           {(blockContent.time_period || mode === 'edit') && (
-            <div className="inline-flex items-center px-4 py-2 bg-blue-50 border border-blue-200 rounded-full text-blue-800">
-              <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className={`inline-flex items-center px-4 py-2 ${timePeriodColors.bg} border ${timePeriodColors.border} rounded-full ${timePeriodColors.text}`}>
+              <svg className={`w-4 h-4 mr-2 ${timePeriodColors.icon}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               {mode !== 'preview' ? (
@@ -482,6 +550,9 @@ export default function BeforeAfterStats(props: BeforeAfterStatsProps) {
               onImprovementEdit={handleImprovementEdit}
               onRemoveStatComparison={handleRemoveStatComparison}
               canRemove={statComparisons.length > 1}
+              cardBorder={cardBorder}
+              arrowGradient={arrowGradient}
+              improvementGradient={improvementGradient}
             />
           ))}
         </div>

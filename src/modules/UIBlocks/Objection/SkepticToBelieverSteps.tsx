@@ -4,12 +4,14 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
-  EditableAdaptiveText 
+import {
+  EditableAdaptiveHeadline,
+  EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 // Content interface for type safety
 interface SkepticToBelieverStepsContent {
@@ -89,6 +91,46 @@ const CONTENT_SCHEMA = {
   }
 };
 
+// Color mapping function for theme-aware styling
+const getStepColors = (theme: UIBlockTheme) => {
+  const colorMap = {
+    warm: {
+      avatarBg: 'bg-orange-100',
+      avatarBorder: 'border-orange-300',
+      cardBorder: 'border-orange-200',
+      quoteBg: 'bg-orange-50',
+      quoteBorder: 'border-orange-200',
+      quoteText: 'text-orange-900',
+      connectionLine: 'bg-orange-200',
+      summaryBg: 'bg-orange-50',
+      summaryText: 'text-orange-900'
+    },
+    cool: {
+      avatarBg: 'bg-blue-100',
+      avatarBorder: 'border-blue-300',
+      cardBorder: 'border-blue-200',
+      quoteBg: 'bg-blue-50',
+      quoteBorder: 'border-blue-200',
+      quoteText: 'text-blue-900',
+      connectionLine: 'bg-blue-200',
+      summaryBg: 'bg-blue-50',
+      summaryText: 'text-blue-900'
+    },
+    neutral: {
+      avatarBg: 'bg-gray-100',
+      avatarBorder: 'border-gray-300',
+      cardBorder: 'border-gray-200',
+      quoteBg: 'bg-gray-50',
+      quoteBorder: 'border-gray-200',
+      quoteText: 'text-gray-900',
+      connectionLine: 'bg-gray-200',
+      summaryBg: 'bg-gray-50',
+      summaryText: 'text-gray-900'
+    }
+  };
+  return colorMap[theme];
+};
+
 export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
   
   // Use the abstraction hook with background type support
@@ -105,6 +147,28 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Detect theme: manual override > auto-detection > neutral fallback
+  const theme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Debug theme detection
+  React.useEffect(() => {
+    console.log('🎨 SkepticToBelieverSteps theme detection:', {
+      sectionId,
+      hasManualOverride: !!props.manualThemeOverride,
+      manualTheme: props.manualThemeOverride,
+      hasUserContext: !!props.userContext,
+      userContext: props.userContext,
+      finalTheme: theme
+    });
+  }, [theme, props.manualThemeOverride, props.userContext, sectionId]);
+
+  // Get theme-specific colors
+  const stepColors = getStepColors(theme);
 
   // Parse conversion steps from both individual and legacy formats
   const parseConversionSteps = (content: SkepticToBelieverStepsContent): Array<{title: string, thought: string, description: string, index: number}> => {
@@ -270,9 +334,9 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
 
         {/* Customer Success Stories */}
         <div className="relative">
-          
+
           {/* Subtle Connection Line */}
-          <div className="absolute left-8 top-16 bottom-16 w-px bg-gray-200 rounded-full hidden lg:block"></div>
+          <div className={`absolute left-8 top-16 bottom-16 w-px ${stepColors.connectionLine} rounded-full hidden lg:block`}></div>
           
           <div className="space-y-12">
             {conversionSteps.map((step, index) => (
@@ -283,7 +347,7 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
 
                   {/* Profile Avatar */}
                   <div className="flex-shrink-0 relative">
-                    <div className="w-16 h-16 rounded-full flex items-center justify-center bg-gray-100 border-2 border-white shadow-lg transition-all duration-300">
+                    <div className={`w-16 h-16 rounded-full flex items-center justify-center ${stepColors.avatarBg} border-2 ${stepColors.avatarBorder} shadow-lg transition-all duration-300`}>
                       <IconEditableText
                         mode={mode}
                         value={getStepIcon(index)}
@@ -303,7 +367,7 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
 
                   {/* Testimonial Content */}
                   <div className="flex-1 pb-8 relative">
-                    <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-sm hover:shadow-md transition-shadow duration-300">
+                    <div className={`bg-white border ${stepColors.cardBorder} rounded-xl p-8 shadow-sm hover:shadow-md transition-shadow duration-300`}>
 
                       {/* Delete Button - only show in edit mode and if more than 1 step */}
                       {mode !== 'preview' && conversionSteps.length > 1 && (
@@ -341,7 +405,7 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
 
                       {/* Quote */}
                       {step.thought && (
-                        <div className="bg-blue-50 border-l-4 border-blue-200 p-4 mb-4 relative">
+                        <div className={`${stepColors.quoteBg} border-l-4 ${stepColors.quoteBorder} p-4 mb-4 relative`}>
                           <EditableAdaptiveText
                             mode={mode}
                             value={step.thought || ''}
@@ -352,7 +416,7 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
                             backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                             colorTokens={colorTokens}
                             variant="body"
-                            className="text-blue-900 italic text-lg font-medium"
+                            className={`${stepColors.quoteText} italic text-lg font-medium`}
                             placeholder="Enter customer quote"
                             sectionBackground={sectionBackground}
                             data-section-id={sectionId}
@@ -407,15 +471,15 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
         {/* Objections Summary */}
         {(blockContent.objections_summary || mode === 'edit') && (
           <div className="mt-16 text-center">
-            <div className="max-w-3xl mx-auto p-6 bg-blue-50">
+            <div className={`max-w-3xl mx-auto p-6 ${stepColors.summaryBg}`}>
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.objections_summary || ''}
                 onEdit={(value) => handleContentUpdate('objections_summary', value)}
                 backgroundType="neutral"
-                colorTokens={{ ...colorTokens, textPrimary: 'text-blue-900' }}
+                colorTokens={{ ...colorTokens, textPrimary: stepColors.summaryText }}
                 variant="body"
-                className="text-2xl font-medium underline text-blue-900"
+                className={`text-2xl font-medium underline ${stepColors.summaryText}`}
                 placeholder="Add a summary of how objections have been addressed..."
                 sectionId={sectionId}
                 elementKey="objections_summary"

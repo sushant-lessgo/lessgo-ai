@@ -7,6 +7,8 @@ import {
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface StatBlocksProps extends LayoutComponentProps {}
 
@@ -206,6 +208,9 @@ const StatBlock = ({
   index,
   mode,
   sectionId,
+  theme,
+  cardColors,
+  iconColors,
   onValueEdit,
   onLabelEdit,
   onDescriptionEdit,
@@ -218,6 +223,9 @@ const StatBlock = ({
   index: number;
   mode: 'edit' | 'preview';
   sectionId: string;
+  theme: UIBlockTheme;
+  cardColors: ReturnType<typeof getStatCardColors>;
+  iconColors: ReturnType<typeof getIconColors>;
   onValueEdit: (index: number, value: string) => void;
   onLabelEdit: (index: number, value: string) => void;
   onDescriptionEdit: (index: number, value: string) => void;
@@ -229,11 +237,11 @@ const StatBlock = ({
   const { getTextStyle } = useTypography();
 
   return (
-    <div className={`group/stat-${index} relative text-center p-8 bg-white rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300`}>
-      
+    <div className={`group/stat-${index} relative text-center p-8 ${cardColors.bg} rounded-xl border ${cardColors.border} ${cardColors.borderHover} ${cardColors.shadow} transition-all duration-300`}>
+
       {/* Stat Icon */}
       <div className="mb-6">
-        <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 mx-auto group-hover:bg-blue-200 group-hover:scale-110 transition-all duration-300">
+        <div className={`w-16 h-16 ${iconColors.bg} rounded-2xl flex items-center justify-center ${iconColors.text} mx-auto ${iconColors.bgHover} group-hover:scale-110 transition-all duration-300`}>
           <IconEditableText
             mode={mode}
             value={getStatIcon(index)}
@@ -241,7 +249,7 @@ const StatBlock = ({
             backgroundType="neutral"
             colorTokens={{}}
             iconSize="lg"
-            className="text-blue-600 text-2xl"
+            className={`${iconColors.text} text-2xl`}
             sectionId={sectionId}
             elementKey={`stat_icon_${index + 1}`}
           />
@@ -344,6 +352,89 @@ export default function StatBlocks(props: StatBlocksProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Theme detection: manual override > auto-detection > neutral fallback
+  const theme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Get theme-based colors for stat cards
+  const getStatCardColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        bg: 'bg-white',
+        border: 'border-orange-200',
+        borderHover: 'hover:border-orange-300',
+        shadow: 'hover:shadow-lg hover:shadow-orange-100/20'
+      },
+      cool: {
+        bg: 'bg-white',
+        border: 'border-blue-200',
+        borderHover: 'hover:border-blue-300',
+        shadow: 'hover:shadow-lg hover:shadow-blue-100/20'
+      },
+      neutral: {
+        bg: 'bg-white',
+        border: 'border-gray-200',
+        borderHover: 'hover:border-gray-300',
+        shadow: 'hover:shadow-lg'
+      }
+    }[theme];
+  };
+
+  // Get theme-based colors for icon backgrounds
+  const getIconColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        bg: 'bg-orange-100',
+        bgHover: 'group-hover:bg-orange-200',
+        text: 'text-orange-600'
+      },
+      cool: {
+        bg: 'bg-blue-100',
+        bgHover: 'group-hover:bg-blue-200',
+        text: 'text-blue-600'
+      },
+      neutral: {
+        bg: 'bg-gray-100',
+        bgHover: 'group-hover:bg-gray-200',
+        text: 'text-gray-600'
+      }
+    }[theme];
+  };
+
+  // Get theme-based colors for add button
+  const getAddButtonColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        bg: 'bg-orange-50',
+        bgHover: 'hover:bg-orange-100',
+        border: 'border-orange-200',
+        borderHover: 'hover:border-orange-300',
+        text: 'text-orange-700'
+      },
+      cool: {
+        bg: 'bg-blue-50',
+        bgHover: 'hover:bg-blue-100',
+        border: 'border-blue-200',
+        borderHover: 'hover:border-blue-300',
+        text: 'text-blue-700'
+      },
+      neutral: {
+        bg: 'bg-gray-50',
+        bgHover: 'hover:bg-gray-100',
+        border: 'border-gray-200',
+        borderHover: 'hover:border-gray-300',
+        text: 'text-gray-700'
+      }
+    }[theme];
+  };
+
+  const cardColors = getStatCardColors(theme);
+  const iconColors = getIconColors(theme);
+  const addButtonColors = getAddButtonColors(theme);
 
   // Parse stat data
   const statItems = parseStatData(blockContent.stat_values, blockContent.stat_labels, blockContent.stat_descriptions);
@@ -504,6 +595,9 @@ export default function StatBlocks(props: StatBlocksProps) {
               index={index}
               mode={mode}
               sectionId={sectionId}
+              theme={theme}
+              cardColors={cardColors}
+              iconColors={iconColors}
               onValueEdit={handleValueEdit}
               onLabelEdit={handleLabelEdit}
               onDescriptionEdit={handleDescriptionEdit}
@@ -520,12 +614,12 @@ export default function StatBlocks(props: StatBlocksProps) {
           <div className="mt-8 text-center">
             <button
               onClick={handleAddStat}
-              className="flex items-center space-x-2 mx-auto px-4 py-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-xl transition-all duration-200 group"
+              className={`flex items-center space-x-2 mx-auto px-4 py-3 ${addButtonColors.bg} ${addButtonColors.bgHover} border-2 ${addButtonColors.border} ${addButtonColors.borderHover} rounded-xl transition-all duration-200 group`}
             >
-              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className={`w-5 h-5 ${addButtonColors.text}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              <span className="text-blue-700 font-medium">Add Stat</span>
+              <span className={`${addButtonColors.text} font-medium`}>Add Stat</span>
             </button>
           </div>
         )}

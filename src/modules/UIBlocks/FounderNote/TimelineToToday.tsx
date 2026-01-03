@@ -7,14 +7,16 @@ import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
-  EditableAdaptiveText, 
-  AccentBadge 
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import {
+  EditableAdaptiveHeadline,
+  EditableAdaptiveText,
+  AccentBadge
 } from '@/components/layout/EditableContent';
-import { 
-  CTAButton, 
-  TrustIndicators 
+import {
+  CTAButton,
+  TrustIndicators
 } from '@/components/layout/ComponentRegistry';
 import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators';
 import IconEditableText from '@/components/ui/IconEditableText';
@@ -96,6 +98,52 @@ const CONTENT_SCHEMA = {
   current_state_icon: { type: 'string' as const, default: '🎯' }
 };
 
+// Theme-based color function for all themeable elements
+const getThemeColors = (theme: UIBlockTheme) => {
+  const colorMap = {
+    warm: {
+      timelineLine: 'from-orange-200 to-red-200',
+      badgeQuarter: 'from-orange-500 to-red-600',      // quarters
+      badgeMonth: 'from-orange-400 to-amber-500',      // months (lighter warm)
+      badgePhase: 'from-red-500 to-pink-600',          // phases (warmer)
+      badgeDefault: 'from-orange-500 to-red-600',      // years/default
+      yearText: '#ea580c',                             // orange-600
+      currentStateBg: 'from-orange-50 to-red-50',
+      currentStateIcon: 'from-orange-500 to-red-600',
+      trustNumberColor: '#ea580c',                     // orange-600
+      borderColor: '#fed7aa',                          // orange-200
+      founderAvatar: 'from-orange-400 to-red-600'
+    },
+    cool: {
+      timelineLine: 'from-blue-200 to-purple-200',
+      badgeQuarter: 'from-green-500 to-emerald-600',   // keep green for quarters
+      badgeMonth: 'from-purple-500 to-violet-600',     // keep purple for months
+      badgePhase: 'from-blue-500 to-indigo-600',       // phases
+      badgeDefault: 'from-blue-500 to-indigo-600',     // years/default
+      yearText: '#2563eb',                             // blue-600
+      currentStateBg: 'from-blue-50 to-indigo-50',
+      currentStateIcon: 'from-blue-500 to-indigo-600',
+      trustNumberColor: '#2563eb',                     // blue-600
+      borderColor: '#bfdbfe',                          // blue-200
+      founderAvatar: 'from-blue-400 to-indigo-600'
+    },
+    neutral: {
+      timelineLine: 'from-gray-200 to-slate-200',
+      badgeQuarter: 'from-gray-500 to-slate-600',      // quarters
+      badgeMonth: 'from-gray-400 to-slate-500',        // months
+      badgePhase: 'from-slate-500 to-gray-600',        // phases
+      badgeDefault: 'from-gray-500 to-slate-600',      // years/default
+      yearText: '#4b5563',                             // gray-600
+      currentStateBg: 'from-gray-50 to-slate-50',
+      currentStateIcon: 'from-gray-500 to-slate-600',
+      trustNumberColor: '#4b5563',                     // gray-600
+      borderColor: '#e5e7eb',                          // gray-200
+      founderAvatar: 'from-gray-400 to-slate-600'
+    }
+  };
+  return colorMap[theme];
+};
+
 // Smart badge display logic for different time period formats
 const getBadgeDisplay = (period: string): string => {
   if (!period) return '??';
@@ -132,37 +180,37 @@ const getBadgeDisplay = (period: string): string => {
   return period.substring(0, 3).trim().toUpperCase();
 };
 
-// Get badge background color based on period type
-const getBadgeColor = (period: string): string => {
-  if (!period) return 'from-gray-400 to-gray-600';
-  
-  // Quarters - green
+// Get badge background color based on period type (theme-aware)
+const getBadgeColor = (period: string, themeColors: ReturnType<typeof getThemeColors>): string => {
+  if (!period) return themeColors.badgeDefault;
+
+  // Quarters - theme-specific
   if (period.match(/^Q\d/i)) {
-    return 'from-green-500 to-emerald-600';
+    return themeColors.badgeQuarter;
   }
-  
-  // Months - purple
+
+  // Months - theme-specific
   if (period.match(/^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/i)) {
-    return 'from-purple-500 to-violet-600';
+    return themeColors.badgeMonth;
   }
-  
-  // Phases - orange
+
+  // Phases - theme-specific
   if (period.match(/^(Phase|Stage)/i)) {
-    return 'from-orange-500 to-amber-600';
+    return themeColors.badgePhase;
   }
-  
-  // Default (years) - blue
-  return 'from-blue-500 to-indigo-600';
+
+  // Default (years) - theme-specific
+  return themeColors.badgeDefault;
 };
 
 // Timeline Item Component with WYSIWYG editing
-const TimelineItem = React.memo(({ 
-  year, 
-  icon, 
-  title, 
-  description, 
-  stats, 
-  isLast, 
+const TimelineItem = React.memo(({
+  year,
+  icon,
+  title,
+  description,
+  stats,
+  isLast,
   colorTokens,
   dynamicTextColors,
   mode,
@@ -174,7 +222,8 @@ const TimelineItem = React.memo(({
   onRemove,
   index,
   sectionId,
-  backgroundType
+  backgroundType,
+  themeColors
 }: {
   year: string;
   icon: string;
@@ -194,15 +243,16 @@ const TimelineItem = React.memo(({
   index?: number;
   sectionId?: string;
   backgroundType?: string;
+  themeColors: ReturnType<typeof getThemeColors>;
 }) => (
   <div className="relative flex items-start space-x-6 pb-8">
     {/* Timeline line */}
     {!isLast && (
-      <div className="absolute left-7 top-16 w-0.5 h-full bg-gradient-to-b from-blue-200 to-purple-200"></div>
+      <div className={`absolute left-7 top-16 w-0.5 h-full bg-gradient-to-b ${themeColors.timelineLine}`}></div>
     )}
-    
+
     {/* Period badge with dynamic color */}
-    <div className={`flex-shrink-0 w-14 h-14 bg-gradient-to-br ${getBadgeColor(year)} rounded-full flex items-center justify-center text-white font-bold text-xs shadow-lg`}>
+    <div className={`flex-shrink-0 w-14 h-14 bg-gradient-to-br ${getBadgeColor(year, themeColors)} rounded-full flex items-center justify-center text-white font-bold text-xs shadow-lg`}>
       {getBadgeDisplay(year)}
     </div>
     
@@ -260,7 +310,7 @@ const TimelineItem = React.memo(({
                   backgroundType="neutral"
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={{ fontSize: '0.875rem', fontWeight: '500', color: '#2563eb' }}
+                  textStyle={{ fontSize: '0.875rem', fontWeight: '500', color: themeColors.yearText }}
                   placeholder="Year"
                   sectionId={sectionId || 'timeline'}
                   elementKey={`timeline_year_${(index || 0) + 1}`}
@@ -270,7 +320,7 @@ const TimelineItem = React.memo(({
             ) : (
               <>
                 <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-                <span className="text-sm text-blue-600 font-medium">{year}</span>
+                <span className="text-sm font-medium" style={{ color: themeColors.yearText }}>{year}</span>
               </>
             )}
           </div>
@@ -338,7 +388,16 @@ export default function TimelineToToday(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
-  
+
+  // Detect theme: manual override > auto-detection > neutral fallback
+  const uiBlockTheme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  const themeColors = getThemeColors(uiBlockTheme);
+
   const { getTextStyle: getTypographyStyle } = useTypography();
 
   // Get individual timeline icon fields
@@ -527,6 +586,7 @@ export default function TimelineToToday(props: LayoutComponentProps) {
                 index={item.index}
                 sectionId={sectionId}
                 backgroundType={backgroundType}
+                themeColors={themeColors}
               />
             ))}
           </div>
@@ -549,9 +609,9 @@ export default function TimelineToToday(props: LayoutComponentProps) {
         </div>
 
         {/* Current State */}
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-8 text-center">
+        <div className={`bg-gradient-to-br ${themeColors.currentStateBg} rounded-xl p-8 text-center`}>
           <div className="max-w-3xl mx-auto">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-6 shadow-lg relative group/icon-edit">
+            <div className={`w-16 h-16 bg-gradient-to-br ${themeColors.currentStateIcon} rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-6 shadow-lg relative group/icon-edit`}>
               {mode !== 'preview' ? (
                 <IconEditableText
                   mode={(mode || 'preview') as 'preview' | 'edit'}
@@ -643,7 +703,7 @@ export default function TimelineToToday(props: LayoutComponentProps) {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {trustItems.map((item, index) => (
                     <div key={index} className="text-center">
-                      <div className="text-2xl font-bold text-blue-600 mb-1">
+                      <div className="text-2xl font-bold mb-1" style={{ color: themeColors.trustNumberColor }}>
                         {item.split(' ')[0]}
                       </div>
                       <div className="text-sm text-gray-600">
@@ -666,9 +726,9 @@ export default function TimelineToToday(props: LayoutComponentProps) {
             />
 
             {/* Founder Attribution */}
-            <div className="mt-6 pt-6 border-t border-blue-200">
+            <div className="mt-6 pt-6 border-t" style={{ borderColor: themeColors.borderColor }}>
               <div className="flex items-center justify-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold">
+                <div className={`w-10 h-10 bg-gradient-to-br ${themeColors.founderAvatar} rounded-full flex items-center justify-center text-white font-bold`}>
                   {blockContent.founder_name?.charAt(0) || 'F'}
                 </div>
                 <div className="text-left">

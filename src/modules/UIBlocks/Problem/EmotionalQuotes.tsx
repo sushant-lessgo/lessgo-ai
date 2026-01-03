@@ -6,11 +6,13 @@ import {
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
-import { 
+import {
   CTAButton,
-  TrustIndicators 
+  TrustIndicators
 } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface EmotionalQuotesContent {
   headline: string;
@@ -137,6 +139,68 @@ export default function EmotionalQuotes(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
+  // Theme detection: manual override > auto-detection > neutral
+  const uiBlockTheme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral' as const;
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Theme-based color mappings
+  const getThemeColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        quoteIcon: 'text-orange-400',
+        cardPrimaryBg: 'bg-white/10 backdrop-blur-sm border-white/20',
+        cardPrimaryHover: 'hover:bg-white/20 hover:border-white/30',
+        cardSecondaryBg: 'bg-white border-orange-200',
+        cardSecondaryHover: 'hover:border-orange-300 hover:shadow-lg',
+        impactBg: 'bg-orange-50',
+        impactBorder: 'border-orange-200',
+        impactText: 'text-orange-800',
+        impactIcon: 'text-orange-600',
+        contextBg: 'bg-orange-50/30',
+        contextBorder: 'border-orange-100',
+        addButtonBg: 'bg-orange-50 hover:bg-orange-100',
+        addButtonBorder: 'border-orange-200 hover:border-orange-300',
+        addButtonText: 'text-orange-700'
+      },
+      cool: {
+        quoteIcon: 'text-blue-400',
+        cardPrimaryBg: 'bg-white/10 backdrop-blur-sm border-white/20',
+        cardPrimaryHover: 'hover:bg-white/20 hover:border-white/30',
+        cardSecondaryBg: 'bg-white border-blue-200',
+        cardSecondaryHover: 'hover:border-blue-300 hover:shadow-lg',
+        impactBg: 'bg-blue-50',
+        impactBorder: 'border-blue-200',
+        impactText: 'text-blue-800',
+        impactIcon: 'text-blue-600',
+        contextBg: 'bg-blue-50/30',
+        contextBorder: 'border-blue-100',
+        addButtonBg: 'bg-blue-50 hover:bg-blue-100',
+        addButtonBorder: 'border-blue-200 hover:border-blue-300',
+        addButtonText: 'text-blue-700'
+      },
+      neutral: {
+        quoteIcon: 'text-gray-400',
+        cardPrimaryBg: 'bg-white/10 backdrop-blur-sm border-white/20',
+        cardPrimaryHover: 'hover:bg-white/20 hover:border-white/30',
+        cardSecondaryBg: 'bg-white border-gray-200',
+        cardSecondaryHover: 'hover:border-gray-300 hover:shadow-lg',
+        impactBg: 'bg-yellow-50',
+        impactBorder: 'border-yellow-200',
+        impactText: 'text-yellow-800',
+        impactIcon: 'text-yellow-600',
+        contextBg: 'bg-gray-50',
+        contextBorder: 'border-gray-100',
+        addButtonBg: 'bg-gray-50 hover:bg-gray-100',
+        addButtonBorder: 'border-gray-200 hover:border-gray-300',
+        addButtonText: 'text-gray-700'
+      }
+    }[theme];
+  };
+
+  const themeColors = getThemeColors(uiBlockTheme);
 
   const emotionalQuotes = blockContent.emotional_quotes 
     ? blockContent.emotional_quotes.split('|').map(item => item.trim()).filter(Boolean)
@@ -250,14 +314,14 @@ export default function EmotionalQuotes(props: LayoutComponentProps) {
     onRemove?: (index: number) => void;
     canRemove?: boolean;
   }) => {
-    // Get card background based on section background (like IconGrid)
+    // Get card background based on section background AND theme
     const cardBackground = backgroundType === 'primary'
-      ? 'bg-white/10 backdrop-blur-sm border-white/20'
-      : 'bg-white border-gray-200';
+      ? themeColors.cardPrimaryBg
+      : themeColors.cardSecondaryBg;
 
     const cardHover = backgroundType === 'primary'
-      ? 'hover:bg-white/20 hover:border-white/30'
-      : 'hover:border-blue-300 hover:shadow-lg';
+      ? themeColors.cardPrimaryHover
+      : themeColors.cardSecondaryHover;
 
     return (
       <div className={`group/quote-card-${index} relative p-8 rounded-2xl border ${cardBackground} ${cardHover} transition-all duration-300`}>
@@ -281,7 +345,7 @@ export default function EmotionalQuotes(props: LayoutComponentProps) {
         )}
         {/* Quote Icon */}
         <div className="mb-6">
-          <svg className="w-12 h-12 text-gray-400" fill="currentColor" viewBox="0 0 32 32">
+          <svg className={`w-12 h-12 ${themeColors.quoteIcon}`} fill="currentColor" viewBox="0 0 32 32">
             <path d="M13.8 9.6L13.8 9.6c-1.6 0-3.2 0.6-4.4 1.8s-1.8 2.8-1.8 4.4c0 1.6 0.6 3.2 1.8 4.4s2.8 1.8 4.4 1.8c1.6 0 3.2-0.6 4.4-1.8 1.2-1.2 1.8-2.8 1.8-4.4 0-0.4 0-0.8-0.1-1.2l1.8-5.8h-4.4L15.5 12c-0.5-1.5-1.9-2.4-3.5-2.4H13.8z"/>
             <path d="M24.2 9.6L24.2 9.6c-1.6 0-3.2 0.6-4.4 1.8s-1.8 2.8-1.8 4.4c0 1.6 0.6 3.2 1.8 4.4s2.8 1.8 4.4 1.8c1.6 0 3.2-0.6 4.4-1.8 1.2-1.2 1.8-2.8 1.8-4.4 0-0.4 0-0.8-0.1-1.2l1.8-5.8h-4.4L25.9 12c-0.5-1.5-1.9-2.4-3.5-2.4H24.2z"/>
           </svg>
@@ -442,19 +506,19 @@ export default function EmotionalQuotes(props: LayoutComponentProps) {
           <div className="mb-12 flex justify-center">
             <button
               onClick={handleAddQuote}
-              className="flex items-center space-x-2 px-4 py-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-xl transition-all duration-200 group"
+              className={`flex items-center space-x-2 px-4 py-3 ${themeColors.addButtonBg} border-2 ${themeColors.addButtonBorder} rounded-xl transition-all duration-200 group`}
             >
-              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className={`w-5 h-5 ${themeColors.addButtonText}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              <span className="text-blue-700 font-medium">Add Quote</span>
+              <span className={`${themeColors.addButtonText} font-medium`}>Add Quote</span>
             </button>
           </div>
         )}
 
         {/* Context and Emotional Impact */}
         {(blockContent.context_text || blockContent.emotional_impact || mode === 'edit') && (
-          <div className="bg-gray-50 rounded-2xl p-8 border border-gray-100 mb-12">
+          <div className={`${themeColors.contextBg} rounded-2xl p-8 border ${themeColors.contextBorder} mb-12`}>
             <div className="max-w-4xl mx-auto text-center">
               {(blockContent.context_text || mode === 'edit') && (
                 <div className="mb-6">
@@ -475,20 +539,20 @@ export default function EmotionalQuotes(props: LayoutComponentProps) {
               )}
 
               {(blockContent.emotional_impact || mode === 'edit') && (
-                <div className="bg-yellow-100 border border-yellow-300 rounded-xl p-6">
+                <div className={`${themeColors.impactBg} border ${themeColors.impactBorder} rounded-xl p-6`}>
                   <div className="flex items-center justify-center space-x-3">
-                    <svg className="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className={`w-8 h-8 ${themeColors.impactIcon}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                     </svg>
-                    <div className="text-xl font-semibold text-yellow-800">
+                    <div className={`text-xl font-semibold ${themeColors.impactText}`}>
                       <EditableAdaptiveText
                         mode={mode}
                         value={blockContent.emotional_impact || ''}
                         onEdit={(value) => handleContentUpdate('emotional_impact', value)}
                         backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                        colorTokens={{...colorTokens, textPrimary: 'text-yellow-800'}}
+                        colorTokens={{...colorTokens, textPrimary: themeColors.impactText}}
                         variant="body"
-                        className="inline font-semibold text-yellow-800"
+                        className={`inline font-semibold ${themeColors.impactText}`}
                         placeholder="Add emotional impact statement..."
                         sectionId={sectionId}
                         elementKey="emotional_impact"

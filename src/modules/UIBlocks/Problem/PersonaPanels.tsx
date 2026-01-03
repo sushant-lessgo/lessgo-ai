@@ -11,6 +11,8 @@ import {
   TrustIndicators 
 } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface PersonaPanelsContent {
   headline: string;
@@ -98,6 +100,13 @@ export default function PersonaPanels(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
+  // Theme detection with priority: manual override > auto-detection > neutral
+  const theme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
   const [activePersona, setActivePersona] = useState(0);
 
   const personaNames = blockContent.persona_names 
@@ -139,7 +148,7 @@ export default function PersonaPanels(props: LayoutComponentProps) {
     title: personaTitles[index] || '',
     painPoints: personaPainPoints[index] || [],
     goals: personaGoals[index] || [],
-    color: getPersonaColor(index)
+    color: getPersonaColor(index, theme)
   }));
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
@@ -259,13 +268,33 @@ export default function PersonaPanels(props: LayoutComponentProps) {
     handleContentUpdate('persona_goals', goalsList.join('|'));
   };
 
-  function getPersonaColor(index: number) {
-    const colors = [
+  function getPersonaColor(index: number, theme: UIBlockTheme) {
+    // Warm theme: orange variations
+    const warmColors = [
+      { bg: 'bg-orange-500', light: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-700' },
+      { bg: 'bg-amber-500', light: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700' },
       { bg: 'bg-red-500', light: 'bg-red-50', border: 'border-red-200', text: 'text-red-700' },
-      { bg: 'bg-blue-500', light: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700' },
-      { bg: 'bg-green-500', light: 'bg-green-50', border: 'border-green-200', text: 'text-green-700' },
-      { bg: 'bg-purple-500', light: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-700' }
+      { bg: 'bg-yellow-500', light: 'bg-yellow-50', border: 'border-yellow-200', text: 'text-yellow-700' }
     ];
+
+    // Cool theme: blue variations
+    const coolColors = [
+      { bg: 'bg-blue-500', light: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700' },
+      { bg: 'bg-cyan-500', light: 'bg-cyan-50', border: 'border-cyan-200', text: 'text-cyan-700' },
+      { bg: 'bg-indigo-500', light: 'bg-indigo-50', border: 'border-indigo-200', text: 'text-indigo-700' },
+      { bg: 'bg-teal-500', light: 'bg-teal-50', border: 'border-teal-200', text: 'text-teal-700' }
+    ];
+
+    // Neutral theme: gray/slate variations
+    const neutralColors = [
+      { bg: 'bg-gray-500', light: 'bg-gray-50', border: 'border-gray-200', text: 'text-gray-700' },
+      { bg: 'bg-slate-500', light: 'bg-slate-50', border: 'border-slate-200', text: 'text-slate-700' },
+      { bg: 'bg-zinc-500', light: 'bg-zinc-50', border: 'border-zinc-200', text: 'text-zinc-700' },
+      { bg: 'bg-stone-500', light: 'bg-stone-50', border: 'border-stone-200', text: 'text-stone-700' }
+    ];
+
+    const colorSets = { warm: warmColors, cool: coolColors, neutral: neutralColors };
+    const colors = colorSets[theme];
     return colors[index % colors.length];
   }
 

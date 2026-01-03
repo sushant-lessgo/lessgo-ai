@@ -3,24 +3,26 @@ import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
+import {
+  EditableAdaptiveHeadline,
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
-import { 
+import {
   CTAButton,
   TrustIndicators,
-  StarRating 
+  StarRating
 } from '@/components/layout/ComponentRegistry';
 import AvatarEditableComponent from '@/components/ui/AvatarEditableComponent';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { 
-  parseCustomerAvatarData, 
-  getCustomerAvatarUrl, 
+import {
+  parseCustomerAvatarData,
+  getCustomerAvatarUrl,
   updateAvatarUrls,
   parsePipeData,
-  updateListData 
+  updateListData
 } from '@/utils/dataParsingUtils';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface AvatarCarouselContent {
   headline: string;
@@ -123,11 +125,48 @@ const CONTENT_SCHEMA = {
     type: 'string' as const,
     default: 'Creations made'
   },
-  avatar_urls: { 
-    type: 'string' as const, 
-    default: '{}' 
+  avatar_urls: {
+    type: 'string' as const,
+    default: '{}'
   }
 };
+
+// Theme color mapping function
+const getThemeColors = (theme: UIBlockTheme) => ({
+  warm: {
+    activeIndicator: 'bg-orange-500',
+    cardGradient: 'from-orange-50 via-red-50 to-amber-50',
+    cardBorder: 'border-orange-100',
+    companyText: 'text-orange-600',
+    statsGradient: 'from-orange-50 via-amber-50 to-yellow-50',
+    statsBorder: 'border-orange-100',
+    stat1: 'text-orange-600',
+    stat2: 'text-red-600',
+    stat3: 'text-amber-600'
+  },
+  cool: {
+    activeIndicator: 'bg-blue-500',
+    cardGradient: 'from-blue-50 via-cyan-50 to-sky-50',
+    cardBorder: 'border-blue-100',
+    companyText: 'text-blue-600',
+    statsGradient: 'from-cyan-50 via-blue-50 to-indigo-50',
+    statsBorder: 'border-blue-100',
+    stat1: 'text-blue-600',
+    stat2: 'text-cyan-600',
+    stat3: 'text-indigo-600'
+  },
+  neutral: {
+    activeIndicator: 'bg-gray-500',
+    cardGradient: 'from-gray-50 via-slate-50 to-zinc-50',
+    cardBorder: 'border-gray-100',
+    companyText: 'text-gray-600',
+    statsGradient: 'from-slate-50 via-gray-50 to-zinc-50',
+    statsBorder: 'border-gray-100',
+    stat1: 'text-gray-600',
+    stat2: 'text-slate-600',
+    stat3: 'text-zinc-600'
+  }
+})[theme];
 
 export default function AvatarCarousel(props: LayoutComponentProps) {
   const { getTextStyle: getTypographyStyle } = useTypography();
@@ -146,6 +185,15 @@ export default function AvatarCarousel(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Theme detection: manual override > auto-detection > neutral fallback
+  const uiBlockTheme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  const themeColors = getThemeColors(uiBlockTheme);
 
   // Create typography styles
   const h3Style = getTypographyStyle('h3');
@@ -278,7 +326,7 @@ export default function AvatarCarousel(props: LayoutComponentProps) {
         
         {isActive && (
           <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2">
-            <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+            <div className={`w-2 h-2 ${themeColors.activeIndicator} rounded-full`}></div>
           </div>
         )}
       </div>
@@ -358,7 +406,7 @@ export default function AvatarCarousel(props: LayoutComponentProps) {
 
             {/* Active Testimonial */}
             {activeTestimonial && (
-              <div className="bg-gradient-to-r from-purple-50 via-pink-50 to-orange-50 rounded-2xl p-8 border border-purple-100 mb-12">
+              <div className={`bg-gradient-to-r ${themeColors.cardGradient} rounded-2xl p-8 border ${themeColors.cardBorder} mb-12`}>
                 <div className="text-center">
                   <div className="flex justify-center mb-4">
                     <StarRating rating={activeTestimonial.rating} size="large" />
@@ -421,7 +469,7 @@ export default function AvatarCarousel(props: LayoutComponentProps) {
                           backgroundType={safeBackgroundType}
                           colorTokens={colorTokens}
                           variant="body"
-                          className="text-sm text-purple-600 font-medium"
+                          className={`text-sm ${themeColors.companyText} font-medium`}
                           placeholder="Company/handle..."
                           sectionId={sectionId}
                           elementKey={`customer_company_${activeIndex}`}
@@ -457,8 +505,8 @@ export default function AvatarCarousel(props: LayoutComponentProps) {
                       setIsAutoRotating(false);
                     }}
                     className={`w-3 h-3 rounded-full transition-colors duration-200 ${
-                      index === activeIndex 
-                        ? 'bg-purple-500' 
+                      index === activeIndex
+                        ? themeColors.activeIndicator
                         : 'bg-gray-300 hover:bg-gray-400'
                     }`}
                   />
@@ -479,7 +527,7 @@ export default function AvatarCarousel(props: LayoutComponentProps) {
             </div>
 
         {/* Creator Community Stats */}
-        <div className="bg-gradient-to-r from-pink-50 via-purple-50 to-indigo-50 rounded-2xl p-8 border border-pink-100 mb-12">
+        <div className={`bg-gradient-to-r ${themeColors.statsGradient} rounded-2xl p-8 border ${themeColors.statsBorder} mb-12`}>
           <div className="text-center">
             <EditableAdaptiveText
               mode={mode}
@@ -505,7 +553,7 @@ export default function AvatarCarousel(props: LayoutComponentProps) {
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  className="text-3xl font-bold text-purple-600 mb-2"
+                  className={`text-3xl font-bold ${themeColors.stat1} mb-2`}
                   placeholder="Creator count..."
                   sectionId={sectionId}
                   elementKey="active_creators_count"
@@ -533,7 +581,7 @@ export default function AvatarCarousel(props: LayoutComponentProps) {
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  className="text-3xl font-bold text-pink-600 mb-2"
+                  className={`text-3xl font-bold ${themeColors.stat2} mb-2`}
                   placeholder="Rating display..."
                   sectionId={sectionId}
                   elementKey="average_rating_display"
@@ -561,7 +609,7 @@ export default function AvatarCarousel(props: LayoutComponentProps) {
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  className="text-3xl font-bold text-indigo-600 mb-2"
+                  className={`text-3xl font-bold ${themeColors.stat3} mb-2`}
                   placeholder="Creations count..."
                   sectionId={sectionId}
                   elementKey="creations_count"

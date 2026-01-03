@@ -7,6 +7,8 @@ import {
 } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface ResultsGalleryContent {
   headline: string;
@@ -94,6 +96,42 @@ export default function ResultsGallery(props: LayoutComponentProps) {
   // Safe background type (filter out 'custom')
   const safeBackgroundType = props.backgroundType === 'custom' ? 'neutral' : (props.backgroundType || 'neutral');
 
+  // Detect theme: manual override > auto-detection > neutral fallback
+  const theme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Theme-aware color functions
+  const getPlaceholderColors = (theme: UIBlockTheme) => {
+    return {
+      warm: 'from-orange-50 to-red-100',
+      cool: 'from-blue-50 to-purple-100',
+      neutral: 'from-gray-50 to-slate-100'
+    }[theme];
+  };
+
+  const getIconColors = (theme: UIBlockTheme) => {
+    return {
+      warm: 'text-orange-400',
+      cool: 'text-blue-400',
+      neutral: 'text-gray-400'
+    }[theme];
+  };
+
+  const getShadowColors = (theme: UIBlockTheme) => {
+    return {
+      warm: 'shadow-lg hover:shadow-xl hover:shadow-orange-200/40',
+      cool: 'shadow-lg hover:shadow-xl hover:shadow-blue-200/40',
+      neutral: 'shadow-lg hover:shadow-xl'
+    }[theme];
+  };
+
+  const placeholderGradient = getPlaceholderColors(theme);
+  const iconColor = getIconColors(theme);
+  const imageShadow = getShadowColors(theme);
+
   // Handle file upload
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -148,13 +186,13 @@ export default function ResultsGallery(props: LayoutComponentProps) {
   // Image placeholder component
   const ImagePlaceholder = ({ onClick }: { onClick?: () => void }) => (
     <div
-      className="relative w-full h-64 rounded-lg overflow-hidden bg-gradient-to-br from-blue-50 to-purple-100 cursor-pointer hover:from-blue-100 hover:to-purple-150 transition-all"
+      className={`relative w-full h-64 rounded-lg overflow-hidden bg-gradient-to-br ${placeholderGradient} cursor-pointer hover:opacity-90 transition-all`}
       onClick={onClick}
     >
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="text-center">
           <svg
-            className="w-12 h-12 text-blue-400 mx-auto mb-2"
+            className={`w-12 h-12 ${iconColor} mx-auto mb-2`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -206,7 +244,7 @@ export default function ResultsGallery(props: LayoutComponentProps) {
               <img
                 src={imageUrl}
                 alt={caption || `Result ${index}`}
-                className="w-full h-auto object-contain rounded-lg shadow-md"
+                className={`w-full h-auto object-contain rounded-lg ${imageShadow}`}
                 data-section-id={sectionId}
                 data-element-key={imageKey}
               />

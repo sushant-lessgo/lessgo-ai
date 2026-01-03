@@ -2,16 +2,18 @@ import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
+import {
+  EditableAdaptiveHeadline,
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
-import { 
+import {
   CTAButton,
-  TrustIndicators 
+  TrustIndicators
 } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface MiniStackedCardsContent {
   headline: string;
@@ -226,7 +228,7 @@ const CONTENT_SCHEMA = {
 };
 
 export default function MiniStackedCards(props: LayoutComponentProps) {
-  
+
   const {
     sectionId,
     mode,
@@ -243,7 +245,59 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
   });
 
   const { getTextStyle: getTypographyStyle } = useTypography();
-  
+
+  // Theme detection: manual override > auto-detection > neutral fallback
+  const theme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Theme-aware color mappings
+  const getThemeColors = (theme: UIBlockTheme) => ({
+    warm: {
+      border: 'border-orange-200',
+      borderHover: 'hover:border-orange-300',
+      badgeBg: 'bg-orange-50',
+      badgeText: 'text-orange-600',
+      badgeSolid: 'bg-orange-500',
+      iconBg: 'bg-orange-100',
+      iconText: 'text-orange-600',
+      popularBadge: 'bg-gradient-to-r from-orange-500 to-red-500',
+      checkmark: 'text-orange-500',
+      sectionBg: 'bg-orange-50',
+      sectionBorder: 'border-orange-100'
+    },
+    cool: {
+      border: 'border-blue-200',
+      borderHover: 'hover:border-blue-300',
+      badgeBg: 'bg-blue-50',
+      badgeText: 'text-blue-600',
+      badgeSolid: 'bg-blue-500',
+      iconBg: 'bg-blue-100',
+      iconText: 'text-blue-600',
+      popularBadge: 'bg-gradient-to-r from-blue-500 to-indigo-500',
+      checkmark: 'text-blue-500',
+      sectionBg: 'bg-blue-50',
+      sectionBorder: 'border-blue-100'
+    },
+    neutral: {
+      border: 'border-gray-200',
+      borderHover: 'hover:border-gray-300',
+      badgeBg: 'bg-gray-50',
+      badgeText: 'text-gray-600',
+      badgeSolid: 'bg-gray-500',
+      iconBg: 'bg-gray-100',
+      iconText: 'text-gray-600',
+      popularBadge: 'bg-gradient-to-r from-gray-700 to-gray-900',
+      checkmark: 'text-gray-500',
+      sectionBg: 'bg-gray-50',
+      sectionBorder: 'border-gray-100'
+    }
+  })[theme];
+
+  const themeColors = getThemeColors(theme);
+
   // Create typography styles
   const h3Style = getTypographyStyle('h3');
   const h4Style = getTypographyStyle('h4');
@@ -375,22 +429,22 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
   const getFeatureIcon = (iconName: string) => {
     const icons = {
       'secure-reliable': (
-        <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className={`w-6 h-6 ${themeColors.iconText}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
         </svg>
       ),
       'expert-support': (
-        <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className={`w-6 h-6 ${themeColors.iconText}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
         </svg>
       ),
       'easy-migration': (
-        <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className={`w-6 h-6 ${themeColors.iconText}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
         </svg>
       ),
       'default': (
-        <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className={`w-6 h-6 ${themeColors.iconText}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
         </svg>
       )
@@ -409,21 +463,21 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
     getTypographyStyle: (variant: string) => React.CSSProperties;
   }) => (
     <div className={`relative bg-white rounded-xl border p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group/pricing-card ${
-      tier.isPopular 
-        ? `border-primary shadow-lg` 
-        : 'border-gray-200 hover:border-gray-300'
+      tier.isPopular
+        ? `${themeColors.border} shadow-lg`
+        : `${themeColors.border} ${themeColors.borderHover}`
     }`}>
-      
+
       {/* Popular Badge */}
       {tier.isPopular && (
-        <div className={`absolute -top-2 -right-2 ${colorTokens.ctaBg} text-white px-3 py-1 rounded-full text-xs font-semibold`}>
+        <div className={`absolute -top-2 -right-2 ${themeColors.popularBadge} text-white px-3 py-1 rounded-full text-xs font-semibold`}>
           Popular
         </div>
       )}
 
       {/* Savings Badge */}
       {tier.savingsLabel && (
-        <div className="absolute -top-2 -left-2 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
+        <div className={`absolute -top-2 -left-2 ${themeColors.badgeSolid} text-white px-3 py-1 rounded-full text-xs font-semibold`}>
           {mode !== 'preview' ? (
             <div
               contentEditable
@@ -527,7 +581,7 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
 
         {/* Editable Highlight */}
         {(tier.highlight || mode === 'edit') && (
-          <div className={`text-xs ${tier.isPopular ? colorTokens.ctaText : 'text-blue-600'} font-medium mb-3`}>
+          <div className={`text-xs ${tier.isPopular ? colorTokens.ctaText : themeColors.badgeText} font-medium mb-3`}>
             {mode !== 'preview' ? (
               <div
                 contentEditable
@@ -553,7 +607,7 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
       <div className="space-y-2 mb-4">
         {tier.features.slice(0, 3).map((feature, featureIndex) => (
           <div key={featureIndex} className="flex items-center space-x-2 group/feature-item">
-            <svg className="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className={`w-4 h-4 ${themeColors.checkmark} flex-shrink-0`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
             {mode !== 'preview' ? (
@@ -830,7 +884,7 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
                     
                     return (
                       <div key={index} className="text-center relative group/plans-feature">
-                        <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center group/icon-edit">
+                        <div className={`w-12 h-12 mx-auto mb-4 rounded-full ${themeColors.iconBg} flex items-center justify-center group/icon-edit`}>
                           <IconEditableText
                             mode={mode}
                             value={String(blockContent[`plans_feature_${index}_icon` as keyof MiniStackedCardsContent] || '🎯')}
@@ -1010,7 +1064,7 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
 
             {/* Trust Indicators */}
             {((blockContent.show_trust_bar !== false && trustBarItems.length > 0) || (mode === 'edit' && (blockContent.trust_item_1 !== '___REMOVED___' || blockContent.trust_item_2 !== '___REMOVED___' || blockContent.trust_item_3 !== '___REMOVED___' || blockContent.trust_item_4 !== '___REMOVED___'))) && (
-              <div className="text-center bg-blue-50 rounded-xl p-6 border border-blue-100 relative group/trust-section">
+              <div className={`text-center ${themeColors.sectionBg} rounded-xl p-6 border ${themeColors.sectionBorder} relative group/trust-section`}>
                 
                 {/* Delete Section Button */}
                 {mode === 'edit' && (
@@ -1048,7 +1102,7 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
                     
                     return (
                       <div key={index} className="flex items-center space-x-2 relative group/trust-item">
-                        <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className={`w-5 h-5 ${themeColors.checkmark} flex-shrink-0`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                         

@@ -4,12 +4,14 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
-  EditableAdaptiveText 
+import {
+  EditableAdaptiveHeadline,
+  EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 // Content interface for type safety
 interface VisualObjectionTilesContent {
@@ -100,8 +102,33 @@ const CONTENT_SCHEMA = {
   }
 };
 
+// Color mapping function for theme-aware styling
+const getTileColors = (theme: UIBlockTheme) => {
+  const colorMap = {
+    warm: {
+      iconBg: 'from-orange-50 to-orange-100',
+      border: 'border-orange-200',
+      hoverBorder: 'hover:border-orange-300',
+      accent: 'from-orange-400 to-orange-500'
+    },
+    cool: {
+      iconBg: 'from-blue-50 to-indigo-100',
+      border: 'border-blue-200',
+      hoverBorder: 'hover:border-blue-300',
+      accent: 'from-blue-400 to-indigo-500'
+    },
+    neutral: {
+      iconBg: 'from-gray-50 to-gray-100',
+      border: 'border-gray-200',
+      hoverBorder: 'hover:border-gray-300',
+      accent: 'from-gray-400 to-gray-500'
+    }
+  };
+  return colorMap[theme];
+};
+
 export default function VisualObjectionTiles(props: LayoutComponentProps) {
-  
+
   // Use the abstraction hook with background type support
   const {
     sectionId,
@@ -116,6 +143,28 @@ export default function VisualObjectionTiles(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Detect theme: manual override > auto-detection > neutral fallback
+  const theme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Debug theme detection
+  React.useEffect(() => {
+    console.log('🎨 VisualObjectionTiles theme detection:', {
+      sectionId,
+      hasManualOverride: !!props.manualThemeOverride,
+      manualTheme: props.manualThemeOverride,
+      hasUserContext: !!props.userContext,
+      userContext: props.userContext,
+      finalTheme: theme
+    });
+  }, [theme, props.manualThemeOverride, props.userContext, sectionId]);
+
+  // Get theme-specific colors
+  const tileColors = getTileColors(theme);
 
   // Parse objection tiles from both individual and legacy formats
   const parseObjectionTiles = (content: VisualObjectionTilesContent): Array<{icon: string, objection: string, answer: string, label?: string, index: number}> => {
@@ -286,7 +335,7 @@ export default function VisualObjectionTiles(props: LayoutComponentProps) {
           {objectionTiles.map((tile, index) => (
             <div
               key={index}
-              className={`relative group/objection-tile-${index} bg-white/90 backdrop-blur-sm border border-gray-200 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1`}
+              className={`relative group/objection-tile-${index} bg-white/90 backdrop-blur-sm border ${tileColors.border} ${tileColors.hoverBorder} rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1`}
             >
 
               {/* Delete button - only show in edit mode and if more than 1 tile */}
@@ -307,7 +356,7 @@ export default function VisualObjectionTiles(props: LayoutComponentProps) {
 
               {/* Icon */}
               <div className="text-center mb-6">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-2xl text-3xl group-hover:scale-110 transition-transform duration-300">
+                <div className={`inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br ${tileColors.iconBg} rounded-2xl text-3xl group-hover:scale-110 transition-transform duration-300`}>
                   <IconEditableText
                     mode={mode}
                     value={tile.icon}
@@ -373,7 +422,7 @@ export default function VisualObjectionTiles(props: LayoutComponentProps) {
               {/* Bottom accent */}
               <div className="mt-6 pt-4 border-t border-gray-100">
                 <div className="flex items-center justify-center">
-                  <div className="w-8 h-1 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-full group-hover:w-12 transition-all duration-300"></div>
+                  <div className={`w-8 h-1 bg-gradient-to-r ${tileColors.accent} rounded-full group-hover:w-12 transition-all duration-300`}></div>
                 </div>
               </div>
             </div>
