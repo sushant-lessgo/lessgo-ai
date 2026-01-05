@@ -8,6 +8,8 @@ import { X } from 'lucide-react';
 type SlugModalProps = {
   slug: string;
   onChange: (val: string) => void;
+  title: string;
+  onTitleChange: (val: string) => void;
   onCancel: () => void;
   onConfirm: () => void;
   loading: boolean;
@@ -22,6 +24,8 @@ type SlugModalProps = {
 export function SlugModal({
   slug,
   onChange,
+  title,
+  onTitleChange,
   onCancel,
   onConfirm,
   loading,
@@ -105,6 +109,23 @@ export function SlugModal({
             />
             <span className="text-gray-500">.lessgo.ai</span>
           </div>
+        </div>
+
+        {/* Title Input Field */}
+        <div className="mt-4">
+          <label className="text-sm font-medium text-gray-700 mb-2 block">
+            Page Title (for SEO & social sharing)
+          </label>
+          <Input
+            value={title}
+            onChange={(e) => onTitleChange(e.target.value)}
+            maxLength={100}
+            placeholder="e.g., Design Tools for Social Media Marketers"
+            className="w-full"
+          />
+          <p className={`text-xs mt-1 ${title.length > 60 ? 'text-amber-600' : 'text-gray-500'}`}>
+            {title.length}/60 chars {title.length > 60 && '(recommended for SEO)'}
+          </p>
         </div>
 
         {error && <p className="text-sm text-red-500 mt-2">{error}</p>}

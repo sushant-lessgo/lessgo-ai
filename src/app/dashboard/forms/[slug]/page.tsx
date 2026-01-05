@@ -6,6 +6,7 @@ import Footer from '@/components/shared/Footer'
 import FormSubmissionsTable from '@/components/dashboard/FormSubmissionsTable'
 import { ArrowLeft, Download, Filter } from 'lucide-react'
 import Link from 'next/link'
+import { stripHTMLTags } from '@/utils/htmlSanitization'
 
 interface PageProps {
   params: {
@@ -80,7 +81,7 @@ export default async function FormSubmissionsPage({ params }: PageProps) {
             Form Submissions
           </h1>
           <p className="text-brand-mutedText">
-            {publishedPage.title} • <strong>{totalSubmissions}</strong> total submissions from <strong>{uniqueForms}</strong> forms
+            {stripHTMLTags(publishedPage.title || '')} • <strong>{totalSubmissions}</strong> total submissions from <strong>{uniqueForms}</strong> forms
           </p>
         </div>
 

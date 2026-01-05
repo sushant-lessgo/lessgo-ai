@@ -10,6 +10,7 @@ import { SlugModal } from '@/components/SlugModal';
 import posthog from "posthog-js";
 import { getTabManager, cleanupTabManager } from '@/utils/tabManager';
 import { logger } from '@/lib/logger';
+import { generateSmartTitle, stripHTMLTags } from '@/utils/smartTitleGenerator';
 
 export default function PreviewPage() {
   const params = useParams();
@@ -76,6 +77,7 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
   const [publishError, setPublishError] = useState("");
   const [showSlugModal, setShowSlugModal] = useState(false);
   const [customSlug, setCustomSlug] = useState('');
+  const [publishTitle, setPublishTitle] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [tabManager, setTabManager] = useState<ReturnType<typeof getTabManager> | null>(null);
@@ -287,16 +289,30 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
   const handlePublishClick = () => {
     if (!isPublishReady) return;
 
-    // If already published, use existing slug
+    // Get headline for fallback
+    const heroSectionId = sections.find(id => id.includes('hero'));
+    const headline = heroSectionId ? content[heroSectionId]?.elements?.headline : null;
+    const headlineContent = headline?.content || '';
+    const headlineText = typeof headlineContent === 'string' ? headlineContent : '';
+
+    // If already published, use existing slug and title
     if (existingPublished) {
       setCustomSlug(existingPublished.slug);
+      setPublishTitle(existingPublished.title || generateSmartTitle(
+        onboardingData?.validatedFields?.marketCategory,
+        onboardingData?.validatedFields?.targetAudience,
+        headlineText
+      ));
     } else {
-      // Generate new slug from headline
-      const heroSectionId = sections.find(id => id.includes('hero'));
-      const headline = heroSectionId ? content[heroSectionId]?.elements?.headline : null;
-      const headlineContent = headline?.content || '';
-      const headlineText = typeof headlineContent === 'string' ? headlineContent : '';
+      // Generate smart title from market category + target audience
+      const smartTitle = generateSmartTitle(
+        onboardingData?.validatedFields?.marketCategory,
+        onboardingData?.validatedFields?.targetAudience,
+        headlineText
+      );
+      setPublishTitle(smartTitle);
 
+      // Generate new slug from headline
       const defaultSlug = (headlineText || `page-${Date.now()}`)
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
@@ -331,12 +347,6 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
         textMuted: 'gray-600'
       };
 
-      // Get hero section ID for title
-      const heroSectionId = sections.find(id => id.includes('hero'));
-      const headline = heroSectionId ? content[heroSectionId]?.elements?.headline : null;
-      const headlineContent = headline?.content || '';
-      const headlineText = typeof headlineContent === 'string' ? headlineContent : '';
-
       // Publish the page
       const response = await fetch('/api/publish', {
         method: 'POST',
@@ -344,7 +354,7 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
         body: JSON.stringify({
           slug: customSlug,
           htmlContent,
-          title: headlineText || title || 'Untitled Page',
+          title: stripHTMLTags(publishTitle || title || 'Untitled Page'),
           content: { 
             layout: { sections, theme },
             content 
@@ -371,7 +381,7 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
       // Analytics
       posthog?.capture("publish_clicked", {
         slug: customSlug,
-        title: headlineText || "",
+        title: publishTitle || "",
         hasCTA: isPublishReady,
         fromEdit: true,
       });
@@ -490,6 +500,8 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
         <SlugModal
           slug={customSlug}
           onChange={setCustomSlug}
+          title={publishTitle}
+          onTitleChange={setPublishTitle}
           onCancel={() => setShowSlugModal(false)}
           onConfirm={handlePublish}
           loading={publishing}

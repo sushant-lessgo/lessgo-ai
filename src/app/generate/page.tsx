@@ -13,6 +13,7 @@ import type { GPTOutput } from "@/modules/prompt/types";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { SlugModal } from '@/components/SlugModal';
 import { logger } from '@/lib/logger';
+import { generateSmartTitle, stripHTMLTags } from '@/utils/smartTitleGenerator';
 
 
 export default function PreviewPage() {
@@ -27,6 +28,7 @@ const [publishError, setPublishError] = useState("");
 
 const [showSlugModal, setShowSlugModal] = useState(false);
 const [customSlug, setCustomSlug] = useState('');
+const [publishTitle, setPublishTitle] = useState('');
 
 
 const [tokenId, setTokenId] = useState<string | null>(null);      // 🆕
@@ -142,7 +144,7 @@ const htmlContent = previewElement.innerHTML;
       body: JSON.stringify({
         slug: customSlug,
         htmlContent, // can sanitize if needed
-        title: data.hero?.headline || 'Untitled Page',
+        title: stripHTMLTags(publishTitle || data.hero?.headline || 'Untitled Page'),
         content: data,
         themeValues: {
           primary,
@@ -165,7 +167,7 @@ const htmlContent = previewElement.innerHTML;
 
     posthog?.capture("publish_clicked", {
       slug: customSlug,
-      title: data.hero?.headline || "",
+      title: publishTitle || "",
       hasCTA: !!(data.hero?.ctaConfig?.cta_text && data.hero?.ctaConfig?.url),
     });
 
@@ -239,6 +241,14 @@ const htmlContent = previewElement.innerHTML;
       <div>
         <button
           onClick={() => {
+            // Generate smart title from market category + target audience
+            const smartTitle = generateSmartTitle(
+              data?.meta?.marketCategory,
+              data?.meta?.targetAudience,
+              data?.hero?.headline
+            );
+            setPublishTitle(smartTitle);
+
             const defaultSlug = (data?.hero?.headline || `page-${Date.now()}`)
               .toLowerCase()
               .replace(/[^a-z0-9]+/g, "-")
@@ -271,6 +281,8 @@ const htmlContent = previewElement.innerHTML;
   <SlugModal
     slug={customSlug}
     onChange={setCustomSlug}
+    title={publishTitle}
+    onTitleChange={setPublishTitle}
     onCancel={() => setShowSlugModal(false)}
     onConfirm={handlePublish} // This function will use customSlug
     loading={publishing}

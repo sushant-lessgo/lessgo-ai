@@ -7,6 +7,7 @@ import { PublishSchema, sanitizeForLogging } from '@/lib/validation';
 import { createSecureResponse, validateSlug, sanitizeHtmlContent, verifyProjectAccess } from '@/lib/security';
 import { withPublishRateLimit } from '@/lib/rateLimit';
 import { getUserPlan, checkLimit } from '@/lib/planManager';
+import { stripHTMLTags } from '@/utils/smartTitleGenerator';
 
 async function publishHandler(req: NextRequest) {
   const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
@@ -33,6 +34,9 @@ async function publishHandler(req: NextRequest) {
     }
     
     const { slug, title, content, themeValues, tokenId, inputText, previewImage } = validationResult.data;
+
+    // Sanitize title - strip HTML tags for meta/OG image safety
+    const cleanTitle = stripHTMLTags(title || '').trim().slice(0, 100) || 'Untitled Page';
 
     // A04: Insecure Design - Validate slug security
     const slugValidation = validateSlug(slug);
@@ -61,7 +65,7 @@ async function publishHandler(req: NextRequest) {
         where: { slug },
         data: {
           htmlContent: '',  // Phase 2: Empty for dynamic rendering
-          title,
+          title: cleanTitle,
           content: content as any,
           themeValues: themeValues as any,
           projectId: project?.id || null,
@@ -90,7 +94,7 @@ async function publishHandler(req: NextRequest) {
           userId,
           slug,
           htmlContent: '',  // Phase 2: Empty for dynamic rendering
-          title,
+          title: cleanTitle,
           content: content as any,
           themeValues: themeValues as any,
           projectId: project?.id || null,
@@ -116,13 +120,13 @@ async function publishHandler(req: NextRequest) {
       create: {
         tokenId,
         userId,
-        title: title || 'Untitled',
+        title: cleanTitle,
         content: content as any,
         inputText,
         status: 'published',
       },
       update: {
-        title,
+        title: cleanTitle,
         content: content as any,
         inputText,
         status: 'published',

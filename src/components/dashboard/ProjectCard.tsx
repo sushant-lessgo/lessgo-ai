@@ -3,6 +3,7 @@
 import posthog from 'posthog-js'
 import { useRouter } from 'next/navigation'
 import { logger } from '@/lib/logger'
+import { stripHTMLTags } from '@/utils/htmlSanitization'
 
 export type Project = {
   id: string
@@ -85,7 +86,7 @@ export default function ProjectCard({ project, onEdit, onPreview }: Props) {
   return (
     <div className="border border-brand-border rounded-md p-4 flex items-center justify-between hover:shadow-sm transition duration-200 bg-white">
       <div>
-        <h3 className="text-heading4 font-heading text-brand-text mb-1">{project.name}</h3>
+        <h3 className="text-heading4 font-heading text-brand-text mb-1">{stripHTMLTags(project.name || '')}</h3>
         <p className="text-sm text-brand-mutedText">
           {project.status}
           {project.slug && ` at /p/${project.slug}`}

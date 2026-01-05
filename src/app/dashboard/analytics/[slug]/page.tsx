@@ -15,6 +15,7 @@ import ExportCSV from './components/ExportCSV'
 import LastUpdated from './components/LastUpdated'
 import UTMBuilder from './components/UTMBuilder'
 import EmptyState from './components/EmptyState'
+import { stripHTMLTags } from '@/utils/htmlSanitization'
 
 interface PageProps {
   params: {
@@ -205,7 +206,7 @@ export default async function AnalyticsPage({ params, searchParams }: PageProps)
             Landing Page Analytics
           </h1>
           <p className="text-brand-mutedText mb-4">
-            {publishedPage.title}
+            {stripHTMLTags(publishedPage.title || '')}
           </p>
           <div className="flex items-center justify-between">
             <a
