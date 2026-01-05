@@ -5,6 +5,8 @@ import { LayoutSection } from '@/components/layout/LayoutSection';
 import { EditableAdaptiveHeadline, EditableAdaptiveText } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface IndustryUseCaseGridContent {
   headline: string;
@@ -134,6 +136,48 @@ const removeIndustryCard = (index: number, handleContentUpdate: any) => {
 export default function IndustryUseCaseGrid(props: LayoutComponentProps) {
   const { sectionId, mode, blockContent, colorTokens, getTextStyle, sectionBackground, handleContentUpdate } = useLayoutComponent<IndustryUseCaseGridContent>({ ...props, contentSchema: CONTENT_SCHEMA });
 
+  // Detect theme: manual override > auto-detection > neutral fallback
+  const uiTheme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Theme-based color mapping
+  const getThemeColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        cardBg: 'bg-white',
+        cardBorder: 'border-orange-200',
+        cardHover: 'hover:border-orange-300 hover:shadow-lg hover:shadow-orange-100/50',
+        iconBg: 'bg-orange-50',
+        iconText: 'text-orange-600',
+        industryText: 'text-gray-900',
+        useCaseText: 'text-gray-600'
+      },
+      cool: {
+        cardBg: 'bg-white',
+        cardBorder: 'border-blue-200',
+        cardHover: 'hover:border-blue-300 hover:shadow-lg hover:shadow-blue-100/50',
+        iconBg: 'bg-blue-50',
+        iconText: 'text-blue-600',
+        industryText: 'text-gray-900',
+        useCaseText: 'text-gray-600'
+      },
+      neutral: {
+        cardBg: 'bg-white',
+        cardBorder: 'border-gray-200',
+        cardHover: 'hover:shadow-lg',
+        iconBg: 'bg-gray-50',
+        iconText: 'text-gray-600',
+        industryText: 'text-gray-900',
+        useCaseText: 'text-gray-600'
+      }
+    }[theme];
+  };
+
+  const themeColors = getThemeColors(uiTheme);
+
   const industryCards = getIndustryCards(blockContent);
 
   // Get industry icon from content fields by index
@@ -180,7 +224,7 @@ export default function IndustryUseCaseGrid(props: LayoutComponentProps) {
             const fieldIndex = actualIndex !== -1 ? actualIndex : index;
 
             return (
-              <div key={card.id} className={`relative group/industry-card-${fieldIndex} bg-white p-8 rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300`}>
+              <div key={card.id} className={`relative group/industry-card-${fieldIndex} ${themeColors.cardBg} p-8 rounded-xl border ${themeColors.cardBorder} ${themeColors.cardHover} transition-all duration-300`}>
                 {/* Delete button - only show in edit mode */}
                 {mode === 'edit' && (
                   <button
@@ -197,7 +241,7 @@ export default function IndustryUseCaseGrid(props: LayoutComponentProps) {
                   </button>
                 )}
 
-                <div className="text-6xl mb-6 text-center">
+                <div className={`${themeColors.iconBg} ${themeColors.iconText} p-6 rounded-full w-32 h-32 mx-auto flex items-center justify-center mb-6`}>
                   <IconEditableText
                     mode={mode}
                     value={getIndustryIcon(fieldIndex)}

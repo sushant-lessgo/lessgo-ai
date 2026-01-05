@@ -14,6 +14,8 @@ import {
 } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { getIconFromCategory, getRandomIconFromCategory } from '@/utils/iconMapping';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface PullQuoteStackContent {
   headline: string;
@@ -122,6 +124,13 @@ export default function PullQuoteStack(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
+  // Theme detection with priority: manual override > auto-detection > neutral fallback
+  const theme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
   // Create typography styles
   const h3Style = getTypographyStyle('h3');
   const bodyLgStyle = getTypographyStyle('body-lg');
@@ -194,16 +203,33 @@ export default function PullQuoteStack(props: LayoutComponentProps) {
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
 
-  const getEmotionalColor = (index: number) => {
-    const colors = [
-      { bg: 'from-red-50 to-orange-50', border: 'border-red-200', accent: 'text-red-600' },
-      { bg: 'from-blue-50 to-indigo-50', border: 'border-blue-200', accent: 'text-blue-600' },
-      { bg: 'from-purple-50 to-pink-50', border: 'border-purple-200', accent: 'text-purple-600' },
-      { bg: 'from-green-50 to-teal-50', border: 'border-green-200', accent: 'text-green-600' },
-      { bg: 'from-yellow-50 to-amber-50', border: 'border-yellow-200', accent: 'text-yellow-600' },
-      { bg: 'from-gray-50 to-slate-50', border: 'border-gray-200', accent: 'text-gray-600' }
-    ];
-    return colors[index % colors.length];
+  const getEmotionalColor = (index: number, theme: UIBlockTheme) => {
+    const themeColors = {
+      warm: {
+        gradients: ['from-orange-50 to-red-50', 'from-amber-50 to-yellow-50', 'from-pink-50 to-rose-50'],
+        borders: ['border-orange-200', 'border-amber-200', 'border-pink-200'],
+        accents: ['text-orange-600', 'text-amber-600', 'text-pink-600']
+      },
+      cool: {
+        gradients: ['from-blue-50 to-indigo-50', 'from-cyan-50 to-teal-50', 'from-sky-50 to-blue-50'],
+        borders: ['border-blue-200', 'border-cyan-200', 'border-sky-200'],
+        accents: ['text-blue-600', 'text-cyan-600', 'text-sky-600']
+      },
+      neutral: {
+        gradients: ['from-gray-50 to-slate-50', 'from-zinc-50 to-neutral-50', 'from-stone-50 to-gray-50'],
+        borders: ['border-gray-200', 'border-zinc-200', 'border-stone-200'],
+        accents: ['text-gray-600', 'text-zinc-600', 'text-stone-600']
+      }
+    };
+
+    const colors = themeColors[theme];
+    const colorIndex = index % 3; // 3 variations per theme
+
+    return {
+      bg: colors.gradients[colorIndex],
+      border: colors.borders[colorIndex],
+      accent: colors.accents[colorIndex]
+    };
   };
 
   // Helper function to add a new testimonial
@@ -393,7 +419,7 @@ export default function PullQuoteStack(props: LayoutComponentProps) {
     h3Style: React.CSSProperties;
     bodyLgStyle: React.CSSProperties;
   }) => {
-    const color = getEmotionalColor(index);
+    const color = getEmotionalColor(index, theme);
     const isLarge = index % 3 === 0; // Every third quote is larger
     
     return (

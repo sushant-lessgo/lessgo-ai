@@ -5,6 +5,8 @@ import { LayoutSection } from '@/components/layout/LayoutSection';
 import { EditableAdaptiveHeadline } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface InteractiveUseCaseMapContent {
   headline: string;
@@ -142,6 +144,51 @@ export default function InteractiveUseCaseMap(props: LayoutComponentProps) {
   const categoryData = parseCategories(blockContent);
   const [selectedCategory, setSelectedCategory] = useState(0);
 
+  // Theme detection
+  const uiTheme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Get theme-specific colors
+  const getThemeColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        categorySelectedBg: 'bg-orange-600',
+        categorySelectedBorder: 'border-orange-600',
+        categorySelectedText: 'text-white',
+        categoryHoverBorder: 'hover:border-orange-300',
+        addBorder: 'border-orange-200',
+        addHoverBorder: 'hover:border-orange-400',
+        addText: 'text-orange-600',
+        addHoverText: 'hover:text-orange-700'
+      },
+      cool: {
+        categorySelectedBg: 'bg-blue-600',
+        categorySelectedBorder: 'border-blue-600',
+        categorySelectedText: 'text-white',
+        categoryHoverBorder: 'hover:border-blue-300',
+        addBorder: 'border-blue-200',
+        addHoverBorder: 'hover:border-blue-400',
+        addText: 'text-blue-600',
+        addHoverText: 'hover:text-blue-700'
+      },
+      neutral: {
+        categorySelectedBg: 'bg-gray-600',
+        categorySelectedBorder: 'border-gray-600',
+        categorySelectedText: 'text-white',
+        categoryHoverBorder: 'hover:border-gray-300',
+        addBorder: 'border-gray-200',
+        addHoverBorder: 'hover:border-gray-400',
+        addText: 'text-gray-600',
+        addHoverText: 'hover:text-gray-700'
+      }
+    }[theme];
+  };
+
+  const themeColors = getThemeColors(uiTheme);
+
   // Get category icon from content fields by index
   const getCategoryIcon = (index: number) => {
     const iconFields = [
@@ -175,7 +222,7 @@ export default function InteractiveUseCaseMap(props: LayoutComponentProps) {
               <div key={item.index} className={`relative group/category-${item.index}`}>
                 <button
                   onClick={() => setSelectedCategory(idx)}
-                  className={`w-full text-left p-4 rounded-lg border transition-all duration-300 ${selectedCategory === idx ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-900 border-gray-200 hover:border-blue-300'}`}
+                  className={`w-full text-left p-4 rounded-lg border transition-all duration-300 ${selectedCategory === idx ? `${themeColors.categorySelectedBg} ${themeColors.categorySelectedText} ${themeColors.categorySelectedBorder}` : `bg-white text-gray-900 border-gray-200 ${themeColors.categoryHoverBorder}`}`}
                 >
                   <div className="flex items-center space-x-3">
                     <IconEditableText
@@ -233,7 +280,7 @@ export default function InteractiveUseCaseMap(props: LayoutComponentProps) {
             {mode === 'edit' && categoryData.length < 6 && (
               <button
                 onClick={() => addCategory(blockContent, handleContentUpdate)}
-                className="w-full p-4 border-2 border-dashed border-gray-300 hover:border-blue-400 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2 text-gray-600 hover:text-blue-600"
+                className={`w-full p-4 border-2 border-dashed ${themeColors.addBorder} ${themeColors.addHoverBorder} rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2 ${themeColors.addText} ${themeColors.addHoverText}`}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />

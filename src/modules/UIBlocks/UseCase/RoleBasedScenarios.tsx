@@ -5,6 +5,8 @@ import { LayoutSection } from '@/components/layout/LayoutSection';
 import { EditableAdaptiveHeadline } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface RoleBasedScenariosContent {
   headline: string;
@@ -71,6 +73,57 @@ export default function RoleBasedScenarios(props: LayoutComponentProps) {
   const roles = blockContent.roles.split('|').map(r => r.trim()).filter(Boolean);
   const scenarios = blockContent.scenarios.split('|').map(s => s.trim()).filter(Boolean);
 
+  // Theme detection with priority: manual > auto > neutral
+  const uiTheme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Get theme-specific colors
+  const getThemeColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        gradientFrom: 'from-orange-500',
+        gradientTo: 'to-orange-600',
+        focusRing: 'focus:ring-orange-500',
+        cardBorder: 'border-orange-200',
+        addBg: 'bg-orange-50',
+        addHoverBg: 'hover:bg-orange-100',
+        addBorder: 'border-orange-200',
+        addHoverBorder: 'hover:border-orange-300',
+        addIcon: 'text-orange-600',
+        addText: 'text-orange-700'
+      },
+      cool: {
+        gradientFrom: 'from-blue-500',
+        gradientTo: 'to-indigo-600',
+        focusRing: 'focus:ring-blue-500',
+        cardBorder: 'border-gray-200',
+        addBg: 'bg-blue-50',
+        addHoverBg: 'hover:bg-blue-100',
+        addBorder: 'border-blue-200',
+        addHoverBorder: 'hover:border-blue-300',
+        addIcon: 'text-blue-600',
+        addText: 'text-blue-700'
+      },
+      neutral: {
+        gradientFrom: 'from-gray-500',
+        gradientTo: 'to-gray-600',
+        focusRing: 'focus:ring-gray-500',
+        cardBorder: 'border-gray-200',
+        addBg: 'bg-gray-50',
+        addHoverBg: 'hover:bg-gray-100',
+        addBorder: 'border-gray-200',
+        addHoverBorder: 'hover:border-gray-300',
+        addIcon: 'text-gray-600',
+        addText: 'text-gray-700'
+      }
+    }[theme];
+  };
+
+  const themeColors = getThemeColors(uiTheme);
+
   // Handle individual role editing
   const handleRoleEdit = (index: number, value: string) => {
     const roleList = blockContent.roles.split('|');
@@ -124,8 +177,8 @@ export default function RoleBasedScenarios(props: LayoutComponentProps) {
         <EditableAdaptiveHeadline mode={mode} value={blockContent.headline || ''} onEdit={(value) => handleContentUpdate('headline', value)} level="h2" backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'secondary')} colorTokens={colorTokens} className="text-center mb-16" sectionId={sectionId} elementKey="headline" sectionBackground={sectionBackground} />
         <div className="space-y-8">
           {roles.map((role, index) => (
-            <div key={index} className={`group/scenario-card-${index} relative bg-white p-8 rounded-xl border border-gray-200 flex items-center space-x-8`}>
-              <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex flex-col items-center justify-center text-white flex-shrink-0">
+            <div key={index} className={`group/scenario-card-${index} relative bg-white p-8 rounded-xl border ${themeColors.cardBorder} flex items-center space-x-8`}>
+              <div className={`w-20 h-20 bg-gradient-to-br ${themeColors.gradientFrom} ${themeColors.gradientTo} rounded-full flex flex-col items-center justify-center text-white flex-shrink-0`}>
                 {getRoleIcon(index) ? (
                   <>
                     <div className="text-xs font-bold">{role.split(' ').map(w => w[0]).join('')}</div>
@@ -151,7 +204,7 @@ export default function RoleBasedScenarios(props: LayoutComponentProps) {
                     contentEditable
                     suppressContentEditableWarning
                     onBlur={(e) => handleRoleEdit(index, e.currentTarget.textContent || '')}
-                    className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[28px] cursor-text hover:bg-gray-50 font-bold text-gray-900 mb-3"
+                    className={`outline-none focus:ring-2 ${themeColors.focusRing} focus:ring-opacity-50 rounded px-1 min-h-[28px] cursor-text hover:bg-gray-50 font-bold text-gray-900 mb-3`}
                   >
                     {role}
                   </div>
@@ -163,7 +216,7 @@ export default function RoleBasedScenarios(props: LayoutComponentProps) {
                     contentEditable
                     suppressContentEditableWarning
                     onBlur={(e) => handleScenarioEdit(index, e.currentTarget.textContent || '')}
-                    className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 text-gray-600"
+                    className={`outline-none focus:ring-2 ${themeColors.focusRing} focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 text-gray-600`}
                   >
                     {scenarios[index] || 'Role-specific scenario'}
                   </div>
@@ -195,12 +248,12 @@ export default function RoleBasedScenarios(props: LayoutComponentProps) {
           <div className="mt-8 text-center">
             <button
               onClick={handleAddScenario}
-              className="flex items-center space-x-2 mx-auto px-4 py-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-xl transition-all duration-200 group"
+              className={`flex items-center space-x-2 mx-auto px-4 py-3 ${themeColors.addBg} ${themeColors.addHoverBg} border-2 ${themeColors.addBorder} ${themeColors.addHoverBorder} rounded-xl transition-all duration-200 group`}
             >
-              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className={`w-5 h-5 ${themeColors.addIcon}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              <span className="text-blue-700 font-medium">Add Scenario</span>
+              <span className={`${themeColors.addText} font-medium`}>Add Scenario</span>
             </button>
           </div>
         )}

@@ -8,6 +8,8 @@ import { EditableAdaptiveHeadline, EditableAdaptiveText } from '@/components/lay
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { getIconFromCategory, getRandomIconFromCategory } from '@/utils/iconMapping';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface TechnicalAdvantageContent {
   headline: string;
@@ -94,6 +96,26 @@ const removeAdvantage = (titles: string, descriptions: string, indexToRemove: nu
   };
 };
 
+const getAdvantageColors = (theme: UIBlockTheme) => {
+  return {
+    warm: {
+      cardBg: 'from-orange-50 to-red-50',
+      iconBg: 'from-orange-500 to-red-600',
+      hoverShadow: 'hover:shadow-orange-200/50'
+    },
+    cool: {
+      cardBg: 'from-blue-50 to-indigo-50',
+      iconBg: 'from-blue-500 to-indigo-600',
+      hoverShadow: 'hover:shadow-blue-200/50'
+    },
+    neutral: {
+      cardBg: 'from-gray-50 to-slate-50',
+      iconBg: 'from-gray-500 to-slate-600',
+      hoverShadow: 'hover:shadow-gray-200/50'
+    }
+  }[theme];
+};
+
 const AdvantageCard = ({
   advantage,
   index,
@@ -106,7 +128,8 @@ const AdvantageCard = ({
   colorTokens,
   handleContentUpdate,
   canRemove = true,
-  sectionBackground
+  sectionBackground,
+  themeColors
 }: {
   advantage: AdvantageItem;
   index: number;
@@ -120,14 +143,15 @@ const AdvantageCard = ({
   handleContentUpdate: (field: keyof TechnicalAdvantageContent, value: string) => void;
   canRemove?: boolean;
   sectionBackground?: string;
+  themeColors: any;
 }) => {
   const { getTextStyle } = useTypography();
 
   return (
     <div className="group relative">
-      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 hover:shadow-lg transition-all duration-300 h-full">
+      <div className={`bg-gradient-to-br ${themeColors.cardBg} rounded-xl p-6 hover:shadow-lg transition-all duration-300 h-full`}>
         <div className="flex items-start space-x-4">
-          <div className="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-md">
+          <div className={`flex-shrink-0 w-14 h-14 bg-gradient-to-br ${themeColors.iconBg} rounded-lg flex items-center justify-center shadow-md`}>
             <IconEditableText
               mode={mode}
               value={getAdvantageIcon(blockContent, index)}
@@ -209,6 +233,15 @@ export default function TechnicalAdvantage(props: LayoutComponentProps) {
   const { getTextStyle: getTypographyStyle } = useTypography();
   const store = useEditStore();
   const onboardingStore = useOnboardingStore();
+
+  // Detect theme: manual override > auto-detection > neutral fallback
+  const uiTheme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  const colors = getAdvantageColors(uiTheme);
 
   // Auto-populate icons on initial generation
   useEffect(() => {
@@ -324,6 +357,7 @@ export default function TechnicalAdvantage(props: LayoutComponentProps) {
               handleContentUpdate={handleContentUpdate}
               canRemove={advantages.length > 3}
               sectionBackground={sectionBackground}
+              themeColors={colors}
             />
           ))}
         </div>

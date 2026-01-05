@@ -8,6 +8,8 @@ import { EditableAdaptiveHeadline, EditableAdaptiveText } from '@/components/lay
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { getIconFromCategory, getRandomIconFromCategory } from '@/utils/iconMapping';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface InnovationTimelineContent {
   headline: string;
@@ -133,7 +135,8 @@ const TimelineCard = ({
   handleContentUpdate,
   canRemove = true,
   sectionBackground,
-  isLast = false
+  isLast = false,
+  timelineColors
 }: {
   timelineItem: TimelineItem;
   index: number;
@@ -149,6 +152,16 @@ const TimelineCard = ({
   canRemove?: boolean;
   sectionBackground?: string;
   isLast?: boolean;
+  timelineColors: {
+    timelineLine: string;
+    iconBg: string;
+    dateBadgeBg: string;
+    dateBadgeText: string;
+    dateBadgeHover: string;
+    cardBorderHover: string;
+    addButtonBg: string;
+    focusRing: string;
+  };
 }) => {
   const { getTextStyle } = useTypography();
 
@@ -156,11 +169,11 @@ const TimelineCard = ({
     <div className="group/timeline-item relative flex items-start space-x-6">
       {/* Timeline Line */}
       {!isLast && (
-        <div className="absolute left-6 top-16 w-0.5 h-20 bg-gradient-to-b from-blue-600 to-blue-300"></div>
+        <div className={`absolute left-6 top-16 w-0.5 h-20 bg-gradient-to-b ${timelineColors.timelineLine} to-transparent`}></div>
       )}
 
       {/* Timeline Icon Circle */}
-      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0 shadow-lg z-10">
+      <div className={`w-12 h-12 bg-gradient-to-br ${timelineColors.iconBg} rounded-full flex items-center justify-center text-white font-bold flex-shrink-0 shadow-lg z-10`}>
         <IconEditableText
           mode={mode}
           value={getTimelineIcon(blockContent, index)}
@@ -178,15 +191,15 @@ const TimelineCard = ({
       </div>
 
       {/* Timeline Card */}
-      <div className="bg-white p-6 rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300 flex-1 relative">
+      <div className={`bg-white p-6 rounded-lg border border-gray-200 ${timelineColors.cardBorderHover} hover:shadow-lg transition-all duration-300 flex-1 relative`}>
         <div className="flex items-center gap-4 mb-3">
-          <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full font-semibold text-sm">
+          <div className={`${timelineColors.dateBadgeBg} ${timelineColors.dateBadgeText} px-3 py-1 rounded-full font-semibold text-sm`}>
             {mode !== 'preview' ? (
               <div
                 contentEditable
                 suppressContentEditableWarning
                 onBlur={(e) => onDateEdit(index, e.currentTarget.textContent || '')}
-                className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-blue-200"
+                className={`outline-none focus:ring-2 ${timelineColors.focusRing} focus:ring-opacity-50 rounded px-1 cursor-text ${timelineColors.dateBadgeHover}`}
               >
                 {timelineItem.date}
               </div>
@@ -201,7 +214,7 @@ const TimelineCard = ({
             contentEditable
             suppressContentEditableWarning
             onBlur={(e) => onEventEdit(index, e.currentTarget.textContent || '')}
-            className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 mb-2 cursor-text hover:bg-gray-50 font-bold text-gray-900 text-lg"
+            className={`outline-none focus:ring-2 ${timelineColors.focusRing} focus:ring-opacity-50 rounded px-1 mb-2 cursor-text hover:bg-gray-50 font-bold text-gray-900 text-lg`}
           >
             {timelineItem.event}
           </div>
@@ -214,7 +227,7 @@ const TimelineCard = ({
             contentEditable
             suppressContentEditableWarning
             onBlur={(e) => onDescriptionEdit(index, e.currentTarget.textContent || '')}
-            className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[48px] cursor-text hover:bg-gray-50 text-gray-600"
+            className={`outline-none focus:ring-2 ${timelineColors.focusRing} focus:ring-opacity-50 rounded px-1 min-h-[48px] cursor-text hover:bg-gray-50 text-gray-600`}
           >
             {timelineItem.description}
           </div>
@@ -258,6 +271,51 @@ export default function InnovationTimeline(props: LayoutComponentProps) {
   const { getTextStyle: getTypographyStyle } = useTypography();
   const store = useEditStore();
   const onboardingStore = useOnboardingStore();
+
+  // Detect theme: manual override > auto-detection > neutral fallback
+  const uiTheme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Theme-based color mapping
+  const getTimelineColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        timelineLine: 'from-orange-400',
+        iconBg: 'from-orange-500 to-orange-600',
+        dateBadgeBg: 'bg-orange-100',
+        dateBadgeText: 'text-orange-800',
+        dateBadgeHover: 'hover:bg-orange-200',
+        cardBorderHover: 'hover:border-orange-300',
+        addButtonBg: 'bg-orange-600 hover:bg-orange-700',
+        focusRing: 'focus:ring-orange-500'
+      },
+      cool: {
+        timelineLine: 'from-blue-400',
+        iconBg: 'from-blue-500 to-blue-600',
+        dateBadgeBg: 'bg-blue-100',
+        dateBadgeText: 'text-blue-800',
+        dateBadgeHover: 'hover:bg-blue-200',
+        cardBorderHover: 'hover:border-blue-300',
+        addButtonBg: 'bg-blue-600 hover:bg-blue-700',
+        focusRing: 'focus:ring-blue-500'
+      },
+      neutral: {
+        timelineLine: 'from-gray-400',
+        iconBg: 'from-gray-500 to-gray-600',
+        dateBadgeBg: 'bg-gray-100',
+        dateBadgeText: 'text-gray-800',
+        dateBadgeHover: 'hover:bg-gray-200',
+        cardBorderHover: 'hover:border-gray-400',
+        addButtonBg: 'bg-gray-600 hover:bg-gray-700',
+        focusRing: 'focus:ring-gray-500'
+      }
+    }[theme];
+  };
+
+  const timelineColors = getTimelineColors(uiTheme);
 
   // Auto-populate icons on initial generation
   useEffect(() => {
@@ -384,6 +442,7 @@ export default function InnovationTimeline(props: LayoutComponentProps) {
               canRemove={timelineItems.length > 3}
               sectionBackground={sectionBackground}
               isLast={index === timelineItems.length - 1}
+              timelineColors={timelineColors}
             />
           ))}
         </div>
@@ -392,7 +451,7 @@ export default function InnovationTimeline(props: LayoutComponentProps) {
           <div className="mt-8 text-center">
             <button
               onClick={handleAddItem}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200"
+              className={`inline-flex items-center gap-2 px-6 py-3 ${timelineColors.addButtonBg} text-white rounded-lg transition-colors duration-200`}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />

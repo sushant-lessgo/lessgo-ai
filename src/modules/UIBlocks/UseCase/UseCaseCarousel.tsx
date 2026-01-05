@@ -5,6 +5,8 @@ import { LayoutSection } from '@/components/layout/LayoutSection';
 import { EditableAdaptiveHeadline, EditableAdaptiveText } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface UseCaseCarouselContent {
   headline: string;
@@ -95,6 +97,48 @@ export default function UseCaseCarousel(props: LayoutComponentProps) {
   // Get use cases using the new helper function
   const useCases = getUseCases(blockContent);
 
+  // Theme detection with priority: manual > auto > neutral
+  const uiTheme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Get theme-specific colors
+  const getThemeColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        iconBg: 'bg-orange-100',
+        addBg: 'bg-orange-50',
+        addHoverBg: 'hover:bg-orange-100',
+        addBorder: 'border-orange-200',
+        addHoverBorder: 'hover:border-orange-300',
+        addIcon: 'text-orange-600',
+        addText: 'text-orange-700'
+      },
+      cool: {
+        iconBg: 'bg-blue-100',
+        addBg: 'bg-blue-50',
+        addHoverBg: 'hover:bg-blue-100',
+        addBorder: 'border-blue-200',
+        addHoverBorder: 'hover:border-blue-300',
+        addIcon: 'text-blue-600',
+        addText: 'text-blue-700'
+      },
+      neutral: {
+        iconBg: 'bg-gray-100',
+        addBg: 'bg-gray-50',
+        addHoverBg: 'hover:bg-gray-100',
+        addBorder: 'border-gray-200',
+        addHoverBorder: 'hover:border-gray-300',
+        addIcon: 'text-gray-600',
+        addText: 'text-gray-700'
+      }
+    }[theme];
+  };
+
+  const themeColors = getThemeColors(uiTheme);
+
   // Get use case icon from content fields by index
   const getUseCaseIcon = (index: number) => {
     const iconFields = [
@@ -164,7 +208,7 @@ export default function UseCaseCarousel(props: LayoutComponentProps) {
             return (
               <div key={index} className="bg-white p-6 rounded-xl border border-gray-200 min-w-[300px] flex-shrink-0 relative group/use-case-card">
                 {/* Icon section */}
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                <div className={`w-12 h-12 ${themeColors.iconBg} rounded-lg flex items-center justify-center mb-4`}>
                   <IconEditableText
                     mode={mode}
                     value={getUseCaseIcon(index)}
@@ -236,12 +280,12 @@ export default function UseCaseCarousel(props: LayoutComponentProps) {
           <div className="mt-8 text-center">
             <button
               onClick={handleAddUseCase}
-              className="flex items-center space-x-2 mx-auto px-4 py-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-xl transition-all duration-200 group"
+              className={`flex items-center space-x-2 mx-auto px-4 py-3 ${themeColors.addBg} ${themeColors.addHoverBg} border-2 ${themeColors.addBorder} ${themeColors.addHoverBorder} rounded-xl transition-all duration-200 group`}
             >
-              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className={`w-5 h-5 ${themeColors.addIcon}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              <span className="text-blue-700 font-medium">Add Use Case</span>
+              <span className={`${themeColors.addText} font-medium`}>Add Use Case</span>
             </button>
           </div>
         )}

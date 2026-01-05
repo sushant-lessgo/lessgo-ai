@@ -7,6 +7,8 @@ import { LayoutSection } from '@/components/layout/LayoutSection';
 import { EditableAdaptiveHeadline, EditableAdaptiveText } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { getIconFromCategory, getRandomIconFromCategory } from '@/utils/iconMapping';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface AlgorithmExplainerContent {
   headline: string;
@@ -79,7 +81,8 @@ const StepCard = ({
   onStepEdit,
   onDescriptionEdit,
   onRemoveStep,
-  canRemove = true
+  canRemove = true,
+  algorithmColors
 }: {
   stepData: StepItem;
   index: number;
@@ -89,12 +92,13 @@ const StepCard = ({
   onDescriptionEdit: (index: number, value: string) => void;
   onRemoveStep?: (index: number) => void;
   canRemove?: boolean;
+  algorithmColors: any;
 }) => {
   const { getTextStyle } = useTypography();
 
   return (
     <div className="relative group/algorithm-step text-center">
-      <div className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-lg">
+      <div className={`w-12 h-12 ${algorithmColors.stepBadgeBg} rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-lg`}>
         {index + 1}
       </div>
 
@@ -103,7 +107,7 @@ const StepCard = ({
           contentEditable
           suppressContentEditableWarning
           onBlur={(e) => onStepEdit(index, e.currentTarget.textContent || '')}
-          className="outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50 rounded px-2 py-1 min-h-[24px] cursor-text hover:bg-white hover:bg-opacity-10 font-semibold text-center mb-2"
+          className={`outline-none focus:ring-2 ${algorithmColors.focusRing} focus:ring-opacity-50 rounded px-2 py-1 min-h-[24px] cursor-text ${algorithmColors.hoverBg} font-semibold text-center mb-2`}
         >
           {stepData.step}
         </div>
@@ -118,7 +122,7 @@ const StepCard = ({
               contentEditable
               suppressContentEditableWarning
               onBlur={(e) => onDescriptionEdit(index, e.currentTarget.textContent || '')}
-              className="outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50 rounded px-2 py-1 min-h-[36px] cursor-text hover:bg-white hover:bg-opacity-10 text-sm opacity-90"
+              className={`outline-none focus:ring-2 ${algorithmColors.focusRing} focus:ring-opacity-50 rounded px-2 py-1 min-h-[36px] cursor-text ${algorithmColors.hoverBg} text-sm opacity-90`}
             >
               {stepData.description}
             </div>
@@ -134,7 +138,7 @@ const StepCard = ({
             e.stopPropagation();
             onRemoveStep?.(index);
           }}
-          className="opacity-0 group-hover/algorithm-step:opacity-100 absolute top-0 right-0 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-200"
+          className={`opacity-0 group-hover/algorithm-step:opacity-100 absolute top-0 right-0 w-6 h-6 ${algorithmColors.removeBg} rounded-full flex items-center justify-center transition-all duration-200`}
           title="Remove this step"
         >
           <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -163,6 +167,57 @@ export default function AlgorithmExplainer(props: LayoutComponentProps) {
   const { getTextStyle: getTypographyStyle } = useTypography();
   const store = useEditStore();
   const onboardingStore = useOnboardingStore();
+
+  // Detect theme: manual override > auto-detection > neutral fallback
+  const uiTheme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Theme-based color mapping
+  const getAlgorithmColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        algorithmName: 'text-orange-600',
+        algorithmDesc: 'text-gray-600',
+        gradientFrom: 'from-orange-600',
+        gradientTo: 'to-red-600',
+        stepBadgeBg: 'bg-white bg-opacity-20',
+        textColor: 'text-white',
+        hoverBg: 'hover:bg-white hover:bg-opacity-10',
+        focusRing: 'focus:ring-white',
+        addButtonBg: 'bg-white bg-opacity-20 hover:bg-opacity-30',
+        removeBg: 'bg-red-500 hover:bg-red-600'
+      },
+      cool: {
+        algorithmName: 'text-blue-600',
+        algorithmDesc: 'text-gray-600',
+        gradientFrom: 'from-blue-600',
+        gradientTo: 'to-indigo-700',
+        stepBadgeBg: 'bg-white bg-opacity-20',
+        textColor: 'text-white',
+        hoverBg: 'hover:bg-white hover:bg-opacity-10',
+        focusRing: 'focus:ring-white',
+        addButtonBg: 'bg-white bg-opacity-20 hover:bg-opacity-30',
+        removeBg: 'bg-red-500 hover:bg-red-600'
+      },
+      neutral: {
+        algorithmName: 'text-gray-600',
+        algorithmDesc: 'text-gray-600',
+        gradientFrom: 'from-gray-600',
+        gradientTo: 'to-gray-700',
+        stepBadgeBg: 'bg-white bg-opacity-20',
+        textColor: 'text-white',
+        hoverBg: 'hover:bg-white hover:bg-opacity-10',
+        focusRing: 'focus:ring-white',
+        addButtonBg: 'bg-white bg-opacity-20 hover:bg-opacity-30',
+        removeBg: 'bg-red-500 hover:bg-red-600'
+      }
+    }[theme];
+  };
+
+  const algorithmColors = getAlgorithmColors(uiTheme);
 
   const algorithmSteps = parseStepData(
     blockContent.algorithm_steps || '',
@@ -233,7 +288,7 @@ export default function AlgorithmExplainer(props: LayoutComponentProps) {
             backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
             colorTokens={colorTokens}
             variant="body"
-            className="text-blue-600 font-bold text-lg mb-2"
+            className={`${algorithmColors.algorithmName} font-bold text-lg mb-2`}
             sectionId={sectionId}
             elementKey="algorithm_name"
             sectionBackground={sectionBackground}
@@ -246,7 +301,7 @@ export default function AlgorithmExplainer(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-gray-600 max-w-3xl mx-auto"
+              className={`${algorithmColors.algorithmDesc} max-w-3xl mx-auto`}
               sectionId={sectionId}
               elementKey="algorithm_description"
               sectionBackground={sectionBackground}
@@ -254,7 +309,7 @@ export default function AlgorithmExplainer(props: LayoutComponentProps) {
           )}
         </div>
 
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-8 text-white">
+        <div className={`bg-gradient-to-r ${algorithmColors.gradientFrom} ${algorithmColors.gradientTo} rounded-2xl p-8 ${algorithmColors.textColor}`}>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
             {algorithmSteps.map((stepData, displayIndex) => (
               <StepCard
@@ -267,6 +322,7 @@ export default function AlgorithmExplainer(props: LayoutComponentProps) {
                 onDescriptionEdit={handleDescriptionEdit}
                 onRemoveStep={handleRemoveStep}
                 canRemove={algorithmSteps.length > 3}
+                algorithmColors={algorithmColors}
               />
             ))}
           </div>
@@ -275,7 +331,7 @@ export default function AlgorithmExplainer(props: LayoutComponentProps) {
             <div className="mt-8 text-center">
               <button
                 onClick={handleAddStep}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg transition-colors duration-200"
+                className={`inline-flex items-center gap-2 px-6 py-3 ${algorithmColors.addButtonBg} rounded-lg transition-colors duration-200`}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />

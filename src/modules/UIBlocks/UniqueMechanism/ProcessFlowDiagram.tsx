@@ -8,6 +8,8 @@ import { LayoutSection } from '@/components/layout/LayoutSection';
 import { EditableAdaptiveHeadline, EditableAdaptiveText } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface ProcessFlowDiagramContent {
   headline: string;
@@ -80,10 +82,64 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
-  
+
   const { getTextStyle: getTypographyStyle } = useTypography();
   const steps = blockContent.process_steps.split('|').map(s => s.trim()).filter(Boolean);
   const descriptions = blockContent.step_descriptions.split('|').map(d => d.trim()).filter(Boolean);
+
+  // Theme detection: manual override > auto-detection > neutral fallback
+  const uiTheme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Theme-based color mapping
+  const getProcessColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        gradientFrom: 'from-orange-600',
+        gradientTo: 'to-red-600',
+        glowBg: 'bg-orange-400/40',
+        benefitsBg: 'bg-orange-50',
+        benefitsBorder: 'border-orange-200',
+        benefitsTextPrimary: 'text-orange-900',
+        benefitsTextSecondary: 'text-orange-700',
+        benefitIconFrom: 'from-orange-500',
+        benefitIconTo: 'to-orange-600',
+        addButtonBg: 'bg-orange-600',
+        addButtonHover: 'hover:bg-orange-700'
+      },
+      cool: {
+        gradientFrom: 'from-blue-600',
+        gradientTo: 'to-indigo-700',
+        glowBg: 'bg-blue-400/40',
+        benefitsBg: 'bg-blue-50',
+        benefitsBorder: 'border-blue-200',
+        benefitsTextPrimary: 'text-blue-900',
+        benefitsTextSecondary: 'text-blue-700',
+        benefitIconFrom: 'from-blue-500',
+        benefitIconTo: 'to-blue-600',
+        addButtonBg: 'bg-blue-600',
+        addButtonHover: 'hover:bg-blue-700'
+      },
+      neutral: {
+        gradientFrom: 'from-gray-600',
+        gradientTo: 'to-gray-700',
+        glowBg: 'bg-gray-400/40',
+        benefitsBg: 'bg-gray-50',
+        benefitsBorder: 'border-gray-200',
+        benefitsTextPrimary: 'text-gray-900',
+        benefitsTextSecondary: 'text-gray-700',
+        benefitIconFrom: 'from-gray-500',
+        benefitIconTo: 'to-gray-600',
+        addButtonBg: 'bg-gray-600',
+        addButtonHover: 'hover:bg-gray-700'
+      }
+    }[theme];
+  };
+
+  const processColors = getProcessColors(uiTheme);
 
   // Helper function to get appropriate grid class based on step count
   const getGridCols = (stepCount: number) => {
@@ -190,14 +246,14 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
     {/* Step Circle */}
     <div className="relative mb-5">
       <div
-        className="
-          relative z-10 w-24 h-24 
-          rounded-full flex items-center justify-center 
+        className={`
+          relative z-10 w-24 h-24
+          rounded-full flex items-center justify-center
           text-white font-semibold text-xl
-          bg-gradient-to-br from-blue-400 via-blue-500 to-indigo-600
+          bg-gradient-to-br ${processColors.gradientFrom} ${processColors.gradientTo}
           shadow-[0_0_30px_rgba(59,130,246,0.55),0_10px_25px_rgba(15,23,42,0.35)]
           ring-1 ring-white/25
-        "
+        `}
       >
         {index + 1}
       </div>
@@ -205,7 +261,7 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
         className={`
           pointer-events-none absolute inset-0
           rounded-full blur-xl
-          bg-blue-400/40
+          ${processColors.glowBg}
           opacity-0
           transition-opacity duration-300
           group-hover/process-step-${index}:opacity-80
@@ -317,7 +373,7 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
           <div className="flex justify-center mt-8">
             <button
               onClick={handleAddStep}
-              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+              className={`flex items-center space-x-2 px-4 py-2 ${processColors.addButtonBg} text-white rounded-lg ${processColors.addButtonHover} transition-colors duration-200`}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -329,18 +385,18 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
 
         {/* Key Benefits */}
         {(blockContent.benefits_title || blockContent.benefit_titles || mode === 'edit') && (
-          <div className="mt-16 bg-blue-50 rounded-2xl p-8 border border-blue-200">
+          <div className={`mt-16 ${processColors.benefitsBg} rounded-2xl p-8 border ${processColors.benefitsBorder}`}>
             <EditableAdaptiveHeadline
               mode={mode}
               value={blockContent.benefits_title || ''}
               onEdit={(value) => handleContentUpdate('benefits_title', value)}
               level="h3"
               backgroundType="neutral"
-              colorTokens={{ ...colorTokens, textPrimary: 'text-blue-900' }}
-              className="text-center font-bold text-blue-900 mb-6"
+              colorTokens={{ ...colorTokens, textPrimary: processColors.benefitsTextPrimary }}
+              className={`text-center font-bold ${processColors.benefitsTextPrimary} mb-6`}
               sectionId={sectionId}
               elementKey="benefits_title"
-              sectionBackground="bg-blue-50"
+              sectionBackground={processColors.benefitsBg}
             />
             <div className="grid md:grid-cols-3 gap-6">
               {blockContent.benefit_titles && blockContent.benefit_titles.split('|').map((title, index) => {
@@ -352,13 +408,13 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
                 ];
                 return (
                   <div key={index} className="text-center">
-                    <div className="w-16 h-16 rounded-2xl
+                    <div className={`w-16 h-16 rounded-2xl
                         flex items-center justify-center mx-auto mb-4
-                        bg-gradient-to-br from-blue-400 via-blue-500 to-indigo-600
+                        bg-gradient-to-br ${processColors.benefitIconFrom} ${processColors.benefitIconTo}
                         shadow-[0_4px_18px_rgba(59,130,246,0.35),0_6px_14px_rgba(15,23,42,0.2)]
                         ring-1 ring-white/20
                         backdrop-blur-sm
-                        text-white">
+                        text-white`}>
                       <IconEditableText
                         mode={mode}
                         value={iconFields[index] || '✨'}
@@ -382,14 +438,14 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
                         handleContentUpdate('benefit_titles', updatedTitles.join('|'));
                       }}
                       backgroundType="neutral"
-                      colorTokens={{ ...colorTokens, textPrimary: 'text-blue-900' }}
+                      colorTokens={{ ...colorTokens, textPrimary: processColors.benefitsTextPrimary }}
                       variant="body"
                       className="font-semibold mb-2"
                       formatState={{ textAlign: 'center' } as any}
                       placeholder={`Benefit ${index + 1} title`}
                       sectionId={sectionId}
                       elementKey={`benefit_title_${index + 1}`}
-                      sectionBackground="bg-blue-50"
+                      sectionBackground={processColors.benefitsBg}
                       data-section-id={sectionId}
                       data-element-key={`benefit_title_${index + 1}`}
                     />
@@ -403,14 +459,14 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
                         handleContentUpdate('benefit_descriptions', updatedDescriptions.join('|'));
                       }}
                       backgroundType="neutral"
-                      colorTokens={{ ...colorTokens, textSecondary: 'text-blue-700' }}
+                      colorTokens={{ ...colorTokens, textSecondary: processColors.benefitsTextSecondary }}
                       variant="body"
                       className="text-sm"
                       formatState={{ textAlign: 'center' } as any}
                       placeholder={`Benefit ${index + 1} description`}
                       sectionId={sectionId}
                       elementKey={`benefit_description_${index + 1}`}
-                      sectionBackground="bg-blue-50"
+                      sectionBackground={processColors.benefitsBg}
                       data-section-id={sectionId}
                       data-element-key={`benefit_description_${index + 1}`}
                     />

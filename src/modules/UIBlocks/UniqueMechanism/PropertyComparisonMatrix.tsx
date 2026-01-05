@@ -6,6 +6,8 @@ import { LayoutSection } from '@/components/layout/LayoutSection';
 import { EditableAdaptiveHeadline, EditableAdaptiveText } from '@/components/layout/EditableContent';
 import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface PropertyComparisonMatrixContent {
   headline: string;
@@ -30,7 +32,49 @@ const CONTENT_SCHEMA = {
 export default function PropertyComparisonMatrix(props: LayoutComponentProps) {
   const { sectionId, mode, blockContent, colorTokens, getTextStyle, sectionBackground, handleContentUpdate } = useLayoutComponent<PropertyComparisonMatrixContent>({ ...props, contentSchema: CONTENT_SCHEMA });
   const { getTextStyle: getTypographyStyle } = useTypography();
-  
+
+  // Detect theme: manual override > auto-detection > neutral fallback
+  const uiTheme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Theme-based color mapping
+  const getThemeColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        headerBg: 'bg-orange-50',
+        headerBorder: 'border-orange-200',
+        usColumnBg: 'bg-green-50',
+        usColumnText: 'text-green-700',
+        competitorText: 'text-gray-500',
+        cardBorder: 'border-orange-200',
+        cardShadow: 'shadow-md shadow-orange-100/50'
+      },
+      cool: {
+        headerBg: 'bg-blue-50',
+        headerBorder: 'border-blue-200',
+        usColumnBg: 'bg-green-50',
+        usColumnText: 'text-green-700',
+        competitorText: 'text-gray-500',
+        cardBorder: 'border-blue-200',
+        cardShadow: 'shadow-md shadow-blue-100/50'
+      },
+      neutral: {
+        headerBg: 'bg-gray-50',
+        headerBorder: 'border-gray-200',
+        usColumnBg: 'bg-green-50',
+        usColumnText: 'text-green-700',
+        competitorText: 'text-gray-500',
+        cardBorder: 'border-gray-200',
+        cardShadow: 'shadow-lg'
+      }
+    }[theme];
+  };
+
+  const themeColors = getThemeColors(uiTheme);
+
   // Parse data using utility functions (following IconGrid pattern)
   const properties = parsePipeData(blockContent.properties);
   const usValues = parsePipeData(blockContent.us_values);
@@ -118,8 +162,8 @@ export default function PropertyComparisonMatrix(props: LayoutComponentProps) {
       <div className="max-w-4xl mx-auto">
         <EditableAdaptiveHeadline mode={mode} value={blockContent.headline || ''} onEdit={(value) => handleContentUpdate('headline', value)} level="h2" backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')} colorTokens={colorTokens} className="text-center mb-12" sectionId={sectionId} elementKey="headline" sectionBackground={sectionBackground} />
         
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
-          <div className="grid grid-cols-3 bg-gray-50 border-b border-gray-200">
+        <div className={`bg-white rounded-xl overflow-hidden border ${themeColors.cardBorder} ${themeColors.cardShadow}`}>
+          <div className={`grid grid-cols-3 ${themeColors.headerBg} border-b ${themeColors.headerBorder}`}>
             <div style={bodyStyle} className="p-4 font-bold text-gray-900">
               <EditableAdaptiveText
                 mode={mode}

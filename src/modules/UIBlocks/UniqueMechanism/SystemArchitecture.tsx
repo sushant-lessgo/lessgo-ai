@@ -6,6 +6,8 @@ import { LayoutSection } from '@/components/layout/LayoutSection';
 import { EditableAdaptiveHeadline, EditableAdaptiveText } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface SystemArchitectureContent {
   headline: string;
@@ -44,6 +46,45 @@ const CONTENT_SCHEMA = {
 export default function SystemArchitecture(props: LayoutComponentProps) {
   const { sectionId, mode, blockContent, colorTokens, getTextStyle, sectionBackground, handleContentUpdate } = useLayoutComponent<SystemArchitectureContent>({ ...props, contentSchema: CONTENT_SCHEMA });
   const { getTextStyle: getTypographyStyle } = useTypography();
+
+  // Detect theme: manual override > auto-detection > neutral fallback
+  const uiTheme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  const getArchitectureColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        iconBg: 'bg-orange-100',
+        iconText: 'text-orange-600',
+        addButtonBg: 'bg-orange-50 hover:bg-orange-100',
+        addButtonBorder: 'border-orange-200 hover:border-orange-300',
+        addButtonIcon: 'text-orange-600',
+        addButtonText: 'text-orange-700'
+      },
+      cool: {
+        iconBg: 'bg-blue-100',
+        iconText: 'text-blue-600',
+        addButtonBg: 'bg-blue-50 hover:bg-blue-100',
+        addButtonBorder: 'border-blue-200 hover:border-blue-300',
+        addButtonIcon: 'text-blue-600',
+        addButtonText: 'text-blue-700'
+      },
+      neutral: {
+        iconBg: 'bg-gray-100',
+        iconText: 'text-gray-600',
+        addButtonBg: 'bg-gray-50 hover:bg-gray-100',
+        addButtonBorder: 'border-gray-200 hover:border-gray-300',
+        addButtonIcon: 'text-gray-600',
+        addButtonText: 'text-gray-700'
+      }
+    }[theme];
+  };
+
+  const colors = getArchitectureColors(uiTheme);
+
   // Get components with individual fields taking priority over pipe-separated format
   const getComponents = (): string[] => {
     const individualComponents = [
@@ -124,7 +165,7 @@ export default function SystemArchitecture(props: LayoutComponentProps) {
                   </button>
                 )}
 
-                <div className="w-16 h-16 bg-blue-100 rounded-lg mx-auto mb-4 flex items-center justify-center">
+                <div className={`w-16 h-16 ${colors.iconBg} rounded-lg mx-auto mb-4 flex items-center justify-center`}>
                   <IconEditableText
                     mode={mode}
                     value={getComponentIcon(index)}
@@ -167,12 +208,12 @@ export default function SystemArchitecture(props: LayoutComponentProps) {
           <div className="mt-8 text-center">
             <button
               onClick={addComponent}
-              className="flex items-center space-x-2 mx-auto px-4 py-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-xl transition-all duration-200 group"
+              className={`flex items-center space-x-2 mx-auto px-4 py-3 ${colors.addButtonBg} border-2 ${colors.addButtonBorder} rounded-xl transition-all duration-200 group`}
             >
-              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className={`w-5 h-5 ${colors.addButtonIcon}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              <span className="text-blue-700 font-medium">Add Component</span>
+              <span className={`${colors.addButtonText} font-medium`}>Add Component</span>
             </button>
           </div>
         )}

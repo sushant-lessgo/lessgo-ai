@@ -21,6 +21,8 @@ import {
   updateListData
 } from '@/utils/dataParsingUtils';
 import { getIconFromCategory, getRandomIconFromCategory } from '@/utils/iconMapping';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface BeforeAfterQuoteContent {
   headline: string;
@@ -140,6 +142,35 @@ export default function BeforeAfterQuote(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Theme detection: manual override > auto-detection > neutral fallback
+  const theme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Theme-based before/after colors
+  const getBeforeAfterColors = (theme: UIBlockTheme) => {
+    const themeColors = {
+      warm: {
+        before: { bg: 'bg-orange-50', icon: 'bg-orange-500' },
+        after: { bg: 'bg-amber-50', icon: 'bg-amber-500' }
+      },
+      cool: {
+        before: { bg: 'bg-blue-50', icon: 'bg-blue-500' },
+        after: { bg: 'bg-cyan-50', icon: 'bg-cyan-500' }
+      },
+      neutral: {
+        before: { bg: 'bg-gray-50', icon: 'bg-gray-500' },
+        after: { bg: 'bg-slate-50', icon: 'bg-slate-500' }
+      }
+    };
+
+    return themeColors[theme];
+  };
+
+  const colors = getBeforeAfterColors(theme);
 
   // Create typography styles
   const h3Style = getTypographyStyle('h3');
@@ -314,11 +345,12 @@ export default function BeforeAfterQuote(props: LayoutComponentProps) {
     ? 'hover:bg-white/20 hover:border-white/30'
     : 'hover:border-blue-300 hover:shadow-lg';
 
-  const TransformationCard = React.memo(({ transformation, index, canRemove, onRemove }: {
+  const TransformationCard = React.memo(({ transformation, index, canRemove, onRemove, colors }: {
     transformation: typeof transformations[0];
     index: number;
     canRemove: boolean;
     onRemove: () => void;
+    colors: ReturnType<typeof getBeforeAfterColors>;
   }) => {
     const customerData = customerAvatarData.find(c => c.name === transformation.customerName);
     
@@ -345,9 +377,9 @@ export default function BeforeAfterQuote(props: LayoutComponentProps) {
         <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-200">
           
           {/* Before */}
-          <div className="p-6 bg-red-50">
+          <div className={`p-6 ${colors.before.bg}`}>
             <div className="flex items-center space-x-2 mb-4">
-              <div className="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center group/icon-edit relative">
+              <div className={`w-8 h-8 rounded-full ${colors.before.icon} flex items-center justify-center group/icon-edit relative`}>
                 <IconEditableText
                   mode={mode}
                   value={blockContent.before_icon || '❌'}
@@ -378,9 +410,9 @@ export default function BeforeAfterQuote(props: LayoutComponentProps) {
           </div>
           
           {/* After */}
-          <div className="p-6 bg-green-50">
+          <div className={`p-6 ${colors.after.bg}`}>
             <div className="flex items-center space-x-2 mb-4">
-              <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center group/icon-edit relative">
+              <div className={`w-8 h-8 rounded-full ${colors.after.icon} flex items-center justify-center group/icon-edit relative`}>
                 <IconEditableText
                   mode={mode}
                   value={blockContent.after_icon || '✅'}
@@ -527,6 +559,7 @@ export default function BeforeAfterQuote(props: LayoutComponentProps) {
               index={index}
               canRemove={transformations.length > 1}
               onRemove={() => removeTransformation(index)}
+              colors={colors}
             />
           ))}
         </div>

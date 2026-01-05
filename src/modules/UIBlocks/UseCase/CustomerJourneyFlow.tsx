@@ -5,6 +5,8 @@ import { LayoutSection } from '@/components/layout/LayoutSection';
 import { EditableAdaptiveHeadline, EditableAdaptiveText } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface CustomerJourneyFlowContent {
   headline: string;
@@ -119,6 +121,66 @@ export default function CustomerJourneyFlow(props: LayoutComponentProps) {
 
   const journeyStages = getJourneyStages();
 
+  // Theme detection with priority: manual > auto > neutral
+  const uiTheme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Get theme-specific colors
+  const getThemeColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        connectingLine: 'bg-orange-200',
+        gradientFrom: 'from-orange-500',
+        gradientTo: 'to-orange-600',
+        footerBg: 'bg-orange-50',
+        footerBorder: 'border-orange-200',
+        footerTitle: 'text-orange-900',
+        footerDesc: 'text-orange-700',
+        addBg: 'bg-orange-50',
+        addHoverBg: 'hover:bg-orange-100',
+        addBorder: 'border-orange-200',
+        addHoverBorder: 'hover:border-orange-300',
+        addIcon: 'text-orange-600',
+        addText: 'text-orange-700'
+      },
+      cool: {
+        connectingLine: 'bg-blue-200',
+        gradientFrom: 'from-blue-500',
+        gradientTo: 'to-indigo-600',
+        footerBg: 'bg-blue-50',
+        footerBorder: 'border-blue-200',
+        footerTitle: 'text-blue-900',
+        footerDesc: 'text-blue-700',
+        addBg: 'bg-blue-50',
+        addHoverBg: 'hover:bg-blue-100',
+        addBorder: 'border-blue-200',
+        addHoverBorder: 'hover:border-blue-300',
+        addIcon: 'text-blue-600',
+        addText: 'text-blue-700'
+      },
+      neutral: {
+        connectingLine: 'bg-gray-200',
+        gradientFrom: 'from-gray-500',
+        gradientTo: 'to-gray-600',
+        footerBg: 'bg-gray-50',
+        footerBorder: 'border-gray-200',
+        footerTitle: 'text-gray-900',
+        footerDesc: 'text-gray-700',
+        addBg: 'bg-gray-50',
+        addHoverBg: 'hover:bg-gray-100',
+        addBorder: 'border-gray-200',
+        addHoverBorder: 'hover:border-gray-300',
+        addIcon: 'text-gray-600',
+        addText: 'text-gray-700'
+      }
+    }[theme];
+  };
+
+  const themeColors = getThemeColors(uiTheme);
+
   // Handle adding a new journey stage
   const handleAddStage = () => {
     // Find the first empty slot
@@ -156,13 +218,13 @@ export default function CustomerJourneyFlow(props: LayoutComponentProps) {
       <div className="max-w-7xl mx-auto">
         <EditableAdaptiveHeadline mode={mode} value={blockContent.headline || ''} onEdit={(value) => handleContentUpdate('headline', value)} level="h2" backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')} colorTokens={colorTokens} className="text-center mb-16" sectionId={sectionId} elementKey="headline" sectionBackground={sectionBackground} />
         <div className="relative">
-          <div className="hidden lg:block absolute top-1/2 left-0 right-0 h-1 bg-blue-200 transform -translate-y-1/2"></div>
+          <div className={`hidden lg:block absolute top-1/2 left-0 right-0 h-1 ${themeColors.connectingLine} transform -translate-y-1/2`}></div>
           <div className={`grid gap-8 ${journeyStages.length <= 3 ? 'lg:grid-cols-3' : journeyStages.length === 4 ? 'lg:grid-cols-4' : journeyStages.length === 5 ? 'lg:grid-cols-5' : 'lg:grid-cols-6'}`}>
             {journeyStages.map((stage) => {
               const stageNumber = stage.index + 1;
               return (
                 <div key={stage.index} className={`relative text-center group/journey-stage-${stage.index}`}>
-                  <div className="relative z-10 w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex flex-col items-center justify-center text-white font-bold mx-auto mb-4 shadow-lg">
+                  <div className={`relative z-10 w-20 h-20 bg-gradient-to-br ${themeColors.gradientFrom} ${themeColors.gradientTo} rounded-full flex flex-col items-center justify-center text-white font-bold mx-auto mb-4 shadow-lg`}>
                     <div className="text-sm">{stageNumber}</div>
                     <IconEditableText
                       mode={mode}
@@ -231,25 +293,25 @@ export default function CustomerJourneyFlow(props: LayoutComponentProps) {
           <div className="mt-8 text-center">
             <button
               onClick={handleAddStage}
-              className="inline-flex items-center space-x-2 px-4 py-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-xl transition-all duration-200 group"
+              className={`inline-flex items-center space-x-2 px-4 py-3 ${themeColors.addBg} ${themeColors.addHoverBg} border-2 ${themeColors.addBorder} ${themeColors.addHoverBorder} rounded-xl transition-all duration-200 group`}
             >
-              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className={`w-5 h-5 ${themeColors.addIcon}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              <span className="text-blue-700 font-medium">Add Journey Stage</span>
+              <span className={`${themeColors.addText} font-medium`}>Add Journey Stage</span>
             </button>
           </div>
         )}
         {(blockContent.footer_title || blockContent.footer_description || mode === 'edit') && (
-          <div className="mt-16 bg-blue-50 rounded-2xl p-8 text-center border border-blue-200">
+          <div className={`mt-16 ${themeColors.footerBg} rounded-2xl p-8 text-center border ${themeColors.footerBorder}`}>
             <EditableAdaptiveHeadline
               mode={mode}
               value={blockContent.footer_title || ''}
               onEdit={(value) => handleContentUpdate('footer_title', value)}
               level="h3"
               backgroundType="neutral"
-              colorTokens={{ ...colorTokens, textPrimary: 'text-blue-900' }}
-              className="font-bold text-blue-900 mb-4"
+              colorTokens={{ ...colorTokens, textPrimary: themeColors.footerTitle }}
+              className={`font-bold ${themeColors.footerTitle} mb-4`}
               sectionId={sectionId}
               elementKey="footer_title"
               sectionBackground="bg-blue-50"
@@ -259,9 +321,9 @@ export default function CustomerJourneyFlow(props: LayoutComponentProps) {
               value={blockContent.footer_description || ''}
               onEdit={(value) => handleContentUpdate('footer_description', value)}
               backgroundType="neutral"
-              colorTokens={{ ...colorTokens, textPrimary: 'text-blue-700' }}
+              colorTokens={{ ...colorTokens, textPrimary: themeColors.footerDesc }}
               variant="body"
-              className="text-blue-700"
+              className={themeColors.footerDesc}
               placeholder="Add footer description..."
               sectionId={sectionId}
               elementKey="footer_description"

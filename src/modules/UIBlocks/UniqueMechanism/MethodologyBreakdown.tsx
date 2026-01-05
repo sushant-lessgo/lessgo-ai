@@ -8,6 +8,8 @@ import { EditableAdaptiveHeadline, EditableAdaptiveText } from '@/components/lay
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { getIconFromCategory, getRandomIconFromCategory } from '@/utils/iconMapping';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface MethodologyBreakdownContent {
   headline: string;
@@ -133,7 +135,8 @@ const PrincipleCard = ({
   colorTokens,
   handleContentUpdate,
   canRemove = true,
-  sectionBackground
+  sectionBackground,
+  methodologyColors
 }: {
   principle: PrincipleItem;
   index: number;
@@ -147,12 +150,24 @@ const PrincipleCard = ({
   handleContentUpdate: (field: keyof MethodologyBreakdownContent, value: string) => void;
   canRemove?: boolean;
   sectionBackground?: string;
+  methodologyColors: {
+    headerGradient: string;
+    headerIconBg: string;
+    headerText: string;
+    headerSubtext: string;
+    principleIconBg: string;
+    principleCardBorderHover: string;
+    resultMetricText: string;
+    resultMetricHover: string;
+    addButtonBg: string;
+    focusRing: string;
+  };
 }) => {
   const { getTextStyle } = useTypography();
 
   return (
-    <div className="relative group/principle bg-white rounded-xl p-8 border border-gray-200 hover:shadow-lg hover:border-purple-200 transition-all duration-300">
-      <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-lg mb-4">
+    <div className={`relative group/principle bg-white rounded-xl p-8 border border-gray-200 hover:shadow-lg ${methodologyColors.principleCardBorderHover} transition-all duration-300`}>
+      <div className={`w-12 h-12 bg-gradient-to-br ${methodologyColors.principleIconBg} rounded-lg flex items-center justify-center text-white font-bold text-lg mb-4`}>
         <IconEditableText
           mode={mode}
           value={getPrincipleIcon(blockContent, index)}
@@ -174,7 +189,7 @@ const PrincipleCard = ({
           contentEditable
           suppressContentEditableWarning
           onBlur={(e) => onNameEdit(index, e.currentTarget.textContent || '')}
-          className="outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 rounded px-1 mb-3 cursor-text hover:bg-gray-50 font-bold text-gray-900 text-xl"
+          className={`outline-none focus:ring-2 ${methodologyColors.focusRing} focus:ring-opacity-50 rounded px-1 mb-3 cursor-text hover:bg-gray-50 font-bold text-gray-900 text-xl`}
         >
           {principle.name}
         </div>
@@ -187,7 +202,7 @@ const PrincipleCard = ({
           contentEditable
           suppressContentEditableWarning
           onBlur={(e) => onDetailEdit(index, e.currentTarget.textContent || '')}
-          className="outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 rounded px-1 min-h-[48px] cursor-text hover:bg-gray-50 text-gray-600"
+          className={`outline-none focus:ring-2 ${methodologyColors.focusRing} focus:ring-opacity-50 rounded px-1 min-h-[48px] cursor-text hover:bg-gray-50 text-gray-600`}
         >
           {principle.detail}
         </div>
@@ -230,6 +245,57 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
   const { getTextStyle: getTypographyStyle } = useTypography();
   const store = useEditStore();
   const onboardingStore = useOnboardingStore();
+
+  // Detect theme: manual override > auto-detection > neutral fallback
+  const uiTheme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Theme-based color mapping
+  const getMethodologyColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        headerGradient: 'from-orange-600 to-red-600',
+        headerIconBg: 'bg-white bg-opacity-20',
+        headerText: 'text-white',
+        headerSubtext: 'text-orange-100',
+        principleIconBg: 'from-orange-500 to-red-600',
+        principleCardBorderHover: 'hover:border-orange-200',
+        resultMetricText: 'text-orange-600',
+        resultMetricHover: 'hover:bg-orange-50',
+        addButtonBg: 'bg-orange-600 hover:bg-orange-700',
+        focusRing: 'focus:ring-orange-500'
+      },
+      cool: {
+        headerGradient: 'from-blue-600 to-indigo-700',
+        headerIconBg: 'bg-white bg-opacity-20',
+        headerText: 'text-white',
+        headerSubtext: 'text-blue-100',
+        principleIconBg: 'from-blue-500 to-indigo-600',
+        principleCardBorderHover: 'hover:border-blue-200',
+        resultMetricText: 'text-blue-600',
+        resultMetricHover: 'hover:bg-blue-50',
+        addButtonBg: 'bg-blue-600 hover:bg-blue-700',
+        focusRing: 'focus:ring-blue-500'
+      },
+      neutral: {
+        headerGradient: 'from-gray-700 to-gray-800',
+        headerIconBg: 'bg-white bg-opacity-20',
+        headerText: 'text-white',
+        headerSubtext: 'text-gray-200',
+        principleIconBg: 'from-gray-500 to-gray-700',
+        principleCardBorderHover: 'hover:border-gray-300',
+        resultMetricText: 'text-gray-700',
+        resultMetricHover: 'hover:bg-gray-50',
+        addButtonBg: 'bg-gray-600 hover:bg-gray-700',
+        focusRing: 'focus:ring-gray-500'
+      }
+    }[theme];
+  };
+
+  const methodologyColors = getMethodologyColors(uiTheme);
 
   // Auto-populate icons on initial generation
   useEffect(() => {
@@ -313,7 +379,7 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
         </div>
 
         {/* Methodology Header */}
-        <div className="bg-gradient-to-r from-purple-600 to-indigo-700 rounded-2xl p-12 text-white text-center mb-12">
+        <div className={`bg-gradient-to-r ${methodologyColors.headerGradient} rounded-2xl p-12 text-white text-center mb-12`}>
           <div className="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-6">
             <IconEditableText
               mode={mode}
@@ -344,9 +410,9 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
             value={blockContent.methodology_description || ''}
             onEdit={(value) => handleContentUpdate('methodology_description', value)}
             backgroundType="primary"
-            colorTokens={{ ...colorTokens, textSecondary: 'text-purple-100' }}
+            colorTokens={{ ...colorTokens, textSecondary: methodologyColors.headerSubtext }}
             variant="body"
-            className="text-purple-100 text-lg max-w-3xl mx-auto"
+            className={`${methodologyColors.headerSubtext} text-lg max-w-3xl mx-auto`}
             sectionId={sectionId}
             elementKey="methodology_description"
             sectionBackground="bg-purple-600"
@@ -376,6 +442,7 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
               handleContentUpdate={handleContentUpdate}
               canRemove={principles.length > 3}
               sectionBackground={sectionBackground}
+              methodologyColors={methodologyColors}
             />
           ))}
         </div>
@@ -384,7 +451,7 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
           <div className="mb-12 text-center">
             <button
               onClick={handleAddPrinciple}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors duration-200"
+              className={`inline-flex items-center gap-2 px-6 py-3 ${methodologyColors.addButtonBg} text-white rounded-lg transition-colors duration-200`}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -415,7 +482,7 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {results.map((result, index) => (
                 <div key={result.id} className="text-center">
-                  <div className="text-4xl font-bold text-purple-600 mb-2">
+                  <div className={`text-4xl font-bold ${methodologyColors.resultMetricText} mb-2`}>
                     {mode !== 'preview' ? (
                       <div
                         contentEditable
@@ -425,7 +492,7 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
                           metrics[index] = e.currentTarget.textContent || '';
                           handleContentUpdate('result_metrics', metrics.join('|'));
                         }}
-                        className="outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-purple-50"
+                        className={`outline-none focus:ring-2 ${methodologyColors.focusRing} focus:ring-opacity-50 rounded px-1 cursor-text ${methodologyColors.resultMetricHover}`}
                       >
                         {result.metric}
                       </div>

@@ -4,13 +4,15 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
-  EditableAdaptiveText 
+import {
+  EditableAdaptiveHeadline,
+  EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 // Content interface for type safety
 interface PersonaGridContent {
@@ -110,15 +112,16 @@ const removePersona = (names: string, descriptions: string, indexToRemove: numbe
 };
 
 // Persona Avatar Component
-const PersonaAvatar = React.memo(({ 
-  name, 
-  iconOverride, 
-  mode, 
-  colorTokens, 
-  sectionId, 
-  index, 
-  onIconEdit 
-}: { 
+const PersonaAvatar = React.memo(({
+  name,
+  iconOverride,
+  mode,
+  colorTokens,
+  sectionId,
+  index,
+  onIconEdit,
+  themeColors
+}: {
   name: string;
   iconOverride?: string;
   mode: 'edit' | 'preview';
@@ -126,48 +129,29 @@ const PersonaAvatar = React.memo(({
   sectionId: string;
   index: number;
   onIconEdit: (index: number, value: string) => void;
-}) => {
-  // Generate avatar based on persona type
-  const getPersonaInfo = (personaName: string) => {
-    const lower = personaName.toLowerCase();
-    
-    // Professional color schemes for different roles
-    const roleColors = {
-      marketing: { bg: 'from-pink-500 to-purple-600', icon: 'megaphone' },
-      sales: { bg: 'from-green-500 to-emerald-600', icon: 'trending-up' },
-      operations: { bg: 'from-blue-500 to-indigo-600', icon: 'settings' },
-      product: { bg: 'from-orange-500 to-red-600', icon: 'cube' },
-      customer: { bg: 'from-teal-500 to-cyan-600', icon: 'users' },
-      finance: { bg: 'from-yellow-500 to-amber-600', icon: 'chart' },
-      default: { bg: 'from-gray-500 to-slate-600', icon: 'user' }
-    };
-    
-    let roleInfo = roleColors.default;
-    
-    if (lower.includes('marketing')) roleInfo = roleColors.marketing;
-    else if (lower.includes('sales')) roleInfo = roleColors.sales;
-    else if (lower.includes('operations') || lower.includes('ops')) roleInfo = roleColors.operations;
-    else if (lower.includes('product')) roleInfo = roleColors.product;
-    else if (lower.includes('customer') || lower.includes('success')) roleInfo = roleColors.customer;
-    else if (lower.includes('finance') || lower.includes('accounting')) roleInfo = roleColors.finance;
-    
-    // Generate initials
-    const initials = personaName
-      .split(' ')
-      .map(word => word.charAt(0))
-      .join('')
-      .substring(0, 2)
-      .toUpperCase();
-    
-    return { ...roleInfo, initials };
+  themeColors: {
+    avatarGradient: string;
+    avatarRing: string;
+    cardBorder: string;
+    cardHover: string;
+    addButtonBg: string;
+    addButtonBorder: string;
+    addButtonHover: string;
+    addButtonText: string;
   };
-
-  const { bg, initials } = getPersonaInfo(name);
+}) => {
+  // Generate initials from name
+  const initials = name
+    .split(' ')
+    .map(word => word.charAt(0))
+    .join('')
+    .substring(0, 2)
+    .toUpperCase();
 
   return (
     <div className="relative mb-4">
       {/* Main Avatar Circle */}
-      <div className={`w-16 h-16 bg-gradient-to-br ${bg} rounded-full flex items-center justify-center text-white shadow-[0_6px_18px_rgba(15,23,42,0.18)] ring-1 ring-white/25 backdrop-blur-sm mx-auto transition-all duration-300 group-hover:shadow-[0_12px_32px_rgba(15,23,42,0.22)] group-hover:-translate-y-0.5`}>
+      <div className={`w-16 h-16 bg-gradient-to-br ${themeColors.avatarGradient} rounded-full flex items-center justify-center text-white shadow-[0_6px_18px_rgba(15,23,42,0.18)] ${themeColors.avatarRing} ring-1 backdrop-blur-sm mx-auto transition-all duration-300 group-hover:shadow-[0_12px_32px_rgba(15,23,42,0.22)] group-hover:-translate-y-0.5`}>
         {iconOverride ? (
           <IconEditableText
             mode={mode}
@@ -213,7 +197,8 @@ const PersonaCard = React.memo(({
   onDescriptionEdit,
   onIconEdit,
   onRemovePersona,
-  canRemove = true
+  canRemove = true,
+  themeColors
 }: {
   persona: Persona;
   mode: 'edit' | 'preview';
@@ -227,20 +212,31 @@ const PersonaCard = React.memo(({
   onIconEdit: (index: number, value: string) => void;
   onRemovePersona?: (index: number) => void;
   canRemove?: boolean;
+  themeColors: {
+    avatarGradient: string;
+    avatarRing: string;
+    cardBorder: string;
+    cardHover: string;
+    addButtonBg: string;
+    addButtonBorder: string;
+    addButtonHover: string;
+    addButtonText: string;
+  };
 }) => {
-  
+
   return (
-    <div className="group/persona-card relative bg-white p-6 rounded-2xl border border-gray-200 shadow-lg hover:border-gray-300 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center">
-      
+    <div className={`group/persona-card relative bg-white p-6 rounded-2xl border ${themeColors.cardBorder} shadow-lg ${themeColors.cardHover} hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center`}>
+
       {/* Persona Avatar */}
-      <PersonaAvatar 
-        name={persona.name} 
+      <PersonaAvatar
+        name={persona.name}
         iconOverride={iconOverride}
         mode={mode}
         colorTokens={colorTokens}
         sectionId={sectionId}
         index={persona.index}
         onIconEdit={onIconEdit}
+        themeColors={themeColors}
       />
       
       {/* Persona Name */}
@@ -315,6 +311,51 @@ export default function PersonaGrid(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Theme detection
+  const uiTheme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Get theme-specific colors
+  const getThemeColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        avatarGradient: 'from-orange-500 to-red-600',
+        avatarRing: 'ring-orange-200',
+        cardBorder: 'border-orange-100',
+        cardHover: 'hover:border-orange-200',
+        addButtonBg: 'from-orange-50 to-red-50',
+        addButtonBorder: 'border-orange-200',
+        addButtonHover: 'hover:border-orange-300',
+        addButtonText: 'text-orange-700'
+      },
+      cool: {
+        avatarGradient: 'from-blue-500 to-indigo-600',
+        avatarRing: 'ring-blue-200',
+        cardBorder: 'border-blue-100',
+        cardHover: 'hover:border-blue-200',
+        addButtonBg: 'from-blue-50 to-indigo-50',
+        addButtonBorder: 'border-blue-200',
+        addButtonHover: 'hover:border-blue-300',
+        addButtonText: 'text-blue-700'
+      },
+      neutral: {
+        avatarGradient: 'from-gray-500 to-slate-600',
+        avatarRing: 'ring-gray-200',
+        cardBorder: 'border-gray-200',
+        cardHover: 'hover:border-gray-300',
+        addButtonBg: 'from-gray-50 to-slate-50',
+        addButtonBorder: 'border-gray-200',
+        addButtonHover: 'hover:border-gray-300',
+        addButtonText: 'text-gray-700'
+      }
+    }[theme];
+  };
+
+  const themeColors = getThemeColors(uiTheme);
 
   // Parse persona data
   const personas = parsePersonaData(blockContent.persona_names, blockContent.persona_descriptions);
@@ -418,6 +459,7 @@ export default function PersonaGrid(props: LayoutComponentProps) {
               onIconEdit={handleIconEdit}
               onRemovePersona={handleRemovePersona}
               canRemove={personas.length > 1}
+              themeColors={themeColors}
             />
           ))}
         </div>
@@ -427,12 +469,12 @@ export default function PersonaGrid(props: LayoutComponentProps) {
           <div className="mt-8 text-center">
             <button
               onClick={handleAddPersona}
-              className="flex items-center space-x-2 mx-auto px-6 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 border-2 border-dashed border-blue-200 hover:border-blue-300 rounded-2xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 group"
+              className={`flex items-center space-x-2 mx-auto px-6 py-3 bg-gradient-to-r ${themeColors.addButtonBg} hover:from-${uiTheme === 'warm' ? 'orange' : uiTheme === 'cool' ? 'blue' : 'gray'}-100 hover:to-${uiTheme === 'warm' ? 'red' : uiTheme === 'cool' ? 'indigo' : 'slate'}-100 border-2 border-dashed ${themeColors.addButtonBorder} ${themeColors.addButtonHover} rounded-2xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 group`}
             >
-              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className={`w-5 h-5 ${themeColors.addButtonText}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              <span className="text-blue-700 font-medium">Add Persona</span>
+              <span className={`${themeColors.addButtonText} font-medium`}>Add Persona</span>
             </button>
           </div>
         )}

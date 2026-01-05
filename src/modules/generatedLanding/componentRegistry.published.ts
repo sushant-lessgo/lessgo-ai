@@ -128,6 +128,28 @@ import UserCountBarPublished from '@/modules/UIBlocks/SocialProof/UserCountBar.p
 import QuoteGridPublished from '@/modules/UIBlocks/Testimonial/QuoteGrid.published';
 import AvatarCarouselPublished from '@/modules/UIBlocks/Testimonial/AvatarCarousel.published';
 import RatingCardsPublished from '@/modules/UIBlocks/Testimonial/RatingCards.published';
+import PullQuoteStackPublished from '@/modules/UIBlocks/Testimonial/PullQuoteStack.published';
+import BeforeAfterQuotePublished from '@/modules/UIBlocks/Testimonial/BeforeAfterQuote.published';
+
+// UniqueMechanism
+import StackedHighlightsPublished from '@/modules/UIBlocks/UniqueMechanism/StackedHighlights.published';
+import AlgorithmExplainerPublished from '@/modules/UIBlocks/UniqueMechanism/AlgorithmExplainer.published';
+import ProcessFlowDiagramPublished from '@/modules/UIBlocks/UniqueMechanism/ProcessFlowDiagram.published';
+import SecretSauceRevealPublished from '@/modules/UIBlocks/UniqueMechanism/SecretSauceReveal.published';
+import TechnicalAdvantagePublished from '@/modules/UIBlocks/UniqueMechanism/TechnicalAdvantage.published';
+import SystemArchitecturePublished from '@/modules/UIBlocks/UniqueMechanism/SystemArchitecture.published';
+import InnovationTimelinePublished from '@/modules/UIBlocks/UniqueMechanism/InnovationTimeline.published';
+import MethodologyBreakdownPublished from '@/modules/UIBlocks/UniqueMechanism/MethodologyBreakdown.published';
+import PropertyComparisonMatrixPublished from '@/modules/UIBlocks/UniqueMechanism/PropertyComparisonMatrix.published';
+
+// UseCase
+import IndustryUseCaseGridPublished from '@/modules/UIBlocks/UseCase/IndustryUseCaseGrid.published';
+import WorkflowDiagramsPublished from '@/modules/UIBlocks/UseCase/WorkflowDiagrams.published';
+import InteractiveUseCaseMapPublished from '@/modules/UIBlocks/UseCase/InteractiveUseCaseMap.published';
+import PersonaGridPublished from '@/modules/UIBlocks/UseCase/PersonaGrid.published';
+import CustomerJourneyFlowPublished from '@/modules/UIBlocks/UseCase/CustomerJourneyFlow.published';
+import RoleBasedScenariosPublished from '@/modules/UIBlocks/UseCase/RoleBasedScenarios.published';
+import UseCaseCarouselPublished from '@/modules/UIBlocks/UseCase/UseCaseCarousel.published';
 
 // Registry structure - ONLY server-safe published components
 const publishedComponentRegistry: Record<string, Record<string, React.ComponentType<any>>> = {
@@ -249,6 +271,28 @@ const publishedComponentRegistry: Record<string, Record<string, React.ComponentT
     quotegrid: QuoteGridPublished,
     avatarcarousel: AvatarCarouselPublished,
     ratingcards: RatingCardsPublished,
+    pullquotestack: PullQuoteStackPublished,
+    beforeafterquote: BeforeAfterQuotePublished,
+  },
+  uniquemechanism: {
+    stackedhighlights: StackedHighlightsPublished,
+    algorithmexplainer: AlgorithmExplainerPublished,
+    processflowdiagram: ProcessFlowDiagramPublished,
+    secretsaucereveal: SecretSauceRevealPublished,
+    technicaladvantage: TechnicalAdvantagePublished,
+    systemarchitecture: SystemArchitecturePublished,
+    innovationtimeline: InnovationTimelinePublished,
+    methodologybreakdown: MethodologyBreakdownPublished,
+    propertycomparisonmatrix: PropertyComparisonMatrixPublished,
+  },
+  usecase: {
+    industryusecasegrid: IndustryUseCaseGridPublished,
+    workflowdiagrams: WorkflowDiagramsPublished,
+    interactiveusecasemap: InteractiveUseCaseMapPublished,
+    personagrid: PersonaGridPublished,
+    customerjourneyflow: CustomerJourneyFlowPublished,
+    rolebasedscenarios: RoleBasedScenariosPublished,
+    usecasecarousel: UseCaseCarouselPublished,
   },
 };
 

@@ -5,6 +5,8 @@ import { LayoutSection } from '@/components/layout/LayoutSection';
 import { EditableAdaptiveHeadline } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface WorkflowDiagramsContent {
   headline: string;
@@ -111,7 +113,8 @@ const WorkflowCard = ({
   handleContentUpdate,
   onRemove,
   canRemove,
-  showArrow
+  showArrow,
+  themeColors
 }: {
   step: string;
   index: number;
@@ -123,6 +126,17 @@ const WorkflowCard = ({
   onRemove: (index: number) => void;
   canRemove: boolean;
   showArrow: boolean;
+  themeColors: {
+    stepBg: string;
+    stepText: string;
+    arrow: string;
+    addBg: string;
+    addHoverBg: string;
+    addBorder: string;
+    addHoverBorder: string;
+    addIconText: string;
+    addButtonText: string;
+  };
 }) => {
   const getStepIcon = () => {
     const iconFields = [
@@ -143,7 +157,7 @@ const WorkflowCard = ({
 
   return (
     <React.Fragment>
-      <div className={`relative group/workflow-step-${index} bg-blue-600 text-white px-6 py-4 rounded-lg font-semibold flex items-center space-x-2`}>
+      <div className={`relative group/workflow-step-${index} ${themeColors.stepBg} ${themeColors.stepText} px-6 py-4 rounded-lg font-semibold flex items-center space-x-2`}>
         <IconEditableText
           mode={mode}
           value={getStepIcon()}
@@ -187,13 +201,61 @@ const WorkflowCard = ({
       </div>
 
       {/* Arrow between steps */}
-      {showArrow && <div className="text-blue-600 text-2xl">→</div>}
+      {showArrow && <div className={`${themeColors.arrow} text-2xl`}>→</div>}
     </React.Fragment>
   );
 };
 
 export default function WorkflowDiagrams(props: LayoutComponentProps) {
   const { sectionId, mode, blockContent, colorTokens, getTextStyle, sectionBackground, handleContentUpdate } = useLayoutComponent<WorkflowDiagramsContent>({ ...props, contentSchema: CONTENT_SCHEMA });
+
+  // Theme detection
+  const uiTheme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Get theme-specific colors
+  const getThemeColors = (theme: UIBlockTheme) => {
+    return {
+      warm: {
+        stepBg: 'bg-orange-600',
+        stepText: 'text-white',
+        arrow: 'text-orange-600',
+        addBg: 'bg-orange-50',
+        addHoverBg: 'hover:bg-orange-100',
+        addBorder: 'border-orange-200',
+        addHoverBorder: 'hover:border-orange-300',
+        addIconText: 'text-orange-600',
+        addButtonText: 'text-orange-700'
+      },
+      cool: {
+        stepBg: 'bg-blue-600',
+        stepText: 'text-white',
+        arrow: 'text-blue-600',
+        addBg: 'bg-blue-50',
+        addHoverBg: 'hover:bg-blue-100',
+        addBorder: 'border-blue-200',
+        addHoverBorder: 'hover:border-blue-300',
+        addIconText: 'text-blue-600',
+        addButtonText: 'text-blue-700'
+      },
+      neutral: {
+        stepBg: 'bg-gray-600',
+        stepText: 'text-white',
+        arrow: 'text-gray-600',
+        addBg: 'bg-gray-50',
+        addHoverBg: 'hover:bg-gray-100',
+        addBorder: 'border-gray-200',
+        addHoverBorder: 'hover:border-gray-300',
+        addIconText: 'text-gray-600',
+        addButtonText: 'text-gray-700'
+      }
+    }[theme];
+  };
+
+  const themeColors = getThemeColors(uiTheme);
 
   // Get the current workflow steps
   const steps = getWorkflowSteps(blockContent);
@@ -218,6 +280,7 @@ export default function WorkflowDiagrams(props: LayoutComponentProps) {
               onRemove={(idx) => removeWorkflowStep(idx, handleContentUpdate)}
               canRemove={steps.length > 1}
               showArrow={index < steps.length - 1}
+              themeColors={themeColors}
             />
           ))}
 
@@ -226,13 +289,13 @@ export default function WorkflowDiagrams(props: LayoutComponentProps) {
             <div className="group/add-workflow">
               <button
                 onClick={() => addWorkflowStep(blockContent, handleContentUpdate)}
-                className="flex items-center space-x-2 px-4 py-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-lg transition-all duration-200"
+                className={`flex items-center space-x-2 px-4 py-3 ${themeColors.addBg} ${themeColors.addHoverBg} border-2 ${themeColors.addBorder} ${themeColors.addHoverBorder} rounded-lg transition-all duration-200`}
                 title="Add workflow step"
               >
-                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className={`w-5 h-5 ${themeColors.addIconText}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
-                <span className="text-blue-700 font-medium">Add Step</span>
+                <span className={`${themeColors.addButtonText} font-medium`}>Add Step</span>
               </button>
             </div>
           )}
