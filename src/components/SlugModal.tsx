@@ -12,6 +12,11 @@ type SlugModalProps = {
   onConfirm: () => void;
   loading: boolean;
   error?: string;
+  existingPublished?: {
+    slug: string;
+    title: string;
+    publishedAt: string;
+  } | null;
 };
 
 export function SlugModal({
@@ -20,9 +25,20 @@ export function SlugModal({
   onCancel,
   onConfirm,
   loading,
-  error
+  error,
+  existingPublished
 }: SlugModalProps) {
   const fullUrl = `https://${slug}.lessgo.ai`;
+  const [isChangingSlug, setIsChangingSlug] = useState(false);
+
+  // Detect if user changes slug from existing
+  useEffect(() => {
+    if (existingPublished && slug !== existingPublished.slug) {
+      setIsChangingSlug(true);
+    } else {
+      setIsChangingSlug(false);
+    }
+  }, [slug, existingPublished]);
 
   return (
     <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center px-4">
@@ -34,9 +50,43 @@ export function SlugModal({
           <X className="w-5 h-5" />
         </button>
 
-        <h2 className="text-lg font-bold mb-2">Choose your page URL</h2>
+        <h2 className="text-lg font-bold mb-2">
+          {existingPublished ? 'Republish Your Page' : 'Choose your page URL'}
+        </h2>
+
+        {existingPublished && (
+          <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-800 mb-1">
+              <strong>Currently published at:</strong>
+            </p>
+            <p className="text-sm font-mono text-blue-900 break-all">
+              https://{existingPublished.slug}.lessgo.ai
+            </p>
+            <p className="text-xs text-blue-600 mt-1">
+              Last updated: {new Date(existingPublished.publishedAt).toLocaleDateString()}
+            </p>
+          </div>
+        )}
+
+        {isChangingSlug && existingPublished && (
+          <div className="mb-3 p-3 bg-amber-50 border border-amber-300 rounded-lg">
+            <div className="flex items-start gap-2">
+              <svg className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-1.964-.833-2.732 0L5.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+              <div>
+                <p className="text-sm font-semibold text-amber-800">Warning: Changing URL</p>
+                <p className="text-xs text-amber-700 mt-1">
+                  Your old URL (https://{existingPublished.slug}.lessgo.ai) will stop working.
+                  Any links you've shared will break. Only change if necessary.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <p className="text-sm text-gray-600 mb-4">
-          This is how your link will appear:
+          {existingPublished ? 'Keep existing URL or change to new one:' : 'This is how your link will appear:'}
         </p>
         <div className="text-sm mb-3">
           <div className="flex items-center">
@@ -64,7 +114,12 @@ export function SlugModal({
             Cancel
           </Button>
           <Button onClick={onConfirm} disabled={loading || !slug}>
-            {loading ? 'Publishing...' : 'Confirm & Publish'}
+            {loading
+              ? 'Publishing...'
+              : existingPublished
+                ? (isChangingSlug ? 'Change URL & Republish' : 'Update Published Page')
+                : 'Confirm & Publish'
+            }
           </Button>
         </div>
       </div>

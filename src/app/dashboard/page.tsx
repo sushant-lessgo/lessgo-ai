@@ -10,7 +10,7 @@ export default async function DashboardPage() {
   const { userId } = await auth()
   if (!userId) return null
 
-  // 1. Fetch draft projects
+  // Unified query: Projects with published info
   const user = await prisma.user.findUnique({
     where: { clerkId: userId },
     include: {
@@ -28,76 +28,79 @@ export default async function DashboardPage() {
     },
   })
 
-  const draftProjects = user?.projects.map((project) => {
+  const projects = user?.projects ?? []
+
+  // Get all published pages for this user
+  const publishedPages = await prisma.publishedPage.findMany({
+    where: { userId },
+    select: {
+      slug: true,
+      title: true,
+      updatedAt: true,
+      projectId: true,
+    },
+  })
+
+  // Create lookup map: projectId → publishedPage
+  const publishedByProjectId = new Map(
+    publishedPages
+      .filter(p => p.projectId)
+      .map(p => [p.projectId, p])
+  )
+
+  // Transform projects into unified items
+  const allItems = projects.map((project) => {
+    const publishedPage = publishedByProjectId.get(project.id)
+
     // Generate smart project name from available data
-    let smartName = project.title;
-    
+    let smartName = project.title
+
     if (!smartName || smartName === 'Untitled Project') {
-      const content = project.content as any;
-      const onboarding = content?.onboarding || {};
-      const validatedFields = onboarding.validatedFields || {};
-      const confirmedFields = onboarding.confirmedFields || {};
-      
+      const content = project.content as any
+      const onboarding = content?.onboarding || {}
+      const validatedFields = onboarding.validatedFields || {}
+      const confirmedFields = onboarding.confirmedFields || {}
+
       // Helper function to capitalize and clean field values
       const formatField = (field: string) => {
         return field.split(/[-_\s]+/)
           .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-          .join(' ');
-      };
-      
+          .join(' ')
+      }
+
       // Try different naming strategies in order of preference
       if (validatedFields.marketCategory && validatedFields.targetAudience) {
-        smartName = `${formatField(validatedFields.marketCategory)} for ${formatField(validatedFields.targetAudience)}`;
+        smartName = `${formatField(validatedFields.marketCategory)} for ${formatField(validatedFields.targetAudience)}`
       } else if (confirmedFields.marketCategory?.value && confirmedFields.targetAudience?.value) {
-        smartName = `${formatField(confirmedFields.marketCategory.value)} for ${formatField(confirmedFields.targetAudience.value)}`;
+        smartName = `${formatField(confirmedFields.marketCategory.value)} for ${formatField(confirmedFields.targetAudience.value)}`
       } else if (validatedFields.marketCategory) {
-        smartName = `${formatField(validatedFields.marketCategory)} Tool`;
+        smartName = `${formatField(validatedFields.marketCategory)} Tool`
       } else if (confirmedFields.marketCategory?.value) {
-        smartName = `${formatField(confirmedFields.marketCategory.value)} Tool`;
+        smartName = `${formatField(confirmedFields.marketCategory.value)} Tool`
       } else if (project.inputText) {
         // Extract first meaningful part of inputText (up to 50 chars)
-        const shortInput = project.inputText.slice(0, 50).trim();
-        smartName = shortInput.length === 50 ? `${shortInput}...` : shortInput;
+        const shortInput = project.inputText.slice(0, 50).trim()
+        smartName = shortInput.length === 50 ? `${shortInput}...` : shortInput
       } else if (onboarding.oneLiner) {
-        // Extract first meaningful part of oneLiner (up to 50 chars) 
-        const shortOneLiner = onboarding.oneLiner.slice(0, 50).trim();
-        smartName = shortOneLiner.length === 50 ? `${shortOneLiner}...` : shortOneLiner;
+        // Extract first meaningful part of oneLiner (up to 50 chars)
+        const shortOneLiner = onboarding.oneLiner.slice(0, 50).trim()
+        smartName = shortOneLiner.length === 50 ? `${shortOneLiner}...` : shortOneLiner
       } else {
-        smartName = 'New Project';
+        smartName = 'New Project'
       }
     }
-    
+
     return {
       id: project.id,
       name: smartName,
-      status: 'Draft' as const,
+      status: publishedPage ? ('Published' as const) : ('Draft' as const),
       updatedAt: project.updatedAt.toISOString(),
       tokenId: project.token.value,
-      slug: null,
-      type: 'draft' as const,
-    };
-  }) ?? []
-
-  // 2. Fetch published pages
-  const publishedPages = await prisma.publishedPage.findMany({
-    where: { userId },
-    orderBy: { updatedAt: 'desc' },
+      slug: publishedPage?.slug || null,
+      type: 'unified' as const,
+      publishedAt: publishedPage?.updatedAt.toISOString(),
+    }
   })
-
-  const publishedItems = publishedPages.map((page) => ({
-    id: page.id,
-    name: page.title || 'Untitled Page',
-    status: 'Published' as const,
-    updatedAt: page.updatedAt.toISOString(),
-    tokenId: null,
-    slug: page.slug,
-    type: 'published' as const,
-  }))
-
-  // 3. Merge and sort
-  const allItems = [...draftProjects, ...publishedItems].sort(
-    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-  )
 
   return (
     <div className="flex flex-col min-h-screen bg-white text-brand-text font-body">

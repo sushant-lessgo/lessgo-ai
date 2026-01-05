@@ -79,11 +79,16 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [tabManager, setTabManager] = useState<ReturnType<typeof getTabManager> | null>(null);
+  const [existingPublished, setExistingPublished] = useState<{
+    slug: string;
+    title: string;
+    publishedAt: string;
+  } | null>(null);
 
   // Set mode to preview on mount and initialize tab manager
   useEffect(() => {
     setMode('preview');
-    
+
     // Initialize tab manager for preview page
     const manager = getTabManager('preview', tokenId);
     setTabManager(manager);
@@ -92,6 +97,30 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
       cleanupTabManager('preview', tokenId);
     };
   }, [setMode, tokenId]);
+
+  // Fetch existing published slug
+  useEffect(() => {
+    const fetchPublishedStatus = async () => {
+      try {
+        const response = await fetch(`/api/projects/${tokenId}/published-slug`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.published) {
+            setExistingPublished({
+              slug: data.slug,
+              title: data.title,
+              publishedAt: data.publishedAt
+            });
+          }
+        }
+      } catch (error) {
+        logger.warn('Failed to fetch published status:', error);
+        // Non-critical, continue without existing slug
+      }
+    };
+
+    fetchPublishedStatus();
+  }, [tokenId]);
 
   // Validate publish readiness
   const isPublishReady = useMemo(() => {
@@ -258,18 +287,25 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
   const handlePublishClick = () => {
     if (!isPublishReady) return;
 
-    const heroSectionId = sections.find(id => id.includes('hero'));
-    const headline = heroSectionId ? content[heroSectionId]?.elements?.headline : null;
-    const headlineContent = headline?.content || '';
-    const headlineText = typeof headlineContent === 'string' ? headlineContent : '';
+    // If already published, use existing slug
+    if (existingPublished) {
+      setCustomSlug(existingPublished.slug);
+    } else {
+      // Generate new slug from headline
+      const heroSectionId = sections.find(id => id.includes('hero'));
+      const headline = heroSectionId ? content[heroSectionId]?.elements?.headline : null;
+      const headlineContent = headline?.content || '';
+      const headlineText = typeof headlineContent === 'string' ? headlineContent : '';
 
-    const defaultSlug = (headlineText || `page-${Date.now()}`)
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "")
-      .slice(0, 40);
+      const defaultSlug = (headlineText || `page-${Date.now()}`)
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(0, 40);
 
-    setCustomSlug(defaultSlug);
+      setCustomSlug(defaultSlug);
+    }
+
     setShowSlugModal(true);
   };
 
@@ -458,6 +494,7 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
           onConfirm={handlePublish}
           loading={publishing}
           error={publishError}
+          existingPublished={existingPublished}
         />
       )}
 

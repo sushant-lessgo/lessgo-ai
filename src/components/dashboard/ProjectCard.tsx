@@ -11,7 +11,8 @@ export type Project = {
   updatedAt: string
   tokenId: string | null
   slug: string | null
-  type: 'draft' | 'published'
+  type: 'unified'
+  publishedAt?: string
 }
 
 type Props = {
@@ -86,11 +87,15 @@ export default function ProjectCard({ project, onEdit, onPreview }: Props) {
       <div>
         <h3 className="text-heading4 font-heading text-brand-text mb-1">{project.name}</h3>
         <p className="text-sm text-brand-mutedText">
-          {project.status} • {formatTime(project.updatedAt)}
+          {project.status}
+          {project.slug && ` at /p/${project.slug}`}
+          {' • '}
+          {formatTime(project.updatedAt)}
         </p>
       </div>
 
       <div className="flex gap-2">
+        {/* Draft projects: Continue button */}
         {project.status === 'Draft' && project.tokenId && (
           <button
             onClick={handleEdit}
@@ -100,26 +105,37 @@ export default function ProjectCard({ project, onEdit, onPreview }: Props) {
           </button>
         )}
 
-        {project.status === 'Published' && project.slug && (
+        {/* Published projects: Edit + View Live + Analytics + Forms */}
+        {project.status === 'Published' && project.tokenId && (
           <>
             <button
-              onClick={handlePreview}
+              onClick={handleEdit}
               className="border text-sm px-3 py-1 rounded-md hover:bg-gray-50 transition"
             >
-              Preview
+              Edit
             </button>
-            <button
-              onClick={() => router.push(`/dashboard/analytics/${project.slug}`)}
-              className="border border-purple-200 bg-purple-50 text-purple-600 text-sm px-3 py-1 rounded-md hover:bg-purple-100 transition"
-            >
-              📊 Analytics
-            </button>
-            <button
-              onClick={() => router.push(`/dashboard/forms/${project.slug}`)}
-              className="border border-blue-200 bg-blue-50 text-blue-600 text-sm px-3 py-1 rounded-md hover:bg-blue-100 transition"
-            >
-              View Forms
-            </button>
+            {project.slug && (
+              <>
+                <button
+                  onClick={handlePreview}
+                  className="border border-brand-accentPrimary bg-brand-accentPrimary text-white text-sm px-3 py-1 rounded-md hover:bg-orange-500 transition"
+                >
+                  View Live
+                </button>
+                <button
+                  onClick={() => router.push(`/dashboard/analytics/${project.slug}`)}
+                  className="border border-purple-200 bg-purple-50 text-purple-600 text-sm px-3 py-1 rounded-md hover:bg-purple-100 transition"
+                >
+                  Analytics
+                </button>
+                <button
+                  onClick={() => router.push(`/dashboard/forms/${project.slug}`)}
+                  className="border border-blue-200 bg-blue-50 text-blue-600 text-sm px-3 py-1 rounded-md hover:bg-blue-100 transition"
+                >
+                  Forms
+                </button>
+              </>
+            )}
           </>
         )}
       </div>
