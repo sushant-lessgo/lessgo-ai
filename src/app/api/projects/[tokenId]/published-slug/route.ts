@@ -21,24 +21,17 @@ export async function GET(
       );
     }
 
-    // Get project by tokenId (verify ownership)
-    const project = await prisma.project.findUnique({
-      where: { tokenId },
-      select: {
-        id: true,
-        userId: true
+    // Get project by tokenId AND verify ownership via User.clerkId
+    const project = await prisma.project.findFirst({
+      where: {
+        tokenId,
+        user: { clerkId: userId }  // Filter by Clerk ID
       },
+      select: { id: true },
     });
 
     if (!project) {
-      return NextResponse.json(
-        { error: 'Project not found' },
-        { status: 404 }
-      );
-    }
-
-    // Verify ownership
-    if (project.userId !== userId) {
+      // Could be "not found" or "forbidden" - return generic 403 for security
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 

@@ -1,175 +1,112 @@
+Yep — the **403 is the whole reason** your UI keeps generating a new slug on every Publish click.
+
+And the **403 is happening because your ownership check is comparing two different kinds of IDs**.
 
 ---
 
-## TL;DR (what’s *actually* happening)
+## What’s the issue (simple + exact)
 
-You **did the right thing** with `suppressHydrationWarning`, but the new error is **not the same problem**.
+### In your schema
 
-### The new error is **NOT** about HTML string mismatch
+* `PublishedPage.userId` = **Clerk user id** (external) ✅
+* `User.clerkId` = **Clerk user id** ✅
+* `User.id` = **your internal DB user id** (cuid) ✅
+* `Project.userId` = **your internal DB user id** (references `User.id`) ✅
 
-It is about **invalid DOM structure caused by double `<p>` nesting**.
+So:
 
-> **“Did not expect server HTML to contain a `<p>` in `<div>`”**
-> is React’s way of saying:
-> “You rendered a `<p>` tag *inside another `<p>`* (or inside something that becomes `<p>`).”
+### In your endpoint
 
-React **cannot hydrate invalid HTML**, even with `suppressHydrationWarning`.
+You do:
 
----
-
-## Root Cause (very important)
-
-### This line is the real culprit 👇
-
-From **`Announcement.published.tsx`**:
-
-```tsx
-<TextPublished
-  value={supporting_copy}
-  element="p"          // ⛔️ problem
-  className="text-lg"
-  style={{ color: textColors.muted, fontSize: '1.125rem' }}
-/>
+```ts
+const { userId } = await auth(); // Clerk userId (external)
+...
+select: { id: true, userId: true } // Project.userId = internal User.id
+...
+if (project.userId !== userId) return 403;
 ```
 
-But `supporting_copy` **already contains HTML** like:
+That comparison will **always fail**, because:
 
-```html
-<p class="cvGsUA direction-ltr ...">
-  We’ve curated a carefully selected lineup...
-</p>
+* `project.userId` looks like: `ckx...` (cuid)
+* `userId` looks like: `user_2abc...` (Clerk id)
+
+✅ Result: endpoint always returns **403 Forbidden** even for the owner.
+
+That means your preview page never receives the existing published slug, so it falls back to generating a new slug from headline every click.
+
+---
+
+## Why your other endpoint “works” without auth
+
+`src/app/api/projects/[tokenId]/route.ts` has **no auth check** at all, so it can return the project fine. But it also doesn’t help with “published slug”, because the published slug lives in `PublishedPage`.
+
+---
+
+## Fix options (pick one)
+
+### ✅ Fix A (recommended): verify ownership via the `User` relation (`User.clerkId`)
+
+Change your project query to check the related user’s `clerkId`:
+
+```ts
+const project = await prisma.project.findUnique({
+  where: { tokenId },
+  select: {
+    id: true,
+    user: { select: { clerkId: true } },
+  },
+});
+
+if (!project) return 404;
+
+if (project.user?.clerkId !== userId) {
+  return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+}
 ```
 
-So the final HTML becomes:
+This matches:
 
-```html
-<p>                ← TextPublished wrapper
-  <p>...</p>       ← content from editor
-</p>
+* `project.user.clerkId` (Clerk id) ✅
+  with
+* `auth().userId` (Clerk id) ✅
+
+You can even do it in one go by filtering:
+
+```ts
+const project = await prisma.project.findFirst({
+  where: {
+    tokenId,
+    user: { clerkId: userId },
+  },
+  select: { id: true },
+});
+
+if (!project) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 ```
 
-❌ **Invalid HTML**
-❌ **Hydration is impossible**
-❌ `suppressHydrationWarning` cannot save this
+(If you want to distinguish “not found” vs “forbidden”, do a second lookup.)
 
 ---
 
-## Why this error appears only now
+### Fix B: store Clerk id on Project (not necessary right now)
 
-Before:
-
-* HTML was dumped via `dangerouslySetInnerHTML` at page root
-* Browser “fixed” invalid nesting silently
-
-Now:
-
-* React Server Components + hydration
-* React enforces DOM correctness strictly
-
-This is expected behavior.
-This is **not a Next.js bug**.
+Add `clerkUserId` to Project and compare directly. This is a schema change, so only do it if you want to simplify future authorization.
 
 ---
 
-## The Correct Fix (do this, nothing else)
+## One more thing (secondary cause of “new slug every click”)
 
-### Rule (lock this into your architecture)
+Even after fixing 403, you might still see slug changes if your preview page’s slug generation falls back to `page-${Date.now()}` because headline content isn’t a string.
 
-> **If content may contain block-level HTML (`<p>`, `<div>`, `<ul>`):
-> NEVER wrap it in a `<p>` or heading element.**
+From the file you uploaded earlier, your code does:
 
----
+* if headline is not a string → `headlineText = ''`
+* then it uses `page-${Date.now()}` → new every click
 
-## Concrete Code Fix ✅
+So after fixing 403, also make sure headline extraction is stable (e.g., use `project.title` or extract text from your rich JSON).
 
-### Fix `TextPublished` usage for rich text
-
-#### ❌ Current (wrong)
-
-```tsx
-<TextPublished
-  value={supporting_copy}
-  element="p"
-  className="text-lg"
-/>
-```
-
-#### ✅ Correct
-
-```tsx
-<TextPublished
-  value={supporting_copy}
-  element="div"        // ✅ wrapper is div
-  className="text-lg"
-/>
-```
-
-This produces valid HTML:
-
-```html
-<div>
-  <p>...</p>
-</div>
-```
-
-Perfectly hydratable.
-
----
-
-## Optional but Recommended: make this impossible to misuse
-
-Inside **`TextPublished.tsx`**, harden it:
-
-```tsx
-const containsHTML = typeof value === 'string' && /<[^>]+>/.test(value);
-
-const Tag = containsHTML ? 'div' : element;
-```
-
-So even if someone passes `element="p"`, it auto-corrects.
-
----
-
-## Why `suppressHydrationWarning` was still correct
-
-You **should keep it**, because:
-
-* Rich text HTML can differ in insignificant ways
-* ISR + editor content = unavoidable mismatch risk
-* This is the documented React pattern
-
-But:
-
-> `suppressHydrationWarning` **does NOT fix invalid DOM structure**
-
----
-
-## Final Architecture Verdict (important for your confidence)
-
-You are **100% on the right architectural path**:
-
-✅ Server Components for published pages
-✅ JSON → React rendering (not static HTML blobs)
-✅ Client islands only where needed (forms)
-✅ Theme computed server-side
-✅ No client-side theme injection on `/p/*`
-
-What you hit is a **classic rich-text + React hydration trap**, not a design flaw.
-
-Every serious page builder (Webflow, Framer, Notion) has **exactly this rule**:
-
-> “Rich text must be rendered inside neutral containers.”
-
----
-
-## Checklist to close this issue
-
-1. Change **all rich-text usages** to `element="div"`
-
-   * `supporting_copy`
-   * editor-generated paragraphs
-2. Keep `suppressHydrationWarning`
-3. Hard refresh
-4. Hydration errors disappear permanently
+But **your current main blocker is definitely the 403 ownership mismatch**.
 
 ---
