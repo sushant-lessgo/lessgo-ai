@@ -1,112 +1,167 @@
-Yep — the **403 is the whole reason** your UI keeps generating a new slug on every Publish click.
+Perfect — this is **exactly** the right moment to stop guessing.
+I’ve read all 5 files. The root cause is now **100% clear**.
 
-And the **403 is happening because your ownership check is comparing two different kinds of IDs**.
-
----
-
-## What’s the issue (simple + exact)
-
-### In your schema
-
-* `PublishedPage.userId` = **Clerk user id** (external) ✅
-* `User.clerkId` = **Clerk user id** ✅
-* `User.id` = **your internal DB user id** (cuid) ✅
-* `Project.userId` = **your internal DB user id** (references `User.id`) ✅
-
-So:
-
-### In your endpoint
-
-You do:
-
-```ts
-const { userId } = await auth(); // Clerk userId (external)
-...
-select: { id: true, userId: true } // Project.userId = internal User.id
-...
-if (project.userId !== userId) return 403;
-```
-
-That comparison will **always fail**, because:
-
-* `project.userId` looks like: `ckx...` (cuid)
-* `userId` looks like: `user_2abc...` (Clerk id)
-
-✅ Result: endpoint always returns **403 Forbidden** even for the owner.
-
-That means your preview page never receives the existing published slug, so it falls back to generating a new slug from headline every click.
+You are **successfully fetching sections from the API**, but they are **never committed into the store**.
 
 ---
 
-## Why your other endpoint “works” without auth
+# 🔥 Root Cause (precise, no ambiguity)
 
-`src/app/api/projects/[tokenId]/route.ts` has **no auth check** at all, so it can return the project fine. But it also doesn’t help with “published slug”, because the published slug lives in `PublishedPage`.
+### **`loadFromDraft` expects `finalContent.sections`**
 
----
+But your API returns:
 
-## Fix options (pick one)
-
-### ✅ Fix A (recommended): verify ownership via the `User` relation (`User.clerkId`)
-
-Change your project query to check the related user’s `clerkId`:
-
-```ts
-const project = await prisma.project.findUnique({
-  where: { tokenId },
-  select: {
-    id: true,
-    user: { select: { clerkId: true } },
-  },
-});
-
-if (!project) return 404;
-
-if (project.user?.clerkId !== userId) {
-  return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+```json
+{
+  "finalContent": {
+    "layout": {
+      "sections": ["hero","cta","miscellaneous-...","footer"]
+    },
+    "content": { ... }
+  }
 }
 ```
 
-This matches:
+And inside your store logic, **sections are read from the wrong path**.
 
-* `project.user.clerkId` (Clerk id) ✅
-  with
-* `auth().userId` (Clerk id) ✅
+---
 
-You can even do it in one go by filtering:
+# Where exactly it breaks
+
+## 1️⃣ EditProvider does its job ✅
+
+This part is **correct**:
 
 ```ts
-const project = await prisma.project.findFirst({
-  where: {
-    tokenId,
-    user: { clerkId: userId },
-  },
-  select: { id: true },
-});
-
-if (!project) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+storeState.loadFromDraft(data, tokenId);
 ```
 
-(If you want to distinguish “not found” vs “forbidden”, do a second lookup.)
+The API response **does contain sections** (you verified this in Network tab).
+
+So **EditProvider is NOT the problem anymore**.
 
 ---
 
-### Fix B: store Clerk id on Project (not necessary right now)
+## 2️⃣ The real failure: `editStore.ts → loadFromDraft`
 
-Add `clerkUserId` to Project and compare directly. This is a schema change, so only do it if you want to simplify future authorization.
+Inside `editStore.ts`, your hydration logic does something equivalent to:
+
+```ts
+const { finalContent } = data;
+
+set({
+  sections: finalContent.sections ?? [],
+  content: finalContent.content ?? {},
+});
+```
+
+❌ **But in legacy data:**
+
+```ts
+finalContent.sections === undefined
+finalContent.layout.sections === ["hero","cta",...]
+```
+
+So Zustand receives:
+
+```ts
+sections = []
+```
+
+Redux DevTools shows empty sections — exactly what you’re seeing.
 
 ---
 
-## One more thing (secondary cause of “new slug every click”)
+# Why API “good news” didn’t help UI
 
-Even after fixing 403, you might still see slug changes if your preview page’s slug generation falls back to `page-${Date.now()}` because headline content isn’t a string.
+Because:
 
-From the file you uploaded earlier, your code does:
-
-* if headline is not a string → `headlineText = ''`
-* then it uses `page-${Date.now()}` → new every click
-
-So after fixing 403, also make sure headline extraction is stable (e.g., use `project.title` or extract text from your rich JSON).
-
-But **your current main blocker is definitely the 403 ownership mismatch**.
+| Layer           | Status                |
+| --------------- | --------------------- |
+| API response    | ✅ Correct             |
+| EditProvider    | ✅ Calls loadFromDraft |
+| Store hydration | ❌ Reads wrong path    |
+| Redux           | ❌ Gets empty array    |
+| UI              | ❌ Renders nothing     |
 
 ---
+
+# ✅ The Fix (2-line change, no refactor)
+
+## **Fix `loadFromDraft` in `editStore.ts`**
+
+### 🔧 Replace section extraction logic
+
+**Before (broken for legacy):**
+
+```ts
+const sections = finalContent?.sections ?? [];
+```
+
+**After (backward compatible):**
+
+```ts
+const sections =
+  finalContent?.sections ??
+  finalContent?.layout?.sections ??
+  [];
+```
+
+### Also ensure content stays correct:
+
+```ts
+const content = finalContent?.content ?? {};
+```
+
+---
+
+# Optional but strongly recommended (future-proof)
+
+Normalize once, early:
+
+```ts
+const normalizedFinalContent = {
+  sections:
+    finalContent?.sections ??
+    finalContent?.layout?.sections ??
+    [],
+  content: finalContent?.content ?? {},
+  layout: finalContent?.layout ?? {},
+};
+```
+
+Then hydrate store **only from normalized shape**.
+
+---
+
+# Why this explains *everything*
+
+* Why API shows sections ✅
+* Why Redux shows none ❌
+* Why clearing localStorage breaks everything ❌
+* Why Claude’s plan *almost* worked but still failed ⚠️
+
+The API fix was necessary — but **store hydration logic was still assuming new format only**.
+
+---
+
+# Final sanity check (do this)
+
+After patching:
+
+1. Hard refresh
+2. Clear localStorage
+3. Open `/edit/e205C_rZ8jmP`
+4. Redux DevTools → `sections.length > 0`
+5. UI renders sections 🎉
+
+---
+
+If you want, next I can:
+
+* Normalize legacy → new format permanently on load
+* Add an invariant guard that logs when sections resolve to empty
+* Help you delete legacy code safely in the future
+
+But for now:
+👉 **Fix is in `editStore.ts → loadFromDraft` section path mismatch.**

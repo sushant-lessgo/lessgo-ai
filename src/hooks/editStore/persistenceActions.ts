@@ -76,12 +76,17 @@ export function createPersistenceActions(set: any, get: any) {
         const contentToLoad = apiResponse.finalContent || apiResponse.content?.finalContent || apiResponse.content;
         
         set((state: EditStore) => {
-          // Restore core content if available
-          if (contentToLoad && contentToLoad.sections && Array.isArray(contentToLoad.sections)) {
+          // Extract sections from either new format (top-level) or legacy format (nested in layout)
+          const sections = contentToLoad?.sections ?? contentToLoad?.layout?.sections ?? [];
+          const sectionLayouts = contentToLoad?.sectionLayouts ?? contentToLoad?.layout?.sectionLayouts ?? {};
+          const sectionSpacing = contentToLoad?.sectionSpacing ?? contentToLoad?.layout?.sectionSpacing ?? {};
 
-            state.sections = contentToLoad.sections;
-            state.sectionLayouts = contentToLoad.sectionLayouts || {};
-            state.sectionSpacing = contentToLoad.sectionSpacing || {};
+          // Restore core content if available
+          if (contentToLoad && sections && Array.isArray(sections)) {
+
+            state.sections = sections;
+            state.sectionLayouts = sectionLayouts;
+            state.sectionSpacing = sectionSpacing;
             state.content = contentToLoad.content || {};
 
             // Migrate blob URLs to placeholders
@@ -122,17 +127,19 @@ export function createPersistenceActions(set: any, get: any) {
           } else {
           }
           
-          // Restore theme and settings if available
-          if (contentToLoad && contentToLoad.theme) {
-            
-            const mergedTheme = { ...state.theme, ...contentToLoad.theme };
+          // Restore theme and settings if available (check both new and legacy paths)
+          const theme = contentToLoad?.theme ?? contentToLoad?.layout?.theme;
+          if (contentToLoad && theme) {
+
+            const mergedTheme = { ...state.theme, ...theme };
             state.theme = mergedTheme;
-            
+
           } else {
           }
-          
-          if (contentToLoad && contentToLoad.globalSettings) {
-            Object.assign(state.globalSettings, contentToLoad.globalSettings);
+
+          const globalSettings = contentToLoad?.globalSettings ?? contentToLoad?.layout?.globalSettings;
+          if (contentToLoad && globalSettings) {
+            Object.assign(state.globalSettings, globalSettings);
           }
           
           // Restore navigation configuration if available

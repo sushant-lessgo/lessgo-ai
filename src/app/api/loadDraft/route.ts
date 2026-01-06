@@ -91,22 +91,37 @@ export async function GET(req: Request) {
     const content = (project.content as ProjectContent) || {};
     const onboarding = content.onboarding || {};
 
+    // 🔧 BACKWARD COMPATIBILITY: Detect legacy data format
+    // Legacy format: { layout, sections, content } at top level
+    // New format: { onboarding, finalContent }
+    let finalContent = null;
+
+    if (content.finalContent) {
+      // New format - data wrapped in finalContent
+      finalContent = content.finalContent;
+    } else if (content.layout || content.sections) {
+      // Legacy format - entire content is the page data
+      // Extract only page-related fields, exclude onboarding
+      const { onboarding: _onboarding, ...legacyPageData } = content;
+      finalContent = legacyPageData;
+    }
+
     const response = {
       // Basic project info
       inputText: project.inputText || "",
       title: project.title || "Untitled Project",
       themeValues: project.themeValues || null,
-      
+
       // Onboarding state for resume
       stepIndex: onboarding.stepIndex || 0,
       confirmedFields: onboarding.confirmedFields || {},
       validatedFields: onboarding.validatedFields || {},
       featuresFromAI: onboarding.featuresFromAI || [],
       hiddenInferredFields: onboarding.hiddenInferredFields || {},
-      
-      // Final content (if onboarding is complete)
-      finalContent: content.finalContent || null,
-      
+
+      // Final content (supports both new and legacy formats)
+      finalContent: finalContent,
+
       // Metadata
       lastUpdated: project.updatedAt,
     };

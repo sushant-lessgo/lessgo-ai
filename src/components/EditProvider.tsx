@@ -141,12 +141,12 @@ export function EditProvider({ children, tokenId, options = {} }: EditProviderPr
           }
           return response.json();
         })
-        .then(data => {
-          
+        .then(async (data) => {
+
           // Load data into store using existing loadFromDraft action
           const storeState = store.getState();
           if (typeof storeState.loadFromDraft === 'function') {
-            storeState.loadFromDraft(data, tokenId);
+            await storeState.loadFromDraft(data, tokenId);
 
             // Verify image data loaded correctly
             const updatedState = store.getState();
