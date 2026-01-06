@@ -8,6 +8,7 @@
 import React from 'react';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { LogoPublished } from '@/components/published/LogoPublished';
+import { getPublishedTypographyStyles } from '@/lib/publishedTextColors';
 import {
   FaEnvelope,
   FaPhone,
@@ -27,6 +28,11 @@ import {
 
 export default function ContactFooterPublished(props: LayoutComponentProps) {
   const { theme } = props;
+
+  // Typography styles
+  const h5Typography = getPublishedTypographyStyles('h5', theme);
+  const bodySmTypography = getPublishedTypographyStyles('body-sm', theme);
+  const captionTypography = getPublishedTypographyStyles('caption', theme);
 
   // Extract content from props with defaults
   const copyright = props.copyright || `© ${new Date().getFullYear()} Your Company. All rights reserved.`;
@@ -101,7 +107,7 @@ export default function ContactFooterPublished(props: LayoutComponentProps) {
                   return (
                     <div key={index} className="flex items-start gap-3">
                       <Icon className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
-                      <span className="text-sm text-gray-300">{item.text}</span>
+                      <span className="text-sm text-gray-300" style={bodySmTypography}>{item.text}</span>
                     </div>
                   );
                 })}
@@ -134,8 +140,8 @@ export default function ContactFooterPublished(props: LayoutComponentProps) {
 
           {/* Right Column: Newsletter */}
           <div>
-            <h3 className="font-semibold text-white mb-2">{newsletter_title}</h3>
-            <p className="text-sm text-gray-300 mb-4">{newsletter_description}</p>
+            <h3 className="font-semibold text-white mb-2" style={h5Typography}>{newsletter_title}</h3>
+            <p className="text-sm text-gray-300 mb-4" style={bodySmTypography}>{newsletter_description}</p>
 
             {/* Static Newsletter Form (disabled in Phase 1) */}
             <div className="flex gap-2">
@@ -158,7 +164,7 @@ export default function ContactFooterPublished(props: LayoutComponentProps) {
 
         {/* Copyright */}
         <div className="pt-8 border-t border-gray-800 text-center">
-          <p className="text-sm text-gray-400">{copyright}</p>
+          <p className="text-sm text-gray-400" style={captionTypography}>{copyright}</p>
         </div>
       </div>
     </footer>

@@ -61,7 +61,7 @@ function MinimalistPublished(props: LayoutComponentProps) {
   const textColor = '#FFFFFF';
 
   // Typography styles from theme
-  const headlineTypography = getPublishedTypographyStyles('hero', theme);
+  const headlineTypography = getPublishedTypographyStyles('h1', theme);
   const subheadlineTypography = getPublishedTypographyStyles('body-lg', theme);
 
   return (
@@ -222,7 +222,7 @@ export default function Minimalist(props: LayoutComponentProps) {
 
         {/* Headline at Top */}
         <div className="relative z-30 p-6 md:p-8 lg:p-12">
-          <div className="max-w-2xl mx-auto pt-10">
+          <div className="max-w-3xl mx-auto pt-10">
 
 
 

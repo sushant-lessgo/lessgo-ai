@@ -1,167 +1,110 @@
-Perfect — this is **exactly** the right moment to stop guessing.
-I’ve read all 5 files. The root cause is now **100% clear**.
+Findings from actual HTML + computed CSS
+1) You currently have 3 different render paths (Edit / Preview / Publish)
 
-You are **successfully fetching sections from the API**, but they are **never committed into the store**.
+They do not output the same DOM or apply typography the same way.
 
----
+Preview
 
-# 🔥 Root Cause (precise, no ambiguity)
+Renders semantic heading tags (h1, h2)
 
-### **`loadFromDraft` expects `finalContent.sections`**
+Applies typography via inline styles from landingTypography:
 
-But your API returns:
+e.g. font-size: clamp(2rem, 5vw, 3rem) for h1
 
-```json
-{
-  "finalContent": {
-    "layout": {
-      "sections": ["hero","cta","miscellaneous-...","footer"]
-    },
-    "content": { ... }
-  }
-}
-```
+plus font-family, letter-spacing, line-height etc
 
-And inside your store logic, **sections are read from the wrong path**.
+✅ Preview is the “most correct” representation of the design system.
 
----
+Edit
 
-# Where exactly it breaks
+Renders semantic tags (h1, h2, p) but includes editor overlay classes/attrs
 
-## 1️⃣ EditProvider does its job ✅
+Does NOT apply default typography inline (only alignment/color/cursor)
 
-This part is **correct**:
+Therefore typography often falls back to browser defaults or whatever classes happen to exist
 
-```ts
-storeState.loadFromDraft(data, tokenId);
-```
+Headline in edit: missing clamp font-size + font-family
 
-The API response **does contain sections** (you verified this in Network tab).
+Subheadline in edit: looks fine because Tailwind text-2xl md:text-4xl is present
 
-So **EditProvider is NOT the problem anymore**.
+⚠️ Edit is inconsistent because it doesn’t consistently apply typography defaults unless they’re coming from className.
 
----
+Published
 
-## 2️⃣ The real failure: `editStore.ts → loadFromDraft`
+Intentionally static + LCP optimized (good)
 
-Inside `editStore.ts`, your hydration logic does something equivalent to:
+DOM output varies by element type:
 
-```ts
-const { finalContent } = data;
+Some headlines become <div><span>…</span></div> (loses semantic heading tags)
 
-set({
-  sections: finalContent.sections ?? [],
-  content: finalContent.content ?? {},
-});
-```
+Some subheadlines remain <p class="text-2xl md:text-4xl">…</p>
 
-❌ **But in legacy data:**
+Even when published markup looks “underspecified”, actual size can still be correct because typography is coming from compiled CSS.
 
-```ts
-finalContent.sections === undefined
-finalContent.layout.sections === ["hero","cta",...]
-```
+✅ Confirmed by DevTools:
 
-So Zustand receives:
+Computed font-size = 32px
 
-```ts
-sections = []
-```
+Source: /_next/static/css/app/p/layout.css
 
-Redux DevTools shows empty sections — exactly what you’re seeing.
+Rule: font-size: clamp(1.5rem, 3.5vw, 2rem) (max 32px)
 
----
+So: Published can be visually correct even without inline styles because layout.css applies typography via selectors/inheritance.
 
-# Why API “good news” didn’t help UI
+Key comparisons that exposed the system behavior
+Hero headline (problem case)
 
-Because:
+Preview: <h1 style="font-size: clamp(...); font-family: ...">
 
-| Layer           | Status                |
-| --------------- | --------------------- |
-| API response    | ✅ Correct             |
-| EditProvider    | ✅ Calls loadFromDraft |
-| Store hydration | ❌ Reads wrong path    |
-| Redux           | ❌ Gets empty array    |
-| UI              | ❌ Renders nothing     |
+Edit: <h1 style="text-align/color only"> (no font-size)
 
----
+Publish: <div class="text-center leading-[1.1]">... (no explicit size)
 
-# ✅ The Fix (2-line change, no refactor)
+➡️ This explains why hero headline looked like ~16px at times in published HTML dumps: it’s a <div> with no explicit sizing unless CSS rules happen to apply.
 
-## **Fix `loadFromDraft` in `editStore.ts`**
+Minimalist subheadline (healthy case)
 
-### 🔧 Replace section extraction logic
+All three modes use:
 
-**Before (broken for legacy):**
+<p class="text-2xl md:text-4xl">
 
-```ts
-const sections = finalContent?.sections ?? [];
-```
+➡️ Because it’s Tailwind class-driven, it stays consistent in edit/preview/publish.
 
-**After (backward compatible):**
+Announcement headline (mixed signals but confirmed)
 
-```ts
-const sections =
-  finalContent?.sections ??
-  finalContent?.layout?.sections ??
-  [];
-```
+Published markup shown as <div><span class="a_GcMg">…</span></div>
 
-### Also ensure content stays correct:
+Yet the published page visually looks correct
 
-```ts
-const content = finalContent?.content ?? {};
-```
+DevTools confirmed clamp sizing comes from layout.css
 
----
+➡️ Means published typography is being applied by compiled CSS even if markup isn’t semantic.
 
-# Optional but strongly recommended (future-proof)
+Root cause (most likely)
+You have two typography delivery mechanisms coexisting:
 
-Normalize once, early:
+Inline style typography (Preview path)
 
-```ts
-const normalizedFinalContent = {
-  sections:
-    finalContent?.sections ??
-    finalContent?.layout?.sections ??
-    [],
-  content: finalContent?.content ?? {},
-  layout: finalContent?.layout ?? {},
-};
-```
+Stylesheet-based typography (Published path via compiled layout.css)
 
-Then hydrate store **only from normalized shape**.
+Edit mode is a third inconsistent case: it often doesn’t apply typography defaults at all unless Tailwind classes are present.
 
----
+This causes mismatches because:
 
-# Why this explains *everything*
+headline elements often depend on typography system, not Tailwind size classes
 
-* Why API shows sections ✅
-* Why Redux shows none ❌
-* Why clearing localStorage breaks everything ❌
-* Why Claude’s plan *almost* worked but still failed ⚠️
+published renderer sometimes changes semantic tags (h1/h2) into generic wrappers (div/span), which can break selector matching or inheritance
 
-The API fix was necessary — but **store hydration logic was still assuming new format only**.
+edit renderer drops default typography unless “modified” or unless CSS classes provide it
 
----
+Gut feel / design diagnosis
 
-# Final sanity check (do this)
+Your typography system is conceptually right (global → section → block → page → user override), but implementation is fractured because each mode uses a different renderer and a different method of applying typography.
 
-After patching:
+You can still keep Publish static/LCP friendly, but you need a single “typography resolution contract” shared by all 3 modes, with two emitters:
 
-1. Hard refresh
-2. Clear localStorage
-3. Open `/edit/e205C_rZ8jmP`
-4. Redux DevTools → `sections.length > 0`
-5. UI renders sections 🎉
+Preview/Edit emitter: inline style object (or className)
 
----
+Publish emitter: deterministic className/selector that compiles into CSS
 
-If you want, next I can:
-
-* Normalize legacy → new format permanently on load
-* Add an invariant guard that logs when sections resolve to empty
-* Help you delete legacy code safely in the future
-
-But for now:
-👉 **Fix is in `editStore.ts → loadFromDraft` section path mismatch.**
+Right now it’s “accidentally consistent” in some cases (announcement), and “broken” in others (hero headline) depending on markup differences and whether rules attach.

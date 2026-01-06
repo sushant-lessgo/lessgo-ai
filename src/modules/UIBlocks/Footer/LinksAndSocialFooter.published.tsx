@@ -9,6 +9,7 @@
 import React from 'react';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { LogoPublished } from '@/components/published/LogoPublished';
+import { getPublishedTypographyStyles } from '@/lib/publishedTextColors';
 import {
   FaTwitter,
   FaLinkedin,
@@ -24,6 +25,12 @@ import {
 } from 'react-icons/fa';
 
 export default function LinksAndSocialFooterPublished(props: LayoutComponentProps) {
+  const { theme } = props;
+
+  // Typography styles
+  const bodySmTypography = getPublishedTypographyStyles('body-sm', theme);
+  const captionTypography = getPublishedTypographyStyles('caption', theme);
+
   // Extract content from props with defaults
   const copyright = props.copyright || `© ${new Date().getFullYear()} Your Company. All rights reserved.`;
   const company_name = props.company_name || 'Your Company';
@@ -84,7 +91,7 @@ export default function LinksAndSocialFooterPublished(props: LayoutComponentProp
           />
 
           {/* Tagline */}
-          <p className="text-gray-400 text-center text-sm">{tagline}</p>
+          <p className="text-gray-400 text-center text-sm" style={bodySmTypography}>{tagline}</p>
 
           {/* Social Media Icons */}
           {socialItems.length > 0 && (
@@ -110,7 +117,7 @@ export default function LinksAndSocialFooterPublished(props: LayoutComponentProp
 
         {/* Copyright */}
         <div className="pt-8 border-t border-gray-800 text-center">
-          <p className="text-sm text-gray-400">{copyright}</p>
+          <p className="text-sm text-gray-400" style={captionTypography}>{copyright}</p>
         </div>
       </div>
     </footer>

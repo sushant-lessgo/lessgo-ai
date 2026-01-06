@@ -8,16 +8,25 @@
 import React from 'react';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { TextPublished } from '@/components/published/TextPublished';
+import { getPublishedTypographyStyles } from '@/lib/publishedTextColors';
 
 export default function SimpleFooterPublished(props: LayoutComponentProps) {
-  const { sectionBackgroundCSS } = props;
+  const { sectionBackgroundCSS, theme } = props;
   const copyright = props.copyright || `© ${new Date().getFullYear()} Your Company. All rights reserved.`;
+
+  // Typography styles
+  const captionTypography = getPublishedTypographyStyles('caption', theme);
 
   return (
     <section style={{ background: sectionBackgroundCSS }} className="py-8 px-6 border-t">
       <div className="flex flex-col items-center gap-2">
-        <TextPublished value={copyright} element="p" className="text-sm text-gray-600" />
-        <div className="text-sm text-gray-600">
+        <TextPublished
+          value={copyright}
+          element="p"
+          className="text-sm text-gray-600"
+          style={captionTypography}
+        />
+        <div className="text-sm text-gray-600" style={captionTypography}>
           Built with{' '}
           <a href="https://lessgo.ai" target="_blank" rel="noopener noreferrer" className="text-blue-600">
             Lessgo.ai
