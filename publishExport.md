@@ -191,6 +191,16 @@ model PublishedPage {
 npx prisma migrate dev --name add_static_export_fields
 ```
 
+Phase 2 is complete. Test successful.
+
+[Phase 2] Blob uploaded: {
+  version: '2026-01-07T174451913-OrurSp',
+  blobKey: 'pages/cmk49cwz10003ltfc4ub5fvum/2026-01-07T174451913-OrurSp/index.html',
+  size: '2.83 KB',
+  duration: '1708ms'
+}
+ POST /api/publish 200 in 7935ms
+
 ---
 
 ## Phase 3: Routing Layer with Vercel KV

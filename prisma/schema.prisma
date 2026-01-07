@@ -58,7 +58,36 @@ model PublishedPage {
   previewImage String?
   views        Int     @default(0)
 
+  // Static export fields (Phase 2)
+  publishState     String   @default("draft") // draft, publishing, published, failed
+  currentVersionId String?  @unique            // FK to PublishedPageVersion.id
+  lastPublishAt    DateTime?
+  publishError     String?
+  analyticsEnabled Boolean  @default(false)
+
+  // Relations
+  currentVersion PublishedPageVersion? @relation("CurrentVersion", fields: [currentVersionId], references: [id])
+  versions       PublishedPageVersion[] @relation("PageVersions")
+
   @@index([userId])
+}
+
+model PublishedPageVersion {
+  id              String   @id @default(cuid())
+  publishedPageId String
+  version         String // timestamp-nanoid: 20260107T123045789-a3k9xz
+  blobKey         String // pages/{pageId}/{version}/index.html
+  blobUrl         String
+  sizeBytes       Int
+  status          String   @default("active") // active, deleted
+  createdAt       DateTime @default(now())
+
+  publishedPage PublishedPage  @relation("PageVersions", fields: [publishedPageId], references: [id], onDelete: Cascade)
+  currentFor    PublishedPage? @relation("CurrentVersion")
+
+  @@unique([publishedPageId, version])
+  @@index([publishedPageId])
+  @@index([createdAt])
 }
 
 model TaxonomyEmbedding {

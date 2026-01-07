@@ -1,5 +1,6 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
+import { getRoute } from '@/lib/routing/kvRoutes'
 
 const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
@@ -23,6 +24,7 @@ const isPublicRoute = createRouteMatcher([
   '/thanks',
   '/privacy',
   '/terms',
+  '/__blob_proxy',
 ])
 
 export default clerkMiddleware(async (auth, req) => {
@@ -37,9 +39,35 @@ export default clerkMiddleware(async (auth, req) => {
     if (subdomain && subdomain !== 'www' && subdomain !== 'lessgo') {
       // Don't rewrite API routes - they need to go through normally
       if (!url.pathname.startsWith('/api/')) {
-        // Rewrite subdomain requests to /p/[slug] route
-        url.pathname = `/p/${subdomain}`
-        return NextResponse.rewrite(url)
+        // === PHASE 3: KV ROUTING ===
+        // Try KV routing first (edge-optimized static serving)
+        const originalPath = url.pathname; // Preserve for logging
+
+        try {
+          const routeKey = await getRoute(host, originalPath || '/');
+
+          if (routeKey) {
+            // Found in KV - rewrite to blob proxy with ROUTE KEY (not blob key)
+            // Proxy will do KV lookup to prevent user-supplied key spoofing
+            url.pathname = '/__blob_proxy';
+            url.searchParams.set('rk', routeKey); // rk = route key
+
+            // Optional: minimal logging (only in dev)
+            if (process.env.NODE_ENV === 'development') {
+              console.log('[Middleware] KV hit:', { host, path: originalPath });
+            }
+
+            return NextResponse.rewrite(url);
+          }
+        } catch (error) {
+          // KV error - log and fall through to legacy SSR
+          console.error('[Middleware] KV lookup error:', error);
+        }
+
+        // === FALLBACK: LEGACY SSR ===
+        // Not in KV or KV error - use existing SSR route
+        url.pathname = `/p/${subdomain}`;
+        return NextResponse.rewrite(url);
       }
     }
   }

@@ -137,45 +137,184 @@ async function publishHandler(req: NextRequest) {
       },
     });
 
-    // Phase 1: Static HTML generation (testing only)
-    if (process.env.ENABLE_STATIC_EXPORT === 'true') {
-      try {
-        const { generateStaticHTML } = await import('@/lib/staticExport/htmlGenerator');
+    // Phase 2: Static HTML generation + Blob upload (always runs)
+    const startTime = Date.now();
+    let uploadedBlobKey: string | null = null;
 
-        // Extract description from hero section
-        const heroSection = content.layout?.sections?.[0];
-        const heroContent = content[heroSection];
-        const description =
-          heroContent?.elements?.subheadline?.content ||
-          heroContent?.elements?.headline?.content ||
-          cleanTitle;
+    try {
+      // Get page ID (use existing or newly created)
+      const publishedPage = await prisma.publishedPage.findUnique({ where: { slug } });
+      const pageId = publishedPage?.id;
 
-        const staticHTML = await generateStaticHTML({
-          sections: content.layout.sections,
-          content: content,
-          theme: content.layout.theme,
-          publishedPageId: existing?.id || 'new-page-id',
-          pageOwnerId: userId,
-          slug,
-          title: cleanTitle,
-          description: typeof description === 'string' ? description.slice(0, 160) : cleanTitle.slice(0, 160),
-          previewImage,
-          analyticsOptIn: false,
-          baseURL: baseUrl,
-        });
-
-        // Phase 1: Log metadata only (don't save yet)
-        console.log('[Phase 1] Static HTML generated:', {
-          size: `${(staticHTML.metadata.size / 1024).toFixed(2)} KB`,
-          fonts: staticHTML.metadata.fonts,
-          cssVariables: staticHTML.metadata.cssVariableCount,
-        });
-
-        // Phase 2 will: Upload to Blob, update KV routing
-      } catch (error) {
-        console.error('[Phase 1] Static export failed:', error);
-        // Don't block publish - legacy SSR still works
+      if (!pageId) {
+        throw new Error('Failed to get published page ID');
       }
+
+      // Idempotency guard: prevent double-publish
+      const currentPage = await prisma.publishedPage.findUnique({
+        where: { id: pageId },
+        select: { publishState: true }
+      });
+
+      if (currentPage?.publishState === 'publishing') {
+        console.warn('[Phase 2] Page already publishing:', pageId);
+        // Don't throw - let it continue (may be retry after network error)
+      }
+
+      // Set publishing state
+      await prisma.publishedPage.update({
+        where: { id: pageId },
+        data: { publishState: 'publishing' }
+      });
+
+      // Generate HTML
+      const { generateStaticHTML } = await import('@/lib/staticExport/htmlGenerator');
+      const { uploadStaticSite } = await import('@/lib/staticExport/blobUploader');
+      const { cleanupOldVersions } = await import('@/lib/staticExport/versionCleanup');
+      const { del } = await import('@vercel/blob');
+
+      // Extract description from hero section
+      const contentData = content as any;
+      const heroSection = contentData.layout?.sections?.[0];
+      const heroContent = contentData[heroSection];
+      const description =
+        heroContent?.elements?.subheadline?.content ||
+        heroContent?.elements?.headline?.content ||
+        cleanTitle;
+
+      const staticHTML = await generateStaticHTML({
+        sections: contentData.layout.sections,
+        content: contentData,
+        theme: contentData.layout.theme,
+        publishedPageId: pageId,
+        pageOwnerId: userId,
+        slug,
+        title: cleanTitle,
+        description: typeof description === 'string' ? description.slice(0, 160) : cleanTitle.slice(0, 160),
+        previewImage,
+        analyticsOptIn: false,
+        baseURL: baseUrl,
+      });
+
+      // Upload to blob with timeout protection
+      const uploadPromise = uploadStaticSite({
+        pageId,
+        html: staticHTML.html,
+        assetBundleVersion: 'v1',
+      });
+
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Blob upload timeout after 15s')), 15000)
+      );
+
+      const { version, blobKey, blobUrl, sizeBytes } = await Promise.race([
+        uploadPromise,
+        timeoutPromise
+      ]);
+
+      uploadedBlobKey = blobKey;
+
+      // Validate upload response
+      if (!version || !blobKey || !blobUrl) {
+        throw new Error('Invalid blob upload response');
+      }
+
+      // Create version record
+      const newVersion = await prisma.publishedPageVersion.create({
+        data: {
+          publishedPageId: pageId,
+          version,
+          blobKey,
+          blobUrl,
+          sizeBytes,
+          status: 'active',
+        }
+      });
+
+      // Update page with current version pointer
+      await prisma.publishedPage.update({
+        where: { id: pageId },
+        data: {
+          publishState: 'published',
+          currentVersionId: newVersion.id,
+          lastPublishAt: new Date(),
+          htmlContent: '', // Clear legacy field (save DB space)
+        },
+      });
+
+      // === PHASE 3: UPDATE KV ROUTING ===
+      // Add after successful DB update
+      try {
+        const { atomicPublish } = await import('@/lib/routing/kvRoutes');
+
+        // Build domain list (currently only {slug}.lessgo.ai)
+        // Phase 5 will add custom domains from DB
+        const domains = [`${slug}.lessgo.ai`];
+
+        // CRITICAL: Pass blobUrl (not blobKey) to KV
+        // This allows proxy to fetch directly without head() API call
+        await atomicPublish(
+          pageId,
+          domains,
+          version,
+          blobUrl  // Use blobUrl from upload result, not blobKey
+        );
+
+        // Minimal logging (only in dev)
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[Phase 3] KV routing updated:', {
+            pageId,
+            version,
+            domains,
+          });
+        }
+      } catch (kvError) {
+        // Don't fail publish if KV update fails
+        // Middleware will fall back to SSR
+        console.error('[Phase 3] KV update failed (non-critical):', kvError);
+      }
+
+      const duration = Date.now() - startTime;
+      console.log('[Phase 2] Blob uploaded:', {
+        version,
+        blobKey,
+        size: `${(sizeBytes / 1024).toFixed(2)} KB`,
+        duration: `${duration}ms`,
+      });
+
+      // Cleanup old versions AFTER successful publish (fire-and-forget)
+      cleanupOldVersions(pageId, 10).catch(err => {
+        console.error('[Cleanup Error]', err);
+      });
+
+    } catch (error) {
+      console.error('[Phase 2] Static export failed:', error);
+
+      // Rollback: delete uploaded blob if DB update failed
+      if (uploadedBlobKey) {
+        try {
+          const { del } = await import('@vercel/blob');
+          await del(uploadedBlobKey);
+          console.log('[Rollback] Deleted orphaned blob:', uploadedBlobKey);
+        } catch (delErr) {
+          console.error('[Rollback] Failed to delete blob:', delErr);
+        }
+      }
+
+      // Set failed state
+      const publishedPage = await prisma.publishedPage.findUnique({ where: { slug } });
+      if (publishedPage) {
+        await prisma.publishedPage.update({
+          where: { id: publishedPage.id },
+          data: {
+            publishState: 'failed',
+            publishError: error instanceof Error ? error.message : 'Unknown error',
+          },
+        });
+      }
+
+      // Don't block publish - legacy SSR still works
+      console.warn('[Phase 2] Continuing with legacy publish despite static export failure');
     }
 
     return createSecureResponse({

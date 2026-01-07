@@ -1,193 +1,163 @@
+This plan is **directionally right** (KV lookup in middleware → serve blob fast, SSR fallback on miss), but there are a few **critical corrections** you should make before implementing. Some are correctness/security, some are performance.
 
-## 🔥 Root Cause (confirmed)
+## What’s good
 
-Your app is **breaking at build/compile time**, not at runtime.
+* KV-first routing with SSR fallback ✅
+* Non-blocking KV update during publish ✅ (fallback keeps the site working)
+* Key scheme `route:{host}:{path}` ✅ (good for multi-domain later)
+* Edge proxy route ✅ (makes global serving possible)
 
-The **single root cause** is:
+## Critical issues to fix
 
-> **`src/lib/staticExport/htmlGenerator.ts` statically imports `react-dom/server`, and that module is pulled into the App Router graph via `/api/publish`.
-> Next.js explicitly forbids this.**
+### 1) **`@vercel/blob head()` in Edge runtime may not be what you want**
 
-Everything else (preview 500, edit 500, publish 500) is a **cascade failure**.
+In `__blob_proxy`, the plan does:
 
----
+* `head(blobKey)` to get a URL
+* `fetch(blob.url)` to stream content
 
-## Why this happens (with your exact files)
+You don’t actually need `head()` if you already have a stable blob URL or can derive it. But with Vercel Blob, you typically **don’t** have a deterministic public URL purely from `blobKey` without calling the API.
 
-### 1️⃣ The forbidden import
+**Problem:** `head()` is an API call per request → adds latency and is a dependency on Blob API availability. That undermines “<50ms”.
 
-In `htmlGenerator.ts` you have:
+✅ Better: store **blobUrl** in KV alongside blobKey.
 
-```ts
-import ReactDOMServer from "react-dom/server";
-```
-
-Next.js App Router **does not allow** `react-dom/server` to be statically imported inside modules that are part of the app bundle (even server routes).
-
-This is why Next throws:
-
-```
-You're importing a component that imports react-dom/server.
-To fix it, render or return the content directly as a Server Component instead
-```
-
-This error is emitted **during compilation**, not execution.
-
----
-
-### 2️⃣ Why `/api/publish` fails
-
-Your route handler imports `htmlGenerator.ts`:
-
-```
-./src/app/api/publish/route.ts
- → ./src/lib/staticExport/htmlGenerator.ts
-```
-
-As soon as Next tries to compile `/api/publish`, it hits the forbidden import and **the entire route fails to build**.
-
-That’s why you see:
-
-```
-POST /api/publish 500
-```
-
-before anything even runs.
-
----
-
-### 3️⃣ Why `/preview/[token]` also returns 500 (even though it’s client-side)
-
-Your `PreviewPage` **does NOT import `htmlGenerator.ts`** (this is good 👍) 
-
-However:
-
-* `/preview/[token]` bootstraps the app
-* The app build graph includes `/api/publish`
-* `/api/publish` fails compilation
-* **Next dev server marks the whole build as broken**
-* Any request that touches the server → **500**
-
-So this is **not** a bug in `page.tsx`. The preview page is innocent.
-
----
-
-## ❌ What is NOT the problem (important)
-
-* ❌ Not hydration
-* ❌ Not client/server mismatch
-* ❌ Not `use client`
-* ❌ Not DOM access (`document.getElementById`)
-* ❌ Not your Preview page logic
-* ❌ Not the publish flow JS
-
-You diagnosed correctly by suspecting **Phase 1 export changes**.
-
----
-
-## ✅ The correct fix (minimal, safe, production-grade)
-
-### ✅ Step 1: Force Node runtime for the route
-
-In **`src/app/api/publish/route.ts`**:
+So KV RouteConfig should include:
 
 ```ts
-export const runtime = "nodejs";
+blobUrl: string
 ```
 
-This ensures the route is never treated as Edge.
-
----
-
-### ✅ Step 2: Make `htmlGenerator.ts` server-only
-
-At the **very top** of `htmlGenerator.ts`:
+Then `__blob_proxy` just does:
 
 ```ts
-import "server-only";
+fetch(blobUrl)
 ```
 
-This prevents accidental client imports (future-proofing).
+No Blob API call per request.
 
 ---
 
-### ✅ Step 3: REMOVE the static import of `react-dom/server`
+### 2) **Cache headers are wrong for a stable route**
 
-❌ **Remove this**:
+The proxy sets:
+
+`Cache-Control: public, s-maxage=31536000, immutable`
+
+That is great for **versioned URLs**, but your proxy route is a **stable path** (`/__blob_proxy?key=...`) and could be cached aggressively by CDNs *if you’re not careful*, especially if the `key` changes.
+
+It *might* be okay because the query param changes per version, but you’re going to route stable slugs to it. You need to be explicit about caching strategy.
+
+✅ Recommendation:
+
+* For the proxy response, set caching based on **blobUrl/version**, not “immutable for everything”.
+
+If your `key` is versioned and never reused, then immutable is fine. But be careful: if you later change proxy shape to `/__blob_proxy/{slug}`, immutable would be catastrophic.
+
+**Safer now:**
+
+```http
+Cache-Control: public, s-maxage=3600, stale-while-revalidate=86400
+```
+
+…and then in Phase 3.5 switch to immutable once you’re 100% sure the response is strictly versioned.
+
+(If you keep `key=...version...`, immutable is acceptable, but document the invariant: **key must be content-addressed or version-addressed**.)
+
+---
+
+### 3) Middleware logging will hurt you
+
+`console.log` in middleware for every request is expensive/noisy at scale.
+
+✅ Do:
+
+* log only on debug env, or sample (1%)
+* or remove logs once verified
+
+---
+
+### 4) Middleware rewrite logic is slightly off
+
+In the KV hit branch, plan does:
 
 ```ts
-import ReactDOMServer from "react-dom/server";
+url.pathname = '/__blob_proxy';
+url.searchParams.set('key', route.blobKey);
+console.log('[Middleware] KV hit:', { host, path: url.pathname, ... })
+return NextResponse.rewrite(url);
 ```
 
-✅ **Replace it with a dynamic import inside the function**:
+That log prints `path: '/__blob_proxy'`, not the original path, so debugging is misleading.
+
+Also `path: url.pathname || '/'` earlier—`url.pathname` is never empty.
+
+✅ Better:
+
+* preserve originalPath in a variable
+* write it to header `X-Route-From` if needed
+
+---
+
+### 5) Security: validating `blobKey` is not enough
+
+The proxy only checks that key starts with `pages/` and ends with `/index.html`. If an attacker guesses or scrapes keys, they can fetch any page.
+
+You may be okay with published pages being public. But you should still prevent arbitrary traversal.
+
+✅ Add a stricter regex:
+
+* `pages/{pageId}/{version}/index.html` where `pageId` matches your ID format
+* `version` matches your timestamp+nanoid format
+
+And (stronger):
+✅ Only accept keys that exist in KV route config for the requesting host.
+That means: **don’t pass blobKey directly from middleware to proxy** as a query param unless you’re sure it can’t be forged.
+
+Best pattern:
+
+* middleware rewrites to `/__blob_proxy?host=...&path=...`
+* proxy itself does KV lookup (host/path) and fetches the blobUrl
+* now users can’t spoof `key=...`
+
+This is more secure and actually simpler long-term.
+
+---
+
+### 6) Atomicity: `kv.pipeline()` + `await kv.get()` is not truly atomic
+
+The plan does `await kv.get(existingMeta)` outside pipeline then writes inside pipeline. That’s not atomic, but for this use case it’s fine.
+
+However, you don’t really need `site:{pageId}:versions` in KV at all if DB is source-of-truth for versions. KV should be for routing.
+
+✅ Simplify Phase 3 KV to only:
+
+* `route:{host}:{path} -> { pageId, version, blobUrl }`
+
+Everything else can stay in DB.
+
+---
+
+## My recommended “Phase 3 MVP” (simpler + faster + safer)
+
+### KV value should include `blobUrl`
+
+Store this:
 
 ```ts
-export async function generateStaticHTML(...) {
-  const ReactDOMServer = await import("react-dom/server");
-
-  const html = ReactDOMServer.renderToStaticMarkup(
-    <LandingPagePublishedRenderer ... />
-  );
-
-  return html;
-}
+{ pageId, version, blobUrl, publishedAt }
 ```
 
-🔑 This is the key fix.
-Next.js **only blocks static imports**. Dynamic imports inside Node-only code are allowed.
+### Middleware does KV hit → rewrite to proxy with **route key**, not blob key
+
+Rewrite to:
+`/__blob_proxy?rk=route:{host}:{path}`
+
+### Proxy does:
+
+* `kv.get(rk)`
+* `fetch(blobUrl)` and stream
+
+No `head()` call, no user-supplied blobKey, secure by design.
 
 ---
-
-## Why this works
-
-* `react-dom/server` is no longer visible to Next’s static analyzer
-* The file remains server-only
-* `/api/publish` compiles
-* App build succeeds
-* Preview + Edit pages stop returning 500
-* Publish flow works again
-
----
-
-## 🔬 Extra validation you can run
-
-After applying the fix:
-
-```bash
-rm -rf .next
-npm run dev
-```
-
-Then hit:
-
-* `/preview/[token]` → should load
-* Click Publish → `/api/publish` should respond
-* No webpack / SWC errors
-
----
-
-## 🧠 Architectural note (important for Phase 2+)
-
-Your **Phase 1 approach is conceptually correct**, but App Router imposes this rule:
-
-> **“If you want HTML, either return a Server Component OR dynamically import renderers.”**
-
-For Phase 2 / export pipelines, I recommend:
-
-* keeping **all HTML generation behind API routes**
-* keeping `react-dom/server` usage **isolated + dynamic**
-* never importing export logic into UI modules
-
-You’re already 90% aligned with this — just hit the App Router guardrail.
-
----
-
-## TL;DR
-
-**Root cause:**
-`react-dom/server` is statically imported in `htmlGenerator.ts`, which breaks Next App Router compilation.
-
-**Fix:**
-Dynamic import + `server-only` + Node runtime.
-
-Nothing else in your code is fundamentally broken.
