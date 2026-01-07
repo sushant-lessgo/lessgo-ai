@@ -9,6 +9,9 @@ import { withPublishRateLimit } from '@/lib/rateLimit';
 import { getUserPlan, checkLimit } from '@/lib/planManager';
 import { stripHTMLTags } from '@/utils/smartTitleGenerator';
 
+// Force Node.js runtime for ReactDOMServer support
+export const runtime = 'nodejs';
+
 async function publishHandler(req: NextRequest) {
   const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
   const host = req.headers.get("host") || "localhost:3000";
@@ -133,6 +136,47 @@ async function publishHandler(req: NextRequest) {
         updatedAt: new Date(),
       },
     });
+
+    // Phase 1: Static HTML generation (testing only)
+    if (process.env.ENABLE_STATIC_EXPORT === 'true') {
+      try {
+        const { generateStaticHTML } = await import('@/lib/staticExport/htmlGenerator');
+
+        // Extract description from hero section
+        const heroSection = content.layout?.sections?.[0];
+        const heroContent = content[heroSection];
+        const description =
+          heroContent?.elements?.subheadline?.content ||
+          heroContent?.elements?.headline?.content ||
+          cleanTitle;
+
+        const staticHTML = await generateStaticHTML({
+          sections: content.layout.sections,
+          content: content,
+          theme: content.layout.theme,
+          publishedPageId: existing?.id || 'new-page-id',
+          pageOwnerId: userId,
+          slug,
+          title: cleanTitle,
+          description: typeof description === 'string' ? description.slice(0, 160) : cleanTitle.slice(0, 160),
+          previewImage,
+          analyticsOptIn: false,
+          baseURL: baseUrl,
+        });
+
+        // Phase 1: Log metadata only (don't save yet)
+        console.log('[Phase 1] Static HTML generated:', {
+          size: `${(staticHTML.metadata.size / 1024).toFixed(2)} KB`,
+          fonts: staticHTML.metadata.fonts,
+          cssVariables: staticHTML.metadata.cssVariableCount,
+        });
+
+        // Phase 2 will: Upload to Blob, update KV routing
+      } catch (error) {
+        console.error('[Phase 1] Static export failed:', error);
+        // Don't block publish - legacy SSR still works
+      }
+    }
 
     return createSecureResponse({
       message: 'Page published successfully',

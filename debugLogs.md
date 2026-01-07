@@ -1,57 +1,134 @@
-Minimalist Headline
+Front end
 
-Preview
-<div class="max-w-2xl mx-auto pt-10"><h1 class="font-bold leading-tight text-gray-50 text-white text-center leading-[1.1]" style="font-size: clamp(2rem, 5vw, 3rem); font-weight: bold; font-family: Manrope, sans-serif, Inter, sans-serif; line-height: 1.3; letter-spacing: -0.005em; text-align: center; color: rgb(255, 255, 255);">GLOBAL. INDIAN. <span style="color: rgb(16, 185, 129);">ICON</span>. FIRST TIME IN GERMANY.</h1></div>
+  GET http://localhost:3000/preview/Dt9MrHFy5f5b 500 (Internal Server Error)
+Router @ webpack-internal:///…s/app-router.js:392
+renderWithHooksAgain @ webpack-internal:///…evelopment.js:11272
+replaySuspendedComponentWithHooks @ webpack-internal:///…evelopment.js:11219
+replayFunctionComponent @ webpack-internal:///…evelopment.js:16324
+replaySuspendedUnitOfWork @ webpack-internal:///…evelopment.js:25806
+renderRootConcurrent @ webpack-internal:///…evelopment.js:25578
+performConcurrentWorkOnRoot @ webpack-internal:///…evelopment.js:24504
+workLoop @ webpack-internal:///….development.js:256
+flushWork @ webpack-internal:///….development.js:225
+performWorkUntilDeadline @ webpack-internal:///….development.js:534
+index.js:625 Uncaught ModuleBuildError: Module build failed (from ./node_modules/next/dist/build/webpack/loaders/next-swc-loader.js):
+Error: 
+  × You're importing a component that imports react-dom/server. To fix it, render or return the content directly as a Server Component instead for perf and security.
+  │ Learn more: https://nextjs.org/docs/getting-started/react-essentials
+    ╭─[C:\Users\susha\lessgo-ai\src\lib\staticExport\htmlGenerator.ts:5:1]
+  5 │  * Uses ReactDOMServer.renderToStaticMarkup() with LandingPagePublishedRenderer
+  6 │  */
+  7 │ 
+  8 │ import ReactDOMServer from 'react-dom/server';
+    · ──────────────────────────────────────────────
+  9 │ import React from 'react';
+ 10 │ import { LandingPagePublishedRenderer } from '@/modules/generatedLanding/LandingPagePublishedRenderer';
+ 10 │ import { validateAndResolveAssetURLs } from './assetResolver';
+    ╰────
+
+    at processResult (file://C:\Users\susha\lessgo-ai\node_modules\next\dist\compiled\webpack\bundle5.js:28:400590)
+    at <unknown> (file://C:\Users\susha\lessgo-ai\node_modules\next\dist\compiled\webpack\bundle5.js:28:402302)
+    at <unknown> (file://C:\Users\susha\lessgo-ai\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js:1:8645)
+    at <unknown> (file://C:\Users\susha\lessgo-ai\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js:1:5019)
+    at r.callback (file://C:\Users\susha\lessgo-ai\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js:1:4039)
+getServerError @ nodeStackFrames.js:38
+eval @ index.js:625
+setTimeout
+hydrate @ index.js:613
+await in hydrate
+pageBootrap @ page-bootstrap.js:27
+eval @ next-dev.js:25
+Promise.then
+eval @ next-dev.js:23
+./node_modules/next/dist/client/next-dev.js @ main.js:820
+options.factory @ webpack.js:647
+__webpack_require__ @ webpack.js:37
+__webpack_exec__ @ main.js:1975
+(anonymous) @ main.js:1976
+webpackJsonpCallback @ webpack.js:1195
+(anonymous) @ main.js:9
+hydration-error-info.js:63 ./src/lib/staticExport/htmlGenerator.ts
+Error: 
+  × You're importing a component that imports react-dom/server. To fix it, render or return the content directly as a Server Component instead for perf and security.
+  │ Learn more: https://nextjs.org/docs/getting-started/react-essentials
+    ╭─[C:\Users\susha\lessgo-ai\src\lib\staticExport\htmlGenerator.ts:5:1]
+  5 │  * Uses ReactDOMServer.renderToStaticMarkup() with LandingPagePublishedRenderer
+  6 │  */
+  7 │ 
+  8 │ import ReactDOMServer from 'react-dom/server';
+    · ──────────────────────────────────────────────
+  9 │ import React from 'react';
+ 10 │ import { LandingPagePublishedRenderer } from '@/modules/generatedLanding/LandingPagePublishedRenderer';
+ 10 │ import { validateAndResolveAssetURLs } from './assetResolver';
+    ╰────
+console.error @ hydration-error-info.js:63
+window.console.error @ setup-hydration-warning.js:18
+handleErrors @ hot-reloader-client.js:162
+processMessage @ hot-reloader-client.js:239
+eval @ hot-reloader-client.js:67
+handleMessage @ websocket.js:45
 
 
-Edit
+=================
 
-<div class="max-w-2xl mx-auto pt-10"><h1 contenteditable="false" class="inline-text-editor-v2 font-bold leading-tight text-gray-50 text-white text-center leading-[1.1] cursor-pointer hover:bg-opacity-10 selectable-element hover:bg-blue-50 hover:bg-opacity-50 transition-colors rounded" data-section-id="hero" data-element-key="headline" data-editing="false" role="button" aria-label="Element headline in section hero" aria-multiline="true" tabindex="0" data-selectable="true" style="text-align: center; color: rgb(255, 255, 255); cursor: pointer;" aria-selected="false">GLOBAL. INDIAN. <span style="color: rgb(16, 185, 129);">ICON</span>. FIRST TIME IN GERMANY.</h1></div>
+backend
 
-Publish
+ ○ Compiling /api/publish ...
+ ⨯ ./src/lib/staticExport/htmlGenerator.ts
+Error:
+  × You're importing a component that imports react-dom/server. To fix it, render or return the content directly as a Server Component instead for perf and security.
+  │ Learn more: https://nextjs.org/docs/getting-started/react-essentials
+    ╭─[C:\Users\susha\lessgo-ai\src\lib\staticExport\htmlGenerator.ts:5:1]
+  5 │  * Uses ReactDOMServer.renderToStaticMarkup() with LandingPagePublishedRenderer
+  6 │  */
+  7 │
+  8 │ import ReactDOMServer from 'react-dom/server';
+    · ──────────────────────────────────────────────
+  9 │ import React from 'react';
+ 10 │ import { LandingPagePublishedRenderer } from '@/modules/generatedLanding/LandingPagePublishedRenderer';
+ 10 │ import { validateAndResolveAssetURLs } from './assetResolver';
+    ╰────
 
-<div class="max-w-2xl mx-auto pt-10"><div class="text-center leading-[1.1]" style="color:#FFFFFF"><div>GLOBAL. INDIAN. <span style="color:rgb(0, 255, 0);">ICON.</span> FIRST TIME IN GERMANY.</div></div></div>
+Import trace for requested module:
+./src/lib/staticExport/htmlGenerator.ts
+./src/app/api/publish/route.ts
+ ⨯ ./src/lib/staticExport/htmlGenerator.ts
+Error:
+  × You're importing a component that imports react-dom/server. To fix it, render or return the content directly as a Server Component instead for perf and security.
+  │ Learn more: https://nextjs.org/docs/getting-started/react-essentials
+    ╭─[C:\Users\susha\lessgo-ai\src\lib\staticExport\htmlGenerator.ts:5:1]
+  5 │  * Uses ReactDOMServer.renderToStaticMarkup() with LandingPagePublishedRenderer
+  6 │  */
+  7 │
+  8 │ import ReactDOMServer from 'react-dom/server';
+    · ──────────────────────────────────────────────
+  9 │ import React from 'react';
+ 10 │ import { LandingPagePublishedRenderer } from '@/modules/generatedLanding/LandingPagePublishedRenderer';
+ 10 │ import { validateAndResolveAssetURLs } from './assetResolver';
+    ╰────
 
-CSS:
+Import trace for requested module:
+./src/lib/staticExport/htmlGenerator.ts
+./src/app/api/publish/route.ts
+ ⨯ ./src/lib/staticExport/htmlGenerator.ts
+Error:
+  × You're importing a component that imports react-dom/server. To fix it, render or return the content directly as a Server Component instead for perf and security.
+  │ Learn more: https://nextjs.org/docs/getting-started/react-essentials
+    ╭─[C:\Users\susha\lessgo-ai\src\lib\staticExport\htmlGenerator.ts:5:1]
+  5 │  * Uses ReactDOMServer.renderToStaticMarkup() with LandingPagePublishedRenderer
+  6 │  */
+  7 │
+  8 │ import ReactDOMServer from 'react-dom/server';
+    · ──────────────────────────────────────────────
+  9 │ import React from 'react';
+ 10 │ import { LandingPagePublishedRenderer } from '@/modules/generatedLanding/LandingPagePublishedRenderer';
+ 10 │ import { validateAndResolveAssetURLs } from './assetResolver';
+    ╰────
 
-Font size - 19.2 px
-
-<link rel="stylesheet" href="/_next/static/css/app/p/layout.css?v=1767689493425" data-precedence="next_static/css/app/p/layout.css">
-
-
-Minimalist sub-headline
-
-Edit
-
-<div class="max-w-[50rem] mx-auto pb-20"><p contenteditable="false" class="inline-text-editor-v2 leading-relaxed text-gray-200 text-white text-justify text-2xl md:text-4xl cursor-pointer hover:bg-opacity-10 selectable-element hover:bg-blue-50 hover:bg-opacity-50 transition-colors rounded" data-section-id="hero" data-element-key="subheadline" data-editing="false" role="button" aria-label="Element subheadline in section hero" aria-multiline="true" tabindex="0" data-selectable="true" style="text-align: center; color: rgb(255, 255, 255); cursor: pointer;" aria-selected="false">Join Us for a Premium Bollywood Night at Stadium Scale in Düsseldorf.</p></div>
-
-
-Preview
-
-<div class="max-w-[50rem] mx-auto pb-20"><p class="leading-relaxed text-gray-200 text-white text-justify text-2xl md:text-4xl" style="text-align: center; color: rgb(255, 255, 255);">Join Us for a Premium Bollywood Night at Stadium Scale in Düsseldorf.</p></div>
-
-
-Published
-
-<div class="max-w-[50rem] mx-auto pb-20"><p class="text-justify text-2xl md:text-4xl" style="color:#FFFFFF">Join Us for a Premium Bollywood Night at Stadium Scale in Düsseldorf.</p></div>
-
-Announcement Heading
-
-Edit
-
-<h2 contenteditable="false" class="inline-text-editor-v2 font-bold leading-tight text-gray-900 mb-4 cursor-pointer hover:bg-opacity-10 selectable-element hover:bg-blue-50 hover:bg-opacity-50 transition-colors rounded" data-section-id="miscellaneous-1766162124815" data-element-key="headline" data-editing="false" role="button" aria-label="Element headline in section miscellaneous-1766162124815" aria-multiline="true" tabindex="0" data-selectable="true" aria-selected="false" style="cursor: pointer;"><span class="a_GcMg font-feature-liga-off font-feature-clig-off font-feature-calt-off text-decoration-none text-strikethrough-none" style="color: rgba(0,255,0,var(--O42jJQ,1)); caret-color: rgb(0, 255, 0); --Ys-XuQ: none; font-kerning: normal;">WHO's PERFORMING?</span></h2>
-
-Preview
-
-<h2 class="font-bold leading-tight text-gray-50 mb-4" style="font-size: clamp(1.5rem, 3.5vw, 2rem); font-family: Manrope, sans-serif, Inter, sans-serif; line-height: 1.3; letter-spacing: 0px;"><span style="color: rgba(0,255,0,var(--O42jJQ,1)); caret-color: rgb(0, 255, 0); --Ys-XuQ: none; font-kerning: normal;">WHO's PERFORMING?</span></h2>
-
-
-Published
-
-<div><span class="a_GcMg font-feature-liga-off font-feature-clig-off font-feature-calt-off text-decoration-none text-strikethrough-none" style="color: rgba(0,255,0,var(--O42jJQ,1)); caret-color: rgb(0, 255, 0); --Ys-XuQ: none; font-kerning: normal;">WHO's PERFORMING?</span></div>
-
-computed CSS:
-
-font-size: 32 clamp(1.5rem, 3.5vw, 2rem)
-
-from /_next/static/css/app/p/layout.css
+Import trace for requested module:
+./src/lib/staticExport/htmlGenerator.ts
+./src/app/api/publish/route.ts
+ POST /api/publish 500 in 4446ms
+ GET /edit/Dt9MrHFy5f5b 500 in 55ms
+ GET /preview/Dt9MrHFy5f5b 500 in 53ms
+ GET /.well-known/appspecific/com.chrome.devtools.json 500 in 16ms
