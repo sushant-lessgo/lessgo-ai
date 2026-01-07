@@ -79,6 +79,7 @@ export function LandingPagePublishedRenderer({
 
   // 3. Render sections with mode="published"
   return (
+    <>
     <div className={`landing-page-published ${className}`}>
       {processedSections.map((section) => {
         if (!section) return null;
@@ -138,5 +139,27 @@ export function LandingPagePublishedRenderer({
         );
       })}
     </div>
+
+    {/* Smooth scroll enhancement for anchor links */}
+    <script
+      dangerouslySetInnerHTML={{
+        __html: `
+(function() {
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+      anchor.addEventListener('click', function(e) {
+        var target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  });
+})();
+        `.trim()
+      }}
+    />
+  </>
   );
 }

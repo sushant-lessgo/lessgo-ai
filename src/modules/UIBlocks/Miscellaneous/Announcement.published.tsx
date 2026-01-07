@@ -11,6 +11,7 @@ import { LogoPublished } from '@/components/published/LogoPublished';
 import { CTAButtonPublished } from '@/components/published/CTAButtonPublished';
 import { getPublishedTextColors, getPublishedTypographyStyles } from '@/lib/publishedTextColors';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
+import { tailwindToHex } from '@/lib/themeUtils';
 
 export default function AnnouncementPublished(props: LayoutComponentProps) {
   const { sectionId, backgroundType, sectionBackgroundCSS, theme } = props;
@@ -29,7 +30,9 @@ export default function AnnouncementPublished(props: LayoutComponentProps) {
   // Colors and typography
   const textColors = getPublishedTextColors(backgroundType || 'primary', theme, sectionBackgroundCSS);
   const h2Typography = getPublishedTypographyStyles('h2', theme);
-  const ctaBg = theme?.colors?.accentColor || '#3B82F6';
+  const ctaBg = theme?.colors?.accentCSS
+    ? tailwindToHex(theme.colors.accentCSS)
+    : theme?.colors?.accentColor || '#3B82F6';
   const ctaText = '#FFFFFF';
 
   return (
@@ -59,7 +62,7 @@ export default function AnnouncementPublished(props: LayoutComponentProps) {
         {/* CTA */}
         <div className="text-center space-y-6">
           <TextPublished value={above_cta_copy} element="p" className="text-xl" style={{ color: textColors.body, fontSize: '1.25rem' }} />
-          <CTAButtonPublished text={cta_text} backgroundColor={ctaBg} textColor={ctaText} />
+          <CTAButtonPublished text={cta_text} backgroundColor={ctaBg} textColor={ctaText} href="#form-section" />
         </div>
       </div>
     </section>

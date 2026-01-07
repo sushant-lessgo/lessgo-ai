@@ -1,110 +1,60 @@
-Findings from actual HTML + computed CSS
-1) You currently have 3 different render paths (Edit / Preview / Publish)
+Best fix (clean + scalable): add multiline to InlineTextEditorV2 and use normalized innerHTML when multiline
+1) Update props
 
-They do not output the same DOM or apply typography the same way.
+Add this to InlineTextEditorV2Props:
 
-Preview
+multiline?: boolean;
 
-Renders semantic heading tags (h1, h2)
 
-Applies typography via inline styles from landingTypography:
+and default it in the component signature:
 
-e.g. font-size: clamp(2rem, 5vw, 3rem) for h1
+multiline = false,
 
-plus font-family, letter-spacing, line-height etc
+2) Normalize HTML for multiline and save that (instead of textContent)
 
-✅ Preview is the “most correct” representation of the design system.
+Replace saveContent() with this version (minimal but robust):
 
-Edit
+const normalizeMultilineHTML = (html: string) => {
+  return html
+    .replace(/<br\s*\/?>/gi, '<br>')      // normalize <br/>
+    .replace(/<(div|p)><br><\/\1>/gi, '<br>') // empty lines
+    .replace(/<(div|p)>/gi, '<br>')      // convert blocks to <br>
+    .replace(/<\/(div|p)>/gi, '')        // remove closing tags
+    .replace(/^<br>/, '');               // remove leading break
+};
 
-Renders semantic tags (h1, h2, p) but includes editor overlay classes/attrs
+const saveContent = () => {
+  if (!editorRef.current) return;
 
-Does NOT apply default typography inline (only alignment/color/cursor)
+  try {
+    const html = editorRef.current.innerHTML;
 
-Therefore typography often falls back to browser defaults or whatever classes happen to exist
+    const hasFormatting = !!editorRef.current.querySelector('span[style]');
+    const shouldPreserveStructure = multiline; // key: multiline drives behavior
 
-Headline in edit: missing clamp font-size + font-family
+    let finalContent: string;
 
-Subheadline in edit: looks fine because Tailwind text-2xl md:text-4xl is present
+    if (hasFormatting) {
+      finalContent = html;
+    } else if (shouldPreserveStructure && (html.includes('<br') || html.includes('<div') || html.includes('<p'))) {
+      finalContent = normalizeMultilineHTML(html);
+    } else {
+      finalContent = editorRef.current.textContent || '';
+    }
 
-⚠️ Edit is inconsistent because it doesn’t consistently apply typography defaults unless they’re coming from className.
+    if (finalContent !== originalContentRef.current) {
+      onContentChange(finalContent);
+      originalContentRef.current = finalContent;
+    }
+  } catch (error) {
+    console.error('Error saving content:', error);
+  }
+};
 
-Published
+1. Prefer node traversal approach or simpler innerHTML manipulation?
 
-Intentionally static + LCP optimized (good)
+Answer simpler innerHTML
 
-DOM output varies by element type:
+2. Should this apply to all multiline elements or just announcement supporting_copy?
 
-Some headlines become <div><span>…</span></div> (loses semantic heading tags)
-
-Some subheadlines remain <p class="text-2xl md:text-4xl">…</p>
-
-Even when published markup looks “underspecified”, actual size can still be correct because typography is coming from compiled CSS.
-
-✅ Confirmed by DevTools:
-
-Computed font-size = 32px
-
-Source: /_next/static/css/app/p/layout.css
-
-Rule: font-size: clamp(1.5rem, 3.5vw, 2rem) (max 32px)
-
-So: Published can be visually correct even without inline styles because layout.css applies typography via selectors/inheritance.
-
-Key comparisons that exposed the system behavior
-Hero headline (problem case)
-
-Preview: <h1 style="font-size: clamp(...); font-family: ...">
-
-Edit: <h1 style="text-align/color only"> (no font-size)
-
-Publish: <div class="text-center leading-[1.1]">... (no explicit size)
-
-➡️ This explains why hero headline looked like ~16px at times in published HTML dumps: it’s a <div> with no explicit sizing unless CSS rules happen to apply.
-
-Minimalist subheadline (healthy case)
-
-All three modes use:
-
-<p class="text-2xl md:text-4xl">
-
-➡️ Because it’s Tailwind class-driven, it stays consistent in edit/preview/publish.
-
-Announcement headline (mixed signals but confirmed)
-
-Published markup shown as <div><span class="a_GcMg">…</span></div>
-
-Yet the published page visually looks correct
-
-DevTools confirmed clamp sizing comes from layout.css
-
-➡️ Means published typography is being applied by compiled CSS even if markup isn’t semantic.
-
-Root cause (most likely)
-You have two typography delivery mechanisms coexisting:
-
-Inline style typography (Preview path)
-
-Stylesheet-based typography (Published path via compiled layout.css)
-
-Edit mode is a third inconsistent case: it often doesn’t apply typography defaults at all unless Tailwind classes are present.
-
-This causes mismatches because:
-
-headline elements often depend on typography system, not Tailwind size classes
-
-published renderer sometimes changes semantic tags (h1/h2) into generic wrappers (div/span), which can break selector matching or inheritance
-
-edit renderer drops default typography unless “modified” or unless CSS classes provide it
-
-Gut feel / design diagnosis
-
-Your typography system is conceptually right (global → section → block → page → user override), but implementation is fractured because each mode uses a different renderer and a different method of applying typography.
-
-You can still keep Publish static/LCP friendly, but you need a single “typography resolution contract” shared by all 3 modes, with two emitters:
-
-Preview/Edit emitter: inline style object (or className)
-
-Publish emitter: deterministic className/selector that compiles into CSS
-
-Right now it’s “accidentally consistent” in some cases (announcement), and “broken” in others (hero headline) depending on markup differences and whether rules attach.
+Answer: all multiline elements

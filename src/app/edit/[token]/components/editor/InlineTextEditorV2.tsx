@@ -17,6 +17,7 @@ export interface InlineTextEditorV2Props {
   backgroundType?: string;
   colorTokens?: any;
   sectionBackground?: string;
+  multiline?: boolean;
 }
 
 export function InlineTextEditorV2({
@@ -31,7 +32,8 @@ export function InlineTextEditorV2({
   placeholder = 'Click to edit',
   backgroundType,
   colorTokens,
-  sectionBackground
+  sectionBackground,
+  multiline = false
 }: InlineTextEditorV2Props) {
   const [isEditing, setIsEditing] = useState(false);
   const editorRef = useRef<HTMLElement>(null);
@@ -53,16 +55,35 @@ export function InlineTextEditorV2({
     }
   }, [content, isEditing]);
 
+  // Normalize HTML for multiline content
+  const normalizeMultilineHTML = (html: string) => {
+    return html
+      .replace(/<br\s*\/?>/gi, '<br>')           // normalize <br/>
+      .replace(/<(div|p)><br><\/\1>/gi, '<br>') // empty lines
+      .replace(/<(div|p)>/gi, '<br>')           // convert blocks to <br>
+      .replace(/<\/(div|p)>/gi, '')             // remove closing tags
+      .replace(/^<br>/, '');                    // remove leading break
+  };
+
   // Save content to store
   const saveContent = () => {
     if (!editorRef.current) return;
 
     try {
-      // Check for formatting (span with style attributes)
-      const hasFormatting = editorRef.current.querySelector('span[style]');
-      const finalContent = hasFormatting
-        ? editorRef.current.innerHTML
-        : editorRef.current.textContent || '';
+      const html = editorRef.current.innerHTML;
+      const hasFormatting = !!editorRef.current.querySelector('span[style]');
+      const shouldPreserveStructure = multiline;
+
+      let finalContent: string;
+
+      if (hasFormatting) {
+        finalContent = html;
+      } else if (shouldPreserveStructure &&
+                 (html.includes('<br') || html.includes('<div') || html.includes('<p'))) {
+        finalContent = normalizeMultilineHTML(html);
+      } else {
+        finalContent = editorRef.current.textContent || '';
+      }
 
       // Only save if content changed
       if (finalContent !== originalContentRef.current) {

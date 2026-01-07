@@ -281,6 +281,7 @@ export function EditableContent({
         backgroundType={backgroundType}
         colorTokens={colorTokens}
         sectionBackground={sectionBackground}
+        multiline={multiline}
       />
     );
   }

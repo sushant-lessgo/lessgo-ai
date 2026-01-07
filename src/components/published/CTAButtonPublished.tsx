@@ -22,21 +22,39 @@ interface CTAButtonPublishedProps {
   backgroundColor?: string;
   textColor?: string;
   className?: string;
+  href?: string;
 }
 
 export function CTAButtonPublished({
   text,
   backgroundColor,
   textColor,
-  className = ''
+  className = '',
+  href
 }: CTAButtonPublishedProps) {
+  const style = {
+    background: backgroundColor,
+    color: textColor,
+  };
+
+  const baseClasses = `inline-block px-6 py-3 rounded-lg font-semibold transition ${className}`;
+
+  if (href) {
+    return (
+      <a
+        href={href}
+        style={style}
+        className={baseClasses}
+      >
+        {text}
+      </a>
+    );
+  }
+
   return (
     <button
-      style={{
-        background: backgroundColor,
-        color: textColor,
-      }}
-      className={`px-6 py-3 rounded-lg font-semibold transition ${className}`}
+      style={style}
+      className={baseClasses}
     >
       {text}
     </button>

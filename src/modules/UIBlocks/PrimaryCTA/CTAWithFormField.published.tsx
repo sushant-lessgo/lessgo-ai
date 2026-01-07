@@ -82,7 +82,7 @@ export default function CTAWithFormFieldPublished(props: LayoutComponentProps) {
           </div>
 
           {/* Right Column - Interactive Form Island */}
-          <div className="bg-gray-100 rounded-2xl p-8 shadow-xl border border-gray-200 mt-12 lg:mt-0">
+          <div id="form-section" className="bg-gray-100 rounded-2xl p-8 shadow-xl border border-gray-200 mt-12 lg:mt-0">
             <FormIsland
               formId={`form-${sectionId}`}
               submitButtonText={cta_text}

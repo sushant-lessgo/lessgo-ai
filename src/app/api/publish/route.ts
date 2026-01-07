@@ -69,7 +69,7 @@ async function publishHandler(req: NextRequest) {
           content: content as any,
           themeValues: themeValues as any,
           projectId: project?.id || null,
-          previewImage: previewImage || null,
+          ...(previewImage !== undefined && { previewImage }),
           updatedAt: new Date()
         }
       });
