@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 // api/stripe/create-portal-session/route.ts - Create Stripe customer portal session
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';

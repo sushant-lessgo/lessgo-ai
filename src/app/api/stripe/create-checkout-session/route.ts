@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 // api/stripe/create-checkout-session/route.ts - Create Stripe checkout session
 import { NextRequest, NextResponse } from 'next/server';
 import { auth, currentUser } from '@clerk/nextjs/server';

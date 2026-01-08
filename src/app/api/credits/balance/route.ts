@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 // api/credits/balance/route.ts - Get user's credit balance
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
