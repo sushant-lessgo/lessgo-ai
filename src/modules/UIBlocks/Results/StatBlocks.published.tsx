@@ -34,11 +34,11 @@ export default function StatBlocksPublished(props: LayoutComponentProps) {
   const stat_labels = props.stat_labels || '';
   const stat_descriptions = props.stat_descriptions || '';
 
-  const valueList = stat_values.split('|').map(v => v.trim()).filter(v => v && v !== '___REMOVED___');
-  const labelList = stat_labels.split('|').map(l => l.trim());
-  const descList = stat_descriptions ? stat_descriptions.split('|').map(d => d.trim()) : [];
+  const valueList = stat_values.split('|').map((v: string) => v.trim()).filter((v: string) => v && v !== '___REMOVED___');
+  const labelList = stat_labels.split('|').map((l: string) => l.trim());
+  const descList = stat_descriptions ? stat_descriptions.split('|').map((d: string) => d.trim()) : [];
 
-  const stats: Stat[] = valueList.map((value, idx) => ({
+  const stats: Stat[] = valueList.map((value: string, idx: number) => ({
     value,
     label: labelList[idx] || 'Metric',
     description: descList[idx] || ''
@@ -134,7 +134,7 @@ export default function StatBlocksPublished(props: LayoutComponentProps) {
 
         {/* Stats Grid */}
         <div className={`grid gap-8 ${gridCols} mx-auto`}>
-          {stats.map((stat, idx) => (
+          {stats.map((stat: Stat, idx: number) => (
             <div
               key={`stat-${idx}`}
               className="relative text-center p-8 bg-white rounded-xl border transition-all duration-300"

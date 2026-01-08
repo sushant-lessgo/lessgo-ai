@@ -133,7 +133,7 @@ export default function VisualObjectionTilesPublished(props: LayoutComponentProp
 
         {/* Objection Tiles Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {objectionTiles.map((tile, index) => (
+          {objectionTiles.map((tile: ObjectionTile, index: number) => (
             <div
               key={index}
               className="bg-white/90 backdrop-blur-sm border rounded-2xl p-8 shadow-lg"

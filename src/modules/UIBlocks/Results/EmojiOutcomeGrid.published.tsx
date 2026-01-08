@@ -35,12 +35,12 @@ export default function EmojiOutcomeGridPublished(props: LayoutComponentProps) {
   const descriptions = props.descriptions || '';
 
   // Parse all arrays
-  const emojiList = emojis.split('|').map(e => e.trim()).filter(e => e && e !== '___REMOVED___');
-  const outcomeList = outcomes.split('|').map(o => o.trim()).filter(o => o && o !== '___REMOVED___');
-  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d && d !== '___REMOVED___');
+  const emojiList = emojis.split('|').map((e: string) => e.trim()).filter((e: string) => e && e !== '___REMOVED___');
+  const outcomeList = outcomes.split('|').map((o: string) => o.trim()).filter((o: string) => o && o !== '___REMOVED___');
+  const descriptionList = descriptions.split('|').map((d: string) => d.trim()).filter((d: string) => d && d !== '___REMOVED___');
 
   // Build outcomes array
-  const outcomeData: Outcome[] = emojiList.map((emoji, index) => ({
+  const outcomeData: Outcome[] = emojiList.map((emoji: string, index: number) => ({
     emoji,
     outcome: outcomeList[index] || 'Great Result',
     description: descriptionList[index] || 'Amazing outcomes await you'
@@ -130,7 +130,7 @@ export default function EmojiOutcomeGridPublished(props: LayoutComponentProps) {
 
         {/* Outcomes Grid */}
         <div className={`grid gap-8 ${getGridClass(outcomeData.length)}`}>
-          {outcomeData.map((outcome, index) => (
+          {outcomeData.map((outcome: Outcome, index: number) => (
             <div
               key={`outcome-${index}`}
               className="relative text-center p-6 bg-white rounded-2xl border transition-all duration-300"
@@ -142,8 +142,8 @@ export default function EmojiOutcomeGridPublished(props: LayoutComponentProps) {
               <div className="mb-4">
                 <div className="text-5xl mx-auto w-20 h-20 flex items-center justify-center">
                   <IconPublished
-                    value={outcome.emoji}
-                    size="xl"
+                    icon={outcome.emoji}
+                    size={48}
                     className="text-5xl"
                   />
                 </div>

@@ -16,7 +16,7 @@ import { CTAButtonPublished } from '@/components/published/CTAButtonPublished';
 // Helper: Parse pipe-separated data
 const parsePipeData = (data: string | undefined): string[] => {
   if (!data) return [];
-  return data.split('|').map(item => item.trim()).filter(item => item !== '' && item !== '___REMOVED___');
+  return data.split('|').map((item: string) => item.trim()).filter((item: string) => item !== '' && item !== '___REMOVED___');
 };
 
 // Helper: Theme colors (server-safe inline styles)
@@ -88,7 +88,7 @@ export default function PullQuoteStackPublished(props: LayoutComponentProps) {
     props.avatar_4,
     props.avatar_5,
     props.avatar_6
-  ].filter(a => a && a !== '___REMOVED___');
+  ].filter((a: string) => a && a !== '___REMOVED___');
 
   const contextIcons = [
     props.context_icon_1,
@@ -97,10 +97,10 @@ export default function PullQuoteStackPublished(props: LayoutComponentProps) {
     props.context_icon_4,
     props.context_icon_5,
     props.context_icon_6
-  ].filter(i => i && i !== '___REMOVED___');
+  ].filter((i: string) => i && i !== '___REMOVED___');
 
   // Build testimonials (limit 6)
-  const testimonials = quotes.slice(0, 6).map((quote, index) => ({
+  const testimonials = quotes.slice(0, 6).map((quote: string, index: number) => ({
     quote,
     name: names[index] || 'Anonymous',
     title: titles[index] || '',
@@ -157,7 +157,7 @@ export default function PullQuoteStackPublished(props: LayoutComponentProps) {
 
         {/* Testimonial Grid */}
         <div className="grid md:grid-cols-3 gap-6">
-          {testimonials.map((testimonial, index) => {
+          {testimonials.map((testimonial: { quote: string; name: string; title: string; company: string; context: string; emotion: string; avatar: string; icon: string }, index: number) => {
             const colors = getThemeColors(
               props.manualThemeOverride as 'warm' | 'cool' | 'neutral' | undefined,
               index

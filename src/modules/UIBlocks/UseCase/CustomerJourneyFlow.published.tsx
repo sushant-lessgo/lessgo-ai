@@ -43,7 +43,7 @@ export default function CustomerJourneyFlowPublished(props: LayoutComponentProps
 
   // Build stages array - filter out empty/removed
   const stages: JourneyStage[] = stageFields
-    .map((stage, idx) => ({
+    .map((stage: { title: any; desc: any; icon: any }, idx: number) => ({
       title: stage.title || '',
       description: stage.desc || '',
       icon: stage.icon,
@@ -134,7 +134,7 @@ export default function CustomerJourneyFlowPublished(props: LayoutComponentProps
 
           {/* Stages Grid */}
           <div className={`grid gap-8 ${getGridCols(stages.length)}`}>
-            {stages.map((stage, index) => (
+            {stages.map((stage: JourneyStage, index: number) => (
               <div key={index} className="relative text-center">
                 {/* Stage Circle */}
                 <div

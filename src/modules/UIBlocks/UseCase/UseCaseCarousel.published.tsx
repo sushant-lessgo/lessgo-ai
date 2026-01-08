@@ -90,7 +90,7 @@ export default function UseCaseCarouselPublished(props: LayoutComponentProps) {
 
         {/* Horizontal Scrolling Carousel */}
         <div className="flex overflow-x-auto space-x-6 pb-6">
-          {useCases.map((useCase, index) => (
+          {useCases.map((useCase: UseCase, index: number) => (
             <div
               key={index}
               className="bg-white p-6 rounded-xl border border-gray-200 min-w-[300px] flex-shrink-0"

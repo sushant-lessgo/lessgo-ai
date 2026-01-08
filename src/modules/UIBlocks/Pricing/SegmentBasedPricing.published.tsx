@@ -64,7 +64,7 @@ const parseSegmentData = (props: any): Segment[] => {
     segment.split('|').map((item: string) => item.trim()).filter((item: string) => item && item !== '___REMOVED___')
   );
 
-  return segmentNames.map((name, segIdx) => {
+  return segmentNames.map((name: string, segIdx: number) => {
     const tierNames = tierNamesBySegment[segIdx] || [];
     const tierPrices = tierPricesBySegment[segIdx] || [];
     const tierFeatures = tierFeaturesBySegment[segIdx] || [];
@@ -77,7 +77,7 @@ const parseSegmentData = (props: any): Segment[] => {
       useCase: segmentUseCases[segIdx] || '',
       icon: segmentIcons[segIdx] || '🏢',
       recommendedTier: recommendedTierIndex,
-      tiers: tierNames.map((tierName, tierIdx) => ({
+      tiers: tierNames.map((tierName: string, tierIdx: number) => ({
         name: tierName,
         price: tierPrices[tierIdx] || '$0',
         features: tierFeatures[tierIdx] || [],
@@ -467,7 +467,7 @@ export default function SegmentBasedPricingPublished(props: LayoutComponentProps
         {trustItems.length > 0 && (
           <div className="text-center">
             <div className="flex flex-wrap justify-center items-center gap-6">
-              {trustItems.map((item, index) => (
+              {trustItems.map((item: string, index: number) => (
                 <div key={index} className="flex items-center space-x-2">
                   <div className="w-5 h-5">
                     <CheckmarkIconPublished color="#10b981" size={20} />

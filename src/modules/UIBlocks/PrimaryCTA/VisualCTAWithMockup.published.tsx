@@ -68,7 +68,7 @@ const ProductMockup = () => (
               </div>
             </div>
             <div className="flex items-end justify-between h-16">
-              {[40, 60, 45, 80, 65, 90, 85].map((height, i) => (
+              {[40, 60, 45, 80, 65, 90, 85].map((height: number, i: number) => (
                 <div
                   key={i}
                   className="bg-gradient-to-t from-blue-500 to-blue-400 rounded-t w-6"
@@ -115,7 +115,7 @@ export default function VisualCTAWithMockupPublished(props: LayoutComponentProps
 
   // Parse trust items
   const trustItems = [trust_item_1, trust_item_2, trust_item_3, trust_item_4, trust_item_5]
-    .filter(item => item && item.trim() !== '' && item !== '___REMOVED___');
+    .filter((item: string) => item && item.trim() !== '' && item !== '___REMOVED___');
 
   // Get text colors
   const textColors = getPublishedTextColors(
@@ -177,9 +177,6 @@ export default function VisualCTAWithMockupPublished(props: LayoutComponentProps
                   backgroundColor="transparent"
                   textColor={theme.colors?.accentColor || '#3b82f6'}
                   className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 px-8 py-4 text-lg border-2"
-                  style={{
-                    borderColor: theme.colors?.accentColor || '#3b82f6'
-                  }}
                 />
               )}
             </div>
@@ -187,7 +184,7 @@ export default function VisualCTAWithMockupPublished(props: LayoutComponentProps
             {/* Trust indicators */}
             {trustItems.length > 0 && (
               <div className="flex flex-wrap gap-4">
-                {trustItems.map((item, index) => (
+                {trustItems.map((item: string, index: number) => (
                   <div key={index} className="flex items-center space-x-2">
                     <CheckmarkIconPublished color="#10b981" size={16} />
                     <span

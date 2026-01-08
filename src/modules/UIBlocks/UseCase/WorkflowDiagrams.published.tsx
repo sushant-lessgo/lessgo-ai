@@ -46,7 +46,7 @@ export default function WorkflowDiagramsPublished(props: LayoutComponentProps) {
   ];
 
   // Build steps array
-  const steps: WorkflowStep[] = stepFields.map((step, idx) => ({
+  const steps: WorkflowStep[] = stepFields.map((step: string, idx: number) => ({
     text: step,
     icon: iconFields[idx] || '📋'
   }));
@@ -101,7 +101,7 @@ export default function WorkflowDiagramsPublished(props: LayoutComponentProps) {
 
         {/* Workflow Steps Container */}
         <div className="flex flex-wrap justify-center items-center gap-4">
-          {steps.map((step, index) => (
+          {steps.map((step: WorkflowStep, index: number) => (
             <React.Fragment key={index}>
               {/* Step Card */}
               <div

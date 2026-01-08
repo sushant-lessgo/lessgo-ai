@@ -116,7 +116,7 @@ export default function MinimalNavHeaderPublished(props: LayoutComponentProps) {
           {/* Navigation on right */}
           <div className="flex items-center gap-4">
             <ul className="flex items-center gap-4 md:gap-5">
-              {navItems.map((navItem, index) => (
+              {navItems.map((navItem: { label: string; link: string }, index: number) => (
                 <li key={index}>
                   <a
                     href={navItem.link}

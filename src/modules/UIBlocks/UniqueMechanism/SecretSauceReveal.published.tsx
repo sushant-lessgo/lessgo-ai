@@ -14,6 +14,13 @@ import { SectionWrapperPublished } from '@/components/published/SectionWrapperPu
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
+// Secret item structure
+interface SecretItem {
+  title: string;
+  description: string;
+  icon: string;
+}
+
 export default function SecretSauceRevealPublished(props: LayoutComponentProps) {
   const { sectionId, sectionBackgroundCSS, theme, backgroundType } = props;
 
@@ -28,12 +35,12 @@ export default function SecretSauceRevealPublished(props: LayoutComponentProps) 
   const secret_icon_4 = props.secret_icon_4 || '💡';
 
   // Parse pipe-delimited strings
-  const titles = secret_titles.split('|').map(t => t.trim()).filter(t => t && t !== '___REMOVED___');
-  const descriptions = secret_descriptions.split('|').map(d => d.trim()).filter(d => d && d !== '___REMOVED___');
+  const titles = secret_titles.split('|').map((t: string) => t.trim()).filter((t: string) => t && t !== '___REMOVED___');
+  const descriptions = secret_descriptions.split('|').map((d: string) => d.trim()).filter((d: string) => d && d !== '___REMOVED___');
   const icons = [secret_icon_1, secret_icon_2, secret_icon_3, secret_icon_4];
 
   // Combine into secret items
-  const secrets = titles.map((title, index) => ({
+  const secrets = titles.map((title: string, index: number) => ({
     title,
     description: descriptions[index] || '',
     icon: icons[index] || '🔬'
@@ -118,7 +125,7 @@ export default function SecretSauceRevealPublished(props: LayoutComponentProps) 
 
         {/* Secret Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {secrets.map((secret, index) => (
+          {secrets.map((secret: SecretItem, index: number) => (
             <div key={index} className="group relative">
               <div
                 style={{
@@ -144,11 +151,7 @@ export default function SecretSauceRevealPublished(props: LayoutComponentProps) 
                     className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4"
                   >
                     <IconPublished
-                      value={secret.icon}
-                      style={{
-                        color: '#ffffff',
-                        fontSize: '1.5rem'
-                      }}
+                      icon={secret.icon} color={'#ffffff'}
                     />
                   </div>
 

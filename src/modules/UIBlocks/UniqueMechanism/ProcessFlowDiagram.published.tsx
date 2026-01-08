@@ -30,10 +30,10 @@ export default function ProcessFlowDiagramPublished(props: LayoutComponentProps)
   const benefit_icon_3 = props.benefit_icon_3 || '🔧';
 
   // Parse pipe-delimited strings
-  const steps = process_steps.split('|').map(s => s.trim()).filter(s => s && s !== '___REMOVED___');
-  const descriptions = step_descriptions.split('|').map(d => d.trim()).filter(d => d && d !== '___REMOVED___');
-  const benefitTitles = benefit_titles.split('|').map(t => t.trim()).filter(t => t && t !== '___REMOVED___');
-  const benefitDescs = benefit_descriptions.split('|').map(d => d.trim()).filter(d => d && d !== '___REMOVED___');
+  const steps = process_steps.split('|').map((s: string) => s.trim()).filter((s: string) => s && s !== '___REMOVED___');
+  const descriptions = step_descriptions.split('|').map((d: string) => d.trim()).filter((d: string) => d && d !== '___REMOVED___');
+  const benefitTitles = benefit_titles.split('|').map((t: string) => t.trim()).filter((t: string) => t && t !== '___REMOVED___');
+  const benefitDescs = benefit_descriptions.split('|').map((d: string) => d.trim()).filter((d: string) => d && d !== '___REMOVED___');
   const benefitIcons = [benefit_icon_1, benefit_icon_2, benefit_icon_3];
 
   // Theme detection (no useMemo - direct evaluation)
@@ -135,7 +135,7 @@ export default function ProcessFlowDiagramPublished(props: LayoutComponentProps)
         {/* Process Flow */}
         <div className="relative">
           <div className={`grid grid-cols-1 md:grid-cols-2 ${getGridCols(steps.length)} gap-12`}>
-            {steps.map((step, index) => (
+            {steps.map((step: string, index: number) => (
               <div
                 key={index}
                 className="relative flex flex-col items-center px-4 pt-10 pb-6 rounded-3xl bg-white/80 ring-1 ring-slate-100/80 shadow-[0_18px_45px_rgba(15,23,42,0.08)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_65px_rgba(15,23,42,0.18)]"
@@ -206,7 +206,7 @@ export default function ProcessFlowDiagramPublished(props: LayoutComponentProps)
               />
             )}
             <div className="grid md:grid-cols-3 gap-6">
-              {benefitTitles.map((title, index) => (
+              {benefitTitles.map((title: string, index: number) => (
                 <div key={index} className="text-center">
                   <div
                     style={{
@@ -216,11 +216,7 @@ export default function ProcessFlowDiagramPublished(props: LayoutComponentProps)
                     className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 ring-1 ring-white/20 backdrop-blur-sm"
                   >
                     <IconPublished
-                      value={benefitIcons[index] || '✨'}
-                      style={{
-                        color: '#ffffff',
-                        fontSize: '1.5rem'
-                      }}
+                      icon={benefitIcons[index] || '✨'} color={'#ffffff'}
                     />
                   </div>
                   <TextPublished

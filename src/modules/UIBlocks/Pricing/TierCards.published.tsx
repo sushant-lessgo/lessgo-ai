@@ -50,7 +50,7 @@ const parsePricingData = (props: any): PricingTier[] => {
 
   const tierCount = parseInt(props.tier_count || '3') || 3;
 
-  return names.slice(0, tierCount).map((name, index) => {
+  return names.slice(0, tierCount).map((name: string, index: number) => {
     const icon = props[`tier_icon_${index + 1}`] || ['🚀', '⭐', '💎'][index] || '🎯';
 
     return {
@@ -161,7 +161,7 @@ export default function TierCardsPublished(props: LayoutComponentProps) {
 
         {/* Pricing Cards Grid */}
         <div className={`grid gap-8 ${gridClass}`}>
-          {pricingTiers.map((tier, index) => (
+          {pricingTiers.map((tier: PricingTier, index: number) => (
             <div
               key={`tier-${index}`}
               className={`relative ${tier.isPopular ? 'transform scale-105 z-10' : ''}`}
@@ -202,8 +202,8 @@ export default function TierCardsPublished(props: LayoutComponentProps) {
                     }}
                   >
                     <IconPublished
-                      value={tier.icon}
-                      size="lg"
+                      icon={tier.icon}
+                      size={32}
                       className="text-2xl"
                     />
                   </div>
@@ -249,7 +249,7 @@ export default function TierCardsPublished(props: LayoutComponentProps) {
                 {/* Features */}
                 <div className="mb-8">
                   <ul className="space-y-3">
-                    {tier.features.map((feature, fIndex) => (
+                    {tier.features.map((feature: string, fIndex: number) => (
                       <li key={fIndex} className="flex items-start">
                         <svg
                           className="w-5 h-5 mr-3 mt-0.5 flex-shrink-0"
@@ -285,7 +285,7 @@ export default function TierCardsPublished(props: LayoutComponentProps) {
         {showTrustFooter && (
           <div className="mt-24 text-center">
             <div className="flex flex-wrap justify-center items-center gap-20 text-sm">
-              {trustItems.map((item, index) => (
+              {trustItems.map((item: string, index: number) => (
                 <div key={index} className="flex items-center">
                   <svg
                     className="w-4 h-4 mr-3.5"

@@ -129,7 +129,7 @@ export default function ValueStackCTAPublished(props: LayoutComponentProps) {
 
         {/* Value Propositions Grid */}
         <div className="grid gap-6 mb-12">
-          {valueProps.map((valueProp, index) => (
+          {valueProps.map((valueProp: { title: string; description: string; icon: string }, index: number) => (
             <div
               key={index}
               className="flex items-start space-x-4 p-6 bg-white rounded-xl"
@@ -216,7 +216,6 @@ export default function ValueStackCTAPublished(props: LayoutComponentProps) {
                 backgroundColor="transparent"
                 textColor="#ffffff"
                 className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 px-8 py-4 text-lg border-2"
-                style={{ borderColor: '#ffffff' }}
               />
             )}
 

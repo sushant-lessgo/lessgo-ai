@@ -31,8 +31,8 @@ export default function RoleBasedScenariosPublished(props: LayoutComponentProps)
   const rolesString = props.roles || '';
   const scenariosString = props.scenarios || '';
 
-  const roles = rolesString.split('|').map(r => r.trim()).filter(Boolean);
-  const scenarios = scenariosString.split('|').map(s => s.trim()).filter(Boolean);
+  const roles = rolesString.split('|').map((r: string) => r.trim()).filter(Boolean);
+  const scenarios = scenariosString.split('|').map((s: string) => s.trim()).filter(Boolean);
 
   // Extract role icons
   const iconFields = [
@@ -45,7 +45,7 @@ export default function RoleBasedScenariosPublished(props: LayoutComponentProps)
   ];
 
   // Build scenarios array
-  const roleScenarios: RoleScenario[] = roles.map((role, idx) => ({
+  const roleScenarios: RoleScenario[] = roles.map((role: string, idx: number) => ({
     role,
     scenario: scenarios[idx] || 'Role-specific scenario',
     icon: iconFields[idx] || '📋',
@@ -105,7 +105,7 @@ export default function RoleBasedScenariosPublished(props: LayoutComponentProps)
 
         {/* Role Scenarios */}
         <div className="space-y-8">
-          {roleScenarios.map((item, index) => (
+          {roleScenarios.map((item: RoleScenario, index: number) => (
             <div
               key={index}
               className="bg-white p-8 rounded-xl flex items-center space-x-8 border"

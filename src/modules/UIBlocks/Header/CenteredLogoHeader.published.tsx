@@ -117,7 +117,7 @@ export default function CenteredLogoHeaderPublished(props: LayoutComponentProps)
         <nav className="flex items-center justify-between py-2 md:py-3">
           {/* Left Navigation */}
           <ul className="flex items-center gap-4 md:gap-5 flex-1">
-            {leftNavItems.map((navItem, index) => (
+            {leftNavItems.map((navItem: { label: string; link: string }, index: number) => (
               <li key={index}>
                 <a
                   href={navItem.link}
@@ -145,7 +145,7 @@ export default function CenteredLogoHeaderPublished(props: LayoutComponentProps)
 
           {/* Right Navigation */}
           <ul className="flex items-center gap-4 md:gap-5 flex-1 justify-end">
-            {rightNavItems.map((navItem, index) => (
+            {rightNavItems.map((navItem: { label: string; link: string }, index: number) => (
               <li key={index}>
                 <a
                   href={navItem.link}

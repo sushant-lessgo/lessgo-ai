@@ -16,7 +16,7 @@ import { AvatarPublished } from '@/components/published/AvatarPublished';
 // Parse pipe-separated data
 const parsePipeData = (data: string | undefined): string[] => {
   if (!data) return [];
-  return data.split('|').map(item => item.trim()).filter(item => item !== '' && item !== '___REMOVED___');
+  return data.split('|').map((item: string) => item.trim()).filter((item: string) => item !== '' && item !== '___REMOVED___');
 };
 
 // Parse rating for star rendering
@@ -53,7 +53,7 @@ const parseTestimonials = (props: any): Testimonial[] => {
   ].filter(icon => icon && icon !== '___REMOVED___');
 
   // Limit to 6 testimonials
-  return quotes.slice(0, 6).map((quote, index) => ({
+  return quotes.slice(0, 6).map((quote: string, index: number) => ({
     quote,
     customerName: names[index] || 'Anonymous',
     customerTitle: titles[index] || undefined,
@@ -169,7 +169,7 @@ export default function QuoteGridPublished(props: LayoutComponentProps) {
           testimonials.length === 3 ? 'md:grid-cols-2 lg:grid-cols-3' :
           'md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-2 xl:max-w-5xl xl:mx-auto'
         }`}>
-          {testimonials.map((testimonial, index) => (
+          {testimonials.map((testimonial: Testimonial, index: number) => (
             <div
               key={index}
               className="bg-white p-8 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 relative"
@@ -183,9 +183,8 @@ export default function QuoteGridPublished(props: LayoutComponentProps) {
               {/* Testimonial Icon */}
               <div className="mb-4">
                 <IconPublished
-                  value={testimonial.icon}
-                  size="lg"
-                  style={{ color: themeColors.iconColor }}
+                  icon={testimonial.icon}
+                  size={32} color={themeColors.iconColor}
                 />
               </div>
 
@@ -199,7 +198,7 @@ export default function QuoteGridPublished(props: LayoutComponentProps) {
                 {/* Customer Avatar */}
                 <AvatarPublished
                   name={testimonial.customerName}
-                  size="md"
+                  size={48}
                 />
 
                 {/* Customer Details */}

@@ -30,9 +30,9 @@ export default function ContactFooterPublished(props: LayoutComponentProps) {
   const { theme } = props;
 
   // Typography styles
-  const h5Typography = getPublishedTypographyStyles('h5', theme);
+  const h5Typography = getPublishedTypographyStyles('h4', theme);
   const bodySmTypography = getPublishedTypographyStyles('body-sm', theme);
-  const captionTypography = getPublishedTypographyStyles('caption', theme);
+  const captionTypography = getPublishedTypographyStyles('body-sm', theme);
 
   // Extract content from props with defaults
   const copyright = props.copyright || `© ${new Date().getFullYear()} Your Company. All rights reserved.`;
@@ -58,7 +58,7 @@ export default function ContactFooterPublished(props: LayoutComponentProps) {
     props.social_item_6,
     props.social_item_7,
     props.social_item_8,
-  ].filter(item => item && item !== '___REMOVED___' && item.trim() !== '')
+  ].filter((item: string) => item && item !== '___REMOVED___' && item.trim() !== '')
     .map(item => {
       const parts = item.split('|');
       if (parts.length >= 2) {
@@ -102,7 +102,7 @@ export default function ContactFooterPublished(props: LayoutComponentProps) {
             {/* Contact Information */}
             {contactInfo.length > 0 && (
               <div className="space-y-3">
-                {contactInfo.map((item, index) => {
+                {contactInfo.map((item: { icon: React.ComponentType<{ className?: string }>; text: string; type: string }, index: number) => {
                   const Icon = item.icon;
                   return (
                     <div key={index} className="flex items-start gap-3">
@@ -118,7 +118,7 @@ export default function ContactFooterPublished(props: LayoutComponentProps) {
             {socialItems.length > 0 && (
               <div className="mt-6 pt-4 border-t border-gray-700">
                 <div className="flex items-center gap-4">
-                  {socialItems.map((social, index) => {
+                  {socialItems.map((social: { platform: string; url: string }, index: number) => {
                     const IconComponent = socialIconMap[social.platform] || FaGlobe;
                     return (
                       <a

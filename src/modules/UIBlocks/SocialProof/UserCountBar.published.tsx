@@ -34,11 +34,11 @@ export default function UserCountBarPublished(props: LayoutComponentProps) {
 
   // Parse data (inline functions, server-safe)
   const parseMetrics = (metrics: string): string[] => {
-    return metrics.split('|').map(m => m.trim()).filter(m => m && m !== '___REMOVED___');
+    return metrics.split('|').map((m: string) => m.trim()).filter((m: string) => m && m !== '___REMOVED___');
   };
 
   const parseLabels = (labels: string): string[] => {
-    return labels.split('|').map(l => l.trim()).filter(l => l && l !== '___REMOVED___');
+    return labels.split('|').map((l: string) => l.trim()).filter((l: string) => l && l !== '___REMOVED___');
   };
 
   const parseGrowth = (growth: string): string[] => {
@@ -46,7 +46,7 @@ export default function UserCountBarPublished(props: LayoutComponentProps) {
   };
 
   const parseAvatars = (names: string, urls: string): { name: string; avatarUrl: string }[] => {
-    const nameList = names.split('|').map(n => n.trim()).filter(n => n);
+    const nameList = names.split('|').map((n: string) => n.trim()).filter((n: string) => n);
     const urlMap = (() => {
       try {
         return JSON.parse(urls || '{}');
@@ -61,7 +61,7 @@ export default function UserCountBarPublished(props: LayoutComponentProps) {
   const labels = parseLabels(metric_labels).slice(0, 4);
   const growth = parseGrowth(growth_indicators);
   const avatars = parseAvatars(customer_names, avatar_urls);
-  const trustItems = [trust_item_1, trust_item_2, trust_item_3].filter(i => i && i !== '___REMOVED___');
+  const trustItems = [trust_item_1, trust_item_2, trust_item_3].filter((i: string) => i && i !== '___REMOVED___');
 
   // Detect theme: manual override > auto-detection > neutral fallback
   const uiTheme: UIBlockTheme = props.manualThemeOverride ||
@@ -137,12 +137,12 @@ export default function UserCountBarPublished(props: LayoutComponentProps) {
           {avatars.length > 0 && (
             <div className="flex items-center justify-center space-x-4 mb-8">
               <div className="flex -space-x-2">
-                {avatars.map((customer, idx) => (
+                {avatars.map((customer: { name: string; avatarUrl: string }, idx: number) => (
                   <AvatarPublished
                     key={idx}
-                    avatarUrl={customer.avatarUrl}
-                    customerName={customer.name}
-                    size="md"
+                    name={customer.name}
+                    imageUrl={customer.avatarUrl}
+                    size={48}
                   />
                 ))}
               </div>
@@ -187,7 +187,7 @@ export default function UserCountBarPublished(props: LayoutComponentProps) {
 
         {/* Metrics Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
-          {metrics.map((metric, idx) => (
+          {metrics.map((metric: string, idx: number) => (
             <div
               key={idx}
               className="text-center p-6 rounded-xl backdrop-blur-sm border hover:bg-white/10 transition-all duration-300"
@@ -244,7 +244,7 @@ export default function UserCountBarPublished(props: LayoutComponentProps) {
             className="flex flex-wrap items-center justify-center gap-8 pt-8 border-t"
             style={{ borderColor: 'rgba(255,255,255,0.1)' }}
           >
-            {trustItems.map((item, idx) => (
+            {trustItems.map((item: string, idx: number) => (
               <div key={idx} className="flex items-center space-x-2">
                 <svg
                   className="w-5 h-5"

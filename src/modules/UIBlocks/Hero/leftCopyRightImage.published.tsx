@@ -35,7 +35,7 @@ import { getPublishedTextColors, getPublishedTypographyStyles } from '@/lib/publ
  * Parse customer avatar data from pipe-separated names and JSON URL mapping
  */
 function parseCustomerAvatarData(names: string, urls: string): Array<{ name: string; avatarUrl: string }> {
-  const nameArray = names.split('|').map(n => n.trim()).filter(Boolean);
+  const nameArray = names.split('|').map((n: string) => n.trim()).filter(Boolean);
   let urlMap: Record<string, string> = {};
 
   try {
@@ -105,7 +105,7 @@ function DashboardPlaceholder() {
         {/* Chart placeholder */}
         <div className="bg-white rounded-lg p-6 shadow">
           <div className="flex items-end justify-between h-32 gap-2">
-            {[60, 80, 45, 90, 75, 95, 70].map((height, i) => (
+            {[60, 80, 45, 90, 75, 95, 70].map((height: number, i: number) => (
               <div
                 key={i}
                 className="flex-1 bg-gradient-to-t from-blue-500 to-indigo-500 rounded-t"
@@ -150,7 +150,7 @@ export default function LeftCopyRightImagePublished(props: LayoutComponentProps)
     props.trust_item_3,
     props.trust_item_4,
     props.trust_item_5
-  ].filter(item => item && item !== '___REMOVED___' && item.trim() !== '');
+  ].filter((item: string) => item && item !== '___REMOVED___' && item.trim() !== '');
 
   // Parse customer avatar data
   const customerAvatars = parseCustomerAvatarData(customer_names, avatar_urls);
@@ -268,7 +268,7 @@ export default function LeftCopyRightImagePublished(props: LayoutComponentProps)
             {/* Trust Indicators */}
             {trustItems.length > 0 && (
               <div className="flex items-center space-x-4 flex-wrap">
-                {trustItems.map((item, i) => (
+                {trustItems.map((item: string, i: number) => (
                   <div key={i} className="flex items-center space-x-2">
                     <CheckmarkIconPublished color="#10b981" size={16} />
                     <span style={{ color: textColors.muted }} className="text-sm">{item}</span>
@@ -286,7 +286,7 @@ export default function LeftCopyRightImagePublished(props: LayoutComponentProps)
                 <div className="flex items-center space-x-2">
                   {show_customer_avatars && customerAvatars.length > 0 && (
                     <div className="flex -space-x-2">
-                      {customerAvatars.map((customer, i) => (
+                      {customerAvatars.map((customer: { name: string; avatarUrl: string }, i: number) => (
                         <AvatarPublished
                           key={customer.name}
                           imageUrl={customer.avatarUrl}

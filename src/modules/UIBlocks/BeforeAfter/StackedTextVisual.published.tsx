@@ -179,9 +179,8 @@ export default function StackedTextVisualPublished(props: LayoutComponentProps) 
                   style={{ backgroundColor: themeColors.before.iconBg }}
                 >
                   <IconPublished
-                    value={before_icon}
-                    size="lg"
-                    style={{ color: themeColors.before.iconText, fontSize: '1.5rem' }}
+                    icon={before_icon}
+                    size={32} color={themeColors.before.iconText}
                   />
                 </div>
 
@@ -221,9 +220,8 @@ export default function StackedTextVisualPublished(props: LayoutComponentProps) 
                 style={{ backgroundColor: themeColors.transition.bg }}
               >
                 <IconPublished
-                  value={transition_icon}
-                  size="md"
-                  style={{ color: themeColors.transition.text, fontSize: '1.125rem' }}
+                  icon={transition_icon}
+                  size={24} color={themeColors.transition.text}
                 />
               </div>
 
@@ -261,9 +259,8 @@ export default function StackedTextVisualPublished(props: LayoutComponentProps) 
                   style={{ backgroundColor: themeColors.after.iconBg }}
                 >
                   <IconPublished
-                    value={after_icon}
-                    size="lg"
-                    style={{ color: themeColors.after.iconText, fontSize: '1.5rem' }}
+                    icon={after_icon}
+                    size={32} color={themeColors.after.iconText}
                   />
                 </div>
 

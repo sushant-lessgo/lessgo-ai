@@ -38,28 +38,28 @@ export default function SplitAlternatingPublished(props: LayoutComponentProps) {
   const benefit_2 = props.benefit_2 || '';
 
   // Parse pipe-separated fields
-  const titles = (props.feature_titles || '').split('|').map(t => t.trim()).filter(Boolean);
-  const descriptions = (props.feature_descriptions || '').split('|').map(d => d.trim()).filter(Boolean);
+  const titles = (props.feature_titles || '').split('|').map((t: string) => t.trim()).filter(Boolean);
+  const descriptions = (props.feature_descriptions || '').split('|').map((d: string) => d.trim()).filter(Boolean);
 
   // Extract icons (6 slots)
-  const icons = [];
+  const icons: string[] = [];
   for (let i = 1; i <= 6; i++) {
     icons.push((props[`feature_icon_${i}`] as string) || '🎯');
   }
 
   // Extract visuals (6 slots - individual fields)
-  const visuals = [];
+  const visuals: string[] = [];
   for (let i = 0; i < 6; i++) {
     visuals.push((props[`feature_visual_${i}`] as string) || '');
   }
 
   // Build features array - only include features with visuals
-  const features: Feature[] = titles.map((title, idx) => ({
+  const features: Feature[] = titles.map((title: string, idx: number) => ({
     title,
     description: descriptions[idx] || '',
     visual: visuals[idx] || '',
     icon: icons[idx] || '🎯'
-  })).filter(feature => feature.visual.trim() !== ''); // Only show features with images in published mode
+  })).filter((feature: Feature) => feature.visual.trim() !== ''); // Only show features with images in published mode
 
   // Detect theme
   const uiTheme: UIBlockTheme = props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
@@ -97,7 +97,7 @@ export default function SplitAlternatingPublished(props: LayoutComponentProps) {
   const h2Typography = getPublishedTypographyStyles('h2', theme);
 
   // Trust indicators
-  const trustList = trust_items ? trust_items.split('|').map(item => item.trim()).filter(Boolean) : [];
+  const trustList = trust_items ? trust_items.split('|').map((item: string) => item.trim()).filter(Boolean) : [];
 
   return (
     <SectionWrapperPublished
@@ -135,7 +135,7 @@ export default function SplitAlternatingPublished(props: LayoutComponentProps) {
         {/* Features - Alternating Layout */}
         {features.length > 0 && (
           <div className="space-y-24">
-            {features.map((feature, idx) => {
+            {features.map((feature: Feature, idx: number) => {
               const isEven = idx % 2 === 0;
 
               return (

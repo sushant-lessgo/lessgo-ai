@@ -53,7 +53,7 @@ function parseBeliefItems(
 ): Array<{ icon: string; title: string; description: string }> {
   if (!beliefItems || beliefItems === '___REMOVED___') return [];
 
-  const parts = beliefItems.split('|').map(s => s.trim());
+  const parts = beliefItems.split('|').map((s: string) => s.trim());
   const beliefs: Array<{ icon: string; title: string; description: string }> = [];
 
   // Parse pairs of title|description
@@ -99,7 +99,7 @@ export default function FoundersBeliefStackPublished(props: LayoutComponentProps
     props.company_value_3,
     props.company_value_4,
     props.company_value_5,
-  ].filter(v => v && v !== '___REMOVED___' && v.trim() !== '');
+  ].filter((v: string) => v && v !== '___REMOVED___' && v.trim() !== '');
 
   // Trust items (filter removed)
   const trustItems = [
@@ -108,7 +108,7 @@ export default function FoundersBeliefStackPublished(props: LayoutComponentProps
     props.trust_item_3,
     props.trust_item_4,
     props.trust_item_5,
-  ].filter(t => t && t !== '___REMOVED___' && t.trim() !== '');
+  ].filter((t: string) => t && t !== '___REMOVED___' && t.trim() !== '');
 
   // Individual belief icons
   const beliefIcons = [
@@ -169,7 +169,7 @@ export default function FoundersBeliefStackPublished(props: LayoutComponentProps
 
         {/* Belief cards grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-          {parsedBeliefs.map((belief, idx) => {
+          {parsedBeliefs.map((belief: { icon: string; title: string; description: string }, idx: number) => {
             // Adapt card background to section background (like base component)
             const cardBg = backgroundType === 'primary'
               ? 'bg-white/10 backdrop-blur-sm border-white/20'
@@ -260,7 +260,7 @@ export default function FoundersBeliefStackPublished(props: LayoutComponentProps
               {values_heading}
             </h3>
             <div className="flex flex-wrap justify-center gap-4">
-              {companyValues.map((value, idx) => (
+              {companyValues.map((value: string, idx: number) => (
                 <span
                   key={idx}
                   className={`${colors.valueBadgeBg} rounded-full px-6 py-3 shadow-md border ${colors.valueBadgeBorder} font-medium text-sm`}
@@ -285,7 +285,7 @@ export default function FoundersBeliefStackPublished(props: LayoutComponentProps
           {/* Trust indicators */}
           {trustItems.length > 0 && (
             <div className="flex flex-wrap justify-center gap-4 text-sm">
-              {trustItems.map((item, idx) => (
+              {trustItems.map((item: string, idx: number) => (
                 <div key={idx} className="flex items-center space-x-1">
                   <svg className="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />

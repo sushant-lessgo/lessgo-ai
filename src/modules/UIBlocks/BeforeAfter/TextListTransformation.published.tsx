@@ -42,14 +42,14 @@ export default function TextListTransformationPublished(props: LayoutComponentPr
   const transformation_icon = props.transformation_icon || '➡️';
 
   // Parse lists
-  const beforeItems = before_list.split('|').map(item => item.trim()).filter(Boolean);
-  const afterItems = after_list.split('|').map(item => item.trim()).filter(Boolean);
+  const beforeItems = before_list.split('|').map((item: string) => item.trim()).filter(Boolean);
+  const afterItems = after_list.split('|').map((item: string) => item.trim()).filter(Boolean);
 
   // Parse trust indicators
   const trustItemsList = (props.trust_items || '')
     .split('|')
-    .map(item => item.trim())
-    .filter(item => item && item !== '___REMOVED___');
+    .map((item: string) => item.trim())
+    .filter((item: string) => item && item !== '___REMOVED___');
 
   // Detect UIBlock theme
   const uiTheme: UIBlockTheme = props.manualThemeOverride ||
@@ -129,9 +129,8 @@ export default function TextListTransformationPublished(props: LayoutComponentPr
         style={{ backgroundColor: colors.iconBgColor }}
       >
         <IconPublished
-          value={icon}
-          size="sm"
-          style={{ color: colors.iconColor, fontSize: '0.875rem' }}
+          icon={icon}
+          size={16} color={colors.iconColor}
         />
       </div>
       <TextPublished
@@ -206,7 +205,7 @@ export default function TextListTransformationPublished(props: LayoutComponentPr
             </div>
 
             <div className="space-y-4">
-              {beforeItems.map((item, index) => (
+              {beforeItems.map((item: string, index: number) => (
                 <ListItemPublished
                   key={index}
                   text={item}
@@ -225,12 +224,8 @@ export default function TextListTransformationPublished(props: LayoutComponentPr
                 style={{ backgroundColor: theme?.colors?.accentColor || '#3b82f6' }}
               >
                 <IconPublished
-                  value={transformation_icon}
-                  size="lg"
-                  style={{
-                    color: '#ffffff',
-                    fontSize: '1.875rem'
-                  }}
+                  icon={transformation_icon}
+                  size={32} color={'#ffffff'}
                 />
               </div>
 
@@ -270,7 +265,7 @@ export default function TextListTransformationPublished(props: LayoutComponentPr
             </div>
 
             <div className="space-y-4">
-              {afterItems.map((item, index) => (
+              {afterItems.map((item: string, index: number) => (
                 <ListItemPublished
                   key={index}
                   text={item}
@@ -293,7 +288,7 @@ export default function TextListTransformationPublished(props: LayoutComponentPr
           <div className="text-center space-y-6">
             {/* Dots indicator */}
             <div className="flex justify-center space-x-4">
-              {[1, 2, 3].map(i => (
+              {[1, 2, 3].map((i: number) => (
                 <div
                   key={i}
                   className="w-3 h-3 rounded-full"
@@ -349,7 +344,7 @@ export default function TextListTransformationPublished(props: LayoutComponentPr
                 {/* Trust Indicators - Inline SVG */}
                 {trustItemsList.length > 0 && (
                   <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
-                    {trustItemsList.map((item, index) => (
+                    {trustItemsList.map((item: string, index: number) => (
                       <div key={index} className="flex items-center space-x-2">
                         <svg
                           className="w-4 h-4 flex-shrink-0"

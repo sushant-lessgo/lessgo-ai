@@ -42,10 +42,10 @@ export default function StackedPainBulletsPublished(props: LayoutComponentProps)
   const icons = [pain_icon_1, pain_icon_2, pain_icon_3, pain_icon_4, pain_icon_5, pain_icon_6];
 
   // Parse pain points
-  const pointList = pain_points.split('|').map(p => p.trim()).filter(p => p && p !== '___REMOVED___');
-  const descriptionList = pain_descriptions ? pain_descriptions.split('|').map(d => d.trim()) : [];
+  const pointList = pain_points.split('|').map((p: string) => p.trim()).filter((p: string) => p && p !== '___REMOVED___');
+  const descriptionList = pain_descriptions ? pain_descriptions.split('|').map((d: string) => d.trim()) : [];
 
-  const painPoints: PainPoint[] = pointList.map((point, index) => ({
+  const painPoints: PainPoint[] = pointList.map((point: string, index: number) => ({
     point,
     description: descriptionList[index] || '',
     icon: icons[index] || '⚠️'
@@ -142,7 +142,7 @@ export default function StackedPainBulletsPublished(props: LayoutComponentProps)
 
         {/* Pain Points List */}
         <div className="space-y-6">
-          {painPoints.map((painPoint, index) => (
+          {painPoints.map((painPoint: PainPoint, index: number) => (
             <div
               key={`pain-${index}`}
               className="group flex items-start space-x-4 p-6 bg-white rounded-lg border hover:shadow-md transition-all duration-300"
@@ -159,8 +159,8 @@ export default function StackedPainBulletsPublished(props: LayoutComponentProps)
                 }}
               >
                 <IconPublished
-                  value={painPoint.icon}
-                  size="lg"
+                  icon={painPoint.icon}
+                  size={32}
                   className="text-2xl"
                 />
               </div>

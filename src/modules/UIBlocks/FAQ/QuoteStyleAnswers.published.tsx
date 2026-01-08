@@ -48,8 +48,8 @@ export default function QuoteStyleAnswersPublished(props: LayoutComponentProps) 
   const quoteIcon = props.quote_icon || '💬';
 
   // Helper function to get FAQ items with expert info
-  const getFAQItems = () => {
-    const items = [];
+  const getFAQItems = (): Array<{question: string; answer: string; expertName: string; expertTitle: string; index: number}> => {
+    const items: Array<{question: string; answer: string; expertName: string; expertTitle: string; index: number}> = [];
 
     // Check individual fields first (preferred)
     for (let i = 1; i <= 3; i++) {
@@ -76,12 +76,12 @@ export default function QuoteStyleAnswersPublished(props: LayoutComponentProps) 
       const expertNamesRaw = props.expert_names;
       const expertTitlesRaw = props.expert_titles;
 
-      const questions = (typeof questionsRaw === 'string' ? questionsRaw.split('|').map(q => q.trim()).filter(Boolean) : []);
-      const answers = (typeof answersRaw === 'string' ? answersRaw.split('|').map(a => a.trim()).filter(Boolean) : []);
-      const expertNames = (typeof expertNamesRaw === 'string' ? expertNamesRaw.split('|').map(n => n.trim()).filter(Boolean) : []);
-      const expertTitles = (typeof expertTitlesRaw === 'string' ? expertTitlesRaw.split('|').map(t => t.trim()).filter(Boolean) : []);
+      const questions = (typeof questionsRaw === 'string' ? questionsRaw.split('|').map((q: string) => q.trim()).filter(Boolean) : []);
+      const answers = (typeof answersRaw === 'string' ? answersRaw.split('|').map((a: string) => a.trim()).filter(Boolean) : []);
+      const expertNames = (typeof expertNamesRaw === 'string' ? expertNamesRaw.split('|').map((n: string) => n.trim()).filter(Boolean) : []);
+      const expertTitles = (typeof expertTitlesRaw === 'string' ? expertTitlesRaw.split('|').map((t: string) => t.trim()).filter(Boolean) : []);
 
-      questions.forEach((question, index) => {
+      questions.forEach((question: string, index: number) => {
         items.push({
           question,
           answer: answers[index] || '',
@@ -180,7 +180,7 @@ export default function QuoteStyleAnswersPublished(props: LayoutComponentProps) 
                       color: accentColor
                     }}
                   >
-                    <IconPublished value={quoteIcon} size="xl" />
+                    <IconPublished icon={quoteIcon} size={48} />
                   </div>
                 )}
 

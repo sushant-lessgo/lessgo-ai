@@ -156,7 +156,7 @@ export default function ObjectionAccordionPublished(props: LayoutComponentProps)
 
         {/* Objections List - All expanded in published mode */}
         <div className="space-y-4">
-          {objectionItems.map((item, index) => (
+          {objectionItems.map((item: ObjectionItem, index: number) => (
             <div
               key={index}
               className="border rounded-lg overflow-hidden bg-white shadow-sm"

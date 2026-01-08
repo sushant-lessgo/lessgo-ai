@@ -29,7 +29,7 @@ export default function LinksAndSocialFooterPublished(props: LayoutComponentProp
 
   // Typography styles
   const bodySmTypography = getPublishedTypographyStyles('body-sm', theme);
-  const captionTypography = getPublishedTypographyStyles('caption', theme);
+  const captionTypography = getPublishedTypographyStyles('body-sm', theme);
 
   // Extract content from props with defaults
   const copyright = props.copyright || `© ${new Date().getFullYear()} Your Company. All rights reserved.`;
@@ -50,7 +50,7 @@ export default function LinksAndSocialFooterPublished(props: LayoutComponentProp
     props.social_item_9,
     props.social_item_10,
     props.social_item_11,
-  ].filter(item => item && item !== '___REMOVED___' && item.trim() !== '')
+  ].filter((item: string) => item && item !== '___REMOVED___' && item.trim() !== '')
     .map(item => {
       const parts = item.split('|');
       if (parts.length >= 2) {
@@ -96,7 +96,7 @@ export default function LinksAndSocialFooterPublished(props: LayoutComponentProp
           {/* Social Media Icons */}
           {socialItems.length > 0 && (
             <div className="flex items-center gap-4">
-              {socialItems.map((social, index) => {
+              {socialItems.map((social: { platform: string; url: string }, index: number) => {
                 const IconComponent = socialIconMap[social.platform] || FaGlobe;
                 return (
                   <a

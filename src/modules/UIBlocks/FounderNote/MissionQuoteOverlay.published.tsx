@@ -57,7 +57,7 @@ function parseMissionStats(props: LayoutComponentProps): Array<{ value: string; 
     const statField = props[`mission_stat_${i}`];
     if (statField && statField !== '___REMOVED___' && statField.trim() !== '') {
       // Parse "Value|Label" or "Value Label" format
-      const parts = statField.split('|').map(s => s.trim());
+      const parts = statField.split('|').map((s: string) => s.trim());
       if (parts.length >= 2) {
         stats.push({ value: parts[0], label: parts[1] });
       } else {
@@ -74,7 +74,7 @@ function parseMissionStats(props: LayoutComponentProps): Array<{ value: string; 
 
   // Fallback to legacy mission_stats field (pipe-separated)
   if (stats.length === 0 && props.mission_stats) {
-    const legacyStats = props.mission_stats.split('|').map(s => s.trim()).filter(Boolean);
+    const legacyStats = props.mission_stats.split('|').map((s: string) => s.trim()).filter(Boolean);
     for (let i = 0; i < legacyStats.length; i++) {
       const stat = legacyStats[i];
       const words = stat.split(' ');
@@ -122,8 +122,7 @@ export default function MissionQuoteOverlayPublished(props: LayoutComponentProps
             <ImagePublished
               src={background_image}
               alt="Mission background"
-              className="w-full h-full object-cover"
-              style={{ opacity: 0.2 }}
+              className="w-full h-full object-cover opacity-20"
             />
           </div>
         )}
@@ -234,7 +233,7 @@ export default function MissionQuoteOverlayPublished(props: LayoutComponentProps
             className="grid grid-cols-2 md:grid-cols-4 gap-6 rounded-2xl p-6 mb-12"
             style={{ background: colors.statsBg, backdropFilter: 'blur(10px)' }}
           >
-            {missionStats.map((stat, idx) => (
+            {missionStats.map((stat: { value: string; label: string }, idx: number) => (
               <div key={idx}>
                 <div style={{ color: '#ffffff', fontSize: '2.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>
                   {stat.value}

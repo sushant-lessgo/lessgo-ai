@@ -37,7 +37,7 @@ export default function SystemArchitecturePublished(props: LayoutComponentProps)
 
   const componentNames = individualComponents.length > 0
     ? individualComponents
-    : (props.architecture_components || '').split('|').map(c => c.trim()).filter(Boolean);
+    : (props.architecture_components || '').split('|').map((c: string) => c.trim()).filter(Boolean);
 
   // Extract icons
   const icons = [
@@ -49,7 +49,7 @@ export default function SystemArchitecturePublished(props: LayoutComponentProps)
     props.component_icon_6 || '📈'
   ];
 
-  const components: ComponentItem[] = componentNames.map((name, index) => ({
+  const components: ComponentItem[] = componentNames.map((name: string, index: number) => ({
     name,
     icon: icons[index] || '🏗️'
   }));
@@ -109,7 +109,7 @@ export default function SystemArchitecturePublished(props: LayoutComponentProps)
 
         {/* Component Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
-          {components.map((component, index) => (
+          {components.map((component: ComponentItem, index: number) => (
             <div
               key={`component-${index}`}
               className="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300"
@@ -122,8 +122,8 @@ export default function SystemArchitecturePublished(props: LayoutComponentProps)
                 }}
               >
                 <IconPublished
-                  value={component.icon}
-                  size="lg"
+                  icon={component.icon}
+                  size={32}
                   className="text-2xl"
                 />
               </div>

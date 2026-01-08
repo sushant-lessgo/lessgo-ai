@@ -39,18 +39,18 @@ export default function MiniCardsPublished(props: LayoutComponentProps) {
   const show_feature_summary = props.show_feature_summary !== false;
 
   // Parse pipe-separated fields
-  const titles = (props.feature_titles || '').split('|').map(t => t.trim()).filter(Boolean);
-  const descriptions = (props.feature_descriptions || '').split('|').map(d => d.trim()).filter(Boolean);
-  const keywords = (props.feature_keywords || '').split('|').map(k => k.trim()).filter(Boolean);
+  const titles = (props.feature_titles || '').split('|').map((t: string) => t.trim()).filter(Boolean);
+  const descriptions = (props.feature_descriptions || '').split('|').map((d: string) => d.trim()).filter(Boolean);
+  const keywords = (props.feature_keywords || '').split('|').map((k: string) => k.trim()).filter(Boolean);
 
   // Extract icons (12 slots)
-  const icons = [];
+  const icons: string[] = [];
   for (let i = 1; i <= 12; i++) {
     icons.push((props[`feature_icon_${i}`] as string) || '📊');
   }
 
   // Build features array
-  const features: Feature[] = titles.map((title, idx) => ({
+  const features: Feature[] = titles.map((title: string, idx: number) => ({
     title,
     description: descriptions[idx] || '',
     keyword: keywords[idx] || '',
@@ -104,7 +104,7 @@ export default function MiniCardsPublished(props: LayoutComponentProps) {
   const h3Typography = getPublishedTypographyStyles('h3', theme);
 
   // Trust indicators
-  const trustList = trust_items ? trust_items.split('|').map(item => item.trim()).filter(Boolean) : [];
+  const trustList = trust_items ? trust_items.split('|').map((item: string) => item.trim()).filter(Boolean) : [];
 
   return (
     <SectionWrapperPublished
@@ -142,7 +142,7 @@ export default function MiniCardsPublished(props: LayoutComponentProps) {
         {/* Features Grid */}
         {features.length > 0 && (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {features.map((feature, index) => (
+            {features.map((feature: Feature, index: number) => (
               <div
                 key={index}
                 className="bg-white rounded-lg p-6 border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all duration-300 h-full flex flex-col"

@@ -79,7 +79,7 @@ export default function VideoNoteWithTranscriptPublished(props: LayoutComponentP
 
   // Parse trust items (pipe-separated)
   const trustList = trust_items
-    ? trust_items.split('|').map(s => s.trim()).filter(Boolean)
+    ? trust_items.split('|').map((s: string) => s.trim()).filter(Boolean)
     : [];
 
   // Convert video URL to embed format
@@ -229,7 +229,7 @@ export default function VideoNoteWithTranscriptPublished(props: LayoutComponentP
             {trustList.length > 0 && (
               <div className="pt-4 border-t border-gray-200">
                 <div className="space-y-2">
-                  {trustList.map((item, idx) => (
+                  {trustList.map((item: string, idx: number) => (
                     <div key={idx} className="flex items-center space-x-2">
                       <svg
                         className="w-5 h-5 flex-shrink-0"

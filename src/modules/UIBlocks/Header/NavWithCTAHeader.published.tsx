@@ -21,7 +21,7 @@ export default function NavWithCTAHeaderPublished(props: LayoutComponentProps) {
     { label: props.nav_item_4, link: props.nav_link_4 },
     { label: props.nav_item_5, link: props.nav_link_5 },
     { label: props.nav_item_6, link: props.nav_link_6 },
-  ].filter(item =>
+  ].filter((item) =>
     item.label &&
     item.label !== '___REMOVED___' &&
     item.label.trim() !== '' &&
@@ -62,7 +62,7 @@ export default function NavWithCTAHeaderPublished(props: LayoutComponentProps) {
           <div className="flex items-center justify-center flex-1">
             {navItems.length > 0 && (
               <ul className="flex items-center gap-4 md:gap-6">
-                {navItems.map((navItem, index) => (
+                {navItems.map((navItem: { label: string; link: string }, index: number) => (
                   <li key={index}>
                     <a
                       href={navItem.link}

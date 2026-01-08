@@ -58,7 +58,7 @@ export default function InteractiveUseCaseMapPublished(props: LayoutComponentPro
   ];
 
   // Build category cards
-  const categoryCards: CategoryCard[] = categories.map((category, index) => ({
+  const categoryCards: CategoryCard[] = categories.map((category: string, index: number) => ({
     category,
     useCase: useCases[index] || 'Use case details for this category',
     icon: icons[index] || '🎯'
@@ -119,7 +119,7 @@ export default function InteractiveUseCaseMapPublished(props: LayoutComponentPro
 
         {/* Category Cards Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {categoryCards.map((card, index) => (
+          {categoryCards.map((card: CategoryCard, index: number) => (
             <div
               key={`category-${index}`}
               className="bg-white rounded-xl shadow-sm p-6"

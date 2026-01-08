@@ -29,8 +29,8 @@ export default function PersonaGridPublished(props: LayoutComponentProps) {
   const footerText = props.footer_text;
 
   // Parse pipe-separated data
-  const names = (props.persona_names || '').split('|').map(n => n.trim()).filter(Boolean);
-  const descriptions = (props.persona_descriptions || '').split('|').map(d => d.trim()).filter(Boolean);
+  const names = (props.persona_names || '').split('|').map((n: string) => n.trim()).filter(Boolean);
+  const descriptions = (props.persona_descriptions || '').split('|').map((d: string) => d.trim()).filter(Boolean);
 
   // Extract persona icon overrides
   const icons = [
@@ -43,7 +43,7 @@ export default function PersonaGridPublished(props: LayoutComponentProps) {
   ];
 
   // Build persona cards
-  const personas: PersonaCard[] = names.map((name, index) => ({
+  const personas: PersonaCard[] = names.map((name: string, index: number) => ({
     name,
     description: descriptions[index] || 'Persona description not provided.',
     icon: icons[index],
@@ -122,7 +122,7 @@ export default function PersonaGridPublished(props: LayoutComponentProps) {
 
         {/* Persona Grid */}
         <div className={`grid gap-8 ${gridClasses}`}>
-          {personas.map((persona, index) => (
+          {personas.map((persona: PersonaCard, index: number) => (
             <div
               key={index}
               className="bg-white p-6 rounded-2xl shadow-lg transition-all duration-300 group"

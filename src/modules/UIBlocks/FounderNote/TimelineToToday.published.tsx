@@ -203,14 +203,14 @@ export default function TimelineToTodayPublished(props: LayoutComponentProps) {
     props.trust_item_3,
     props.trust_item_4,
     props.trust_item_5
-  ].filter(item => item && item !== '___REMOVED___' && item.trim() !== '');
+  ].filter((item: string) => item && item !== '___REMOVED___' && item.trim() !== '');
 
   // Parse timeline items (format: "Year|Icon|Title|Description|Stats|Year|Icon|Title|Description|Stats...")
   const parseTimelineItems = () => {
     if (!timeline_items) return [];
 
     const parts = timeline_items.split('|');
-    const items = [];
+    const items: Array<{year: string; icon: string; title: string; description: string}> = [];
 
     for (let i = 0; i < parts.length; i += 4) {
       if (parts[i] && parts[i + 1] && parts[i + 2]) {
@@ -273,7 +273,7 @@ export default function TimelineToTodayPublished(props: LayoutComponentProps) {
         {/* Timeline */}
         <div className="relative">
           <div className="space-y-0">
-            {timelineItems.map((item, index) => (
+            {timelineItems.map((item: { year: string; icon: string; title: string; description: string }, index: number) => (
               <TimelineItemPublished
                 key={index}
                 year={item.year}
@@ -323,7 +323,7 @@ export default function TimelineToTodayPublished(props: LayoutComponentProps) {
             {trustItems.length > 0 && (
               <div className="mb-8">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {trustItems.map((item, index) => (
+                  {trustItems.map((item: string, index: number) => (
                     <div key={index} className="text-center">
                       <div
                         className="text-2xl font-bold mb-1"

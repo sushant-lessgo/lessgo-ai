@@ -42,10 +42,10 @@ export default function StackedHighlightsPublished(props: LayoutComponentProps) 
   const icons = [highlight_icon_1, highlight_icon_2, highlight_icon_3, highlight_icon_4, highlight_icon_5, highlight_icon_6];
 
   // Parse data
-  const titleList = highlight_titles.split('|').map(t => t.trim()).filter(t => t && t !== '___REMOVED___');
-  const descriptionList = highlight_descriptions.split('|').map(d => d.trim());
+  const titleList = highlight_titles.split('|').map((t: string) => t.trim()).filter((t: string) => t && t !== '___REMOVED___');
+  const descriptionList = highlight_descriptions.split('|').map((d: string) => d.trim());
 
-  const highlightItems: HighlightItem[] = titleList.map((title, index) => ({
+  const highlightItems: HighlightItem[] = titleList.map((title: string, index: number) => ({
     title,
     description: descriptionList[index] || '',
     icon: icons[index] || '✨'
@@ -162,7 +162,7 @@ export default function StackedHighlightsPublished(props: LayoutComponentProps) 
 
         {/* Stacked Highlights */}
         <div className="space-y-0">
-          {highlightItems.map((highlight, index) => (
+          {highlightItems.map((highlight: HighlightItem, index: number) => (
             <div key={`highlight-${index}`} className="group relative">
               {/* Connection Line (except for last item) */}
               {index < highlightItems.length - 1 && (
@@ -189,8 +189,8 @@ export default function StackedHighlightsPublished(props: LayoutComponentProps) 
                   }}
                 >
                   <IconPublished
-                    value={highlight.icon}
-                    size="lg"
+                    icon={highlight.icon}
+                    size={32}
                     className="text-2xl text-white"
                   />
                 </div>

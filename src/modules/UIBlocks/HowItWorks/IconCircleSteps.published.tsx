@@ -17,10 +17,10 @@ import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThe
 
 // Parse step data from pipe-separated strings
 const parseStepData = (titles: string, descriptions: string) => {
-  const titleList = titles.split('|').map(t => t.trim()).filter(t => t && t !== '___REMOVED___');
-  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d && d !== '___REMOVED___');
+  const titleList = titles.split('|').map((t: string) => t.trim()).filter((t: string) => t && t !== '___REMOVED___');
+  const descriptionList = descriptions.split('|').map((d: string) => d.trim()).filter((d: string) => d && d !== '___REMOVED___');
 
-  return titleList.map((title, index) => ({
+  return titleList.map((title: string, index: number) => ({
     title,
     description: descriptionList[index] || '',
     id: `step-${index}`
@@ -213,7 +213,7 @@ export default function IconCircleStepsPublished(props: LayoutComponentProps) {
 
   // Parse trust items
   const trustItemsList = trust_items
-    ? trust_items.split('|').map(item => item.trim()).filter(Boolean)
+    ? trust_items.split('|').map((item: string) => item.trim()).filter(Boolean)
     : [];
 
   // Detect theme
@@ -271,7 +271,7 @@ export default function IconCircleStepsPublished(props: LayoutComponentProps) {
 
         {/* Steps Grid */}
         <div className={`grid ${steps.length === 3 ? 'md:grid-cols-3' : steps.length === 2 ? 'md:grid-cols-2' : 'md:grid-cols-4'} gap-12 mb-16`}>
-          {steps.map((step, index) => (
+          {steps.map((step: { title: string; description: string; id: string }, index: number) => (
             <CircleStep
               key={step.id}
               title={step.title}
@@ -287,7 +287,7 @@ export default function IconCircleStepsPublished(props: LayoutComponentProps) {
 
         {/* Process Flow Indicator */}
         <div className="flex items-center justify-center space-x-4 mb-12">
-          {steps.map((_, index) => (
+          {steps.map((_: { title: string; description: string; id: string }, index: number) => (
             <React.Fragment key={index}>
               <div
                 className="w-3 h-3 rounded-full"
@@ -447,7 +447,7 @@ export default function IconCircleStepsPublished(props: LayoutComponentProps) {
 
                 {trustItemsList.length > 0 && (
                   <div className="flex items-center space-x-4">
-                    {trustItemsList.map((item, idx) => (
+                    {trustItemsList.map((item: string, idx: number) => (
                       <div key={idx} className="flex items-center space-x-2">
                         <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />

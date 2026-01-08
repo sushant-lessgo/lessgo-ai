@@ -74,7 +74,7 @@ export default function SideBySidePhotoStoryPublished(props: LayoutComponentProp
     { value: props.story_stat_2 },
     { value: props.story_stat_3 },
     { value: props.story_stat_4 }
-  ].filter(s => s && s.value && s.value !== '___REMOVED___' && s.value.trim() !== '');
+  ].filter((s) => s && s.value && s.value !== '___REMOVED___' && s.value.trim() !== '');
 
   // Trust items
   const trustItems = [
@@ -83,7 +83,7 @@ export default function SideBySidePhotoStoryPublished(props: LayoutComponentProp
     props.trust_item_3,
     props.trust_item_4,
     props.trust_item_5
-  ].filter(t => t && t !== '___REMOVED___' && t.trim() !== '');
+  ].filter((t: string) => t && t !== '___REMOVED___' && t.trim() !== '');
 
   // Typography styles
   const headlineTypography = getPublishedTypographyStyles('h2', theme);
@@ -194,7 +194,7 @@ export default function SideBySidePhotoStoryPublished(props: LayoutComponentProp
             {/* Trust Indicators */}
             {trustItems.length > 0 && (
               <div className="flex items-center gap-4 flex-wrap">
-                {trustItems.map((item, idx) => (
+                {trustItems.map((item: string, idx: number) => (
                   <div key={idx} className="flex items-center text-sm">
                     <IconPublished icon="✓" size={16} className="mr-1 text-green-500" />
                     <TextPublished
@@ -241,7 +241,7 @@ export default function SideBySidePhotoStoryPublished(props: LayoutComponentProp
             style={{ background: themeStyles.statsBarGradient }}
           >
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-              {stats.map((stat, index) => {
+              {stats.map((stat: { value: string }, index: number) => {
                 const parts = stat.value.split(' ');
                 const number = parts[0];
                 const label = parts.slice(1).join(' ');

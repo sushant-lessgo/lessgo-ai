@@ -15,7 +15,7 @@ export default function SimpleFooterPublished(props: LayoutComponentProps) {
   const copyright = props.copyright || `© ${new Date().getFullYear()} Your Company. All rights reserved.`;
 
   // Typography styles
-  const captionTypography = getPublishedTypographyStyles('caption', theme);
+  const captionTypography = getPublishedTypographyStyles('body-sm', theme);
 
   return (
     <section style={{ background: sectionBackgroundCSS }} className="py-8 px-6 border-t">

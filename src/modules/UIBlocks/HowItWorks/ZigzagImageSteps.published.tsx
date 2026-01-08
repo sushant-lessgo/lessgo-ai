@@ -50,11 +50,11 @@ export default function ZigzagImageStepsPublished(props: LayoutComponentProps) {
   const step_visual_5 = props.step_visual_5 || '';
 
   // Parse steps
-  const titleList = step_titles.split('|').map(t => t.trim()).filter(t => t && t !== '___REMOVED___');
-  const descriptionList = step_descriptions.split('|').map(d => d.trim()).filter(d => d && d !== '___REMOVED___');
+  const titleList = step_titles.split('|').map((t: string) => t.trim()).filter((t: string) => t && t !== '___REMOVED___');
+  const descriptionList = step_descriptions.split('|').map((d: string) => d.trim()).filter((d: string) => d && d !== '___REMOVED___');
   const visualList = [step_visual_0, step_visual_1, step_visual_2, step_visual_3, step_visual_4, step_visual_5];
 
-  const steps: Step[] = titleList.map((title, index) => ({
+  const steps: Step[] = titleList.map((title: string, index: number) => ({
     title,
     description: descriptionList[index] || '',
     visual: visualList[index] || ''
@@ -148,7 +148,7 @@ export default function ZigzagImageStepsPublished(props: LayoutComponentProps) {
 
         {/* Zigzag Steps */}
         <div className="space-y-24">
-          {steps.map((step, index) => {
+          {steps.map((step: Step, index: number) => {
             const isEven = index % 2 === 0;
 
             return (

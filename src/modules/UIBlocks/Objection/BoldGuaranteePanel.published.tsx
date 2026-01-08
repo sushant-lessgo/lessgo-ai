@@ -187,7 +187,7 @@ export default function BoldGuaranteePanelPublished(props: LayoutComponentProps)
             className="grid md:grid-cols-3 gap-6"
             style={{ marginBottom: '2rem' }}
           >
-            {guarantees.map((guarantee, index) => (
+            {guarantees.map((guarantee: Guarantee, index: number) => (
               <div
                 key={index}
                 className="text-center p-6"

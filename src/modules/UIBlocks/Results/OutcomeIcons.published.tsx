@@ -44,10 +44,10 @@ export default function OutcomeIconsPublished(props: LayoutComponentProps) {
   const icons = [icon_1, icon_2, icon_3, icon_4, icon_5, icon_6, icon_7, icon_8];
 
   // Parse outcomes
-  const titleList = titles.split('|').map(t => t.trim()).filter(t => t && t !== '___REMOVED___');
-  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d && d !== '___REMOVED___');
+  const titleList = titles.split('|').map((t: string) => t.trim()).filter((t: string) => t && t !== '___REMOVED___');
+  const descriptionList = descriptions.split('|').map((d: string) => d.trim()).filter((d: string) => d && d !== '___REMOVED___');
 
-  const outcomes: Outcome[] = titleList.map((title, index) => ({
+  const outcomes: Outcome[] = titleList.map((title: string, index: number) => ({
     title,
     description: descriptionList[index] || 'Amazing results await',
     icon: icons[index] || '⭐'
@@ -140,7 +140,7 @@ export default function OutcomeIconsPublished(props: LayoutComponentProps) {
 
         {/* Outcomes Grid */}
         <div className={`grid gap-8 ${getGridClass(outcomes.length)}`}>
-          {outcomes.map((outcome, index) => (
+          {outcomes.map((outcome: Outcome, index: number) => (
             <div
               key={`outcome-${index}`}
               className="group text-center p-6 bg-white rounded-2xl border hover:shadow-lg transition-all duration-300"
@@ -158,8 +158,8 @@ export default function OutcomeIconsPublished(props: LayoutComponentProps) {
                   }}
                 >
                   <IconPublished
-                    value={outcome.icon}
-                    size="lg"
+                    icon={outcome.icon}
+                    size={32}
                     className="text-3xl"
                   />
                 </div>

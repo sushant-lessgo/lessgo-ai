@@ -162,7 +162,7 @@ export default function SkepticToBelieverStepsPublished(props: LayoutComponentPr
           ></div>
 
           <div className="space-y-12">
-            {conversionSteps.map((step, index) => (
+            {conversionSteps.map((step: ConversionStep, index: number) => (
               <div key={index} className="relative">
                 {/* Step Container */}
                 <div className="flex items-start space-x-8">

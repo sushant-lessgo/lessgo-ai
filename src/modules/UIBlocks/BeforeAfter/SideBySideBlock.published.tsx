@@ -41,8 +41,8 @@ export default function SideBySideBlockPublished(props: LayoutComponentProps) {
   // Parse trust indicators from pipe-separated string
   const trustItemsList = (props.trust_items || '')
     .split('|')
-    .map(item => item.trim())
-    .filter(item => item && item !== '___REMOVED___');
+    .map((item: string) => item.trim())
+    .filter((item: string) => item && item !== '___REMOVED___');
 
   // Detect UIBlock theme
   const uiTheme: UIBlockTheme = props.manualThemeOverride ||
@@ -131,8 +131,8 @@ export default function SideBySideBlockPublished(props: LayoutComponentProps) {
                 {before_icon ? (
                   <div className="mr-3">
                     <IconPublished
-                      value={before_icon}
-                      size="lg"
+                      icon={before_icon}
+                      size={32}
                       className="text-xl"
                     />
                   </div>
@@ -183,8 +183,8 @@ export default function SideBySideBlockPublished(props: LayoutComponentProps) {
                 {after_icon ? (
                   <div className="mr-3">
                     <IconPublished
-                      value={after_icon}
-                      size="lg"
+                      icon={after_icon}
+                      size={32}
                       className="text-xl"
                     />
                   </div>
@@ -255,7 +255,7 @@ export default function SideBySideBlockPublished(props: LayoutComponentProps) {
                 {/* Trust Indicators - Inline SVG Implementation */}
                 {trustItemsList.length > 0 && (
                   <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
-                    {trustItemsList.map((item, index) => (
+                    {trustItemsList.map((item: string, index: number) => (
                       <div key={index} className="flex items-center space-x-2">
                         <svg
                           className="w-4 h-4 flex-shrink-0"

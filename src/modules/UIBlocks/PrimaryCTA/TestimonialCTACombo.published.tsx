@@ -215,7 +215,6 @@ export default function TestimonialCTAComboPublished(props: LayoutComponentProps
                   backgroundColor="transparent"
                   textColor={theme.colors?.accentColor || '#3B82F6'}
                   className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 px-8 py-4 text-lg border-2"
-                  style={{ borderColor: theme.colors?.accentColor || '#3B82F6' }}
                 />
               )}
             </div>

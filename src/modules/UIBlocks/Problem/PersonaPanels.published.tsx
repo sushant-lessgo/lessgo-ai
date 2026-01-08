@@ -59,26 +59,26 @@ export default function PersonaPanelsPublished(props: LayoutComponentProps) {
   ];
 
   // Parse all arrays
-  const nameList = persona_names.split('|').map(t => t.trim()).filter(t => t && t !== '___REMOVED___');
-  const problemList = persona_problems.split('|').map(d => d.trim()).filter(d => d && d !== '___REMOVED___');
-  const descriptionList = persona_descriptions ? persona_descriptions.split('|').map(d => d.trim()) : [];
-  const titleList = persona_titles ? persona_titles.split('|').map(t => t.trim()) : [];
+  const nameList = persona_names.split('|').map((t: string) => t.trim()).filter((t: string) => t && t !== '___REMOVED___');
+  const problemList = persona_problems.split('|').map((d: string) => d.trim()).filter((d: string) => d && d !== '___REMOVED___');
+  const descriptionList = persona_descriptions ? persona_descriptions.split('|').map((d: string) => d.trim()) : [];
+  const titleList = persona_titles ? persona_titles.split('|').map((t: string) => t.trim()) : [];
 
   const painPointsList = persona_pain_points
-    ? persona_pain_points.split('|').map(item =>
+    ? persona_pain_points.split('|').map((item: string) =>
         item.trim().split(',').map(point => point.trim()).filter(Boolean)
       )
     : [];
 
   const goalsList = persona_goals
-    ? persona_goals.split('|').map(item =>
+    ? persona_goals.split('|').map((item: string) =>
         item.trim().split(',').map(goal => goal.trim()).filter(Boolean)
       )
     : [];
 
   // Parse trust items
   const trustItemsList = trust_items
-    ? trust_items.split('|').map(item => item.trim()).filter(Boolean)
+    ? trust_items.split('|').map((item: string) => item.trim()).filter(Boolean)
     : [];
 
   // Detect theme
@@ -112,7 +112,7 @@ export default function PersonaPanelsPublished(props: LayoutComponentProps) {
   };
 
   // Build personas array
-  const personas: Persona[] = nameList.map((name, index) => ({
+  const personas: Persona[] = nameList.map((name: string, index: number) => ({
     name,
     problem: problemList[index] || '',
     description: descriptionList[index] || '',
@@ -187,7 +187,7 @@ export default function PersonaPanelsPublished(props: LayoutComponentProps) {
 
         {/* Persona Selection Cards */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-          {personas.map((persona, index) => (
+          {personas.map((persona: Persona, index: number) => (
             <div
               key={`persona-${index}`}
               className="bg-white rounded-2xl border-2 transition-all duration-300"
@@ -203,8 +203,8 @@ export default function PersonaPanelsPublished(props: LayoutComponentProps) {
                     style={{ backgroundColor: persona.color.bg }}
                   >
                     <IconPublished
-                      value={persona.icon}
-                      size="xl"
+                      icon={persona.icon}
+                      size={48}
                       className="text-3xl"
                     />
                   </div>
@@ -292,8 +292,8 @@ export default function PersonaPanelsPublished(props: LayoutComponentProps) {
                 style={{ backgroundColor: firstPersona.color.bg }}
               >
                 <IconPublished
-                  value={firstPersona.icon}
-                  size="xl"
+                  icon={firstPersona.icon}
+                  size={48}
                   className="text-3xl"
                 />
               </div>
@@ -372,7 +372,7 @@ export default function PersonaPanelsPublished(props: LayoutComponentProps) {
                     Daily Frustrations
                   </h4>
                   <div className="space-y-3">
-                    {firstPersona.painPoints.map((point, index) => (
+                    {firstPersona.painPoints.map((point: string, index: number) => (
                       <div key={index} className="flex items-start space-x-3">
                         <div
                           className="w-2 h-2 rounded-full mt-2 flex-shrink-0"
@@ -420,7 +420,7 @@ export default function PersonaPanelsPublished(props: LayoutComponentProps) {
                     Your Goals
                   </h4>
                   <div className="space-y-3">
-                    {firstPersona.goals.map((goal, index) => (
+                    {firstPersona.goals.map((goal: string, index: number) => (
                       <div key={index} className="flex items-start space-x-3">
                         <div
                           className="w-2 h-2 rounded-full mt-2 flex-shrink-0"
@@ -458,7 +458,7 @@ export default function PersonaPanelsPublished(props: LayoutComponentProps) {
 
             {trustItemsList.length > 0 && (
               <div className="flex flex-wrap justify-center gap-6">
-                {trustItemsList.map((item, index) => (
+                {trustItemsList.map((item: string, index: number) => (
                   <div key={index} className="flex items-center space-x-2">
                     <svg
                       className="w-5 h-5 flex-shrink-0"

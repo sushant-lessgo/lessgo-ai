@@ -42,12 +42,12 @@ export default function StackedWinsListPublished(props: LayoutComponentProps) {
   const momentum_icon = props.momentum_icon || '📈';
 
   // Parse all arrays
-  const winList = wins.split('|').map(w => w.trim()).filter(w => w && w !== '___REMOVED___');
-  const descriptionList = descriptions ? descriptions.split('|').map(d => d.trim()) : [];
-  const categoryList = categories ? categories.split('|').map(c => c.trim()) : [];
+  const winList = wins.split('|').map((w: string) => w.trim()).filter((w: string) => w && w !== '___REMOVED___');
+  const descriptionList = descriptions ? descriptions.split('|').map((d: string) => d.trim()) : [];
+  const categoryList = categories ? categories.split('|').map((c: string) => c.trim()) : [];
 
   // Build wins array
-  const winData: Win[] = winList.map((win, index) => ({
+  const winData: Win[] = winList.map((win: string, index: number) => ({
     win,
     description: descriptionList[index] || '',
     category: categoryList[index] || ''
@@ -195,8 +195,8 @@ export default function StackedWinsListPublished(props: LayoutComponentProps) {
               }}
             >
               <IconPublished
-                value={badge_icon}
-                size="sm"
+                icon={badge_icon}
+                size={16}
                 className="text-sm mr-2"
               />
               <TextPublished
@@ -209,7 +209,7 @@ export default function StackedWinsListPublished(props: LayoutComponentProps) {
 
         {/* Wins List */}
         <div className="space-y-4">
-          {winData.map((win, index) => {
+          {winData.map((win: Win, index: number) => {
             const categoryColors = getCategoryColor(win.category, uiTheme);
 
             return (
@@ -227,8 +227,8 @@ export default function StackedWinsListPublished(props: LayoutComponentProps) {
                     }}
                   >
                     <IconPublished
-                      value={win_icon}
-                      size="sm"
+                      icon={win_icon}
+                      size={16}
                       className="text-lg text-white"
                     />
                   </div>
@@ -288,8 +288,8 @@ export default function StackedWinsListPublished(props: LayoutComponentProps) {
           <div className="mt-16 text-center">
             <div className="inline-flex items-center space-x-2 mb-4">
               <IconPublished
-                value={momentum_icon}
-                size="md"
+                icon={momentum_icon}
+                size={24}
                 className="text-2xl"
               />
               {footer_title && (

@@ -1,0 +1,35 @@
+
+> lessgo@0.1.0 build
+> npm run build:published-css && next build
+
+
+> lessgo@0.1.0 build:published-css
+> node scripts/buildPublishedCSS.js
+
+🎨 Building published.css...
+✅ Created temporary Tailwind config
+✅ Created input CSS file
+⚙️  Running Tailwind CSS compilation...
+✅ Published CSS generated: 54.58 KB
+🧹 Cleaned up temporary files
+✅ Published CSS build complete!
+  ▲ Next.js 14.2.31
+  - Environments: .env.local, .env
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./src/modules/UIBlocks/FAQ/AccordionFAQ.published.tsx:64:58
+Type error: Parameter 'q' implicitly has an 'any' type.
+
+[0m [90m 62 |[39m   [90m// Fallback to legacy format if no individual items found[39m[0m
+[0m [90m 63 |[39m   [36mif[39m (faqItems[33m.[39mlength [33m===[39m [35m0[39m [33m&&[39m questions_legacy) {[0m
+[0m[31m[1m>[22m[39m[90m 64 |[39m     [36mconst[39m questionList [33m=[39m questions_legacy[33m.[39msplit([32m'|'[39m)[33m.[39mmap(q [33m=>[39m q[33m.[39mtrim())[33m.[39mfilter(q [33m=>[39m q [33m&&[39m q [33m!==[39m [32m'___REMOVED___'[39m)[33m;[39m[0m
+[0m [90m    |[39m                                                          [31m[1m^[22m[39m[0m
+[0m [90m 65 |[39m     [36mconst[39m answerList [33m=[39m answers_legacy [33m?[39m answers_legacy[33m.[39msplit([32m'|'[39m)[33m.[39mmap(a [33m=>[39m a[33m.[39mtrim()) [33m:[39m [][33m;[39m[0m
+[0m [90m 66 |[39m[0m
+[0m [90m 67 |[39m     questionList[33m.[39mforEach((question[33m,[39m index) [33m=>[39m {[0m
+Next.js build worker exited with code: 1 and signal: null

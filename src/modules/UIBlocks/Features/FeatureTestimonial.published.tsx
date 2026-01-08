@@ -81,14 +81,14 @@ export default function FeatureTestimonialPublished(props: LayoutComponentProps)
   const trust_item_5 = props.trust_item_5 || '';
 
   // Parse pipe-separated data
-  const titleList = feature_titles.split('|').map(t => t.trim()).filter(t => t && t !== '___REMOVED___');
-  const descriptionList = feature_descriptions.split('|').map(d => d.trim()).filter(d => d && d !== '___REMOVED___');
-  const quoteList = testimonial_quotes.split('|').map(q => q.trim()).filter(q => q && q !== '___REMOVED___');
-  const nameList = testimonial_names.split('|').map(n => n.trim()).filter(n => n && n !== '___REMOVED___');
-  const roleList = testimonial_roles.split('|').map(r => r.trim()).filter(r => r && r !== '___REMOVED___');
+  const titleList = feature_titles.split('|').map((t: string) => t.trim()).filter((t: string) => t && t !== '___REMOVED___');
+  const descriptionList = feature_descriptions.split('|').map((d: string) => d.trim()).filter((d: string) => d && d !== '___REMOVED___');
+  const quoteList = testimonial_quotes.split('|').map((q: string) => q.trim()).filter((q: string) => q && q !== '___REMOVED___');
+  const nameList = testimonial_names.split('|').map((n: string) => n.trim()).filter((n: string) => n && n !== '___REMOVED___');
+  const roleList = testimonial_roles.split('|').map((r: string) => r.trim()).filter((r: string) => r && r !== '___REMOVED___');
 
   // Build features array
-  const features: FeatureTestimonial[] = titleList.map((title, index) => ({
+  const features: FeatureTestimonial[] = titleList.map((title: string, index: number) => ({
     title,
     description: descriptionList[index] || '',
     quote: quoteList[index] || '',
@@ -142,7 +142,7 @@ export default function FeatureTestimonialPublished(props: LayoutComponentProps)
 
   // Trust items array
   const trustItems = [trust_item_1, trust_item_2, trust_item_3, trust_item_4, trust_item_5]
-    .filter(item => item && item !== '___REMOVED___' && item.trim() !== '');
+    .filter((item: string) => item && item !== '___REMOVED___' && item.trim() !== '');
 
   // Trust metrics array
   const trustMetrics = [
@@ -187,7 +187,7 @@ export default function FeatureTestimonialPublished(props: LayoutComponentProps)
 
         {/* Features Grid */}
         <div className="grid md:grid-cols-2 gap-6">
-          {features.map((feature, index) => (
+          {features.map((feature: FeatureTestimonial, index: number) => (
             <div
               key={index}
               className="bg-white rounded-xl p-8 border border-gray-100 hover:shadow-xl transition-all duration-300 h-full flex flex-col"
@@ -205,8 +205,8 @@ export default function FeatureTestimonialPublished(props: LayoutComponentProps)
                     style={{ backgroundColor: themeColors.iconBg }}
                   >
                     <IconPublished
-                      value={feature.icon}
-                      size="md"
+                      icon={feature.icon}
+                      size={24}
                       className="text-white text-2xl"
                     />
                   </div>
@@ -267,7 +267,7 @@ export default function FeatureTestimonialPublished(props: LayoutComponentProps)
                       }}
                     >
                       <span className="text-white font-bold text-lg">
-                        {feature.name.split(' ').map(n => n[0]).join('')}
+                        {feature.name.split(' ').map((n: string) => n[0]).join('')}
                       </span>
                     </div>
                   )}
@@ -313,7 +313,7 @@ export default function FeatureTestimonialPublished(props: LayoutComponentProps)
               </h3>
 
               <div className="flex flex-wrap justify-center gap-8">
-                {trustMetrics.map((item, index) => (
+                {trustMetrics.map((item: { metric: string; label: string }, index: number) => (
                   <div key={index} className="text-center">
                     <div
                       style={{
@@ -372,7 +372,7 @@ export default function FeatureTestimonialPublished(props: LayoutComponentProps)
 
               {trustItems.length > 0 && (
                 <div className="flex flex-wrap items-center justify-center gap-4">
-                  {trustItems.map((item, index) => (
+                  {trustItems.map((item: string, index: number) => (
                     <div key={index} className="flex items-center space-x-2">
                       <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />

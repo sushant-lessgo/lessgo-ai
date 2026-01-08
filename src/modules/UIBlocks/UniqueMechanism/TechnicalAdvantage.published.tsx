@@ -40,10 +40,10 @@ export default function TechnicalAdvantagePublished(props: LayoutComponentProps)
   ];
 
   // Parse data
-  const titleList = advantage_titles.split('|').map(t => t.trim()).filter(t => t && t !== '___REMOVED___');
-  const descriptionList = advantage_descriptions.split('|').map(d => d.trim());
+  const titleList = advantage_titles.split('|').map((t: string) => t.trim()).filter((t: string) => t && t !== '___REMOVED___');
+  const descriptionList = advantage_descriptions.split('|').map((d: string) => d.trim());
 
-  const advantages: AdvantageItem[] = titleList.map((title, index) => ({
+  const advantages: AdvantageItem[] = titleList.map((title: string, index: number) => ({
     title,
     description: descriptionList[index] || '',
     icon: icons[index] || '⚡'
@@ -126,7 +126,7 @@ export default function TechnicalAdvantagePublished(props: LayoutComponentProps)
           advantages.length === 4 ? 'grid-cols-1 md:grid-cols-2' :
           'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
         }`}>
-          {advantages.map((advantage, index) => (
+          {advantages.map((advantage: AdvantageItem, index: number) => (
             <div
               key={`advantage-${index}`}
               className="rounded-xl p-6 hover:shadow-lg transition-all duration-300 h-full"
@@ -143,8 +143,8 @@ export default function TechnicalAdvantagePublished(props: LayoutComponentProps)
                   }}
                 >
                   <IconPublished
-                    value={advantage.icon}
-                    size="lg"
+                    icon={advantage.icon}
+                    size={32}
                     className="text-2xl text-white"
                   />
                 </div>

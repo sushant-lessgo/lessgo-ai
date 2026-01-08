@@ -33,10 +33,10 @@ const parsePrincipleData = (
   details: string,
   icons: string[]
 ): PrincipleItem[] => {
-  const principleList = principles.split('|').map(p => p.trim()).filter(p => p && p !== '___REMOVED___');
-  const detailList = details.split('|').map(d => d.trim());
+  const principleList = principles.split('|').map((p: string) => p.trim()).filter((p: string) => p && p !== '___REMOVED___');
+  const detailList = details.split('|').map((d: string) => d.trim());
 
-  return principleList.map((name, index) => ({
+  return principleList.map((name: string, index: number) => ({
     name,
     detail: detailList[index] || 'Detail not provided.',
     icon: icons[index] || '🎯'
@@ -45,10 +45,10 @@ const parsePrincipleData = (
 
 // Parse result data from pipe-separated strings
 const parseResultData = (metrics: string, labels: string): ResultItem[] => {
-  const metricList = metrics.split('|').map(m => m.trim()).filter(m => m && m !== '___REMOVED___');
-  const labelList = labels.split('|').map(l => l.trim());
+  const metricList = metrics.split('|').map((m: string) => m.trim()).filter((m: string) => m && m !== '___REMOVED___');
+  const labelList = labels.split('|').map((l: string) => l.trim());
 
-  return metricList.map((metric, index) => ({
+  return metricList.map((metric: string, index: number) => ({
     metric,
     label: labelList[index] || 'Result'
   }));
@@ -175,8 +175,8 @@ export default function MethodologyBreakdownPublished(props: LayoutComponentProp
             style={{ backgroundColor: themeColors.headerIconBg }}
           >
             <IconPublished
-              value={methodology_icon}
-              size="xl"
+              icon={methodology_icon}
+              size={48}
               className="text-white text-3xl"
             />
           </div>
@@ -210,7 +210,7 @@ export default function MethodologyBreakdownPublished(props: LayoutComponentProp
         {/* Key Principles */}
         {principleItems.length > 0 && (
           <div className={`grid gap-6 lg:gap-8 mb-12 ${getGridClass(principleItems.length)}`}>
-            {principleItems.map((item, index) => {
+            {principleItems.map((item: PrincipleItem, index: number) => {
               const [isHovered, setIsHovered] = React.useState(false);
 
               return (
@@ -230,7 +230,7 @@ export default function MethodologyBreakdownPublished(props: LayoutComponentProp
                     className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold text-lg mb-4"
                     style={{ background: themeColors.principleIconGradient }}
                   >
-                    <IconPublished value={item.icon} size="md" />
+                    <IconPublished icon={item.icon} size={24} />
                   </div>
 
                   {/* Principle name */}
@@ -277,7 +277,7 @@ export default function MethodologyBreakdownPublished(props: LayoutComponentProp
             )}
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {resultItems.map((result, index) => (
+              {resultItems.map((result: ResultItem, index: number) => (
                 <div key={`result-${index}`} className="text-center">
                   <TextPublished
                     value={result.metric}

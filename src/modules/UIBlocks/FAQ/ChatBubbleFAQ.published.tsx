@@ -69,8 +69,8 @@ export default function ChatBubbleFAQPublished(props: LayoutComponentProps) {
   const supportAvatarIcon = props.support_avatar_icon || '';
 
   // Helper function to get FAQ items
-  const getFAQItems = () => {
-    const items = [];
+  const getFAQItems = (): Array<{question: string; answer: string; index: number}> => {
+    const items: Array<{question: string; answer: string; index: number}> = [];
 
     // Check individual fields first (preferred)
     for (let i = 1; i <= 5; i++) {
@@ -91,10 +91,10 @@ export default function ChatBubbleFAQPublished(props: LayoutComponentProps) {
       const questionsRaw = props.questions;
       const answersRaw = props.answers;
 
-      const questions = (typeof questionsRaw === 'string' ? questionsRaw.split('|').map(q => q.trim()).filter(Boolean) : []);
-      const answers = (typeof answersRaw === 'string' ? answersRaw.split('|').map(a => a.trim()).filter(Boolean) : []);
+      const questions = (typeof questionsRaw === 'string' ? questionsRaw.split('|').map((q: string) => q.trim()).filter(Boolean) : []);
+      const answers = (typeof answersRaw === 'string' ? answersRaw.split('|').map((a: string) => a.trim()).filter(Boolean) : []);
 
-      questions.forEach((question, index) => {
+      questions.forEach((question: string, index: number) => {
         items.push({
           question,
           answer: answers[index] || '',
@@ -175,7 +175,7 @@ export default function ChatBubbleFAQPublished(props: LayoutComponentProps) {
               style={{ backgroundColor: accentColor }}
             >
               {supportAvatarIcon && supportAvatarIcon.trim() !== '' && supportAvatarIcon !== '👤' ? (
-                <IconPublished value={supportAvatarIcon} size="md" color="#FFFFFF" />
+                <IconPublished icon={supportAvatarIcon} size={24} color="#FFFFFF" />
               ) : (
                 supportAvatar
               )}
@@ -189,7 +189,7 @@ export default function ChatBubbleFAQPublished(props: LayoutComponentProps) {
                 }}
               />
               <div className="flex items-center gap-2 text-sm" style={{ color: '#10b981' }}>
-                <IconPublished value={statusIndicatorIcon} size="sm" />
+                <IconPublished icon={statusIndicatorIcon} size={16} />
                 <TextPublished
                   value={onlineStatusText}
                   style={{
@@ -280,7 +280,7 @@ export default function ChatBubbleFAQPublished(props: LayoutComponentProps) {
                 className="p-2 rounded-full text-white flex items-center justify-center"
                 style={{ backgroundColor: accentColor }}
               >
-                <IconPublished value={sendIcon} size="md" color="#FFFFFF" />
+                <IconPublished icon={sendIcon} size={24} color="#FFFFFF" />
               </button>
             </div>
           </div>

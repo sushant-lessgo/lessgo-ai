@@ -54,7 +54,7 @@ const getTierFeatures = (tierIndex: number, props: any): string[] => {
 
 // Helper to get avatar placeholder from name
 const getAvatarPlaceholder = (name: string): string => {
-  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  return name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
 };
 
 // Helper to get tier icon
@@ -86,7 +86,7 @@ const parsePricingData = (props: any): PricingTier[] => {
 
   const tierCount = parseInt(props.tier_count || '3') || 3;
 
-  return names.slice(0, tierCount).map((name, index) => ({
+  return names.slice(0, tierCount).map((name: string, index: number) => ({
     name,
     price: prices[index] || 'Contact Us',
     description: descriptions[index] || '',
@@ -280,7 +280,7 @@ export default function CardWithTestimonialPublished(props: LayoutComponentProps
 
         {/* Pricing Cards Grid */}
         <div className={`grid gap-8 mb-12 ${gridClass}`}>
-          {pricingTiers.map((tier, index) => (
+          {pricingTiers.map((tier: PricingTier, index: number) => (
             <div key={`tier-${index}`} className="relative">
               {/* Card */}
               <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 p-6 h-full flex flex-col">
@@ -294,8 +294,8 @@ export default function CardWithTestimonialPublished(props: LayoutComponentProps
                     }}
                   >
                     <IconPublished
-                      value={tier.icon}
-                      size="md"
+                      icon={tier.icon}
+                      size={24}
                       className="text-xl"
                     />
                   </div>
@@ -342,7 +342,7 @@ export default function CardWithTestimonialPublished(props: LayoutComponentProps
 
                 {/* Features */}
                 <div className="space-y-3 mb-6 flex-grow">
-                  {tier.features.map((feature, fIndex) => (
+                  {tier.features.map((feature: string, fIndex: number) => (
                     <div key={fIndex} className="flex items-start space-x-3">
                       <svg
                         className="w-5 h-5 mt-0.5 flex-shrink-0"
@@ -401,10 +401,9 @@ export default function CardWithTestimonialPublished(props: LayoutComponentProps
                         {/* Avatar */}
                         {tier.testimonial.image ? (
                           <AvatarPublished
-                            src={tier.testimonial.image}
-                            alt={tier.testimonial.name}
-                            fallbackText={getAvatarPlaceholder(tier.testimonial.name)}
-                            size="sm"
+                            imageUrl={tier.testimonial.image}
+                            name={tier.testimonial.name}
+                            size={40}
                           />
                         ) : (
                           <div
@@ -479,7 +478,7 @@ export default function CardWithTestimonialPublished(props: LayoutComponentProps
               )}
 
               <div className="grid md:grid-cols-4 gap-8">
-                {socialMetrics.map((metric, index) => (
+                {socialMetrics.map((metric: SocialMetric, index: number) => (
                   <div key={index} className="text-center">
                     {/* Social Icon */}
                     <div
@@ -490,8 +489,8 @@ export default function CardWithTestimonialPublished(props: LayoutComponentProps
                       }}
                     >
                       <IconPublished
-                        value={metric.icon}
-                        size="md"
+                        icon={metric.icon}
+                        size={24}
                         className="text-xl"
                       />
                     </div>
@@ -591,7 +590,7 @@ export default function CardWithTestimonialPublished(props: LayoutComponentProps
 
             {trustItems.length > 0 && (
               <div className="flex flex-wrap justify-center items-center gap-8">
-                {trustItems.map((item, index) => (
+                {trustItems.map((item: string, index: number) => (
                   <div key={index} className="flex items-center space-x-2">
                     <svg
                       className="w-4 h-4"

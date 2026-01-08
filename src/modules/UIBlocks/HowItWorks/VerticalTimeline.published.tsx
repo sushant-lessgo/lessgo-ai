@@ -36,11 +36,11 @@ export default function VerticalTimelinePublished(props: LayoutComponentProps) {
   const use_step_icons = props.use_step_icons || false;
 
   // Parse steps
-  const titleList = step_titles.split('|').map(t => t.trim()).filter(t => t && t !== '___REMOVED___');
-  const descriptionList = step_descriptions.split('|').map(d => d.trim()).filter(d => d && d !== '___REMOVED___');
-  const durationList = step_durations.split('|').map(d => d.trim()).filter(d => d && d !== '___REMOVED___');
+  const titleList = step_titles.split('|').map((t: string) => t.trim()).filter((t: string) => t && t !== '___REMOVED___');
+  const descriptionList = step_descriptions.split('|').map((d: string) => d.trim()).filter((d: string) => d && d !== '___REMOVED___');
+  const durationList = step_durations.split('|').map((d: string) => d.trim()).filter((d: string) => d && d !== '___REMOVED___');
 
-  const steps: Step[] = titleList.map((title, index) => ({
+  const steps: Step[] = titleList.map((title: string, index: number) => ({
     title,
     description: descriptionList[index] || '',
     duration: durationList[index] || '',
@@ -156,7 +156,7 @@ export default function VerticalTimelinePublished(props: LayoutComponentProps) {
 
         {/* Timeline Steps */}
         <div className="space-y-0">
-          {steps.map((step, index) => {
+          {steps.map((step: Step, index: number) => {
             const isLast = index === steps.length - 1;
             const stepGradient = themeColors.stepGradients[index % themeColors.stepGradients.length];
 

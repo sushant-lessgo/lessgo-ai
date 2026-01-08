@@ -99,7 +99,7 @@ export default function SegmentedFAQTabsPublished(props: LayoutComponentProps) {
 
   // Helper function to get FAQ items for a specific tab
   const getTabFAQItems = (tabNumber: number) => {
-    const items = [];
+    const items: Array<{question: string; answer: string; index: number; tabNumber: number}> = [];
 
     // Check individual fields first (preferred)
     for (let i = 1; i <= 4; i++) {
@@ -121,10 +121,10 @@ export default function SegmentedFAQTabsPublished(props: LayoutComponentProps) {
       const questionsRaw = props[`tab${tabNumber}_questions` as keyof typeof props];
       const answersRaw = props[`tab${tabNumber}_answers` as keyof typeof props];
 
-      const questions = (typeof questionsRaw === 'string' ? questionsRaw.split('|').map(q => q.trim()).filter(Boolean) : []);
-      const answers = (typeof answersRaw === 'string' ? answersRaw.split('|').map(a => a.trim()).filter(Boolean) : []);
+      const questions = (typeof questionsRaw === 'string' ? questionsRaw.split('|').map((q: string) => q.trim()).filter(Boolean) : []);
+      const answers = (typeof answersRaw === 'string' ? answersRaw.split('|').map((a: string) => a.trim()).filter(Boolean) : []);
 
-      questions.forEach((question, index) => {
+      questions.forEach((question: string, index: number) => {
         items.push({
           question,
           answer: answers[index] || '',
@@ -211,7 +211,7 @@ export default function SegmentedFAQTabsPublished(props: LayoutComponentProps) {
             borderBottom: `1px solid ${borderColor}`
           }}
         >
-          {tabLabels.map((label, index) => (
+          {tabLabels.map((label: string, index: number) => (
             <div
               key={index}
               className="px-6 py-3 font-medium transition-all duration-200"

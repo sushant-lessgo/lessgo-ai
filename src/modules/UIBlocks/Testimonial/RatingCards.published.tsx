@@ -17,7 +17,7 @@ import { CheckmarkIconPublished } from '@/components/published/CheckmarkIconPubl
 // Parse pipe-separated data
 const parsePipeData = (data: string | undefined): string[] => {
   if (!data) return [];
-  return data.split('|').map(item => item.trim()).filter(item => item !== '' && item !== '___REMOVED___');
+  return data.split('|').map((item: string) => item.trim()).filter((item: string) => item !== '' && item !== '___REMOVED___');
 };
 
 // Parse rating value
@@ -68,7 +68,7 @@ const parseReviews = (props: any): Review[] => {
   const verifiedBadges = parsePipeData(props.verified_badges);
   const locations = parsePipeData(props.customer_locations);
 
-  return quotes.map((quote, index) => ({
+  return quotes.map((quote: string, index: number) => ({
     quote,
     customerName: names[index] || 'Anonymous',
     customerTitle: titles[index] || '',
@@ -171,7 +171,7 @@ export default function RatingCardsPublished(props: LayoutComponentProps) {
 
   // Parse trust items
   const trustItemsList = trust_items
-    ? trust_items.split('|').map(item => item.trim()).filter(Boolean)
+    ? trust_items.split('|').map((item: string) => item.trim()).filter(Boolean)
     : [];
 
   return (
@@ -223,7 +223,7 @@ export default function RatingCardsPublished(props: LayoutComponentProps) {
 
         {/* Review Cards Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {reviews.map((review, index) => (
+          {reviews.map((review: Review, index: number) => (
             <div
               key={`review-${index}`}
               className={`bg-white rounded-xl shadow-lg border p-6 ${themeColors.shadow} transition-shadow duration-300`}
@@ -234,8 +234,7 @@ export default function RatingCardsPublished(props: LayoutComponentProps) {
                 <div className="flex items-center space-x-3">
                   <AvatarPublished
                     name={review.customerName}
-                    avatarUrl=""
-                    size="md"
+                    size={48}
                   />
                   <div>
                     <div className="font-semibold text-gray-900">
@@ -338,7 +337,7 @@ export default function RatingCardsPublished(props: LayoutComponentProps) {
 
                 {trustItemsList.length > 0 && (
                   <div className="flex flex-wrap items-center justify-center gap-4">
-                    {trustItemsList.map((item, idx) => (
+                    {trustItemsList.map((item: string, idx: number) => (
                       <div key={idx} className="flex items-center space-x-2">
                         <CheckmarkIconPublished color="#10b981" size={16} />
                         <span className="text-sm" style={{ color: textColors.muted }}>

@@ -30,10 +30,10 @@ export default function AlgorithmExplainerPublished(props: LayoutComponentProps)
   const step_descriptions = props.step_descriptions || '';
 
   // Parse data
-  const stepList = algorithm_steps.split('|').map(s => s.trim()).filter(s => s && s !== '___REMOVED___');
-  const descriptionList = step_descriptions.split('|').map(d => d.trim());
+  const stepList = algorithm_steps.split('|').map((s: string) => s.trim()).filter((s: string) => s && s !== '___REMOVED___');
+  const descriptionList = step_descriptions.split('|').map((d: string) => d.trim());
 
-  const algorithmSteps: StepItem[] = stepList.map((step, index) => ({
+  const algorithmSteps: StepItem[] = stepList.map((step: string, index: number) => ({
     step,
     description: descriptionList[index] || ''
   }));
@@ -130,7 +130,7 @@ export default function AlgorithmExplainerPublished(props: LayoutComponentProps)
           }}
         >
           <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-            {algorithmSteps.map((stepData, index) => (
+            {algorithmSteps.map((stepData: StepItem, index: number) => (
               <div key={`step-${index}`} className="text-center">
                 <div
                   className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-lg"

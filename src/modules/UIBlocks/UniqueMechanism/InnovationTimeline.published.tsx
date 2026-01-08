@@ -29,11 +29,11 @@ const parseTimelineData = (
   descriptions: string,
   icons: string[]
 ): TimelineItem[] => {
-  const dateList = dates.split('|').map(d => d.trim()).filter(d => d && d !== '___REMOVED___');
-  const eventList = events.split('|').map(e => e.trim());
-  const descriptionList = descriptions.split('|').map(d => d.trim());
+  const dateList = dates.split('|').map((d: string) => d.trim()).filter((d: string) => d && d !== '___REMOVED___');
+  const eventList = events.split('|').map((e: string) => e.trim());
+  const descriptionList = descriptions.split('|').map((d: string) => d.trim());
 
-  return dateList.map((date, index) => ({
+  return dateList.map((date: string, index: number) => ({
     date,
     event: eventList[index] || 'Event not provided',
     description: descriptionList[index] || 'Description not provided.',
@@ -152,7 +152,7 @@ export default function InnovationTimelinePublished(props: LayoutComponentProps)
 
         {/* Timeline Items */}
         <div className="space-y-8">
-          {timelineItems.map((item, index) => {
+          {timelineItems.map((item: TimelineItem, index: number) => {
             const [isHovered, setIsHovered] = React.useState(false);
 
             return (
@@ -175,8 +175,8 @@ export default function InnovationTimelinePublished(props: LayoutComponentProps)
                   }}
                 >
                   <IconPublished
-                    value={item.icon}
-                    size="sm"
+                    icon={item.icon}
+                    size={16}
                     className="text-white"
                   />
                 </div>

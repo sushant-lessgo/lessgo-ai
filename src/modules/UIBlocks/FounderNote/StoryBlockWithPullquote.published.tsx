@@ -91,7 +91,7 @@ export default function StoryBlockWithPullquotePublished(props: LayoutComponentP
     props.trust_item_3,
     props.trust_item_4,
     props.trust_item_5
-  ].filter(item => item && item !== '___REMOVED___' && item.trim() !== '');
+  ].filter((item: string) => item && item !== '___REMOVED___' && item.trim() !== '');
 
   // Get text colors
   const textColors = getPublishedTextColors(
@@ -300,7 +300,7 @@ export default function StoryBlockWithPullquotePublished(props: LayoutComponentP
           {trustItems.length > 0 && (
             <div className="max-w-2xl mx-auto">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                {trustItems.map((item, index) => (
+                {trustItems.map((item: string, index: number) => (
                   <div key={index} className="text-center">
                     <div
                       className="text-xl font-bold mb-1"

@@ -100,7 +100,7 @@ const QuoteCardPublished = ({
       <div className="flex items-center space-x-3">
         {/* Icon Badge */}
         <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white" style={{ backgroundColor: '#3B82F6' }}>
-          <IconPublished value={icon} size="md" />
+          <IconPublished icon={icon} size={24} />
         </div>
 
         <div className="flex-1">
@@ -130,10 +130,10 @@ export default function EmotionalQuotesPublished(props: LayoutComponentProps) {
   const trust_items = props.trust_items;
 
   // Parse pipe-separated values
-  const quotes = emotional_quotes.split('|').map(q => q.trim()).filter(Boolean);
-  const attributions = quote_attributions.split('|').map(a => a.trim()).filter(Boolean);
-  const categories = quote_categories.split('|').map(c => c.trim()).filter(Boolean);
-  const trustItemsList = trust_items ? trust_items.split('|').map(t => t.trim()).filter(Boolean) : [];
+  const quotes = emotional_quotes.split('|').map((q: string) => q.trim()).filter(Boolean);
+  const attributions = quote_attributions.split('|').map((a: string) => a.trim()).filter(Boolean);
+  const categories = quote_categories.split('|').map((c: string) => c.trim()).filter(Boolean);
+  const trustItemsList = trust_items ? trust_items.split('|').map((t: string) => t.trim()).filter(Boolean) : [];
 
   // Get category icons
   const icons = [
@@ -145,7 +145,7 @@ export default function EmotionalQuotesPublished(props: LayoutComponentProps) {
   ];
 
   // Combine data
-  const quoteData = quotes.map((quote, index) => ({
+  const quoteData = quotes.map((quote: string, index: number) => ({
     text: quote,
     attribution: attributions[index] || 'Anonymous Business Owner',
     category: categories[index] || 'Business Challenge',
@@ -215,7 +215,7 @@ export default function EmotionalQuotesPublished(props: LayoutComponentProps) {
 
         {/* Quote Cards Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-          {quoteData.map((quote, index) => (
+          {quoteData.map((quote: { text: string; attribution: string; category: string; icon: string }, index: number) => (
             <QuoteCardPublished
               key={index}
               quote={quote.text}
@@ -287,7 +287,7 @@ export default function EmotionalQuotesPublished(props: LayoutComponentProps) {
 
             {trustItemsList.length > 0 && (
               <div className="flex flex-wrap justify-center gap-6 items-center text-sm">
-                {trustItemsList.map((item, index) => (
+                {trustItemsList.map((item: string, index: number) => (
                   <div key={index} className="flex items-center space-x-2">
                     <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />

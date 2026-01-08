@@ -43,7 +43,7 @@ export default function LogoWallPublished(props: LayoutComponentProps) {
 
   // Parse company data
   const parseCompanyNames = (names: string): string[] => {
-    return names.split('|').map(n => n.trim()).filter(n => n && n !== '___REMOVED___');
+    return names.split('|').map((n: string) => n.trim()).filter((n: string) => n && n !== '___REMOVED___');
   };
 
   const parseLogoUrls = (urlsJson: string): Record<string, string> => {
@@ -141,7 +141,7 @@ export default function LogoWallPublished(props: LayoutComponentProps) {
 
         {/* Company Logos Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-          {companies.map((company, index) => (
+          {companies.map((company: CompanyLogo, index: number) => (
             <div
               key={`company-${index}`}
               className="p-6 bg-white rounded-lg border hover:shadow-md transition-all duration-300 flex flex-col items-center justify-center min-h-[120px]"

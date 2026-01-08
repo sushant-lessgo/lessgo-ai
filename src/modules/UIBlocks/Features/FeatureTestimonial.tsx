@@ -273,7 +273,8 @@ const FeatureCard = React.memo(({
   sectionBackground,
   blockContent,
   onRemove,
-  handleImageToolbar
+  handleImageToolbar,
+  theme
 }: {
   title: string;
   description: string;

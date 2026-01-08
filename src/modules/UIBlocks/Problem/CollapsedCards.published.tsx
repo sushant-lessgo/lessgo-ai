@@ -51,13 +51,13 @@ export default function CollapsedCardsPublished(props: LayoutComponentProps) {
   ];
 
   // Parse all arrays
-  const titleList = problem_titles.split('|').map(t => t.trim()).filter(t => t && t !== '___REMOVED___');
-  const descriptionList = problem_descriptions.split('|').map(d => d.trim()).filter(d => d && d !== '___REMOVED___');
-  const impactList = problem_impacts ? problem_impacts.split('|').map(i => i.trim()) : [];
-  const solutionList = solution_hints ? solution_hints.split('|').map(s => s.trim()) : [];
+  const titleList = problem_titles.split('|').map((t: string) => t.trim()).filter((t: string) => t && t !== '___REMOVED___');
+  const descriptionList = problem_descriptions.split('|').map((d: string) => d.trim()).filter((d: string) => d && d !== '___REMOVED___');
+  const impactList = problem_impacts ? problem_impacts.split('|').map((i: string) => i.trim()) : [];
+  const solutionList = solution_hints ? solution_hints.split('|').map((s: string) => s.trim()) : [];
 
   // Build problem cards array
-  const problemCards: ProblemCard[] = titleList.map((title, index) => ({
+  const problemCards: ProblemCard[] = titleList.map((title: string, index: number) => ({
     title,
     description: descriptionList[index] || '',
     impact: impactList[index] || '',
@@ -67,7 +67,7 @@ export default function CollapsedCardsPublished(props: LayoutComponentProps) {
 
   // Parse trust items
   const trustItemsList = trust_items
-    ? trust_items.split('|').map(item => item.trim()).filter(Boolean)
+    ? trust_items.split('|').map((item: string) => item.trim()).filter(Boolean)
     : [];
 
   // Detect theme
@@ -170,7 +170,7 @@ export default function CollapsedCardsPublished(props: LayoutComponentProps) {
 
         {/* Problem Cards - All Expanded */}
         <div className="space-y-4 mb-8">
-          {problemCards.map((problem, index) => (
+          {problemCards.map((problem: ProblemCard, index: number) => (
             <div
               key={`problem-${index}`}
               className="group bg-white rounded-xl border-2 shadow-xl overflow-hidden"
@@ -190,8 +190,8 @@ export default function CollapsedCardsPublished(props: LayoutComponentProps) {
                     }}
                   >
                     <IconPublished
-                      value={problem.icon}
-                      size="lg"
+                      icon={problem.icon}
+                      size={32}
                       className="text-2xl"
                     />
                   </div>
@@ -335,7 +335,7 @@ export default function CollapsedCardsPublished(props: LayoutComponentProps) {
 
             {trustItemsList.length > 0 && (
               <div className="flex flex-wrap justify-center gap-6">
-                {trustItemsList.map((item, index) => (
+                {trustItemsList.map((item: string, index: number) => (
                   <div key={index} className="flex items-center space-x-2">
                     <svg
                       className="w-5 h-5 flex-shrink-0"

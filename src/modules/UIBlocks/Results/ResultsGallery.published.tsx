@@ -107,7 +107,7 @@ export default function ResultsGalleryPublished(props: LayoutComponentProps) {
 
         {/* 2x2 Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {images.map((img, idx) => (
+          {images.map((img: { url: string; caption: string }, idx: number) => (
             <div key={idx} className="space-y-3">
               <img
                 src={img.url}

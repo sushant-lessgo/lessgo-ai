@@ -33,7 +33,7 @@ export default function CTAWithFormFieldPublished(props: LayoutComponentProps) {
     props.benefit_3,
     props.benefit_4,
     props.benefit_5
-  ].filter(b => b && b !== '___REMOVED___' && b.trim() !== '');
+  ].filter((b: string) => b && b !== '___REMOVED___' && b.trim() !== '');
 
   const trustItems = [
     props.trust_item_1,
@@ -41,7 +41,7 @@ export default function CTAWithFormFieldPublished(props: LayoutComponentProps) {
     props.trust_item_3,
     props.trust_item_4,
     props.trust_item_5
-  ].filter(t => t && t !== '___REMOVED___' && t.trim() !== '');
+  ].filter((t: string) => t && t !== '___REMOVED___' && t.trim() !== '');
 
   // Colors
   const textColors = getPublishedTextColors(backgroundType || 'secondary', theme, sectionBackgroundCSS);
@@ -69,7 +69,7 @@ export default function CTAWithFormFieldPublished(props: LayoutComponentProps) {
             {/* Benefits */}
             {benefits.length > 0 && (
               <div className="space-y-3">
-                {benefits.map((benefit, index) => (
+                {benefits.map((benefit: string, index: number) => (
                   <div key={index} className="flex items-center space-x-3">
                     <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 bg-green-500/15 ring-1 ring-green-500/25">
                       <CheckmarkIconPublished color="#10b981" size={14} />
@@ -99,7 +99,7 @@ export default function CTAWithFormFieldPublished(props: LayoutComponentProps) {
             {trustItems.length > 0 && (
               <div className="mt-6 pt-6 border-t border-gray-200">
                 <div className="flex items-center justify-center space-x-4 text-sm flex-wrap gap-y-2">
-                  {trustItems.map((item, index) => (
+                  {trustItems.map((item: string, index: number) => (
                     <div key={index} className="flex items-center space-x-2">
                       <CheckmarkIconPublished color="#10b981" size={16} />
                       <span style={{ color: textColors.muted, fontSize: '0.875rem' }}>{item}</span>

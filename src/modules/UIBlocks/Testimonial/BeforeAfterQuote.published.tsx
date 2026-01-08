@@ -16,7 +16,7 @@ import { CTAButtonPublished } from '@/components/published/CTAButtonPublished';
 // Helper: Parse pipe-separated data
 const parsePipeData = (data: string | undefined): string[] => {
   if (!data) return [];
-  return data.split('|').map(item => item.trim()).filter(item => item !== '' && item !== '___REMOVED___');
+  return data.split('|').map((item: string) => item.trim()).filter((item: string) => item !== '' && item !== '___REMOVED___');
 };
 
 // Helper: Parse JSON avatar URLs
@@ -93,17 +93,17 @@ export default function BeforeAfterQuotePublished(props: LayoutComponentProps) {
     props.before_icon_2,
     props.before_icon_3,
     props.before_icon_4
-  ].filter(i => i && i !== '___REMOVED___');
+  ].filter((i: string) => i && i !== '___REMOVED___');
 
   const afterIcons = [
     props.after_icon_1,
     props.after_icon_2,
     props.after_icon_3,
     props.after_icon_4
-  ].filter(i => i && i !== '___REMOVED___');
+  ].filter((i: string) => i && i !== '___REMOVED___');
 
   // Build transformations (limit 4)
-  const transformations = beforeSituations.slice(0, 4).map((before, index) => ({
+  const transformations = beforeSituations.slice(0, 4).map((before: string, index: number) => ({
     before,
     after: afterOutcomes[index] || '',
     quote: quotes[index] || '',
@@ -162,7 +162,7 @@ export default function BeforeAfterQuotePublished(props: LayoutComponentProps) {
 
         {/* Transformations Grid */}
         <div className="grid lg:grid-cols-2 gap-8 mb-12">
-          {transformations.map((transformation, index) => (
+          {transformations.map((transformation: { before: string; after: string; quote: string; name: string; title: string; avatar: string; beforeIcon: string; afterIcon: string }, index: number) => (
             <div
               key={index}
               className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100"

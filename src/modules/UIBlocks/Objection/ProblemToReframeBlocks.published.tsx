@@ -190,7 +190,7 @@ export default function ProblemToReframeBlocksPublished(props: LayoutComponentPr
 
         {/* Problem/Reframe Blocks Grid */}
         <div className="space-y-8">
-          {problemReframePairs.map((pair, index) => (
+          {problemReframePairs.map((pair: ProblemReframePair, index: number) => (
             <div key={index} className="relative grid lg:grid-cols-2 gap-8 items-center">
               {/* Problem Side */}
               <div
@@ -219,7 +219,7 @@ export default function ProblemToReframeBlocksPublished(props: LayoutComponentPr
                       style={{ background: colors.problemIconBg }}
                       className="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center mt-1"
                     >
-                      <IconPublished value={problem_icon} className="text-2xl" />
+                      <IconPublished icon={problem_icon} className="text-2xl" />
                     </div>
                     <div className="flex-1">
                       <h3
@@ -252,7 +252,7 @@ export default function ProblemToReframeBlocksPublished(props: LayoutComponentPr
                   style={{ background: colors.arrowBg }}
                   className="w-12 h-12 rounded-full flex items-center justify-center"
                 >
-                  <IconPublished value="⬇️" className="text-2xl text-white" />
+                  <IconPublished icon="⬇️" className="text-2xl text-white" />
                 </div>
               </div>
 
@@ -262,7 +262,7 @@ export default function ProblemToReframeBlocksPublished(props: LayoutComponentPr
                   style={{ background: colors.arrowBg }}
                   className="w-16 h-16 rounded-full flex items-center justify-center"
                 >
-                  <IconPublished value={arrow_icon} className="text-3xl text-white" />
+                  <IconPublished icon={arrow_icon} className="text-3xl text-white" />
                 </div>
               </div>
 
@@ -294,8 +294,7 @@ export default function ProblemToReframeBlocksPublished(props: LayoutComponentPr
                       className="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center mt-1"
                     >
                       <IconPublished
-                        value={reframe_icon}
-                        style={{ color: colors.reframeIconText }}
+                        icon={reframe_icon} color={colors.reframeIconText}
                         className="text-2xl"
                       />
                     </div>
@@ -365,11 +364,10 @@ export default function ProblemToReframeBlocksPublished(props: LayoutComponentPr
 
             {benefits.length > 0 && (
               <div className="flex flex-wrap justify-center gap-6 mt-6">
-                {benefits.map((benefit, index) => (
+                {benefits.map((benefit: Benefit, index: number) => (
                   <div key={index} className="flex items-center space-x-2">
                     <IconPublished
-                      value={benefit.icon}
-                      style={{ color: colors.reframeIconText }}
+                      icon={benefit.icon} color={colors.reframeIconText}
                       className="text-base"
                     />
                     <span style={{ color: textColors.body }}>{benefit.label}</span>

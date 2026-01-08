@@ -44,10 +44,10 @@ export default function IconGridPublished(props: LayoutComponentProps) {
   const icons = [icon_1, icon_2, icon_3, icon_4, icon_5, icon_6, icon_7, icon_8, icon_9];
 
   // Parse features
-  const titleList = feature_titles.split('|').map(t => t.trim()).filter(t => t && t !== '___REMOVED___');
-  const descriptionList = feature_descriptions.split('|').map(d => d.trim()).filter(d => d && d !== '___REMOVED___');
+  const titleList = feature_titles.split('|').map((t: string) => t.trim()).filter((t: string) => t && t !== '___REMOVED___');
+  const descriptionList = feature_descriptions.split('|').map((d: string) => d.trim()).filter((d: string) => d && d !== '___REMOVED___');
 
-  const features: Feature[] = titleList.map((title, index) => ({
+  const features: Feature[] = titleList.map((title: string, index: number) => ({
     title,
     description: descriptionList[index] || 'Feature description not provided.',
     icon: icons[index] || '⭐'
@@ -134,7 +134,7 @@ export default function IconGridPublished(props: LayoutComponentProps) {
 
         {/* Features Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {features.map((feature, index) => (
+          {features.map((feature: Feature, index: number) => (
             <div
               key={`feature-${index}`}
               className="group p-6 rounded-xl border hover:shadow-lg transition-all duration-300"
@@ -153,8 +153,8 @@ export default function IconGridPublished(props: LayoutComponentProps) {
                   }}
                 >
                   <IconPublished
-                    value={feature.icon}
-                    size="md"
+                    icon={feature.icon}
+                    size={24}
                     className="text-2xl"
                   />
                 </div>

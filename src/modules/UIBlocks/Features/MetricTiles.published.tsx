@@ -43,10 +43,10 @@ export default function MetricTilesPublished(props: LayoutComponentProps) {
   const roi_description = props.roi_description || '';
 
   // Parse pipe-separated data
-  const titles = (props.feature_titles || '').split('|').map(t => t.trim()).filter(t => t && t !== '___REMOVED___');
-  const metrics = (props.feature_metrics || '').split('|').map(m => m.trim()).filter(m => m && m !== '___REMOVED___');
-  const labels = (props.metric_labels || '').split('|').map(l => l.trim()).filter(l => l && l !== '___REMOVED___');
-  const descriptions = (props.feature_descriptions || '').split('|').map(d => d.trim()).filter(d => d && d !== '___REMOVED___');
+  const titles = (props.feature_titles || '').split('|').map((t: string) => t.trim()).filter((t: string) => t && t !== '___REMOVED___');
+  const metrics = (props.feature_metrics || '').split('|').map((m: string) => m.trim()).filter((m: string) => m && m !== '___REMOVED___');
+  const labels = (props.metric_labels || '').split('|').map((l: string) => l.trim()).filter((l: string) => l && l !== '___REMOVED___');
+  const descriptions = (props.feature_descriptions || '').split('|').map((d: string) => d.trim()).filter((d: string) => d && d !== '___REMOVED___');
 
   // Extract icons (4 slots)
   const icons = [
@@ -57,7 +57,7 @@ export default function MetricTilesPublished(props: LayoutComponentProps) {
   ];
 
   // Build metric tiles array
-  const metricTiles: MetricTileData[] = titles.map((title, idx) => ({
+  const metricTiles: MetricTileData[] = titles.map((title: string, idx: number) => ({
     title,
     metric: metrics[idx] || '',
     label: labels[idx] || '',
@@ -143,7 +143,7 @@ export default function MetricTilesPublished(props: LayoutComponentProps) {
   const bodyLgTypography = getPublishedTypographyStyles('body-lg', theme);
 
   // Trust items
-  const trustList = trust_items ? trust_items.split('|').map(item => item.trim()).filter(Boolean) : [];
+  const trustList = trust_items ? trust_items.split('|').map((item: string) => item.trim()).filter(Boolean) : [];
 
   return (
     <SectionWrapperPublished
@@ -190,7 +190,7 @@ export default function MetricTilesPublished(props: LayoutComponentProps) {
                                    'repeat(auto-fit, minmax(240px, 1fr))'
             }}
           >
-            {metricTiles.map((tile, index) => (
+            {metricTiles.map((tile: MetricTileData, index: number) => (
               <div
                 key={index}
                 className="bg-white rounded-xl p-8 border border-gray-100 hover:shadow-xl transition-all duration-300 h-full flex flex-col"
@@ -294,7 +294,7 @@ export default function MetricTilesPublished(props: LayoutComponentProps) {
               </h3>
 
               <div className="grid md:grid-cols-3 gap-8">
-                {roiMetrics.map((item, index) => (
+                {roiMetrics.map((item: ROIMetric, index: number) => (
                   <div key={index} className="text-center">
                     <div
                       className="text-4xl font-bold mb-2"

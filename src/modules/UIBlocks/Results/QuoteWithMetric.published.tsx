@@ -42,14 +42,14 @@ export default function QuoteWithMetricPublished(props: LayoutComponentProps) {
   const metric_labels = props.metric_labels || '';
   const metric_values = props.metric_values || '';
 
-  const quoteList = quotes.split('|').map(q => q.trim()).filter(q => q && q !== '___REMOVED___');
-  const authorList = authors.split('|').map(a => a.trim());
-  const companyList = companies.split('|').map(c => c.trim());
-  const roleList = roles.split('|').map(r => r.trim());
-  const metricLabelList = metric_labels.split('|').map(m => m.trim());
-  const metricValueList = metric_values.split('|').map(m => m.trim());
+  const quoteList = quotes.split('|').map((q: string) => q.trim()).filter((q: string) => q && q !== '___REMOVED___');
+  const authorList = authors.split('|').map((a: string) => a.trim());
+  const companyList = companies.split('|').map((c: string) => c.trim());
+  const roleList = roles.split('|').map((r: string) => r.trim());
+  const metricLabelList = metric_labels.split('|').map((m: string) => m.trim());
+  const metricValueList = metric_values.split('|').map((m: string) => m.trim());
 
-  const quoteMetrics: QuoteMetric[] = quoteList.map((quote, idx) => ({
+  const quoteMetrics: QuoteMetric[] = quoteList.map((quote: string, idx: number) => ({
     id: `quote-${idx}`,
     quote,
     author: authorList[idx] || 'Anonymous',
@@ -61,7 +61,7 @@ export default function QuoteWithMetricPublished(props: LayoutComponentProps) {
 
   // Get avatar initials
   const getAvatarInitials = (name: string): string => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    return name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
   // Get avatar color (consistent with base component)
@@ -166,7 +166,7 @@ export default function QuoteWithMetricPublished(props: LayoutComponentProps) {
 
         {/* Quotes Grid */}
         <div className={`grid gap-8 ${gridCols}`}>
-          {quoteMetrics.map((quoteMetric, idx) => (
+          {quoteMetrics.map((quoteMetric: QuoteMetric, idx: number) => (
             <div
               key={quoteMetric.id}
               className="relative bg-white rounded-2xl border overflow-hidden transition-all duration-300"
@@ -181,11 +181,7 @@ export default function QuoteWithMetricPublished(props: LayoutComponentProps) {
                 <div className="mb-6">
                   <IconPublished
                     icon={quote_icon}
-                    size={40}
-                    style={{
-                      color: accentColors.quoteIcon,
-                      opacity: 0.2
-                    }}
+                    size={40} color={accentColors.quoteIcon}
                   />
                 </div>
 
@@ -200,10 +196,6 @@ export default function QuoteWithMetricPublished(props: LayoutComponentProps) {
                   <AvatarPublished
                     name={quoteMetric.author}
                     size={48}
-                    style={{
-                      backgroundColor: getAvatarColor(quoteMetric.author),
-                      color: '#ffffff'
-                    }}
                   />
 
                   {/* Author Details */}
@@ -270,11 +262,7 @@ export default function QuoteWithMetricPublished(props: LayoutComponentProps) {
             >
               <IconPublished
                 icon={credibility_icon}
-                size={18}
-                style={{
-                  color: '#059669',
-                  marginRight: '0.5rem'
-                }}
+                size={18} color={'#059669'}
               />
               <span style={{ fontWeight: 500 }}>{footer_text}</span>
             </div>

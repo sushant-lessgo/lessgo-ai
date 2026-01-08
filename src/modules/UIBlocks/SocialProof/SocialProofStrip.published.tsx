@@ -40,9 +40,9 @@ export default function SocialProofStripPublished(props: LayoutComponentProps) {
 
   // Parse proof stats
   const parseProofStats = (stats: string, labels: string): ProofStat[] => {
-    const statList = stats.split('|').map(s => s.trim()).filter(s => s && s !== '___REMOVED___');
-    const labelList = labels.split('|').map(l => l.trim()).filter(l => l);
-    return statList.map((value, index) => ({
+    const statList = stats.split('|').map((s: string) => s.trim()).filter((s: string) => s && s !== '___REMOVED___');
+    const labelList = labels.split('|').map((l: string) => l.trim()).filter((l: string) => l);
+    return statList.map((value: string, index: number) => ({
       value,
       label: labelList[index] || `Metric ${index + 1}`
     }));
@@ -50,7 +50,7 @@ export default function SocialProofStripPublished(props: LayoutComponentProps) {
 
   // Parse company names
   const parseCompanyNames = (names: string): string[] => {
-    return names.split('|').map(n => n.trim()).filter(n => n && n !== '___REMOVED___');
+    return names.split('|').map((n: string) => n.trim()).filter((n: string) => n && n !== '___REMOVED___');
   };
 
   // Parse logo URLs
@@ -141,7 +141,7 @@ export default function SocialProofStripPublished(props: LayoutComponentProps) {
         {/* Stats Section */}
         {stats.length > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
-            {stats.slice(0, 4).map((stat, index) => (
+            {stats.slice(0, 4).map((stat: ProofStat, index: number) => (
               <div key={`stat-${index}`} className="text-center">
                 <div
                   className="text-3xl font-bold mb-1"
@@ -181,7 +181,7 @@ export default function SocialProofStripPublished(props: LayoutComponentProps) {
               Trusted by industry leaders
             </div>
             <div className="flex flex-wrap items-center justify-center gap-4">
-              {companies.slice(0, 8).map((company, index) => (
+              {companies.slice(0, 8).map((company: CompanyLogo, index: number) => (
                 <div
                   key={`company-${index}`}
                   className="flex items-center justify-center px-4 py-2 backdrop-blur-sm rounded-lg border transition-all duration-300"

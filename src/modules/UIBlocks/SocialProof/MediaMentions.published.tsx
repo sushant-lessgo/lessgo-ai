@@ -26,11 +26,11 @@ export default function MediaMentionsPublished(props: LayoutComponentProps) {
 
   // Parse data (inline functions, no hooks)
   const parseOutlets = (outlets: string): string[] => {
-    return outlets.split('|').map(n => n.trim()).filter(n => n && n !== '___REMOVED___');
+    return outlets.split('|').map((n: string) => n.trim()).filter((n: string) => n && n !== '___REMOVED___');
   };
 
   const parseQuotes = (quotes: string): string[] => {
-    return quotes.split('|').map(q => q.trim()).filter(q => q && q !== '___REMOVED___');
+    return quotes.split('|').map((q: string) => q.trim()).filter((q: string) => q && q !== '___REMOVED___');
   };
 
   const parseLogoUrls = (urlsJson: string): Record<string, string> => {
@@ -114,7 +114,7 @@ export default function MediaMentionsPublished(props: LayoutComponentProps) {
 
         {/* Media Outlet Logos Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6 mb-16">
-          {outlets.map((outletName, index) => (
+          {outlets.map((outletName: string, index: number) => (
             <div
               key={`outlet-${index}`}
               className="flex flex-col items-center space-y-3 p-6 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/10 transition-all duration-300"
@@ -141,7 +141,7 @@ export default function MediaMentionsPublished(props: LayoutComponentProps) {
         {/* Testimonial Quotes */}
         {quotes.length > 0 && (
           <div className="grid md:grid-cols-3 gap-8">
-            {quotes.map((quote, index) => (
+            {quotes.map((quote: string, index: number) => (
               <div
                 key={`quote-${index}`}
                 className="text-center p-6 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10"

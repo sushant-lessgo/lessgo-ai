@@ -91,7 +91,7 @@ export default function CarouselPublished(props: LayoutComponentProps) {
   const h3Typography = getPublishedTypographyStyles('h3', theme);
 
   // Trust indicators
-  const trustList = trust_items ? trust_items.split('|').map(item => item.trim()).filter(Boolean) : [];
+  const trustList = trust_items ? trust_items.split('|').map((item: string) => item.trim()).filter(Boolean) : [];
 
   return (
     <SectionWrapperPublished
@@ -129,7 +129,7 @@ export default function CarouselPublished(props: LayoutComponentProps) {
         {/* Features Grid */}
         {features.length > 0 && (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
+            {features.map((feature: Feature, index: number) => (
               <div key={index} className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
                 {/* Feature Tag */}
                 {feature.tag && (

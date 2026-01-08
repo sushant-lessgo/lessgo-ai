@@ -162,7 +162,7 @@ export default function QuoteBackedAnswersPublished(props: LayoutComponentProps)
 
         {/* Quotes Grid */}
         <div className="grid lg:grid-cols-2 gap-8">
-          {quotes.map((quoteItem, index) => (
+          {quotes.map((quoteItem: Quote, index: number) => (
             <div key={index} className="relative">
               {/* Quote Card */}
               <div

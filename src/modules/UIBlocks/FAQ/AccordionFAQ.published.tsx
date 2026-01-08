@@ -61,10 +61,10 @@ export default function AccordionFAQPublished(props: LayoutComponentProps) {
 
   // Fallback to legacy format if no individual items found
   if (faqItems.length === 0 && questions_legacy) {
-    const questionList = questions_legacy.split('|').map(q => q.trim()).filter(q => q && q !== '___REMOVED___');
-    const answerList = answers_legacy ? answers_legacy.split('|').map(a => a.trim()) : [];
+    const questionList = questions_legacy.split('|').map((q: string) => q.trim()).filter((q: string) => q && q !== '___REMOVED___');
+    const answerList = answers_legacy ? answers_legacy.split('|').map((a: string) => a.trim()) : [];
 
-    questionList.forEach((question, index) => {
+    questionList.forEach((question: string, index: number) => {
       faqItems.push({
         question,
         answer: (answerList[index] && answerList[index] !== '___REMOVED___') ? answerList[index] : 'Answer not provided.'

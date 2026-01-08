@@ -202,6 +202,20 @@ const StatIcon = ({ label, index }: { label: string, index: number }) => {
   return getIcon(label, index);
 };
 
+// Type definitions for color objects
+type StatCardColors = {
+  bg: string;
+  border: string;
+  borderHover: string;
+  shadow: string;
+};
+
+type IconColors = {
+  bg: string;
+  bgHover: string;
+  text: string;
+};
+
 // Individual Stat Block
 const StatBlock = ({
   stat,
@@ -224,8 +238,8 @@ const StatBlock = ({
   mode: 'edit' | 'preview';
   sectionId: string;
   theme: UIBlockTheme;
-  cardColors: ReturnType<typeof getStatCardColors>;
-  iconColors: ReturnType<typeof getIconColors>;
+  cardColors: StatCardColors;
+  iconColors: IconColors;
   onValueEdit: (index: number, value: string) => void;
   onLabelEdit: (index: number, value: string) => void;
   onDescriptionEdit: (index: number, value: string) => void;

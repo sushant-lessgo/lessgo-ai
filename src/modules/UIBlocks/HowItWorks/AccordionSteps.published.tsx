@@ -43,11 +43,11 @@ export default function AccordionStepsPublished(props: LayoutComponentProps) {
   const tech_specs_description = props.tech_specs_description || 'Built for enterprise requirements with comprehensive security, scalability, and integration capabilities';
 
   // Parse steps
-  const titleList = step_titles.split('|').map(t => t.trim()).filter(t => t && t !== '___REMOVED___');
-  const descriptionList = step_descriptions.split('|').map(d => d.trim()).filter(d => d && d !== '___REMOVED___');
-  const detailsList = step_details.split('|').map(d => d.trim()).filter(d => d && d !== '___REMOVED___');
+  const titleList = step_titles.split('|').map((t: string) => t.trim()).filter((t: string) => t && t !== '___REMOVED___');
+  const descriptionList = step_descriptions.split('|').map((d: string) => d.trim()).filter((d: string) => d && d !== '___REMOVED___');
+  const detailsList = step_details.split('|').map((d: string) => d.trim()).filter((d: string) => d && d !== '___REMOVED___');
 
-  const steps: Step[] = titleList.map((title, index) => ({
+  const steps: Step[] = titleList.map((title: string, index: number) => ({
     title,
     description: descriptionList[index] || '',
     details: detailsList[index] || ''
@@ -147,7 +147,7 @@ export default function AccordionStepsPublished(props: LayoutComponentProps) {
 
         {/* Steps - All Expanded */}
         <div className="space-y-4">
-          {steps.map((step, index) => (
+          {steps.map((step: Step, index: number) => (
             <div
               key={`step-${index}`}
               className="border rounded-lg overflow-hidden shadow-md"

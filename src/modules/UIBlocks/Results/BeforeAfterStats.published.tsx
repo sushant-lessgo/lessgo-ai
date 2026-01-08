@@ -31,12 +31,12 @@ export default function BeforeAfterStatsPublished(props: LayoutComponentProps) {
   const improvement_icon = props.improvement_icon || '📈';
 
   // Parse pipe-separated data
-  const metricList = stat_metrics.split('|').map(m => m.trim()).filter(m => m && m !== '___REMOVED___');
-  const beforeList = stat_before.split('|').map(b => b.trim());
-  const afterList = stat_after.split('|').map(a => a.trim());
-  const improvementList = stat_improvements.split('|').map(i => i.trim());
+  const metricList = stat_metrics.split('|').map((m: string) => m.trim()).filter((m: string) => m && m !== '___REMOVED___');
+  const beforeList = stat_before.split('|').map((b: string) => b.trim());
+  const afterList = stat_after.split('|').map((a: string) => a.trim());
+  const improvementList = stat_improvements.split('|').map((i: string) => i.trim());
 
-  const statComparisons = metricList.map((metric, index) => ({
+  const statComparisons = metricList.map((metric: string, index: number) => ({
     metric,
     before: beforeList[index] || '0',
     after: afterList[index] || '0',
@@ -159,7 +159,7 @@ export default function BeforeAfterStatsPublished(props: LayoutComponentProps) {
 
         {/* Stats Grid */}
         <div className={`grid gap-8 ${gridCols} mx-auto`}>
-          {statComparisons.map((stat, idx) => (
+          {statComparisons.map((stat: { metric: string; before: string; after: string; improvement: string }, idx: number) => (
             <div
               key={idx}
               className="p-8 bg-white rounded-2xl"

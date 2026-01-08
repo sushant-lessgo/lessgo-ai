@@ -44,7 +44,7 @@ export default function TwoColumnFAQPublished(props: LayoutComponentProps) {
 
   // Helper function to get column FAQ items
   const getColumnFAQItems = (column: 'left' | 'right') => {
-    const items = [];
+    const items: Array<{question: string; answer: string; index: number}> = [];
 
     // Check individual fields first (preferred)
     for (let i = 1; i <= 3; i++) {
@@ -68,10 +68,10 @@ export default function TwoColumnFAQPublished(props: LayoutComponentProps) {
       const questionsRaw = props[questionsKey];
       const answersRaw = props[answersKey];
 
-      const questions = (typeof questionsRaw === 'string' ? questionsRaw.split('|').map(q => q.trim()).filter(Boolean) : []);
-      const answers = (typeof answersRaw === 'string' ? answersRaw.split('|').map(a => a.trim()).filter(Boolean) : []);
+      const questions = (typeof questionsRaw === 'string' ? questionsRaw.split('|').map((q: string) => q.trim()).filter(Boolean) : []);
+      const answers = (typeof answersRaw === 'string' ? answersRaw.split('|').map((a: string) => a.trim()).filter(Boolean) : []);
 
-      questions.forEach((question, index) => {
+      questions.forEach((question: string, index: number) => {
         items.push({
           question,
           answer: answers[index] || '',

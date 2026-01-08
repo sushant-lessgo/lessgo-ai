@@ -127,7 +127,7 @@ export default function FullNavHeaderPublished(props: LayoutComponentProps) {
           {/* Navigation centered */}
           <div className="flex items-center justify-center flex-1">
             <ul className="flex items-center gap-4 md:gap-6">
-              {navItems.map((navItem, index) => (
+              {navItems.map((navItem: { label: string; link: string }, index: number) => (
                 <li key={index}>
                   <a
                     href={navItem.link}

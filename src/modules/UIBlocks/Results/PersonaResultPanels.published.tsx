@@ -39,13 +39,13 @@ export default function PersonaResultPanelsPublished(props: LayoutComponentProps
   const result_descriptions = props.result_descriptions || '';
   const key_benefits = props.key_benefits || '';
 
-  const personaList = personas.split('|').map(p => p.trim()).filter(p => p && p !== '___REMOVED___');
-  const roleList = roles.split('|').map(r => r.trim());
-  const metricList = result_metrics.split('|').map(m => m.trim());
-  const descList = result_descriptions.split('|').map(d => d.trim());
-  const benefitList = key_benefits.split('|').map(b => b.trim());
+  const personaList = personas.split('|').map((p: string) => p.trim()).filter((p: string) => p && p !== '___REMOVED___');
+  const roleList = roles.split('|').map((r: string) => r.trim());
+  const metricList = result_metrics.split('|').map((m: string) => m.trim());
+  const descList = result_descriptions.split('|').map((d: string) => d.trim());
+  const benefitList = key_benefits.split('|').map((b: string) => b.trim());
 
-  const panels: PersonaPanel[] = personaList.map((persona, idx) => ({
+  const panels: PersonaPanel[] = personaList.map((persona: string, idx: number) => ({
     id: `persona-${idx}`,
     persona,
     role: roleList[idx] || 'Team Member',
@@ -137,9 +137,9 @@ export default function PersonaResultPanelsPublished(props: LayoutComponentProps
 
         {/* Persona Panels Grid */}
         <div className={`grid gap-8 ${gridCols} mx-auto`}>
-          {panels.map((panel, idx) => {
+          {panels.map((panel: PersonaPanel, idx: number) => {
             const colors = getPersonaColors(idx, uiTheme);
-            const benefits = panel.key_benefits.split(',').map(b => b.trim()).filter(b => b);
+            const benefits = panel.key_benefits.split(',').map((b: string) => b.trim()).filter((b: string) => b);
 
             return (
               <div
@@ -200,7 +200,7 @@ export default function PersonaResultPanelsPublished(props: LayoutComponentProps
                       Key Benefits:
                     </h4>
                     <ul className="space-y-2">
-                      {benefits.map((benefit, bidx) => (
+                      {benefits.map((benefit: string, bidx: number) => (
                         <li key={bidx} className="flex items-center space-x-2">
                           <svg
                             className="w-4 h-4 flex-shrink-0"

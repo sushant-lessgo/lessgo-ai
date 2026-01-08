@@ -31,7 +31,7 @@ import { getPublishedTextColors, getPublishedTypographyStyles } from '@/lib/publ
  * Parse customer avatar data from pipe-separated names and JSON URL mapping
  */
 function parseCustomerAvatarData(names: string, urls: string): Array<{ name: string; avatarUrl: string }> {
-  const nameArray = names.split('|').map(n => n.trim()).filter(Boolean);
+  const nameArray = names.split('|').map((n: string) => n.trim()).filter(Boolean);
   let urlMap: Record<string, string> = {};
 
   try {
@@ -240,7 +240,7 @@ export default function SplitScreenPublished(props: LayoutComponentProps) {
     props.trust_item_3,
     props.trust_item_4,
     props.trust_item_5
-  ].filter(item => item && item !== '___REMOVED___' && item.trim() !== '');
+  ].filter((item: string) => item && item !== '___REMOVED___' && item.trim() !== '');
 
   // Parse customer avatar data
   const customerAvatars = parseCustomerAvatarData(customer_names, avatar_urls);
@@ -354,7 +354,6 @@ export default function SplitScreenPublished(props: LayoutComponentProps) {
                       backgroundColor="transparent"
                       textColor={textColors.body}
                       className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 text-lg px-8 py-4 border-2"
-                      style={{ borderColor: textColors.body }}
                     />
                   )}
                 </div>
@@ -362,7 +361,7 @@ export default function SplitScreenPublished(props: LayoutComponentProps) {
                 {/* Trust Indicators */}
                 {trustItems.length > 0 && (
                   <div className="flex flex-wrap items-center gap-3 text-sm">
-                    {trustItems.map((item, i) => (
+                    {trustItems.map((item: string, i: number) => (
                       <div key={i} className="flex items-center space-x-2">
                         <CheckmarkIconPublished color="#10b981" size={16} />
                         <span style={{ color: textColors.muted }}>{item}</span>
@@ -380,7 +379,7 @@ export default function SplitScreenPublished(props: LayoutComponentProps) {
                     <div className="flex items-center space-x-3">
                       {show_customer_avatars && customerAvatars.length > 0 && (
                         <div className="flex -space-x-2">
-                          {customerAvatars.map((customer, i) => (
+                          {customerAvatars.map((customer: { name: string; avatarUrl: string }, i: number) => (
                             <AvatarPublished
                               key={customer.name}
                               imageUrl={customer.avatarUrl}

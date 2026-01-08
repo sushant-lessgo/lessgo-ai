@@ -135,8 +135,8 @@ function PremiumCardPublished({
           }}
         >
           <IconPublished
-            value={placeholderIcon}
-            size="xl"
+            icon={placeholderIcon}
+            size={48}
             className="text-4xl"
           />
         </div>
@@ -223,8 +223,8 @@ function PremiumCardPublished({
               {premiumFeatureIcon && (
                 <div className="mr-2">
                   <IconPublished
-                    value={premiumFeatureIcon}
-                    size="sm"
+                    icon={premiumFeatureIcon}
+                    size={16}
                     className="text-sm"
                   />
                 </div>
@@ -273,8 +273,8 @@ export default function SplitCardPublished(props: LayoutComponentProps) {
   // Parse trust indicators from pipe-separated string
   const trustItemsList = (props.trust_items || '')
     .split('|')
-    .map(item => item.trim())
-    .filter(item => item && item !== '___REMOVED___');
+    .map((item: string) => item.trim())
+    .filter((item: string) => item && item !== '___REMOVED___');
 
   // Detect UIBlock theme
   const uiTheme: UIBlockTheme = props.manualThemeOverride ||
@@ -348,8 +348,8 @@ export default function SplitCardPublished(props: LayoutComponentProps) {
             <div className="text-center lg:hidden">
               <div className="inline-flex items-center space-x-2 bg-white rounded-full shadow-lg px-6 py-3">
                 <IconPublished
-                  value={upgrade_icon}
-                  size="sm"
+                  icon={upgrade_icon}
+                  size={16}
                   className="text-lg text-gray-400"
                 />
                 <TextPublished
@@ -371,8 +371,8 @@ export default function SplitCardPublished(props: LayoutComponentProps) {
             <div className="hidden lg:block absolute -left-8 top-1/2 transform -translate-y-1/2">
               <div className="flex flex-col items-center space-y-2 bg-white rounded-full shadow-lg px-4 py-6">
                 <IconPublished
-                  value={upgrade_icon}
-                  size="md"
+                  icon={upgrade_icon}
+                  size={24}
                   className="text-xl text-gray-400"
                 />
                 <div
@@ -432,7 +432,7 @@ export default function SplitCardPublished(props: LayoutComponentProps) {
                 {/* Trust Indicators - Inline SVG Implementation */}
                 {trustItemsList.length > 0 && (
                   <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
-                    {trustItemsList.map((item, index) => (
+                    {trustItemsList.map((item: string, index: number) => (
                       <div key={index} className="flex items-center space-x-2">
                         <svg
                           className="w-4 h-4 flex-shrink-0"

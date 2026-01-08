@@ -68,7 +68,7 @@ export default function BeforeImageAfterTextPublished(props: LayoutComponentProp
 
   // Parse trust items
   const trustItemsList = trust_items
-    ? trust_items.split('|').map(item => item.trim()).filter(Boolean)
+    ? trust_items.split('|').map((item: string) => item.trim()).filter(Boolean)
     : [];
 
   // Get text colors
@@ -353,7 +353,7 @@ export default function BeforeImageAfterTextPublished(props: LayoutComponentProp
 
             {trustItemsList.length > 0 && (
               <div className="flex flex-wrap justify-center gap-6">
-                {trustItemsList.map((item, index) => (
+                {trustItemsList.map((item: string, index: number) => (
                   <div key={index} className="flex items-center space-x-2">
                     <svg
                       className="w-5 h-5 flex-shrink-0"

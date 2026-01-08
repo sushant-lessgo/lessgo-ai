@@ -154,9 +154,6 @@ export default function CenteredHeadlineCTAPublished(props: LayoutComponentProps
               backgroundColor="transparent"
               textColor={theme.colors?.accentColor || '#3B82F6'}
               className="text-xl px-12 py-6 shadow-2xl hover:shadow-3xl border-2"
-              style={{
-                borderColor: theme.colors?.accentColor || '#3B82F6'
-              }}
             />
           )}
         </div>
@@ -164,7 +161,7 @@ export default function CenteredHeadlineCTAPublished(props: LayoutComponentProps
         {/* Trust Indicators */}
         {trustItems.length > 0 && (
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 mb-8">
-            {trustItems.map((item, index) => (
+            {trustItems.map((item: string, index: number) => (
               <div key={index} className="flex items-center space-x-2">
                 <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
                   style={{

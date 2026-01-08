@@ -18,7 +18,7 @@ import { CheckmarkIconPublished } from '@/components/published/CheckmarkIconPubl
 // Parse pipe-separated data
 const parsePipeData = (data: string | undefined): string[] => {
   if (!data) return [];
-  return data.split('|').map(item => item.trim()).filter(item => item !== '' && item !== '___REMOVED___');
+  return data.split('|').map((item: string) => item.trim()).filter((item: string) => item !== '' && item !== '___REMOVED___');
 };
 
 // Parse rating value
@@ -201,7 +201,7 @@ export default function AvatarCarouselPublished(props: LayoutComponentProps) {
                 <AvatarPublished
                   name={firstTestimonial.name}
                   imageUrl={firstTestimonial.avatar}
-                  size="lg"
+                  size={64}
                 />
               </div>
 
@@ -327,7 +327,7 @@ export default function AvatarCarouselPublished(props: LayoutComponentProps) {
 
               {trustItems.length > 0 && (
                 <div className="flex items-center space-x-4">
-                  {trustItems.map((item, index) => (
+                  {trustItems.map((item: string, index: number) => (
                     <div key={index} className="flex items-center space-x-2">
                       <CheckmarkIconPublished color="#10b981" size={16} />
                       <span className="text-sm" style={{ color: textColors.muted }}>

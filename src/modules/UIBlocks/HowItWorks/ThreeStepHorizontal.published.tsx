@@ -23,10 +23,10 @@ interface StepItem {
 
 // Parse step data from pipe-separated strings (server-safe, no hooks)
 const parseStepData = (titles: string, descriptions: string): StepItem[] => {
-  const titleList = titles.split('|').map(t => t.trim()).filter(t => t && t !== '___REMOVED___');
-  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d && d !== '___REMOVED___');
+  const titleList = titles.split('|').map((t: string) => t.trim()).filter((t: string) => t && t !== '___REMOVED___');
+  const descriptionList = descriptions.split('|').map((d: string) => d.trim()).filter((d: string) => d && d !== '___REMOVED___');
 
-  return titleList.map((title, index) => ({
+  return titleList.map((title: string, index: number) => ({
     id: `step-${index}`,
     title,
     description: descriptionList[index] || 'Step description not provided.'
@@ -272,7 +272,7 @@ export default function ThreeStepHorizontalPublished(props: LayoutComponentProps
 
         {/* Steps Container - Responsive: vertical on mobile, horizontal on desktop */}
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between space-y-12 lg:space-y-0 lg:space-x-8 relative">
-          {stepItems.map((item, index) => (
+          {stepItems.map((item: StepItem, index: number) => (
             <StepCard
               key={item.id}
               item={item}

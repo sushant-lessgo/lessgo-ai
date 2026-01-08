@@ -69,7 +69,7 @@ export default function TestimonialFAQsPublished(props: LayoutComponentProps) {
     return (
       <div className="flex items-center gap-1">
         {Array.from({ length: starCount }, (_, i) => (
-          <IconPublished key={i} value={icon} size="sm" color="#FBBF24" />
+          <IconPublished key={i} icon={icon} size={16} color="#FBBF24" />
         ))}
       </div>
     );
@@ -77,7 +77,7 @@ export default function TestimonialFAQsPublished(props: LayoutComponentProps) {
 
   // Helper function to get testimonial FAQ items
   const getTestimonialFAQItems = () => {
-    const items = [];
+    const items: Array<{question: string; answer: string; customerName: string; customerTitle: string; customerCompany: string; rating: string; index: number}> = [];
 
     // Check individual fields first (preferred)
     for (let i = 1; i <= 3; i++) {
@@ -109,13 +109,13 @@ export default function TestimonialFAQsPublished(props: LayoutComponentProps) {
       const customerTitlesRaw = props.customer_titles;
       const customerCompaniesRaw = props.customer_companies;
 
-      const questions = (typeof questionsRaw === 'string' ? questionsRaw.split('|').map(q => q.trim()).filter(Boolean) : []);
-      const answers = (typeof answersRaw === 'string' ? answersRaw.split('|').map(a => a.trim()).filter(Boolean) : []);
-      const customerNames = (typeof customerNamesRaw === 'string' ? customerNamesRaw.split('|').map(n => n.trim()).filter(Boolean) : []);
-      const customerTitles = (typeof customerTitlesRaw === 'string' ? customerTitlesRaw.split('|').map(t => t.trim()).filter(Boolean) : []);
-      const customerCompanies = (typeof customerCompaniesRaw === 'string' ? customerCompaniesRaw.split('|').map(c => c.trim()).filter(Boolean) : []);
+      const questions = (typeof questionsRaw === 'string' ? questionsRaw.split('|').map((q: string) => q.trim()).filter(Boolean) : []);
+      const answers = (typeof answersRaw === 'string' ? answersRaw.split('|').map((a: string) => a.trim()).filter(Boolean) : []);
+      const customerNames = (typeof customerNamesRaw === 'string' ? customerNamesRaw.split('|').map((n: string) => n.trim()).filter(Boolean) : []);
+      const customerTitles = (typeof customerTitlesRaw === 'string' ? customerTitlesRaw.split('|').map((t: string) => t.trim()).filter(Boolean) : []);
+      const customerCompanies = (typeof customerCompaniesRaw === 'string' ? customerCompaniesRaw.split('|').map((c: string) => c.trim()).filter(Boolean) : []);
 
-      questions.forEach((question, index) => {
+      questions.forEach((question: string, index: number) => {
         items.push({
           question,
           answer: answers[index] || '',
@@ -153,7 +153,7 @@ export default function TestimonialFAQsPublished(props: LayoutComponentProps) {
   const getInitials = (name: string) => {
     return name
       .split(' ')
-      .map(n => n.charAt(0))
+      .map((n: string) => n.charAt(0))
       .join('')
       .toUpperCase() || 'C';
   };

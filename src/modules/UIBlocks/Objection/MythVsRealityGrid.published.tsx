@@ -143,7 +143,7 @@ export default function MythVsRealityGridPublished(props: LayoutComponentProps) 
 
         {/* Myth vs Reality Grid */}
         <div className="space-y-8">
-          {mythRealityPairs.map((pair, index) => (
+          {mythRealityPairs.map((pair: MythRealityPair, index: number) => (
             <div key={index} className="grid md:grid-cols-2 gap-6 lg:gap-8">
               {/* Myth Card */}
               <div
@@ -171,7 +171,7 @@ export default function MythVsRealityGridPublished(props: LayoutComponentProps) 
                       style={{ background: colors.mythIconBg }}
                       className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center mt-1"
                     >
-                      <IconPublished value={myth_icon} className="text-base text-white" />
+                      <IconPublished icon={myth_icon} className="text-base text-white" />
                     </div>
                     <p
                       style={{
@@ -212,7 +212,7 @@ export default function MythVsRealityGridPublished(props: LayoutComponentProps) 
                       style={{ background: colors.realityIconBg }}
                       className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center mt-1"
                     >
-                      <IconPublished value={reality_icon} className="text-base text-white" />
+                      <IconPublished icon={reality_icon} className="text-base text-white" />
                     </div>
                     <p
                       style={{

@@ -42,7 +42,7 @@ const parsePricingData = (props: any): PricingTier[] => {
   const featureHighlights = props.feature_highlights ? props.feature_highlights.split('|').map((fh: string) => fh.trim()) : [];
   const popularTiers = props.popular_tiers ? props.popular_tiers.split('|').map((p: string) => p.trim().toLowerCase() === 'true') : [];
 
-  return names.map((name, index) => ({
+  return names.map((name: string, index: number) => ({
     name,
     price: prices[index] || '$0',
     description: descriptions[index] || '',
@@ -134,7 +134,7 @@ export default function MiniStackedCardsPublished(props: LayoutComponentProps) {
       title: props.plans_feature_3_title || '',
       description: props.plans_feature_3_desc || ''
     }
-  ].filter(f => f.title && f.title !== '___REMOVED___' && f.description && f.description !== '___REMOVED___');
+  ].filter((f) => f.title && f.title !== '___REMOVED___' && f.description && f.description !== '___REMOVED___');
 
   // FAQ items (always show per user decision)
   const faqItems = [
@@ -210,7 +210,7 @@ export default function MiniStackedCardsPublished(props: LayoutComponentProps) {
 
         {/* Mini Pricing Cards */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {pricingTiers.map((tier, index) => (
+          {pricingTiers.map((tier: PricingTier, index: number) => (
             <div
               key={index}
               className="relative bg-white rounded-xl border p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
@@ -298,7 +298,7 @@ export default function MiniStackedCardsPublished(props: LayoutComponentProps) {
 
               {/* Key Features */}
               <div className="space-y-2 mb-4">
-                {tier.features.slice(0, 3).map((feature, featureIndex) => (
+                {tier.features.slice(0, 3).map((feature: string, featureIndex: number) => (
                   <div key={featureIndex} className="flex items-center space-x-2">
                     <div className="w-4 h-4 flex-shrink-0">
                       <CheckmarkIconPublished color={colors.checkmark} size={16} />
@@ -349,7 +349,7 @@ export default function MiniStackedCardsPublished(props: LayoutComponentProps) {
             </h3>
 
             <div className="grid md:grid-cols-3 gap-6">
-              {plansFeatures.map((feature, index) => (
+              {plansFeatures.map((feature: { icon: string; title: string; description: string }, index: number) => (
                 <div key={index} className="text-center">
                   <div
                     className="w-12 h-12 mx-auto mb-4 rounded-full flex items-center justify-center text-2xl"
@@ -400,7 +400,7 @@ export default function MiniStackedCardsPublished(props: LayoutComponentProps) {
             </h3>
 
             <div className="grid md:grid-cols-2 gap-6">
-              {faqItems.map((faq, index) => (
+              {faqItems.map((faq: { question: string; answer: string }, index: number) => (
                 <div key={index}>
                   <h4
                     style={{
@@ -432,7 +432,7 @@ export default function MiniStackedCardsPublished(props: LayoutComponentProps) {
             }}
           >
             <div className="flex flex-wrap justify-center items-center gap-4">
-              {trustItems.map((item, index) => (
+              {trustItems.map((item: string, index: number) => (
                 <div key={index} className="flex items-center space-x-2">
                   <div className="w-5 h-5 flex-shrink-0">
                     <CheckmarkIconPublished color={colors.checkmark} size={20} />
