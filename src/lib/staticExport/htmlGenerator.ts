@@ -65,7 +65,10 @@ export async function generateStaticHTML(
     })
   );
 
-  // 4. Build complete HTML document
+  // 4. Detect if page has forms
+  const hasForms = Boolean(options.content?.forms && Object.keys(options.content.forms).length > 0);
+
+  // 5. Build complete HTML document
   const html = buildHTMLDocument({
     bodyHTML,
     cssVariables,
@@ -76,8 +79,10 @@ export async function generateStaticHTML(
       previewImage: options.previewImage,
       slug: options.slug,
       baseURL: options.baseURL || 'https://lessgo.ai',
+      publishedPageId: options.publishedPageId,
     },
     analyticsOptIn: options.analyticsOptIn || false,
+    hasForms,
   });
 
   // 5. Validate and resolve asset URLs
@@ -175,10 +180,12 @@ function buildHTMLDocument(params: {
     previewImage?: string;
     slug: string;
     baseURL: string;
+    publishedPageId: string;
   };
   analyticsOptIn: boolean;
+  hasForms: boolean;
 }): string {
-  const { bodyHTML, cssVariables, fonts, metadata, analyticsOptIn } = params;
+  const { bodyHTML, cssVariables, fonts, metadata, analyticsOptIn, hasForms } = params;
 
   // Generate Google Fonts URL
   const fontsURL = generateGoogleFontsURL(fonts);
@@ -232,13 +239,13 @@ function buildHTMLDocument(params: {
 <body>
   ${bodyHTML}
 
-  <!-- Placeholder for Phase 4: Form handler -->
-  <!-- <script src="/assets/form.v1.js" defer></script> -->
+  <!-- Phase 4: Form handler (loaded if page has forms) -->
+  ${hasForms ? `<script src="https://lessgo.ai/assets/form.v1.js" defer></script>` : ''}
 
+  <!-- Phase 4: Analytics beacon (opt-in) -->
   ${
     analyticsOptIn
-      ? `<!-- Placeholder for Phase 4: Analytics -->
-  <!-- <script src="/assets/a.v1.js" data-page-id="${metadata.slug}" data-slug="${metadata.slug}" defer></script> -->`
+      ? `<script src="https://lessgo.ai/assets/a.v1.js" data-page-id="${metadata.publishedPageId}" data-slug="${metadata.slug}" defer></script>`
       : ''
   }
 </body>

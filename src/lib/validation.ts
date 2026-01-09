@@ -45,6 +45,7 @@ export const PublishSchema = z.object({
   tokenId: z.string().min(1).max(100).regex(/^[a-zA-Z0-9_-]+$/, 'Invalid token format'),
   inputText: z.string().max(5000).optional(),
   previewImage: z.string().url('Must be a valid URL').optional(),
+  analyticsEnabled: z.boolean().optional(), // Phase 4: Analytics opt-in
 });
 
 // A05: Security Misconfiguration - Rate limiting data

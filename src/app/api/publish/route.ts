@@ -38,7 +38,7 @@ async function publishHandler(req: NextRequest) {
       );
     }
     
-    const { slug, title, content, themeValues, tokenId, inputText, previewImage } = validationResult.data;
+    const { slug, title, content, themeValues, tokenId, inputText, previewImage, analyticsEnabled } = validationResult.data;
 
     // Sanitize title - strip HTML tags for meta/OG image safety
     const cleanTitle = stripHTMLTags(title || '').trim().slice(0, 100) || 'Untitled Page';
@@ -75,6 +75,7 @@ async function publishHandler(req: NextRequest) {
           themeValues: themeValues as any,
           projectId: project?.id || null,
           ...(previewImage !== undefined && { previewImage }),
+          analyticsEnabled: analyticsEnabled || false, // Phase 4
           updatedAt: new Date()
         }
       });
@@ -103,7 +104,8 @@ async function publishHandler(req: NextRequest) {
           content: content as any,
           themeValues: themeValues as any,
           projectId: project?.id || null,
-          previewImage: previewImage || null
+          previewImage: previewImage || null,
+          analyticsEnabled: analyticsEnabled || false, // Phase 4
         }
       });
     }
@@ -194,7 +196,7 @@ async function publishHandler(req: NextRequest) {
         title: cleanTitle,
         description: typeof description === 'string' ? description.slice(0, 160) : cleanTitle.slice(0, 160),
         previewImage,
-        analyticsOptIn: false,
+        analyticsOptIn: analyticsEnabled || false, // Phase 4
         baseURL: baseUrl,
       });
 
@@ -240,6 +242,7 @@ async function publishHandler(req: NextRequest) {
           publishState: 'published',
           currentVersionId: newVersion.id,
           lastPublishAt: new Date(),
+          analyticsEnabled: analyticsEnabled || false, // Phase 4
           htmlContent: '', // Clear legacy field (save DB space)
         },
       });

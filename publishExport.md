@@ -636,3 +636,13 @@ Ship in small increments, test each step:
 4. Database migration for new fields
 5. Blob upload integration
 6. KV setup and routing table
+
+
+----------
+
+ Phase 4.5 (Future) - Deferred Items
+
+ - Blob-hosted shared assets for edge CDN serving
+ - KV queue for raw analytics events (batch processing)
+ - Advanced rate limiting strategies
+ - Bot/spam detection and filtering
