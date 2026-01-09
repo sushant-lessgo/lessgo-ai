@@ -6,13 +6,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { FormRenderer } from './FormRenderer';
+import { InlineFormInput } from './InlineFormInput';
 import { logger } from '@/lib/logger';
 import { useAnalytics } from '@/app/p/[slug]/components/AnalyticsContext';
+import { determineFormPlacement } from '@/utils/formPlacement';
+import { findPrimaryCTASection } from '@/utils/sectionHelpers';
 
 interface ButtonConfig {
   type: 'link' | 'form' | 'link-with-input';
   formId?: string;
   behavior?: 'scrollTo' | 'openModal';
+  ctaType?: 'primary' | 'secondary'; // NEW: CTA type for placement logic
   url?: string;
   inputConfig?: {
     label?: string;
@@ -29,13 +33,29 @@ interface FormConnectedButtonProps {
   userId?: string;
   publishedPageId?: string;
   pageSlug?: string; // For analytics tracking
+  sectionId?: string; // NEW: Current section for placement logic
+  size?: 'small' | 'medium' | 'large'; // NEW: Button size for inline forms
+  variant?: 'primary' | 'secondary'; // NEW: Button variant for inline forms
+  colorTokens?: any; // NEW: Color tokens for styling
 }
 
-export function FormConnectedButton({ buttonConfig, className, children, onClick, userId, publishedPageId, pageSlug }: FormConnectedButtonProps) {
+export function FormConnectedButton({
+  buttonConfig,
+  className,
+  children,
+  onClick,
+  userId,
+  publishedPageId,
+  pageSlug,
+  sectionId,
+  size,
+  variant,
+  colorTokens,
+}: FormConnectedButtonProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [inputError, setInputError] = useState('');
-  const { getFormById } = useEditStore();
+  const { getFormById, sections } = useEditStore();
   const analytics = useAnalytics();
 
   const handleClick = (e: React.MouseEvent) => {
@@ -96,10 +116,19 @@ export function FormConnectedButton({ buttonConfig, className, children, onClick
           if (buttonConfig.behavior === 'openModal') {
             setIsModalOpen(true);
           } else {
-            // Scroll to form
-            const formElement = document.getElementById(`form-${buttonConfig.formId}`);
-            if (formElement) {
-              formElement.scrollIntoView({ behavior: 'smooth' });
+            // Scroll to primary CTA section (where full forms render)
+            const primaryCTASection = findPrimaryCTASection(sections);
+            if (primaryCTASection) {
+              const ctaSectionElement = document.getElementById(`section-${primaryCTASection}`);
+              if (ctaSectionElement) {
+                ctaSectionElement.scrollIntoView({ behavior: 'smooth' });
+              } else {
+                // Fallback: scroll to form ID
+                const formElement = document.getElementById(`form-${buttonConfig.formId}`);
+                if (formElement) {
+                  formElement.scrollIntoView({ behavior: 'smooth' });
+                }
+              }
             }
           }
         }
@@ -108,6 +137,44 @@ export function FormConnectedButton({ buttonConfig, className, children, onClick
   };
 
   const form = buttonConfig?.formId ? getFormById(buttonConfig.formId) : null;
+
+  // NEW: Check if this button should render as inline form
+  if (buttonConfig?.type === 'form' && form && sectionId) {
+    const ctaType = buttonConfig.ctaType || 'primary';
+    const placement = determineFormPlacement(
+      form,
+      ctaType,
+      sectionId,
+      sections,
+      buttonConfig.behavior
+    );
+
+    // Inline forms: Replace button with InlineFormInput
+    if (placement.renderAs === 'inputWithButton') {
+      return (
+        <InlineFormInput
+          form={form}
+          size={size || 'large'}
+          variant={variant || 'primary'}
+          colorTokens={colorTokens}
+          userId={userId}
+          publishedPageId={publishedPageId}
+          pageSlug={pageSlug}
+          sectionId={sectionId}
+          className={className}
+        />
+      );
+    }
+
+    // Invalid form: Render disabled button
+    if (placement.placement === 'invalid') {
+      return (
+        <Button disabled className={className}>
+          {children || 'Configure CTA'}
+        </Button>
+      );
+    }
+  }
 
   return (
     <>

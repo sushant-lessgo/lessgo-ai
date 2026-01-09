@@ -378,6 +378,7 @@ export function createEditStore(tokenId: string) {
               globalSettings: state.globalSettings,
               tokenId: state.tokenId,
               onboardingData: state.onboardingData,
+              forms: state.forms, // Include forms in localStorage persistence
               id: state.id,
               title: state.title,
               lastUpdated: state.lastUpdated,

@@ -14,14 +14,15 @@ export const createFormActions = (
       createdAt: new Date(),
       updatedAt: new Date()
     };
-    
+
     set((state) => {
       if (!state.forms) {
         state.forms = {};
       }
       state.forms[newForm.id] = newForm;
+      state.persistence.isDirty = true;
     });
-    
+
     return newForm.id;
   },
 
@@ -33,6 +34,7 @@ export const createFormActions = (
           ...updates,
           updatedAt: new Date()
         };
+        state.persistence.isDirty = true;
       }
     });
   },
@@ -42,7 +44,7 @@ export const createFormActions = (
       if (state.forms && state.forms[id]) {
         delete state.forms[id];
       }
-      
+
       // Also remove any button links to this form
       Object.keys(state.content).forEach(sectionId => {
         const section = state.content[sectionId];
@@ -54,6 +56,24 @@ export const createFormActions = (
           }
         }
       });
+
+      // Clean up button metadata connections
+      Object.keys(state.content).forEach(sectionId => {
+        const section = state.content[sectionId];
+        if (section?.elements) {
+          Object.entries(section.elements).forEach(([elementKey, element]: [string, any]) => {
+            if (element?.metadata?.buttonConfig?.formId === id) {
+              if (element.metadata.buttonConfig) {
+                element.metadata.buttonConfig.type = 'link';
+                delete element.metadata.buttonConfig.formId;
+                delete element.metadata.buttonConfig.behavior;
+              }
+            }
+          });
+        }
+      });
+
+      state.persistence.isDirty = true;
     });
   },
 
@@ -63,11 +83,12 @@ export const createFormActions = (
       ...field,
       id: `field-${Date.now()}`
     };
-    
+
     set((state) => {
       if (state.forms && state.forms[formId]) {
         state.forms[formId].fields.push(newField);
         state.forms[formId].updatedAt = new Date();
+        state.persistence.isDirty = true;
       }
     });
   },
@@ -82,6 +103,7 @@ export const createFormActions = (
             ...updates
           };
           state.forms[formId].updatedAt = new Date();
+          state.persistence.isDirty = true;
         }
       }
     });
@@ -92,6 +114,7 @@ export const createFormActions = (
       if (state.forms && state.forms[formId]) {
         state.forms[formId].fields = state.forms[formId].fields.filter(f => f.id !== fieldId);
         state.forms[formId].updatedAt = new Date();
+        state.persistence.isDirty = true;
       }
     });
   },
@@ -104,6 +127,7 @@ export const createFormActions = (
         fields.splice(endIndex, 0, removed);
         state.forms[formId].fields = fields;
         state.forms[formId].updatedAt = new Date();
+        state.persistence.isDirty = true;
       }
     });
   },

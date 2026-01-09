@@ -152,7 +152,61 @@ export function createPersistenceActions(set: any, get: any) {
             state.socialMediaConfig = contentToLoad.socialMediaConfig;
             logger.debug('🔗 [SOCIAL-DEBUG] Restored social media config:', state.socialMediaConfig);
           }
-          
+
+          // Restore forms data if available
+          if (contentToLoad && contentToLoad.forms) {
+            const restoredForms: Record<string, any> = {};
+
+            try {
+              const formsData = contentToLoad.forms;
+
+              if (typeof formsData === 'object' && formsData !== null) {
+                Object.entries(formsData).forEach(([formId, form]: [string, any]) => {
+                  if (form && typeof form === 'object' && form.id && Array.isArray(form.fields)) {
+                    restoredForms[formId] = {
+                      ...form,
+                      createdAt: form.createdAt ? new Date(form.createdAt) : new Date(),
+                      updatedAt: form.updatedAt ? new Date(form.updatedAt) : new Date(),
+                    };
+                  }
+                });
+
+                state.forms = restoredForms;
+                logger.debug('✅ Restored forms:', Object.keys(restoredForms).length);
+              }
+            } catch (error) {
+              logger.error('❌ Error restoring forms:', error);
+              state.forms = {};
+            }
+          } else {
+            state.forms = {};
+          }
+
+          // Validate button-form connections
+          if (state.forms && state.content) {
+            const formIds = Object.keys(state.forms);
+            let orphanedConnections = 0;
+
+            Object.keys(state.content).forEach(sectionId => {
+              const section = state.content[sectionId];
+              if (section?.elements) {
+                Object.entries(section.elements).forEach(([elementKey, element]: [string, any]) => {
+                  const buttonConfig = element?.metadata?.buttonConfig;
+                  if (buttonConfig?.type === 'form' && buttonConfig.formId) {
+                    if (!formIds.includes(buttonConfig.formId)) {
+                      orphanedConnections++;
+                      logger.warn(`⚠️ Orphaned button: ${sectionId}.${elementKey} → ${buttonConfig.formId}`);
+                    }
+                  }
+                });
+              }
+            });
+
+            if (orphanedConnections > 0) {
+              logger.warn(`⚠️ Found ${orphanedConnections} orphaned connection(s)`);
+            }
+          }
+
           // Restore meta data
           state.id = apiResponse.tokenId || urlTokenId || '';
           state.title = apiResponse.title || 'Untitled Project';
@@ -208,11 +262,12 @@ export function createPersistenceActions(set: any, get: any) {
         navigationConfig: state.navigationConfig,
         socialMediaConfig: state.socialMediaConfig,
         onboardingData: state.onboardingData,
+        forms: state.forms || {}, // Include forms in export
         lastUpdated: state.lastUpdated,
         version: state.version,
       };
-      
-      
+
+
       return exportData;
     },
 

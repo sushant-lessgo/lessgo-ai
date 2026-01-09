@@ -2,7 +2,14 @@
 
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { FormRenderer } from './FormRenderer';
+import { InlineFormInput } from './InlineFormInput';
 import type { MVPForm } from '@/types/core/forms';
+import {
+  determineFormPlacement,
+  shouldRenderInline,
+  shouldRenderFullForm,
+} from '@/utils/formPlacement';
+import { getSectionType } from '@/utils/sectionHelpers';
 
 interface FormPlacementRendererProps {
   sectionId: string;
@@ -10,31 +17,75 @@ interface FormPlacementRendererProps {
   userId?: string;
   publishedPageId?: string;
   pageSlug?: string; // For analytics tracking
+  colorTokens?: any; // Color tokens for styling
 }
 
-export function FormPlacementRenderer({ sectionId, className, userId, publishedPageId, pageSlug }: FormPlacementRendererProps) {
-  const { content, getAllForms } = useEditStore();
-  
-  // Get all forms that should be rendered inline in this section
+/**
+ * FormPlacementRenderer - Intelligently renders forms based on placement logic
+ *
+ * New behavior:
+ * - Single-field forms: Render inline (InlineFormInput) in hero AND primary CTA sections
+ * - Multi-field forms: Render full form only in primary CTA section
+ * - Modal forms: Skip (handled by button component)
+ */
+export function FormPlacementRenderer({
+  sectionId,
+  className,
+  userId,
+  publishedPageId,
+  pageSlug,
+  colorTokens,
+}: FormPlacementRendererProps) {
+  const { content, getAllForms, sections } = useEditStore();
+
+  // Get all forms and current section
   const allForms = getAllForms();
   const section = content[sectionId];
-  
-  // Find forms that are linked to buttons in this section with "scrollTo" behavior
-  const formsToRender: MVPForm[] = [];
-  
-  if (section?.elements) {
-    Object.values(section.elements).forEach((element: any) => {
-      if (element.metadata?.buttonConfig?.type === 'form' && 
-          element.metadata?.buttonConfig?.behavior === 'scrollTo' &&
-          element.metadata?.buttonConfig?.formId) {
-        
-        const form = allForms.find((f: MVPForm) => f.id === element.metadata.buttonConfig.formId);
-        if (form && !formsToRender.find((f: MVPForm) => f.id === form.id)) {
-          formsToRender.push(form);
-        }
-      }
-    });
+
+  if (!section?.elements) {
+    return null;
   }
+
+  // Track forms to render (avoid duplicates)
+  const renderedFormIds = new Set<string>();
+  const formsToRender: Array<{
+    form: MVPForm;
+    placement: ReturnType<typeof determineFormPlacement>;
+    buttonElement: any;
+  }> = [];
+
+  // Scan section elements for form-connected buttons
+  Object.entries(section.elements).forEach(([elementKey, element]: [string, any]) => {
+    const buttonConfig = element.metadata?.buttonConfig;
+
+    if (
+      buttonConfig?.type === 'form' &&
+      buttonConfig?.formId &&
+      !renderedFormIds.has(buttonConfig.formId)
+    ) {
+      const form = allForms.find((f: MVPForm) => f.id === buttonConfig.formId);
+
+      if (form) {
+        // Determine placement based on new logic
+        const ctaType = buttonConfig.ctaType || 'primary'; // Default to primary if not set
+        const placement = determineFormPlacement(
+          form,
+          ctaType,
+          sectionId,
+          sections,
+          buttonConfig.behavior
+        );
+
+        formsToRender.push({
+          form,
+          placement,
+          buttonElement: element,
+        });
+
+        renderedFormIds.add(form.id);
+      }
+    }
+  });
 
   if (formsToRender.length === 0) {
     return null;
@@ -42,22 +93,50 @@ export function FormPlacementRenderer({ sectionId, className, userId, publishedP
 
   return (
     <div className={className}>
-      {formsToRender.map((form) => (
-        <div
-          key={form.id}
-          id={`form-${form.id}`}
-          data-has-email-form={form.fields.some(f => f.type === 'email')}
-          className="mb-8"
-        >
-          <FormRenderer
-            form={form}
-            userId={userId}
-            publishedPageId={publishedPageId}
-            pageSlug={pageSlug}
-            mode="inline"
-          />
-        </div>
-      ))}
+      {formsToRender.map(({ form, placement, buttonElement }) => {
+        // Check if we should render inline form in this section
+        if (shouldRenderInline(placement, sectionId)) {
+          return (
+            <div key={form.id} className="mb-6">
+              <InlineFormInput
+                form={form}
+                size={buttonElement.metadata?.buttonConfig?.size || 'large'}
+                variant={buttonElement.metadata?.buttonConfig?.variant || 'primary'}
+                colorTokens={colorTokens}
+                userId={userId}
+                publishedPageId={publishedPageId}
+                pageSlug={pageSlug}
+                sectionId={sectionId}
+              />
+            </div>
+          );
+        }
+
+        // Check if we should render full form in this section
+        if (shouldRenderFullForm(placement, sectionId)) {
+          return (
+            <div
+              key={form.id}
+              id={`form-${form.id}`}
+              data-has-email-form={form.fields.some((f) => f.type === 'email')}
+              className="mb-8"
+            >
+              <FormRenderer
+                form={form}
+                userId={userId}
+                publishedPageId={publishedPageId}
+                pageSlug={pageSlug}
+                sectionId={sectionId}
+                colorTokens={colorTokens}
+                mode="inline"
+              />
+            </div>
+          );
+        }
+
+        // Modal forms: skip (rendered by FormConnectedButton component)
+        return null;
+      })}
     </div>
   );
 }

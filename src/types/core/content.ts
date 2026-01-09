@@ -160,6 +160,7 @@ export interface SectionCTA {
   type?: 'link' | 'form' | 'email-form' | 'link-with-input';
   formId?: string;
   behavior?: 'scrollTo' | 'openModal';
+  ctaType?: 'primary' | 'secondary'; // NEW: Identifies primary vs secondary CTA for form placement logic
   inputConfig?: {
     label?: string;
     placeholder?: string;

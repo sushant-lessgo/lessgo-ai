@@ -15,6 +15,7 @@ import { VariableThemeInjector } from '@/modules/Design/ColorSystem/VariableThem
 import { CSSVariableErrorBoundary } from '@/components/CSSVariableErrorBoundary';
 import { useFeatureFlags } from '@/utils/featureFlags';
 import { SectionTracker } from '@/app/p/[slug]/components/SectionTracker';
+import { FormPlacementRenderer } from '@/components/forms/FormPlacementRenderer';
 
 import { logger } from '@/lib/logger';
 // ... (font loading utility remains the same)
@@ -472,6 +473,12 @@ const finalSections: OrderedSection[] = processedSections
                 pageOwnerId={pageOwnerId}
                 {...(data || {})}
               />
+              {/* Render forms that should appear inline in this section */}
+              <FormPlacementRenderer
+                sectionId={sectionId}
+                userId={pageOwnerId}
+                publishedPageId={publishedPageId}
+              />
             </div>
           </SectionTracker>
         );
@@ -501,6 +508,12 @@ const finalSections: OrderedSection[] = processedSections
                 publishedPageId={publishedPageId}
                 pageOwnerId={pageOwnerId}
                 {...(data || {})}
+              />
+              {/* Render forms that should appear inline in this section */}
+              <FormPlacementRenderer
+                sectionId={sectionId}
+                userId={pageOwnerId}
+                publishedPageId={publishedPageId}
               />
             </SmartTextSection>
           </SectionTracker>

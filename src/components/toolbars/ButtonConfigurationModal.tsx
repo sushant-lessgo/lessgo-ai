@@ -10,11 +10,13 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { logger } from '@/lib/logger';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
-import { Plus, X } from 'lucide-react';
+import { Plus, X, AlertCircle, Info } from 'lucide-react';
 import type { ElementSelection } from '@/types/store/state';
 import IconPicker from '@/components/ui/IconPicker';
 import { decodeIcon, lucideNameToPascalCase } from '@/lib/iconStorage';
 import * as LucideIcons from 'lucide-react';
+import { getDisabledBehaviorOptions } from '@/utils/formPlacement';
+import { hasPrimaryCTASection } from '@/utils/sectionHelpers';
 
 interface ButtonConfig {
   type: 'link' | 'form' | 'link-with-input';
@@ -22,6 +24,7 @@ interface ButtonConfig {
   url?: string;
   formId?: string;
   behavior?: 'scrollTo' | 'openModal';
+  ctaType?: 'primary' | 'secondary'; // NEW: CTA type for placement logic
   inputConfig?: {
     label?: string;
     placeholder?: string;
@@ -50,7 +53,8 @@ export function ButtonConfigurationModal({
     getAllForms,
     showFormBuilder,
     content,
-    setSection
+    setSection,
+    sections // NEW: Get sections for placement logic
   } = useEditStore();
   
   const availableForms = getAllForms();
@@ -58,6 +62,7 @@ export function ButtonConfigurationModal({
   const [config, setConfig] = useState<ButtonConfig>({
     type: 'link',
     text: '',
+    ctaType: 'primary', // Default to primary CTA
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -83,6 +88,7 @@ export function ButtonConfigurationModal({
             url: savedConfig.url || '',
             formId: savedConfig.formId || '',
             behavior: savedConfig.behavior || 'scrollTo',
+            ctaType: savedConfig.ctaType || 'primary', // NEW: Load CTA type
             leadingIcon: savedConfig.leadingIcon,
             trailingIcon: savedConfig.trailingIcon,
             iconConfig: savedConfig.iconConfig || { leadingSize: 'md', trailingSize: 'md' },
@@ -93,6 +99,7 @@ export function ButtonConfigurationModal({
           setConfig({
             type: 'link',
             text: buttonText,
+            ctaType: 'primary', // NEW: Default CTA type
           });
         }
       }
@@ -148,6 +155,7 @@ export function ButtonConfigurationModal({
             ...element.metadata,
             buttonConfig: {
               type: config.type,
+              ctaType: config.ctaType, // NEW: Save CTA type
               ...(config.type === 'link' && { url: config.url }),
               ...(config.type === 'link-with-input' && {
                 url: config.url,
@@ -348,6 +356,34 @@ export function ButtonConfigurationModal({
             {errors.text && <p className="text-sm text-red-500 mt-1">{errors.text}</p>}
           </div>
 
+          {/* CTA Type Selection */}
+          <div>
+            <Label>CTA Type*</Label>
+            <RadioGroup
+              value={config.ctaType || 'primary'}
+              onValueChange={(val) => setConfig(prev => ({ ...prev, ctaType: val as 'primary' | 'secondary' }))}
+            >
+              <div className="flex items-start space-x-2">
+                <RadioGroupItem value="primary" id="cta-primary" />
+                <div>
+                  <Label htmlFor="cta-primary">Primary CTA</Label>
+                  <p className="text-sm text-gray-600">
+                    Main conversion action (e.g., "Get Started", "Sign Up")
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-2 mt-2">
+                <RadioGroupItem value="secondary" id="cta-secondary" />
+                <div>
+                  <Label htmlFor="cta-secondary">Secondary CTA</Label>
+                  <p className="text-sm text-gray-600">
+                    Alternative action (e.g., "Watch Demo", "Learn More")
+                  </p>
+                </div>
+              </div>
+            </RadioGroup>
+          </div>
+
           {/* Icon Configuration */}
           <div className="border rounded-lg p-4 space-y-3 bg-gray-50">
             <Label className="text-sm font-semibold">Button Icons (Optional)</Label>
@@ -544,24 +580,75 @@ export function ButtonConfigurationModal({
                 {errors.form && <p className="text-sm text-red-500 mt-1">{errors.form}</p>}
               </div>
 
-              {config.formId && (
-                <div>
-                  <Label>Button Behavior</Label>
-                  <RadioGroup
-                    value={config.behavior || 'scrollTo'}
-                    onValueChange={(val) => setConfig(prev => ({ ...prev, behavior: val as 'scrollTo' | 'openModal' }))}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="scrollTo" id="scroll-to" />
-                      <Label htmlFor="scroll-to">Scroll to Form</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="openModal" id="open-modal" />
-                      <Label htmlFor="open-modal">Open in Modal</Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-              )}
+              {config.formId && (() => {
+                const selectedForm = availableForms.find((f: any) => f.id === config.formId);
+                const disabledOptions = getDisabledBehaviorOptions(
+                  selectedForm,
+                  config.ctaType || 'primary',
+                  hasPrimaryCTASection(sections)
+                );
+
+                return (
+                  <div className="space-y-2">
+                    <Label>Button Behavior</Label>
+
+                    {/* Show info message if both options disabled (single-field) */}
+                    {disabledOptions.disableModal && disabledOptions.disableScroll && (
+                      <div className="flex items-start gap-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                        <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                        <div className="text-sm text-blue-800">
+                          <strong>Single-field forms display inline</strong>
+                          <p className="mt-1 text-blue-700">
+                            This form will appear as an email input + button, replacing the CTA button for better conversion.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Show warning if scroll disabled but modal available */}
+                    {disabledOptions.disableScroll && !disabledOptions.disableModal && (
+                      <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-md">
+                        <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                        <div className="text-sm text-amber-800">
+                          <strong>Modal only</strong>
+                          <p className="mt-1 text-amber-700">
+                            {disabledOptions.reason}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Only show behavior options if not single-field */}
+                    {!(disabledOptions.disableModal && disabledOptions.disableScroll) && (
+                      <RadioGroup
+                        value={config.behavior || (disabledOptions.disableScroll ? 'openModal' : 'scrollTo')}
+                        onValueChange={(val) => setConfig(prev => ({ ...prev, behavior: val as 'scrollTo' | 'openModal' }))}
+                      >
+                        <div className={`flex items-center space-x-2 ${disabledOptions.disableScroll ? 'opacity-50' : ''}`}>
+                          <RadioGroupItem
+                            value="scrollTo"
+                            id="scroll-to"
+                            disabled={disabledOptions.disableScroll}
+                          />
+                          <Label htmlFor="scroll-to" className={disabledOptions.disableScroll ? 'cursor-not-allowed' : ''}>
+                            Scroll to Form
+                          </Label>
+                        </div>
+                        <div className={`flex items-center space-x-2 ${disabledOptions.disableModal ? 'opacity-50' : ''}`}>
+                          <RadioGroupItem
+                            value="openModal"
+                            id="open-modal"
+                            disabled={disabledOptions.disableModal}
+                          />
+                          <Label htmlFor="open-modal" className={disabledOptions.disableModal ? 'cursor-not-allowed' : ''}>
+                            Open in Modal
+                          </Label>
+                        </div>
+                      </RadioGroup>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
           )}
 
