@@ -87,7 +87,10 @@
       "Bash(git commit:*)",
       "Bash(for file in src/modules/UIBlocks/**/*.published.tsx)",
       "Bash(do sed -i 's/\\\\\\(titleList\\\\|titles\\\\|title\\\\\\)\\\\.map\\(\\(\\\\\\(title\\\\|t\\\\\\),/\\\\1.map\\(\\(\\\\2: string,/g' \"$file\")",
-      "Bash(tee:*)"
+      "Bash(tee:*)",
+      "Bash(python:*)",
+      "Bash(awk:*)",
+      "Bash(timeout /t 3)"
     ],
     "deny": [],
     "ask": [],

@@ -485,10 +485,18 @@ export default function ImageFirst(props: LayoutComponentProps) {
               />
             )}
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+            {(() => {
+              const buttonConfig = content[sectionId]?.elements?.cta_text?.metadata?.buttonConfig;
+              const isInlineForm = buttonConfig?.type === 'form';
+              const containerClass = isInlineForm
+                ? "flex flex-col gap-6"
+                : "flex flex-col sm:flex-row items-center justify-center gap-6";
+
+              return (
+                <div className={containerClass}>
+
 
               {(() => {
-                const buttonConfig = content[sectionId]?.elements?.cta_text?.metadata?.buttonConfig;
                 const primaryClassName = "shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200";
 
                 if (buttonConfig?.type === 'form') {
@@ -520,7 +528,7 @@ export default function ImageFirst(props: LayoutComponentProps) {
               })()}
 
               {/* Secondary CTA */}
-              {((blockContent.secondary_cta_text && blockContent.secondary_cta_text !== '___REMOVED___') || mode === 'edit') && (() => {
+              {(blockContent.secondary_cta_text && blockContent.secondary_cta_text !== '___REMOVED___' && blockContent.secondary_cta_text.trim() !== '') && (() => {
                 const secondaryButtonConfig = content[sectionId]?.elements?.secondary_cta_text?.metadata?.buttonConfig;
                 const secondaryClassName = "shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200";
 
@@ -599,7 +607,9 @@ export default function ImageFirst(props: LayoutComponentProps) {
                   iconColor="text-green-500"
                 />
               )}
-            </div>
+                </div>
+              );
+            })()}
 
             {(blockContent.supporting_text || mode === 'edit') && (
               <EditableAdaptiveText

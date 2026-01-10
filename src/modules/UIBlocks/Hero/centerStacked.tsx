@@ -403,10 +403,17 @@ export default function CenterStacked(props: LayoutComponentProps) {
             />
           )}
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          {(() => {
+            // Conditional layout based on inline form presence
+            const buttonConfig = content[sectionId]?.elements?.cta_text?.metadata?.buttonConfig;
+            const isInlineForm = buttonConfig?.type === 'form';
+            const containerClass = isInlineForm
+              ? "flex flex-col items-center justify-center gap-4"
+              : "flex flex-col sm:flex-row items-center justify-center gap-4";
 
-            {(() => {
-              const buttonConfig = content[sectionId]?.elements?.cta_text?.metadata?.buttonConfig;
+            return (
+              <div className={containerClass}>
+                {(() => {
               const primaryClassName = `px-12 py-6 font-semibold rounded-xl ${shadows.cta[theme]} ${shadows.ctaHover[theme]} transition-all duration-200 transform hover:-translate-y-0.5`;
 
               if (buttonConfig?.type === 'link-with-input') {
@@ -470,7 +477,7 @@ export default function CenterStacked(props: LayoutComponentProps) {
             })()}
 
             {/* Secondary CTA */}
-            {((blockContent.secondary_cta_text && blockContent.secondary_cta_text !== '___REMOVED___') || mode === 'edit') && (() => {
+            {(blockContent.secondary_cta_text && blockContent.secondary_cta_text !== '___REMOVED___' && blockContent.secondary_cta_text.trim() !== '') && (() => {
               const secondaryButtonConfig = content[sectionId]?.elements?.secondary_cta_text?.metadata?.buttonConfig;
               const secondaryClassName = `px-12 py-6 font-semibold rounded-xl ${shadows.cta[theme]} ${shadows.ctaHover[theme]} transition-all duration-200 transform hover:-translate-y-0.5`;
 
@@ -579,7 +586,9 @@ export default function CenterStacked(props: LayoutComponentProps) {
                 iconColor="text-green-500"
               />
             )}
-          </div>
+              </div>
+            );
+          })()}
 
           {(blockContent.show_social_proof !== false) && (
             <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-8 pt-4">

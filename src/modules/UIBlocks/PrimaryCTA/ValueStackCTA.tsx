@@ -4,6 +4,7 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -260,6 +261,7 @@ ValuePropCard.displayName = 'ValuePropCard';
 
 export default function ValueStackCTA(props: LayoutComponentProps) {
   const { getTextStyle: getTypographyStyle } = useTypography();
+  const { content } = useEditStore();
   
   const {
     sectionId,
@@ -516,7 +518,7 @@ export default function ValueStackCTA(props: LayoutComponentProps) {
             />
 
             {/* Secondary CTA */}
-            {((blockContent.secondary_cta_text && blockContent.secondary_cta_text !== '___REMOVED___') || mode === 'edit') && (
+            {(blockContent.secondary_cta_text && blockContent.secondary_cta_text !== '___REMOVED___' && blockContent.secondary_cta_text.trim() !== '') && (
               <CTAButton
                 text={blockContent.secondary_cta_text || 'Watch Demo'}
                 colorTokens={{ ...colorTokens, ctaBg: 'bg-transparent', ctaText: 'text-white', ctaHover: 'hover:bg-white/10', ctaBorder: 'border-2 border-white' }}

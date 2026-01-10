@@ -244,7 +244,7 @@ export default function VisualCTAWithMockup(props: LayoutComponentProps) {
               />
 
               {/* Secondary CTA */}
-              {((blockContent.secondary_cta && blockContent.secondary_cta !== '___REMOVED___') || mode === 'edit') && (
+              {(blockContent.secondary_cta && blockContent.secondary_cta !== '___REMOVED___' && blockContent.secondary_cta.trim() !== '') && (
                 <CTAButton
                   text={blockContent.secondary_cta || 'Watch Demo'}
                   colorTokens={colorTokens}

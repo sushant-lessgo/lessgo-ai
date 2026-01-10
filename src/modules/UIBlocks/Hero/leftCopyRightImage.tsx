@@ -501,11 +501,19 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
             )}
 
             {/* ✅ ENHANCED: CTA and Trust Indicators */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+            {(() => {
+              const buttonConfig = content[sectionId]?.elements?.cta_text?.metadata?.buttonConfig;
+              const isInlineForm = buttonConfig?.type === 'form';
+              const containerClass = isInlineForm
+                ? "flex flex-col gap-6"
+                : "flex flex-col sm:flex-row items-start sm:items-center gap-6";
+
+              return (
+                <div className={containerClass}>
+
 
               {/* ✅ ENHANCED: Primary CTA Button with Accent Colors */}
               {(() => {
-                const buttonConfig = content[sectionId]?.elements?.cta_text?.metadata?.buttonConfig;
                 const primaryClassName = "shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200";
 
                 if (buttonConfig?.type === 'form') {
@@ -537,7 +545,7 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
               })()}
 
               {/* Secondary CTA */}
-              {((blockContent.secondary_cta_text && blockContent.secondary_cta_text !== '___REMOVED___') || mode === 'edit') && (() => {
+              {(blockContent.secondary_cta_text && blockContent.secondary_cta_text !== '___REMOVED___' && blockContent.secondary_cta_text.trim() !== '') && (() => {
                 const secondaryButtonConfig = content[sectionId]?.elements?.secondary_cta_text?.metadata?.buttonConfig;
                 const secondaryClassName = "shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200";
 
@@ -617,7 +625,9 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
                   iconColor="text-green-500" // Keep green for checkmarks
                 />
               )}
-            </div>
+                </div>
+              );
+            })()}
 
             {/* ✅ ENHANCED: Additional Trust Elements with Dynamic Colors */}
             {(blockContent.show_social_proof !== false) && (
