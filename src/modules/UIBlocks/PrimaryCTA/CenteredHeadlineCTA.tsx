@@ -17,6 +17,7 @@ import {
   TrustIndicators,
   SocialProofNumber
 } from '@/components/layout/ComponentRegistry';
+import { FormConnectedButton } from '@/components/forms/FormConnectedButton';
 import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData } from '@/utils/dataParsingUtils';
@@ -253,54 +254,96 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
 
         {/* Primary CTA Button */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
-          {content[sectionId]?.elements?.cta_text?.metadata?.buttonConfig?.type === 'link-with-input' ? (
-            <CTAButtonWithInput
-              text={blockContent.cta_text}
-              colorTokens={colorTokens}
-              buttonConfig={content[sectionId].elements.cta_text.metadata.buttonConfig}
-              size="large"
-              className="text-xl px-12 py-6 shadow-2xl hover:shadow-3xl"
-              sectionId={sectionId}
-              elementKey="cta_text"
-            />
-          ) : (
-            <CTAButton
-              text={blockContent.cta_text}
-              colorTokens={colorTokens}
-              size="large"
-              className="text-xl px-12 py-6 shadow-2xl hover:shadow-3xl"
-              sectionId={sectionId}
-              elementKey="cta_text"
-              onClick={createCTAClickHandler(sectionId, "cta_text")}
-            />
-          )}
+          {(() => {
+            const buttonConfig = content[sectionId]?.elements?.cta_text?.metadata?.buttonConfig;
+            const primaryClassName = "text-xl px-12 py-6 shadow-2xl hover:shadow-3xl";
+
+            if (buttonConfig?.type === 'link-with-input') {
+              return (
+                <CTAButtonWithInput
+                  text={blockContent.cta_text}
+                  colorTokens={colorTokens}
+                  buttonConfig={buttonConfig}
+                  size="large"
+                  className={primaryClassName}
+                  sectionId={sectionId}
+                  elementKey="cta_text"
+                />
+              );
+            } else if (buttonConfig?.type === 'form') {
+              return (
+                <FormConnectedButton
+                  buttonConfig={buttonConfig}
+                  sectionId={sectionId}
+                  size="large"
+                  variant="primary"
+                  colorTokens={colorTokens}
+                  className={primaryClassName}
+                >
+                  {blockContent.cta_text}
+                </FormConnectedButton>
+              );
+            } else {
+              return (
+                <CTAButton
+                  text={blockContent.cta_text}
+                  colorTokens={colorTokens}
+                  size="large"
+                  className={primaryClassName}
+                  sectionId={sectionId}
+                  elementKey="cta_text"
+                  onClick={createCTAClickHandler(sectionId, "cta_text")}
+                />
+              );
+            }
+          })()}
 
           {/* Secondary CTA */}
-          {((blockContent.secondary_cta_text && blockContent.secondary_cta_text !== '___REMOVED___') || mode === 'edit') && (
-            content[sectionId]?.elements?.secondary_cta_text?.metadata?.buttonConfig?.type === 'link-with-input' ? (
-              <CTAButtonWithInput
-                text={blockContent.secondary_cta_text || 'Watch Demo'}
-                colorTokens={colorTokens}
-                buttonConfig={content[sectionId].elements.secondary_cta_text.metadata.buttonConfig}
-                size="large"
-                className="text-xl px-12 py-6 shadow-2xl hover:shadow-3xl"
-                variant="outline"
-                sectionId={sectionId}
-                elementKey="secondary_cta_text"
-              />
-            ) : (
-              <CTAButton
-                text={blockContent.secondary_cta_text || 'Watch Demo'}
-                colorTokens={colorTokens}
-                size="large"
-                className="text-xl px-12 py-6 shadow-2xl hover:shadow-3xl"
-                variant="outline"
-                sectionId={sectionId}
-                elementKey="secondary_cta_text"
-                onClick={createCTAClickHandler(sectionId, "secondary_cta_text")}
-              />
-            )
-          )}
+          {(blockContent.secondary_cta_text && blockContent.secondary_cta_text !== '___REMOVED___' && blockContent.secondary_cta_text.trim() !== '') && (() => {
+            const secondaryButtonConfig = content[sectionId]?.elements?.secondary_cta_text?.metadata?.buttonConfig;
+            const secondaryClassName = "text-xl px-12 py-6 shadow-2xl hover:shadow-3xl";
+
+            if (secondaryButtonConfig?.type === 'link-with-input') {
+              return (
+                <CTAButtonWithInput
+                  text={blockContent.secondary_cta_text || 'Watch Demo'}
+                  colorTokens={colorTokens}
+                  buttonConfig={secondaryButtonConfig}
+                  size="large"
+                  className={secondaryClassName}
+                  variant="secondary"
+                  sectionId={sectionId}
+                  elementKey="secondary_cta_text"
+                />
+              );
+            } else if (secondaryButtonConfig?.type === 'form') {
+              return (
+                <FormConnectedButton
+                  buttonConfig={{ ...secondaryButtonConfig, ctaType: 'secondary' }}
+                  sectionId={sectionId}
+                  size="large"
+                  variant="secondary"
+                  colorTokens={colorTokens}
+                  className={secondaryClassName}
+                >
+                  {blockContent.secondary_cta_text || 'Watch Demo'}
+                </FormConnectedButton>
+              );
+            } else {
+              return (
+                <CTAButton
+                  text={blockContent.secondary_cta_text || 'Watch Demo'}
+                  colorTokens={colorTokens}
+                  size="large"
+                  className={secondaryClassName}
+                  variant="secondary"
+                  sectionId={sectionId}
+                  elementKey="secondary_cta_text"
+                  onClick={createCTAClickHandler(sectionId, "secondary_cta_text")}
+                />
+              );
+            }
+          })()}
         </div>
 
         {/* Trust Indicators */}

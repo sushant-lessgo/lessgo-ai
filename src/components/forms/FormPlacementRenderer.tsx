@@ -94,23 +94,8 @@ export function FormPlacementRenderer({
   return (
     <div className={className}>
       {formsToRender.map(({ form, placement, buttonElement }) => {
-        // Check if we should render inline form in this section
-        if (shouldRenderInline(placement, sectionId)) {
-          return (
-            <div key={form.id} className="mb-6">
-              <InlineFormInput
-                form={form}
-                size={buttonElement.metadata?.buttonConfig?.size || 'large'}
-                variant={buttonElement.metadata?.buttonConfig?.variant || 'primary'}
-                colorTokens={colorTokens}
-                userId={userId}
-                publishedPageId={publishedPageId}
-                pageSlug={pageSlug}
-                sectionId={sectionId}
-              />
-            </div>
-          );
-        }
+        // SKIP inline forms - they're rendered by FormConnectedButton in the UIBlock
+        // This prevents duplicate rendering of inline forms
 
         // Check if we should render full form in this section
         if (shouldRenderFullForm(placement, sectionId)) {
@@ -135,6 +120,7 @@ export function FormPlacementRenderer({
         }
 
         // Modal forms: skip (rendered by FormConnectedButton component)
+        // Inline forms: skip (rendered by FormConnectedButton in button position)
         return null;
       })}
     </div>

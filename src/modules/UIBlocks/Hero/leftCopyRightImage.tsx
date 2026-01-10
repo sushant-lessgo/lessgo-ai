@@ -12,10 +12,11 @@ import {
   EditableAdaptiveText, 
   AccentBadge 
 } from '@/components/layout/EditableContent';
-import { 
-  CTAButton, 
-  TrustIndicators 
+import {
+  CTAButton,
+  TrustIndicators
 } from '@/components/layout/ComponentRegistry';
+import { FormConnectedButton } from '@/components/forms/FormConnectedButton';
 import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators';
 import AvatarEditableComponent from '@/components/ui/AvatarEditableComponent';
 import { LayoutComponentProps } from '@/types/storeTypes';
@@ -291,7 +292,8 @@ HeroImagePlaceholder.displayName = 'HeroImagePlaceholder';
 
 export default function LeftCopyRightImage(props: LayoutComponentProps) {
   const { getTextStyle: getTypographyStyle } = useTypography();
-  
+  const { content } = useEditStore();
+
   // ✅ ENHANCED: Use the abstraction hook with background type support
   const {
     sectionId,
@@ -500,30 +502,72 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
 
             {/* ✅ ENHANCED: CTA and Trust Indicators */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-              
+
               {/* ✅ ENHANCED: Primary CTA Button with Accent Colors */}
-              <CTAButton
-                text={blockContent.cta_text}
-                colorTokens={colorTokens} // ✅ Now includes proper accent colors
-                className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
-                variant="primary"
-                sectionId={sectionId}
-                elementKey="cta_text"
-                onClick={createCTAClickHandler(sectionId, "cta_text")}
-              />
+              {(() => {
+                const buttonConfig = content[sectionId]?.elements?.cta_text?.metadata?.buttonConfig;
+                const primaryClassName = "shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200";
+
+                if (buttonConfig?.type === 'form') {
+                  return (
+                    <FormConnectedButton
+                      buttonConfig={buttonConfig}
+                      sectionId={sectionId}
+                      size="large"
+                      variant="primary"
+                      colorTokens={colorTokens}
+                      className={primaryClassName}
+                    >
+                      {blockContent.cta_text}
+                    </FormConnectedButton>
+                  );
+                } else {
+                  return (
+                    <CTAButton
+                      text={blockContent.cta_text}
+                      colorTokens={colorTokens}
+                      className={primaryClassName}
+                      variant="primary"
+                      sectionId={sectionId}
+                      elementKey="cta_text"
+                      onClick={createCTAClickHandler(sectionId, "cta_text")}
+                    />
+                  );
+                }
+              })()}
 
               {/* Secondary CTA */}
-              {((blockContent.secondary_cta_text && blockContent.secondary_cta_text !== '___REMOVED___') || mode === 'edit') && (
-                <CTAButton
-                  text={blockContent.secondary_cta_text || 'Watch Demo'}
-                  colorTokens={colorTokens}
-                  className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
-                  variant="outline"
-                  sectionId={sectionId}
-                  elementKey="secondary_cta_text"
-                  onClick={createCTAClickHandler(sectionId, "secondary_cta_text")}
-                />
-              )}
+              {((blockContent.secondary_cta_text && blockContent.secondary_cta_text !== '___REMOVED___') || mode === 'edit') && (() => {
+                const secondaryButtonConfig = content[sectionId]?.elements?.secondary_cta_text?.metadata?.buttonConfig;
+                const secondaryClassName = "shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200";
+
+                if (secondaryButtonConfig?.type === 'form') {
+                  return (
+                    <FormConnectedButton
+                      buttonConfig={{ ...secondaryButtonConfig, ctaType: 'secondary' }}
+                      sectionId={sectionId}
+                      size="large"
+                      variant="secondary"
+                      colorTokens={colorTokens}
+                      className={secondaryClassName}
+                    >
+                      {blockContent.secondary_cta_text || 'Watch Demo'}
+                    </FormConnectedButton>
+                  );
+                } else {
+                  return (
+                    <CTAButton
+                      text={blockContent.secondary_cta_text || 'Watch Demo'}
+                      colorTokens={colorTokens}
+                      className={secondaryClassName}
+                      variant="secondary"
+                      sectionId={sectionId}
+                      elementKey="secondary_cta_text"
+                      onClick={createCTAClickHandler(sectionId, "secondary_cta_text")}
+                    />
+                  );
+                }
+              })()}
 
               {/* ✅ ENHANCED: Trust Indicators with Dynamic Color */}
               {mode !== 'preview' ? (

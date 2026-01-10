@@ -1670,7 +1670,7 @@ const elementRules: SectionLayoutRules = {
       { variable: "landingPageGoals", values: ["free-trial", "demo", "book-call"], weight: 4 },
       { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k"], weight: 3 }
     ],
-    minScore: 5
+    minScore: 999  // Disabled by default - user adds manually via "add optional element"
   },
   {
     element: "badge_text",

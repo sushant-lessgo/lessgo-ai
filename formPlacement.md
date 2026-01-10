@@ -237,3 +237,320 @@ findPrimaryCTASection(sections: string[]): string | null
 - Success state: show inline (not navigate away)
 - Form validation: same rules as modal/full forms
 - Analytics: track placement type on submission events
+
+
+===================
+
+# Fix Form-Connected Buttons in Hero & PrimaryCTA UIBlocks
+
+## Problem
+When users attach forms to CTA buttons (via ButtonConfigurationModal), UIBlocks render regular CTAButton instead of FormConnectedButton. This breaks inline form functionality - forms appear at section bottom instead of replacing the button inline.
+
+## Root Cause
+UIBlocks check for `buttonConfig.type === 'link-with-input'` but not `buttonConfig.type === 'form'`. Form-connected buttons fall through to default CTAButton rendering.
+
+## Solution Overview
+Add form type check to all Hero and PrimaryCTA UIBlocks. When `buttonConfig.type === 'form'`, render FormConnectedButton which handles:
+- Single-field forms → InlineFormInput (replaces button)
+- Multi-field forms → Button with scroll/modal behavior
+
+Also disable secondary_cta_text generation by default (user adds manually via "add optional element").
+
+---
+
+## Implementation Steps
+
+### Step 1: Disable Secondary CTA Generation
+**File:** `src/modules/sections/selectOptionalElements.ts`
+**Line:** ~1668
+
+Change secondary_cta_text rule:
+```typescript
+{
+  element: "secondary_cta_text",
+  conditions: [
+    { variable: "landingPageGoals", values: ["free-trial", "demo", "book-call"], weight: 4 },
+    { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k"], weight: 3 }
+  ],
+  minScore: 999  // Changed from 5 - effectively disables generation
+}
+```
+
+**Rationale:** Prevent AI from generating secondary CTAs automatically. Users add manually if needed.
+
+---
+
+### Step 2: Fix Hero UIBlocks (4 files)
+
+**Pattern to apply:**
+```tsx
+import { FormConnectedButton } from '@/components/forms/FormConnectedButton';
+
+// In button rendering section:
+{(() => {
+  const buttonConfig = content[sectionId]?.elements?.cta_text?.metadata?.buttonConfig;
+  const baseClassName = "..."; // Extract existing className
+
+  if (buttonConfig?.type === 'link-with-input') {
+    return <CTAButtonWithInput ... />;  // Keep existing if present
+  } else if (buttonConfig?.type === 'form') {
+    return (
+      <FormConnectedButton
+        buttonConfig={buttonConfig}
+        sectionId={sectionId}
+        elementKey="cta_text"
+        size="large"
+        variant="primary"
+        colorTokens={colorTokens}
+        className={baseClassName}
+      >
+        {blockContent.cta_text}
+      </FormConnectedButton>
+    );
+  } else {
+    return <CTAButton ... />;  // Keep existing
+  }
+})()}
+```
+
+**Files to modify:**
+1. `src/modules/UIBlocks/Hero/centerStacked.tsx`
+   - Lines 407-466: Primary CTA
+   - Lines 469-526: Secondary CTA
+   - Note: Already has link-with-input checks
+
+2. `src/modules/UIBlocks/Hero/imageFirst.tsx`
+   - Lines 488-496: Primary CTA
+   - Lines 499-509: Secondary CTA
+   - Note: Missing link-with-input checks (skip for now)
+
+3. `src/modules/UIBlocks/Hero/leftCopyRightImage.tsx`
+   - Lines 505-513: Primary CTA
+   - Lines 516-526: Secondary CTA
+   - Note: Missing link-with-input checks (skip for now)
+
+4. `src/modules/UIBlocks/Hero/splitScreen.tsx`
+   - Lines 494-530: Primary CTA (within link-with-input block)
+   - Lines 580-652: Primary/Secondary CTAs (standard block)
+   - Note: Complex conditional structure, already has link-with-input
+
+**Skip:** `minimalist.tsx` (no buttons)
+
+---
+
+### Step 3: Fix PrimaryCTA UIBlocks (7 files)
+
+**Same pattern as Hero, with adjustments:**
+- Element keys may differ (`cta_text`, `left_cta_text`, `right_cta_text`)
+- Secondary CTA variant: use `variant="secondary"` (standardized)
+- For secondary CTA: pass `buttonConfig={{ ...secondaryButtonConfig, ctaType: 'secondary' }}`
+
+**Files to modify:**
+
+1. `src/modules/UIBlocks/PrimaryCTA/CenteredHeadlineCTA.tsx`
+   - Lines 256-276: Primary CTA
+   - Lines 279-303: Secondary CTA
+   - Has link-with-input checks
+
+2. `src/modules/UIBlocks/PrimaryCTA/CountdownLimitedCTA.tsx`
+   - Find Primary CTA section
+   - No link-with-input checks (skip those)
+
+3. `src/modules/UIBlocks/PrimaryCTA/CTAWithBadgeRow.tsx`
+   - Primary + Secondary CTAs
+   - No link-with-input checks (skip those)
+
+4. `src/modules/UIBlocks/PrimaryCTA/SideBySideCTA.tsx` **SPECIAL CASE**
+   - Lines 149-169: LEFT CTA (`left_cta_text`, variant="primary")
+   - Lines 221-241: RIGHT CTA (`right_cta_text`, variant="secondary")
+   - Has link-with-input checks
+   - Both buttons need independent form checks
+
+5. `src/modules/UIBlocks/PrimaryCTA/TestimonialCTACombo.tsx`
+   - Primary + Secondary CTAs
+   - No link-with-input checks (skip those)
+
+6. `src/modules/UIBlocks/PrimaryCTA/ValueStackCTA.tsx`
+   - Primary + Secondary CTAs
+   - No link-with-input checks (skip those)
+
+7. `src/modules/UIBlocks/PrimaryCTA/VisualCTAWithMockup.tsx`
+   - Primary + Secondary CTA (`secondary_cta` element key)
+   - No link-with-input checks (skip those)
+
+**Skip:** `CTAWithFormField.tsx` (already uses FormRenderer)
+
+---
+
+## Key Implementation Details
+
+### Import Addition
+Add to each modified file:
+```tsx
+import { FormConnectedButton } from '@/components/forms/FormConnectedButton';
+```
+
+### Size Mapping
+Extract from existing button className:
+- `px-12 py-6` → size="large"
+- `px-8 py-4` → size="medium"
+- Default: "large" for all Hero/CTA sections
+
+### Variant Mapping
+- Primary CTA → `variant="primary"`
+- Secondary CTA → `variant="secondary"` (standardized across all files)
+
+### Secondary CTA Pattern
+```tsx
+{((blockContent.secondary_cta_text && blockContent.secondary_cta_text !== '___REMOVED___') || mode === 'edit') && (() => {
+  const secondaryButtonConfig = content[sectionId]?.elements?.secondary_cta_text?.metadata?.buttonConfig;
+
+  if (secondaryButtonConfig?.type === 'link-with-input') {
+    return <CTAButtonWithInput ... variant="secondary" />;
+  } else if (secondaryButtonConfig?.type === 'form') {
+    return (
+      <FormConnectedButton
+        buttonConfig={{ ...secondaryButtonConfig, ctaType: 'secondary' }}  // Add ctaType
+        sectionId={sectionId}
+        elementKey="secondary_cta_text"
+        size="large"
+        variant="secondary"
+        colorTokens={colorTokens}
+        className={baseClassName}
+      >
+        {blockContent.secondary_cta_text || 'Watch Demo'}
+      </FormConnectedButton>
+    );
+  } else {
+    return <CTAButton ... variant="secondary" />;
+  }
+})()}
+```
+
+### Button Icons (Known Limitation)
+- FormConnectedButton doesn't support `leadingIcon`/`trailingIcon`
+- When form is attached to button with icons, icons won't display
+- Document as acceptable limitation
+- Don't pass icon props to FormConnectedButton
+
+### ClassName Extraction
+For readability, extract className before IIFE:
+```tsx
+const primaryClassName = "px-12 py-6 font-semibold rounded-xl shadow-xl hover:shadow-2xl transition-all duration-200 transform hover:-translate-y-0.5";
+
+{(() => {
+  // ... checks
+  return <FormConnectedButton className={primaryClassName} ... />;
+})()}
+```
+
+---
+
+## Critical Files
+
+1. **src/modules/sections/selectOptionalElements.ts** - Disable secondary_cta_text
+2. **src/components/forms/FormConnectedButton.tsx** - Reference for understanding behavior
+3. **src/modules/UIBlocks/Hero/centerStacked.tsx** - Most complete Hero pattern
+4. **src/modules/UIBlocks/PrimaryCTA/CenteredHeadlineCTA.tsx** - Clean PrimaryCTA pattern
+5. **src/modules/UIBlocks/PrimaryCTA/SideBySideCTA.tsx** - Dual-CTA special case
+
+---
+
+## Implementation Order
+
+1. ✅ Disable secondary_cta_text in selectOptionalElements.ts
+2. Fix Hero UIBlocks (establish pattern):
+   - centerStacked.tsx
+   - imageFirst.tsx
+   - leftCopyRightImage.tsx
+   - splitScreen.tsx
+3. Fix PrimaryCTA UIBlocks (follow pattern):
+   - CenteredHeadlineCTA.tsx (reference)
+   - CountdownLimitedCTA.tsx
+   - CTAWithBadgeRow.tsx
+   - TestimonialCTACombo.tsx
+   - ValueStackCTA.tsx
+   - VisualCTAWithMockup.tsx
+   - SideBySideCTA.tsx (LAST - most complex)
+
+---
+
+## Testing & Verification
+
+### Test Scenarios (per modified UIBlock)
+
+**1. Single-field form on primary CTA:**
+- Create page with UIBlock
+- Create form with 1 email field
+- Attach form to primary CTA button (behavior: scroll/modal doesn't matter)
+- **Expected:** InlineFormInput replaces button (email input + submit side-by-side)
+- Test submission, verify success state
+
+**2. Multi-field form on primary CTA:**
+- Create form with 2+ fields
+- Attach to primary CTA with behavior = "scrollTo"
+- **Expected:** Button renders normally, clicking scrolls to PrimaryCTA section
+- Verify full form renders in PrimaryCTA section
+
+**3. Multi-field form with modal:**
+- Set behavior = "openModal"
+- **Expected:** Button renders, clicking opens modal with form
+
+**4. Secondary CTA form (always modal):**
+- Attach form to secondary CTA
+- **Expected:** Button renders with secondary variant, clicking opens modal
+- Single or multi-field should both use modal (per placement logic)
+
+**5. Regression: Regular buttons:**
+- Button with no form attached
+- **Expected:** Regular CTAButton behavior (no changes)
+
+**6. Regression: Link-with-input buttons (if present):**
+- Button with link-with-input type
+- **Expected:** CTAButtonWithInput renders (no changes)
+
+### Manual Test Steps
+
+1. Create new landing page
+2. Choose hero UIBlock (e.g., centerStacked)
+3. Click primary CTA button → open ButtonConfigurationModal
+4. Select "Native Form"
+5. Create new form with 1 email field
+6. Save
+7. **Verify:** Email input + submit button replaces CTA button inline
+8. Enter email, submit
+9. **Verify:** Success message appears inline
+10. Repeat for multi-field form (scroll and modal behaviors)
+
+### Expected Behavior Summary
+
+| Form Type | CTA Type | Behavior Setting | Expected Rendering |
+|-----------|----------|------------------|-------------------|
+| Single-field | Primary | Any | InlineFormInput (replaces button) |
+| Single-field | Secondary | Any | Button → Modal |
+| Multi-field | Primary | scrollTo | Button → Scroll to CTA section |
+| Multi-field | Primary | openModal | Button → Modal |
+| Multi-field | Secondary | Any | Button → Modal |
+
+---
+
+## Edge Cases
+
+1. **Missing buttonConfig:** Falls through to default CTAButton (safe)
+2. **Invalid form (no fields):** FormConnectedButton renders disabled button with "Configure CTA"
+3. **Button icons:** Icons don't display on form-connected buttons (known limitation)
+4. **Props availability:** userId/publishedPageId may not be available (FormConnectedButton handles gracefully)
+5. **className complexity:** Extract to variable for readability
+
+---
+
+## Success Criteria
+
+- [ ] Secondary_cta_text minScore set to 999 in selectOptionalElements.ts
+- [ ] All 4 Hero UIBlocks support form-connected buttons
+- [ ] All 7 PrimaryCTA UIBlocks support form-connected buttons
+- [ ] Single-field forms render inline (InlineFormInput)
+- [ ] Multi-field forms render as button with scroll/modal
+- [ ] Secondary CTAs use variant="secondary" consistently
+- [ ] Existing link-with-input and regular buttons still work (regression)
+- [ ] Manual testing confirms inline forms submit successfully

@@ -15,6 +15,7 @@ import {
   CTAButtonWithInput,
   TrustIndicators
 } from '@/components/layout/ComponentRegistry';
+import { FormConnectedButton } from '@/components/forms/FormConnectedButton';
 import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators';
 import AvatarEditableComponent from '@/components/ui/AvatarEditableComponent';
 import { LayoutComponentProps } from '@/types/storeTypes';
@@ -505,29 +506,49 @@ export default function SplitScreen(props: LayoutComponentProps) {
                   />
 
                   {/* Secondary CTA */}
-                  {((blockContent.secondary_cta_text && blockContent.secondary_cta_text !== '___REMOVED___') || mode === 'edit') && (
-                    content[sectionId]?.elements?.secondary_cta_text?.metadata?.buttonConfig?.type === 'link-with-input' ? (
-                      <CTAButtonWithInput
-                        text={blockContent.secondary_cta_text || 'Watch Demo'}
-                        colorTokens={colorTokens}
-                        buttonConfig={content[sectionId].elements.secondary_cta_text.metadata.buttonConfig}
-                        className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 text-lg px-8 py-4"
-                        variant="outline"
-                        sectionId={sectionId}
-                        elementKey="secondary_cta_text"
-                      />
-                    ) : (
-                      <CTAButton
-                        text={blockContent.secondary_cta_text || 'Watch Demo'}
-                        colorTokens={colorTokens}
-                        className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 text-lg px-8 py-4"
-                        variant="outline"
-                        sectionId={sectionId}
-                        elementKey="secondary_cta_text"
-                        onClick={createCTAClickHandler(sectionId, "secondary_cta_text")}
-                      />
-                    )
-                  )}
+                  {(blockContent.secondary_cta_text && blockContent.secondary_cta_text !== '___REMOVED___' && blockContent.secondary_cta_text.trim() !== '') && (() => {
+                    const secondaryButtonConfig = content[sectionId]?.elements?.secondary_cta_text?.metadata?.buttonConfig;
+                    const secondaryClassName = "shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 text-lg px-8 py-4";
+
+                    if (secondaryButtonConfig?.type === 'link-with-input') {
+                      return (
+                        <CTAButtonWithInput
+                          text={blockContent.secondary_cta_text || 'Watch Demo'}
+                          colorTokens={colorTokens}
+                          buttonConfig={secondaryButtonConfig}
+                          className={secondaryClassName}
+                          variant="secondary"
+                          sectionId={sectionId}
+                          elementKey="secondary_cta_text"
+                        />
+                      );
+                    } else if (secondaryButtonConfig?.type === 'form') {
+                      return (
+                        <FormConnectedButton
+                          buttonConfig={{ ...secondaryButtonConfig, ctaType: 'secondary' }}
+                          sectionId={sectionId}
+                          size="large"
+                          variant="secondary"
+                          colorTokens={colorTokens}
+                          className={secondaryClassName}
+                        >
+                          {blockContent.secondary_cta_text || 'Watch Demo'}
+                        </FormConnectedButton>
+                      );
+                    } else {
+                      return (
+                        <CTAButton
+                          text={blockContent.secondary_cta_text || 'Watch Demo'}
+                          colorTokens={colorTokens}
+                          className={secondaryClassName}
+                          variant="secondary"
+                          sectionId={sectionId}
+                          elementKey="secondary_cta_text"
+                          onClick={createCTAClickHandler(sectionId, "secondary_cta_text")}
+                        />
+                      );
+                    }
+                  })()}
 
                   {mode !== 'preview' ? (
                     <EditableTrustIndicators
@@ -577,30 +598,81 @@ export default function SplitScreen(props: LayoutComponentProps) {
                   )}
                 </div>
               ) : (
-                // Standard button: Keep existing flex-row layout
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 sm:gap-8 mt-4">
-                  <CTAButton
-                    text={blockContent.cta_text}
-                    colorTokens={colorTokens}
-                    className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 text-lg px-8 py-4"
-                    variant="primary"
-                    sectionId={sectionId}
-                    elementKey="cta_text"
-                    onClick={createCTAClickHandler(sectionId, "cta_text")}
-                  />
+                // Standard button: Conditional layout based on form type
+                (() => {
+                  const buttonConfig = content[sectionId]?.elements?.cta_text?.metadata?.buttonConfig;
+                  const isInlineForm = buttonConfig?.type === 'form';
+
+                  // Use vertical layout when form is inline to prevent trust items from being adjacent
+                  const layoutClass = isInlineForm
+                    ? "flex flex-col gap-6 mt-4"
+                    : "flex flex-col sm:flex-row items-start sm:items-center gap-6 sm:gap-8 mt-4";
+
+                  return (
+                    <div className={layoutClass}>
+                      {(() => {
+                        const primaryClassName = "shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 text-lg px-8 py-4";
+
+                        if (buttonConfig?.type === 'form') {
+                          return (
+                            <FormConnectedButton
+                              buttonConfig={buttonConfig}
+                              sectionId={sectionId}
+                              size="large"
+                              variant="primary"
+                              colorTokens={colorTokens}
+                              className={primaryClassName}
+                            >
+                              {blockContent.cta_text}
+                            </FormConnectedButton>
+                          );
+                        } else {
+                          return (
+                            <CTAButton
+                              text={blockContent.cta_text}
+                              colorTokens={colorTokens}
+                              className={primaryClassName}
+                              variant="primary"
+                              sectionId={sectionId}
+                              elementKey="cta_text"
+                              onClick={createCTAClickHandler(sectionId, "cta_text")}
+                            />
+                          );
+                        }
+                  })()}
 
                   {/* Secondary CTA */}
-                  {((blockContent.secondary_cta_text && blockContent.secondary_cta_text !== '___REMOVED___') || mode === 'edit') && (
-                    <CTAButton
-                      text={blockContent.secondary_cta_text || 'Watch Demo'}
-                      colorTokens={colorTokens}
-                      className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 text-lg px-8 py-4"
-                      variant="outline"
-                      sectionId={sectionId}
-                      elementKey="secondary_cta_text"
-                      onClick={createCTAClickHandler(sectionId, "secondary_cta_text")}
-                    />
-                  )}
+                  {(blockContent.secondary_cta_text && blockContent.secondary_cta_text !== '___REMOVED___' && blockContent.secondary_cta_text.trim() !== '') && (() => {
+                    const secondaryButtonConfig = content[sectionId]?.elements?.secondary_cta_text?.metadata?.buttonConfig;
+                    const secondaryClassName = "shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 text-lg px-8 py-4";
+
+                    if (secondaryButtonConfig?.type === 'form') {
+                      return (
+                        <FormConnectedButton
+                          buttonConfig={{ ...secondaryButtonConfig, ctaType: 'secondary' }}
+                          sectionId={sectionId}
+                          size="large"
+                          variant="secondary"
+                          colorTokens={colorTokens}
+                          className={secondaryClassName}
+                        >
+                          {blockContent.secondary_cta_text || 'Watch Demo'}
+                        </FormConnectedButton>
+                      );
+                    } else {
+                      return (
+                        <CTAButton
+                          text={blockContent.secondary_cta_text || 'Watch Demo'}
+                          colorTokens={colorTokens}
+                          className={secondaryClassName}
+                          variant="secondary"
+                          sectionId={sectionId}
+                          elementKey="secondary_cta_text"
+                          onClick={createCTAClickHandler(sectionId, "secondary_cta_text")}
+                        />
+                      );
+                    }
+                  })()}
 
                   {mode !== 'preview' ? (
                     <EditableTrustIndicators
@@ -648,7 +720,9 @@ export default function SplitScreen(props: LayoutComponentProps) {
                       iconColor="text-green-500"
                     />
                   )}
-                </div>
+                    </div>
+                  );
+                })()
               )}
 
               {(blockContent.show_social_proof !== false) && (

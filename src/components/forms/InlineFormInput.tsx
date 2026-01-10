@@ -166,13 +166,12 @@ export function InlineFormInput({
       setIsSubmitted(true);
 
       // Track analytics
-      if (analytics?.track) {
-        analytics.track('form_submitted', {
-          formId: form.id,
-          formName: form.name,
-          sectionId,
-          pageSlug,
-          fieldCount: 1,
+      if (analytics?.trackEvent) {
+        analytics.trackEvent('landing_page_form_submit', {
+          form_id: form.id,
+          form_name: form.name,
+          form_fields: [field.type],
+          form_field_count: 1,
           placement: 'inline',
         });
       }
@@ -210,7 +209,6 @@ export function InlineFormInput({
 
   // Get styling classes
   const sizeClasses = getSizeClasses(size);
-  const buttonStyles = getButtonStyles(variant, colorTokens);
 
   return (
     <form onSubmit={handleSubmit} className={`w-full ${className}`}>
@@ -226,7 +224,7 @@ export function InlineFormInput({
             required={field.required}
             disabled={isSubmitting}
             className={`
-              w-full rounded-lg border transition-all duration-200
+              w-full min-w-[200px] rounded-lg border transition-all duration-200
               ${sizeClasses.input}
               ${
                 error
@@ -257,11 +255,13 @@ export function InlineFormInput({
           disabled={isSubmitting}
           className={`
             ${sizeClasses.button}
+            ${getButtonColorClasses(variant, colorTokens)}
             rounded-lg font-semibold transition-all duration-200
+            shadow-xl hover:shadow-2xl
+            transform hover:-translate-y-0.5
             flex items-center justify-center gap-2
-            ${isSubmitting ? 'opacity-60 cursor-not-allowed' : 'hover:opacity-90 hover:scale-105'}
+            ${isSubmitting ? 'opacity-60 cursor-not-allowed' : ''}
           `}
-          style={buttonStyles}
         >
           {isSubmitting ? (
             <>
@@ -308,8 +308,8 @@ function getSizeClasses(size: 'small' | 'medium' | 'large') {
     case 'large':
       return {
         container: 'text-lg',
-        input: 'px-5 py-3 text-lg',
-        button: 'px-6 py-3 text-lg whitespace-nowrap',
+        input: 'px-6 py-4 text-lg',
+        button: 'px-8 py-4 text-lg whitespace-nowrap',
       };
     default:
       return {
@@ -321,22 +321,24 @@ function getSizeClasses(size: 'small' | 'medium' | 'large') {
 }
 
 /**
- * Get button styling based on variant and color tokens
+ * Get button color classes based on variant and color tokens
+ * Matches CTAButton styling from ComponentRegistry
  */
-function getButtonStyles(
+function getButtonColorClasses(
   variant: 'primary' | 'secondary',
   colorTokens?: any
-): React.CSSProperties {
+): string {
   if (variant === 'secondary') {
-    return {
-      backgroundColor: colorTokens?.surfaceElevated || '#F3F4F6',
-      color: colorTokens?.textPrimary || '#111827',
-    };
+    const bgClass = colorTokens?.surfaceElevated || 'bg-gray-100';
+    const textClass = colorTokens?.textPrimary || 'text-gray-900';
+    const hoverClass = colorTokens?.surfaceSection || 'bg-gray-200';
+    return `${bgClass} ${textClass} hover:${hoverClass}`;
   }
 
-  // Primary variant (default)
-  return {
-    backgroundColor: colorTokens?.ctaBg || '#14B8A6',
-    color: colorTokens?.ctaText || '#FFFFFF',
-  };
+  // Primary variant - use validated CTA colors (matches CTAButton pattern)
+  const primaryBg = colorTokens?.ctaBg || colorTokens?.accent || 'bg-blue-600';
+  const primaryText = colorTokens?.ctaText || 'text-white';
+  const primaryHover = colorTokens?.ctaHover || colorTokens?.accentHover || 'bg-blue-700';
+
+  return `${primaryBg} ${primaryText} hover:${primaryHover}`;
 }

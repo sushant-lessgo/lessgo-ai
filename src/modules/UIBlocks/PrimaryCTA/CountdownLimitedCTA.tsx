@@ -4,12 +4,14 @@
 import React, { useState, useEffect } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
   EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
 import { CTAButton } from '@/components/layout/ComponentRegistry';
+import { FormConnectedButton } from '@/components/forms/FormConnectedButton';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { createCTAClickHandler } from '@/utils/ctaHandler';
 import { CountdownConfigModal } from '@/app/edit/[token]/components/ui/CountdownConfigModal';
@@ -285,6 +287,7 @@ export default function CountdownLimitedCTA(props: LayoutComponentProps) {
   
   const { getTextStyle: getTypographyStyle } = useTypography();
   
+  const { content } = useEditStore();
   // Modal state for countdown configuration
   const [isCountdownModalOpen, setIsCountdownModalOpen] = useState(false);
 
@@ -402,16 +405,38 @@ export default function CountdownLimitedCTA(props: LayoutComponentProps) {
 
         {/* CTA Button */}
         <div className="mb-8">
-          <CTAButton
-            text={blockContent.cta_text}
-            colorTokens={colorTokens}
-            className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 bg-red-600 hover:bg-red-700 text-white px-8 py-4 text-lg"
-            variant="primary"
-            size="large"
-            sectionId={sectionId}
-            elementKey="cta_text"
-            onClick={createCTAClickHandler(sectionId, "cta_text")}
-          />
+          {(() => {
+            const buttonConfig = content[sectionId]?.elements?.cta_text?.metadata?.buttonConfig;
+            const primaryClassName = "shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 bg-red-600 hover:bg-red-700 text-white px-8 py-4 text-lg";
+
+            if (buttonConfig?.type === 'form') {
+              return (
+                <FormConnectedButton
+                  buttonConfig={buttonConfig}
+                  sectionId={sectionId}
+                  size="large"
+                  variant="primary"
+                  colorTokens={colorTokens}
+                  className={primaryClassName}
+                >
+                  {blockContent.cta_text}
+                </FormConnectedButton>
+              );
+            } else {
+              return (
+                <CTAButton
+                  text={blockContent.cta_text}
+                  colorTokens={colorTokens}
+                  className={primaryClassName}
+                  variant="primary"
+                  size="large"
+                  sectionId={sectionId}
+                  elementKey="cta_text"
+                  onClick={createCTAClickHandler(sectionId, "cta_text")}
+                />
+              );
+            }
+          })()}
         </div>
 
         {/* Offer Details */}

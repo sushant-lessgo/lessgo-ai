@@ -85,6 +85,7 @@ export default function BeforeImageAfterText(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
+  const { content } = useEditStore();
   // Theme detection with priority: manual override > auto-detection > neutral
   const theme = React.useMemo(() => {
     if (props.manualThemeOverride) return props.manualThemeOverride;
