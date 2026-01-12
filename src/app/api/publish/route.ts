@@ -260,10 +260,10 @@ async function publishHandler(req: NextRequest) {
         },
       });
 
-      // === PHASE 3: UPDATE KV ROUTING ===
+      // === PHASE 3: UPDATE KV ROUTING WITH RETRY & VERIFICATION ===
       // Add after successful DB update
       try {
-        const { atomicPublish } = await import('@/lib/routing/kvRoutes');
+        const { atomicPublishWithRetry } = await import('@/lib/routing/kvRoutes');
 
         // Build domain list (currently only {slug}.lessgo.ai)
         // Phase 5 will add custom domains from DB
@@ -271,25 +271,54 @@ async function publishHandler(req: NextRequest) {
 
         // CRITICAL: Pass blobUrl (not blobKey) to KV
         // This allows proxy to fetch directly without head() API call
-        await atomicPublish(
+        console.log('[Phase 3] Updating KV routing with retry & verification:', {
+          pageId,
+          slug,
+          domains,
+          version,
+        });
+
+        const kvResult = await atomicPublishWithRetry(
           pageId,
           domains,
           version,
-          blobUrl  // Use blobUrl from upload result, not blobKey
+          blobUrl,  // Use blobUrl from upload result, not blobKey
+          { maxRetries: 3, baseDelay: 1000 }
         );
 
-        // Minimal logging (only in dev)
-        if (process.env.NODE_ENV === 'development') {
-          console.log('[Phase 3] KV routing updated:', {
-            pageId,
-            version,
-            domains,
-          });
-        }
+        console.log('[Phase 3] ✓ KV routing updated successfully:', {
+          pageId,
+          version,
+          domains,
+          attempts: kvResult.attempts,
+          verified: kvResult.verified,
+        });
+
       } catch (kvError) {
-        // Don't fail publish if KV update fails
-        // Middleware will fall back to SSR
-        console.error('[Phase 3] KV update failed (non-critical):', kvError);
+        // CRITICAL: KV update failed after retries - this is a fatal error
+        // Without KV entry, the page won't be accessible via subdomain
+        const errorMsg = kvError instanceof Error ? kvError.message : 'Unknown KV error';
+
+        console.error('[Phase 3] ❌ CRITICAL: KV update failed after all retries:', {
+          error: errorMsg,
+          pageId,
+          slug,
+          blobUrl,
+        });
+
+        // Set failed state in DB
+        await prisma.publishedPage.update({
+          where: { id: pageId },
+          data: {
+            publishState: 'failed',
+            publishError: `KV routing update failed: ${errorMsg}`,
+          },
+        });
+
+        // Return error to user - don't silently fail
+        throw new Error(
+          `Failed to update routing. The page was generated but is not accessible. Error: ${errorMsg}`
+        );
       }
 
       const duration = Date.now() - startTime;

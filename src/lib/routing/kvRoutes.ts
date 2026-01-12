@@ -86,3 +86,106 @@ export async function atomicPublish(
     throw new Error(`KV publish failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
+
+/**
+ * Sleep helper for exponential backoff
+ */
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * Publish with retry logic and verification
+ * Attempts up to 3 times with exponential backoff
+ * Verifies KV entry after each attempt
+ * @throws Error if all attempts fail
+ */
+export async function atomicPublishWithRetry(
+  pageId: string,
+  domains: string[],
+  version: string,
+  blobUrl: string,
+  options: { maxRetries?: number; baseDelay?: number } = {}
+): Promise<{ attempts: number; verified: boolean }> {
+  const { maxRetries = 3, baseDelay = 1000 } = options;
+  let lastError: Error | null = null;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      // Log attempt
+      console.log(`[KV] Publish attempt ${attempt}/${maxRetries}:`, {
+        pageId,
+        domains,
+        version,
+      });
+
+      // Attempt publish
+      await atomicPublish(pageId, domains, version, blobUrl);
+
+      // Verify the write succeeded
+      console.log('[KV] Verifying write...');
+      let allVerified = true;
+      const verificationErrors: string[] = [];
+
+      for (const domain of domains) {
+        const routeKey = `route:${domain}:/`;
+        const stored = await kv.get<RouteConfig>(routeKey);
+
+        if (!stored) {
+          allVerified = false;
+          verificationErrors.push(`${routeKey}: entry not found`);
+        } else if (stored.pageId !== pageId) {
+          allVerified = false;
+          verificationErrors.push(
+            `${routeKey}: pageId mismatch (expected ${pageId}, got ${stored.pageId})`
+          );
+        } else if (stored.version !== version) {
+          allVerified = false;
+          verificationErrors.push(
+            `${routeKey}: version mismatch (expected ${version}, got ${stored.version})`
+          );
+        } else if (stored.blobUrl !== blobUrl) {
+          allVerified = false;
+          verificationErrors.push(
+            `${routeKey}: blobUrl mismatch`
+          );
+        }
+      }
+
+      if (allVerified) {
+        console.log(`[KV] ✓ Publish verified successfully on attempt ${attempt}`);
+        return { attempts: attempt, verified: true };
+      } else {
+        throw new Error(
+          `KV verification failed: ${verificationErrors.join(', ')}`
+        );
+      }
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+
+      console.error(`[KV] Attempt ${attempt}/${maxRetries} failed:`, {
+        error: lastError.message,
+        pageId,
+        domains,
+      });
+
+      // If not the last attempt, wait with exponential backoff
+      if (attempt < maxRetries) {
+        const delay = baseDelay * Math.pow(2, attempt - 1);
+        console.log(`[KV] Retrying in ${delay}ms...`);
+        await sleep(delay);
+      }
+    }
+  }
+
+  // All attempts failed
+  const errorMessage = `KV publish failed after ${maxRetries} attempts: ${lastError?.message || 'Unknown error'}`;
+  console.error('[KV] All retry attempts exhausted:', {
+    pageId,
+    domains,
+    version,
+    lastError: lastError?.message,
+  });
+
+  throw new Error(errorMessage);
+}
