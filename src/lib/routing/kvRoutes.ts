@@ -25,7 +25,13 @@ export async function getRouteByKeyEdge(
     }
 
     const data = await response.json();
-    return data.result as RouteConfig | null;
+    if (!data.result) return null;
+
+    // Upstash REST API returns JSON string, need to parse
+    const route = typeof data.result === 'string'
+      ? JSON.parse(data.result)
+      : data.result;
+    return route as RouteConfig;
   } catch (error) {
     console.error('[KV Edge] getRouteByKeyEdge error:', error);
     return null;
