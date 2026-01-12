@@ -341,12 +341,9 @@ async function publishHandler(req: NextRequest) {
     });
 
   } catch (err) {
-    // A09: Security Logging - Safe error handling
-    if (process.env.NODE_ENV !== 'production') {
-      // Log publish errors only in development
-    }
-    return createSecureResponse({ error: 'Internal Server Error' }, 500);
-  }
+  console.error('[publish] fatal error:', err);
+  return createSecureResponse({ error: 'Internal Server Error' }, 500);
+}
 }
 
 // Apply rate limiting to the POST handler
