@@ -1,6 +1,6 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
-import { getRoute } from '@/lib/routing/kvRoutes'
+import { getRouteEdge } from '@/lib/routing/kvRoutes'
 
 const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
@@ -47,7 +47,7 @@ export default clerkMiddleware(async (auth, req) => {
 
         try {
           console.error('[Middleware] Checking KV:', { host, path: originalPath });
-          const routeKey = await getRoute(host, originalPath || '/');
+          const routeKey = await getRouteEdge(host, originalPath || '/');
           console.error('[Middleware] KV result:', { routeKey, found: !!routeKey });
 
           if (routeKey) {

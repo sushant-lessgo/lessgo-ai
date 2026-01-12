@@ -2,7 +2,39 @@ import { kv } from '@vercel/kv';
 import type { RouteConfig } from './types';
 
 /**
+ * Get route config by route key (Edge-compatible)
+ * Uses direct REST API instead of @vercel/kv package
+ * @param routeKey - Format: "route:{host}:{path}"
+ * @returns RouteConfig with blobUrl or null
+ */
+export async function getRouteByKeyEdge(
+  routeKey: string
+): Promise<RouteConfig | null> {
+  try {
+    const url = `${process.env.KV_REST_API_URL}/get/${encodeURIComponent(routeKey)}`;
+
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${process.env.KV_REST_API_TOKEN}`,
+      },
+    });
+
+    if (!response.ok) {
+      console.error('[KV Edge] HTTP error:', response.status);
+      return null;
+    }
+
+    const data = await response.json();
+    return data.result as RouteConfig | null;
+  } catch (error) {
+    console.error('[KV Edge] getRouteByKeyEdge error:', error);
+    return null;
+  }
+}
+
+/**
  * Get route config by route key (used by blob proxy)
+ * @deprecated Use getRouteByKeyEdge() for Edge runtime
  * @param routeKey - Format: "route:{host}:{path}"
  * @returns RouteConfig with blobUrl or null
  */
@@ -19,7 +51,42 @@ export async function getRouteByKey(
 }
 
 /**
+ * Get route configuration for domain + path (Edge-compatible)
+ * Uses direct REST API instead of @vercel/kv package
+ * Used by middleware to check if route exists
+ * @returns route key string if found, null otherwise
+ */
+export async function getRouteEdge(
+  domain: string,
+  path: string = '/'
+): Promise<string | null> {
+  const routeKey = `route:${domain}:${path}`;
+
+  try {
+    const url = `${process.env.KV_REST_API_URL}/exists/${encodeURIComponent(routeKey)}`;
+
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${process.env.KV_REST_API_TOKEN}`,
+      },
+    });
+
+    if (!response.ok) {
+      console.error('[KV Edge] HTTP error:', response.status);
+      return null;
+    }
+
+    const data = await response.json();
+    return data.result > 0 ? routeKey : null;
+  } catch (error) {
+    console.error('[KV Edge] getRouteEdge error:', error);
+    return null; // Graceful fallback to SSR
+  }
+}
+
+/**
  * Get route configuration for domain + path
+ * @deprecated Use getRouteEdge() for Edge runtime
  * Used by middleware to check if route exists
  * @returns route key string if found, null otherwise
  */

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getRouteByKey } from '@/lib/routing/kvRoutes';
+import { getRouteByKeyEdge } from '@/lib/routing/kvRoutes';
 
 export const runtime = 'edge';
 
@@ -29,15 +29,26 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    console.error('[Blob Proxy] Received request:', { routeKey });
+
     // 3. Get route config from KV (includes blobUrl)
-    const route = await getRouteByKey(routeKey);
+    const route = await getRouteByKeyEdge(routeKey);
+
+    console.error('[Blob Proxy] KV lookup result:', {
+      route: route ? 'found' : 'null',
+      hasUrl: !!route?.blobUrl,
+      blobUrl: route?.blobUrl?.substring(0, 50)
+    });
 
     if (!route || !route.blobUrl) {
+      console.error('[Blob Proxy] Returning 404 - route not found');
       return new NextResponse('Page not found', {
         status: 404,
         headers: { 'Content-Type': 'text/plain' },
       });
     }
+
+    console.error('[Blob Proxy] Fetching blob:', route.blobUrl);
 
     // 4. Fetch blob content directly from CDN URL
     // No head() call needed - we have the URL from KV
