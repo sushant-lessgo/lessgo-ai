@@ -19,6 +19,7 @@ const isPublicRoute = createRouteMatcher([
   '/api/admin/migrate-project',
   '/api/admin/transfer-ownership',
   '/api/admin/kv',
+  '/api/admin/env-check',
   '/api/forms/submit',
   '/api/og(.*)',
   '/p/:slug',
@@ -45,7 +46,9 @@ export default clerkMiddleware(async (auth, req) => {
         const originalPath = url.pathname; // Preserve for logging
 
         try {
+          console.error('[Middleware] Checking KV:', { host, path: originalPath });
           const routeKey = await getRoute(host, originalPath || '/');
+          console.error('[Middleware] KV result:', { routeKey, found: !!routeKey });
 
           if (routeKey) {
             // Found in KV - rewrite to blob proxy with ROUTE KEY (not blob key)
@@ -53,12 +56,10 @@ export default clerkMiddleware(async (auth, req) => {
             url.pathname = '/__blob_proxy';
             url.searchParams.set('rk', routeKey); // rk = route key
 
-            // Optional: minimal logging (only in dev)
-            if (process.env.NODE_ENV === 'development') {
-              console.log('[Middleware] KV hit:', { host, path: originalPath });
-            }
-
+            console.error('[Middleware] Rewriting to blob proxy:', routeKey);
             return NextResponse.rewrite(url);
+          } else {
+            console.error('[Middleware] KV not found, falling back to SSR');
           }
         } catch (error) {
           // KV error - log and fall through to legacy SSR

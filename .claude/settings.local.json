@@ -90,7 +90,9 @@
       "Bash(tee:*)",
       "Bash(python:*)",
       "Bash(awk:*)",
-      "Bash(timeout /t 3)"
+      "Bash(timeout /t 3)",
+      "Bash(npx tsx:*)",
+      "Bash(tr:*)"
     ],
     "deny": [],
     "ask": [],
