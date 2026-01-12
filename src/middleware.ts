@@ -26,7 +26,7 @@ const isPublicRoute = createRouteMatcher([
   '/thanks',
   '/privacy',
   '/terms',
-  '/__blob_proxy',
+  '/api/blob-proxy',
 ])
 
 export default clerkMiddleware(async (auth, req) => {
@@ -53,7 +53,7 @@ export default clerkMiddleware(async (auth, req) => {
           if (routeKey) {
             // Found in KV - rewrite to blob proxy with ROUTE KEY (not blob key)
             // Proxy will do KV lookup to prevent user-supplied key spoofing
-            url.pathname = '/__blob_proxy';
+            url.pathname = '/api/blob-proxy';
             url.searchParams.set('rk', routeKey); // rk = route key
 
             console.error('[Middleware] Rewriting to blob proxy:', routeKey);
