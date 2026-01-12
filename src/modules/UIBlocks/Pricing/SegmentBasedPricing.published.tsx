@@ -37,30 +37,48 @@ interface PricingTier {
   isRecommended: boolean;
 }
 
+// Helper: Convert to string if array, return as-is if string
+const ensureString = (value: any, defaultValue: string = ''): string => {
+  if (Array.isArray(value)) {
+    return value.join('|');
+  }
+  return value || defaultValue;
+};
+
+// Helper: Convert nested arrays to semicolon-separated string
+const ensureNestedString = (value: any, defaultValue: string = ''): string => {
+  if (Array.isArray(value)) {
+    return value.map(segment =>
+      Array.isArray(segment) ? segment.join('|') : segment
+    ).join(';');
+  }
+  return value || defaultValue;
+};
+
 // Parse segment-based data from props
 const parseSegmentData = (props: any): Segment[] => {
-  const segmentNames = (props.segment_names || '').split('|').map((n: string) => n.trim()).filter((n: string) => n && n !== '___REMOVED___');
-  const segmentDescriptions = (props.segment_descriptions || '').split('|').map((d: string) => d.trim()).filter((d: string) => d && d !== '___REMOVED___');
-  const segmentUseCases = (props.segment_use_cases || '').split('|').map((u: string) => u.trim()).filter((u: string) => u && u !== '___REMOVED___');
-  const segmentIcons = (props.segment_icons || '').split('|').map((i: string) => i.trim());
-  const recommendedTiers = (props.recommended_tiers || '').split('|').map((r: string) => parseInt(r.trim()) || 0);
+  const segmentNames = ensureString(props.segment_names).split('|').map((n: string) => n.trim()).filter((n: string) => n && n !== '___REMOVED___');
+  const segmentDescriptions = ensureString(props.segment_descriptions).split('|').map((d: string) => d.trim()).filter((d: string) => d && d !== '___REMOVED___');
+  const segmentUseCases = ensureString(props.segment_use_cases).split('|').map((u: string) => u.trim()).filter((u: string) => u && u !== '___REMOVED___');
+  const segmentIcons = ensureString(props.segment_icons).split('|').map((i: string) => i.trim());
+  const recommendedTiers = ensureString(props.recommended_tiers).split('|').map((r: string) => parseInt(r.trim()) || 0);
 
   // Parse tier data for each segment (semicolon-separated segments, pipe-separated tiers)
-  const tierNamesBySegment = (props.tier_names || '').split(';').map((segment: string) =>
+  const tierNamesBySegment = ensureNestedString(props.tier_names).split(';').map((segment: string) =>
     segment.split('|').map((item: string) => item.trim()).filter((item: string) => item && item !== '___REMOVED___')
   );
 
-  const tierPricesBySegment = (props.tier_prices || '').split(';').map((segment: string) =>
+  const tierPricesBySegment = ensureNestedString(props.tier_prices).split(';').map((segment: string) =>
     segment.split('|').map((item: string) => item.trim()).filter((item: string) => item && item !== '___REMOVED___')
   );
 
-  const tierFeaturesBySegment = (props.tier_features || '').split(';').map((segment: string) =>
+  const tierFeaturesBySegment = ensureNestedString(props.tier_features).split(';').map((segment: string) =>
     segment.split('|').map((item: string) =>
       item.split(',').map((feature: string) => feature.trim()).filter((feature: string) => feature && feature !== '___REMOVED___')
     )
   );
 
-  const ctaTextsBySegment = (props.cta_texts || '').split(';').map((segment: string) =>
+  const ctaTextsBySegment = ensureNestedString(props.cta_texts).split(';').map((segment: string) =>
     segment.split('|').map((item: string) => item.trim()).filter((item: string) => item && item !== '___REMOVED___')
   );
 

@@ -337,6 +337,8 @@ export interface LayoutComponentProps {
   manualThemeOverride?: 'warm' | 'cool' | 'neutral'; // ✅ NEW: Manual theme override from store
   publishedPageId?: string; // For form submissions
   pageOwnerId?: string; // For form submissions
+  content?: Record<string, any>; // ✅ NEW (Phase 4): Full content object for form access
+  sections?: string[]; // ✅ NEW (Phase 4): Section ID array for form placement logic
   [key: string]: any; // ✅ Phase 2: Allow dynamic content props from flattened elements
 }
 

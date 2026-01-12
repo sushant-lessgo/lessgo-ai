@@ -22,10 +22,20 @@ import { CheckmarkIconPublished } from '@/components/published/CheckmarkIconPubl
 import { AvatarPublished } from '@/components/published/AvatarPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { getPublishedTextColors, getPublishedTypographyStyles } from '@/lib/publishedTextColors';
+import { FormMarkupPublished } from '@/components/published/FormMarkupPublished';
+import { InlineFormMarkupPublished } from '@/components/published/InlineFormMarkupPublished';
+import { determineFormPlacement } from '@/utils/formPlacement';
 
 // ============================================================================
 // Helper Functions (server-safe, no hooks)
 // ============================================================================
+
+/**
+ * Check if page has a primary CTA section
+ */
+function hasPrimaryCTASection(sections: string[]): boolean {
+  return sections.some(id => id.startsWith('cta-'));
+}
 
 /**
  * Parse customer avatar data from pipe-separated names and JSON URL mapping
@@ -215,7 +225,12 @@ HeroImagePlaceholder.displayName = 'HeroImagePlaceholder';
 // ============================================================================
 
 export default function SplitScreenPublished(props: LayoutComponentProps) {
-  const { sectionId, sectionBackgroundCSS, theme, backgroundType } = props;
+  const { sectionId, sectionBackgroundCSS, theme, backgroundType, publishedPageId, pageOwnerId } = props;
+
+  // Extract button metadata for form detection
+  const sectionData = props.content?.[sectionId];
+  const ctaElement = sectionData?.elements?.cta_text;
+  const buttonConfig = ctaElement?.metadata?.buttonConfig;
 
   // Extract content from props (flattened by LandingPagePublishedRenderer)
   const headline = props.headline || 'Transform Your Business with Smart Automation';
@@ -223,7 +238,7 @@ export default function SplitScreenPublished(props: LayoutComponentProps) {
   const supporting_text = props.supporting_text || 'Save 20+ hours per week with automated workflows that just work.';
   const badge_text = props.badge_text || '';
   const cta_text = props.cta_text || 'Start Free Trial';
-  const secondary_cta_text = props.secondary_cta_text || 'Watch Demo';
+  const secondary_cta_text = props.secondary_cta_text;
   const split_hero_image = props.split_hero_image || '/hero-placeholder.jpg';
   const customer_count = props.customer_count || '500+ happy customers';
   const rating_value = props.rating_value || '4.9/5';
@@ -339,13 +354,71 @@ export default function SplitScreenPublished(props: LayoutComponentProps) {
               {/* CTA Buttons & Trust Indicators */}
               <div className="flex flex-col gap-6 mt-4">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 sm:gap-8">
-                  {/* Primary CTA */}
-                  <CTAButtonPublished
-                    text={cta_text}
-                    backgroundColor={accentColor}
-                    textColor="#FFFFFF"
-                    className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 text-lg px-8 py-4"
-                  />
+                  {/* Primary CTA - Form or Button */}
+                  {(() => {
+                    // Regular button (no form attached)
+                    if (!buttonConfig || buttonConfig.type !== 'form') {
+                      return (
+                        <CTAButtonPublished
+                          text={cta_text}
+                          backgroundColor={accentColor}
+                          textColor="#FFFFFF"
+                          className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 text-lg px-8 py-4"
+                        />
+                      );
+                    }
+
+                    // Form-connected button
+                    const form = props.content?.forms?.[buttonConfig.formId];
+                    if (!form) {
+                      console.warn(`Form not found: ${buttonConfig.formId}`);
+                      return (
+                        <CTAButtonPublished
+                          text={cta_text}
+                          backgroundColor={accentColor}
+                          textColor="#FFFFFF"
+                          className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 text-lg px-8 py-4"
+                        />
+                      );
+                    }
+
+                    // Determine placement
+                    const placement = determineFormPlacement(
+                      form,
+                      buttonConfig.ctaType || 'primary',
+                      'hero',
+                      props.sections || []
+                    );
+
+                    // Render inline form (single-field)
+                    if (placement.placement === 'inline') {
+                      return (
+                        <InlineFormMarkupPublished
+                          form={form}
+                          publishedPageId={publishedPageId || ''}
+                          pageOwnerId={pageOwnerId || ''}
+                          size="large"
+                          variant="primary"
+                          colorTokens={{
+                            bg: accentColor,
+                            text: '#FFFFFF'
+                          }}
+                          className="w-full sm:w-auto"
+                        />
+                      );
+                    }
+
+                    // Multi-field: render button (form renders in CTA section)
+                    return (
+                      <CTAButtonPublished
+                        text={cta_text}
+                        backgroundColor={accentColor}
+                        textColor="#FFFFFF"
+                        href={buttonConfig.behavior === 'scrollTo' ? '#form-section' : undefined}
+                        className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 text-lg px-8 py-4"
+                      />
+                    );
+                  })()}
 
                   {/* Secondary CTA */}
                   {secondary_cta_text && secondary_cta_text !== '___REMOVED___' && (

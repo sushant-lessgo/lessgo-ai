@@ -91,6 +91,40 @@
     form.outerHTML = successHTML;
   }
 
+  // Show inline success UI (for inline forms)
+  function showInlineSuccess(container, successMessage) {
+    const formContainer = container.querySelector('.inline-form-container');
+    if (!formContainer) return;
+
+    const successHTML = `
+      <div class="flex items-center gap-2 text-green-600 font-medium">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+        </svg>
+        <span>${escapeHTML(successMessage || "Thank you! We'll be in touch soon.")}</span>
+      </div>
+    `;
+
+    formContainer.innerHTML = successHTML;
+  }
+
+  // Show inline error (for inline forms)
+  function showInlineError(container, message) {
+    // Remove existing error
+    const existingError = container.querySelector('.inline-form-error');
+    if (existingError) existingError.remove();
+
+    // Create error element
+    const error = document.createElement('div');
+    error.className = 'inline-form-error text-red-600 text-sm mt-2';
+    error.textContent = message;
+
+    container.appendChild(error);
+
+    // Auto-hide after 5s
+    setTimeout(() => error.remove(), 5000);
+  }
+
   // Show error UI
   function showError(form, message) {
     // Remove existing status
@@ -194,15 +228,110 @@
     }
   }
 
+  // Handle inline form submission
+  async function handleInlineSubmit(event) {
+    event.preventDefault();
+
+    const formElement = event.target;
+    const container = formElement.closest('[data-lessgo-inline-form]');
+    if (!container) return;
+
+    const submitButton = formElement.querySelector('button[type="submit"]');
+    const originalButtonText = submitButton ? submitButton.textContent : '';
+
+    // Validate
+    if (!validateForm(formElement)) {
+      return;
+    }
+
+    // Get form config from data attributes
+    const formId = container.dataset.lessgoInlineForm;
+    const pageId = container.dataset.pageId;
+    const ownerId = container.dataset.ownerId;
+    const successMessage = container.dataset.successMessage;
+
+    if (!formId || !pageId || !ownerId) {
+      showInlineError(container, 'Form configuration error. Please contact support.');
+      return;
+    }
+
+    // Disable submit button
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.textContent = 'Submitting...';
+    }
+
+    // Collect form data
+    const formData = new FormData(formElement);
+    const data = {};
+    formData.forEach((value, key) => {
+      data[key] = value;
+    });
+
+    try {
+      // Submit with keepalive for reliability
+      const response = await fetch('/api/forms/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          formId,
+          data,
+          publishedPageId: pageId,
+          userId: ownerId,
+        }),
+        keepalive: true,
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        // Fire analytics event if tracking is enabled
+        if (typeof window._lessgoTrack === 'function') {
+          window._lessgoTrack('form_submit', {
+            formId,
+            pageId,
+            placement: 'inline',
+          });
+        }
+
+        // Show inline success UI
+        showInlineSuccess(container, successMessage);
+      } else {
+        showInlineError(container, result.message || 'Submission failed. Please try again.');
+
+        // Re-enable button
+        if (submitButton) {
+          submitButton.disabled = false;
+          submitButton.textContent = originalButtonText;
+        }
+      }
+    } catch (error) {
+      console.error('Inline form submission error:', error);
+      showInlineError(container, 'Network error. Please check your connection and try again.');
+
+      // Re-enable button
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = originalButtonText;
+      }
+    }
+  }
+
   // Initialize forms on page load
   function initForms() {
+    // Initialize full forms
     const forms = document.querySelectorAll('[data-lessgo-form]');
-
     forms.forEach(form => {
       form.addEventListener('submit', handleSubmit);
     });
 
-    console.log(`[Lessgo Forms] Initialized ${forms.length} form(s)`);
+    // Initialize inline forms
+    const inlineForms = document.querySelectorAll('[data-lessgo-inline-form] form');
+    inlineForms.forEach(form => {
+      form.addEventListener('submit', handleInlineSubmit);
+    });
+
+    console.log(`[Lessgo Forms] Initialized ${forms.length} full form(s) and ${inlineForms.length} inline form(s)`);
   }
 
   // Run on DOMContentLoaded

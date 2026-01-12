@@ -107,10 +107,16 @@ export default async function PublishedPage({ params }: PageProps) {
   const content = page.content as any;
   const { LandingPagePublishedRenderer } = await import('@/modules/generatedLanding/LandingPagePublishedRenderer');
 
+  // Merge section content and forms for renderer
+  const mergedContent = {
+    ...(content.content || {}),  // Section data
+    forms: content.forms || {}    // Forms data
+  };
+
   return (
     <LandingPagePublishedRenderer
       sections={content.layout?.sections || []}
-      content={content.content || {}}
+      content={mergedContent}
       theme={content.layout?.theme || {}}
       publishedPageId={page.id}
       pageOwnerId={page.userId}

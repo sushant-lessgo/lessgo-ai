@@ -18,8 +18,9 @@ import { getComponent, extractSectionType } from './componentRegistry.published'
  * Extract content fields from elements structure
  * Converts: { elements: { headline: { content: "text" } } }
  * To: { headline: "text" }
+ * Also includes forms from fullContent for form-connected buttons
  */
-function extractContentFields(sectionData: any): Record<string, any> {
+function extractContentFields(sectionData: any, fullContent?: any): Record<string, any> {
   const { elements, ...systemProps } = sectionData;
   const contentProps: Record<string, any> = {};
 
@@ -122,7 +123,7 @@ export function LandingPagePublishedRenderer({
         }
 
         // Extract content fields from elements structure
-        const flattenedData = extractContentFields(data);
+        const flattenedData = extractContentFields(data, content);
 
         return (
           <LayoutComponent
@@ -134,6 +135,8 @@ export function LandingPagePublishedRenderer({
             theme={theme}
             publishedPageId={publishedPageId}
             pageOwnerId={pageOwnerId}
+            content={content}
+            sections={sections}
             {...flattenedData}
           />
         );

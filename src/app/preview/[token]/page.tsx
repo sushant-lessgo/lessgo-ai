@@ -48,6 +48,7 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
   const {
     sections,
     content,
+    forms,
     theme,
     title,
     onboardingData,
@@ -347,6 +348,9 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
         textMuted: 'gray-600'
       };
 
+      // Serialize forms to strip non-serializable Zustand properties
+      const safeForms = forms ? JSON.parse(JSON.stringify(forms)) : {};
+
       // Publish the page
       const response = await fetch('/api/publish', {
         method: 'POST',
@@ -355,9 +359,10 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
           slug: customSlug,
           htmlContent,
           title: stripHTMLTags(publishTitle || title || 'Untitled Page'),
-          content: { 
+          content: {
             layout: { sections, theme },
-            content 
+            content,
+            forms: safeForms
           },
           themeValues: {
             primary: colorTokens.accent,

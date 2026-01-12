@@ -179,6 +179,19 @@ async function publishHandler(req: NextRequest) {
 
       // Extract description from hero section
       const contentData = content as any;
+
+      // 🔥 REQUIRED: flatten nested section content
+      // Published renderer expects flat structure, not nested content.content
+      if (contentData.content && typeof contentData.content === 'object') {
+        Object.assign(contentData, contentData.content);
+        delete contentData.content;
+      }
+
+      // 🔥 REQUIRED: ensure forms exist at root
+      if (!contentData.forms) {
+        contentData.forms = {};
+      }
+
       const heroSection = contentData.layout?.sections?.[0];
       const heroContent = contentData[heroSection];
       const description =
