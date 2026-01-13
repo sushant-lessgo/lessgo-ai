@@ -16,6 +16,7 @@ const isPublicRoute = createRouteMatcher([
   '/api/market-insights',
   '/api/validate-fields',
   '/api/upload-image',
+  '/api/proxy-image',
   '/api/admin/migrate-project',
   '/api/admin/transfer-ownership',
   '/api/admin/kv',

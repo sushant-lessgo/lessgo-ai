@@ -511,31 +511,54 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
     selectStockPhoto: (photoId: string) => {
       const state = get();
       const photo = state.images.stockPhotos.searchResults.find((p: any) => p.id === photoId);
-      
+
       if (!photo) {
         logger.warn('⚠️ Photo not found:', photoId);
         return;
       }
-      
-      // Use download URL for better quality
-      const imageUrl = photo.downloadUrl || photo.url;
-      
-      // If there's a target element, replace the image
+
+      // Use Pexels URL immediately for optimistic UX
+      const previewUrl = photo.downloadUrl || photo.url;
       const targetElement = (state.images.stockPhotos as any).targetElement;
+
       if (targetElement) {
-        get().replaceImage(targetElement.sectionId, targetElement.elementKey, imageUrl);
-        
+        // Show preview immediately
+        get().replaceImage(targetElement.sectionId, targetElement.elementKey, previewUrl);
+
+        // Proxy through Sharp in background for compression
+        const tokenId = get().tokenId;
+        if (tokenId) {
+          fetch('/api/proxy-image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pexelsPhotoId: photoId, tokenId }),
+          })
+            .then(async (res) => {
+              if (res.ok) {
+                const { url: blobUrl } = await res.json();
+                // Swap to compressed Blob URL
+                get().replaceImage(targetElement.sectionId, targetElement.elementKey, blobUrl);
+                logger.debug('✅ Stock photo compressed:', { photoId, blobUrl });
+              } else {
+                logger.warn('⚠️ Proxy failed, keeping Pexels URL');
+              }
+            })
+            .catch((err) => {
+              logger.warn('⚠️ Proxy error, keeping Pexels URL:', err);
+            });
+        }
+
         // Clean up target element
         set((state: EditStore) => {
           delete (state.images.stockPhotos as any).targetElement;
         });
       }
-      
+
       // Hide search results
       get().hideStockPhotoSearch();
-      
-      logger.debug('✅ Stock photo selected:', { photoId, imageUrl });
-      return imageUrl;
+
+      logger.debug('✅ Stock photo selected (preview):', { photoId, previewUrl });
+      return previewUrl;
     },
     
     generateImageAltText: async (imageUrl: string) => {
