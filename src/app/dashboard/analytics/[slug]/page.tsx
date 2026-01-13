@@ -9,11 +9,7 @@ import MetricsCards from './components/MetricsCards'
 import TrendChart from './components/TrendChart'
 import TrafficSourcesTable from './components/TrafficSourcesTable'
 import DeviceBreakdown from './components/DeviceBreakdown'
-import ConversionFunnel from './components/ConversionFunnel'
-import InsightsPanel from './components/InsightsPanel'
 import ExportCSV from './components/ExportCSV'
-import LastUpdated from './components/LastUpdated'
-import UTMBuilder from './components/UTMBuilder'
 import EmptyState from './components/EmptyState'
 import { stripHTMLTags } from '@/utils/htmlSanitization'
 
@@ -90,35 +86,11 @@ export default async function AnalyticsPage({ params, searchParams }: PageProps)
     uniqueVisitors: analytics.reduce((sum, day) => sum + day.uniqueVisitors, 0),
     submissions: analytics.reduce((sum, day) => sum + day.formSubmissions, 0),
     conversionRate: 0,
-    avgTimeOnPage: 0,
-    bounceRate: 0,
     ctaClicks: analytics.reduce((sum, day) => sum + day.ctaClicks, 0),
   }
 
   if (totals.views > 0) {
     totals.conversionRate = (totals.submissions / totals.views) * 100
-  }
-
-  // Calculate weighted average time on page
-  const timeOnPageValues = analytics
-    .filter(d => d.avgTimeOnPage !== null)
-    .map(d => ({ time: d.avgTimeOnPage!, weight: d.views }))
-
-  if (timeOnPageValues.length > 0) {
-    const totalWeight = timeOnPageValues.reduce((sum, d) => sum + d.weight, 0)
-    const weightedSum = timeOnPageValues.reduce((sum, d) => sum + (d.time * d.weight), 0)
-    totals.avgTimeOnPage = Math.round(weightedSum / totalWeight)
-  }
-
-  // Calculate weighted average bounce rate
-  const bounceRateValues = analytics
-    .filter(d => d.bounceRate !== null)
-    .map(d => ({ rate: d.bounceRate!, weight: d.views }))
-
-  if (bounceRateValues.length > 0) {
-    const totalWeight = bounceRateValues.reduce((sum, d) => sum + d.weight, 0)
-    const weightedSum = bounceRateValues.reduce((sum, d) => sum + (d.rate * d.weight), 0)
-    totals.bounceRate = weightedSum / totalWeight
   }
 
   // Calculate previous period totals for comparison
@@ -127,37 +99,60 @@ export default async function AnalyticsPage({ params, searchParams }: PageProps)
     uniqueVisitors: previousAnalytics.reduce((sum, day) => sum + day.uniqueVisitors, 0),
     submissions: previousAnalytics.reduce((sum, day) => sum + day.formSubmissions, 0),
     conversionRate: 0,
+    ctaClicks: previousAnalytics.reduce((sum, day) => sum + day.ctaClicks, 0),
   }
 
   if (previousTotals.views > 0) {
     previousTotals.conversionRate = (previousTotals.submissions / previousTotals.views) * 100
   }
 
-  // Aggregate traffic sources (top 5)
-  const allReferrers: Record<string, number> = {}
-  const allUtmSources: Record<string, number> = {}
+  // Prepare sparkline data (last 7 days of current selection)
+  const sparklineData = analytics.slice(-7).map(day => ({
+    date: day.date,
+    views: day.views,
+    conversions: day.formSubmissions,
+    conversionRate: day.views > 0 ? (day.formSubmissions / day.views) * 100 : 0,
+    ctaClicks: day.ctaClicks,
+  }))
+
+  // Aggregate traffic sources with conversion data
+  const referrerData: Record<string, { views: number; conversions: number }> = {}
+  const utmData: Record<string, { views: number; conversions: number }> = {}
 
   analytics.forEach(day => {
     if (day.topReferrers) {
       const refs = day.topReferrers as Record<string, number>
       Object.entries(refs).forEach(([ref, count]) => {
-        allReferrers[ref] = (allReferrers[ref] || 0) + count
+        if (!referrerData[ref]) referrerData[ref] = { views: 0, conversions: 0 }
+        referrerData[ref].views += count
       })
     }
     if (day.topUtmSources) {
       const sources = day.topUtmSources as Record<string, number>
       Object.entries(sources).forEach(([source, count]) => {
-        allUtmSources[source] = (allUtmSources[source] || 0) + count
+        if (!utmData[source]) utmData[source] = { views: 0, conversions: 0 }
+        utmData[source].views += count
       })
     }
   })
 
-  const topReferrers = Object.entries(allReferrers)
-    .sort((a, b) => b[1] - a[1])
+  // Sort by views for now (conversion tracking per-source requires schema change)
+  const topReferrers = Object.entries(referrerData)
+    .map(([name, data]) => ({
+      name,
+      views: data.views,
+      conversionRate: totals.views > 0 ? (data.views / totals.views) * totals.conversionRate : 0,
+    }))
+    .sort((a, b) => b.conversionRate - a.conversionRate)
     .slice(0, 5)
 
-  const topUtmSources = Object.entries(allUtmSources)
-    .sort((a, b) => b[1] - a[1])
+  const topUtmSources = Object.entries(utmData)
+    .map(([name, data]) => ({
+      name,
+      views: data.views,
+      conversionRate: totals.views > 0 ? (data.views / totals.views) * totals.conversionRate : 0,
+    }))
+    .sort((a, b) => b.conversionRate - a.conversionRate)
     .slice(0, 5)
 
   // Device breakdown
@@ -173,132 +168,88 @@ export default async function AnalyticsPage({ params, searchParams }: PageProps)
     tablet: analytics.reduce((sum, d) => sum + d.tabletConversions, 0),
   }
 
-  // Get last update timestamp (most recent analytics entry)
-  const lastUpdate = analytics.length > 0
-    ? analytics.reduce((latest, day) => {
-        return new Date(day.updatedAt) > new Date(latest.updatedAt) ? day : latest
-      }).updatedAt
-    : null
-
-  // Base URL for UTM builder
-  const baseUrl = 'https://lessgo.ai'
-
   return (
-    <div className="flex flex-col min-h-screen bg-white text-brand-text font-body">
+    <div className="flex flex-col min-h-screen bg-gray-50 text-brand-text font-body">
       <Header />
-      <main className="flex-grow w-full max-w-7xl mx-auto px-4 py-8">
+      <main className="flex-grow w-full max-w-6xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center space-x-4">
-            <Link
-              href="/dashboard"
-              className="flex items-center text-brand-mutedText hover:text-brand-text transition"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Dashboard
-            </Link>
-          </div>
-          <ExportCSV analytics={analytics} slug={params.slug} />
+        <div className="flex items-center justify-between mb-6">
+          <Link
+            href="/dashboard"
+            className="flex items-center text-brand-mutedText hover:text-brand-text transition"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Dashboard
+          </Link>
         </div>
 
         <div className="mb-6">
-          <h1 className="text-heading1 font-heading text-landing-textPrimary mb-2">
-            Landing Page Analytics
+          <h1 className="text-2xl font-bold text-brand-text mb-1">
+            {stripHTMLTags(publishedPage.title || 'Untitled Page')}
           </h1>
-          <p className="text-brand-mutedText mb-4">
-            {stripHTMLTags(publishedPage.title || '')}
-          </p>
-          <div className="flex items-center justify-between">
-            <a
-              href={`/p/${params.slug}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-brand-accentPrimary hover:underline"
-            >
-              https://lessgo.ai/p/{params.slug}
-            </a>
-            <LastUpdated lastUpdate={lastUpdate} slug={params.slug} />
-          </div>
+          <a
+            href={`/p/${params.slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-brand-mutedText hover:text-brand-accentPrimary"
+          >
+            lessgo.ai/p/{params.slug} ↗
+          </a>
         </div>
 
-        {/* Date Range Selector */}
-        <div className="flex items-center gap-2 mb-6">
-          <Link
-            href={`/dashboard/analytics/${params.slug}?days=7`}
-            className={`px-3 py-1.5 text-sm rounded-md transition ${
-              validDays === 7
-                ? 'bg-brand-accentPrimary text-white'
-                : 'border border-brand-border hover:bg-gray-50'
-            }`}
-          >
-            Last 7 Days
-          </Link>
-          <Link
-            href={`/dashboard/analytics/${params.slug}?days=30`}
-            className={`px-3 py-1.5 text-sm rounded-md transition ${
-              validDays === 30
-                ? 'bg-brand-accentPrimary text-white'
-                : 'border border-brand-border hover:bg-gray-50'
-            }`}
-          >
-            Last 30 Days
-          </Link>
-          <Link
-            href={`/dashboard/analytics/${params.slug}?days=90`}
-            className={`px-3 py-1.5 text-sm rounded-md transition ${
-              validDays === 90
-                ? 'bg-brand-accentPrimary text-white'
-                : 'border border-brand-border hover:bg-gray-50'
-            }`}
-          >
-            Last 90 Days
-          </Link>
+        {/* Date Range + Export */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            {[7, 30, 90].map((d) => (
+              <Link
+                key={d}
+                href={`/dashboard/analytics/${params.slug}?days=${d}`}
+                className={`px-3 py-1.5 text-sm rounded-md transition ${
+                  validDays === d
+                    ? 'bg-brand-text text-white'
+                    : 'bg-white border border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                {d}d
+              </Link>
+            ))}
+          </div>
+          {analytics.length > 0 && (
+            <ExportCSV analytics={analytics} slug={params.slug} />
+          )}
         </div>
 
         {analytics.length > 0 ? (
           <div className="space-y-6">
-            {/* Metrics Cards */}
-            <MetricsCards totals={totals} previousTotals={previousTotals} />
+            {/* Top: Is this page working? */}
+            <MetricsCards
+              totals={totals}
+              previousTotals={previousTotals}
+              sparklineData={sparklineData}
+            />
 
-            {/* Trend Chart */}
+            {/* Middle: What changed over time? */}
             <TrendChart analytics={analytics} />
 
-            {/* Two-column layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Bottom: What should I do next? */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <TrafficSourcesTable
                 topReferrers={topReferrers}
+                totalViews={totals.views}
+              />
+              <TrafficSourcesTable
                 topUtmSources={topUtmSources}
                 totalViews={totals.views}
+                isUtm
               />
               <DeviceBreakdown
                 deviceTotals={deviceTotals}
                 deviceConversions={deviceConversions}
               />
             </div>
-
-            {/* Conversion Funnel & Insights */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <ConversionFunnel totals={totals} />
-              <InsightsPanel
-                totals={totals}
-                deviceTotals={deviceTotals}
-                deviceConversions={deviceConversions}
-                topReferrers={topReferrers}
-              />
-            </div>
-
-            {/* UTM Builder Tool */}
-            <UTMBuilder baseUrl={baseUrl} slug={params.slug} />
           </div>
         ) : (
-          <>
-            <EmptyState slug={params.slug} publishedPageTitle={publishedPage.title || 'Untitled Page'} />
-
-            {/* Show UTM Builder even when no data */}
-            <div className="mt-6">
-              <UTMBuilder baseUrl={baseUrl} slug={params.slug} />
-            </div>
-          </>
+          <EmptyState slug={params.slug} publishedPageTitle={publishedPage.title || 'Untitled Page'} />
         )}
       </main>
       <Footer />

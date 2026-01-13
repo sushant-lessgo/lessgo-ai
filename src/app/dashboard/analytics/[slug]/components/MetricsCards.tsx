@@ -1,17 +1,28 @@
 'use client'
 
-import { Eye, Users, CheckCircle, TrendingUp, ArrowUp, ArrowDown, Minus } from 'lucide-react'
+import { Eye, Target, TrendingUp, MousePointer, ArrowUp, ArrowDown } from 'lucide-react'
+import { LineChart, Line, ResponsiveContainer } from 'recharts'
+
+interface SparklineData {
+  date: Date
+  views: number
+  conversions: number
+  conversionRate: number
+  ctaClicks: number
+}
 
 interface Totals {
   views: number
   uniqueVisitors: number
   submissions: number
   conversionRate: number
+  ctaClicks: number
 }
 
 interface Props {
   totals: Totals
   previousTotals: Totals
+  sparklineData: SparklineData[]
 }
 
 function calculateChange(current: number, previous: number): {
@@ -19,108 +30,126 @@ function calculateChange(current: number, previous: number): {
   direction: 'up' | 'down' | 'neutral'
 } {
   if (previous === 0) {
-    return { percentage: current > 0 ? 100 : 0, direction: 'neutral' }
+    return { percentage: current > 0 ? 100 : 0, direction: current > 0 ? 'up' : 'neutral' }
   }
-
   const change = ((current - previous) / previous) * 100
-  const direction = change > 0 ? 'up' : change < 0 ? 'down' : 'neutral'
+  return {
+    percentage: Math.abs(change),
+    direction: change > 0 ? 'up' : change < 0 ? 'down' : 'neutral',
+  }
+}
 
-  return { percentage: Math.abs(change), direction }
+function MiniSparkline({ data, dataKey, color }: { data: any[]; dataKey: string; color: string }) {
+  if (data.length < 2) return null
+  return (
+    <div className="w-20 h-8">
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={data}>
+          <Line
+            type="monotone"
+            dataKey={dataKey}
+            stroke={color}
+            strokeWidth={1.5}
+            dot={false}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  )
 }
 
 function MetricCard({
   title,
   value,
+  subtext,
   change,
   icon: Icon,
-  highlight = false,
+  sparklineData,
+  sparklineKey,
+  color,
 }: {
   title: string
   value: string
+  subtext?: string
   change: { percentage: number; direction: 'up' | 'down' | 'neutral' }
-  icon: any
-  highlight?: boolean
+  icon: React.ElementType
+  sparklineData: SparklineData[]
+  sparklineKey: string
+  color: string
 }) {
   return (
-    <div className={`bg-white border ${highlight ? 'border-blue-200 bg-blue-50/30' : 'border-brand-border'} rounded-lg p-6`}>
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm text-brand-mutedText mb-1">{title}</p>
-          <p className="text-3xl font-bold text-brand-text mb-2">{value}</p>
-
-          {change.percentage > 0 && (
-            <div className="flex items-center gap-1 text-sm">
-              {change.direction === 'up' && (
-                <>
-                  <ArrowUp className="w-4 h-4 text-green-600" />
-                  <span className="text-green-600 font-medium">
-                    {change.percentage.toFixed(1)}%
-                  </span>
-                </>
-              )}
-              {change.direction === 'down' && (
-                <>
-                  <ArrowDown className="w-4 h-4 text-red-600" />
-                  <span className="text-red-600 font-medium">
-                    {change.percentage.toFixed(1)}%
-                  </span>
-                </>
-              )}
-              {change.direction === 'neutral' && (
-                <>
-                  <Minus className="w-4 h-4 text-gray-600" />
-                  <span className="text-gray-600 font-medium">
-                    No change
-                  </span>
-                </>
-              )}
-              <span className="text-brand-mutedText">vs previous period</span>
-            </div>
-          )}
+    <div className="bg-white border border-gray-200 rounded-xl p-5">
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex items-center gap-2 text-gray-500">
+          <Icon className="w-4 h-4" />
+          <span className="text-sm font-medium">{title}</span>
         </div>
-
-        <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-          highlight ? 'bg-blue-100' : 'bg-gray-100'
-        }`}>
-          <Icon className={`w-6 h-6 ${highlight ? 'text-blue-600' : 'text-gray-600'}`} />
-        </div>
+        <MiniSparkline data={sparklineData} dataKey={sparklineKey} color={color} />
       </div>
+
+      <div className="mb-1">
+        <span className="text-3xl font-bold text-gray-900">{value}</span>
+        {subtext && (
+          <span className="ml-2 text-sm text-gray-500">{subtext}</span>
+        )}
+      </div>
+
+      {change.percentage > 0 && change.direction !== 'neutral' && (
+        <div className="flex items-center gap-1 text-sm">
+          {change.direction === 'up' ? (
+            <ArrowUp className="w-3 h-3 text-green-600" />
+          ) : (
+            <ArrowDown className="w-3 h-3 text-red-600" />
+          )}
+          <span className={change.direction === 'up' ? 'text-green-600' : 'text-red-600'}>
+            {change.percentage.toFixed(0)}%
+          </span>
+          <span className="text-gray-400">vs prev</span>
+        </div>
+      )}
     </div>
   )
 }
 
-export default function MetricsCards({ totals, previousTotals }: Props) {
-  const viewsChange = calculateChange(totals.views, previousTotals.views)
-  const visitorsChange = calculateChange(totals.uniqueVisitors, previousTotals.uniqueVisitors)
-  const conversionsChange = calculateChange(totals.submissions, previousTotals.submissions)
-  const convRateChange = calculateChange(totals.conversionRate, previousTotals.conversionRate)
-
+export default function MetricsCards({ totals, previousTotals, sparklineData }: Props) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       <MetricCard
-        title="Page Views"
+        title="Views"
         value={totals.views.toLocaleString()}
-        change={viewsChange}
+        subtext={`${totals.uniqueVisitors.toLocaleString()} unique`}
+        change={calculateChange(totals.views, previousTotals.views)}
         icon={Eye}
-      />
-      <MetricCard
-        title="Unique Visitors"
-        value={totals.uniqueVisitors.toLocaleString()}
-        change={visitorsChange}
-        icon={Users}
+        sparklineData={sparklineData}
+        sparklineKey="views"
+        color="#3b82f6"
       />
       <MetricCard
         title="Conversions"
         value={totals.submissions.toLocaleString()}
-        change={conversionsChange}
-        icon={CheckCircle}
+        change={calculateChange(totals.submissions, previousTotals.submissions)}
+        icon={Target}
+        sparklineData={sparklineData}
+        sparklineKey="conversions"
+        color="#22c55e"
       />
       <MetricCard
-        title="Conversion Rate"
-        value={`${totals.conversionRate.toFixed(2)}%`}
-        change={convRateChange}
+        title="Conv. Rate"
+        value={`${totals.conversionRate.toFixed(1)}%`}
+        change={calculateChange(totals.conversionRate, previousTotals.conversionRate)}
         icon={TrendingUp}
-        highlight={true}
+        sparklineData={sparklineData}
+        sparklineKey="conversionRate"
+        color="#8b5cf6"
+      />
+      <MetricCard
+        title="CTA Clicks"
+        value={totals.ctaClicks.toLocaleString()}
+        change={calculateChange(totals.ctaClicks, previousTotals.ctaClicks)}
+        icon={MousePointer}
+        sparklineData={sparklineData}
+        sparklineKey="ctaClicks"
+        color="#f59e0b"
       />
     </div>
   )

@@ -8,8 +8,6 @@ interface AnalyticsData {
   uniqueVisitors: number
   formSubmissions: number
   conversionRate: number
-  avgTimeOnPage: number | null
-  bounceRate: number | null
   ctaClicks: number
   desktopViews: number
   mobileViews: number
@@ -32,8 +30,6 @@ function convertToCSV(data: AnalyticsData[]): string {
     'Unique Visitors',
     'Form Submissions',
     'Conversion Rate (%)',
-    'Avg Time on Page (s)',
-    'Bounce Rate (%)',
     'CTA Clicks',
     'Desktop Views',
     'Mobile Views',
@@ -46,28 +42,18 @@ function convertToCSV(data: AnalyticsData[]): string {
     day.uniqueVisitors,
     day.formSubmissions,
     day.conversionRate.toFixed(2),
-    day.avgTimeOnPage ?? '',
-    day.bounceRate?.toFixed(2) ?? '',
     day.ctaClicks,
     day.desktopViews,
     day.mobileViews,
     day.tabletViews,
   ])
 
-  const csvContent = [
-    headers.join(','),
-    ...rows.map(row => row.join(',')),
-  ].join('\n')
-
-  return csvContent
+  return [headers.join(','), ...rows.map(row => row.join(','))].join('\n')
 }
 
 export default function ExportCSV({ analytics, slug }: Props) {
   const handleExport = () => {
-    if (analytics.length === 0) {
-      alert('No data to export')
-      return
-    }
+    if (analytics.length === 0) return
 
     const csv = convertToCSV(analytics)
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
@@ -84,11 +70,10 @@ export default function ExportCSV({ analytics, slug }: Props) {
   return (
     <button
       onClick={handleExport}
-      disabled={analytics.length === 0}
-      className="flex items-center px-4 py-2 bg-brand-accentPrimary text-white rounded-md hover:bg-brand-logo transition disabled:opacity-50 disabled:cursor-not-allowed"
+      className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-500 hover:text-gray-700 transition"
     >
-      <Download className="w-4 h-4 mr-2" />
-      Export CSV
+      <Download className="w-4 h-4" />
+      Export
     </button>
   )
 }
