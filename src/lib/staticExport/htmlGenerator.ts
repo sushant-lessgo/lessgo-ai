@@ -11,6 +11,9 @@ import React from 'react';
 import { LandingPagePublishedRenderer } from '@/modules/generatedLanding/LandingPagePublishedRenderer';
 import { validateAndResolveAssetURLs } from './assetResolver';
 
+// Self-hosted core fonts (don't load from Google Fonts)
+const CORE_FONTS = new Set(['Inter', 'Sora', 'DM Sans', 'Playfair Display']);
+
 export interface StaticHTMLOptions {
   // Content
   sections: string[];
@@ -227,8 +230,11 @@ function buildHTMLDocument(params: {
   <meta name="twitter:description" content="${escapeHTML(metadata.description)}">
   <meta name="twitter:image" content="${ogImage}">
 
-  <!-- Google Fonts -->
+  <!-- Google Fonts (for non-core fonts only) -->
   ${fontsURL ? `<link href="${fontsURL}" rel="stylesheet">` : ''}
+
+  <!-- Self-hosted core fonts (Inter, Sora, DM Sans, Playfair Display) -->
+  <link rel="stylesheet" href="https://lessgo.ai/assets/fonts-self-hosted.css">
 
   <!-- Shared CSS -->
   <link rel="stylesheet" href="/assets/published.css">
@@ -254,16 +260,23 @@ function buildHTMLDocument(params: {
 
 /**
  * Generate Google Fonts CDN URL with display=swap
+ * Filters out self-hosted core fonts (Inter, Sora, DM Sans, Playfair Display)
  */
 function generateGoogleFontsURL(fonts: string[]): string {
-  if (!fonts.length) return '';
+  if (!fonts || fonts.length === 0) return '';
 
-  // Filter out default fonts already loaded
-  const fontsToLoad = fonts.filter(
-    (f) => f !== 'Inter' && f !== 'Bricolage Grotesque'
-  );
+  // Filter: Only load non-core fonts from Google
+  const fontsToLoad = fonts.filter((f) => {
+    const fontName = f.replace(/['"]/g, '').split(',')[0].trim();
+    // Skip core self-hosted fonts
+    if (CORE_FONTS.has(fontName)) return false;
+    // Skip Inter and Bricolage Grotesque (backward compat)
+    if (fontName === 'Inter' || fontName === 'Bricolage Grotesque') return false;
+    return true;
+  });
 
-  if (!fontsToLoad.length) return '';
+  // If all fonts are self-hosted, return empty string
+  if (fontsToLoad.length === 0) return '';
 
   // Format: https://fonts.googleapis.com/css2?family=Poppins&family=Open+Sans&display=swap
   const families = fontsToLoad
