@@ -83,6 +83,8 @@
       headers: { 'Content-Type': 'application/json' },
       body: payload,
       keepalive: true,
+      credentials: 'omit',  // Force NO cookies/auth headers
+      mode: 'cors',         // Explicit CORS mode
     }).catch(err => {
       console.error('[Lessgo Analytics] Track error:', err);
     });
