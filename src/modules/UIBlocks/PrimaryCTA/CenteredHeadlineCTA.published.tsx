@@ -14,6 +14,9 @@ import { SectionWrapperPublished } from '@/components/published/SectionWrapperPu
 import { CheckmarkIconPublished } from '@/components/published/CheckmarkIconPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { FormMarkupPublished } from '@/components/published/FormMarkupPublished';
+import { InlineFormMarkupPublished } from '@/components/published/InlineFormMarkupPublished';
+import { determineFormPlacement } from '@/utils/formPlacement';
 
 // Theme colors helper (hex values for inline styles)
 const getThemeColors = (theme: UIBlockTheme) => {
@@ -88,6 +91,11 @@ export default function CenteredHeadlineCTAPublished(props: LayoutComponentProps
     (rating_stat && rating_stat !== '___REMOVED___') ||
     (uptime_stat && uptime_stat !== '___REMOVED___');
 
+  // Extract button metadata for form detection
+  const sectionData = props.content?.[sectionId];
+  const ctaElement = sectionData?.elements?.cta_text;
+  const buttonConfig = ctaElement?.metadata?.buttonConfig;
+
   return (
     <SectionWrapperPublished
       sectionId={sectionId}
@@ -140,12 +148,70 @@ export default function CenteredHeadlineCTAPublished(props: LayoutComponentProps
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
           {/* Primary CTA */}
-          <CTAButtonPublished
-            text={cta_text}
-            backgroundColor={theme.colors?.accentColor || '#3B82F6'}
-            textColor="#FFFFFF"
-            className="text-xl px-12 py-6 shadow-2xl hover:shadow-3xl"
-          />
+          {(() => {
+            // Check if button is form-connected
+            if (!buttonConfig || buttonConfig.type !== 'form') {
+              return (
+                <CTAButtonPublished
+                  text={cta_text}
+                  backgroundColor={theme.colors?.accentColor || '#3B82F6'}
+                  textColor="#FFFFFF"
+                  className="text-xl px-12 py-6 shadow-2xl hover:shadow-3xl"
+                />
+              );
+            }
+
+            // Get form from content
+            const form = props.content?.forms?.[buttonConfig.formId];
+            if (!form) {
+              console.warn(`Form not found: ${buttonConfig.formId}`);
+              return (
+                <CTAButtonPublished
+                  text={cta_text}
+                  backgroundColor={theme.colors?.accentColor || '#3B82F6'}
+                  textColor="#FFFFFF"
+                  className="text-xl px-12 py-6 shadow-2xl hover:shadow-3xl"
+                />
+              );
+            }
+
+            // Determine placement
+            const placement = determineFormPlacement(
+              form,
+              buttonConfig.ctaType || 'primary',
+              'cta',
+              props.sections || []
+            );
+
+            // Render inline form (single-field)
+            if (placement.placement === 'inline') {
+              return (
+                <InlineFormMarkupPublished
+                  form={form}
+                  publishedPageId={props.publishedPageId || ''}
+                  pageOwnerId={props.pageOwnerId || ''}
+                  size="large"
+                  variant="primary"
+                  colorTokens={{
+                    bg: theme.colors?.accentColor || '#3B82F6',
+                    text: '#FFFFFF'
+                  }}
+                  className="text-xl px-12 py-6 shadow-2xl hover:shadow-3xl"
+                />
+              );
+            }
+
+            // Multi-field: render button with scroll anchor
+            return (
+              <CTAButtonPublished
+                text={cta_text}
+                backgroundColor={theme.colors?.accentColor || '#3B82F6'}
+                textColor="#FFFFFF"
+                href={buttonConfig.behavior === 'scrollTo' ? '#form-section' : undefined}
+                className="text-xl px-12 py-6 shadow-2xl hover:shadow-3xl"
+              />
+            );
+          })()}
 
           {/* Secondary CTA */}
           {secondary_cta_text && secondary_cta_text.trim() !== '' && secondary_cta_text !== '___REMOVED___' && (

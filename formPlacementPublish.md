@@ -329,9 +329,9 @@ Mark each UIBlock as you complete it:
 
 ### PrimaryCTA
 - [x] CTAWithFormField.published.tsx ✅ COMPLETE (different pattern - FormIsland)
-- [ ] CenteredHeadlineCTA.published.tsx
-- [ ] TestimonialCTACombo.published.tsx
-- [ ] ValueStackCTA.published.tsx
-- [ ] VisualCTAWithMockup.published.tsx
+- [x] CenteredHeadlineCTA.published.tsx ✅ COMPLETE
+- [x] TestimonialCTACombo.published.tsx ✅ COMPLETE
+- [x] ValueStackCTA.published.tsx ✅ COMPLETE
+- [x] VisualCTAWithMockup.published.tsx ✅ COMPLETE
 
-**Progress:** 2/10 complete (20%)
+**Progress:** 6/10 complete (60%)

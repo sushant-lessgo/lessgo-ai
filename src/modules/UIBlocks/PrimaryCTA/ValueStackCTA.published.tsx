@@ -13,6 +13,9 @@ import { CTAButtonPublished } from '@/components/published/CTAButtonPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { FormMarkupPublished } from '@/components/published/FormMarkupPublished';
+import { InlineFormMarkupPublished } from '@/components/published/InlineFormMarkupPublished';
+import { determineFormPlacement } from '@/utils/formPlacement';
 
 // Theme colors helper (hex values for inline styles)
 const getThemeColors = (theme: UIBlockTheme) => {
@@ -92,6 +95,11 @@ export default function ValueStackCTAPublished(props: LayoutComponentProps) {
 
   // Parse value props
   const valueProps = parseValueProps(props);
+
+  // Extract button metadata for form detection
+  const sectionData = props.content?.[sectionId];
+  const ctaElement = sectionData?.elements?.cta_text;
+  const buttonConfig = ctaElement?.metadata?.buttonConfig;
 
   return (
     <SectionWrapperPublished
@@ -202,12 +210,70 @@ export default function ValueStackCTAPublished(props: LayoutComponentProps) {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
             {/* Primary CTA */}
-            <CTAButtonPublished
-              text={cta_text}
-              backgroundColor="#ffffff"
-              textColor={colors.ctaButtonText}
-              className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 px-8 py-4 text-lg"
-            />
+            {(() => {
+              // Check if button is form-connected
+              if (!buttonConfig || buttonConfig.type !== 'form') {
+                return (
+                  <CTAButtonPublished
+                    text={cta_text}
+                    backgroundColor="#ffffff"
+                    textColor={colors.ctaButtonText}
+                    className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 px-8 py-4 text-lg"
+                  />
+                );
+              }
+
+              // Get form from content
+              const form = props.content?.forms?.[buttonConfig.formId];
+              if (!form) {
+                console.warn(`Form not found: ${buttonConfig.formId}`);
+                return (
+                  <CTAButtonPublished
+                    text={cta_text}
+                    backgroundColor="#ffffff"
+                    textColor={colors.ctaButtonText}
+                    className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 px-8 py-4 text-lg"
+                  />
+                );
+              }
+
+              // Determine placement
+              const placement = determineFormPlacement(
+                form,
+                buttonConfig.ctaType || 'primary',
+                'cta',
+                props.sections || []
+              );
+
+              // Render inline form (single-field)
+              if (placement.placement === 'inline') {
+                return (
+                  <InlineFormMarkupPublished
+                    form={form}
+                    publishedPageId={props.publishedPageId || ''}
+                    pageOwnerId={props.pageOwnerId || ''}
+                    size="large"
+                    variant="primary"
+                    colorTokens={{
+                      bg: '#ffffff',
+                      text: colors.ctaButtonText
+                    }}
+                    className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 px-8 py-4 text-lg"
+                  />
+                );
+              }
+
+              // Multi-field: render button with scroll anchor
+              return (
+                <CTAButtonPublished
+                  text={cta_text}
+                  backgroundColor="#ffffff"
+                  textColor={colors.ctaButtonText}
+                  href={buttonConfig.behavior === 'scrollTo' ? '#form-section' : undefined}
+                  className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 px-8 py-4 text-lg"
+                />
+              );
+            })()}
 
             {/* Secondary CTA */}
             {secondary_cta_text && secondary_cta_text.trim() !== '' && secondary_cta_text !== '___REMOVED___' && (
