@@ -40,6 +40,7 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
     updateElementContent,
     uploadImage,
     hideElementToolbar,
+    tokenId,
   } = useEditStore();
 
   // Stub executeAction (removed in V2 refactor)
@@ -408,14 +409,28 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
             setShowStockPhotos(false);
           }}
           onSelectImage={(stockPhoto) => {
-            // Update the element content so the image actually displays
             const targetInfo = parseTargetId(targetId);
             if (targetInfo) {
-              updateElementContent(targetInfo.sectionId, targetInfo.elementKey, stockPhoto.url);
-            } else {
-              // console.error('❌ Could not parse targetId for stock photo:', targetId);
-            }
+              // Show preview immediately (optimistic UX)
+              updateElementContent(targetInfo.sectionId, targetInfo.elementKey, stockPhoto.downloadUrl || stockPhoto.url);
 
+              // Proxy through Sharp in background for compression
+              if (tokenId) {
+                fetch('/api/proxy-image', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ pexelsPhotoId: stockPhoto.id, tokenId }),
+                })
+                  .then(res => res.ok ? res.json() : null)
+                  .then(data => {
+                    if (data?.url) {
+                      updateElementContent(targetInfo.sectionId, targetInfo.elementKey, data.url);
+                      logger.debug('✅ Stock photo compressed:', { id: stockPhoto.id, url: data.url });
+                    }
+                  })
+                  .catch(() => logger.warn('⚠️ Proxy failed, keeping original URL'));
+              }
+            }
             setShowStockPhotos(false);
           }}
         />,
