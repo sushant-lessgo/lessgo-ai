@@ -473,6 +473,73 @@ model PageAnalytics {
 
 ---
 
+## Phase 5 Implementation Status (Updated: 2026-01-13)
+
+### ✅ IMPLEMENTED (6/7 Items)
+
+1. **Enhanced Publish API** - `src/app/api/publish/route.ts`
+   - Publishing state management (draft → publishing → published → failed)
+   - Static HTML generation via Phase 1 generator
+   - Blob upload with version tracking
+   - Atomic KV routing with retry & verification
+   - Error handling with DB rollback
+   - Version history persistence in `PublishedPageVersion` table
+   - Async version cleanup (keeps last 10)
+
+2. **Database Schema Updates** - `prisma/schema.prisma`
+   - `PublishedPage` additions: `publishState`, `currentVersionId`, `lastPublishAt`, `publishError`, `analyticsEnabled`
+   - New `PublishedPageVersion` model for version history
+   - Foreign key relations with cascading deletes
+
+3. **KV Routing with Retry & Verification** - `src/lib/routing/kvRoutes.ts`
+   - `atomicPublish()` - atomic KV updates for all domains
+   - `atomicPublishWithRetry()` - 3-attempt retry with exponential backoff
+   - KV verification after each write
+   - Edge-compatible REST API functions
+
+4. **Blob Proxy Route** - `src/app/api/blob-proxy/route.ts`
+   - Edge runtime optimized
+   - Route key validation (not user-supplied blob keys)
+   - KV lookup via route key
+   - Direct blob fetch from CDN URL
+   - Conservative cache headers
+   - Security headers (X-Content-Type-Options, CORS)
+
+5. **Middleware Integration** - `src/middleware.ts`
+   - Subdomain extraction for published pages
+   - KV routing lookup (edge-optimized)
+   - Rewrite to `blob-proxy` with route key
+   - Fallback to legacy SSR if KV fails
+
+6. **Version Cleanup Implementation** - `src/lib/staticExport/versionCleanup.ts`
+   - Keeps last 10 versions (configurable)
+   - Async cleanup (fire-and-forget)
+   - Deletes both blob files and DB records
+   - Graceful error handling
+
+### ❌ DEFERRED (1/7 Items) - Implement Later
+
+7. **Rollback API & Version History UI** - **SKIPPED FOR NOW**
+   - **Missing:** `src/app/api/publish/rollback/route.ts` (~100 lines)
+     - Should verify ownership
+     - Call `rollbackVersion()` to swap KV entries
+     - Update DB `currentVersionId` and `lastPublishAt`
+
+   - **Missing:** `src/components/dashboard/VersionHistory.tsx` (~150 lines)
+     - Display last 5 versions from DB
+     - Show version timestamps, "Current" badges
+     - Rollback button with confirmation modal
+     - Integration point: project settings or publish modal
+
+   **Rationale:** System is production-ready for static export + republish (Phases 1-4). Rollback UI is nice-to-have, not critical path.
+
+   **Future Questions to Resolve:**
+   - Where to integrate version history UI (dashboard, modal, separate page)?
+   - Rollback ownership verification requirements?
+   - Multi-domain rollback handling (atomic swap all domains)?
+
+---
+
 ## Migration Strategy
 
 ### Backward Compatibility
