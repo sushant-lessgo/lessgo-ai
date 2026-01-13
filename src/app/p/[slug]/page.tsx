@@ -78,6 +78,7 @@ export default async function PublishedPage({ params }: PageProps) {
       title: true,
       userId: true,
       content: true,
+      analyticsEnabled: true,
     },
   });
 
@@ -120,6 +121,8 @@ export default async function PublishedPage({ params }: PageProps) {
       theme={content.layout?.theme || {}}
       publishedPageId={page.id}
       pageOwnerId={page.userId}
+      slug={page.slug}
+      analyticsEnabled={page.analyticsEnabled || false}
     />
   );
 }

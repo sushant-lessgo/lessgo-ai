@@ -67,17 +67,18 @@
 
   // Send event via sendBeacon or fetch fallback
   function sendEvent(eventData) {
+    const API_URL = 'https://lessgo.ai/api/analytics/event';
     const payload = JSON.stringify(eventData);
 
     // Try sendBeacon first (preferred for page unload)
     if (navigator.sendBeacon) {
       const blob = new Blob([payload], { type: 'application/json' });
-      const sent = navigator.sendBeacon('/api/analytics/event', blob);
+      const sent = navigator.sendBeacon(API_URL, blob);
       if (sent) return;
     }
 
     // Fallback to fetch with keepalive
-    fetch('/api/analytics/event', {
+    fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: payload,

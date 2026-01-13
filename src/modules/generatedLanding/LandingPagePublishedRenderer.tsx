@@ -12,6 +12,7 @@
  */
 
 import React from 'react';
+import Script from 'next/script';
 import { getComponent, extractSectionType } from './componentRegistry.published';
 
 /**
@@ -43,6 +44,8 @@ interface LandingPagePublishedRendererProps {
   className?: string;
   publishedPageId?: string;     // For analytics (optional)
   pageOwnerId?: string;         // For analytics (optional)
+  slug?: string;                // For analytics tracking
+  analyticsEnabled?: boolean;   // Enable analytics beacon
 }
 
 export function LandingPagePublishedRenderer({
@@ -51,7 +54,9 @@ export function LandingPagePublishedRenderer({
   theme,
   className = '',
   publishedPageId,
-  pageOwnerId
+  pageOwnerId,
+  slug,
+  analyticsEnabled
 }: LandingPagePublishedRendererProps) {
   // 1. Extract sectionLayouts from content
   const sectionLayouts: Record<string, string> = {};
@@ -163,6 +168,16 @@ export function LandingPagePublishedRenderer({
         `.trim()
       }}
     />
+
+    {/* Analytics Script (conditionally injected) */}
+    {analyticsEnabled && publishedPageId && slug && (
+      <Script
+        src="https://lessgo.ai/assets/a.v1.js"
+        data-page-id={publishedPageId}
+        data-slug={slug}
+        strategy="afterInteractive"
+      />
+    )}
   </>
   );
 }
