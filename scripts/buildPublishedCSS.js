@@ -285,13 +285,16 @@ async function buildPublishedCSS() {
     );
     console.log('✅ Created temporary Tailwind config');
 
-    // Create input CSS with color-variables import
+    // Create input CSS with color-variables and fonts-self-hosted imports
     const inputCSS = `@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* Import color-variables.css for CSS variable system */
 @import './src/styles/color-variables.css';
+
+/* Import self-hosted fonts for performance optimization */
+@import './src/styles/fonts-self-hosted.css';
 `;
 
     const inputCSSPath = path.join(rootDir, 'published.input.css');

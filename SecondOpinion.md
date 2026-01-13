@@ -1,52 +1,58 @@
-Your write-up is directionally correct about the mechanism (KV only has /, so /assets/... misses and falls through → 404). But the proposed fix (redirect /assets + /_next to main domain) is a band-aid that will work in some cases and bite you later.
+I agree with the **first half** (root cause), but **not with the “Solution” as stated**.
 
-Here’s my take, very specifically:
+## ✅ Root cause (yes)
 
-What’s good in it
+Yes: what you’re doing right now (`metadata.other = { links: JSON.stringify([...]) }`) only produces:
 
-✅ Correct diagnosis: HTML is served via KV/Blob-proxy, assets are not, so /assets/published.css on the subdomain has no backing file/route.
+```html
+<meta name="links" content="[...]">
+```
 
-✅ Correct observation: middleware lookup key is path-specific; no entry for /assets/... → SSR handler → 404.
+That **does not create real `<link>` tags**, so the browser won’t preload anything. So the conclusion “no `<link rel="preload">` tags appearing” is correct, and the cause is essentially “wrong mechanism”.
 
-What I don’t like about the fix (redirect)
-1) Redirect is the wrong primitive (you want rewrite/proxy, not redirect)
+Also: it’s fair to say **metadata.other won’t generate `<link>` tags** (it becomes `<meta name="...">`). So yes.
 
-A 307/308 redirect makes the browser change origin to lessgo.ai. That can introduce:
+## ❌ “Solution” (I wouldn’t do it that way)
 
-CORS / font loading edge cases (usually fine if same eTLD+1, but still)
+> “Client Component with document.head.appendChild() during useEffect… This creates DOM elements that persist in the HTML.”
 
-cookie/credential differences
+This is the part I disagree with:
 
-caching weirdness (browser caches redirects aggressively sometimes)
+* `useEffect` runs **after hydration**, so it’s **too late for LCP improvements**. The whole point is to make fonts start loading *before* rendering.
+* It **does not persist in the HTML source** (View Source is server HTML). It only mutates the DOM after JS runs.
+* On slow mobile devices, this is exactly when you *don’t* want to wait for JS to add critical hints.
 
-analytics attribution quirks (referrer/origin changes)
+## What to do instead (correct fix)
 
-Better to rewrite to an internal handler that fetches the asset (server-side) and returns it.
+You want the `<link>` tags **in the server-rendered `<head>`**.
 
-2) Redirecting /_next/* is risky
+Use one of these:
 
-/_next/ assets are deployment/build-specific and include:
+### Option A) Put `<link>` tags directly in `app/p/layout.tsx`
 
-chunk hashes
+```tsx
+export default function PublishedLayout({ children }) {
+  return (
+    <html lang="en">
+      <head>
+        <link rel="preload" as="font" href="/fonts/sora/sora-v17-latin-700.woff2" type="font/woff2" crossOrigin="anonymous" />
+        <link rel="preload" as="font" href="/fonts/inter/inter-v20-latin-regular.woff2" type="font/woff2" crossOrigin="anonymous" />
+      </head>
+      <body>{children}</body>
+    </html>
+  );
+}
+```
 
-runtime routes
+### Option B) Use `generateMetadata()` and return `other`? (not for `<link>`)
 
-image optimizer paths
+Metadata API supports `icons`, `alternates`, etc. But for arbitrary `<link>` preload, the clean approach is still **render `<link>` in the layout head**.
 
-potentially different behavior between subdomain route and main domain route
+---
 
-If page3.lessgo.ai is served from the same deployment as lessgo.ai, /_next/* should already exist on that host. If it doesn’t, that’s a smell that you’re mixing “static exported HTML” with “Next runtime assets” incorrectly.
+## One more important thing
 
-Most likely you do not need to touch /_next/* at all.
+Even if preload works, it won’t apply the font unless you also have `@font-face` rules somewhere (CSS). Preload alone doesn’t “activate” a font.
 
-3) It hides the real architectural decision
+So: **real `<link>` + `@font-face`** = correct.
 
-You must choose one of these and stick to it:
-
-Assets are packaged with the app (public/assets/...) so every host serves /assets/* locally.
-
-Assets are on Blob/CDN and HTML uses absolute blob URLs.
-
-Assets are resolved via KV just like HTML (KV entry per asset path, or a shared KV rule for /assets/*).
-
-Redirecting is like: “we didn’t decide, so we’ll bounce the browser elsewhere.”

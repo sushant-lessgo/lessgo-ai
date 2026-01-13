@@ -1,0 +1,149 @@
+/**
+ * Self-Hosted Core Fonts
+ *
+ * These @font-face declarations load core fonts (Inter, Sora, DM Sans, Playfair Display)
+ * from local /public/fonts/ directory instead of Google Fonts.
+ *
+ * Benefits:
+ * - Eliminates 3-hop font chain (HTML → Google CSS → woff2)
+ * - Reduces mobile LCP from 2.4s to target <2s
+ * - Enables preloading of critical hero weights (700, 400)
+ * - Latin subset only (30-40% smaller than full fonts)
+ */
+
+/* ============================================================================
+   Inter - Default font (Heading + Body)
+   ============================================================================ */
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/inter/inter-v20-latin-regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/inter/inter-v20-latin-500.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/inter/inter-v20-latin-600.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/inter/inter-v20-latin-700.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ============================================================================
+   Sora - Bold/Startup/AI tone
+   ============================================================================ */
+
+@font-face {
+  font-family: 'Sora';
+  src: url('/fonts/sora/sora-v17-latin-regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Sora';
+  src: url('/fonts/sora/sora-v17-latin-500.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Sora';
+  src: url('/fonts/sora/sora-v17-latin-600.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Sora';
+  src: url('/fonts/sora/sora-v17-latin-700.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ============================================================================
+   DM Sans - Friendly/Approachable tone
+   ============================================================================ */
+
+@font-face {
+  font-family: 'DM Sans';
+  src: url('/fonts/dm-sans/dm-sans-v17-latin-regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'DM Sans';
+  src: url('/fonts/dm-sans/dm-sans-v17-latin-500.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'DM Sans';
+  src: url('/fonts/dm-sans/dm-sans-v17-latin-600.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'DM Sans';
+  src: url('/fonts/dm-sans/dm-sans-v17-latin-700.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ============================================================================
+   Playfair Display - Premium/Elegant tone (Headings only)
+   Note: No 400 weight - this font is used for headings only
+   ============================================================================ */
+
+@font-face {
+  font-family: 'Playfair Display';
+  src: url('/fonts/playfair-display/playfair-display-v40-latin-500.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Playfair Display';
+  src: url('/fonts/playfair-display/playfair-display-v40-latin-600.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Playfair Display';
+  src: url('/fonts/playfair-display/playfair-display-v40-latin-700.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
