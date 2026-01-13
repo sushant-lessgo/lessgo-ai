@@ -67,7 +67,7 @@
 
   // Send event via sendBeacon or fetch fallback
   function sendEvent(eventData) {
-    const API_URL = 'https://lessgo.ai/api/analytics/event';
+    const API_URL = '/api/analytics/event';  // Same-origin (centralization at DB layer)
     const payload = JSON.stringify(eventData);
 
     // Try sendBeacon first (preferred for page unload)
@@ -83,8 +83,6 @@
       headers: { 'Content-Type': 'application/json' },
       body: payload,
       keepalive: true,
-      credentials: 'omit',  // Force NO cookies/auth headers
-      mode: 'cors',         // Explicit CORS mode
     }).catch(err => {
       console.error('[Lessgo Analytics] Track error:', err);
     });
