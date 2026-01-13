@@ -322,10 +322,10 @@ Mark each UIBlock as you complete it:
 
 ### Hero
 - [x] splitScreen.published.tsx ✅ COMPLETE
-- [ ] Minimalist.published.tsx
-- [ ] centerStacked.published.tsx
-- [ ] imageFirst.published.tsx
-- [ ] leftCopyRightImage.published.tsx
+- [x] Minimalist.published.tsx ⏭️ SKIPPED (no CTA buttons)
+- [x] centerStacked.published.tsx ✅ COMPLETE
+- [x] imageFirst.published.tsx ✅ COMPLETE
+- [x] leftCopyRightImage.published.tsx ✅ COMPLETE
 
 ### PrimaryCTA
 - [x] CTAWithFormField.published.tsx ✅ COMPLETE (different pattern - FormIsland)

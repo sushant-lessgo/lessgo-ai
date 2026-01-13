@@ -24,6 +24,9 @@ import { CheckmarkIconPublished } from '@/components/published/CheckmarkIconPubl
 import { AvatarPublished } from '@/components/published/AvatarPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { getPublishedTextColors, getPublishedTypographyStyles } from '@/lib/publishedTextColors';
+import { FormMarkupPublished } from '@/components/published/FormMarkupPublished';
+import { InlineFormMarkupPublished } from '@/components/published/InlineFormMarkupPublished';
+import { determineFormPlacement } from '@/utils/formPlacement';
 
 // ============================================================================
 // Helper Functions (server-safe, no hooks)
@@ -122,7 +125,7 @@ function DashboardPlaceholder() {
 // ============================================================================
 
 export default function ImageFirstPublished(props: LayoutComponentProps) {
-  const { sectionId, sectionBackgroundCSS, theme, backgroundType } = props;
+  const { sectionId, sectionBackgroundCSS, theme, backgroundType, publishedPageId, pageOwnerId } = props;
 
   // Extract content from props (flattened by LandingPagePublishedRenderer)
   const headline = props.headline || 'Transform Your Business with Smart Automation';
@@ -175,6 +178,11 @@ export default function ImageFirstPublished(props: LayoutComponentProps) {
                           imageValue.startsWith('blob:') ||
                           imageValue.startsWith('data:');
   const imageSrc = isValidImagePath && imageValue !== '' ? imageValue : '';
+
+  // Extract button metadata for form detection
+  const sectionData = props.content?.[sectionId];
+  const ctaElement = sectionData?.elements?.cta_text;
+  const buttonConfig = ctaElement?.metadata?.buttonConfig;
 
   return (
     <SectionWrapperPublished
@@ -247,13 +255,71 @@ export default function ImageFirstPublished(props: LayoutComponentProps) {
 
             {/* CTA Section */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-6">
-              {/* Primary CTA */}
-              <CTAButtonPublished
-                text={cta_text}
-                backgroundColor={accentColor}
-                textColor="#FFFFFF"
-                className="px-8 py-4 font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all"
-              />
+              {/* Primary CTA - Form or Button */}
+              {(() => {
+                // Check if button is form-connected
+                if (!buttonConfig || buttonConfig.type !== 'form') {
+                  return (
+                    <CTAButtonPublished
+                      text={cta_text}
+                      backgroundColor={accentColor}
+                      textColor="#FFFFFF"
+                      className="px-8 py-4 font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all"
+                    />
+                  );
+                }
+
+                // Get form from content
+                const form = props.content?.forms?.[buttonConfig.formId];
+                if (!form) {
+                  console.warn(`Form not found: ${buttonConfig.formId}`);
+                  return (
+                    <CTAButtonPublished
+                      text={cta_text}
+                      backgroundColor={accentColor}
+                      textColor="#FFFFFF"
+                      className="px-8 py-4 font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all"
+                    />
+                  );
+                }
+
+                // Determine placement
+                const placement = determineFormPlacement(
+                  form,
+                  buttonConfig.ctaType || 'primary',
+                  'hero',
+                  props.sections || []
+                );
+
+                // Render inline form (single-field)
+                if (placement.placement === 'inline') {
+                  return (
+                    <InlineFormMarkupPublished
+                      form={form}
+                      publishedPageId={publishedPageId || ''}
+                      pageOwnerId={pageOwnerId || ''}
+                      size="large"
+                      variant="primary"
+                      colorTokens={{
+                        bg: accentColor,
+                        text: '#FFFFFF'
+                      }}
+                      className="w-full sm:w-auto"
+                    />
+                  );
+                }
+
+                // Multi-field: render button (form renders in CTA section)
+                return (
+                  <CTAButtonPublished
+                    text={cta_text}
+                    backgroundColor={accentColor}
+                    textColor="#FFFFFF"
+                    href={buttonConfig.behavior === 'scrollTo' ? '#form-section' : undefined}
+                    className="px-8 py-4 font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all"
+                  />
+                );
+              })()}
 
               {/* Secondary CTA */}
               {secondary_cta_text && secondary_cta_text !== '___REMOVED___' && (
