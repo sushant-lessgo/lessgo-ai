@@ -1,33 +1,977 @@
-
-
-
-In view source
-
-<!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Sora&display=swap" rel="stylesheet">
-
-
-Network tab font
-
-Request URL
-https://fonts.gstatic.com/s/sora/v17/xMQOuFFYT72X5wkB_18qmnndmSdSnk-NKQI.woff2
-Request Method
-GET
-Status Code
-200 OK (from memory cache)
-Remote Address
-[2a00:1450:400e:804::2003]:443
-
-CSS
-
-Request URL
-https://fonts.googleapis.com/css2?family=Sora&display=swap
-Request Method
-GET
-Status Code
-200 OK (from memory cache)
-Remote Address
-[2a00:1450:400e:806::200a]:443
-Referrer Policy
-strict-origin-when-cross-origin
-
+placeholder-image.jpg:1  Failed to load resource: the server responded with a status of 404 (Not Found)
+app-index.js:33 Warning: Expected server HTML to contain a matching <div> in <body>.
+    at div
+    at LandingPagePublishedRenderer (Server)
+    at PublishedPage (Server)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at body
+    at html
+    at PublishedLayout (Server)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at PostHogProvider (webpack-internal:///(app-pages-browser)/./node_modules/posthog-js/react/dist/esm/index.js:51:23)
+    at PostHogProvider (webpack-internal:///(app-pages-browser)/./src/providers/ph-provider.tsx:20:11)
+    at Provider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-context/dist/index.mjs:34:15)
+    at TooltipProvider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-tooltip/dist/index.mjs:58:13)
+    at body
+    at html
+    at __experimental_CheckoutProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/shared/dist/react/index.mjs:117:42)
+    at SWRConfig (webpack-internal:///(app-pages-browser)/./node_modules/swr/dist/_internal/config-context-client-BoS53ST9.mjs:554:13)
+    at OrganizationProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/shared/dist/react/index.mjs:129:3)
+    at ClerkContextProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:1448:11)
+    at ClerkProviderBase (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:1540:11)
+    at Hoc (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/chunk-3664V5SS.mjs:81:5)
+    at ClerkNextOptionsProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/client-boundary/NextOptionsContext.js:17:11)
+    at NextClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:60:13)
+    at ClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:127:13)
+    at ClerkProvider (Server)
+    at RootLayout (Server)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at DevRootNotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/dev-root-not-found-boundary.js:33:11)
+    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
+    at HotReload (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:321:11)
+    at Router (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:207:11)
+    at ErrorBoundaryHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at AppRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:585:13)
+    at ServerRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:112:27)
+    at Root (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:117:11)
+window.console.error @ app-index.js:33
+console.error @ hydration-error-info.js:63
+printWarning @ react-dom.development.js:94
+error @ react-dom.development.js:68
+warnForInsertedHydratedElement @ react-dom.development.js:35155
+didNotFindHydratableInstance @ react-dom.development.js:36286
+warnNonHydratedInstance @ react-dom.development.js:6868
+tryToClaimNextHydratableInstance @ react-dom.development.js:7037
+updateHostComponent$1 @ react-dom.development.js:16621
+beginWork$1 @ react-dom.development.js:18503
+beginWork @ react-dom.development.js:26927
+performUnitOfWork @ react-dom.development.js:25748
+workLoopConcurrent @ react-dom.development.js:25734
+renderRootConcurrent @ react-dom.development.js:25690
+performConcurrentWorkOnRoot @ react-dom.development.js:24504
+workLoop @ scheduler.development.js:256
+flushWork @ scheduler.development.js:225
+performWorkUntilDeadline @ scheduler.development.js:534
+react-dom.development.js:6981 Uncaught Error: Hydration failed because the initial UI does not match what was rendered on the server.
+See more info here: https://nextjs.org/docs/messages/react-hydration-error
+    at throwOnHydrationMismatch (react-dom.development.js:6981:9)
+    at tryToClaimNextHydratableInstance (react-dom.development.js:7040:7)
+    at updateHostComponent$1 (react-dom.development.js:16621:5)
+    at beginWork$1 (react-dom.development.js:18503:14)
+    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
+    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
+    at invokeGuardedCallback (react-dom.development.js:20689:29)
+    at beginWork (react-dom.development.js:26949:7)
+    at performUnitOfWork (react-dom.development.js:25748:12)
+    at workLoopConcurrent (react-dom.development.js:25734:5)
+    at renderRootConcurrent (react-dom.development.js:25690:9)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24504:38)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+throwOnHydrationMismatch @ react-dom.development.js:6981
+tryToClaimNextHydratableInstance @ react-dom.development.js:7040
+updateHostComponent$1 @ react-dom.development.js:16621
+beginWork$1 @ react-dom.development.js:18503
+callCallback @ react-dom.development.js:20565
+invokeGuardedCallbackImpl @ react-dom.development.js:20614
+invokeGuardedCallback @ react-dom.development.js:20689
+beginWork @ react-dom.development.js:26949
+performUnitOfWork @ react-dom.development.js:25748
+workLoopConcurrent @ react-dom.development.js:25734
+renderRootConcurrent @ react-dom.development.js:25690
+performConcurrentWorkOnRoot @ react-dom.development.js:24504
+workLoop @ scheduler.development.js:256
+flushWork @ scheduler.development.js:225
+performWorkUntilDeadline @ scheduler.development.js:534
+app-index.js:33 Warning: An error occurred during hydration. The server HTML was replaced with client content in <#document>.
+window.console.error @ app-index.js:33
+console.error @ hydration-error-info.js:63
+printWarning @ react-dom.development.js:94
+error @ react-dom.development.js:68
+errorHydratingContainer @ react-dom.development.js:36301
+recoverFromConcurrentError @ react-dom.development.js:24593
+performConcurrentWorkOnRoot @ react-dom.development.js:24542
+workLoop @ scheduler.development.js:256
+flushWork @ scheduler.development.js:225
+performWorkUntilDeadline @ scheduler.development.js:534
+app-index.js:33 Warning: In HTML, <html> cannot be a child of <body>.
+This will cause a hydration error.
+    at html
+    at PublishedLayout (Server)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at PostHogProvider (webpack-internal:///(app-pages-browser)/./node_modules/posthog-js/react/dist/esm/index.js:51:23)
+    at PostHogProvider (webpack-internal:///(app-pages-browser)/./src/providers/ph-provider.tsx:20:11)
+    at Provider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-context/dist/index.mjs:34:15)
+    at TooltipProvider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-tooltip/dist/index.mjs:58:13)
+    at body
+    at html
+    at __experimental_CheckoutProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/shared/dist/react/index.mjs:117:42)
+    at SWRConfig (webpack-internal:///(app-pages-browser)/./node_modules/swr/dist/_internal/config-context-client-BoS53ST9.mjs:554:13)
+    at OrganizationProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/shared/dist/react/index.mjs:129:3)
+    at ClerkContextProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:1448:11)
+    at ClerkProviderBase (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:1540:11)
+    at Hoc (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/chunk-3664V5SS.mjs:81:5)
+    at ClerkNextOptionsProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/client-boundary/NextOptionsContext.js:17:11)
+    at NextClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:60:13)
+    at ClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:127:13)
+    at ClerkProvider (Server)
+    at RootLayout (Server)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at DevRootNotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/dev-root-not-found-boundary.js:33:11)
+    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
+    at HotReload (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:321:11)
+    at Router (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:207:11)
+    at ErrorBoundaryHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at AppRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:585:13)
+    at ServerRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:112:27)
+    at Root (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:117:11)
+window.console.error @ app-index.js:33
+console.error @ hydration-error-info.js:63
+printWarning @ react-dom.development.js:94
+error @ react-dom.development.js:68
+validateDOMNesting @ react-dom.development.js:4282
+resolveSingletonInstance @ react-dom.development.js:36312
+completeWork @ react-dom.development.js:19728
+completeUnitOfWork @ react-dom.development.js:25963
+performUnitOfWork @ react-dom.development.js:25759
+workLoopSync @ react-dom.development.js:25464
+renderRootSync @ react-dom.development.js:25419
+recoverFromConcurrentError @ react-dom.development.js:24597
+performConcurrentWorkOnRoot @ react-dom.development.js:24542
+workLoop @ scheduler.development.js:256
+flushWork @ scheduler.development.js:225
+performWorkUntilDeadline @ scheduler.development.js:534
+app-index.js:33 Warning: You are mounting a new html component when a previous one has not first unmounted. It is an error to render more than one html component at a time and attributes and children of these components will likely fail in unpredictable ways. Please only render a single instance of <html> and if you need to mount a new one, ensure any previous ones have unmounted first.
+    at html
+    at PublishedLayout (Server)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at PostHogProvider (webpack-internal:///(app-pages-browser)/./node_modules/posthog-js/react/dist/esm/index.js:51:23)
+    at PostHogProvider (webpack-internal:///(app-pages-browser)/./src/providers/ph-provider.tsx:20:11)
+    at Provider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-context/dist/index.mjs:34:15)
+    at TooltipProvider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-tooltip/dist/index.mjs:58:13)
+    at body
+    at html
+    at __experimental_CheckoutProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/shared/dist/react/index.mjs:117:42)
+    at SWRConfig (webpack-internal:///(app-pages-browser)/./node_modules/swr/dist/_internal/config-context-client-BoS53ST9.mjs:554:13)
+    at OrganizationProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/shared/dist/react/index.mjs:129:3)
+    at ClerkContextProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:1448:11)
+    at ClerkProviderBase (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:1540:11)
+    at Hoc (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/chunk-3664V5SS.mjs:81:5)
+    at ClerkNextOptionsProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/client-boundary/NextOptionsContext.js:17:11)
+    at NextClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:60:13)
+    at ClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:127:13)
+    at ClerkProvider (Server)
+    at RootLayout (Server)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at DevRootNotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/dev-root-not-found-boundary.js:33:11)
+    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
+    at HotReload (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:321:11)
+    at Router (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:207:11)
+    at ErrorBoundaryHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at AppRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:585:13)
+    at ServerRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:112:27)
+    at Root (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:117:11)
+window.console.error @ app-index.js:33
+console.error @ hydration-error-info.js:63
+printWarning @ react-dom.development.js:94
+error @ react-dom.development.js:68
+acquireSingletonInstance @ react-dom.development.js:36365
+commitMutationEffectsOnFiber @ react-dom.development.js:22584
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22488
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22488
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22488
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22593
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22593
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22488
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22488
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22488
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22488
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22681
+commitMutationEffects @ react-dom.development.js:22397
+commitRootImpl @ react-dom.development.js:26213
+commitRoot @ react-dom.development.js:26077
+commitRootWhenReady @ react-dom.development.js:24749
+finishConcurrentRender @ react-dom.development.js:24714
+performConcurrentWorkOnRoot @ react-dom.development.js:24559
+workLoop @ scheduler.development.js:256
+flushWork @ scheduler.development.js:225
+performWorkUntilDeadline @ scheduler.development.js:534
+app-index.js:33 Warning: You are mounting a new head component when a previous one has not first unmounted. It is an error to render more than one head component at a time and attributes and children of these components will likely fail in unpredictable ways. Please only render a single instance of <head> and if you need to mount a new one, ensure any previous ones have unmounted first.
+    at head
+    at html
+    at PublishedLayout (Server)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at PostHogProvider (webpack-internal:///(app-pages-browser)/./node_modules/posthog-js/react/dist/esm/index.js:51:23)
+    at PostHogProvider (webpack-internal:///(app-pages-browser)/./src/providers/ph-provider.tsx:20:11)
+    at Provider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-context/dist/index.mjs:34:15)
+    at TooltipProvider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-tooltip/dist/index.mjs:58:13)
+    at body
+    at html
+    at __experimental_CheckoutProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/shared/dist/react/index.mjs:117:42)
+    at SWRConfig (webpack-internal:///(app-pages-browser)/./node_modules/swr/dist/_internal/config-context-client-BoS53ST9.mjs:554:13)
+    at OrganizationProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/shared/dist/react/index.mjs:129:3)
+    at ClerkContextProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:1448:11)
+    at ClerkProviderBase (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:1540:11)
+    at Hoc (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/chunk-3664V5SS.mjs:81:5)
+    at ClerkNextOptionsProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/client-boundary/NextOptionsContext.js:17:11)
+    at NextClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:60:13)
+    at ClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:127:13)
+    at ClerkProvider (Server)
+    at RootLayout (Server)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at DevRootNotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/dev-root-not-found-boundary.js:33:11)
+    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
+    at HotReload (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:321:11)
+    at Router (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:207:11)
+    at ErrorBoundaryHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at AppRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:585:13)
+    at ServerRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:112:27)
+    at Root (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:117:11)
+window.console.error @ app-index.js:33
+console.error @ hydration-error-info.js:63
+printWarning @ react-dom.development.js:94
+error @ react-dom.development.js:68
+acquireSingletonInstance @ react-dom.development.js:36365
+commitMutationEffectsOnFiber @ react-dom.development.js:22584
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22593
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22488
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22488
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22488
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22593
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22593
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22488
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22488
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22488
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22488
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22681
+commitMutationEffects @ react-dom.development.js:22397
+commitRootImpl @ react-dom.development.js:26213
+commitRoot @ react-dom.development.js:26077
+commitRootWhenReady @ react-dom.development.js:24749
+finishConcurrentRender @ react-dom.development.js:24714
+performConcurrentWorkOnRoot @ react-dom.development.js:24559
+workLoop @ scheduler.development.js:256
+flushWork @ scheduler.development.js:225
+performWorkUntilDeadline @ scheduler.development.js:534
+app-index.js:33 Warning: You are mounting a new body component when a previous one has not first unmounted. It is an error to render more than one body component at a time and attributes and children of these components will likely fail in unpredictable ways. Please only render a single instance of <body> and if you need to mount a new one, ensure any previous ones have unmounted first.
+    at body
+    at html
+    at PublishedLayout (Server)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at PostHogProvider (webpack-internal:///(app-pages-browser)/./node_modules/posthog-js/react/dist/esm/index.js:51:23)
+    at PostHogProvider (webpack-internal:///(app-pages-browser)/./src/providers/ph-provider.tsx:20:11)
+    at Provider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-context/dist/index.mjs:34:15)
+    at TooltipProvider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-tooltip/dist/index.mjs:58:13)
+    at body
+    at html
+    at __experimental_CheckoutProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/shared/dist/react/index.mjs:117:42)
+    at SWRConfig (webpack-internal:///(app-pages-browser)/./node_modules/swr/dist/_internal/config-context-client-BoS53ST9.mjs:554:13)
+    at OrganizationProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/shared/dist/react/index.mjs:129:3)
+    at ClerkContextProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:1448:11)
+    at ClerkProviderBase (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:1540:11)
+    at Hoc (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/chunk-3664V5SS.mjs:81:5)
+    at ClerkNextOptionsProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/client-boundary/NextOptionsContext.js:17:11)
+    at NextClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:60:13)
+    at ClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:127:13)
+    at ClerkProvider (Server)
+    at RootLayout (Server)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at DevRootNotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/dev-root-not-found-boundary.js:33:11)
+    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
+    at HotReload (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:321:11)
+    at Router (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:207:11)
+    at ErrorBoundaryHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at AppRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:585:13)
+    at ServerRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:112:27)
+    at Root (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:117:11)
+window.console.error @ app-index.js:33
+console.error @ hydration-error-info.js:63
+printWarning @ react-dom.development.js:94
+error @ react-dom.development.js:68
+acquireSingletonInstance @ react-dom.development.js:36365
+commitMutationEffectsOnFiber @ react-dom.development.js:22584
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22593
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22488
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22488
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22488
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22593
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22593
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22488
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22488
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22488
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22488
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22449
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22876
+recursivelyTraverseMutationEffects @ react-dom.development.js:22427
+commitMutationEffectsOnFiber @ react-dom.development.js:22681
+commitMutationEffects @ react-dom.development.js:22397
+commitRootImpl @ react-dom.development.js:26213
+commitRoot @ react-dom.development.js:26077
+commitRootWhenReady @ react-dom.development.js:24749
+finishConcurrentRender @ react-dom.development.js:24714
+performConcurrentWorkOnRoot @ react-dom.development.js:24559
+workLoop @ scheduler.development.js:256
+flushWork @ scheduler.development.js:225
+performWorkUntilDeadline @ scheduler.development.js:534
+on-recoverable-error.js:20 Uncaught Error: Hydration failed because the initial UI does not match what was rendered on the server.
+See more info here: https://nextjs.org/docs/messages/react-hydration-error
+    at throwOnHydrationMismatch (react-dom.development.js:6981:9)
+    at tryToClaimNextHydratableInstance (react-dom.development.js:7040:7)
+    at updateHostComponent$1 (react-dom.development.js:16621:5)
+    at beginWork$1 (react-dom.development.js:18503:14)
+    at beginWork (react-dom.development.js:26927:14)
+    at performUnitOfWork (react-dom.development.js:25748:12)
+    at workLoopConcurrent (react-dom.development.js:25734:5)
+    at renderRootConcurrent (react-dom.development.js:25690:9)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24504:38)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+throwOnHydrationMismatch @ react-dom.development.js:6981
+tryToClaimNextHydratableInstance @ react-dom.development.js:7040
+updateHostComponent$1 @ react-dom.development.js:16621
+beginWork$1 @ react-dom.development.js:18503
+beginWork @ react-dom.development.js:26927
+performUnitOfWork @ react-dom.development.js:25748
+workLoopConcurrent @ react-dom.development.js:25734
+renderRootConcurrent @ react-dom.development.js:25690
+performConcurrentWorkOnRoot @ react-dom.development.js:24504
+workLoop @ scheduler.development.js:256
+flushWork @ scheduler.development.js:225
+performWorkUntilDeadline @ scheduler.development.js:534
+on-recoverable-error.js:20 Uncaught Error: Hydration failed because the initial UI does not match what was rendered on the server.
+See more info here: https://nextjs.org/docs/messages/react-hydration-error
+    at throwOnHydrationMismatch (react-dom.development.js:6981:9)
+    at tryToClaimNextHydratableInstance (react-dom.development.js:7040:7)
+    at updateHostComponent$1 (react-dom.development.js:16621:5)
+    at beginWork$1 (react-dom.development.js:18503:14)
+    at beginWork (react-dom.development.js:26927:14)
+    at performUnitOfWork (react-dom.development.js:25748:12)
+    at workLoopConcurrent (react-dom.development.js:25734:5)
+    at renderRootConcurrent (react-dom.development.js:25690:9)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24504:38)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+throwOnHydrationMismatch @ react-dom.development.js:6981
+tryToClaimNextHydratableInstance @ react-dom.development.js:7040
+updateHostComponent$1 @ react-dom.development.js:16621
+beginWork$1 @ react-dom.development.js:18503
+beginWork @ react-dom.development.js:26927
+performUnitOfWork @ react-dom.development.js:25748
+workLoopConcurrent @ react-dom.development.js:25734
+renderRootConcurrent @ react-dom.development.js:25690
+performConcurrentWorkOnRoot @ react-dom.development.js:24504
+workLoop @ scheduler.development.js:256
+flushWork @ scheduler.development.js:225
+performWorkUntilDeadline @ scheduler.development.js:534
+on-recoverable-error.js:20 Uncaught Error: Hydration failed because the initial UI does not match what was rendered on the server.
+See more info here: https://nextjs.org/docs/messages/react-hydration-error
+    at throwOnHydrationMismatch (react-dom.development.js:6981:9)
+    at tryToClaimNextHydratableInstance (react-dom.development.js:7040:7)
+    at updateHostComponent$1 (react-dom.development.js:16621:5)
+    at beginWork$1 (react-dom.development.js:18503:14)
+    at beginWork (react-dom.development.js:26927:14)
+    at performUnitOfWork (react-dom.development.js:25748:12)
+    at workLoopConcurrent (react-dom.development.js:25734:5)
+    at renderRootConcurrent (react-dom.development.js:25690:9)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24504:38)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+throwOnHydrationMismatch @ react-dom.development.js:6981
+tryToClaimNextHydratableInstance @ react-dom.development.js:7040
+updateHostComponent$1 @ react-dom.development.js:16621
+beginWork$1 @ react-dom.development.js:18503
+beginWork @ react-dom.development.js:26927
+performUnitOfWork @ react-dom.development.js:25748
+workLoopConcurrent @ react-dom.development.js:25734
+renderRootConcurrent @ react-dom.development.js:25690
+performConcurrentWorkOnRoot @ react-dom.development.js:24504
+workLoop @ scheduler.development.js:256
+flushWork @ scheduler.development.js:225
+performWorkUntilDeadline @ scheduler.development.js:534
+on-recoverable-error.js:20 Uncaught Error: Hydration failed because the initial UI does not match what was rendered on the server.
+See more info here: https://nextjs.org/docs/messages/react-hydration-error
+    at throwOnHydrationMismatch (react-dom.development.js:6981:9)
+    at tryToClaimNextHydratableInstance (react-dom.development.js:7040:7)
+    at updateHostComponent$1 (react-dom.development.js:16621:5)
+    at beginWork$1 (react-dom.development.js:18503:14)
+    at beginWork (react-dom.development.js:26927:14)
+    at performUnitOfWork (react-dom.development.js:25748:12)
+    at workLoopConcurrent (react-dom.development.js:25734:5)
+    at renderRootConcurrent (react-dom.development.js:25690:9)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24504:38)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+throwOnHydrationMismatch @ react-dom.development.js:6981
+tryToClaimNextHydratableInstance @ react-dom.development.js:7040
+updateHostComponent$1 @ react-dom.development.js:16621
+beginWork$1 @ react-dom.development.js:18503
+beginWork @ react-dom.development.js:26927
+performUnitOfWork @ react-dom.development.js:25748
+workLoopConcurrent @ react-dom.development.js:25734
+renderRootConcurrent @ react-dom.development.js:25690
+performConcurrentWorkOnRoot @ react-dom.development.js:24504
+workLoop @ scheduler.development.js:256
+flushWork @ scheduler.development.js:225
+performWorkUntilDeadline @ scheduler.development.js:534
+on-recoverable-error.js:20 Uncaught Error: Hydration failed because the initial UI does not match what was rendered on the server.
+See more info here: https://nextjs.org/docs/messages/react-hydration-error
+    at throwOnHydrationMismatch (react-dom.development.js:6981:9)
+    at tryToClaimNextHydratableInstance (react-dom.development.js:7040:7)
+    at updateHostComponent$1 (react-dom.development.js:16621:5)
+    at beginWork$1 (react-dom.development.js:18503:14)
+    at beginWork (react-dom.development.js:26927:14)
+    at performUnitOfWork (react-dom.development.js:25748:12)
+    at workLoopConcurrent (react-dom.development.js:25734:5)
+    at renderRootConcurrent (react-dom.development.js:25690:9)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24504:38)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+throwOnHydrationMismatch @ react-dom.development.js:6981
+tryToClaimNextHydratableInstance @ react-dom.development.js:7040
+updateHostComponent$1 @ react-dom.development.js:16621
+beginWork$1 @ react-dom.development.js:18503
+beginWork @ react-dom.development.js:26927
+performUnitOfWork @ react-dom.development.js:25748
+workLoopConcurrent @ react-dom.development.js:25734
+renderRootConcurrent @ react-dom.development.js:25690
+performConcurrentWorkOnRoot @ react-dom.development.js:24504
+workLoop @ scheduler.development.js:256
+flushWork @ scheduler.development.js:225
+performWorkUntilDeadline @ scheduler.development.js:534
+on-recoverable-error.js:20 Uncaught Error: Hydration failed because the initial UI does not match what was rendered on the server.
+See more info here: https://nextjs.org/docs/messages/react-hydration-error
+    at throwOnHydrationMismatch (react-dom.development.js:6981:9)
+    at tryToClaimNextHydratableInstance (react-dom.development.js:7040:7)
+    at updateHostComponent$1 (react-dom.development.js:16621:5)
+    at beginWork$1 (react-dom.development.js:18503:14)
+    at beginWork (react-dom.development.js:26927:14)
+    at performUnitOfWork (react-dom.development.js:25748:12)
+    at workLoopConcurrent (react-dom.development.js:25734:5)
+    at renderRootConcurrent (react-dom.development.js:25690:9)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24504:38)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+throwOnHydrationMismatch @ react-dom.development.js:6981
+tryToClaimNextHydratableInstance @ react-dom.development.js:7040
+updateHostComponent$1 @ react-dom.development.js:16621
+beginWork$1 @ react-dom.development.js:18503
+beginWork @ react-dom.development.js:26927
+performUnitOfWork @ react-dom.development.js:25748
+workLoopConcurrent @ react-dom.development.js:25734
+renderRootConcurrent @ react-dom.development.js:25690
+performConcurrentWorkOnRoot @ react-dom.development.js:24504
+workLoop @ scheduler.development.js:256
+flushWork @ scheduler.development.js:225
+performWorkUntilDeadline @ scheduler.development.js:534
+on-recoverable-error.js:20 Uncaught Error: Hydration failed because the initial UI does not match what was rendered on the server.
+See more info here: https://nextjs.org/docs/messages/react-hydration-error
+    at throwOnHydrationMismatch (react-dom.development.js:6981:9)
+    at tryToClaimNextHydratableInstance (react-dom.development.js:7040:7)
+    at updateHostComponent$1 (react-dom.development.js:16621:5)
+    at beginWork$1 (react-dom.development.js:18503:14)
+    at beginWork (react-dom.development.js:26927:14)
+    at performUnitOfWork (react-dom.development.js:25748:12)
+    at workLoopConcurrent (react-dom.development.js:25734:5)
+    at renderRootConcurrent (react-dom.development.js:25690:9)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24504:38)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+throwOnHydrationMismatch @ react-dom.development.js:6981
+tryToClaimNextHydratableInstance @ react-dom.development.js:7040
+updateHostComponent$1 @ react-dom.development.js:16621
+beginWork$1 @ react-dom.development.js:18503
+beginWork @ react-dom.development.js:26927
+performUnitOfWork @ react-dom.development.js:25748
+workLoopConcurrent @ react-dom.development.js:25734
+renderRootConcurrent @ react-dom.development.js:25690
+performConcurrentWorkOnRoot @ react-dom.development.js:24504
+workLoop @ scheduler.development.js:256
+flushWork @ scheduler.development.js:225
+performWorkUntilDeadline @ scheduler.development.js:534
+react-dom.development.js:16571 Uncaught Error: There was an error while hydrating. Because the error happened outside of a Suspense boundary, the entire root will switch to client rendering.
+See more info here: https://nextjs.org/docs/messages/react-hydration-error
+    at updateHostRoot (react-dom.development.js:16571:57)
+    at beginWork$1 (react-dom.development.js:18486:14)
+    at beginWork (react-dom.development.js:26927:14)
+    at performUnitOfWork (react-dom.development.js:25748:12)
+    at workLoopSync (react-dom.development.js:25464:5)
+    at renderRootSync (react-dom.development.js:25419:7)
+    at recoverFromConcurrentError (react-dom.development.js:24597:20)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24542:26)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+updateHostRoot @ react-dom.development.js:16571
+beginWork$1 @ react-dom.development.js:18486
+beginWork @ react-dom.development.js:26927
+performUnitOfWork @ react-dom.development.js:25748
+workLoopSync @ react-dom.development.js:25464
+renderRootSync @ react-dom.development.js:25419
+recoverFromConcurrentError @ react-dom.development.js:24597
+performConcurrentWorkOnRoot @ react-dom.development.js:24542
+workLoop @ scheduler.development.js:256
+flushWork @ scheduler.development.js:225
+performWorkUntilDeadline @ scheduler.development.js:534
+placeholder-image.jpg:1  Failed to load resource: the server responded with a status of 404 (Not Found)

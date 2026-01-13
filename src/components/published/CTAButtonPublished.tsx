@@ -45,6 +45,7 @@ export function CTAButtonPublished({
         href={href}
         style={style}
         className={baseClasses}
+        data-lessgo-cta=""
       >
         {text}
       </a>
@@ -55,6 +56,7 @@ export function CTAButtonPublished({
     <button
       style={style}
       className={baseClasses}
+      data-lessgo-cta=""
     >
       {text}
     </button>

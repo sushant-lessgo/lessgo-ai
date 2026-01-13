@@ -5,7 +5,6 @@ import { CheckCircle, AlertCircle, Loader2, ArrowRight } from 'lucide-react';
 import posthog from 'posthog-js';
 import type { MVPForm, MVPFormField } from '@/types/core/forms';
 import { logger } from '@/lib/logger';
-import { useAnalytics } from '@/app/p/[slug]/components/AnalyticsContext';
 
 /**
  * InlineFormInput Component
@@ -79,7 +78,6 @@ export function InlineFormInput({
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const analytics = useAnalytics();
 
   // Validate that form has exactly one field
   if (!form.fields || form.fields.length !== 1) {
@@ -164,25 +162,6 @@ export function InlineFormInput({
 
       // Success
       setIsSubmitted(true);
-
-      // Track analytics
-      if (analytics?.trackEvent) {
-        analytics.trackEvent('landing_page_form_submit', {
-          form_id: form.id,
-          form_name: form.name,
-          form_fields: [field.type],
-          form_field_count: 1,
-          placement: 'inline',
-        });
-      }
-
-      if (typeof posthog !== 'undefined') {
-        posthog.capture('form_submitted', {
-          formId: form.id,
-          formName: form.name,
-          placement: 'inline',
-        });
-      }
 
       logger.info('Inline form submitted', { formId: form.id });
     } catch (err: any) {

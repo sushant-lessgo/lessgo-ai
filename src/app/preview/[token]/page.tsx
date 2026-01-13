@@ -79,6 +79,7 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
   const [showSlugModal, setShowSlugModal] = useState(false);
   const [customSlug, setCustomSlug] = useState('');
   const [publishTitle, setPublishTitle] = useState('');
+  const [analyticsEnabled, setAnalyticsEnabled] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [tabManager, setTabManager] = useState<ReturnType<typeof getTabManager> | null>(null);
@@ -371,6 +372,7 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
           },
           tokenId,
           inputText: onboardingData.oneLiner,
+          analyticsEnabled,
         }),
       });
 
@@ -512,6 +514,8 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
           loading={publishing}
           error={publishError}
           existingPublished={existingPublished}
+          analyticsEnabled={analyticsEnabled}
+          onAnalyticsChange={setAnalyticsEnabled}
         />
       )}
 

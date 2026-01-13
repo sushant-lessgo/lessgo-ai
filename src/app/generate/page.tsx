@@ -29,7 +29,7 @@ const [publishError, setPublishError] = useState("");
 const [showSlugModal, setShowSlugModal] = useState(false);
 const [customSlug, setCustomSlug] = useState('');
 const [publishTitle, setPublishTitle] = useState('');
-
+const [analyticsEnabled, setAnalyticsEnabled] = useState(false);
 
 const [tokenId, setTokenId] = useState<string | null>(null);      // 🆕
 const [inputText, setInputText] = useState<string>('');           // 🆕
@@ -153,6 +153,7 @@ const htmlContent = previewElement.innerHTML;
         },
         tokenId,
         inputText,
+        analyticsEnabled,
       }),
     });
 
@@ -287,6 +288,8 @@ const htmlContent = previewElement.innerHTML;
     onConfirm={handlePublish} // This function will use customSlug
     loading={publishing}
     error={publishError}
+    analyticsEnabled={analyticsEnabled}
+    onAnalyticsChange={setAnalyticsEnabled}
   />
 )}
 

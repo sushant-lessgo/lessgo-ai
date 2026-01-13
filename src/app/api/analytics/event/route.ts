@@ -1,11 +1,14 @@
 /**
- * Analytics Event API - Phase 4
+ * Analytics Event API - Privacy-First Beacon
  *
- * Handles analytics events from static published pages
- * - Pageviews, CTA clicks, form submissions
- * - Direct DB upserts (no KV queue in MVP)
- * - CORS support for custom domains
- * - Optional rate limiting
+ * PRIVACY CONTRACT:
+ * - No IP addresses collected or stored
+ * - No cookies or persistent identifiers
+ * - Only derived, non-identifying metadata is persisted
+ * - Raw request data must not be logged in production
+ * - Rate limiting uses compound hash (no identifiable data)
+ *
+ * Handles: pageviews, CTA clicks, form submissions
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -55,31 +58,68 @@ export async function OPTIONS() {
   });
 }
 
-// Extract client IP from Vercel headers
-function getClientIP(request: NextRequest): string {
-  return (
-    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-    request.headers.get('x-real-ip') ||
-    'unknown'
-  );
+// Extract coarse user-agent bucket (no raw UA stored)
+function getUserAgentBucket(userAgent: string): string {
+  const ua = userAgent.toLowerCase();
+
+  // Device type
+  const device = /mobile|android|iphone|ipod|blackberry|iemobile|opera mini/i.test(ua)
+    ? 'mobile'
+    : /tablet|ipad/i.test(ua)
+    ? 'tablet'
+    : 'desktop';
+
+  // Browser family (coarse)
+  const browser = /chrome|crios/i.test(ua)
+    ? 'chrome'
+    : /safari/i.test(ua)
+    ? 'safari'
+    : /firefox/i.test(ua)
+    ? 'firefox'
+    : 'other';
+
+  return `${device}-${browser}`;
 }
 
-// Simple in-memory rate limiting (optional, can be KV-based later)
+// Generate privacy-preserving rate limit key
+function generateRateLimitKey(
+  sessionId: string,
+  userAgent: string,
+  pageId: string,
+  timeWindow: number
+): string {
+  const bucket = getUserAgentBucket(userAgent);
+  const windowStart = Math.floor(Date.now() / timeWindow) * timeWindow;
+
+  // Hash compound key to prevent reverse engineering
+  const crypto = require('crypto');
+  const composite = `${sessionId}:${bucket}:${pageId}:${windowStart}`;
+  return crypto.createHash('sha256').update(composite).digest('hex');
+}
+
+// Rate limiting map (keyed by non-identifying hash)
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 
-function checkRateLimit(ip: string, limit = 1000, windowMs = 3600000): boolean {
+function checkRateLimit(
+  sessionId: string,
+  userAgent: string,
+  pageId: string,
+  limit = 100,
+  windowMs = 3600000
+): boolean {
   const now = Date.now();
-  const entry = rateLimitMap.get(ip);
+  const key = generateRateLimitKey(sessionId, userAgent, pageId, windowMs);
+  const entry = rateLimitMap.get(key);
 
   // Clean expired entries periodically
   if (rateLimitMap.size > 10000) {
-    for (const [key, val] of rateLimitMap.entries()) {
-      if (val.resetAt < now) rateLimitMap.delete(key);
+    for (const [k, val] of rateLimitMap.entries()) {
+      if (val.resetAt < now) rateLimitMap.delete(k);
     }
   }
 
   if (!entry || entry.resetAt < now) {
-    rateLimitMap.set(ip, { count: 1, resetAt: now + windowMs });
+    rateLimitMap.set(key, { count: 1, resetAt: now + windowMs });
     return true;
   }
 
@@ -105,18 +145,7 @@ function detectDevice(userAgent: string): 'desktop' | 'mobile' | 'tablet' {
 
 export async function POST(request: NextRequest) {
   try {
-    // Rate limiting (optional, can be disabled)
-    const clientIP = getClientIP(request);
-    if (process.env.ENABLE_ANALYTICS_RATE_LIMIT === 'true') {
-      if (!checkRateLimit(clientIP)) {
-        return NextResponse.json(
-          { error: 'Rate limit exceeded' },
-          { status: 429, headers: corsHeaders }
-        );
-      }
-    }
-
-    // Parse and validate request body
+    // Parse and validate request body first (need sessionId and pageId for rate limiting)
     const body = await request.json();
     const validationResult = AnalyticsEventSchema.safeParse(body);
 
@@ -129,8 +158,20 @@ export async function POST(request: NextRequest) {
 
     const event = validationResult.data;
 
-    // Override device type from server-side detection if not provided
+    // Get user agent for rate limiting and device detection
     const userAgent = request.headers.get('user-agent') || '';
+
+    // Rate limiting with privacy-preserving compound hash
+    if (process.env.ENABLE_ANALYTICS_RATE_LIMIT === 'true') {
+      if (!checkRateLimit(event.sessionId || 'unknown', userAgent, event.pageId)) {
+        return NextResponse.json(
+          { error: 'Rate limit exceeded' },
+          { status: 429, headers: corsHeaders }
+        );
+      }
+    }
+
+    // Override device type from server-side detection if not provided
     const deviceType = event.deviceType || detectDevice(userAgent);
 
     // Get current date for aggregation

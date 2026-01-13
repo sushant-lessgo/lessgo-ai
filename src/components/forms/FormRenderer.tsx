@@ -9,7 +9,6 @@ import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import posthog from 'posthog-js';
 import type { MVPForm, MVPFormField } from '@/types/core/forms';
 import { logger } from '@/lib/logger';
-import { useAnalytics } from '@/app/p/[slug]/components/AnalyticsContext';
 
 interface FormRendererProps {
   form: MVPForm;
@@ -35,7 +34,6 @@ export function FormRenderer({ form, mode = 'inline', className = '', userId, pu
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
-  const analytics = useAnalytics();
 
   const validateField = (field: MVPFormField, value: any): string | null => {
     // Required field validation
@@ -123,23 +121,6 @@ export function FormRenderer({ form, mode = 'inline', className = '', userId, pu
         if (!response.ok) {
           throw new Error('Failed to submit form');
         }
-      }
-
-      // Analytics: Track form submission
-      const slug = pageSlug || analytics.pageSlug;
-      if (slug) {
-        analytics.trackEvent('landing_page_form_submit', {
-          form_id: form.id,
-          form_name: form.name,
-          form_fields: form.fields.map(f => f.type),
-          form_field_count: form.fields.length,
-        });
-
-        logger.debug('📊 Analytics: Form submission tracked', {
-          slug,
-          formId: form.id,
-          formName: form.name,
-        });
       }
 
       setIsSubmitted(true);

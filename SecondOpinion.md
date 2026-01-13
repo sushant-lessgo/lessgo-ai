@@ -1,37 +1,83 @@
-Claude’s plan is **mostly correct** — and the “root cause” it found is very plausible: **Google Fonts being imported globally in `src/app/globals.css` will affect every route, including `/p/[slug]`**, and it will definitely produce exactly what you’re seeing in View Source (`<link href="https://fonts.googleapis.com/...">` or `@import` requests in CSS).
+🔴 1. Rate limiting purely by sessionId is too weak (as-is)
 
-That said, there are two important nuances:
+You already noted the limitation, but here’s the better compromise that still respects privacy:
 
-## 1) Removing those `@import` lines is the right move
+Recommended approach
+Use a compound key, but never store IP:
 
-✅ Do it.
-Because if `globals.css` is loaded by `src/app/layout.tsx` (typical Next.js), then those `@import url('https://fonts.googleapis.com/...')` calls will happen everywhere. That will keep pulling `fonts.googleapis.com` + `fonts.gstatic.com` in production no matter what you do in `/p/layout.tsx`.
+rateLimitKey = hash(
+  sessionId +
+  userAgentBucket +
+  pageId +
+  timeWindow
+)
 
-So Step 1 is solid.
 
-## 2) Don’t “move Google Fonts to editor-only CSS” unless you truly need it
+Where:
 
-Claude suggests an editor-only CSS file, but you likely **don’t need it** because you already said you have a `loadGoogleFonts()` function for editor mode.
+userAgentBucket = "desktop-chrome" | "mobile-safari" (coarse)
 
-Best practice here:
+no raw UA string
 
-* **Published pages** (`/p/*`): strictly self-hosted + static preloads ✅
-* **Editor pages**: use your existing `loadGoogleFonts()` (dynamic) ✅
+no IP
 
-So I’d skip creating `fonts-editor.css` unless you discover the editor now looks wrong after removing the global imports.
+hash before storing
 
-## 3) One more thing Claude didn’t mention: “family=Sora” without weights
+This gives you:
 
-In your prod source you have:
+better bot resistance
 
-```html
-<link href="https://fonts.googleapis.com/css2?family=Sora&display=swap" rel="stylesheet">
-```
+zero personal data storage
 
-That **doesn’t match** the `globals.css` imports Claude quoted (`Sora:wght@100..800`). So after you remove the global imports, if you *still* see `family=Sora&display=swap`, it means there’s **another injector** (likely your theme injector or a “font loader” that adds a minimal Sora link).
+no consent issues
 
-So after Step 1, do a repo search for:
+You still don’t store identifying data—only a derived hash.
 
-* `family=Sora`
-* `fonts.googleapis.com/css2`
-* `fonts.gstatic.com`
+🔴 2. Explicitly document “derived data only” in code + policy
+
+You should codify your privacy stance in two places:
+
+a) Code comment (important)
+
+At the beacon API entry point:
+
+/**
+ * Privacy contract:
+ * - No IP addresses collected or stored
+ * - No cookies or persistent identifiers
+ * - Only derived, non-identifying metadata is persisted
+ * - Raw request data must not be logged
+ */
+
+
+This protects future contributors from “just adding IPs later”.
+
+b) Privacy policy microcopy
+
+Your badge links to /privacy — make sure that page explicitly states:
+
+“We do not store IP addresses”
+
+“Analytics are anonymous and aggregated”
+
+“Used only to help page owners understand performance”
+
+This matters more than lawyers—users read this now.
+
+🔴 3. Script injection must be server-only, never client toggled
+
+You hinted at this, but I’ll state it clearly:
+
+❌ Don’t conditionally load analytics script via client-side JS
+
+✅ Inject <script src="/assets/a.v1.js"> only at render time if analyticsEnabled === true
+
+Why this matters:
+
+avoids race conditions
+
+prevents “flash of tracking”
+
+guarantees disabled pages truly do nothing
+
+Your test plan implies you’re doing this correctly—just calling it out as non-negotiable.

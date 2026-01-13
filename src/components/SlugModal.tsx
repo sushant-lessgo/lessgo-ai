@@ -19,6 +19,8 @@ type SlugModalProps = {
     title: string;
     publishedAt: string;
   } | null;
+  analyticsEnabled?: boolean;
+  onAnalyticsChange?: (enabled: boolean) => void;
 };
 
 export function SlugModal({
@@ -30,7 +32,9 @@ export function SlugModal({
   onConfirm,
   loading,
   error,
-  existingPublished
+  existingPublished,
+  analyticsEnabled,
+  onAnalyticsChange
 }: SlugModalProps) {
   const fullUrl = `https://${slug}.lessgo.ai`;
   const [isChangingSlug, setIsChangingSlug] = useState(false);
@@ -126,6 +130,26 @@ export function SlugModal({
           <p className={`text-xs mt-1 ${title.length > 60 ? 'text-amber-600' : 'text-gray-500'}`}>
             {title.length}/60 chars {title.length > 60 && '(recommended for SEO)'}
           </p>
+        </div>
+
+        {/* Analytics opt-in checkbox */}
+        <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={analyticsEnabled || false}
+              onChange={(e) => onAnalyticsChange?.(e.target.checked)}
+              className="mt-0.5 w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+            />
+            <div className="flex-1">
+              <span className="text-sm font-medium text-gray-900">
+                Enable analytics tracking
+              </span>
+              <p className="text-xs text-gray-600 mt-0.5">
+                Track pageviews, CTA clicks, and form submissions. No personal data collected.
+              </p>
+            </div>
+          </label>
         </div>
 
         {error && <p className="text-sm text-red-500 mt-2">{error}</p>}

@@ -1,10 +1,4 @@
 {
-  "crons": [
-    {
-      "path": "/api/cron/sync-analytics",
-      "schedule": "0 2 * * *"
-    }
-  ],
   "headers": [
     {
       "source": "/api/forms/:path*",

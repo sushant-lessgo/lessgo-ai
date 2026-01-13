@@ -8,7 +8,6 @@ import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { FormRenderer } from './FormRenderer';
 import { InlineFormInput } from './InlineFormInput';
 import { logger } from '@/lib/logger';
-import { useAnalytics } from '@/app/p/[slug]/components/AnalyticsContext';
 import { determineFormPlacement } from '@/utils/formPlacement';
 import { findPrimaryCTASection } from '@/utils/sectionHelpers';
 
@@ -56,26 +55,9 @@ export function FormConnectedButton({
   const [inputValue, setInputValue] = useState('');
   const [inputError, setInputError] = useState('');
   const { getFormById, sections } = useEditStore();
-  const analytics = useAnalytics();
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
-
-    // Track CTA click analytics
-    const slug = pageSlug || analytics.pageSlug;
-    if (slug && children) {
-      analytics.trackEvent('landing_page_cta_click', {
-        cta_text: typeof children === 'string' ? children : 'Button',
-        cta_action: buttonConfig?.type || 'unknown',
-        cta_behavior: buttonConfig?.behavior || null,
-      });
-
-      logger.debug('📊 Analytics: CTA click tracked', {
-        slug,
-        ctaText: children,
-        action: buttonConfig?.type,
-      });
-    }
 
     // If there's a custom onClick handler, use it
     if (onClick) {
