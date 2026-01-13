@@ -1,58 +1,37 @@
-I agree with the **first half** (root cause), but **not with the “Solution” as stated**.
+Claude’s plan is **mostly correct** — and the “root cause” it found is very plausible: **Google Fonts being imported globally in `src/app/globals.css` will affect every route, including `/p/[slug]`**, and it will definitely produce exactly what you’re seeing in View Source (`<link href="https://fonts.googleapis.com/...">` or `@import` requests in CSS).
 
-## ✅ Root cause (yes)
+That said, there are two important nuances:
 
-Yes: what you’re doing right now (`metadata.other = { links: JSON.stringify([...]) }`) only produces:
+## 1) Removing those `@import` lines is the right move
+
+✅ Do it.
+Because if `globals.css` is loaded by `src/app/layout.tsx` (typical Next.js), then those `@import url('https://fonts.googleapis.com/...')` calls will happen everywhere. That will keep pulling `fonts.googleapis.com` + `fonts.gstatic.com` in production no matter what you do in `/p/layout.tsx`.
+
+So Step 1 is solid.
+
+## 2) Don’t “move Google Fonts to editor-only CSS” unless you truly need it
+
+Claude suggests an editor-only CSS file, but you likely **don’t need it** because you already said you have a `loadGoogleFonts()` function for editor mode.
+
+Best practice here:
+
+* **Published pages** (`/p/*`): strictly self-hosted + static preloads ✅
+* **Editor pages**: use your existing `loadGoogleFonts()` (dynamic) ✅
+
+So I’d skip creating `fonts-editor.css` unless you discover the editor now looks wrong after removing the global imports.
+
+## 3) One more thing Claude didn’t mention: “family=Sora” without weights
+
+In your prod source you have:
 
 ```html
-<meta name="links" content="[...]">
+<link href="https://fonts.googleapis.com/css2?family=Sora&display=swap" rel="stylesheet">
 ```
 
-That **does not create real `<link>` tags**, so the browser won’t preload anything. So the conclusion “no `<link rel="preload">` tags appearing” is correct, and the cause is essentially “wrong mechanism”.
+That **doesn’t match** the `globals.css` imports Claude quoted (`Sora:wght@100..800`). So after you remove the global imports, if you *still* see `family=Sora&display=swap`, it means there’s **another injector** (likely your theme injector or a “font loader” that adds a minimal Sora link).
 
-Also: it’s fair to say **metadata.other won’t generate `<link>` tags** (it becomes `<meta name="...">`). So yes.
+So after Step 1, do a repo search for:
 
-## ❌ “Solution” (I wouldn’t do it that way)
-
-> “Client Component with document.head.appendChild() during useEffect… This creates DOM elements that persist in the HTML.”
-
-This is the part I disagree with:
-
-* `useEffect` runs **after hydration**, so it’s **too late for LCP improvements**. The whole point is to make fonts start loading *before* rendering.
-* It **does not persist in the HTML source** (View Source is server HTML). It only mutates the DOM after JS runs.
-* On slow mobile devices, this is exactly when you *don’t* want to wait for JS to add critical hints.
-
-## What to do instead (correct fix)
-
-You want the `<link>` tags **in the server-rendered `<head>`**.
-
-Use one of these:
-
-### Option A) Put `<link>` tags directly in `app/p/layout.tsx`
-
-```tsx
-export default function PublishedLayout({ children }) {
-  return (
-    <html lang="en">
-      <head>
-        <link rel="preload" as="font" href="/fonts/sora/sora-v17-latin-700.woff2" type="font/woff2" crossOrigin="anonymous" />
-        <link rel="preload" as="font" href="/fonts/inter/inter-v20-latin-regular.woff2" type="font/woff2" crossOrigin="anonymous" />
-      </head>
-      <body>{children}</body>
-    </html>
-  );
-}
-```
-
-### Option B) Use `generateMetadata()` and return `other`? (not for `<link>`)
-
-Metadata API supports `icons`, `alternates`, etc. But for arbitrary `<link>` preload, the clean approach is still **render `<link>` in the layout head**.
-
----
-
-## One more important thing
-
-Even if preload works, it won’t apply the font unless you also have `@font-face` rules somewhere (CSS). Preload alone doesn’t “activate” a font.
-
-So: **real `<link>` + `@font-face`** = correct.
-
+* `family=Sora`
+* `fonts.googleapis.com/css2`
+* `fonts.gstatic.com`
