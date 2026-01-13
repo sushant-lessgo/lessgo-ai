@@ -7,10 +7,10 @@ interface FormSubmission {
   id: string
   formId: string
   formName: string
-  data: Record<string, any>
-  ipAddress?: string
-  userAgent?: string
-  createdAt: string
+  data: unknown
+  ipAddress?: string | null
+  userAgent?: string | null
+  createdAt: Date | string
 }
 
 interface FormSubmissionsTableProps {
@@ -41,8 +41,8 @@ export default function FormSubmissionsTable({ submissions }: FormSubmissionsTab
     }
   }
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
+  const formatDate = (dateInput: Date | string) => {
+    const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
@@ -52,7 +52,12 @@ export default function FormSubmissionsTable({ submissions }: FormSubmissionsTab
     })
   }
 
-  const getMainFields = (data: Record<string, any>) => {
+  const isRecord = (value: unknown): value is Record<string, unknown> => {
+    return typeof value === 'object' && value !== null && !Array.isArray(value)
+  }
+
+  const getMainFields = (data: unknown) => {
+    if (!isRecord(data)) return []
     // Show the first 3 most important fields in the collapsed view
     const priorityFields = ['email', 'name', 'firstName', 'lastName', 'phone', 'company']
     const fields = Object.entries(data)
@@ -108,7 +113,8 @@ export default function FormSubmissionsTable({ submissions }: FormSubmissionsTab
             {submissions.map((submission) => {
               const isExpanded = expandedRows.has(submission.id)
               const mainFields = getMainFields(submission.data)
-              const remainingFieldsCount = Object.keys(submission.data).length - mainFields.length
+              const dataObj = isRecord(submission.data) ? submission.data : {}
+              const remainingFieldsCount = Object.keys(dataObj).length - mainFields.length
 
               return (
                 <tr key={submission.id} className="hover:bg-gray-50">
@@ -171,12 +177,13 @@ export default function FormSubmissionsTable({ submissions }: FormSubmissionsTab
       {submissions.map((submission) => {
         const isExpanded = expandedRows.has(submission.id)
         if (!isExpanded) return null
+        const expandedData = isRecord(submission.data) ? submission.data : {}
 
         return (
           <div key={`${submission.id}-expanded`} className="border-t border-gray-200 bg-gray-50 px-6 py-4">
             <h4 className="text-sm font-medium text-gray-900 mb-3">Complete Submission Data</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {Object.entries(submission.data).map(([key, value]) => {
+              {Object.entries(expandedData).map(([key, value]) => {
                 const fieldKey = `${submission.id}-${key}`
                 const displayValue = String(value)
                 
