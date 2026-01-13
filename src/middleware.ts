@@ -21,6 +21,7 @@ const isPublicRoute = createRouteMatcher([
   '/api/admin/kv',
   '/api/admin/env-check',
   '/api/forms/submit',
+  '/api/analytics/event',
   '/api/og(.*)',
   '/p/:slug',
   '/thanks',
