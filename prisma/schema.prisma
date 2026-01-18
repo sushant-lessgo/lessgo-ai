@@ -287,3 +287,37 @@ model UsageEvent {
   @@index([createdAt])
   @@index([userId])
 }
+
+model IVOCCache {
+  id String @id @default(cuid())
+
+  // Normalized keys (lowercase, trimmed) for lookups
+  categoryKey String
+  audienceKey String
+
+  // Raw values for display
+  categoryRaw String
+  audienceRaw String
+
+  // IVOC data
+  pains           Json // string[]
+  desires         Json // string[]
+  objections      Json // string[]
+  firmBeliefs     Json // string[]
+  shakableBeliefs Json // string[]
+  commonPhrases   Json // string[]
+
+  // Metadata for debugging
+  query      String // Tavily query used
+  rawSources Json // Tavily snippets
+  model      String @default("gpt-4o-mini")
+  version    Int    @default(1)
+  source     String @default("tavily") // tavily, gpt-fallback
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([categoryKey, audienceKey])
+  @@index([categoryKey])
+  @@index([audienceKey])
+}

@@ -1,62 +1,103 @@
-Changes I’d make before implementing
-1) Don’t accept arbitrary imageUrl (SSRF risk)
+## UIBlock selection prompt — what to improve
 
-If the endpoint fetches any URL the client sends, someone can make your server request internal/metadata URLs.
+### ✅ What’s good
 
-Safer pattern:
+* Composition constraints are explicit (“MUST FOLLOW”).
+* You pass **filtered candidates per section**, which is the biggest reliability win.
+* Output includes `selections` + `questions` with `null` when uncertain (good for batching).
 
-Accept pexelsPhotoId (and optionally a size key), not a raw URL
+### 🔧 Fixes / upgrades
 
-Server calls Pexels API to get the correct image URL for that ID
+1. Only one time it can ask questions to user, right or will it be in an infinit loop?
 
-Or at minimum: only allow hosts like images.pexels.com via strict allowlist
+2. **Give each candidate layout metadata**
+   “text-heavy / accordion / image-based / persona-aware” needs to be machine-readable; otherwise the model guesses.
 
-2) Idempotency + caching (avoid paying twice)
+Pass per candidate:
 
-Users will click different photos, reselect, undo/redo, etc. You don’t want to reprocess the same Pexels image repeatedly.
+* `tags: ["text-heavy","accordion","image","persona-aware"]`
+  Example format:
+  `Hero: [CenterStacked(tags:image), Minimalist(tags:text-heavy)]`
+
+3. **Avoid quoting “multiple audiences: true/false” vaguely**
+   Instead pass:
+
+* `personasCount: 2` (or list of personas)
+  So the model can reliably apply persona-aware preference.
+
+4. **Enforce “one selection per section”**
+   Add: “Return exactly one layout (or null) per section listed. Do not invent sections.”
+
+5. **Question format should include `id` + options = layout IDs**
+   To make second pass deterministic:
+
+```json
+{ "id": "Hero.assetImage", "section": "Hero", "question": "...", "options": ["use-text-only", "use-pexels-image"] }
+```
+
+---
+
+## Copy generation prompt — what to improve
+
+### ✅ What’s good
+
+* “Identity” + “Voice” anchors (IVOC phrases + beliefs) help the model stay grounded.
+* You provide **per-element char limits** and **mandatory/optional** rules — excellent.
+* You include card count bounds (min/max/optimal) and “null to exclude”.
+
+### 🔧 Must-fix: you’re only listing ai_generated elements
+
+In your pseudo-code you filter:
+`filter(e => e.generation === 'ai_generated')`
+
+But the spec expects:
+
+* `ai_generated` → model outputs
+* `ai_generated_needs_review` → model outputs BUT flagged
+* `manual_preferred` → skipped in prompt, yes — but your post-processing must handle defaults
+
+So for the prompt, include **both**:
+
+* `ai_generated`
+* `ai_generated_needs_review` (and tell the model to output them, but expect review)
+
+Add a note per element:
+
+* “If element is needs_review: output value, keep realistic, avoid made-up numbers.”
+
+Otherwise the model may not output testimonials/pricing/results content correctly.
+
+### 🔧 Add “don’t hallucinate hard facts” rule
+
+The “No placeholder text” rule is good, but it doesn’t prevent **invented metrics**.
 
 Add:
 
-A deterministic key: sha1(pexelsPhotoId + desiredWidth + quality)
+* “Do not invent statistics, customer names, company logos, or exact numbers. If unknown, write in a way that avoids specific numbers, or return `{ value: '...', needsReview: true }` for review-required fields.”
 
-Store mapping in DB (or even KV) { key -> blobUrl }
+(You already have the needsReview plan — this makes the model use it correctly.)
 
-If exists, return existing blobUrl instantly
+### 🔧 Output format is underspecified for repeaters
 
-3) Validate content type + size limits
+For cards/lists, the model needs to know the **shape**:
 
-Before Sharp:
+* Is `faq_items` an array of `{ q, a }`?
+* Are features arrays of strings, or objects?
+* Are pricing tiers objects?
 
-Ensure response is an image (content-type starts with image/)
+Right now your `ElementValue` allows `string | string[]`, but lots of UIBlocks will require structured arrays (e.g., `{ title, description }`).
 
-Enforce max input bytes (e.g., 15–20MB) to protect memory/timeouts
+You should include **element schemas** (even minimal) per element, e.g.:
 
-Handle Pexels 403/429 gracefully
+* `faq_items`: array of `{ question: string; answer: string }`
+* `feature_cards`: array of `{ headline: string; detail: string }`
 
-4) Choose the right Pexels URL variant
+Otherwise parsing becomes brittle and the model will vary formats.
 
-Pexels provides multiple sizes in src (original, large2x, large, medium…).
-You probably don’t need original.
+### 🔧 Add “return JSON only” + strictness
 
-Preferred:
+Add at bottom:
 
-pick large2x or large depending on your max target (2400px)
+* “Return **valid JSON only**. No markdown, no commentary.”
 
-then Sharp still normalizes
-
-5) UX: don’t block editor more than necessary
-
-A spinner is fine, but make it feel instant:
-
-set a temporary preview immediately (use the Pexels URL in the UI)
-
-swap to blobUrl once ready
-
-if proxy fails, fall back to Pexels URL (with a warning) so the user isn’t stuck
-
-6) Consider AVIF (optional)
-
-If you want maximum LCP wins:
-
-try avif at ~50–60 quality, fallback to webp
-But WebP alone is totally fine for MVP.
+And for each section include a stable `sectionId` key format (e.g., the section name string exactly).

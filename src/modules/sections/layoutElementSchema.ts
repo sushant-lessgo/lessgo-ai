@@ -1,18 +1,28 @@
-interface LayoutElement {
+/**
+ * Generation types for elements:
+ * - ai_generated: AI generates content, ready to use
+ * - manual_preferred: User provides (logo, hero_image), has defaults
+ * - ai_generated_needs_review: AI generates placeholder, flagged "Verify this"
+ * - hybrid: Mix of AI and manual
+ */
+export type GenerationType = 'ai_generated' | 'manual_preferred' | 'ai_generated_needs_review' | 'hybrid';
+
+export interface LayoutElement {
   element: string;
   mandatory: boolean;
-  generation?: 'ai_generated' | 'manual_preferred' | 'hybrid';
+  generation?: GenerationType;
   isCard?: boolean; // Indicates if this element is part of a card structure
   description?: string; // Optional description or guidance for the element
+  charLimit?: number; // Maximum character length for this element
 }
 
-interface CardStructure {
+export interface CardStructure {
   type: 'cards' | 'pairs' | 'items' | 'blocks' | 'steps' | 'triplets' | 'quadruplets' | 'sextuplets' | 'tabbed_pairs' | 'rows' | 'usage_based' | 'column_pairs';
   elements: string[];  // All card elements are mandatory by default
-  generation: 'ai_generated' | 'manual_preferred' | 'hybrid';
+  generation: GenerationType;
 }
 
-interface CardRequirements {
+export interface CardRequirements {
   type: string;
   min: number;
   max: number;
@@ -21,13 +31,13 @@ interface CardRequirements {
   respectUserContent?: boolean; // Prioritize user-provided features
 }
 
-interface UnifiedLayoutElement {
+export interface UnifiedLayoutElement {
   sectionElements: LayoutElement[];
   cardStructure?: CardStructure;
   cardRequirements: CardRequirements | null;
 }
 
-interface LayoutSchema {
+export interface LayoutSchema {
   [layoutName: string]: LayoutElement[] | UnifiedLayoutElement;
 }
 

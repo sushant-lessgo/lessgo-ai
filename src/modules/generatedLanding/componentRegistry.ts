@@ -16,36 +16,36 @@ import AccordionFAQ from '@/modules/UIBlocks/FAQ/AccordionFAQ';
 import AccordionSteps from '@/modules/UIBlocks/HowItWorks/AccordionSteps';
 import AlgorithmExplainer from '@/modules/UIBlocks/UniqueMechanism/AlgorithmExplainer';
 import AnimatedProcessLine from '@/modules/UIBlocks/HowItWorks/AnimatedProcessLine';
-import AnimatedUpgradePath from '@/modules/UIBlocks/Comparison/AnimatedUpgradePath';
-import AuditResultsPanel from '@/modules/UIBlocks/Security/AuditResultsPanel';
-import AvatarCarousel from '@/modules/UIBlocks/Testimonial/AvatarCarousel';
-import BadgeCarousel from '@/modules/UIBlocks/Integration/BadgeCarousel';
-import BasicFeatureGrid from '@/modules/UIBlocks/Comparison/BasicFeatureGrid';
-import BeforeAfterQuote from '@/modules/UIBlocks/Testimonial/BeforeAfterQuote';
+// ARCHIVED: import AnimatedUpgradePath from '@/modules/UIBlocks/Comparison/AnimatedUpgradePath';
+// ARCHIVED: import AuditResultsPanel from '@/modules/UIBlocks/Security/AuditResultsPanel';
+import AvatarCarousel from '@/modules/UIBlocks/Testimonials/AvatarCarousel';
+// ARCHIVED: import BadgeCarousel from '@/modules/UIBlocks/Integration/BadgeCarousel';
+// ARCHIVED: import BasicFeatureGrid from '@/modules/UIBlocks/Comparison/BasicFeatureGrid';
+import BeforeAfterQuote from '@/modules/UIBlocks/Testimonials/BeforeAfterQuote';
 import BeforeAfterStats from '@/modules/UIBlocks/Results/BeforeAfterStats';
 import BeforeImageAfterText from '@/modules/UIBlocks/Problem/BeforeImageAfterText';
-import BoldGuaranteePanel from '@/modules/UIBlocks/Objection/BoldGuaranteePanel';
-import BonusStackCTA from '@/modules/UIBlocks/Close/BonusStackCTA';
+import BoldGuaranteePanel from '@/modules/UIBlocks/ObjectionHandle/BoldGuaranteePanel';
+// ARCHIVED: import BonusStackCTA from '@/modules/UIBlocks/Close/BonusStackCTA';
 import BeforeAfterSlider from '@/modules/UIBlocks/BeforeAfter/BeforeAfterSlider';
-// import BeforeAfterWorkflow from '@/modules/UIBlocks/UseCase/BeforeAfterWorkflow'; // Temporarily disabled - not related to use case
+// import BeforeAfterWorkflow from '@/modules/UIBlocks/UseCases/BeforeAfterWorkflow'; // Temporarily disabled - not related to use case
 import CallToQuotePlan from '@/modules/UIBlocks/Pricing/CallToQuotePlan';
 import CardFlipSteps from '@/modules/UIBlocks/HowItWorks/CardFlipSteps';
 import CardWithTestimonial from '@/modules/UIBlocks/Pricing/CardWithTestimonial';
 import Carousel from '@/modules/UIBlocks/Features/Carousel';
-import CategoryAccordion from '@/modules/UIBlocks/Integration/CategoryAccordion';
-import CenterStacked from '@/modules/UIBlocks/Hero/centerStacked';
-import CenteredHeadlineCTA from '@/modules/UIBlocks/PrimaryCTA/CenteredHeadlineCTA';
+// ARCHIVED: import CategoryAccordion from '@/modules/UIBlocks/Integration/CategoryAccordion';
+import CenterStacked from '@/modules/UIBlocks/Hero/CenterStacked';
+import CenteredHeadlineCTA from '@/modules/UIBlocks/CTA/CenteredHeadlineCTA';
 import ChatBubbleFAQ from '@/modules/UIBlocks/FAQ/ChatBubbleFAQ';
-import CheckmarkComparison from '@/modules/UIBlocks/Comparison/CheckmarkComparison';
+// ARCHIVED: import CheckmarkComparison from '@/modules/UIBlocks/Comparison/CheckmarkComparison';
 import CollapsedCards from '@/modules/UIBlocks/Problem/CollapsedCards';
-import CompetitorCallouts from '@/modules/UIBlocks/Comparison/CompetitorCallouts';
-import CTAWithBadgeRow from '@/modules/UIBlocks/PrimaryCTA/CTAWithBadgeRow';
-import CTAWithFormField from '@/modules/UIBlocks/PrimaryCTA/CTAWithFormField';
-import CountdownLimitedCTA from '@/modules/UIBlocks/PrimaryCTA/CountdownLimitedCTA';
-import CustomerJourneyFlow from '@/modules/UIBlocks/UseCase/CustomerJourneyFlow';
+// ARCHIVED: import CompetitorCallouts from '@/modules/UIBlocks/Comparison/CompetitorCallouts';
+import CTAWithBadgeRow from '@/modules/UIBlocks/CTA/CTAWithBadgeRow';
+import CTAWithFormField from '@/modules/UIBlocks/CTA/CTAWithFormField';
+import CountdownLimitedCTA from '@/modules/UIBlocks/CTA/CountdownLimitedCTA';
+import CustomerJourneyFlow from '@/modules/UIBlocks/UseCases/CustomerJourneyFlow';
 import EmojiOutcomeGrid from '@/modules/UIBlocks/Results/EmojiOutcomeGrid';
 import EmotionalQuotes from '@/modules/UIBlocks/Problem/EmotionalQuotes';
-import EnterpriseContactBox from '@/modules/UIBlocks/Close/EnterpriseContactBox';
+// ARCHIVED: import EnterpriseContactBox from '@/modules/UIBlocks/Close/EnterpriseContactBox';
 import FeatureMatrix from '@/modules/UIBlocks/Pricing/FeatureMatrix';
 import FeatureTestimonial from '@/modules/UIBlocks/Features/FeatureTestimonial';
 import FounderCardWithQuote from '@/modules/UIBlocks/FounderNote/FounderCardWithQuote';
@@ -53,22 +53,22 @@ import FoundersBeliefStack from '@/modules/UIBlocks/FounderNote/FoundersBeliefSt
 import IconCircleSteps from '@/modules/UIBlocks/HowItWorks/IconCircleSteps';
 import IconGrid from '@/modules/UIBlocks/Features/IconGrid';
 import IconWithAnswers from '@/modules/UIBlocks/FAQ/IconWithAnswers';
-import ImageFirst from '@/modules/UIBlocks/Hero/imageFirst';
-import MinimalistComponent from '@/modules/UIBlocks/Hero/minimalist';
+import ImageFirst from '@/modules/UIBlocks/Hero/ImageFirst';
+import MinimalistComponent from '@/modules/UIBlocks/Hero/Minimalist';
 import InnovationTimeline from '@/modules/UIBlocks/UniqueMechanism/InnovationTimeline';
 import IndustryBadgeLine from '@/modules/UIBlocks/SocialProof/IndustryBadgeLine';
-import IndustryUseCaseGrid from '@/modules/UIBlocks/UseCase/IndustryUseCaseGrid';
+import IndustryUseCaseGrid from '@/modules/UIBlocks/UseCases/IndustryUseCaseGrid';
 import InlineQnAList from '@/modules/UIBlocks/FAQ/InlineQnAList';
-import InteractiveStackDiagram from '@/modules/UIBlocks/Integration/InteractiveStackDiagram';
-import InteractiveTestimonialMap from '@/modules/UIBlocks/Testimonial/InteractiveTestimonialMap';
-import InteractiveUseCaseMap from '@/modules/UIBlocks/UseCase/InteractiveUseCaseMap';
-import LeadMagnetCard from '@/modules/UIBlocks/Close/LeadMagnetCard';
-import LeftCopyRightImage from '@/modules/UIBlocks/Hero/leftCopyRightImage';
+// ARCHIVED: import InteractiveStackDiagram from '@/modules/UIBlocks/Integration/InteractiveStackDiagram';
+import InteractiveTestimonialMap from '@/modules/UIBlocks/Testimonials/InteractiveTestimonialMap';
+import InteractiveUseCaseMap from '@/modules/UIBlocks/UseCases/InteractiveUseCaseMap';
+// ARCHIVED: import LeadMagnetCard from '@/modules/UIBlocks/Close/LeadMagnetCard';
+import LeftCopyRightImage from '@/modules/UIBlocks/Hero/LeftCopyRightImage';
 import LetterStyleBlock from '@/modules/UIBlocks/FounderNote/LetterStyleBlock';
-import LiteVsProVsEnterprise from '@/modules/UIBlocks/Comparison/LiteVsProVsEnterprise';
-import LivePreviewEmbed from '@/modules/UIBlocks/Close/LivePreviewEmbed';
-import LogoGrid from '@/modules/UIBlocks/Integration/LogoGrid';
-import LogoWithQuoteUse from '@/modules/UIBlocks/Integration/LogoWithQuoteUse';
+// ARCHIVED: import LiteVsProVsEnterprise from '@/modules/UIBlocks/Comparison/LiteVsProVsEnterprise';
+// ARCHIVED: import LivePreviewEmbed from '@/modules/UIBlocks/Close/LivePreviewEmbed';
+// ARCHIVED: import LogoGrid from '@/modules/UIBlocks/Integration/LogoGrid';
+// ARCHIVED: import LogoWithQuoteUse from '@/modules/UIBlocks/Integration/LogoWithQuoteUse';
 import LogoWall from '@/modules/UIBlocks/SocialProof/LogoWall';
 import MapHeatSpots from '@/modules/UIBlocks/SocialProof/MapHeatSpots';
 import MediaMentions from '@/modules/UIBlocks/SocialProof/MediaMentions';
@@ -77,45 +77,45 @@ import MetricTiles from '@/modules/UIBlocks/Features/MetricTiles';
 import MiniCards from '@/modules/UIBlocks/Features/MiniCards';
 import MiniStackedCards from '@/modules/UIBlocks/Pricing/MiniStackedCards';
 import MissionQuoteOverlay from '@/modules/UIBlocks/FounderNote/MissionQuoteOverlay';
-import MockupWithCTA from '@/modules/UIBlocks/Close/MockupWithCTA';
-import MultistepCTAStack from '@/modules/UIBlocks/Close/MultistepCTAStack';
-import MythVsRealityGrid from '@/modules/UIBlocks/Objection/MythVsRealityGrid';
-import ObjectionAccordion from '@/modules/UIBlocks/Objection/ObjectionAccordion';
-// import ObjectionCarousel from '@/modules/UIBlocks/Objection/ObjectionCarousel'; // Temporarily disabled
+// ARCHIVED: import MockupWithCTA from '@/modules/UIBlocks/Close/MockupWithCTA';
+// ARCHIVED: import MultistepCTAStack from '@/modules/UIBlocks/Close/MultistepCTAStack';
+import MythVsRealityGrid from '@/modules/UIBlocks/ObjectionHandle/MythVsRealityGrid';
+import ObjectionAccordion from '@/modules/UIBlocks/ObjectionHandle/ObjectionAccordion';
+// import ObjectionCarousel from '@/modules/UIBlocks/ObjectionHandle/ObjectionCarousel'; // Temporarily disabled
 import OutcomeIcons from '@/modules/UIBlocks/Results/OutcomeIcons';
 // TODO: Disabled for MVP - import PainMeterChart from '@/modules/UIBlocks/Problem/PainMeterChart';
-import PenetrationTestResults from '@/modules/UIBlocks/Security/PenetrationTestResults';
-import PersonaGrid from '@/modules/UIBlocks/UseCase/PersonaGrid';
+// ARCHIVED: import PenetrationTestResults from '@/modules/UIBlocks/Security/PenetrationTestResults';
+import PersonaGrid from '@/modules/UIBlocks/UseCases/PersonaGrid';
 import PersonaJourney from '@/modules/UIBlocks/BeforeAfter/PersonaJourney';
 import PersonaPanels from '@/modules/UIBlocks/Problem/PersonaPanels';
 import PersonaResultPanels from '@/modules/UIBlocks/Results/PersonaResultPanels';
 import ResultsGallery from '@/modules/UIBlocks/Results/ResultsGallery';
-import PersonaUseCaseCompare from '@/modules/UIBlocks/Comparison/PersonaUseCaseCompare';
-import PrivacyCommitmentBlock from '@/modules/UIBlocks/Security/PrivacyCommitmentBlock';
+// ARCHIVED: import PersonaUseCaseCompare from '@/modules/UIBlocks/Comparison/PersonaUseCaseCompare';
+// ARCHIVED: import PrivacyCommitmentBlock from '@/modules/UIBlocks/Security/PrivacyCommitmentBlock';
 import ProcessFlowDiagram from '@/modules/UIBlocks/UniqueMechanism/ProcessFlowDiagram';
 // TODO: Temporarily disabled - not useful currently
 // import ProblemChecklist from '@/modules/UIBlocks/Problem/ProblemChecklist';
-import ProblemToReframeBlocks from '@/modules/UIBlocks/Objection/ProblemToReframeBlocks';
+import ProblemToReframeBlocks from '@/modules/UIBlocks/ObjectionHandle/ProblemToReframeBlocks';
 import PropertyComparisonMatrix from '@/modules/UIBlocks/UniqueMechanism/PropertyComparisonMatrix';
-import PullQuoteStack from '@/modules/UIBlocks/Testimonial/PullQuoteStack';
-import QuoteBackedAnswers from '@/modules/UIBlocks/Objection/QuoteBackedAnswers';
-import QuoteGrid from '@/modules/UIBlocks/Testimonial/QuoteGrid';
+import PullQuoteStack from '@/modules/UIBlocks/Testimonials/PullQuoteStack';
+import QuoteBackedAnswers from '@/modules/UIBlocks/ObjectionHandle/QuoteBackedAnswers';
+import QuoteGrid from '@/modules/UIBlocks/Testimonials/QuoteGrid';
 import QuoteStyleAnswers from '@/modules/UIBlocks/FAQ/QuoteStyleAnswers';
 import QuoteWithMetric from '@/modules/UIBlocks/Results/QuoteWithMetric';
-import RatingCards from '@/modules/UIBlocks/Testimonial/RatingCards';
-import RoleBasedScenarios from '@/modules/UIBlocks/UseCase/RoleBasedScenarios';
+import RatingCards from '@/modules/UIBlocks/Testimonials/RatingCards';
+import RoleBasedScenarios from '@/modules/UIBlocks/UseCases/RoleBasedScenarios';
 import SecretSauceReveal from '@/modules/UIBlocks/UniqueMechanism/SecretSauceReveal';
-import SecurityChecklist from '@/modules/UIBlocks/Security/SecurityChecklist';
-import SecurityGuaranteePanel from '@/modules/UIBlocks/Security/SecurityGuaranteePanel';
+// ARCHIVED: import SecurityChecklist from '@/modules/UIBlocks/Security/SecurityChecklist';
+// ARCHIVED: import SecurityGuaranteePanel from '@/modules/UIBlocks/Security/SecurityGuaranteePanel';
 import SegmentBasedPricing from '@/modules/UIBlocks/Pricing/SegmentBasedPricing';
 import SegmentedFAQTabs from '@/modules/UIBlocks/FAQ/SegmentedFAQTabs';
-import SegmentedTestimonials from '@/modules/UIBlocks/Testimonial/SegmentedTestimonials';
+import SegmentedTestimonials from '@/modules/UIBlocks/Testimonials/SegmentedTestimonials';
 import SideBySideBlocks from '@/modules/UIBlocks/BeforeAfter/SideBySideBlock';
-import SideBySideOfferCards from '@/modules/UIBlocks/Close/SideBySideOfferCards';
-import SideBySideCTA from '@/modules/UIBlocks/PrimaryCTA/SideBySideCTA';
+// ARCHIVED: import SideBySideOfferCards from '@/modules/UIBlocks/Close/SideBySideOfferCards';
+import SideBySideCTA from '@/modules/UIBlocks/CTA/SideBySideCTA';
 import SideBySidePhotoStory from '@/modules/UIBlocks/FounderNote/SideBySidePhotoStory';
 import SideBySideSplit from '@/modules/UIBlocks/Problem/SideBySideSplit';
-import SkepticToBelieverSteps from '@/modules/UIBlocks/Objection/SkepticToBelieverSteps';
+import SkepticToBelieverSteps from '@/modules/UIBlocks/ObjectionHandle/SkepticToBelieverSteps';
 import SliderPricing from '@/modules/UIBlocks/Pricing/SliderPricing';
 import SocialProofStrip from '@/modules/UIBlocks/SocialProof/SocialProofStrip';
 import SplitCard from '@/modules/UIBlocks/BeforeAfter/SplitCard';
@@ -126,43 +126,43 @@ import SystemArchitecture from '@/modules/UIBlocks/UniqueMechanism/SystemArchite
 import StackedPainBullets from '@/modules/UIBlocks/Problem/StackedPainBullets';
 import SplitAlternating from '@/modules/UIBlocks/Features/SplitAlternating';
 import StackedTextVisual from '@/modules/UIBlocks/BeforeAfter/StackedTextVisual';
-import SplitScreen from '@/modules/UIBlocks/Hero/splitScreen';
+import SplitScreen from '@/modules/UIBlocks/Hero/SplitScreen';
 import StatBlocks from '@/modules/UIBlocks/Results/StatBlocks';
 import StoryBlockWithPullquote from '@/modules/UIBlocks/FounderNote/StoryBlockWithPullquote';
 import TechnicalAdvantage from '@/modules/UIBlocks/UniqueMechanism/TechnicalAdvantage';
 import StripWithReviews from '@/modules/UIBlocks/SocialProof/StripWithReviews';
 import Tabbed from '@/modules/UIBlocks/Features/Tabbed';
-import TabbyIntegrationCards from '@/modules/UIBlocks/Integration/TabbyIntegrationCards';
-import TestimonialCTACombo from '@/modules/UIBlocks/PrimaryCTA/TestimonialCTACombo';
+// ARCHIVED: import TabbyIntegrationCards from '@/modules/UIBlocks/Integration/TabbyIntegrationCards';
+import TestimonialCTACombo from '@/modules/UIBlocks/CTA/TestimonialCTACombo';
 import TestimonialFAQs from '@/modules/UIBlocks/FAQ/TestimonialFAQs';
 import ThreeStepHorizontal from '@/modules/UIBlocks/HowItWorks/ThreeStepHorizontal';
 import TierCards from '@/modules/UIBlocks/Pricing/TierCards';
 import TimelineResults from '@/modules/UIBlocks/Results/TimelineResults';
 // import Timeline from '@/modules/UIBlocks/Features/Timeline'; // Temporarily retired
 import TimelineToToday from '@/modules/UIBlocks/FounderNote/TimelineToToday';
-import ToggleableComparison from '@/modules/UIBlocks/Comparison/ToggleableComparison';
+// ARCHIVED: import ToggleableComparison from '@/modules/UIBlocks/Comparison/ToggleableComparison';
 import ToggleableMonthlyYearly from '@/modules/UIBlocks/Pricing/ToggleableMonthlyYearly';
-import TrustSealCollection from '@/modules/UIBlocks/Security/TrustSealCollection';
+// ARCHIVED: import TrustSealCollection from '@/modules/UIBlocks/Security/TrustSealCollection';
 import TwoColumnFAQ from '@/modules/UIBlocks/FAQ/TwoColumnFAQ';
 import StatComparison from '@/modules/UIBlocks/BeforeAfter/StatComparison';
 import TextListTransformation from '@/modules/UIBlocks/BeforeAfter/TextListTransformation';
-import UseCaseCarousel from '@/modules/UIBlocks/UseCase/UseCaseCarousel';
-import UseCaseTiles from '@/modules/UIBlocks/Integration/UseCaseTiles';
+import UseCaseCarousel from '@/modules/UIBlocks/UseCases/UseCaseCarousel';
+// ARCHIVED: import UseCaseTiles from '@/modules/UIBlocks/Integration/UseCaseTiles';
 import UserCountBar from '@/modules/UIBlocks/SocialProof/UserCountBar';
-import ValueReinforcementBlock from '@/modules/UIBlocks/Close/ValueReinforcementBlock';
-import ValueStackCTA from '@/modules/UIBlocks/PrimaryCTA/ValueStackCTA';
+// ARCHIVED: import ValueReinforcementBlock from '@/modules/UIBlocks/Close/ValueReinforcementBlock';
+import ValueStackCTA from '@/modules/UIBlocks/CTA/ValueStackCTA';
 import VerticalTimeline from '@/modules/UIBlocks/HowItWorks/VerticalTimeline';
 import VideoNoteWithTranscript from '@/modules/UIBlocks/FounderNote/VideoNoteWithTranscript';
-import VideoTestimonials from '@/modules/UIBlocks/Testimonial/VideoTestimonials';
+import VideoTestimonials from '@/modules/UIBlocks/Testimonials/VideoTestimonials';
 import VideoWalkthrough from '@/modules/UIBlocks/HowItWorks/VideoWalkthrough';
-import VisualCTAWithMockup from '@/modules/UIBlocks/PrimaryCTA/VisualCTAWithMockup';
-import VisualObjectionTiles from '@/modules/UIBlocks/Objection/VisualObjectionTiles';
+import VisualCTAWithMockup from '@/modules/UIBlocks/CTA/VisualCTAWithMockup';
+import VisualObjectionTiles from '@/modules/UIBlocks/ObjectionHandle/VisualObjectionTiles';
 import VisualStoryline from '@/modules/UIBlocks/BeforeAfter/VisualStoryline';
-import WorkflowDiagrams from '@/modules/UIBlocks/UseCase/WorkflowDiagrams';
-import YouVsThemHighlight from '@/modules/UIBlocks/Comparison/YouVsThemHighlight';
-import ZapierLikeBuilderPreview from '@/modules/UIBlocks/Integration/ZapierLikeBuilderPreview';
+import WorkflowDiagrams from '@/modules/UIBlocks/UseCases/WorkflowDiagrams';
+// ARCHIVED: import YouVsThemHighlight from '@/modules/UIBlocks/Comparison/YouVsThemHighlight';
+// ARCHIVED: import ZapierLikeBuilderPreview from '@/modules/UIBlocks/Integration/ZapierLikeBuilderPreview';
 import ZigzagImageSteps from '@/modules/UIBlocks/HowItWorks/ZigzagImageSteps';
-import Announcement from '@/modules/UIBlocks/Miscellaneous/Announcement';
+// ARCHIVED: import Announcement from '@/modules/UIBlocks/Miscellaneous/Announcement';
 
 
 import { logger } from '@/lib/logger';
@@ -309,25 +309,27 @@ export const componentRegistry: ComponentRegistry = {
     SocialProofStrip: SocialProofStrip,
   },
   
-  security: {
-    AuditResultsPanel: AuditResultsPanel,
-    PenetrationTestResults: PenetrationTestResults,
-    PrivacyCommitmentBlock: PrivacyCommitmentBlock,
-    SecurityChecklist: SecurityChecklist,
-    SecurityGuaranteePanel: SecurityGuaranteePanel,
-    TrustSealCollection: TrustSealCollection,
-  },
-  
-  integrations: {
-    LogoGrid: LogoGrid,
-    CategoryAccordion: CategoryAccordion,
-    InteractiveStackDiagram: InteractiveStackDiagram,
-    UseCaseTiles: UseCaseTiles,
-    BadgeCarousel: BadgeCarousel,
-    TabbyIntegrationCards: TabbyIntegrationCards,
-    ZapierLikeBuilderPreview: ZapierLikeBuilderPreview,
-    LogoWithQuoteUse: LogoWithQuoteUse,
-  },
+  // ARCHIVED: security section - components moved to archive/uiblocks-extra/Security
+  // security: {
+  //   AuditResultsPanel: AuditResultsPanel,
+  //   PenetrationTestResults: PenetrationTestResults,
+  //   PrivacyCommitmentBlock: PrivacyCommitmentBlock,
+  //   SecurityChecklist: SecurityChecklist,
+  //   SecurityGuaranteePanel: SecurityGuaranteePanel,
+  //   TrustSealCollection: TrustSealCollection,
+  // },
+
+  // ARCHIVED: integrations section - components moved to archive/uiblocks-extra/Integration
+  // integrations: {
+  //   LogoGrid: LogoGrid,
+  //   CategoryAccordion: CategoryAccordion,
+  //   InteractiveStackDiagram: InteractiveStackDiagram,
+  //   UseCaseTiles: UseCaseTiles,
+  //   BadgeCarousel: BadgeCarousel,
+  //   TabbyIntegrationCards: TabbyIntegrationCards,
+  //   ZapierLikeBuilderPreview: ZapierLikeBuilderPreview,
+  //   LogoWithQuoteUse: LogoWithQuoteUse,
+  // },
   
   objectionHandling: {
     ObjectionAccordion: ObjectionAccordion,
@@ -351,16 +353,17 @@ export const componentRegistry: ComponentRegistry = {
     FoundersBeliefStack: FoundersBeliefStack,
   },
   
-  comparisonTable: {
-    BasicFeatureGrid: BasicFeatureGrid,
-    CheckmarkComparison: CheckmarkComparison,
-    YouVsThemHighlight: YouVsThemHighlight,
-    ToggleableComparison: ToggleableComparison,
-    CompetitorCallouts: CompetitorCallouts,
-    AnimatedUpgradePath: AnimatedUpgradePath,
-    PersonaUseCaseCompare: PersonaUseCaseCompare,
-    LiteVsProVsEnterprise: LiteVsProVsEnterprise,
-  },
+  // ARCHIVED: comparisonTable section - components moved to archive/uiblocks-extra/Comparison
+  // comparisonTable: {
+  //   BasicFeatureGrid: BasicFeatureGrid,
+  //   CheckmarkComparison: CheckmarkComparison,
+  //   YouVsThemHighlight: YouVsThemHighlight,
+  //   ToggleableComparison: ToggleableComparison,
+  //   CompetitorCallouts: CompetitorCallouts,
+  //   AnimatedUpgradePath: AnimatedUpgradePath,
+  //   PersonaUseCaseCompare: PersonaUseCaseCompare,
+  //   LiteVsProVsEnterprise: LiteVsProVsEnterprise,
+  // },
   
   cta: {
     CenteredHeadlineCTA: CenteredHeadlineCTA,
@@ -373,20 +376,22 @@ export const componentRegistry: ComponentRegistry = {
     TestimonialCTACombo: TestimonialCTACombo,
   },
   
-  closeSection: {
-    MockupWithCTA: MockupWithCTA,
-    BonusStackCTA: BonusStackCTA,
-    LeadMagnetCard: LeadMagnetCard,
-    EnterpriseContactBox: EnterpriseContactBox,
-    ValueReinforcementBlock: ValueReinforcementBlock,
-    LivePreviewEmbed: LivePreviewEmbed,
-    SideBySideOfferCards: SideBySideOfferCards,
-    MultistepCTAStack: MultistepCTAStack,
-  },
+  // ARCHIVED: closeSection - components moved to archive/uiblocks-extra/Close
+  // closeSection: {
+  //   MockupWithCTA: MockupWithCTA,
+  //   BonusStackCTA: BonusStackCTA,
+  //   LeadMagnetCard: LeadMagnetCard,
+  //   EnterpriseContactBox: EnterpriseContactBox,
+  //   ValueReinforcementBlock: ValueReinforcementBlock,
+  //   LivePreviewEmbed: LivePreviewEmbed,
+  //   SideBySideOfferCards: SideBySideOfferCards,
+  //   MultistepCTAStack: MultistepCTAStack,
+  // },
 
-  miscellaneous: {
-    Announcement: Announcement,
-  },
+  // ARCHIVED: miscellaneous section - components moved to archive/uiblocks-extra/Miscellaneous
+  // miscellaneous: {
+  //   Announcement: Announcement,
+  // },
 
   footer: {
     SimpleFooter: SimpleFooter,

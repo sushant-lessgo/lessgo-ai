@@ -819,3 +819,46 @@ export const normalizeFieldName = (input: string): CanonicalFieldName | null => 
   
   return null;
 };
+
+/**
+ * ===== NEW GENERATION SYSTEM TYPES =====
+ * Phase 1 Foundation - see newOnboarding.md
+ */
+export type {
+  LandingGoal,
+  Vibe,
+  PricingModel as GenerationPricingModel,
+  AwarenessLevel as GenerationAwarenessLevel,
+  SophisticationLevel,
+  SectionType as GenerationSectionType,
+  OneReader,
+  OneIdea,
+  IVOC,
+  FeatureAnalysis,
+  ObjectionMapping,
+  AssetAvailability as GenerationAssetAvailability,
+  UnderstandingData,
+  StrategyOutput,
+  UIBlockQuestion,
+} from '../generation';
+
+export {
+  landingGoals,
+  vibes,
+  pricingModels as generationPricingModels,
+  awarenessLevels as generationAwarenessLevels,
+  sophisticationLevels,
+  sectionTypes as generationSectionTypes,
+  fixedSections,
+  sectionPurposes,
+  landingGoalLabels,
+  pricingModelLabels as generationPricingModelLabels,
+  awarenessLevelLabels,
+  sophisticationLevelLabels,
+  isValidLandingGoal,
+  isValidVibe,
+  isValidPricingModel as isValidGenerationPricingModel,
+  isValidSectionType as isValidGenerationSectionType,
+  isValidAwarenessLevel as isValidGenerationAwarenessLevel,
+  isValidSophisticationLevel,
+} from '../generation';

@@ -10,6 +10,11 @@ export const CREDIT_COSTS = {
   ELEMENT_REGENERATION: 1,
   FIELD_INFERENCE: 1,
   FIELD_VALIDATION: 0, // Free operation
+  // V2 Generation system
+  IVOC_RESEARCH: 3, // Only charged when Tavily called (cache hits = 0)
+  STRATEGY_GENERATION: 2,
+  UIBLOCK_SELECT: 1,
+  GENERATE_COPY: 3,
 } as const;
 
 // Event types for usage tracking
@@ -18,6 +23,11 @@ export enum UsageEventType {
   SECTION_REGEN = 'section_regen',
   ELEMENT_REGEN = 'element_regen',
   FIELD_INFERENCE = 'field_inference',
+  // V2 Generation system
+  IVOC_RESEARCH = 'ivoc_research',
+  STRATEGY_GENERATION = 'strategy_generation',
+  UIBLOCK_SELECT = 'uiblock_select',
+  GENERATE_COPY = 'generate_copy',
 }
 
 // Usage event interface

@@ -92,7 +92,12 @@
       "Bash(awk:*)",
       "Bash(timeout /t 3)",
       "Bash(npx tsx:*)",
-      "Bash(tr:*)"
+      "Bash(tr:*)",
+      "Bash(dir \"C:\\\\Users\\\\susha\\\\lessgo-ai\\\\src\\\\modules\\\\UIBlocks\" /AD /B)",
+      "Bash(ls:*)",
+      "Bash(git mv:*)",
+      "Bash(for file in src/app/create/[token]/components/*.tsx)",
+      "Bash(do git mv \"$file\" archive/onboarding-v1/src/app/create/[token]/components/)"
     ],
     "deny": [],
     "ask": [],

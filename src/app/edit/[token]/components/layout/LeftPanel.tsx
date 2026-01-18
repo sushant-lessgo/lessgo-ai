@@ -4,7 +4,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useEditStoreContext, useStoreState } from '@/components/EditProvider';
 import { useOnboardingStore } from '@/hooks/useOnboardingStore';
-import ConfirmedFieldTile from '@/app/create/[token]/components/ConfirmedFieldTile';
+// ARCHIVED: ConfirmedFieldTile moved to archive/onboarding-v1 - component not used in current code
 import TaxonomyModalManager from '../modals/TaxonomyModalManager';
 import LoadingButtonBar from '@/components/shared/LoadingButtonBar';
 import { FIELD_DISPLAY_NAMES, CANONICAL_FIELD_NAMES, HIDDEN_FIELD_DISPLAY_NAMES, type CanonicalFieldName, type AnyFieldName } from '@/types/core/index';
