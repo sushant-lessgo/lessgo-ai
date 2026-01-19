@@ -1,103 +1,46 @@
-## UIBlock selection prompt — what to improve
+It passes because your current checks are **structure-only**, not **language-likeness**:
 
-### ✅ What’s good
+* “2 words” ✅ (because there’s a space)
+* “10+ chars” ✅
+* “no single char repeated 6+ times” ✅ (it alternates characters, so it dodges the repetition rule)
 
-* Composition constraints are explicit (“MUST FOLLOW”).
-* You pass **filtered candidates per section**, which is the biggest reliability win.
-* Output includes `selections` + `questions` with `null` when uncertain (good for batching).
+So consonant-heavy keyboard mash looks “valid” even though it’s not meaningful.
 
-### 🔧 Fixes / upgrades
+## Vowel ratio check: good, but tune it to avoid false positives
 
-1. Only one time it can ask questions to user, right or will it be in an infinit loop?
+I agree with the direction (cheap, no deps). Just be careful about false negatives like:
 
-2. **Give each candidate layout metadata**
-   “text-heavy / accordion / image-based / persona-aware” needs to be machine-readable; otherwise the model guesses.
+* Acronyms / product-y strings: `CRM API SDK`, `B2B SaaS`, `GPT-4 agent`
+* Non-English inputs (Dutch, Hindi transliteration, etc.)
+* Short inputs (vowel ratio is noisy on short strings)
 
-Pass per candidate:
+### Practical implementation rules
 
-* `tags: ["text-heavy","accordion","image","persona-aware"]`
-  Example format:
-  `Hero: [CenterStacked(tags:image), Minimalist(tags:text-heavy)]`
+Use vowel ratio **only when input is long enough** and **mostly letters**:
 
-3. **Avoid quoting “multiple audiences: true/false” vaguely**
-   Instead pass:
+* Apply only if `lettersOnlyLength >= 20` (or 25)
+* Compute ratio on letters only (ignore spaces, digits, punctuation)
+* Threshold: start with `ratio < 0.12` (not 0.15) to reduce false rejects
+* Add exemptions:
 
-* `personasCount: 2` (or list of personas)
-  So the model can reliably apply persona-aware preference.
+  * if it contains common tokens like `AI`, `API`, `CRM`, `SaaS`, `B2B`, `IoT`, etc.
+  * if it contains at least one “normal-ish” word (length ≥ 3) with a vowel
 
-4. **Enforce “one selection per section”**
-   Add: “Return exactly one layout (or null) per section listed. Do not invent sections.”
+That catches `fgrgrggffgdfg fgdfgdfgfgf` (0 vowels) reliably, without blocking real SaaS-ish descriptions.
 
-5. **Question format should include `id` + options = layout IDs**
-   To make second pass deterministic:
+## Even better: combine 2 cheap heuristics (still no deps)
 
-```json
-{ "id": "Hero.assetImage", "section": "Hero", "question": "...", "options": ["use-text-only", "use-pexels-image"] }
-```
+Vowel ratio + “has at least one word with a vowel”:
 
----
+* Fail if **both**:
 
-## Copy generation prompt — what to improve
+  * vowel ratio is low **and**
+  * no word contains a vowel
 
-### ✅ What’s good
+This reduces the chance you reject something like `CRM tool for SMBs` (has vowels in “tool”, “for”).
 
-* “Identity” + “Voice” anchors (IVOC phrases + beliefs) help the model stay grounded.
-* You provide **per-element char limits** and **mandatory/optional** rules — excellent.
-* You include card count bounds (min/max/optimal) and “null to exclude”.
+## Zod can do this cleanly
 
-### 🔧 Must-fix: you’re only listing ai_generated elements
+You’re correct: Zod doesn’t have built-in gibberish detection, but `.refine()` is exactly the right place to plug your `isMeaningfulText()` function (client + server).
 
-In your pseudo-code you filter:
-`filter(e => e.generation === 'ai_generated')`
-
-But the spec expects:
-
-* `ai_generated` → model outputs
-* `ai_generated_needs_review` → model outputs BUT flagged
-* `manual_preferred` → skipped in prompt, yes — but your post-processing must handle defaults
-
-So for the prompt, include **both**:
-
-* `ai_generated`
-* `ai_generated_needs_review` (and tell the model to output them, but expect review)
-
-Add a note per element:
-
-* “If element is needs_review: output value, keep realistic, avoid made-up numbers.”
-
-Otherwise the model may not output testimonials/pricing/results content correctly.
-
-### 🔧 Add “don’t hallucinate hard facts” rule
-
-The “No placeholder text” rule is good, but it doesn’t prevent **invented metrics**.
-
-Add:
-
-* “Do not invent statistics, customer names, company logos, or exact numbers. If unknown, write in a way that avoids specific numbers, or return `{ value: '...', needsReview: true }` for review-required fields.”
-
-(You already have the needsReview plan — this makes the model use it correctly.)
-
-### 🔧 Output format is underspecified for repeaters
-
-For cards/lists, the model needs to know the **shape**:
-
-* Is `faq_items` an array of `{ q, a }`?
-* Are features arrays of strings, or objects?
-* Are pricing tiers objects?
-
-Right now your `ElementValue` allows `string | string[]`, but lots of UIBlocks will require structured arrays (e.g., `{ title, description }`).
-
-You should include **element schemas** (even minimal) per element, e.g.:
-
-* `faq_items`: array of `{ question: string; answer: string }`
-* `feature_cards`: array of `{ headline: string; detail: string }`
-
-Otherwise parsing becomes brittle and the model will vary formats.
-
-### 🔧 Add “return JSON only” + strictness
-
-Add at bottom:
-
-* “Return **valid JSON only**. No markdown, no commentary.”
-
-And for each section include a stable `sectionId` key format (e.g., the section name string exactly).
+**My recommendation:** implement vowel ratio (with the safeguards above) as a `.refine()` and keep “manual fallback” only if validation rejects a user who insists the text is valid.

@@ -1,29 +1,47 @@
-// src/app/create/[token]/page.tsx
-// Placeholder: New generation flow coming in Phase 2
-// Old onboarding archived to archive/onboarding-v1/
+'use client';
+
+import { useGenerationStore } from '@/hooks/useGenerationStore';
+import { Button } from '@/components/ui/button';
+import StepContainer from './components/StepContainer';
+import OneLinerStep from './components/steps/OneLinerStep';
+import UnderstandingStep from './components/steps/UnderstandingStep';
+import LandingGoalStep from './components/steps/LandingGoalStep';
+import OfferStep from './components/steps/OfferStep';
+import AssetAvailabilityStep from './components/steps/AssetAvailabilityStep';
+
+// Placeholder for Phase 4B/4C steps (with temp Skip button for testing)
+function PlaceholderStep({ name }: { name: string }) {
+  const nextStep = useGenerationStore((s) => s.nextStep);
+  return (
+    <div className="text-center p-8">
+      <p className="text-gray-500 mb-4">Step: {name} (coming in Phase 4B/4C)</p>
+      <Button variant="outline" onClick={nextStep}>
+        Skip (dev only)
+      </Button>
+    </div>
+  );
+}
+
+const stepComponents: Record<string, React.ComponentType> = {
+  oneLiner: OneLinerStep,
+  understanding: UnderstandingStep,
+  landingGoal: LandingGoalStep,
+  offer: OfferStep,
+  assetAvailability: AssetAvailabilityStep,
+  research: () => <PlaceholderStep name="research" />,
+  strategy: () => <PlaceholderStep name="strategy" />,
+  uiblockSelection: () => <PlaceholderStep name="uiblockSelection" />,
+  generating: () => <PlaceholderStep name="generating" />,
+  complete: () => <PlaceholderStep name="complete" />,
+};
 
 export default function CreatePage() {
+  const currentStep = useGenerationStore((s) => s.currentStep);
+  const StepComponent = stepComponents[currentStep];
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="text-center max-w-md p-8">
-        <div className="w-16 h-16 mx-auto mb-6 bg-blue-100 rounded-full flex items-center justify-center">
-          <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-          </svg>
-        </div>
-        <h1 className="text-2xl font-semibold text-gray-900 mb-3">
-          New Generation Flow Coming Soon
-        </h1>
-        <p className="text-gray-600 mb-6">
-          We&apos;re building a smarter, AI-driven landing page generation experience.
-        </p>
-        <a
-          href="/dashboard"
-          className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          Return to Dashboard
-        </a>
-      </div>
-    </div>
+    <StepContainer>
+      <StepComponent />
+    </StepContainer>
   );
 }

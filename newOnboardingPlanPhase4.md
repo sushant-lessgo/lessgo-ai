@@ -1,5 +1,7 @@
 # Phase 4: Frontend Onboarding UI - Implementation Plan
 
+NOTE: This is part of newOnboardingPlan.md implementation. Go through it for larger context
+
 ## Overview
 
 Build 10-step onboarding flow using `useGenerationStore` + v2 APIs.
@@ -11,7 +13,7 @@ Target: <2000 LOC (vs archived 4300 LOC)
 
 Phase 4 is large. Split into 3 sub-phases:
 
-### Sub-Phase 4A: Core Structure + Simple Steps ← START HERE
+### Sub-Phase 4A: Core Structure + Simple Steps ✅ COMPLETE
 
 **Files to create:**
 1. `src/app/create/[token]/page.tsx` - Step router
@@ -243,3 +245,43 @@ Step 9: Success → redirect to /edit/[token]
 | Brand assets | Dashboard prompt + editor, not in generation flow |
 | Back navigation | Steps 1-4 only, clears downstream data |
 | Starting sub-phase | 4A: Core structure |
+
+---
+
+# Phase 4A Completion Summary
+
+## Status: ✅ Complete
+
+## Files Created
+
+### Store
+- `src/hooks/useGenerationStore.ts` - Zustand store with 10-step flow, productName + resetFrom added
+
+### Layout
+- `src/app/create/[token]/page.tsx` - Main page with step router
+- `src/app/create/[token]/layout.tsx` - Clerk auth protection
+- `src/app/create/[token]/components/StepContainer.tsx` - Header + progress bar + card wrapper
+
+### Steps (4 of 10)
+- `src/app/create/[token]/components/steps/OneLinerStep.tsx` - Product description input
+- `src/app/create/[token]/components/steps/LandingGoalStep.tsx` - Goal selection (6 options)
+- `src/app/create/[token]/components/steps/OfferStep.tsx` - Offer description
+- `src/app/create/[token]/components/steps/AssetAvailabilityStep.tsx` - Asset checkboxes
+
+### Shared
+- `src/app/create/[token]/components/shared/OptionCard.tsx` - Reusable selection card
+- `src/app/create/[token]/components/shared/ErrorRetry.tsx` - Error state component
+
+### Types
+- `src/types/generation.ts` - All generation types (LandingGoal, Vibe, SectionType, etc.)
+
+## UI Polish Applied
+
+- Logo: 80px centered with balanced spacers
+- Progress bar: h-1.5 with brand-accentPrimary
+- Card: White bg, rounded-xl, shadow-sm, border
+- Labels: text-gray-700 to avoid hyperlink look
+- Buttons: hover:scale-105 + hover:shadow-lg
+- Example chips: rounded-full, orange hover
+- Step indicator: Inside max-w-3xl container (not floating)
+- Responsive: grid-cols-1 sm:grid-cols-2 for options

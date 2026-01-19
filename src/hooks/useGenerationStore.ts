@@ -47,6 +47,7 @@ interface GenerationState {
 
   // Step 0: One-liner
   oneLiner: string;
+  productName: string;
 
   // Step 1: Understanding (AI-extracted, user-confirmed)
   understanding: UnderstandingData | null;
@@ -97,6 +98,7 @@ interface GenerationActions {
 
   // Step 0: One-liner
   setOneLiner: (value: string) => void;
+  setProductName: (name: string) => void;
 
   // Step 1: Understanding
   setUnderstanding: (data: UnderstandingData) => void;
@@ -137,6 +139,7 @@ interface GenerationActions {
 
   // Reset
   reset: () => void;
+  resetFrom: (step: GenerationStep) => void;
 }
 
 type GenerationStore = GenerationState & GenerationActions;
@@ -148,6 +151,7 @@ const initialState: GenerationState = {
   currentStep: 'oneLiner',
   stepIndex: 0,
   oneLiner: '',
+  productName: '',
   understanding: null,
   understandingLoading: false,
   understandingError: null,
@@ -234,6 +238,10 @@ export const useGenerationStore = create<GenerationStore>()(
       // Step 0: One-liner
       setOneLiner: (value) => set((state) => {
         state.oneLiner = value;
+      }),
+
+      setProductName: (name) => set((state) => {
+        state.productName = name;
       }),
 
       // Step 1: Understanding
@@ -339,6 +347,52 @@ export const useGenerationStore = create<GenerationStore>()(
 
       // Reset
       reset: () => set(initialState),
+
+      resetFrom: (step) => set((state) => {
+        const stepIndex = GENERATION_STEPS.indexOf(step);
+
+        // Clear from current step onwards
+        if (stepIndex <= 0) {
+          state.oneLiner = '';
+          state.productName = '';
+        }
+        if (stepIndex <= 1) {
+          state.understanding = null;
+          state.understandingLoading = false;
+          state.understandingError = null;
+        }
+        if (stepIndex <= 2) {
+          state.landingGoal = null;
+        }
+        if (stepIndex <= 3) {
+          state.offer = '';
+        }
+        if (stepIndex <= 4) {
+          state.assetAvailability = null;
+        }
+        if (stepIndex <= 5) {
+          state.ivoc = null;
+          state.ivocLoading = false;
+          state.ivocError = null;
+        }
+        if (stepIndex <= 6) {
+          state.strategy = null;
+          state.strategyLoading = false;
+          state.strategyError = null;
+          state.selectedSections = [];
+        }
+        if (stepIndex <= 7) {
+          state.uiblockSelections = {};
+          state.uiblockQuestions = [];
+          state.uiblockQuestionsAnswered = false;
+          state.uiblockLoading = false;
+          state.uiblockError = null;
+        }
+        if (stepIndex <= 8) {
+          state.generationProgress = 0;
+          state.generationError = null;
+        }
+      }),
     })),
     { name: 'GenerationStore' }
   )
@@ -350,6 +404,7 @@ export const useGenerationStore = create<GenerationStore>()(
 export const useCurrentStep = () => useGenerationStore((s) => s.currentStep);
 export const useStepIndex = () => useGenerationStore((s) => s.stepIndex);
 export const useOneLiner = () => useGenerationStore((s) => s.oneLiner);
+export const useProductName = () => useGenerationStore((s) => s.productName);
 export const useUnderstanding = () => useGenerationStore((s) => s.understanding);
 export const useLandingGoal = () => useGenerationStore((s) => s.landingGoal);
 export const useOffer = () => useGenerationStore((s) => s.offer);

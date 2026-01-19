@@ -19,11 +19,11 @@ export type LandingGoal = (typeof landingGoals)[number];
 
 export const landingGoalLabels: Record<LandingGoal, string> = {
   'waitlist': 'Join waitlist',
-  'signup': 'Sign up / Start free',
+  'signup': 'Sign up',
   'free-trial': 'Start free trial',
-  'buy': 'Buy now / Subscribe',
+  'buy': 'Buy now',
   'demo': 'Book demo',
-  'download': 'Download app'
+  'download': 'Download'
 };
 
 /**
