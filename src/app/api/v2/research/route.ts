@@ -72,17 +72,18 @@ async function researchHandler(req: NextRequest): Promise<Response> {
       });
 
       if (cached) {
-        logger.dev(`IVOC cache hit for ${categoryKey}/${audienceKey}`);
+        const cachedData = {
+          pains: cached.pains,
+          desires: cached.desires,
+          objections: cached.objections,
+          firmBeliefs: cached.firmBeliefs,
+          shakableBeliefs: cached.shakableBeliefs,
+          commonPhrases: cached.commonPhrases,
+        } as IVOC;
+        logger.dev(`[research] CACHE HIT for ${categoryKey}/${audienceKey}:`, JSON.stringify(cachedData, null, 2));
         return createSecureResponse({
           success: true,
-          data: {
-            pains: cached.pains,
-            desires: cached.desires,
-            objections: cached.objections,
-            firmBeliefs: cached.firmBeliefs,
-            shakableBeliefs: cached.shakableBeliefs,
-            commonPhrases: cached.commonPhrases,
-          } as IVOC,
+          data: cachedData,
           cached: true,
           creditsUsed: 0,
         });

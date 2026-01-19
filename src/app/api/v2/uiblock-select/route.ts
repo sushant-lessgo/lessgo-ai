@@ -59,7 +59,6 @@ const StrategySchema = z.object({
       feature: z.string(),
       benefit: z.string(),
       benefitOfBenefit: z.string(),
-      whatItMeans: z.string(),
     })
   ),
   objections: z.array(
@@ -73,7 +72,7 @@ const StrategySchema = z.object({
 // Request schema
 const UIBlockSelectRequestSchema = z.object({
   strategy: StrategySchema,
-  productName: z.string().min(1, 'Product name is required'),
+  productName: z.string().optional(),  // Optional - fallback handled in prompts
   assets: z.object({
     hasTestimonials: z.boolean(),
     hasSocialProof: z.boolean(),
@@ -129,6 +128,8 @@ async function uiblockSelectHandler(req: NextRequest): Promise<Response> {
       : buildSelectionPrompt(strategy as StrategyOutput, productName);
 
     // 4. Call OpenAI
+    logger.dev('[uiblock-select] PROMPT:', prompt);
+
     let aiResponse: string;
     try {
       const response = await openai.chat.completions.create({
@@ -139,6 +140,8 @@ async function uiblockSelectHandler(req: NextRequest): Promise<Response> {
       });
 
       const content = response.choices[0]?.message?.content;
+      logger.dev('[uiblock-select] RESPONSE:', content);
+
       if (!content) {
         return createSecureResponse(
           {
@@ -181,6 +184,21 @@ async function uiblockSelectHandler(req: NextRequest): Promise<Response> {
     }
 
     const { selections, questions } = parseResult;
+
+    // 5.5 Validate layout names - reject invalid layouts
+    for (const [section, layout] of Object.entries(selections)) {
+      if (layout && layout !== null) {
+        const validLayouts = getLayoutsForSection(section as SectionType);
+        if (validLayouts.length > 0 && !validLayouts.includes(layout)) {
+          logger.warn(`[uiblock-select] Invalid layout for ${section}:`, {
+            received: layout,
+            validLayouts: validLayouts.slice(0, 5), // Log first 5 for brevity
+          });
+          // Set to null to force question/auto-fix, don't silently fallback
+          (selections as Record<string, string | null>)[section] = null;
+        }
+      }
+    }
 
     // Check for unresolved sections (null values or questions)
     const unresolvedSections = Object.entries(selections)

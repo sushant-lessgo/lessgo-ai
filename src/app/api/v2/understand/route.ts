@@ -88,6 +88,8 @@ async function understandHandler(req: NextRequest): Promise<Response> {
     const prompt = buildUnderstandPrompt(oneLiner);
 
     // 4. Call OpenAI
+    logger.dev('[understand] PROMPT:', prompt);
+
     let understandingData: UnderstandingData;
     try {
       const response = await openai.chat.completions.create({
@@ -98,6 +100,8 @@ async function understandHandler(req: NextRequest): Promise<Response> {
       });
 
       const content = response.choices[0]?.message?.content;
+      logger.dev('[understand] RESPONSE:', content);
+
       if (!content) {
         return createSecureResponse(
           {

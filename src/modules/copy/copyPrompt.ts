@@ -19,7 +19,7 @@ export interface CopyPromptInput {
   oneLiner: string;
   offer: string;
   landingGoal: LandingGoal;
-  features: Array<{ feature: string; benefit: string }>;
+  features: string[];  // Simple list - benefits in strategy.featureAnalysis
 }
 
 /**
@@ -185,7 +185,7 @@ ${strategy.objections.map((o) => `- ${o.thought} (address in ${o.section})`).joi
 ${featureAnalysis}
 
 ## USER-PROVIDED FEATURES
-${features.map((f) => `- ${f.feature}: ${f.benefit}`).join('\n')}
+${features.map((f) => `- ${f}`).join('\n')}
 
 ## TONE
 ${getToneGuidance(strategy.vibe)}

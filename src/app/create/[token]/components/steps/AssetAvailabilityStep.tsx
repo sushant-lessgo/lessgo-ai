@@ -38,6 +38,7 @@ const assetOptions: AssetOption[] = [
 export default function AssetAvailabilityStep() {
   const assetAvailability = useGenerationStore((s) => s.assetAvailability);
   const setAssetAvailability = useGenerationStore((s) => s.setAssetAvailability);
+  const setIVOCLoading = useGenerationStore((s) => s.setIVOCLoading);
   const nextStep = useGenerationStore((s) => s.nextStep);
 
   const [assets, setAssets] = useState<AssetAvailability>(
@@ -54,8 +55,8 @@ export default function AssetAvailabilityStep() {
 
   const handleContinue = () => {
     setAssetAvailability(assets);
+    setIVOCLoading(true);  // Prime research step
     nextStep();
-    // TODO (Phase 4C): Trigger /v2/research API call
   };
 
   return (

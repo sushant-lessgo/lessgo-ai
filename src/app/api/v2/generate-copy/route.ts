@@ -55,7 +55,6 @@ const StrategySchema = z.object({
       feature: z.string(),
       benefit: z.string(),
       benefitOfBenefit: z.string(),
-      whatItMeans: z.string(),
     })
   ),
   objections: z.array(
@@ -74,12 +73,8 @@ const GenerateCopyRequestSchema = z.object({
   oneLiner: z.string().min(10, 'One-liner must be at least 10 characters'),
   offer: z.string().min(1, 'Offer is required'),
   landingGoal: z.enum(landingGoals as unknown as [string, ...string[]]),
-  features: z.array(
-    z.object({
-      feature: z.string(),
-      benefit: z.string(),
-    })
-  ).min(1, 'At least one feature is required'),
+  // Features as string array - benefits already in strategy.featureAnalysis
+  features: z.array(z.string()).min(1, 'At least one feature is required'),
 });
 
 async function generateCopyHandler(req: NextRequest): Promise<Response> {
@@ -131,6 +126,8 @@ async function generateCopyHandler(req: NextRequest): Promise<Response> {
     });
 
     // 4. Call OpenAI with retry logic
+    logger.dev('[generate-copy] PROMPT:', prompt);
+
     let sections: Record<string, SectionCopy> | null = null;
     let lastError: string | null = null;
     let attempts = 0;
@@ -138,6 +135,7 @@ async function generateCopyHandler(req: NextRequest): Promise<Response> {
 
     while (attempts <= MAX_RETRIES && !sections) {
       attempts++;
+      logger.dev(`[generate-copy] Attempt ${attempts}/${MAX_RETRIES + 1}`);
 
       try {
         const response = await openai.chat.completions.create({
@@ -149,6 +147,8 @@ async function generateCopyHandler(req: NextRequest): Promise<Response> {
         });
 
         const content = response.choices[0]?.message?.content;
+        logger.dev('[generate-copy] RESPONSE:', content);
+
         if (!content) {
           lastError = 'AI returned empty response';
           continue;

@@ -106,6 +106,12 @@ export async function checkCredits(
   userId: string,
   creditsRequired: number
 ): Promise<{ allowed: boolean; remaining: number; required: number }> {
+  // Dev mode bypass
+  if (process.env.NODE_ENV === 'development' && process.env.DEV_BYPASS_CREDITS === 'true') {
+    logger.dev(`[DEV] Bypassing credit check for ${creditsRequired} credits`);
+    return { allowed: true, remaining: 999999, required: creditsRequired };
+  }
+
   try {
     const usage = await getUserUsage(userId);
     const allowed = usage.creditsRemaining >= creditsRequired;
@@ -129,6 +135,12 @@ export async function deductCredits(
   creditsToDeduct: number,
   eventType: UsageEventType
 ): Promise<{ success: boolean; remaining: number; error?: string }> {
+  // Dev mode bypass
+  if (process.env.NODE_ENV === 'development' && process.env.DEV_BYPASS_CREDITS === 'true') {
+    logger.dev(`[DEV] Bypassing credit deduction of ${creditsToDeduct} credits`);
+    return { success: true, remaining: 999999 };
+  }
+
   try {
     const period = getCurrentPeriod();
 

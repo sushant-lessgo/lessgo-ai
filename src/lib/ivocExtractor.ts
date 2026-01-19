@@ -43,6 +43,8 @@ export async function extractIVOC(
     .replace('{audience}', audience)
     .replace('{snippets}', snippets);
 
+  logger.dev('[research/extractIVOC] PROMPT:', prompt);
+
   try {
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
@@ -52,6 +54,8 @@ export async function extractIVOC(
     });
 
     const content = response.choices[0]?.message?.content;
+    logger.dev('[research/extractIVOC] RESPONSE:', content);
+
     if (!content) {
       return { success: false, error: 'empty_response' };
     }
@@ -103,6 +107,8 @@ Output valid JSON only:
   "commonPhrases": ["..."]
 }`;
 
+  logger.dev('[research/fallback] PROMPT:', prompt);
+
   try {
     const response = await openai.chat.completions.create({
       model: 'gpt-4o',
@@ -112,6 +118,8 @@ Output valid JSON only:
     });
 
     const content = response.choices[0]?.message?.content;
+    logger.dev('[research/fallback] RESPONSE:', content);
+
     if (!content) {
       return { success: false, error: 'empty_response' };
     }

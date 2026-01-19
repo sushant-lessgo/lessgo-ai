@@ -1,46 +1,87 @@
-It passes because your current checks are **structure-only**, not **language-likeness**:
+Your plan is a **solid “first 60%”** for the Phase-3 UIBlock selection problems, but there are a couple of hidden traps + a few missing fixes that will keep the system brittle even after these 3 changes.
 
-* “2 words” ✅ (because there’s a space)
-* “10+ chars” ✅
-* “no single char repeated 6+ times” ✅ (it alternates characters, so it dodges the repetition rule)
+## What’s good
 
-So consonant-heavy keyboard mash looks “valid” even though it’s not meaningful.
+* **#1 (missing candidates)** is very plausibly the *root cause* behind “AI invents layouts / assigns Pricing layouts to other sections”. Fixing candidate retrieval will immediately improve downstream behavior.
+* **#2 (question quality)** is the right direction: you want questions that surface *user assets + intent*, not internal layout mechanics.
+* **#3 (validation)** is a necessary safety net. You *must* prevent “Include”/random strings from propagating as a layout.
 
-## Vowel ratio check: good, but tune it to avoid false positives
+## Biggest risk in your #1 fix
 
-I agree with the direction (cheap, no deps). Just be careful about false negatives like:
+Removing `toLowerCase()` is only correct **if**:
 
-* Acronyms / product-y strings: `CRM API SDK`, `B2B SaaS`, `GPT-4 agent`
-* Non-English inputs (Dutch, Hindi transliteration, etc.)
-* Short inputs (vowel ratio is noisy on short strings)
+* `layoutNamesBySection` keys are **exactly** the same casing as `sectionType` values everywhere (e.g. `uniqueMechanism`, `useCases`, etc.), and
+* nothing else passes `sectionType` as `UniqueMechanism`, `UseCases`, `HERO`, etc.
 
-### Practical implementation rules
+If today your map keys are lowercased (common pattern), then removing normalization will **break** sections like `Hero`/`Header` that might have been working by accident.
 
-Use vowel ratio **only when input is long enough** and **mostly letters**:
+**Safer fix:** normalize with an alias map rather than removing normalization entirely, e.g.:
 
-* Apply only if `lettersOnlyLength >= 20` (or 25)
-* Compute ratio on letters only (ignore spaces, digits, punctuation)
-* Threshold: start with `ratio < 0.12` (not 0.15) to reduce false rejects
-* Add exemptions:
+* First try `layoutNamesBySection[sectionType]`
+* Then try common variants: `camelCase`, `lowercase`, `PascalCase` mapping
+* And log when a fallback path was used (so you can kill the fallback later)
 
-  * if it contains common tokens like `AI`, `API`, `CRM`, `SaaS`, `B2B`, `IoT`, etc.
-  * if it contains at least one “normal-ish” word (length ≥ 3) with a vowel
+This avoids “fix #1 breaks 5 other sections” surprises.
 
-That catches `fgrgrggffgdfg fgdfgdfgfgf` (0 vowels) reliably, without blocking real SaaS-ish descriptions.
+## #2 Prompt guidance: good, but you need one more constraint
 
-## Even better: combine 2 cheap heuristics (still no deps)
+Guidelines alone often won’t prevent technical questions unless you also:
 
-Vowel ratio + “has at least one word with a vowel”:
+* **ban layout IDs from appearing in questions**, explicitly
+* enforce a **question type** (asset/goal/audience/offer/proof) so it doesn’t drift back to “include/exclude”
+* add a rule: **ask questions only when confidence is low** (otherwise users get interrogated)
 
-* Fail if **both**:
+If you don’t add the “only ask when needed” rule, the AI will still generate obvious filler questions because it thinks it must.
 
-  * vowel ratio is low **and**
-  * no word contains a vowel
+## #3 Validation: fallback-to-first-candidate is dangerous
 
-This reduces the chance you reject something like `CRM tool for SMBs` (has vowels in “tool”, “for”).
+“If invalid, pick first candidate” will hide real issues and can lead to weird mismatches.
 
-## Zod can do this cleanly
+Better behavior:
 
-You’re correct: Zod doesn’t have built-in gibberish detection, but `.refine()` is exactly the right place to plug your `isMeaningfulText()` function (client + server).
+* If invalid layout → set `layout = null` and **force a question** (or run your “auto-fix composition” logic explicitly with a reason)
+* If no candidates → return a structured error that points to candidate retrieval (not silent defaults)
 
-**My recommendation:** implement vowel ratio (with the safeguards above) as a `.refine()` and keep “manual fallback” only if validation rejects a user who insists the text is valid.
+At minimum, log:
+
+* sectionType
+* candidates
+* invalid value received
+* the fallback chosen + reason
+
+## What’s missing (you’ll still have bugs after implementing this plan)
+
+### 4) Separate “include/exclude” from “layout selection” in the response schema
+
+Right now “Include” is being interpreted like a layout. Validation helps, but the real fix is schema separation:
+
+* `includeSections: { UniqueMechanism: true/false }`
+* `sectionLayouts: { UniqueMechanism: "SomeLayout" | null }`
+
+If you don’t split these, you’ll keep fighting the same class of bug.
+
+### 5) Copy generation keying/section naming mismatch (your known issue #1)
+
+This plan doesn’t address: **AI returning layout names as keys** (e.g. `SimpleFooter`) instead of section keys (`Footer`). That’s not a UIBlock selection bug — it’s copy output schema / parsing validation.
+
+You need either:
+
+* stricter schema in copy prompt + validation, or
+* a post-processor that maps `{ layout: "SimpleFooter" }` into `{ section: "Footer", layout: "SimpleFooter" }`
+
+### 6) Layout registry/schema mismatch issues (causes missing fields → frontend crashes)
+
+Even with correct layout names, if your schema registry can’t find a layout definition, your extraction/validation will drop fields and your UI components will receive `undefined`.
+
+Add a check:
+
+* “layout exists in registry” **before** generating or parsing copy for it
+
+## Suggested execution order (to avoid churn)
+
+1. Fix candidate retrieval (#1) **but with safe normalization**
+2. Add validation (#3) + log hard when invalid
+3. Split include vs layout schema (missing #4)
+4. Upgrade question prompt (#2) + “ask only when needed”
+5. Fix copy section naming (missing #5)
+6. Add registry/schema existence check (missing #6)

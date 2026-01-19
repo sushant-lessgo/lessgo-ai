@@ -76,14 +76,15 @@ function countPersonas(strategy: StrategyOutput): number {
  */
 export function buildSelectionPrompt(
   strategy: StrategyOutput,
-  productName: string
+  productName?: string
 ): string {
   const personasCount = countPersonas(strategy);
   const personaNote = personasCount > 1 ? 'prefer persona-aware blocks' : '';
+  const displayName = productName || 'this product';
 
   const prompt = `You are selecting UIBlock layouts for a landing page.
 
-Product: ${productName}
+Product: ${displayName}
 Vibe: ${strategy.vibe}
 Reader: ${strategy.oneReader.who} (${strategy.oneReader.awareness})
 Personas: ${personasCount} ${personaNote ? `(${personaNote})` : ''}
@@ -101,16 +102,26 @@ ${buildCandidatesSection(strategy.sections)}
 
 Tag key: text-heavy, accordion, image, persona-aware
 
+QUESTION RULES (STRICT):
+1. NEVER mention layout names in questions (e.g., "leftCopyRightImage", "PersonaPanels")
+2. NEVER ask "Should we include X section?" - you decide based on strategy
+3. ONLY ask about user's CONTENT/ASSETS:
+   - "Do you have product screenshots or mockups to showcase?"
+   - "Do you have a video demo or walkthrough?"
+   - "What's your main differentiator - a unique process, proprietary tech, or methodology?"
+4. Ask questions ONLY when confidence is low - don't interrogate users
+5. Maximum 2 questions per request
+6. Options must be layout IDs from candidates (but question text must NOT mention them)
+
 Output JSON (valid JSON only, no markdown):
 {
   "selections": { "Section": "Layout" | null },
   "questions": [
-    { "id": "Section.reason", "section": "Section", "question": "...", "options": ["LayoutA", "LayoutB"] }
+    { "id": "Section.reason", "section": "Section", "question": "user-facing question about content/assets", "options": ["LayoutA", "LayoutB"] }
   ]
 }
 
-Use null + question if uncertain. Options must be layout IDs from candidates.
-This is a ONE-TIME question pass. No follow-up questions.`;
+Use null + question if uncertain. This is a ONE-TIME question pass.`;
 
   return prompt;
 }
@@ -120,7 +131,7 @@ This is a ONE-TIME question pass. No follow-up questions.`;
  */
 export function buildSelectionPromptWithAnswers(
   strategy: StrategyOutput,
-  productName: string,
+  productName: string | undefined,
   previousSelections: Partial<Record<SectionType, string | null>>,
   answers: Record<string, string>
 ): string {

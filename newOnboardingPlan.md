@@ -326,19 +326,60 @@ Reference: `newOnboarding.md` for detailed requirements.
 9. Generation loading
 10. Redirect to editor
 
-**Deliverables:**
-- All step components
-- Step navigation logic
-- Loading states
-- Error handling
-- Auto-save integration
-
-**Exit Criteria:**
-- Can complete full flow
-- Data flows correctly to APIs
-- Redirects to editor with generated page
-
 **Dependencies:** Phases 2 & 3 APIs
+
+**Status: ✅ COMPLETE (2026-01-19)**
+
+<details>
+<summary>Phase 4 Completion Summary</summary>
+
+### Sub-Phases
+- **4A**: Core structure + simple steps ✅
+- **4B**: Understanding step + /api/v2/understand ✅
+- **4C**: Async steps + final flow ✅
+
+### Files Created
+
+| Category | Count |
+|----------|-------|
+| Store | 1 (useGenerationStore.ts) |
+| Layout | 2 (page.tsx, layout.tsx) |
+| Container | 1 (StepContainer.tsx) |
+| Steps | 10 (all steps implemented) |
+| Shared | 4 (OptionCard, ErrorRetry, FeatureListEditor, LoadingOverlay) |
+| API | 1 (/api/v2/understand) |
+
+### Full Step Flow
+
+| Step | Component | API | Credits |
+|------|-----------|-----|---------|
+| 0 | OneLinerStep | - | 0 |
+| 1 | UnderstandingStep | /api/v2/understand | 1 |
+| 2 | LandingGoalStep | - | 0 |
+| 3 | OfferStep | - | 0 |
+| 4 | AssetAvailabilityStep | - | 0 |
+| 5 | ResearchStep | /api/v2/research | 3 (0 cached) |
+| 6 | StrategyStep | /api/v2/strategy | 2 |
+| 7 | UIBlockStep | /api/v2/uiblock-select | 0 |
+| 8 | GeneratingStep | /api/v2/generate-copy | 3 |
+| 9 | CompleteStep | /api/saveDraft | 0 |
+
+**Total Credits**: 9 (6 if IVOC cached)
+
+### Key Bug Fixed
+UIBlockStep timing issue - StrategyStep was calling `nextStep()` synchronously with `setStrategy()`, causing UIBlockStep to skip. Fixed by separating into useEffect for auto-advance.
+
+### Open Questions Resolved
+
+| Question | Decision |
+|----------|----------|
+| Step 7 (strategy display) | Skip display, auto-advance |
+| Auto-save frequency | Once at CompleteStep |
+| Back navigation | Steps 1-4 only |
+
+See `newOnboardingPlanPhase4.md` for detailed breakdown.
+
+</details>
 
 ---
 
@@ -399,10 +440,10 @@ Linear dependency. Each phase builds on previous.
 - ~~Copy generation - retry strategy on failure?~~ → 2 retries with repair prompt, no placeholder fallback
 - ~~Element character limits - enforce in prompt or validate after?~~ → Enforce in prompt + trim arrays to max after
 
-### Phase 4
-- Step 7 (strategy display) - show to user or skip?
-- Auto-save frequency?
-- Back navigation - allowed or linear only?
+### Phase 4 ✅ RESOLVED
+- ~~Step 7 (strategy display) - show to user or skip?~~ → Skip, auto-advance to UIBlock
+- ~~Auto-save frequency?~~ → Once at CompleteStep
+- ~~Back navigation - allowed or linear only?~~ → Steps 1-4 only (before API calls)
 
 ### Phase 5
 - Pexels query construction from Vibe?

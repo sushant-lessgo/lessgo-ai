@@ -29,12 +29,8 @@ const StrategyRequestSchema = z.object({
   // Product info
   productName: z.string().min(1, 'Product name is required'),
   oneLiner: z.string().min(10, 'One-liner must be at least 10 characters'),
-  features: z.array(
-    z.object({
-      feature: z.string(),
-      benefit: z.string(),
-    })
-  ).min(1, 'At least one feature is required'),
+  // Features as string array - AI extracts benefits internally
+  features: z.array(z.string()).min(1, 'At least one feature is required'),
 
   // Context
   landingGoal: z.enum(landingGoals as unknown as [string, ...string[]]),
@@ -114,6 +110,8 @@ async function strategyHandler(req: NextRequest): Promise<Response> {
     });
 
     // 4. Call OpenAI
+    logger.dev('[strategy] PROMPT:', prompt);
+
     let strategyData: StrategyOutput;
     try {
       const response = await openai.chat.completions.create({
@@ -124,6 +122,8 @@ async function strategyHandler(req: NextRequest): Promise<Response> {
       });
 
       const content = response.choices[0]?.message?.content;
+      logger.dev('[strategy] RESPONSE:', content);
+
       if (!content) {
         return createSecureResponse(
           {

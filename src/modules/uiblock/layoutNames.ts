@@ -184,9 +184,17 @@ export const layoutNamesBySection: Record<string, string[]> = {
  * Server-safe version that doesn't import React components
  */
 export function getLayoutNames(sectionType: string): string[] {
-  // Handle case sensitivity - convert to lowercase for lookup
-  const normalizedKey = sectionType.toLowerCase();
-  return layoutNamesBySection[normalizedKey] || [];
+  // Try exact match first (handles camelCase keys like uniqueMechanism, useCases)
+  if (layoutNamesBySection[sectionType]) {
+    return layoutNamesBySection[sectionType];
+  }
+  // Fallback to lowercase for backwards compatibility
+  const lowercaseKey = sectionType.toLowerCase();
+  if (layoutNamesBySection[lowercaseKey]) {
+    console.warn(`[layoutNames] Using lowercase fallback for: ${sectionType} → ${lowercaseKey}`);
+    return layoutNamesBySection[lowercaseKey];
+  }
+  return [];
 }
 
 /**

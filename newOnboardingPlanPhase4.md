@@ -285,3 +285,182 @@ Step 9: Success → redirect to /edit/[token]
 - Example chips: rounded-full, orange hover
 - Step indicator: Inside max-w-3xl container (not floating)
 - Responsive: grid-cols-1 sm:grid-cols-2 for options
+
+---
+
+# Phase 4B Completion Summary
+
+## Status: ✅ Complete
+
+## Files Created
+
+### API
+- `src/app/api/v2/understand/route.ts` - Product understanding endpoint (1 credit, gpt-4o-mini)
+
+### Steps
+- `src/app/create/[token]/components/steps/UnderstandingStep.tsx` - Step 1: playback cards + inline edit
+
+### Shared
+- `src/app/create/[token]/components/shared/FeatureListEditor.tsx` - Simple add/remove/edit feature list (no DnD)
+
+## Files Modified
+
+### Credit System
+- `src/lib/creditSystem.ts` - Added UNDERSTAND cost (1) + UsageEventType.UNDERSTAND
+
+### Steps
+- `src/app/create/[token]/components/steps/OneLinerStep.tsx` - Sets loading state on submit + gibberish validation
+
+### Router
+- `src/app/create/[token]/page.tsx` - Wired UnderstandingStep to router
+
+## Features Implemented
+
+### UnderstandingStep UI
+- Loading state with rotating messages (800ms)
+- Playback view with 4 editable sections:
+  - Categories (chip editor: click to remove, input to add)
+  - Audiences (chip editor)
+  - What It Does (textarea)
+  - Features (simple list with add/remove)
+- Error state with "Edit your one-liner" (primary) + "Try again" (secondary)
+- "Looks Good" button to proceed
+
+### Input Validation (OneLinerStep)
+- Min 10 characters
+- Min 2 words
+- Repeated character detection ("qqqqqqq")
+- Repeated word detection ("test test test")
+- Vowel ratio + word check for gibberish (>= 20 letters)
+
+## Design Decisions
+
+| Decision | Rationale |
+|----------|-----------|
+| No DnD for features | Feature order doesn't impact strategy generation |
+| Vowel ratio threshold 0.12 | Catches consonant-heavy gibberish, allows "CRM tool" |
+| Fail only if BOTH low ratio AND no word has vowel | Reduces false positives on SaaS-y text |
+| "Edit your one-liner" as primary error action | Better UX than just "retry" |
+| Chip editor: click to remove | Simple, no separate edit mode needed |
+
+---
+
+# Phase 4C Completion Summary
+
+## Status: ✅ Complete
+
+## Files Created
+
+### Steps
+- `src/app/create/[token]/components/steps/ResearchStep.tsx` - IVOC research with loading overlay
+- `src/app/create/[token]/components/steps/StrategyStep.tsx` - Strategy generation with auto-advance
+- `src/app/create/[token]/components/steps/UIBlockStep.tsx` - UIBlock selection + questions UI
+- `src/app/create/[token]/components/steps/GeneratingStep.tsx` - Copy generation with progress
+- `src/app/create/[token]/components/steps/CompleteStep.tsx` - Redirect to editor
+
+### Shared
+- `src/app/create/[token]/components/shared/LoadingOverlay.tsx` - Rotating messages overlay
+
+## Files Modified
+
+### Router
+- `src/app/create/[token]/page.tsx` - Wired all async steps to router
+
+### Steps
+- `src/app/create/[token]/components/steps/AssetAvailabilityStep.tsx` - Triggers research loading on submit
+
+## Key Bug Fix: UIBlockStep Timing Issue
+
+### Problem
+StrategyStep called `setStrategy()` + `nextStep()` synchronously. UIBlockStep mounted before Zustand propagated strategy, causing:
+- `strategy` was `null` on first render
+- useEffect skipped due to guard
+- `nextStep()` advanced past UIBlockStep before it could fetch
+
+### Solution
+1. **StrategyStep**: Removed `nextStep()` from success handler
+2. **StrategyStep**: Added separate useEffect to auto-advance when strategy ready
+3. **UIBlockStep**: Added `hasFetched` guard to prevent double-fetch
+4. **UIBlockStep**: Proper useEffect dependencies for strategy reactivity
+
+### Debug Logs Added (to remove later)
+- `[CreatePage]` - step rendering
+- `[StrategyStep]` - strategy success + auto-advance
+- `[UIBlockStep]` - component render, state, guards, API calls
+
+## Flow Now Working
+
+```
+Strategy API completes
+    ↓
+setStrategy(data) + setStrategyLoading(false)
+    ↓
+Auto-advance useEffect triggers nextStep()
+    ↓
+UIBlockStep mounts with strategy available
+    ↓
+useEffect passes guards, calls /api/v2/uiblock-select
+    ↓
+Selections stored, advances to GeneratingStep
+    ↓
+Copy generation with section specs
+    ↓
+CompleteStep redirects to editor
+```
+
+## Known Issues (Phase 3, not Phase 4)
+
+| Issue | Cause | Fix Location |
+|-------|-------|--------------|
+| Missing sections in copy (Header, Footer) | AI not generating all requested sections | Phase 3: copyPrompt.ts |
+| Wrong section names (SimpleFooter vs Footer) | AI using different names | Phase 3: copyPrompt.ts |
+
+These are copy generation prompt issues, not frontend flow issues.
+
+---
+
+# Phase 4 Overall Summary
+
+## Status: ✅ Complete
+
+## Sub-Phases
+- **4A**: Core structure + simple steps ✅
+- **4B**: Understanding step + /api/v2/understand ✅
+- **4C**: Async steps + final flow ✅
+
+## Full Step Flow (10 steps)
+
+| Step | Component | API | Credits |
+|------|-----------|-----|---------|
+| 0 | OneLinerStep | - | 0 |
+| 1 | UnderstandingStep | /api/v2/understand | 1 |
+| 2 | LandingGoalStep | - | 0 |
+| 3 | OfferStep | - | 0 |
+| 4 | AssetAvailabilityStep | - | 0 |
+| 5 | ResearchStep | /api/v2/research | 3 (0 if cached) |
+| 6 | StrategyStep | /api/v2/strategy | 2 |
+| 7 | UIBlockStep | /api/v2/uiblock-select | 0 |
+| 8 | GeneratingStep | /api/v2/generate-copy | 3 |
+| 9 | CompleteStep | /api/saveDraft | 0 |
+
+**Total Credits**: 9 (6 if IVOC cached)
+
+## Files Created (Phase 4 Total)
+
+| Category | Count | Files |
+|----------|-------|-------|
+| Store | 1 | useGenerationStore.ts |
+| Layout | 2 | page.tsx, layout.tsx |
+| Container | 1 | StepContainer.tsx |
+| Steps | 10 | OneLiner, Understanding, LandingGoal, Offer, AssetAvailability, Research, Strategy, UIBlock, Generating, Complete |
+| Shared | 4 | OptionCard, ErrorRetry, FeatureListEditor, LoadingOverlay |
+| API | 1 | /api/v2/understand |
+| Types | 1 | generation.ts (extended) |
+
+## Open Questions Resolved
+
+| Question | Decision |
+|----------|----------|
+| Step 7 (strategy display) | Skip display, auto-advance to UIBlock |
+| Auto-save frequency | Save once at CompleteStep |
+| Back navigation | Allowed on steps 1-4 only (before API calls) |

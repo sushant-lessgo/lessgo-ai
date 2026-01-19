@@ -8,6 +8,8 @@ interface ErrorRetryProps {
   message: string;
   onRetry: () => void;
   retryLabel?: string;
+  onSecondary?: () => void;
+  secondaryLabel?: string;
 }
 
 export default function ErrorRetry({
@@ -15,6 +17,8 @@ export default function ErrorRetry({
   message,
   onRetry,
   retryLabel = 'Try again',
+  onSecondary,
+  secondaryLabel,
 }: ErrorRetryProps) {
   return (
     <div className="text-center py-12">
@@ -23,9 +27,16 @@ export default function ErrorRetry({
       </div>
       <h3 className="text-lg font-medium text-gray-900 mb-2">{title}</h3>
       <p className="text-gray-600 mb-6 max-w-sm mx-auto">{message}</p>
-      <Button onClick={onRetry} variant="outline">
-        {retryLabel}
-      </Button>
+      <div className="flex flex-col gap-3 items-center">
+        <Button onClick={onRetry} variant="outline">
+          {retryLabel}
+        </Button>
+        {onSecondary && secondaryLabel && (
+          <Button onClick={onSecondary} variant="ghost" className="text-gray-500">
+            {secondaryLabel}
+          </Button>
+        )}
+      </div>
     </div>
   );
 }

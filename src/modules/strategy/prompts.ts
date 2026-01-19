@@ -6,7 +6,7 @@ import type { IVOC, LandingGoal, AssetAvailability } from '@/types/generation';
 interface StrategyPromptInput {
   productName: string;
   oneLiner: string;
-  features: Array<{ feature: string; benefit: string }>;
+  features: string[];  // Simple list - AI extracts benefits
   landingGoal: LandingGoal;
   offer: string;
   ivoc: IVOC;
@@ -29,7 +29,7 @@ export function buildStrategyPrompt(input: StrategyPromptInput): string {
   } = input;
 
   const featuresFormatted = features
-    .map((f) => `- ${f.feature}: ${f.benefit}`)
+    .map((f) => `- ${f}`)
     .join('\n');
 
   const audiencesFormatted = otherAudiences.length > 0
@@ -80,8 +80,9 @@ Common Phrases: ${JSON.stringify(ivoc.commonPhrases)}
    - reasonToBelieve: Proof point or credibility
 
 3. Analyze FEATURES:
-   For each feature, derive benefit chain:
-   - feature → benefit → benefit of benefit (emotional/life impact)
+   For each feature listed, derive:
+   - benefit: What the user gets from this feature
+   - benefitOfBenefit: Emotional/life impact (why it matters)
 
 4. Select VIBE:
    Choose one: "Dark Tech", "Light Trust", "Warm Friendly", "Bold Energy", "Calm Minimal"
