@@ -132,9 +132,15 @@ One API call generates:
     "coreDesire": "Get paid faster without awkward follow-ups",
     "corePain": "Chasing payments feels unprofessional",
     "beliefs": "Clients always pay late, invoicing is tedious",
-    "awareness": "Solution-aware",
-    "sophistication": "Medium",
-    "emotionalState": "Frustrated"
+    "awareness": "solution-aware",
+    "sophistication": "medium",
+    "emotionalState": "frustrated"
+  },
+
+  "oneIdea": {
+    "bigBenefit": "Spend time on creative work, not admin",
+    "uniqueMechanism": "AI creates invoices from a chat",
+    "reasonToBelieve": "10,000+ freelancers, avg 14 days faster"
   },
 
   "featureAnalysis": [
@@ -145,26 +151,64 @@ One API call generates:
     }
   ],
 
-  "oneIdea": {
-    "bigBenefit": "Spend time on creative work, not admin",
-    "uniqueMechanism": "AI creates invoices from a chat",
-    "reasonToBelieve": "10,000+ freelancers, avg 14 days faster"
+  "frictionAssessment": {
+    "level": "low",
+    "reasoning": "Free trial with no credit card is minimal commitment"
   },
 
-  "objections": [
-    { "thought": "Will clients take AI invoices seriously?", "section": "SocialProof" },
-    { "thought": "How does it actually work?", "section": "HowItWorks" }
+  "allObjections": [
+    { "thought": "Will clients take AI invoices seriously?", "theme": "trust", "intensity": "high", "preHandledByHero": false },
+    { "thought": "Is my data secure?", "theme": "risk", "intensity": "medium", "preHandledByHero": false },
+    { "thought": "How does it actually work?", "theme": "how", "intensity": "medium", "preHandledByHero": false },
+    { "thought": "What if I don't like it?", "theme": "risk", "intensity": "low", "preHandledByHero": true }
   ],
 
-  "sections": ["Header", "Hero", "SocialProof", "HowItWorks", "Features", "Testimonials", "CTA", "FAQ", "Footer"]
+  "objectionGroups": [
+    {
+      "theme": "trust",
+      "objections": [{ "thought": "Will clients take AI invoices seriously?", "theme": "trust", "intensity": "high" }],
+      "resolvedBy": "SocialProof",
+      "reasoning": "Social proof shows real businesses using it successfully"
+    },
+    {
+      "theme": "how",
+      "objections": [{ "thought": "How does it actually work?", "theme": "how", "intensity": "medium" }],
+      "resolvedBy": "HowItWorks",
+      "reasoning": "Process explanation removes mystery around implementation"
+    }
+  ],
+
+  "middleSections": ["SocialProof", "HowItWorks", "Features", "Testimonials", "FAQ"]
 }
 ```
 
-**Section selection logic:**
-1. AI role-plays as One Reader seeing One Idea
-2. Generates objection sequence
-3. For each objection → picks best section
-4. Deduplicates → ordered section list
+**Two-Phase Section Selection:**
+
+**Phase 1: List ALL Objections (Pure Psychology)**
+- Role-play as One Reader landing on the page
+- List EVERY thought, concern, question that arises
+- Tag each with: theme (trust/risk/fit/how/what/price/effort), intensity (low/medium/high)
+- Mark `preHandledByHero: true` if offer already addresses it (e.g., "free trial no CC" handles risk)
+
+**Phase 2: Group Objections → Map to Sections (Many:1)**
+- Multiple objections can be resolved by ONE section
+- Skip sections for objections pre-handled by Hero
+- Pick 1-2 proof sections max (Testimonials/SocialProof/Results)
+- Each section must earn its place by resolving meaningful objections
+
+**Friction-Based Grouping:**
+| Friction | Offer Examples | Section Count |
+|----------|----------------|---------------|
+| Low | free trial no CC, waitlist, download | 5-7 (aggressive grouping) |
+| Medium | free trial with CC, freemium, demo | 6-8 |
+| High | paid plans, annual, enterprise | 7-9 (more sections) |
+
+**Canonical Section Order (enforced post-AI):**
+```
+Problem → BeforeAfter → UniqueMechanism → Features → HowItWorks →
+UseCases → Testimonials → SocialProof → Results → Pricing →
+ObjectionHandle → FAQ → FounderNote
+```
 
 **One Reader vs Personas:**
 - One Reader = primary target, drives copy tone
@@ -277,30 +321,51 @@ Store Tavily results by category + audience:
 
 ```
 Product: [Name] - "[One-liner]"
+Goal: [waitlist/signup/free-trial/buy/demo/download]
+Offer: [What user gets]
 
-One Reader:
-- Who: [Specific person]
-- Core desire: [What they want]
-- Core pain: [What hurts]
-- Awareness: [Unaware/Problem/Solution/Product/Most aware]
-- Sophistication: [Low/Medium/High]
-- Emotional state: [Overwhelmed/Neutral/Motivated/Skeptical]
+Target Audience: [Primary audience]
+Other personas: [Secondary audiences]
 
-One Idea:
-- Big Benefit: [What they get]
-- Unique Mechanism: [Why this works]
-- Reason to Believe: [Proof]
+Features:
+- [Feature 1]
+- [Feature 2]
 
-Context:
-- Landing goal: [waitlist/signup/free-trial/buy/demo/download]
-- Offer: [What user gets]
-- Assets: [Testimonials/Logos/Results — yes/no]
+Voice of Customer Research:
+- Pains: [from IVOC]
+- Desires: [from IVOC]
+- Objections: [from IVOC]
+- Firm Beliefs: [from IVOC]
+- Shakable Beliefs: [from IVOC]
 
-Task:
-1. Role-play as One Reader seeing One Idea
-2. Generate objection sequence
-3. For each objection, pick best section
-4. Output deduplicated, ordered section list
+Assets:
+- Testimonials: yes/no
+- Social Proof: yes/no
+- Concrete Results: yes/no
+
+Task (Two-Phase Objection Flow):
+
+Step 1-4: Define One Reader, One Idea, Feature Analysis, Vibe
+
+Step 5: Assess Friction
+- Low: free trial no CC, waitlist, download
+- Medium: free trial with CC, freemium, demo
+- High: paid plans, annual, enterprise
+
+Step 6: List ALL Objections (Pure Psychology)
+- Role-play as One Reader landing on page
+- List EVERY concern with theme/intensity/preHandledByHero
+
+Step 7: Group Objections → Map to Sections (Many:1)
+Principles:
+- Multiple objections → ONE section
+- Skip if preHandledByHero
+- 1-2 proof sections max
+- Each section must earn its place
+- Low friction → aggressive grouping (5-7 sections)
+- High friction → more sections (7-9)
+
+Step 8: Output middleSections (Header/Hero/CTA/Footer added automatically)
 ```
 
 ### UIBlock Selection Prompt
@@ -411,3 +476,20 @@ Published page schema   →  "what gets stored"
 **FAQ placement:**
 - Low friction (free, download): FAQ after CTA
 - High friction (buy, demo): FAQ before CTA
+
+### Objection Themes
+
+| Theme | Reader Question | Resolved By |
+|-------|-----------------|-------------|
+| trust | "Is this legit? Who else uses this?" | Testimonials, SocialProof, Results |
+| risk | "What if it doesn't work? Can I cancel?" | ObjectionHandle, Hero (if low friction) |
+| fit | "Is this for me / my situation?" | UseCases, Features |
+| how | "How does it work? Is it hard to use?" | HowItWorks |
+| what | "What exactly do I get?" | Features, UniqueMechanism |
+| price | "Is it worth the cost?" | Pricing |
+| effort | "How much work is this to set up?" | HowItWorks, BeforeAfter |
+
+**Intensity levels:**
+- High: Firm beliefs from research (hard to change)
+- Medium: Shakable beliefs (can be addressed)
+- Low: Generic concerns not in research

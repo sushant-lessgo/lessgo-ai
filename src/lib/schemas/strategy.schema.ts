@@ -156,5 +156,54 @@ export const EnhancedStrategyResponseSchema = z.object({
 
 export type EnhancedStrategyResponse = z.infer<typeof EnhancedStrategyResponseSchema>;
 
+// Sequential strategy response schema - for sequential objection flow mode
+// AI processes each objection individually instead of grouping
+export const SequentialStrategyResponseSchema = z.object({
+  vibe: z.enum(['Dark Tech', 'Light Trust', 'Warm Friendly', 'Bold Energy', 'Calm Minimal']),
+  oneReader: z.object({
+    who: z.string().min(1),
+    coreDesire: z.string().min(1),
+    corePain: z.string().min(1),
+    beliefs: z.string().min(1),
+    awareness: z.enum(['unaware', 'problem-aware', 'solution-aware', 'product-aware', 'most-aware']),
+    sophistication: z.enum(['low', 'medium', 'high']),
+    emotionalState: z.string().min(1),
+  }),
+  oneIdea: z.object({
+    bigBenefit: z.string().min(1),
+    uniqueMechanism: z.string().min(1),
+    reasonToBelieve: z.string().min(1),
+  }),
+  featureAnalysis: z.array(z.object({
+    feature: z.string().min(1),
+    benefit: z.string().min(1),
+    benefitOfBenefit: z.string().min(1),
+  })).min(1),
+  frictionAssessment: z.object({
+    level: z.enum(['low', 'medium', 'high']),
+    reasoning: z.string().min(1),
+  }),
+  // SIMPLIFIED: only thought + intensity (no theme, no preHandledByHero)
+  allObjections: z.array(z.object({
+    thought: z.string().min(1),
+    intensity: z.enum(['low', 'medium', 'high']),
+  })),
+  // NEW: per-objection resolutions (AI argues for each)
+  objectionResolutions: z.array(z.object({
+    thought: z.string().min(1),
+    intensity: z.enum(['low', 'medium', 'high']),
+    inferredTheme: z.enum(['trust', 'risk', 'fit', 'how', 'what', 'price', 'effort']),
+    preHandledByHero: z.boolean(),
+    candidateSections: z.array(z.enum(['Problem', 'BeforeAfter', 'Features', 'UniqueMechanism', 'HowItWorks', 'Testimonials', 'SocialProof', 'Results', 'FounderNote', 'Pricing', 'ObjectionHandle', 'FAQ', 'UseCases'])),
+    alreadyCoveredBy: z.enum(['Problem', 'BeforeAfter', 'Features', 'UniqueMechanism', 'HowItWorks', 'Testimonials', 'SocialProof', 'Results', 'FounderNote', 'Pricing', 'ObjectionHandle', 'FAQ', 'UseCases']).nullable(),
+    decision: z.enum(['add', 'skip']),
+    chosenSection: z.enum(['Problem', 'BeforeAfter', 'Features', 'UniqueMechanism', 'HowItWorks', 'Testimonials', 'SocialProof', 'Results', 'FounderNote', 'Pricing', 'ObjectionHandle', 'FAQ', 'UseCases']).nullable(),
+    reasoning: z.string().min(1),
+  })),
+  middleSections: z.array(z.enum(['Problem', 'BeforeAfter', 'Features', 'UniqueMechanism', 'HowItWorks', 'Testimonials', 'SocialProof', 'Results', 'FounderNote', 'Pricing', 'ObjectionHandle', 'FAQ', 'UseCases'])).min(1),
+});
+
+export type SequentialStrategyResponse = z.infer<typeof SequentialStrategyResponseSchema>;
+
 // Type for middle section (for exports)
 export type MiddleSection = z.infer<typeof MiddleSectionEnum>;

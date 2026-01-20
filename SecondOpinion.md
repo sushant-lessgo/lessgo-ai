@@ -1,121 +1,108 @@
-Here’s what stands out in the **two backend logs** specifically around **section selection quality** (ignoring UIBlocks), plus **concrete fixes**.
+Directionally: **yes**. This plan will let you swap providers safely and keep your `/api/v2/research` contract stable.
+
+But in its current form it **won’t reliably fix “garbage IVOC”** unless you tighten three things: **cache behavior, grounding/evidence, and source control**.
+
+## What’s good
+
+* **Feature flag + fallback chain** is the right rollout strategy.
+* Keeping the **frontend + API contract unchanged** reduces risk.
+* Centralizing provider logic inside `src/app/api/v2/research/route.ts` is clean.
+
+## The big gaps (and how to fix them)
+
+### 1) Cache will hide Perplexity improvements
+
+Right now your cache key is only `categoryKey + audienceKey`. So if a Tavily cache entry exists (even garbage), Perplexity will **never run** unless `forceRefresh=true`.
+
+**Fix options (pick one):**
+
+* **Option A (minimal):** If `RESEARCH_PROVIDER=perplexity` and cached.source !== `perplexity`, treat it as a miss.
+* **Option B (better):** Add provider into the cache key (or add `providerVersion`), so Tavily/Perplexity can coexist.
+* **Option C (best):** Keep same key but introduce `version` and bump it when you switch research engines; ignore cache when `cached.version < REQUIRED_RESEARCH_VERSION`.
+
+If you don’t do this, you’ll think “Perplexity isn’t helping” when it’s just never being called.
 
 ---
 
-## 1) You’re calling `/understand` twice → downstream section selection becomes noisy
+### 2) “Verbatim quotes” will still be hallucinated without evidence linking
 
-In **both logs**, the *exact same* understand prompt is fired twice, producing slightly different outputs (audiences/features).  
-That cascades into different strategy + section choices across runs.
+Your plan says “extract VERBATIM language” and returns `citations: string[]`. With Sonar, you typically get **`search_results` metadata** (titles/urls/dates), not guaranteed per-claim links. The model can still invent a “quote” that wasn’t actually in a source.
 
-**Fix (do this first):**
+Perplexity’s chat-completions responses include `search_results` (sources list). ([Perplexity][1])
 
-* Add **idempotency** for onboarding calls:
+**Fix:** change the output format so every IVOC item includes **source indices** that point into `search_results`.
 
-  * Frontend: guard the “auto-call” with a `useRef` “alreadyCalled” flag + AbortController.
-  * Backend: accept an `onboardingRunId + stepName` key and **return cached response** if already computed.
-* In dev, React Strict Mode can double-invoke effects. Your logs look exactly like that pattern. 
+Example (still compatible with your existing IVOC arrays if you want):
 
----
+* Keep arrays of strings, but embed source markers:
+  `"they charged me twice and ghosted support [2]"`
 
-## 2) IVOC/research quality is contaminating section selection
+Or (better but requires type change):
 
-### A) “Ray” research retrieval includes wildly irrelevant sources (cookies, human cloning, Reddit alternatives)
+```json
+"pains": [{ "text": "...", "sources": [2,5] }]
+```
 
-Your IVOC extraction prompt is fed search results that include **Congress.gov human cloning**, **web cookies**, and **Reddit alternatives**.  
-So the extracted “pains/desires” become generic/low-signal (“pain points and challenges…”, etc.). 
-
-**Concrete improvements:**
-
-* Improve the Tavily/query formation:
-
-  * Use a more specific query like: **“AI personal trainer real-time adaptive workouts app pain points pricing complaints”** instead of just Fitness + audience.
-  * Add exclusion keywords: `-cookies -congress -cloning -reddit alternatives -voat`.
-  * Prefer review/community domains (Reddit fitness subs, app stores, G2/Capterra) and filter everything else.
-* Add a **relevance filter step** before IVOC extraction:
-
-  * Embed each search snippet and drop any below a similarity threshold to (category + audience + product type).
-  * If < N relevant results remain, **re-search** with a fallback query template.
-
-### B) “Invoicer” cache looks polluted / mismatched for “invoicing/freelancers”
-
-Cache hit includes things like “better alternative to Upwork”, “keep getting rejected” etc. which don’t belong to invoicing tools. 
-This will push the strategist into wrong objections → wrong sections.
-
-**Concrete improvements:**
-
-* Make cache keys more specific than `category/audience`:
-
-  * include **subcategory** or **productType** (e.g., `invoice-generator` vs “freelancer SaaS”), or include a short “whatItDoes” hash.
-* Add a cache quality validator:
-
-  * If IVOC contains platform-market phrases (Upwork, “getting rejected”) while category is invoicing → mark as **cache miss** and re-fetch.
+If you keep a separate `citations[]` array only, you’ll have no reliable way to know which source supports which insight.
 
 ---
 
-## 3) Strategy → section selection is **non-deterministic** and varies too much
+### 3) Don’t rely on “Search Reddit…” in the prompt — enforce it via params
 
-### Invoicer shows two different section sets / orders across runs
+With Sonar you can pass **`search_domain_filter`** and **`search_recency_filter`** as request params. ([Perplexity][1])
+This is much stronger than hoping the model “chooses” Reddit/forums.
 
-One run outputs:
-`Problem, UniqueMechanism, Features, HowItWorks, Testimonials, SocialProof, ObjectionHandle, Pricing, FAQ` 
-Another run outputs a *different* set including `BeforeAfter` and `UseCases`, and a different order. 
+**Recommendation for IVOC retrieval:**
 
-### Ray also varies (different middleSections across runs)
+* Use `search_domain_filter` allowlist like:
+  `["reddit.com","g2.com","capterra.com","trustpilot.com","apps.apple.com","play.google.com","producthunt.com","indiehackers.com"]`
+* Add `search_recency_filter: "year"` (or `"month"` for fast-moving categories). ([Perplexity][1])
 
-Example run includes `Problem` and `BeforeAfter` and starts with `UniqueMechanism`. 
-Another run omits `Problem` and includes `UseCases`. 
+That will reduce SEO/template garbage dramatically.
 
-**Concrete improvements (make selection stable):**
-
-* Introduce a **deterministic “base skeleton”** chosen by rules, then allow the model to add only 0–2 extras.
-
-  * For *solution-aware SaaS free trial*, a safe base is usually:
-    **Problem → BeforeAfter → Features → HowItWorks → Proof (Testimonials OR SocialProof) → Pricing/Trial → FAQ**
-* Put a hard cap like **7–9 middle sections** to avoid bloat.
-* Add a post-processor that:
-
-  * **Deduplicates** (already done),
-  * **Reorders** into a canonical funnel order (see next point),
-  * Ensures required sections exist (e.g., if awareness is solution-aware, don’t skip Problem/BeforeAfter).
+### 4 Instead of only giving category and audince, shall we also give what it does so that results are better.. for a category and audienc.. its too droad for IVOC
 
 ---
 
-## 4) The model’s section ORDER is sometimes wrong for persuasion flow
+## Model choice for your plan
 
-Ray example starts: `UniqueMechanism → HowItWorks → Problem…` 
-That’s usually backwards: readers need the **pain + outcome** before mechanism/steps.
+Given your goal (high-quality IVOC):
 
-**Concrete improvements:**
-
-* Apply a **canonical ordering layer** after `middleSections` comes back:
-
-  * **Awareness/Empathy**: Problem
-  * **Outcome**: BeforeAfter
-  * **Differentiation**: UniqueMechanism
-  * **What you get**: Features
-  * **How to use**: HowItWorks
-  * **Trust**: Testimonials/SocialProof/Results
-  * **Price & risk**: Pricing + ObjectionHandle
-  * **Leftovers**: FAQ + UseCases + FounderNote
-* If you want the model to still “choose”, let it choose inclusion, but **you own the order**.
+* Default **`sonar-pro`** for research quality (it’s explicitly “deeper content understanding”). ([Perplexity][2])
+* Use **`sonar`** only when you need high volume / cheap mode.
+* Avoid `sonar-reasoning-pro` **if you rely on strict JSON parsing**, because it can output a `<think>` block before JSON and requires special parsing. ([Perplexity][3])
 
 ---
 
-## 5) Thought → section mapping is semantically inconsistent
+## Implementation tweaks I’d apply to your plan
 
-Examples:
+### Update `researchWithPerplexity` return type
 
-* “Is this built for freelancers or generic?” mapped to **Problem** in one run. That’s really **UseCases** or **UniqueMechanism**. 
-* In another invoicer run, “Does this solve my specific freelance invoicing needs?” correctly maps to **UseCases**. 
-  This inconsistency is why section selection feels “off” even when the set is reasonable.
+Instead of `citations: string[]`, return the sources you actually get:
 
-**Concrete improvements:**
+* `citations: { title: string; url: string; date?: string }[]` from `response.search_results` ([Perplexity][1])
 
-* Tighten definitions in prompt with a “routing table”, e.g.:
+And in `route.ts`, store:
 
-  * **Problem** = empathy/recognition of pain
-  * **UseCases** = “is it for me / my scenario”
-  * **UniqueMechanism** = “why different”
-  * **ObjectionHandle** = risk/cancellation/security/switching
-* Or: do mapping with a small deterministic classifier (rule-based / few-shot) rather than free-form LLM.
+* `rawSources = response.search_results`
+* `query = prompt summary or the actual composed prompt`
 
+### Use structured outputs (so JSON is guaranteed)
+
+Perplexity supports **JSON Schema structured outputs** via `response_format`. ([Perplexity][4])
+This will reduce parsing failures and weird formatting.
+
+### Add an IVOC “quality gate” before caching
+
+If output contains phrases like:
+
+* “target audience”, “pain points”, “market research”, “pricing transparency concerns”
+  …then mark it low-quality and **don’t cache** (or cache with short TTL).
+
+---
+
+[1]: https://docs.perplexity.ai/guides/chat-completions-guide "OpenAI Compatibility - Perplexity"
+[2]: https://docs.perplexity.ai/getting-started/models/models/sonar-pro?utm_source=chatgpt.com "Sonar pro"
+[3]: https://docs.perplexity.ai/getting-started/models/models/sonar-reasoning-pro?utm_source=chatgpt.com "Sonar reasoning pro"
+[4]: https://docs.perplexity.ai/guides/structured-outputs "Structured Outputs Guide - Perplexity"
+[5]: https://docs.perplexity.ai/api-reference/search-post "Search - Perplexity"

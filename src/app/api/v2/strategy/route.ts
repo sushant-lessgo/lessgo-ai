@@ -17,7 +17,10 @@ import { withAIRateLimit } from '@/lib/rateLimit';
 import { requireAuth } from '@/lib/middleware/planCheck';
 import { consumeCredits, CREDIT_COSTS, UsageEventType } from '@/lib/creditSystem';
 import { generateWithSchema } from '@/lib/aiClient';
-import { EnhancedStrategyResponseSchema } from '@/lib/schemas';
+import {
+  EnhancedStrategyResponseSchema,
+  SequentialStrategyResponseSchema,
+} from '@/lib/schemas';
 import {
   buildStrategyPrompt,
   validateSections,
@@ -114,21 +117,37 @@ async function strategyHandler(req: NextRequest): Promise<Response> {
       },
     });
 
-    // 4. Call AI with structured outputs (enhanced schema with two-phase objection flow)
+    // 4. Call AI with structured outputs
+    // Choose schema based on objection flow mode
+    const objectionFlowMode = process.env.OBJECTION_FLOW_MODE || 'grouped';
+    const isSequentialMode = objectionFlowMode === 'sequential';
+    const responseSchema = isSequentialMode
+      ? SequentialStrategyResponseSchema
+      : EnhancedStrategyResponseSchema;
+
     logger.dev('[strategy] PROMPT:', prompt);
 
     let strategyData: StrategyOutput;
     try {
-      // AI returns enhanced response with friction assessment and objection groups
+      // AI returns response based on selected schema
       const response = await generateWithSchema(
         'strategy',
         [{ role: 'user', content: prompt }],
-        EnhancedStrategyResponseSchema,
+        responseSchema,
         'strategy'
       );
       logger.dev('[strategy] AI RESPONSE:', response);
       logger.dev('[strategy] FRICTION:', response.frictionAssessment);
-      logger.dev('[strategy] OBJECTION GROUPS:', response.objectionGroups?.length || 0);
+
+      if (isSequentialMode) {
+        // Sequential mode: objectionResolutions
+        const seqResponse = response as any;
+        logger.dev('[strategy] OBJECTION RESOLUTIONS:', seqResponse.objectionResolutions?.length || 0);
+      } else {
+        // Grouped mode: objectionGroups
+        const grpResponse = response as any;
+        logger.dev('[strategy] OBJECTION GROUPS:', grpResponse.objectionGroups?.length || 0);
+      }
 
       // 5. Post-processing pipeline for middleSections
       let middleSections = (response.middleSections || ['Features']) as SectionType[];
@@ -150,14 +169,28 @@ async function strategyHandler(req: NextRequest): Promise<Response> {
         'Footer',
       ] as StrategyOutput['sections'];
 
-      // Convert enhanced response to StrategyOutput for downstream compatibility
-      // Map objection groups back to legacy format
-      const legacyObjections = response.objectionGroups?.flatMap((group) =>
-        group.objections.map((obj) => ({
-          thought: obj.thought,
-          section: group.resolvedBy,
-        }))
-      ) || [];
+      // Convert response to StrategyOutput for downstream compatibility
+      let legacyObjections: Array<{ thought: string; section: string }> = [];
+
+      if (isSequentialMode) {
+        // Sequential mode: map objectionResolutions to legacy format
+        const seqResponse = response as any;
+        legacyObjections = (seqResponse.objectionResolutions || [])
+          .filter((res: any) => res.decision === 'add' && res.chosenSection)
+          .map((res: any) => ({
+            thought: res.thought,
+            section: res.chosenSection,
+          }));
+      } else {
+        // Grouped mode: map objectionGroups to legacy format
+        const grpResponse = response as any;
+        legacyObjections = (grpResponse.objectionGroups || []).flatMap((group: any) =>
+          group.objections.map((obj: any) => ({
+            thought: obj.thought,
+            section: group.resolvedBy,
+          }))
+        );
+      }
 
       strategyData = {
         vibe: response.vibe as StrategyOutput['vibe'],
