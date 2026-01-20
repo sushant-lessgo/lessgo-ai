@@ -5,10 +5,9 @@
  * 1. Validate request
  * 2. Auth + credits check (2 credits)
  * 3. Build strategy prompt
- * 4. Call OpenAI (gpt-4o-mini, temp 0.6)
- * 5. Parse + normalize response
- * 6. validateSections() post-processing
- * 7. Consume credits, return strategy
+ * 4. Call AI with structured outputs
+ * 5. validateSections() post-processing
+ * 6. Consume credits, return strategy
  */
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
@@ -17,8 +16,9 @@ import { createSecureResponse } from '@/lib/security';
 import { withAIRateLimit } from '@/lib/rateLimit';
 import { requireAuth } from '@/lib/middleware/planCheck';
 import { consumeCredits, CREDIT_COSTS, UsageEventType } from '@/lib/creditSystem';
-import { openai } from '@/lib/openaiClient';
-import { buildStrategyPrompt, parseStrategyResponse, validateSections, ensureMinimumSections } from '@/modules/strategy';
+import { generateWithSchema } from '@/lib/aiClient';
+import { StrategyResponseSchema } from '@/lib/schemas';
+import { buildStrategyPrompt, validateSections } from '@/modules/strategy';
 import type { IVOC, LandingGoal, StrategyOutput } from '@/types/generation';
 import { landingGoals } from '@/types/generation';
 
@@ -109,51 +109,42 @@ async function strategyHandler(req: NextRequest): Promise<Response> {
       },
     });
 
-    // 4. Call OpenAI
+    // 4. Call AI with structured outputs
     logger.dev('[strategy] PROMPT:', prompt);
 
     let strategyData: StrategyOutput;
     try {
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.6,
-        response_format: { type: 'json_object' },
-      });
+      // AI returns middleSections; we construct full sections array
+      const response = await generateWithSchema(
+        'strategy',
+        [{ role: 'user', content: prompt }],
+        StrategyResponseSchema,
+        'strategy'
+      );
+      logger.dev('[strategy] AI RESPONSE:', response);
 
-      const content = response.choices[0]?.message?.content;
-      logger.dev('[strategy] RESPONSE:', content);
+      // Construct full sections: Header, Hero, ...middleSections, CTA, Footer
+      const middleSections = response.middleSections || ['Features'];
+      const sections = [
+        'Header',
+        'Hero',
+        ...middleSections,
+        'CTA',
+        'Footer',
+      ] as StrategyOutput['sections'];
 
-      if (!content) {
-        return createSecureResponse(
-          {
-            success: false,
-            error: 'empty_response',
-            message: 'AI returned empty response',
-            recoverable: true,
-          },
-          500
-        );
-      }
-
-      // 5. Parse + normalize
-      const parseResult = parseStrategyResponse(content);
-      if (!parseResult.success) {
-        logger.error('Strategy parse failed:', parseResult.error);
-        return createSecureResponse(
-          {
-            success: false,
-            error: 'parse_error',
-            message: parseResult.error,
-            recoverable: true,
-          },
-          500
-        );
-      }
-
-      strategyData = parseResult.data;
+      // Convert to StrategyOutput (replace middleSections with sections)
+      strategyData = {
+        vibe: response.vibe as StrategyOutput['vibe'],
+        oneReader: response.oneReader as StrategyOutput['oneReader'],
+        oneIdea: response.oneIdea as StrategyOutput['oneIdea'],
+        featureAnalysis: response.featureAnalysis as StrategyOutput['featureAnalysis'],
+        objections: response.objections as StrategyOutput['objections'],
+        sections,
+      };
+      logger.dev('[strategy] CONSTRUCTED SECTIONS:', sections);
     } catch (aiError: any) {
-      logger.error('OpenAI strategy generation failed:', aiError);
+      logger.error('AI strategy generation failed:', aiError);
       return createSecureResponse(
         {
           success: false,
@@ -165,7 +156,7 @@ async function strategyHandler(req: NextRequest): Promise<Response> {
       );
     }
 
-    // 6. Post-processing: validate sections
+    // 6. Post-processing: validate sections against assets
     const assets = {
       hasTestimonials: data.hasTestimonials,
       hasSocialProof: data.hasSocialProof,
@@ -178,8 +169,8 @@ async function strategyHandler(req: NextRequest): Promise<Response> {
       assets
     );
 
-    // Ensure minimum sections are present
-    strategyData.sections = ensureMinimumSections(strategyData.sections);
+    // Dedupe sections (preserve order)
+    strategyData.sections = [...new Set(strategyData.sections)];
 
     // 7. Consume credits
     const creditResult = await consumeCredits(

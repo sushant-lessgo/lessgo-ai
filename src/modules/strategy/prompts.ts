@@ -108,10 +108,11 @@ Common Phrases: ${JSON.stringify(ivoc.commonPhrases)}
    - UseCases: "Is this for me?"
    - FounderNote: "Who's behind this?"
 
-6. Output SECTION ORDER:
-   Fixed structure: Header (first), Hero (second), [middle sections], CTA (near end), Footer (last)
-   Fill middle with sections from objection mapping, deduplicated, in the order objections arise.
+6. Output MIDDLE SECTIONS only:
+   Header, Hero, CTA, Footer are AUTOMATICALLY included - do NOT include them.
+   Return only the middle sections from objection mapping, deduplicated, in the order objections arise.
    Do NOT include sections for assets the user doesn't have.
+   Allowed middle sections: Problem, BeforeAfter, Features, UniqueMechanism, HowItWorks, Testimonials, SocialProof, Results, FounderNote, Pricing, ObjectionHandle, FAQ, UseCases
 
 Output valid JSON matching this exact schema:
 {
@@ -136,7 +137,7 @@ Output valid JSON matching this exact schema:
   "objections": [
     { "thought": "reader's thought/concern", "section": "SectionName" }
   ],
-  "sections": ["Header", "Hero", "...", "CTA", "Footer"]
+  "middleSections": ["Features", "HowItWorks", "..."]
 }
 
 Output JSON only, no explanation.`;

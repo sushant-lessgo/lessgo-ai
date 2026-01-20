@@ -76,6 +76,7 @@ interface GenerationState {
   // Step 7: UIBlock selection
   selectedSections: SectionType[];  // from strategy output
   uiblockSelections: Partial<Record<SectionType, string | null>>;  // null = pending question
+  uiblockAnswers: Record<string, string>;  // User answers to questions (separate from selections)
   uiblockQuestions: UIBlockQuestion[];
   uiblockQuestionsAnswered: boolean;
   uiblockLoading: boolean;
@@ -166,6 +167,7 @@ const initialState: GenerationState = {
   strategyError: null,
   selectedSections: [],
   uiblockSelections: {},
+  uiblockAnswers: {},
   uiblockQuestions: [],
   uiblockQuestionsAnswered: false,
   uiblockLoading: false,
@@ -317,7 +319,9 @@ export const useGenerationStore = create<GenerationStore>()(
       }),
 
       answerUIBlockQuestion: (section, answer) => set((state) => {
-        state.uiblockSelections[section] = answer;
+        // Track answer separately - DON'T overwrite uiblockSelections!
+        // The selection should come from the API response, not the user's answer
+        state.uiblockAnswers[section] = answer;
         state.uiblockQuestions = state.uiblockQuestions.filter(q => q.section !== section);
         if (state.uiblockQuestions.length === 0) {
           state.uiblockQuestionsAnswered = true;
@@ -383,6 +387,7 @@ export const useGenerationStore = create<GenerationStore>()(
         }
         if (stepIndex <= 7) {
           state.uiblockSelections = {};
+          state.uiblockAnswers = {};
           state.uiblockQuestions = [];
           state.uiblockQuestionsAnswered = false;
           state.uiblockLoading = false;

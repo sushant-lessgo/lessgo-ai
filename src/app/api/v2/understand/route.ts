@@ -5,9 +5,8 @@
  * 1. Validate request
  * 2. Auth check (1 credit)
  * 3. Build extraction prompt
- * 4. Call OpenAI (gpt-4o-mini, temp 0.3)
- * 5. Parse response
- * 6. Consume credits, return understanding data
+ * 4. Call AI with structured outputs
+ * 5. Consume credits, return understanding data
  */
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
@@ -16,7 +15,8 @@ import { createSecureResponse } from '@/lib/security';
 import { withAIRateLimit } from '@/lib/rateLimit';
 import { requireAuth } from '@/lib/middleware/planCheck';
 import { consumeCredits, CREDIT_COSTS, UsageEventType } from '@/lib/creditSystem';
-import { openai } from '@/lib/openaiClient';
+import { generateWithSchema } from '@/lib/aiClient';
+import { UnderstandingResponseSchema } from '@/lib/schemas';
 import type { UnderstandingData } from '@/types/generation';
 
 export const dynamic = 'force-dynamic';
@@ -24,14 +24,6 @@ export const dynamic = 'force-dynamic';
 // Request schema
 const UnderstandRequestSchema = z.object({
   oneLiner: z.string().min(10, 'One-liner must be at least 10 characters'),
-});
-
-// Response validation
-const UnderstandingResponseSchema = z.object({
-  categories: z.array(z.string()).min(1).max(3),
-  audiences: z.array(z.string()).min(1).max(3),
-  whatItDoes: z.string().min(1),
-  features: z.array(z.string()).min(1).max(8),
 });
 
 function buildUnderstandPrompt(oneLiner: string): string {
@@ -87,68 +79,20 @@ async function understandHandler(req: NextRequest): Promise<Response> {
     // 3. Build prompt
     const prompt = buildUnderstandPrompt(oneLiner);
 
-    // 4. Call OpenAI
+    // 4. Call AI with structured outputs
     logger.dev('[understand] PROMPT:', prompt);
 
     let understandingData: UnderstandingData;
     try {
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.3,
-        response_format: { type: 'json_object' },
-      });
-
-      const content = response.choices[0]?.message?.content;
-      logger.dev('[understand] RESPONSE:', content);
-
-      if (!content) {
-        return createSecureResponse(
-          {
-            success: false,
-            error: 'empty_response',
-            message: 'AI returned empty response',
-            recoverable: true,
-          },
-          500
-        );
-      }
-
-      // 5. Parse response
-      let parsed;
-      try {
-        parsed = JSON.parse(content);
-      } catch {
-        logger.error('Failed to parse understand response:', content);
-        return createSecureResponse(
-          {
-            success: false,
-            error: 'parse_error',
-            message: 'Failed to parse AI response',
-            recoverable: true,
-          },
-          500
-        );
-      }
-
-      // Validate structure
-      const responseValidation = UnderstandingResponseSchema.safeParse(parsed);
-      if (!responseValidation.success) {
-        logger.error('Invalid understand response structure:', responseValidation.error);
-        return createSecureResponse(
-          {
-            success: false,
-            error: 'invalid_response',
-            message: 'AI response missing required fields',
-            recoverable: true,
-          },
-          500
-        );
-      }
-
-      understandingData = responseValidation.data;
+      understandingData = await generateWithSchema(
+        'understand',
+        [{ role: 'user', content: prompt }],
+        UnderstandingResponseSchema,
+        'understanding'
+      );
+      logger.dev('[understand] RESPONSE:', understandingData);
     } catch (error: any) {
-      logger.error('OpenAI understand call failed:', error);
+      logger.error('AI understand call failed:', error);
       return createSecureResponse(
         {
           success: false,

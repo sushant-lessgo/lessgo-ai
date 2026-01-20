@@ -1,87 +1,41 @@
-Your plan is a **solid “first 60%”** for the Phase-3 UIBlock selection problems, but there are a couple of hidden traps + a few missing fixes that will keep the system brittle even after these 3 changes.
+Here’s the crisp “final advice” you can hand to Claude Code and ship the MVP safely:
 
-## What’s good
+## MVP rule
 
-* **#1 (missing candidates)** is very plausibly the *root cause* behind “AI invents layouts / assigns Pricing layouts to other sections”. Fixing candidate retrieval will immediately improve downstream behavior.
-* **#2 (question quality)** is the right direction: you want questions that surface *user assets + intent*, not internal layout mechanics.
-* **#3 (validation)** is a necessary safety net. You *must* prevent “Include”/random strings from propagating as a layout.
+Be **strict on IDs**, **relaxed on text**.
 
-## Biggest risk in your #1 fix
+## Do this
 
-Removing `toLowerCase()` is only correct **if**:
+1. **Lock the spine**
 
-* `layoutNamesBySection` keys are **exactly** the same casing as `sectionType` values everywhere (e.g. `uniqueMechanism`, `useCases`, etc.), and
-* nothing else passes `sectionType` as `UniqueMechanism`, `UseCases`, `HERO`, etc.
+   * Sections must be **canonical enums** (no free strings).
+   * UIBlock/layout IDs must be validated against your **registry**.
+   * Always return **valid JSON** (Structured Outputs).
 
-If today your map keys are lowercased (common pattern), then removing normalization will **break** sections like `Hero`/`Header` that might have been working by accident.
+2. **Avoid unsupported schema features (Anthropic + OpenAI)**
 
-**Safer fix:** normalize with an alias map rather than removing normalization entirely, e.g.:
+   * Don’t use JSON Schema `propertyNames` (so avoid `z.record(enum, …)` if it generates it).
+   * Don’t rely on `minItems > 1` / `minLength` in the provider schema.
+   * If you must keep Zod strict, enforce constraints **post-parse**.
 
-* First try `layoutNamesBySection[sectionType]`
-* Then try common variants: `camelCase`, `lowercase`, `PascalCase` mapping
-* And log when a fallback path was used (so you can kill the fallback later)
+3. **Best MVP shape**
 
-This avoids “fix #1 breaks 5 other sections” surprises.
+   * Strategy returns only **`middleSections`** (enum array with `min(1)`), and server appends `Header, Hero, CTA, Footer`.
+   * If `middleSections` empty/missing → default to `['Features']`.
 
-## #2 Prompt guidance: good, but you need one more constraint
+4. **Sanitize only for provider schema, not your business rules**
 
-Guidelines alone often won’t prevent technical questions unless you also:
+   * Use `sanitizeSchemaForAnthropic()` to strip unsupported constraints **only in `output_format`**.
+   * Keep real validation in Zod/business logic, but for MVP use **safeParse + fallback**, not throw.
 
-* **ban layout IDs from appearing in questions**, explicitly
-* enforce a **question type** (asset/goal/audience/offer/proof) so it doesn’t drift back to “include/exclude”
-* add a rule: **ask questions only when confidence is low** (otherwise users get interrogated)
+5. **Fallback logic**
 
-If you don’t add the “only ask when needed” rule, the AI will still generate obvious filler questions because it thinks it must.
+   * Fallback to backup model **only for infrastructure errors** (429/5xx/timeout/network).
+   * On content/validation issues: **apply deterministic defaults** (don’t waste money switching models).
 
-## #3 Validation: fallback-to-first-candidate is dangerous
+6. **Two must-have guardrails**
 
-“If invalid, pick first candidate” will hide real issues and can lead to weird mismatches.
+   * Dedupe + stable sort sections server-side.
+   * If a layout is invalid/unknown → set `null` or choose first candidate (and log).
 
-Better behavior:
-
-* If invalid layout → set `layout = null` and **force a question** (or run your “auto-fix composition” logic explicitly with a reason)
-* If no candidates → return a structured error that points to candidate retrieval (not silent defaults)
-
-At minimum, log:
-
-* sectionType
-* candidates
-* invalid value received
-* the fallback chosen + reason
-
-## What’s missing (you’ll still have bugs after implementing this plan)
-
-### 4) Separate “include/exclude” from “layout selection” in the response schema
-
-Right now “Include” is being interpreted like a layout. Validation helps, but the real fix is schema separation:
-
-* `includeSections: { UniqueMechanism: true/false }`
-* `sectionLayouts: { UniqueMechanism: "SomeLayout" | null }`
-
-If you don’t split these, you’ll keep fighting the same class of bug.
-
-### 5) Copy generation keying/section naming mismatch (your known issue #1)
-
-This plan doesn’t address: **AI returning layout names as keys** (e.g. `SimpleFooter`) instead of section keys (`Footer`). That’s not a UIBlock selection bug — it’s copy output schema / parsing validation.
-
-You need either:
-
-* stricter schema in copy prompt + validation, or
-* a post-processor that maps `{ layout: "SimpleFooter" }` into `{ section: "Footer", layout: "SimpleFooter" }`
-
-### 6) Layout registry/schema mismatch issues (causes missing fields → frontend crashes)
-
-Even with correct layout names, if your schema registry can’t find a layout definition, your extraction/validation will drop fields and your UI components will receive `undefined`.
-
-Add a check:
-
-* “layout exists in registry” **before** generating or parsing copy for it
-
-## Suggested execution order (to avoid churn)
-
-1. Fix candidate retrieval (#1) **but with safe normalization**
-2. Add validation (#3) + log hard when invalid
-3. Split include vs layout schema (missing #4)
-4. Upgrade question prompt (#2) + “ask only when needed”
-5. Fix copy section naming (missing #5)
-6. Add registry/schema existence check (missing #6)
+That’s it: schema-safe outputs + deterministic fallbacks → no more “Heroic”, no more crashes, MVP stays unblocked.

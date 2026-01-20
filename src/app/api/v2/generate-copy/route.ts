@@ -5,10 +5,9 @@
  * 1. Validate request
  * 2. Auth + credits check (3 credits)
  * 3. Build copy prompt
- * 4. Call OpenAI (gpt-4o-mini)
- * 5. Parse response (with retry on failure)
- * 6. Validate completeness
- * 7. Consume credits, return copy
+ * 4. Call AI with structured outputs (with retry on failure)
+ * 5. Validate completeness
+ * 6. Consume credits, return copy
  */
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
@@ -17,13 +16,10 @@ import { createSecureResponse } from '@/lib/security';
 import { withAIRateLimit } from '@/lib/rateLimit';
 import { requireAuth } from '@/lib/middleware/planCheck';
 import { consumeCredits, CREDIT_COSTS, UsageEventType } from '@/lib/creditSystem';
-import { openai } from '@/lib/openaiClient';
+import { generateWithSchema } from '@/lib/aiClient';
+import { CopyResponseSchema } from '@/lib/schemas';
 import { buildCopyPrompt, buildCopyRetryPrompt } from '@/modules/copy/copyPrompt';
-import {
-  parseCopyResponse,
-  validateCompleteness,
-  getErrorContext,
-} from '@/modules/copy/parseCopy';
+import { validateCompleteness } from '@/modules/copy/parseCopy';
 import type { SectionType, StrategyOutput, SectionCopy, LandingGoal } from '@/types/generation';
 import { sectionTypes, vibes, awarenessLevels, landingGoals } from '@/types/generation';
 
@@ -125,7 +121,7 @@ async function generateCopyHandler(req: NextRequest): Promise<Response> {
       features,
     });
 
-    // 4. Call OpenAI with retry logic
+    // 4. Call AI with structured outputs (with retry)
     logger.dev('[generate-copy] PROMPT:', prompt);
 
     let sections: Record<string, SectionCopy> | null = null;
@@ -138,43 +134,25 @@ async function generateCopyHandler(req: NextRequest): Promise<Response> {
       logger.dev(`[generate-copy] Attempt ${attempts}/${MAX_RETRIES + 1}`);
 
       try {
-        const response = await openai.chat.completions.create({
-          model: 'gpt-4o-mini',
-          messages: [{ role: 'user', content: currentPrompt }],
-          temperature: 0.7,
-          max_tokens: 4000, // Copy can be lengthy
-          response_format: { type: 'json_object' },
-        });
-
-        const content = response.choices[0]?.message?.content;
-        logger.dev('[generate-copy] RESPONSE:', content);
-
-        if (!content) {
-          lastError = 'AI returned empty response';
-          continue;
-        }
-
-        // 5. Parse response
-        const parseResult = parseCopyResponse(
-          content,
-          uiblocks as Record<SectionType, string>
+        const response = await generateWithSchema(
+          'copy',
+          [{ role: 'user', content: currentPrompt }],
+          CopyResponseSchema,
+          'copy_generation'
         );
+        logger.dev('[generate-copy] RESPONSE:', response);
 
-        if (parseResult.success) {
-          sections = parseResult.sections;
-        } else {
-          lastError = parseResult.error;
-
-          // Build retry prompt for next attempt
-          if (attempts <= MAX_RETRIES) {
-            const { error, snippet } = getErrorContext(parseResult);
-            currentPrompt = buildCopyRetryPrompt(prompt, error, snippet);
-            logger.warn(`Copy parse failed (attempt ${attempts}), retrying:`, lastError);
-          }
-        }
+        // Transform response to expected format
+        sections = response as Record<string, SectionCopy>;
       } catch (aiError: any) {
         lastError = aiError.message || 'AI generation failed';
-        logger.error(`OpenAI copy generation failed (attempt ${attempts}):`, aiError);
+        logger.error(`AI copy generation failed (attempt ${attempts}):`, aiError);
+
+        // Build retry prompt for next attempt
+        if (attempts <= MAX_RETRIES) {
+          currentPrompt = buildCopyRetryPrompt(prompt, lastError || 'Unknown error', '');
+          logger.warn(`Copy generation failed (attempt ${attempts}), retrying`);
+        }
       }
     }
 

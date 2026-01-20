@@ -222,10 +222,16 @@ Reference: `newOnboarding.md` for detailed requirements.
 
 **Dependencies:** Phase 2 strategy output
 
-**Status: ✅ COMPLETE (2026-01-19)**
+**Status: ⚠️ MOSTLY COMPLETE (2026-01-19)** - One bug remaining: `answerUIBlockQuestion` overwrites selection with answer
 
 <details>
 <summary>Phase 3 Completion Summary</summary>
+
+### Bug Fix Needed (discovered in testing)
+- **Issue**: `useGenerationStore.answerUIBlockQuestion` sets answer as selection directly
+- **Impact**: "yes" becomes Hero layout instead of keeping original selection
+- **Fix**: Track answers separately, don't overwrite `uiblockSelections`
+- **File**: `src/hooks/useGenerationStore.ts:319-325`
 
 ### New Files Created
 
@@ -403,6 +409,31 @@ See `newOnboardingPlanPhase4.md` for detailed breakdown.
 
 **Dependencies:** Phase 4 complete
 
+**Known Issues to Fix:**
+
+| Issue | Description | Location |
+|-------|-------------|----------|
+| **Component registry lookup** | `Layout component not found: uniquemechanism-5723eb9e.ProcessFlowDiagram` - lookup uses sectionId.layoutName but registry expects different format | Component rendering |
+| **testimonial_quotes type mismatch** | `blockContent.testimonial_quotes.split is not a function` - AI returns array instead of pipe-delimited string | `SegmentedTestimonials.tsx:185` |
+| **Layout undefined in extractLayoutContent** | `{layout: undefined}` passed to content extraction | Content extraction flow |
+| **marketCategory/targetAudience undefined** | `selectUIBlockTheme: {marketCategory: undefined}` - theme selection missing data | Theme selection |
+| **Missing copy for Header/Footer** | `Copy generation incomplete, missing sections: ["Header", "Footer"]` - empty element lists | `copyPrompt.ts` |
+| **Element schema per UIBlock** | Each UIBlock needs proper element list in copy prompt - currently some have empty/missing schemas | `copyPrompt.ts` / element schemas |
+| **Section-layout mismatch validation** | AI can still pick wrong layout type for section if candidates empty | Post-validation |
+| **Question options not layout IDs** | AI asks with `["yes", "no"]` instead of layout IDs, prompt rule ignored | `selectionPrompt.ts` compliance |
+| **previousSelections hardcoded empty** | Route passes `{}` instead of tracking first response selections | `uiblock-select/route.ts:125` |
+| **OpenAI schema validation fails (cheap tier)** | `z.unknown()` in copy schema produces JSON Schema without `type` key - OpenAI rejects. Works with Claude (production tier). Fix: replace `z.unknown()` with explicit types per UIBlock element | `src/lib/schemas/copy.schema.ts:15` |
+
+**Phase 5 Sub-Tasks:**
+
+1. **Element Schema Audit** - Review each UIBlock's expected elements vs copy prompt
+2. **Data Format Standardization** - Ensure AI outputs match component expectations (pipe-strings vs arrays)
+3. **Registry Lookup Fix** - Align section ID format with component registry
+4. **Content Extraction Debug** - Trace why layout is undefined in extraction
+5. **Theme Data Flow** - Ensure marketCategory/targetAudience passed through
+6. **Copy Schema Fix** - Replace `z.unknown()` with explicit element types per UIBlock (enables cheap tier)
+7. **End-to-End Test** - Full flow without errors
+
 ---
 
 ## Phase Dependencies
@@ -449,6 +480,9 @@ Linear dependency. Each phase builds on previous.
 - Pexels query construction from Vibe?
 - ai_generated_needs_review UI treatment in editor?
 - Performance benchmarks?
+- Element schema format: pipe-delimited strings vs arrays?
+- Component registry lookup format alignment?
+- How to handle missing layout components gracefully?
 
 ---
 

@@ -5,8 +5,8 @@
  * 1. Validate request
  * 2. Auth + credits check (1 credit)
  * 3. Build selection prompt
- * 4. Call OpenAI (gpt-4o-mini)
- * 5. Parse response
+ * 4. Call AI with structured outputs
+ * 5. Validate layout names
  * 6. Post-validate composition (auto-fix violations)
  * 7. If questions exist, return needsInput response
  * 8. Consume credits, return UIBlocks
@@ -18,11 +18,11 @@ import { createSecureResponse } from '@/lib/security';
 import { withAIRateLimit } from '@/lib/rateLimit';
 import { requireAuth } from '@/lib/middleware/planCheck';
 import { consumeCredits, CREDIT_COSTS, UsageEventType } from '@/lib/creditSystem';
-import { openai } from '@/lib/openaiClient';
+import { generateWithSchema } from '@/lib/aiClient';
+import { UIBlockSelectionResponseSchema } from '@/lib/schemas';
 import {
   buildSelectionPrompt,
   buildSelectionPromptWithAnswers,
-  parseSelectionResponse,
   getLayoutsForSection,
 } from '@/modules/uiblock/selectionPrompt';
 import { ensureValidComposition } from '@/modules/uiblock/compositionRules';
@@ -127,36 +127,29 @@ async function uiblockSelectHandler(req: NextRequest): Promise<Response> {
         )
       : buildSelectionPrompt(strategy as StrategyOutput, productName);
 
-    // 4. Call OpenAI
+    // 4. Call AI with structured outputs
     logger.dev('[uiblock-select] PROMPT:', prompt);
 
-    let aiResponse: string;
+    let selections: Partial<Record<SectionType, string | null>>;
+    let questions: Array<{ id: string; section: SectionType; question: string; options: string[] }>;
+
     try {
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.4, // Lower temp for more consistent selections
-        response_format: { type: 'json_object' },
-      });
+      const response = await generateWithSchema(
+        'uiblock',
+        [{ role: 'user', content: prompt }],
+        UIBlockSelectionResponseSchema,
+        'uiblock_selection'
+      );
+      logger.dev('[uiblock-select] RESPONSE:', response);
 
-      const content = response.choices[0]?.message?.content;
-      logger.dev('[uiblock-select] RESPONSE:', content);
-
-      if (!content) {
-        return createSecureResponse(
-          {
-            success: false,
-            error: 'empty_response',
-            message: 'AI returned empty response',
-            recoverable: true,
-          },
-          500
-        );
+      // Convert array of entries to record (schema uses array to avoid propertyNames constraint)
+      selections = {};
+      for (const entry of response.selections) {
+        selections[entry.section as SectionType] = entry.layout;
       }
-
-      aiResponse = content;
+      questions = response.questions as Array<{ id: string; section: SectionType; question: string; options: string[] }>;
     } catch (aiError: any) {
-      logger.error('OpenAI UIBlock selection failed:', aiError);
+      logger.error('AI UIBlock selection failed:', aiError);
       return createSecureResponse(
         {
           success: false,
@@ -167,23 +160,6 @@ async function uiblockSelectHandler(req: NextRequest): Promise<Response> {
         500
       );
     }
-
-    // 5. Parse response
-    const parseResult = parseSelectionResponse(aiResponse);
-    if (!parseResult) {
-      logger.error('UIBlock selection parse failed');
-      return createSecureResponse(
-        {
-          success: false,
-          error: 'parse_error',
-          message: 'Failed to parse AI response',
-          recoverable: true,
-        },
-        500
-      );
-    }
-
-    const { selections, questions } = parseResult;
 
     // 5.5 Validate layout names - reject invalid layouts
     for (const [section, layout] of Object.entries(selections)) {

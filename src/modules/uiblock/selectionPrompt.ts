@@ -115,13 +115,17 @@ QUESTION RULES (STRICT):
 
 Output JSON (valid JSON only, no markdown):
 {
-  "selections": { "Section": "Layout" | null },
+  "selections": [
+    { "section": "Header", "layout": "LayoutName" },
+    { "section": "Hero", "layout": "LayoutName" },
+    { "section": "Problem", "layout": null }
+  ],
   "questions": [
     { "id": "Section.reason", "section": "Section", "question": "user-facing question about content/assets", "options": ["LayoutA", "LayoutB"] }
   ]
 }
 
-Use null + question if uncertain. This is a ONE-TIME question pass.`;
+Use layout: null + question if uncertain. Include an entry for EVERY section listed above.`;
 
   return prompt;
 }
