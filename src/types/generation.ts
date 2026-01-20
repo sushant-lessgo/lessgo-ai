@@ -204,7 +204,62 @@ export interface FeatureAnalysis {
 }
 
 /**
- * ===== OBJECTION MAPPING =====
+ * ===== OBJECTION THEMES =====
+ * Categorize objections by what they're questioning
+ */
+export const objectionThemes = [
+  'trust',   // "Is this legit? Who uses this?"
+  'risk',    // "What if it doesn't work? Can I cancel?"
+  'fit',     // "Is this for me / my situation?"
+  'how',     // "How does it work? Is it hard to use?"
+  'what',    // "What exactly do I get?"
+  'price',   // "Is it worth the cost?"
+  'effort',  // "How much work is this to set up?"
+] as const;
+
+export type ObjectionTheme = (typeof objectionThemes)[number];
+
+/**
+ * ===== FRICTION LEVELS =====
+ * Derived from landing goal + offer
+ */
+export const frictionLevels = ['low', 'medium', 'high'] as const;
+
+export type FrictionLevel = (typeof frictionLevels)[number];
+
+/**
+ * ===== FRICTION ASSESSMENT =====
+ * AI's assessment of friction level with reasoning
+ */
+export interface FrictionAssessment {
+  level: FrictionLevel;
+  reasoning: string;
+}
+
+/**
+ * ===== ENHANCED OBJECTION =====
+ * Objection with theme, intensity, and pre-handling flag
+ */
+export interface EnhancedObjection {
+  thought: string;                  // "Will clients take AI invoices seriously?"
+  theme: ObjectionTheme;            // "trust"
+  intensity: 'low' | 'medium' | 'high'; // derived from IVOC (firmBelief=high)
+  preHandledByHero?: boolean;       // Hero already addresses this (e.g., free trial handles risk)
+}
+
+/**
+ * ===== OBJECTION GROUP =====
+ * Multiple objections resolved by one section (many:1)
+ */
+export interface ObjectionGroup {
+  theme: ObjectionTheme;
+  objections: EnhancedObjection[];
+  resolvedBy: SectionType;
+  reasoning: string;                // Why this section resolves these objections
+}
+
+/**
+ * ===== OBJECTION MAPPING (Legacy) =====
  * Maps reader objections to sections that address them
  */
 export interface ObjectionMapping {
@@ -243,6 +298,21 @@ export interface StrategyOutput {
   oneIdea: OneIdea;
   featureAnalysis: FeatureAnalysis[];
   objections: ObjectionMapping[];
+  sections: SectionType[];
+}
+
+/**
+ * ===== ENHANCED STRATEGY OUTPUT =====
+ * New strategy output with friction assessment and objection groups
+ */
+export interface EnhancedStrategyOutput {
+  vibe: Vibe;
+  oneReader: OneReader;
+  oneIdea: OneIdea;
+  featureAnalysis: FeatureAnalysis[];
+  frictionAssessment: FrictionAssessment;
+  allObjections: EnhancedObjection[];
+  objectionGroups: ObjectionGroup[];
   sections: SectionType[];
 }
 
@@ -347,3 +417,9 @@ export const isValidAwarenessLevel = (v: string): v is AwarenessLevel =>
 
 export const isValidSophisticationLevel = (v: string): v is SophisticationLevel =>
   sophisticationLevels.includes(v as SophisticationLevel);
+
+export const isValidObjectionTheme = (v: string): v is ObjectionTheme =>
+  objectionThemes.includes(v as ObjectionTheme);
+
+export const isValidFrictionLevel = (v: string): v is FrictionLevel =>
+  frictionLevels.includes(v as FrictionLevel);

@@ -1,3 +1,9 @@
 export { buildStrategyPrompt } from './prompts';
 export { parseStrategyResponse } from './parseStrategy';
-export { validateSections, ensureMinimumSections } from './validateSections';
+export {
+  validateSections,
+  ensureMinimumSections,
+  applyCanonicalOrder,
+  limitProofSections,
+  getFrictionFromGoal,
+} from './validateSections';

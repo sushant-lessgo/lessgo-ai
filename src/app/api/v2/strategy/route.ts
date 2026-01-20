@@ -17,9 +17,14 @@ import { withAIRateLimit } from '@/lib/rateLimit';
 import { requireAuth } from '@/lib/middleware/planCheck';
 import { consumeCredits, CREDIT_COSTS, UsageEventType } from '@/lib/creditSystem';
 import { generateWithSchema } from '@/lib/aiClient';
-import { StrategyResponseSchema } from '@/lib/schemas';
-import { buildStrategyPrompt, validateSections } from '@/modules/strategy';
-import type { IVOC, LandingGoal, StrategyOutput } from '@/types/generation';
+import { EnhancedStrategyResponseSchema } from '@/lib/schemas';
+import {
+  buildStrategyPrompt,
+  validateSections,
+  applyCanonicalOrder,
+  limitProofSections,
+} from '@/modules/strategy';
+import type { IVOC, LandingGoal, StrategyOutput, SectionType } from '@/types/generation';
 import { landingGoals } from '@/types/generation';
 
 export const dynamic = 'force-dynamic';
@@ -109,22 +114,34 @@ async function strategyHandler(req: NextRequest): Promise<Response> {
       },
     });
 
-    // 4. Call AI with structured outputs
+    // 4. Call AI with structured outputs (enhanced schema with two-phase objection flow)
     logger.dev('[strategy] PROMPT:', prompt);
 
     let strategyData: StrategyOutput;
     try {
-      // AI returns middleSections; we construct full sections array
+      // AI returns enhanced response with friction assessment and objection groups
       const response = await generateWithSchema(
         'strategy',
         [{ role: 'user', content: prompt }],
-        StrategyResponseSchema,
+        EnhancedStrategyResponseSchema,
         'strategy'
       );
       logger.dev('[strategy] AI RESPONSE:', response);
+      logger.dev('[strategy] FRICTION:', response.frictionAssessment);
+      logger.dev('[strategy] OBJECTION GROUPS:', response.objectionGroups?.length || 0);
+
+      // 5. Post-processing pipeline for middleSections
+      let middleSections = (response.middleSections || ['Features']) as SectionType[];
+
+      // 5a. Apply canonical persuasion order
+      middleSections = applyCanonicalOrder(middleSections);
+      logger.dev('[strategy] AFTER CANONICAL ORDER:', middleSections);
+
+      // 5b. Limit proof sections to at most 2
+      middleSections = limitProofSections(middleSections);
+      logger.dev('[strategy] AFTER PROOF LIMIT:', middleSections);
 
       // Construct full sections: Header, Hero, ...middleSections, CTA, Footer
-      const middleSections = response.middleSections || ['Features'];
       const sections = [
         'Header',
         'Hero',
@@ -133,13 +150,21 @@ async function strategyHandler(req: NextRequest): Promise<Response> {
         'Footer',
       ] as StrategyOutput['sections'];
 
-      // Convert to StrategyOutput (replace middleSections with sections)
+      // Convert enhanced response to StrategyOutput for downstream compatibility
+      // Map objection groups back to legacy format
+      const legacyObjections = response.objectionGroups?.flatMap((group) =>
+        group.objections.map((obj) => ({
+          thought: obj.thought,
+          section: group.resolvedBy,
+        }))
+      ) || [];
+
       strategyData = {
         vibe: response.vibe as StrategyOutput['vibe'],
         oneReader: response.oneReader as StrategyOutput['oneReader'],
         oneIdea: response.oneIdea as StrategyOutput['oneIdea'],
         featureAnalysis: response.featureAnalysis as StrategyOutput['featureAnalysis'],
-        objections: response.objections as StrategyOutput['objections'],
+        objections: legacyObjections as StrategyOutput['objections'],
         sections,
       };
       logger.dev('[strategy] CONSTRUCTED SECTIONS:', sections);
@@ -156,7 +181,7 @@ async function strategyHandler(req: NextRequest): Promise<Response> {
       );
     }
 
-    // 6. Post-processing: validate sections against assets
+    // 6. Final validation: filter by asset availability and handle FAQ placement
     const assets = {
       hasTestimonials: data.hasTestimonials,
       hasSocialProof: data.hasSocialProof,

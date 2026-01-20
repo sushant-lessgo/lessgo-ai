@@ -34,6 +34,34 @@ const middleSectionTypes = [
 ] as const;
 export const MiddleSectionEnum = z.enum(middleSectionTypes);
 
+// Inline enum values to avoid $ref issues with Anthropic structured outputs
+// When zod-to-json-schema creates shared refs, transformSchemaForAnthropic breaks nested paths
+const objectionThemeValues = ['trust', 'risk', 'fit', 'how', 'what', 'price', 'effort'] as const;
+const intensityValues = ['low', 'medium', 'high'] as const;
+const frictionValues = ['low', 'medium', 'high'] as const;
+
+// FrictionAssessment schema
+export const FrictionAssessmentSchema = z.object({
+  level: z.enum(frictionValues),
+  reasoning: z.string().min(1),
+});
+
+// EnhancedObjection schema
+export const EnhancedObjectionSchema = z.object({
+  thought: z.string().min(1),
+  theme: z.enum(objectionThemeValues),
+  intensity: z.enum(intensityValues),
+  preHandledByHero: z.boolean().nullable(),
+});
+
+// ObjectionGroup schema
+export const ObjectionGroupSchema = z.object({
+  theme: z.enum(objectionThemeValues),
+  objections: z.array(EnhancedObjectionSchema).min(1),
+  resolvedBy: MiddleSectionEnum,
+  reasoning: z.string().min(1),
+});
+
 // OneReader schema
 export const OneReaderSchema = z.object({
   who: z.string().min(1),
@@ -77,6 +105,56 @@ export const StrategyResponseSchema = z.object({
 });
 
 export type StrategyResponse = z.infer<typeof StrategyResponseSchema>;
+
+// Enhanced strategy response schema - FULLY INLINED to avoid $ref issues
+// Anthropic structured outputs breaks when zod-to-json-schema creates nested $refs
+// ALL enum values must be inlined as literals - NO shared schema references allowed
+export const EnhancedStrategyResponseSchema = z.object({
+  vibe: z.enum(['Dark Tech', 'Light Trust', 'Warm Friendly', 'Bold Energy', 'Calm Minimal']),
+  oneReader: z.object({
+    who: z.string().min(1),
+    coreDesire: z.string().min(1),
+    corePain: z.string().min(1),
+    beliefs: z.string().min(1),
+    awareness: z.enum(['unaware', 'problem-aware', 'solution-aware', 'product-aware', 'most-aware']),
+    sophistication: z.enum(['low', 'medium', 'high']),
+    emotionalState: z.string().min(1),
+  }),
+  oneIdea: z.object({
+    bigBenefit: z.string().min(1),
+    uniqueMechanism: z.string().min(1),
+    reasonToBelieve: z.string().min(1),
+  }),
+  featureAnalysis: z.array(z.object({
+    feature: z.string().min(1),
+    benefit: z.string().min(1),
+    benefitOfBenefit: z.string().min(1),
+  })).min(1),
+  frictionAssessment: z.object({
+    level: z.enum(['low', 'medium', 'high']),
+    reasoning: z.string().min(1),
+  }),
+  allObjections: z.array(z.object({
+    thought: z.string().min(1),
+    theme: z.enum(['trust', 'risk', 'fit', 'how', 'what', 'price', 'effort']),
+    intensity: z.enum(['low', 'medium', 'high']),
+    preHandledByHero: z.boolean().nullable(),
+  })),
+  objectionGroups: z.array(z.object({
+    theme: z.enum(['trust', 'risk', 'fit', 'how', 'what', 'price', 'effort']),
+    objections: z.array(z.object({
+      thought: z.string().min(1),
+      theme: z.enum(['trust', 'risk', 'fit', 'how', 'what', 'price', 'effort']),
+      intensity: z.enum(['low', 'medium', 'high']),
+      preHandledByHero: z.boolean().nullable(),
+    })).min(1),
+    resolvedBy: z.enum(['Problem', 'BeforeAfter', 'Features', 'UniqueMechanism', 'HowItWorks', 'Testimonials', 'SocialProof', 'Results', 'FounderNote', 'Pricing', 'ObjectionHandle', 'FAQ', 'UseCases']),
+    reasoning: z.string().min(1),
+  })),
+  middleSections: z.array(z.enum(['Problem', 'BeforeAfter', 'Features', 'UniqueMechanism', 'HowItWorks', 'Testimonials', 'SocialProof', 'Results', 'FounderNote', 'Pricing', 'ObjectionHandle', 'FAQ', 'UseCases'])).min(1),
+});
+
+export type EnhancedStrategyResponse = z.infer<typeof EnhancedStrategyResponseSchema>;
 
 // Type for middle section (for exports)
 export type MiddleSection = z.infer<typeof MiddleSectionEnum>;

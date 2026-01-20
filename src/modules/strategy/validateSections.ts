@@ -1,13 +1,68 @@
 /**
  * Validate and fix section ordering.
  */
-import type { SectionType, LandingGoal, AssetAvailability } from '@/types/generation';
+import type { SectionType, LandingGoal, AssetAvailability, FrictionLevel } from '@/types/generation';
 
 // Low friction goals = FAQ after CTA
 const LOW_FRICTION_GOALS: LandingGoal[] = ['waitlist', 'signup', 'free-trial', 'download'];
 
 // High friction goals = FAQ before CTA
 const HIGH_FRICTION_GOALS: LandingGoal[] = ['buy', 'demo'];
+
+/**
+ * Canonical persuasion order for middle sections.
+ * AI chooses which sections to include, we enforce the order.
+ */
+const CANONICAL_ORDER: SectionType[] = [
+  'Problem',         // Awareness/Empathy - "Do you understand my pain?"
+  'BeforeAfter',     // Outcome - "What transformation do I get?"
+  'UniqueMechanism', // Differentiation - "Why is this different?"
+  'Features',        // What you get - "What do I get?"
+  'HowItWorks',      // How to use - "How do I use it?"
+  'UseCases',        // Fit confirmation - "Is this for me?"
+  'Testimonials',    // Trust (proof) - "Are there people like me?"
+  'SocialProof',     // Trust (proof) - "Is this legit?"
+  'Results',         // Trust (proof) - "Does it work?"
+  'Pricing',         // Price - "How much?"
+  'ObjectionHandle', // Risk - "What about [risk]?"
+  'FAQ',             // Cleanup - "Small questions"
+  'FounderNote',     // Personal - "Who's behind this?"
+];
+
+/**
+ * Apply canonical persuasion order to middle sections.
+ * Preserves only sections that exist in the input, but reorders them.
+ */
+export function applyCanonicalOrder(middleSections: SectionType[]): SectionType[] {
+  const sectionSet = new Set(middleSections);
+  return CANONICAL_ORDER.filter((s) => sectionSet.has(s));
+}
+
+/**
+ * Limit proof sections to at most 2.
+ * Keeps the first 2 in canonical order (Testimonials > SocialProof > Results).
+ */
+export function limitProofSections(middleSections: SectionType[]): SectionType[] {
+  const proofSections: SectionType[] = ['Testimonials', 'SocialProof', 'Results'];
+  const proofInSections = middleSections.filter((s) => proofSections.includes(s));
+
+  if (proofInSections.length <= 2) {
+    return middleSections;
+  }
+
+  // Keep first 2 proof sections (in canonical order)
+  const toRemove = proofInSections.slice(2);
+  return middleSections.filter((s) => !toRemove.includes(s));
+}
+
+/**
+ * Determine friction level from landing goal.
+ */
+export function getFrictionFromGoal(landingGoal: LandingGoal): FrictionLevel {
+  if (LOW_FRICTION_GOALS.includes(landingGoal)) return 'low';
+  if (HIGH_FRICTION_GOALS.includes(landingGoal)) return 'high';
+  return 'medium';
+}
 
 /**
  * Validate and fix section ordering based on spec rules.
