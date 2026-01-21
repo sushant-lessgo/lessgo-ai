@@ -423,3 +423,64 @@ export const isValidObjectionTheme = (v: string): v is ObjectionTheme =>
 
 export const isValidFrictionLevel = (v: string): v is FrictionLevel =>
   frictionLevels.includes(v as FrictionLevel);
+
+/**
+ * ===== SIMPLIFIED V3 TYPES =====
+ * Simplified onboarding flow types (SecondOpinion.md framework)
+ */
+
+/**
+ * Simplified awareness levels (combines awareness + sophistication)
+ * Reference: SecondOpinion.md
+ */
+export const simplifiedAwarenessLevels = [
+  'problem-aware-cold',      // Knows problem, low emotional intensity
+  'problem-aware-hot',       // Feels pain intensely, urgent
+  'solution-aware-skeptical', // Knows solutions, needs convincing
+  'solution-aware-eager',    // Ready to act, needs confirmation
+] as const;
+
+export type SimplifiedAwarenessLevel = (typeof simplifiedAwarenessLevels)[number];
+
+export const simplifiedAwarenessLevelLabels: Record<SimplifiedAwarenessLevel, string> = {
+  'problem-aware-cold': 'Problem Aware - Cold',
+  'problem-aware-hot': 'Problem Aware - Hot',
+  'solution-aware-skeptical': 'Solution Aware - Skeptical',
+  'solution-aware-eager': 'Solution Aware - Eager',
+};
+
+/**
+ * Simplified OneReader for V3 strategy
+ */
+export interface SimplifiedOneReader {
+  personaDescription: string;  // Who they are (job, situation, context)
+  pain: string[];              // Pain points (use their words)
+  desire: string[];            // Desires (use their words)
+  objections: string[];        // Likely objections
+}
+
+/**
+ * Section decisions from LLM (for Product Ready pages)
+ */
+export interface SectionDecisions {
+  includeBeforeAfter: boolean;
+  includeUniqueMechanism: boolean;
+  includeObjectionHandle: boolean;
+  isB2B: boolean;
+}
+
+/**
+ * Simplified Strategy Output for V3
+ */
+export interface SimplifiedStrategyOutput {
+  awareness: SimplifiedAwarenessLevel;
+  oneReader: SimplifiedOneReader;
+  oneIdea: OneIdea;
+  vibe: Vibe;
+  featureAnalysis: FeatureAnalysis[];
+  sectionDecisions: SectionDecisions;
+  sections: SectionType[];
+}
+
+export const isValidSimplifiedAwarenessLevel = (v: string): v is SimplifiedAwarenessLevel =>
+  simplifiedAwarenessLevels.includes(v as SimplifiedAwarenessLevel);

@@ -7,3 +7,7 @@ export {
   limitProofSections,
   getFrictionFromGoal,
 } from './validateSections';
+
+// V3 exports
+export { buildSimplifiedStrategyPrompt } from './promptsV3';
+export { selectSectionsV3 } from './sectionSelectionV3';

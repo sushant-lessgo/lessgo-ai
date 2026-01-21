@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useCallback, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useGenerationStore } from '@/hooks/useGenerationStore';
 import { Check } from 'lucide-react';
@@ -79,6 +79,9 @@ export default function GeneratingStep() {
   const [completedSections, setCompletedSections] = useState<Set<string>>(new Set());
   const [messageIndex, setMessageIndex] = useState(0);
   const [apiComplete, setApiComplete] = useState(false);
+
+  // Ref guard to prevent double API calls (React Strict Mode)
+  const hasCalledApi = useRef(false);
 
   // Rotate messages
   useEffect(() => {
@@ -226,7 +229,8 @@ export default function GeneratingStep() {
 
   // Trigger API call on mount
   useEffect(() => {
-    if (generationProgress === 0 && !generationError && !apiComplete) {
+    if (generationProgress === 0 && !generationError && !apiComplete && !hasCalledApi.current) {
+      hasCalledApi.current = true;
       callGenerateCopyAPI();
     }
   }, []); // Only on mount

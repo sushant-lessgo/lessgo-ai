@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useGenerationStore } from '@/hooks/useGenerationStore';
+import { useSimplifiedOnboardingV3 } from '@/hooks/useSimplifiedOnboarding';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { MessageSquareQuote, Building2, TrendingUp } from 'lucide-react';
@@ -36,9 +37,12 @@ const assetOptions: AssetOption[] = [
 ];
 
 export default function AssetAvailabilityStep() {
+  const isV3 = useSimplifiedOnboardingV3();
   const assetAvailability = useGenerationStore((s) => s.assetAvailability);
   const setAssetAvailability = useGenerationStore((s) => s.setAssetAvailability);
   const setIVOCLoading = useGenerationStore((s) => s.setIVOCLoading);
+  const setStrategyLoading = useGenerationStore((s) => s.setStrategyLoading);
+  const setSimplifiedV3 = useGenerationStore((s) => s.setSimplifiedV3);
   const nextStep = useGenerationStore((s) => s.nextStep);
 
   const [assets, setAssets] = useState<AssetAvailability>(
@@ -49,13 +53,26 @@ export default function AssetAvailabilityStep() {
     }
   );
 
+  // Set V3 mode in store when component mounts
+  useEffect(() => {
+    setSimplifiedV3(isV3);
+  }, [isV3, setSimplifiedV3]);
+
   const toggleAsset = (key: keyof AssetAvailability) => {
     setAssets((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   const handleContinue = () => {
     setAssetAvailability(assets);
-    setIVOCLoading(true);  // Prime research step
+
+    if (isV3) {
+      // V3: Skip research, go directly to strategy
+      setStrategyLoading(true);
+    } else {
+      // V2: Prime research step
+      setIVOCLoading(true);
+    }
+
     nextStep();
   };
 

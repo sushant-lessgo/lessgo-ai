@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useGenerationStore } from '@/hooks/useGenerationStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -133,6 +133,9 @@ export default function UnderstandingStep() {
   const prevStep = useGenerationStore((s) => s.prevStep);
   const resetFrom = useGenerationStore((s) => s.resetFrom);
 
+  // Ref guard to prevent double API calls (React Strict Mode)
+  const hasCalledApi = useRef(false);
+
   // Local edits state
   const [localEdits, setLocalEdits] = useState<UnderstandingData | null>(null);
 
@@ -170,7 +173,8 @@ export default function UnderstandingStep() {
 
   // Trigger API call on mount if needed
   useEffect(() => {
-    if (understandingLoading && !understanding && !understandingError) {
+    if (understandingLoading && !understanding && !understandingError && !hasCalledApi.current) {
+      hasCalledApi.current = true;
       callUnderstandAPI();
     }
   }, []); // Only on mount

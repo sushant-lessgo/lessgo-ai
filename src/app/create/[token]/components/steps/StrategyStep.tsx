@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useCallback, useState, useRef } from 'react';
 import { useGenerationStore } from '@/hooks/useGenerationStore';
 import LoadingOverlay from '../shared/LoadingOverlay';
 import ErrorRetry from '../shared/ErrorRetry';
@@ -15,6 +15,7 @@ const strategyMessages = [
 const MAX_RETRIES = 3;
 
 export default function StrategyStep() {
+  const isV3 = useGenerationStore((s) => s.isSimplifiedV3);
   const productName = useGenerationStore((s) => s.productName);
   const oneLiner = useGenerationStore((s) => s.oneLiner);
   const understanding = useGenerationStore((s) => s.understanding);
@@ -32,36 +33,65 @@ export default function StrategyStep() {
 
   const [retryCount, setRetryCount] = useState(0);
 
+  // Ref guard to prevent double API calls (React Strict Mode)
+  const hasCalledApi = useRef(false);
+
   // API call
   const callStrategyAPI = useCallback(async () => {
-    if (!understanding || !landingGoal || !assetAvailability || !ivoc) return;
+    // V3: No IVOC required
+    // V2: Requires IVOC
+    if (!understanding || !landingGoal || !assetAvailability) return;
+    if (!isV3 && !ivoc) return;
 
     setStrategyLoading(true);
     setStrategyError(null);
 
     try {
-      const response = await fetch('/api/v2/strategy', {
+      // Choose endpoint based on V3 mode
+      const endpoint = isV3 ? '/api/v3/strategy' : '/api/v2/strategy';
+
+      // Build request body based on version
+      const requestBody = isV3
+        ? {
+            // V3 request body (no IVOC)
+            productName: productName || 'Your Product',
+            oneLiner,
+            features: understanding.features,
+            landingGoal,
+            offer,
+            hasTestimonials: assetAvailability.hasTestimonials,
+            hasSocialProof: assetAvailability.hasSocialProof,
+            hasConcreteResults: assetAvailability.hasConcreteResults,
+            primaryAudience: understanding.audiences[0],
+            otherAudiences: understanding.audiences.slice(1),
+            categories: understanding.categories,
+            hasMultipleAudiences: understanding.audiences.length > 1,
+          }
+        : {
+            // V2 request body (with IVOC)
+            productName: productName || 'Your Product',
+            oneLiner,
+            features: understanding.features,
+            landingGoal,
+            offer,
+            hasTestimonials: assetAvailability.hasTestimonials,
+            hasSocialProof: assetAvailability.hasSocialProof,
+            hasConcreteResults: assetAvailability.hasConcreteResults,
+            ivoc,
+            primaryAudience: understanding.audiences[0],
+            otherAudiences: understanding.audiences.slice(1),
+          };
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          productName: productName || 'Your Product',
-          oneLiner,
-          features: understanding.features,  // string[] - API extracts benefits
-          landingGoal,
-          offer,
-          hasTestimonials: assetAvailability.hasTestimonials,
-          hasSocialProof: assetAvailability.hasSocialProof,
-          hasConcreteResults: assetAvailability.hasConcreteResults,
-          ivoc,
-          primaryAudience: understanding.audiences[0],
-          otherAudiences: understanding.audiences.slice(1),
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       const result = await response.json();
 
       if (result.success) {
-        console.log('[StrategyStep] Strategy success, setting strategy');
+        console.log(`[StrategyStep] Strategy ${isV3 ? 'V3' : 'V2'} success, setting strategy`);
         setStrategy(result.data);
         setStrategyLoading(false);
         // Don't call nextStep() here - let the auto-advance effect handle it
@@ -73,14 +103,15 @@ export default function StrategyStep() {
       setStrategyError('Network error. Please try again.');
     }
   }, [
-    productName, oneLiner, understanding, landingGoal, offer,
+    isV3, productName, oneLiner, understanding, landingGoal, offer,
     assetAvailability, ivoc, setStrategy, setStrategyLoading,
     setStrategyError
   ]);
 
   // Trigger API call on mount when loading flag is set
   useEffect(() => {
-    if (strategyLoading && !strategy && !strategyError) {
+    if (strategyLoading && !strategy && !strategyError && !hasCalledApi.current) {
+      hasCalledApi.current = true;
       callStrategyAPI();
     }
   }, []); // Only on mount

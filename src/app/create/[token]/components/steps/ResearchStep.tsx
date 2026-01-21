@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { useGenerationStore } from '@/hooks/useGenerationStore';
 import LoadingOverlay from '../shared/LoadingOverlay';
 import ErrorRetry from '../shared/ErrorRetry';
@@ -33,6 +33,9 @@ export default function ResearchStep() {
   const setIVOCError = useGenerationStore((s) => s.setIVOCError);
   const setStrategyLoading = useGenerationStore((s) => s.setStrategyLoading);
   const nextStep = useGenerationStore((s) => s.nextStep);
+
+  // Ref guard to prevent double API calls (React Strict Mode)
+  const hasCalledApi = useRef(false);
 
   // API call
   const callResearchAPI = useCallback(async () => {
@@ -68,7 +71,8 @@ export default function ResearchStep() {
 
   // Trigger API call on mount when loading flag is set
   useEffect(() => {
-    if (ivocLoading && !ivoc && !ivocError) {
+    if (ivocLoading && !ivoc && !ivocError && !hasCalledApi.current) {
+      hasCalledApi.current = true;
       callResearchAPI();
     }
   }, []); // Only on mount

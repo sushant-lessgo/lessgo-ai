@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useCallback, useState, useRef } from 'react';
 import { useGenerationStore } from '@/hooks/useGenerationStore';
 import { Button } from '@/components/ui/button';
 import LoadingOverlay from '../shared/LoadingOverlay';
@@ -71,12 +71,12 @@ export default function UIBlockStep() {
 
   // Local state for question answers before submission
   const [localAnswers, setLocalAnswers] = useState<Record<string, string>>({});
-  // Track if initial fetch done to prevent double-fetch
-  const [hasFetched, setHasFetched] = useState(false);
+  // Ref guard to prevent double API calls (React Strict Mode)
+  const hasCalledApi = useRef(false);
 
   console.log('[UIBlockStep] State:', {
     hasStrategy: !!strategy,
-    hasFetched,
+    hasCalledApi: hasCalledApi.current,
     selectionsCount: Object.keys(uiblockSelections).length,
     questionsCount: uiblockQuestions.length,
     uiblockLoading,
@@ -154,8 +154,8 @@ export default function UIBlockStep() {
       console.log('[UIBlockStep] Guard: no strategy, skipping');
       return;
     }
-    if (hasFetched) {
-      console.log('[UIBlockStep] Guard: already fetched, skipping');
+    if (hasCalledApi.current) {
+      console.log('[UIBlockStep] Guard: already called API, skipping');
       return;
     }
     if (Object.keys(uiblockSelections).length > 0) {
@@ -168,9 +168,9 @@ export default function UIBlockStep() {
     }
 
     console.log('[UIBlockStep] All guards passed, calling API...');
-    setHasFetched(true);
+    hasCalledApi.current = true;
     callUIBlockAPI();
-  }, [strategy, hasFetched, uiblockSelections, uiblockQuestions, callUIBlockAPI]);
+  }, [strategy, uiblockSelections, uiblockQuestions, callUIBlockAPI]);
 
   // Handle local answer change
   const handleAnswerChange = (section: string, answer: string) => {

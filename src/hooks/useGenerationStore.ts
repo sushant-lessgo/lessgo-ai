@@ -41,6 +41,9 @@ export type GenerationStep = (typeof GENERATION_STEPS)[number];
  * Generation store state
  */
 interface GenerationState {
+  // V3 mode flag
+  isSimplifiedV3: boolean;
+
   // Progress
   currentStep: GenerationStep;
   stepIndex: number;
@@ -91,6 +94,9 @@ interface GenerationState {
  * Generation store actions
  */
 interface GenerationActions {
+  // V3 mode
+  setSimplifiedV3: (enabled: boolean) => void;
+
   // Navigation
   goToStep: (step: GenerationStep) => void;
   nextStep: () => void;
@@ -149,6 +155,7 @@ type GenerationStore = GenerationState & GenerationActions;
  * Initial state
  */
 const initialState: GenerationState = {
+  isSimplifiedV3: false,
   currentStep: 'oneLiner',
   stepIndex: 0,
   oneLiner: '',
@@ -217,6 +224,11 @@ export const useGenerationStore = create<GenerationStore>()(
     immer((set, get) => ({
       ...initialState,
 
+      // V3 mode
+      setSimplifiedV3: (enabled) => set((state) => {
+        state.isSimplifiedV3 = enabled;
+      }),
+
       // Navigation
       goToStep: (step) => set((state) => {
         state.currentStep = step;
@@ -224,7 +236,14 @@ export const useGenerationStore = create<GenerationStore>()(
       }),
 
       nextStep: () => set((state) => {
-        const nextIndex = Math.min(state.stepIndex + 1, GENERATION_STEPS.length - 1);
+        let nextIndex = state.stepIndex + 1;
+
+        // Skip research step in V3 mode
+        if (state.isSimplifiedV3 && GENERATION_STEPS[nextIndex] === 'research') {
+          nextIndex++;
+        }
+
+        nextIndex = Math.min(nextIndex, GENERATION_STEPS.length - 1);
         state.stepIndex = nextIndex;
         state.currentStep = GENERATION_STEPS[nextIndex];
       }),
@@ -406,6 +425,7 @@ export const useGenerationStore = create<GenerationStore>()(
 /**
  * Selector hooks for common access patterns
  */
+export const useIsSimplifiedV3 = () => useGenerationStore((s) => s.isSimplifiedV3);
 export const useCurrentStep = () => useGenerationStore((s) => s.currentStep);
 export const useStepIndex = () => useGenerationStore((s) => s.stepIndex);
 export const useOneLiner = () => useGenerationStore((s) => s.oneLiner);
