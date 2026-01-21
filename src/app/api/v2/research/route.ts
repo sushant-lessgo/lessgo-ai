@@ -21,9 +21,10 @@ import { withAIRateLimit } from '@/lib/rateLimit';
 import { requireAuth } from '@/lib/middleware/planCheck';
 import { consumeCredits, CREDIT_COSTS, UsageEventType } from '@/lib/creditSystem';
 import { normalizeIVOCKeys } from '@/lib/normalize';
-import { searchTavily, formatTavilySnippets } from '@/lib/tavily';
-import { extractIVOC, generateIVOCFallback } from '@/lib/ivocExtractor';
-import { researchWithPerplexity, isLowQualityIVOC } from '@/lib/perplexity';
+import { searchTavily, formatTavilySnippets, searchTavilyMulti, formatTavilyAdvancedSnippets } from '@/lib/tavily';
+import { extractIVOC, generateIVOCFallback, extractPainsOnly } from '@/lib/ivocExtractor';
+import { generatePainQueries } from '@/lib/painQueryGenerator';
+import { researchWithPerplexity, searchWithPerplexity, isLowQualityIVOC } from '@/lib/perplexity';
 import type { IVOC } from '@/types/generation';
 
 export const dynamic = 'force-dynamic';
@@ -37,11 +38,27 @@ const ResearchRequestSchema = z.object({
 });
 
 /**
- * Get the configured research provider.
+ * Get the configured research mode.
+ * - tavily-deep: LLM-generated queries → parallel Tavily → pain extraction (best quality)
+ * - perplexity-search: Perplexity for grounded search → LLM extraction
+ * - perplexity-direct: Perplexity search + extraction in one call (may lack grounding)
+ * - tavily: Tavily search → LLM extraction (default)
  */
-function getResearchProvider(): 'tavily' | 'perplexity' {
+function getResearchMode(): 'tavily-deep' | 'perplexity-search' | 'perplexity-direct' | 'tavily' {
+  const mode = process.env.RESEARCH_MODE;
+
+  if (mode === 'tavily-deep' && process.env.TAVILY_API_KEY) {
+    return 'tavily-deep';
+  }
+  if (mode === 'perplexity-search' && process.env.PERPLEXITY_API_KEY) {
+    return 'perplexity-search';
+  }
+  if ((mode === 'perplexity-direct' || mode === 'perplexity') && process.env.PERPLEXITY_API_KEY) {
+    return 'perplexity-direct';
+  }
+  // Legacy support: RESEARCH_PROVIDER=perplexity → perplexity-direct
   if (process.env.RESEARCH_PROVIDER === 'perplexity' && process.env.PERPLEXITY_API_KEY) {
-    return 'perplexity';
+    return 'perplexity-direct';
   }
   return 'tavily';
 }
@@ -73,9 +90,9 @@ async function researchHandler(req: NextRequest): Promise<Response> {
       audience
     );
 
-    // Determine which provider to use
-    const provider = getResearchProvider();
-    logger.dev(`[research] Using provider: ${provider}`);
+    // Determine which mode to use
+    const mode = getResearchMode();
+    logger.dev(`[research] Using mode: ${mode}`);
 
     // 3. Check cache first (before auth - cache hits are free)
     // Provider-aware: if Perplexity enabled but cache is from Tavily, treat as miss
@@ -90,8 +107,9 @@ async function researchHandler(req: NextRequest): Promise<Response> {
       });
 
       if (cached) {
-        // Only use cache if: using tavily (accepts any) OR cache matches current provider
-        const cacheValid = provider === 'tavily' || cached.source === provider;
+        // Only use cache if: using tavily (accepts any) OR cache matches a perplexity source
+        const isPerplexityMode = mode === 'perplexity-search' || mode === 'perplexity-direct';
+        const cacheValid = mode === 'tavily' || (isPerplexityMode && cached.source.startsWith('perplexity'));
 
         if (cacheValid) {
           const cachedData = {
@@ -111,7 +129,7 @@ async function researchHandler(req: NextRequest): Promise<Response> {
             creditsUsed: 0,
           });
         } else {
-          logger.dev(`[research] CACHE SKIP - provider mismatch (cached: ${cached.source}, current: ${provider})`);
+          logger.dev(`[research] CACHE SKIP - mode mismatch (cached: ${cached.source}, current: ${mode})`);
         }
       }
     }
@@ -138,10 +156,203 @@ async function researchHandler(req: NextRequest): Promise<Response> {
     let query: string;
     let shouldCache = true;
 
-    // 5. Research using configured provider
-    if (provider === 'perplexity') {
-      // 5a. Perplexity: search + IVOC in one call
-      logger.dev(`[research] Calling Perplexity for ${categoryRaw}/${audienceRaw}`);
+    // 5. Research using configured mode
+    if (mode === 'tavily-deep') {
+      // 5a. Tavily deep mode: LLM-generated queries → parallel search → pain extraction
+      logger.dev(`[research] Using tavily-deep mode for ${categoryRaw}/${audienceRaw}`);
+
+      let tavilyDeepSuccess = false;
+
+      // Requires productDescription for query generation
+      if (productDescription) {
+        const queryResult = await generatePainQueries({
+          category: categoryRaw,
+          audience: audienceRaw,
+          productDescription,
+        });
+
+        if (queryResult.success) {
+          logger.dev(`[research] Generated ${queryResult.queries.length} pain queries`);
+
+          const searchResult = await searchTavilyMulti(queryResult.queries);
+
+          if (searchResult.success && searchResult.data.results.length > 0) {
+            const snippets = formatTavilyAdvancedSnippets(searchResult.data.results);
+
+            const painResult = await extractPainsOnly(categoryRaw, audienceRaw, snippets);
+
+            if (painResult.success) {
+              // Build IVOC with enhanced pains, empty other fields for now
+              ivocData = {
+                pains: painResult.data.pains,
+                desires: [],
+                objections: [],
+                firmBeliefs: [],
+                shakableBeliefs: [],
+                commonPhrases: [],
+              };
+              source = 'tavily-deep';
+              model = `${queryResult.model}+${painResult.model}`;
+              rawSources = searchResult.data.results;
+              query = searchResult.data.queries.join(' | ');
+              tavilyDeepSuccess = true;
+
+              logger.dev(`[research] tavily-deep extracted ${painResult.data.pains.length} pains`);
+            } else {
+              logger.warn(`[research] Pain extraction failed: ${painResult.error}`);
+            }
+          } else {
+            logger.warn(`[research] Tavily multi-search failed or empty results`);
+          }
+        } else {
+          logger.warn(`[research] Query generation failed: ${queryResult.error}`);
+        }
+      } else {
+        logger.warn(`[research] tavily-deep requires productDescription, falling back`);
+      }
+
+      // If tavily-deep failed at any step, fall back to standard tavily
+      if (!tavilyDeepSuccess) {
+        logger.dev(`[research] tavily-deep failed, falling back to standard tavily`);
+        const tavilyResult = await searchTavily(categoryRaw, audienceRaw);
+
+        if (tavilyResult.success) {
+          const snippets = formatTavilySnippets(tavilyResult.data.results);
+          rawSources = tavilyResult.data.results;
+          query = tavilyResult.data.query;
+
+          const extractionResult = await extractIVOC(categoryRaw, audienceRaw, snippets);
+
+          if (extractionResult.success) {
+            ivocData = extractionResult.data;
+            source = 'tavily';
+            model = extractionResult.model;
+          } else {
+            const fallbackResult = await generateIVOCFallback(categoryRaw, audienceRaw);
+            if (!fallbackResult.success) {
+              return createSecureResponse(
+                { success: false, error: 'research_failed', message: 'All research methods failed', recoverable: true },
+                500
+              );
+            }
+            ivocData = fallbackResult.data;
+            source = 'gpt-fallback';
+            model = fallbackResult.model;
+            rawSources = [];
+            query = `fallback: ${categoryRaw} ${audienceRaw}`;
+          }
+        } else {
+          const fallbackResult = await generateIVOCFallback(categoryRaw, audienceRaw);
+          if (!fallbackResult.success) {
+            return createSecureResponse(
+              { success: false, error: 'research_failed', message: 'Research service unavailable', recoverable: true },
+              503
+            );
+          }
+          ivocData = fallbackResult.data;
+          source = 'gpt-fallback';
+          model = fallbackResult.model;
+          rawSources = [];
+          query = `fallback: ${categoryRaw} ${audienceRaw}`;
+        }
+      }
+    } else if (mode === 'perplexity-search') {
+      // 5a. Perplexity search-only mode: grounded search → LLM extraction
+      logger.dev(`[research] Calling Perplexity SEARCH for ${categoryRaw}/${audienceRaw}`);
+      const searchResult = await searchWithPerplexity(
+        categoryRaw,
+        audienceRaw,
+        productDescription
+      );
+
+      if (searchResult.success) {
+        logger.dev(`[research] Perplexity search returned ${searchResult.citations.length} citations`);
+
+        // Extract IVOC from raw search content using existing extractor
+        const extractionResult = await extractIVOC(categoryRaw, audienceRaw, searchResult.content);
+
+        if (extractionResult.success) {
+          // Quality gate check
+          if (isLowQualityIVOC(extractionResult.data)) {
+            logger.warn(`[research] Low quality IVOC from perplexity-search for ${categoryKey}/${audienceKey}, not caching`);
+            shouldCache = false;
+          }
+
+          ivocData = extractionResult.data;
+          source = 'perplexity-search';
+          model = `${searchResult.model}+${extractionResult.model}`;
+          rawSources = searchResult.citations;
+          query = `perplexity-search: ${categoryRaw} for ${audienceRaw}`;
+        } else {
+          // Extraction failed - try GPT fallback
+          logger.warn(`[research] IVOC extraction failed for perplexity-search, trying fallback`);
+          const fallbackResult = await generateIVOCFallback(categoryRaw, audienceRaw);
+          if (!fallbackResult.success) {
+            return createSecureResponse(
+              { success: false, error: 'research_failed', message: 'IVOC extraction failed', recoverable: true },
+              500
+            );
+          }
+          ivocData = fallbackResult.data;
+          source = 'gpt-fallback';
+          model = fallbackResult.model;
+          rawSources = [];
+          query = `fallback: ${categoryRaw} ${audienceRaw}`;
+        }
+      } else if (searchResult.recoverable) {
+        // Perplexity search failed but recoverable - fall back to Tavily
+        logger.warn(`[research] Perplexity search failed (recoverable), falling back to Tavily: ${searchResult.error}`);
+        const tavilyResult = await searchTavily(categoryRaw, audienceRaw);
+
+        if (tavilyResult.success) {
+          const snippets = formatTavilySnippets(tavilyResult.data.results);
+          rawSources = tavilyResult.data.results;
+          query = tavilyResult.data.query;
+
+          const extractionResult = await extractIVOC(categoryRaw, audienceRaw, snippets);
+
+          if (extractionResult.success) {
+            ivocData = extractionResult.data;
+            source = 'tavily';
+            model = extractionResult.model;
+          } else {
+            const fallbackResult = await generateIVOCFallback(categoryRaw, audienceRaw);
+            if (!fallbackResult.success) {
+              return createSecureResponse(
+                { success: false, error: 'research_failed', message: 'All research methods failed', recoverable: true },
+                500
+              );
+            }
+            ivocData = fallbackResult.data;
+            source = 'gpt-fallback';
+            model = fallbackResult.model;
+            rawSources = [];
+            query = `fallback: ${categoryRaw} ${audienceRaw}`;
+          }
+        } else {
+          const fallbackResult = await generateIVOCFallback(categoryRaw, audienceRaw);
+          if (!fallbackResult.success) {
+            return createSecureResponse(
+              { success: false, error: 'research_failed', message: 'Research service unavailable', recoverable: true },
+              503
+            );
+          }
+          ivocData = fallbackResult.data;
+          source = 'gpt-fallback';
+          model = fallbackResult.model;
+          rawSources = [];
+          query = `fallback: ${categoryRaw} ${audienceRaw}`;
+        }
+      } else {
+        // Non-recoverable error
+        return createSecureResponse(
+          { success: false, error: 'research_failed', message: `Perplexity search error: ${searchResult.error}`, recoverable: false },
+          500
+        );
+      }
+    } else if (mode === 'perplexity-direct') {
+      // 5b. Perplexity direct mode: search + IVOC in one call (may lack grounding)
+      logger.dev(`[research] Calling Perplexity DIRECT for ${categoryRaw}/${audienceRaw}`);
       const perplexityResult = await researchWithPerplexity(
         categoryRaw,
         audienceRaw,
@@ -214,7 +425,7 @@ async function researchHandler(req: NextRequest): Promise<Response> {
         );
       }
     } else {
-      // 5b. Tavily path (default)
+      // 5c. Tavily path (default)
       const tavilyResult = await searchTavily(categoryRaw, audienceRaw);
 
       if (tavilyResult.success) {

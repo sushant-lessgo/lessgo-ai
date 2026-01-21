@@ -1,108 +1,198 @@
-Directionally: **yes**. This plan will let you swap providers safely and keep your `/api/v2/research` contract stable.
+## Awareness Level Detection (LLM Prompt)
 
-But in its current form it **won’t reliably fix “garbage IVOC”** unless you tighten three things: **cache behavior, grounding/evidence, and source control**.
+Given: [product, audience, problem, category]
 
-## What’s good
+Choose ONE awareness level that will resonate with the most number of users:
 
-* **Feature flag + fallback chain** is the right rollout strategy.
-* Keeping the **frontend + API contract unchanged** reduces risk.
-* Centralizing provider logic inside `src/app/api/v2/research/route.ts` is clean.
+1. Problem aware - Cold
+   Knows problem exists but low emotional intensity. Not urgently seeking solutions. Needs to be reminded why this matters.
 
-## The big gaps (and how to fix them)
+2. Problem aware - Hot
+   Feels the pain intensely. Actively frustrated. Urgently wants relief. "Hair on fire" problem.
 
-### 1) Cache will hide Perplexity improvements
+3. Solution aware - Skeptical
+   Knows solutions exist. Has seen/tried alternatives. Hesitant, needs convincing why THIS one is different.
 
-Right now your cache key is only `categoryKey + audienceKey`. So if a Tavily cache entry exists (even garbage), Perplexity will **never run** unless `forceRefresh=true`.
-
-**Fix options (pick one):**
-
-* **Option A (minimal):** If `RESEARCH_PROVIDER=perplexity` and cached.source !== `perplexity`, treat it as a miss.
-* **Option B (better):** Add provider into the cache key (or add `providerVersion`), so Tavily/Perplexity can coexist.
-* **Option C (best):** Keep same key but introduce `version` and bump it when you switch research engines; ignore cache when `cached.version < REQUIRED_RESEARCH_VERSION`.
-
-If you don’t do this, you’ll think “Perplexity isn’t helping” when it’s just never being called.
+4. Solution aware - Eager
+   Knows solutions exist. Ready to act. Just needs to confirm this is the right choice.
 
 ---
 
-### 2) “Verbatim quotes” will still be hallucinated without evidence linking
+## Unique Mechanism / Before-After / Objection Handle Detection (LLM Prompt)
 
-Your plan says “extract VERBATIM language” and returns `citations: string[]`. With Sonar, you typically get **`search_results` metadata** (titles/urls/dates), not guaranteed per-claim links. The model can still invent a “quote” that wasn’t actually in a source.
+Given: [product, audience, problem, category, awareness level]
 
-Perplexity’s chat-completions responses include `search_results` (sources list). ([Perplexity][1])
+Choose section(s) that will resonate most:
 
-**Fix:** change the output format so every IVOC item includes **source indices** that point into `search_results`.
+1. Before/After
+   Show transformation. State before → state after.
+   Use when: outcomes are tangible, visual, or emotionally relatable.
+   Examples: design tools, fitness, productivity, revenue growth.
 
-Example (still compatible with your existing IVOC arrays if you want):
+2. Unique Mechanism
+   Reveal WHY/HOW it works differently.
+   Use when: product has novel methodology, process, or technology.
+   Examples: proprietary algorithm, unique framework, contrarian approach.
 
-* Keep arrays of strings, but embed source markers:
-  `"they charged me twice and ghosted support [2]"`
+3. Objection Handle
+   Address common doubts, hesitations, or "why this won't work for me" thoughts.
+   Use when: audience is skeptical, has tried alternatives, or has specific concerns.
+   Examples: "But I'm not technical", "I've tried X before", "This seems too good".
 
-Or (better but requires type change):
-
-```json
-"pains": [{ "text": "...", "sources": [2,5] }]
-```
-
-If you keep a separate `citations[]` array only, you’ll have no reliable way to know which source supports which insight.
-
----
-
-### 3) Don’t rely on “Search Reddit…” in the prompt — enforce it via params
-
-With Sonar you can pass **`search_domain_filter`** and **`search_recency_filter`** as request params. ([Perplexity][1])
-This is much stronger than hoping the model “chooses” Reddit/forums.
-
-**Recommendation for IVOC retrieval:**
-
-* Use `search_domain_filter` allowlist like:
-  `["reddit.com","g2.com","capterra.com","trustpilot.com","apps.apple.com","play.google.com","producthunt.com","indiehackers.com"]`
-* Add `search_recency_filter: "year"` (or `"month"` for fast-moving categories). ([Perplexity][1])
-
-That will reduce SEO/template garbage dramatically.
-
-### 4 Instead of only giving category and audince, shall we also give what it does so that results are better.. for a category and audienc.. its too droad for IVOC
+Pick one or more. Combine only if strongly justified.
+If both Before/After and Unique Mechanism: Before/After first, then Unique Mechanism.
 
 ---
 
-## Model choice for your plan
+# Templates
 
-Given your goal (high-quality IVOC):
+## 1. Waitlist
 
-* Default **`sonar-pro`** for research quality (it’s explicitly “deeper content understanding”). ([Perplexity][2])
-* Use **`sonar`** only when you need high volume / cheap mode.
-* Avoid `sonar-reasoning-pro` **if you rely on strict JSON parsing**, because it can output a `<think>` block before JSON and requires special parsing. ([Perplexity][3])
 
----
+Problem aware - Cold
 
-## Implementation tweaks I’d apply to your plan
 
-### Update `researchWithPerplexity` return type
+Hero
 
-Instead of `citations: string[]`, return the sources you actually get:
+Problem
 
-* `citations: { title: string; url: string; date?: string }[]` from `response.search_results` ([Perplexity][1])
+Unique mechanism
 
-And in `route.ts`, store:
+Features (always)
 
-* `rawSources = response.search_results`
-* `query = prompt summary or the actual composed prompt`
+Use cases (only if B2B + multiple target audiences)
 
-### Use structured outputs (so JSON is guaranteed)
+How it works (always)
 
-Perplexity supports **JSON Schema structured outputs** via `response_format`. ([Perplexity][4])
-This will reduce parsing failures and weird formatting.
+Trust section — Order: Results → Testimonials → Social Proof → Founder Note. Include all available. Skip Founder Note if 2+ of [Results, Testimonials, Social Proof] exist.
 
-### Add an IVOC “quality gate” before caching
+CTA
 
-If output contains phrases like:
 
-* “target audience”, “pain points”, “market research”, “pricing transparency concerns”
-  …then mark it low-quality and **don’t cache** (or cache with short TTL).
+Problem - aware - hot
 
----
+Hero
 
-[1]: https://docs.perplexity.ai/guides/chat-completions-guide "OpenAI Compatibility - Perplexity"
-[2]: https://docs.perplexity.ai/getting-started/models/models/sonar-pro?utm_source=chatgpt.com "Sonar pro"
-[3]: https://docs.perplexity.ai/getting-started/models/models/sonar-reasoning-pro?utm_source=chatgpt.com "Sonar reasoning pro"
-[4]: https://docs.perplexity.ai/guides/structured-outputs "Structured Outputs Guide - Perplexity"
-[5]: https://docs.perplexity.ai/api-reference/search-post "Search - Perplexity"
+Unique mechanism
+
+Features (always)
+
+Use cases (only if B2B + multiple target audiences)
+
+How it works (always)
+
+Trust section — Order: Results → Testimonials → Social Proof → Founder Note. Include all available. Skip Founder Note if 2+ of [Results, Testimonials, Social Proof] exist.
+
+CTA
+
+
+Solution aware
+
+
+Hero
+
+Unique mechanism
+
+Features (always)
+
+Use cases (only if B2B + multiple target audiences)
+
+How it works (always)
+
+Trust section — Order: Results → Testimonials → Social Proof → Founder Note. Include all available. Skip Founder Note if 2+ of [Results, Testimonials, Social Proof] exist.
+
+CTA
+
+2. Product ready (all other landing goals)
+
+
+Problem aware - Cold
+
+
+Hero
+
+Problem
+
+Before/After and/or Unique Mechanism (per LLM decision above)
+
+
+Trust section — Order: Results → Testimonials → Social Proof. Include all available. If none, use Founder Note as fallback.
+
+Features (always)
+
+Use cases (only if B2B + multiple target audiences)
+
+How it works (always)
+
+Pricing
+
+CTA
+
+FAQ (Answer all practical questions)
+
+
+Problem aware - hot
+
+
+
+
+Hero
+
+Before/After and/or Unique Mechanism (per LLM decision above)
+
+
+Trust section — Order: Results → Testimonials → Social Proof. Include all available. If none, use Founder Note as fallback.
+
+Features (always)
+
+Use cases (only if B2B + multiple target audiences)
+
+How it works (always)
+
+Pricing
+
+CTA
+
+FAQ (Answer all practical questions)
+
+
+Solution aware - skeptical
+
+
+Hero
+
+Trust section — Order: Results → Testimonials → Social Proof. Include all available. If none, use Founder Note as fallback.
+
+Before/After and/or Unique Mechanism and/or Objection Handle (per LLM decision above) 
+
+Features (always)
+
+Use cases (only if B2B + multiple target audiences)
+
+How it works (always)
+
+Pricing
+
+CTA
+
+FAQ (Answer all practical questions)
+
+
+Solution aware - eager
+
+
+Hero
+
+Features (always)
+
+Use cases (only if B2B + multiple target audiences)
+
+How it works (always)
+
+Trust section — Order: Results → Testimonials → Social Proof. Include all available. If none, use Founder Note as fallback.
+
+Pricing
+
+CTA
+
+FAQ (Answer all practical questions)

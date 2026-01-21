@@ -151,3 +151,107 @@ function validateIVOC(ivoc: any): ivoc is IVOC {
     Array.isArray(ivoc.commonPhrases)
   );
 }
+
+// ============================================
+// Pain-only extraction (tavily-deep mode)
+// ============================================
+
+const PAIN_EXTRACTION_PROMPT = `You are a Voice of Customer analyst specializing in pain point extraction.
+
+Given these search results about "{category}" products for "{audience}":
+
+{snippets}
+
+Extract ONLY customer PAINS - complaints, frustrations, problems, things that annoy them.
+
+RULES:
+- Use EXACT language from the results when possible
+- Keep phrases SHORT (under 12 words)
+- Use FIRST PERSON ("I can't...", "I hate...", "so frustrating when...")
+- Be SPECIFIC, not generic
+- Include emotional language they actually use
+
+BAD (do NOT output):
+- "challenges with pricing transparency"
+- "pain points and frustrations"
+- "concerns about customer service"
+
+GOOD (use this style):
+- "spent 3 hours on hold and got nothing"
+- "why do I have to click 10 times to do one thing"
+- "the app crashes every time I try to export"
+- "cancellation process is a nightmare"
+
+Output valid JSON only:
+{
+  "pains": ["...", "...", ...],
+  "painCategories": {
+    "product": ["pains about the product itself"],
+    "support": ["pains about customer service"],
+    "pricing": ["pains about cost/value"],
+    "ux": ["pains about usability"],
+    "reliability": ["pains about bugs/crashes/downtime"]
+  }
+}
+
+Return 10-15 pains total, distributed across relevant categories.`;
+
+export interface PainExtractionResult {
+  pains: string[];
+  painCategories: {
+    product: string[];
+    support: string[];
+    pricing: string[];
+    ux: string[];
+    reliability: string[];
+  };
+}
+
+/**
+ * Extract ONLY pain points from search snippets.
+ * More focused than full IVOC extraction.
+ */
+export async function extractPainsOnly(
+  category: string,
+  audience: string,
+  snippets: string
+): Promise<{ success: true; data: PainExtractionResult; model: string } | { success: false; error: string }> {
+  const prompt = PAIN_EXTRACTION_PROMPT
+    .replace('{category}', category)
+    .replace('{audience}', audience)
+    .replace('{snippets}', snippets);
+
+  logger.dev('[extractPains] Snippets length:', snippets.length);
+
+  // Log snippet preview for debugging
+  if (process.env.DEBUG_AI_PROMPTS === 'true') {
+    logger.dev('[extractPains] Snippets preview (first 3000 chars):', snippets.slice(0, 3000));
+  }
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.3,
+      response_format: { type: 'json_object' },
+    });
+
+    const content = response.choices[0]?.message?.content;
+    if (!content) {
+      return { success: false, error: 'empty_response' };
+    }
+
+    const parsed = JSON.parse(content) as PainExtractionResult;
+
+    if (!Array.isArray(parsed.pains) || parsed.pains.length === 0) {
+      return { success: false, error: 'no_pains_extracted' };
+    }
+
+    logger.dev('[extractPains] Extracted', parsed.pains.length, 'pains');
+
+    return { success: true, data: parsed, model: 'gpt-4o-mini' };
+  } catch (error: any) {
+    logger.error('Pain extraction failed:', error);
+    return { success: false, error: error.message || 'extraction_failed' };
+  }
+}

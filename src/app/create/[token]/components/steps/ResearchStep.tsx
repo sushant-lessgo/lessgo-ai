@@ -46,8 +46,9 @@ export default function ResearchStep() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          category: understanding.categories[0],
-          audience: understanding.audiences[0],
+          category: understanding.categories.join(', '),
+          audience: understanding.audiences.join(', '),
+          productDescription: understanding.whatItDoes,
         }),
       });
 

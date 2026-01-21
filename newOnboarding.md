@@ -104,21 +104,61 @@ AI extracts (no web search, pure comprehension):
 Other asset questions (demo video, feature images) asked during UIBlock selection.
 
 ### Step 5: Research (IVOC)
-Tavily search + LLM extraction → Voice of Customer data.
+Voice of Customer research via Perplexity (primary) or Tavily (fallback).
+
+**Provider:** `RESEARCH_PROVIDER` env var (`perplexity` | `tavily`)
+
+**Request payload:**
+```typescript
+{
+  category: categories.join(', '),        // All categories, not just first
+  audience: audiences.join(', '),         // All audiences, not just first
+  productDescription: whatItDoes          // Product context for targeted search
+}
+```
+
+**Perplexity config:**
+```typescript
+{
+  model: 'sonar',  // or 'sonar-pro' for better quality
+  search_domain_filter: [
+    'reddit.com', 'g2.com', 'capterra.com',
+    'trustpilot.com', 'producthunt.com', 'indiehackers.com'
+  ],
+  search_recency_filter: 'year',
+  response_format: { type: 'json_schema', ... }
+}
+```
 
 **IVOC Schema:**
 ```json
 {
-  "pains": ["Chasing payments", "Looking unprofessional"],
-  "desires": ["Get paid faster", "Look legit"],
-  "objections": ["Is it secure?", "Hidden fees?"],
-  "firmBeliefs": ["Clients always pay late"],
-  "shakableBeliefs": ["I need an accountant"],
-  "commonPhrases": ["get paid faster", "in seconds"]
+  "pains": ["my knees hurt after every run", "can't stick to any routine"],
+  "desires": ["just need simple workout plans", "personalized plans without the BS"],
+  "objections": ["too expensive for what it is", "free trials lock you in"],
+  "firmBeliefs": ["consistency beats fancy gadgets"],
+  "shakableBeliefs": ["apps can't replace a trainer"],
+  "commonPhrases": ["I tried it and quit", "waste of my money"]
 }
 ```
 
-**Cache strategy:** Store by category + audience. Lookup first, Tavily fallback.
+**Quality rules:**
+- First-person language ("I hate...", "my...")
+- Short phrases (under 10 words)
+- Specific, not generic ("trackers die mid-workout" not "pain points")
+
+**Quality gate:** Reject if contains garbage phrases:
+- "target audience", "pain points", "market research", "pricing transparency"
+
+**Fallback chain:**
+```
+Perplexity (if enabled) → Tavily → GPT-4o fallback
+```
+
+**Cache strategy:**
+- Key: `categoryKey + audienceKey`
+- Provider-aware: Perplexity cache not used when Tavily selected (and vice versa)
+- Low-quality results not cached
 
 ### Step 6: Strategy + Section Selection
 One API call generates:
@@ -304,9 +344,12 @@ Single API call for entire page.
 - First gen → empty → user uploads → saved for future
 
 ### IVOC Cache
-Store Tavily results by category + audience:
-- `pains`, `desires`, `objections`, `firmBeliefs`, `shakableBeliefs`, `commonPhrases`
-- Exact match lookup, no TTL (cache forever)
+Store research results by category + audience:
+- Fields: `pains`, `desires`, `objections`, `firmBeliefs`, `shakableBeliefs`, `commonPhrases`
+- Metadata: `source` (perplexity/tavily/gpt-fallback), `model`, `rawSources`, `query`
+- Provider-aware: cache lookup respects current provider setting
+- Quality gate: low-quality results skipped from cache
+- No TTL (cache forever)
 
 ### Page Type (MVP)
 - Single-page website always
