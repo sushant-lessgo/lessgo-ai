@@ -3,62 +3,22 @@ export const layoutToSectionType: Record<string, string> = {
   // BeforeAfter layouts
   'SideBySideBlocks': 'beforeAfter',
   'StackedTextVisual': 'beforeAfter',
-  'BeforeAfterSlider': 'beforeAfter',
   'SplitCard': 'beforeAfter',
-  'TextListTransformation': 'beforeAfter',
-  'VisualStoryline': 'beforeAfter',
-  'StatComparison': 'beforeAfter',
-  'PersonaJourney': 'beforeAfter',
-
-  // Close layouts
-  'MockupWithCTA': 'closeSection',
-  'BonusStackCTA': 'closeSection',
-  'LeadMagnetCard': 'closeSection',
-  'EnterpriseContactBox': 'closeSection',
-  'ValueReinforcementBlock': 'closeSection',
-  'LivePreviewEmbed': 'closeSection',
-  'SideBySideOfferCards': 'closeSection',
-  'MultistepCTAStack': 'closeSection',
-
-  // Comparison layouts
-  'BasicFeatureGrid': 'comparisonTable',
-  'CheckmarkComparison': 'comparisonTable',
-  'YouVsThemHighlight': 'comparisonTable',
-  'ToggleableComparison': 'comparisonTable',
-  'CompetitorCallouts': 'comparisonTable',
-  'AnimatedUpgradePath': 'comparisonTable',
-  'PersonaUseCaseCompare': 'comparisonTable',
-  'LiteVsProVsEnterprise': 'comparisonTable',
 
   // FAQ layouts
   'AccordionFAQ': 'faq',
   'TwoColumnFAQ': 'faq',
   'InlineQnAList': 'faq',
   'SegmentedFAQTabs': 'faq',
-  'QuoteStyleAnswers': 'faq',
-  'IconWithAnswers': 'faq',
-  'TestimonialFAQs': 'faq',
-  'ChatBubbleFAQ': 'faq',
 
   // Features layouts
   'IconGrid': 'features',
   'SplitAlternating': 'features',
-  'Tabbed': 'features',
-  'Timeline': 'features',
-  'FeatureTestimonial': 'features',
   'MetricTiles': 'features',
-  'MiniCards': 'features',
   'Carousel': 'features',
 
   // FounderNote layouts
-  'FounderCardWithQuote': 'founderNote',
   'LetterStyleBlock': 'founderNote',
-  'VideoNoteWithTranscript': 'founderNote',
-  'MissionQuoteOverlay': 'founderNote',
-  'TimelineToToday': 'founderNote',
-  'SideBySidePhotoStory': 'founderNote',
-  'StoryBlockWithPullquote': 'founderNote',
-  'FoundersBeliefStack': 'founderNote',
 
   // Hero layouts
   'leftCopyRightImage': 'hero',
@@ -69,137 +29,61 @@ export const layoutToSectionType: Record<string, string> = {
   // HowItWorks layouts
   'ThreeStepHorizontal': 'howItWorks',
   'VerticalTimeline': 'howItWorks',
-  'IconCircleSteps': 'howItWorks',
   'AccordionSteps': 'howItWorks',
-  'CardFlipSteps': 'howItWorks',
   'VideoWalkthrough': 'howItWorks',
-  'ZigzagImageSteps': 'howItWorks',
-  'AnimatedProcessLine': 'howItWorks',
-
-  // Integration layouts
-  'LogoGrid': 'integrations',
-  'CategoryAccordion': 'integrations',
-  'InteractiveStackDiagram': 'integrations',
-  'UseCaseTiles': 'integrations',
-  'BadgeCarousel': 'integrations',
-  'TabbyIntegrationCards': 'integrations',
-  'ZapierLikeBuilderPreview': 'integrations',
-  'LogoWithQuoteUse': 'integrations',
 
   // Objection layouts
-  'ObjectionAccordion': 'objectionHandling',
   'MythVsRealityGrid': 'objectionHandling',
-  'QuoteBackedAnswers': 'objectionHandling',
-  'StoryDrivenObjections': 'objectionHandling',
-  'ResearchBackedProof': 'objectionHandling',
-  'TabsWithEvidence': 'objectionHandling',
-  'VideoProofPoints': 'objectionHandling',
-  'SecurityBadgesObjection': 'objectionHandling',
   'VisualObjectionTiles': 'objectionHandling',
-  'ProblemToReframeBlocks': 'objectionHandling',
-  'SkepticToBelieverSteps': 'objectionHandling',
-  'BoldGuaranteePanel': 'objectionHandling',
 
   // Pricing layouts
   'TierCards': 'pricing',
   'ToggleableMonthlyYearly': 'pricing',
-  'FeatureMatrix': 'pricing',
-  'SegmentBasedPricing': 'pricing',
   'SliderPricing': 'pricing',
   'CallToQuotePlan': 'pricing',
-  'CardWithTestimonial': 'pricing',
-  'MiniStackedCards': 'pricing',
 
   // Problem layouts
-  'StackedPainBullets': 'problem',
-  'BeforeImageAfterText': 'problem',
-  // TODO: Temporarily disabled - 'SideBySideSplit': 'problem',
-  'EmotionalQuotes': 'problem',
   'CollapsedCards': 'problem',
-  'PainMeterChart': 'problem',
+  'SideBySideSplit': 'problem',
   'PersonaPanels': 'problem',
-  'ProblemChecklist': 'problem',
 
   // Results layouts
   'StatBlocks': 'results',
-  'BeforeAfterStats': 'results',
-  'QuoteWithMetric': 'results',
-  'EmojiOutcomeGrid': 'results',
-  'TimelineResults': 'results',
-  'OutcomeIcons': 'results',
   'StackedWinsList': 'results',
-  'PersonaResultPanels': 'results',
   'ResultsGallery': 'results',
-
-  // Security layouts
-  'AuditResultsPanel': 'security',
-  'PenetrationTestResults': 'security',
-  'PrivacyCommitmentBlock': 'security',
-  'SecurityChecklist': 'security',
-  'SecurityGuaranteePanel': 'security',
-  'TrustSealCollection': 'security',
 
   // SocialProof layouts
   'LogoWall': 'socialProof',
-  'MediaMentions': 'socialProof',
-  'UserCountBar': 'socialProof',
-  'IndustryBadgeLine': 'socialProof',
-  'MapHeatSpots': 'socialProof',
-  'StackedStats': 'socialProof',
-  'StripWithReviews': 'socialProof',
-  'SocialProofStrip': 'socialProof',
 
   // Testimonial layouts
   'QuoteGrid': 'testimonials',
   'VideoTestimonials': 'testimonials',
   'AvatarCarousel': 'testimonials',
   'BeforeAfterQuote': 'testimonials',
-  'SegmentedTestimonials': 'testimonials',
-  'RatingCards': 'testimonials',
   'PullQuoteStack': 'testimonials',
-  'InteractiveTestimonialMap': 'testimonials',
 
   // UniqueMechanism layouts
-  'AlgorithmExplainer': 'uniqueMechanism',
-  'InnovationTimeline': 'uniqueMechanism',
   'MethodologyBreakdown': 'uniqueMechanism',
   'ProcessFlowDiagram': 'uniqueMechanism',
   'PropertyComparisonMatrix': 'uniqueMechanism',
   'SecretSauceReveal': 'uniqueMechanism',
   'StackedHighlights': 'uniqueMechanism',
-  'SystemArchitecture': 'uniqueMechanism',
   'TechnicalAdvantage': 'uniqueMechanism',
 
   // UseCase layouts
-  'BeforeAfterWorkflow': 'useCases',
-  'CustomerJourneyFlow': 'useCases',
   'IndustryUseCaseGrid': 'useCases',
-  'InteractiveUseCaseMap': 'useCases',
   'PersonaGrid': 'useCases',
   'RoleBasedScenarios': 'useCases',
-  'UseCaseCarousel': 'useCases',
-  'WorkflowDiagrams': 'useCases',
 
   // CTA layouts
   'CenteredHeadlineCTA': 'cta',
-  'CTAWithBadgeRow': 'cta',
   'VisualCTAWithMockup': 'cta',
-  'SideBySideCTA': 'cta',
-  'CountdownLimitedCTA': 'cta',
-  'CTAWithFormField': 'cta',
   'ValueStackCTA': 'cta',
-  'TestimonialCTACombo': 'cta',
 
   // Header layouts
-  'CenteredLogoHeader': 'header',
-  'FullNavHeader': 'header',
   'MinimalNavHeader': 'header',
-  'NavWithCTAHeader': 'header',
 
   // Footer layouts
-  'SimpleFooter': 'footer',
-  'LinksAndSocialFooter': 'footer',
-  'MultiColumnFooter': 'footer',
   'ContactFooter': 'footer',
 };
 

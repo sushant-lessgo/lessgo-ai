@@ -187,22 +187,43 @@ const handleDesignAndCopyRegeneration = async (
       state.aiGeneration.status = 'Updating section layouts...';
     });
 
-    const { generateSectionLayouts } = await import('@/modules/sections/generateSectionLayouts');
-    // Create a mock EditStore instance that provides the needed methods
-    const mockEditStore = {
-      getState: () => ({
-        setSectionLayouts: (layouts: Record<string, string>) => {
-          setState((state: EditStore) => {
-            state.sectionLayouts = { ...state.sectionLayouts, ...layouts };
-          });
-        }
-      })
-    } as any;
-    
-    // This updates the store's sectionLayouts internally
-    generateSectionLayouts(currentSections, mockEditStore);
-    const updatedState = getState();
-    const newLayouts = updatedState.sectionLayouts;
+    const { layoutRegistry } = await import('@/modules/sections/layoutRegistry');
+
+    // Simple random layout selection from active layouts
+    const sectionToRegistryKey: Record<string, keyof typeof layoutRegistry> = {
+      hero: 'Hero',
+      features: 'Features',
+      pricing: 'Pricing',
+      testimonials: 'Testimonial',
+      faq: 'FAQ',
+      cta: 'CTA',
+      problem: 'Problem',
+      results: 'Results',
+      socialProof: 'SocialProof',
+      howItWorks: 'HowItWorks',
+      beforeAfter: 'BeforeAfter',
+      founderNote: 'FounderNote',
+      uniqueMechanism: 'UniqueMechanism',
+      useCases: 'UseCase',
+      objectionHandling: 'Objection',
+      header: 'Header',
+      footer: 'Footer',
+    };
+
+    const newLayouts: Record<string, string> = {};
+    currentSections.forEach((sectionId: string) => {
+      const registryKey = sectionToRegistryKey[sectionId];
+      if (registryKey && layoutRegistry[registryKey]) {
+        const layouts = layoutRegistry[registryKey];
+        // Random selection from available layouts
+        newLayouts[sectionId] = layouts[Math.floor(Math.random() * layouts.length)];
+      }
+    });
+
+    // Update store with new layouts
+    setState((state: EditStore) => {
+      state.sectionLayouts = { ...state.sectionLayouts, ...newLayouts };
+    });
     
 
     // Step 3: Update theme with new background system

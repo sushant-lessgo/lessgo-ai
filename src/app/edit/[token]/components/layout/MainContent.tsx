@@ -26,26 +26,22 @@ interface MainContentProps {
 function getSectionFallbackLayout(sectionId: string): string {
   const sectionFallbacks: Record<string, string> = {
     beforeAfter: "SideBySideBlocks",
-    closeSection: "MockupWithCTA", 
-    comparisonTable: "BasicFeatureGrid",
     faq: "AccordionFAQ",
     features: "IconGrid",
-    founderNote: "FounderCardWithQuote",
+    founderNote: "LetterStyleBlock",
     hero: "leftCopyRightImage",
     howItWorks: "ThreeStepHorizontal",
-    integrations: "LogoGrid",
-    objectionHandling: "ObjectionAccordion",
+    objectionHandling: "MythVsRealityGrid",
     pricing: "TierCards",
     cta: "CenteredHeadlineCTA",
-    problem: "StackedPainBullets",
+    problem: "CollapsedCards",
     results: "StatBlocks",
-    security: "SecurityChecklist",
     socialProof: "LogoWall",
     testimonials: "QuoteGrid",
     uniqueMechanism: "StackedHighlights",
     useCases: "PersonaGrid",
   };
-  
+
   return sectionFallbacks[sectionId] || "IconGrid"; // Ultimate fallback
 }
 

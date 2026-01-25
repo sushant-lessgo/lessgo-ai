@@ -109,7 +109,7 @@ export function LayoutSelector({
 
   // Simple recommendation logic (can be enhanced with actual scoring)
   const getRecommendation = (layoutId: string) => {
-    // This is simplified - in production, use the scoring algorithms from generateSectionLayouts.ts
+    // This is simplified - in production, use selectUIBlocksV3 for intelligent selection
     const popularLayouts: Record<string, string[]> = {
       hero: ['leftCopyRightImage', 'centerStacked'],
       features: ['IconGrid', 'TabSwitcher'],

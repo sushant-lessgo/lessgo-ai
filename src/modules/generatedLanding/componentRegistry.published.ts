@@ -18,17 +18,17 @@ import React from 'react';
 // These are separate .published.tsx files with ZERO hook imports
 
 // Hero
-import MinimalistPublished from '@/modules/UIBlocks/Hero/Minimalist.published';
+// ARCHIVED: import MinimalistPublished from '@/modules/UIBlocks/Hero/Minimalist.published';
 import CenterStackedPublished from '@/modules/UIBlocks/Hero/CenterStacked.published';
 import ImageFirstPublished from '@/modules/UIBlocks/Hero/ImageFirst.published';
 import LeftCopyRightImagePublished from '@/modules/UIBlocks/Hero/LeftCopyRightImage.published';
 import SplitScreenPublished from '@/modules/UIBlocks/Hero/SplitScreen.published';
 
 // Header
-import CenteredLogoHeaderPublished from '@/modules/UIBlocks/Header/CenteredLogoHeader.published';
-import FullNavHeaderPublished from '@/modules/UIBlocks/Header/FullNavHeader.published';
+// ARCHIVED: import CenteredLogoHeaderPublished from '@/modules/UIBlocks/Header/CenteredLogoHeader.published';
+// ARCHIVED: import FullNavHeaderPublished from '@/modules/UIBlocks/Header/FullNavHeader.published';
 import MinimalNavHeaderPublished from '@/modules/UIBlocks/Header/MinimalNavHeader.published';
-import NavWithCTAHeaderPublished from '@/modules/UIBlocks/Header/NavWithCTAHeader.published';
+// ARCHIVED: import NavWithCTAHeaderPublished from '@/modules/UIBlocks/Header/NavWithCTAHeader.published';
 
 // Miscellaneous
 // ARCHIVED: import AnnouncementPublished from '@/modules/UIBlocks/Miscellaneous/Announcement.published';
@@ -41,10 +41,10 @@ import ValueStackCTAPublished from '@/modules/UIBlocks/CTA/ValueStackCTA.publish
 // V3 ARCHIVED: import TestimonialCTAComboPublished from '@/modules/UIBlocks/CTA/TestimonialCTACombo.published';
 
 // Footer
-import SimpleFooterPublished from '@/modules/UIBlocks/Footer/SimpleFooter.published';
+// ARCHIVED: import SimpleFooterPublished from '@/modules/UIBlocks/Footer/SimpleFooter.published';
 import ContactFooterPublished from '@/modules/UIBlocks/Footer/ContactFooter.published';
-import LinksAndSocialFooterPublished from '@/modules/UIBlocks/Footer/LinksAndSocialFooter.published';
-import MultiColumnFooterPublished from '@/modules/UIBlocks/Footer/MultiColumnFooter.published';
+// ARCHIVED: import LinksAndSocialFooterPublished from '@/modules/UIBlocks/Footer/LinksAndSocialFooter.published';
+// ARCHIVED: import MultiColumnFooterPublished from '@/modules/UIBlocks/Footer/MultiColumnFooter.published';
 
 // Problem
 // V3 ARCHIVED: import StackedPainBulletsPublished from '@/modules/UIBlocks/Problem/StackedPainBullets.published';
@@ -79,14 +79,14 @@ import VerticalTimelinePublished from '@/modules/UIBlocks/HowItWorks/VerticalTim
 // V3 ARCHIVED: import ZigzagImageStepsPublished from '@/modules/UIBlocks/HowItWorks/ZigzagImageSteps.published';
 
 // FounderNote
-import FounderCardWithQuotePublished from '@/modules/UIBlocks/FounderNote/FounderCardWithQuote.published';
-import FoundersBeliefStackPublished from '@/modules/UIBlocks/FounderNote/FoundersBeliefStack.published';
+// ARCHIVED: import FounderCardWithQuotePublished from '@/modules/UIBlocks/FounderNote/FounderCardWithQuote.published';
+// ARCHIVED: import FoundersBeliefStackPublished from '@/modules/UIBlocks/FounderNote/FoundersBeliefStack.published';
 import LetterStyleBlockPublished from '@/modules/UIBlocks/FounderNote/LetterStyleBlock.published';
 // V3 ARCHIVED: import SideBySidePhotoStoryPublished from '@/modules/UIBlocks/FounderNote/SideBySidePhotoStory.published';
 // V3 ARCHIVED: import StoryBlockWithPullquotePublished from '@/modules/UIBlocks/FounderNote/StoryBlockWithPullquote.published';
-import TimelineToTodayPublished from '@/modules/UIBlocks/FounderNote/TimelineToToday.published';
+// ARCHIVED: import TimelineToTodayPublished from '@/modules/UIBlocks/FounderNote/TimelineToToday.published';
 // V3 ARCHIVED: import VideoNoteWithTranscriptPublished from '@/modules/UIBlocks/FounderNote/VideoNoteWithTranscript.published';
-import MissionQuoteOverlayPublished from '@/modules/UIBlocks/FounderNote/MissionQuoteOverlay.published';
+// ARCHIVED: import MissionQuoteOverlayPublished from '@/modules/UIBlocks/FounderNote/MissionQuoteOverlay.published';
 
 // FAQ
 import AccordionFAQPublished from '@/modules/UIBlocks/FAQ/AccordionFAQ.published';
@@ -154,17 +154,17 @@ import RoleBasedScenariosPublished from '@/modules/UIBlocks/UseCases/RoleBasedSc
 // Registry structure - ONLY server-safe published components
 const publishedComponentRegistry: Record<string, Record<string, React.ComponentType<any>>> = {
   hero: {
-    minimalist: MinimalistPublished,
+    // ARCHIVED: minimalist: MinimalistPublished,
     centerstacked: CenterStackedPublished,
     imagefirst: ImageFirstPublished,
     leftcopyrightimage: LeftCopyRightImagePublished,
     splitscreen: SplitScreenPublished,
   },
   header: {
-    centeredlogoheader: CenteredLogoHeaderPublished,
-    fullnavheader: FullNavHeaderPublished,
+    // ARCHIVED: centeredlogoheader: CenteredLogoHeaderPublished,
+    // ARCHIVED: fullnavheader: FullNavHeaderPublished,
     minimalnavheader: MinimalNavHeaderPublished,
-    navwithctaheader: NavWithCTAHeaderPublished,
+    // ARCHIVED: navwithctaheader: NavWithCTAHeaderPublished,
   },
   // ARCHIVED: miscellaneous section - components moved to archive/uiblocks-extra/Miscellaneous
   // miscellaneous: {
@@ -185,10 +185,10 @@ const publishedComponentRegistry: Record<string, Record<string, React.ComponentT
     // V3 ARCHIVED: testimonialctacombo: TestimonialCTAComboPublished,
   },
   footer: {
-    simplefooter: SimpleFooterPublished,
+    // ARCHIVED: simplefooter: SimpleFooterPublished,
     contactfooter: ContactFooterPublished,
-    linksandsocialfooter: LinksAndSocialFooterPublished,
-    multicolumnfooter: MultiColumnFooterPublished,
+    // ARCHIVED: linksandsocialfooter: LinksAndSocialFooterPublished,
+    // ARCHIVED: multicolumnfooter: MultiColumnFooterPublished,
   },
   problem: {
     // V3 ARCHIVED: stackedpainbullets: StackedPainBulletsPublished,
@@ -223,13 +223,13 @@ const publishedComponentRegistry: Record<string, Record<string, React.ComponentT
     // V3 ARCHIVED: zigzagimagesteps: ZigzagImageStepsPublished,
   },
   foundernote: {
-    foundercardwithquote: FounderCardWithQuotePublished,
-    foundersbeliefstack: FoundersBeliefStackPublished,
+    // ARCHIVED: foundercardwithquote: FounderCardWithQuotePublished,
+    // ARCHIVED: foundersbeliefstack: FoundersBeliefStackPublished,
     letterstyleblock: LetterStyleBlockPublished,
-    missionquoteoverlay: MissionQuoteOverlayPublished,
+    // ARCHIVED: missionquoteoverlay: MissionQuoteOverlayPublished,
     // V3 ARCHIVED: sidebysidephotostory: SideBySidePhotoStoryPublished,
     // V3 ARCHIVED: storyblockwithpullquote: StoryBlockWithPullquotePublished,
-    timelinetotoday: TimelineToTodayPublished,
+    // ARCHIVED: timelinetotoday: TimelineToTodayPublished,
     // V3 ARCHIVED: "videonotewith transcript": VideoNoteWithTranscriptPublished,
   },
   faq: {

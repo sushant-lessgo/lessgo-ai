@@ -10,15 +10,15 @@
 export const layoutNamesBySection: Record<string, string[]> = {
   header: [
     'MinimalNavHeader',
-    'NavWithCTAHeader',
-    'CenteredLogoHeader',
-    'FullNavHeader',
+    // ARCHIVED: 'NavWithCTAHeader',
+    // ARCHIVED: 'CenteredLogoHeader',
+    // ARCHIVED: 'FullNavHeader',
   ],
 
   footer: [
-    'SimpleFooter',
-    'LinksAndSocialFooter',
-    'MultiColumnFooter',
+    // ARCHIVED: 'SimpleFooter',
+    // ARCHIVED: 'LinksAndSocialFooter',
+    // ARCHIVED: 'MultiColumnFooter',
     'ContactFooter',
   ],
 
@@ -27,7 +27,7 @@ export const layoutNamesBySection: Record<string, string[]> = {
     'centerStacked',
     'splitScreen',
     'imageFirst',
-    'minimalist',
+    // ARCHIVED: 'minimalist',
   ],
 
   beforeAfter: [
@@ -159,14 +159,14 @@ export const layoutNamesBySection: Record<string, string[]> = {
   ],
 
   founderNote: [
-    'FounderCardWithQuote',
+    // ARCHIVED: 'FounderCardWithQuote',
     'LetterStyleBlock',
     // V3 ARCHIVED: 'VideoNoteWithTranscript',
-    'MissionQuoteOverlay',
-    'TimelineToToday',
+    // ARCHIVED: 'MissionQuoteOverlay',
+    // ARCHIVED: 'TimelineToToday',
     // V3 ARCHIVED: 'SideBySidePhotoStory',
     // V3 ARCHIVED: 'StoryBlockWithPullquote',
-    'FoundersBeliefStack',
+    // ARCHIVED: 'FoundersBeliefStack',
   ],
 
   cta: [

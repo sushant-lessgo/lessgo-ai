@@ -17,9 +17,9 @@ type UIBlockTagMap = Record<string, UIBlockTag[]>;
 // ===== HEADER =====
 const headerTags: UIBlockTagMap = {
   MinimalNavHeader: ['text-heavy'],
-  NavWithCTAHeader: ['text-heavy'],
-  CenteredLogoHeader: ['image'],
-  FullNavHeader: ['text-heavy'],
+  // ARCHIVED: NavWithCTAHeader: ['text-heavy'],
+  // ARCHIVED: CenteredLogoHeader: ['image'],
+  // ARCHIVED: FullNavHeader: ['text-heavy'],
 };
 
 // ===== HERO =====
@@ -28,7 +28,7 @@ const heroTags: UIBlockTagMap = {
   centerStacked: ['image'],
   splitScreen: ['image'],
   imageFirst: ['image'],
-  minimalist: ['text-heavy'],
+  // ARCHIVED: minimalist: ['text-heavy'],
 };
 
 // ===== BEFORE/AFTER =====
@@ -173,14 +173,14 @@ const objectionHandlingTags: UIBlockTagMap = {
 
 // ===== FOUNDER NOTE =====
 const founderNoteTags: UIBlockTagMap = {
-  FounderCardWithQuote: ['image'],
+  // ARCHIVED: FounderCardWithQuote: ['image'],
   LetterStyleBlock: ['text-heavy'],
   // V3 ARCHIVED: VideoNoteWithTranscript: ['image'],
-  MissionQuoteOverlay: ['image'],
-  TimelineToToday: ['text-heavy'],
+  // ARCHIVED: MissionQuoteOverlay: ['image'],
+  // ARCHIVED: TimelineToToday: ['text-heavy'],
   // V3 ARCHIVED: SideBySidePhotoStory: ['image'],
   // V3 ARCHIVED: StoryBlockWithPullquote: ['text-heavy'],
-  FoundersBeliefStack: ['text-heavy'],
+  // ARCHIVED: FoundersBeliefStack: ['text-heavy'],
 };
 
 // ===== CTA =====
@@ -197,9 +197,9 @@ const ctaTags: UIBlockTagMap = {
 
 // ===== FOOTER =====
 const footerTags: UIBlockTagMap = {
-  SimpleFooter: ['text-heavy'],
-  LinksAndSocialFooter: ['text-heavy'],
-  MultiColumnFooter: ['text-heavy'],
+  // ARCHIVED: SimpleFooter: ['text-heavy'],
+  // ARCHIVED: LinksAndSocialFooter: ['text-heavy'],
+  // ARCHIVED: MultiColumnFooter: ['text-heavy'],
   ContactFooter: ['text-heavy'],
 };
 

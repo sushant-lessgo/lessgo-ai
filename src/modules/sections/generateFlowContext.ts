@@ -5,18 +5,27 @@ import type {
   PreviousSectionContext,
   NextSectionContext
 } from './flowContextTypes';
-import type { LayoutPickerInput } from './layoutPickerInput';
+import type {
+  AwarenessLevel,
+  ToneProfile,
+  MarketSophisticationLevel,
+  CopyIntent,
+  TargetAudience
+} from '@/types/core/index';
+
+// Business context fields needed for flow context generation
+export interface FlowContextBusinessContext {
+  awarenessLevel?: AwarenessLevel;
+  toneProfile?: ToneProfile;
+  marketSophisticationLevel?: MarketSophisticationLevel;
+  copyIntent?: CopyIntent;
+  targetAudience?: TargetAudience;
+}
 
 export interface FlowContextInput {
   sections: string[];
   sectionIndex: number;
-  businessContext: Pick<LayoutPickerInput,
-    'awarenessLevel' |
-    'toneProfile' |
-    'marketSophisticationLevel' |
-    'copyIntent' |
-    'targetAudience'
-  >;
+  businessContext: FlowContextBusinessContext;
 }
 
 export interface SectionFlowContext {
@@ -29,6 +38,19 @@ export interface SectionFlowContext {
   flowComplexity: FlowComplexity;
 }
 
+// Audience IDs that indicate analytical/technical flow
+const TECHNICAL_AUDIENCES = [
+  'developers', 'no-code-builders', 'ai-engineers', 'devops-engineers', 'tech-leads',
+  'data-engineers', 'security-engineers', 'enterprise-tech-teams', 'enterprise-marketing-teams',
+  'it-decision-makers'
+] as const;
+
+// Audience IDs that indicate emotional/creator flow
+const CREATOR_AUDIENCES = [
+  'content-creators', 'youtubers', 'newsletter-writers', 'podcasters', 'online-educators',
+  'course-creators', 'coaches-consultants', 'cohort-instructors'
+] as const;
+
 /**
  * Determines flow tone (analytical vs emotional) based on business context
  *
@@ -37,9 +59,11 @@ export interface SectionFlowContext {
  */
 export function determineFlowTone(context: FlowContextInput['businessContext']): FlowTone {
   // Analytical indicators (prioritize technical/enterprise)
+  const isAnalyticalAudience = context.targetAudience &&
+    TECHNICAL_AUDIENCES.includes(context.targetAudience as typeof TECHNICAL_AUDIENCES[number]);
+
   if (
-    context.targetAudience === 'builders' ||
-    context.targetAudience === 'enterprise' ||
+    isAnalyticalAudience ||
     context.marketSophisticationLevel === 'level-5' ||
     context.toneProfile === 'minimal-technical' ||
     context.toneProfile === 'luxury-expert'
@@ -48,13 +72,16 @@ export function determineFlowTone(context: FlowContextInput['businessContext']):
   }
 
   // Emotional indicators (prioritize pain/storytelling)
+  const isCreatorAudience = context.targetAudience &&
+    CREATOR_AUDIENCES.includes(context.targetAudience as typeof CREATOR_AUDIENCES[number]);
+
   if (
     context.copyIntent === 'pain-led' ||
     context.toneProfile === 'confident-playful' ||
     context.toneProfile === 'bold-persuasive' ||
     context.awarenessLevel === 'unaware' ||
     context.awarenessLevel === 'problem-aware' ||
-    context.targetAudience === 'creators'
+    isCreatorAudience
   ) {
     return 'emotional';
   }
@@ -62,6 +89,12 @@ export function determineFlowTone(context: FlowContextInput['businessContext']):
   // Default: balanced (mix of both)
   return 'balanced';
 }
+
+// Enterprise audience IDs that indicate detailed flow
+const ENTERPRISE_AUDIENCES = [
+  'enterprise-tech-teams', 'enterprise-marketing-teams', 'it-decision-makers',
+  'mid-market-companies'
+] as const;
 
 /**
  * Determines flow complexity (simple vs detailed) based on business context and section count
@@ -84,10 +117,13 @@ export function determineFlowComplexity(
   }
 
   // Detailed flow indicators
+  const isEnterpriseAudience = context.targetAudience &&
+    ENTERPRISE_AUDIENCES.includes(context.targetAudience as typeof ENTERPRISE_AUDIENCES[number]);
+
   if (
     totalSections >= 10 ||
     context.marketSophisticationLevel === 'level-5' ||
-    context.targetAudience === 'enterprise' ||
+    isEnterpriseAudience ||
     context.marketSophisticationLevel === 'level-4'
   ) {
     return 'detailed';

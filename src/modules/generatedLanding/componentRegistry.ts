@@ -2,14 +2,14 @@ import React from 'react';
 
 // Header components
 import MinimalNavHeader from '@/modules/UIBlocks/Header/MinimalNavHeader';
-import NavWithCTAHeader from '@/modules/UIBlocks/Header/NavWithCTAHeader';
-import CenteredLogoHeader from '@/modules/UIBlocks/Header/CenteredLogoHeader';
-import FullNavHeader from '@/modules/UIBlocks/Header/FullNavHeader';
+// ARCHIVED: import NavWithCTAHeader from '@/modules/UIBlocks/Header/NavWithCTAHeader';
+// ARCHIVED: import CenteredLogoHeader from '@/modules/UIBlocks/Header/CenteredLogoHeader';
+// ARCHIVED: import FullNavHeader from '@/modules/UIBlocks/Header/FullNavHeader';
 
 // Footer components
-import SimpleFooter from '@/modules/UIBlocks/Footer/SimpleFooter';
-import LinksAndSocialFooter from '@/modules/UIBlocks/Footer/LinksAndSocialFooter';
-import MultiColumnFooter from '@/modules/UIBlocks/Footer/MultiColumnFooter';
+// ARCHIVED: import SimpleFooter from '@/modules/UIBlocks/Footer/SimpleFooter';
+// ARCHIVED: import LinksAndSocialFooter from '@/modules/UIBlocks/Footer/LinksAndSocialFooter';
+// ARCHIVED: import MultiColumnFooter from '@/modules/UIBlocks/Footer/MultiColumnFooter';
 import ContactFooter from '@/modules/UIBlocks/Footer/ContactFooter';
 
 import AccordionFAQ from '@/modules/UIBlocks/FAQ/AccordionFAQ';
@@ -48,13 +48,13 @@ import CollapsedCards from '@/modules/UIBlocks/Problem/CollapsedCards';
 // ARCHIVED: import EnterpriseContactBox from '@/modules/UIBlocks/Close/EnterpriseContactBox';
 // V3 ARCHIVED: import FeatureMatrix from '@/modules/UIBlocks/Pricing/FeatureMatrix';
 // V3 ARCHIVED: import FeatureTestimonial from '@/modules/UIBlocks/Features/FeatureTestimonial';
-import FounderCardWithQuote from '@/modules/UIBlocks/FounderNote/FounderCardWithQuote';
-import FoundersBeliefStack from '@/modules/UIBlocks/FounderNote/FoundersBeliefStack';
+// ARCHIVED: import FounderCardWithQuote from '@/modules/UIBlocks/FounderNote/FounderCardWithQuote';
+// ARCHIVED: import FoundersBeliefStack from '@/modules/UIBlocks/FounderNote/FoundersBeliefStack';
 // V3 ARCHIVED: import IconCircleSteps from '@/modules/UIBlocks/HowItWorks/IconCircleSteps';
 import IconGrid from '@/modules/UIBlocks/Features/IconGrid';
 // V3 ARCHIVED: import IconWithAnswers from '@/modules/UIBlocks/FAQ/IconWithAnswers';
 import ImageFirst from '@/modules/UIBlocks/Hero/ImageFirst';
-import MinimalistComponent from '@/modules/UIBlocks/Hero/Minimalist';
+// ARCHIVED: import MinimalistComponent from '@/modules/UIBlocks/Hero/Minimalist';
 // V3 ARCHIVED: import InnovationTimeline from '@/modules/UIBlocks/UniqueMechanism/InnovationTimeline';
 // V3 ARCHIVED: import IndustryBadgeLine from '@/modules/UIBlocks/SocialProof/IndustryBadgeLine';
 import IndustryUseCaseGrid from '@/modules/UIBlocks/UseCases/IndustryUseCaseGrid';
@@ -76,7 +76,7 @@ import MethodologyBreakdown from '@/modules/UIBlocks/UniqueMechanism/Methodology
 import MetricTiles from '@/modules/UIBlocks/Features/MetricTiles';
 // V3 ARCHIVED: import MiniCards from '@/modules/UIBlocks/Features/MiniCards';
 // V3 ARCHIVED: import MiniStackedCards from '@/modules/UIBlocks/Pricing/MiniStackedCards';
-import MissionQuoteOverlay from '@/modules/UIBlocks/FounderNote/MissionQuoteOverlay';
+// ARCHIVED: import MissionQuoteOverlay from '@/modules/UIBlocks/FounderNote/MissionQuoteOverlay';
 // ARCHIVED: import MockupWithCTA from '@/modules/UIBlocks/Close/MockupWithCTA';
 // ARCHIVED: import MultistepCTAStack from '@/modules/UIBlocks/Close/MultistepCTAStack';
 import MythVsRealityGrid from '@/modules/UIBlocks/ObjectionHandle/MythVsRealityGrid';
@@ -139,7 +139,7 @@ import ThreeStepHorizontal from '@/modules/UIBlocks/HowItWorks/ThreeStepHorizont
 import TierCards from '@/modules/UIBlocks/Pricing/TierCards';
 // V3 ARCHIVED: import TimelineResults from '@/modules/UIBlocks/Results/TimelineResults';
 // import Timeline from '@/modules/UIBlocks/Features/Timeline'; // Temporarily retired
-import TimelineToToday from '@/modules/UIBlocks/FounderNote/TimelineToToday';
+// ARCHIVED: import TimelineToToday from '@/modules/UIBlocks/FounderNote/TimelineToToday';
 // ARCHIVED: import ToggleableComparison from '@/modules/UIBlocks/Comparison/ToggleableComparison';
 import ToggleableMonthlyYearly from '@/modules/UIBlocks/Pricing/ToggleableMonthlyYearly';
 // ARCHIVED: import TrustSealCollection from '@/modules/UIBlocks/Security/TrustSealCollection';
@@ -173,9 +173,9 @@ export type ComponentRegistry = Record<string, Record<string, React.ComponentTyp
 export const componentRegistry: ComponentRegistry = {
   header: {
     MinimalNavHeader: MinimalNavHeader,
-    NavWithCTAHeader: NavWithCTAHeader,
-    CenteredLogoHeader: CenteredLogoHeader,
-    FullNavHeader: FullNavHeader,
+    // ARCHIVED: NavWithCTAHeader: NavWithCTAHeader,
+    // ARCHIVED: CenteredLogoHeader: CenteredLogoHeader,
+    // ARCHIVED: FullNavHeader: FullNavHeader,
   },
   
   beforeAfter: {
@@ -194,7 +194,7 @@ export const componentRegistry: ComponentRegistry = {
     centerStacked: CenterStacked,
     splitScreen: SplitScreen,
     imageFirst: ImageFirst,
-    minimalist: MinimalistComponent,
+    // ARCHIVED: minimalist: MinimalistComponent,
   },
   
   features: {
@@ -344,14 +344,14 @@ export const componentRegistry: ComponentRegistry = {
   },
   
   founderNote: {
-    FounderCardWithQuote: FounderCardWithQuote,
+    // ARCHIVED: FounderCardWithQuote: FounderCardWithQuote,
     LetterStyleBlock: LetterStyleBlock,
     // V3 ARCHIVED: VideoNoteWithTranscript: VideoNoteWithTranscript,
-    MissionQuoteOverlay: MissionQuoteOverlay,
-    TimelineToToday: TimelineToToday,
+    // ARCHIVED: MissionQuoteOverlay: MissionQuoteOverlay,
+    // ARCHIVED: TimelineToToday: TimelineToToday,
     // V3 ARCHIVED: SideBySidePhotoStory: SideBySidePhotoStory,
     // V3 ARCHIVED: StoryBlockWithPullquote: StoryBlockWithPullquote,
-    FoundersBeliefStack: FoundersBeliefStack,
+    // ARCHIVED: FoundersBeliefStack: FoundersBeliefStack,
   },
   
   // ARCHIVED: comparisonTable section - components moved to archive/uiblocks-extra/Comparison
@@ -395,9 +395,9 @@ export const componentRegistry: ComponentRegistry = {
   // },
 
   footer: {
-    SimpleFooter: SimpleFooter,
-    LinksAndSocialFooter: LinksAndSocialFooter,
-    MultiColumnFooter: MultiColumnFooter,
+    // ARCHIVED: SimpleFooter: SimpleFooter,
+    // ARCHIVED: LinksAndSocialFooter: LinksAndSocialFooter,
+    // ARCHIVED: MultiColumnFooter: MultiColumnFooter,
     ContactFooter: ContactFooter,
   },
 };

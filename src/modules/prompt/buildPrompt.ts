@@ -452,34 +452,7 @@ function getSectionLayoutGuidance(sectionType: string, layout: string): string {
     BeforeAfter: {
       SideBySideBlocks: "Side-by-side comparison layout. Use parallel structure in before/after descriptions. Keep labels concise and contrasting.",
       StackedTextVisual: "Vertical flow design. Build narrative momentum from before to after. Use transition language to connect states.",
-      BeforeAfterSlider: "Interactive slider comparison. Before/after labels should be clear and immediate. Focus on visual contrast in copy.",
       SplitCard: "Card-based comparison. Titles should create stark contrast. Descriptions should highlight the transformation clearly.",
-      TextListTransformation: "List-based transformation view. Use parallel list structure. Make transformation obvious through language patterns.",
-      VisualStoryline: "Story-driven narrative layout. Copy should flow like a story with clear progression. Use connecting phrases between steps.",
-      StatComparison: "Data-driven comparison. Focus on specific, measurable differences. Use numbers and percentages prominently.",
-      PersonaJourney: "User-centered transformation story. Write from user perspective. Show emotional and practical journey."
-    },
-    
-    Close: {
-      MockupWithCTA: "Visual product focus with action. Let mockup showcase value, copy should create urgency and remove friction.",
-      BonusStackCTA: "Value-stacking offer presentation. Build perceived value progressively. Use cumulative language and urgency.",
-      LeadMagnetCard: "Lead capture focused design. Emphasize immediate value and low commitment. Address privacy concerns naturally.",
-      EnterpriseContactBox: "B2B sales-focused layout. Professional tone, feature comprehensive benefits. Include multiple contact options naturally.",
-      ValueReinforcementBlock: "Value summary and action. Reinforce key benefits delivered earlier. Create final compelling reason to act.",
-      LivePreviewEmbed: "Interactive product demonstration. Let preview speak for itself. Copy should guide interaction and next steps.",
-      SideBySideOfferCards: "Multiple offer comparison. Differentiate offers clearly. Help users choose the right option confidently.",
-      MultistepCTAStack: "Process-oriented conversion. Break down commitment into manageable steps. Reduce perceived complexity."
-    },
-
-    Comparison: {
-      BasicFeatureGrid: "Simple feature comparison table. Use clear, scannable feature names. Focus on differentiation, not explanation.",
-      CheckmarkComparison: "Visual feature availability comparison. Feature names should be benefit-focused. Keep descriptions concise.",
-      YouVsThemHighlight: "Direct competitive positioning. Use confident, factual tone. Focus on unique advantages clearly.",
-      ToggleableComparison: "Interactive comparison tool. Labels should be immediately understandable. Categories should group logically.",
-      CompetitorCallouts: "Competitive advantage showcase. Use specific, verifiable claims. Maintain professional, not attacking tone.",
-      AnimatedUpgradePath: "Progressive improvement narrative. Show clear progression path. Use upgrade-focused language throughout.",
-      PersonaUseCaseCompare: "User-centered comparison approach. Write from user perspective. Focus on outcomes, not features.",
-      LiteVsProVsEnterprise: "Tiered offering comparison. Clear tier differentiation. Help users self-select appropriate level."
     },
 
     FAQ: {
@@ -487,39 +460,21 @@ function getSectionLayoutGuidance(sectionType: string, layout: string): string {
       TwoColumnFAQ: "Side-by-side Q&A layout. Questions should be clear and direct. Answers should be complete but concise.",
       InlineQnAList: "Simple list-based Q&A. Questions should flow logically. Answers should be immediately helpful.",
       SegmentedFAQTabs: "Categorized question organization. Tab labels should be clear categories. Questions should be segment-specific.",
-      QuoteStyleAnswers: "Testimonial-based answers. Use authentic voice in responses. Include credible attribution details.",
-      IconWithAnswers: "Visual-enhanced Q&A format. Icons should support question themes. Keep visual-text balance appropriate.",
-      TestimonialFAQs: "Customer-answered questions. Use real customer language. Include relevant customer context and credibility.",
-      ChatBubbleFAQ: "Conversational Q&A interface. Use natural, conversational tone. Make interaction feel personal and helpful."
     },
 
     Features: {
       IconGrid: "Icon-driven feature showcase. IMPORTANT: Use ALL features from KEY FEATURES & BENEFITS section. Generate pipe-separated values (e.g., 'Title1|Title2|Title3|Title4' and 'Desc1|Desc2|Desc3|Desc4'). Feature titles should be 2-4 words max. Descriptions should be benefit-focused, not feature-focused.",
       SplitAlternating: "Alternating image-text feature layout. Use ALL features from KEY FEATURES & BENEFITS. Generate pipe-separated values. Vary headline lengths for visual rhythm. Use action-oriented language throughout.",
-      Tabbed: "Tab-based feature navigation. Use ALL features from KEY FEATURES & BENEFITS. Generate pipe-separated values. Headlines should clearly differentiate between tabs. Keep descriptions concise and focused.",
-      Timeline: "Chronological feature presentation. Use ALL features from KEY FEATURES & BENEFITS. Generate pipe-separated values. Use progressive language that builds momentum. Each step should connect to the next.",
-      FeatureTestimonial: "Social proof enhanced features. Use ALL features from KEY FEATURES & BENEFITS. Generate pipe-separated values. Blend feature benefits with customer validation. Use authentic testimonial language.",
       MetricTiles: "Data-driven feature presentation. Use ALL features from KEY FEATURES & BENEFITS. Generate pipe-separated values. Lead with compelling numbers. Support metrics with clear explanations.",
-      MiniCards: "Compact feature card layout. Use ALL features from KEY FEATURES & BENEFITS. Generate pipe-separated values. Keep titles punchy and clear. Descriptions should be scannable and benefit-focused.",
       Carousel: "Sliding feature presentation. Use ALL features from KEY FEATURES & BENEFITS. Generate pipe-separated values. Each slide should be self-contained. Use navigation-friendly language and structure."
     },
 
     FounderNote: {
-      FounderCardWithQuote: "Personal founder introduction. Use authentic, personal voice. Balance credibility with relatability.",
       LetterStyleBlock: "Formal letter format presentation. Use personal, direct address. Maintain professional yet warm tone. LETTER_BODY FORMAT: Use \\n for line breaks to create proper paragraphs. PS_TEXT: Add compelling postscript for urgency or final value point.",
-      VideoNoteWithTranscript: "Video-first personal message. Transcript should capture spoken authenticity. Include human elements. TRANSCRIPT_TEXT FORMAT: Use \\n for natural conversation breaks and pauses. Make it sound genuinely spoken, not written.",
-      MissionQuoteOverlay: "Mission-focused founder statement. Use inspirational, purpose-driven language. Keep message clear and compelling. MISSION_STATS: Use specific numbers with context (e.g., '10,000+ customers served', '$2M+ saved for clients').",
-      TimelineToToday: "Founder journey narrative. Show progression and growth. Connect past experience to current solution. TIMELINE_ITEMS FORMAT: Use pipe-separated format 'Year|Event|Description' for chronological journey (e.g., '2019|Started in garage|Built first prototype'). TRUST_ITEMS: Include actual certifications, press mentions, or achievements.",
-      SideBySidePhotoStory: "Visual storytelling format. Let image support story. Use personal, relatable language throughout. STORY_STATS: Use growth metrics with context. TRUST_ITEMS: Include relevant industry badges or certifications.",
-      StoryBlockWithPullquote: "Narrative with highlighted quote. Pullquote should capture key insight. Story should build to that moment. STORY_CONTENT: Write full narrative that builds to pullquote moment. PULLQUOTE_TEXT: Extract most powerful quote from story.",
-      FoundersBeliefStack: "Value-driven founder presentation. Use conviction-based language. Connect beliefs to product benefits. BELIEF_ITEMS FORMAT: Use pipe-separated format 'Icon|Title|Description' for each belief (e.g., '🌟|Quality First|We never compromise on excellence'). COMPANY_VALUES: Use individual value fields (company_value_1, company_value_2, etc.) for core principles. TRUST_ITEMS: Include actual certifications, awards, or industry recognition."
     },
 
     Header: {
       MinimalNavHeader: "Simple navigation header. Keep nav items short (1-2 words). Use clear, action-oriented labels. Nav items should match main sections.",
-      NavWithCTAHeader: "Navigation with primary CTA. Nav items should be intuitive. CTA should match main conversion goal. Keep CTA text urgent but not pushy.",
-      CenteredLogoHeader: "Balanced centered logo design. Distribute nav items evenly. Use consistent labeling style. Create visual hierarchy through spacing.",
-      FullNavHeader: "Complete navigation with dual CTAs. Primary CTA should be stronger action. Secondary CTA for existing users. Maintain clear visual hierarchy."
     },
 
     Hero: {
@@ -532,41 +487,13 @@ function getSectionLayoutGuidance(sectionType: string, layout: string): string {
     HowItWorks: {
       ThreeStepHorizontal: "Three-step process overview. Use parallel structure across steps. Keep steps simple and actionable.",
       VerticalTimeline: "Sequential step presentation. Use connecting language between steps. Show clear progression and momentum. PROCESS SUMMARY: Create compelling reinforcement of process benefits.",
-      IconCircleSteps: "Icon-enhanced step guide. Step titles should be clear actions. Icons should support comprehension.",
       AccordionSteps: "Expandable step details. Step titles should be compelling. Details should provide necessary depth.",
-      CardFlipSteps: "Interactive step exploration. Front should intrigue, back should satisfy. Use curiosity-driven language.",
       VideoWalkthrough: "Video-guided process explanation. Complement video with clear structure. Include key timestamps and chapters.",
-      ZigzagImageSteps: "Visual-heavy step presentation. Let images carry weight. Copy should support and clarify visuals.",
-      AnimatedProcessLine: "Animated step progression. Use momentum-building language. Connect steps with transitional phrases."
-    },
-
-    Integration: {
-      LogoGrid: "Simple logo showcase layout. Let logos speak for credibility. Use minimal, supportive copy that doesn't compete.",
-      CategoryAccordion: "Organized integration categories. Category titles should be clear groupings. Descriptions should explain category value.",
-      InteractiveStackDiagram: "Technical integration visualization. Use technical but accessible language. Explain connections clearly.",
-      UseCaseTiles: "Use case focused integration display. Connect integrations to specific user needs. Show practical application value.",
-      BadgeCarousel: "Sliding integration showcase. Each badge should be self-explanatory. Use consistent formatting across items.",
-      TabbyIntegrationCards: "Tabbed integration organization. Tab labels should be intuitive categories. Cards should show integration value.",
-      ZapierLikeBuilderPreview: "Workflow builder demonstration. Use action-oriented integration language. Show cause-and-effect relationships.",
-      LogoWithQuoteUse: "Social proof enhanced integrations. Combine logos with usage validation. Use specific, credible testimonials."
     },
 
     Objection: {
-      ObjectionAccordion: "EXPANDABLE OBJECTION HANDLING: Address real concerns with individual fields (objection_1, response_1, etc.). OBJECTION STRATEGY: Use market sophistication-aware concerns - Level 1-2 markets focus on basic functionality/cost, Level 3-4 markets address implementation/integration, Level 5 markets tackle differentiation/ROI. RESPONSE APPROACH: Start with acknowledgment, provide evidence-backed answers, end with confidence-building statements. TONE: Never defensive - use consultative, understanding language that builds trust.",
-
       MythVsRealityGrid: "MYTH VS REALITY COMPARISON: Use individual myth_1/reality_1 field pairs for better content control. MYTH SELECTION: Address actual market misconceptions from competitor messaging, outdated information, or industry assumptions. Focus on myths that create purchase hesitation. REALITY STATEMENTS: Provide compelling counter-evidence with specifics, numbers, or proof points. Use confident, factual language that builds credibility. VISUAL STRATEGY: Create clear contrast between misconception (red/warning) and truth (green/positive).",
-
-      QuoteBackedAnswers: "EXPERT AUTHORITY RESPONSES: Use individual objection/quote/attribution triplets for sophisticated markets (Level 4-5). OBJECTION FOCUS: Address high-level strategic concerns that experts would validate. QUOTE STRATEGY: Create realistic expert voices with specific credentials - CTOs for technical concerns, CEOs for ROI/strategy, consultants for implementation. ATTRIBUTION: Include company type, role, and context that matches target audience sophistication. CREDIBILITY: Use industry-specific language and concerns.",
-
-      SkepticToBelieverSteps: "CONVERSION JOURNEY NARRATIVE: Use individual step fields (step_name_1, step_quote_1, step_result_1) to show progression. NARRATIVE ARC: Start with relatable skepticism, show gradual buy-in with evidence, demonstrate increasing enthusiasm and results. PERSONA STRATEGY: Use company names and scenarios that match target audience. QUOTE EVOLUTION: Progress from 'I was skeptical...' to 'This actually works...' to 'Best decision we made.' RESULTS: Make outcomes specific and measurable - time savings, revenue increases, efficiency gains.",
-
       VisualObjectionTiles: "VISUAL OBJECTION TILES: Use individual tile fields (tile_objection_1, tile_response_1) for scannable format. TILE STRATEGY: Keep objections concise for visual presentation, responses punchy but complete. OBJECTION SELECTION: Choose concerns that benefit from visual/icon treatment. RESPONSE TONE: Use confident, reassuring language that works in limited space. VISUAL HIERARCHY: Ensure responses feel more prominent than objections through design contrast.",
-
-      ProblemToReframeBlocks: "PERSPECTIVE REFRAMING: Use individual problem/reframe pairs to shift customer mindset. PROBLEM IDENTIFICATION: Address limiting beliefs and old-paradigm thinking that prevents adoption. REFRAME STRATEGY: Show new perspective that makes your solution the obvious choice. LANGUAGE PATTERNS: Use 'Instead of thinking... consider...' or 'What if... actually meant...' reframing structures. TRANSITION: Include smooth transition text between problems and reframes.",
-
-      BoldGuaranteePanel: "RISK REVERSAL FOCUS: Use detailed guarantee fields for maximum confidence-building. GUARANTEE STRUCTURE: Include specific guarantee statement, detailed terms, and clear risk reversal language. CONFIDENCE BUILDING: Address the #1 purchase anxiety with bold, unconditional language. LEGAL BALANCE: Create compelling copy while maintaining realistic business terms. TRUST ELEMENTS: Include security badges, company backing, and verification indicators.",
-
-      ObjectionCarousel: "PROGRESSIVE OBJECTION FLOW: Use individual slide fields (slide_objection_1, slide_response_1) for 5-8 sequential concerns. FLOW STRATEGY: Order objections from surface-level to deep concerns, building complexity and addressing sophistication. CAROUSEL ADVANTAGE: Use multiple objections to demonstrate thoroughness and preparedness. RESPONSE CONSISTENCY: Maintain confident, helpful tone across all slides while varying evidence and approach."
     },
 
     Pricing: {
