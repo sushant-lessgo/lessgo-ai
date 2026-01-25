@@ -1,5 +1,6 @@
 import { layoutElementSchema, getLayoutElements } from './layoutElementSchema';
-import { selectOptionalElements, getAllLayoutElements } from './selectOptionalElements';
+// ARCHIVED: selectOptionalElements.ts moved to archive/sections/
+// AI now decides optional elements at generation time
 import { sectionList } from './sectionList';
 import type { InputVariables, HiddenInferredFields } from '@/types/core/index';
 import { logger } from '@/lib/logger';
@@ -110,9 +111,10 @@ export function mapStoreToVariables(
 
 /**
  * Gets required elements for a specific section and layout
+ * Returns ALL elements (mandatory + all optional) - AI decides which to generate
  * @param sectionType - The section type (e.g., "Hero", "Features")
  * @param layout - The layout name (e.g., "leftCopyRightImage")
- * @param variables - Variables object for element selection
+ * @param variables - Variables object (no longer used for element selection, kept for API compatibility)
  * @returns Object with mandatory, optional, and all elements
  */
 export function getRequiredElements(
@@ -125,7 +127,28 @@ export function getRequiredElements(
   all: string[];
   excluded: string[];
 } {
-  return getAllLayoutElements(sectionType, layout, variables);
+  // Get all elements from schema - AI decides which optional elements to include
+  const layoutElements = getLayoutElements(layout);
+
+  if (layoutElements.length === 0) {
+    return { mandatory: [], optional: [], all: [], excluded: [] };
+  }
+
+  const mandatory = layoutElements
+    .filter(element => element.mandatory)
+    .map(element => element.element);
+
+  const optional = layoutElements
+    .filter(element => !element.mandatory)
+    .map(element => element.element);
+
+  // Return ALL elements - AI determines exclusions at generation time
+  return {
+    mandatory,
+    optional,
+    all: [...mandatory, ...optional],
+    excluded: [], // No pre-computed exclusions - AI decides
+  };
 }
 
 /**

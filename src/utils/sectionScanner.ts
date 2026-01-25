@@ -56,53 +56,32 @@ const LAYOUT_TO_SECTION_TYPE: Record<string, string> = {
   // Features layouts
   IconGrid: 'features',
   SplitAlternating: 'features',
-  Tabbed: 'features',
-  Timeline: 'features',
-  FeatureTestimonial: 'features',
-  MetricTiles: 'features',
-  MiniCards: 'features',
-  Carousel: 'features',
-  
+
   // Pricing layouts
   TierCards: 'pricing',
   ToggleableMonthlyYearly: 'pricing',
-  FeatureMatrix: 'pricing',
-  SegmentBasedPricing: 'pricing',
   SliderPricing: 'pricing',
   CallToQuotePlan: 'pricing',
-  CardWithTestimonial: 'pricing',
-  MiniStackedCards: 'pricing',
-  
+
   // Testimonials layouts
   QuoteGrid: 'testimonials',
   VideoTestimonials: 'testimonials',
   AvatarCarousel: 'testimonials',
   BeforeAfterQuote: 'testimonials',
-  SegmentedTestimonials: 'testimonials',
-  RatingCards: 'testimonials',
   PullQuoteStack: 'testimonials',
-  InteractiveTestimonialMap: 'testimonials',
-  
+
   // FAQ layouts
   AccordionFAQ: 'faq',
   TwoColumnFAQ: 'faq',
   InlineQnAList: 'faq',
   SegmentedFAQTabs: 'faq',
-  QuoteStyleAnswers: 'faq',
-  IconWithAnswers: 'faq',
-  TestimonialFAQs: 'faq',
-  ChatBubbleFAQ: 'faq',
-  
+
   // How It Works layouts
-  AccordionSteps: 'howitworks',
-  AnimatedProcessLine: 'howitworks',
-  CardFlipSteps: 'howitworks',
-  IconCircleSteps: 'howitworks',
   ThreeStepHorizontal: 'howitworks',
   VerticalTimeline: 'howitworks',
+  AccordionSteps: 'howitworks',
   VideoWalkthrough: 'howitworks',
-  ZigzagImageSteps: 'howitworks',
-  
+
   // Other section types follow similar pattern...
 };
 
@@ -206,13 +185,11 @@ export function scanSectionsForNavigation(
  * Get max navigation items for header variant
  */
 export function getMaxNavItemsForHeader(headerLayout: string): number {
+  // Archived header layouts moved to archive/utils/sectionScanner.archived.ts
   const maxItemsMap: Record<string, number> = {
     MinimalNavHeader: 4,
-    NavWithCTAHeader: 6,  // Updated from 4 to 6 (no CTA anymore)
-    CenteredLogoHeader: 6,
-    FullNavHeader: 7,  // Updated from 5 to 7 (no CTAs anymore)
   };
-  
+
   return maxItemsMap[headerLayout] || 4;
 }
 

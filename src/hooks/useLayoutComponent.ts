@@ -13,9 +13,8 @@ import { getTextColorForBackground } from '@/modules/Design/background/enhancedB
 import { validateTextBackgroundContrast } from '@/utils/textContrastUtils';
 import { getSmartTextColor } from '@/utils/improvedTextColors';
 import { analyzeBackground } from '@/utils/backgroundAnalysis';
-import { getExcludedOptionalElements } from '@/modules/sections/selectOptionalElements';
-import { mapStoreToVariables } from '@/modules/sections/elementDetermination';
-import { useOnboardingStore } from '@/hooks/useOnboardingStore';
+// ARCHIVED: selectOptionalElements.ts moved to archive/sections/
+// AI now decides optional elements at generation time, stored in aiMetadata.excludedElements
 
 import { logger } from '@/lib/logger';
 export interface UseLayoutComponentProps extends LayoutComponentProps {
@@ -56,60 +55,18 @@ export function useLayoutComponent<T = Record<string, any>>({
   const layout = sectionContent?.layout;
 
   // Get excluded optional elements for this section
-  let excludedElements: string[] = [];
-  if (layout) {
-    // ✅ FIXED: Get the section type with proper capitalization (e.g., "hero" → "Hero")
-    const sectionType = sectionId.charAt(0).toUpperCase() + sectionId.slice(1);
-    
-    // Get the stores data to compute variables
-    const onboardingData = useOnboardingStore.getState();
-    const editStore = useEditStore.getState();
-    const pageStore = {
-      layout: {
-        sections: editStore.sections,
-        sectionLayouts: editStore.sectionLayouts,
-      },
-      meta: {
-        onboardingData: {
-          oneLiner: onboardingData.oneLiner || '',
-          validatedFields: onboardingData.validatedFields || {},
-          featuresFromAI: onboardingData.featuresFromAI || [],
-          targetAudience: onboardingData.validatedFields?.targetAudience,
-          businessType: onboardingData.validatedFields?.marketCategory,
-        }
-      }
-    };
-    const variables = mapStoreToVariables(onboardingData, pageStore as any);
+  // AI decides optional elements at generation time, stored in aiMetadata.excludedElements
+  // If no stored exclusions, default to empty array (all optional elements shown)
+  const storedExclusions = sectionContent?.aiMetadata?.excludedElements;
+  const excludedElements: string[] = (storedExclusions && Array.isArray(storedExclusions))
+    ? storedExclusions
+    : [];
 
-    // ✅ CRITICAL FIX: Check stored exclusions but validate they're not empty
-    const storedExclusions = sectionContent?.aiMetadata?.excludedElements;
-    const hasValidStoredExclusions = storedExclusions && Array.isArray(storedExclusions) && storedExclusions.length > 0;
-
-    if (hasValidStoredExclusions) {
-      // Use stored exclusions from generation time only if they contain actual data
-      excludedElements = storedExclusions;
-      logger.dev(`💾 [STORED_EXCLUSION] ${sectionId} using ${excludedElements.length} stored exclusions from generation:`, {
-        excludedCount: excludedElements.length,
-        excludedElements: excludedElements,
-        source: 'generation_time'
-      });
-    } else {
-      // ALWAYS compute live exclusions if stored ones are empty/missing
-      excludedElements = getExcludedOptionalElements(sectionType, layout, variables);
-      logger.dev(`🧮 [COMPUTED_EXCLUSION] ${sectionId} computing ${excludedElements.length} live exclusions (stored=${storedExclusions?.length || 0}):`, {
-        excludedCount: excludedElements.length,
-        excludedElements: excludedElements,
-        source: 'live_computation',
-        storedWasEmpty: !hasValidStoredExclusions,
-        storedLength: storedExclusions?.length || 0,
-        variables: {
-          awarenessLevel: variables.awarenessLevel,
-          marketSophisticationLevel: variables.marketSophisticationLevel,
-          copyIntent: variables.copyIntent,
-          targetAudience: variables.targetAudience
-        }
-      });
-    }
+  if (excludedElements.length > 0) {
+    logger.dev(`💾 [STORED_EXCLUSION] ${sectionId} using ${excludedElements.length} stored exclusions from AI generation:`, {
+      excludedCount: excludedElements.length,
+      excludedElements: excludedElements
+    });
   }
 
   // Extract content with type safety and defaults

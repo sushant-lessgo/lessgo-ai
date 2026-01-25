@@ -39,7 +39,7 @@ export const genericToUIBlockMapping: SectionTypeMapping = {
   },
   social_proof: {
     sectionId: 'socialProof',
-    layoutName: 'StackedStats'  // Updated: StackedStats instead of LogoWall for better metrics display
+    layoutName: 'LogoWall'  // Updated: LogoWall is the only active socialProof layout
   },
   pricing: {
     sectionId: 'pricing',
@@ -47,7 +47,7 @@ export const genericToUIBlockMapping: SectionTypeMapping = {
   },
   problem: {
     sectionId: 'problem',
-    layoutName: 'StackedPainBullets'  // Confirmed: exists in Problem section
+    layoutName: 'CollapsedCards'  // Updated: CollapsedCards is an active Problem layout
   },
   uniqueMechanism: {
     sectionId: 'uniqueMechanism',

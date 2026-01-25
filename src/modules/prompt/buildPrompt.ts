@@ -533,85 +533,53 @@ function getSectionLayoutGuidance(sectionType: string, layout: string): string {
     },
 
     Problem: {
-      StackedPainBullets: "Pain point enumeration layout. Use emotionally resonant language. Build urgency through accumulated pain points.",
-      BeforeImageAfterText: "Visual pain demonstration. Let image show current struggle. Text should agitate and relate to user experience.",
+      // Archived layouts moved to archive/prompt/buildPrompt.guidance.archived.ts
       SideBySideSplit: "Problem-solution preview layout. Balance problem urgency with solution hope. Create natural bridge between states.",
-      EmotionalQuotes: "User voice pain expression. Use authentic, emotional customer language. Include relatable context and attribution.",
       CollapsedCards: "Expandable problem exploration. Problem titles should be immediately recognizable. Details should build emotional connection.",
-      PainMeterChart: "Data-driven pain visualization. Use clear metrics and categories. Show severity and impact quantitatively.",
       PersonaPanels: "User-specific problem presentation. Tailor problems to specific user types. Use language each persona would recognize.",
-      ProblemChecklist: "Interactive problem assessment with scoring. Problem statements should be specific and relatable. Checklist items should be short, clear labels. Include scoring guidance (0-2 well managed, 3-5 improvement needed, 6-8 significant challenges, 9-10 critical). Provide actionable thresholds and encouragement for different score ranges."
     },
 
     Results: {
+      // Archived layouts moved to archive/prompt/buildPrompt.guidance.archived.ts
       StatBlocks: "Metric-focused results presentation. Lead with compelling numbers. Support statistics with clear context and explanations.",
-      BeforeAfterStats: "Comparative results showcase. Use clear before-after language. Emphasize improvement and transformation metrics.",
-      QuoteWithMetric: "Social proof enhanced results. Combine customer voice with quantifiable outcomes. Use specific, credible testimonials.",
-      EmojiOutcomeGrid: "Visual results representation. Generate pipe-separated values for emojis, outcomes, and descriptions (e.g., '🚀|💰|⚡' and 'Faster Launch|Higher Revenue|Lightning Speed' and 'Get to market 3x faster|Increase revenue by 200%|Process in milliseconds'). Keep each outcome clear and immediately understandable. Use emojis that match the outcome theme.",
-      TimelineResults: "Progressive results demonstration. Show improvement over time. Use time-based language and milestone markers.",
-      OutcomeIcons: "Icon-enhanced results display. Icons should support outcome comprehension. Keep text concise and impact-focused.",
       StackedWinsList: "Achievement-focused results list. Use victory language and positive framing. Stack wins for cumulative impact.",
-      PersonaResultPanels: "Role-specific results presentation. Each persona needs tailored metric (e.g., '3x Lead Generation'), role description (e.g., 'Growth Focused'), and comma-separated key benefits. Use role-appropriate language and metrics. Include persona icons and footer message about universal benefits."
     },
 
-    Security: {
-      AuditResultsPanel: "Third-party validation presentation. Use authoritative, credible language. Include relevant dates and certification details.",
-      PenetrationTestResults: "Security testing results showcase. Present test categories and results clearly. Use technical yet accessible language.",
-      PrivacyCommitmentBlock: "Detailed policy presentation. Policy titles should be clear categories. Details should be comprehensive but understandable.",
-      SecurityChecklist: "Security feature enumeration. Use clear, non-technical security language. Focus on user protection and peace of mind.",
-      SecurityGuaranteePanel: "Security metric presentation. Combine protection statistics with visual security symbols. Use confidence-building language.",
-      TrustSealCollection: "Compliance credential showcase. Let badges establish credibility. Use minimal, supportive compliance language."
-    },
+    // Security: ENTIRE SECTION ARCHIVED - see archive/prompt/buildPrompt.guidance.archived.ts
 
     SocialProof: {
+      // Archived layouts moved to archive/prompt/buildPrompt.guidance.archived.ts
       LogoWall: "Simple logo credibility display. Let logos establish market presence. Use minimal text that doesn't compete with visual impact.",
-      MediaMentions: "Press coverage showcase. Use credible media sources. Include specific quotes or coverage details for authenticity.",
-      UserCountBar: "Usage statistic presentation. Use impressive but believable numbers. Include growth context and user categories.",
-      IndustryBadgeLine: "Industry recognition display. Use award and recognition language. Include relevant context and achievement dates.",
-      MapHeatSpots: "Geographic usage visualization. Show global or regional adoption. Use location-specific language and statistics.",
-      StackedStats: "Multiple statistic presentation. Use clear, compelling metrics. Stack statistics for cumulative impressive impact.",
-      StripWithReviews: "Review aggregation display. Use authentic review language. Include rating scores and review source credibility.",
-      SocialProofStrip: "Multiple proof point showcase. Combine different types of social validation. Use consistent formatting across proof types."
     },
 
     Testimonial: {
+      // Archived layouts moved to archive/prompt/buildPrompt.guidance.archived.ts
       QuoteGrid: "Multiple testimonial showcase. Use authentic customer voice throughout. Include relevant customer context and credibility markers.",
       VideoTestimonials: "ENTERPRISE VIDEO TESTIMONIAL FOCUS with maximum credibility and authority. VIDEO CONTENT: Generate video_titles and video_descriptions that highlight specific business outcomes and ROI results. CUSTOMER PROFILES: Create enterprise-appropriate customer_names, customer_titles (Director level+), and customer_companies using real-sounding business names. ENTERPRISE CONTEXT: Include industry_leaders_title and enterprise statistics (enterprise_customers_stat, uptime_stat, support_stat) that build B2B credibility. TRUST INDICATORS: Use specific metrics and timeframes in descriptions. AUTHENTICITY: Generate realistic video scenarios that could actually exist. PLATFORM CREDIBILITY: Reference legitimate business contexts and use cases that match your target audience.",
       AvatarCarousel: "Rotating testimonial presentation. Each testimonial should be complete and compelling. Use consistent formatting across testimonials.",
       BeforeAfterQuote: "Transformation-focused testimonials. Use before-after language structure. Emphasize change and improvement outcomes.",
-      SegmentedTestimonials: "AUDIENCE SEGMENTATION TESTIMONIALS with targeted messaging for diverse business types. SEGMENT STRATEGY: Generate segment_names and segment_descriptions for 4 distinct business categories (Enterprise|Agencies|SMB|Dev Teams). SEGMENT TESTIMONIALS: Create testimonial_quotes that address segment-specific pain points and use cases. CUSTOMER PROFILES: Match customer_names, customer_titles, and customer_companies to appropriate segments with realistic business contexts. SEGMENT STATISTICS: Include segment-specific trust indicators (enterprise_stat, agencies_stat, small_business_stat, dev_teams_stat) with corresponding labels. ICON SYSTEM: Use segment_icon_1 through segment_icon_4 for visual differentiation. DIFFERENTIATION: Each segment should have distinct language, concerns, and outcomes that resonate with that specific audience type.",
-      RatingCards: "REVIEW-STYLE TESTIMONIALS with platform authenticity and rating credibility. RATING AUTHENTICITY: Generate realistic ratings (4-5 stars mostly) with review_platforms (G2|Capterra|Trustpilot|Product Hunt) and believable review_dates. TESTIMONIAL CONTENT: Create testimonial_quotes that sound like genuine product reviews with specific details and outcomes. CUSTOMER CREDIBILITY: Use customer_names, customer_titles, and customer_locations that feel authentic and diverse. VERIFICATION SIGNALS: Include verified_badges (true/false pattern) and customer_locations for geographic diversity. PLATFORM CONSISTENCY: Match testimonial tone and content style to review platform conventions. TRUST BUILDING: Include specific metrics, timeframes, and concrete results in testimonials. SOCIAL PROOF: Use consistent rating display and platform credibility markers.",
       PullQuoteStack: "Highlighted quote presentation. Pullquotes should capture key insights. Include sufficient context and attribution.",
-      InteractiveTestimonialMap: "Geographic testimonial display. Connect testimonials to locations. Use location-relevant context and validation."
     },
 
     UniqueMechanism: {
-      AlgorithmExplainer: "Algorithm explanation showcase. Use technical yet accessible language. Explain the unique algorithm and its benefits.",
-      InnovationTimeline: "Innovation evolution presentation. Show progression and breakthroughs. Use milestone-based narrative.",
+      // Archived layouts moved to archive/prompt/buildPrompt.guidance.archived.ts
       MethodologyBreakdown: "Tagged explanation format. Use clear categorization language. Tags should enhance understanding and organization.",
       ProcessFlowDiagram: "Process visualization presentation. Use cyclical, momentum-building language. Show how components work together.",
       PropertyComparisonMatrix: "Approach comparison presentation. Use clear differentiation language. Show advantages of unique approach.",
       SecretSauceReveal: "Intellectual property showcase. Use innovation and proprietary language. Include relevant patent or IP context.",
       StackedHighlights: "Feature uniqueness showcase. Use differentiation-focused language. Emphasize unique approach and methodology. HIGHLIGHT_ICONS FORMAT: Generate individual icon fields (highlight_icon_1, highlight_icon_2, etc.) using semantic category names that match each highlight's function. AVAILABLE CATEGORIES: analytics, insights, data, metrics, speed, performance, fast, instant, automation, ai, intelligence, smart, security, protection, safe, privacy, growth, success, results, achievement, efficiency, optimization, streamline, workflow, process, system, method, integration, connection, sync, connect, innovation, technology, advanced, cutting_edge, quality, excellence, premium, professional, collaboration, team, communication, social, scale, enterprise, global, massive. SELECTION STRATEGY: Analyze each highlight title and description, then select the most semantically relevant category. Example: For 'Intelligent Auto-Prioritization' use 'intelligence', for 'Real-Time Analytics' use 'analytics', for 'Speed Optimization' use 'speed'.",
-      SystemArchitecture: "Conceptual model presentation. Use clear, explanatory language that supports visual understanding.",
       TechnicalAdvantage: "Technical advantage cards layout. Use clear technical benefits language. Present multiple technical capabilities as structured advantage cards."
     },
 
     UseCase: {
-      BeforeAfterWorkflow: "Workflow transformation showcase. Use clear before/after contrast. Show step-by-step improvement in processes.",
-      CustomerJourneyFlow: "Customer journey visualization. Use journey-stage language. Show progression and touchpoints clearly.",
+      // Archived layouts moved to archive/prompt/buildPrompt.guidance.archived.ts
       IndustryUseCaseGrid: "Industry-specific application display. Use industry-appropriate language and terminology. Address industry-specific needs.",
-      InteractiveUseCaseMap: "Interactive use case exploration. Use clear categorization. Enable easy navigation between different use cases.",
       PersonaGrid: "User type showcase layout. Use persona-specific language and concerns. Address different user needs and motivations.",
       RoleBasedScenarios: "Role-specific scenario presentation. Use role-appropriate language and concerns. Show practical application for each role.",
-      UseCaseCarousel: "Rotating use case presentation. Each use case should be complete and relatable. Use consistent narrative structure.",
-      WorkflowDiagrams: "Process visualization showcase. Use clear workflow language. Show logical progression and decision points."
     },
 
     Footer: {
-      SimpleFooter: "Minimal footer design. Include essential legal links. Keep copyright current. Link text should be standard (Privacy, Terms, etc.).",
-      LinksAndSocialFooter: "Footer with social presence. Include relevant social platforms only. Tagline should reinforce brand value. Organize links logically.",
-      MultiColumnFooter: "Organized multi-column layout. Group links by category (Product, Company, Resources). Column titles should be clear. Maintain consistent link style.",
+      // Archived layouts moved to archive/prompt/buildPrompt.guidance.archived.ts
       ContactFooter: "Contact-focused footer with newsletter. Newsletter copy should offer value. Include multiple contact methods. Make contact info scannable."
     }
   };
@@ -1735,19 +1703,6 @@ function getSpecificElementGuidance(elementName: string, sectionType: string): s
       headline: "Create urgency and desire. Overcome final hesitations.",
       cta_text: "Final push to action. Address any remaining objections."
     },
-    AlgorithmExplainer: {
-      headline: "Emphasize intelligence and sophistication of your process.",
-      algorithm_name: "Position as proprietary IP. Use technical but accessible naming.",
-      algorithm_step_1: "Start with data input or user action. Make it concrete.",
-      algorithm_step_2: "Show intelligent processing. Highlight AI or automation.",
-      algorithm_step_3: "Demonstrate output or result. Focus on user benefit."
-    },
-    InnovationTimeline: {
-      headline: "Show evolution and continuous improvement over time.",
-      timeline_item_1: "Early foundation or breakthrough. Establish credibility.",
-      timeline_item_2: "Major milestone or validation. Show market traction.",
-      timeline_item_3: "Recent innovation or expansion. Demonstrate momentum."
-    },
     MethodologyBreakdown: {
       headline: "Position your approach as scientifically superior.",
       methodology_name: "Brand as proprietary framework. Include trademark.",
@@ -1781,11 +1736,6 @@ function getSpecificElementGuidance(elementName: string, sectionType: string): s
       highlight_icon_5: "Semantic category for fifth highlight if needed.",
       highlight_icon_6: "Semantic category for sixth highlight if needed.",
       mechanism_name: "Brand the overall system. Proprietary methodology."
-    },
-    SystemArchitecture: {
-      headline: "Communicate technical sophistication and reliability.",
-      component_1: "Core system element. Foundation of your platform.",
-      component_2: "Build complexity gradually. Show integration."
     },
     TechnicalAdvantage: {
       headline: "Highlight superior technical capabilities and innovation.",

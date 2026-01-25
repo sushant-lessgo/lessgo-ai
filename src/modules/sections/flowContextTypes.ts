@@ -37,9 +37,9 @@ export type SectionPurpose =
  * Set by the first content section (usually position 3) and maintained across the page.
  *
  * @example
- * - 'emotional': EmotionalQuotes problem section → keep subsequent sections relatable
+ * - 'emotional': PersonaPanels problem section → keep subsequent sections relatable
  * - 'analytical': CollapsedCards problem section → use data-driven layouts
- * - 'balanced': StackedPainBullets → mix of both approaches
+ * - 'balanced': SideBySideSplit → mix of both approaches
  */
 export type FlowTone = 'emotional' | 'analytical' | 'balanced';
 
@@ -61,9 +61,9 @@ export type FlowComplexity = 'simple' | 'moderate' | 'detailed';
  * Used for visual rhythm - alternating dense and light sections prevents fatigue.
  *
  * @example
- * - 'light': IconGrid, OutcomeIcons, EmojiOutcomeGrid
- * - 'medium': MiniCards, StackedPainBullets, TestimonialCards
- * - 'heavy': SplitAlternating, CollapsedCards, QuoteWithMetric
+ * - 'light': IconGrid, OutcomeIcons, StatBlocks
+ * - 'medium': MiniCards, SideBySideSplit, TestimonialCards
+ * - 'heavy': SplitAlternating, CollapsedCards, StackedWinsList
  */
 export type LayoutDensity = 'light' | 'medium' | 'heavy';
 
@@ -158,28 +158,23 @@ export function getLayoutDensity(layout: string): LayoutDensity {
   const lightLayouts = [
     'IconGrid',
     'OutcomeIcons',
-    'EmojiOutcomeGrid',
+    'StatBlocks',
     'StackedWinsList',
-    'LogoGrid',
     'LogoWall',
-    'StatsBar',
     'CenteredHero',
     'MinimalHeader',
-    'SimpleFooter'
+    'ContactFooter'
   ];
 
   // Heavy layouts - dense, detailed, comprehensive
   const heavyLayouts = [
     'SplitAlternating',
     'CollapsedCards',
-    'FeatureTestimonial',
-    'QuoteWithMetric',
-    'PersonaResultPanels',
     'AccordionSteps',
-    'DetailedApproach',
-    'ComparisonTable',
-    'IndustryTestimonials',
-    'CategoryIntegrations'
+    'VerticalTimeline',
+    'MythVsRealityGrid',
+    'VisualObjectionTiles',
+    'MethodologyBreakdown'
   ];
 
   if (lightLayouts.some(l => layout.includes(l))) {
@@ -204,23 +199,20 @@ export function getLayoutDensity(layout: string): LayoutDensity {
 export function getLayoutTone(layout: string): FlowTone {
   // Emotional layouts - personal, relatable, story-driven
   const emotionalLayouts = [
-    'EmotionalQuotes',
-    'EmojiOutcomeGrid',
-    'FounderStory',
-    'PersonalLetter',
-    'TestimonialCards',
-    'ScenarioCards'
+    'PersonaPanels',
+    'LetterStyleBlock',
+    'VideoTestimonials',
+    'QuoteGrid'
   ];
 
   // Analytical layouts - data-driven, structured, technical
   const analyticalLayouts = [
     'CollapsedCards',
     'StatBlocks',
-    'BeforeAfterStats',
-    'ComparisonTable',
+    'StackedWinsList',
     'MetricTiles',
-    'TwoColumnObjections',
-    'ComplianceGrid'
+    'MythVsRealityGrid',
+    'TierCards'
   ];
 
   if (emotionalLayouts.some(l => layout.includes(l))) {
@@ -246,23 +238,21 @@ export function getLayoutComplexity(layout: string): FlowComplexity {
   // Simple layouts - quick comprehension, minimal detail
   const simpleLayouts = [
     'IconGrid',
-    'ThreeStepProcess',
-    'StepByStep',
-    'OutcomeIcons',
-    'CenteredCTA',
-    'SinglePrice',
-    'MiniCards'
+    'ThreeStepHorizontal',
+    'StatBlocks',
+    'CenteredHeadlineCTA',
+    'TierCards',
+    'LogoWall'
   ];
 
   // Detailed layouts - comprehensive, in-depth
   const detailedLayouts = [
     'SplitAlternating',
     'AccordionSteps',
-    'DetailedApproach',
-    'PersonaResultPanels',
-    'CategoryFAQ',
-    'ComparisonPricing',
-    'CategoryIntegrations'
+    'VerticalTimeline',
+    'SegmentedFAQTabs',
+    'SliderPricing',
+    'MethodologyBreakdown'
   ];
 
   if (simpleLayouts.some(l => layout.includes(l))) {
