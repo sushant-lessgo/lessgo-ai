@@ -114,6 +114,48 @@ IMPORTANT: Be selective. Include AT MOST 1-2 of the first three sections. Defaul
 
 - isB2B: true/false - Is this a B2B product targeting businesses/professionals? Consider: categories include "SaaS", "Enterprise", "B2B"; audiences mention "teams", "companies", "businesses", "founders", "developers".
 
+### Step 7: uiblockDecisions
+Make layout decisions for sections that need judgment.
+
+- productType: Classify the product's visualization needs:
+  - "behind-the-scenes": API, automation, analytics, infrastructure (no visual UI to show)
+  - "visual-ui-hero": Visual product where UI IS the selling point (design tools, visual builders)
+  - "visual-ui-supports": Visual product but copy leads, UI supports (dashboards, apps, SaaS)
+
+- featuresUIBlock: Choose layout for Features section based on feature count and type:
+  - "IconGrid": Standard features with icon + title + description (default)
+  - "MetricTiles": Features with quantifiable benefits/numbers
+  - "Carousel": Many features (5+), interactive browsing
+  - "SplitAlternating": Visual products, image + text alternating
+
+- uniqueMechanismUIBlock: Choose based on differentiation style:
+  - "SecretSauceReveal": Multiple unique elements, "secrets" approach
+  - "StackedHighlights": Simple list of differentiators
+  - "TechnicalAdvantage": Technical/developer audience
+  - "MethodologyBreakdown": Framework/methodology explanation
+  - "PropertyComparisonMatrix": Direct "Us vs Them" comparison
+  - "ProcessFlowDiagram": Unique process (works well for 5 steps)
+
+- pricingUIBlock: Based on pricing model (look at the offer):
+  - "TierCards": Default, simple tiers
+  - "ToggleableMonthlyYearly": Subscription with monthly + yearly options
+  - "SliderPricing": Usage-based pricing
+  - "CallToQuotePlan": Enterprise / no public pricing / "contact us"
+
+- objectionHandleUIBlock: Based on objection nature:
+  - "VisualObjectionTiles": General objections, multiple concerns
+  - "MythVsRealityGrid": Myths/misconceptions to bust, "you might think X but actually Y"
+
+- faqQuestionCount: Estimate practical question count (1-20) based on:
+  - Product complexity (more complex = more questions)
+  - Pricing model (enterprise/custom = more questions)
+  - Objections identified (each objection may become an FAQ)
+  - Landing goal (buy/demo = more questions than waitlist)
+
+- useCasesAudienceType: If multiple B2B audiences, classify them:
+  - "industry": Audiences are industries (Finance, Healthcare, Retail, etc.)
+  - "role": Audiences are roles/personas (CEO, Developer, Marketer, etc.)
+
 ${isWaitlist ? `
 NOTE: This is a WAITLIST page (pre-product). The section decisions still matter for understanding the product, but the actual sections used will follow the Waitlist template.
 ` : ''}

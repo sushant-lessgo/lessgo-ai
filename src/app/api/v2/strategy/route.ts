@@ -114,6 +114,9 @@ async function strategyHandler(req: NextRequest): Promise<Response> {
         hasTestimonials: data.hasTestimonials,
         hasSocialProof: data.hasSocialProof,
         hasConcreteResults: data.hasConcreteResults,
+        hasDemoVideo: false,
+        testimonialType: null,
+        socialProofTypes: null,
       },
     });
 
@@ -219,6 +222,9 @@ async function strategyHandler(req: NextRequest): Promise<Response> {
       hasTestimonials: data.hasTestimonials,
       hasSocialProof: data.hasSocialProof,
       hasConcreteResults: data.hasConcreteResults,
+      hasDemoVideo: false,
+      testimonialType: null,
+      socialProofTypes: null,
     };
 
     strategyData.sections = validateSections(

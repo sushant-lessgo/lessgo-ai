@@ -20,7 +20,8 @@ import { generateWithSchema } from '@/lib/aiClient';
 import { SimplifiedStrategyResponseSchema } from '@/lib/schemas/strategyV3.schema';
 import { buildSimplifiedStrategyPrompt } from '@/modules/strategy/promptsV3';
 import { selectSectionsV3 } from '@/modules/strategy/sectionSelectionV3';
-import type { LandingGoal, SimplifiedStrategyOutput } from '@/types/generation';
+import { selectUIBlocksV3 } from '@/modules/uiblock/selectUIBlocksV3';
+import type { LandingGoal, SimplifiedStrategyOutput, AssetAvailability } from '@/types/generation';
 import { landingGoals } from '@/types/generation';
 
 export const dynamic = 'force-dynamic';
@@ -36,10 +37,25 @@ const StrategyV3RequestSchema = z.object({
   landingGoal: z.enum(landingGoals as unknown as [string, ...string[]]),
   offer: z.string().min(1, 'Offer is required'),
 
-  // Assets
+  // Assets (expanded for V3)
   hasTestimonials: z.boolean(),
   hasSocialProof: z.boolean(),
   hasConcreteResults: z.boolean(),
+  hasDemoVideo: z.boolean().optional().default(false),
+  testimonialType: z
+    .enum(['text', 'photos', 'video', 'transformation'])
+    .nullable()
+    .optional()
+    .default(null),
+  socialProofTypes: z
+    .object({
+      hasLogos: z.boolean(),
+      hasMediaMentions: z.boolean(),
+      hasCertifications: z.boolean(),
+    })
+    .nullable()
+    .optional()
+    .default(null),
 
   // Audiences
   primaryAudience: z.string().min(1, 'Primary audience is required'),
@@ -115,31 +131,54 @@ async function strategyV3Handler(req: NextRequest): Promise<Response> {
       // Log AI response
       logger.info('[Strategy V3] Awareness:', response.awareness);
       logger.info('[Strategy V3] Section decisions:', response.sectionDecisions);
+      logger.info('[Strategy V3] UIBlock decisions:', response.uiblockDecisions);
 
       // 5. Deterministic section selection
+      const assets: AssetAvailability = {
+        hasTestimonials: data.hasTestimonials,
+        hasSocialProof: data.hasSocialProof,
+        hasConcreteResults: data.hasConcreteResults,
+        hasDemoVideo: data.hasDemoVideo,
+        testimonialType: data.testimonialType,
+        socialProofTypes: data.socialProofTypes,
+      };
+
       const sections = selectSectionsV3({
         landingGoal: data.landingGoal as LandingGoal,
         awareness: response.awareness,
-        assets: {
-          hasTestimonials: data.hasTestimonials,
-          hasSocialProof: data.hasSocialProof,
-          hasConcreteResults: data.hasConcreteResults,
-        },
+        assets,
         sectionDecisions: response.sectionDecisions,
         hasMultipleAudiences: data.hasMultipleAudiences,
       });
 
-      logger.info('[Strategy V3] Final sections:', sections);
-
-      // Construct SimplifiedStrategyOutput
-      strategyData = {
+      // 6. Deterministic UIBlock selection
+      const partialStrategy: SimplifiedStrategyOutput = {
         awareness: response.awareness,
         oneReader: response.oneReader,
         oneIdea: response.oneIdea,
         vibe: response.vibe,
         featureAnalysis: response.featureAnalysis,
         sectionDecisions: response.sectionDecisions,
+        uiblockDecisions: response.uiblockDecisions,
         sections,
+      };
+
+      const { uiblocks } = selectUIBlocksV3({
+        sections,
+        strategy: partialStrategy,
+        assets,
+        landingGoal: data.landingGoal as LandingGoal,
+        hasMultipleAudiences: data.hasMultipleAudiences,
+      });
+
+      // Log final selections
+      logger.info('[Strategy V3] Final sections:', sections);
+      logger.info('[Strategy V3] Final UIBlocks:', uiblocks);
+
+      // Construct SimplifiedStrategyOutput with UIBlocks
+      strategyData = {
+        ...partialStrategy,
+        uiblocks,
       };
     } catch (aiError: any) {
       logger.error('AI strategy V3 generation failed:', aiError);

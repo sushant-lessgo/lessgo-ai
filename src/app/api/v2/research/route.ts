@@ -149,11 +149,11 @@ async function researchHandler(req: NextRequest): Promise<Response> {
 
     const userId = authCheck.userId!;
 
-    let ivocData: IVOC;
-    let source: string;
-    let model: string;
-    let rawSources: any;
-    let query: string;
+    let ivocData!: IVOC;
+    let source!: string;
+    let model!: string;
+    let rawSources!: any;
+    let query!: string;
     let shouldCache = true;
 
     // 5. Research using configured mode

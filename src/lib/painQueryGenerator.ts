@@ -95,7 +95,7 @@ export async function generatePainQueries(
     .replace('{audience}', input.audience)
     .replace('{productDescription}', input.productDescription);
 
-  logger.dev('[painQuery] Generating queries for:', input.category, '/', input.audience);
+  logger.dev(`[painQuery] Generating queries for: ${input.category}/${input.audience}`);
 
   try {
     const response = await openai.chat.completions.create({

@@ -46,6 +46,8 @@ interface AvatarCarouselContent {
   creations_label?: string;
   // Dynamic avatar system
   avatar_urls?: string;
+  // Display mode: carousel (default) or static grid
+  display_mode?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -128,6 +130,10 @@ const CONTENT_SCHEMA = {
   avatar_urls: {
     type: 'string' as const,
     default: '{}'
+  },
+  display_mode: {
+    type: 'string' as const,
+    default: 'carousel'  // 'carousel' or 'static'
   }
 };
 
@@ -381,16 +387,113 @@ export default function AvatarCarousel(props: LayoutComponentProps) {
           )}
         </div>
 
-        {/* WYSIWYG Avatar Carousel - Always Visible */}
+        {/* Display Mode: Carousel or Static Grid */}
+        {blockContent.display_mode === 'static' ? (
+          /* Static Grid Mode */
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            {testimonials.map((testimonial, index) => (
+              <div
+                key={index}
+                className={`bg-gradient-to-r ${themeColors.cardGradient} rounded-2xl p-6 border ${themeColors.cardBorder}`}
+              >
+                <div className="text-center">
+                  {/* Avatar */}
+                  <div className="flex justify-center mb-4">
+                    <AvatarEditableComponent
+                      mode={mode}
+                      avatarUrl={testimonial.avatar}
+                      onAvatarChange={(url) => handleAvatarChange(testimonial.name, url)}
+                      customerName={testimonial.name}
+                      size="md"
+                      className="border-4 border-white shadow-lg"
+                    />
+                  </div>
+
+                  {/* Star Rating */}
+                  <div className="flex justify-center mb-3">
+                    <StarRating rating={testimonial.rating} size="small" />
+                  </div>
+
+                  {/* Quote */}
+                  <blockquote className="leading-relaxed mb-4">
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={`"${testimonial.quote}"`}
+                      onEdit={(value) => {
+                        const cleanedValue = value.replace(/^["']|["']$/g, '');
+                        handleQuoteEdit(index, cleanedValue);
+                      }}
+                      backgroundType={safeBackgroundType}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-gray-800 text-sm"
+                      placeholder="Add testimonial quote..."
+                      sectionId={sectionId}
+                      elementKey={`testimonial_quote_${index}`}
+                      sectionBackground={sectionBackground}
+                    />
+                  </blockquote>
+
+                  {/* Customer Info */}
+                  <div className="text-center">
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={testimonial.name}
+                      onEdit={(value) => handleNameEdit(index, value)}
+                      backgroundType={safeBackgroundType}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="font-semibold text-gray-900 text-sm"
+                      placeholder="Customer name..."
+                      sectionId={sectionId}
+                      elementKey={`customer_name_${index}`}
+                      sectionBackground={sectionBackground}
+                    />
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={testimonial.title}
+                      onEdit={(value) => handleTitleEdit(index, value)}
+                      backgroundType={safeBackgroundType}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-xs text-gray-600"
+                      placeholder="Customer title..."
+                      sectionId={sectionId}
+                      elementKey={`customer_title_${index}`}
+                      sectionBackground={sectionBackground}
+                    />
+                    {(testimonial.company || mode === 'edit') && (
+                      <EditableAdaptiveText
+                        mode={mode}
+                        value={testimonial.company || ''}
+                        onEdit={(value) => handleCompanyEdit(index, value)}
+                        backgroundType={safeBackgroundType}
+                        colorTokens={colorTokens}
+                        variant="body"
+                        className={`text-xs ${themeColors.companyText} font-medium`}
+                        placeholder="Company/handle..."
+                        sectionId={sectionId}
+                        elementKey={`customer_company_${index}`}
+                        sectionBackground={sectionBackground}
+                      />
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          /* Carousel Mode (default) */
+          <>
             {/* Avatar Carousel */}
             <div className="relative h-32 mb-12">
               <div className="relative h-full flex items-center justify-center">
                 {testimonials.map((testimonial, index) => {
                   const isActive = index === activeIndex;
-                  const isAdjacent = Math.abs(index - activeIndex) === 1 || 
+                  const isAdjacent = Math.abs(index - activeIndex) === 1 ||
                     (activeIndex === 0 && index === testimonials.length - 1) ||
                     (activeIndex === testimonials.length - 1 && index === 0);
-                  
+
                   return (
                     <AvatarItem
                       key={index}
@@ -411,7 +514,7 @@ export default function AvatarCarousel(props: LayoutComponentProps) {
                   <div className="flex justify-center mb-4">
                     <StarRating rating={activeTestimonial.rating} size="large" />
                   </div>
-                  
+
                   <blockquote className="leading-relaxed mb-6 max-w-3xl mx-auto">
                     <EditableAdaptiveText
                       mode={mode}
@@ -432,7 +535,7 @@ export default function AvatarCarousel(props: LayoutComponentProps) {
                       sectionBackground={sectionBackground}
                     />
                   </blockquote>
-                  
+
                   <div className="flex items-center justify-center space-x-3">
                     <div className="text-center">
                       <EditableAdaptiveText
@@ -495,7 +598,7 @@ export default function AvatarCarousel(props: LayoutComponentProps) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              
+
               <div className="flex space-x-2">
                 {testimonials.map((_, index) => (
                   <button
@@ -512,7 +615,7 @@ export default function AvatarCarousel(props: LayoutComponentProps) {
                   />
                 ))}
               </div>
-              
+
               <button
                 onClick={() => {
                   setActiveIndex(activeIndex < testimonials.length - 1 ? activeIndex + 1 : 0);
@@ -525,6 +628,8 @@ export default function AvatarCarousel(props: LayoutComponentProps) {
                 </svg>
               </button>
             </div>
+          </>
+        )}
 
         {/* Creator Community Stats */}
         <div className={`bg-gradient-to-r ${themeColors.statsGradient} rounded-2xl p-8 border ${themeColors.statsBorder} mb-12`}>

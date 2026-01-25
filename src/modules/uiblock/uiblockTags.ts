@@ -35,22 +35,23 @@ const heroTags: UIBlockTagMap = {
 const beforeAfterTags: UIBlockTagMap = {
   SideBySideBlocks: ['text-heavy'],
   StackedTextVisual: ['text-heavy'],
-  BeforeAfterSlider: ['image'],
+  // V3 ARCHIVED: BeforeAfterSlider: ['image'],
   SplitCard: ['text-heavy'],
-  TextListTransformation: ['text-heavy'],
-  VisualStoryline: ['image'],
-  StatComparison: ['text-heavy'],
-  PersonaJourney: ['text-heavy', 'persona-aware'],
+  // V3 ARCHIVED: TextListTransformation: ['text-heavy'],
+  // V3 ARCHIVED: VisualStoryline: ['image'],
+  // V3 ARCHIVED: StatComparison: ['text-heavy'],
+  // V3 ARCHIVED: PersonaJourney: ['text-heavy', 'persona-aware'],
 };
 
 // ===== FEATURES =====
 const featuresTags: UIBlockTagMap = {
   IconGrid: ['text-heavy'],
   SplitAlternating: ['image'],
-  FeatureTestimonial: ['image'],
+  // V3 ARCHIVED: FeatureTestimonial: ['image'],
   MetricTiles: ['text-heavy'],
-  MiniCards: ['text-heavy'],
+  // V3 ARCHIVED: MiniCards: ['text-heavy'],
   Carousel: ['image'],
+  // V3 ARCHIVED: Tabbed: ['text-heavy'],
 };
 
 // ===== FAQ =====
@@ -59,22 +60,22 @@ const faqTags: UIBlockTagMap = {
   TwoColumnFAQ: ['text-heavy'],
   InlineQnAList: ['text-heavy'],
   SegmentedFAQTabs: ['text-heavy'],
-  QuoteStyleAnswers: ['text-heavy'],
-  IconWithAnswers: ['text-heavy'],
-  TestimonialFAQs: ['text-heavy'],
-  ChatBubbleFAQ: ['text-heavy'],
+  // V3 ARCHIVED: QuoteStyleAnswers: ['text-heavy'],
+  // V3 ARCHIVED: IconWithAnswers: ['text-heavy'],
+  // V3 ARCHIVED: TestimonialFAQs: ['text-heavy'],
+  // V3 ARCHIVED: ChatBubbleFAQ: ['text-heavy'],
 };
 
 // ===== PRICING =====
 const pricingTags: UIBlockTagMap = {
   TierCards: ['text-heavy'],
   ToggleableMonthlyYearly: ['text-heavy'],
-  FeatureMatrix: ['text-heavy'],
-  SegmentBasedPricing: ['text-heavy', 'persona-aware'],
+  // V3 ARCHIVED: FeatureMatrix: ['text-heavy'],
+  // V3 ARCHIVED: SegmentBasedPricing: ['text-heavy', 'persona-aware'],
   SliderPricing: ['text-heavy'],
   CallToQuotePlan: ['text-heavy'],
-  CardWithTestimonial: ['text-heavy'],
-  MiniStackedCards: ['text-heavy'],
+  // V3 ARCHIVED: CardWithTestimonial: ['text-heavy'],
+  // V3 ARCHIVED: MiniStackedCards: ['text-heavy'],
 };
 
 // ===== TESTIMONIALS =====
@@ -83,31 +84,32 @@ const testimonialsTags: UIBlockTagMap = {
   VideoTestimonials: ['image'],
   AvatarCarousel: ['image'],
   BeforeAfterQuote: ['text-heavy'],
-  SegmentedTestimonials: ['text-heavy', 'persona-aware'],
-  RatingCards: ['text-heavy'],
+  // V3 ARCHIVED: SegmentedTestimonials: ['text-heavy', 'persona-aware'],
+  // V3 ARCHIVED: RatingCards: ['text-heavy'],
   PullQuoteStack: ['text-heavy'],
-  InteractiveTestimonialMap: ['image'],
+  // V3 ARCHIVED: InteractiveTestimonialMap: ['image'],
 };
 
 // ===== PROBLEM =====
 const problemTags: UIBlockTagMap = {
-  StackedPainBullets: ['text-heavy'],
-  BeforeImageAfterText: ['image'],
-  EmotionalQuotes: ['text-heavy'],
+  // V3 ARCHIVED: StackedPainBullets: ['text-heavy'],
+  // V3 ARCHIVED: BeforeImageAfterText: ['image'],
+  // V3 ARCHIVED: EmotionalQuotes: ['text-heavy'],
   CollapsedCards: ['text-heavy', 'accordion'],
+  SideBySideSplit: ['text-heavy'],
   PersonaPanels: ['text-heavy', 'persona-aware'],
 };
 
 // ===== RESULTS =====
 const resultsTags: UIBlockTagMap = {
   StatBlocks: ['text-heavy'],
-  BeforeAfterStats: ['text-heavy'],
-  QuoteWithMetric: ['text-heavy'],
-  EmojiOutcomeGrid: ['text-heavy'],
-  TimelineResults: ['text-heavy'],
-  OutcomeIcons: ['text-heavy'],
+  // V3 ARCHIVED: BeforeAfterStats: ['text-heavy'],
+  // V3 ARCHIVED: QuoteWithMetric: ['text-heavy'],
+  // V3 ARCHIVED: EmojiOutcomeGrid: ['text-heavy'],
+  // V3 ARCHIVED: TimelineResults: ['text-heavy'],
+  // V3 ARCHIVED: OutcomeIcons: ['text-heavy'],
   StackedWinsList: ['text-heavy'],
-  PersonaResultPanels: ['text-heavy', 'persona-aware'],
+  // V3 ARCHIVED: PersonaResultPanels: ['text-heavy', 'persona-aware'],
   ResultsGallery: ['image'],
 };
 
@@ -115,82 +117,82 @@ const resultsTags: UIBlockTagMap = {
 const howItWorksTags: UIBlockTagMap = {
   ThreeStepHorizontal: ['text-heavy'],
   VerticalTimeline: ['text-heavy'],
-  IconCircleSteps: ['text-heavy'],
+  // V3 ARCHIVED: IconCircleSteps: ['text-heavy'],
   AccordionSteps: ['text-heavy', 'accordion'],
   VideoWalkthrough: ['image'],
-  ZigzagImageSteps: ['image'],
-  AnimatedProcessLine: ['text-heavy'],
+  // V3 ARCHIVED: ZigzagImageSteps: ['image'],
+  // V3 ARCHIVED: AnimatedProcessLine: ['text-heavy'],
 };
 
 // ===== USE CASES =====
 const useCasesTags: UIBlockTagMap = {
-  CustomerJourneyFlow: ['text-heavy'],
+  // V3 ARCHIVED: CustomerJourneyFlow: ['text-heavy'],
   IndustryUseCaseGrid: ['text-heavy'],
-  InteractiveUseCaseMap: ['image'],
+  // V3 ARCHIVED: InteractiveUseCaseMap: ['image'],
   PersonaGrid: ['text-heavy', 'persona-aware'],
   RoleBasedScenarios: ['text-heavy', 'persona-aware'],
-  UseCaseCarousel: ['image'],
-  WorkflowDiagrams: ['image'],
+  // V3 ARCHIVED: UseCaseCarousel: ['image'],
+  // V3 ARCHIVED: WorkflowDiagrams: ['image'],
 };
 
 // ===== UNIQUE MECHANISM =====
 const uniqueMechanismTags: UIBlockTagMap = {
-  AlgorithmExplainer: ['text-heavy'],
-  InnovationTimeline: ['text-heavy'],
+  // V3 ARCHIVED: AlgorithmExplainer: ['text-heavy'],
+  // V3 ARCHIVED: InnovationTimeline: ['text-heavy'],
   MethodologyBreakdown: ['text-heavy'],
   ProcessFlowDiagram: ['image'],
   PropertyComparisonMatrix: ['text-heavy'],
   SecretSauceReveal: ['text-heavy'],
   StackedHighlights: ['text-heavy'],
-  SystemArchitecture: ['image'],
+  // V3 ARCHIVED: SystemArchitecture: ['image'],
   TechnicalAdvantage: ['text-heavy'],
 };
 
 // ===== SOCIAL PROOF =====
 const socialProofTags: UIBlockTagMap = {
   LogoWall: ['image'],
-  MediaMentions: ['image'],
-  UserCountBar: ['text-heavy'],
-  IndustryBadgeLine: ['image'],
-  MapHeatSpots: ['image'],
-  StackedStats: ['text-heavy'],
-  StripWithReviews: ['text-heavy'],
-  SocialProofStrip: ['text-heavy'],
+  // V3 ARCHIVED: MediaMentions: ['image'],
+  // V3 ARCHIVED: UserCountBar: ['text-heavy'],
+  // V3 ARCHIVED: IndustryBadgeLine: ['image'],
+  // V3 ARCHIVED: MapHeatSpots: ['image'],
+  // V3 ARCHIVED: StackedStats: ['text-heavy'],
+  // V3 ARCHIVED: StripWithReviews: ['text-heavy'],
+  // V3 ARCHIVED: SocialProofStrip: ['text-heavy'],
 };
 
 // ===== OBJECTION HANDLING =====
 const objectionHandlingTags: UIBlockTagMap = {
-  ObjectionAccordion: ['text-heavy', 'accordion'],
+  // V3 ARCHIVED: ObjectionAccordion: ['text-heavy', 'accordion'],
   MythVsRealityGrid: ['text-heavy'],
-  QuoteBackedAnswers: ['text-heavy'],
+  // V3 ARCHIVED: QuoteBackedAnswers: ['text-heavy'],
   VisualObjectionTiles: ['image'],
-  ProblemToReframeBlocks: ['text-heavy'],
-  SkepticToBelieverSteps: ['text-heavy'],
-  BoldGuaranteePanel: ['text-heavy'],
+  // V3 ARCHIVED: ProblemToReframeBlocks: ['text-heavy'],
+  // V3 ARCHIVED: SkepticToBelieverSteps: ['text-heavy'],
+  // V3 ARCHIVED: BoldGuaranteePanel: ['text-heavy'],
 };
 
 // ===== FOUNDER NOTE =====
 const founderNoteTags: UIBlockTagMap = {
   FounderCardWithQuote: ['image'],
   LetterStyleBlock: ['text-heavy'],
-  VideoNoteWithTranscript: ['image'],
+  // V3 ARCHIVED: VideoNoteWithTranscript: ['image'],
   MissionQuoteOverlay: ['image'],
   TimelineToToday: ['text-heavy'],
-  SideBySidePhotoStory: ['image'],
-  StoryBlockWithPullquote: ['text-heavy'],
+  // V3 ARCHIVED: SideBySidePhotoStory: ['image'],
+  // V3 ARCHIVED: StoryBlockWithPullquote: ['text-heavy'],
   FoundersBeliefStack: ['text-heavy'],
 };
 
 // ===== CTA =====
 const ctaTags: UIBlockTagMap = {
   CenteredHeadlineCTA: ['text-heavy'],
-  CTAWithBadgeRow: ['text-heavy'],
+  // V3 ARCHIVED: CTAWithBadgeRow: ['text-heavy'],
   VisualCTAWithMockup: ['image'],
-  SideBySideCTA: ['text-heavy'],
-  CountdownLimitedCTA: ['text-heavy'],
-  CTAWithFormField: ['text-heavy'],
+  // V3 ARCHIVED: SideBySideCTA: ['text-heavy'],
+  // V3 ARCHIVED: CountdownLimitedCTA: ['text-heavy'],
+  // V3 ARCHIVED: CTAWithFormField: ['text-heavy'],
   ValueStackCTA: ['text-heavy'],
-  TestimonialCTACombo: ['text-heavy'],
+  // V3 ARCHIVED: TestimonialCTACombo: ['text-heavy'],
 };
 
 // ===== FOOTER =====
@@ -284,4 +286,123 @@ export function formatLayoutWithTags(layoutName: string): string {
   const tags = getTags(layoutName);
   if (tags.length === 0) return layoutName;
   return `${layoutName} [${tags.join(', ')}]`;
+}
+
+// ============================================================
+// UIBLOCK ORIENTATIONS (for rhythm-based selection in V3)
+// ============================================================
+
+export type UIBlockOrientation = 'horizontal' | 'vertical' | 'grid' | 'stack';
+
+/**
+ * Orientation metadata for rhythm-based UIBlock selection
+ * Used to alternate layouts for visual variety
+ */
+export const uiblockOrientations: Record<string, UIBlockOrientation> = {
+  // BeforeAfter
+  SideBySideBlocks: 'horizontal',
+  StackedTextVisual: 'vertical',
+  SplitCard: 'horizontal',
+
+  // HowItWorks
+  ThreeStepHorizontal: 'horizontal',
+  VerticalTimeline: 'vertical',
+  AccordionSteps: 'vertical',
+  VideoWalkthrough: 'stack', // Video takes priority, neutral rhythm
+
+  // Results
+  StatBlocks: 'horizontal',
+  StackedWinsList: 'vertical',
+  ResultsGallery: 'grid',
+
+  // UseCases
+  IndustryUseCaseGrid: 'grid',
+  PersonaGrid: 'horizontal',
+  RoleBasedScenarios: 'vertical',
+
+  // UniqueMechanism
+  SecretSauceReveal: 'horizontal',
+  StackedHighlights: 'vertical',
+  TechnicalAdvantage: 'horizontal',
+  MethodologyBreakdown: 'horizontal',
+  PropertyComparisonMatrix: 'vertical',
+  ProcessFlowDiagram: 'horizontal',
+
+  // Features
+  IconGrid: 'grid',
+  MetricTiles: 'grid',
+  Carousel: 'horizontal',
+  SplitAlternating: 'vertical',
+
+  // Testimonials
+  QuoteGrid: 'grid',
+  PullQuoteStack: 'vertical',
+  AvatarCarousel: 'horizontal',
+  VideoTestimonials: 'stack',
+  BeforeAfterQuote: 'vertical',
+
+  // FAQ
+  InlineQnAList: 'vertical',
+  TwoColumnFAQ: 'horizontal',
+  AccordionFAQ: 'vertical',
+  SegmentedFAQTabs: 'horizontal',
+
+  // Pricing
+  TierCards: 'horizontal',
+  ToggleableMonthlyYearly: 'horizontal',
+  SliderPricing: 'vertical',
+  CallToQuotePlan: 'stack',
+
+  // ObjectionHandle
+  VisualObjectionTiles: 'grid',
+  MythVsRealityGrid: 'horizontal',
+
+  // Problem
+  CollapsedCards: 'vertical',
+  PersonaPanels: 'horizontal',
+
+  // CTA
+  CenteredHeadlineCTA: 'stack',
+  VisualCTAWithMockup: 'horizontal',
+  ValueStackCTA: 'vertical',
+
+  // Hero
+  leftCopyRightImage: 'horizontal',
+  centerStacked: 'stack',
+  splitScreen: 'horizontal',
+  imageFirst: 'vertical',
+};
+
+/**
+ * Get orientation for a UIBlock layout
+ * Returns null if not defined (defaults to neutral in selection logic)
+ */
+export function getOrientation(layoutName: string): UIBlockOrientation | null {
+  return uiblockOrientations[layoutName] || null;
+}
+
+/**
+ * Check if layout is horizontal
+ */
+export function isHorizontal(layoutName: string): boolean {
+  return getOrientation(layoutName) === 'horizontal';
+}
+
+/**
+ * Check if layout is vertical
+ */
+export function isVertical(layoutName: string): boolean {
+  return getOrientation(layoutName) === 'vertical';
+}
+
+/**
+ * Get opposite orientation for rhythm
+ */
+export function getOppositeOrientation(
+  orientation: UIBlockOrientation | null
+): UIBlockOrientation {
+  if (orientation === 'horizontal') return 'vertical';
+  if (orientation === 'vertical') return 'horizontal';
+  // For grid/stack/null, default to horizontal
+  return 'horizontal';
 }

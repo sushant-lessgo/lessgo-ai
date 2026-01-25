@@ -33,6 +33,14 @@ interface LogoWallContent {
   // Trust reinforcement fields
   trust_badge_text: string;
   show_trust_badge?: boolean;
+  // Media mentions section
+  media_mentions?: string;           // "TechCrunch|Forbes|Wired|ProductHunt"
+  media_mention_quotes?: string;     // "Best tool of 2024|Game-changing|..."
+  show_media_section?: boolean;
+  // Certifications section
+  certifications?: string;           // "SOC2|GDPR|ISO27001|HIPAA"
+  certification_labels?: string;     // "SOC 2 Type II|GDPR Compliant|..."
+  show_certifications_section?: boolean;
 }
 
 // Company logo structure
@@ -70,7 +78,15 @@ const CONTENT_SCHEMA = {
   show_stats_section: { type: 'boolean' as const, default: true },
   // Trust reinforcement
   trust_badge_text: { type: 'string' as const, default: 'Join thousands of satisfied customers' },
-  show_trust_badge: { type: 'boolean' as const, default: true }
+  show_trust_badge: { type: 'boolean' as const, default: true },
+  // Media mentions
+  media_mentions: { type: 'string' as const, default: '' },
+  media_mention_quotes: { type: 'string' as const, default: '' },
+  show_media_section: { type: 'boolean' as const, default: true },
+  // Certifications
+  certifications: { type: 'string' as const, default: '' },
+  certification_labels: { type: 'string' as const, default: '' },
+  show_certifications_section: { type: 'boolean' as const, default: true }
 };
 
 // Parse company data from pipe-separated strings
@@ -244,7 +260,13 @@ export default function LogoWall(props: LayoutComponentProps) {
         trustBadgeBorder: '#fed7aa',
         trustBadgeText: '#9a3412',
         addButtonBorder: '#fed7aa',
-        statNumberColor: '#ea580c'
+        statNumberColor: '#ea580c',
+        mediaBg: '#fffbeb',
+        mediaBorder: '#fde68a',
+        mediaText: '#92400e',
+        certBg: '#f0fdf4',
+        certBorder: '#86efac',
+        certText: '#166534'
       },
       cool: {
         logoBorder: '#bfdbfe',
@@ -253,7 +275,13 @@ export default function LogoWall(props: LayoutComponentProps) {
         trustBadgeBorder: '#bfdbfe',
         trustBadgeText: '#1e40af',
         addButtonBorder: '#93c5fd',
-        statNumberColor: '#2563eb'
+        statNumberColor: '#2563eb',
+        mediaBg: '#f0f9ff',
+        mediaBorder: '#7dd3fc',
+        mediaText: '#0c4a6e',
+        certBg: '#ecfeff',
+        certBorder: '#67e8f9',
+        certText: '#155e75'
       },
       neutral: {
         logoBorder: '#e5e7eb',
@@ -262,7 +290,13 @@ export default function LogoWall(props: LayoutComponentProps) {
         trustBadgeBorder: '#e5e7eb',
         trustBadgeText: '#1f2937',
         addButtonBorder: '#d1d5db',
-        statNumberColor: '#374151'
+        statNumberColor: '#374151',
+        mediaBg: '#f9fafb',
+        mediaBorder: '#d1d5db',
+        mediaText: '#374151',
+        certBg: '#f9fafb',
+        certBorder: '#d1d5db',
+        certText: '#374151'
       }
     }[theme];
   };
@@ -422,6 +456,220 @@ export default function LogoWall(props: LayoutComponentProps) {
             </div>
           )}
         </div>
+
+        {/* Media Mentions Section */}
+        {blockContent.show_media_section !== false && (blockContent.media_mentions || mode === 'edit') && (
+          <div className="mt-12">
+            <div className="text-center mb-6">
+              <span
+                className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium"
+                style={{
+                  backgroundColor: colors.mediaBg,
+                  borderColor: colors.mediaBorder,
+                  color: colors.mediaText,
+                  borderWidth: '1px'
+                }}
+              >
+                <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M2 5a2 2 0 012-2h8a2 2 0 012 2v10a2 2 0 002 2H4a2 2 0 01-2-2V5zm3 1h6v4H5V6zm6 6H5v2h6v-2z" clipRule="evenodd" />
+                  <path d="M15 7h1a2 2 0 012 2v5.5a1.5 1.5 0 01-3 0V7z" />
+                </svg>
+                Featured In
+              </span>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-6">
+              {parsePipeData(blockContent.media_mentions || '').map((mention, index) => {
+                const quotes = parsePipeData(blockContent.media_mention_quotes || '');
+                const quote = quotes[index] || '';
+                return (
+                  <div key={`media-${index}`} className="relative group/media-item text-center">
+                    <div
+                      className="px-6 py-3 rounded-lg border"
+                      style={{
+                        backgroundColor: 'white',
+                        borderColor: colors.mediaBorder
+                      }}
+                    >
+                      {mode !== 'preview' ? (
+                        <div className="space-y-1">
+                          <div
+                            contentEditable
+                            suppressContentEditableWarning
+                            onBlur={(e) => {
+                              const updated = updateListData(blockContent.media_mentions || '', index, e.currentTarget.textContent || '');
+                              handleContentUpdate('media_mentions', updated);
+                            }}
+                            className="outline-none focus:ring-2 focus:ring-blue-500 rounded px-1 font-semibold text-gray-900"
+                          >
+                            {mention}
+                          </div>
+                          {(quote || mode === 'edit') && (
+                            <div
+                              contentEditable
+                              suppressContentEditableWarning
+                              onBlur={(e) => {
+                                const updated = updateListData(blockContent.media_mention_quotes || '', index, e.currentTarget.textContent || '');
+                                handleContentUpdate('media_mention_quotes', updated);
+                              }}
+                              className="outline-none focus:ring-2 focus:ring-blue-500 rounded px-1 text-sm text-gray-600 italic"
+                            >
+                              {quote || 'Add quote...'}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="space-y-1">
+                          <span className="font-semibold text-gray-900">{mention}</span>
+                          {quote && <p className="text-sm text-gray-600 italic">"{quote}"</p>}
+                        </div>
+                      )}
+                    </div>
+                    {/* Remove button */}
+                    {mode !== 'preview' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const mentions = parsePipeData(blockContent.media_mentions || '');
+                          const quotes = parsePipeData(blockContent.media_mention_quotes || '');
+                          mentions.splice(index, 1);
+                          quotes.splice(index, 1);
+                          handleContentUpdate('media_mentions', mentions.join('|'));
+                          handleContentUpdate('media_mention_quotes', quotes.join('|'));
+                        }}
+                        className="opacity-0 group-hover/media-item:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white hover:bg-red-50 text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm border border-gray-200"
+                        title="Remove mention"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+              {/* Add Media Mention Button */}
+              {mode !== 'preview' && (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const newMention = prompt('Enter publication name:');
+                    if (newMention && newMention.trim()) {
+                      const current = blockContent.media_mentions ? blockContent.media_mentions : '';
+                      const updated = current ? `${current}|${newMention.trim()}` : newMention.trim();
+                      handleContentUpdate('media_mentions', updated);
+                    }
+                  }}
+                  className="px-4 py-2 rounded-lg border-2 border-dashed text-gray-500 hover:text-gray-700 hover:border-gray-400 transition-colors"
+                  style={{ borderColor: colors.mediaBorder }}
+                >
+                  + Add Publication
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Certifications Section */}
+        {blockContent.show_certifications_section !== false && (blockContent.certifications || mode === 'edit') && (
+          <div className="mt-12">
+            <div className="text-center mb-6">
+              <span
+                className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium"
+                style={{
+                  backgroundColor: colors.certBg,
+                  borderColor: colors.certBorder,
+                  color: colors.certText,
+                  borderWidth: '1px'
+                }}
+              >
+                <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                Security & Compliance
+              </span>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-4">
+              {parsePipeData(blockContent.certifications || '').map((cert, index) => {
+                const labels = parsePipeData(blockContent.certification_labels || '');
+                const label = labels[index] || cert;
+                return (
+                  <div key={`cert-${index}`} className="relative group/cert-item">
+                    <div
+                      className="flex items-center px-4 py-2 rounded-lg border"
+                      style={{
+                        backgroundColor: colors.certBg,
+                        borderColor: colors.certBorder
+                      }}
+                    >
+                      <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" style={{ color: colors.certText }}>
+                        <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      {mode !== 'preview' ? (
+                        <div
+                          contentEditable
+                          suppressContentEditableWarning
+                          onBlur={(e) => {
+                            const updated = updateListData(blockContent.certification_labels || blockContent.certifications || '', index, e.currentTarget.textContent || '');
+                            handleContentUpdate('certification_labels', updated);
+                          }}
+                          className="outline-none focus:ring-2 focus:ring-blue-500 rounded px-1 font-medium text-sm"
+                          style={{ color: colors.certText }}
+                        >
+                          {label}
+                        </div>
+                      ) : (
+                        <span className="font-medium text-sm" style={{ color: colors.certText }}>
+                          {label}
+                        </span>
+                      )}
+                    </div>
+                    {/* Remove button */}
+                    {mode !== 'preview' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const certs = parsePipeData(blockContent.certifications || '');
+                          const labels = parsePipeData(blockContent.certification_labels || '');
+                          certs.splice(index, 1);
+                          labels.splice(index, 1);
+                          handleContentUpdate('certifications', certs.join('|'));
+                          handleContentUpdate('certification_labels', labels.join('|'));
+                        }}
+                        className="opacity-0 group-hover/cert-item:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white hover:bg-red-50 text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm border border-gray-200"
+                        title="Remove certification"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+              {/* Add Certification Button */}
+              {mode !== 'preview' && (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const newCert = prompt('Enter certification (e.g., SOC2, GDPR, ISO27001):');
+                    if (newCert && newCert.trim()) {
+                      const currentCerts = blockContent.certifications ? blockContent.certifications : '';
+                      const currentLabels = blockContent.certification_labels ? blockContent.certification_labels : '';
+                      const updatedCerts = currentCerts ? `${currentCerts}|${newCert.trim()}` : newCert.trim();
+                      const updatedLabels = currentLabels ? `${currentLabels}|${newCert.trim()}` : newCert.trim();
+                      handleContentUpdate('certifications', updatedCerts);
+                      handleContentUpdate('certification_labels', updatedLabels);
+                    }
+                  }}
+                  className="px-4 py-2 rounded-lg border-2 border-dashed text-gray-500 hover:text-gray-700 hover:border-gray-400 transition-colors"
+                  style={{ borderColor: colors.certBorder }}
+                >
+                  + Add Certification
+                </button>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Social Proof Stats */}
         {blockContent.show_stats_section !== false && (

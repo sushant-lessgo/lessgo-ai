@@ -247,7 +247,7 @@ export async function extractPainsOnly(
       return { success: false, error: 'no_pains_extracted' };
     }
 
-    logger.dev('[extractPains] Extracted', parsed.pains.length, 'pains');
+    logger.dev(`[extractPains] Extracted ${parsed.pains.length} pains`);
 
     return { success: true, data: parsed, model: 'gpt-4o-mini' };
   } catch (error: any) {

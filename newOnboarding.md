@@ -57,6 +57,8 @@ type PricingModel = 'free' | 'freemium' | 'subscription' | 'one-time' | 'usage-b
 
 ## 2. Generation Flow
 
+> **V3 Simplified Flow:** Set `NEXT_PUBLIC_SIMPLIFIED_ONBOARDING_V3=true` in `.env.local` to enable simplified flow that skips Research (Step 5) and uses deterministic section selection. See [Appendix: V3 Simplified Section Selection](#appendix-v3-simplified-section-selection).
+
 ### Step 1: One-Liner
 User provides product description.
 ```
@@ -104,6 +106,9 @@ AI extracts (no web search, pure comprehension):
 Other asset questions (demo video, feature images) asked during UIBlock selection.
 
 ### Step 5: Research (IVOC)
+
+> **V3:** This step is SKIPPED. Strategy uses deterministic templates instead.
+
 Voice of Customer research via Perplexity (primary) or Tavily (fallback).
 
 **Provider:** `RESEARCH_PROVIDER` env var (`perplexity` | `tavily`)
@@ -161,6 +166,9 @@ Perplexity (if enabled) → Tavily → GPT-4o fallback
 - Low-quality results not cached
 
 ### Step 6: Strategy + Section Selection
+
+> **V3:** Uses `/api/v3/strategy` with simplified prompt. LLM detects awareness level + optional sections, then deterministic templates select final sections. See [Appendix: V3 Simplified Section Selection](#appendix-v3-simplified-section-selection).
+
 One API call generates:
 
 ```json
@@ -536,3 +544,524 @@ Published page schema   →  "what gets stored"
 - High: Firm beliefs from research (hard to change)
 - Medium: Shakable beliefs (can be addressed)
 - Low: Generic concerns not in research
+
+---
+
+## Appendix: V3 Simplified Section Selection
+
+> V3 skips IVOC research. Uses deterministic templates based on awareness + landing goal.
+
+### Awareness Level Detection (LLM)
+
+Given: [product, audience, problem, category]
+
+Choose ONE awareness level that will resonate with the most users:
+
+| Level | Description |
+|-------|-------------|
+| **problem-aware-cold** | Knows problem exists but low emotional intensity. Not urgently seeking solutions. Needs to be reminded why this matters. |
+| **problem-aware-hot** | Feels the pain intensely. Actively frustrated. Urgently wants relief. "Hair on fire" problem. |
+| **solution-aware-skeptical** | Knows solutions exist. Has seen/tried alternatives. Hesitant, needs convincing why THIS one is different. |
+| **solution-aware-eager** | Knows solutions exist. Ready to act. Just needs to confirm this is the right choice. |
+
+### Optional Section Decisions (LLM)
+
+Pick **AT MOST 1-2** of these. Default to false unless STRONG case.
+
+| Section | YES when | NO when |
+|---------|----------|---------|
+| **BeforeAfter** | Transformation is VISUAL and emotionally striking. Clear painful "before" and aspirational "after". | Abstract/technical products. B2B tools where transformation isn't visual. |
+| **UniqueMechanism** | Genuinely novel approach explainable in ONE sentence. Clear differentiation from competitors. | "AI-powered" (not unique). Standard tech. Too technical to explain simply. |
+| **ObjectionHandle** | Chose "solution-aware-skeptical" AND specific objections you can overcome. | Audience is eager (don't plant doubts). Would raise concerns they didn't have. |
+
+### Templates
+
+#### 1. Waitlist (pre-product)
+
+UniqueMechanism is ALWAYS included. LLM section decisions ignored.
+
+**Problem-aware-cold:**
+```
+Hero → Problem → UniqueMechanism → Features → [UseCases] → HowItWorks → Trust → CTA
+```
+
+**Problem-aware-hot:**
+```
+Hero → UniqueMechanism → Features → [UseCases] → HowItWorks → Trust → CTA
+```
+
+**Solution-aware (both):**
+```
+Hero → UniqueMechanism → Features → [UseCases] → HowItWorks → Trust → CTA
+```
+
+#### 2. Product Ready (all other landing goals)
+
+LLM section decisions apply.
+
+**Problem-aware-cold:**
+```
+Hero → Problem → [LLM sections] → Trust → Features → [UseCases] → HowItWorks → Pricing → CTA → FAQ
+```
+
+**Problem-aware-hot:**
+```
+Hero → [LLM sections] → Trust → Features → [UseCases] → HowItWorks → Pricing → CTA → FAQ
+```
+
+**Solution-aware-skeptical:**
+```
+Hero → Trust → [LLM sections] → Features → [UseCases] → HowItWorks → Pricing → CTA → FAQ
+```
+
+**Solution-aware-eager:**
+```
+Hero → Features → [UseCases] → HowItWorks → Trust → Pricing → CTA → FAQ
+```
+(No LLM sections for eager - they don't need extra convincing)
+
+### Trust Section Rules
+
+**Order:** Results → Testimonials → SocialProof (strongest to weakest)
+
+**Include:** All available based on user's asset availability answers.
+
+**FounderNote fallback:** Add only if < 2 trust sections available.
+
+### UseCases Rule
+
+Include **only if:** `isB2B === true AND hasMultipleAudiences === true`
+
+### Section Order Reference
+
+```
+[LLM sections] = BeforeAfter → UniqueMechanism → ObjectionHandle (in this order if included)
+[Trust] = Results → Testimonials → SocialProof → FounderNote (include available, FounderNote if < 2 others)
+[UseCases] = only if B2B + multiple audiences
+```
+
+---
+
+## Appendix: UIBlock Selection Rules
+
+### Header
+
+**Always:** `MinimalNavHeader`
+
+No variation needed. Simple, works for all cases.
+
+---
+
+### Hero
+
+**Available UIBlocks:**
+| UIBlock | Layout |
+|---------|--------|
+| LeftCopyRightImage | Side by side (copy left, image right) |
+| CenterStacked | Centered, image below headline |
+| ImageFirst | Image dominant, copy secondary |
+| SplitScreen | 50/50 dramatic split |
+
+**Selection Logic:**
+
+```
+1. If waitlist → CenterStacked
+
+2. AI judges product type (single call, 3 outcomes):
+   - "behind-the-scenes": API, automation, analytics, infrastructure
+   - "visual-ui-hero": Visual product where UI IS the selling point (design tools, visual builders)
+   - "visual-ui-supports": Visual product but copy leads, UI supports (dashboards, apps, SaaS)
+
+3. If behind-the-scenes → CenterStacked
+
+4. If visual (ui-hero or ui-supports):
+   - No proof assets (hasTestimonials=false AND hasSocialProof=false) → CenterStacked
+   - Has proof assets → continue...
+
+5. If visual + has proof:
+   - "visual-ui-hero" → ImageFirst
+   - "visual-ui-supports" → LeftCopyRightImage
+     - Vibe upgrade: Dark Tech OR Bold Energy → SplitScreen
+```
+
+**Summary Table:**
+
+| Condition | Hero UIBlock |
+|-----------|--------------|
+| Waitlist | CenterStacked |
+| Behind-the-scenes | CenterStacked |
+| Visual + no proof (early stage) | CenterStacked |
+| Visual + proof + UI is THE selling point | ImageFirst |
+| Visual + proof + UI supports copy | LeftCopyRightImage |
+| ↳ + Dark Tech / Bold Energy vibe | SplitScreen |
+
+**Default fallback:** CenterStacked (safe when no compelling image expected)
+
+---
+
+### Problem
+
+**Available UIBlocks:** CollapsedCards, SideBySideSplit, PersonaPanels
+
+**Selection Logic:**
+
+```
+If isB2B AND audiences.length > 1 → PersonaPanels
+Else → CollapsedCards
+```
+
+Rarely selected section (only problem-aware-cold). Keep simple.
+
+---
+
+### BeforeAfter
+
+**Available UIBlocks:** SideBySideBlock, StackedTextVisual, SplitCard
+
+**Removed:** PersonaJourney, StatComparison, BeforeAfterSlider, TextListTransformation
+
+**UIBlock Types:**
+| Type | UIBlocks |
+|------|----------|
+| Image-based | SplitCard |
+| Text-based | SideBySideBlock, StackedTextVisual |
+
+**Selection Logic:**
+
+```
+If previous section is image-based → random(SideBySideBlock, StackedTextVisual)
+If previous section is text-based → SplitCard
+```
+
+Creates visual rhythm by alternating image/text layouts.
+
+---
+
+### Features
+
+**Available UIBlocks:** IconGrid, MetricTiles, Carousel, SplitAlternating
+
+**Removed:** MiniCards, Tabbed
+
+| UIBlock | Structure | Best for |
+|---------|-----------|----------|
+| IconGrid | Icon + title + description | Standard features |
+| MetricTiles | Icon + title + number + description | Features with quantifiable benefits |
+| Carousel | Interactive | Many features (5+) |
+| SplitAlternating | Image + text, alternating | Visual products |
+
+**Selection: AI picks**
+
+LLM recommends based on feature analysis (count, benefits, product type).
+
+---
+
+### HowItWorks
+
+**Available UIBlocks:** VideoWalkthrough, ThreeStepHorizontal, AccordionSteps, VerticalTimeline
+
+**Removed:** ZigzagImageSteps, AnimatedProcessLine, VisualStoryline
+
+| UIBlock | Direction |
+|---------|-----------|
+| VideoWalkthrough | - (video takes priority) |
+| ThreeStepHorizontal | Horizontal |
+| AccordionSteps | Vertical |
+| VerticalTimeline | Vertical |
+
+**Selection Logic:**
+
+```
+If hasDemoVideo → VideoWalkthrough
+
+Else:
+  If previous section horizontal → random(AccordionSteps, VerticalTimeline)
+  If previous section vertical → ThreeStepHorizontal
+```
+
+**User question:** "Do you have a demo video?"
+
+Creates layout rhythm by alternating horizontal/vertical.
+
+---
+
+### UniqueMechanism
+
+**Available UIBlocks:** SecretSauceReveal, StackedHighlights, TechnicalAdvantage, MethodologyBreakdown, PropertyComparisonMatrix, ProcessFlowDiagram
+
+**Removed:** AlgorithmExplainer
+
+| UIBlock | Orientation | Best For |
+|---------|-------------|----------|
+| SecretSauceReveal | Horizontal (grid) | Multiple unique elements, "secrets" |
+| StackedHighlights | Vertical | Simple list of differentiators |
+| TechnicalAdvantage | Horizontal (grid) | Technical/developer audience |
+| MethodologyBreakdown | Horizontal (hero + grid) | Framework/methodology explanation |
+| PropertyComparisonMatrix | Vertical (table) | Direct "Us vs Them" comparison |
+| ProcessFlowDiagram | Horizontal | Unique process (5 steps) |
+
+**Selection: AI picks**
+
+LLM recommends based on:
+- The unique mechanism it identified in strategy
+- Audience type (technical vs general)
+- Nature of differentiation (process, comparison, methodology, etc.)
+
+---
+
+### SocialProof
+
+**One flexible UIBlock** that adapts based on what user has.
+
+**Elements (show if user has):**
+| Element | Content |
+|---------|---------|
+| Logo wall | Client/company logos |
+| Media strip | "As seen in..." press logos |
+| Badges | Certifications, awards, ratings |
+
+**Selection: No UIBlock choice needed**
+
+UIBlock renders only the elements user indicates they have.
+
+Asset availability questions TBD (see Testimonials & Results for final list).
+
+---
+
+### Testimonials
+
+**Available UIBlocks:** QuoteGrid, PullQuoteStack, AvatarCarousel, VideoTestimonials, BeforeAfterQuote
+
+**Removed:** RatingCards, SegmentedTestimonials, QuoteBackedAnswers, StripWithReviews (moved to SocialProof)
+
+| UIBlock | B2B/B2C | Type |
+|---------|---------|------|
+| QuoteGrid | B2B | Text + Photos |
+| PullQuoteStack | B2C | Text |
+| AvatarCarousel | B2C | Photos |
+| VideoTestimonials | Both | Video |
+| BeforeAfterQuote | Both | Transformation |
+
+**Asset Availability - User selects ONE:**
+- Text quotes
+- Photos with quotes
+- Video testimonials
+- Transformation stories
+
+**Selection Logic:**
+
+| User Selection | B2B | B2C |
+|----------------|-----|-----|
+| Text quotes | QuoteGrid | PullQuoteStack |
+| Photos with quotes | QuoteGrid | AvatarCarousel |
+| Video | VideoTestimonials | VideoTestimonials |
+| Transformation | BeforeAfterQuote | BeforeAfterQuote |
+
+---
+
+### Results
+
+**Available UIBlocks:** StatBlocks, StackedWinsList, ResultsGallery
+
+**Removed:** OutcomeIcons, EmojiOutcomeGrid, PersonaResultPanels, TimelineResults
+
+| UIBlock | Orientation |
+|---------|-------------|
+| StatBlocks | Horizontal |
+| StackedWinsList | Vertical |
+| ResultsGallery | - (for visual products) |
+
+**Selection Logic:**
+
+```
+If visual-ui-hero → ResultsGallery
+
+Else:
+  If previous section horizontal → StackedWinsList (vertical)
+  If previous section vertical → StatBlocks (horizontal)
+```
+
+Uses Hero AI judgment + layout rhythm.
+
+---
+
+### Pricing
+
+**Available UIBlocks:** TierCards, ToggleableMonthlyYearly, SliderPricing, CallToQuotePlan
+
+**Removed:** FeatureMatrix
+
+| UIBlock | When |
+|---------|------|
+| TierCards | Default, simple tiers |
+| ToggleableMonthlyYearly | Subscription with monthly + yearly |
+| SliderPricing | Usage-based pricing |
+| CallToQuotePlan | Enterprise / no public pricing |
+
+**Selection: AI picks** (based on offer + landingGoal + isB2B)
+
+| Offer contains | UIBlock |
+|----------------|---------|
+| "contact", "quote", "custom", "enterprise" | CallToQuotePlan |
+| "per user", "per seat", "usage" | SliderPricing |
+| Both monthly + yearly pricing | ToggleableMonthlyYearly |
+| Default | TierCards |
+
+No user question needed.
+
+---
+
+### ObjectionHandle
+
+**Available UIBlocks:** VisualObjectionTiles, MythVsRealityGrid
+
+**Removed:** BoldGuaranteePanel (guarantees belong in Hero/CTA)
+
+| UIBlock | Format |
+|---------|--------|
+| VisualObjectionTiles | Tiles addressing multiple objections |
+| MythVsRealityGrid | Myth vs Reality format |
+
+**Selection: AI picks**
+
+LLM has objections from `oneReader.objections`. Judges:
+- General objections → VisualObjectionTiles
+- Myths/misconceptions to bust → MythVsRealityGrid
+
+---
+
+### FAQ
+
+**Available UIBlocks:** InlineQnAList, TwoColumnFAQ, AccordionFAQ, SegmentedFAQTabs
+
+**Removed:** ChatBubbleFAQ
+
+**Selection: AI estimates FAQ count**
+
+LLM estimates practical question count based on:
+- Objections from `oneReader.objections`
+- Product complexity
+- Pricing model
+- Landing goal
+
+| Question Count | UIBlock |
+|----------------|---------|
+| 1-6 | InlineQnAList |
+| 7-10 | TwoColumnFAQ |
+| 11-14 | AccordionFAQ |
+| 15+ | SegmentedFAQTabs |
+
+---
+
+### UseCases
+
+**Available UIBlocks:** IndustryUseCaseGrid, PersonaGrid, RoleBasedScenarios
+
+**Removed:** UseCaseCarousel
+
+Only included when `isB2B AND hasMultipleAudiences`.
+
+| UIBlock | Orientation | When |
+|---------|-------------|------|
+| IndustryUseCaseGrid | - | Audiences are industries |
+| PersonaGrid | Horizontal | Audiences are roles |
+| RoleBasedScenarios | Vertical | Audiences are roles |
+
+**Selection Logic:**
+
+```
+If audiences are industries (Finance, Healthcare, etc.) → IndustryUseCaseGrid
+
+If audiences are roles/personas:
+  If previous section horizontal → RoleBasedScenarios (vertical)
+  If previous section vertical → PersonaGrid (horizontal)
+```
+
+AI judges industry vs role + rhythm-based for role audiences.
+
+---
+
+### FounderNote
+
+**Always:** `LetterStyleBlock`
+
+**Removed:** StoryBlockWithPullquote, VideoNoteWithTranscript, SideBySidePhotoStory
+
+Only included as trust fallback when < 2 other trust sections available.
+
+**Note:** Component needs to support optional founder image placeholder (works with or without photo).
+
+**Selection: No choice needed.**
+
+---
+
+### CTA
+
+**Available UIBlocks:** CenteredHeadlineCTA, VisualCTAWithMockup, ValueStackCTA
+
+**Removed:** CTAWithBadgeRow, SideBySideCTA, CountdownLimitedCTA
+
+| UIBlock | When |
+|---------|------|
+| CenteredHeadlineCTA | Default, simplicity wins |
+| VisualCTAWithMockup | Product-led SaaS (visual products) |
+| ValueStackCTA | Direct buy, value reinforcement, long pages |
+
+**Selection Logic:**
+
+```
+If landingGoal === 'buy' → ValueStackCTA
+If visual product (visual-ui-hero/supports) → VisualCTAWithMockup
+Else → CenteredHeadlineCTA
+```
+
+---
+
+## Appendix: V3 UIBlock Selection Implementation Status
+
+> Implemented 2025-01-24
+
+### Completed
+
+1. **Types expanded** (`src/types/generation.ts`)
+   - AssetAvailability: hasDemoVideo, testimonialType, socialProofTypes
+   - UIBlockDecisions type added
+   - SimplifiedStrategyOutput updated
+
+2. **AssetAvailabilityStep UI** (`src/app/create/[token]/components/steps/AssetAvailabilityStep.tsx`)
+   - Demo video checkbox
+   - Testimonial type radio group (conditional)
+   - Social proof types checkboxes (conditional)
+
+3. **Orientation metadata** (`src/modules/uiblock/uiblockTags.ts`)
+   - UIBlockOrientation type
+   - uiblockOrientations map
+   - Helper functions
+
+4. **Strategy schema** (`src/lib/schemas/strategyV3.schema.ts`)
+   - UIBlockDecisionsSchema
+   - Added to SimplifiedStrategyResponseSchema
+
+5. **Strategy prompt** (`src/modules/strategy/promptsV3.ts`)
+   - Step 7: uiblockDecisions
+
+6. **Deterministic selection** (`src/modules/uiblock/selectUIBlocksV3.ts`)
+   - All section selection logic implemented
+
+7. **UIBlockStep** (`src/app/create/[token]/components/steps/UIBlockStep.tsx`)
+   - V3: Uses selectUIBlocksV3() (no API call)
+   - V2: Still uses /api/v2/uiblock-select
+
+8. **Strategy API** (`src/app/api/v3/strategy/route.ts`)
+   - Accepts expanded asset fields
+   - Returns uiblockDecisions
+
+### Pending
+
+1. **FlexibleSocialProof component** - Create adaptive SocialProof UIBlock
+   - Currently falls back to LogoWall
+   - Needs to render logos + media + badges based on user selection
+
+2. **Archive removed UIBlocks** - Move to archive folder
+   - See plan for list of UIBlocks to archive
+   - Update layoutNames.ts and componentRegistry.ts

@@ -53,7 +53,7 @@ export default function StrategyStep() {
       // Build request body based on version
       const requestBody = isV3
         ? {
-            // V3 request body (no IVOC)
+            // V3 request body (no IVOC, includes UIBlock decision data)
             productName: productName || 'Your Product',
             oneLiner,
             features: understanding.features,
@@ -62,6 +62,9 @@ export default function StrategyStep() {
             hasTestimonials: assetAvailability.hasTestimonials,
             hasSocialProof: assetAvailability.hasSocialProof,
             hasConcreteResults: assetAvailability.hasConcreteResults,
+            hasDemoVideo: assetAvailability.hasDemoVideo,
+            testimonialType: assetAvailability.testimonialType,
+            socialProofTypes: assetAvailability.socialProofTypes,
             primaryAudience: understanding.audiences[0],
             otherAudiences: understanding.audiences.slice(1),
             categories: understanding.categories,

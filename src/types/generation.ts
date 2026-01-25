@@ -271,10 +271,21 @@ export interface ObjectionMapping {
  * ===== ASSET AVAILABILITY =====
  * What assets does the user have available
  */
+export type TestimonialType = 'text' | 'photos' | 'video' | 'transformation';
+
+export interface SocialProofTypes {
+  hasLogos: boolean;
+  hasMediaMentions: boolean;
+  hasCertifications: boolean;
+}
+
 export interface AssetAvailability {
   hasTestimonials: boolean;
   hasSocialProof: boolean;          // Logos, user counts, etc.
   hasConcreteResults: boolean;      // Stats, case studies
+  hasDemoVideo: boolean;
+  testimonialType: TestimonialType | null;  // Only if hasTestimonials
+  socialProofTypes: SocialProofTypes | null; // Only if hasSocialProof
 }
 
 /**
@@ -470,6 +481,31 @@ export interface SectionDecisions {
 }
 
 /**
+ * ===== PRODUCT TYPE (for Hero UIBlock selection) =====
+ */
+export const productTypes = [
+  'behind-the-scenes',   // API, automation, analytics (no visual UI)
+  'visual-ui-hero',      // UI IS the selling point (design tools)
+  'visual-ui-supports',  // Copy leads, UI supports (dashboards, SaaS)
+] as const;
+
+export type ProductType = (typeof productTypes)[number];
+
+/**
+ * ===== UIBLOCK DECISIONS (from strategy LLM) =====
+ * Decisions for sections that need LLM judgment
+ */
+export interface UIBlockDecisions {
+  productType: ProductType;
+  featuresUIBlock: 'IconGrid' | 'MetricTiles' | 'Carousel' | 'SplitAlternating';
+  uniqueMechanismUIBlock: 'SecretSauceReveal' | 'StackedHighlights' | 'TechnicalAdvantage' | 'MethodologyBreakdown' | 'PropertyComparisonMatrix' | 'ProcessFlowDiagram';
+  pricingUIBlock: 'TierCards' | 'ToggleableMonthlyYearly' | 'SliderPricing' | 'CallToQuotePlan';
+  objectionHandleUIBlock: 'VisualObjectionTiles' | 'MythVsRealityGrid';
+  faqQuestionCount: number;
+  useCasesAudienceType: 'industry' | 'role';
+}
+
+/**
  * Simplified Strategy Output for V3
  */
 export interface SimplifiedStrategyOutput {
@@ -479,7 +515,9 @@ export interface SimplifiedStrategyOutput {
   vibe: Vibe;
   featureAnalysis: FeatureAnalysis[];
   sectionDecisions: SectionDecisions;
+  uiblockDecisions: UIBlockDecisions;
   sections: SectionType[];
+  uiblocks?: Record<string, string>;  // Final UIBlock selections (from backend)
 }
 
 export const isValidSimplifiedAwarenessLevel = (v: string): v is SimplifiedAwarenessLevel =>

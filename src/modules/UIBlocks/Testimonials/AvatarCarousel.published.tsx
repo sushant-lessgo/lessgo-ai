@@ -124,16 +124,20 @@ export default function AvatarCarouselPublished(props: LayoutComponentProps) {
   const legacyAvatars = parsePipeData(props.customer_avatars);
   const ratings = parsePipeData(props.ratings).map(r => parseRating(r));
   const trustItems = parsePipeData(props.trust_items);
+  const displayMode = props.display_mode || 'carousel';
 
-  // Get first testimonial (static display)
-  const firstTestimonial = quotes.length > 0 ? {
-    quote: quotes[0],
-    name: names[0] || 'Anonymous',
-    title: titles[0] || '',
-    company: companies[0] || '',
-    avatar: getAvatarUrl(props.avatar_urls, names[0], legacyAvatars, 0),
-    rating: ratings[0] || 5
-  } : null;
+  // Build all testimonials for static grid mode
+  const testimonials = quotes.map((quote, index) => ({
+    quote,
+    name: names[index] || 'Anonymous',
+    title: titles[index] || '',
+    company: companies[index] || '',
+    avatar: getAvatarUrl(props.avatar_urls, names[index], legacyAvatars, index),
+    rating: ratings[index] || 5
+  }));
+
+  // Get first testimonial (for carousel mode - static display on published)
+  const firstTestimonial = testimonials[0] || null;
 
   // Get text colors based on background
   const textColors = getPublishedTextColors(
@@ -185,64 +189,125 @@ export default function AvatarCarouselPublished(props: LayoutComponentProps) {
           )}
         </div>
 
-        {/* First Testimonial (Static) */}
-        {firstTestimonial && (
-          <div
-            className="rounded-2xl p-8 mb-12"
-            style={{
-              background: themeColors.cardGradient,
-              borderWidth: '1px',
-              borderColor: themeColors.cardBorder
-            }}
-          >
-            <div className="text-center">
-              {/* Avatar */}
-              <div className="flex justify-center mb-6">
-                <AvatarPublished
-                  name={firstTestimonial.name}
-                  imageUrl={firstTestimonial.avatar}
-                  size={64}
-                />
-              </div>
-
-              {/* Star Rating */}
-              <div className="flex justify-center mb-4">
-                {renderStars(firstTestimonial.rating)}
-              </div>
-
-              {/* Quote */}
-              <blockquote
-                className="leading-relaxed mb-6 max-w-3xl mx-auto"
+        {/* Display Mode: Static Grid or Single Testimonial */}
+        {displayMode === 'static' ? (
+          /* Static Grid Mode - Show all testimonials */
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            {testimonials.map((testimonial, index) => (
+              <div
+                key={index}
+                className="rounded-2xl p-6"
                 style={{
-                  color: textColors.body,
-                  ...h3Typography
+                  background: themeColors.cardGradient,
+                  borderWidth: '1px',
+                  borderColor: themeColors.cardBorder
                 }}
               >
-                "{firstTestimonial.quote}"
-              </blockquote>
-
-              {/* Customer Attribution */}
-              <div className="flex items-center justify-center space-x-3">
                 <div className="text-center">
-                  <div className="font-semibold mb-1" style={{ color: textColors.heading }}>
-                    {firstTestimonial.name}
+                  {/* Avatar */}
+                  <div className="flex justify-center mb-4">
+                    <AvatarPublished
+                      name={testimonial.name}
+                      imageUrl={testimonial.avatar}
+                      size={48}
+                    />
                   </div>
 
-                  {firstTestimonial.title && (
-                    <div className="text-sm mb-1" style={{ color: textColors.muted }}>
-                      {firstTestimonial.title}
-                    </div>
-                  )}
+                  {/* Star Rating */}
+                  <div className="flex justify-center mb-3">
+                    {renderStars(testimonial.rating)}
+                  </div>
 
-                  {firstTestimonial.company && (
-                    <div className="text-sm font-medium" style={{ color: themeColors.companyText }}>
-                      {firstTestimonial.company}
+                  {/* Quote */}
+                  <blockquote
+                    className="leading-relaxed mb-4 text-sm"
+                    style={{ color: textColors.body }}
+                  >
+                    "{testimonial.quote}"
+                  </blockquote>
+
+                  {/* Customer Attribution */}
+                  <div className="text-center">
+                    <div className="font-semibold text-sm mb-1" style={{ color: textColors.heading }}>
+                      {testimonial.name}
                     </div>
-                  )}
+
+                    {testimonial.title && (
+                      <div className="text-xs mb-1" style={{ color: textColors.muted }}>
+                        {testimonial.title}
+                      </div>
+                    )}
+
+                    {testimonial.company && (
+                      <div className="text-xs font-medium" style={{ color: themeColors.companyText }}>
+                        {testimonial.company}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          /* Carousel Mode - Show first testimonial only (static on published) */
+          firstTestimonial && (
+            <div
+              className="rounded-2xl p-8 mb-12"
+              style={{
+                background: themeColors.cardGradient,
+                borderWidth: '1px',
+                borderColor: themeColors.cardBorder
+              }}
+            >
+              <div className="text-center">
+                {/* Avatar */}
+                <div className="flex justify-center mb-6">
+                  <AvatarPublished
+                    name={firstTestimonial.name}
+                    imageUrl={firstTestimonial.avatar}
+                    size={64}
+                  />
+                </div>
+
+                {/* Star Rating */}
+                <div className="flex justify-center mb-4">
+                  {renderStars(firstTestimonial.rating)}
+                </div>
+
+                {/* Quote */}
+                <blockquote
+                  className="leading-relaxed mb-6 max-w-3xl mx-auto"
+                  style={{
+                    color: textColors.body,
+                    ...h3Typography
+                  }}
+                >
+                  "{firstTestimonial.quote}"
+                </blockquote>
+
+                {/* Customer Attribution */}
+                <div className="flex items-center justify-center space-x-3">
+                  <div className="text-center">
+                    <div className="font-semibold mb-1" style={{ color: textColors.heading }}>
+                      {firstTestimonial.name}
+                    </div>
+
+                    {firstTestimonial.title && (
+                      <div className="text-sm mb-1" style={{ color: textColors.muted }}>
+                        {firstTestimonial.title}
+                      </div>
+                    )}
+
+                    {firstTestimonial.company && (
+                      <div className="text-sm font-medium" style={{ color: themeColors.companyText }}>
+                        {firstTestimonial.company}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )
         )}
 
         {/* Community Stats */}

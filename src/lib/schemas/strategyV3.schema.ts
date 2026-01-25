@@ -57,6 +57,27 @@ export const SectionDecisionsSchema = z.object({
 });
 
 /**
+ * UIBlock Decisions Schema
+ * LLM decisions for sections that need judgment-based UIBlock selection
+ */
+export const UIBlockDecisionsSchema = z.object({
+  productType: z.enum(['behind-the-scenes', 'visual-ui-hero', 'visual-ui-supports']),
+  featuresUIBlock: z.enum(['IconGrid', 'MetricTiles', 'Carousel', 'SplitAlternating']),
+  uniqueMechanismUIBlock: z.enum([
+    'SecretSauceReveal',
+    'StackedHighlights',
+    'TechnicalAdvantage',
+    'MethodologyBreakdown',
+    'PropertyComparisonMatrix',
+    'ProcessFlowDiagram',
+  ]),
+  pricingUIBlock: z.enum(['TierCards', 'ToggleableMonthlyYearly', 'SliderPricing', 'CallToQuotePlan']),
+  objectionHandleUIBlock: z.enum(['VisualObjectionTiles', 'MythVsRealityGrid']),
+  faqQuestionCount: z.number().int().min(1).max(20),
+  useCasesAudienceType: z.enum(['industry', 'role']),
+});
+
+/**
  * Simplified Strategy Response Schema - FULLY INLINED
  * Used for Anthropic structured outputs
  */
@@ -89,6 +110,22 @@ export const SimplifiedStrategyResponseSchema = z.object({
     includeUniqueMechanism: z.boolean(),
     includeObjectionHandle: z.boolean(),
     isB2B: z.boolean(),
+  }),
+  uiblockDecisions: z.object({
+    productType: z.enum(['behind-the-scenes', 'visual-ui-hero', 'visual-ui-supports']),
+    featuresUIBlock: z.enum(['IconGrid', 'MetricTiles', 'Carousel', 'SplitAlternating']),
+    uniqueMechanismUIBlock: z.enum([
+      'SecretSauceReveal',
+      'StackedHighlights',
+      'TechnicalAdvantage',
+      'MethodologyBreakdown',
+      'PropertyComparisonMatrix',
+      'ProcessFlowDiagram',
+    ]),
+    pricingUIBlock: z.enum(['TierCards', 'ToggleableMonthlyYearly', 'SliderPricing', 'CallToQuotePlan']),
+    objectionHandleUIBlock: z.enum(['VisualObjectionTiles', 'MythVsRealityGrid']),
+    faqQuestionCount: z.number().int().min(1).max(20),
+    useCasesAudienceType: z.enum(['industry', 'role']),
   }),
 });
 
