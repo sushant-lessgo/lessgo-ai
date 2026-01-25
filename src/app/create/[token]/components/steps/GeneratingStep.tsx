@@ -125,11 +125,12 @@ export default function GeneratingStep() {
         (type) => `${type.toLowerCase()}-${crypto.randomUUID().slice(0, 8)}`
       );
 
-      // Build sectionLayouts map
+      // Build sectionLayouts map (V3 strategy has uiblocks embedded)
       const sectionLayouts: Record<string, string> = {};
       sectionIds.forEach((id, i) => {
         const sectionType = sectionOrder[i];
-        sectionLayouts[id] = uiblockSelections[sectionType] || 'default';
+        // @ts-expect-error - V3 strategy has uiblocks, V2 uses uiblockSelections
+        sectionLayouts[id] = strategy.uiblocks?.[sectionType] || uiblockSelections[sectionType] || 'default';
       });
 
       // Build content map
@@ -187,12 +188,15 @@ export default function GeneratingStep() {
     if (!strategy || !understanding) return;
 
     try {
-      const response = await fetch('/api/v2/generate-copy', {
+      // @ts-expect-error - V3 strategy has uiblocks embedded
+      const uiblocks = strategy.uiblocks || uiblockSelections;
+
+      const response = await fetch('/api/v3/generate-copy', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           strategy,
-          uiblocks: uiblockSelections,
+          uiblocks,
           productName: productName || 'Your Product',
           oneLiner,
           offer,

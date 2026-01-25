@@ -407,7 +407,22 @@ export function extractSectionType(sectionId: string): string {
   // Section IDs are in format: sectionType-timestamp (e.g., "hero-1753195467366")
   // Extract everything before the last dash and numbers
   const match = sectionId.match(/^([a-zA-Z]+)/);
-  return match ? match[1] : sectionId;
+  if (!match) return sectionId;
+
+  const rawType = match[1].toLowerCase();
+
+  // Normalize to registry keys (PascalCase sections → camelCase registry)
+  const typeMap: Record<string, string> = {
+    'objectionhandle': 'objectionHandling',
+    'howitworks': 'howItWorks',
+    'beforeafter': 'beforeAfter',
+    'socialproof': 'socialProof',
+    'usecases': 'useCases',
+    'uniquemechanism': 'uniqueMechanism',
+    'foundernote': 'founderNote',
+  };
+
+  return typeMap[rawType] || rawType;
 }
 
 // Helper function to get a component by section and layout

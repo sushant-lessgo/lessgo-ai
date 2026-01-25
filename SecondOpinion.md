@@ -1,198 +1,112 @@
-## Awareness Level Detection (LLM Prompt)
+Yes — the direction is right: **make arrays the canonical (“source of truth”) format**, and **support legacy/UX-friendly shapes during migration**.
 
-Given: [product, audience, problem, category]
+That said, I’d tweak the recommendation slightly:
 
-Choose ONE awareness level that will resonate with the most number of users:
+## Recommended pattern (best-practice)
 
-1. Problem aware - Cold
-   Knows problem exists but low emotional intensity. Not urgently seeking solutions. Needs to be reminded why this matters.
+### 1) Canonical data shape = arrays (always)
 
-2. Problem aware - Hot
-   Feels the pain intensely. Actively frustrated. Urgently wants relief. "Hair on fire" problem.
+* AI generates arrays ✅
+* DB/state/save format uses arrays ✅
+* Validation operates on arrays ✅
 
-3. Solution aware - Skeptical
-   Knows solutions exist. Has seen/tried alternatives. Hesitant, needs convincing why THIS one is different.
+### 2) Components accept “canonical + legacy”, but normalize immediately
 
-4. Solution aware - Eager
-   Knows solutions exist. Ready to act. Just needs to confirm this is the right choice.
+Instead of letting the rest of the app juggle both shapes, do:
 
----
+* **Normalize at the boundary** (when data enters a component/state)
+* Use only **one internal shape** everywhere after that
 
-## Unique Mechanism / Before-After / Objection Handle Detection (LLM Prompt)
+### 3) Avoid persisting numbered fields long-term
 
-Given: [product, audience, problem, category, awareness level]
-
-Choose section(s) that will resonate most:
-
-1. Before/After
-   Show transformation. State before → state after.
-   Use when: outcomes are tangible, visual, or emotionally relatable.
-   Examples: design tools, fitness, productivity, revenue growth.
-
-2. Unique Mechanism
-   Reveal WHY/HOW it works differently.
-   Use when: product has novel methodology, process, or technology.
-   Examples: proprietary algorithm, unique framework, contrarian approach.
-
-3. Objection Handle
-   Address common doubts, hesitations, or "why this won't work for me" thoughts.
-   Use when: audience is skeptical, has tried alternatives, or has specific concerns.
-   Examples: "But I'm not technical", "I've tried X before", "This seems too good".
-
-Pick one or more. Combine only if strongly justified.
-If both Before/After and Unique Mechanism: Before/After first, then Unique Mechanism.
+Numbered fields (`myth_1`, `reality_1`) are fine as a **temporary compatibility layer**, but they become a schema explosion over time. For editor UX, you can still edit **array items inline** (by index) without needing separate fields.
 
 ---
 
-# Templates
+## What I’d ship as the “standard”
 
-## 1. Waitlist
+### Canonical type
 
+```ts
+type MythRealityItem = { id: string; myth: string; reality: string };
 
-Problem aware - Cold
+type MythRealityCanonical = {
+  headline: string;
+  items: MythRealityItem[]; // canonical
+};
+```
 
+### Incoming (supports both formats)
 
-Hero
+```ts
+type MythRealityIncoming = {
+  headline: string;
 
-Problem
+  // AI / canonical-ish
+  myth_reality_items?: Array<{ myth: string; reality: string; id?: string }>;
 
-Unique mechanism
+  // Legacy/manual compatibility
+  myth_1?: string; reality_1?: string;
+  myth_2?: string; reality_2?: string;
+  myth_3?: string; reality_3?: string;
+  myth_4?: string; reality_4?: string;
+  myth_5?: string; reality_5?: string;
+  myth_6?: string; reality_6?: string;
+};
+```
 
-Features (always)
+### Normalizer (single gate)
 
-Use cases (only if B2B + multiple target audiences)
+```ts
+const MAX = 6;
 
-How it works (always)
+export function normalizeMythReality(content: MythRealityIncoming): MythRealityCanonical {
+  const headline = content.headline ?? "";
 
-Trust section — Order: Results → Testimonials → Social Proof → Founder Note. Include all available. Skip Founder Note if 2+ of [Results, Testimonials, Social Proof] exist.
+  // 1) Prefer array
+  const arr = content.myth_reality_items?.filter(x => x?.myth && x?.reality) ?? [];
+  if (arr.length) {
+    return {
+      headline,
+      items: arr.slice(0, MAX).map((x, i) => ({
+        id: x.id ?? `mr_${i}`,
+        myth: x.myth,
+        reality: x.reality,
+      })),
+    };
+  }
 
-CTA
+  // 2) Fallback to numbered fields
+  const items: MythRealityItem[] = [];
+  for (let i = 1; i <= MAX; i++) {
+    const myth = (content as any)[`myth_${i}`];
+    const reality = (content as any)[`reality_${i}`];
+    if (myth && reality) items.push({ id: `mr_${i-1}`, myth, reality });
+  }
 
+  return { headline, items };
+}
+```
 
-Problem - aware - hot
+### Save rule
 
-Hero
+* When user edits: **save back only to `myth_reality_items` (canonical)**.
+* Optionally, during migration only: also “mirror” into numbered fields if some old surface still needs it.
 
-Unique mechanism
+---
 
-Features (always)
+## Two important upgrades to your proposal
 
-Use cases (only if B2B + multiple target audiences)
+1. **Add `id` per item**
+   Helps React keys, reordering, diffing, and prevents “edit jumps” when items are inserted/removed.
 
-How it works (always)
+2. **Normalize once, don’t parse everywhere**
+   Your helper approach is right — but make it the *only* place that knows about legacy fields.
 
-Trust section — Order: Results → Testimonials → Social Proof → Founder Note. Include all available. Skip Founder Note if 2+ of [Results, Testimonials, Social Proof] exist.
+---
 
-CTA
+## What I 100% agree to kill
 
-
-Solution aware
-
-
-Hero
-
-Unique mechanism
-
-Features (always)
-
-Use cases (only if B2B + multiple target audiences)
-
-How it works (always)
-
-Trust section — Order: Results → Testimonials → Social Proof → Founder Note. Include all available. Skip Founder Note if 2+ of [Results, Testimonials, Social Proof] exist.
-
-CTA
-
-2. Product ready (all other landing goals)
-
-
-Problem aware - Cold
-
-
-Hero
-
-Problem
-
-Before/After and/or Unique Mechanism (per LLM decision above)
-
-
-Trust section — Order: Results → Testimonials → Social Proof. Include all available. If none, use Founder Note as fallback.
-
-Features (always)
-
-Use cases (only if B2B + multiple target audiences)
-
-How it works (always)
-
-Pricing
-
-CTA
-
-FAQ (Answer all practical questions)
-
-
-Problem aware - hot
-
-
-
-
-Hero
-
-Before/After and/or Unique Mechanism (per LLM decision above)
-
-
-Trust section — Order: Results → Testimonials → Social Proof. Include all available. If none, use Founder Note as fallback.
-
-Features (always)
-
-Use cases (only if B2B + multiple target audiences)
-
-How it works (always)
-
-Pricing
-
-CTA
-
-FAQ (Answer all practical questions)
-
-
-Solution aware - skeptical
-
-
-Hero
-
-Trust section — Order: Results → Testimonials → Social Proof. Include all available. If none, use Founder Note as fallback.
-
-Before/After and/or Unique Mechanism and/or Objection Handle (per LLM decision above) 
-
-Features (always)
-
-Use cases (only if B2B + multiple target audiences)
-
-How it works (always)
-
-Pricing
-
-CTA
-
-FAQ (Answer all practical questions)
-
-
-Solution aware - eager
-
-
-Hero
-
-Features (always)
-
-Use cases (only if B2B + multiple target audiences)
-
-How it works (always)
-
-Trust section — Order: Results → Testimonials → Social Proof. Include all available. If none, use Founder Note as fallback.
-
-Pricing
-
-CTA
-
-FAQ (Answer all practical questions)
+* Pipe strings / comma-separated formats ❌ (they break on real content and are brittle)
+* “arrays that must stay in sync” (`questions[]` + `answers[]`) ❌
+* `___REMOVED___` markers ❌ (use `null`, omit, or filter)

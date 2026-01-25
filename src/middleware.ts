@@ -28,6 +28,8 @@ const isPublicRoute = createRouteMatcher([
   '/api/v2/strategy',
   '/api/v2/uiblock-select',
   '/api/v2/generate-copy',
+  '/api/v3/strategy',
+  '/api/v3/generate-copy',
   '/p/:slug',
   '/thanks',
   '/privacy',

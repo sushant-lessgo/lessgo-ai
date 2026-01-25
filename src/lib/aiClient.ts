@@ -185,6 +185,75 @@ function isInfrastructureError(error: unknown): boolean {
 }
 
 /**
+ * Call model without structured outputs - for schemas with z.record() that
+ * Anthropic doesn't support (additionalProperties: object)
+ */
+async function callModelRaw(model: string, prompt: string): Promise<string> {
+  const provider = getProvider(model);
+
+  if (provider === 'openai') {
+    const response = await openai.chat.completions.create({
+      model,
+      max_tokens: 8192,
+      messages: [{ role: 'user', content: prompt }],
+    });
+    return response.choices[0].message.content || '';
+  } else {
+    const response = await anthropic.messages.create({
+      model,
+      max_tokens: 8192,
+      messages: [{ role: 'user', content: prompt }],
+    });
+    const content = response.content[0];
+    return content.type === 'text' ? content.text : '';
+  }
+}
+
+/**
+ * Generate raw JSON without structured outputs
+ * Use for schemas with z.record() that Anthropic doesn't support
+ * Parses JSON from response text and validates with zod
+ */
+export async function generateRawJson<T extends z.ZodType>(
+  endpoint: Endpoint,
+  prompt: string,
+  schema: T
+): Promise<z.infer<T>> {
+  const { primary, backup } = getModelConfig(endpoint);
+
+  async function tryGenerate(model: string): Promise<z.infer<T>> {
+    console.log(`[aiClient] Trying raw JSON generation with: ${model}`);
+    const text = await callModelRaw(model, prompt);
+
+    // Extract JSON from response (may have markdown code blocks)
+    const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/) ||
+                      text.match(/```\s*([\s\S]*?)\s*```/) ||
+                      text.match(/(\{[\s\S]*\})/);
+
+    if (!jsonMatch) {
+      throw new Error('No JSON found in response');
+    }
+
+    const jsonStr = jsonMatch[1] || jsonMatch[0];
+    const parsed = JSON.parse(jsonStr);
+    return schema.parse(parsed);
+  }
+
+  try {
+    return await tryGenerate(primary);
+  } catch (error) {
+    console.error(`[aiClient] Primary raw generation failed:`, error);
+
+    if (backup && isInfrastructureError(error)) {
+      console.log(`[aiClient] Falling back to: ${backup}`);
+      return await tryGenerate(backup);
+    }
+
+    throw error;
+  }
+}
+
+/**
  * Generate with schema validation and automatic fallback
  *
  * @param endpoint - Which endpoint (determines model selection)
