@@ -103,23 +103,14 @@ const CONTENT_SCHEMA = {
     type: 'boolean' as const,
     default: true
   },
-  // V2: Arrays with default items
+  // V2: Optional arrays - empty by default (only exist if AI generated or user added)
   trust_items: {
     type: 'array' as const,
-    default: [
-      { id: 't1', text: 'Free 14-day trial' },
-      { id: 't2', text: 'No credit card required' },
-      { id: 't3', text: 'Cancel anytime' }
-    ]
+    default: []
   },
   customer_avatars: {
     type: 'array' as const,
-    default: [
-      { id: 'a1', name: 'Sarah Chen', avatar_url: '' },
-      { id: 'a2', name: 'Alex Rivera', avatar_url: '' },
-      { id: 'a3', name: 'Jordan Kim', avatar_url: '' },
-      { id: 'a4', name: 'Maya Patel', avatar_url: '' }
-    ]
+    default: []
   }
 };
 

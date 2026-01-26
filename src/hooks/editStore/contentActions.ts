@@ -79,6 +79,46 @@ export function createContentActions(set: any, get: any): ContentActions {
           return;
         }
 
+        // V2 COLLECTIONS: Arrays stored directly, no stringify
+        // Principle: "AI output = DB format = Component format"
+        if (Array.isArray(content)) {
+          const oldValue = state.content[sectionId].elements[elementKey];
+          (state.content[sectionId].elements as Record<string, any>)[elementKey] = content;
+
+          // Initialize aiMetadata if missing
+          if (!state.content[sectionId].aiMetadata) {
+            state.content[sectionId].aiMetadata = {
+              lastGenerated: 0,
+              aiGenerated: false,
+              isCustomized: false,
+              aiGeneratedElements: [],
+              excludedElements: []
+            };
+          }
+          state.content[sectionId].aiMetadata.isCustomized = true;
+          state.persistence.isDirty = true;
+
+          // Track change for auto-save
+          state.queuedChanges.push({
+            id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            type: 'content',
+            sectionId,
+            elementKey,
+            oldValue,
+            newValue: content,
+            timestamp: Date.now(),
+            source: 'user',
+          });
+          state.lastUpdated = Date.now();
+
+          logger.debug(`🔄 [${updateTime}] updateElementContent ARRAY stored directly:`, {
+            sectionId,
+            elementKey,
+            itemCount: content.length
+          });
+          return; // Early return - arrays handled, skip string processing
+        }
+
         // If element doesn't exist, create it (for cases like hero_image)
         if (!state.content[sectionId].elements[elementKey]) {
           logger.debug(`Creating missing element: ${elementKey} in section ${sectionId}`);
@@ -91,13 +131,10 @@ export function createContentActions(set: any, get: any): ContentActions {
         }
 
         const element = state.content[sectionId].elements[elementKey];
-        
-        // CRITICAL FIX: Ensure content is always a primitive string, never an object
+
+        // String content handling (non-array)
         let stringContent: string;
-        if (Array.isArray(content)) {
-          // V2 collections: store as JSON string (for object arrays like trust_items)
-          stringContent = JSON.stringify(content);
-        } else if (typeof content === 'string') {
+        if (typeof content === 'string') {
           stringContent = content;
         } else {
           logger.warn('Unexpected content type, converting to string:', { type: typeof content, content });
