@@ -22,6 +22,7 @@ import { generateRawJson } from '@/lib/aiClient';
 import { CopyResponseSchema } from '@/lib/schemas';
 import { buildCopyPromptV3, buildCopyRetryPromptV3 } from '@/modules/copy/copyPromptV3';
 import { validateCompleteness } from '@/modules/copy/parseCopy';
+import { applyAllSchemaDefaults } from '@/modules/sections/layoutElementSchema';
 import type { SectionCopy, SimplifiedStrategyOutput, LandingGoal } from '@/types/generation';
 import { sectionTypes, vibes, simplifiedAwarenessLevels, landingGoals } from '@/types/generation';
 
@@ -152,6 +153,8 @@ async function generateCopyV3Handler(req: NextRequest): Promise<Response> {
         logger.dev('[generate-copy-v3] RESPONSE:', response);
 
         sections = response as Record<string, SectionCopy>;
+        // Apply schema defaults for manual_preferred fields
+        sections = applyAllSchemaDefaults(sections, uiblocks) as Record<string, SectionCopy>;
       } catch (aiError: any) {
         lastError = aiError.message || 'AI generation failed';
         logger.error(`AI copy generation failed (attempt ${attempts}):`, aiError);

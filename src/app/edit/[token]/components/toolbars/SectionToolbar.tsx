@@ -126,7 +126,7 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
 
       // Filter out elements already in section
       const existingElementKeys = Object.keys(sectionData?.elements || {});
-      const availableElements = requirements.excludedElements.filter(elementName =>
+      const availableElements = requirements.optionalElements.filter(elementName =>
         !existingElementKeys.includes(elementName)
       );
 
@@ -230,7 +230,7 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
 
       // Filter out elements already in section (unless empty/removed)
       const existingElementKeys = Object.keys(sectionData?.elements || {});
-      const availableOptionalElements = requirements.excludedElements.filter(elementName => {
+      const availableOptionalElements = requirements.optionalElements.filter(elementName => {
         // Element not in section → can add
         if (!existingElementKeys.includes(elementName)) return true;
 

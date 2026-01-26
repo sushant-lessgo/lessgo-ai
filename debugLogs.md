@@ -1,173 +1,531 @@
-MythVsRealityGrid.tsx:188 Uncaught TypeError: content.myth_reality_pairs.split is not a function
-    at parseMythRealityPairs (MythVsRealityGrid.tsx:188:54)
-    at MythVsRealityGrid (MythVsRealityGrid.tsx:203:28)
-    at renderWithHooks (react-dom.development.js:11121:18)
-    at mountIndeterminateComponent (react-dom.development.js:16869:13)
-    at beginWork$1 (react-dom.development.js:18458:16)
-    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
-    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
-    at invokeGuardedCallback (react-dom.development.js:20689:29)
-    at beginWork (react-dom.development.js:26949:7)
-    at performUnitOfWork (react-dom.development.js:25748:12)
-    at workLoopSync (react-dom.development.js:25464:5)
-    at renderRootSync (react-dom.development.js:25419:7)
-    at performConcurrentWorkOnRoot (react-dom.development.js:24504:74)
-    at workLoop (scheduler.development.js:256:34)
-    at flushWork (scheduler.development.js:225:14)
-    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-MythVsRealityGrid.tsx:188 Uncaught TypeError: content.myth_reality_pairs.split is not a function
-    at parseMythRealityPairs (MythVsRealityGrid.tsx:188:54)
-    at MythVsRealityGrid (MythVsRealityGrid.tsx:203:28)
-    at renderWithHooks (react-dom.development.js:11121:18)
-    at mountIndeterminateComponent (react-dom.development.js:16869:13)
-    at beginWork$1 (react-dom.development.js:18458:16)
-    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
-    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
-    at invokeGuardedCallback (react-dom.development.js:20689:29)
-    at beginWork (react-dom.development.js:26949:7)
-    at performUnitOfWork (react-dom.development.js:25748:12)
-    at workLoopSync (react-dom.development.js:25464:5)
-    at renderRootSync (react-dom.development.js:25419:7)
-    at performConcurrentWorkOnRoot (react-dom.development.js:24504:74)
-    at workLoop (scheduler.development.js:256:34)
-    at flushWork (scheduler.development.js:225:14)
-    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-MythVsRealityGrid.tsx:188 Uncaught TypeError: content.myth_reality_pairs.split is not a function
-    at parseMythRealityPairs (MythVsRealityGrid.tsx:188:54)
-    at MythVsRealityGrid (MythVsRealityGrid.tsx:203:28)
-    at renderWithHooks (react-dom.development.js:11121:18)
-    at mountIndeterminateComponent (react-dom.development.js:16869:13)
-    at beginWork$1 (react-dom.development.js:18458:16)
-    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
-    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
-    at invokeGuardedCallback (react-dom.development.js:20689:29)
-    at beginWork (react-dom.development.js:26949:7)
-    at performUnitOfWork (react-dom.development.js:25748:12)
-    at workLoopSync (react-dom.development.js:25464:5)
-    at renderRootSync (react-dom.development.js:25419:7)
-    at recoverFromConcurrentError (react-dom.development.js:24597:20)
-    at performConcurrentWorkOnRoot (react-dom.development.js:24542:26)
-    at workLoop (scheduler.development.js:256:34)
-    at flushWork (scheduler.development.js:225:14)
-    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-MythVsRealityGrid.tsx:188 Uncaught TypeError: content.myth_reality_pairs.split is not a function
-    at parseMythRealityPairs (MythVsRealityGrid.tsx:188:54)
-    at MythVsRealityGrid (MythVsRealityGrid.tsx:203:28)
-    at renderWithHooks (react-dom.development.js:11121:18)
-    at mountIndeterminateComponent (react-dom.development.js:16869:13)
-    at beginWork$1 (react-dom.development.js:18458:16)
-    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
-    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
-    at invokeGuardedCallback (react-dom.development.js:20689:29)
-    at beginWork (react-dom.development.js:26949:7)
-    at performUnitOfWork (react-dom.development.js:25748:12)
-    at workLoopSync (react-dom.development.js:25464:5)
-    at renderRootSync (react-dom.development.js:25419:7)
-    at recoverFromConcurrentError (react-dom.development.js:24597:20)
-    at performConcurrentWorkOnRoot (react-dom.development.js:24542:26)
-    at workLoop (scheduler.development.js:256:34)
-    at flushWork (scheduler.development.js:225:14)
-    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-app-index.js:33 The above error occurred in the <MythVsRealityGrid> component:
-
-    at MythVsRealityGrid (webpack-internal:///(app-pages-browser)/./src/modules/UIBlocks/ObjectionHandle/MythVsRealityGrid.tsx:103:210)
-    at div
-    at div
-    at SectionTracker (webpack-internal:///(app-pages-browser)/./src/app/p/[slug]/components/SectionTracker.tsx:15:11)
-    at main
-    at div
-    at VariableThemeInjector (webpack-internal:///(app-pages-browser)/./src/modules/Design/ColorSystem/VariableThemeInjector.tsx:37:11)
-    at div
-    at div
-    at CSSVariableErrorBoundary (webpack-internal:///(app-pages-browser)/./src/components/CSSVariableErrorBoundary.tsx:261:9)
-    at LandingPageRenderer (webpack-internal:///(app-pages-browser)/./src/modules/generatedLanding/LandingPageRenderer.tsx:142:11)
-    at div
-    at div
-    at PageRevealAnimation (webpack-internal:///(app-pages-browser)/./src/app/generate/[token]/components/PageRevealAnimation.tsx:17:11)
-    at div
-    at CompleteStepContent (webpack-internal:///(app-pages-browser)/./src/app/create/[token]/components/steps/CompleteStep.tsx:57:11)
-    at EditErrorBoundary (webpack-internal:///(app-pages-browser)/./src/components/EditErrorBoundary.tsx:87:9)
-    at EditProvider (webpack-internal:///(app-pages-browser)/./src/components/EditProvider.tsx:135:11)
-    at CompleteStep (webpack-internal:///(app-pages-browser)/./src/app/create/[token]/components/steps/CompleteStep.tsx:28:78)
-    at BailoutToCSR (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/shared/lib/lazy-dynamic/dynamic-bailout-to-csr.js:13:11)
-    at Suspense
-    at LoadableComponent
-    at div
-    at div
-    at div
-    at div
-    at StepContainer (webpack-internal:///(app-pages-browser)/./src/app/create/[token]/components/StepContainer.tsx:23:11)
-    at CreatePage (webpack-internal:///(app-pages-browser)/./src/app/create/[token]/page.tsx:56:102)
-    at ClientPageRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/client-page.js:14:11)
-    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
-    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
-    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
-    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
-    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
-    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
-    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
-    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
-    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
-    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
-    at CreateLayout (Server)
-    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
-    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
-    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
-    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
-    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
-    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
-    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
-    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
-    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
-    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
-    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
-    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
-    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
-    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
-    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
-    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
-    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
-    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
-    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
-    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
-    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
-    at PostHogProvider (webpack-internal:///(app-pages-browser)/./node_modules/posthog-js/react/dist/esm/index.js:51:23)
-    at PostHogProvider (webpack-internal:///(app-pages-browser)/./src/providers/ph-provider.tsx:20:11)
-    at Provider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-context/dist/index.mjs:34:15)
-    at TooltipProvider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-tooltip/dist/index.mjs:58:13)
-    at body
-    at html
-    at __experimental_CheckoutProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/shared/dist/react/index.mjs:117:42)
-    at SWRConfig (webpack-internal:///(app-pages-browser)/./node_modules/swr/dist/_internal/config-context-client-BoS53ST9.mjs:554:13)
-    at OrganizationProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/shared/dist/react/index.mjs:129:3)
-    at ClerkContextProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:1448:11)
-    at ClerkProviderBase (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:1540:11)
-    at Hoc (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/chunk-3664V5SS.mjs:81:5)
-    at ClerkNextOptionsProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/client-boundary/NextOptionsContext.js:17:11)
-    at NextClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:60:13)
-    at ClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:127:13)
-    at ClerkProvider (Server)
-    at RootLayout (Server)
-    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
-    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
-    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
-    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
-    at DevRootNotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/dev-root-not-found-boundary.js:33:11)
-    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
-    at HotReload (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:321:11)
-    at Router (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:207:11)
-    at ErrorBoundaryHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
-    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
-    at AppRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:585:13)
-    at ServerRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:112:27)
-    at Root (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:117:11)
-
-React will try to recreate this component tree from scratch using the error boundary you provided, EditErrorBoundary.
-window.console.error @ app-index.js:33
-app-index.js:33 🚨 EditErrorBoundary caught an error: Object
-window.console.error @ app-index.js:33
-app-index.js:33 [2026-01-25T07:02:10.990Z] ERROR: 🚨 EditProvider error boundary caught: {
-  "error": "content.myth_reality_pairs.split is not a function",
-  "tokenId": "_dHskaxh2dqH",
-  "componentStack": "\n    at MythVsRealityGrid (webpack-internal:///(app-pages-browser)/./src/modules/UIBlocks/ObjectionHandle/MythVsRealityGrid.tsx:103:210)\n    at div\n    at div\n    at SectionTracker (webpack-internal:///(app-pages-browser)/./src/app/p/[slug]/components/SectionTracker.tsx:15:11)\n    at main\n    at div\n    at VariableThemeInjector (webpack-internal:///(app-pages-browser)/./src/modules/Design/ColorSystem/VariableThemeInjector.tsx:37:11)\n    at div\n    at div\n    at CSSVariableErrorBoundary (webpack-internal:///(app-pages-browser)/./src/components/CSSVariableErrorBoundary.tsx:261:9)\n    at LandingPageRenderer (webpack-internal:///(app-pages-browser)/./src/modules/generatedLanding/LandingPageRenderer.tsx:142:11)\n    at div\n    at div\n    at PageRevealAnimation (webpack-internal:///(app-pages-browser)/./src/app/generate/[token]/components/PageRevealAnimation.tsx:17:11)\n    at div\n    at CompleteStepContent (webpack-internal:///(app-pages-browser)/./src/app/create/[token]/components/steps/CompleteStep.tsx:57:11)\n    at EditErrorBoundary (webpack-internal:///(app-pages-browser)/./src/components/EditErrorBoundary.tsx:87:9)\n    at EditProvider (webpack-internal:///(app-pages-browser)/./src/components/EditProvider.tsx:135:11)\n    at CompleteStep (webpack-internal:///(app-pages-browser)/./src/app/create/[token]/components/steps/CompleteStep.tsx:28:78)\n    at BailoutToCSR (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/shared/lib/lazy-dynamic/dynamic-bailout-to-csr.js:13:11)\n    at Suspense\n    at LoadableComponent\n    at div\n    at div\n    at div\n    at div\n    at StepContainer (webpack-internal:///(app-pages-browser)/./src/app/create/[token]/components/StepContainer.tsx:23:11)\n    at CreatePage (webpack-internal:///(app-pages-browser)/./src/app/create/[token]/page.tsx:56:102)\n    at ClientPageRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/client-page.js:14:11)\n    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)\n    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)\n    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)\n    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)\n    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)\n    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)\n    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)\n    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)\n    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)\n    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)\n    at CreateLayout (Server)\n    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)\n    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)\n    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)\n    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)\n    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)\n    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)\n    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)\n    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)\n    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)\n    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)\n    at InnerLayoutRouter (web
-window.console.error @ app-index.js:33
+{
+  sections: [
+    'header-6789d56a',
+    'hero-47d7b5eb',
+    'uniquemechanism-c1183351',
+    'features-ce3379a8',
+    'howitworks-c4e117e5',
+    'foundernote-2f42a441',
+    'cta-699f7731',
+    'footer-f9eee069'
+  ],
+  sectionLayouts: {
+    'cta-699f7731': 'VisualCTAWithMockup',
+    'hero-47d7b5eb': 'leftCopyRightImage',
+    'footer-f9eee069': 'ContactFooter',
+    'header-6789d56a': 'MinimalNavHeader',
+    'features-ce3379a8': 'IconGrid',
+    'howitworks-c4e117e5': 'AccordionSteps',
+    'foundernote-2f42a441': 'LetterStyleBlock',
+    'uniquemechanism-c1183351': 'MethodologyBreakdown'
+  },
+  sectionSpacing: {},
+  theme: {
+    typography: {
+      bodyFont: '\'Inter\', sans-serif',
+      headingFont: '\'Manrope\', sans-serif'
+    },
+    colors: {
+      states: {
+        focus: {},
+        hover: {},
+        active: {},
+        disabled: {}
+      },
+      semantic: {
+        info: 'bg-blue-500',
+        error: 'bg-red-500',
+        neutral: 'bg-gray-500',
+        success: 'bg-green-500',
+        warning: 'bg-yellow-500'
+      },
+      accentCSS: 'bg-purple-600',
+      baseColor: 'gray',
+      accentColor: 'purple',
+      sectionBackgrounds: {
+        divider: 'bg-gray-100/50',
+        neutral: 'bg-white',
+        primary: 'bg-gray-800',
+        secondary: 'bg-gray-50'
+      }
+    },
+    spacing: {
+      unit: 8,
+      scale: [
+        0,
+        4,
+        8,
+        12,
+        16,
+        20,
+        24,
+        32,
+        40,
+        48,
+        64,
+        80,
+        96,
+        128
+      ],
+      presets: {
+        lg: '1.5rem',
+        md: '1rem',
+        sm: '0.75rem',
+        xl: '2rem',
+        xs: '0.5rem',
+        xxl: '3rem'
+      }
+    },
+    corners: {
+      scale: {
+        full: 9999,
+        large: 16,
+        small: 4,
+        medium: 8
+      },
+      radius: 8
+    },
+    animations: {
+      easing: {
+        easeIn: 'cubic-bezier(0.4, 0, 1, 1)',
+        easeOut: 'cubic-bezier(0, 0, 0.2, 1)',
+        easeInOut: 'cubic-bezier(0.4, 0, 0.2, 1)'
+      },
+      enabled: true,
+      duration: {
+        fast: 150,
+        slow: 500,
+        medium: 300
+      },
+      reducedMotion: false
+    }
+  },
+  navigationConfig: {
+    items: [
+      {
+        id: 'nav-home',
+        link: '#',
+        label: 'Home',
+        order: 0,
+        isAutoGenerated: true
+      },
+      {
+        id: 'nav-features-ce3379a8',
+        link: '#features-ce3379a8',
+        label: 'Features',
+        order: 1,
+        sectionId: 'features-ce3379a8',
+        isAutoGenerated: true
+      },
+      {
+        id: 'nav-howitworks-c4e117e5',
+        link: '#howitworks-c4e117e5',
+        label: 'How It Works',
+        order: 2,
+        sectionId: 'howitworks-c4e117e5',
+        isAutoGenerated: true
+      },
+      {
+        id: 'nav-uniquemechanism-c1183351',
+        link: '#uniquemechanism-c1183351',
+        label: 'Technology',
+        order: 3,
+        sectionId: 'uniquemechanism-c1183351',
+        isAutoGenerated: true
+      }
+    ],
+    maxItems: 4,
+    lastUpdated: 1769440495548,
+    autoConfigured: true
+  },
+  socialMediaConfig: {
+    items: [],
+    maxItems: 8,
+    lastUpdated: 1769440495551
+  },
+  globalSettings: {
+    maxWidth: '1200px',
+    containerPadding: '32px',
+    sectionSpacing: '64px',
+    deviceMode: 'desktop',
+    zoomLevel: 100
+  },
+  content: {
+    'cta-699f7731': {
+      elements: {
+        cta_text: 'Get on the Waitlist - 1 Year Free',
+        headline: 'Ready to Stop Feeling Guilty and Start Feeling Strong?',
+        subheadline: 'Join parents who are reclaiming their energy without sacrificing family time',
+        trust_item_1: 'Full access to all features when we launch',
+        trust_item_2: 'First year completely free - no credit card needed',
+        trust_item_3: 'Cancel anytime (but we think you\'ll actually stick with this one)'
+      }
+    },
+    'hero-47d7b5eb': {
+      elements: {
+        cta_text: 'Join the Waitlist - Get 1 Year Free',
+        headline: 'Finally, a Workout Plan That Works Around Your Kids, Not Against Them',
+        badge_text: 'Built by parents, for parents',
+        hero_image: 'https://3aybchtobvtq53dm.public.blob.vercel-storage.com/uploads/ekUolq4-SbUt/pexels-2261477.webp',
+        subheadline: 'Get back to feeling strong and energized without sacrificing family time. Adaptive routines designed for parents who have 15 minutes, not an hour.',
+        trust_items: {
+          type: 'text',
+          content: '["[\\"[\\\\\\"[\\\\\\\\\\\\\\"[\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"[\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"[{\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"id\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"t1769444284852\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"text\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"New trust item\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"}]\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",{\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"id\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"t1769444291152\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"text\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"New trust item\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"}]\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",{\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"id\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"t1769444292445\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"text\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"New trust item\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"}]\\\\\\\\\\\\\\",{\\\\\\\\\\\\\\"id\\\\\\\\\\\\\\":\\\\\\\\\\\\\\"t1769444331594\\\\\\\\\\\\\\",\\\\\\\\\\\\\\"text\\\\\\\\\\\\\\":\\\\\\\\\\\\\\"New trust item\\\\\\\\\\\\\\"}]\\\\\\",{\\\\\\"id\\\\\\":\\\\\\"t1769444444155\\\\\\",\\\\\\"text\\\\\\":\\\\\\"New trust item\\\\\\"}]\\",{\\"id\\":\\"t1769444449824\\",\\"text\\":\\"New trust item\\"}]",{"id":"t1769444459299","text":"New trust item"}]',
+          editMode: 'inline',
+          isEditable: true
+        },
+        supporting_text: 'Launch offer: First members get instant access to all features plus 1 year completely free'
+      },
+      aiMetadata: {
+        aiGenerated: false,
+        isCustomized: true,
+        lastGenerated: 0,
+        excludedElements: [],
+        aiGeneratedElements: []
+      }
+    },
+    'footer-f9eee069': {
+      elements: {
+        newsletter_cta: 'Send Me Tips',
+        newsletter_title: 'Parent Fitness Tips',
+        newsletter_description: 'Real strategies for staying active when you\'re running on fumes and caffeine. No BS, just practical tips from parents who get it.'
+      }
+    },
+    'header-6789d56a': {
+      elements: {}
+    },
+    'features-ce3379a8': {
+      elements: {
+        icon_1: 'calendar-edit',
+        icon_2: 'bell',
+        icon_3: 'chart-line-up',
+        icon_4: 'users',
+        icon_5: 'timer',
+        headline: 'Everything You Need, Nothing That Gets in Your Way',
+        subheadline: 'Designed to make staying consistent feel effortless—even when life isn\'t',
+        feature_titles: [
+          'Schedules That Actually Flex',
+          'Helpful (Not Nagging) Reminders',
+          'Progress That Motivates',
+          'Kid-Friendly Workouts',
+          'Quick Wins That Add Up'
+        ],
+        feature_descriptions: [
+          'Customize your workout schedule around daycare pickup, bedtime routines, and everything else. Change it anytime—life changes, your plan should too.',
+          'Smart notifications that remind you at the right times and know when to back off. Exercise becomes automatic without feeling like another obligation.',
+          'Watch your consistency build and celebrate every workout completed. See the proof that you\'re showing up for yourself, even in small ways.',
+          'Turn family time into active time with exercises your kids can join. Squat while they count, race during cardio, make memories while getting stronger.',
+          '15-minute routines that leave you feeling accomplished, not exhausted. Because a short workout you finish beats a long one you never start.'
+        ]
+      }
+    },
+    'howitworks-c4e117e5': {
+      elements: {
+        cta_text: 'Reserve Your Free Year Now',
+        headline: 'From Overwhelmed to On Track in Four Simple Steps',
+        step_titles: [
+          'Tell Us About Your Real Schedule',
+          'Get Your Personalized Plan',
+          'Start With What You Can Handle',
+          'Watch It Adapt as You Go'
+        ],
+        subheadline: 'We handle the planning, you just show up (whenever you can)',
+        step_details: [
+          'Takes less than 3 minutes. We ask about your morning routine, work schedule, kids\' activities, and when you typically crash on the couch. The more honest you are, the better your plan works.',
+          'You\'ll see realistic workout slots mapped to your actual day—maybe 15 minutes before the kids wake up, or 20 minutes during lunch. No 5am boot camps unless that\'s actually your thing.',
+          'Your first week is intentionally easy. We\'re building the habit of showing up, not testing your limits. You can always increase intensity later—consistency comes first.',
+          'Skipped Tuesday because someone had a fever? We\'ve already reshuffled your week. Feeling extra energized on Friday? We\'ll remember that pattern for next week. It gets smarter as you use it.'
+        ],
+        step_descriptions: [
+          'Share when you typically have pockets of time and what your energy levels look like throughout the week',
+          'Receive a workout schedule built specifically around your constraints, not some idealized version of your life',
+          'Begin with manageable routines that fit your current fitness level and available time—no jumping into the deep end',
+          'The system learns from your patterns, adjusts when life happens, and keeps you on track without starting over'
+        ]
+      }
+    },
+    'foundernote-2f42a441': {
+      elements: {
+        ps_text: 'P.S. — The 1 year free offer is only for our founding members. Once we launch, this goes away. Get on the list now and lock it in.',
+        cta_text: 'Join the Waitlist',
+        letter_body: 'I created this after my third failed attempt at a "quick 30-minute morning routine" that never accounted for surprise diaper blowouts or toddlers who suddenly refused to get dressed.\n\nEvery fitness app I tried was built by people who apparently had never met a real child or worked a job where you can\'t just duck out for an hour. I was tired of feeling like a failure because I couldn\'t maintain routines designed for people without my life.\n\nSo I built something different. Something that understands that some mornings you have 10 minutes and others you have zero. That your Wednesday energy is not your Friday energy. That you love your kids and your job, but you also need to feel like yourself again.\n\nThis isn\'t about transformation photos or beach bodies. It\'s about having the energy to play tag without getting winded. About feeling proud instead of guilty when you look in the mirror. About proving to yourself that you can prioritize your health without becoming a less present parent or employee.\n\nYou\'re not failing at fitness. The fitness industry has been failing you. Let\'s fix that together.',
+        founder_title: 'Fellow Exhausted Parent & Founder',
+        letter_header: 'A Note From a Parent Who Gets It',
+        letter_greeting: 'Hey there,',
+        letter_signature: 'To your health (and sanity)'
+      }
+    },
+    'uniquemechanism-c1183351': {
+      elements: {
+        headline: 'Workouts That Adapt to Your Real Life (Yes, Even When Everything Goes Sideways)',
+        principles: [
+          'Smart Time-Blocking',
+          'Energy-Aware Scheduling',
+          'Interruption Recovery',
+          'Flexible Duration Options'
+        ],
+        principle_icons: [
+          'calendar-check',
+          'battery-charging',
+          'refresh',
+          'clock'
+        ],
+        principle_details: [
+          'Identifies your realistic workout windows based on your schedule patterns, then protects that time with reminders that actually help instead of guilt-trip',
+          'Matches workout intensity to when you actually have energy—lighter routines for exhausted evenings, energizing sessions for whenever you feel ready',
+          'Missed a workout? The system automatically adjusts your week instead of letting you fall off track completely. No starting over, just keep going',
+          'Choose 10, 15, or 20-minute routines based on what you actually have today. Every workout counts, even the short ones'
+        ],
+        methodology_description: 'Forget rigid workout plans that fall apart the moment your toddler gets sick or work runs late. Our adaptive scheduling learns your patterns, adjusts to interruptions, and builds routines around your actual energy levels—not some fitness guru\'s ideal day. It\'s the difference between a plan you abandon in week two and a routine you\'re still doing six months later.'
+      }
+    }
+  },
+  mode: 'edit',
+  editMode: 'section',
+  generationMode: false,
+  selectedSection: 'hero-47d7b5eb',
+  multiSelection: [],
+  isTextEditing: false,
+  formattingInProgress: false,
+  leftPanel: {
+    width: 300,
+    collapsed: false,
+    manuallyToggled: false,
+    activeTab: 'pageStructure'
+  },
+  toolbar: {
+    type: 'section',
+    visible: true,
+    position: {
+      x: 876.875,
+      y: 285.01171875
+    },
+    targetId: 'hero-47d7b5eb',
+    actions: [
+      'change-layout',
+      'add-element',
+      'background-settings',
+      'regenerate-section',
+      'duplicate-section',
+      'delete-section'
+    ]
+  },
+  aiGeneration: {
+    isGenerating: false,
+    currentOperation: null,
+    progress: 0,
+    status: '',
+    errors: [],
+    warnings: [],
+    context: null
+  },
+  elementVariations: {
+    visible: false,
+    variations: []
+  },
+  layoutChangeModal: {
+    visible: false
+  },
+  formData: {},
+  images: {
+    assets: {},
+    stockPhotos: {
+      searchResults: [],
+      searchQuery: '',
+      searchVisible: false
+    },
+    uploadProgress: {}
+  },
+  errors: {},
+  loadingStates: {},
+  isLoading: false,
+  queuedChanges: [
+    {
+      id: '1769444394198-l4sp8gnct',
+      type: 'content',
+      sectionId: 'uniquemechanism-c1183351',
+      elementKey: 'principle_icon_1',
+      oldValue: '',
+      newValue: '📋',
+      timestamp: 1769444394198,
+      source: 'user'
+    },
+    {
+      id: '1769444394248-eh9wsrkil',
+      type: 'content',
+      sectionId: 'uniquemechanism-c1183351',
+      elementKey: 'principle_icon_1',
+      oldValue: '📋',
+      newValue: '📋',
+      timestamp: 1769444394248,
+      source: 'user'
+    },
+    {
+      id: '1769444444156-bp90tn8mj',
+      type: 'content',
+      sectionId: 'hero-47d7b5eb',
+      elementKey: 'trust_items',
+      oldValue: '["[\\"[\\\\\\"[{\\\\\\\\\\\\\\"id\\\\\\\\\\\\\\":\\\\\\\\\\\\\\"t1769444284852\\\\\\\\\\\\\\",\\\\\\\\\\\\\\"text\\\\\\\\\\\\\\":\\\\\\\\\\\\\\"New trust item\\\\\\\\\\\\\\"}]\\\\\\",{\\\\\\"id\\\\\\":\\\\\\"t1769444291152\\\\\\",\\\\\\"text\\\\\\":\\\\\\"New trust item\\\\\\"}]\\",{\\"id\\":\\"t1769444292445\\",\\"text\\":\\"New trust item\\"}]",{"id":"t1769444331594","text":"New trust item"}]',
+      newValue: [
+        '["[\\"[\\\\\\"[{\\\\\\\\\\\\\\"id\\\\\\\\\\\\\\":\\\\\\\\\\\\\\"t1769444284852\\\\\\\\\\\\\\",\\\\\\\\\\\\\\"text\\\\\\\\\\\\\\":\\\\\\\\\\\\\\"New trust item\\\\\\\\\\\\\\"}]\\\\\\",{\\\\\\"id\\\\\\":\\\\\\"t1769444291152\\\\\\",\\\\\\"text\\\\\\":\\\\\\"New trust item\\\\\\"}]\\",{\\"id\\":\\"t1769444292445\\",\\"text\\":\\"New trust item\\"}]",{"id":"t1769444331594","text":"New trust item"}]',
+        {
+          id: 't1769444444155',
+          text: 'New trust item'
+        }
+      ],
+      timestamp: 1769444444156,
+      source: 'user'
+    },
+    {
+      id: '1769444449824-6gwvt7hgd',
+      type: 'content',
+      sectionId: 'hero-47d7b5eb',
+      elementKey: 'trust_items',
+      oldValue: '["[\\"[\\\\\\"[\\\\\\\\\\\\\\"[{\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"id\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"t1769444284852\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"text\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"New trust item\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"}]\\\\\\\\\\\\\\",{\\\\\\\\\\\\\\"id\\\\\\\\\\\\\\":\\\\\\\\\\\\\\"t1769444291152\\\\\\\\\\\\\\",\\\\\\\\\\\\\\"text\\\\\\\\\\\\\\":\\\\\\\\\\\\\\"New trust item\\\\\\\\\\\\\\"}]\\\\\\",{\\\\\\"id\\\\\\":\\\\\\"t1769444292445\\\\\\",\\\\\\"text\\\\\\":\\\\\\"New trust item\\\\\\"}]\\",{\\"id\\":\\"t1769444331594\\",\\"text\\":\\"New trust item\\"}]",{"id":"t1769444444155","text":"New trust item"}]',
+      newValue: [
+        '["[\\"[\\\\\\"[\\\\\\\\\\\\\\"[{\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"id\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"t1769444284852\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"text\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"New trust item\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"}]\\\\\\\\\\\\\\",{\\\\\\\\\\\\\\"id\\\\\\\\\\\\\\":\\\\\\\\\\\\\\"t1769444291152\\\\\\\\\\\\\\",\\\\\\\\\\\\\\"text\\\\\\\\\\\\\\":\\\\\\\\\\\\\\"New trust item\\\\\\\\\\\\\\"}]\\\\\\",{\\\\\\"id\\\\\\":\\\\\\"t1769444292445\\\\\\",\\\\\\"text\\\\\\":\\\\\\"New trust item\\\\\\"}]\\",{\\"id\\":\\"t1769444331594\\",\\"text\\":\\"New trust item\\"}]",{"id":"t1769444444155","text":"New trust item"}]',
+        {
+          id: 't1769444449824',
+          text: 'New trust item'
+        }
+      ],
+      timestamp: 1769444449824,
+      source: 'user'
+    },
+    {
+      id: '1769444459300-sbxq088ku',
+      type: 'content',
+      sectionId: 'hero-47d7b5eb',
+      elementKey: 'trust_items',
+      oldValue: '["[\\"[\\\\\\"[\\\\\\\\\\\\\\"[\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"[{\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"id\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"t1769444284852\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"text\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"New trust item\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"}]\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",{\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"id\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"t1769444291152\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"text\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"New trust item\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"}]\\\\\\\\\\\\\\",{\\\\\\\\\\\\\\"id\\\\\\\\\\\\\\":\\\\\\\\\\\\\\"t1769444292445\\\\\\\\\\\\\\",\\\\\\\\\\\\\\"text\\\\\\\\\\\\\\":\\\\\\\\\\\\\\"New trust item\\\\\\\\\\\\\\"}]\\\\\\",{\\\\\\"id\\\\\\":\\\\\\"t1769444331594\\\\\\",\\\\\\"text\\\\\\":\\\\\\"New trust item\\\\\\"}]\\",{\\"id\\":\\"t1769444444155\\",\\"text\\":\\"New trust item\\"}]",{"id":"t1769444449824","text":"New trust item"}]',
+      newValue: [
+        '["[\\"[\\\\\\"[\\\\\\\\\\\\\\"[\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"[{\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"id\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"t1769444284852\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"text\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"New trust item\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"}]\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",{\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"id\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"t1769444291152\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"text\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"New trust item\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"}]\\\\\\\\\\\\\\",{\\\\\\\\\\\\\\"id\\\\\\\\\\\\\\":\\\\\\\\\\\\\\"t1769444292445\\\\\\\\\\\\\\",\\\\\\\\\\\\\\"text\\\\\\\\\\\\\\":\\\\\\\\\\\\\\"New trust item\\\\\\\\\\\\\\"}]\\\\\\",{\\\\\\"id\\\\\\":\\\\\\"t1769444331594\\\\\\",\\\\\\"text\\\\\\":\\\\\\"New trust item\\\\\\"}]\\",{\\"id\\":\\"t1769444444155\\",\\"text\\":\\"New trust item\\"}]",{"id":"t1769444449824","text":"New trust item"}]',
+        {
+          id: 't1769444459299',
+          text: 'New trust item'
+        }
+      ],
+      timestamp: 1769444459300,
+      source: 'user'
+    }
+  ],
+  history: {
+    undoStack: [],
+    redoStack: [],
+    maxHistorySize: 50
+  },
+  apiQueue: {
+    queue: [],
+    processing: false,
+    rateLimitRemaining: 100,
+    rateLimitReset: 1769444453034
+  },
+  id: 'ekUolq4-SbUt',
+  title: 'Untitled Landing Page',
+  slug: '',
+  description: '',
+  lastUpdated: 1769444459300,
+  version: 1,
+  tokenId: 'ekUolq4-SbUt',
+  onboardingData: {
+    oneLiner: '',
+    validatedFields: {},
+    featuresFromAI: [],
+    hiddenInferredFields: {},
+    confirmedFields: {}
+  },
+  publishing: {
+    isPublishReady: false
+  },
+  changeTracking: {
+    originalInputs: {},
+    currentInputs: {},
+    hasChanges: false,
+    changedFields: [],
+    lastChangeTimestamp: 1769444393034
+  },
+  forms: {},
+  formBuilderOpen: false,
+  editingFormId: null,
+  simpleForms: [],
+  formBuilder: {
+    visible: false,
+    fieldLibrary: []
+  },
+  integrations: {},
+  analytics: {},
+  persistence: {
+    isDirty: false,
+    isSaving: false,
+    isLoading: false,
+    hasActiveConflicts: false,
+    backgroundSaveEnabled: true,
+    autoSaveEnabled: true,
+    retryCount: 0,
+    metrics: {
+      totalSaves: 9,
+      successfulSaves: 9,
+      failedSaves: 0,
+      averageSaveTime: 0,
+      lastSaveTime: 1769444465399,
+      totalLoads: 0,
+      cacheHits: 0,
+      cacheMisses: 0,
+      conflictsDetected: 0,
+      conflictsResolved: 0
+    },
+    syncStatus: {
+      localVersion: 1,
+      serverVersion: 1,
+      status: 'synced',
+      pendingChanges: 0
+    },
+    lastSaved: 1769444465398
+  },
+  conflictResolution: {
+    hasConflict: false,
+    resolveStrategy: 'manual'
+  },
+  performance: {
+    saveCount: 0,
+    averageSaveTime: 0,
+    lastSaveTime: 0,
+    failedSaves: 0
+  },
+  cssVariables: {
+    phase: 'legacy',
+    featureFlags: {
+      enableVariableMode: false,
+      enableHybridMode: false,
+      enableLegacyFallbacks: true,
+      enableCustomColorPicker: false,
+      enableBackgroundCustomization: false,
+      enableMigrationDebug: false,
+      enablePerformanceLogging: false,
+      enableVisualDiff: false,
+      enableMigrationAnalytics: false,
+      rolloutPercentage: 0,
+      staffAccess: false,
+      betaAccess: false
+    },
+    customColors: {},
+    generatedVariables: {},
+    browserSupport: {
+      cssVariables: false,
+      customProperties: false,
+      fallbackRequired: true
+    },
+    metrics: {
+      cssSize: 0,
+      variableCount: 0,
+      renderTime: 0,
+      lastUpdated: 1769444392474
+    },
+    debugMode: false,
+    _cssVariableSlice: {
+      version: '1.0.0',
+      initialized: false,
+      lastMigration: 1769444393034
+    }
+  }
+}

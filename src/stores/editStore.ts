@@ -457,12 +457,11 @@ export function createEditStore(tokenId: string) {
 export type EditStoreInstance = ReturnType<typeof createEditStore>;
 
 // Development utilities
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
   (window as any).__editStoreFactory = {
     createEditStore,
     getStorageKey,
     defaultTheme,
     createInitialState,
   };
-  
 }

@@ -55,6 +55,11 @@ function selectHero(
   assets: AssetAvailability,
   vibe: Vibe
 ): string {
+  // TODO: TEMP - Force leftCopyRightImage for V2 schema testing
+  // Revert after testing is complete
+  return 'leftCopyRightImage';
+
+  /* ORIGINAL LOGIC (commented out for testing):
   // Waitlist always uses CenterStacked
   if (landingGoal === 'waitlist') {
     return 'centerStacked';
@@ -82,6 +87,7 @@ function selectHero(
   }
 
   return 'leftCopyRightImage';
+  */
 }
 
 /**

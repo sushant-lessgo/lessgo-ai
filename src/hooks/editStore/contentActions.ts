@@ -62,7 +62,9 @@ export function createContentActions(set: any, get: any): ContentActions {
           elementKey,
           contentType: typeof content,
           contentLength: Array.isArray(content) ? content.length : content?.length,
-          contentPreview: Array.isArray(content) ? content[0]?.substring(0, 50) : content?.toString().substring(0, 50),
+          contentPreview: Array.isArray(content)
+            ? JSON.stringify(content[0])?.substring(0, 50)
+            : content?.toString().substring(0, 50),
           callStack: new Error().stack?.split('\n')[2]?.trim()
         });
         
@@ -93,7 +95,8 @@ export function createContentActions(set: any, get: any): ContentActions {
         // CRITICAL FIX: Ensure content is always a primitive string, never an object
         let stringContent: string;
         if (Array.isArray(content)) {
-          stringContent = content.join(' ');
+          // V2 collections: store as JSON string (for object arrays like trust_items)
+          stringContent = JSON.stringify(content);
         } else if (typeof content === 'string') {
           stringContent = content;
         } else {
@@ -124,8 +127,17 @@ export function createContentActions(set: any, get: any): ContentActions {
           return;
         }
         
-        
-        // Mark as customized
+
+        // Mark as customized (initialize aiMetadata if missing)
+        if (!state.content[sectionId].aiMetadata) {
+          state.content[sectionId].aiMetadata = {
+            lastGenerated: 0,
+            aiGenerated: false,
+            isCustomized: false,
+            aiGeneratedElements: [],
+            excludedElements: []
+          };
+        }
         state.content[sectionId].aiMetadata.isCustomized = true;
         state.persistence.isDirty = true;
         

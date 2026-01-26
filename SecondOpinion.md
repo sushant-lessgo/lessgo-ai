@@ -1,58 +1,66 @@
-Archive Verification - INCOMPLETE           
-                                                                                                                                                                              Files with Active Archived Layout References                                                                                                                                                                                                                                                                                                          
-  1. sectionScanner.ts (LAYOUT_TO_SECTION_TYPE mapping)                                                                                                                       ┌──────┬───────────────────────────┬──────────────┐
-  │ Line │      Archived Layout      │   Section    │
-  ├──────┼───────────────────────────┼──────────────┤
-  │ 59   │ Tabbed                    │ features     │
-  ├──────┼───────────────────────────┼──────────────┤
-  │ 61   │ FeatureTestimonial        │ features     │
-  ├──────┼───────────────────────────┼──────────────┤
-  │ 63   │ MiniCards                 │ features     │
-  ├──────┼───────────────────────────┼──────────────┤
-  │ 69   │ FeatureMatrix             │ pricing      │
-  ├──────┼───────────────────────────┼──────────────┤
-  │ 70   │ SegmentBasedPricing       │ pricing      │
-  ├──────┼───────────────────────────┼──────────────┤
-  │ 73   │ CardWithTestimonial       │ pricing      │
-  ├──────┼───────────────────────────┼──────────────┤
-  │ 74   │ MiniStackedCards          │ pricing      │
-  ├──────┼───────────────────────────┼──────────────┤
-  │ 81   │ SegmentedTestimonials     │ testimonials │
-  ├──────┼───────────────────────────┼──────────────┤
-  │ 82   │ RatingCards               │ testimonials │
-  ├──────┼───────────────────────────┼──────────────┤
-  │ 84   │ InteractiveTestimonialMap │ testimonials │
-  ├──────┼───────────────────────────┼──────────────┤
-  │ 91   │ QuoteStyleAnswers         │ faq          │
-  ├──────┼───────────────────────────┼──────────────┤
-  │ 92   │ IconWithAnswers           │ faq          │
-  ├──────┼───────────────────────────┼──────────────┤
-  │ 93   │ TestimonialFAQs           │ faq          │
-  ├──────┼───────────────────────────┼──────────────┤
-  │ 94   │ ChatBubbleFAQ             │ faq          │
-  ├──────┼───────────────────────────┼──────────────┤
-  │ 98   │ AnimatedProcessLine       │ howitworks   │
-  ├──────┼───────────────────────────┼──────────────┤
-  │ 99   │ CardFlipSteps             │ howitworks   │
-  ├──────┼───────────────────────────┼──────────────┤
-  │ 100  │ IconCircleSteps           │ howitworks   │
-  ├──────┼───────────────────────────┼──────────────┤
-  │ 104  │ ZigzagImageSteps          │ howitworks   │
-  └──────┴───────────────────────────┴──────────────┘
-  2. buildPrompt.ts (layout descriptions)
-  ┌──────┬────────────────────┐
-  │ Line │  Archived Layout   │
-  ├──────┼────────────────────┤
-  │ 1706 │ AlgorithmExplainer │
-  ├──────┼────────────────────┤
-  │ 1713 │ InnovationTimeline │
-  ├──────┼────────────────────┤
-  │ 1753 │ SystemArchitecture │
-  └──────┴────────────────────┘
-  Summary
+Mostly yes — the **strategy** is sound (manual_preferred + defaults), but I’d tweak 2 details so you don’t introduce new problems.
 
-  parseAiResponse.ts - ✅ CLEAN (archived processors removed)
+## What I agree with
 
-  sectionScanner.ts - ❌ 18 archived layouts in LAYOUT_TO_SECTION_TYPE mapping
+* **Manual_preferred** removes icon hallucinations and removes icon instructions from the AI prompt.
+* A **default** makes the UI instantly usable.
+* “Smart default” gives variety without involving AI.
 
-  buildPrompt.ts - ❌ 3 archived layout descriptions still present
+## The 2 tweaks I recommend
+
+### 1) Don’t do `<LucideIcons[item.icon] />` without a safe fallback
+
+In React, if `item.icon` is invalid/undefined, that will render `undefined` and can crash or silently fail.
+
+Do:
+
+```tsx
+const Icon = (LucideIcons as any)[iconName] ?? LucideIcons.Sparkles;
+return <Icon />;
+```
+
+(or pick `Circle` as the safest fallback)
+
+### 2) Don’t store `"auto"` in the DB if you can avoid it
+
+Storing `"auto"` makes your DB contain “control flags” rather than actual content. It’s not terrible, but it’s cleaner to store `icon?: string` and compute the default at render-time.
+
+**Cleaner pattern:**
+
+* DB: `icon` is either a real Lucide name or undefined
+* Render: `iconName = item.icon ?? getIconFromText(item.title, item.description) ?? "Sparkles"`
+
+Example:
+
+```ts
+const iconName =
+  item.icon ??
+  getIconFromText(item.title, item.description) ??
+  "Sparkles";
+```
+
+That gives you Option B behavior without storing `"auto"`.
+
+---
+
+## Revised “Agree + best MVP version”
+
+**Yes** to: `manual_preferred + smart default + user override`.
+
+Just implement it like this:
+
+* Schema:
+
+  * `fillMode: "manual_preferred"`
+  * `default` optional (you can even omit and rely on render fallback)
+
+* DB:
+
+  * store only user choice (or nothing)
+
+* Component:
+
+  * derive a default when icon is missing
+  * always use fallback icon if name invalid
+
+That keeps complexity low *and* avoids broken icons and DB flags.

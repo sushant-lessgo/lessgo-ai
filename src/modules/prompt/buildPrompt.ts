@@ -2,6 +2,8 @@
 import {
   layoutElementSchema,
   isUnifiedSchema,
+  isV2Schema,
+  getAllElements,
   getCardRequirements as getSchemaCardRequirements
 } from '../sections/layoutElementSchema'
 import type { ParsedStrategy } from './parseStrategyResponse'
@@ -842,21 +844,7 @@ function isUnifiedSchemaObject(schema: any): schema is { sectionElements: any[],
   return schema && typeof schema === 'object' && Array.isArray(schema.sectionElements);
 }
 
-/**
- * Gets all elements from a schema (unified or legacy)
- */
-function getAllElements(schema: any) {
-  if (isUnifiedSchemaObject(schema)) {
-    const sectionElements = schema.sectionElements || [];
-    const cardElements = schema.cardStructure?.elements?.map((name: string) => ({
-      element: name,
-      mandatory: true
-    })) || [];
-    return [...sectionElements, ...cardElements];
-  }
-  // Legacy array format
-  return Array.isArray(schema) ? schema : [];
-}
+// getAllElements is now imported from layoutElementSchema.ts (handles V1 and V2 formats)
 
 /**
  * Gets card requirements from schema
@@ -1330,7 +1318,7 @@ function buildFieldClassificationGuidance(elementsMap: Record<string, SectionInf
     const schema = layoutElementSchema[layoutName];
 
     if (schema) {
-      const elements = Array.isArray(schema) ? schema : [...schema.sectionElements, ...(schema.cardStructure?.elements.map(e => ({ element: e, generation: schema.cardStructure!.generation })) || [])];
+      const elements = getAllElements(schema);
 
       const aiGenerated = elements.filter(el => el.generation === 'ai_generated').length;
       const manualPreferred = elements.filter(el => el.generation === 'manual_preferred').length;

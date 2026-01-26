@@ -21,14 +21,20 @@ import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators
 import AvatarEditableComponent from '@/components/ui/AvatarEditableComponent';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { createCTAClickHandler } from '@/utils/ctaHandler';
-import { 
-  parseCustomerAvatarData, 
-  getCustomerAvatarUrl, 
-  updateAvatarUrls,
-  parsePipeData 
-} from '@/utils/dataParsingUtils';
+// V2: Legacy parsing utils no longer needed - using clean arrays
 
-// Content interface for type safety
+// V2 Content interface - uses clean arrays
+interface TrustItem {
+  id: string;
+  text: string;
+}
+
+interface CustomerAvatar {
+  id: string;
+  name: string;
+  avatar_url?: string;
+}
+
 interface LeftCopyRightImageContent {
   headline: string;
   cta_text: string;
@@ -36,29 +42,22 @@ interface LeftCopyRightImageContent {
   subheadline?: string;
   supporting_text?: string;
   badge_text?: string;
-  trust_items?: string;
-  trust_item_1?: string;
-  trust_item_2?: string;
-  trust_item_3?: string;
-  trust_item_4?: string;
-  trust_item_5?: string;
   hero_image?: string;
   customer_count?: string;
   rating_value?: string;
   rating_count?: string;
   show_social_proof?: boolean;
   show_customer_avatars?: boolean;
-  avatar_count?: number;
-  // Dynamic avatar system
-  customer_names?: string;
-  avatar_urls?: string;
+  // V2: Clean arrays
+  trust_items?: TrustItem[];
+  customer_avatars?: CustomerAvatar[];
 }
 
-// Content schema - defines structure and defaults
+// V2 Content schema - uses clean arrays
 const CONTENT_SCHEMA = {
-  headline: { 
-    type: 'string' as const, 
-    default: 'Transform Your Business with Smart Automation' 
+  headline: {
+    type: 'string' as const,
+    default: 'Transform Your Business with Smart Automation'
   },
   cta_text: {
     type: 'string' as const,
@@ -68,77 +67,59 @@ const CONTENT_SCHEMA = {
     type: 'string' as const,
     default: 'Watch Demo'
   },
-  subheadline: { 
-    type: 'string' as const, 
-    default: 'Streamline workflows, boost productivity, and scale effortlessly with our intelligent automation platform.' 
+  subheadline: {
+    type: 'string' as const,
+    default: 'Streamline workflows, boost productivity, and scale effortlessly with our intelligent automation platform.'
   },
-  supporting_text: { 
-    type: 'string' as const, 
-    default: 'Save 20+ hours per week with automated workflows that just work.' 
+  supporting_text: {
+    type: 'string' as const,
+    default: 'Save 20+ hours per week with automated workflows that just work.'
   },
-  badge_text: { 
-    type: 'string' as const, 
-    default: '' 
+  badge_text: {
+    type: 'string' as const,
+    default: ''
   },
-  trust_items: { 
-    type: 'string' as const, 
-    default: 'Free 14-day trial|No credit card required|Cancel anytime' 
+  hero_image: {
+    type: 'string' as const,
+    default: '/hero-placeholder.jpg'
   },
-  trust_item_1: { 
-    type: 'string' as const, 
-    default: 'Free 14-day trial' 
+  customer_count: {
+    type: 'string' as const,
+    default: '500+ happy customers'
   },
-  trust_item_2: { 
-    type: 'string' as const, 
-    default: 'No credit card required' 
+  rating_value: {
+    type: 'string' as const,
+    default: '4.9/5'
   },
-  trust_item_3: { 
-    type: 'string' as const, 
-    default: 'Cancel anytime' 
+  rating_count: {
+    type: 'string' as const,
+    default: 'from 127 reviews'
   },
-  trust_item_4: { 
-    type: 'string' as const, 
-    default: '' 
+  show_social_proof: {
+    type: 'boolean' as const,
+    default: true
   },
-  trust_item_5: { 
-    type: 'string' as const, 
-    default: '' 
+  show_customer_avatars: {
+    type: 'boolean' as const,
+    default: true
   },
-  hero_image: { 
-    type: 'string' as const, 
-    default: '/hero-placeholder.jpg' 
+  // V2: Arrays with default items
+  trust_items: {
+    type: 'array' as const,
+    default: [
+      { id: 't1', text: 'Free 14-day trial' },
+      { id: 't2', text: 'No credit card required' },
+      { id: 't3', text: 'Cancel anytime' }
+    ]
   },
-  customer_count: { 
-    type: 'string' as const, 
-    default: '500+ happy customers' 
-  },
-  rating_value: { 
-    type: 'string' as const, 
-    default: '4.9/5' 
-  },
-  rating_count: { 
-    type: 'string' as const, 
-    default: 'from 127 reviews' 
-  },
-  show_social_proof: { 
-    type: 'boolean' as const, 
-    default: true 
-  },
-  show_customer_avatars: { 
-    type: 'boolean' as const, 
-    default: true 
-  },
-  avatar_count: { 
-    type: 'number' as const, 
-    default: 4 
-  },
-  customer_names: { 
-    type: 'string' as const, 
-    default: 'Sarah Chen|Alex Rivera|Jordan Kim|Maya Patel' 
-  },
-  avatar_urls: { 
-    type: 'string' as const, 
-    default: '{}' 
+  customer_avatars: {
+    type: 'array' as const,
+    default: [
+      { id: 'a1', name: 'Sarah Chen', avatar_url: '' },
+      { id: 'a2', name: 'Alex Rivera', avatar_url: '' },
+      { id: 'a3', name: 'Jordan Kim', avatar_url: '' },
+      { id: 'a4', name: 'Maya Patel', avatar_url: '' }
+    ]
   }
 };
 
@@ -307,69 +288,26 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
     handleContentUpdate
   } = useLayoutComponent<LeftCopyRightImageContent>({
     ...props,
-    contentSchema: CONTENT_SCHEMA
+    contentSchema: CONTENT_SCHEMA as any  // V2: Schema now includes arrays
   });
   
   // Create typography styles
   const bodyLgStyle = getTypographyStyle('body-lg');
 
 
-  // Handle trust items - support both legacy pipe-separated format and individual fields
-  const getTrustItems = (): string[] => {
-    // Check if individual trust item fields exist
-    const individualItems = [
-      blockContent.trust_item_1,
-      blockContent.trust_item_2, 
-      blockContent.trust_item_3,
-      blockContent.trust_item_4,
-      blockContent.trust_item_5
-    ].filter((item): item is string => Boolean(item && item.trim() !== ''));
-    
-    // If individual items exist, use them; otherwise fall back to legacy format
-    if (individualItems.length > 0) {
-      return individualItems;
-    }
-    
-    // Legacy format fallback
-    return blockContent.trust_items 
-      ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
-      : ['Free trial', 'No credit card'];
-  };
-  
-  const trustItems = getTrustItems();
+  // V2: Direct array access - no legacy parsing needed
+  const trustItems = blockContent.trust_items || [];
+  const customerAvatars = blockContent.customer_avatars || [];
 
-  // ✅ ENHANCED: Get muted text color for trust indicators
+  // Muted text color for trust indicators
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
 
-  // Handle customer avatars - support both legacy avatar_count and new dynamic system
-  const getCustomerAvatars = (): { name: string; avatarUrl: string }[] => {
-    // If customer_names exists, use dynamic system
-    if (blockContent.customer_names) {
-      const customerData = parseCustomerAvatarData(
-        blockContent.customer_names, 
-        blockContent.avatar_urls || '{}'
-      );
-      return customerData.map(customer => ({
-        name: customer.name,
-        avatarUrl: customer.avatarUrl || ''
-      }));
-    }
-    
-    // Fallback to legacy system with generic names
-    const avatarCount = blockContent.avatar_count || 4;
-    const defaultNames = ['Sarah Chen', 'Alex Rivera', 'Jordan Kim', 'Maya Patel', 'Casey Martinez', 'Taylor Wright'];
-    return Array.from({ length: Math.min(avatarCount, 6) }, (_, i) => ({
-      name: defaultNames[i] || `Customer ${i + 1}`,
-      avatarUrl: ''
-    }));
-  };
-
-  const customerAvatars = getCustomerAvatars();
-
-  // Handle avatar URL updates
-  const handleAvatarChange = (customerName: string, avatarUrl: string) => {
-    const updatedAvatarUrls = updateAvatarUrls(blockContent.avatar_urls || '{}', customerName, avatarUrl);
-    handleContentUpdate('avatar_urls', updatedAvatarUrls);
+  // Handle avatar URL updates (V2: update array item directly)
+  const handleAvatarChange = (avatarId: string, avatarUrl: string) => {
+    const updatedAvatars = customerAvatars.map(avatar =>
+      avatar.id === avatarId ? { ...avatar, avatar_url: avatarUrl } : avatar
+    );
+    (handleContentUpdate as any)('customer_avatars', updatedAvatars);
   };
 
   // Parse rating for dynamic stars
@@ -431,13 +369,11 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center min-h-[600px]">
           
           {/* Left Column - Copy Content */}
-          <div className="order-2 lg:order-1 space-y-6">
-            
-            {/* ✅ ENHANCED: Optional Badge with Accent Colors */}
-            {blockContent.badge_text &&
-             blockContent.badge_text !== '___REMOVED___' &&
-             blockContent.badge_text.trim() !== '' && (
-              <div>
+          <div className="order-2 lg:order-1 max-w-xl">
+
+            {/* V2: Optional Badge with Accent Colors */}
+            {blockContent.badge_text && blockContent.badge_text.trim() !== '' && (
+              <div className="mb-4">
                 <AccentBadge
                   mode={mode}
                   value={blockContent.badge_text}
@@ -451,197 +387,191 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
               </div>
             )}
 
-            {/* ✅ ENHANCED: Main Headline with Dynamic Text Color */}
-            <EditableAdaptiveHeadline
-              mode={mode}
-              value={blockContent.headline || ''}
-              onEdit={(value) => handleContentUpdate('headline', value)}
-              level="h1"
-              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
-              colorTokens={colorTokens}
-              className="leading-tight"
-              sectionId={sectionId}
-              elementKey="headline"
-              sectionBackground={sectionBackground}
-            />
+            {/* Main Headline */}
+            <div className="mb-4">
+              <EditableAdaptiveHeadline
+                mode={mode}
+                value={blockContent.headline || ''}
+                onEdit={(value) => handleContentUpdate('headline', value)}
+                level="h1"
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                colorTokens={colorTokens}
+                className="leading-tight"
+                sectionId={sectionId}
+                elementKey="headline"
+                sectionBackground={sectionBackground}
+              />
+            </div>
 
-            {/* ✅ ENHANCED: Subheadline with Dynamic Text Color */}
+            {/* Subheadline */}
             {(blockContent.subheadline || mode === 'edit') && (
-              <EditableAdaptiveText
-                mode={mode}
-                value={blockContent.subheadline || ''}
-                onEdit={(value) => handleContentUpdate('subheadline', value)}
-                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
-                colorTokens={colorTokens}
-                variant="body"
-                className="leading-relaxed"
-                style={bodyLgStyle}
-                placeholder="Add a compelling subheadline that supports your main message and explains the key benefit..."
-                sectionId={sectionId}
-                elementKey="subheadline"
-                sectionBackground={sectionBackground}
-              />
+              <div className="mb-3">
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.subheadline || ''}
+                  onEdit={(value) => handleContentUpdate('subheadline', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="leading-relaxed"
+                  style={bodyLgStyle}
+                  placeholder="Add a compelling subheadline that supports your main message and explains the key benefit..."
+                  sectionId={sectionId}
+                  elementKey="subheadline"
+                  sectionBackground={sectionBackground}
+                />
+              </div>
             )}
 
-            {/* ✅ ENHANCED: Supporting Text with Dynamic Text Color */}
+            {/* Supporting Text - smaller and lighter for hierarchy */}
             {(blockContent.supporting_text || mode === 'edit') && (
-              <EditableAdaptiveText
-                mode={mode}
-                value={blockContent.supporting_text || ''}
-                onEdit={(value) => handleContentUpdate('supporting_text', value)}
-                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
-                colorTokens={colorTokens}
-                variant="body"
-                className="leading-relaxed"
-                placeholder="Add supporting text with social proof, customer count, or key metrics..."
-                sectionId={sectionId}
-                elementKey="supporting_text"
-                sectionBackground={sectionBackground}
-              />
+              <div className="mb-8">
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.supporting_text || ''}
+                  onEdit={(value) => handleContentUpdate('supporting_text', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="leading-relaxed text-sm opacity-75"
+                  placeholder="Add supporting text with social proof, customer count, or key metrics..."
+                  sectionId={sectionId}
+                  elementKey="supporting_text"
+                  sectionBackground={sectionBackground}
+                />
+              </div>
             )}
 
-            {/* ✅ ENHANCED: CTA and Trust Indicators */}
+            {/* CTA Section - buttons and trust indicators separated */}
             {(() => {
               const buttonConfig = content[sectionId]?.elements?.cta_text?.metadata?.buttonConfig;
               const isInlineForm = buttonConfig?.type === 'form';
-              const containerClass = isInlineForm
-                ? "flex flex-col gap-6"
-                : "flex flex-col sm:flex-row items-start sm:items-center gap-6";
 
               return (
-                <div className={containerClass}>
+                <div className="flex flex-col gap-6">
+                  {/* CTA Buttons Row */}
+                  <div className={isInlineForm ? "flex flex-col gap-4" : "flex flex-col sm:flex-row items-start sm:items-center gap-4"}>
+                    {/* Primary CTA Button */}
+                    {(() => {
+                      const primaryClassName = "shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200";
 
+                      if (buttonConfig?.type === 'form') {
+                        return (
+                          <FormConnectedButton
+                            buttonConfig={buttonConfig}
+                            sectionId={sectionId}
+                            size="large"
+                            variant="primary"
+                            colorTokens={colorTokens}
+                            className={primaryClassName}
+                          >
+                            {blockContent.cta_text}
+                          </FormConnectedButton>
+                        );
+                      } else {
+                        return (
+                          <CTAButton
+                            text={blockContent.cta_text}
+                            colorTokens={colorTokens}
+                            className={primaryClassName}
+                            variant="primary"
+                            sectionId={sectionId}
+                            elementKey="cta_text"
+                            onClick={createCTAClickHandler(sectionId, "cta_text")}
+                          />
+                        );
+                      }
+                    })()}
 
-              {/* ✅ ENHANCED: Primary CTA Button with Accent Colors */}
-              {(() => {
-                const primaryClassName = "shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200";
+                    {/* Secondary CTA */}
+                    {(blockContent.secondary_cta_text && blockContent.secondary_cta_text.trim() !== '') && (() => {
+                      const secondaryButtonConfig = content[sectionId]?.elements?.secondary_cta_text?.metadata?.buttonConfig;
+                      const secondaryClassName = "shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200";
 
-                if (buttonConfig?.type === 'form') {
-                  return (
-                    <FormConnectedButton
-                      buttonConfig={buttonConfig}
-                      sectionId={sectionId}
-                      size="large"
-                      variant="primary"
+                      if (secondaryButtonConfig?.type === 'form') {
+                        return (
+                          <FormConnectedButton
+                            buttonConfig={{ ...secondaryButtonConfig, ctaType: 'secondary' }}
+                            sectionId={sectionId}
+                            size="large"
+                            variant="secondary"
+                            colorTokens={colorTokens}
+                            className={secondaryClassName}
+                          >
+                            {blockContent.secondary_cta_text || 'Watch Demo'}
+                          </FormConnectedButton>
+                        );
+                      } else {
+                        return (
+                          <CTAButton
+                            text={blockContent.secondary_cta_text || 'Watch Demo'}
+                            colorTokens={colorTokens}
+                            className={secondaryClassName}
+                            variant="secondary"
+                            sectionId={sectionId}
+                            elementKey="secondary_cta_text"
+                            onClick={createCTAClickHandler(sectionId, "secondary_cta_text")}
+                          />
+                        );
+                      }
+                    })()}
+                  </div>
+
+                  {/* Trust Indicators - separate row below CTAs */}
+                  {mode !== 'preview' ? (
+                    <EditableTrustIndicators
+                      mode={mode}
+                      trustItems={trustItems.map(item => item.text)}
+                      onTrustItemChange={(index, value) => {
+                        const updatedItems = trustItems.map((item, i) =>
+                          i === index ? { ...item, text: value } : item
+                        );
+                        (handleContentUpdate as any)('trust_items', updatedItems);
+                      }}
+                      onAddTrustItem={() => {
+                        if (trustItems.length < 5) {
+                          const newItem: TrustItem = {
+                            id: `t${Date.now()}`,
+                            text: 'New trust item'
+                          };
+                          (handleContentUpdate as any)('trust_items', [...trustItems, newItem]);
+                        }
+                      }}
+                      onRemoveTrustItem={(index) => {
+                        const updatedItems = trustItems.filter((_, i) => i !== index);
+                        (handleContentUpdate as any)('trust_items', updatedItems);
+                      }}
                       colorTokens={colorTokens}
-                      className={primaryClassName}
-                    >
-                      {blockContent.cta_text}
-                    </FormConnectedButton>
-                  );
-                } else {
-                  return (
-                    <CTAButton
-                      text={blockContent.cta_text}
-                      colorTokens={colorTokens}
-                      className={primaryClassName}
-                      variant="primary"
+                      sectionBackground={sectionBackground}
                       sectionId={sectionId}
-                      elementKey="cta_text"
-                      onClick={createCTAClickHandler(sectionId, "cta_text")}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                      iconColor="text-green-500"
+                      colorClass={mutedTextColor}
                     />
-                  );
-                }
-              })()}
-
-              {/* Secondary CTA */}
-              {(blockContent.secondary_cta_text && blockContent.secondary_cta_text !== '___REMOVED___' && blockContent.secondary_cta_text.trim() !== '') && (() => {
-                const secondaryButtonConfig = content[sectionId]?.elements?.secondary_cta_text?.metadata?.buttonConfig;
-                const secondaryClassName = "shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200";
-
-                if (secondaryButtonConfig?.type === 'form') {
-                  return (
-                    <FormConnectedButton
-                      buttonConfig={{ ...secondaryButtonConfig, ctaType: 'secondary' }}
-                      sectionId={sectionId}
-                      size="large"
-                      variant="secondary"
-                      colorTokens={colorTokens}
-                      className={secondaryClassName}
-                    >
-                      {blockContent.secondary_cta_text || 'Watch Demo'}
-                    </FormConnectedButton>
-                  );
-                } else {
-                  return (
-                    <CTAButton
-                      text={blockContent.secondary_cta_text || 'Watch Demo'}
-                      colorTokens={colorTokens}
-                      className={secondaryClassName}
-                      variant="secondary"
-                      sectionId={sectionId}
-                      elementKey="secondary_cta_text"
-                      onClick={createCTAClickHandler(sectionId, "secondary_cta_text")}
+                  ) : (
+                    <TrustIndicators
+                      items={trustItems.map(item => item.text)}
+                      colorClass={mutedTextColor}
+                      iconColor="text-green-500"
                     />
-                  );
-                }
-              })()}
-
-              {/* ✅ ENHANCED: Trust Indicators with Dynamic Color */}
-              {mode !== 'preview' ? (
-                <EditableTrustIndicators
-                  mode={mode}
-                  trustItems={[
-                    blockContent.trust_item_1 || '',
-                    blockContent.trust_item_2 || '',
-                    blockContent.trust_item_3 || '',
-                    blockContent.trust_item_4 || '',
-                    blockContent.trust_item_5 || ''
-                  ]}
-                  onTrustItemChange={(index, value) => {
-                    const fieldKey = `trust_item_${index + 1}` as keyof LeftCopyRightImageContent;
-                    handleContentUpdate(fieldKey, value);
-                  }}
-                  onAddTrustItem={() => {
-                    // Find first empty slot and add placeholder
-                    const emptyIndex = [
-                      blockContent.trust_item_1,
-                      blockContent.trust_item_2,
-                      blockContent.trust_item_3,
-                      blockContent.trust_item_4,
-                      blockContent.trust_item_5
-                    ].findIndex(item => !item || item.trim() === '' || item === '___REMOVED___');
-                    
-                    if (emptyIndex !== -1) {
-                      const fieldKey = `trust_item_${emptyIndex + 1}` as keyof LeftCopyRightImageContent;
-                      handleContentUpdate(fieldKey, 'New trust item');
-                    }
-                  }}
-                  onRemoveTrustItem={(index) => {
-                    const fieldKey = `trust_item_${index + 1}` as keyof LeftCopyRightImageContent;
-                    handleContentUpdate(fieldKey, '___REMOVED___');
-                  }}
-                  colorTokens={colorTokens}
-                  sectionBackground={sectionBackground}
-                  sectionId={sectionId}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
-                  iconColor="text-green-500"
-                  colorClass={mutedTextColor}
-                />
-              ) : (
-                <TrustIndicators 
-                  items={trustItems}
-                  colorClass={mutedTextColor}
-                  iconColor="text-green-500" // Keep green for checkmarks
-                />
-              )}
+                  )}
                 </div>
               );
             })()}
 
-            {/* ✅ ENHANCED: Additional Trust Elements with Dynamic Colors */}
+            {/* V2: Social Proof Section */}
             {(blockContent.show_social_proof !== false) && (
               <div className="flex items-center space-x-6 pt-4">
-                {blockContent.customer_count && blockContent.customer_count !== '___REMOVED___' && (
+                {blockContent.customer_count && (
                   <div className="relative group/customer-count flex items-center space-x-2">
-                    {blockContent.show_customer_avatars !== false && (
+                    {blockContent.show_customer_avatars !== false && customerAvatars.length > 0 && (
                       <div className="flex -space-x-2">
-                        {customerAvatars.map((customer, i) => (
+                        {customerAvatars.map((customer) => (
                           <AvatarEditableComponent
-                            key={customer.name}
+                            key={customer.id}
                             mode={mode}
-                            avatarUrl={customer.avatarUrl}
-                            onAvatarChange={(url) => handleAvatarChange(customer.name, url)}
+                            avatarUrl={customer.avatar_url || ''}
+                            onAvatarChange={(url) => handleAvatarChange(customer.id, url)}
                             customerName={customer.name}
                             size="sm"
                             className="cursor-default"
@@ -662,13 +592,13 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
                       data-section-id={sectionId}
                       data-element-key="customer_count"
                     />
-                    
+
                     {/* Remove button for customer count */}
                     {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleContentUpdate('customer_count', '___REMOVED___');
+                          handleContentUpdate('customer_count', '');
                         }}
                         className="opacity-0 group-hover/customer-count:opacity-100 ml-2 text-red-500 hover:text-red-700 transition-opacity duration-200"
                         title="Remove customer count"
@@ -681,7 +611,8 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
                   </div>
                 )}
                 
-                {blockContent.rating_value && blockContent.rating_value !== '___REMOVED___' && (
+                {/* V2: Rating section - no ___REMOVED___ markers */}
+                {blockContent.rating_value && (
                   <div className="relative group/rating-section flex items-center space-x-1">
                     {renderStars(blockContent.rating_value)}
                     <EditableAdaptiveText
@@ -710,14 +641,14 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
                       data-section-id={sectionId}
                       data-element-key="rating_count"
                     />
-                    
+
                     {/* Remove button for rating section */}
                     {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleContentUpdate('rating_value', '___REMOVED___');
-                          handleContentUpdate('rating_count', '___REMOVED___');
+                          handleContentUpdate('rating_value', '');
+                          handleContentUpdate('rating_count', '');
                         }}
                         className="opacity-0 group-hover/rating-section:opacity-100 ml-2 text-red-500 hover:text-red-700 transition-opacity duration-200"
                         title="Remove rating section"
@@ -751,30 +682,37 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
 
               return imageSrc ? (
                 <div className="relative w-full h-full min-h-[500px] lg:min-h-[600px]">
+                  {/* Decorative gradient blob behind image - uses theme accent color */}
+                  <div
+                    className="absolute -inset-4 rounded-3xl blur-2xl opacity-30"
+                    style={{
+                      background: `linear-gradient(135deg, ${colorTokens.accent}40 0%, transparent 50%, ${colorTokens.accent}20 100%)`
+                    }}
+                  />
                   <img
                     src={imageSrc}
-                  alt="Hero"
-                  className="w-full h-full object-cover rounded-2xl shadow-2xl cursor-pointer"
-                  data-image-id={`${sectionId}-hero-image`}
-                  onMouseUp={(e) => {
-                    if (mode !== 'preview') {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      handleImageToolbar(`${sectionId}-hero-image`, {
-                        x: rect.left + rect.width / 2,
-                        y: rect.top - 10
-                      });
-                    }
-                  }}
-                  onClick={(e) => {
-                    if (mode !== 'preview') {
-                      e.stopPropagation();
-                      e.preventDefault();
-                    }
-                  }}
-                />
-              </div>
+                    alt="Hero"
+                    className="relative z-10 w-full h-full object-cover rounded-2xl shadow-2xl cursor-pointer"
+                    data-image-id={`${sectionId}-hero-image`}
+                    onMouseUp={(e) => {
+                      if (mode !== 'preview') {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        handleImageToolbar(`${sectionId}-hero-image`, {
+                          x: rect.left + rect.width / 2,
+                          y: rect.top - 10
+                        });
+                      }
+                    }}
+                    onClick={(e) => {
+                      if (mode !== 'preview') {
+                        e.stopPropagation();
+                        e.preventDefault();
+                      }
+                    }}
+                  />
+                </div>
             ) : (
               <HeroImagePlaceholder />
             );
@@ -796,7 +734,7 @@ export const componentMeta = {
   complexity: 'simple',
   estimatedBuildTime: '15 minutes',
   
-  // ✅ ENHANCED: Schema for component generation tools
+  // V2: Schema for component generation tools - uses clean arrays
   contentFields: [
     { key: 'headline', label: 'Main Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
@@ -804,21 +742,15 @@ export const componentMeta = {
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: true },
     { key: 'secondary_cta_text', label: 'Secondary CTA Button Text', type: 'text', required: false },
     { key: 'badge_text', label: 'Badge Text (uses accent colors)', type: 'text', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
-    { key: 'trust_item_1', label: 'Trust Item 1', type: 'text', required: false },
-    { key: 'trust_item_2', label: 'Trust Item 2', type: 'text', required: false },
-    { key: 'trust_item_3', label: 'Trust Item 3', type: 'text', required: false },
-    { key: 'trust_item_4', label: 'Trust Item 4', type: 'text', required: false },
-    { key: 'trust_item_5', label: 'Trust Item 5', type: 'text', required: false },
+    { key: 'hero_image', label: 'Hero Image', type: 'image', required: false },
     { key: 'customer_count', label: 'Customer Count', type: 'text', required: false },
     { key: 'rating_value', label: 'Rating (e.g., 4.9/5)', type: 'text', required: false },
     { key: 'rating_count', label: 'Review Count (e.g., from 127 reviews)', type: 'text', required: false },
     { key: 'show_social_proof', label: 'Show Social Proof', type: 'boolean', required: false },
     { key: 'show_customer_avatars', label: 'Show Customer Avatars', type: 'boolean', required: false },
-    { key: 'avatar_count', label: 'Number of Avatars (1-6) - Legacy', type: 'number', required: false },
-    { key: 'customer_names', label: 'Customer Names (pipe separated)', type: 'text', required: false },
-    { key: 'avatar_urls', label: 'Avatar URLs (JSON format)', type: 'text', required: false },
-    { key: 'hero_image', label: 'Hero Image', type: 'image', required: false }
+    // V2: Arrays - not editable via simple form, use inline editing
+    { key: 'trust_items', label: 'Trust Items (array)', type: 'array', required: false },
+    { key: 'customer_avatars', label: 'Customer Avatars (array)', type: 'array', required: false }
   ],
   
   // ✅ NEW: Enhanced features
