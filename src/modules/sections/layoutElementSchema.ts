@@ -677,86 +677,157 @@ export const layoutElementSchema: LayoutSchema = {
     }
   },
 
+  // Hero Section - V2 Schema
   centerStacked: {
-    sectionElements: [
-      { element: "headline", mandatory: true, generation: "ai_generated" },
-      { element: "cta_text", mandatory: true, generation: "ai_generated" },
-      { element: "subheadline", mandatory: true, generation: "ai_generated" },
-      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
-      { element: "secondary_cta_text", mandatory: false, generation: "ai_generated" },
-      { element: "badge_text", mandatory: false, generation: "ai_generated" },
-      { element: "trust_items", mandatory: false, generation: "ai_generated" },
-      { element: "trust_item_1", mandatory: false, generation: "ai_generated" },
-      { element: "trust_item_2", mandatory: false, generation: "ai_generated" },
-      { element: "trust_item_3", mandatory: false, generation: "ai_generated" },
-      { element: "trust_item_4", mandatory: false, generation: "ai_generated" },
-      { element: "trust_item_5", mandatory: false, generation: "ai_generated" },
-      { element: "center_hero_image", mandatory: true, generation: "manual_preferred" },
-      { element: "customer_count", mandatory: false, generation: "manual_preferred" },
-      { element: "rating_value", mandatory: false, generation: "manual_preferred" },
-      { element: "rating_count", mandatory: false, generation: "manual_preferred" },
-      { element: "show_social_proof", mandatory: false, generation: "manual_preferred" },
-      { element: "show_customer_avatars", mandatory: false, generation: "manual_preferred" },
-      { element: "avatar_count", mandatory: false, generation: "manual_preferred" },
-      { element: "customer_names", mandatory: false, generation: "manual_preferred" },
-      { element: "avatar_urls", mandatory: false, generation: "manual_preferred" },
-    ],
-    cardRequirements: null
+    sectionType: "centerStacked",
+
+    elements: {
+      // Required AI-generated
+      headline:           { type: "string", requirement: "required", fillMode: "ai_generated" },
+      subheadline:        { type: "string", requirement: "required", fillMode: "ai_generated" },
+      cta_text:           { type: "string", requirement: "required", fillMode: "ai_generated" },
+
+      // Optional AI-generated
+      secondary_cta_text: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      supporting_text:    { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      badge_text:         { type: "string", requirement: "optional", fillMode: "ai_generated" },
+
+      // Manual preferred - required (show with placeholder)
+      center_hero_image:  { type: "string", requirement: "required", fillMode: "manual_preferred", default: "/hero-placeholder.jpg" },
+
+      // Manual preferred - optional (user adds via toolbar)
+      show_social_proof:  { type: "boolean", requirement: "optional", fillMode: "manual_preferred", default: true },
+      show_customer_avatars: { type: "boolean", requirement: "optional", fillMode: "manual_preferred", default: true },
+
+      // AI-generated needs review (user should verify these)
+      customer_count:     { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review" },
+      rating_value:       { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review" },
+      rating_count:       { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review" },
+    },
+
+    collections: {
+      trust_items: {
+        requirement: "optional",
+        fillMode: "ai_generated",
+        constraints: { min: 0, max: 5 },
+        fields: {
+          id:   { type: "string", fillMode: "system" },
+          text: { type: "string", fillMode: "ai_generated" },
+        }
+      },
+      customer_avatars: {
+        requirement: "optional",
+        fillMode: "manual_preferred",
+        constraints: { min: 0, max: 6 },
+        fields: {
+          id:         { type: "string", fillMode: "system" },
+          name:       { type: "string", fillMode: "manual_preferred", default: "Customer" },
+          avatar_url: { type: "string", fillMode: "manual_preferred", default: "" },
+        }
+      }
+    }
   },
 
+  // Hero Section - V2 Schema
   splitScreen: {
-    sectionElements: [
-      { element: "headline", mandatory: true, generation: "ai_generated" },
-      { element: "cta_text", mandatory: true, generation: "ai_generated" },
-      { element: "secondary_cta_text", mandatory: false, generation: "ai_generated" },
-      { element: "subheadline", mandatory: true, generation: "ai_generated" },
-      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
-      { element: "badge_text", mandatory: false, generation: "ai_generated" },
-      { element: "value_proposition", mandatory: false, generation: "ai_generated" },
-      { element: "trust_items", mandatory: false, generation: "ai_generated" },
-      { element: "trust_item_1", mandatory: false, generation: "ai_generated" },
-      { element: "trust_item_2", mandatory: false, generation: "ai_generated" },
-      { element: "trust_item_3", mandatory: false, generation: "ai_generated" },
-      { element: "trust_item_4", mandatory: false, generation: "ai_generated" },
-      { element: "trust_item_5", mandatory: false, generation: "ai_generated" },
-      { element: "split_hero_image", mandatory: true, generation: "manual_preferred" },
-      { element: "customer_count", mandatory: false, generation: "manual_preferred" },
-      { element: "rating_value", mandatory: false, generation: "manual_preferred" },
-      { element: "rating_count", mandatory: false, generation: "manual_preferred" },
-      { element: "show_social_proof", mandatory: false, generation: "manual_preferred" },
-      { element: "show_customer_avatars", mandatory: false, generation: "manual_preferred" },
-      { element: "avatar_count", mandatory: false, generation: "manual_preferred" },
-      { element: "customer_names", mandatory: false, generation: "manual_preferred" },
-      { element: "avatar_urls", mandatory: false, generation: "manual_preferred" },
-    ],
-    cardRequirements: null
+    sectionType: "splitScreen",
+
+    elements: {
+      // Required AI-generated
+      headline:           { type: "string", requirement: "required", fillMode: "ai_generated" },
+      subheadline:        { type: "string", requirement: "required", fillMode: "ai_generated" },
+      cta_text:           { type: "string", requirement: "required", fillMode: "ai_generated" },
+
+      // Optional AI-generated
+      secondary_cta_text: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      supporting_text:    { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      badge_text:         { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      value_proposition:  { type: "string", requirement: "optional", fillMode: "ai_generated" },
+
+      // Manual preferred - required (show with placeholder)
+      split_hero_image:   { type: "string", requirement: "required", fillMode: "manual_preferred", default: "/hero-placeholder.jpg" },
+
+      // Manual preferred - optional (user adds via toolbar)
+      show_social_proof:  { type: "boolean", requirement: "optional", fillMode: "manual_preferred", default: true },
+      show_customer_avatars: { type: "boolean", requirement: "optional", fillMode: "manual_preferred", default: true },
+
+      // AI-generated needs review (user should verify these)
+      customer_count:     { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review" },
+      rating_value:       { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review" },
+      rating_count:       { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review" },
+    },
+
+    collections: {
+      trust_items: {
+        requirement: "optional",
+        fillMode: "ai_generated",
+        constraints: { min: 0, max: 5 },
+        fields: {
+          id:   { type: "string", fillMode: "system" },
+          text: { type: "string", fillMode: "ai_generated" },
+        }
+      },
+      customer_avatars: {
+        requirement: "optional",
+        fillMode: "manual_preferred",
+        constraints: { min: 0, max: 6 },
+        fields: {
+          id:         { type: "string", fillMode: "system" },
+          name:       { type: "string", fillMode: "manual_preferred", default: "Customer" },
+          avatar_url: { type: "string", fillMode: "manual_preferred", default: "" },
+        }
+      }
+    }
   },
 
   imageFirst: {
-    sectionElements: [
-      { element: "headline", mandatory: true, generation: "ai_generated" },
-      { element: "cta_text", mandatory: true, generation: "ai_generated" },
-      { element: "secondary_cta_text", mandatory: false, generation: "ai_generated" },
-      { element: "subheadline", mandatory: true, generation: "ai_generated" },
-      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
-      { element: "badge_text", mandatory: false, generation: "ai_generated" },
-      { element: "trust_items", mandatory: false, generation: "ai_generated" },
-      { element: "trust_item_1", mandatory: false, generation: "ai_generated" },
-      { element: "trust_item_2", mandatory: false, generation: "ai_generated" },
-      { element: "trust_item_3", mandatory: false, generation: "ai_generated" },
-      { element: "trust_item_4", mandatory: false, generation: "ai_generated" },
-      { element: "trust_item_5", mandatory: false, generation: "ai_generated" },
-      { element: "image_first_hero_image", mandatory: true, generation: "manual_preferred" },
-      { element: "customer_count", mandatory: false, generation: "manual_preferred" },
-      { element: "rating_value", mandatory: false, generation: "manual_preferred" },
-      { element: "rating_count", mandatory: false, generation: "manual_preferred" },
-      { element: "show_social_proof", mandatory: false, generation: "manual_preferred" },
-      { element: "show_customer_avatars", mandatory: false, generation: "manual_preferred" },
-      { element: "avatar_count", mandatory: false, generation: "manual_preferred" },
-      { element: "customer_names", mandatory: false, generation: "manual_preferred" },
-      { element: "avatar_urls", mandatory: false, generation: "manual_preferred" },
-    ],
-    cardRequirements: null
+    sectionType: "imageFirst",
+
+    elements: {
+      // Required AI-generated
+      headline:           { type: "string", requirement: "required", fillMode: "ai_generated" },
+      subheadline:        { type: "string", requirement: "required", fillMode: "ai_generated" },
+      cta_text:           { type: "string", requirement: "required", fillMode: "ai_generated" },
+
+      // Optional AI-generated
+      secondary_cta_text: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      supporting_text:    { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      badge_text:         { type: "string", requirement: "optional", fillMode: "ai_generated" },
+
+      // Manual preferred - required
+      image_first_hero_image: { type: "string", requirement: "required", fillMode: "manual_preferred", default: "/hero-placeholder.jpg" },
+
+      // Manual preferred - optional
+      show_social_proof:     { type: "boolean", requirement: "optional", fillMode: "manual_preferred", default: true },
+      show_customer_avatars: { type: "boolean", requirement: "optional", fillMode: "manual_preferred", default: true },
+
+      // AI-generated needs review
+      customer_count:     { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review" },
+      rating_value:       { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review" },
+      rating_count:       { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review" },
+    },
+
+    collections: {
+      trust_items: {
+        requirement: "optional",
+        fillMode: "ai_generated",
+        constraints: { min: 0, max: 5 },
+        fields: {
+          id:   { type: "string", fillMode: "system" },
+          text: { type: "string", fillMode: "ai_generated" },
+        }
+      },
+      customer_avatars: {
+        requirement: "optional",
+        fillMode: "manual_preferred",
+        constraints: { min: 0, max: 6 },
+        fields: {
+          id:         { type: "string", fillMode: "system" },
+          name:       { type: "string", fillMode: "manual_preferred", default: "Customer" },
+          avatar_url: { type: "string", fillMode: "manual_preferred", default: "" },
+        }
+      }
+    }
   },
 
   // HowItWorks Section

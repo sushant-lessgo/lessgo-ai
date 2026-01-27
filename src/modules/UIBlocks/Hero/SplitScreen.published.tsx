@@ -1,17 +1,20 @@
 /**
- * SplitScreen Hero - Published Version
+ * SplitScreen Hero - Published Version (V2)
  *
  * Server-safe component with ZERO hook imports
  * Used by componentRegistry.published.ts for SSR rendering
+ *
+ * V2 Changes:
+ * - Clean arrays for trust_items and customer_avatars
+ * - No pipe-separated strings or ___REMOVED___ markers
  *
  * Features:
  * - 50/50 split layout (left: content, right: image)
  * - Badge, headline, subheadline, supporting text
  * - Primary and secondary CTA buttons
- * - Trust indicators (up to 5 items)
- * - Social proof: customer avatars, star ratings
+ * - Trust indicators (array of {id, text})
+ * - Social proof: customer avatars (array of {id, name, avatar_url}), star ratings
  * - Hero image with animated dashboard placeholder
- * - 23 configurable content fields
  */
 
 import React from 'react';
@@ -37,24 +40,7 @@ function hasPrimaryCTASection(sections: string[]): boolean {
   return sections.some(id => id.startsWith('cta-'));
 }
 
-/**
- * Parse customer avatar data from pipe-separated names and JSON URL mapping
- */
-function parseCustomerAvatarData(names: string, urls: string): Array<{ name: string; avatarUrl: string }> {
-  const nameArray = names.split('|').map((n: string) => n.trim()).filter(Boolean);
-  let urlMap: Record<string, string> = {};
-
-  try {
-    urlMap = JSON.parse(urls);
-  } catch {
-    // Invalid JSON, use empty map
-  }
-
-  return nameArray.map(name => ({
-    name,
-    avatarUrl: urlMap[name] || ''
-  }));
-}
+// V2: parseCustomerAvatarData removed - now using clean arrays
 
 /**
  * Render star rating SVGs (server-safe)
@@ -245,20 +231,16 @@ export default function SplitScreenPublished(props: LayoutComponentProps) {
   const rating_count = props.rating_count || 'from 127 reviews';
   const show_social_proof = props.show_social_proof !== false;
   const show_customer_avatars = props.show_customer_avatars !== false;
-  const customer_names = props.customer_names || 'Sarah Chen|Alex Rivera|Jordan Kim|Maya Patel';
-  const avatar_urls = props.avatar_urls || '{}';
 
-  // Build trust items array (filter ___REMOVED___)
-  const trustItems = [
-    props.trust_item_1,
-    props.trust_item_2,
-    props.trust_item_3,
-    props.trust_item_4,
-    props.trust_item_5
-  ].filter((item: string) => item && item !== '___REMOVED___' && item.trim() !== '');
+  // V2: Direct array access for trust_items
+  const trustItemsRaw: Array<{ id: string; text: string } | string> = props.trust_items || [];
+  const trustItems = trustItemsRaw.map((item: any) =>
+    typeof item === 'string' ? item : item.text
+  ).filter((text: string) => text && text.trim() !== '');
 
-  // Parse customer avatar data
-  const customerAvatars = parseCustomerAvatarData(customer_names, avatar_urls);
+  // V2: Direct array access for customer_avatars
+  const customerAvatars: Array<{ id: string; name: string; avatar_url?: string }> =
+    props.customer_avatars || [];
 
   // Get text colors based on background
   const textColors = getPublishedTextColors(
@@ -297,7 +279,7 @@ export default function SplitScreenPublished(props: LayoutComponentProps) {
             <div className="max-w-lg space-y-8 md:space-y-10 lg:space-y-12">
 
               {/* Badge */}
-              {badge_text && badge_text !== '___REMOVED___' && badge_text.trim() !== '' && (
+              {badge_text && badge_text.trim() !== '' && (
                 <div>
                   <span
                     style={{
@@ -327,7 +309,7 @@ export default function SplitScreenPublished(props: LayoutComponentProps) {
               </div>
 
               {/* Subheadline */}
-              {subheadline && subheadline !== '___REMOVED___' && (
+              {subheadline  && (
                 <TextPublished
                   value={subheadline}
                   element="p"
@@ -340,7 +322,7 @@ export default function SplitScreenPublished(props: LayoutComponentProps) {
               )}
 
               {/* Supporting Text */}
-              {supporting_text && supporting_text !== '___REMOVED___' && (
+              {supporting_text  && (
                 <TextPublished
                   value={supporting_text}
                   element="p"
@@ -421,7 +403,7 @@ export default function SplitScreenPublished(props: LayoutComponentProps) {
                   })()}
 
                   {/* Secondary CTA */}
-                  {secondary_cta_text && secondary_cta_text !== '___REMOVED___' && (
+                  {secondary_cta_text && (
                     <CTAButtonPublished
                       text={secondary_cta_text}
                       backgroundColor="transparent"
@@ -448,14 +430,14 @@ export default function SplitScreenPublished(props: LayoutComponentProps) {
               {show_social_proof && (
                 <div className="flex flex-col space-y-6 pt-8 md:pt-10">
                   {/* Customer Count with Avatars */}
-                  {customer_count && customer_count !== '___REMOVED___' && (
+                  {customer_count && (
                     <div className="flex items-center space-x-3">
                       {show_customer_avatars && customerAvatars.length > 0 && (
                         <div className="flex -space-x-2">
-                          {customerAvatars.map((customer: { name: string; avatarUrl: string }, i: number) => (
+                          {customerAvatars.map((customer) => (
                             <AvatarPublished
-                              key={customer.name}
-                              imageUrl={customer.avatarUrl}
+                              key={customer.id}
+                              imageUrl={customer.avatar_url || ''}
                               name={customer.name}
                               size={40}
                             />
@@ -472,7 +454,7 @@ export default function SplitScreenPublished(props: LayoutComponentProps) {
                   )}
 
                   {/* Rating with Stars */}
-                  {rating_value && rating_value !== '___REMOVED___' && (
+                  {rating_value && (
                     <div className="flex items-center space-x-2">
                       {renderStars(rating_value)}
                       <div className="flex items-center space-x-2 ml-3">
@@ -482,7 +464,7 @@ export default function SplitScreenPublished(props: LayoutComponentProps) {
                           className="text-sm"
                           style={{ color: textColors.body }}
                         />
-                        {rating_count && rating_count !== '___REMOVED___' && (
+                        {rating_count && (
                           <TextPublished
                             value={rating_count}
                             element="span"

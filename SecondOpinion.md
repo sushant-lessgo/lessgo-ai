@@ -1,66 +1,62 @@
-Mostly yes — the **strategy** is sound (manual_preferred + defaults), but I’d tweak 2 details so you don’t introduce new problems.
+ImageFirst (Hero_v7) - Design Review 
+                                                                                                                                                                              VERDICT: ⚠️ NEEDS WORK                                                                                                                                                                                                                                                                                                                                 
+  ---                                                                                                                                                                         Elements rendered:                                                                                                                                                        
+  - ✅ hero_image (top, centered, with shadow)
+  - ✅ badge_text
+  - ✅ headline (centered)
+  - ✅ subheadline
+  - ✅ primary CTA + secondary CTA
+  - ✅ trust_items
+  - ✅ supporting_text
+  - ✅ social proof row
 
-## What I agree with
+  ---
+  Strengths:
+  - Image-first creates immediate visual hook
+  - Image shadow/reflection treatment looks good
+  - Center alignment is consistent
+  - Headline is good length (2 lines)
 
-* **Manual_preferred** removes icon hallucinations and removes icon instructions from the AI prompt.
-* A **default** makes the UI instantly usable.
-* “Smart default” gives variety without involving AI.
+  ---
+  Issues:
 
-## The 2 tweaks I recommend
+  1. [Critical] Element order is wrong
 
-### 1) Don’t do `<LucideIcons[item.icon] />` without a safe fallback
+  1. Current flow:
+  [Image]
+  [Badge]
+  [Headline]
+  [Subheadline]
+  [CTAs]
+  [Trust items]        ← odd position
+  [Supporting text]    ← should be BEFORE CTAs
+  [Social proof]
 
-In React, if `item.icon` is invalid/undefined, that will render `undefined` and can crash or silently fail.
+  1. Expected flow:
+  [Image]
+  [Badge]
+  [Headline]
+  [Subheadline]
+  [Supporting text]    ← context before action
+  [CTAs]
+  [Trust items]        ← reinforcement after CTA
+  [Social proof]
 
-Do:
+  1. → Fix: Move supporting_text above CTAs
+  2. [Major] Transition from image to copy is weak
+    - Large image → tiny badge feels abrupt
+    - No visual bridge between image and text content
+  → Consider: reduce gap OR increase badge visual weight
+  3. [Minor] Image dominates viewport
+    - Copy likely pushed below fold on laptops
+    - Acceptable for "image-first" intent, but note the tradeoff
+  4. [Minor] Social proof row dense
+    - Same issue as CenterStacked
+    - Avatars + count + stars + reviews all inline
 
-```tsx
-const Icon = (LucideIcons as any)[iconName] ?? LucideIcons.Sparkles;
-return <Icon />;
-```
+  ---
+  Priority Fixes:
 
-(or pick `Circle` as the safest fallback)
-
-### 2) Don’t store `"auto"` in the DB if you can avoid it
-
-Storing `"auto"` makes your DB contain “control flags” rather than actual content. It’s not terrible, but it’s cleaner to store `icon?: string` and compute the default at render-time.
-
-**Cleaner pattern:**
-
-* DB: `icon` is either a real Lucide name or undefined
-* Render: `iconName = item.icon ?? getIconFromText(item.title, item.description) ?? "Sparkles"`
-
-Example:
-
-```ts
-const iconName =
-  item.icon ??
-  getIconFromText(item.title, item.description) ??
-  "Sparkles";
-```
-
-That gives you Option B behavior without storing `"auto"`.
-
----
-
-## Revised “Agree + best MVP version”
-
-**Yes** to: `manual_preferred + smart default + user override`.
-
-Just implement it like this:
-
-* Schema:
-
-  * `fillMode: "manual_preferred"`
-  * `default` optional (you can even omit and rely on render fallback)
-
-* DB:
-
-  * store only user choice (or nothing)
-
-* Component:
-
-  * derive a default when icon is missing
-  * always use fallback icon if name invalid
-
-That keeps complexity low *and* avoids broken icons and DB flags.
+  1. Reorder elements: supporting_text before CTAs
+  2. Tighten image-to-badge gap or add visual transition
+  3. Consider social proof row spacing

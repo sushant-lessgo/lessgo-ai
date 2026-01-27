@@ -6,6 +6,7 @@ const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/',
+  '/dev/(.*)',  // Dev routes (blocked in production by middleware)
   '/api/subscribe',
   '/api/generate-landing',
   '/api/test',
@@ -40,6 +41,11 @@ const isPublicRoute = createRouteMatcher([
 export default clerkMiddleware(async (auth, req) => {
   const host = req.headers.get('host')
   const url = req.nextUrl.clone()
+
+  // Block /dev/* routes in production
+  if (url.pathname.startsWith('/dev/') && process.env.NODE_ENV === 'production') {
+    return NextResponse.json({ error: 'Dev routes disabled in production' }, { status: 404 })
+  }
   
   // Handle subdomain routing for published pages
   if (host && host.includes('.lessgo.ai')) {

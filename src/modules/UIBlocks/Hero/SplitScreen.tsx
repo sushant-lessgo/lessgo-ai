@@ -21,13 +21,9 @@ import AvatarEditableComponent from '@/components/ui/AvatarEditableComponent';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { createCTAClickHandler } from '@/utils/ctaHandler';
 import { logger } from '@/lib/logger';
-import { 
-  parseCustomerAvatarData, 
-  getCustomerAvatarUrl, 
-  updateAvatarUrls,
-  parsePipeData 
-} from '@/utils/dataParsingUtils';
+// V2: No legacy parsing imports needed - using clean arrays
 
+// V2: Clean array types - no pipe-separated strings
 interface SplitScreenContent {
   headline: string;
   cta_text: string;
@@ -35,28 +31,23 @@ interface SplitScreenContent {
   subheadline?: string;
   supporting_text?: string;
   badge_text?: string;
-  trust_items?: string;
-  trust_item_1?: string;
-  trust_item_2?: string;
-  trust_item_3?: string;
-  trust_item_4?: string;
-  trust_item_5?: string;
+  value_proposition?: string;
   split_hero_image?: string;
   customer_count?: string;
   rating_value?: string;
   rating_count?: string;
   show_social_proof?: boolean;
   show_customer_avatars?: boolean;
-  avatar_count?: number;
-  // Dynamic avatar system
-  customer_names?: string;
-  avatar_urls?: string;
+  // V2: Clean arrays
+  trust_items?: Array<{ id: string; text: string }>;
+  customer_avatars?: Array<{ id: string; name: string; avatar_url?: string }>;
 }
 
+// V2: Clean schema with arrays - no pipe-separated strings
 const CONTENT_SCHEMA = {
-  headline: { 
-    type: 'string' as const, 
-    default: 'Transform Your Business with Smart Automation' 
+  headline: {
+    type: 'string' as const,
+    default: 'Transform Your Business with Smart Automation'
   },
   cta_text: {
     type: 'string' as const,
@@ -66,77 +57,54 @@ const CONTENT_SCHEMA = {
     type: 'string' as const,
     default: 'Watch Demo'
   },
-  subheadline: { 
-    type: 'string' as const, 
-    default: 'Streamline workflows, boost productivity, and scale effortlessly with our intelligent automation platform.' 
+  subheadline: {
+    type: 'string' as const,
+    default: 'Streamline workflows, boost productivity, and scale effortlessly with our intelligent automation platform.'
   },
-  supporting_text: { 
-    type: 'string' as const, 
-    default: 'Save 20+ hours per week with automated workflows that just work.' 
+  supporting_text: {
+    type: 'string' as const,
+    default: 'Save 20+ hours per week with automated workflows that just work.'
   },
-  badge_text: { 
-    type: 'string' as const, 
-    default: '' 
+  badge_text: {
+    type: 'string' as const,
+    default: ''
   },
-  trust_items: { 
-    type: 'string' as const, 
-    default: 'Free 14-day trial|No credit card required|Cancel anytime' 
+  value_proposition: {
+    type: 'string' as const,
+    default: ''
   },
-  trust_item_1: { 
-    type: 'string' as const, 
-    default: 'Free 14-day trial' 
+  split_hero_image: {
+    type: 'string' as const,
+    default: '/hero-placeholder.jpg'
   },
-  trust_item_2: { 
-    type: 'string' as const, 
-    default: 'No credit card required' 
+  customer_count: {
+    type: 'string' as const,
+    default: '500+ happy customers'
   },
-  trust_item_3: { 
-    type: 'string' as const, 
-    default: 'Cancel anytime' 
+  rating_value: {
+    type: 'string' as const,
+    default: '4.9/5'
   },
-  trust_item_4: { 
-    type: 'string' as const, 
-    default: '' 
+  rating_count: {
+    type: 'string' as const,
+    default: 'from 127 reviews'
   },
-  trust_item_5: { 
-    type: 'string' as const, 
-    default: '' 
+  show_social_proof: {
+    type: 'boolean' as const,
+    default: true
   },
-  split_hero_image: { 
-    type: 'string' as const, 
-    default: '/hero-placeholder.jpg' 
+  show_customer_avatars: {
+    type: 'boolean' as const,
+    default: true
   },
-  customer_count: { 
-    type: 'string' as const, 
-    default: '500+ happy customers' 
+  // V2: Clean arrays
+  trust_items: {
+    type: 'array' as const,
+    default: []
   },
-  rating_value: { 
-    type: 'string' as const, 
-    default: '4.9/5' 
-  },
-  rating_count: { 
-    type: 'string' as const, 
-    default: 'from 127 reviews' 
-  },
-  show_social_proof: { 
-    type: 'boolean' as const, 
-    default: true 
-  },
-  show_customer_avatars: { 
-    type: 'boolean' as const, 
-    default: true 
-  },
-  avatar_count: { 
-    type: 'number' as const, 
-    default: 4 
-  },
-  customer_names: { 
-    type: 'string' as const, 
-    default: 'Sarah Chen|Alex Rivera|Jordan Kim|Maya Patel' 
-  },
-  avatar_urls: { 
-    type: 'string' as const, 
-    default: '{}' 
+  customer_avatars: {
+    type: 'array' as const,
+    default: []
   }
 };
 
@@ -291,62 +259,24 @@ export default function SplitScreen(props: LayoutComponentProps) {
     handleContentUpdate
   } = useLayoutComponent<SplitScreenContent>({
     ...props,
-    contentSchema: CONTENT_SCHEMA
+    contentSchema: CONTENT_SCHEMA as any  // V2: Schema now includes arrays
   });
 
-  // Handle trust items - support both legacy pipe-separated format and individual fields
-  const getTrustItems = (): string[] => {
-    // Check if individual trust item fields exist
-    const individualItems = [
-      blockContent.trust_item_1,
-      blockContent.trust_item_2, 
-      blockContent.trust_item_3,
-      blockContent.trust_item_4,
-      blockContent.trust_item_5
-    ].filter((item): item is string => Boolean(item && item.trim() !== ''));
-    
-    // If individual items exist, use them; otherwise fall back to legacy format
-    if (individualItems.length > 0) {
-      return individualItems;
-    }
-    
-    // Legacy format fallback
-    return blockContent.trust_items 
-      ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
-      : ['Free trial', 'No credit card'];
-  };
-  
-  const trustItems = getTrustItems();
+  // V2: Direct array access - no legacy parsing
+  const trustItems = (blockContent.trust_items || []).map((item: any) =>
+    typeof item === 'string' ? item : item.text
+  ).filter((text: string) => text && text.trim() !== '');
 
-  // Handle customer avatars - support both legacy avatar_count and new dynamic system
-  const getCustomerAvatars = (): { name: string; avatarUrl: string }[] => {
-    // If customer_names exists, use dynamic system
-    if (blockContent.customer_names) {
-      const customerData = parseCustomerAvatarData(
-        blockContent.customer_names, 
-        blockContent.avatar_urls || '{}'
-      );
-      return customerData.map(customer => ({
-        name: customer.name,
-        avatarUrl: customer.avatarUrl || ''
-      }));
-    }
-    
-    // Fallback to legacy system with generic names
-    const avatarCount = blockContent.avatar_count || 4;
-    const defaultNames = ['Sarah Chen', 'Alex Rivera', 'Jordan Kim', 'Maya Patel', 'Casey Martinez', 'Taylor Wright'];
-    return Array.from({ length: Math.min(avatarCount, 6) }, (_, i) => ({
-      name: defaultNames[i] || `Customer ${i + 1}`,
-      avatarUrl: ''
-    }));
-  };
+  // V2: Direct array access for customer avatars
+  const customerAvatars: Array<{ id: string; name: string; avatar_url?: string }> =
+    blockContent.customer_avatars || [];
 
-  const customerAvatars = getCustomerAvatars();
-
-  // Handle avatar URL updates
-  const handleAvatarChange = (customerName: string, avatarUrl: string) => {
-    const updatedAvatarUrls = updateAvatarUrls(blockContent.avatar_urls || '{}', customerName, avatarUrl);
-    handleContentUpdate('avatar_urls', updatedAvatarUrls);
+  // Handle avatar URL updates - V2 version using array
+  const handleAvatarChange = (customerId: string, avatarUrl: string) => {
+    const updatedAvatars = customerAvatars.map((avatar) =>
+      avatar.id === customerId ? { ...avatar, avatar_url: avatarUrl } : avatar
+    );
+    (handleContentUpdate as any)('customer_avatars', updatedAvatars);
   };
 
   // Create hero typography styles using landingTypography system
@@ -429,7 +359,6 @@ export default function SplitScreen(props: LayoutComponentProps) {
             <div className="max-w-lg space-y-8 md:space-y-10 lg:space-y-12">
               
               {blockContent.badge_text &&
-               blockContent.badge_text !== '___REMOVED___' &&
                blockContent.badge_text.trim() !== '' && (
                 <div>
                   <AccentBadge
@@ -506,7 +435,7 @@ export default function SplitScreen(props: LayoutComponentProps) {
                   />
 
                   {/* Secondary CTA */}
-                  {(blockContent.secondary_cta_text && blockContent.secondary_cta_text !== '___REMOVED___' && blockContent.secondary_cta_text.trim() !== '') && (() => {
+                  {(blockContent.secondary_cta_text && blockContent.secondary_cta_text.trim() !== '') && (() => {
                     const secondaryButtonConfig = content[sectionId]?.elements?.secondary_cta_text?.metadata?.buttonConfig;
                     const secondaryClassName = "shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 text-lg px-8 py-4";
 
@@ -550,52 +479,6 @@ export default function SplitScreen(props: LayoutComponentProps) {
                     }
                   })()}
 
-                  {mode !== 'preview' ? (
-                    <EditableTrustIndicators
-                      mode={mode}
-                      trustItems={[
-                        blockContent.trust_item_1 || '',
-                        blockContent.trust_item_2 || '',
-                        blockContent.trust_item_3 || '',
-                        blockContent.trust_item_4 || '',
-                        blockContent.trust_item_5 || ''
-                      ]}
-                      onTrustItemChange={(index, value) => {
-                        const fieldKey = `trust_item_${index + 1}` as keyof SplitScreenContent;
-                        handleContentUpdate(fieldKey, value);
-                      }}
-                      onAddTrustItem={() => {
-                        const emptyIndex = [
-                          blockContent.trust_item_1,
-                          blockContent.trust_item_2,
-                          blockContent.trust_item_3,
-                          blockContent.trust_item_4,
-                          blockContent.trust_item_5
-                        ].findIndex(item => !item || item.trim() === '' || item === '___REMOVED___');
-
-                        if (emptyIndex !== -1) {
-                          const fieldKey = `trust_item_${emptyIndex + 1}` as keyof SplitScreenContent;
-                          handleContentUpdate(fieldKey, 'New trust item');
-                        }
-                      }}
-                      onRemoveTrustItem={(index) => {
-                        const fieldKey = `trust_item_${index + 1}` as keyof SplitScreenContent;
-                        handleContentUpdate(fieldKey, '___REMOVED___');
-                      }}
-                      colorTokens={colorTokens}
-                      sectionBackground={sectionBackground}
-                      sectionId={sectionId}
-                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
-                      iconColor="text-green-500"
-                      colorClass={mutedTextColor}
-                    />
-                  ) : (
-                    <TrustIndicators
-                      items={trustItems}
-                      colorClass={mutedTextColor}
-                      iconColor="text-green-500"
-                    />
-                  )}
                 </div>
               ) : (
                 // Standard button: Conditional layout based on form type
@@ -642,7 +525,7 @@ export default function SplitScreen(props: LayoutComponentProps) {
                   })()}
 
                   {/* Secondary CTA */}
-                  {(blockContent.secondary_cta_text && blockContent.secondary_cta_text !== '___REMOVED___' && blockContent.secondary_cta_text.trim() !== '') && (() => {
+                  {(blockContent.secondary_cta_text && blockContent.secondary_cta_text.trim() !== '') && (() => {
                     const secondaryButtonConfig = content[sectionId]?.elements?.secondary_cta_text?.metadata?.buttonConfig;
                     const secondaryClassName = "shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 text-lg px-8 py-4";
 
@@ -674,37 +557,36 @@ export default function SplitScreen(props: LayoutComponentProps) {
                     }
                   })()}
 
+                    </div>
+                  );
+                })()
+              )}
+
+              {/* V2: Trust indicators - SEPARATE ROW (design fix) */}
+              {trustItems.length > 0 && (
+                <div className="flex items-center gap-6 flex-wrap mt-6">
                   {mode !== 'preview' ? (
                     <EditableTrustIndicators
                       mode={mode}
-                      trustItems={[
-                        blockContent.trust_item_1 || '',
-                        blockContent.trust_item_2 || '',
-                        blockContent.trust_item_3 || '',
-                        blockContent.trust_item_4 || '',
-                        blockContent.trust_item_5 || ''
-                      ]}
+                      trustItems={trustItems}
                       onTrustItemChange={(index, value) => {
-                        const fieldKey = `trust_item_${index + 1}` as keyof SplitScreenContent;
-                        handleContentUpdate(fieldKey, value);
+                        const items = blockContent.trust_items || [];
+                        const updatedItems = items.map((item: any, i: number) =>
+                          i === index ? { ...item, text: value } : item
+                        );
+                        (handleContentUpdate as any)('trust_items', updatedItems);
                       }}
                       onAddTrustItem={() => {
-                        const emptyIndex = [
-                          blockContent.trust_item_1,
-                          blockContent.trust_item_2,
-                          blockContent.trust_item_3,
-                          blockContent.trust_item_4,
-                          blockContent.trust_item_5
-                        ].findIndex(item => !item || item.trim() === '' || item === '___REMOVED___');
-
-                        if (emptyIndex !== -1) {
-                          const fieldKey = `trust_item_${emptyIndex + 1}` as keyof SplitScreenContent;
-                          handleContentUpdate(fieldKey, 'New trust item');
+                        const items = blockContent.trust_items || [];
+                        if (items.length < 5) {
+                          const newItem = { id: `t${Date.now()}`, text: 'New trust item' };
+                          (handleContentUpdate as any)('trust_items', [...items, newItem]);
                         }
                       }}
                       onRemoveTrustItem={(index) => {
-                        const fieldKey = `trust_item_${index + 1}` as keyof SplitScreenContent;
-                        handleContentUpdate(fieldKey, '___REMOVED___');
+                        const items = blockContent.trust_items || [];
+                        const updatedItems = items.filter((_: any, i: number) => i !== index);
+                        (handleContentUpdate as any)('trust_items', updatedItems);
                       }}
                       colorTokens={colorTokens}
                       sectionBackground={sectionBackground}
@@ -720,23 +602,22 @@ export default function SplitScreen(props: LayoutComponentProps) {
                       iconColor="text-green-500"
                     />
                   )}
-                    </div>
-                  );
-                })()
+                </div>
               )}
 
+              {/* V2: Social proof section - no ___REMOVED___ markers */}
               {(blockContent.show_social_proof !== false) && (
                 <div className="flex flex-col space-y-6 pt-8 md:pt-10">
-                  {blockContent.customer_count && blockContent.customer_count !== '___REMOVED___' && (
+                  {blockContent.customer_count && (
                     <div className="relative group/customer-count flex items-center space-x-3">
-                      {blockContent.show_customer_avatars !== false && (
+                      {blockContent.show_customer_avatars !== false && customerAvatars.length > 0 && (
                         <div className="flex -space-x-2">
-                          {customerAvatars.map((customer, i) => (
+                          {customerAvatars.map((customer) => (
                             <AvatarEditableComponent
-                              key={customer.name}
+                              key={customer.id}
                               mode={mode}
-                              avatarUrl={customer.avatarUrl}
-                              onAvatarChange={(url) => handleAvatarChange(customer.name, url)}
+                              avatarUrl={customer.avatar_url || ''}
+                              onAvatarChange={(url) => handleAvatarChange(customer.id, url)}
                               customerName={customer.name}
                               size="sm"
                               className="cursor-default"
@@ -757,13 +638,13 @@ export default function SplitScreen(props: LayoutComponentProps) {
                         data-section-id={sectionId}
                         data-element-key="customer_count"
                       />
-                      
+
                       {/* Remove button for customer count */}
                       {mode !== 'preview' && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleContentUpdate('customer_count', '___REMOVED___');
+                            handleContentUpdate('customer_count', '');
                           }}
                           className="opacity-0 group-hover/customer-count:opacity-100 ml-2 text-red-500 hover:text-red-700 transition-opacity duration-200"
                           title="Remove customer count"
@@ -776,7 +657,7 @@ export default function SplitScreen(props: LayoutComponentProps) {
                     </div>
                   )}
                   
-                  {blockContent.rating_value && blockContent.rating_value !== '___REMOVED___' && (
+                  {blockContent.rating_value && (
                     <div className="relative group/rating-section flex items-center space-x-2">
                       {renderStars(blockContent.rating_value)}
                       <div className="flex items-center space-x-2 ml-3">
@@ -807,14 +688,14 @@ export default function SplitScreen(props: LayoutComponentProps) {
                           data-element-key="rating_count"
                         />
                       </div>
-                      
+
                       {/* Remove button for rating section */}
                       {mode !== 'preview' && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleContentUpdate('rating_value', '___REMOVED___');
-                            handleContentUpdate('rating_count', '___REMOVED___');
+                            handleContentUpdate('rating_value', '');
+                            handleContentUpdate('rating_count', '');
                           }}
                           className="opacity-0 group-hover/rating-section:opacity-100 ml-2 text-red-500 hover:text-red-700 transition-opacity duration-200"
                           title="Remove rating section"
@@ -872,6 +753,7 @@ export const componentMeta = {
   complexity: 'simple',
   estimatedBuildTime: '15 minutes',
   
+  // V2: Clean array-based content fields
   contentFields: [
     { key: 'headline', label: 'Main Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
@@ -879,20 +761,14 @@ export const componentMeta = {
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: true },
     { key: 'secondary_cta_text', label: 'Secondary CTA Button Text', type: 'text', required: false },
     { key: 'badge_text', label: 'Badge Text (uses accent colors)', type: 'text', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
-    { key: 'trust_item_1', label: 'Trust Item 1', type: 'text', required: false },
-    { key: 'trust_item_2', label: 'Trust Item 2', type: 'text', required: false },
-    { key: 'trust_item_3', label: 'Trust Item 3', type: 'text', required: false },
-    { key: 'trust_item_4', label: 'Trust Item 4', type: 'text', required: false },
-    { key: 'trust_item_5', label: 'Trust Item 5', type: 'text', required: false },
+    { key: 'value_proposition', label: 'Value Proposition', type: 'text', required: false },
+    { key: 'trust_items', label: 'Trust Indicators (array)', type: 'array', required: false },
     { key: 'customer_count', label: 'Customer Count', type: 'text', required: false },
     { key: 'rating_value', label: 'Rating (e.g., 4.9/5)', type: 'text', required: false },
     { key: 'rating_count', label: 'Review Count (e.g., from 127 reviews)', type: 'text', required: false },
     { key: 'show_social_proof', label: 'Show Social Proof', type: 'boolean', required: false },
     { key: 'show_customer_avatars', label: 'Show Customer Avatars', type: 'boolean', required: false },
-    { key: 'avatar_count', label: 'Number of Avatars (1-6) - Legacy', type: 'number', required: false },
-    { key: 'customer_names', label: 'Customer Names (pipe separated)', type: 'text', required: false },
-    { key: 'avatar_urls', label: 'Avatar URLs (JSON format)', type: 'text', required: false },
+    { key: 'customer_avatars', label: 'Customer Avatars (array)', type: 'array', required: false },
     { key: 'split_hero_image', label: 'Hero Image', type: 'image', required: false }
   ],
   

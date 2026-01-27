@@ -34,24 +34,7 @@ import { determineFormPlacement } from '@/utils/formPlacement';
 // Helper Functions (server-safe, no hooks)
 // ============================================================================
 
-/**
- * Parse customer avatar data from pipe-separated names and JSON URL mapping
- */
-function parseCustomerAvatarData(names: string, urls: string): Array<{ name: string; avatarUrl: string }> {
-  const nameArray = names.split('|').map((n: string) => n.trim()).filter(Boolean);
-  let urlMap: Record<string, string> = {};
-
-  try {
-    urlMap = JSON.parse(urls);
-  } catch {
-    // Invalid JSON, use empty map
-  }
-
-  return nameArray.map(name => ({
-    name,
-    avatarUrl: urlMap[name] || ''
-  }));
-}
+// V2: parseCustomerAvatarData removed - now using clean arrays
 
 /**
  * Render star rating SVGs (server-safe)
@@ -143,20 +126,15 @@ export default function LeftCopyRightImagePublished(props: LayoutComponentProps)
   const rating_count = props.rating_count || 'from 127 reviews';
   const show_social_proof = props.show_social_proof !== false;
   const show_customer_avatars = props.show_customer_avatars !== false;
-  const customer_names = props.customer_names || 'Sarah Chen|Alex Rivera|Jordan Kim|Maya Patel';
-  const avatar_urls = props.avatar_urls || '{}';
 
-  // Build trust items array (filter ___REMOVED___)
-  const trustItems = [
-    props.trust_item_1,
-    props.trust_item_2,
-    props.trust_item_3,
-    props.trust_item_4,
-    props.trust_item_5
-  ].filter((item: string) => item && item !== '___REMOVED___' && item.trim() !== '');
+  // V2: Direct array access - no legacy parsing
+  const trustItems = ((props as any).trust_items || []).map((item: any) =>
+    typeof item === 'string' ? item : item.text
+  ).filter((text: string) => text && text.trim() !== '');
 
-  // Parse customer avatar data
-  const customerAvatars = parseCustomerAvatarData(customer_names, avatar_urls);
+  // V2: Direct array access for customer avatars
+  const customerAvatars: Array<{ id: string; name: string; avatar_url?: string }> =
+    (props as any).customer_avatars || [];
 
   // Get text colors based on background
   const textColors = getPublishedTextColors(
@@ -197,11 +175,11 @@ export default function LeftCopyRightImagePublished(props: LayoutComponentProps)
       <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center min-h-[600px]">
 
         {/* LEFT COLUMN - Copy/Content (order-2 on mobile, order-1 on desktop) */}
-        <div className="order-2 lg:order-1 space-y-6">
+        <div className="order-2 lg:order-1 max-w-xl">
 
           {/* Badge */}
           {badge_text && badge_text !== '___REMOVED___' && badge_text.trim() !== '' && (
-            <div>
+            <div className="mb-4">
               <span
                 style={{
                   color: accentColor,
@@ -218,120 +196,129 @@ export default function LeftCopyRightImagePublished(props: LayoutComponentProps)
           )}
 
           {/* Headline */}
-          <HeadlinePublished
-            value={headline}
-            level="h1"
-            className="leading-[1.1]"
-            style={{
-              color: textColors.heading,
-              ...h1Typography
-            }}
-          />
+          <div className="mb-4">
+            <HeadlinePublished
+              value={headline}
+              level="h1"
+              className="leading-[1.1]"
+              style={{
+                color: textColors.heading,
+                ...h1Typography
+              }}
+            />
+          </div>
 
           {/* Subheadline */}
           {subheadline && subheadline !== '___REMOVED___' && (
-            <TextPublished
-              value={subheadline}
-              element="p"
-              className="leading-relaxed"
-              style={{
-                color: textColors.body,
-                ...bodyLgTypography
-              }}
-            />
+            <div className="mb-3">
+              <TextPublished
+                value={subheadline}
+                element="p"
+                className="leading-relaxed"
+                style={{
+                  color: textColors.body,
+                  ...bodyLgTypography
+                }}
+              />
+            </div>
           )}
 
           {/* Supporting Text */}
           {supporting_text && supporting_text !== '___REMOVED___' && (
-            <TextPublished
-              value={supporting_text}
-              element="p"
-              className="leading-relaxed"
-              style={{
-                color: textColors.body
-              }}
-            />
+            <div className="mb-8">
+              <TextPublished
+                value={supporting_text}
+                element="p"
+                className="leading-relaxed text-sm opacity-75"
+                style={{
+                  color: textColors.body
+                }}
+              />
+            </div>
           )}
 
-          {/* CTAs + Trust Indicators */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-            {/* Primary CTA - Form or Button */}
-            {(() => {
-              // Check if button is form-connected
-              if (!buttonConfig || buttonConfig.type !== 'form') {
+          {/* CTAs + Trust Indicators - Separated rows */}
+          <div className="flex flex-col gap-6">
+            {/* CTA buttons row */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              {/* Primary CTA - Form or Button */}
+              {(() => {
+                // Check if button is form-connected
+                if (!buttonConfig || buttonConfig.type !== 'form') {
+                  return (
+                    <CTAButtonPublished
+                      text={cta_text}
+                      backgroundColor={accentColor}
+                      textColor="#FFFFFF"
+                      className="px-8 py-4 font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all"
+                    />
+                  );
+                }
+
+                // Get form from content
+                const form = props.content?.forms?.[buttonConfig.formId];
+                if (!form) {
+                  console.warn(`Form not found: ${buttonConfig.formId}`);
+                  return (
+                    <CTAButtonPublished
+                      text={cta_text}
+                      backgroundColor={accentColor}
+                      textColor="#FFFFFF"
+                      className="px-8 py-4 font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all"
+                    />
+                  );
+                }
+
+                // Determine placement
+                const placement = determineFormPlacement(
+                  form,
+                  buttonConfig.ctaType || 'primary',
+                  'hero',
+                  props.sections || []
+                );
+
+                // Render inline form (single-field)
+                if (placement.placement === 'inline') {
+                  return (
+                    <InlineFormMarkupPublished
+                      form={form}
+                      publishedPageId={publishedPageId || ''}
+                      pageOwnerId={pageOwnerId || ''}
+                      size="large"
+                      variant="primary"
+                      colorTokens={{
+                        bg: accentColor,
+                        text: '#FFFFFF'
+                      }}
+                      className="w-full sm:w-auto"
+                    />
+                  );
+                }
+
+                // Multi-field: render button (form renders in CTA section)
                 return (
                   <CTAButtonPublished
                     text={cta_text}
                     backgroundColor={accentColor}
                     textColor="#FFFFFF"
+                    href={buttonConfig.behavior === 'scrollTo' ? '#form-section' : undefined}
                     className="px-8 py-4 font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all"
                   />
                 );
-              }
+              })()}
 
-              // Get form from content
-              const form = props.content?.forms?.[buttonConfig.formId];
-              if (!form) {
-                console.warn(`Form not found: ${buttonConfig.formId}`);
-                return (
-                  <CTAButtonPublished
-                    text={cta_text}
-                    backgroundColor={accentColor}
-                    textColor="#FFFFFF"
-                    className="px-8 py-4 font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all"
-                  />
-                );
-              }
-
-              // Determine placement
-              const placement = determineFormPlacement(
-                form,
-                buttonConfig.ctaType || 'primary',
-                'hero',
-                props.sections || []
-              );
-
-              // Render inline form (single-field)
-              if (placement.placement === 'inline') {
-                return (
-                  <InlineFormMarkupPublished
-                    form={form}
-                    publishedPageId={publishedPageId || ''}
-                    pageOwnerId={pageOwnerId || ''}
-                    size="large"
-                    variant="primary"
-                    colorTokens={{
-                      bg: accentColor,
-                      text: '#FFFFFF'
-                    }}
-                    className="w-full sm:w-auto"
-                  />
-                );
-              }
-
-              // Multi-field: render button (form renders in CTA section)
-              return (
+              {/* Secondary CTA */}
+              {secondary_cta_text && secondary_cta_text !== '___REMOVED___' && (
                 <CTAButtonPublished
-                  text={cta_text}
-                  backgroundColor={accentColor}
-                  textColor="#FFFFFF"
-                  href={buttonConfig.behavior === 'scrollTo' ? '#form-section' : undefined}
-                  className="px-8 py-4 font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all"
+                  text={secondary_cta_text}
+                  backgroundColor="transparent"
+                  textColor={textColors.body}
+                  className="px-8 py-4 font-semibold rounded-xl border-2 hover:bg-opacity-5 transition-all"
                 />
-              );
-            })()}
+              )}
+            </div>
 
-            {/* Secondary CTA */}
-            {secondary_cta_text && secondary_cta_text !== '___REMOVED___' && (
-              <CTAButtonPublished
-                text={secondary_cta_text}
-                backgroundColor="transparent"
-                textColor={textColors.body}
-                className="px-8 py-4 font-semibold rounded-xl border-2 hover:bg-opacity-5 transition-all"
-              />
-            )}
-
-            {/* Trust Indicators */}
+            {/* Trust Indicators - separate row below */}
             {trustItems.length > 0 && (
               <div className="flex items-center space-x-4 flex-wrap">
                 {trustItems.map((item: string, i: number) => (
@@ -352,10 +339,10 @@ export default function LeftCopyRightImagePublished(props: LayoutComponentProps)
                 <div className="flex items-center space-x-2">
                   {show_customer_avatars && customerAvatars.length > 0 && (
                     <div className="flex -space-x-2">
-                      {customerAvatars.map((customer: { name: string; avatarUrl: string }, i: number) => (
+                      {customerAvatars.map((customer) => (
                         <AvatarPublished
-                          key={customer.name}
-                          imageUrl={customer.avatarUrl}
+                          key={customer.id}
+                          imageUrl={customer.avatar_url || ''}
                           name={customer.name}
                           size={40}
                         />
@@ -406,11 +393,20 @@ export default function LeftCopyRightImagePublished(props: LayoutComponentProps)
         {/* RIGHT COLUMN - Image (order-1 on mobile, order-2 on desktop) */}
         <div className="order-1 lg:order-2">
           {imageSrc ? (
-            <img
-              src={imageSrc}
-              alt="Hero"
-              className="w-full min-h-[500px] lg:min-h-[600px] object-cover rounded-2xl shadow-2xl"
-            />
+            <div className="relative w-full h-full min-h-[500px] lg:min-h-[600px]">
+              {/* Decorative gradient blob behind image - uses theme accent color */}
+              <div
+                className="absolute -inset-4 rounded-3xl blur-2xl opacity-30"
+                style={{
+                  background: `linear-gradient(135deg, ${accentColor}40 0%, transparent 50%, ${accentColor}20 100%)`
+                }}
+              />
+              <img
+                src={imageSrc}
+                alt="Hero"
+                className="relative z-10 w-full h-full object-cover rounded-2xl shadow-2xl"
+              />
+            </div>
           ) : (
             <DashboardPlaceholder />
           )}

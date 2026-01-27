@@ -133,12 +133,25 @@ export default function GeneratingStep() {
         sectionLayouts[id] = strategy.uiblocks?.[sectionType] || uiblockSelections[sectionType] || 'default';
       });
 
-      // Build content map
-      const content: Record<string, { elements: Record<string, unknown> }> = {};
+      // Build content map with full structure (layout, id, aiMetadata required for editor)
+      const content: Record<string, any> = {};
       sectionIds.forEach((id, i) => {
         const sectionType = sectionOrder[i];
         const sectionCopy = sections[sectionType];
-        content[id] = sectionCopy || { elements: {} };
+        const layout = sectionLayouts[id];
+
+        content[id] = {
+          id,
+          layout,
+          elements: sectionCopy?.elements || {},
+          aiMetadata: {
+            aiGenerated: true,
+            isCustomized: false,
+            lastGenerated: Date.now(),
+            aiGeneratedElements: Object.keys(sectionCopy?.elements || {}),
+            excludedElements: []
+          }
+        };
       });
 
       // Get theme from vibe mapping
