@@ -43,9 +43,7 @@ export const layoutToSectionType: Record<string, string> = {
   'CallToQuotePlan': 'pricing',
 
   // Problem layouts
-  'CollapsedCards': 'problem',
-  'SideBySideSplit': 'problem',
-  'PersonaPanels': 'problem',
+  'StackedPainBullets': 'problem',
 
   // Results layouts
   'StatBlocks': 'results',

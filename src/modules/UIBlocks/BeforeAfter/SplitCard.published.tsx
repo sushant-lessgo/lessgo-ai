@@ -2,15 +2,11 @@
  * SplitCard - Published Version
  *
  * Server-safe component with ZERO hook imports
- * Used by componentRegistry.published.ts for SSR rendering
- *
  * Features:
  * - Premium before/after card comparison
- * - Theme-aware colors (warm/cool/neutral)
- * - Premium badge on after card
+ * - After card uses theme accent color
+ * - Optional summary text below cards
  * - Upgrade indicators (mobile + desktop)
- * - Optional images with placeholders
- * - Optional CTA and trust indicators
  */
 
 import React from 'react';
@@ -20,75 +16,10 @@ import { HeadlinePublished, TextPublished } from '@/components/published/TextPub
 import { IconPublished } from '@/components/published/IconPublished';
 import { ImagePublished } from '@/components/published/ImagePublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
-import { CTAButtonPublished } from '@/components/published/CTAButtonPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
-// Theme-based color system (same as editable version)
-const getCardColors = (theme: UIBlockTheme) => ({
-  warm: {
-    beforeBorder: '#fed7aa',
-    beforeLabel: '#c2410c',
-    beforeDot: '#f97316',
-    beforeDotRing: '#ffedd5',
-    afterBorder: '#fed7aa',
-    afterRing: '#ffedd5',
-    afterLabel: '#c2410c',
-    afterDot: '#f97316',
-    afterDotRing: '#ffedd5',
-    afterBorderTop: '#ffedd5',
-    badgeGradient: 'linear-gradient(to right, #f97316, #ea580c)',
-    beforePlaceholderBg: 'linear-gradient(to bottom right, #ffedd5, #fed7aa)',
-    beforePlaceholderIcon: '#fdba74',
-    afterPlaceholderBg: 'linear-gradient(to bottom right, #fff7ed, #ffedd5)',
-    afterPlaceholderIcon: '#fed7aa',
-    featureText: '#ea580c',
-    ctaBg: '#f97316',
-    trustIconColor: '#f97316'
-  },
-  cool: {
-    beforeBorder: '#bfdbfe',
-    beforeLabel: '#1e40af',
-    beforeDot: '#3b82f6',
-    beforeDotRing: '#dbeafe',
-    afterBorder: '#bfdbfe',
-    afterRing: '#dbeafe',
-    afterLabel: '#1e40af',
-    afterDot: '#3b82f6',
-    afterDotRing: '#dbeafe',
-    afterBorderTop: '#dbeafe',
-    badgeGradient: 'linear-gradient(to right, #3b82f6, #2563eb)',
-    beforePlaceholderBg: 'linear-gradient(to bottom right, #dbeafe, #bfdbfe)',
-    beforePlaceholderIcon: '#93c5fd',
-    afterPlaceholderBg: 'linear-gradient(to bottom right, #eff6ff, #dbeafe)',
-    afterPlaceholderIcon: '#bfdbfe',
-    featureText: '#2563eb',
-    ctaBg: '#3b82f6',
-    trustIconColor: '#3b82f6'
-  },
-  neutral: {
-    beforeBorder: '#e5e7eb',
-    beforeLabel: '#374151',
-    beforeDot: '#6b7280',
-    beforeDotRing: '#f3f4f6',
-    afterBorder: '#e5e7eb',
-    afterRing: '#f3f4f6',
-    afterLabel: '#374151',
-    afterDot: '#6b7280',
-    afterDotRing: '#f3f4f6',
-    afterBorderTop: '#f3f4f6',
-    badgeGradient: 'linear-gradient(to right, #374151, #1f2937)',
-    beforePlaceholderBg: 'linear-gradient(to bottom right, #f3f4f6, #e5e7eb)',
-    beforePlaceholderIcon: '#d1d5db',
-    afterPlaceholderBg: 'linear-gradient(to bottom right, #f9fafb, #f3f4f6)',
-    afterPlaceholderIcon: '#e5e7eb',
-    featureText: '#4b5563',
-    ctaBg: '#374151',
-    trustIconColor: '#6b7280'
-  }
-}[theme]);
-
-// Premium Card Component (server-safe, no memo needed)
+// Premium Card Component (server-safe)
 function PremiumCardPublished({
   type,
   label,
@@ -100,7 +31,8 @@ function PremiumCardPublished({
   premiumFeatureIcon,
   themeColors,
   textColors,
-  bodyTypography
+  bodyTypography,
+  accentColor
 }: {
   type: 'before' | 'after';
   label: string;
@@ -110,9 +42,19 @@ function PremiumCardPublished({
   premiumFeaturesText?: string;
   premiumBadgeText?: string;
   premiumFeatureIcon?: string;
-  themeColors: ReturnType<typeof getCardColors>;
+  themeColors: {
+    beforeBorder: string;
+    beforeLabel: string;
+    beforeDot: string;
+    beforeDotRing: string;
+    beforePlaceholderBg: string;
+    beforePlaceholderIcon: string;
+    afterPlaceholderBg: string;
+    afterPlaceholderIcon: string;
+  };
   textColors: { heading: string; body: string; muted: string };
   bodyTypography: React.CSSProperties;
+  accentColor: string;
 }) {
 
   // Visual Placeholder Component
@@ -150,9 +92,9 @@ function PremiumCardPublished({
         type === 'after' ? 'ring-2' : ''
       }`}
       style={{
-        borderColor: type === 'before' ? themeColors.beforeBorder : themeColors.afterBorder,
+        borderColor: type === 'before' ? themeColors.beforeBorder : `${accentColor}40`,
         ...(type === 'after' && {
-          boxShadow: `0 0 0 2px ${themeColors.afterRing}`
+          boxShadow: `0 0 0 2px ${accentColor}20`
         })
       }}
     >
@@ -162,7 +104,7 @@ function PremiumCardPublished({
         <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
           <div
             className="text-white px-4 py-1 rounded-full text-xs font-semibold uppercase tracking-wide shadow-lg"
-            style={{ background: themeColors.badgeGradient }}
+            style={{ background: `linear-gradient(to right, ${accentColor}, ${accentColor}cc)` }}
           >
             {premiumBadgeText}
           </div>
@@ -189,8 +131,8 @@ function PremiumCardPublished({
           <div
             className="w-3 h-3 rounded-full mr-3"
             style={{
-              backgroundColor: type === 'before' ? themeColors.beforeDot : themeColors.afterDot,
-              boxShadow: `0 0 0 4px ${type === 'before' ? themeColors.beforeDotRing : themeColors.afterDotRing}`
+              backgroundColor: type === 'before' ? themeColors.beforeDot : accentColor,
+              boxShadow: `0 0 0 4px ${type === 'before' ? themeColors.beforeDotRing : `${accentColor}20`}`
             }}
           />
           <TextPublished
@@ -198,7 +140,7 @@ function PremiumCardPublished({
             element="span"
             style={{
               ...bodyTypography,
-              color: type === 'before' ? themeColors.beforeLabel : themeColors.afterLabel
+              color: type === 'before' ? themeColors.beforeLabel : accentColor
             }}
           />
         </div>
@@ -217,9 +159,9 @@ function PremiumCardPublished({
         {type === 'after' && premiumFeaturesText && (
           <div
             className="mt-6 pt-4 border-t"
-            style={{ borderColor: themeColors.afterBorderTop }}
+            style={{ borderColor: `${accentColor}20` }}
           >
-            <div className="flex items-center">
+            <div className="flex items-center" style={{ color: accentColor }}>
               {premiumFeatureIcon && (
                 <div className="mr-2">
                   <IconPublished
@@ -235,7 +177,7 @@ function PremiumCardPublished({
                 style={{
                   fontSize: '0.875rem',
                   fontWeight: 500,
-                  color: themeColors.featureText
+                  color: accentColor
                 }}
               />
             </div>
@@ -249,7 +191,7 @@ function PremiumCardPublished({
 export default function SplitCardPublished(props: LayoutComponentProps) {
   const { sectionId, sectionBackgroundCSS, theme, backgroundType } = props;
 
-  // Extract content from props (flattened by LandingPagePublishedRenderer)
+  // Extract content
   const headline = props.headline || 'Premium Transformation Experience';
   const subheadline = props.subheadline || '';
   const before_label = props.before_label || 'Current Challenge';
@@ -258,8 +200,7 @@ export default function SplitCardPublished(props: LayoutComponentProps) {
   const after_description = props.after_description || 'Expertly crafted automation that delivers exceptional results with minimal effort and maximum efficiency.';
   const before_visual = props.before_visual || '';
   const after_visual = props.after_visual || '';
-  const supporting_text = props.supporting_text || '';
-  const cta_text = props.cta_text || '';
+  const summary_text = (props as any).summary_text || '';
   const premium_features_text = props.premium_features_text || 'Premium Features Included';
   const upgrade_text = props.upgrade_text || 'Upgrade';
   const premium_badge_text = props.premium_badge_text || 'Premium';
@@ -270,15 +211,46 @@ export default function SplitCardPublished(props: LayoutComponentProps) {
   const upgrade_icon = props.upgrade_icon || '➡️';
   const premium_feature_icon = props.premium_feature_icon || '✅';
 
-  // Parse trust indicators from pipe-separated string
-  const trustItemsList = (props.trust_items || '')
-    .split('|')
-    .map((item: string) => item.trim())
-    .filter((item: string) => item && item !== '___REMOVED___');
-
   // Detect UIBlock theme
   const uiTheme: UIBlockTheme = props.manualThemeOverride ||
     (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+
+  // Get accent color from theme
+  const accentColor = theme?.colors?.accentColor || '#3b82f6';
+
+  // Theme colors (Before uses theme, After uses accent)
+  const getCardColors = (themeType: UIBlockTheme) => ({
+    warm: {
+      beforeBorder: '#fed7aa',
+      beforeLabel: '#c2410c',
+      beforeDot: '#f97316',
+      beforeDotRing: '#ffedd5',
+      beforePlaceholderBg: 'linear-gradient(to bottom right, #ffedd5, #fed7aa)',
+      beforePlaceholderIcon: '#fdba74',
+      afterPlaceholderBg: `linear-gradient(to bottom right, ${accentColor}10, ${accentColor}20)`,
+      afterPlaceholderIcon: `${accentColor}40`
+    },
+    cool: {
+      beforeBorder: '#bfdbfe',
+      beforeLabel: '#1e40af',
+      beforeDot: '#3b82f6',
+      beforeDotRing: '#dbeafe',
+      beforePlaceholderBg: 'linear-gradient(to bottom right, #dbeafe, #bfdbfe)',
+      beforePlaceholderIcon: '#93c5fd',
+      afterPlaceholderBg: `linear-gradient(to bottom right, ${accentColor}10, ${accentColor}20)`,
+      afterPlaceholderIcon: `${accentColor}40`
+    },
+    neutral: {
+      beforeBorder: '#e5e7eb',
+      beforeLabel: '#374151',
+      beforeDot: '#6b7280',
+      beforeDotRing: '#f3f4f6',
+      beforePlaceholderBg: 'linear-gradient(to bottom right, #f3f4f6, #e5e7eb)',
+      beforePlaceholderIcon: '#d1d5db',
+      afterPlaceholderBg: `linear-gradient(to bottom right, ${accentColor}10, ${accentColor}20)`,
+      afterPlaceholderIcon: `${accentColor}40`
+    }
+  }[themeType]);
 
   const themeColors = getCardColors(uiTheme);
 
@@ -329,7 +301,7 @@ export default function SplitCardPublished(props: LayoutComponentProps) {
         </div>
 
         {/* Side by Side Cards */}
-        <div className="grid lg:grid-cols-2 gap-8 mb-12">
+        <div className="grid lg:grid-cols-2 gap-8">
 
           {/* Before Card with Mobile Upgrade Indicator */}
           <div className="space-y-6">
@@ -342,6 +314,7 @@ export default function SplitCardPublished(props: LayoutComponentProps) {
               themeColors={themeColors}
               textColors={textColors}
               bodyTypography={bodyTypography}
+              accentColor={accentColor}
             />
 
             {/* Upgrade Indicator (Mobile) */}
@@ -396,63 +369,24 @@ export default function SplitCardPublished(props: LayoutComponentProps) {
               themeColors={themeColors}
               textColors={textColors}
               bodyTypography={bodyTypography}
+              accentColor={accentColor}
             />
           </div>
         </div>
 
-        {/* Optional CTA and Trust Section */}
-        {(cta_text || trustItemsList.length > 0 || supporting_text) && (
-          <div className="text-center space-y-6">
-            {/* Optional Supporting Text */}
-            {supporting_text && (
-              <TextPublished
-                value={supporting_text}
-                element="p"
-                style={{
-                  color: textColors.body,
-                  ...bodyLgTypography,
-                  maxWidth: '48rem',
-                  margin: '0 auto 2rem'
-                }}
-              />
-            )}
-
-            {/* CTA Button and Trust Indicators */}
-            {(cta_text || trustItemsList.length > 0) && (
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-                {cta_text && (
-                  <CTAButtonPublished
-                    text={cta_text}
-                    backgroundColor={themeColors.ctaBg}
-                    textColor="#ffffff"
-                    className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
-                  />
-                )}
-
-                {/* Trust Indicators - Inline SVG Implementation */}
-                {trustItemsList.length > 0 && (
-                  <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
-                    {trustItemsList.map((item: string, index: number) => (
-                      <div key={index} className="flex items-center space-x-2">
-                        <svg
-                          className="w-4 h-4 flex-shrink-0"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                          style={{ color: themeColors.trustIconColor }}
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        <span style={{ color: textColors.muted }}>{item}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+        {/* Summary Text - Optional transition copy below cards */}
+        {summary_text && (
+          <div className="text-center mt-12">
+            <TextPublished
+              value={summary_text}
+              element="p"
+              style={{
+                color: textColors.body,
+                ...bodyLgTypography,
+                maxWidth: '48rem',
+                margin: '0 auto'
+              }}
+            />
           </div>
         )}
       </div>

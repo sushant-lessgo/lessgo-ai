@@ -293,87 +293,88 @@ export function applyAllSchemaDefaults(
 }
 
 export const layoutElementSchema: LayoutSchema = {
-  // BeforeAfter Section
+  // BeforeAfter Section - V2 Schema
   SideBySideBlocks: {
-    sectionElements: [
-      { element: "headline", mandatory: true, generation: "ai_generated" },
-      { element: "before_label", mandatory: true, generation: "ai_generated" },
-      { element: "after_label", mandatory: true, generation: "ai_generated" },
-      { element: "before_description", mandatory: true, generation: "ai_generated" },
-      { element: "after_description", mandatory: true, generation: "ai_generated" },
-      { element: "before_icon", mandatory: false, generation: "ai_generated" },
-      { element: "after_icon", mandatory: false, generation: "ai_generated" },
-      { element: "subheadline", mandatory: false, generation: "ai_generated" },
-      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
-      { element: "cta_text", mandatory: false, generation: "ai_generated" },
-      { element: "trust_items", mandatory: false, generation: "ai_generated" }
-    ],
-    cardRequirements: {
-      type: 'pairs',
-      min: 1,
-      max: 3,
-      optimal: [2, 2],
-      description: 'Before/after comparison blocks'
+    sectionType: "SideBySideBlocks",
+
+    elements: {
+      headline:           { type: "string", requirement: "required", fillMode: "ai_generated" },
+      before_label:       { type: "string", requirement: "required", fillMode: "ai_generated" },
+      after_label:        { type: "string", requirement: "required", fillMode: "ai_generated" },
+      before_description: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      after_description:  { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      subheadline:        { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      summary_text:       { type: "string", requirement: "optional", fillMode: "ai_generated" },  // Transition copy below cards
+      before_icon:        { type: "string", requirement: "optional", fillMode: "manual_preferred", default: "❌" },
+      after_icon:         { type: "string", requirement: "optional", fillMode: "manual_preferred", default: "✅" },
+    },
+
+    collections: {
+      before_points: {
+        requirement: "optional",
+        fillMode: "ai_generated",
+        constraints: { min: 0, max: 5 },
+        fields: {
+          id:   { type: "string", fillMode: "system" },
+          text: { type: "string", fillMode: "ai_generated" },
+        }
+      },
+      after_points: {
+        requirement: "optional",
+        fillMode: "ai_generated",
+        constraints: { min: 0, max: 5 },
+        fields: {
+          id:   { type: "string", fillMode: "system" },
+          text: { type: "string", fillMode: "ai_generated" },
+        }
+      },
     }
   },
 
+  // BeforeAfter Section - V2 Schema
   StackedTextVisual: {
-    sectionElements: [
-      { element: "headline", mandatory: true, generation: "ai_generated" },
-      { element: "before_text", mandatory: true, generation: "ai_generated" },
-      { element: "after_text", mandatory: true, generation: "ai_generated" },
-      { element: "before_label", mandatory: true, generation: "ai_generated" },
-      { element: "after_label", mandatory: true, generation: "ai_generated" },
-      { element: "transition_text", mandatory: false, generation: "ai_generated" },
-      { element: "before_icon", mandatory: false, generation: "ai_generated" },
-      { element: "after_icon", mandatory: false, generation: "ai_generated" },
-      { element: "transition_icon", mandatory: false, generation: "ai_generated" },
-      { element: "summary_text", mandatory: false, generation: "ai_generated" },
-      { element: "show_summary_box", mandatory: false, generation: "ai_generated" },
-      { element: "subheadline", mandatory: false, generation: "ai_generated" },
-      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
-      { element: "cta_text", mandatory: false, generation: "ai_generated" },
-      { element: "trust_items", mandatory: false, generation: "ai_generated" }
-    ],
-    cardRequirements: {
-      type: 'pairs',
-      min: 1,
-      max: 3,
-      optimal: [2, 2],
-      description: 'Stacked before/after comparisons'
-    }
+    sectionType: "StackedTextVisual",
+
+    elements: {
+      headline:        { type: "string", requirement: "required", fillMode: "ai_generated" },
+      before_text:     { type: "string", requirement: "required", fillMode: "ai_generated" },
+      after_text:      { type: "string", requirement: "required", fillMode: "ai_generated" },
+      before_label:    { type: "string", requirement: "required", fillMode: "ai_generated" },
+      after_label:     { type: "string", requirement: "required", fillMode: "ai_generated" },
+      subheadline:     { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      transition_text: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      summary_text:    { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      show_summary_box:{ type: "boolean", requirement: "optional", fillMode: "manual_preferred", default: false },
+      before_icon:     { type: "string", requirement: "optional", fillMode: "manual_preferred" },
+      after_icon:      { type: "string", requirement: "optional", fillMode: "manual_preferred" },
+      transition_icon: { type: "string", requirement: "optional", fillMode: "manual_preferred" },
+    },
+    // No collections - no trust_items/cta per user decision
   },
 
+  // BeforeAfter Section - V2 Schema
   SplitCard: {
-    sectionElements: [
-      { element: "headline", mandatory: true, generation: "ai_generated" },
-      { element: "before_label", mandatory: true, generation: "ai_generated" },
-      { element: "after_label", mandatory: true, generation: "ai_generated" },
-      { element: "before_description", mandatory: true, generation: "ai_generated" },
-      { element: "after_description", mandatory: true, generation: "ai_generated" },
-      { element: "before_visual", mandatory: false, generation: "manual_preferred" },
-      { element: "after_visual", mandatory: false, generation: "manual_preferred" },
-      { element: "premium_features_text", mandatory: false, generation: "ai_generated" },
-      { element: "upgrade_text", mandatory: false, generation: "ai_generated" },
-      { element: "before_placeholder_text", mandatory: false, generation: "ai_generated" },
-      { element: "after_placeholder_text", mandatory: false, generation: "ai_generated" },
-      { element: "premium_badge_text", mandatory: false, generation: "ai_generated" },
-      { element: "before_icon", mandatory: false, generation: "ai_generated" },
-      { element: "after_icon", mandatory: false, generation: "ai_generated" },
-      { element: "upgrade_icon", mandatory: false, generation: "ai_generated" },
-      { element: "premium_feature_icon", mandatory: false, generation: "ai_generated" },
-      { element: "subheadline", mandatory: false, generation: "ai_generated" },
-      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
-      { element: "cta_text", mandatory: false, generation: "ai_generated" },
-      { element: "trust_items", mandatory: false, generation: "ai_generated" }
-    ],
-    cardRequirements: {
-      type: 'pairs',
-      min: 1,
-      max: 1,
-      optimal: [1, 1],
-      description: 'Split card premium vs standard comparison'
-    }
+    sectionType: "SplitCard",
+
+    elements: {
+      headline:             { type: "string", requirement: "required", fillMode: "ai_generated" },
+      before_label:         { type: "string", requirement: "required", fillMode: "ai_generated" },
+      after_label:          { type: "string", requirement: "required", fillMode: "ai_generated" },
+      before_description:   { type: "string", requirement: "required", fillMode: "ai_generated" },
+      after_description:    { type: "string", requirement: "required", fillMode: "ai_generated" },
+      subheadline:          { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      summary_text:         { type: "string", requirement: "optional", fillMode: "ai_generated" },  // Transition copy below cards
+      premium_features_text:{ type: "string", requirement: "optional", fillMode: "ai_generated" },
+      upgrade_text:         { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      premium_badge_text:   { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      before_visual:        { type: "string", requirement: "optional", fillMode: "manual_preferred", default: "/Before default.jpg" },
+      after_visual:         { type: "string", requirement: "optional", fillMode: "manual_preferred", default: "/After default.jpg" },
+      before_icon:          { type: "string", requirement: "optional", fillMode: "manual_preferred" },
+      after_icon:           { type: "string", requirement: "optional", fillMode: "manual_preferred" },
+      upgrade_icon:         { type: "string", requirement: "optional", fillMode: "manual_preferred" },
+      premium_feature_icon: { type: "string", requirement: "optional", fillMode: "manual_preferred" },
+    },
+    // No collections - no trust_items/cta per user decision
   },
 
   // FAQ Section
@@ -492,30 +493,27 @@ export const layoutElementSchema: LayoutSchema = {
     }
   },
 
-  // Features Section
+  // Features Section - V2 Schema
   IconGrid: {
-    sectionElements: [
-      { element: "headline", mandatory: true, generation: "ai_generated" },
-      { element: "subheadline", mandatory: false, generation: "ai_generated" },
-      { element: "icon_1", mandatory: true, generation: "ai_generated" },
-      { element: "icon_2", mandatory: true, generation: "ai_generated" },
-      { element: "icon_3", mandatory: true, generation: "ai_generated" },
-      { element: "icon_4", mandatory: true, generation: "ai_generated" },
-      { element: "icon_5", mandatory: true, generation: "ai_generated" },
-      { element: "icon_6", mandatory: true, generation: "ai_generated" }
-    ],
-    cardStructure: {
-      type: "cards",
-      elements: ["feature_titles", "feature_descriptions"],
-      generation: "ai_generated"
+    sectionType: "IconGrid",
+
+    elements: {
+      headline:    { type: "string", requirement: "required", fillMode: "ai_generated" },
+      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated" },
     },
-    cardRequirements: {
-      type: 'cards',
-      min: 3,
-      max: 9,
-      optimal: [4, 6],
-      description: 'Feature cards with icons',
-      respectUserContent: true
+
+    collections: {
+      features: {
+        requirement: "required",
+        fillMode: "ai_generated",
+        constraints: { min: 3, max: 9 },
+        fields: {
+          id:          { type: "string", fillMode: "system" },
+          title:       { type: "string", fillMode: "ai_generated" },
+          description: { type: "string", fillMode: "ai_generated" },
+          icon:        { type: "string", fillMode: "manual_preferred" },
+        }
+      }
     }
   },
 
@@ -608,22 +606,28 @@ export const layoutElementSchema: LayoutSchema = {
     }
   },
 
-  // FounderNote Section
+  // FounderNote Section - V2 Schema
   LetterStyleBlock: {
-    sectionElements: [
-      { element: "letter_header", mandatory: true, generation: "ai_generated" },
-      { element: "letter_greeting", mandatory: true, generation: "ai_generated" },
-      { element: "letter_body", mandatory: true, generation: "ai_generated" },
-      { element: "letter_signature", mandatory: true, generation: "ai_generated" },
-      { element: "founder_title", mandatory: true, generation: "ai_generated" },
-      { element: "cta_text", mandatory: true, generation: "ai_generated" },
-      { element: "founder_name", mandatory: false, generation: "ai_generated" },
-      { element: "company_name", mandatory: false, generation: "ai_generated" },
-      { element: "date_text", mandatory: false, generation: "ai_generated" },
-      { element: "ps_text", mandatory: false, generation: "ai_generated" },
-      { element: "founder_image", mandatory: false, generation: "manual_preferred" }
-    ],
-    cardRequirements: null
+    sectionType: "LetterStyleBlock",
+
+    elements: {
+      // Required AI-generated
+      letter_header:    { type: "string", requirement: "required", fillMode: "ai_generated" },
+      letter_greeting:  { type: "string", requirement: "required", fillMode: "ai_generated" },
+      letter_body:      { type: "string", requirement: "required", fillMode: "ai_generated" },
+      letter_signature: { type: "string", requirement: "required", fillMode: "ai_generated" },
+
+      // Optional AI-generated
+      founder_title:    { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      company_name:     { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      date_text:        { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      ps_text:          { type: "string", requirement: "optional", fillMode: "ai_generated" },
+
+      // Manual preferred
+      founder_image:    { type: "string", requirement: "optional", fillMode: "manual_preferred", default: "/images/founder.jpg" },
+    },
+
+    collections: {}
   },
 
   // Hero Section - V2 Schema
@@ -1150,83 +1154,28 @@ export const layoutElementSchema: LayoutSchema = {
     { element: "contact_icon_4", mandatory: false },
   ],
 
-  // Problem Section
-  CollapsedCards: {
-    sectionElements: [
-      { element: "headline", mandatory: true, generation: "ai_generated" },
-      { element: "intro_text", mandatory: false, generation: "ai_generated" },
-      { element: "subheadline", mandatory: false, generation: "ai_generated" },
-      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
-      { element: "trust_items", mandatory: false, generation: "ai_generated" }
-    ],
-    cardStructure: {
-      type: "cards",
-      elements: ["problem_titles", "problem_descriptions", "expand_labels", "problem_impacts", "solution_hints", "problem_icons"],
-      generation: "ai_generated"
-    },
-    cardRequirements: {
-      type: 'cards',
-      min: 2,
-      max: 4,
-      optimal: [3, 3],
-      description: 'Expandable problem challenge cards'
-    }
-  },
+  // Problem Section - V2 Schema
+  StackedPainBullets: {
+    sectionType: "StackedPainBullets",
 
-  SideBySideSplit: {
-    sectionElements: [
-      { element: "headline", mandatory: true, generation: "ai_generated" },
-      { element: "problem_title", mandatory: true, generation: "ai_generated" },
-      { element: "problem_description", mandatory: true, generation: "ai_generated" },
-      { element: "solution_preview", mandatory: true, generation: "ai_generated" },
-      { element: "call_to_action", mandatory: false, generation: "ai_generated" },
-      { element: "transition_text", mandatory: false, generation: "ai_generated" },
-      { element: "subheadline", mandatory: false, generation: "ai_generated" },
-      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
-      { element: "trust_items", mandatory: false, generation: "ai_generated" },
-      { element: "bottom_stat_1", mandatory: false, generation: "ai_generated" },
-      { element: "bottom_stat_1_label", mandatory: false, generation: "ai_generated" },
-      { element: "bottom_stat_2", mandatory: false, generation: "ai_generated" },
-      { element: "bottom_stat_2_label", mandatory: false, generation: "ai_generated" },
-      { element: "bottom_stat_3", mandatory: false, generation: "ai_generated" },
-      { element: "bottom_stat_3_label", mandatory: false, generation: "ai_generated" },
-      { element: "cta_section_message", mandatory: false, generation: "ai_generated" },
-      { element: "path_1_icon", mandatory: false, generation: "ai_generated" },
-      { element: "path_2_icon", mandatory: false, generation: "ai_generated" }
-    ],
-    cardStructure: {
-      type: "pairs",
-      elements: ["problem_points", "solution_points"],
-      generation: "ai_generated"
+    elements: {
+      headline:        { type: "string", requirement: "required", fillMode: "ai_generated" },
+      subheadline:     { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      conclusion_text: { type: "string", requirement: "optional", fillMode: "ai_generated" },
     },
-    cardRequirements: {
-      type: 'pairs',
-      min: 3,
-      max: 5,
-      optimal: [4, 5],
-      description: 'Problem vs solution point pairs'
-    }
-  },
 
-  PersonaPanels: {
-    sectionElements: [
-      { element: "headline", mandatory: true, generation: "ai_generated" },
-      { element: "intro_text", mandatory: false, generation: "ai_generated" },
-      { element: "subheadline", mandatory: false, generation: "ai_generated" },
-      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
-      { element: "trust_items", mandatory: false, generation: "ai_generated" }
-    ],
-    cardStructure: {
-      type: "cards",
-      elements: ["persona_names", "persona_problems", "persona_descriptions", "persona_titles", "persona_pain_points", "persona_goals", "persona_icons"],
-      generation: "ai_generated"
-    },
-    cardRequirements: {
-      type: 'cards',
-      min: 3,
-      max: 4,
-      optimal: [4, 4],
-      description: 'Business owner persona panels'
+    collections: {
+      pain_items: {
+        requirement: "required",
+        fillMode: "ai_generated",
+        constraints: { min: 2, max: 6 },
+        fields: {
+          id:          { type: "string", fillMode: "system" },
+          point:       { type: "string", fillMode: "ai_generated" },
+          description: { type: "string", fillMode: "ai_generated" },
+          icon:        { type: "string", fillMode: "manual_preferred" },
+        }
+      }
     }
   },
 

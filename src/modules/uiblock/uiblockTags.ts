@@ -92,12 +92,12 @@ const testimonialsTags: UIBlockTagMap = {
 
 // ===== PROBLEM =====
 const problemTags: UIBlockTagMap = {
-  // V3 ARCHIVED: StackedPainBullets: ['text-heavy'],
+  StackedPainBullets: ['text-heavy'],
   // V3 ARCHIVED: BeforeImageAfterText: ['image'],
   // V3 ARCHIVED: EmotionalQuotes: ['text-heavy'],
-  CollapsedCards: ['text-heavy', 'accordion'],
-  SideBySideSplit: ['text-heavy'],
-  PersonaPanels: ['text-heavy', 'persona-aware'],
+  // V3 ARCHIVED: CollapsedCards: ['text-heavy', 'accordion'],
+  // V3 ARCHIVED: SideBySideSplit: ['text-heavy'],
+  // V3 ARCHIVED: PersonaPanels: ['text-heavy', 'persona-aware'],
 };
 
 // ===== RESULTS =====
@@ -358,8 +358,9 @@ export const uiblockOrientations: Record<string, UIBlockOrientation> = {
   MythVsRealityGrid: 'horizontal',
 
   // Problem
-  CollapsedCards: 'vertical',
-  PersonaPanels: 'horizontal',
+  StackedPainBullets: 'vertical',
+  // V3 ARCHIVED: CollapsedCards: 'vertical',
+  // V3 ARCHIVED: PersonaPanels: 'horizontal',
 
   // CTA
   CenteredHeadlineCTA: 'stack',

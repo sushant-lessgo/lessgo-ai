@@ -26,7 +26,7 @@ interface StackedTextVisualContent {
   transition_icon?: string;
   subheadline?: string;
   summary_text?: string;
-  show_summary_box?: string;
+  show_summary_box?: boolean | string;  // V2: boolean (with backward compat for string)
 }
 
 // Content schema for StackedTextVisual layout
@@ -39,7 +39,7 @@ const CONTENT_SCHEMA = {
   transition_text: { type: 'string' as const, default: '' },
   subheadline: { type: 'string' as const, default: '' },
   summary_text: { type: 'string' as const, default: '' },
-  show_summary_box: { type: 'string' as const, default: 'false' },
+  show_summary_box: { type: 'boolean' as const, default: false },
   before_icon: {
     type: 'string' as const,
     default: '➕'
@@ -82,15 +82,10 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
   const uiTheme: UIBlockTheme = props.manualThemeOverride ||
     (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
 
-  // Debug logging
-  console.log('🎨 StackedTextVisual theme:', {
-    manualThemeOverride: props.manualThemeOverride,
-    detectedTheme: uiTheme,
-    marketCategory: props.userContext?.marketCategory,
-    sectionId
-  });
+  // Get accent color for After block
+  const accentColor = colorTokens.ctaBg || '#3b82f6';
 
-  // Theme-based color system for before/after/transition blocks
+  // Theme-based color system - After block uses accent color
   const getStackedColors = (theme: UIBlockTheme) => ({
     warm: {
       before: {
@@ -104,10 +99,10 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
         text: '#ea580c'          // orange-600
       },
       after: {
-        bg: '#fef3c7',           // amber-100
-        border: '#f59e0b',       // amber-500
-        iconBg: '#fde68a',       // amber-200
-        iconText: '#d97706'      // amber-600
+        bg: `${accentColor}15`,      // light accent
+        border: accentColor,          // accent
+        iconBg: `${accentColor}30`,   // medium accent
+        iconText: accentColor         // accent
       },
       summary: {
         gradient: 'from-orange-50 via-amber-50 to-yellow-50',
@@ -126,10 +121,10 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
         text: '#2563eb'          // blue-600
       },
       after: {
-        bg: '#dcfce7',           // green-100
-        border: '#22c55e',       // green-500
-        iconBg: '#bbf7d0',       // green-200
-        iconText: '#16a34a'      // green-600
+        bg: `${accentColor}15`,      // light accent
+        border: accentColor,          // accent
+        iconBg: `${accentColor}30`,   // medium accent
+        iconText: accentColor         // accent
       },
       summary: {
         gradient: 'from-blue-50 via-indigo-50 to-purple-50',
@@ -148,10 +143,10 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
         text: '#4b5563'          // gray-600
       },
       after: {
-        bg: '#f0fdf4',           // green-50
-        border: '#22c55e',       // green-500
-        iconBg: '#bbf7d0',       // green-200
-        iconText: '#16a34a'      // green-600
+        bg: `${accentColor}15`,      // light accent
+        border: accentColor,          // accent
+        iconBg: `${accentColor}30`,   // medium accent
+        iconText: accentColor         // accent
       },
       summary: {
         gradient: 'from-gray-50 via-slate-50 to-zinc-50',
@@ -361,9 +356,9 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
                       letterSpacing: '0.05em',
                       fontWeight: 600,
                       fontSize: '0.875rem',
-                      color: '#15803d'
+                      color: themeColors.after.iconText
                     }}
-                    className="text-green-700 font-semibold mb-3 uppercase tracking-wide text-sm"
+                    className="font-semibold mb-3 uppercase tracking-wide text-sm"
                     sectionId={sectionId}
                     elementKey="after_label"
                     sectionBackground={sectionBackground}
@@ -376,7 +371,8 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
                     backgroundType={safeBackgroundType}
                     colorTokens={colorTokens}
                     variant="body"
-                    className="text-green-700 leading-relaxed"
+                    className="leading-relaxed"
+                    textStyle={{ color: themeColors.after.iconText }}
                     sectionId={sectionId}
                     elementKey="after_text"
                     sectionBackground={sectionBackground}
@@ -387,52 +383,55 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
           </div>
         </div>
 
-        {/* Optional Summary Box */}
-        {(blockContent.show_summary_box !== 'false' && (blockContent.summary_text || mode === 'edit')) && (
-          <div className={`mt-8 p-6 bg-gradient-to-r ${themeColors.summary.gradient} rounded-2xl border ${themeColors.summary.border} relative group/summary-item`}>
-            <div className="text-center">
-              <EditableAdaptiveText
-                mode={mode}
-                value={blockContent.summary_text || ''}
-                onEdit={(value) => handleContentUpdate('summary_text', value)}
-                backgroundType={safeBackgroundType}
-                colorTokens={colorTokens}
-                variant="body"
-                className="font-medium max-w-2xl mx-auto"
-                style={bodyLgStyle}
-                placeholder="Add optional summary text to reinforce the transformation..."
-                sectionId={sectionId}
-                elementKey="summary_text"
-                sectionBackground={sectionBackground}
-              />
+        {/* Optional Summary Box - V2: handles both boolean and legacy string 'true'/'false' */}
+        {(() => {
+          const summaryBoxVisible = blockContent.show_summary_box === true || blockContent.show_summary_box === 'true';
+          return summaryBoxVisible && (blockContent.summary_text || mode === 'edit') && (
+            <div className={`mt-8 p-6 bg-gradient-to-r ${themeColors.summary.gradient} rounded-2xl border ${themeColors.summary.border} relative group/summary-item`}>
+              <div className="text-center">
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.summary_text || ''}
+                  onEdit={(value) => handleContentUpdate('summary_text', value)}
+                  backgroundType={safeBackgroundType}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="font-medium max-w-2xl mx-auto"
+                  style={bodyLgStyle}
+                  placeholder="Add optional summary text to reinforce the transformation..."
+                  sectionId={sectionId}
+                  elementKey="summary_text"
+                  sectionBackground={sectionBackground}
+                />
+              </div>
+
+              {/* Remove button - V2: no more ___REMOVED___ marker */}
+              {mode !== 'preview' && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleContentUpdate('summary_text', '');
+                    (handleContentUpdate as any)('show_summary_box', false);
+                  }}
+                  className="opacity-0 group-hover/summary-item:opacity-100 absolute top-2 right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm"
+                  title="Remove summary box"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
             </div>
-            
-            {/* Remove button */}
-            {mode !== 'preview' && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleContentUpdate('summary_text', '___REMOVED___');
-                  handleContentUpdate('show_summary_box', 'false');
-                }}
-                className="opacity-0 group-hover/summary-item:opacity-100 absolute top-2 right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm"
-                title="Remove summary box"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            )}
-          </div>
-        )}
-        
-        {/* Add summary box button */}
-        {mode !== 'preview' && !blockContent.summary_text && blockContent.show_summary_box === 'false' && (
+          );
+        })()}
+
+        {/* Add summary box button - V2: boolean check */}
+        {mode !== 'preview' && !blockContent.summary_text && !blockContent.show_summary_box && (
           <div className="mt-8 text-center">
             <button
               onClick={() => {
                 handleContentUpdate('summary_text', 'Add your transformation summary here...');
-                handleContentUpdate('show_summary_box', 'true');
+                (handleContentUpdate as any)('show_summary_box', true);
               }}
               className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 transition-colors mx-auto"
             >

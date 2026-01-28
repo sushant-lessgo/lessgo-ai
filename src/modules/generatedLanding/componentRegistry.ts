@@ -37,7 +37,7 @@ import CenterStacked from '@/modules/UIBlocks/Hero/CenterStacked';
 import CenteredHeadlineCTA from '@/modules/UIBlocks/CTA/CenteredHeadlineCTA';
 // V3 ARCHIVED: import ChatBubbleFAQ from '@/modules/UIBlocks/FAQ/ChatBubbleFAQ';
 // ARCHIVED: import CheckmarkComparison from '@/modules/UIBlocks/Comparison/CheckmarkComparison';
-import CollapsedCards from '@/modules/UIBlocks/Problem/CollapsedCards';
+// V3 ARCHIVED: import CollapsedCards from '@/modules/UIBlocks/Problem/CollapsedCards';
 // ARCHIVED: import CompetitorCallouts from '@/modules/UIBlocks/Comparison/CompetitorCallouts';
 // V3 ARCHIVED: import CTAWithBadgeRow from '@/modules/UIBlocks/CTA/CTAWithBadgeRow';
 // V3 ARCHIVED: import CTAWithFormField from '@/modules/UIBlocks/CTA/CTAWithFormField';
@@ -87,7 +87,7 @@ import MythVsRealityGrid from '@/modules/UIBlocks/ObjectionHandle/MythVsRealityG
 // ARCHIVED: import PenetrationTestResults from '@/modules/UIBlocks/Security/PenetrationTestResults';
 import PersonaGrid from '@/modules/UIBlocks/UseCases/PersonaGrid';
 // V3 ARCHIVED: import PersonaJourney from '@/modules/UIBlocks/BeforeAfter/PersonaJourney';
-import PersonaPanels from '@/modules/UIBlocks/Problem/PersonaPanels';
+// V3 ARCHIVED: import PersonaPanels from '@/modules/UIBlocks/Problem/PersonaPanels';
 // V3 ARCHIVED: import PersonaResultPanels from '@/modules/UIBlocks/Results/PersonaResultPanels';
 import ResultsGallery from '@/modules/UIBlocks/Results/ResultsGallery';
 // ARCHIVED: import PersonaUseCaseCompare from '@/modules/UIBlocks/Comparison/PersonaUseCaseCompare';
@@ -114,7 +114,7 @@ import SideBySideBlocks from '@/modules/UIBlocks/BeforeAfter/SideBySideBlock';
 // ARCHIVED: import SideBySideOfferCards from '@/modules/UIBlocks/Close/SideBySideOfferCards';
 // V3 ARCHIVED: import SideBySideCTA from '@/modules/UIBlocks/CTA/SideBySideCTA';
 // V3 ARCHIVED: import SideBySidePhotoStory from '@/modules/UIBlocks/FounderNote/SideBySidePhotoStory';
-import SideBySideSplit from '@/modules/UIBlocks/Problem/SideBySideSplit';
+// V3 ARCHIVED: import SideBySideSplit from '@/modules/UIBlocks/Problem/SideBySideSplit';
 // V3 ARCHIVED: import SkepticToBelieverSteps from '@/modules/UIBlocks/ObjectionHandle/SkepticToBelieverSteps';
 import SliderPricing from '@/modules/UIBlocks/Pricing/SliderPricing';
 // V3 ARCHIVED: import SocialProofStrip from '@/modules/UIBlocks/SocialProof/SocialProofStrip';
@@ -123,7 +123,7 @@ import StackedHighlights from '@/modules/UIBlocks/UniqueMechanism/StackedHighlig
 // V3 ARCHIVED: import StackedStats from '@/modules/UIBlocks/SocialProof/StackedStats';
 import StackedWinsList from '@/modules/UIBlocks/Results/StackedWinsList';
 // V3 ARCHIVED: import SystemArchitecture from '@/modules/UIBlocks/UniqueMechanism/SystemArchitecture';
-// V3 ARCHIVED: import StackedPainBullets from '@/modules/UIBlocks/Problem/StackedPainBullets';
+import StackedPainBullets from '@/modules/UIBlocks/Problem/StackedPainBullets';
 import SplitAlternating from '@/modules/UIBlocks/Features/SplitAlternating';
 import StackedTextVisual from '@/modules/UIBlocks/BeforeAfter/StackedTextVisual';
 import SplitScreen from '@/modules/UIBlocks/Hero/SplitScreen';
@@ -242,13 +242,13 @@ export const componentRegistry: ComponentRegistry = {
   },
   
   problem: {
-    // V3 ARCHIVED: StackedPainBullets: StackedPainBullets,
+    StackedPainBullets: StackedPainBullets,
     // V3 ARCHIVED: BeforeImageAfterText: BeforeImageAfterText,
-    SideBySideSplit: SideBySideSplit,
+    // V3 ARCHIVED: SideBySideSplit: SideBySideSplit,
     // V3 ARCHIVED: EmotionalQuotes: EmotionalQuotes,
-    CollapsedCards: CollapsedCards,
+    // V3 ARCHIVED: CollapsedCards: CollapsedCards,
     // TODO: Disabled for MVP - PainMeterChart: PainMeterChart,
-    PersonaPanels: PersonaPanels,
+    // V3 ARCHIVED: PersonaPanels: PersonaPanels,
     // TODO: Temporarily disabled - not useful currently
     // ProblemChecklist: ProblemChecklist,
   },

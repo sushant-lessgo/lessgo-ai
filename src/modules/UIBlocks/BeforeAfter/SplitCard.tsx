@@ -8,10 +8,6 @@ import {
   EditableAdaptiveHeadline,
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
-import {
-  CTAButton,
-  TrustIndicators
-} from '@/components/layout/ComponentRegistry';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
@@ -35,92 +31,28 @@ interface SplitCardContent {
   upgrade_icon?: string;
   premium_feature_icon?: string;
   subheadline?: string;
-  supporting_text?: string;
-  cta_text?: string;
-  trust_items?: string;
+  summary_text?: string;
 }
 
 const CONTENT_SCHEMA = {
-  headline: { 
-    type: 'string' as const, 
-    default: 'Premium Transformation Experience' 
-  },
-  before_label: { 
-    type: 'string' as const, 
-    default: 'Current Challenge' 
-  },
-  after_label: { 
-    type: 'string' as const, 
-    default: 'Premium Solution' 
-  },
-  before_description: { 
-    type: 'string' as const, 
-    default: 'Complex manual processes requiring expertise, time, and significant resources to execute properly.' 
-  },
-  after_description: { 
-    type: 'string' as const, 
-    default: 'Expertly crafted automation that delivers exceptional results with minimal effort and maximum efficiency.' 
-  },
-  before_visual: { 
-    type: 'string' as const, 
-    default: '/Before default.jpg' 
-  },
-  after_visual: { 
-    type: 'string' as const, 
-    default: '/After default.jpg' 
-  },
-  subheadline: { 
-    type: 'string' as const, 
-    default: '' 
-  },
-  supporting_text: { 
-    type: 'string' as const, 
-    default: '' 
-  },
-  cta_text: { 
-    type: 'string' as const, 
-    default: '' 
-  },
-  trust_items: { 
-    type: 'string' as const, 
-    default: '' 
-  },
-  premium_features_text: {
-    type: 'string' as const,
-    default: 'Premium Features Included'
-  },
-  upgrade_text: {
-    type: 'string' as const,
-    default: 'Upgrade'
-  },
-  before_placeholder_text: {
-    type: 'string' as const,
-    default: 'Current State'
-  },
-  after_placeholder_text: {
-    type: 'string' as const,
-    default: 'Premium Result'
-  },
-  premium_badge_text: {
-    type: 'string' as const,
-    default: 'Premium'
-  },
-  before_icon: {
-    type: 'string' as const,
-    default: '⚠️'
-  },
-  after_icon: {
-    type: 'string' as const,
-    default: '⭐'
-  },
-  upgrade_icon: {
-    type: 'string' as const,
-    default: '➡️'
-  },
-  premium_feature_icon: {
-    type: 'string' as const,
-    default: '✅'
-  }
+  headline: { type: 'string' as const, default: 'Premium Transformation Experience' },
+  before_label: { type: 'string' as const, default: 'Current Challenge' },
+  after_label: { type: 'string' as const, default: 'Premium Solution' },
+  before_description: { type: 'string' as const, default: 'Complex manual processes requiring expertise, time, and significant resources to execute properly.' },
+  after_description: { type: 'string' as const, default: 'Expertly crafted automation that delivers exceptional results with minimal effort and maximum efficiency.' },
+  before_visual: { type: 'string' as const, default: '/Before default.jpg' },
+  after_visual: { type: 'string' as const, default: '/After default.jpg' },
+  subheadline: { type: 'string' as const, default: '' },
+  summary_text: { type: 'string' as const, default: '' },
+  premium_features_text: { type: 'string' as const, default: 'Premium Features Included' },
+  upgrade_text: { type: 'string' as const, default: 'Upgrade' },
+  before_placeholder_text: { type: 'string' as const, default: 'Current State' },
+  after_placeholder_text: { type: 'string' as const, default: 'Premium Result' },
+  premium_badge_text: { type: 'string' as const, default: 'Premium' },
+  before_icon: { type: 'string' as const, default: '⚠️' },
+  after_icon: { type: 'string' as const, default: '⭐' },
+  upgrade_icon: { type: 'string' as const, default: '➡️' },
+  premium_feature_icon: { type: 'string' as const, default: '✅' }
 };
 
 const PremiumCard = React.memo(({
@@ -140,7 +72,8 @@ const PremiumCard = React.memo(({
   premiumBadgeText,
   blockContent,
   handleImageToolbar,
-  themeColors
+  themeColors,
+  accentColor
 }: {
   type: 'before' | 'after';
   label: string;
@@ -176,12 +109,10 @@ const PremiumCard = React.memo(({
     afterPlaceholderIcon: string;
     featureText: string;
     featureIcon: string;
-    ctaGradient: string;
-    ctaHover: string;
-    trustIcon: string;
   };
+  accentColor: string;
 }) => {
-  
+
   const VisualPlaceholder = () => (
     <div className={`relative w-full h-64 rounded-t-xl overflow-hidden bg-gradient-to-br ${
       type === 'before'
@@ -196,8 +127,8 @@ const PremiumCard = React.memo(({
         } flex items-center justify-center`}>
           <IconEditableText
             mode={mode}
-            value={type === 'before' ? 
-              (blockContent.before_icon || '⚠️') : 
+            value={type === 'before' ?
+              (blockContent.before_icon || '⚠️') :
               (blockContent.after_icon || '⭐')
             }
             onEdit={(value) => handleContentUpdate(type === 'before' ? 'before_icon' : 'after_icon', value)}
@@ -225,10 +156,13 @@ const PremiumCard = React.memo(({
         } as React.CSSProperties)
       }}
     >
-      
+
       {type === 'after' && (
         <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
-          <div className={`bg-gradient-to-r ${themeColors.badgeGradient} text-white px-4 py-1 rounded-full text-xs font-semibold uppercase tracking-wide shadow-lg`}>
+          <div
+            className="text-white px-4 py-1 rounded-full text-xs font-semibold uppercase tracking-wide shadow-lg"
+            style={{ background: `linear-gradient(to right, ${accentColor}, ${accentColor}cc)` }}
+          >
             <EditableAdaptiveText
               mode={mode}
               value={premiumBadgeText || ''}
@@ -251,7 +185,7 @@ const PremiumCard = React.memo(({
           </div>
         </div>
       )}
-      
+
       <div className="overflow-hidden rounded-t-xl">
         {visual && visual !== '' ? (
           <img
@@ -275,14 +209,14 @@ const PremiumCard = React.memo(({
           <VisualPlaceholder />
         )}
       </div>
-      
+
       <div className="p-8">
         <div className="flex items-center mb-4">
           <div
             className="w-3 h-3 rounded-full mr-3 ring-4"
             style={{
-              backgroundColor: type === 'before' ? themeColors.beforeDot : themeColors.afterDot,
-              '--tw-ring-color': type === 'before' ? themeColors.beforeDotRing : themeColors.afterDotRing
+              backgroundColor: type === 'before' ? themeColors.beforeDot : accentColor,
+              '--tw-ring-color': type === 'before' ? themeColors.beforeDotRing : `${accentColor}20`
             } as React.CSSProperties}
           />
           <EditableAdaptiveText
@@ -294,7 +228,7 @@ const PremiumCard = React.memo(({
             variant="body"
             textStyle={{
               ...bodyLgStyle,
-              color: type === 'before' ? themeColors.beforeLabel : themeColors.afterLabel
+              color: type === 'before' ? themeColors.beforeLabel : accentColor
             }}
             className=""
             sectionId={sectionId}
@@ -302,7 +236,7 @@ const PremiumCard = React.memo(({
             sectionBackground={sectionBackground}
           />
         </div>
-        
+
         <EditableAdaptiveText
           mode={mode}
           value={description || ''}
@@ -315,13 +249,13 @@ const PremiumCard = React.memo(({
           elementKey={type === 'before' ? 'before_description' : 'after_description'}
           sectionBackground={sectionBackground}
         />
-        
+
         {type === 'after' && (
           <div
             className="mt-6 pt-4 border-t"
-            style={{ borderColor: themeColors.afterBorderTop }}
+            style={{ borderColor: `${accentColor}20` }}
           >
-            <div className={`flex items-center ${themeColors.featureIcon}`}>
+            <div className="flex items-center" style={{ color: accentColor }}>
               <IconEditableText
                 mode={mode}
                 value={blockContent.premium_feature_icon || '✅'}
@@ -343,7 +277,7 @@ const PremiumCard = React.memo(({
                 textStyle={{
                   fontSize: '0.875rem',
                   fontWeight: 500,
-                  color: themeColors.featureText
+                  color: accentColor
                 }}
                 className="text-sm font-medium"
                 sectionId={sectionId}
@@ -361,7 +295,7 @@ PremiumCard.displayName = 'PremiumCard';
 
 export default function SplitCard(props: LayoutComponentProps) {
   const { getTextStyle: getTypographyStyle } = useTypography();
-  
+
   const {
     sectionId,
     mode,
@@ -376,107 +310,86 @@ export default function SplitCard(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
-  
-  // Create typography styles
+
   const bodyLgStyle = getTypographyStyle('body-lg');
 
-  // Detect UIBlock theme - warm/cool/neutral
+  // Detect UIBlock theme
   const uiTheme: UIBlockTheme = props.manualThemeOverride ||
     (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
 
-  // Debug logging
-  console.log('🎨 SplitCard theme:', {
-    manualThemeOverride: props.manualThemeOverride,
-    detectedTheme: uiTheme,
-    marketCategory: props.userContext?.marketCategory,
-    sectionId
-  });
+  // Get accent color for After card
+  const accentColor = colorTokens.ctaBg || '#3b82f6';
 
-  // Theme-based color system for cards
+  // Theme colors for Before card (After uses accent)
   const getCardColors = (theme: UIBlockTheme) => ({
     warm: {
-      beforeBorder: '#fed7aa',           // orange-200
-      beforeLabel: '#c2410c',            // orange-700
-      beforeDot: '#f97316',              // orange-500
-      beforeDotRing: '#ffedd5',          // orange-100
-      afterBorder: '#fed7aa',            // orange-200
-      afterRing: '#ffedd5',              // orange-100
-      afterLabel: '#c2410c',             // orange-700
-      afterDot: '#f97316',               // orange-500
-      afterDotRing: '#ffedd5',           // orange-100
-      afterBorderTop: '#ffedd5',         // orange-100
-      badgeGradient: 'from-orange-500 to-orange-600',
+      beforeBorder: '#fed7aa',
+      beforeLabel: '#c2410c',
+      beforeDot: '#f97316',
+      beforeDotRing: '#ffedd5',
+      afterBorder: `${accentColor}40`,
+      afterRing: `${accentColor}20`,
+      afterLabel: accentColor,
+      afterDot: accentColor,
+      afterDotRing: `${accentColor}20`,
+      afterBorderTop: `${accentColor}20`,
+      badgeGradient: `from-[${accentColor}] to-[${accentColor}cc]`,
       beforePlaceholderBg: 'from-orange-100 to-orange-200',
       beforePlaceholderIcon: 'bg-orange-300',
-      afterPlaceholderBg: 'from-orange-50 to-orange-100',
-      afterPlaceholderIcon: 'bg-orange-200',
-      featureText: '#ea580c',            // orange-600
-      featureIcon: 'text-orange-600',
-      ctaGradient: 'from-orange-500 to-orange-600',
-      ctaHover: 'from-orange-600 to-orange-700',
-      trustIcon: 'text-orange-500'
+      afterPlaceholderBg: 'from-blue-50 to-blue-100',
+      afterPlaceholderIcon: 'bg-blue-200',
+      featureText: accentColor,
+      featureIcon: `text-[${accentColor}]`
     },
     cool: {
-      beforeBorder: '#bfdbfe',           // blue-200
-      beforeLabel: '#1e40af',            // blue-800
-      beforeDot: '#3b82f6',              // blue-500
-      beforeDotRing: '#dbeafe',          // blue-100
-      afterBorder: '#bfdbfe',            // blue-200
-      afterRing: '#dbeafe',              // blue-100
-      afterLabel: '#1e40af',             // blue-800
-      afterDot: '#3b82f6',               // blue-500
-      afterDotRing: '#dbeafe',           // blue-100
-      afterBorderTop: '#dbeafe',         // blue-100
-      badgeGradient: 'from-blue-500 to-blue-600',
+      beforeBorder: '#bfdbfe',
+      beforeLabel: '#1e40af',
+      beforeDot: '#3b82f6',
+      beforeDotRing: '#dbeafe',
+      afterBorder: `${accentColor}40`,
+      afterRing: `${accentColor}20`,
+      afterLabel: accentColor,
+      afterDot: accentColor,
+      afterDotRing: `${accentColor}20`,
+      afterBorderTop: `${accentColor}20`,
+      badgeGradient: `from-[${accentColor}] to-[${accentColor}cc]`,
       beforePlaceholderBg: 'from-blue-100 to-blue-200',
       beforePlaceholderIcon: 'bg-blue-300',
       afterPlaceholderBg: 'from-blue-50 to-blue-100',
       afterPlaceholderIcon: 'bg-blue-200',
-      featureText: '#2563eb',            // blue-600
-      featureIcon: 'text-blue-600',
-      ctaGradient: 'from-blue-500 to-blue-600',
-      ctaHover: 'from-blue-600 to-blue-700',
-      trustIcon: 'text-blue-500'
+      featureText: accentColor,
+      featureIcon: `text-[${accentColor}]`
     },
     neutral: {
-      beforeBorder: '#e5e7eb',           // gray-200
-      beforeLabel: '#374151',            // gray-700
-      beforeDot: '#6b7280',              // gray-500
-      beforeDotRing: '#f3f4f6',          // gray-100
-      afterBorder: '#e5e7eb',            // gray-200
-      afterRing: '#f3f4f6',              // gray-100
-      afterLabel: '#374151',             // gray-700
-      afterDot: '#6b7280',               // gray-500
-      afterDotRing: '#f3f4f6',           // gray-100
-      afterBorderTop: '#f3f4f6',         // gray-100
-      badgeGradient: 'from-gray-700 to-gray-800',
+      beforeBorder: '#e5e7eb',
+      beforeLabel: '#374151',
+      beforeDot: '#6b7280',
+      beforeDotRing: '#f3f4f6',
+      afterBorder: `${accentColor}40`,
+      afterRing: `${accentColor}20`,
+      afterLabel: accentColor,
+      afterDot: accentColor,
+      afterDotRing: `${accentColor}20`,
+      afterBorderTop: `${accentColor}20`,
+      badgeGradient: `from-[${accentColor}] to-[${accentColor}cc]`,
       beforePlaceholderBg: 'from-gray-100 to-gray-200',
       beforePlaceholderIcon: 'bg-gray-300',
       afterPlaceholderBg: 'from-gray-50 to-gray-100',
       afterPlaceholderIcon: 'bg-gray-200',
-      featureText: '#4b5563',            // gray-600
-      featureIcon: 'text-gray-600',
-      ctaGradient: 'from-gray-700 to-gray-800',
-      ctaHover: 'from-gray-800 to-gray-900',
-      trustIcon: 'text-gray-500'
+      featureText: accentColor,
+      featureIcon: `text-[${accentColor}]`
     }
   }[theme]);
 
   const themeColors = getCardColors(uiTheme);
-
-  const trustItems = blockContent.trust_items
-    ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
-
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
-  
+
   const store = useEditStore();
   const showImageToolbar = store.showImageToolbar;
   const handleImageToolbar = useImageToolbar();
-  
-  // Filter out 'custom' background type as it's not supported by EditableContent components
+
   const safeBackgroundType = props.backgroundType === 'custom' ? 'neutral' : (props.backgroundType || 'neutral');
-  
+
   return (
     <LayoutSection
       sectionId={sectionId}
@@ -487,7 +400,7 @@ export default function SplitCard(props: LayoutComponentProps) {
       className={props.className}
     >
       <div className="max-w-6xl mx-auto">
-        
+
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
             mode={mode}
@@ -512,7 +425,7 @@ export default function SplitCard(props: LayoutComponentProps) {
               variant="body"
               className="mb-6 max-w-3xl mx-auto"
               style={bodyLgStyle}
-              placeholder="Add optional subheadline to introduce your premium transformation..."
+              placeholder="Add optional subheadline..."
               sectionId={sectionId}
               elementKey="subheadline"
               sectionBackground={sectionBackground}
@@ -520,8 +433,8 @@ export default function SplitCard(props: LayoutComponentProps) {
           )}
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8 mb-12">
-          
+        <div className="grid lg:grid-cols-2 gap-8">
+
           <div className="space-y-6">
             <PremiumCard
               type="before"
@@ -541,8 +454,9 @@ export default function SplitCard(props: LayoutComponentProps) {
               blockContent={blockContent}
               handleImageToolbar={handleImageToolbar}
               themeColors={themeColors}
+              accentColor={accentColor}
             />
-            
+
             <div className="text-center lg:hidden">
               <div className="inline-flex items-center space-x-2 bg-white rounded-full shadow-lg px-6 py-3">
                 <IconEditableText
@@ -600,7 +514,7 @@ export default function SplitCard(props: LayoutComponentProps) {
                 />
               </div>
             </div>
-            
+
             <PremiumCard
               type="after"
               label={blockContent.after_label}
@@ -619,51 +533,28 @@ export default function SplitCard(props: LayoutComponentProps) {
               blockContent={blockContent}
               handleImageToolbar={handleImageToolbar}
               themeColors={themeColors}
+              accentColor={accentColor}
             />
           </div>
         </div>
 
-
-        {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
-          <div className="text-center space-y-6">
-            {(blockContent.supporting_text || mode === 'edit') && (
-              <EditableAdaptiveText
-                mode={mode}
-                value={blockContent.supporting_text || ''}
-                onEdit={(value) => handleContentUpdate('supporting_text', value)}
-                backgroundType={safeBackgroundType}
-                colorTokens={colorTokens}
-                variant="body"
-                className="max-w-3xl mx-auto mb-8"
-                placeholder="Add optional supporting text to reinforce your premium value proposition..."
-                sectionId={sectionId}
-                elementKey="supporting_text"
-                sectionBackground={sectionBackground}
-              />
-            )}
-
-            {(blockContent.cta_text || trustItems.length > 0) && (
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-                {blockContent.cta_text && (
-                  <CTAButton
-                    text={blockContent.cta_text}
-                    colorTokens={colorTokens}
-                    className={`shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 bg-gradient-to-r ${themeColors.ctaGradient} hover:${themeColors.ctaHover}`}
-                    variant="primary"
-                    sectionId={sectionId}
-                    elementKey="cta_text"
-                  />
-                )}
-
-                {trustItems.length > 0 && (
-                  <TrustIndicators
-                    items={trustItems}
-                    colorClass={mutedTextColor}
-                    iconColor={themeColors.trustIcon}
-                  />
-                )}
-              </div>
-            )}
+        {/* Summary Text - Optional transition copy below cards */}
+        {(blockContent.summary_text || mode === 'edit') && (
+          <div className="text-center mt-12">
+            <EditableAdaptiveText
+              mode={mode}
+              value={blockContent.summary_text || ''}
+              onEdit={(value) => handleContentUpdate('summary_text', value)}
+              backgroundType={safeBackgroundType}
+              colorTokens={colorTokens}
+              variant="body"
+              className="max-w-3xl mx-auto"
+              style={bodyLgStyle}
+              placeholder="Add optional summary/transition text..."
+              sectionId={sectionId}
+              elementKey="summary_text"
+              sectionBackground={sectionBackground}
+            />
           </div>
         )}
       </div>
@@ -674,12 +565,11 @@ export default function SplitCard(props: LayoutComponentProps) {
 export const componentMeta = {
   name: 'SplitCard',
   category: 'Comparison',
-  description: 'Premium card-based comparison layout. Perfect for luxury/expert tone and solution-aware audiences.',
+  description: 'Premium card-based comparison layout with accent-colored After card.',
   tags: ['comparison', 'premium', 'cards', 'luxury', 'expert'],
   defaultBackgroundType: 'neutral' as const,
   complexity: 'medium',
-  estimatedBuildTime: '20 minutes',
-  
+
   contentFields: [
     { key: 'headline', label: 'Main Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
@@ -689,25 +579,19 @@ export const componentMeta = {
     { key: 'after_label', label: 'After Label', type: 'text', required: true },
     { key: 'after_description', label: 'After Description', type: 'textarea', required: true },
     { key: 'after_visual', label: 'After Visual', type: 'image', required: false },
-    { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
-    { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
+    { key: 'summary_text', label: 'Summary Text', type: 'textarea', required: false }
   ],
-  
+
   features: [
-    'Premium card-based design with luxury aesthetics',
-    'Hover animations and premium interactions',
-    'After card highlighted with premium badge',
-    'Perfect for high-end positioning',
-    'Optimized for solution-aware audiences',
-    'Luxury color palette with amber accents'
+    'Premium card-based design',
+    'After card uses theme accent color',
+    'Optional summary text below cards',
+    'Upgrade indicator between cards'
   ],
-  
+
   useCases: [
     'Premium service transformations',
     'High-end product comparisons',
-    'Luxury expert positioning',
-    'Enterprise solution showcases',
-    'Level-3 market sophistication targeting'
+    'Enterprise solution showcases'
   ]
 };

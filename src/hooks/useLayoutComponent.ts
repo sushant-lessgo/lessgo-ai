@@ -18,7 +18,7 @@ import { analyzeBackground } from '@/utils/backgroundAnalysis';
 
 import { logger } from '@/lib/logger';
 export interface UseLayoutComponentProps extends LayoutComponentProps {
-  contentSchema: Record<string, { type: 'string' | 'array' | 'boolean' | 'number'; default: string | boolean | number }>;
+  contentSchema: Record<string, { type: 'string' | 'array' | 'boolean' | 'number'; default: string | boolean | number | any[] }>;
 }
 
 export function useLayoutComponent<T = Record<string, any>>({ 

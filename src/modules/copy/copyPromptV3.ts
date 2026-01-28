@@ -114,12 +114,16 @@ function getElementSchemas(): string {
   return `
 Element schemas (for repeaters/arrays):
 - faq_items: array of { question: string, answer: string }
+- features: array of { id: string, title: string, description: string } (IconGrid - id is auto-generated, icon computed at render)
 - feature_cards: array of { headline: string, description: string, icon?: string }
 - testimonial_cards: array of { quote: string, author: string, title?: string, company?: string } [NEEDS_REVIEW]
 - pricing_tiers: array of { name: string, price: string, features: string[], cta: string } [NEEDS_REVIEW]
 - stat_blocks: array of { value: string, label: string, description?: string } [NEEDS_REVIEW]
 - steps: array of { title: string, description: string, number?: number }
-- pain_points: array of { text: string, icon?: string }
+- pain_items: array of { id: string, point: string, description: string } (StackedPainBullets - id auto-generated)
+- trust_items: array of { id: string, text: string } (Hero sections - id auto-generated)
+- before_points: array of { id: string, text: string }
+- after_points: array of { id: string, text: string }
 - benefits: array of { text: string, icon?: string }`;
 }
 
@@ -220,15 +224,19 @@ Return a JSON object where each key is a section name and value has "elements" o
   "Hero": {
     "elements": {
       "headline": "Your compelling headline",
-      "subheadline": "Supporting text here"
+      "subheadline": "Supporting text here",
+      "trust_items": [
+        { "id": "t1", "text": "Free trial" },
+        { "id": "t2", "text": "No credit card" }
+      ]
     }
   },
   "Features": {
     "elements": {
       "headline": "Features headline",
-      "feature_cards": [
-        { "headline": "Feature 1", "description": "Desc 1" },
-        { "headline": "Feature 2", "description": "Desc 2" }
+      "features": [
+        { "id": "f1", "title": "Feature 1", "description": "Desc 1" },
+        { "id": "f2", "title": "Feature 2", "description": "Desc 2" }
       ]
     }
   }

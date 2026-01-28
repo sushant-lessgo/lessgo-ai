@@ -15,9 +15,6 @@ import {
   EditableAdaptiveText, 
   AccentBadge 
 } from '@/components/layout/EditableContent';
-import { 
-  CTAButton
-} from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 // Content interface for type safety
@@ -26,7 +23,6 @@ interface LetterStyleBlockContent {
   letter_greeting: string;
   letter_body: string;
   letter_signature: string;
-  cta_text: string;
   founder_title?: string;
   company_name?: string;
   date_text?: string;
@@ -36,45 +32,41 @@ interface LetterStyleBlockContent {
 
 // Content schema - defines structure and defaults
 const CONTENT_SCHEMA = {
-  letter_header: { 
-    type: 'string' as const, 
-    default: 'A Personal Note from Our Founder' 
+  letter_header: {
+    type: 'string' as const,
+    default: 'A Personal Note from Our Founder'
   },
-  letter_greeting: { 
-    type: 'string' as const, 
-    default: 'Dear Fellow Entrepreneur,' 
+  letter_greeting: {
+    type: 'string' as const,
+    default: 'Dear Fellow Builder,'
   },
-  letter_body: { 
-    type: 'string' as const, 
-    default: 'Five years ago, I was exactly where you are now. Drowning in spreadsheets, losing sleep over cash flow, and wondering if there was a better way to run a business.\n\nThat\'s when I realized something profound: the tools we use every day weren\'t built for people like us. They were built for Fortune 500 companies with armies of analysts.\n\nSo I decided to build something different. Something that understands the unique challenges of growing a business from the ground up.' 
+  letter_body: {
+    type: 'string' as const,
+    default: 'Three years ago, I sat exactly where you are now—staring at a landing page that just wouldn\'t convert.\n\nI\'d tried everything. Hired expensive copywriters. A/B tested until my eyes crossed. Read every marketing book I could find.\n\nThen it hit me: the problem wasn\'t my copy. It was the process. Great landing pages need great strategy first.\n\nThat\'s why I built Lessgo. To give founders like us the strategic foundation we need before writing a single word.'
   },
-  letter_signature: { 
-    type: 'string' as const, 
-    default: 'Sarah Chen' 
+  letter_signature: {
+    type: 'string' as const,
+    default: 'Sushant Jain'
   },
-  cta_text: { 
-    type: 'string' as const, 
-    default: 'Try It Free Today' 
+  founder_title: {
+    type: 'string' as const,
+    default: 'Founder'
   },
-  founder_title: { 
-    type: 'string' as const, 
-    default: 'Founder & CEO' 
+  company_name: {
+    type: 'string' as const,
+    default: 'Lessgo'
   },
-  company_name: { 
-    type: 'string' as const, 
-    default: 'YourCompany' 
+  date_text: {
+    type: 'string' as const,
+    default: 'January 2025'
   },
-  date_text: { 
-    type: 'string' as const, 
-    default: 'January 2024' 
-  },
-  ps_text: { 
-    type: 'string' as const, 
-    default: 'P.S. I personally read every email that comes through our support. If you have any questions, don\'t hesitate to reach out directly.' 
+  ps_text: {
+    type: 'string' as const,
+    default: 'P.S. Every founder who joins gets a personal strategy review from me. Just reply to your welcome email.'
   },
   founder_image: {
     type: 'string' as const,
-    default: ''
+    default: '/images/founder.jpg'
   }
 };
 
@@ -109,17 +101,17 @@ const getThemeColors = (theme: UIBlockTheme) => {
   return colorMap[theme];
 };
 
-// Founder Image Component
+// Founder Image Placeholder Component - Portrait style
 const FounderImagePlaceholder = React.memo(({ onClick, theme }: { onClick?: (e: React.MouseEvent) => void; theme: UIBlockTheme }) => {
   const themeColors = getThemeColors(theme);
 
   return (
     <div
-      className={`w-24 h-24 rounded-full bg-gradient-to-br ${themeColors.avatarGradient} flex items-center justify-center shadow-lg cursor-pointer hover:shadow-xl transition-shadow duration-200`}
+      className={`w-32 h-40 rounded-lg bg-gradient-to-br ${themeColors.avatarGradient} flex items-center justify-center shadow-md cursor-pointer hover:shadow-lg transition-shadow duration-200`}
       onClick={onClick}
     >
-      <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center">
-        <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="w-28 h-36 rounded-md bg-white/90 flex items-center justify-center">
+        <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
         </svg>
       </div>
@@ -246,16 +238,15 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
               />
             </div>
 
-            {/* Signature Section */}
-            <div className="flex items-end justify-between mt-12">
-              <div className="flex items-center space-x-4">
-                {/* Founder Image */}
+            {/* Signature Section - Full image with name below */}
+            <div className="mt-12">
+              {/* Founder Image - Portrait style */}
+              <div className="mb-4">
                 {blockContent.founder_image && blockContent.founder_image !== '' ? (
                   <img
                     src={blockContent.founder_image}
                     alt="Founder"
-                    className="w-16 h-16 rounded-full object-cover cursor-pointer border-2"
-                    style={{ borderColor: themeColors.avatarBorder }}
+                    className="w-32 h-40 rounded-lg object-cover cursor-pointer shadow-md hover:shadow-lg transition-shadow"
                     data-image-id={`${sectionId}-founder_image`}
                     onMouseUp={(e) => {
                       if (mode === 'edit') {
@@ -278,78 +269,63 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
                     }}
                   />
                 ) : (
-                  <div className="w-16 h-16">
-                    <FounderImagePlaceholder
-                      theme={uiBlockTheme}
-                      onClick={(e) => {
-                        if (mode === 'edit') {
-                          e.stopPropagation();
-                          e.preventDefault();
-                          const rect = e.currentTarget.getBoundingClientRect();
-                          const imageId = `${sectionId}-founder_image`;
-                          const position = {
-                            x: rect.left + rect.width / 2,
-                            y: rect.top - 10
-                          };
-                          handleImageToolbar(imageId, position);
-                        }
-                      }}
-                    />
-                  </div>
+                  <FounderImagePlaceholder
+                    theme={uiBlockTheme}
+                    onClick={(e) => {
+                      if (mode === 'edit') {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        const imageId = `${sectionId}-founder_image`;
+                        const position = {
+                          x: rect.left + rect.width / 2,
+                          y: rect.top - 10
+                        };
+                        handleImageToolbar(imageId, position);
+                      }
+                    }}
+                  />
                 )}
-
-                <div>
-                  <EditableAdaptiveText
-                    mode={mode}
-                    value={blockContent.letter_signature || ''}
-                    onEdit={(value) => handleContentUpdate('letter_signature', value)}
-                    backgroundType="neutral"
-                    colorTokens={colorTokens}
-                    variant="body"
-                    textStyle={{ fontSize: '1.25rem', fontWeight: '600', color: '#111827' }}
-                    placeholder="Your Name"
-                    sectionId={sectionId}
-                    elementKey="letter_signature"
-                    sectionBackground="bg-white"
-                  />
-                  <EditableAdaptiveText
-                    mode={mode}
-                    value={blockContent.founder_title || ''}
-                    onEdit={(value) => handleContentUpdate('founder_title', value)}
-                    backgroundType="neutral"
-                    colorTokens={colorTokens}
-                    variant="body"
-                    textStyle={{ color: '#4B5563' }}
-                    placeholder="Your Title"
-                    sectionId={sectionId}
-                    elementKey="founder_title"
-                    sectionBackground="bg-white"
-                  />
-                  <EditableAdaptiveText
-                    mode={mode}
-                    value={blockContent.company_name || ''}
-                    onEdit={(value) => handleContentUpdate('company_name', value)}
-                    backgroundType="neutral"
-                    colorTokens={colorTokens}
-                    variant="body"
-                    textStyle={{ color: '#4B5563' }}
-                    placeholder="Company Name"
-                    sectionId={sectionId}
-                    elementKey="company_name"
-                    sectionBackground="bg-white"
-                  />
-                </div>
               </div>
 
-              {/* CTA Button */}
-              <CTAButton
-                text={blockContent.cta_text}
-                colorTokens={colorTokens}
-                className="shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
-                variant="primary"
-                sectionId={sectionId}
-                elementKey="cta_text"
-              />
+              {/* Name and Role */}
+              <div>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.letter_signature || ''}
+                  onEdit={(value) => handleContentUpdate('letter_signature', value)}
+                  backgroundType="neutral"
+                  colorTokens={colorTokens}
+                  variant="body"
+                  textStyle={{ fontSize: '1.25rem', fontWeight: '600', color: '#111827' }}
+                  placeholder="Your Name"
+                  sectionId={sectionId}
+                  elementKey="letter_signature"
+                  sectionBackground="bg-white"
+                />
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={`${blockContent.founder_title || ''}${blockContent.founder_title && blockContent.company_name ? ', ' : ''}${blockContent.company_name || ''}`}
+                  onEdit={(value) => {
+                    // Parse "Title, Company" format
+                    const parts = value.split(',').map(s => s.trim());
+                    if (parts.length >= 2) {
+                      handleContentUpdate('founder_title', parts[0]);
+                      handleContentUpdate('company_name', parts.slice(1).join(', '));
+                    } else {
+                      handleContentUpdate('founder_title', value);
+                    }
+                  }}
+                  backgroundType="neutral"
+                  colorTokens={colorTokens}
+                  variant="body"
+                  textStyle={{ color: '#4B5563' }}
+                  placeholder="Title, Company"
+                  sectionId={sectionId}
+                  elementKey="founder_title"
+                  sectionBackground="bg-white"
+                />
+              </div>
             </div>
 
             {/* P.S. Section */}
@@ -397,7 +373,6 @@ export const componentMeta = {
     { key: 'company_name', label: 'Company Name', type: 'text', required: false },
     { key: 'date_text', label: 'Date', type: 'text', required: false },
     { key: 'ps_text', label: 'P.S. Note', type: 'textarea', required: false },
-    { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: true },
     { key: 'founder_image', label: 'Founder Photo', type: 'image', required: false }
   ],
   

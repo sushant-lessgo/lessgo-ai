@@ -1,8 +1,9 @@
 /**
- * IconGrid - Published Version
+ * IconGrid - Published Version (V2)
  *
  * Server-safe component with ZERO hook imports
  * Used by componentRegistry.published.ts for SSR rendering
+ * V2: Uses clean arrays instead of pipe-separated strings
  */
 
 import React from 'react';
@@ -12,46 +13,26 @@ import { HeadlinePublished, TextPublished } from '@/components/published/TextPub
 import { IconPublished } from '@/components/published/IconPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { getIcon } from '@/lib/getIcon';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
-// Feature structure
+// V2: Feature structure - clean array item
 interface Feature {
+  id: string;
   title: string;
   description: string;
-  icon: string;
+  icon?: string;
 }
 
 export default function IconGridPublished(props: LayoutComponentProps) {
   const { sectionId, sectionBackgroundCSS, theme, backgroundType } = props;
 
-  // Extract content from props (flattened by LandingPagePublishedRenderer)
+  // Extract content from props
   const headline = props.headline || 'Powerful Features Built for You';
   const subheadline = props.subheadline || '';
-  const feature_titles = props.feature_titles || '';
-  const feature_descriptions = props.feature_descriptions || '';
 
-  // Extract icons
-  const icon_1 = props.icon_1 || '🤝';
-  const icon_2 = props.icon_2 || '📊';
-  const icon_3 = props.icon_3 || '⚡';
-  const icon_4 = props.icon_4 || '🔒';
-  const icon_5 = props.icon_5 || '🔗';
-  const icon_6 = props.icon_6 || '💬';
-  const icon_7 = props.icon_7 || '🎯';
-  const icon_8 = props.icon_8 || '✨';
-  const icon_9 = props.icon_9 || '🚀';
-
-  const icons = [icon_1, icon_2, icon_3, icon_4, icon_5, icon_6, icon_7, icon_8, icon_9];
-
-  // Parse features
-  const titleList = feature_titles.split('|').map((t: string) => t.trim()).filter((t: string) => t && t !== '___REMOVED___');
-  const descriptionList = feature_descriptions.split('|').map((d: string) => d.trim()).filter((d: string) => d && d !== '___REMOVED___');
-
-  const features: Feature[] = titleList.map((title: string, index: number) => ({
-    title,
-    description: descriptionList[index] || 'Feature description not provided.',
-    icon: icons[index] || '⭐'
-  }));
+  // V2: Direct array access - no pipe parsing needed
+  const features: Feature[] = props.features || [];
 
   // Detect theme
   const uiTheme: UIBlockTheme = props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
@@ -134,59 +115,64 @@ export default function IconGridPublished(props: LayoutComponentProps) {
 
         {/* Features Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {features.map((feature: Feature, index: number) => (
-            <div
-              key={`feature-${index}`}
-              className="group p-6 rounded-xl border hover:shadow-lg transition-all duration-300"
-              style={{
-                backgroundColor: cardBg,
-                borderColor: cardBorder,
-                backdropFilter: isPrimaryBg ? 'blur(12px)' : undefined
-              }}
-            >
-              {/* Icon */}
-              <div className="mb-4">
-                <div
-                  className="inline-flex items-center justify-center w-12 h-12 rounded-lg group-hover:scale-110 transition-all duration-300"
-                  style={{
-                    backgroundColor: themeColors.iconBg
-                  }}
-                >
-                  <IconPublished
-                    icon={feature.icon}
-                    size={24}
-                    className="text-2xl"
-                  />
+          {features.map((feature: Feature) => {
+            // V2: Get icon - use stored value or derive from title/description
+            const displayIcon = feature.icon ?? getIcon(undefined, { title: feature.title, description: feature.description }) ?? '⭐';
+
+            return (
+              <div
+                key={feature.id}
+                className="group p-6 rounded-xl border hover:shadow-lg transition-all duration-300"
+                style={{
+                  backgroundColor: cardBg,
+                  borderColor: cardBorder,
+                  backdropFilter: isPrimaryBg ? 'blur(12px)' : undefined
+                }}
+              >
+                {/* Icon */}
+                <div className="mb-4">
+                  <div
+                    className="inline-flex items-center justify-center w-12 h-12 rounded-lg group-hover:scale-110 transition-all duration-300"
+                    style={{
+                      backgroundColor: themeColors.iconBg
+                    }}
+                  >
+                    <IconPublished
+                      icon={displayIcon}
+                      size={24}
+                      className="text-2xl"
+                    />
+                  </div>
+                </div>
+
+                {/* Title */}
+                <div className="mb-3">
+                  <h3
+                    style={{
+                      ...h3Typography,
+                      fontWeight: 600,
+                      color: textColors.heading
+                    }}
+                  >
+                    {feature.title}
+                  </h3>
+                </div>
+
+                {/* Description */}
+                <div>
+                  <p
+                    style={{
+                      color: textColors.muted,
+                      lineHeight: '1.75rem',
+                      opacity: 0.9
+                    }}
+                  >
+                    {feature.description}
+                  </p>
                 </div>
               </div>
-
-              {/* Title */}
-              <div className="mb-3">
-                <h3
-                  style={{
-                    ...h3Typography,
-                    fontWeight: 600,
-                    color: textColors.heading
-                  }}
-                >
-                  {feature.title}
-                </h3>
-              </div>
-
-              {/* Description */}
-              <div>
-                <p
-                  style={{
-                    color: textColors.muted,
-                    lineHeight: '1.75rem',
-                    opacity: 0.9
-                  }}
-                >
-                  {feature.description}
-                </p>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </SectionWrapperPublished>

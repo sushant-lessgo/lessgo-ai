@@ -85,12 +85,12 @@ export const layoutNamesBySection: Record<string, string[]> = {
   ],
 
   problem: [
-    // V3 ARCHIVED: 'StackedPainBullets',
+    'StackedPainBullets',
     // V3 ARCHIVED: 'BeforeImageAfterText',
     // V3 ARCHIVED: 'EmotionalQuotes',
-    'CollapsedCards',
-    'SideBySideSplit',
-    'PersonaPanels',
+    // V3 ARCHIVED: 'CollapsedCards',
+    // V3 ARCHIVED: 'SideBySideSplit',
+    // V3 ARCHIVED: 'PersonaPanels',
   ],
 
   results: [

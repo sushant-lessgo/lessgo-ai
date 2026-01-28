@@ -1,7 +1,7 @@
-// components/layout/IconGrid.tsx - ENHANCED with Dynamic Text Colors
+// components/layout/IconGrid.tsx - V2: Clean array-based features
 // Production-ready feature grid with icons using unified icon system with background-aware text colors
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import {
@@ -10,135 +10,52 @@ import {
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
-import { getRandomIconFromCategory } from '@/utils/iconMapping';
 import { getIcon } from '@/lib/getIcon';
 import { shadows, cardEnhancements } from '@/modules/Design/designTokens';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
-// Content interface for type safety
+// V2: Feature item structure - clean array item
+interface Feature {
+  id: string;
+  title: string;
+  description: string;
+  icon?: string;
+}
+
+// V2: Content interface - uses clean arrays
 interface IconGridContent {
   headline: string;
   subheadline?: string;
-  feature_titles: string;
-  feature_descriptions: string;
-  // Feature icons with smart defaults
-  icon_1?: string;
-  icon_2?: string;
-  icon_3?: string;
-  icon_4?: string;
-  icon_5?: string;
-  icon_6?: string;
-  icon_7?: string;
-  icon_8?: string;
-  icon_9?: string;
+  features: Feature[];
 }
 
-// Feature item structure
-interface FeatureItem {
-  id: string;
-  index: number;
-  title: string;
-  description: string;
-  iconType: string;
-  icon?: string; // Editable icon (uses auto-selected as default)
-}
-
-// Content schema - defines structure and defaults
+// V2: Content schema - uses clean arrays
 const CONTENT_SCHEMA = {
-  headline: { 
-    type: 'string' as const, 
-    default: 'Powerful Features Built for You' 
+  headline: {
+    type: 'string' as const,
+    default: 'Powerful Features Built for You'
   },
-  subheadline: { 
-    type: 'string' as const, 
-    default: 'Everything you need to streamline your workflow and boost productivity.' 
+  subheadline: {
+    type: 'string' as const,
+    default: 'Everything you need to streamline your workflow and boost productivity.'
   },
-  feature_titles: { 
-    type: 'string' as const, 
-    default: 'Real-time Collaboration|Advanced Analytics|Smart Automation|Secure Data Protection|Custom Integrations|24/7 Support' 
-  },
-  feature_descriptions: { 
-    type: 'string' as const, 
-    default: 'Work together seamlessly with your team in real-time, no matter where you are.|Get deep insights into your data with powerful analytics and reporting tools.|Automate repetitive tasks and workflows to save time and reduce errors.|Enterprise-grade security keeps your data safe with encryption and compliance.|Connect with your favorite tools through our extensive integration library.|Round-the-clock support from our expert team whenever you need help.' 
-  },
-  // Feature icons with smart defaults
-  icon_1: { type: 'string' as const, default: '🤝' },
-  icon_2: { type: 'string' as const, default: '📊' },
-  icon_3: { type: 'string' as const, default: '⚡' },
-  icon_4: { type: 'string' as const, default: '🔒' },
-  icon_5: { type: 'string' as const, default: '🔗' },
-  icon_6: { type: 'string' as const, default: '💬' },
-  icon_7: { type: 'string' as const, default: '🎯' },
-  icon_8: { type: 'string' as const, default: '✨' },
-  icon_9: { type: 'string' as const, default: '🚀' }
-};
-
-// NOTE: Icon validation and contextual selection now handled by unified icon system
-// See: src/lib/getIcon.ts and src/lib/iconCategoryMap.ts
-
-// Parse feature data from pipe-separated strings with unified icon system
-const parseFeatureData = (titles: string, descriptions: string, blockContent: IconGridContent): FeatureItem[] => {
-  const titleList = parsePipeData(titles);
-  const descriptionList = parsePipeData(descriptions);
-
-  return titleList.map((title, index) => {
-    // Get AI-provided category from blockContent
-    const iconCategory = blockContent[`icon_${index + 1}` as keyof IconGridContent] as string | undefined;
-    const description = descriptionList[index] || 'Feature description not provided.';
-
-    // Use unified icon system with intelligent fallback
-    const finalIcon = getIcon(iconCategory, { title, description });
-
-    return {
-      id: `feature-${index}`,
-      index,
-      title,
-      description,
-      iconType: '',
-      icon: finalIcon
-    };
-  });
-};
-
-// Helper function to add a new feature
-const addFeature = (titles: string, descriptions: string): { newTitles: string; newDescriptions: string } => {
-  const titleList = titles.split('|').map(t => t.trim()).filter(t => t);
-  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
-
-  // Add new feature with default content
-  titleList.push('New Feature');
-  descriptionList.push('Describe this feature and its benefits for your users.');
-
-  return {
-    newTitles: titleList.join('|'),
-    newDescriptions: descriptionList.join('|')
-  };
-};
-
-// Helper function to remove a feature
-const removeFeature = (titles: string, descriptions: string, indexToRemove: number): { newTitles: string; newDescriptions: string } => {
-  const titleList = titles.split('|').map(t => t.trim()).filter(t => t);
-  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
-
-  // Remove the feature at the specified index
-  if (indexToRemove >= 0 && indexToRemove < titleList.length) {
-    titleList.splice(indexToRemove, 1);
+  features: {
+    type: 'array' as const,
+    default: [
+      { id: 'f1', title: 'Real-time Collaboration', description: 'Work together seamlessly with your team in real-time, no matter where you are.' },
+      { id: 'f2', title: 'Advanced Analytics', description: 'Get deep insights into your data with powerful analytics and reporting tools.' },
+      { id: 'f3', title: 'Smart Automation', description: 'Automate repetitive tasks and workflows to save time and reduce errors.' },
+      { id: 'f4', title: 'Secure Data Protection', description: 'Enterprise-grade security keeps your data safe with encryption and compliance.' },
+      { id: 'f5', title: 'Custom Integrations', description: 'Connect with your favorite tools through our extensive integration library.' },
+      { id: 'f6', title: '24/7 Support', description: 'Round-the-clock support from our expert team whenever you need help.' }
+    ]
   }
-  if (indexToRemove >= 0 && indexToRemove < descriptionList.length) {
-    descriptionList.splice(indexToRemove, 1);
-  }
-
-  return {
-    newTitles: titleList.join('|'),
-    newDescriptions: descriptionList.join('|')
-  };
 };
 
 // Enhanced Individual Feature Card with Adaptive Colors
 const FeatureCard = React.memo(({
-  item,
+  feature,
   mode,
   colorTokens,
   dynamicTextColors,
@@ -153,41 +70,43 @@ const FeatureCard = React.memo(({
   canRemove = true,
   theme = 'neutral'
 }: {
-  item: FeatureItem;
+  feature: Feature;
   mode: 'edit' | 'preview';
   colorTokens: any;
   dynamicTextColors: any;
   getTextStyle: (variant: 'display' | 'hero' | 'h1' | 'h2' | 'h3' | 'body-lg' | 'body' | 'body-sm' | 'caption') => React.CSSProperties;
-  onTitleEdit: (index: number, value: string) => void;
-  onDescriptionEdit: (index: number, value: string) => void;
-  onIconEdit?: (index: number, value: string) => void;
-  onRemoveFeature?: (index: number) => void;
+  onTitleEdit: (id: string, value: string) => void;
+  onDescriptionEdit: (id: string, value: string) => void;
+  onIconEdit?: (id: string, value: string) => void;
+  onRemoveFeature?: (id: string) => void;
   sectionId: string;
   backgroundType: string;
   sectionBackground: string;
   canRemove?: boolean;
   theme?: UIBlockTheme;
 }) => {
-  
-  // ✅ ENHANCED: Get card background based on section background
-  const cardBackground = backgroundType === 'primary' 
-    ? 'bg-white/10 backdrop-blur-sm border-white/20' 
+  // Get icon - use stored value or derive from title/description
+  const displayIcon = feature.icon ?? getIcon(undefined, { title: feature.title, description: feature.description }) ?? '⭐';
+
+  // Get card background based on section background
+  const cardBackground = backgroundType === 'primary'
+    ? 'bg-white/10 backdrop-blur-sm border-white/20'
     : 'bg-white border-gray-200';
-    
+
   const cardHover = backgroundType === 'primary'
     ? 'hover:bg-white/20 hover:border-white/30'
     : `hover:border-${theme === 'warm' ? 'orange' : theme === 'cool' ? 'blue' : 'slate'}-300`;
 
   return (
-    <div className={`group/feature-${item.index} relative p-6 rounded-xl border ${cardBackground} ${cardHover} ${shadows.card[theme]} ${shadows.cardHover[theme]} ${cardEnhancements.hoverLift} ${cardEnhancements.transition}`}>
+    <div className={`group relative p-6 rounded-xl border ${cardBackground} ${cardHover} ${shadows.card[theme]} ${shadows.cardHover[theme]} ${cardEnhancements.hoverLift} ${cardEnhancements.transition}`}>
       {/* Delete button - only show in edit mode and if can remove */}
       {mode !== 'preview' && onRemoveFeature && canRemove && (
         <button
           onClick={(e) => {
             e.stopPropagation();
-            onRemoveFeature(item.index);
+            onRemoveFeature(feature.id);
           }}
-          className={`absolute top-4 right-4 opacity-0 group-hover/feature-${item.index}:opacity-100 text-red-500 hover:text-red-700 transition-opacity duration-200`}
+          className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-700 transition-opacity duration-200"
           title="Remove this feature"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -196,29 +115,29 @@ const FeatureCard = React.memo(({
         </button>
       )}
 
-      {/* ✅ ENHANCED: Fully Editable Icon */}
+      {/* Icon */}
       <div className="mb-4">
         <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg ${theme === 'warm' ? 'bg-orange-500' : theme === 'cool' ? 'bg-blue-500' : 'bg-slate-500'} bg-opacity-10 group-hover:bg-opacity-20 group-hover:scale-110 transition-all duration-300`}>
           <IconEditableText
             mode={mode}
-            value={item.icon || '⭐'}
-            onEdit={(value) => onIconEdit && onIconEdit(item.index, value)}
+            value={displayIcon}
+            onEdit={(value) => onIconEdit && onIconEdit(feature.id, value)}
             backgroundType={backgroundType as any}
             colorTokens={colorTokens}
             iconSize="md"
             className="text-2xl group-hover:scale-110 transition-transform duration-300"
             placeholder="🎯"
             sectionId={sectionId}
-            elementKey={`icon_${item.index + 1}`}
+            elementKey={`feature_icon_${feature.id}`}
           />
         </div>
       </div>
 
-      {/* ✅ ENHANCED: Title with Adaptive Text */}
+      {/* Title */}
       <EditableAdaptiveText
         mode={mode}
-        value={item.title}
-        onEdit={(value) => onTitleEdit(item.index, value)}
+        value={feature.title}
+        onEdit={(value) => onTitleEdit(feature.id, value)}
         backgroundType={(backgroundType === 'custom' ? 'secondary' : (backgroundType || 'secondary')) as 'neutral' | 'primary' | 'secondary' | 'divider'}
         colorTokens={colorTokens}
         variant="body"
@@ -229,22 +148,22 @@ const FeatureCard = React.memo(({
         className="mb-3"
         placeholder="Feature title..."
         sectionId={sectionId}
-        elementKey={`feature_title_${item.index}`}
+        elementKey={`feature_title_${feature.id}`}
         sectionBackground={sectionBackground}
       />
 
-      {/* ✅ ENHANCED: Description with Adaptive Text */}
+      {/* Description */}
       <EditableAdaptiveText
         mode={mode}
-        value={item.description}
-        onEdit={(value) => onDescriptionEdit(item.index, value)}
+        value={feature.description}
+        onEdit={(value) => onDescriptionEdit(feature.id, value)}
         backgroundType={(backgroundType === 'custom' ? 'secondary' : (backgroundType || 'secondary')) as 'neutral' | 'primary' | 'secondary' | 'divider'}
         colorTokens={colorTokens}
         variant="body"
         className="leading-relaxed opacity-90"
         placeholder="Describe this feature..."
         sectionId={sectionId}
-        elementKey={`feature_description_${item.index}`}
+        elementKey={`feature_description_${feature.id}`}
         sectionBackground={sectionBackground}
       />
     </div>
@@ -253,9 +172,7 @@ const FeatureCard = React.memo(({
 FeatureCard.displayName = 'FeatureCard';
 
 export default function IconGrid(props: LayoutComponentProps) {
-  
-  
-  // ✅ ENHANCED: Use the abstraction hook with background type support
+  // Use the abstraction hook with background type support
   const {
     sectionId,
     mode,
@@ -278,107 +195,50 @@ export default function IconGrid(props: LayoutComponentProps) {
     return 'neutral';
   }, [props.manualThemeOverride, props.userContext]);
 
-  // Debug theme detection
-  React.useEffect(() => {
-    console.log('🎨 IconGrid theme detection:', {
-      sectionId,
-      hasManualOverride: !!props.manualThemeOverride,
-      manualTheme: props.manualThemeOverride,
-      hasUserContext: !!props.userContext,
-      userContext: props.userContext,
-      finalTheme: theme
-    });
-  }, [theme, props.manualThemeOverride, props.userContext, sectionId]);
+  // V2: Direct array access
+  const features = blockContent.features || [];
 
-  // Parse feature data
-  const featureItems = parseFeatureData(blockContent.feature_titles, blockContent.feature_descriptions, blockContent);
-
-  // Handle individual title/description editing
-  const handleTitleEdit = (index: number, value: string) => {
-    const updatedTitles = updateListData(blockContent.feature_titles, index, value);
-    handleContentUpdate('feature_titles', updatedTitles);
+  // V2: Handle title editing - update array item
+  const handleTitleEdit = (id: string, value: string) => {
+    const updatedFeatures = features.map(f =>
+      f.id === id ? { ...f, title: value } : f
+    );
+    (handleContentUpdate as any)('features', updatedFeatures);
   };
 
-  const handleDescriptionEdit = (index: number, value: string) => {
-    const updatedDescriptions = updateListData(blockContent.feature_descriptions, index, value);
-    handleContentUpdate('feature_descriptions', updatedDescriptions);
+  // V2: Handle description editing - update array item
+  const handleDescriptionEdit = (id: string, value: string) => {
+    const updatedFeatures = features.map(f =>
+      f.id === id ? { ...f, description: value } : f
+    );
+    (handleContentUpdate as any)('features', updatedFeatures);
   };
 
-  // Handle icon editing
-  const handleIconEdit = (index: number, value: string) => {
-    const iconField = `icon_${index + 1}` as keyof IconGridContent;
-    handleContentUpdate(iconField, value);
+  // V2: Handle icon editing - update array item
+  const handleIconEdit = (id: string, value: string) => {
+    const updatedFeatures = features.map(f =>
+      f.id === id ? { ...f, icon: value } : f
+    );
+    (handleContentUpdate as any)('features', updatedFeatures);
   };
 
-  // Handle adding a new feature
+  // V2: Handle adding a new feature - simple array push
   const handleAddFeature = () => {
-    const { newTitles, newDescriptions } = addFeature(blockContent.feature_titles, blockContent.feature_descriptions);
-    handleContentUpdate('feature_titles', newTitles);
-    handleContentUpdate('feature_descriptions', newDescriptions);
-
-    // Add a smart icon for the new feature
-    const newFeatureCount = newTitles.split('|').length;
-    const iconField = `icon_${newFeatureCount}` as keyof IconGridContent;
-    if (newFeatureCount <= 9) {
-      // Use random icon from features category for new features
-      const defaultIcon = getRandomIconFromCategory('features');
-      handleContentUpdate(iconField, defaultIcon);
+    if (features.length < 9) {
+      const newFeature: Feature = {
+        id: `f${Date.now()}`,
+        title: 'New Feature',
+        description: 'Describe this feature and its benefits for your users.'
+      };
+      (handleContentUpdate as any)('features', [...features, newFeature]);
     }
   };
 
-  // Handle removing a feature
-  const handleRemoveFeature = (indexToRemove: number) => {
-    const { newTitles, newDescriptions } = removeFeature(blockContent.feature_titles, blockContent.feature_descriptions, indexToRemove);
-    handleContentUpdate('feature_titles', newTitles);
-    handleContentUpdate('feature_descriptions', newDescriptions);
-
-    // Shift icon fields to maintain order
-    const icons = [
-      blockContent.icon_1,
-      blockContent.icon_2,
-      blockContent.icon_3,
-      blockContent.icon_4,
-      blockContent.icon_5,
-      blockContent.icon_6,
-      blockContent.icon_7,
-      blockContent.icon_8,
-      blockContent.icon_9
-    ];
-
-    // Remove the icon at the specified index and shift remaining icons
-    icons.splice(indexToRemove, 1);
-    icons.push(''); // Add empty at the end
-
-    // Update all icon fields
-    icons.forEach((icon, index) => {
-      const iconField = `icon_${index + 1}` as keyof IconGridContent;
-      handleContentUpdate(iconField, icon || '');
-    });
+  // V2: Handle removing a feature - simple array filter
+  const handleRemoveFeature = (id: string) => {
+    const updatedFeatures = features.filter(f => f.id !== id);
+    (handleContentUpdate as any)('features', updatedFeatures);
   };
-
-  // Force center alignment for headline - DIRECT DOM TARGETING
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      // Target the exact element we saw in the DOM
-      const headlineElement = document.querySelector('h2[data-section-id="features"][data-element-key="headline"]');
-      
-      if (headlineElement) {
-        const htmlElement = headlineElement as HTMLElement;
-        htmlElement.style.setProperty('text-align', 'center', 'important');
-        htmlElement.style.setProperty('display', 'block', 'important');
-        
-        // Also set it on the parent div
-        const parentDiv = htmlElement.closest('.text-center');
-        if (parentDiv) {
-          (parentDiv as HTMLElement).style.setProperty('text-align', 'center', 'important');
-        }
-        
-      } else {
-      }
-    }, 1000); // Longer timeout
-    
-    return () => clearTimeout(timer);
-  }, []);
 
   return (
     <LayoutSection
@@ -392,7 +252,7 @@ export default function IconGrid(props: LayoutComponentProps) {
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <div className="text-center mb-12">
-          {/* ✅ ENHANCED: Main Headline with Dynamic Text Color */}
+          {/* Main Headline */}
           <div className="text-center">
             <EditableAdaptiveHeadline
               mode={mode}
@@ -412,7 +272,7 @@ export default function IconGrid(props: LayoutComponentProps) {
             />
           </div>
 
-          {/* ✅ ENHANCED: Subheadline with Dynamic Text Color */}
+          {/* Subheadline */}
           {(blockContent.subheadline || mode === 'edit') && (
             <div style={{ textAlign: 'center' }}>
               <EditableAdaptiveText
@@ -436,12 +296,12 @@ export default function IconGrid(props: LayoutComponentProps) {
           )}
         </div>
 
-        {/* ✅ ENHANCED: Features Grid */}
+        {/* Features Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {featureItems.map((item) => (
+          {features.map((feature) => (
             <FeatureCard
-              key={item.id}
-              item={item}
+              key={feature.id}
+              feature={feature}
               mode={mode}
               colorTokens={colorTokens}
               dynamicTextColors={dynamicTextColors}
@@ -453,14 +313,14 @@ export default function IconGrid(props: LayoutComponentProps) {
               sectionId={sectionId}
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               sectionBackground={sectionBackground}
-              canRemove={featureItems.length > 1}
+              canRemove={features.length > 1}
               theme={theme}
             />
           ))}
         </div>
 
         {/* Add Feature Button - only show in edit mode and if under max limit */}
-        {mode !== 'preview' && featureItems.length < 9 && (
+        {mode !== 'preview' && features.length < 9 && (
           <div className="mt-8 text-center">
             <button
               onClick={handleAddFeature}
@@ -478,7 +338,7 @@ export default function IconGrid(props: LayoutComponentProps) {
   );
 }
 
-// ✅ ENHANCED: Export metadata with adaptive color features and element restrictions
+// Export metadata with V2 schema info
 export const componentMeta = {
   name: 'IconGrid',
   category: 'Feature Sections',
@@ -487,29 +347,28 @@ export const componentMeta = {
   defaultBackgroundType: 'neutral' as const,
   complexity: 'medium',
   estimatedBuildTime: '20 minutes',
-  
+
   // Element restriction information
   elementRestrictions: {
     allowsUniversalElements: false,
     restrictionLevel: 'strict' as const,
     reason: "Icon grid layouts use precise 3-column arrangements with structured feature data that additional elements would disrupt",
     alternativeSuggestions: [
-      "Edit the feature_titles and feature_descriptions using pipe-separated format",
+      "Edit individual feature titles and descriptions inline",
       "Modify the headline and subheadline for section introduction",
-      "Icons are automatically selected based on feature titles",
+      "Icons are automatically selected based on feature content",
       "Switch to a flexible content section for custom elements"
     ]
   },
-  
-  // ✅ ENHANCED: Schema for component generation tools
+
+  // V2: Schema for component generation tools - uses clean arrays
   contentFields: [
     { key: 'headline', label: 'Section Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
-    { key: 'feature_titles', label: 'Feature Titles (pipe separated)', type: 'textarea', required: true },
-    { key: 'feature_descriptions', label: 'Feature Descriptions (pipe separated)', type: 'textarea', required: true }
+    { key: 'features', label: 'Features (array)', type: 'array', required: true }
   ],
-  
-  // ✅ NEW: Enhanced features
+
+  // Features
   features: [
     'Automatic text color adaptation based on background type',
     'Icons use generated accent colors from design system',
@@ -518,9 +377,9 @@ export const componentMeta = {
     'Fully editable titles and descriptions',
     'Auto-selected icons based on content keywords',
     'Responsive grid layout',
-    'Structured content format prevents layout conflicts'
+    'V2: Clean array-based data format'
   ],
-  
+
   // Usage examples
   useCases: [
     'Product feature showcase on dark hero sections',

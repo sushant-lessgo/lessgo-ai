@@ -4,6 +4,7 @@
  * Server-safe component with ZERO hook imports
  * Used by componentRegistry.published.ts for SSR rendering
  *
+ * V2 Schema: Uses problems array instead of pipe-separated strings
  * Note: All cards rendered expanded (no interactivity)
  */
 
@@ -16,59 +17,73 @@ import { SectionWrapperPublished } from '@/components/published/SectionWrapperPu
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
-interface ProblemCard {
+// V2 Schema types
+interface ProblemItem {
+  id: string;
   title: string;
   description: string;
+  expand_label?: string;
   impact: string;
-  solutionHint: string;
-  icon: string;
+  solution_hint: string;
+  icon?: string;
+}
+
+interface TrustItem {
+  id: string;
+  text: string;
 }
 
 export default function CollapsedCardsPublished(props: LayoutComponentProps) {
   const { sectionId, sectionBackgroundCSS, theme, backgroundType } = props;
 
-  // Extract content from props (flattened by LandingPagePublishedRenderer)
+  // Extract content from props
   const headline = props.headline || 'What Business Challenges Are Keeping You Up at Night?';
   const subheadline = props.subheadline || '';
   const intro_text = props.intro_text || '';
   const supporting_text = props.supporting_text || '';
-  const trust_items = props.trust_items || '';
 
-  // Extract pipe-separated fields
-  const problem_titles = props.problem_titles || '';
-  const problem_descriptions = props.problem_descriptions || '';
-  const problem_impacts = props.problem_impacts || '';
-  const solution_hints = props.solution_hints || '';
+  // V2: Get problems array directly (with legacy fallback)
+  let problemCards: ProblemItem[] = [];
 
-  // Extract icons
-  const icons = [
-    props.problem_icon_1 || '⚙️',
-    props.problem_icon_2 || '⚙️',
-    props.problem_icon_3 || '⚙️',
-    props.problem_icon_4 || '⚙️',
-    props.problem_icon_5 || '⚙️',
-    props.problem_icon_6 || '⚙️',
-  ];
+  if (Array.isArray(props.problems)) {
+    // V2 format: problems is already an array
+    problemCards = props.problems;
+  } else if (props.problem_titles) {
+    // Legacy V1 format: parse pipe-separated strings
+    const icons = [
+      props.problem_icon_1 || '⚙️',
+      props.problem_icon_2 || '⚙️',
+      props.problem_icon_3 || '⚙️',
+      props.problem_icon_4 || '⚙️',
+      props.problem_icon_5 || '⚙️',
+      props.problem_icon_6 || '⚙️',
+    ];
 
-  // Parse all arrays
-  const titleList = problem_titles.split('|').map((t: string) => t.trim()).filter((t: string) => t && t !== '___REMOVED___');
-  const descriptionList = problem_descriptions.split('|').map((d: string) => d.trim()).filter((d: string) => d && d !== '___REMOVED___');
-  const impactList = problem_impacts ? problem_impacts.split('|').map((i: string) => i.trim()) : [];
-  const solutionList = solution_hints ? solution_hints.split('|').map((s: string) => s.trim()) : [];
+    const titleList = (props.problem_titles || '').split('|').map((t: string) => t.trim()).filter((t: string) => t && t !== '___REMOVED___');
+    const descriptionList = (props.problem_descriptions || '').split('|').map((d: string) => d.trim());
+    const impactList = (props.problem_impacts || '').split('|').map((i: string) => i.trim());
+    const solutionList = (props.solution_hints || '').split('|').map((s: string) => s.trim());
 
-  // Build problem cards array
-  const problemCards: ProblemCard[] = titleList.map((title: string, index: number) => ({
-    title,
-    description: descriptionList[index] || '',
-    impact: impactList[index] || '',
-    solutionHint: solutionList[index] || '',
-    icon: icons[index] || '⚙️'
-  }));
+    problemCards = titleList.map((title: string, index: number) => ({
+      id: `legacy-${index}`,
+      title,
+      description: descriptionList[index] || '',
+      impact: impactList[index] || '',
+      solution_hint: solutionList[index] || '',
+      icon: icons[index] || '⚙️'
+    }));
+  }
 
-  // Parse trust items
-  const trustItemsList = trust_items
-    ? trust_items.split('|').map((item: string) => item.trim()).filter(Boolean)
-    : [];
+  // V2: Get trust_items array directly (with legacy fallback)
+  let trustItemsList: string[] = [];
+
+  if (Array.isArray(props.trust_items)) {
+    // V2 format: trust_items is array of {id, text}
+    trustItemsList = props.trust_items.map((t: TrustItem) => t.text);
+  } else if (typeof props.trust_items === 'string' && props.trust_items) {
+    // Legacy V1 format: pipe-separated string
+    trustItemsList = props.trust_items.split('|').map((item: string) => item.trim()).filter(Boolean);
+  }
 
   // Detect theme
   const uiTheme: UIBlockTheme = props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
@@ -170,9 +185,9 @@ export default function CollapsedCardsPublished(props: LayoutComponentProps) {
 
         {/* Problem Cards - All Expanded */}
         <div className="space-y-4 mb-8">
-          {problemCards.map((problem: ProblemCard, index: number) => (
+          {problemCards.map((problem: ProblemItem) => (
             <div
-              key={`problem-${index}`}
+              key={problem.id}
               className="group bg-white rounded-xl border-2 shadow-xl overflow-hidden"
               style={{
                 borderColor: solutionColors.cardBorder
@@ -190,7 +205,7 @@ export default function CollapsedCardsPublished(props: LayoutComponentProps) {
                     }}
                   >
                     <IconPublished
-                      icon={problem.icon}
+                      icon={problem.icon || '⚙️'}
                       size={32}
                       className="text-2xl"
                     />
@@ -213,7 +228,7 @@ export default function CollapsedCardsPublished(props: LayoutComponentProps) {
               {/* Expanded Content */}
               <div className="px-6 pb-6 border-t border-gray-100">
                 {/* Problem Description */}
-                <div className="mb-6">
+                <div className="mb-6 mt-4">
                   <TextPublished
                     value={problem.description}
                     style={{
@@ -270,7 +285,7 @@ export default function CollapsedCardsPublished(props: LayoutComponentProps) {
                 )}
 
                 {/* Solution Hint - Theme-based colors */}
-                {problem.solutionHint && (
+                {problem.solution_hint && (
                   <div
                     className="rounded-lg p-4 border"
                     style={{
@@ -304,7 +319,7 @@ export default function CollapsedCardsPublished(props: LayoutComponentProps) {
                           There's a Solution:
                         </h4>
                         <TextPublished
-                          value={problem.solutionHint}
+                          value={problem.solution_hint}
                           style={{
                             color: solutionColors.textSecondary,
                             fontSize: '0.875rem'

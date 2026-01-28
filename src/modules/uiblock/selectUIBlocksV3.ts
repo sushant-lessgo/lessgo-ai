@@ -92,13 +92,10 @@ function selectHero(
 
 /**
  * Select Problem UIBlock
- * B2B + multiple audiences → PersonaPanels, else CollapsedCards
+ * Only one layout: StackedPainBullets
  */
-function selectProblem(isB2B: boolean, hasMultipleAudiences: boolean): string {
-  if (isB2B && hasMultipleAudiences) {
-    return 'PersonaPanels';
-  }
-  return 'CollapsedCards';
+function selectProblem(_isB2B: boolean, _hasMultipleAudiences: boolean): string {
+  return 'StackedPainBullets';
 }
 
 /**

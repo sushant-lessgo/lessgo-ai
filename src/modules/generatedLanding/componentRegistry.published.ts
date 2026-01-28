@@ -47,11 +47,11 @@ import ContactFooterPublished from '@/modules/UIBlocks/Footer/ContactFooter.publ
 // ARCHIVED: import MultiColumnFooterPublished from '@/modules/UIBlocks/Footer/MultiColumnFooter.published';
 
 // Problem
-// V3 ARCHIVED: import StackedPainBulletsPublished from '@/modules/UIBlocks/Problem/StackedPainBullets.published';
+import StackedPainBulletsPublished from '@/modules/UIBlocks/Problem/StackedPainBullets.published';
 // V3 ARCHIVED: import EmotionalQuotesPublished from '@/modules/UIBlocks/Problem/EmotionalQuotes.published';
 // V3 ARCHIVED: import BeforeImageAfterTextPublished from '@/modules/UIBlocks/Problem/BeforeImageAfterText.published';
-import CollapsedCardsPublished from '@/modules/UIBlocks/Problem/CollapsedCards.published';
-import PersonaPanelsPublished from '@/modules/UIBlocks/Problem/PersonaPanels.published';
+// V3 ARCHIVED: import CollapsedCardsPublished from '@/modules/UIBlocks/Problem/CollapsedCards.published';
+// V3 ARCHIVED: import PersonaPanelsPublished from '@/modules/UIBlocks/Problem/PersonaPanels.published';
 
 // Results
 // V3 ARCHIVED: import OutcomeIconsPublished from '@/modules/UIBlocks/Results/OutcomeIcons.published';
@@ -191,11 +191,11 @@ const publishedComponentRegistry: Record<string, Record<string, React.ComponentT
     // ARCHIVED: multicolumnfooter: MultiColumnFooterPublished,
   },
   problem: {
-    // V3 ARCHIVED: stackedpainbullets: StackedPainBulletsPublished,
+    stackedpainbullets: StackedPainBulletsPublished,
     // V3 ARCHIVED: emotionalquotes: EmotionalQuotesPublished,
     // V3 ARCHIVED: beforeimageaftertext: BeforeImageAfterTextPublished,
-    collapsedcards: CollapsedCardsPublished,
-    personapanels: PersonaPanelsPublished,
+    // V3 ARCHIVED: collapsedcards: CollapsedCardsPublished,
+    // V3 ARCHIVED: personapanels: PersonaPanelsPublished,
   },
   results: {
     // V3 ARCHIVED: outcomeicons: OutcomeIconsPublished,

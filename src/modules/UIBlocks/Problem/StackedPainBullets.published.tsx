@@ -1,55 +1,74 @@
 /**
- * StackedPainBullets - Published Version
+ * StackedPainBullets - Published Version (V2)
  *
  * Server-safe component with ZERO hook imports
- * Used by componentRegistry.published.ts for SSR rendering
+ * Uses array-based pain_items instead of pipe-separated strings
  */
 
 import React from 'react';
+import * as LucideIcons from 'lucide-react';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publishedTextColors';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
-import { IconPublished } from '@/components/published/IconPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
-// Pain point structure
-interface PainPoint {
+// Pain item structure (V2)
+interface PainItem {
+  id: string;
   point: string;
   description?: string;
-  icon: string;
+  icon?: string;
 }
+
+// Derive icon from pain point text
+const getPainIconFromText = (point: string, description?: string): string => {
+  const text = `${point} ${description || ''}`.toLowerCase();
+
+  if (text.includes('time') || text.includes('hour') || text.includes('slow') || text.includes('wait')) {
+    return 'Clock';
+  }
+  if (text.includes('disconnect') || text.includes('integration') || text.includes('sync') || text.includes('talk to each other')) {
+    return 'Unlink';
+  }
+  if (text.includes('deadline') || text.includes('miss') || text.includes('late') || text.includes('urgent')) {
+    return 'AlertTriangle';
+  }
+  if (text.includes('burn') || text.includes('exhaust') || text.includes('tired') || text.includes('overwhelm')) {
+    return 'Battery';
+  }
+  if (text.includes('losing') || text.includes('lost') || text.includes('decline') || text.includes('drop')) {
+    return 'TrendingDown';
+  }
+  if (text.includes('chaos') || text.includes('mess') || text.includes('scattered') || text.includes('disorganiz')) {
+    return 'Shuffle';
+  }
+  if (text.includes('manual') || text.includes('repetitive') || text.includes('tedious')) {
+    return 'Hand';
+  }
+  if (text.includes('customer') || text.includes('client') || text.includes('response')) {
+    return 'Users';
+  }
+  return 'AlertCircle';
+};
 
 export default function StackedPainBulletsPublished(props: LayoutComponentProps) {
   const { sectionId, sectionBackgroundCSS, theme, backgroundType } = props;
 
-  // Extract content from props (flattened by LandingPagePublishedRenderer)
+  // Extract content from props
   const headline = props.headline || 'Are You Struggling With These Daily Frustrations?';
   const subheadline = props.subheadline || '';
   const conclusion_text = props.conclusion_text || 'Sound familiar? You\'re not alone.';
-  const pain_points = props.pain_points || '';
-  const pain_descriptions = props.pain_descriptions || '';
 
-  // Extract icons
-  const pain_icon_1 = props.pain_icon_1 || '⏰';
-  const pain_icon_2 = props.pain_icon_2 || '🔗';
-  const pain_icon_3 = props.pain_icon_3 || '⚠️';
-  const pain_icon_4 = props.pain_icon_4 || '😰';
-  const pain_icon_5 = props.pain_icon_5 || '📉';
-  const pain_icon_6 = props.pain_icon_6 || '🌪️';
-
-  const icons = [pain_icon_1, pain_icon_2, pain_icon_3, pain_icon_4, pain_icon_5, pain_icon_6];
-
-  // Parse pain points
-  const pointList = pain_points.split('|').map((p: string) => p.trim()).filter((p: string) => p && p !== '___REMOVED___');
-  const descriptionList = pain_descriptions ? pain_descriptions.split('|').map((d: string) => d.trim()) : [];
-
-  const painPoints: PainPoint[] = pointList.map((point: string, index: number) => ({
-    point,
-    description: descriptionList[index] || '',
-    icon: icons[index] || '⚠️'
-  }));
+  // Get pain items (V2 array format)
+  const painItems: PainItem[] = Array.isArray(props.pain_items)
+    ? props.pain_items
+    : [
+        { id: 'p1', point: 'Spending hours on manual data entry', description: '' },
+        { id: 'p2', point: 'Juggling multiple disconnected tools', description: '' },
+        { id: 'p3', point: 'Missing important deadlines', description: '' },
+      ];
 
   // Detect theme
   const uiTheme: UIBlockTheme = props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
@@ -61,7 +80,6 @@ export default function StackedPainBulletsPublished(props: LayoutComponentProps)
         border: '#fed7aa',
         borderHover: '#fdba74',
         iconBg: '#ffedd5',
-        iconBgHover: '#fed7aa',
         iconText: '#ea580c',
         conclusionBg: '#fff7ed',
         conclusionBorder: '#fed7aa',
@@ -72,7 +90,6 @@ export default function StackedPainBulletsPublished(props: LayoutComponentProps)
         border: '#bfdbfe',
         borderHover: '#93c5fd',
         iconBg: '#dbeafe',
-        iconBgHover: '#bfdbfe',
         iconText: '#2563eb',
         conclusionBg: '#eff6ff',
         conclusionBorder: '#bfdbfe',
@@ -83,7 +100,6 @@ export default function StackedPainBulletsPublished(props: LayoutComponentProps)
         border: '#fde68a',
         borderHover: '#fcd34d',
         iconBg: '#fef3c7',
-        iconBgHover: '#fde68a',
         iconText: '#d97706',
         conclusionBg: '#fffbeb',
         conclusionBorder: '#fde68a',
@@ -106,6 +122,13 @@ export default function StackedPainBulletsPublished(props: LayoutComponentProps)
   // Typography styles
   const headlineTypography = getPublishedTypographyStyles('h2', theme);
   const bodyTypography = getPublishedTypographyStyles('body-lg', theme);
+
+  // Render icon component
+  const renderIcon = (item: PainItem) => {
+    const iconName = item.icon || getPainIconFromText(item.point, item.description);
+    const IconComponent = (LucideIcons as any)[iconName] ?? LucideIcons.AlertCircle;
+    return <IconComponent size={24} strokeWidth={2} />;
+  };
 
   return (
     <SectionWrapperPublished
@@ -142,9 +165,9 @@ export default function StackedPainBulletsPublished(props: LayoutComponentProps)
 
         {/* Pain Points List */}
         <div className="space-y-6">
-          {painPoints.map((painPoint: PainPoint, index: number) => (
+          {painItems.map((painItem: PainItem) => (
             <div
-              key={`pain-${index}`}
+              key={painItem.id}
               className="group flex items-start space-x-4 p-6 bg-white rounded-lg border hover:shadow-md transition-all duration-300"
               style={{
                 borderColor: themeColors.border
@@ -158,11 +181,7 @@ export default function StackedPainBulletsPublished(props: LayoutComponentProps)
                   color: themeColors.iconText
                 }}
               >
-                <IconPublished
-                  icon={painPoint.icon}
-                  size={32}
-                  className="text-2xl"
-                />
+                {renderIcon(painItem)}
               </div>
 
               {/* Pain Content */}
@@ -170,7 +189,7 @@ export default function StackedPainBulletsPublished(props: LayoutComponentProps)
                 {/* Pain Point */}
                 <div className="mb-2">
                   <TextPublished
-                    value={painPoint.point}
+                    value={painItem.point}
                     style={{
                       fontWeight: 600,
                       fontSize: '1.25rem',
@@ -181,9 +200,9 @@ export default function StackedPainBulletsPublished(props: LayoutComponentProps)
                 </div>
 
                 {/* Optional Description */}
-                {painPoint.description && (
+                {painItem.description && (
                   <TextPublished
-                    value={painPoint.description}
+                    value={painItem.description}
                     style={{
                       color: '#4b5563',
                       fontSize: '1rem',

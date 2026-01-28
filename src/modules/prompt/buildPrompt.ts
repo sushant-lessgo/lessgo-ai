@@ -430,10 +430,15 @@ function buildLayoutContext(elementsMap: Record<string, SectionInfo>, onboarding
 
     // Merge feature count instructions directly into Features guidance
     if (sectionType === 'Features' && featureCount > 0) {
-      const featureTitles = featuresFromAI.map(f => f.feature).join('|');
-      const featureDescriptions = featuresFromAI.map(f => f.benefit).join('|');
-
-      guidance += ` CRITICAL: You have ${featureCount} features from KEY FEATURES & BENEFITS. feature_titles MUST contain exactly ${featureCount} pipe-separated titles. feature_descriptions MUST contain exactly ${featureCount} pipe-separated descriptions. Expected format: feature_titles: "${featureTitles}" (adapt to 2-4 words each), feature_descriptions: "${featureDescriptions}" (expand benefits). Use ALL ${featureCount} features - if you generate fewer, users won't see all their features.`;
+      if (layoutName === 'IconGrid') {
+        // V2: IconGrid uses features array format
+        guidance += ` CRITICAL: You have ${featureCount} features from KEY FEATURES & BENEFITS. Generate a 'features' array with exactly ${featureCount} items. Each item: {id: "f1", title: "2-4 word title", description: "benefit-focused description"}. Use ALL ${featureCount} features.`;
+      } else {
+        // Legacy layouts still use pipe-separated format
+        const featureTitles = featuresFromAI.map(f => f.feature).join('|');
+        const featureDescriptions = featuresFromAI.map(f => f.benefit).join('|');
+        guidance += ` CRITICAL: You have ${featureCount} features from KEY FEATURES & BENEFITS. feature_titles MUST contain exactly ${featureCount} pipe-separated titles. feature_descriptions MUST contain exactly ${featureCount} pipe-separated descriptions. Expected format: feature_titles: "${featureTitles}" (adapt to 2-4 words each), feature_descriptions: "${featureDescriptions}" (expand benefits). Use ALL ${featureCount} features - if you generate fewer, users won't see all their features.`;
+      }
     }
 
     layoutContexts.push(`${sectionType} (${layoutName}): ${guidance}`);
@@ -465,7 +470,7 @@ function getSectionLayoutGuidance(sectionType: string, layout: string): string {
     },
 
     Features: {
-      IconGrid: "Icon-driven feature showcase. IMPORTANT: Use ALL features from KEY FEATURES & BENEFITS section. Generate pipe-separated values (e.g., 'Title1|Title2|Title3|Title4' and 'Desc1|Desc2|Desc3|Desc4'). Feature titles should be 2-4 words max. Descriptions should be benefit-focused, not feature-focused.",
+      IconGrid: "Icon-driven feature showcase (V2 array format). IMPORTANT: Use ALL features from KEY FEATURES & BENEFITS section. Generate a 'features' array of objects with {id, title, description}. Each feature needs: id (e.g., 'f1', 'f2'), title (2-4 words, benefit-focused), description (outcome-focused). Icons are auto-derived at render time.",
       SplitAlternating: "Alternating image-text feature layout. Use ALL features from KEY FEATURES & BENEFITS. Generate pipe-separated values. Vary headline lengths for visual rhythm. Use action-oriented language throughout.",
       MetricTiles: "Data-driven feature presentation. Use ALL features from KEY FEATURES & BENEFITS. Generate pipe-separated values. Lead with compelling numbers. Support metrics with clear explanations.",
       Carousel: "Sliding feature presentation. Use ALL features from KEY FEATURES & BENEFITS. Generate pipe-separated values. Each slide should be self-contained. Use navigation-friendly language and structure."
@@ -536,9 +541,10 @@ function getSectionLayoutGuidance(sectionType: string, layout: string): string {
 
     Problem: {
       // Archived layouts moved to archive/prompt/buildPrompt.guidance.archived.ts
-      SideBySideSplit: "Problem-solution preview layout. Balance problem urgency with solution hope. Create natural bridge between states.",
-      CollapsedCards: "Expandable problem exploration. Problem titles should be immediately recognizable. Details should build emotional connection.",
-      PersonaPanels: "User-specific problem presentation. Tailor problems to specific user types. Use language each persona would recognize.",
+      StackedPainBullets: "Pain point list emphasizing problems. Use visceral, relatable language. Stack pains to build urgency before solution.",
+      // V3 ARCHIVED: SideBySideSplit: "Problem-solution preview layout. Balance problem urgency with solution hope. Create natural bridge between states.",
+      // V3 ARCHIVED: CollapsedCards: "Expandable problem exploration. Problem titles should be immediately recognizable. Details should build emotional connection.",
+      // V3 ARCHIVED: PersonaPanels: "User-specific problem presentation. Tailor problems to specific user types. Use language each persona would recognize.",
     },
 
     Results: {

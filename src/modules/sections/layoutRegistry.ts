@@ -56,9 +56,7 @@ export const layoutRegistry = {
   ] as const,
 
   Problem: [
-    "CollapsedCards",
-    "SideBySideSplit",
-    "PersonaPanels",
+    "StackedPainBullets",
   ] as const,
 
   Results: [

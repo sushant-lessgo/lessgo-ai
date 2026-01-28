@@ -32,7 +32,8 @@ export default function StackedTextVisualPublished(props: LayoutComponentProps) 
   const after_label = props.after_label || 'After';
   const transition_text = props.transition_text || '';
   const summary_text = props.summary_text || '';
-  const show_summary_box = props.show_summary_box || 'false';
+  // V2: boolean (with backward compat for string 'true'/'false')
+  const show_summary_box = props.show_summary_box === true || props.show_summary_box === 'true';
 
   // Extract icons (optional)
   const before_icon = props.before_icon || '➕';
@@ -43,7 +44,10 @@ export default function StackedTextVisualPublished(props: LayoutComponentProps) 
   const uiTheme: UIBlockTheme = props.manualThemeOverride ||
     (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
 
-  // Theme-based color system for before/after/transition blocks
+  // Get accent color for After block
+  const accentColor = theme?.colors?.accentColor || '#3b82f6';
+
+  // Theme-based color system - After block uses accent color
   const getStackedColors = (themeType: UIBlockTheme) => ({
     warm: {
       before: {
@@ -57,14 +61,14 @@ export default function StackedTextVisualPublished(props: LayoutComponentProps) 
         text: '#ea580c'          // orange-600
       },
       after: {
-        bg: '#fef3c7',           // amber-100
-        border: '#f59e0b',       // amber-500
-        iconBg: '#fde68a',       // amber-200
-        iconText: '#d97706'      // amber-600
+        bg: `${accentColor}15`,      // light accent
+        border: accentColor,          // accent
+        iconBg: `${accentColor}30`,   // medium accent
+        iconText: accentColor         // accent
       },
       summary: {
-        bg: 'linear-gradient(to right, #fff7ed, #fffbeb, #fefce8)',  // orange-50 to amber-50 to yellow-50
-        border: '#fed7aa'        // orange-200
+        bg: 'linear-gradient(to right, #fff7ed, #fffbeb, #fefce8)',
+        border: '#fed7aa'
       }
     },
     cool: {
@@ -79,14 +83,14 @@ export default function StackedTextVisualPublished(props: LayoutComponentProps) 
         text: '#2563eb'          // blue-600
       },
       after: {
-        bg: '#dcfce7',           // green-100
-        border: '#22c55e',       // green-500
-        iconBg: '#bbf7d0',       // green-200
-        iconText: '#16a34a'      // green-600
+        bg: `${accentColor}15`,      // light accent
+        border: accentColor,          // accent
+        iconBg: `${accentColor}30`,   // medium accent
+        iconText: accentColor         // accent
       },
       summary: {
-        bg: 'linear-gradient(to right, #eff6ff, #e0e7ff, #faf5ff)',  // blue-50 to indigo-50 to purple-50
-        border: '#bfdbfe'        // blue-200
+        bg: 'linear-gradient(to right, #eff6ff, #e0e7ff, #faf5ff)',
+        border: '#bfdbfe'
       }
     },
     neutral: {
@@ -101,14 +105,14 @@ export default function StackedTextVisualPublished(props: LayoutComponentProps) 
         text: '#4b5563'          // gray-600
       },
       after: {
-        bg: '#f0fdf4',           // green-50
-        border: '#22c55e',       // green-500
-        iconBg: '#bbf7d0',       // green-200
-        iconText: '#16a34a'      // green-600
+        bg: `${accentColor}15`,      // light accent
+        border: accentColor,          // accent
+        iconBg: `${accentColor}30`,   // medium accent
+        iconText: accentColor         // accent
       },
       summary: {
-        bg: 'linear-gradient(to right, #f9fafb, #f8fafc, #fafafa)',  // gray-50 to slate-50 to zinc-50
-        border: '#e5e7eb'        // gray-200
+        bg: 'linear-gradient(to right, #f9fafb, #f8fafc, #fafafa)',
+        border: '#e5e7eb'
       }
     }
   }[themeType]);
@@ -225,8 +229,8 @@ export default function StackedTextVisualPublished(props: LayoutComponentProps) 
                 />
               </div>
 
-              {/* Optional Transition Text */}
-              {transition_text && transition_text !== '___REMOVED___' && (
+              {/* Optional Transition Text - V2: no more ___REMOVED___ check */}
+              {transition_text && (
                 <div
                   className="text-sm font-medium text-center px-4 py-2 rounded-full"
                   style={{ backgroundColor: themeColors.transition.bg }}
@@ -273,7 +277,7 @@ export default function StackedTextVisualPublished(props: LayoutComponentProps) 
                       letterSpacing: '0.05em',
                       fontWeight: 600,
                       fontSize: '0.875rem',
-                      color: textColors.body,
+                      color: themeColors.after.iconText,
                       marginBottom: '0.75rem'
                     }}
                   />
@@ -282,7 +286,7 @@ export default function StackedTextVisualPublished(props: LayoutComponentProps) 
                     value={after_text}
                     element="p"
                     style={{
-                      color: textColors.body,
+                      color: themeColors.after.iconText,
                       lineHeight: '1.75rem'
                     }}
                   />
@@ -292,8 +296,8 @@ export default function StackedTextVisualPublished(props: LayoutComponentProps) 
           </div>
         </div>
 
-        {/* Optional Summary Box */}
-        {show_summary_box !== 'false' && summary_text && summary_text !== '___REMOVED___' && (
+        {/* Optional Summary Box - V2: boolean check, no more ___REMOVED___ */}
+        {show_summary_box && summary_text && (
           <div
             className="mt-8 p-6 rounded-2xl border"
             style={{

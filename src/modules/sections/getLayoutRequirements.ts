@@ -47,7 +47,7 @@ export const genericToUIBlockMapping: SectionTypeMapping = {
   },
   problem: {
     sectionId: 'problem',
-    layoutName: 'CollapsedCards'  // Updated: CollapsedCards is an active Problem layout
+    layoutName: 'StackedPainBullets'  // Only Problem layout
   },
   uniqueMechanism: {
     sectionId: 'uniqueMechanism',

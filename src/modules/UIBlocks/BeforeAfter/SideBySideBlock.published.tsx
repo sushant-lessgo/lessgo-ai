@@ -2,13 +2,11 @@
  * SideBySideBlock - Published Version
  *
  * Server-safe component with ZERO hook imports
- * Used by componentRegistry.published.ts for SSR rendering
- *
  * Features:
- * - Before/After comparison with theme-aware colors
- * - Optional icons for both sides
- * - Optional CTA button and trust indicators
- * - Theme-based visual styling (warm/cool/neutral)
+ * - Visual contrast: Before=muted/dashed, After=accent/solid
+ * - Transformation arrow between cards (always horizontal)
+ * - Support for before_points/after_points lists
+ * - Theme-based accent colors
  */
 
 import React from 'react';
@@ -17,57 +15,94 @@ import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publ
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { IconPublished } from '@/components/published/IconPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
-import { CTAButtonPublished } from '@/components/published/CTAButtonPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 export default function SideBySideBlockPublished(props: LayoutComponentProps) {
   const { sectionId, sectionBackgroundCSS, theme, backgroundType } = props;
 
-  // Extract content from props (flattened by LandingPagePublishedRenderer)
+  // Extract content
   const headline = props.headline || 'Your Transformation Story';
   const subheadline = props.subheadline || '';
   const before_label = props.before_label || 'Before';
   const after_label = props.after_label || 'After';
-  const before_description = props.before_description || 'Describe the current state or problem your audience faces.';
-  const after_description = props.after_description || 'Describe the improved state or solution you provide.';
-  const supporting_text = props.supporting_text || '';
-  const cta_text = props.cta_text || '';
+  const before_description = props.before_description || '';
+  const after_description = props.after_description || '';
+  const summary_text = (props as any).summary_text || '';
 
-  // Extract icons (optional)
-  const before_icon = props.before_icon || '';
-  const after_icon = props.after_icon || '';
+  // Extract icons with defaults
+  const before_icon = props.before_icon || '❌';
+  const after_icon = props.after_icon || '✅';
 
-  // Parse trust indicators from pipe-separated string
-  const trustItemsList = (props.trust_items || '')
-    .split('|')
-    .map((item: string) => item.trim())
-    .filter((item: string) => item && item !== '___REMOVED___');
+  // Parse before_points from V2 clean arrays
+  const beforePoints = ((props as any).before_points || []).map((item: any) =>
+    typeof item === 'string' ? item : item.text
+  ).filter((text: string) => text && text.trim() !== '');
+
+  // Parse after_points from V2 clean arrays
+  const afterPoints = ((props as any).after_points || []).map((item: any) =>
+    typeof item === 'string' ? item : item.text
+  ).filter((text: string) => text && text.trim() !== '');
 
   // Detect UIBlock theme
   const uiTheme: UIBlockTheme = props.manualThemeOverride ||
     (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
 
-  // Theme-based color system for before/after visual indicators
-  const getBeforeAfterColors = (themeType: UIBlockTheme) => ({
+  // Get accent color from theme
+  const accentColor = theme?.colors?.accentColor || '#3b82f6';
+  const accentColorLight = `${accentColor}15`; // 15% opacity for bg
+  const accentColorMedium = `${accentColor}40`; // 40% opacity for border
+
+  // Theme colors - Before=muted, After=light accent
+  const getCardColors = (themeType: UIBlockTheme) => ({
     warm: {
-      labelColor: '#ea580c',        // orange-600
-      iconRing: '#ffedd5',          // orange-100
-      border: '#fed7aa'             // orange-200
+      before: {
+        bg: '#fef2f2',
+        border: '#fecaca',
+        labelColor: '#dc2626',
+        pointIcon: '❌'
+      },
+      after: {
+        bg: accentColorLight,
+        border: accentColorMedium,
+        labelColor: accentColor,
+        pointIcon: '✅'
+      },
+      arrow: '#f97316'
     },
     cool: {
-      labelColor: '#2563eb',        // blue-600
-      iconRing: '#dbeafe',          // blue-100
-      border: '#bfdbfe'             // blue-200
+      before: {
+        bg: '#fef2f2',
+        border: '#fecaca',
+        labelColor: '#dc2626',
+        pointIcon: '❌'
+      },
+      after: {
+        bg: accentColorLight,
+        border: accentColorMedium,
+        labelColor: accentColor,
+        pointIcon: '✅'
+      },
+      arrow: accentColor
     },
     neutral: {
-      labelColor: '#4b5563',        // gray-600
-      iconRing: '#f3f4f6',          // gray-100
-      border: '#e5e7eb'             // gray-200
+      before: {
+        bg: '#f9fafb',
+        border: '#d1d5db',
+        labelColor: '#6b7280',
+        pointIcon: '❌'
+      },
+      after: {
+        bg: accentColorLight,
+        border: accentColorMedium,
+        labelColor: accentColor,
+        pointIcon: '✅'
+      },
+      arrow: accentColor
     }
   }[themeType]);
 
-  const themeColors = getBeforeAfterColors(uiTheme);
+  const themeColors = getCardColors(uiTheme);
 
   // Get text colors based on background
   const textColors = getPublishedTextColors(
@@ -79,7 +114,6 @@ export default function SideBySideBlockPublished(props: LayoutComponentProps) {
   // Typography styles
   const headlineTypography = getPublishedTypographyStyles('h2', theme);
   const bodyTypography = getPublishedTypographyStyles('body-lg', theme);
-  const bodyStandardTypography = getPublishedTypographyStyles('body', theme);
 
   return (
     <SectionWrapperPublished
@@ -90,7 +124,6 @@ export default function SideBySideBlockPublished(props: LayoutComponentProps) {
       <div className="max-w-6xl mx-auto">
         {/* Header Section */}
         <div className="text-center mb-12">
-          {/* Main Headline */}
           <HeadlinePublished
             value={headline}
             level="h2"
@@ -101,7 +134,6 @@ export default function SideBySideBlockPublished(props: LayoutComponentProps) {
             }}
           />
 
-          {/* Optional Subheadline */}
           {subheadline && (
             <TextPublished
               value={subheadline}
@@ -116,166 +148,159 @@ export default function SideBySideBlockPublished(props: LayoutComponentProps) {
           )}
         </div>
 
-        {/* Side by Side Blocks */}
-        <div className="grid md:grid-cols-2 gap-8 md:gap-12 mb-12">
-          {/* Before Block */}
-          <div className="group">
+        {/* Side by Side Cards - Always horizontal (3 columns: Before | Arrow | After) */}
+        <div
+          className="grid gap-2 sm:gap-4 md:gap-6 items-stretch"
+          style={{ gridTemplateColumns: '1fr auto 1fr' }}
+        >
+          {/* Before Card - Muted/Problem styling with dashed border */}
+          <div className="min-w-0">
             <div
-              className="rounded-lg shadow-lg p-8 border hover:shadow-xl transition-shadow duration-300 h-full"
+              className="rounded-xl p-4 sm:p-6 md:p-8 h-full transition-all duration-300 hover:shadow-lg"
               style={{
-                backgroundColor: '#ffffff',
-                borderColor: themeColors.border
+                backgroundColor: themeColors.before.bg,
+                border: `2px dashed ${themeColors.before.border}`
               }}
             >
-              <div className="flex items-center mb-6">
-                {before_icon ? (
-                  <div className="mr-3">
-                    <IconPublished
-                      icon={before_icon}
-                      size={32}
-                      className="text-xl"
-                    />
-                  </div>
-                ) : (
-                  <div
-                    className="w-3 h-3 rounded-full mr-3"
-                    style={{
-                      backgroundColor: themeColors.labelColor,
-                      boxShadow: `0 0 0 4px ${themeColors.iconRing}`
-                    }}
-                  />
-                )}
-
+              {/* Label + Icon */}
+              <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                <IconPublished
+                  icon={before_icon}
+                  size={20}
+                  className="sm:text-2xl"
+                />
                 <TextPublished
                   value={before_label}
                   element="span"
                   style={{
-                    ...bodyStandardTypography,
+                    fontWeight: 700,
+                    fontSize: '1rem',
                     textTransform: 'uppercase',
                     letterSpacing: '0.05em',
-                    fontWeight: 600,
-                    color: themeColors.labelColor
+                    color: themeColors.before.labelColor
                   }}
+                  className="text-base sm:text-lg"
                 />
               </div>
 
-              <TextPublished
-                value={before_description}
-                element="p"
-                style={{
-                  color: textColors.body,
-                  lineHeight: '1.75rem'
-                }}
-              />
+              {/* Description */}
+              {before_description && (
+                <TextPublished
+                  value={before_description}
+                  element="p"
+                  style={{
+                    color: textColors.body,
+                    lineHeight: '1.75rem',
+                    marginBottom: beforePoints.length > 0 ? '1rem' : '0'
+                  }}
+                  className="text-sm sm:text-base"
+                />
+              )}
+
+              {/* Pain Points List */}
+              {beforePoints.length > 0 && (
+                <div className="space-y-1 sm:space-y-2">
+                  {beforePoints.map((point: string, index: number) => (
+                    <div key={index} className="flex items-start gap-2 text-sm sm:text-base">
+                      <span style={{ color: themeColors.before.labelColor }} className="flex-shrink-0 mt-0.5">
+                        {themeColors.before.pointIcon}
+                      </span>
+                      <span style={{ color: textColors.body }}>{point}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
-          {/* After Block */}
-          <div className="group">
+          {/* Transformation Arrow - Always visible */}
+          <div className="flex items-center justify-center px-2 sm:px-4">
+            <svg
+              className="w-6 h-6 sm:w-8 sm:h-8"
+              style={{ color: themeColors.arrow }}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2.5}
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 5l7 7-7 7M5 12h15" />
+            </svg>
+          </div>
+
+          {/* After Card - Accent/Success styling with solid border */}
+          <div className="min-w-0">
             <div
-              className="rounded-lg shadow-lg p-8 border hover:shadow-xl transition-shadow duration-300 h-full"
+              className="rounded-xl p-4 sm:p-6 md:p-8 h-full transition-all duration-300 hover:shadow-lg"
               style={{
-                backgroundColor: '#ffffff',
-                borderColor: themeColors.border
+                backgroundColor: themeColors.after.bg,
+                border: `2px solid ${themeColors.after.border}`
               }}
             >
-              <div className="flex items-center mb-6">
-                {after_icon ? (
-                  <div className="mr-3">
-                    <IconPublished
-                      icon={after_icon}
-                      size={32}
-                      className="text-xl"
-                    />
-                  </div>
-                ) : (
-                  <div
-                    className="w-3 h-3 rounded-full mr-3"
-                    style={{
-                      backgroundColor: themeColors.labelColor,
-                      boxShadow: `0 0 0 4px ${themeColors.iconRing}`
-                    }}
-                  />
-                )}
-
+              {/* Label + Icon */}
+              <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                <IconPublished
+                  icon={after_icon}
+                  size={20}
+                  className="sm:text-2xl"
+                />
                 <TextPublished
                   value={after_label}
                   element="span"
                   style={{
-                    ...bodyStandardTypography,
+                    fontWeight: 700,
+                    fontSize: '1rem',
                     textTransform: 'uppercase',
                     letterSpacing: '0.05em',
-                    fontWeight: 600,
-                    color: themeColors.labelColor
+                    color: themeColors.after.labelColor
                   }}
+                  className="text-base sm:text-lg"
                 />
               </div>
 
-              <TextPublished
-                value={after_description}
-                element="p"
-                style={{
-                  color: textColors.body,
-                  lineHeight: '1.75rem'
-                }}
-              />
+              {/* Description */}
+              {after_description && (
+                <TextPublished
+                  value={after_description}
+                  element="p"
+                  style={{
+                    color: textColors.body,
+                    lineHeight: '1.75rem',
+                    marginBottom: afterPoints.length > 0 ? '1rem' : '0'
+                  }}
+                  className="text-sm sm:text-base"
+                />
+              )}
+
+              {/* Benefits List */}
+              {afterPoints.length > 0 && (
+                <div className="space-y-1 sm:space-y-2">
+                  {afterPoints.map((point: string, index: number) => (
+                    <div key={index} className="flex items-start gap-2 text-sm sm:text-base">
+                      <span style={{ color: themeColors.after.labelColor }} className="flex-shrink-0 mt-0.5">
+                        {themeColors.after.pointIcon}
+                      </span>
+                      <span style={{ color: textColors.body }}>{point}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Optional CTA and Trust Section */}
-        {(cta_text || trustItemsList.length > 0 || supporting_text) && (
-          <div className="text-center space-y-6">
-            {/* Optional Supporting Text */}
-            {supporting_text && (
-              <TextPublished
-                value={supporting_text}
-                element="p"
-                style={{
-                  color: textColors.body,
-                  ...bodyTypography,
-                  maxWidth: '48rem',
-                  margin: '0 auto 2rem'
-                }}
-              />
-            )}
-
-            {/* CTA Button and Trust Indicators */}
-            {(cta_text || trustItemsList.length > 0) && (
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-                {cta_text && (
-                  <CTAButtonPublished
-                    text={cta_text}
-                    backgroundColor={theme?.colors?.accentColor || themeColors.labelColor}
-                    textColor="#ffffff"
-                    className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
-                  />
-                )}
-
-                {/* Trust Indicators - Inline SVG Implementation */}
-                {trustItemsList.length > 0 && (
-                  <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
-                    {trustItemsList.map((item: string, index: number) => (
-                      <div key={index} className="flex items-center space-x-2">
-                        <svg
-                          className="w-4 h-4 flex-shrink-0"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                          style={{ color: themeColors.labelColor }}
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        <span style={{ color: textColors.muted }}>{item}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+        {/* Summary Text - Optional transition copy below cards */}
+        {summary_text && (
+          <div className="text-center mt-8 sm:mt-12">
+            <TextPublished
+              value={summary_text}
+              element="p"
+              style={{
+                color: textColors.body,
+                ...bodyTypography,
+                maxWidth: '48rem',
+                margin: '0 auto'
+              }}
+            />
           </div>
         )}
       </div>

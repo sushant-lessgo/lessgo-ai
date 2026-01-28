@@ -41,6 +41,7 @@
 3. There has to be single thread between whats there in layoutElementSchema.ts, the original tsx uiblock file, the published uiblock file
 4. For each UIblock published couterpart should exist
 5. For each UIBlock uiBlockTheme.md should be implemented
+6. No page is live in production so no migration is required. No backward compatibility required.
 
  ## Data Format Principles
   1. Arrays as source of truth - no pipe-separated strings

@@ -37,9 +37,9 @@ export type SectionPurpose =
  * Set by the first content section (usually position 3) and maintained across the page.
  *
  * @example
- * - 'emotional': PersonaPanels problem section → keep subsequent sections relatable
- * - 'analytical': CollapsedCards problem section → use data-driven layouts
- * - 'balanced': SideBySideSplit → mix of both approaches
+ * - 'emotional': LetterStyleBlock founder note → keep subsequent sections relatable
+ * - 'analytical': StackedPainBullets problem section → use data-driven layouts
+ * - 'balanced': IconGrid features → mix of both approaches
  */
 export type FlowTone = 'emotional' | 'analytical' | 'balanced';
 
@@ -61,9 +61,9 @@ export type FlowComplexity = 'simple' | 'moderate' | 'detailed';
  * Used for visual rhythm - alternating dense and light sections prevents fatigue.
  *
  * @example
- * - 'light': IconGrid, OutcomeIcons, StatBlocks
- * - 'medium': MiniCards, SideBySideSplit, TestimonialCards
- * - 'heavy': SplitAlternating, CollapsedCards, StackedWinsList
+ * - 'light': IconGrid, StatBlocks, LogoWall
+ * - 'medium': MetricTiles, QuoteGrid, TierCards
+ * - 'heavy': SplitAlternating, StackedPainBullets, StackedWinsList
  */
 export type LayoutDensity = 'light' | 'medium' | 'heavy';
 
@@ -169,7 +169,7 @@ export function getLayoutDensity(layout: string): LayoutDensity {
   // Heavy layouts - dense, detailed, comprehensive
   const heavyLayouts = [
     'SplitAlternating',
-    'CollapsedCards',
+    'StackedPainBullets',
     'AccordionSteps',
     'VerticalTimeline',
     'MythVsRealityGrid',
@@ -199,15 +199,15 @@ export function getLayoutDensity(layout: string): LayoutDensity {
 export function getLayoutTone(layout: string): FlowTone {
   // Emotional layouts - personal, relatable, story-driven
   const emotionalLayouts = [
-    'PersonaPanels',
     'LetterStyleBlock',
     'VideoTestimonials',
-    'QuoteGrid'
+    'QuoteGrid',
+    'PullQuoteStack'
   ];
 
   // Analytical layouts - data-driven, structured, technical
   const analyticalLayouts = [
-    'CollapsedCards',
+    'StackedPainBullets',
     'StatBlocks',
     'StackedWinsList',
     'MetricTiles',

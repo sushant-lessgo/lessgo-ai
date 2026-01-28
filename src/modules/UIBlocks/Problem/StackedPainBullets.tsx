@@ -7,97 +7,102 @@ import {
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getRandomIconFromCategory } from '@/utils/iconMapping';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
-
-// Pain point structure
-interface PainPoint {
+// Pain item structure (V2 - array based)
+interface PainItem {
+  id: string;
   point: string;
   description?: string;
-  id: string;
+  icon?: string;
 }
 
-// Content interface for StackedPainBullets layout
+// Content interface for StackedPainBullets layout (V2)
 interface StackedPainBulletsContent {
   headline: string;
-  pain_points: string;
-  pain_descriptions?: string;
   subheadline?: string;
   conclusion_text?: string;
-  pain_icon_1?: string;
-  pain_icon_2?: string;
-  pain_icon_3?: string;
-  pain_icon_4?: string;
-  pain_icon_5?: string;
-  pain_icon_6?: string;
+  pain_items: PainItem[];
 }
 
-// Content schema for StackedPainBullets layout
+// Default pain items for new sections
+const DEFAULT_PAIN_ITEMS: PainItem[] = [
+  { id: 'p1', point: 'Spending hours on manual data entry that could be automated', description: '' },
+  { id: 'p2', point: 'Juggling multiple tools that don\'t talk to each other', description: '' },
+  { id: 'p3', point: 'Missing important deadlines because nothing is centralized', description: '' },
+];
+
+// Content schema for StackedPainBullets layout (V2)
 const CONTENT_SCHEMA = {
   headline: { type: 'string' as const, default: 'Are You Struggling With These Daily Frustrations?' },
-  pain_points: { type: 'string' as const, default: 'Spending hours on manual data entry that could be automated|Juggling multiple tools that don\'t talk to each other|Missing important deadlines because nothing is centralized|Watching your team burn out from repetitive, mind-numbing tasks|Losing potential customers because your response time is too slow|Feeling overwhelmed by the chaos of disconnected workflows' },
-  pain_descriptions: { type: 'string' as const, default: '' },
   subheadline: { type: 'string' as const, default: '' },
   conclusion_text: { type: 'string' as const, default: 'Sound familiar? You\'re not alone.' },
-  pain_icon_1: { type: 'string' as const, default: '⏰' },
-  pain_icon_2: { type: 'string' as const, default: '🔗' },
-  pain_icon_3: { type: 'string' as const, default: '⚠️' },
-  pain_icon_4: { type: 'string' as const, default: '😰' },
-  pain_icon_5: { type: 'string' as const, default: '📉' },
-  pain_icon_6: { type: 'string' as const, default: '🌪️' }
+  pain_items: { type: 'array' as const, default: DEFAULT_PAIN_ITEMS },
 };
 
-// Parse pain point data from pipe-separated strings
-const parsePainData = (points: string, descriptions?: string): PainPoint[] => {
-  const pointList = points.split('|').map(p => p.trim()).filter(p => p);
-  const descriptionList = descriptions !== undefined && descriptions !== null
-    ? descriptions.split('|').map(d => d.trim())
-    : [];
+// Derive icon from pain point text - maps keywords to Lucide icons
+const getPainIconFromText = (point: string, description?: string): string => {
+  const text = `${point} ${description || ''}`.toLowerCase();
 
-  return pointList.map((point, index) => ({
-    id: `pain-${index}`,
-    point,
-    description: descriptionList[index] || ''
-  }));
-};
-
-
-// Get pain icon for specific index
-const getPainIcon = (index: number, blockContent: StackedPainBulletsContent) => {
-  const iconFields = ['pain_icon_1', 'pain_icon_2', 'pain_icon_3', 'pain_icon_4', 'pain_icon_5', 'pain_icon_6'];
-  return blockContent[iconFields[index] as keyof StackedPainBulletsContent] || '⚠️';
+  // Time-related pain
+  if (text.includes('time') || text.includes('hour') || text.includes('slow') || text.includes('wait')) {
+    return 'Clock';
+  }
+  // Disconnection/integration issues
+  if (text.includes('disconnect') || text.includes('integration') || text.includes('sync') || text.includes('talk to each other')) {
+    return 'Unlink';
+  }
+  // Deadlines/urgency
+  if (text.includes('deadline') || text.includes('miss') || text.includes('late') || text.includes('urgent')) {
+    return 'AlertTriangle';
+  }
+  // Burnout/fatigue
+  if (text.includes('burn') || text.includes('exhaust') || text.includes('tired') || text.includes('overwhelm')) {
+    return 'Battery';
+  }
+  // Loss/decline
+  if (text.includes('losing') || text.includes('lost') || text.includes('decline') || text.includes('drop')) {
+    return 'TrendingDown';
+  }
+  // Chaos/disorganization
+  if (text.includes('chaos') || text.includes('mess') || text.includes('scattered') || text.includes('disorganiz')) {
+    return 'Shuffle';
+  }
+  // Manual work
+  if (text.includes('manual') || text.includes('repetitive') || text.includes('tedious')) {
+    return 'Hand';
+  }
+  // Customer issues
+  if (text.includes('customer') || text.includes('client') || text.includes('response')) {
+    return 'Users';
+  }
+  // Default pain icon
+  return 'AlertCircle';
 };
 
 // Individual Pain Point Item
 const PainPointItem = ({
-  painPoint,
+  painItem,
   index,
   mode,
   sectionId,
   colorTokens,
   backgroundType,
   sectionBackground,
-  blockContent,
-  handleContentUpdate,
-  onPointEdit,
-  onDescriptionEdit,
+  onItemUpdate,
   onRemove,
   canRemove,
   painColors
 }: {
-  painPoint: PainPoint;
+  painItem: PainItem;
   index: number;
   mode: 'edit' | 'preview';
   sectionId: string;
   colorTokens: any;
   backgroundType: any;
   sectionBackground: any;
-  blockContent: StackedPainBulletsContent;
-  handleContentUpdate: (field: keyof StackedPainBulletsContent, value: any) => void;
-  onPointEdit: (index: number, value: string) => void;
-  onDescriptionEdit: (index: number, value: string) => void;
+  onItemUpdate: (index: number, field: keyof PainItem, value: string) => void;
   onRemove: (index: number) => void;
   canRemove: boolean;
   painColors: {
@@ -114,33 +119,31 @@ const PainPointItem = ({
 }) => {
   return (
     <div className={`group flex items-start space-x-4 p-6 bg-white rounded-lg border ${painColors.border} ${painColors.borderHover} hover:shadow-md transition-all duration-300`}>
-      
+
       {/* Pain Icon */}
       <div className={`flex-shrink-0 w-12 h-12 ${painColors.iconBg} rounded-lg flex items-center justify-center ${painColors.iconText} ${painColors.iconBgHover} transition-colors duration-300 group/icon-edit relative`}>
         <IconEditableText
           mode={mode}
-          value={getPainIcon(index, blockContent)}
-          onEdit={(value) => {
-            const iconField = `pain_icon_${index + 1}` as keyof StackedPainBulletsContent;
-            handleContentUpdate(iconField, value);
-          }}
+          value={painItem.icon || ''}
+          onEdit={(value) => onItemUpdate(index, 'icon', value)}
           backgroundType={backgroundType as any}
           colorTokens={colorTokens}
           iconSize="lg"
           className="text-2xl"
           sectionId={sectionId}
-          elementKey={`pain_icon_${index + 1}`}
+          elementKey={`pain_items.${index}.icon`}
+          placeholder={getPainIconFromText(painItem.point, painItem.description)}
         />
       </div>
-      
+
       {/* Pain Content */}
       <div className="flex-1">
         {/* Pain Point */}
         <div className="mb-2">
           <EditableAdaptiveText
             mode={mode}
-            value={painPoint.point}
-            onEdit={(value) => onPointEdit(index, value)}
+            value={painItem.point}
+            onEdit={(value) => onItemUpdate(index, 'point', value)}
             backgroundType={backgroundType}
             colorTokens={colorTokens}
             variant="body"
@@ -148,36 +151,36 @@ const PainPointItem = ({
             placeholder="Enter pain point..."
             sectionBackground={sectionBackground}
             data-section-id={sectionId}
-            data-element-key={`pain_point_${index}`}
+            data-element-key={`pain_items.${index}.point`}
           />
         </div>
-        
+
         {/* Optional Description */}
-        {(painPoint.description || mode === 'edit') && (
+        {(painItem.description || mode === 'edit') && (
           <div>
             <EditableAdaptiveText
               mode={mode}
-              value={painPoint.description || ''}
-              onEdit={(value) => onDescriptionEdit(index, value)}
+              value={painItem.description || ''}
+              onEdit={(value) => onItemUpdate(index, 'description', value)}
               backgroundType={backgroundType}
               colorTokens={colorTokens}
               variant="body"
-              className={`text-gray-600 text-base leading-relaxed ${!painPoint.description && mode === 'edit' ? 'opacity-50 italic' : ''}`}
+              className={`text-gray-600 text-base leading-relaxed ${!painItem.description && mode === 'edit' ? 'opacity-50 italic' : ''}`}
               placeholder="Add optional description to elaborate on this pain point..."
               sectionBackground={sectionBackground}
               data-section-id={sectionId}
-              data-element-key={`pain_description_${index}`}
+              data-element-key={`pain_items.${index}.description`}
             />
           </div>
         )}
       </div>
-      
+
       {/* Remove Button (Edit Mode Only) */}
       {mode === 'edit' && canRemove && (
         <button
           onClick={(e) => {
             e.stopPropagation();
-            if (painPoint.point.trim() && !confirm('Are you sure you want to remove this pain point?')) {
+            if (painItem.point.trim() && !confirm('Are you sure you want to remove this pain point?')) {
               return;
             }
             onRemove(index);
@@ -190,7 +193,7 @@ const PainPointItem = ({
           </svg>
         </button>
       )}
-      
+
       {/* Emphasis Indicator */}
       <div className={`flex-shrink-0 w-2 h-2 ${painColors.dotColor} rounded-full group-hover:opacity-80 transition-colors duration-300`}></div>
     </div>
@@ -198,14 +201,11 @@ const PainPointItem = ({
 };
 
 export default function StackedPainBullets(props: LayoutComponentProps) {
-  // ✅ Use the standard useLayoutComponent hook
   const {
     sectionId,
     mode,
     blockContent,
     colorTokens,
-    dynamicTextColors,
-    getTextStyle,
     sectionBackground,
     backgroundType,
     handleContentUpdate
@@ -262,76 +262,38 @@ export default function StackedPainBullets(props: LayoutComponentProps) {
 
   const painColors = getPainColors(theme);
 
-  // Parse pain point data
-  const painPoints = parsePainData(blockContent.pain_points, blockContent.pain_descriptions);
+  // Get pain items from content (array-based)
+  const painItems: PainItem[] = Array.isArray(blockContent.pain_items)
+    ? blockContent.pain_items
+    : DEFAULT_PAIN_ITEMS;
 
-  // Handle individual editing
-  const handlePointEdit = (index: number, value: string) => {
-    const points = blockContent.pain_points.split('|');
-    points[index] = value;
-    handleContentUpdate('pain_points', points.join('|'));
-  };
-
-  const handleDescriptionEdit = (index: number, value: string) => {
-    const descriptions = blockContent.pain_descriptions ? blockContent.pain_descriptions.split('|') : [];
-    descriptions[index] = value;
-    handleContentUpdate('pain_descriptions', descriptions.join('|'));
+  // Handle item field update - V2: cast as any for array updates
+  const handleItemUpdate = (index: number, field: keyof PainItem, value: string) => {
+    const updatedItems = painItems.map((item, i) =>
+      i === index ? { ...item, [field]: value } : item
+    );
+    (handleContentUpdate as any)('pain_items', updatedItems);
   };
 
   // Add new pain point
-  const addPainPoint = () => {
-    const points = blockContent.pain_points.split('|');
-    if (points.length >= 6) return; // Maximum 6 pain points
+  const addPainItem = () => {
+    if (painItems.length >= 6) return;
 
-    const newPoints = [...points, 'New pain point'];
+    const newItem: PainItem = {
+      id: `p${Date.now()}`,
+      point: 'New pain point',
+      description: '',
+    };
 
-    // Update pain points
-    handleContentUpdate('pain_points', newPoints.join('|'));
-
-    // Update pain descriptions to maintain array alignment
-    const descriptions = blockContent.pain_descriptions ? blockContent.pain_descriptions.split('|') : [];
-    const newDescriptions = [...descriptions, 'new pain description'];
-    handleContentUpdate('pain_descriptions', newDescriptions.join('|'));
-
-    // Add a smart icon for the new pain point
-    const newPainCount = newPoints.length;
-    const iconField = `pain_icon_${newPainCount}` as keyof StackedPainBulletsContent;
-    if (newPainCount <= 6) {
-      // Use random icon from pain/problem category
-      const painIcons = ['😰', '⚠️', '😤', '😫', '💢', '😓'];
-      const defaultIcon = painIcons[Math.floor(Math.random() * painIcons.length)];
-      handleContentUpdate(iconField, defaultIcon);
-    }
+    (handleContentUpdate as any)('pain_items', [...painItems, newItem]);
   };
 
   // Remove pain point
-  const removePainPoint = (index: number) => {
-    const points = blockContent.pain_points.split('|');
-    if (points.length <= 1) return; // Keep at least 1 pain point
-    
-    const newPoints = points.filter((_, i) => i !== index);
-    handleContentUpdate('pain_points', newPoints.join('|'));
-    
-    // Remove corresponding description if it exists
-    if (blockContent.pain_descriptions) {
-      const descriptions = blockContent.pain_descriptions.split('|');
-      const newDescriptions = descriptions.filter((_, i) => i !== index);
-      handleContentUpdate('pain_descriptions', newDescriptions.join('|'));
-    }
-    
-    // Shift icons down to maintain continuity
-    for (let i = index + 1; i < points.length; i++) {
-      const currentIconField = `pain_icon_${i + 1}` as keyof StackedPainBulletsContent;
-      const nextIconField = `pain_icon_${i}` as keyof StackedPainBulletsContent;
-      const iconValue = blockContent[currentIconField] || '⚠️';
-      handleContentUpdate(nextIconField, iconValue);
-    }
-    
-    // Clear the last icon slot
-    const lastIconField = `pain_icon_${points.length}` as keyof StackedPainBulletsContent;
-    handleContentUpdate(lastIconField, '⚠️');
+  const removePainItem = (index: number) => {
+    if (painItems.length <= 1) return;
+    const updatedItems = painItems.filter((_, i) => i !== index);
+    (handleContentUpdate as any)('pain_items', updatedItems);
   };
-
 
   return (
     <LayoutSection
@@ -378,32 +340,29 @@ export default function StackedPainBullets(props: LayoutComponentProps) {
 
         {/* Pain Points List */}
         <div className="space-y-6">
-          {painPoints.map((painPoint, index) => (
+          {painItems.map((painItem, index) => (
             <PainPointItem
-              key={painPoint.id}
-              painPoint={painPoint}
+              key={painItem.id}
+              painItem={painItem}
               index={index}
               mode={mode}
               sectionId={sectionId}
               colorTokens={colorTokens}
               backgroundType={backgroundType}
               sectionBackground={sectionBackground}
-              blockContent={blockContent}
-              handleContentUpdate={handleContentUpdate}
-              onPointEdit={handlePointEdit}
-              onDescriptionEdit={handleDescriptionEdit}
-              onRemove={removePainPoint}
-              canRemove={painPoints.length > 1}
+              onItemUpdate={handleItemUpdate}
+              onRemove={removePainItem}
+              canRemove={painItems.length > 1}
               painColors={painColors}
             />
           ))}
         </div>
 
         {/* Add Pain Point Button */}
-        {mode === 'edit' && painPoints.length < 6 && (
+        {mode === 'edit' && painItems.length < 6 && (
           <div className="mt-6 flex justify-center">
             <button
-              onClick={addPainPoint}
+              onClick={addPainItem}
               className={`flex items-center space-x-2 px-4 py-2 text-sm ${painColors.iconText} hover:opacity-80 border ${painColors.border} ${painColors.borderHover} rounded-lg hover:${painColors.conclusionBg} transition-all duration-200`}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -435,8 +394,6 @@ export default function StackedPainBullets(props: LayoutComponentProps) {
             />
           </div>
         </div>
-
-
       </div>
     </LayoutSection>
   );
@@ -445,36 +402,25 @@ export default function StackedPainBullets(props: LayoutComponentProps) {
 export const componentMeta = {
   name: 'StackedPainBullets',
   category: 'Problem',
-  description: 'Simple, focused pain point identification with editable content and emotional conclusion.',
+  description: 'Pain point identification with editable cards and emotional conclusion.',
   tags: ['pain-points', 'problems', 'empathy', 'bullets'],
   defaultBackgroundType: 'neutral' as const,
   complexity: 'simple',
-  estimatedBuildTime: '20 minutes',
-  
+
   contentFields: [
     { key: 'headline', label: 'Main Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
-    { key: 'pain_points', label: 'Pain Points (pipe separated)', type: 'textarea', required: true },
-    { key: 'pain_descriptions', label: 'Pain Point Descriptions (pipe separated)', type: 'textarea', required: false },
     { key: 'conclusion_text', label: 'Conclusion Text', type: 'text', required: false },
-    { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
-    { key: 'trust_items', label: 'Trust Items (pipe separated)', type: 'textarea', required: false },
-    { key: 'pain_icon_1', label: 'Pain Icon 1', type: 'icon', required: false },
-    { key: 'pain_icon_2', label: 'Pain Icon 2', type: 'icon', required: false },
-    { key: 'pain_icon_3', label: 'Pain Icon 3', type: 'icon', required: false },
-    { key: 'pain_icon_4', label: 'Pain Icon 4', type: 'icon', required: false },
-    { key: 'pain_icon_5', label: 'Pain Icon 5', type: 'icon', required: false },
-    { key: 'pain_icon_6', label: 'Pain Icon 6', type: 'icon', required: false }
+    { key: 'pain_items', label: 'Pain Points', type: 'collection', required: true },
   ],
-  
+
   features: [
-    'Editable pain points with optional descriptions',
-    'Contextual warning icons for each pain point',
-    'Editable emotional conclusion',
-    'Clean, focused design',
-    'Standard EditableAdaptive integration'
+    'Array-based pain items with add/remove',
+    'Smart icon derivation from text',
+    'Optional descriptions per item',
+    'Theme-aware styling',
   ],
-  
+
   useCases: [
     'Customer frustration identification',
     'Problem statement sections',

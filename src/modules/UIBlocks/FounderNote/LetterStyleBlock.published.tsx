@@ -9,7 +9,6 @@ import React from 'react';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publishedTextColors';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
-import { CTAButtonPublished } from '@/components/published/CTAButtonPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
@@ -45,17 +44,20 @@ const getThemeColors = (theme: UIBlockTheme) => {
   return colorMap[theme];
 };
 
-// Founder Image Placeholder Component (server-safe)
+// Founder Image Placeholder Component (server-safe) - Portrait style
 const FounderImagePlaceholder = ({ theme }: { theme: UIBlockTheme }) => {
   const themeColors = getThemeColors(theme);
 
   return (
     <div
-      className="w-16 h-16 rounded-full flex items-center justify-center shadow-lg"
+      className="w-32 h-40 rounded-lg flex items-center justify-center shadow-md"
       style={{ background: themeColors.avatarGradient }}
     >
-      <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center">
-        <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div
+        className="w-28 h-36 rounded-md flex items-center justify-center"
+        style={{ backgroundColor: 'rgba(255,255,255,0.9)' }}
+      >
+        <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
         </svg>
       </div>
@@ -68,15 +70,14 @@ export default function LetterStyleBlockPublished(props: LayoutComponentProps) {
 
   // Extract content from props (flattened by LandingPagePublishedRenderer)
   const letter_header = props.letter_header || 'A Personal Note from Our Founder';
-  const letter_greeting = props.letter_greeting || 'Dear Fellow Entrepreneur,';
-  const letter_body = props.letter_body || 'Five years ago, I was exactly where you are now...';
-  const letter_signature = props.letter_signature || 'Sarah Chen';
-  const founder_title = props.founder_title || 'Founder & CEO';
-  const company_name = props.company_name || 'YourCompany';
-  const date_text = props.date_text || 'January 2024';
+  const letter_greeting = props.letter_greeting || 'Dear Fellow Builder,';
+  const letter_body = props.letter_body || 'Three years ago, I sat exactly where you are now—staring at a landing page that just wouldn\'t convert.\n\nI\'d tried everything. Hired expensive copywriters. A/B tested until my eyes crossed. Read every marketing book I could find.\n\nThen it hit me: the problem wasn\'t my copy. It was the process. Great landing pages need great strategy first.\n\nThat\'s why I built Lessgo. To give founders like us the strategic foundation we need before writing a single word.';
+  const letter_signature = props.letter_signature || 'Sushant Jain';
+  const founder_title = props.founder_title || 'Founder';
+  const company_name = props.company_name || 'Lessgo';
+  const date_text = props.date_text || 'January 2025';
   const ps_text = props.ps_text || '';
-  const founder_image = props.founder_image || '';
-  const cta_text = props.cta_text || 'Try It Free Today';
+  const founder_image = props.founder_image || '/images/founder.jpg';
 
   // Detect theme
   const uiTheme: UIBlockTheme = props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
@@ -168,60 +169,41 @@ export default function LetterStyleBlockPublished(props: LayoutComponentProps) {
               />
             </div>
 
-            {/* Signature Section */}
-            <div className="flex items-end justify-between mt-12">
-              <div className="flex items-center space-x-4">
-                {/* Founder Image */}
+            {/* Signature Section - Full image with name below */}
+            <div className="mt-12">
+              {/* Founder Image - Portrait style */}
+              <div className="mb-4">
                 {founder_image && founder_image !== '' ? (
                   <img
                     src={founder_image}
                     alt="Founder"
-                    className="w-16 h-16 rounded-full object-cover border-2"
-                    style={{ borderColor: themeColors.avatarBorder }}
+                    className="w-32 h-40 rounded-lg object-cover shadow-md"
                   />
                 ) : (
                   <FounderImagePlaceholder theme={uiTheme} />
                 )}
-
-                <div>
-                  <TextPublished
-                    value={letter_signature}
-                    style={{
-                      fontSize: '1.25rem',
-                      fontWeight: 600,
-                      color: '#111827'
-                    }}
-                  />
-                  {founder_title && (
-                    <TextPublished
-                      value={founder_title}
-                      style={{
-                        color: '#4B5563',
-                        fontSize: '0.875rem'
-                      }}
-                    />
-                  )}
-                  {company_name && (
-                    <TextPublished
-                      value={company_name}
-                      style={{
-                        color: '#4B5563',
-                        fontSize: '0.875rem'
-                      }}
-                    />
-                  )}
-                </div>
               </div>
 
-              {/* CTA Button */}
-              {cta_text && (
-                <CTAButtonPublished
-                  text={cta_text}
-                  backgroundColor={theme?.colors?.accentColor || '#3B82F6'}
-                  textColor="#FFFFFF"
-                  className="shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
+              {/* Name and Role */}
+              <div>
+                <TextPublished
+                  value={letter_signature}
+                  style={{
+                    fontSize: '1.25rem',
+                    fontWeight: 600,
+                    color: '#111827'
+                  }}
                 />
-              )}
+                {(founder_title || company_name) && (
+                  <TextPublished
+                    value={`${founder_title || ''}${founder_title && company_name ? ', ' : ''}${company_name || ''}`}
+                    style={{
+                      color: '#4B5563',
+                      fontSize: '0.875rem'
+                    }}
+                  />
+                )}
+              </div>
             </div>
 
             {/* P.S. Section */}

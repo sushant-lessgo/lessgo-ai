@@ -34,7 +34,7 @@ function getSectionFallbackLayout(sectionId: string): string {
     objectionHandling: "MythVsRealityGrid",
     pricing: "TierCards",
     cta: "CenteredHeadlineCTA",
-    problem: "CollapsedCards",
+    problem: "StackedPainBullets",
     results: "StatBlocks",
     socialProof: "LogoWall",
     testimonials: "QuoteGrid",
