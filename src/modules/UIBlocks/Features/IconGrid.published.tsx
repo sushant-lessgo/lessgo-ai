@@ -30,6 +30,8 @@ export default function IconGridPublished(props: LayoutComponentProps) {
   // Extract content from props
   const headline = props.headline || 'Powerful Features Built for You';
   const subheadline = props.subheadline || '';
+  const badge_text = props.badge_text || '';
+  const supporting_text = props.supporting_text || '';
 
   // V2: Direct array access - no pipe parsing needed
   const features: Feature[] = props.features || [];
@@ -87,6 +89,24 @@ export default function IconGridPublished(props: LayoutComponentProps) {
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <div className="text-center mb-12">
+          {/* Badge Text */}
+          {badge_text && (
+            <div style={{ marginBottom: '1rem' }}>
+              <span
+                style={{
+                  color: themeColors.iconColor,
+                  fontSize: '0.875rem',
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  opacity: 0.8
+                }}
+              >
+                {badge_text}
+              </span>
+            </div>
+          )}
+
           <HeadlinePublished
             value={headline}
             level="h2"
@@ -174,6 +194,22 @@ export default function IconGridPublished(props: LayoutComponentProps) {
             );
           })}
         </div>
+
+        {/* Supporting Text */}
+        {supporting_text && (
+          <div style={{ marginTop: '2.5rem', textAlign: 'center' }}>
+            <TextPublished
+              value={supporting_text}
+              style={{
+                color: textColors.body,
+                ...bodyTypography,
+                maxWidth: '42rem',
+                margin: '0 auto',
+                opacity: 0.9
+              }}
+            />
+          </div>
+        )}
       </div>
     </SectionWrapperPublished>
   );

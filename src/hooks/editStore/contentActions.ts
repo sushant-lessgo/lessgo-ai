@@ -79,6 +79,60 @@ export function createContentActions(set: any, get: any): ContentActions {
           return;
         }
 
+        // V2: Handle nested collection paths like "features.f1.visual"
+        // Format: collectionName.itemId.fieldName
+        if (elementKey.includes('.') && typeof content === 'string') {
+          const pathParts = elementKey.split('.');
+          if (pathParts.length >= 3) {
+            const [collectionName, itemId, fieldName] = pathParts;
+            const collection = (state.content[sectionId].elements as Record<string, any>)[collectionName];
+
+            if (Array.isArray(collection)) {
+              const oldCollection = [...collection];
+              const updatedCollection = collection.map(item =>
+                item.id === itemId ? { ...item, [fieldName]: content } : item
+              );
+
+              (state.content[sectionId].elements as Record<string, any>)[collectionName] = updatedCollection;
+
+              // Initialize aiMetadata if missing
+              if (!state.content[sectionId].aiMetadata) {
+                state.content[sectionId].aiMetadata = {
+                  lastGenerated: 0,
+                  aiGenerated: false,
+                  isCustomized: false,
+                  aiGeneratedElements: [],
+                  excludedElements: []
+                };
+              }
+              state.content[sectionId].aiMetadata.isCustomized = true;
+              state.persistence.isDirty = true;
+
+              // Track change for auto-save
+              state.queuedChanges.push({
+                id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                type: 'content',
+                sectionId,
+                elementKey: collectionName,
+                oldValue: oldCollection,
+                newValue: updatedCollection,
+                timestamp: Date.now(),
+                source: 'user',
+              });
+              state.lastUpdated = Date.now();
+
+              logger.debug(`🔄 [${updateTime}] updateElementContent V2 NESTED PATH:`, {
+                sectionId,
+                collectionName,
+                itemId,
+                fieldName,
+                newValue: content.substring(0, 50)
+              });
+              return; // Early return - nested path handled
+            }
+          }
+        }
+
         // V2 COLLECTIONS: Arrays stored directly, no stringify
         // Principle: "AI output = DB format = Component format"
         if (Array.isArray(content)) {

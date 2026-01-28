@@ -11,14 +11,22 @@ import type {
 
 /**
  * Helper function to parse image targetId (copied from ImageToolbar)
+ * V2: Supports nested collection paths like "sectionId.features.f1.visual"
  */
 function parseImageTargetId(targetId: string) {
   logger.debug('🔍 Parsing image targetId:', targetId);
-  
-  // Check if targetId follows the "sectionId.elementKey" format (from showToolbar)
+
+  // Check if targetId follows the dot notation format (from showToolbar)
   if (targetId.includes('.')) {
-    const [sectionId, elementKey] = targetId.split('.');
-    const result = { sectionId, elementKey };
+    // V2: Split on first dot only to support nested paths like "features.f1.visual"
+    const dotIndex = targetId.indexOf('.');
+    const sectionId = targetId.slice(0, dotIndex);
+    const elementKey = targetId.slice(dotIndex + 1); // Everything after first dot
+
+    // Detect if this is a V2 collection path (has multiple dots after sectionId)
+    const isCollectionPath = elementKey.includes('.');
+
+    const result = { sectionId, elementKey, isCollectionPath };
     logger.debug('🎯 Dot notation parsed:', result);
     return result;
   }

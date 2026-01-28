@@ -499,7 +499,7 @@ export interface UIBlockDecisions {
   productType: ProductType;
   featuresUIBlock: 'IconGrid' | 'MetricTiles' | 'Carousel' | 'SplitAlternating';
   uniqueMechanismUIBlock: 'SecretSauceReveal' | 'StackedHighlights' | 'TechnicalAdvantage' | 'MethodologyBreakdown' | 'PropertyComparisonMatrix' | 'ProcessFlowDiagram';
-  pricingUIBlock: 'TierCards' | 'ToggleableMonthlyYearly' | 'SliderPricing' | 'CallToQuotePlan';
+  pricingUIBlock: 'TierCards' | 'ToggleableMonthlyYearly' | 'CallToQuotePlan';
   objectionHandleUIBlock: 'VisualObjectionTiles' | 'MythVsRealityGrid';
   faqQuestionCount: number;
   useCasesAudienceType: 'industry' | 'role';

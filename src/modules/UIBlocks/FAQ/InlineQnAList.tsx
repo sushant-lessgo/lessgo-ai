@@ -1,58 +1,53 @@
+// components/layout/InlineQnAList.tsx
+// V2 Schema - Clean array format, no numbered fields or pipe strings
+
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
+import {
+  EditableAdaptiveHeadline,
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
+// FAQ item structure (V2 - clean array format)
+interface FAQItem {
+  id: string;
+  question: string;
+  answer: string;
+}
+
+// Content interface (V2 - arrays, not numbered fields)
 interface InlineQnAListContent {
   headline: string;
   subheadline?: string;
-  // Individual Q&A fields (up to 6 items)
-  question_1: string;
-  answer_1: string;
-  question_2: string;
-  answer_2: string;
-  question_3: string;
-  answer_3: string;
-  question_4: string;
-  answer_4: string;
-  question_5: string;
-  answer_5: string;
-  question_6: string;
-  answer_6: string;
-  // Legacy fields for backward compatibility
-  questions?: string;
-  answers?: string;
+  faq_items: FAQItem[];
+  contact_prompt?: string;
+  cta_text?: string;
+  supporting_text?: string;
 }
 
+// Content schema - defines structure and defaults
 const CONTENT_SCHEMA = {
-  headline: { 
-    type: 'string' as const, 
-    default: 'Quick Questions & Answers' 
+  headline: {
+    type: 'string' as const,
+    default: 'Quick Questions & Answers'
   },
-  subheadline: { 
-    type: 'string' as const, 
-    default: 'Get instant answers to the most common questions' 
+  subheadline: {
+    type: 'string' as const,
+    default: 'Get instant answers to the most common questions'
   },
-  // Individual Q&A fields
-  question_1: { type: 'string' as const, default: 'What is your product?' },
-  answer_1: { type: 'string' as const, default: 'We\'re a no-code automation platform that helps you streamline your business processes without writing a single line of code.' },
-  question_2: { type: 'string' as const, default: 'How much does it cost?' },
-  answer_2: { type: 'string' as const, default: 'We offer flexible pricing starting at $29/month. See our pricing page for detailed plans.' },
-  question_3: { type: 'string' as const, default: 'Do I need technical knowledge?' },
-  answer_3: { type: 'string' as const, default: 'Not at all! Our platform is designed for non-technical users. If you can use email, you can use our product.' },
-  question_4: { type: 'string' as const, default: 'How quickly can I get started?' },
-  answer_4: { type: 'string' as const, default: 'You can get started in under 5 minutes. Just sign up, connect your tools, and start automating.' },
-  question_5: { type: 'string' as const, default: 'What if I need help?' },
-  answer_5: { type: 'string' as const, default: 'We provide 24/7 support via chat and email, plus extensive documentation and video tutorials.' },
-  question_6: { type: 'string' as const, default: '' },
-  answer_6: { type: 'string' as const, default: '' },
-  // Legacy fields for backward compatibility
-  questions: { type: 'string' as const, default: '' },
-  answers: { type: 'string' as const, default: '' }
+  faq_items: {
+    type: 'array' as const,
+    default: [
+      { id: 'faq-1', question: 'What is your product?', answer: 'We\'re a no-code automation platform that helps you streamline your business processes without writing a single line of code.' },
+      { id: 'faq-2', question: 'How much does it cost?', answer: 'We offer flexible pricing starting at $29/month. See our pricing page for detailed plans.' },
+      { id: 'faq-3', question: 'Do I need technical knowledge?', answer: 'Not at all! Our platform is designed for non-technical users. If you can use email, you can use our product.' },
+    ]
+  },
+  contact_prompt: { type: 'string' as const, default: '' },
+  cta_text: { type: 'string' as const, default: '' },
+  supporting_text: { type: 'string' as const, default: '' }
 };
 
 export default function InlineQnAList(props: LayoutComponentProps) {
@@ -71,47 +66,41 @@ export default function InlineQnAList(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
-  // Helper function to get FAQ items
-  const getFAQItems = () => {
-    const items = [];
-    
-    // Check individual fields first (preferred)
-    for (let i = 1; i <= 6; i++) {
-      const questionKey = `question_${i}` as keyof InlineQnAListContent;
-      const answerKey = `answer_${i}` as keyof InlineQnAListContent;
-      
-      const question = blockContent[questionKey];
-      const answer = blockContent[answerKey];
-      
-      if (question && question.trim() !== '' && question !== '___REMOVED___') {
-        items.push({
-          question: question.trim(),
-          answer: (answer && answer !== '___REMOVED___') ? answer.trim() : '',
-          index: i
-        });
-      }
-    }
-    
-    // Fallback to legacy format if no individual items found
-    if (items.length === 0 && blockContent.questions) {
-      const questions = blockContent.questions.split('|').map(q => q.trim()).filter(Boolean);
-      const answers = blockContent.answers?.split('|').map(a => a.trim()).filter(Boolean) || [];
-      
-      questions.forEach((question, index) => {
-        items.push({
-          question,
-          answer: answers[index] || '',
-          index: index + 1
-        });
-      });
-    }
-    
-    return items;
-  };
-  
-  const faqItems = getFAQItems();
+  // Get FAQ items from content (direct array access)
+  const faqItems: FAQItem[] = blockContent.faq_items || CONTENT_SCHEMA.faq_items.default;
 
-  const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
+  // Handle question edit
+  const handleQuestionEdit = (id: string, value: string) => {
+    const updatedItems = faqItems.map(item =>
+      item.id === id ? { ...item, question: value } : item
+    );
+    (handleContentUpdate as any)('faq_items', updatedItems);
+  };
+
+  // Handle answer edit
+  const handleAnswerEdit = (id: string, value: string) => {
+    const updatedItems = faqItems.map(item =>
+      item.id === id ? { ...item, answer: value } : item
+    );
+    (handleContentUpdate as any)('faq_items', updatedItems);
+  };
+
+  // Handle remove item
+  const handleRemoveItem = (id: string) => {
+    const updatedItems = faqItems.filter(item => item.id !== id);
+    (handleContentUpdate as any)('faq_items', updatedItems);
+  };
+
+  // Handle add new item
+  const handleAddItem = () => {
+    const newId = `faq-${Date.now()}`;
+    const updatedItems = [...faqItems, {
+      id: newId,
+      question: 'New question',
+      answer: 'New answer'
+    }];
+    (handleContentUpdate as any)('faq_items', updatedItems);
+  };
 
   return (
     <LayoutSection
@@ -137,7 +126,7 @@ export default function InlineQnAList(props: LayoutComponentProps) {
             elementKey="headline"
             sectionBackground={sectionBackground}
           />
-          
+
           {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
@@ -162,47 +151,46 @@ export default function InlineQnAList(props: LayoutComponentProps) {
         {/* Simple Q&A List */}
         <div className="space-y-6">
           {faqItems.map((item) => (
-            <div key={item.index} className="relative group/faq-item border-b border-gray-200 dark:border-gray-700 pb-6 last:border-0">
+            <div key={item.id} className={`relative group/faq-item border-b pb-6 last:border-0 ${dynamicTextColors?.muted ? 'border-current/20' : 'border-gray-200'}`}>
               <div className="mb-2">
                 <EditableAdaptiveText
                   mode={mode}
                   value={item.question}
-                  onEdit={(value) => handleContentUpdate(`question_${item.index}` as keyof InlineQnAListContent, value)}
+                  onEdit={(value) => handleQuestionEdit(item.id, value)}
                   backgroundType={backgroundType}
                   colorTokens={colorTokens}
                   variant="body"
                   className={`font-medium ${dynamicTextColors?.heading || colorTokens.textPrimary}`}
                   style={getTextStyle('h3')}
-                  placeholder={`Question ${item.index}`}
+                  placeholder="Enter question..."
                   sectionBackground={sectionBackground}
                   data-section-id={sectionId}
-                  data-element-key={`question_${item.index}`}
+                  data-element-key={`faq_items.${item.id}.question`}
                 />
               </div>
-              
+
               {(item.answer || mode === 'edit') && (
                 <EditableAdaptiveText
                   mode={mode}
                   value={item.answer}
-                  onEdit={(value) => handleContentUpdate(`answer_${item.index}` as keyof InlineQnAListContent, value)}
+                  onEdit={(value) => handleAnswerEdit(item.id, value)}
                   backgroundType={backgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  className={`leading-relaxed ${mutedTextColor}`}
-                  placeholder={`Answer ${item.index}...`}
+                  className={`leading-relaxed ${dynamicTextColors?.muted || colorTokens.textMuted}`}
+                  placeholder="Enter answer..."
                   sectionBackground={sectionBackground}
                   data-section-id={sectionId}
-                  data-element-key={`answer_${item.index}`}
+                  data-element-key={`faq_items.${item.id}.answer`}
                 />
               )}
-              
+
               {/* Remove button */}
               {mode !== 'preview' && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleContentUpdate(`question_${item.index}` as keyof InlineQnAListContent, '___REMOVED___');
-                    handleContentUpdate(`answer_${item.index}` as keyof InlineQnAListContent, '___REMOVED___');
+                    handleRemoveItem(item.id);
                   }}
                   className="opacity-0 group-hover/faq-item:opacity-100 absolute top-0 right-0 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm z-10"
                   title="Remove this FAQ item"
@@ -214,21 +202,11 @@ export default function InlineQnAList(props: LayoutComponentProps) {
               )}
             </div>
           ))}
-          
+
           {/* Add new FAQ button */}
-          {mode !== 'preview' && faqItems.length < 6 && (
+          {mode !== 'preview' && faqItems.length < 8 && (
             <button
-              onClick={() => {
-                // Find the first empty slot
-                for (let i = 1; i <= 6; i++) {
-                  const questionKey = `question_${i}` as keyof InlineQnAListContent;
-                  if (!blockContent[questionKey] || blockContent[questionKey] === '' || blockContent[questionKey] === '___REMOVED___') {
-                    handleContentUpdate(questionKey, 'New question');
-                    handleContentUpdate(`answer_${i}` as keyof InlineQnAListContent, 'New answer');
-                    break;
-                  }
-                }
-              }}
+              onClick={handleAddItem}
               className="flex items-center space-x-2 text-sm text-blue-600 hover:text-blue-800 transition-colors mt-4 p-4 border-2 border-dashed border-blue-300 rounded-lg hover:border-blue-400 hover:bg-blue-50/50 w-full justify-center"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -238,11 +216,61 @@ export default function InlineQnAList(props: LayoutComponentProps) {
             </button>
           )}
         </div>
+
+        {/* Contact CTA Footer */}
+        {(blockContent.contact_prompt || blockContent.cta_text || mode === 'edit') && (
+          <div className="mt-10 pt-6 text-center">
+            <EditableAdaptiveText
+              mode={mode}
+              value={blockContent.contact_prompt || ''}
+              onEdit={(value) => handleContentUpdate('contact_prompt', value)}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+              colorTokens={colorTokens}
+              variant="body"
+              className="mb-2"
+              placeholder="Still have questions?"
+              sectionId={sectionId}
+              elementKey="contact_prompt"
+              sectionBackground={sectionBackground}
+            />
+            {(blockContent.cta_text || mode === 'edit') && (
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.cta_text || ''}
+                onEdit={(value) => handleContentUpdate('cta_text', value)}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                colorTokens={colorTokens}
+                variant="body"
+                className="font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                placeholder="Contact our support team"
+                sectionId={sectionId}
+                elementKey="cta_text"
+                sectionBackground={sectionBackground}
+              />
+            )}
+            {(blockContent.supporting_text || mode === 'edit') && (
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.supporting_text || ''}
+                onEdit={(value) => handleContentUpdate('supporting_text', value)}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                colorTokens={colorTokens}
+                variant="muted"
+                className="mt-2 text-sm"
+                placeholder="We typically respond within 24 hours"
+                sectionId={sectionId}
+                elementKey="supporting_text"
+                sectionBackground={sectionBackground}
+              />
+            )}
+          </div>
+        )}
       </div>
     </LayoutSection>
   );
 }
 
+// Export additional metadata for the component registry
 export const componentMeta = {
   name: 'InlineQnAList',
   category: 'FAQ Sections',
@@ -251,34 +279,25 @@ export const componentMeta = {
   defaultBackgroundType: 'primary' as const,
   complexity: 'simple',
   estimatedBuildTime: '5 minutes',
-  
+
+  // V2 Schema - clean array format
   contentFields: [
     { key: 'headline', label: 'Section Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Section Description', type: 'textarea', required: false },
-    { key: 'question_1', label: 'Question 1', type: 'text', required: true },
-    { key: 'answer_1', label: 'Answer 1', type: 'textarea', required: true },
-    { key: 'question_2', label: 'Question 2', type: 'text', required: true },
-    { key: 'answer_2', label: 'Answer 2', type: 'textarea', required: true },
-    { key: 'question_3', label: 'Question 3', type: 'text', required: true },
-    { key: 'answer_3', label: 'Answer 3', type: 'textarea', required: true },
-    { key: 'question_4', label: 'Question 4', type: 'text', required: false },
-    { key: 'answer_4', label: 'Answer 4', type: 'textarea', required: false },
-    { key: 'question_5', label: 'Question 5', type: 'text', required: false },
-    { key: 'answer_5', label: 'Answer 5', type: 'textarea', required: false },
-    { key: 'question_6', label: 'Question 6', type: 'text', required: false },
-    { key: 'answer_6', label: 'Answer 6', type: 'textarea', required: false },
-    { key: 'questions', label: 'Questions (legacy pipe separated)', type: 'textarea', required: false },
-    { key: 'answers', label: 'Answers (legacy pipe separated)', type: 'textarea', required: false }
+    { key: 'faq_items', label: 'FAQ Items', type: 'array', required: true },
+    { key: 'contact_prompt', label: 'Contact Prompt', type: 'text', required: false },
+    { key: 'cta_text', label: 'CTA Text', type: 'text', required: false },
+    { key: 'supporting_text', label: 'Supporting Text', type: 'text', required: false }
   ],
-  
+
   features: [
     'Simple, clean layout',
     'Easy to scan format',
     'Minimal design approach',
-    'Perfect for 3-6 FAQs',
+    'Array-based item management',
     'Mobile-friendly'
   ],
-  
+
   useCases: [
     'Early-stage startup FAQs',
     'Simple product questions',

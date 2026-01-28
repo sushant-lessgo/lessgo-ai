@@ -293,20 +293,23 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
                 <div className="space-y-1 sm:space-y-2 text-sm sm:text-base">
                   {beforePoints.map((point, index) => renderPointItem(point, index, false))}
 
-                  {mode === 'edit' && beforePoints.length < 5 && (
-                    <button
-                      onClick={() => {
-                        const points = blockContent.before_points || [];
-                        (handleContentUpdate as any)('before_points', [
-                          ...points,
-                          { id: `bp${Date.now()}`, text: 'Pain point...' }
-                        ]);
-                      }}
-                      className="text-xs sm:text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1 mt-2"
-                    >
-                      <span>+</span> Add point
-                    </button>
-                  )}
+                  {mode === 'edit' && beforePoints.length < 5 && (() => {
+                    const addButtonColor = { warm: 'text-orange-600 hover:text-orange-800', cool: 'text-blue-600 hover:text-blue-800', neutral: 'text-gray-600 hover:text-gray-800' }[uiTheme];
+                    return (
+                      <button
+                        onClick={() => {
+                          const points = blockContent.before_points || [];
+                          (handleContentUpdate as any)('before_points', [
+                            ...points,
+                            { id: `bp${Date.now()}`, text: 'Pain point...' }
+                          ]);
+                        }}
+                        className={`text-xs sm:text-sm ${addButtonColor} flex items-center gap-1 mt-2`}
+                      >
+                        <span>+</span> Add point
+                      </button>
+                    );
+                  })()}
                 </div>
               )}
             </div>
@@ -392,20 +395,23 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
                 <div className="space-y-1 sm:space-y-2 text-sm sm:text-base">
                   {afterPoints.map((point, index) => renderPointItem(point, index, true))}
 
-                  {mode === 'edit' && afterPoints.length < 5 && (
-                    <button
-                      onClick={() => {
-                        const points = blockContent.after_points || [];
-                        (handleContentUpdate as any)('after_points', [
-                          ...points,
-                          { id: `ap${Date.now()}`, text: 'Benefit...' }
-                        ]);
-                      }}
-                      className="text-xs sm:text-sm text-green-600 hover:text-green-800 flex items-center gap-1 mt-2"
-                    >
-                      <span>+</span> Add benefit
-                    </button>
-                  )}
+                  {mode === 'edit' && afterPoints.length < 5 && (() => {
+                    const addButtonColor = { warm: 'text-orange-600 hover:text-orange-800', cool: 'text-blue-600 hover:text-blue-800', neutral: 'text-gray-600 hover:text-gray-800' }[uiTheme];
+                    return (
+                      <button
+                        onClick={() => {
+                          const points = blockContent.after_points || [];
+                          (handleContentUpdate as any)('after_points', [
+                            ...points,
+                            { id: `ap${Date.now()}`, text: 'Benefit...' }
+                          ]);
+                        }}
+                        className={`text-xs sm:text-sm ${addButtonColor} flex items-center gap-1 mt-2`}
+                      >
+                        <span>+</span> Add benefit
+                      </button>
+                    );
+                  })()}
                 </div>
               )}
             </div>

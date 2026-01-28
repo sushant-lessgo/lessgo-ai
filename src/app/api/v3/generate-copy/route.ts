@@ -63,7 +63,7 @@ const V3StrategySchema = z.object({
     productType: z.enum(['behind-the-scenes', 'visual-ui-hero', 'visual-ui-supports']),
     featuresUIBlock: z.enum(['IconGrid', 'MetricTiles', 'Carousel', 'SplitAlternating']),
     uniqueMechanismUIBlock: z.enum(['SecretSauceReveal', 'StackedHighlights', 'TechnicalAdvantage', 'MethodologyBreakdown', 'PropertyComparisonMatrix', 'ProcessFlowDiagram']),
-    pricingUIBlock: z.enum(['TierCards', 'ToggleableMonthlyYearly', 'SliderPricing', 'CallToQuotePlan']),
+    pricingUIBlock: z.enum(['TierCards', 'ToggleableMonthlyYearly', 'CallToQuotePlan']),
     objectionHandleUIBlock: z.enum(['VisualObjectionTiles', 'MythVsRealityGrid']),
     faqQuestionCount: z.number(),
     useCasesAudienceType: z.enum(['industry', 'role']),

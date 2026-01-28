@@ -1,10 +1,11 @@
 /**
- * SegmentedFAQTabs - Published Version
+ * SegmentedFAQTabs - Published Version (V2 Schema)
  *
  * Server-safe component with ZERO hook imports
  * Used by componentRegistry.published.ts for SSR rendering
+ * Consumes nested tabs[].items[] array format
  *
- * Note: Tabs are static in published mode (shows first tab by default)
+ * Note: Shows all tabs content in published mode (no interactive tab switching)
  */
 
 import React from 'react';
@@ -13,138 +14,66 @@ import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publ
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 
-interface SegmentedFAQTabsContent {
-  headline: string;
-  subheadline?: string;
-  // Individual tab labels
-  tab_label_1: string;
-  tab_label_2: string;
-  tab_label_3: string;
-  // Tab 1 Q&A (up to 4 items per tab)
-  tab1_question_1: string;
-  tab1_answer_1: string;
-  tab1_question_2: string;
-  tab1_answer_2: string;
-  tab1_question_3: string;
-  tab1_answer_3: string;
-  tab1_question_4: string;
-  tab1_answer_4: string;
-  // Tab 2 Q&A
-  tab2_question_1: string;
-  tab2_answer_1: string;
-  tab2_question_2: string;
-  tab2_answer_2: string;
-  tab2_question_3: string;
-  tab2_answer_3: string;
-  tab2_question_4: string;
-  tab2_answer_4: string;
-  // Tab 3 Q&A
-  tab3_question_1: string;
-  tab3_answer_1: string;
-  tab3_question_2: string;
-  tab3_answer_2: string;
-  tab3_question_3: string;
-  tab3_answer_3: string;
-  tab3_question_4: string;
-  tab3_answer_4: string;
-  // Legacy fields for backward compatibility
-  tab_labels?: string;
-  tab1_questions?: string;
-  tab1_answers?: string;
-  tab2_questions?: string;
-  tab2_answers?: string;
-  tab3_questions?: string;
-  tab3_answers?: string;
+// FAQ item structure (V2)
+interface FAQItem {
+  id: string;
+  question: string;
+  answer: string;
 }
 
-export default function SegmentedFAQTabsPublished(props: LayoutComponentProps) {
-  const { sectionId, sectionBackgroundCSS, theme, backgroundType } = props;
+// Tab structure with nested items
+interface Tab {
+  id: string;
+  label: string;
+  items: FAQItem[];
+}
 
-  // Extract content from props (flattened by LandingPagePublishedRenderer)
+// Theme-based tab colors (static for SSR)
+const getTabColors = (theme: 'warm' | 'cool' | 'neutral') => ({
+  warm: {
+    activeBg: '#f97316', // orange-500
+    activeText: '#ffffff',
+    cardBg: '#fff7ed', // orange-50
+    border: '#fed7aa', // orange-200
+    divider: '#ffedd5', // orange-100
+    link: '#ea580c' // orange-600
+  },
+  cool: {
+    activeBg: '#3b82f6', // blue-500
+    activeText: '#ffffff',
+    cardBg: '#eff6ff', // blue-50
+    border: '#bfdbfe', // blue-200
+    divider: '#dbeafe', // blue-100
+    link: '#2563eb' // blue-600
+  },
+  neutral: {
+    activeBg: '#374151', // gray-700
+    activeText: '#ffffff',
+    cardBg: '#f9fafb', // gray-50
+    border: '#e5e7eb', // gray-200
+    divider: '#e5e7eb', // gray-200
+    link: '#4b5563' // gray-600
+  }
+})[theme];
+
+export default function SegmentedFAQTabsPublished(props: LayoutComponentProps) {
+  const { sectionId, sectionBackgroundCSS, theme, backgroundType, manualThemeOverride } = props;
+
+  // Extract content from props
   const headline = props.headline || 'Everything You Need to Know';
   const subheadline = props.subheadline || '';
+  const contactPrompt = props.contact_prompt || '';
+  const ctaText = props.cta_text || '';
+  const supportingText = props.supporting_text || '';
 
-  // Static active tab (always show first tab in published mode)
-  const activeTab = 0;
+  // Extract tabs array (V2 format)
+  const tabs: Tab[] = props.tabs || [];
 
-  // Helper function to get tab labels
-  const getTabLabels = () => {
-    const labels = [];
+  // Determine UIBlock theme
+  const uiBlockTheme: 'warm' | 'cool' | 'neutral' = manualThemeOverride || 'neutral';
+  const themeColors = getTabColors(uiBlockTheme);
 
-    // Check individual fields first (preferred)
-    for (let i = 1; i <= 3; i++) {
-      const label = props[`tab_label_${i}` as keyof typeof props];
-
-      if (label && typeof label === 'string' && label.trim() !== '' && label !== '___REMOVED___') {
-        labels.push(label.trim());
-      }
-    }
-
-    // Fallback to legacy format if no individual labels found
-    if (labels.length === 0) {
-      const tabLabelsRaw = props.tab_labels;
-      if (typeof tabLabelsRaw === 'string') {
-        const parsed = tabLabelsRaw.split('|').map(label => label.trim()).filter(Boolean);
-        if (parsed.length > 0) return parsed;
-      }
-    }
-
-    // Default labels if nothing found
-    if (labels.length === 0) {
-      return ['General', 'Technical', 'Billing'];
-    }
-
-    return labels;
-  };
-
-  // Helper function to get FAQ items for a specific tab
-  const getTabFAQItems = (tabNumber: number) => {
-    const items: Array<{question: string; answer: string; index: number; tabNumber: number}> = [];
-
-    // Check individual fields first (preferred)
-    for (let i = 1; i <= 4; i++) {
-      const question = props[`tab${tabNumber}_question_${i}` as keyof typeof props];
-      const answer = props[`tab${tabNumber}_answer_${i}` as keyof typeof props];
-
-      if (question && typeof question === 'string' && question.trim() !== '' && question !== '___REMOVED___') {
-        items.push({
-          question: question.trim(),
-          answer: (answer && typeof answer === 'string' && answer !== '___REMOVED___') ? answer.trim() : '',
-          index: i,
-          tabNumber
-        });
-      }
-    }
-
-    // Fallback to legacy format if no individual items found
-    if (items.length === 0) {
-      const questionsRaw = props[`tab${tabNumber}_questions` as keyof typeof props];
-      const answersRaw = props[`tab${tabNumber}_answers` as keyof typeof props];
-
-      const questions = (typeof questionsRaw === 'string' ? questionsRaw.split('|').map((q: string) => q.trim()).filter(Boolean) : []);
-      const answers = (typeof answersRaw === 'string' ? answersRaw.split('|').map((a: string) => a.trim()).filter(Boolean) : []);
-
-      questions.forEach((question: string, index: number) => {
-        items.push({
-          question,
-          answer: answers[index] || '',
-          index: index + 1,
-          tabNumber
-        });
-      });
-    }
-
-    return items;
-  };
-
-  const tabLabels = getTabLabels();
-  const tabs = [
-    { items: getTabFAQItems(1) },
-    { items: getTabFAQItems(2) },
-    { items: getTabFAQItems(3) }
-  ];
-
-  // Get text colors based on background
+  // Get text colors
   const textColors = getPublishedTextColors(
     backgroundType || 'primary',
     theme,
@@ -153,22 +82,8 @@ export default function SegmentedFAQTabsPublished(props: LayoutComponentProps) {
 
   // Typography styles
   const headlineTypography = getPublishedTypographyStyles('h2', theme);
-  const bodyTypography = getPublishedTypographyStyles('body-lg', theme);
+  const bodyLgTypography = getPublishedTypographyStyles('body-lg', theme);
   const h3Typography = getPublishedTypographyStyles('h3', theme);
-
-  // Accent color
-  const accentColor = theme?.colors?.accentColor || '#3B82F6';
-  const ctaTextColor = '#FFFFFF';
-
-  // Border color
-  const borderColor = backgroundType === 'primary' || !backgroundType
-    ? 'rgba(229, 231, 235, 1)' // gray-200
-    : 'rgba(55, 65, 81, 0.3)'; // gray-700
-
-  // Card background
-  const cardBg = backgroundType === 'primary' || !backgroundType
-    ? 'rgba(249, 250, 251, 1)' // gray-50
-    : 'rgba(31, 41, 55, 0.5)'; // gray-800/50
 
   return (
     <SectionWrapperPublished
@@ -185,80 +100,141 @@ export default function SegmentedFAQTabsPublished(props: LayoutComponentProps) {
             style={{
               color: textColors.heading,
               ...headlineTypography,
-              marginBottom: '1rem'
+              marginBottom: '1rem',
+              textAlign: 'center'
             }}
           />
 
-          {subheadline && subheadline.trim() !== '' && (
+          {subheadline && (
             <TextPublished
               value={subheadline}
               style={{
                 color: textColors.body,
-                ...bodyTypography,
-                textAlign: 'center',
+                ...bodyLgTypography,
                 maxWidth: '48rem',
-                marginLeft: 'auto',
-                marginRight: 'auto'
+                margin: '0 auto',
+                textAlign: 'center'
               }}
             />
           )}
         </div>
 
-        {/* Tab Navigation */}
+        {/* Tab Navigation - Static display for published */}
         <div
-          className="flex flex-wrap justify-center gap-2 mb-8"
+          className="flex flex-wrap justify-center gap-4 mt-12 mb-8 pb-4"
           style={{
-            borderBottom: `1px solid ${borderColor}`
+            borderBottom: `1px solid ${themeColors.border}`
           }}
         >
-          {tabLabels.map((label: string, index: number) => (
+          {tabs.map((tab, index) => (
             <div
-              key={index}
-              className="px-6 py-3 font-medium transition-all duration-200"
+              key={tab.id}
+              className="px-6 py-3 font-medium rounded-t-lg"
               style={{
-                backgroundColor: activeTab === index ? accentColor : 'transparent',
-                color: activeTab === index ? ctaTextColor : textColors.muted,
-                borderBottom: activeTab === index ? '2px solid transparent' : '2px solid transparent'
+                backgroundColor: index === 0 ? themeColors.activeBg : 'transparent',
+                color: index === 0 ? themeColors.activeText : textColors.body
               }}
             >
-              {label}
+              {tab.label}
             </div>
           ))}
         </div>
 
-        {/* Tab Content - Show only active tab */}
-        <div className="space-y-6">
-          {tabs[activeTab].items.map((item) => (
-            <div
-              key={`${item.tabNumber}-${item.index}`}
-              className="rounded-lg p-6"
-              style={{
-                backgroundColor: cardBg
-              }}
-            >
-              <div className="mb-3">
-                <TextPublished
-                  value={item.question}
-                  style={{
-                    color: textColors.heading,
-                    ...h3Typography,
-                    fontWeight: 600
-                  }}
-                />
-              </div>
+        {/* Show all tabs content in published mode for SEO */}
+        {tabs.map((tab, tabIndex) => (
+          <div
+            key={tab.id}
+            className={tabIndex > 0 ? 'mt-12' : ''}
+          >
+            {/* Tab section header (for tabs after first) */}
+            {tabIndex > 0 && (
+              <h3
+                style={{
+                  color: textColors.heading,
+                  ...h3Typography,
+                  marginBottom: '1.5rem',
+                  paddingTop: '1rem',
+                  borderTop: `1px solid ${themeColors.divider}`
+                }}
+              >
+                {tab.label}
+              </h3>
+            )}
 
-              {item.answer && item.answer.trim() !== '' && (
-                <TextPublished
-                  value={item.answer}
+            {/* FAQ Items */}
+            <div className="space-y-6">
+              {tab.items.map((item) => (
+                <div
+                  key={item.id}
+                  className="rounded-lg p-6"
                   style={{
-                    color: textColors.muted,
-                    lineHeight: '1.75'
+                    backgroundColor: themeColors.cardBg
                   }}
-                />
-              )}
+                >
+                  <div className="mb-3">
+                    <TextPublished
+                      value={item.question}
+                      style={{
+                        color: textColors.heading,
+                        ...h3Typography,
+                        fontWeight: 600
+                      }}
+                    />
+                  </div>
+
+                  {item.answer && (
+                    <TextPublished
+                      value={item.answer}
+                      style={{
+                        color: textColors.body,
+                        lineHeight: '1.75rem'
+                      }}
+                    />
+                  )}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
+
+        {/* Contact CTA Footer */}
+        {(contactPrompt || ctaText) && (
+          <div
+            className="mt-10 pt-6 text-center"
+            style={{ borderTop: `1px solid ${themeColors.divider}` }}
+          >
+            {contactPrompt && (
+              <TextPublished
+                value={contactPrompt}
+                style={{
+                  color: textColors.body,
+                  marginBottom: '0.5rem'
+                }}
+              />
+            )}
+            {ctaText && (
+              <TextPublished
+                value={ctaText}
+                style={{
+                  color: themeColors.link,
+                  fontWeight: 500,
+                  cursor: 'pointer'
+                }}
+              />
+            )}
+            {supportingText && (
+              <TextPublished
+                value={supportingText}
+                style={{
+                  color: textColors.body,
+                  opacity: 0.7,
+                  fontSize: '0.875rem',
+                  marginTop: '0.5rem'
+                }}
+              />
+            )}
+          </div>
+        )}
       </div>
     </SectionWrapperPublished>
   );

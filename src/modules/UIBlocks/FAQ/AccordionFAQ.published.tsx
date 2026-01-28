@@ -1,8 +1,9 @@
 /**
- * AccordionFAQ - Published Version
+ * AccordionFAQ - Published Version (V2 Schema)
  *
  * Server-safe component with ZERO hook imports
  * Used by componentRegistry.published.ts for SSR rendering
+ * Consumes faq_items array format
  */
 
 import React from 'react';
@@ -11,66 +12,51 @@ import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publ
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 
-// FAQ item structure
+// FAQ item structure (V2)
 interface FAQItem {
+  id: string;
   question: string;
   answer: string;
 }
 
-export default function AccordionFAQPublished(props: LayoutComponentProps) {
-  const { sectionId, sectionBackgroundCSS, theme, backgroundType } = props;
+// Theme-based accordion colors (static for SSR)
+const getAccordionColors = (theme: 'warm' | 'cool' | 'neutral') => ({
+  warm: {
+    border: '#fed7aa', // orange-200
+    answerBg: '#fff7ed', // orange-50
+    divider: '#ffedd5', // orange-100
+    link: '#ea580c' // orange-600
+  },
+  cool: {
+    border: '#bfdbfe', // blue-200
+    answerBg: '#eff6ff', // blue-50
+    divider: '#dbeafe', // blue-100
+    link: '#2563eb' // blue-600
+  },
+  neutral: {
+    border: '#e5e7eb', // gray-200
+    answerBg: '#f9fafb', // gray-50
+    divider: '#e5e7eb', // gray-200
+    link: '#4b5563' // gray-600
+  }
+})[theme];
 
-  // Extract content from props (flattened by LandingPagePublishedRenderer)
+export default function AccordionFAQPublished(props: LayoutComponentProps) {
+  const { sectionId, sectionBackgroundCSS, theme, backgroundType, manualThemeOverride } = props;
+
+  // Extract content from props
   const headline = props.headline || 'Frequently Asked Questions';
   const subheadline = props.subheadline || '';
+  const contactPrompt = props.contact_prompt || '';
+  const ctaText = props.cta_text || '';
+  const supportingText = props.supporting_text || '';
 
-  // Extract individual Q&A fields (question_1 to question_5, answer_1 to answer_5)
-  const question_1 = props.question_1 || '';
-  const answer_1 = props.answer_1 || '';
-  const question_2 = props.question_2 || '';
-  const answer_2 = props.answer_2 || '';
-  const question_3 = props.question_3 || '';
-  const answer_3 = props.answer_3 || '';
-  const question_4 = props.question_4 || '';
-  const answer_4 = props.answer_4 || '';
-  const question_5 = props.question_5 || '';
-  const answer_5 = props.answer_5 || '';
+  // Extract faq_items array (V2 format)
+  const faqItems: FAQItem[] = props.faq_items || [];
 
-  // Legacy fields for backward compatibility
-  const questions_legacy = props.questions || '';
-  const answers_legacy = props.answers || '';
-
-  // Build FAQ items array
-  const faqItems: FAQItem[] = [];
-
-  // First try individual fields
-  const individualQuestions = [question_1, question_2, question_3, question_4, question_5];
-  const individualAnswers = [answer_1, answer_2, answer_3, answer_4, answer_5];
-
-  for (let i = 0; i < 5; i++) {
-    const question = individualQuestions[i];
-    const answer = individualAnswers[i];
-
-    if (question && question.trim() !== '' && question !== '___REMOVED___') {
-      faqItems.push({
-        question: question.trim(),
-        answer: (answer && answer !== '___REMOVED___') ? answer.trim() : 'Answer not provided.'
-      });
-    }
-  }
-
-  // Fallback to legacy format if no individual items found
-  if (faqItems.length === 0 && questions_legacy) {
-    const questionList = questions_legacy.split('|').map((q: string) => q.trim()).filter((q: string) => q && q !== '___REMOVED___');
-    const answerList = answers_legacy ? answers_legacy.split('|').map((a: string) => a.trim()) : [];
-
-    questionList.forEach((question: string, index: number) => {
-      faqItems.push({
-        question,
-        answer: (answerList[index] && answerList[index] !== '___REMOVED___') ? answerList[index] : 'Answer not provided.'
-      });
-    });
-  }
+  // Determine UIBlock theme
+  const uiBlockTheme: 'warm' | 'cool' | 'neutral' = manualThemeOverride || 'neutral';
+  const themeColors = getAccordionColors(uiBlockTheme);
 
   // Get text colors
   const textColors = getPublishedTextColors(
@@ -118,14 +104,14 @@ export default function AccordionFAQPublished(props: LayoutComponentProps) {
           )}
         </div>
 
-        {/* FAQ Items - All Expanded */}
+        {/* FAQ Items - All Expanded for Published */}
         <div className="space-y-4">
-          {faqItems.map((item, index) => (
+          {faqItems.map((item) => (
             <div
-              key={`faq-${index}`}
+              key={item.id}
               className="border rounded-lg overflow-hidden shadow-sm"
               style={{
-                borderColor: '#e5e7eb'
+                borderColor: themeColors.border
               }}
             >
               {/* Question */}
@@ -148,8 +134,8 @@ export default function AccordionFAQPublished(props: LayoutComponentProps) {
               <div
                 className="px-6 py-4 border-t"
                 style={{
-                  backgroundColor: '#f9fafb',
-                  borderTopColor: '#e5e7eb'
+                  backgroundColor: themeColors.answerBg,
+                  borderTopColor: themeColors.divider
                 }}
               >
                 <TextPublished
@@ -163,6 +149,45 @@ export default function AccordionFAQPublished(props: LayoutComponentProps) {
             </div>
           ))}
         </div>
+
+        {/* Contact CTA Footer - subtle, no big button */}
+        {(contactPrompt || ctaText) && (
+          <div
+            className="mt-10 pt-6 text-center"
+            style={{ borderTop: `1px solid ${themeColors.divider}` }}
+          >
+            {contactPrompt && (
+              <TextPublished
+                value={contactPrompt}
+                style={{
+                  color: textColors.body,
+                  marginBottom: '0.5rem'
+                }}
+              />
+            )}
+            {ctaText && (
+              <TextPublished
+                value={ctaText}
+                style={{
+                  color: themeColors.link,
+                  fontWeight: 500,
+                  cursor: 'pointer'
+                }}
+              />
+            )}
+            {supportingText && (
+              <TextPublished
+                value={supportingText}
+                style={{
+                  color: textColors.body,
+                  opacity: 0.7,
+                  fontSize: '0.875rem',
+                  marginTop: '0.5rem'
+                }}
+              />
+            )}
+          </div>
+        )}
       </div>
     </SectionWrapperPublished>
   );

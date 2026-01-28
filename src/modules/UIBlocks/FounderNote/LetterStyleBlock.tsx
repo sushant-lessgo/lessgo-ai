@@ -178,7 +178,7 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
               level="h2"
               backgroundType="neutral"
               colorTokens={colorTokens}
-              textStyle={{ fontSize: '1.5rem', fontWeight: '700', color: '#111827' }}
+              textStyle={{ fontSize: '1.5rem', fontWeight: '700', color: dynamicTextColors?.heading || '#111827' }}
               className="text-center"
               sectionId={sectionId}
               elementKey="letter_header"
@@ -194,7 +194,7 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
                 backgroundType="neutral"
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={{ fontSize: '0.875rem', color: '#6B7280' }}
+                textStyle={{ fontSize: '0.875rem', color: dynamicTextColors?.muted || '#6B7280' }}
                 placeholder="Add date..."
                 sectionId={sectionId}
                 elementKey="date_text"
@@ -214,7 +214,7 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
               backgroundType="neutral"
               colorTokens={colorTokens}
               variant="body"
-              textStyle={{ fontSize: '1.125rem', color: '#111827', marginBottom: '1.5rem' }}
+              textStyle={{ fontSize: '1.125rem', color: dynamicTextColors?.heading || '#111827', marginBottom: '1.5rem' }}
               placeholder="Dear [Audience],"
               sectionId={sectionId}
               elementKey="letter_greeting"
@@ -230,7 +230,7 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
                 backgroundType="neutral"
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={{ color: '#374151', lineHeight: '1.625', whiteSpace: 'pre-line' }}
+                textStyle={{ color: dynamicTextColors?.body || '#374151', lineHeight: '1.625', whiteSpace: 'pre-line' }}
                 placeholder="Write your personal story and connection with the audience..."
                 sectionId={sectionId}
                 elementKey="letter_body"
@@ -297,7 +297,7 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
                   backgroundType="neutral"
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={{ fontSize: '1.25rem', fontWeight: '600', color: '#111827' }}
+                  textStyle={{ fontSize: '1.25rem', fontWeight: '600', color: dynamicTextColors?.heading || '#111827' }}
                   placeholder="Your Name"
                   sectionId={sectionId}
                   elementKey="letter_signature"
@@ -319,7 +319,7 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
                   backgroundType="neutral"
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={{ color: '#4B5563' }}
+                  textStyle={{ color: dynamicTextColors?.body || '#4B5563' }}
                   placeholder="Title, Company"
                   sectionId={sectionId}
                   elementKey="founder_title"
@@ -338,7 +338,7 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
                   backgroundType="neutral"
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={{ color: '#4B5563', fontStyle: 'italic' }}
+                  textStyle={{ color: dynamicTextColors?.body || '#4B5563', fontStyle: 'italic' }}
                   placeholder="P.S. Add a personal note or special offer..."
                   sectionId={sectionId}
                   elementKey="ps_text"

@@ -1,5 +1,6 @@
 /**
  * TwoColumnFAQ - Published Version
+ * V2 Schema - Clean array format
  *
  * Server-safe component with ZERO hook imports
  * Used by componentRegistry.published.ts for SSR rendering
@@ -11,28 +12,11 @@ import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publ
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 
-interface TwoColumnFAQContent {
-  headline: string;
-  subheadline?: string;
-  // Left column Q&A (up to 3 items)
-  left_question_1: string;
-  left_answer_1: string;
-  left_question_2: string;
-  left_answer_2: string;
-  left_question_3: string;
-  left_answer_3: string;
-  // Right column Q&A (up to 3 items)
-  right_question_1: string;
-  right_answer_1: string;
-  right_question_2: string;
-  right_answer_2: string;
-  right_question_3: string;
-  right_answer_3: string;
-  // Legacy fields for backward compatibility
-  questions_left?: string;
-  answers_left?: string;
-  questions_right?: string;
-  answers_right?: string;
+// FAQ item structure (V2 - clean array format)
+interface FAQItem {
+  id: string;
+  question: string;
+  answer: string;
 }
 
 export default function TwoColumnFAQPublished(props: LayoutComponentProps) {
@@ -41,50 +25,17 @@ export default function TwoColumnFAQPublished(props: LayoutComponentProps) {
   // Extract content from props (flattened by LandingPagePublishedRenderer)
   const headline = props.headline || 'Frequently Asked Questions';
   const subheadline = props.subheadline || '';
+  const contact_prompt = props.contact_prompt as string || '';
+  const cta_text = props.cta_text as string || '';
+  const supporting_text = props.supporting_text as string || '';
 
-  // Helper function to get column FAQ items
-  const getColumnFAQItems = (column: 'left' | 'right') => {
-    const items: Array<{question: string; answer: string; index: number}> = [];
+  // Get FAQ items from props (V2 - direct array)
+  const faqItems: FAQItem[] = (props.faq_items as FAQItem[]) || [];
 
-    // Check individual fields first (preferred)
-    for (let i = 1; i <= 3; i++) {
-      const question = props[`${column}_question_${i}` as keyof typeof props];
-      const answer = props[`${column}_answer_${i}` as keyof typeof props];
-
-      if (question && typeof question === 'string' && question.trim() !== '' && question !== '___REMOVED___') {
-        items.push({
-          question: question.trim(),
-          answer: (answer && typeof answer === 'string' && answer !== '___REMOVED___') ? answer.trim() : '',
-          index: i
-        });
-      }
-    }
-
-    // Fallback to legacy format if no individual items found
-    if (items.length === 0) {
-      const questionsKey = `questions_${column}` as keyof typeof props;
-      const answersKey = `answers_${column}` as keyof typeof props;
-
-      const questionsRaw = props[questionsKey];
-      const answersRaw = props[answersKey];
-
-      const questions = (typeof questionsRaw === 'string' ? questionsRaw.split('|').map((q: string) => q.trim()).filter(Boolean) : []);
-      const answers = (typeof answersRaw === 'string' ? answersRaw.split('|').map((a: string) => a.trim()).filter(Boolean) : []);
-
-      questions.forEach((question: string, index: number) => {
-        items.push({
-          question,
-          answer: answers[index] || '',
-          index: index + 1
-        });
-      });
-    }
-
-    return items;
-  };
-
-  const leftItems = getColumnFAQItems('left');
-  const rightItems = getColumnFAQItems('right');
+  // Split items into two columns (first half = left, second half = right)
+  const midpoint = Math.ceil(faqItems.length / 2);
+  const leftItems = faqItems.slice(0, midpoint);
+  const rightItems = faqItems.slice(midpoint);
 
   // Get text colors based on background
   const textColors = getPublishedTextColors(
@@ -97,6 +48,30 @@ export default function TwoColumnFAQPublished(props: LayoutComponentProps) {
   const headlineTypography = getPublishedTypographyStyles('h2', theme);
   const bodyTypography = getPublishedTypographyStyles('body-lg', theme);
   const questionTypography = getPublishedTypographyStyles('h3', theme);
+
+  // Render a single FAQ item with divider
+  const renderFAQItem = (item: FAQItem) => (
+    <div key={item.id} className="space-y-3 pb-6 border-b border-gray-200 last:border-b-0 last:pb-0">
+      <TextPublished
+        value={item.question}
+        style={{
+          color: textColors.heading,
+          ...questionTypography,
+          fontWeight: 600
+        }}
+      />
+
+      {item.answer && item.answer.trim() !== '' && (
+        <TextPublished
+          value={item.answer}
+          style={{
+            color: textColors.muted,
+            lineHeight: '1.75'
+          }}
+        />
+      )}
+    </div>
+  );
 
   return (
     <SectionWrapperPublished
@@ -133,59 +108,52 @@ export default function TwoColumnFAQPublished(props: LayoutComponentProps) {
         </div>
 
         {/* Two Column Layout */}
-        <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
+        <div className="grid md:grid-cols-2 gap-12 lg:gap-16">
           {/* Left Column */}
-          <div className="space-y-6">
-            {leftItems.map((item) => (
-              <div key={`left-${item.index}`} className="space-y-3">
-                <TextPublished
-                  value={item.question}
-                  style={{
-                    color: textColors.heading,
-                    ...questionTypography,
-                    fontWeight: 600
-                  }}
-                />
-
-                {item.answer && item.answer.trim() !== '' && (
-                  <TextPublished
-                    value={item.answer}
-                    style={{
-                      color: textColors.muted,
-                      lineHeight: '1.75'
-                    }}
-                  />
-                )}
-              </div>
-            ))}
+          <div className="space-y-8">
+            {leftItems.map(renderFAQItem)}
           </div>
 
           {/* Right Column */}
-          <div className="space-y-6">
-            {rightItems.map((item) => (
-              <div key={`right-${item.index}`} className="space-y-3">
-                <TextPublished
-                  value={item.question}
-                  style={{
-                    color: textColors.heading,
-                    ...questionTypography,
-                    fontWeight: 600
-                  }}
-                />
-
-                {item.answer && item.answer.trim() !== '' && (
-                  <TextPublished
-                    value={item.answer}
-                    style={{
-                      color: textColors.muted,
-                      lineHeight: '1.75'
-                    }}
-                  />
-                )}
-              </div>
-            ))}
+          <div className="space-y-8">
+            {rightItems.map(renderFAQItem)}
           </div>
         </div>
+
+        {/* Contact CTA Footer */}
+        {(contact_prompt || cta_text) && (
+          <div className="mt-10 pt-6 text-center">
+            {contact_prompt && (
+              <TextPublished
+                value={contact_prompt}
+                style={{
+                  color: textColors.body,
+                  marginBottom: '0.5rem'
+                }}
+              />
+            )}
+            {cta_text && (
+              <TextPublished
+                value={cta_text}
+                style={{
+                  color: '#2563eb',
+                  fontWeight: 500,
+                  cursor: 'pointer'
+                }}
+              />
+            )}
+            {supporting_text && (
+              <TextPublished
+                value={supporting_text}
+                style={{
+                  color: textColors.muted,
+                  fontSize: '0.875rem',
+                  marginTop: '0.5rem'
+                }}
+              />
+            )}
+          </div>
+        )}
       </div>
     </SectionWrapperPublished>
   );

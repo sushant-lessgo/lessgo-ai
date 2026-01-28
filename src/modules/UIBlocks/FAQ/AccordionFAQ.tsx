@@ -1,116 +1,88 @@
 // components/layout/AccordionFAQ.tsx
-// Production-ready FAQ accordion component using abstraction system
+// V2 Schema - Clean array format, no numbered fields or pipe strings
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
-  EditableAdaptiveText 
+import {
+  EditableAdaptiveHeadline,
+  EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
-// Content interface for type safety
-interface AccordionFAQContent {
-  headline: string;
-  subheadline?: string;
-  // Individual Q&A fields (up to 5 items)
-  question_1: string;
-  answer_1: string;
-  question_2: string;
-  answer_2: string;
-  question_3: string;
-  answer_3: string;
-  question_4: string;
-  answer_4: string;
-  question_5: string;
-  answer_5: string;
-  // Legacy fields for backward compatibility
-  questions?: string;
-  answers?: string;
-}
-
-// FAQ item structure
+// FAQ item structure (V2 - clean array format)
 interface FAQItem {
   id: string;
-  index: number;
   question: string;
   answer: string;
 }
 
+// Content interface (V2 - arrays, not numbered fields)
+interface AccordionFAQContent {
+  headline: string;
+  subheadline?: string;
+  faq_items: FAQItem[];
+  contact_prompt?: string;
+  cta_text?: string;
+  supporting_text?: string;
+}
+
 // Content schema - defines structure and defaults
 const CONTENT_SCHEMA = {
-  headline: { 
-    type: 'string' as const, 
-    default: 'Frequently Asked Questions' 
+  headline: {
+    type: 'string' as const,
+    default: 'Frequently Asked Questions'
   },
-  subheadline: { 
-    type: 'string' as const, 
-    default: 'Find answers to common questions about our platform and services.' 
+  subheadline: {
+    type: 'string' as const,
+    default: 'Find answers to common questions about our platform and services.'
   },
-  // Individual Q&A fields
-  question_1: { type: 'string' as const, default: 'How does the free trial work?' },
-  answer_1: { type: 'string' as const, default: 'Our free trial gives you full access to all features for 14 days. No credit card required to start.' },
-  question_2: { type: 'string' as const, default: 'What payment methods do you accept?' },
-  answer_2: { type: 'string' as const, default: 'We accept all major credit cards, PayPal, and bank transfers for annual plans. All payments are processed securely.' },
-  question_3: { type: 'string' as const, default: 'Can I cancel anytime?' },
-  answer_3: { type: 'string' as const, default: 'Yes, you can cancel your subscription at any time. No long-term contracts or cancellation fees.' },
-  question_4: { type: 'string' as const, default: 'Do you offer customer support?' },
-  answer_4: { type: 'string' as const, default: 'We offer 24/7 customer support via chat, email, and phone. Our average response time is under 2 hours.' },
-  question_5: { type: 'string' as const, default: 'Is my data secure?' },
-  answer_5: { type: 'string' as const, default: 'Absolutely. We use enterprise-grade encryption and are SOC 2 compliant. Your data is stored securely and never shared with third parties.' },
-  // Legacy fields for backward compatibility
-  questions: { type: 'string' as const, default: '' },
-  answers: { type: 'string' as const, default: '' }
+  faq_items: {
+    type: 'array' as const,
+    default: [
+      { id: 'faq-1', question: 'How does the free trial work?', answer: 'Our free trial gives you full access to all features for 14 days. No credit card required to start.' },
+      { id: 'faq-2', question: 'What payment methods do you accept?', answer: 'We accept all major credit cards, PayPal, and bank transfers for annual plans. All payments are processed securely.' },
+      { id: 'faq-3', question: 'Can I cancel anytime?', answer: 'Yes, you can cancel your subscription at any time. No long-term contracts or cancellation fees.' },
+    ]
+  },
+  contact_prompt: { type: 'string' as const, default: '' },
+  cta_text: { type: 'string' as const, default: '' },
+  supporting_text: { type: 'string' as const, default: '' }
 };
 
-// Helper function to get FAQ items
-const getFAQItems = (blockContent: AccordionFAQContent): FAQItem[] => {
-  const items: FAQItem[] = [];
-  
-  // Check individual fields first (preferred)
-  for (let i = 1; i <= 5; i++) {
-    const questionKey = `question_${i}` as keyof AccordionFAQContent;
-    const answerKey = `answer_${i}` as keyof AccordionFAQContent;
-    
-    const question = blockContent[questionKey];
-    const answer = blockContent[answerKey];
-    
-    if (question && question.trim() !== '' && question !== '___REMOVED___') {
-      items.push({
-        id: `faq-${i}`,
-        index: i,
-        question: question.trim(),
-        answer: (answer && answer !== '___REMOVED___') ? answer.trim() : 'Answer not provided.'
-      });
-    }
+// Theme-based accordion colors
+const getAccordionColors = (theme: UIBlockTheme) => ({
+  warm: {
+    border: 'border-orange-200',
+    borderHover: 'hover:border-orange-300',
+    questionBg: 'bg-white',
+    answerBg: 'bg-orange-50',
+    divider: 'border-orange-100'
+  },
+  cool: {
+    border: 'border-blue-200',
+    borderHover: 'hover:border-blue-300',
+    questionBg: 'bg-white',
+    answerBg: 'bg-blue-50',
+    divider: 'border-blue-100'
+  },
+  neutral: {
+    border: 'border-gray-200',
+    borderHover: 'hover:border-gray-300',
+    questionBg: 'bg-white',
+    answerBg: 'bg-gray-50',
+    divider: 'border-gray-200'
   }
-  
-  // Fallback to legacy format if no individual items found
-  if (items.length === 0 && blockContent.questions) {
-    const questionList = parsePipeData(blockContent.questions);
-    const answerList = parsePipeData(blockContent.answers || '');
-    
-    questionList.forEach((question, index) => {
-      items.push({
-        id: `faq-${index}`,
-        index: index + 1,
-        question,
-        answer: answerList[index] || 'Answer not provided.'
-      });
-    });
-  }
-  
-  return items;
-};
+})[theme];
 
 // Individual FAQ Accordion Item Component
-const FAQAccordionItem = React.memo(({ 
-  item, 
-  isOpen, 
-  onToggle, 
-  mode, 
+const FAQAccordionItem = React.memo(({
+  item,
+  isOpen,
+  onToggle,
+  mode,
   colorTokens,
   getTextStyle,
   onQuestionEdit,
@@ -118,7 +90,8 @@ const FAQAccordionItem = React.memo(({
   backgroundType,
   sectionBackground,
   sectionId,
-  onRemove
+  onRemove,
+  themeColors
 }: {
   item: FAQItem;
   isOpen: boolean;
@@ -126,20 +99,21 @@ const FAQAccordionItem = React.memo(({
   mode: 'edit' | 'preview';
   colorTokens: any;
   getTextStyle: (variant: 'display' | 'hero' | 'h1' | 'h2' | 'h3' | 'body-lg' | 'body' | 'body-sm' | 'caption') => React.CSSProperties;
-  onQuestionEdit: (index: number, value: string) => void;
-  onAnswerEdit: (index: number, value: string) => void;
+  onQuestionEdit: (id: string, value: string) => void;
+  onAnswerEdit: (id: string, value: string) => void;
   backgroundType: any;
   sectionBackground: any;
   sectionId: string;
-  onRemove: (index: number) => void;
+  onRemove: (id: string) => void;
+  themeColors: ReturnType<typeof getAccordionColors>;
 }) => {
-  
+
   return (
-    <div className="relative group/faq-item border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
+    <div className={`relative group/faq-item border ${themeColors.border} ${themeColors.borderHover} rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-200`}>
       {/* Question Header */}
       <button
         onClick={onToggle}
-        className={`w-full px-6 py-4 text-left bg-white hover:${colorTokens.surfaceElevated} focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset transition-colors duration-200`}
+        className={`w-full px-6 py-4 text-left ${themeColors.questionBg} focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset transition-colors duration-200`}
         aria-expanded={isOpen}
       >
         <div className="flex items-center justify-between">
@@ -147,18 +121,18 @@ const FAQAccordionItem = React.memo(({
             <EditableAdaptiveText
               mode={mode}
               value={item.question}
-              onEdit={(value) => onQuestionEdit(item.index, value)}
+              onEdit={(value) => onQuestionEdit(item.id, value)}
               backgroundType={backgroundType}
               colorTokens={colorTokens}
               variant="body"
-              className={`font-semibold ${colorTokens.textOnLight || colorTokens.textPrimary} hover:${colorTokens.link} transition-colors duration-200`}
-              placeholder={`Question ${item.index}`}
+              className={`font-semibold ${colorTokens.textOnLight || colorTokens.textPrimary} transition-colors duration-200`}
+              placeholder="Enter question..."
               sectionBackground={sectionBackground}
               data-section-id={sectionId}
-              data-element-key={`question_${item.index}`}
+              data-element-key={`faq_items.${item.id}.question`}
             />
           </div>
-          
+
           {/* Expand/Collapse Icon */}
           <div className="flex-shrink-0">
             <div className={`transform transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
@@ -170,35 +144,31 @@ const FAQAccordionItem = React.memo(({
         </div>
       </button>
 
-      {/* Answer Content */}
-      <div 
-        className={`overflow-hidden transition-all duration-300 ease-in-out ${
-          isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-        }`}
-      >
-        <div className={`px-6 py-4 ${colorTokens.surfaceElevated} border-t border-gray-200`}>
+      {/* Answer Content - conditional render for proper collapse */}
+      {isOpen && (
+        <div className={`px-6 py-4 ${themeColors.answerBg} border-t ${themeColors.divider}`}>
           <EditableAdaptiveText
             mode={mode}
             value={item.answer}
-            onEdit={(value) => onAnswerEdit(item.index, value)}
+            onEdit={(value) => onAnswerEdit(item.id, value)}
             backgroundType={backgroundType}
             colorTokens={colorTokens}
             variant="body"
             className={`${colorTokens.textSecondary} leading-relaxed`}
-            placeholder={`Answer ${item.index}...`}
+            placeholder="Enter answer..."
             sectionBackground={sectionBackground}
             data-section-id={sectionId}
-            data-element-key={`answer_${item.index}`}
+            data-element-key={`faq_items.${item.id}.answer`}
           />
         </div>
-      </div>
-      
+      )}
+
       {/* Remove button */}
       {mode !== 'preview' && (
         <button
           onClick={(e) => {
             e.stopPropagation();
-            onRemove(item.index);
+            onRemove(item.id);
           }}
           className="opacity-0 group-hover/faq-item:opacity-100 absolute top-2 right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm z-10"
           title="Remove this FAQ item"
@@ -230,21 +200,54 @@ export default function AccordionFAQ(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
+  // Theme detection: manual override > auto-detection > neutral fallback
+  const uiBlockTheme = useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  const themeColors = getAccordionColors(uiBlockTheme);
+
   // State for accordion open/closed items
-  const [openItems, setOpenItems] = useState<Set<string>>(new Set(['faq-0'])); // First item open by default
+  const [openItems, setOpenItems] = useState<Set<string>>(new Set(['faq-1']));
 
-  // Get FAQ items
-  const faqItems = getFAQItems(blockContent);
+  // Get FAQ items from content (direct array access)
+  const faqItems: FAQItem[] = blockContent.faq_items || CONTENT_SCHEMA.faq_items.default;
 
-  // Handle individual question/answer editing
-  const handleQuestionEdit = (index: number, value: string) => {
-    const questionKey = `question_${index}` as keyof AccordionFAQContent;
-    handleContentUpdate(questionKey, value);
+  // Handle question edit
+  const handleQuestionEdit = (id: string, value: string) => {
+    const updatedItems = faqItems.map(item =>
+      item.id === id ? { ...item, question: value } : item
+    );
+    (handleContentUpdate as any)('faq_items', updatedItems);
   };
 
-  const handleAnswerEdit = (index: number, value: string) => {
-    const answerKey = `answer_${index}` as keyof AccordionFAQContent;
-    handleContentUpdate(answerKey, value);
+  // Handle answer edit
+  const handleAnswerEdit = (id: string, value: string) => {
+    const updatedItems = faqItems.map(item =>
+      item.id === id ? { ...item, answer: value } : item
+    );
+    (handleContentUpdate as any)('faq_items', updatedItems);
+  };
+
+  // Handle remove item
+  const handleRemoveItem = (id: string) => {
+    const updatedItems = faqItems.filter(item => item.id !== id);
+    (handleContentUpdate as any)('faq_items', updatedItems);
+  };
+
+  // Handle add new item
+  const handleAddItem = () => {
+    const newId = `faq-${Date.now()}`;
+    const updatedItems = [...faqItems, {
+      id: newId,
+      question: 'New question',
+      answer: 'New answer'
+    }];
+    (handleContentUpdate as any)('faq_items', updatedItems);
+    // Auto-open the new item
+    setOpenItems(prev => new Set([...prev, newId]));
   };
 
   // Toggle accordion item
@@ -325,29 +328,15 @@ export default function AccordionFAQ(props: LayoutComponentProps) {
               backgroundType={backgroundType}
               sectionBackground={sectionBackground}
               sectionId={sectionId}
-              onRemove={(index) => {
-                handleContentUpdate(`question_${index}` as keyof AccordionFAQContent, '___REMOVED___');
-                handleContentUpdate(`answer_${index}` as keyof AccordionFAQContent, '___REMOVED___');
-              }}
+              onRemove={handleRemoveItem}
+              themeColors={themeColors}
             />
           ))}
-          
+
           {/* Add new FAQ button */}
-          {mode !== 'preview' && faqItems.length < 5 && (
+          {mode !== 'preview' && faqItems.length < 10 && (
             <button
-              onClick={() => {
-                // Find the first empty slot
-                for (let i = 1; i <= 5; i++) {
-                  const questionKey = `question_${i}` as keyof AccordionFAQContent;
-                  if (!blockContent[questionKey] || blockContent[questionKey] === '' || blockContent[questionKey] === '___REMOVED___') {
-                    handleContentUpdate(questionKey, 'New question');
-                    handleContentUpdate(`answer_${i}` as keyof AccordionFAQContent, 'New answer');
-                    // Auto-open the new item
-                    setOpenItems(prev => new Set([...prev, `faq-${i}`]));
-                    break;
-                  }
-                }
-              }}
+              onClick={handleAddItem}
               className="flex items-center space-x-2 text-sm text-blue-600 hover:text-blue-800 transition-colors mt-6 p-4 border-2 border-dashed border-blue-300 rounded-lg hover:border-blue-400 hover:bg-blue-50/50 w-full justify-center"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -358,6 +347,55 @@ export default function AccordionFAQ(props: LayoutComponentProps) {
           )}
         </div>
 
+        {/* Contact CTA Footer - subtle, no big button */}
+        {(blockContent.contact_prompt || blockContent.cta_text || mode === 'edit') && (
+          <div className={`mt-10 pt-6 border-t ${themeColors.divider} text-center`}>
+            <EditableAdaptiveText
+              mode={mode}
+              value={blockContent.contact_prompt || ''}
+              onEdit={(value) => handleContentUpdate('contact_prompt', value)}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+              colorTokens={colorTokens}
+              variant="body"
+              className="mb-2"
+              placeholder="Still have questions?"
+              sectionId={sectionId}
+              elementKey="contact_prompt"
+              sectionBackground={sectionBackground}
+            />
+            {(blockContent.cta_text || mode === 'edit') && (
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.cta_text || ''}
+                onEdit={(value) => handleContentUpdate('cta_text', value)}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                colorTokens={colorTokens}
+                variant="body"
+                className={`font-medium ${themeColors.border.replace('border-', 'text-').replace('-200', '-600')} hover:underline cursor-pointer`}
+                placeholder="Contact our support team"
+                sectionId={sectionId}
+                elementKey="cta_text"
+                sectionBackground={sectionBackground}
+              />
+            )}
+            {(blockContent.supporting_text || mode === 'edit') && (
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.supporting_text || ''}
+                onEdit={(value) => handleContentUpdate('supporting_text', value)}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                colorTokens={colorTokens}
+                variant="muted"
+                className="mt-2 text-sm"
+                placeholder="We typically respond within 24 hours"
+                sectionId={sectionId}
+                elementKey="supporting_text"
+                sectionBackground={sectionBackground}
+              />
+            )}
+          </div>
+        )}
+
       </div>
     </LayoutSection>
   );
@@ -367,46 +405,31 @@ export default function AccordionFAQ(props: LayoutComponentProps) {
 export const componentMeta = {
   name: 'AccordionFAQ',
   category: 'Content Sections',
-  description: 'Interactive FAQ section with adaptive text colors and expandable accordion items',
-  tags: ['faq', 'accordion', 'questions', 'support', 'adaptive-colors'],
+  description: 'Interactive FAQ section with theme-aware styling and expandable accordion items',
+  tags: ['faq', 'accordion', 'questions', 'support', 'theme-aware'],
   defaultBackgroundType: 'neutral' as const,
   complexity: 'medium',
-  estimatedBuildTime: '20 minutes',
-  
-  // ✅ ENHANCED: Schema for component generation tools - Updated for individual Q&A fields
+
+  // V2 Schema - clean array format
   contentFields: [
     { key: 'headline', label: 'Section Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
-    { key: 'question_1', label: 'Question 1', type: 'text', required: true },
-    { key: 'answer_1', label: 'Answer 1', type: 'textarea', required: true },
-    { key: 'question_2', label: 'Question 2', type: 'text', required: true },
-    { key: 'answer_2', label: 'Answer 2', type: 'textarea', required: true },
-    { key: 'question_3', label: 'Question 3', type: 'text', required: true },
-    { key: 'answer_3', label: 'Answer 3', type: 'textarea', required: true },
-    { key: 'question_4', label: 'Question 4', type: 'text', required: false },
-    { key: 'answer_4', label: 'Answer 4', type: 'textarea', required: false },
-    { key: 'question_5', label: 'Question 5', type: 'text', required: false },
-    { key: 'answer_5', label: 'Answer 5', type: 'textarea', required: false },
-    // Legacy fields for backward compatibility
-    { key: 'questions', label: 'Questions (legacy pipe separated)', type: 'textarea', required: false },
-    { key: 'answers', label: 'Answers (legacy pipe separated)', type: 'textarea', required: false }
+    { key: 'faq_items', label: 'FAQ Items', type: 'array', required: true }
   ],
-  
-  // ✅ NEW: Enhanced features
+
   features: [
-    'Automatic text color adaptation based on background type',
-    'Smooth accordion animations and transitions',
-    'Individual item editing in edit mode',
+    'Theme-aware styling (warm/cool/neutral)',
+    'Smooth accordion animations',
+    'Array-based item management',
     'Professional styling with hover effects',
-    'Responsive design for all screen sizes',
+    'Responsive design',
     'Keyboard accessibility support'
   ],
-  
-  // Usage examples
+
   useCases: [
-    'Product FAQ section on branded backgrounds',
-    'Support documentation with dark themes',
-    'Onboarding help with custom styling',
-    'Pricing questions on gradient backgrounds'
+    'Product FAQ section',
+    'Support documentation',
+    'Onboarding help',
+    'Pricing questions'
   ]
 };

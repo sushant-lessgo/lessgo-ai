@@ -27,6 +27,8 @@ interface Feature {
 interface IconGridContent {
   headline: string;
   subheadline?: string;
+  badge_text?: string;
+  supporting_text?: string;
   features: Feature[];
 }
 
@@ -39,6 +41,14 @@ const CONTENT_SCHEMA = {
   subheadline: {
     type: 'string' as const,
     default: 'Everything you need to streamline your workflow and boost productivity.'
+  },
+  badge_text: {
+    type: 'string' as const,
+    default: ''
+  },
+  supporting_text: {
+    type: 'string' as const,
+    default: ''
   },
   features: {
     type: 'array' as const,
@@ -252,6 +262,26 @@ export default function IconGrid(props: LayoutComponentProps) {
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <div className="text-center mb-12">
+          {/* Badge Text - optional section label */}
+          {(blockContent.badge_text || mode === 'edit') && (
+            <div className="mb-4">
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.badge_text || ''}
+                onEdit={(value) => handleContentUpdate('badge_text', value)}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                colorTokens={colorTokens}
+                variant="body"
+                className="text-sm font-semibold uppercase tracking-wider opacity-80"
+                style={{ color: colorTokens.accent }}
+                placeholder="Core Features"
+                sectionId={sectionId}
+                elementKey="badge_text"
+                sectionBackground={sectionBackground}
+              />
+            </div>
+          )}
+
           {/* Main Headline */}
           <div className="text-center">
             <EditableAdaptiveHeadline
@@ -319,20 +349,47 @@ export default function IconGrid(props: LayoutComponentProps) {
           ))}
         </div>
 
-        {/* Add Feature Button - only show in edit mode and if under max limit */}
-        {mode !== 'preview' && features.length < 9 && (
-          <div className="mt-8 text-center">
-            <button
-              onClick={handleAddFeature}
-              className="inline-flex items-center space-x-2 px-4 py-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-xl transition-all duration-200 group"
-            >
-              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              <span className="text-blue-700 font-medium">Add Feature</span>
-            </button>
+        {/* Supporting Text - post-grid summary */}
+        {(blockContent.supporting_text || mode === 'edit') && (
+          <div className="mt-10 text-center">
+            <EditableAdaptiveText
+              mode={mode}
+              value={blockContent.supporting_text || ''}
+              onEdit={(value) => handleContentUpdate('supporting_text', value)}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+              colorTokens={colorTokens}
+              variant="body"
+              textStyle={getTextStyle('body-lg')}
+              className="max-w-2xl mx-auto opacity-90"
+              placeholder="And that's just the beginning..."
+              sectionId={sectionId}
+              elementKey="supporting_text"
+              sectionBackground={sectionBackground}
+            />
           </div>
         )}
+
+        {/* Add Feature Button - only show in edit mode and if under max limit */}
+        {mode !== 'preview' && features.length < 9 && (() => {
+          const addButtonStyles = {
+            warm: { bg: 'bg-orange-50 hover:bg-orange-100', border: 'border-orange-200 hover:border-orange-300', icon: 'text-orange-600', text: 'text-orange-700' },
+            cool: { bg: 'bg-blue-50 hover:bg-blue-100', border: 'border-blue-200 hover:border-blue-300', icon: 'text-blue-600', text: 'text-blue-700' },
+            neutral: { bg: 'bg-gray-50 hover:bg-gray-100', border: 'border-gray-200 hover:border-gray-300', icon: 'text-gray-600', text: 'text-gray-700' }
+          }[theme];
+          return (
+            <div className="mt-8 text-center">
+              <button
+                onClick={handleAddFeature}
+                className={`inline-flex items-center space-x-2 px-4 py-3 ${addButtonStyles.bg} border-2 ${addButtonStyles.border} rounded-xl transition-all duration-200 group`}
+              >
+                <svg className={`w-5 h-5 ${addButtonStyles.icon}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                <span className={`${addButtonStyles.text} font-medium`}>Add Feature</span>
+              </button>
+            </div>
+          );
+        })()}
       </div>
     </LayoutSection>
   );

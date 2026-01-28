@@ -1,11 +1,13 @@
+'use client';
+
 /**
- * TierCards - Published Version
+ * ToggleableMonthlyYearly - Published Version
  *
- * Server-safe component with ZERO hook imports
+ * Server-safe component with useState for billing toggle
  * Used by componentRegistry.published.ts for SSR rendering
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publishedTextColors';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
@@ -18,12 +20,12 @@ import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThe
 interface Tier {
   id: string;
   name: string;
-  price: string;
-  period: string;
+  monthly_price: string;
+  yearly_price: string;
   description: string;
   features: string[];
   cta_text: string;
-  highlighted: boolean;
+  is_popular: boolean;
 }
 
 // Get theme colors (hex values for inline styles)
@@ -32,21 +34,18 @@ const getPricingColors = (theme: UIBlockTheme, isHighlighted: boolean) => {
     warm: {
       highlightedBorder: '#f97316', // orange-500
       highlightedBadgeBg: '#ea580c', // orange-600
-      highlightedBg: '#fff7ed', // orange-50
       checkmark: '#f97316', // orange-500
       regularBorder: '#e5e7eb', // gray-200
     },
     cool: {
       highlightedBorder: '#3b82f6', // blue-500
       highlightedBadgeBg: '#2563eb', // blue-600
-      highlightedBg: '#eff6ff', // blue-50
       checkmark: '#3b82f6', // blue-500
       regularBorder: '#e5e7eb', // gray-200
     },
     neutral: {
       highlightedBorder: '#374151', // gray-700
       highlightedBadgeBg: '#374151', // gray-700
-      highlightedBg: '#f9fafb', // gray-50
       checkmark: '#10b981', // green-500
       regularBorder: '#e5e7eb', // gray-200
     },
@@ -59,8 +58,20 @@ const getPricingColors = (theme: UIBlockTheme, isHighlighted: boolean) => {
     badgeBg: colors.highlightedBadgeBg,
     checkmark: colors.checkmark,
     shadow: isHighlighted ? '0 10px 25px -5px rgba(0, 0, 0, 0.1)' : '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-    bg: isHighlighted ? colors.highlightedBg : '#ffffff',
   };
+};
+
+// Calculate savings percentage
+const calculateSavings = (monthlyPrice: string, yearlyPrice: string): number => {
+  const monthly = parseFloat(monthlyPrice.replace(/[^0-9.]/g, ''));
+  const yearly = parseFloat(yearlyPrice.replace(/[^0-9.]/g, ''));
+
+  if (monthly && yearly) {
+    const monthlyCost = monthly * 12;
+    const savings = Math.round(((monthlyCost - yearly) / monthlyCost) * 100);
+    return savings > 0 ? savings : 0;
+  }
+  return 0;
 };
 
 // Default tiers (fallback)
@@ -68,45 +79,46 @@ const DEFAULT_TIERS: Tier[] = [
   {
     id: 'tier-1',
     name: 'Starter',
-    price: '$9',
-    period: '/month',
-    description: 'Perfect for individuals getting started',
-    features: ['5 projects', '10GB storage', 'Email support'],
-    cta_text: 'Get Started',
-    highlighted: false,
+    monthly_price: '$29',
+    yearly_price: '$290',
+    description: 'Perfect for small teams getting started',
+    features: ['Up to 5 team members', '10GB storage', 'Basic integrations', 'Email support'],
+    cta_text: 'Start Free Trial',
+    is_popular: false,
   },
   {
     id: 'tier-2',
-    name: 'Pro',
-    price: '$29',
-    period: '/month',
-    description: 'For growing teams that need more power',
-    features: ['Unlimited projects', '100GB storage', 'Priority support', 'API access'],
-    cta_text: 'Go Pro',
-    highlighted: true,
+    name: 'Professional',
+    monthly_price: '$79',
+    yearly_price: '$790',
+    description: 'For growing businesses that need more power',
+    features: ['Up to 25 team members', '100GB storage', 'Advanced integrations', 'Priority support', 'Custom branding'],
+    cta_text: 'Start Free Trial',
+    is_popular: true,
   },
   {
     id: 'tier-3',
     name: 'Enterprise',
-    price: '$99',
-    period: '/month',
+    monthly_price: '$199',
+    yearly_price: '$1990',
     description: 'Custom solutions for large organizations',
-    features: ['Unlimited everything', 'Custom integrations', 'Dedicated support', 'SLA guarantee', 'White-label'],
+    features: ['Unlimited team members', 'Unlimited storage', 'Enterprise integrations', 'Dedicated support', 'Advanced security'],
     cta_text: 'Contact Sales',
-    highlighted: false,
+    is_popular: false,
   },
 ];
 
-export default function TierCardsPublished(props: LayoutComponentProps) {
+export default function ToggleableMonthlyYearlyPublished(props: LayoutComponentProps) {
   const { sectionId, sectionBackgroundCSS, theme, backgroundType } = props;
 
+  // Local state for billing toggle
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
+
   // Extract content
-  const headline = props.headline || 'Choose Your Plan';
+  const headline = props.headline || 'Choose the Perfect Plan for Your Business';
   const subheadline = props.subheadline || '';
-  const badge_text = props.badge_text || '';
+  const annual_discount_label = props.annual_discount_label || 'Save 17% with annual billing';
   const billing_note = props.billing_note || '';
-  const guarantee_text = props.guarantee_text || '';
-  const highlighted_label = props.highlighted_label || 'Most Popular';
   const tiers: Tier[] = props.tiers || DEFAULT_TIERS;
 
   // Detect theme
@@ -114,10 +126,7 @@ export default function TierCardsPublished(props: LayoutComponentProps) {
     props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
 
   // Text colors
-  const textColors = getPublishedTextColors(backgroundType || 'primary', theme, sectionBackgroundCSS);
-
-  // Accent color for badge
-  const accentColor = theme?.colors?.accentColor || '#3b82f6';
+  const textColors = getPublishedTextColors(backgroundType || 'neutral', theme, sectionBackgroundCSS);
 
   // Typography
   const h2Typography = getPublishedTypographyStyles('h2', theme);
@@ -138,23 +147,7 @@ export default function TierCardsPublished(props: LayoutComponentProps) {
     <SectionWrapperPublished sectionId={sectionId} background={sectionBackgroundCSS} padding="normal">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-20">
-          {badge_text && badge_text.trim() !== '' && (
-            <div className="mb-4">
-              <span
-                className="inline-block px-4 py-2 rounded-full font-medium"
-                style={{
-                  color: accentColor,
-                  backgroundColor: `${accentColor}15`,
-                  fontSize: '0.6875rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.22em'
-                }}
-              >
-                {badge_text}
-              </span>
-            </div>
-          )}
+        <div className="text-center mb-12">
           <HeadlinePublished
             value={headline}
             level="h2"
@@ -170,20 +163,77 @@ export default function TierCardsPublished(props: LayoutComponentProps) {
               style={{
                 color: textColors.muted,
                 fontSize: '1.125rem',
+                marginBottom: '2rem',
               }}
             />
           )}
+
+          {/* Billing Toggle */}
+          <div className="flex items-center justify-center mb-8">
+            <div style={{ backgroundColor: '#f3f4f6', borderRadius: '9999px', padding: '4px', display: 'flex' }}>
+              <button
+                onClick={() => setBillingCycle('monthly')}
+                style={{
+                  padding: '8px 24px',
+                  borderRadius: '9999px',
+                  fontWeight: '500',
+                  transition: 'all 0.3s',
+                  backgroundColor: billingCycle === 'monthly' ? '#ffffff' : 'transparent',
+                  color: billingCycle === 'monthly' ? '#111827' : '#6b7280',
+                  boxShadow: billingCycle === 'monthly' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                Monthly
+              </button>
+              <button
+                onClick={() => setBillingCycle('yearly')}
+                style={{
+                  padding: '8px 24px',
+                  borderRadius: '9999px',
+                  fontWeight: '500',
+                  transition: 'all 0.3s',
+                  backgroundColor: billingCycle === 'yearly' ? '#ffffff' : 'transparent',
+                  color: billingCycle === 'yearly' ? '#111827' : '#6b7280',
+                  boxShadow: billingCycle === 'yearly' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                Yearly
+              </button>
+            </div>
+
+            {annual_discount_label && billingCycle === 'yearly' && (
+              <span
+                style={{
+                  marginLeft: '16px',
+                  backgroundColor: `${theme?.colors?.accentColor || '#3b82f6'}20`,
+                  color: theme?.colors?.accentColor || '#3b82f6',
+                  padding: '4px 12px',
+                  borderRadius: '9999px',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                }}
+              >
+                {annual_discount_label}
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Pricing Cards Grid */}
         <div className={`grid gap-8 ${gridClass}`}>
           {tiers.map((tier: Tier) => {
-            const colors = getPricingColors(uiBlockTheme, tier.highlighted);
+            const colors = getPricingColors(uiBlockTheme, tier.is_popular);
+            const currentPrice = billingCycle === 'monthly' ? tier.monthly_price : tier.yearly_price;
+            const savingsPercent = calculateSavings(tier.monthly_price, tier.yearly_price);
 
             return (
-              <div key={tier.id} className={`relative h-full ${tier.highlighted ? 'transform scale-105 z-10' : ''}`}>
-                {/* Highlighted Badge */}
-                {tier.highlighted && (
+              <div key={tier.id} className={`relative ${tier.is_popular ? 'transform scale-105 z-10' : ''}`}>
+                {/* Popular Badge */}
+                {tier.is_popular && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-20">
                     <span
                       style={{
@@ -199,16 +249,32 @@ export default function TierCardsPublished(props: LayoutComponentProps) {
                           clipRule="evenodd"
                         />
                       </svg>
-                      {highlighted_label}
+                      Most Popular
                     </span>
+                  </div>
+                )}
+
+                {/* Annual Savings Badge */}
+                {billingCycle === 'yearly' && savingsPercent > 0 && (
+                  <div
+                    className="absolute -top-3 right-4 z-20"
+                    style={{
+                      backgroundColor: theme?.colors?.accentColor || '#3b82f6',
+                      color: '#ffffff',
+                      padding: '4px 12px',
+                      borderRadius: '9999px',
+                      fontSize: '0.75rem',
+                      fontWeight: '600',
+                    }}
+                  >
+                    Save {savingsPercent}%
                   </div>
                 )}
 
                 {/* Card */}
                 <div
-                  className="relative h-full flex flex-col p-8 rounded-2xl border-2 transition-all duration-300"
+                  className="relative h-full p-8 bg-white rounded-2xl border-2 transition-all duration-300"
                   style={{
-                    backgroundColor: colors.bg,
                     borderColor: colors.border,
                     boxShadow: colors.shadow,
                   }}
@@ -226,20 +292,29 @@ export default function TierCardsPublished(props: LayoutComponentProps) {
                     </h3>
                   </div>
 
-                  {/* Price + Period */}
+                  {/* Price Display */}
                   <div className="text-center mb-4">
                     <div className="flex items-baseline justify-center">
                       <span
                         style={{
-                          fontSize: '2.25rem',
+                          fontSize: 'clamp(2rem, 4vw, 2.5rem)',
                           fontWeight: 'bold',
                           color: textColors.heading,
                         }}
                       >
-                        {tier.price}
+                        {currentPrice}
                       </span>
-                      <span style={{ color: textColors.muted, marginLeft: '4px' }}>{tier.period}</span>
+                      {!currentPrice.toLowerCase().includes('contact') && (
+                        <span style={{ color: textColors.muted, marginLeft: '4px' }}>
+                          /{billingCycle === 'monthly' ? 'month' : 'year'}
+                        </span>
+                      )}
                     </div>
+                    {billingCycle === 'yearly' && !currentPrice.toLowerCase().includes('contact') && (
+                      <div style={{ fontSize: '0.875rem', color: textColors.muted, marginTop: '4px' }}>
+                        ${Math.round(parseFloat(currentPrice.replace(/[^0-9.]/g, '')) / 12)}/month billed annually
+                      </div>
+                    )}
                   </div>
 
                   {/* Description */}
@@ -280,8 +355,8 @@ export default function TierCardsPublished(props: LayoutComponentProps) {
                   <div className="mt-auto">
                     <CTAButtonPublished
                       text={tier.cta_text}
-                      backgroundColor={tier.highlighted ? theme?.colors?.accentColor || '#3b82f6' : '#ffffff'}
-                      textColor={tier.highlighted ? '#ffffff' : theme?.colors?.accentColor || '#3b82f6'}
+                      backgroundColor={tier.is_popular ? theme?.colors?.accentColor || '#3b82f6' : '#ffffff'}
+                      textColor={tier.is_popular ? '#ffffff' : theme?.colors?.accentColor || '#3b82f6'}
                       className="w-full shadow-lg"
                     />
                   </div>
@@ -291,15 +366,10 @@ export default function TierCardsPublished(props: LayoutComponentProps) {
           })}
         </div>
 
-        {/* Footer - Billing Note & Guarantee */}
-        {(billing_note || guarantee_text) && (
-          <div className="mt-12 text-center space-y-2">
-            {billing_note && (
-              <p style={{ fontSize: '0.875rem', color: textColors.muted }}>{billing_note}</p>
-            )}
-            {guarantee_text && (
-              <p style={{ fontSize: '0.875rem', fontWeight: '500', color: textColors.muted }}>{guarantee_text}</p>
-            )}
+        {/* Billing Note */}
+        {billing_note && (
+          <div className="mt-8 text-center">
+            <p style={{ fontSize: '0.875rem', color: textColors.muted }}>{billing_note}</p>
           </div>
         )}
       </div>

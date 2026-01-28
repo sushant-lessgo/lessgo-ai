@@ -513,6 +513,9 @@ module.exports = {
   'lg:grid-cols-6',
   // Grid alignment utilities for MetricTiles dynamic spacing
   'justify-items-center',
+  // SplitAlternating order classes for alternation
+  'lg:order-1',
+  'lg:order-2',
   
   // ✅ Variable-based structural classes (NEW - replaces massive color patterns)
   'bg-pattern-primary',

@@ -1,64 +1,65 @@
+// components/layout/TwoColumnFAQ.tsx
+// V2 Schema - Clean array format, no numbered fields or pipe strings
+
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
+import {
+  EditableAdaptiveHeadline,
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
+// FAQ item structure (V2 - clean array format)
+interface FAQItem {
+  id: string;
+  question: string;
+  answer: string;
+}
+
+// Content interface (V2 - arrays, not numbered fields)
 interface TwoColumnFAQContent {
   headline: string;
   subheadline?: string;
-  // Left column Q&A (up to 3 items)
-  left_question_1: string;
-  left_answer_1: string;
-  left_question_2: string;
-  left_answer_2: string;
-  left_question_3: string;
-  left_answer_3: string;
-  // Right column Q&A (up to 3 items)
-  right_question_1: string;
-  right_answer_1: string;
-  right_question_2: string;
-  right_answer_2: string;
-  right_question_3: string;
-  right_answer_3: string;
-  // Legacy fields for backward compatibility
-  questions_left?: string;
-  answers_left?: string;
-  questions_right?: string;
-  answers_right?: string;
+  faq_items: FAQItem[];
+  contact_prompt?: string;
+  cta_text?: string;
+  supporting_text?: string;
 }
 
+// Content schema - defines structure and defaults
 const CONTENT_SCHEMA = {
-  headline: { 
-    type: 'string' as const, 
-    default: 'Frequently Asked Questions' 
+  headline: {
+    type: 'string' as const,
+    default: 'Frequently Asked Questions'
   },
-  subheadline: { 
-    type: 'string' as const, 
-    default: 'Everything you need to know about our platform' 
+  subheadline: {
+    type: 'string' as const,
+    default: 'Everything you need to know about our platform'
   },
-  // Left column Q&A
-  left_question_1: { type: 'string' as const, default: 'How does the pricing work?' },
-  left_answer_1: { type: 'string' as const, default: 'Our pricing is simple and transparent. Choose from monthly or annual plans, with discounts for annual billing. All plans include core features with no hidden fees.' },
-  left_question_2: { type: 'string' as const, default: 'Is there a free trial available?' },
-  left_answer_2: { type: 'string' as const, default: 'Yes! We offer a 14-day free trial with full access to all features. No credit card required to start your trial.' },
-  left_question_3: { type: 'string' as const, default: 'Can I cancel my subscription anytime?' },
-  left_answer_3: { type: 'string' as const, default: 'Absolutely. You can cancel your subscription at any time from your account settings. There are no cancellation fees or long-term commitments.' },
-  // Right column Q&A
-  right_question_1: { type: 'string' as const, default: 'What kind of support do you offer?' },
-  right_answer_1: { type: 'string' as const, default: 'We provide 24/7 customer support via live chat and email. Premium plans also include priority support and dedicated account managers.' },
-  right_question_2: { type: 'string' as const, default: 'Do you integrate with other tools?' },
-  right_answer_2: { type: 'string' as const, default: 'Yes, we integrate with 50+ popular tools including Slack, Google Workspace, Microsoft Teams, and more. Custom integrations are available for enterprise plans.' },
-  right_question_3: { type: 'string' as const, default: 'Is my data secure?' },
-  right_answer_3: { type: 'string' as const, default: 'Security is our top priority. We use bank-level encryption, regular security audits, and are SOC 2 compliant. Your data is always encrypted in transit and at rest.' },
-  // Legacy fields for backward compatibility
-  questions_left: { type: 'string' as const, default: '' },
-  answers_left: { type: 'string' as const, default: '' },
-  questions_right: { type: 'string' as const, default: '' },
-  answers_right: { type: 'string' as const, default: '' }
+  faq_items: {
+    type: 'array' as const,
+    default: [
+      { id: 'faq-1', question: 'How does the pricing work?', answer: 'Our pricing is simple and transparent. Choose from monthly or annual plans, with discounts for annual billing. All plans include core features with no hidden fees.' },
+      { id: 'faq-2', question: 'Is there a free trial available?', answer: 'Yes! We offer a 14-day free trial with full access to all features. No credit card required to start your trial.' },
+      { id: 'faq-3', question: 'Can I cancel my subscription anytime?', answer: 'Absolutely. You can cancel your subscription at any time from your account settings. There are no cancellation fees or long-term commitments.' },
+      { id: 'faq-4', question: 'What kind of support do you offer?', answer: 'We provide 24/7 customer support via live chat and email. Premium plans also include priority support and dedicated account managers.' },
+      { id: 'faq-5', question: 'Do you integrate with other tools?', answer: 'Yes, we integrate with 50+ popular tools including Slack, Google Workspace, Microsoft Teams, and more. Custom integrations are available for enterprise plans.' },
+      { id: 'faq-6', question: 'Is my data secure?', answer: 'Security is our top priority. We use bank-level encryption, regular security audits, and are SOC 2 compliant. Your data is always encrypted in transit and at rest.' },
+    ]
+  },
+  contact_prompt: {
+    type: 'string' as const,
+    default: ''
+  },
+  cta_text: {
+    type: 'string' as const,
+    default: ''
+  },
+  supporting_text: {
+    type: 'string' as const,
+    default: ''
+  }
 };
 
 export default function TwoColumnFAQ(props: LayoutComponentProps) {
@@ -77,53 +78,100 @@ export default function TwoColumnFAQ(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
-  // Helper function to get column FAQ items
-  const getColumnFAQItems = (column: 'left' | 'right') => {
-    const items = [];
-    
-    // Check individual fields first (preferred)
-    for (let i = 1; i <= 3; i++) {
-      const questionKey = `${column}_question_${i}` as keyof TwoColumnFAQContent;
-      const answerKey = `${column}_answer_${i}` as keyof TwoColumnFAQContent;
-      
-      const question = blockContent[questionKey];
-      const answer = blockContent[answerKey];
-      
-      if (question && question.trim() !== '' && question !== '___REMOVED___') {
-        items.push({
-          question: question.trim(),
-          answer: (answer && answer !== '___REMOVED___') ? answer.trim() : '',
-          index: i,
-          column
-        });
-      }
-    }
-    
-    // Fallback to legacy format if no individual items found
-    if (items.length === 0) {
-      const questionsKey = `questions_${column}` as keyof TwoColumnFAQContent;
-      const answersKey = `answers_${column}` as keyof TwoColumnFAQContent;
-      
-      const questions = blockContent[questionsKey]?.split('|').map(q => q.trim()).filter(Boolean) || [];
-      const answers = blockContent[answersKey]?.split('|').map(a => a.trim()).filter(Boolean) || [];
-      
-      questions.forEach((question, index) => {
-        items.push({
-          question,
-          answer: answers[index] || '',
-          index: index + 1,
-          column
-        });
-      });
-    }
-    
-    return items;
+  // Get FAQ items from content (direct array access)
+  const faqItems: FAQItem[] = blockContent.faq_items || CONTENT_SCHEMA.faq_items.default;
+
+  // Split items into two columns (first half = left, second half = right)
+  const midpoint = Math.ceil(faqItems.length / 2);
+  const leftItems = faqItems.slice(0, midpoint);
+  const rightItems = faqItems.slice(midpoint);
+
+  // Handle question edit
+  const handleQuestionEdit = (id: string, value: string) => {
+    const updatedItems = faqItems.map(item =>
+      item.id === id ? { ...item, question: value } : item
+    );
+    (handleContentUpdate as any)('faq_items', updatedItems);
   };
-  
-  const leftItems = getColumnFAQItems('left');
-  const rightItems = getColumnFAQItems('right');
+
+  // Handle answer edit
+  const handleAnswerEdit = (id: string, value: string) => {
+    const updatedItems = faqItems.map(item =>
+      item.id === id ? { ...item, answer: value } : item
+    );
+    (handleContentUpdate as any)('faq_items', updatedItems);
+  };
+
+  // Handle remove item
+  const handleRemoveItem = (id: string) => {
+    const updatedItems = faqItems.filter(item => item.id !== id);
+    (handleContentUpdate as any)('faq_items', updatedItems);
+  };
+
+  // Handle add new item
+  const handleAddItem = () => {
+    const newId = `faq-${Date.now()}`;
+    const updatedItems = [...faqItems, {
+      id: newId,
+      question: 'New question',
+      answer: 'New answer'
+    }];
+    (handleContentUpdate as any)('faq_items', updatedItems);
+  };
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
+
+  // Render a single FAQ item with divider
+  const renderFAQItem = (item: FAQItem) => (
+    <div key={item.id} className="relative group/faq-item space-y-3 pb-6 border-b border-gray-200 last:border-b-0 last:pb-0">
+      <EditableAdaptiveText
+        mode={mode}
+        value={item.question}
+        onEdit={(value) => handleQuestionEdit(item.id, value)}
+        backgroundType={backgroundType}
+        colorTokens={colorTokens}
+        variant="body"
+        className={`font-semibold ${dynamicTextColors?.heading || colorTokens.textPrimary}`}
+        style={getTextStyle('h3')}
+        placeholder="Enter question..."
+        sectionBackground={sectionBackground}
+        data-section-id={sectionId}
+        data-element-key={`faq_items.${item.id}.question`}
+      />
+
+      {(item.answer || mode === 'edit') && (
+        <EditableAdaptiveText
+          mode={mode}
+          value={item.answer}
+          onEdit={(value) => handleAnswerEdit(item.id, value)}
+          backgroundType={backgroundType}
+          colorTokens={colorTokens}
+          variant="body"
+          className={`leading-relaxed ${mutedTextColor}`}
+          placeholder="Enter answer..."
+          sectionBackground={sectionBackground}
+          data-section-id={sectionId}
+          data-element-key={`faq_items.${item.id}.answer`}
+        />
+      )}
+
+      {/* Remove button */}
+      {mode !== 'preview' && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            handleRemoveItem(item.id);
+          }}
+          className="opacity-0 group-hover/faq-item:opacity-100 absolute -top-1 -right-1 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm z-10"
+          title="Remove this item"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
+    </div>
+  );
 
   return (
     <LayoutSection
@@ -149,7 +197,7 @@ export default function TwoColumnFAQ(props: LayoutComponentProps) {
             elementKey="headline"
             sectionBackground={sectionBackground}
           />
-          
+
           {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
@@ -172,161 +220,81 @@ export default function TwoColumnFAQ(props: LayoutComponentProps) {
         </div>
 
         {/* Two Column Layout */}
-        <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
+        <div className="grid md:grid-cols-2 gap-12 lg:gap-16">
           {/* Left Column */}
-          <div className="space-y-6">
-            {leftItems.map((item) => (
-              <div key={`left-${item.index}`} className="relative group/left-item space-y-3">
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={item.question}
-                  onEdit={(value) => handleContentUpdate(`left_question_${item.index}` as keyof TwoColumnFAQContent, value)}
-                  backgroundType={backgroundType}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className={`font-semibold ${dynamicTextColors?.heading || colorTokens.textPrimary}`}
-                  style={getTextStyle('h3')}
-                  placeholder={`Question ${item.index}`}
-                  sectionBackground={sectionBackground}
-                  data-section-id={sectionId}
-                  data-element-key={`left_question_${item.index}`}
-                />
-                
-                {(item.answer || mode === 'edit') && (
-                  <EditableAdaptiveText
-                    mode={mode}
-                    value={item.answer}
-                    onEdit={(value) => handleContentUpdate(`left_answer_${item.index}` as keyof TwoColumnFAQContent, value)}
-                    backgroundType={backgroundType}
-                    colorTokens={colorTokens}
-                    variant="body"
-                    className={`leading-relaxed ${mutedTextColor}`}
-                    placeholder={`Answer ${item.index}...`}
-                    sectionBackground={sectionBackground}
-                    data-section-id={sectionId}
-                    data-element-key={`left_answer_${item.index}`}
-                  />
-                )}
-                
-                {/* Remove button */}
-                {mode !== 'preview' && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleContentUpdate(`left_question_${item.index}` as keyof TwoColumnFAQContent, '___REMOVED___');
-                      handleContentUpdate(`left_answer_${item.index}` as keyof TwoColumnFAQContent, '___REMOVED___');
-                    }}
-                    className="opacity-0 group-hover/left-item:opacity-100 absolute -top-1 -right-1 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm z-10"
-                    title="Remove this item"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                )}
-              </div>
-            ))}
-            
-            {/* Add button for left column */}
-            {mode !== 'preview' && leftItems.length < 3 && (
-              <button
-                onClick={() => {
-                  for (let i = 1; i <= 3; i++) {
-                    const questionKey = `left_question_${i}` as keyof TwoColumnFAQContent;
-                    if (!blockContent[questionKey] || blockContent[questionKey] === '' || blockContent[questionKey] === '___REMOVED___') {
-                      handleContentUpdate(questionKey, 'New question');
-                      handleContentUpdate(`left_answer_${i}` as keyof TwoColumnFAQContent, 'New answer');
-                      break;
-                    }
-                  }
-                }}
-                className="flex items-center space-x-2 text-sm text-blue-600 hover:text-blue-800 transition-colors"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                <span>Add FAQ item</span>
-              </button>
-            )}
+          <div className="space-y-8">
+            {leftItems.map(renderFAQItem)}
           </div>
 
           {/* Right Column */}
-          <div className="space-y-6">
-            {rightItems.map((item) => (
-              <div key={`right-${item.index}`} className="relative group/right-item space-y-3">
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={item.question}
-                  onEdit={(value) => handleContentUpdate(`right_question_${item.index}` as keyof TwoColumnFAQContent, value)}
-                  backgroundType={backgroundType}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className={`font-semibold ${dynamicTextColors?.heading || colorTokens.textPrimary}`}
-                  style={getTextStyle('h3')}
-                  placeholder={`Question ${item.index}`}
-                  sectionBackground={sectionBackground}
-                  data-section-id={sectionId}
-                  data-element-key={`right_question_${item.index}`}
-                />
-                
-                {(item.answer || mode === 'edit') && (
-                  <EditableAdaptiveText
-                    mode={mode}
-                    value={item.answer}
-                    onEdit={(value) => handleContentUpdate(`right_answer_${item.index}` as keyof TwoColumnFAQContent, value)}
-                    backgroundType={backgroundType}
-                    colorTokens={colorTokens}
-                    variant="body"
-                    className={`leading-relaxed ${mutedTextColor}`}
-                    placeholder={`Answer ${item.index}...`}
-                    sectionBackground={sectionBackground}
-                    data-section-id={sectionId}
-                    data-element-key={`right_answer_${item.index}`}
-                  />
-                )}
-                
-                {/* Remove button */}
-                {mode !== 'preview' && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleContentUpdate(`right_question_${item.index}` as keyof TwoColumnFAQContent, '___REMOVED___');
-                      handleContentUpdate(`right_answer_${item.index}` as keyof TwoColumnFAQContent, '___REMOVED___');
-                    }}
-                    className="opacity-0 group-hover/right-item:opacity-100 absolute -top-1 -right-1 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm z-10"
-                    title="Remove this item"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                )}
-              </div>
-            ))}
-            
-            {/* Add button for right column */}
-            {mode !== 'preview' && rightItems.length < 3 && (
-              <button
-                onClick={() => {
-                  for (let i = 1; i <= 3; i++) {
-                    const questionKey = `right_question_${i}` as keyof TwoColumnFAQContent;
-                    if (!blockContent[questionKey] || blockContent[questionKey] === '' || blockContent[questionKey] === '___REMOVED___') {
-                      handleContentUpdate(questionKey, 'New question');
-                      handleContentUpdate(`right_answer_${i}` as keyof TwoColumnFAQContent, 'New answer');
-                      break;
-                    }
-                  }
-                }}
-                className="flex items-center space-x-2 text-sm text-blue-600 hover:text-blue-800 transition-colors"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                <span>Add FAQ item</span>
-              </button>
-            )}
+          <div className="space-y-8">
+            {rightItems.map(renderFAQItem)}
           </div>
         </div>
+
+        {/* Add new FAQ button */}
+        {mode !== 'preview' && faqItems.length < 10 && (
+          <div className="mt-8 flex justify-center">
+            <button
+              onClick={handleAddItem}
+              className="flex items-center space-x-2 text-sm text-blue-600 hover:text-blue-800 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Add FAQ item</span>
+            </button>
+          </div>
+        )}
+
+        {/* Contact CTA Footer */}
+        {(blockContent.contact_prompt || blockContent.cta_text || mode === 'edit') && (
+          <div className="mt-10 pt-6 text-center">
+            <EditableAdaptiveText
+              mode={mode}
+              value={blockContent.contact_prompt || ''}
+              onEdit={(value) => handleContentUpdate('contact_prompt', value)}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+              colorTokens={colorTokens}
+              variant="body"
+              className="mb-2"
+              placeholder="Still have questions?"
+              sectionId={sectionId}
+              elementKey="contact_prompt"
+              sectionBackground={sectionBackground}
+            />
+            {(blockContent.cta_text || mode === 'edit') && (
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.cta_text || ''}
+                onEdit={(value) => handleContentUpdate('cta_text', value)}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                colorTokens={colorTokens}
+                variant="body"
+                className="font-medium text-blue-600 hover:underline cursor-pointer"
+                placeholder="Contact our support team"
+                sectionId={sectionId}
+                elementKey="cta_text"
+                sectionBackground={sectionBackground}
+              />
+            )}
+            {(blockContent.supporting_text || mode === 'edit') && (
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.supporting_text || ''}
+                onEdit={(value) => handleContentUpdate('supporting_text', value)}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                colorTokens={colorTokens}
+                variant="muted"
+                className="mt-2 text-sm"
+                placeholder="We typically respond within 24 hours"
+                sectionId={sectionId}
+                elementKey="supporting_text"
+                sectionBackground={sectionBackground}
+              />
+            )}
+          </div>
+        )}
       </div>
     </LayoutSection>
   );
@@ -339,46 +307,23 @@ export const componentMeta = {
   tags: ['faq', 'two-column', 'organized', 'technical'],
   defaultBackgroundType: 'primary' as const,
   complexity: 'simple',
-  estimatedBuildTime: '10 minutes',
-  
+
+  // V2 Schema - clean array format
   contentFields: [
     { key: 'headline', label: 'Section Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Section Description', type: 'textarea', required: false },
-    // Left column Q&A
-    { key: 'left_question_1', label: 'Left Question 1', type: 'text', required: true },
-    { key: 'left_answer_1', label: 'Left Answer 1', type: 'textarea', required: true },
-    { key: 'left_question_2', label: 'Left Question 2', type: 'text', required: true },
-    { key: 'left_answer_2', label: 'Left Answer 2', type: 'textarea', required: true },
-    { key: 'left_question_3', label: 'Left Question 3', type: 'text', required: false },
-    { key: 'left_answer_3', label: 'Left Answer 3', type: 'textarea', required: false },
-    // Right column Q&A
-    { key: 'right_question_1', label: 'Right Question 1', type: 'text', required: true },
-    { key: 'right_answer_1', label: 'Right Answer 1', type: 'textarea', required: true },
-    { key: 'right_question_2', label: 'Right Question 2', type: 'text', required: true },
-    { key: 'right_answer_2', label: 'Right Answer 2', type: 'textarea', required: true },
-    { key: 'right_question_3', label: 'Right Question 3', type: 'text', required: false },
-    { key: 'right_answer_3', label: 'Right Answer 3', type: 'textarea', required: false },
-    // Column titles
-    { key: 'left_column_title', label: 'Left Column Title', type: 'text', required: false },
-    { key: 'right_column_title', label: 'Right Column Title', type: 'text', required: false },
-    // Legacy fields for backward compatibility
-    { key: 'questions_left', label: 'Left Questions (legacy pipe separated)', type: 'textarea', required: false },
-    { key: 'answers_left', label: 'Left Answers (legacy pipe separated)', type: 'textarea', required: false },
-    { key: 'questions_right', label: 'Right Questions (legacy pipe separated)', type: 'textarea', required: false },
-    { key: 'answers_right', label: 'Right Answers (legacy pipe separated)', type: 'textarea', required: false },
-    { key: 'questions', label: 'Questions (legacy pipe separated)', type: 'textarea', required: false },
-    { key: 'answers', label: 'Answers (legacy pipe separated)', type: 'textarea', required: false },
-    { key: 'column_titles', label: 'Column Titles (legacy pipe separated)', type: 'text', required: false }
+    { key: 'faq_items', label: 'FAQ Items', type: 'array', required: true }
   ],
-  
+
   features: [
     'Two-column layout for better organization',
     'Automatic text color adaptation',
     'Clean, scannable format',
-    'Ideal for 6-10 FAQ items',
+    'Ideal for 4-10 FAQ items',
+    'Array-based item management',
     'Responsive design'
   ],
-  
+
   useCases: [
     'Technical documentation FAQs',
     'Enterprise software questions',

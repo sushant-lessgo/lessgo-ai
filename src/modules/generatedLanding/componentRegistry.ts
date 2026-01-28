@@ -116,7 +116,7 @@ import SideBySideBlocks from '@/modules/UIBlocks/BeforeAfter/SideBySideBlock';
 // V3 ARCHIVED: import SideBySidePhotoStory from '@/modules/UIBlocks/FounderNote/SideBySidePhotoStory';
 // V3 ARCHIVED: import SideBySideSplit from '@/modules/UIBlocks/Problem/SideBySideSplit';
 // V3 ARCHIVED: import SkepticToBelieverSteps from '@/modules/UIBlocks/ObjectionHandle/SkepticToBelieverSteps';
-import SliderPricing from '@/modules/UIBlocks/Pricing/SliderPricing';
+// V3 ARCHIVED: import SliderPricing from '@/modules/UIBlocks/Pricing/SliderPricing';
 // V3 ARCHIVED: import SocialProofStrip from '@/modules/UIBlocks/SocialProof/SocialProofStrip';
 import SplitCard from '@/modules/UIBlocks/BeforeAfter/SplitCard';
 import StackedHighlights from '@/modules/UIBlocks/UniqueMechanism/StackedHighlights';
@@ -224,7 +224,7 @@ export const componentRegistry: ComponentRegistry = {
     ToggleableMonthlyYearly: ToggleableMonthlyYearly,
     // V3 ARCHIVED: FeatureMatrix: FeatureMatrix,
     // V3 ARCHIVED: SegmentBasedPricing: SegmentBasedPricing,
-    SliderPricing: SliderPricing,
+    // V3 ARCHIVED: SliderPricing: SliderPricing,
     CallToQuotePlan: CallToQuotePlan,
     // V3 ARCHIVED: CardWithTestimonial: CardWithTestimonial,
     // V3 ARCHIVED: MiniStackedCards: MiniStackedCards,

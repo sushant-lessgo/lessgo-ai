@@ -1,6 +1,5 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useImageToolbar } from '@/hooks/useImageToolbar';
 import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
@@ -21,15 +20,12 @@ interface SplitCardContent {
   after_description: string;
   before_visual?: string;
   after_visual?: string;
-  premium_features_text: string;
   upgrade_text: string;
   before_placeholder_text: string;
   after_placeholder_text: string;
-  premium_badge_text: string;
   before_icon?: string;
   after_icon?: string;
   upgrade_icon?: string;
-  premium_feature_icon?: string;
   subheadline?: string;
   summary_text?: string;
 }
@@ -44,15 +40,12 @@ const CONTENT_SCHEMA = {
   after_visual: { type: 'string' as const, default: '/After default.jpg' },
   subheadline: { type: 'string' as const, default: '' },
   summary_text: { type: 'string' as const, default: '' },
-  premium_features_text: { type: 'string' as const, default: 'Premium Features Included' },
   upgrade_text: { type: 'string' as const, default: 'Upgrade' },
   before_placeholder_text: { type: 'string' as const, default: 'Current State' },
   after_placeholder_text: { type: 'string' as const, default: 'Premium Result' },
-  premium_badge_text: { type: 'string' as const, default: 'Premium' },
   before_icon: { type: 'string' as const, default: '⚠️' },
   after_icon: { type: 'string' as const, default: '⭐' },
-  upgrade_icon: { type: 'string' as const, default: '➡️' },
-  premium_feature_icon: { type: 'string' as const, default: '✅' }
+  upgrade_icon: { type: 'string' as const, default: '➡️' }
 };
 
 const PremiumCard = React.memo(({
@@ -60,16 +53,14 @@ const PremiumCard = React.memo(({
   label,
   description,
   visual,
-  showImageToolbar,
   sectionId,
   mode,
   bodyLgStyle,
   handleContentUpdate,
   colorTokens,
+  dynamicTextColors,
   backgroundType,
   sectionBackground,
-  premiumFeaturesText,
-  premiumBadgeText,
   blockContent,
   handleImageToolbar,
   themeColors,
@@ -79,36 +70,26 @@ const PremiumCard = React.memo(({
   label: string;
   description: string;
   visual?: string;
-  showImageToolbar: any;
   sectionId: string;
   mode: 'preview' | 'edit';
   bodyLgStyle: React.CSSProperties;
   handleContentUpdate: (key: string, value: string) => void;
   colorTokens: any;
+  dynamicTextColors?: { heading?: string; body?: string; muted?: string };
   backgroundType: 'custom' | 'neutral' | 'primary' | 'secondary' | 'divider' | 'theme';
   sectionBackground: any;
-  premiumFeaturesText: string;
-  premiumBadgeText: string;
   blockContent: SplitCardContent;
   handleImageToolbar: (imageId: string, position: { x: number; y: number }) => void;
   themeColors: {
     beforeBorder: string;
     beforeLabel: string;
-    beforeDot: string;
-    beforeDotRing: string;
     afterBorder: string;
     afterRing: string;
     afterLabel: string;
-    afterDot: string;
-    afterDotRing: string;
-    afterBorderTop: string;
-    badgeGradient: string;
     beforePlaceholderBg: string;
     beforePlaceholderIcon: string;
     afterPlaceholderBg: string;
     afterPlaceholderIcon: string;
-    featureText: string;
-    featureIcon: string;
   };
   accentColor: string;
 }) => {
@@ -157,35 +138,6 @@ const PremiumCard = React.memo(({
       }}
     >
 
-      {type === 'after' && (
-        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
-          <div
-            className="text-white px-4 py-1 rounded-full text-xs font-semibold uppercase tracking-wide shadow-lg"
-            style={{ background: `linear-gradient(to right, ${accentColor}, ${accentColor}cc)` }}
-          >
-            <EditableAdaptiveText
-              mode={mode}
-              value={premiumBadgeText || ''}
-              onEdit={(value) => handleContentUpdate('premium_badge_text', value)}
-              backgroundType={backgroundType}
-              colorTokens={colorTokens}
-              variant="body"
-              textStyle={{
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                color: 'white'
-              }}
-              className="text-white text-xs font-semibold uppercase tracking-wide"
-              sectionId={sectionId}
-              elementKey="premium_badge_text"
-              sectionBackground={sectionBackground}
-            />
-          </div>
-        </div>
-      )}
-
       <div className="overflow-hidden rounded-t-xl">
         {visual && visual !== '' ? (
           <img
@@ -212,13 +164,6 @@ const PremiumCard = React.memo(({
 
       <div className="p-8">
         <div className="flex items-center mb-4">
-          <div
-            className="w-3 h-3 rounded-full mr-3 ring-4"
-            style={{
-              backgroundColor: type === 'before' ? themeColors.beforeDot : accentColor,
-              '--tw-ring-color': type === 'before' ? themeColors.beforeDotRing : `${accentColor}20`
-            } as React.CSSProperties}
-          />
           <EditableAdaptiveText
             mode={mode}
             value={label || ''}
@@ -244,49 +189,12 @@ const PremiumCard = React.memo(({
           backgroundType={backgroundType}
           colorTokens={colorTokens}
           variant="body"
-          className="text-gray-600 leading-relaxed"
+          className="leading-relaxed"
+          textStyle={{ color: dynamicTextColors?.body || '#4b5563' }}
           sectionId={sectionId}
           elementKey={type === 'before' ? 'before_description' : 'after_description'}
           sectionBackground={sectionBackground}
         />
-
-        {type === 'after' && (
-          <div
-            className="mt-6 pt-4 border-t"
-            style={{ borderColor: `${accentColor}20` }}
-          >
-            <div className="flex items-center" style={{ color: accentColor }}>
-              <IconEditableText
-                mode={mode}
-                value={blockContent.premium_feature_icon || '✅'}
-                onEdit={(value) => handleContentUpdate('premium_feature_icon', value)}
-                backgroundType={backgroundType}
-                colorTokens={colorTokens}
-                iconSize="sm"
-                className="text-sm mr-2"
-                sectionId={sectionId}
-                elementKey="premium_feature_icon"
-              />
-              <EditableAdaptiveText
-                mode={mode}
-                value={premiumFeaturesText || ''}
-                onEdit={(value) => handleContentUpdate('premium_features_text', value)}
-                backgroundType={backgroundType}
-                colorTokens={colorTokens}
-                variant="body"
-                textStyle={{
-                  fontSize: '0.875rem',
-                  fontWeight: 500,
-                  color: accentColor
-                }}
-                className="text-sm font-medium"
-                sectionId={sectionId}
-                elementKey="premium_features_text"
-                sectionBackground={sectionBackground}
-              />
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -325,67 +233,41 @@ export default function SplitCard(props: LayoutComponentProps) {
     warm: {
       beforeBorder: '#fed7aa',
       beforeLabel: '#c2410c',
-      beforeDot: '#f97316',
-      beforeDotRing: '#ffedd5',
       afterBorder: `${accentColor}40`,
       afterRing: `${accentColor}20`,
       afterLabel: accentColor,
-      afterDot: accentColor,
-      afterDotRing: `${accentColor}20`,
-      afterBorderTop: `${accentColor}20`,
-      badgeGradient: `from-[${accentColor}] to-[${accentColor}cc]`,
       beforePlaceholderBg: 'from-orange-100 to-orange-200',
       beforePlaceholderIcon: 'bg-orange-300',
       afterPlaceholderBg: 'from-blue-50 to-blue-100',
-      afterPlaceholderIcon: 'bg-blue-200',
-      featureText: accentColor,
-      featureIcon: `text-[${accentColor}]`
+      afterPlaceholderIcon: 'bg-blue-200'
     },
     cool: {
       beforeBorder: '#bfdbfe',
       beforeLabel: '#1e40af',
-      beforeDot: '#3b82f6',
-      beforeDotRing: '#dbeafe',
       afterBorder: `${accentColor}40`,
       afterRing: `${accentColor}20`,
       afterLabel: accentColor,
-      afterDot: accentColor,
-      afterDotRing: `${accentColor}20`,
-      afterBorderTop: `${accentColor}20`,
-      badgeGradient: `from-[${accentColor}] to-[${accentColor}cc]`,
       beforePlaceholderBg: 'from-blue-100 to-blue-200',
       beforePlaceholderIcon: 'bg-blue-300',
       afterPlaceholderBg: 'from-blue-50 to-blue-100',
-      afterPlaceholderIcon: 'bg-blue-200',
-      featureText: accentColor,
-      featureIcon: `text-[${accentColor}]`
+      afterPlaceholderIcon: 'bg-blue-200'
     },
     neutral: {
       beforeBorder: '#e5e7eb',
       beforeLabel: '#374151',
-      beforeDot: '#6b7280',
-      beforeDotRing: '#f3f4f6',
       afterBorder: `${accentColor}40`,
       afterRing: `${accentColor}20`,
       afterLabel: accentColor,
-      afterDot: accentColor,
-      afterDotRing: `${accentColor}20`,
-      afterBorderTop: `${accentColor}20`,
-      badgeGradient: `from-[${accentColor}] to-[${accentColor}cc]`,
       beforePlaceholderBg: 'from-gray-100 to-gray-200',
       beforePlaceholderIcon: 'bg-gray-300',
       afterPlaceholderBg: 'from-gray-50 to-gray-100',
-      afterPlaceholderIcon: 'bg-gray-200',
-      featureText: accentColor,
-      featureIcon: `text-[${accentColor}]`
+      afterPlaceholderIcon: 'bg-gray-200'
     }
   }[theme]);
 
   const themeColors = getCardColors(uiTheme);
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
 
-  const store = useEditStore();
-  const showImageToolbar = store.showImageToolbar;
   const handleImageToolbar = useImageToolbar();
 
   const safeBackgroundType = props.backgroundType === 'custom' ? 'neutral' : (props.backgroundType || 'neutral');
@@ -441,16 +323,14 @@ export default function SplitCard(props: LayoutComponentProps) {
               label={blockContent.before_label}
               description={blockContent.before_description}
               visual={blockContent.before_visual}
-              showImageToolbar={showImageToolbar}
               sectionId={sectionId}
               mode={mode}
               bodyLgStyle={bodyLgStyle}
               handleContentUpdate={handleContentUpdate}
               colorTokens={colorTokens}
+              dynamicTextColors={dynamicTextColors}
               backgroundType={safeBackgroundType}
               sectionBackground={sectionBackground}
-              premiumFeaturesText={blockContent.premium_features_text}
-              premiumBadgeText={blockContent.premium_badge_text}
               blockContent={blockContent}
               handleImageToolbar={handleImageToolbar}
               themeColors={themeColors}
@@ -520,16 +400,14 @@ export default function SplitCard(props: LayoutComponentProps) {
               label={blockContent.after_label}
               description={blockContent.after_description}
               visual={blockContent.after_visual}
-              showImageToolbar={showImageToolbar}
               sectionId={sectionId}
               mode={mode}
               bodyLgStyle={bodyLgStyle}
               handleContentUpdate={handleContentUpdate}
               colorTokens={colorTokens}
+              dynamicTextColors={dynamicTextColors}
               backgroundType={safeBackgroundType}
               sectionBackground={sectionBackground}
-              premiumFeaturesText={blockContent.premium_features_text}
-              premiumBadgeText={blockContent.premium_badge_text}
               blockContent={blockContent}
               handleImageToolbar={handleImageToolbar}
               themeColors={themeColors}

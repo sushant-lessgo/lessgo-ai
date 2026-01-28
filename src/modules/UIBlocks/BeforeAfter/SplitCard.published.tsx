@@ -26,9 +26,6 @@ function PremiumCardPublished({
   description,
   visual,
   placeholderIcon,
-  premiumFeaturesText,
-  premiumBadgeText,
-  premiumFeatureIcon,
   themeColors,
   textColors,
   bodyTypography,
@@ -39,14 +36,9 @@ function PremiumCardPublished({
   description: string;
   visual?: string;
   placeholderIcon: string;
-  premiumFeaturesText?: string;
-  premiumBadgeText?: string;
-  premiumFeatureIcon?: string;
   themeColors: {
     beforeBorder: string;
     beforeLabel: string;
-    beforeDot: string;
-    beforeDotRing: string;
     beforePlaceholderBg: string;
     beforePlaceholderIcon: string;
     afterPlaceholderBg: string;
@@ -99,18 +91,6 @@ function PremiumCardPublished({
       }}
     >
 
-      {/* Premium Badge (after card only) */}
-      {type === 'after' && premiumBadgeText && (
-        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
-          <div
-            className="text-white px-4 py-1 rounded-full text-xs font-semibold uppercase tracking-wide shadow-lg"
-            style={{ background: `linear-gradient(to right, ${accentColor}, ${accentColor}cc)` }}
-          >
-            {premiumBadgeText}
-          </div>
-        </div>
-      )}
-
       {/* Visual or Placeholder */}
       <div className="overflow-hidden rounded-t-xl">
         {visual && visual !== '' ? (
@@ -126,15 +106,8 @@ function PremiumCardPublished({
 
       {/* Card Content */}
       <div className="p-8">
-        {/* Label with Dot */}
+        {/* Label */}
         <div className="flex items-center mb-4">
-          <div
-            className="w-3 h-3 rounded-full mr-3"
-            style={{
-              backgroundColor: type === 'before' ? themeColors.beforeDot : accentColor,
-              boxShadow: `0 0 0 4px ${type === 'before' ? themeColors.beforeDotRing : `${accentColor}20`}`
-            }}
-          />
           <TextPublished
             value={label}
             element="span"
@@ -154,35 +127,6 @@ function PremiumCardPublished({
             lineHeight: '1.75rem'
           }}
         />
-
-        {/* Premium Features (after card only) */}
-        {type === 'after' && premiumFeaturesText && (
-          <div
-            className="mt-6 pt-4 border-t"
-            style={{ borderColor: `${accentColor}20` }}
-          >
-            <div className="flex items-center" style={{ color: accentColor }}>
-              {premiumFeatureIcon && (
-                <div className="mr-2">
-                  <IconPublished
-                    icon={premiumFeatureIcon}
-                    size={16}
-                    className="text-sm"
-                  />
-                </div>
-              )}
-              <TextPublished
-                value={premiumFeaturesText}
-                element="span"
-                style={{
-                  fontSize: '0.875rem',
-                  fontWeight: 500,
-                  color: accentColor
-                }}
-              />
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -201,15 +145,12 @@ export default function SplitCardPublished(props: LayoutComponentProps) {
   const before_visual = props.before_visual || '';
   const after_visual = props.after_visual || '';
   const summary_text = (props as any).summary_text || '';
-  const premium_features_text = props.premium_features_text || 'Premium Features Included';
   const upgrade_text = props.upgrade_text || 'Upgrade';
-  const premium_badge_text = props.premium_badge_text || 'Premium';
 
   // Extract icons
   const before_icon = props.before_icon || '⚠️';
   const after_icon = props.after_icon || '⭐';
   const upgrade_icon = props.upgrade_icon || '➡️';
-  const premium_feature_icon = props.premium_feature_icon || '✅';
 
   // Detect UIBlock theme
   const uiTheme: UIBlockTheme = props.manualThemeOverride ||
@@ -223,8 +164,6 @@ export default function SplitCardPublished(props: LayoutComponentProps) {
     warm: {
       beforeBorder: '#fed7aa',
       beforeLabel: '#c2410c',
-      beforeDot: '#f97316',
-      beforeDotRing: '#ffedd5',
       beforePlaceholderBg: 'linear-gradient(to bottom right, #ffedd5, #fed7aa)',
       beforePlaceholderIcon: '#fdba74',
       afterPlaceholderBg: `linear-gradient(to bottom right, ${accentColor}10, ${accentColor}20)`,
@@ -233,8 +172,6 @@ export default function SplitCardPublished(props: LayoutComponentProps) {
     cool: {
       beforeBorder: '#bfdbfe',
       beforeLabel: '#1e40af',
-      beforeDot: '#3b82f6',
-      beforeDotRing: '#dbeafe',
       beforePlaceholderBg: 'linear-gradient(to bottom right, #dbeafe, #bfdbfe)',
       beforePlaceholderIcon: '#93c5fd',
       afterPlaceholderBg: `linear-gradient(to bottom right, ${accentColor}10, ${accentColor}20)`,
@@ -243,8 +180,6 @@ export default function SplitCardPublished(props: LayoutComponentProps) {
     neutral: {
       beforeBorder: '#e5e7eb',
       beforeLabel: '#374151',
-      beforeDot: '#6b7280',
-      beforeDotRing: '#f3f4f6',
       beforePlaceholderBg: 'linear-gradient(to bottom right, #f3f4f6, #e5e7eb)',
       beforePlaceholderIcon: '#d1d5db',
       afterPlaceholderBg: `linear-gradient(to bottom right, ${accentColor}10, ${accentColor}20)`,
@@ -363,9 +298,6 @@ export default function SplitCardPublished(props: LayoutComponentProps) {
               description={after_description}
               visual={after_visual}
               placeholderIcon={after_icon}
-              premiumFeaturesText={premium_features_text}
-              premiumBadgeText={premium_badge_text}
-              premiumFeatureIcon={premium_feature_icon}
               themeColors={themeColors}
               textColors={textColors}
               bodyTypography={bodyTypography}

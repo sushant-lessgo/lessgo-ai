@@ -251,7 +251,6 @@ export function getLayoutComplexity(layout: string): FlowComplexity {
     'AccordionSteps',
     'VerticalTimeline',
     'SegmentedFAQTabs',
-    'SliderPricing',
     'MethodologyBreakdown'
   ];
 

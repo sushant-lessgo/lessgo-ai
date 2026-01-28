@@ -88,6 +88,7 @@ const PainPointItem = ({
   mode,
   sectionId,
   colorTokens,
+  dynamicTextColors,
   backgroundType,
   sectionBackground,
   onItemUpdate,
@@ -100,6 +101,7 @@ const PainPointItem = ({
   mode: 'edit' | 'preview';
   sectionId: string;
   colorTokens: any;
+  dynamicTextColors?: { heading?: string; body?: string; muted?: string };
   backgroundType: any;
   sectionBackground: any;
   onItemUpdate: (index: number, field: keyof PainItem, value: string) => void;
@@ -147,7 +149,8 @@ const PainPointItem = ({
             backgroundType={backgroundType}
             colorTokens={colorTokens}
             variant="body"
-            className="font-semibold text-xl text-gray-900 leading-relaxed"
+            className="font-semibold text-xl leading-relaxed"
+            textStyle={{ color: dynamicTextColors?.heading || '#111827' }}
             placeholder="Enter pain point..."
             sectionBackground={sectionBackground}
             data-section-id={sectionId}
@@ -165,7 +168,8 @@ const PainPointItem = ({
               backgroundType={backgroundType}
               colorTokens={colorTokens}
               variant="body"
-              className={`text-gray-600 text-base leading-relaxed ${!painItem.description && mode === 'edit' ? 'opacity-50 italic' : ''}`}
+              className={`text-base leading-relaxed ${!painItem.description && mode === 'edit' ? 'opacity-50 italic' : ''}`}
+              textStyle={{ color: dynamicTextColors?.body || '#4b5563' }}
               placeholder="Add optional description to elaborate on this pain point..."
               sectionBackground={sectionBackground}
               data-section-id={sectionId}
@@ -206,6 +210,7 @@ export default function StackedPainBullets(props: LayoutComponentProps) {
     mode,
     blockContent,
     colorTokens,
+    dynamicTextColors,
     sectionBackground,
     backgroundType,
     handleContentUpdate
@@ -348,6 +353,7 @@ export default function StackedPainBullets(props: LayoutComponentProps) {
               mode={mode}
               sectionId={sectionId}
               colorTokens={colorTokens}
+              dynamicTextColors={dynamicTextColors}
               backgroundType={backgroundType}
               sectionBackground={sectionBackground}
               onItemUpdate={handleItemUpdate}

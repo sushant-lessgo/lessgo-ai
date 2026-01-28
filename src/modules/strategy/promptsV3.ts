@@ -139,7 +139,6 @@ Make layout decisions for sections that need judgment.
 - pricingUIBlock: Based on pricing model (look at the offer):
   - "TierCards": Default, simple tiers
   - "ToggleableMonthlyYearly": Subscription with monthly + yearly options
-  - "SliderPricing": Usage-based pricing
   - "CallToQuotePlan": Enterprise / no public pricing / "contact us"
 
 - objectionHandleUIBlock: Based on objection nature:

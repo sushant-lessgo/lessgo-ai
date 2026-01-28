@@ -72,7 +72,7 @@ const pricingTags: UIBlockTagMap = {
   ToggleableMonthlyYearly: ['text-heavy'],
   // V3 ARCHIVED: FeatureMatrix: ['text-heavy'],
   // V3 ARCHIVED: SegmentBasedPricing: ['text-heavy', 'persona-aware'],
-  SliderPricing: ['text-heavy'],
+  // V3 ARCHIVED: SliderPricing: ['text-heavy'],
   CallToQuotePlan: ['text-heavy'],
   // V3 ARCHIVED: CardWithTestimonial: ['text-heavy'],
   // V3 ARCHIVED: MiniStackedCards: ['text-heavy'],
@@ -350,7 +350,7 @@ export const uiblockOrientations: Record<string, UIBlockOrientation> = {
   // Pricing
   TierCards: 'horizontal',
   ToggleableMonthlyYearly: 'horizontal',
-  SliderPricing: 'vertical',
+  // V3 ARCHIVED: SliderPricing: 'vertical',
   CallToQuotePlan: 'stack',
 
   // ObjectionHandle

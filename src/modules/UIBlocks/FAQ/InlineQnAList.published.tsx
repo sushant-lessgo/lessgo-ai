@@ -1,5 +1,6 @@
 /**
  * InlineQnAList - Published Version
+ * V2 Schema - Clean array format, no numbered fields or pipe strings
  *
  * Server-safe component with ZERO hook imports
  * Used by componentRegistry.published.ts for SSR rendering
@@ -11,25 +12,11 @@ import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publ
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 
-interface InlineQnAListContent {
-  headline: string;
-  subheadline?: string;
-  // Individual Q&A fields (up to 6 items)
-  question_1: string;
-  answer_1: string;
-  question_2: string;
-  answer_2: string;
-  question_3: string;
-  answer_3: string;
-  question_4: string;
-  answer_4: string;
-  question_5: string;
-  answer_5: string;
-  question_6: string;
-  answer_6: string;
-  // Legacy fields for backward compatibility
-  questions?: string;
-  answers?: string;
+// FAQ item structure (V2 - clean array format)
+interface FAQItem {
+  id: string;
+  question: string;
+  answer: string;
 }
 
 export default function InlineQnAListPublished(props: LayoutComponentProps) {
@@ -38,43 +25,15 @@ export default function InlineQnAListPublished(props: LayoutComponentProps) {
   // Extract content from props (flattened by LandingPagePublishedRenderer)
   const headline = props.headline || 'Quick Questions & Answers';
   const subheadline = props.subheadline || '';
+  const contact_prompt = props.contact_prompt || '';
+  const cta_text = props.cta_text || '';
+  const supporting_text = props.supporting_text || '';
 
-  // Helper function to get FAQ items
-  const getFAQItems = () => {
-    const items = [];
-
-    // Check individual fields first (preferred)
-    for (let i = 1; i <= 6; i++) {
-      const question = props[`question_${i}` as keyof typeof props];
-      const answer = props[`answer_${i}` as keyof typeof props];
-
-      if (question && typeof question === 'string' && question.trim() !== '' && question !== '___REMOVED___') {
-        items.push({
-          question: question.trim(),
-          answer: (answer && typeof answer === 'string' && answer !== '___REMOVED___') ? answer.trim() : '',
-          index: i
-        });
-      }
-    }
-
-    // Fallback to legacy format if no individual items found
-    if (items.length === 0) {
-      const questionsRaw = props.questions;
-      const answersRaw = props.answers;
-
-      const questions = (typeof questionsRaw === 'string' ? questionsRaw.split('|').map(q => q.trim()).filter(Boolean) : []);
-      const answers = (typeof answersRaw === 'string' ? answersRaw.split('|').map(a => a.trim()).filter(Boolean) : []);
-
-      questions.forEach((question, index) => {
-        items.push({
-          question,
-          answer: answers[index] || '',
-          index: index + 1
-        });
-      });
-    }
-
-    return items;
+  // Get FAQ items from props (direct array access)
+  const getFAQItems = (): FAQItem[] => {
+    const items = props.faq_items;
+    if (Array.isArray(items)) return items;
+    return [];
   };
 
   const faqItems = getFAQItems();
@@ -94,7 +53,7 @@ export default function InlineQnAListPublished(props: LayoutComponentProps) {
   // Border color based on background
   const borderColor = backgroundType === 'primary' || !backgroundType
     ? 'rgba(229, 231, 235, 1)' // gray-200
-    : 'rgba(55, 65, 81, 0.3)'; // gray-700 with opacity
+    : 'rgba(255, 255, 255, 0.2)'; // light border for dark backgrounds
 
   return (
     <SectionWrapperPublished
@@ -131,7 +90,7 @@ export default function InlineQnAListPublished(props: LayoutComponentProps) {
         <div className="space-y-6">
           {faqItems.map((item, idx) => (
             <div
-              key={item.index}
+              key={item.id}
               className="pb-6 last:border-0"
               style={{
                 borderBottom: idx === faqItems.length - 1 ? 'none' : `1px solid ${borderColor}`
@@ -160,6 +119,43 @@ export default function InlineQnAListPublished(props: LayoutComponentProps) {
             </div>
           ))}
         </div>
+
+        {/* Contact CTA Footer */}
+        {(contact_prompt || cta_text) && (
+          <div
+            className="mt-10 pt-6 text-center"
+                      >
+            {contact_prompt && contact_prompt.trim() !== '' && (
+              <TextPublished
+                value={contact_prompt}
+                style={{
+                  color: textColors.body,
+                  marginBottom: '0.5rem'
+                }}
+              />
+            )}
+            {cta_text && cta_text.trim() !== '' && (
+              <TextPublished
+                value={cta_text}
+                style={{
+                  color: '#2563eb', // blue-600 link color
+                  fontWeight: 500,
+                  cursor: 'pointer'
+                }}
+              />
+            )}
+            {supporting_text && supporting_text.trim() !== '' && (
+              <TextPublished
+                value={supporting_text}
+                style={{
+                  color: textColors.muted,
+                  fontSize: '0.875rem',
+                  marginTop: '0.5rem'
+                }}
+              />
+            )}
+          </div>
+        )}
       </div>
     </SectionWrapperPublished>
   );

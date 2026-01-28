@@ -39,7 +39,7 @@ export const layoutToSectionType: Record<string, string> = {
   // Pricing layouts
   'TierCards': 'pricing',
   'ToggleableMonthlyYearly': 'pricing',
-  'SliderPricing': 'pricing',
+  // V3 ARCHIVED: 'SliderPricing': 'pricing',
   'CallToQuotePlan': 'pricing',
 
   // Problem layouts

@@ -2,172 +2,120 @@ import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
+import {
+  EditableAdaptiveHeadline,
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
-import IconEditableText from '@/components/ui/IconEditableText';
-import { 
-  CTAButton,
-  TrustIndicators 
-} from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { shadows, cardEnhancements } from '@/modules/Design/designTokens';
+
+// V2 Types (no icon - metrics draw attention on their own)
+interface MetricItem {
+  id: string;
+  title: string;
+  metric: string;
+  label: string;
+  description: string;
+}
+
+interface RoiMetricItem {
+  id: string;
+  metric: string;
+  label: string;
+}
 
 interface MetricTilesContent {
   headline: string;
-  feature_titles: string;
-  feature_metrics: string;
-  feature_descriptions: string;
-  metric_labels: string;
-  // Metric icons
-  metric_icon_1?: string;
-  metric_icon_2?: string;
-  metric_icon_3?: string;
-  metric_icon_4?: string;
   subheadline?: string;
-  supporting_text?: string;
-  cta_text?: string;
-  trust_items?: string;
-  // ROI Summary Fields
-  roi_summary_title?: string;
-  roi_metric_1?: string;
-  roi_label_1?: string;
-  roi_metric_2?: string;
-  roi_label_2?: string;
-  roi_metric_3?: string;
-  roi_label_3?: string;
-  roi_description?: string;
   show_roi_summary?: boolean;
+  roi_summary_title?: string;
+  roi_description?: string;
+  metrics: MetricItem[];
+  roi_metrics?: RoiMetricItem[];
 }
 
 const CONTENT_SCHEMA = {
-  headline: { 
-    type: 'string' as const, 
-    default: 'Quantifiable Results That Drive ROI' 
+  headline: {
+    type: 'string' as const,
+    default: 'Quantifiable Results That Drive ROI'
   },
-  feature_titles: { 
-    type: 'string' as const, 
-    default: 'Efficiency Boost|Cost Reduction|Error Prevention|Revenue Growth' 
-  },
-  feature_metrics: { 
-    type: 'string' as const, 
-    default: '300%|$2.4M|99.9%|47%' 
-  },
-  metric_labels: { 
-    type: 'string' as const, 
-    default: 'faster processing|annual savings|accuracy rate|revenue increase' 
-  },
-  feature_descriptions: { 
-    type: 'string' as const, 
-    default: 'Automate manual processes and reduce task completion time by 300% with our intelligent workflow engine.|Save an average of $2.4M annually through reduced operational costs and improved resource allocation.|Achieve 99.9% accuracy with our AI-powered error detection and automatic correction systems.|Drive 47% revenue growth through optimized processes and improved customer satisfaction.' 
-  },
-  // Metric icons - matching the themes
-  metric_icon_1: { 
-    type: 'string' as const, 
-    default: '⚡' 
-  },
-  metric_icon_2: { 
-    type: 'string' as const, 
-    default: '💰' 
-  },
-  metric_icon_3: { 
-    type: 'string' as const, 
-    default: '✅' 
-  },
-  metric_icon_4: { 
-    type: 'string' as const, 
-    default: '📈' 
-  },
-  subheadline: { 
-    type: 'string' as const, 
-    default: '' 
-  },
-  supporting_text: { 
-    type: 'string' as const, 
-    default: '' 
-  },
-  cta_text: { 
-    type: 'string' as const, 
-    default: '' 
-  },
-  trust_items: { 
-    type: 'string' as const, 
-    default: '' 
-  },
-  // ROI Summary Schema
-  roi_summary_title: { 
-    type: 'string' as const, 
-    default: 'Proven Return on Investment' 
-  },
-  roi_metric_1: { 
-    type: 'string' as const, 
-    default: '6 Months' 
-  },
-  roi_label_1: { 
-    type: 'string' as const, 
-    default: 'Average Payback Period' 
-  },
-  roi_metric_2: { 
-    type: 'string' as const, 
-    default: '400%' 
-  },
-  roi_label_2: { 
-    type: 'string' as const, 
-    default: 'Average ROI in Year 1' 
-  },
-  roi_metric_3: { 
-    type: 'string' as const, 
-    default: '$5.2M' 
-  },
-  roi_label_3: { 
-    type: 'string' as const, 
-    default: 'Average 3-Year Value' 
-  },
-  roi_description: { 
-    type: 'string' as const, 
-    default: 'Based on independent analysis of 500+ enterprise implementations' 
+  subheadline: {
+    type: 'string' as const,
+    default: ''
   },
   show_roi_summary: {
     type: 'boolean' as const,
     default: true
+  },
+  roi_summary_title: {
+    type: 'string' as const,
+    default: 'Proven Return on Investment'
+  },
+  roi_description: {
+    type: 'string' as const,
+    default: 'Based on independent analysis of 500+ enterprise implementations'
+  },
+  metrics: {
+    type: 'array' as const,
+    default: [
+      { id: 'm1', title: 'Efficiency Boost', metric: '300%', label: 'faster processing', description: 'Automate manual processes and reduce task completion time by 300% with our intelligent workflow engine.' },
+      { id: 'm2', title: 'Cost Reduction', metric: '$2.4M', label: 'annual savings', description: 'Save an average of $2.4M annually through reduced operational costs and improved resource allocation.' },
+      { id: 'm3', title: 'Error Prevention', metric: '99.9%', label: 'accuracy rate', description: 'Achieve 99.9% accuracy with our AI-powered error detection and automatic correction systems.' },
+      { id: 'm4', title: 'Revenue Growth', metric: '47%', label: 'revenue increase', description: 'Drive 47% revenue growth through optimized processes and improved customer satisfaction.' }
+    ]
+  },
+  roi_metrics: {
+    type: 'array' as const,
+    default: [
+      { id: 'r1', metric: '6 Months', label: 'Average Payback Period' },
+      { id: 'r2', metric: '400%', label: 'Average ROI in Year 1' },
+      { id: 'r3', metric: '$5.2M', label: 'Average 3-Year Value' }
+    ]
   }
 };
 
-// Theme-based color mappings for all styled elements
+// Theme-based card styling (per uiBlockTheme.md)
+const getCardStyles = (theme: UIBlockTheme) => ({
+  warm: {
+    border: 'border-orange-200',
+    shadow: shadows.card.warm,
+    hover: shadows.cardHover.warm,
+  },
+  cool: {
+    border: 'border-blue-200',
+    shadow: shadows.card.cool,
+    hover: shadows.cardHover.cool,
+  },
+  neutral: {
+    border: 'border-gray-200',
+    shadow: shadows.card.neutral,
+    hover: shadows.cardHover.neutral,
+  }
+})[theme];
+
+// Theme-based metric text color
+const getMetricTextColor = (theme: UIBlockTheme) => ({
+  warm: 'text-orange-600',
+  cool: 'text-blue-600',
+  neutral: 'text-gray-700'
+})[theme];
+
+// Theme-based ROI section colors
 const getMetricTilesThemeColors = (theme: UIBlockTheme) => {
   return {
     warm: {
-      metricGradients: [
-        'from-orange-400 to-orange-600',
-        'from-orange-500 to-red-600',
-        'from-orange-600 to-red-700',
-        'from-red-500 to-orange-600'
-      ],
       roiBgGradient: 'from-orange-50 via-red-50 to-orange-50',
       roiBorder: 'border-orange-100',
       roiMetricColors: ['text-orange-600', 'text-red-600', 'text-orange-700']
     },
     cool: {
-      metricGradients: [
-        'from-blue-400 to-blue-600',
-        'from-blue-500 to-indigo-600',
-        'from-indigo-500 to-blue-600',
-        'from-blue-600 to-indigo-700'
-      ],
       roiBgGradient: 'from-blue-50 via-indigo-50 to-blue-50',
       roiBorder: 'border-blue-100',
       roiMetricColors: ['text-blue-600', 'text-indigo-600', 'text-blue-700']
     },
     neutral: {
-      metricGradients: [
-        'from-gray-400 to-gray-600',
-        'from-slate-500 to-gray-600',
-        'from-gray-500 to-slate-600',
-        'from-slate-600 to-gray-700'
-      ],
       roiBgGradient: 'from-gray-50 via-slate-50 to-gray-50',
       roiBorder: 'border-gray-100',
       roiMetricColors: ['text-gray-600', 'text-slate-600', 'text-gray-700']
@@ -176,80 +124,43 @@ const getMetricTilesThemeColors = (theme: UIBlockTheme) => {
 };
 
 const MetricTile = React.memo(({
-  title,
-  metric,
-  label,
-  description,
-  index,
+  item,
   colorTokens,
   mutedTextColor,
   h3Style,
   mode,
-  handleContentUpdate,
-  blockContent,
+  onUpdate,
+  onDelete,
   sectionId,
   backgroundType,
   sectionBackground,
-  onTitleEdit,
-  onMetricEdit,
-  onLabelEdit,
-  onDescriptionEdit,
   theme
 }: {
-  title: string;
-  metric: string;
-  label: string;
-  description: string;
-  index: number;
+  item: MetricItem;
   colorTokens: any;
   mutedTextColor: string;
   h3Style: any;
   mode: 'edit' | 'preview';
-  handleContentUpdate: (key: keyof MetricTilesContent, value: any) => void;
-  blockContent: MetricTilesContent;
+  onUpdate: (id: string, field: keyof MetricItem, value: string) => void;
+  onDelete: (id: string) => void;
   sectionId: string;
   backgroundType: string;
   sectionBackground: string;
-  onTitleEdit: (index: number, value: string) => void;
-  onMetricEdit: (index: number, value: string) => void;
-  onLabelEdit: (index: number, value: string) => void;
-  onDescriptionEdit: (index: number, value: string) => void;
   theme: UIBlockTheme;
 }) => {
-  
-  // Get metric icon from content fields
-  const getMetricIcon = (index: number) => {
-    const iconFields = [
-      blockContent.metric_icon_1,
-      blockContent.metric_icon_2,
-      blockContent.metric_icon_3,
-      blockContent.metric_icon_4
-    ];
-    return iconFields[index] || '📊';
-  };
-
-  const themeColors = getMetricTilesThemeColors(theme);
-
-  const getGradientForIndex = (index: number) => {
-    return themeColors.metricGradients[index % themeColors.metricGradients.length];
-  };
+  const cardStyles = getCardStyles(theme);
 
   return (
-    <div className={`group/metric-tile-${index} relative bg-white rounded-xl shadow-lg p-8 border border-gray-100 hover:shadow-xl transition-all duration-300 h-full flex flex-col`}>
-      
+    <div className={`group/metric-tile relative bg-white ${cardEnhancements.borderRadius} p-8 border ${cardStyles.border} ${cardStyles.shadow} ${cardStyles.hover} ${cardEnhancements.hoverLift} ${cardEnhancements.transition} h-full flex flex-col`}>
+
       {/* Delete Button */}
       {mode === 'edit' && (
         <button
           onClick={(e) => {
             e.stopPropagation();
-            // Mark entire tile as removed
-            onTitleEdit(index, '___REMOVED___');
-            onMetricEdit(index, '___REMOVED___');
-            onLabelEdit(index, '___REMOVED___');
-            onDescriptionEdit(index, '___REMOVED___');
-            handleContentUpdate(`metric_icon_${index + 1}` as keyof MetricTilesContent, '___REMOVED___');
+            onDelete(item.id);
           }}
-          className={`opacity-0 group-hover/metric-tile-${index}:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white/90 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm z-10`}
+          className="opacity-0 group-hover/metric-tile:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white/90 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm z-10"
           title="Remove this metric tile"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -257,90 +168,71 @@ const MetricTile = React.memo(({
           </svg>
         </button>
       )}
-      
-      <div className="mb-6">
-        <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br ${getGradientForIndex(index)} shadow-lg mb-4`}>
-          <IconEditableText
-            mode={mode}
-            value={getMetricIcon(index)}
-            onEdit={(value) => handleContentUpdate(`metric_icon_${index + 1}` as keyof MetricTilesContent, value)}
-            backgroundType="primary"
-            colorTokens={colorTokens}
-            iconSize="lg"
-            className="text-white text-2xl"
-            placeholder="📊"
-            sectionId={sectionId}
-            elementKey={`metric_icon_${index + 1}`}
-          />
-        </div>
-        
+
+      {/* Title */}
+      <EditableAdaptiveText
+        mode={mode}
+        value={item.title}
+        onEdit={(value) => onUpdate(item.id, 'title', value)}
+        backgroundType={backgroundType === 'custom' ? 'secondary' : (backgroundType as any || 'neutral')}
+        colorTokens={colorTokens}
+        variant="body"
+        textStyle={{
+          ...h3Style,
+          fontWeight: 'bold'
+        }}
+        className="mb-4"
+        placeholder="Feature title..."
+        sectionId={sectionId}
+        elementKey={`metric_title_${item.id}`}
+        sectionBackground={sectionBackground}
+      />
+
+      {/* Metric Box */}
+      <div className="text-center bg-gray-50 rounded-lg p-4 mb-4">
         <EditableAdaptiveText
           mode={mode}
-          value={title}
-          onEdit={(value) => onTitleEdit(index, value)}
-          backgroundType={backgroundType === 'custom' ? 'secondary' : (backgroundType as any || 'neutral')}
+          value={item.metric}
+          onEdit={(value) => onUpdate(item.id, 'metric', value)}
+          backgroundType="neutral"
           colorTokens={colorTokens}
           variant="body"
-          textStyle={{
-            ...h3Style,
-            fontWeight: 'bold'
-          }}
-          className="mb-2"
-          placeholder="Feature title..."
+          className={`text-4xl font-bold ${getMetricTextColor(theme)}`}
+          placeholder="Metric..."
           sectionId={sectionId}
-          elementKey={`feature_title_${index}`}
-          sectionBackground={sectionBackground}
+          elementKey={`metric_value_${item.id}`}
+          sectionBackground="bg-gray-50"
         />
-        
-        <div className="text-center bg-gray-50 rounded-lg p-4 mb-4">
-          <EditableAdaptiveText
-            mode={mode}
-            value={metric}
-            onEdit={(value) => onMetricEdit(index, value)}
-            backgroundType="neutral"
-            colorTokens={colorTokens}
-            variant="body"
-            className={`text-4xl font-bold bg-gradient-to-r ${getGradientForIndex(index)} bg-clip-text text-transparent`}
-            placeholder="Metric..."
-            sectionId={sectionId}
-            elementKey={`feature_metric_${index}`}
-            sectionBackground="bg-gray-50"
-          />
-          <EditableAdaptiveText
-            mode={mode}
-            value={label}
-            onEdit={(value) => onLabelEdit(index, value)}
-            backgroundType="neutral"
-            colorTokens={colorTokens}
-            variant="body"
-            className={`text-sm font-medium ${mutedTextColor} uppercase tracking-wide`}
-            placeholder="Metric label..."
-            sectionId={sectionId}
-            elementKey={`metric_label_${index}`}
-            sectionBackground="bg-gray-50"
-          />
-        </div>
+        <EditableAdaptiveText
+          mode={mode}
+          value={item.label}
+          onEdit={(value) => onUpdate(item.id, 'label', value)}
+          backgroundType="neutral"
+          colorTokens={colorTokens}
+          variant="body"
+          className={`text-sm font-medium ${mutedTextColor} uppercase tracking-wide`}
+          placeholder="Metric label..."
+          sectionId={sectionId}
+          elementKey={`metric_label_${item.id}`}
+          sectionBackground="bg-gray-50"
+        />
       </div>
 
+      {/* Description */}
       <div className="mt-auto">
         <EditableAdaptiveText
           mode={mode}
-          value={description}
-          onEdit={(value) => onDescriptionEdit(index, value)}
+          value={item.description}
+          onEdit={(value) => onUpdate(item.id, 'description', value)}
           backgroundType={backgroundType === 'custom' ? 'secondary' : (backgroundType as any || 'neutral')}
           colorTokens={colorTokens}
           variant="body"
-          className="text-gray-600 leading-relaxed text-sm"
+          className={`${mutedTextColor} leading-relaxed text-sm`}
           placeholder="Feature description..."
           sectionId={sectionId}
-          elementKey={`feature_description_${index}`}
+          elementKey={`metric_description_${item.id}`}
           sectionBackground={sectionBackground}
         />
-        
-        <div className="mt-4 flex items-center space-x-2">
-          <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${getGradientForIndex(index)}`} />
-          <span className="text-xs font-medium text-gray-500">Measured impact</span>
-        </div>
       </div>
     </div>
   );
@@ -349,14 +241,13 @@ MetricTile.displayName = 'MetricTile';
 
 export default function MetricTiles(props: LayoutComponentProps) {
   const { getTextStyle: getTypographyStyle } = useTypography();
-  
+
   const {
     sectionId,
     mode,
     blockContent,
     colorTokens,
     dynamicTextColors,
-    getTextStyle,
     sectionBackground,
     backgroundType,
     handleContentUpdate
@@ -364,79 +255,73 @@ export default function MetricTiles(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
-  
-  // Create typography styles
-  const h2Style = getTypographyStyle('h2');
+
   const h3Style = getTypographyStyle('h3');
   const bodyLgStyle = getTypographyStyle('body-lg');
 
-  // Detect theme: manual override > auto-detection > neutral fallback
+  // Detect theme
   const theme = React.useMemo(() => {
     if (props.manualThemeOverride) return props.manualThemeOverride;
     if (props.userContext) return selectUIBlockTheme(props.userContext);
     return 'neutral';
   }, [props.manualThemeOverride, props.userContext]);
 
-  React.useEffect(() => {
-    console.log('🎨 MetricTiles theme detection:', {
-      sectionId,
-      hasManualOverride: !!props.manualThemeOverride,
-      manualTheme: props.manualThemeOverride,
-      hasUserContext: !!props.userContext,
-      userContext: props.userContext,
-      finalTheme: theme
-    });
-  }, [theme, props.manualThemeOverride, props.userContext, sectionId]);
-
-  // Get theme colors for ROI section
   const themeColors = getMetricTilesThemeColors(theme);
+  const cardStyles = getCardStyles(theme);
 
-  // Parse feature data using utility functions
-  const featureTitles = parsePipeData(blockContent.feature_titles);
-  const featureMetrics = parsePipeData(blockContent.feature_metrics);
-  const metricLabels = parsePipeData(blockContent.metric_labels);
-  const featureDescriptions = parsePipeData(blockContent.feature_descriptions);
+  // Arrays from content
+  const metrics: MetricItem[] = blockContent.metrics || [];
+  const roiMetrics: RoiMetricItem[] = blockContent.roi_metrics || [];
 
-  // Filter out removed items and create features array (preserve original indices)
-  const features = featureTitles.map((title, index) => ({
-    title,
-    metric: featureMetrics[index] || '',
-    label: metricLabels[index] || '',
-    description: featureDescriptions[index] || '',
-    originalIndex: index,
-    isRemoved: title === '___REMOVED___' || 
-               featureMetrics[index] === '___REMOVED___' || 
-               metricLabels[index] === '___REMOVED___' || 
-               featureDescriptions[index] === '___REMOVED___'
-  })).filter(feature => !feature.isRemoved);
-
-  // Individual field edit handlers (following IconGrid pattern)
-  const handleTitleEdit = (index: number, value: string) => {
-    const updatedTitles = updateListData(blockContent.feature_titles, index, value);
-    handleContentUpdate('feature_titles', updatedTitles);
+  // V2: Update handlers
+  const handleMetricUpdate = (id: string, field: keyof MetricItem, value: string) => {
+    const updated = metrics.map(m =>
+      m.id === id ? { ...m, [field]: value } : m
+    );
+    (handleContentUpdate as any)('metrics', updated);
   };
 
-  const handleMetricEdit = (index: number, value: string) => {
-    const updatedMetrics = updateListData(blockContent.feature_metrics, index, value);
-    handleContentUpdate('feature_metrics', updatedMetrics);
+  const handleMetricDelete = (id: string) => {
+    const updated = metrics.filter(m => m.id !== id);
+    (handleContentUpdate as any)('metrics', updated);
   };
 
-  const handleLabelEdit = (index: number, value: string) => {
-    const updatedLabels = updateListData(blockContent.metric_labels, index, value);
-    handleContentUpdate('metric_labels', updatedLabels);
+  const handleAddMetric = () => {
+    const newId = `m${Date.now()}`;
+    const newMetric: MetricItem = {
+      id: newId,
+      title: `Metric ${metrics.length + 1}`,
+      metric: '100%',
+      label: 'improvement',
+      description: 'Add metric description here'
+    };
+    (handleContentUpdate as any)('metrics', [...metrics, newMetric]);
   };
 
-  const handleDescriptionEdit = (index: number, value: string) => {
-    const updatedDescriptions = updateListData(blockContent.feature_descriptions, index, value);
-    handleContentUpdate('feature_descriptions', updatedDescriptions);
+  const handleRoiUpdate = (id: string, field: keyof RoiMetricItem, value: string) => {
+    const updated = roiMetrics.map(r =>
+      r.id === id ? { ...r, [field]: value } : r
+    );
+    (handleContentUpdate as any)('roi_metrics', updated);
   };
 
-  const trustItems = blockContent.trust_items 
-    ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
+  const handleRoiDelete = (id: string) => {
+    const updated = roiMetrics.filter(r => r.id !== id);
+    (handleContentUpdate as any)('roi_metrics', updated);
+  };
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
-  
+
+  // Grid columns based on count
+  const getGridClass = (count: number) => {
+    if (count === 1) return 'md:grid-cols-1 justify-items-center';
+    if (count === 2) return 'md:grid-cols-2';
+    if (count === 3) return 'md:grid-cols-2 lg:grid-cols-3';
+    if (count === 4) return 'md:grid-cols-2 lg:grid-cols-4';
+    if (count <= 6) return 'md:grid-cols-2 lg:grid-cols-3';
+    return 'md:grid-cols-2 lg:grid-cols-4';
+  };
+
   return (
     <LayoutSection
       sectionId={sectionId}
@@ -447,7 +332,7 @@ export default function MetricTiles(props: LayoutComponentProps) {
       className={props.className}
     >
       <div className="max-w-6xl mx-auto">
-        
+
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
             mode={mode}
@@ -480,72 +365,34 @@ export default function MetricTiles(props: LayoutComponentProps) {
           )}
         </div>
 
-        <div className={`grid ${
-          features.length === 1 
-            ? 'md:grid-cols-1 justify-items-center' 
-            : features.length === 2 
-            ? 'md:grid-cols-2' 
-            : features.length === 3 
-            ? 'md:grid-cols-2 lg:grid-cols-3' 
-            : 'md:grid-cols-2 lg:grid-cols-4'
-        } gap-6`}>
-          {features.map((feature) => (
+        <div className={`grid ${getGridClass(metrics.length)} gap-6`}>
+          {metrics.map((item) => (
             <MetricTile
-              key={feature.originalIndex}
-              title={feature.title}
-              metric={feature.metric}
-              label={feature.label}
-              description={feature.description}
-              index={feature.originalIndex}
+              key={item.id}
+              item={item}
               colorTokens={colorTokens}
               mutedTextColor={mutedTextColor}
               h3Style={h3Style}
               mode={mode}
-              handleContentUpdate={handleContentUpdate}
-              blockContent={blockContent}
+              onUpdate={handleMetricUpdate}
+              onDelete={handleMetricDelete}
               sectionId={sectionId}
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               sectionBackground={sectionBackground}
-              onTitleEdit={handleTitleEdit}
-              onMetricEdit={handleMetricEdit}
-              onLabelEdit={handleLabelEdit}
-              onDescriptionEdit={handleDescriptionEdit}
               theme={theme}
             />
           ))}
-          
-          {/* Add Metric Tile Button - only in edit mode and when less than 4 tiles */}
-          {mode === 'edit' && features.length < 4 && (
-            <div className="bg-white rounded-xl shadow-lg p-8 border-2 border-dashed border-gray-300 hover:border-gray-400 hover:shadow-xl transition-all duration-300 h-full flex flex-col items-center justify-center min-h-[300px]">
+
+          {/* Add Metric Tile Button */}
+          {mode === 'edit' && metrics.length < 8 && (
+            <div className={`bg-white ${cardEnhancements.borderRadius} p-8 border-2 border-dashed ${cardStyles.border} ${cardStyles.hover} ${cardEnhancements.hoverLift} ${cardEnhancements.transition} h-full flex flex-col items-center justify-center min-h-[250px]`}>
               <button
-                onClick={() => {
-                  const featureTitles = blockContent.feature_titles ? blockContent.feature_titles.split('|') : [];
-                  const featureMetrics = blockContent.feature_metrics ? blockContent.feature_metrics.split('|') : [];
-                  const metricLabels = blockContent.metric_labels ? blockContent.metric_labels.split('|') : [];
-                  const featureDescriptions = blockContent.feature_descriptions ? blockContent.feature_descriptions.split('|') : [];
-                  
-                  const newTileIndex = featureTitles.length;
-                  featureTitles.push(`Metric ${newTileIndex + 1}`);
-                  featureMetrics.push('100%');
-                  metricLabels.push('improvement');
-                  featureDescriptions.push('Add metric description here');
-                  
-                  // Add default icon for the new metric
-                  const defaultIcons = ['⚡', '💰', '✅', '📈'];
-                  const iconField = `metric_icon_${newTileIndex + 1}` as keyof MetricTilesContent;
-                  const defaultIcon = defaultIcons[newTileIndex] || '📊';
-                  
-                  handleContentUpdate('feature_titles', featureTitles.join('|'));
-                  handleContentUpdate('feature_metrics', featureMetrics.join('|'));
-                  handleContentUpdate('metric_labels', metricLabels.join('|'));
-                  handleContentUpdate('feature_descriptions', featureDescriptions.join('|'));
-                  handleContentUpdate(iconField, defaultIcon);
-                }}
+                onClick={handleAddMetric}
                 className="w-full h-full flex flex-col items-center justify-center space-y-4 text-gray-400 hover:text-gray-600 transition-colors duration-300"
                 title="Add new metric tile"
               >
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
                 </div>
@@ -555,8 +402,8 @@ export default function MetricTiles(props: LayoutComponentProps) {
           )}
         </div>
 
-        {/* ROI Summary - Editable */}
-        {blockContent.show_roi_summary !== false && (blockContent.roi_summary_title || mode === 'edit') && (
+        {/* ROI Summary */}
+        {blockContent.show_roi_summary !== false && (blockContent.roi_summary_title || roiMetrics.length > 0 || mode === 'edit') && (
           <div className={`mt-12 bg-gradient-to-r ${themeColors.roiBgGradient} rounded-2xl p-8 border ${themeColors.roiBorder}`}>
             <div className="text-center">
               <EditableAdaptiveText
@@ -576,46 +423,44 @@ export default function MetricTiles(props: LayoutComponentProps) {
                 data-section-id={sectionId}
                 data-element-key="roi_summary_title"
               />
-              
+
               <div className="grid md:grid-cols-3 gap-8">
-                {/* ROI Metric 1 */}
-                {(blockContent.roi_metric_1 || mode === 'edit') && blockContent.roi_metric_1 !== '___REMOVED___' && (
-                  <div className="text-center group/roi-item relative">
+                {roiMetrics.map((item, index) => (
+                  <div key={item.id} className="text-center group/roi-item relative">
                     <EditableAdaptiveText
                       mode={mode}
-                      value={blockContent.roi_metric_1 || ''}
-                      onEdit={(value) => handleContentUpdate('roi_metric_1', value)}
+                      value={item.metric}
+                      onEdit={(value) => handleRoiUpdate(item.id, 'metric', value)}
                       backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                       colorTokens={colorTokens}
                       variant="body"
-                      className={`text-4xl font-bold ${themeColors.roiMetricColors[0]} mb-2`}
-                      placeholder="Metric 1"
+                      className={`text-4xl font-bold ${themeColors.roiMetricColors[index % 3]} mb-2`}
+                      placeholder="Metric"
                       sectionBackground={sectionBackground}
                       data-section-id={sectionId}
-                      data-element-key="roi_metric_1"
+                      data-element-key={`roi_metric_${item.id}`}
                     />
                     <EditableAdaptiveText
                       mode={mode}
-                      value={blockContent.roi_label_1 || ''}
-                      onEdit={(value) => handleContentUpdate('roi_label_1', value)}
+                      value={item.label}
+                      onEdit={(value) => handleRoiUpdate(item.id, 'label', value)}
                       backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                       colorTokens={colorTokens}
                       variant="body"
                       className={`text-sm ${mutedTextColor}`}
-                      placeholder="Label 1"
+                      placeholder="Label"
                       sectionBackground={sectionBackground}
                       data-section-id={sectionId}
-                      data-element-key="roi_label_1"
+                      data-element-key={`roi_label_${item.id}`}
                     />
-                    {mode !== 'preview' && (
+                    {mode === 'edit' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleContentUpdate('roi_metric_1', '___REMOVED___');
-                          handleContentUpdate('roi_label_1', '___REMOVED___');
+                          handleRoiDelete(item.id);
                         }}
                         className="opacity-0 group-hover/roi-item:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm"
-                        title="Remove ROI metric 1"
+                        title="Remove ROI metric"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -623,105 +468,11 @@ export default function MetricTiles(props: LayoutComponentProps) {
                       </button>
                     )}
                   </div>
-                )}
-                
-                {/* ROI Metric 2 */}
-                {(blockContent.roi_metric_2 || mode === 'edit') && blockContent.roi_metric_2 !== '___REMOVED___' && (
-                  <div className="text-center group/roi-item relative">
-                    <EditableAdaptiveText
-                      mode={mode}
-                      value={blockContent.roi_metric_2 || ''}
-                      onEdit={(value) => handleContentUpdate('roi_metric_2', value)}
-                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                      colorTokens={colorTokens}
-                      variant="body"
-                      className={`text-4xl font-bold ${themeColors.roiMetricColors[1]} mb-2`}
-                      placeholder="Metric 2"
-                      sectionBackground={sectionBackground}
-                      data-section-id={sectionId}
-                      data-element-key="roi_metric_2"
-                    />
-                    <EditableAdaptiveText
-                      mode={mode}
-                      value={blockContent.roi_label_2 || ''}
-                      onEdit={(value) => handleContentUpdate('roi_label_2', value)}
-                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                      colorTokens={colorTokens}
-                      variant="body"
-                      className={`text-sm ${mutedTextColor}`}
-                      placeholder="Label 2"
-                      sectionBackground={sectionBackground}
-                      data-section-id={sectionId}
-                      data-element-key="roi_label_2"
-                    />
-                    {mode !== 'preview' && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleContentUpdate('roi_metric_2', '___REMOVED___');
-                          handleContentUpdate('roi_label_2', '___REMOVED___');
-                        }}
-                        className="opacity-0 group-hover/roi-item:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm"
-                        title="Remove ROI metric 2"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    )}
-                  </div>
-                )}
-                
-                {/* ROI Metric 3 */}
-                {(blockContent.roi_metric_3 || mode === 'edit') && blockContent.roi_metric_3 !== '___REMOVED___' && (
-                  <div className="text-center group/roi-item relative">
-                    <EditableAdaptiveText
-                      mode={mode}
-                      value={blockContent.roi_metric_3 || ''}
-                      onEdit={(value) => handleContentUpdate('roi_metric_3', value)}
-                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                      colorTokens={colorTokens}
-                      variant="body"
-                      className={`text-4xl font-bold ${themeColors.roiMetricColors[2]} mb-2`}
-                      placeholder="Metric 3"
-                      sectionBackground={sectionBackground}
-                      data-section-id={sectionId}
-                      data-element-key="roi_metric_3"
-                    />
-                    <EditableAdaptiveText
-                      mode={mode}
-                      value={blockContent.roi_label_3 || ''}
-                      onEdit={(value) => handleContentUpdate('roi_label_3', value)}
-                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                      colorTokens={colorTokens}
-                      variant="body"
-                      className={`text-sm ${mutedTextColor}`}
-                      placeholder="Label 3"
-                      sectionBackground={sectionBackground}
-                      data-section-id={sectionId}
-                      data-element-key="roi_label_3"
-                    />
-                    {mode !== 'preview' && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleContentUpdate('roi_metric_3', '___REMOVED___');
-                          handleContentUpdate('roi_label_3', '___REMOVED___');
-                        }}
-                        className="opacity-0 group-hover/roi-item:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm"
-                        title="Remove ROI metric 3"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    )}
-                  </div>
-                )}
+                ))}
               </div>
-              
-              {(blockContent.roi_description || mode === 'edit') && blockContent.roi_description !== '___REMOVED___' && (
-                <div className="mt-6 group/roi-description relative">
+
+              {(blockContent.roi_description || mode === 'edit') && (
+                <div className="mt-6">
                   <EditableAdaptiveText
                     mode={mode}
                     value={blockContent.roi_description || ''}
@@ -735,66 +486,9 @@ export default function MetricTiles(props: LayoutComponentProps) {
                     data-section-id={sectionId}
                     data-element-key="roi_description"
                   />
-                  {mode !== 'preview' && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleContentUpdate('roi_description', '___REMOVED___');
-                      }}
-                      className="opacity-0 group-hover/roi-description:opacity-100 ml-2 text-red-500 hover:text-red-700 transition-opacity duration-200"
-                      title="Remove ROI description"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  )}
                 </div>
               )}
             </div>
-          </div>
-        )}
-
-        {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
-          <div className="text-center space-y-6 mt-16">
-            {(blockContent.supporting_text || mode === 'edit') && (
-              <EditableAdaptiveText
-                mode={mode}
-                value={blockContent.supporting_text || ''}
-                onEdit={(value) => handleContentUpdate('supporting_text', value)}
-                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                colorTokens={colorTokens}
-                variant="body"
-                className="max-w-3xl mx-auto mb-8"
-                placeholder="Add optional supporting text to reinforce your quantifiable value..."
-                sectionId={sectionId}
-                elementKey="supporting_text"
-                sectionBackground={sectionBackground}
-              />
-            )}
-
-            {(blockContent.cta_text || trustItems.length > 0) && (
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-                {blockContent.cta_text && (
-                  <CTAButton
-                    text={blockContent.cta_text}
-                    colorTokens={colorTokens}
-                    className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
-                    variant="primary"
-                    sectionId={sectionId}
-                    elementKey="cta_text"
-                  />
-                )}
-
-                {trustItems.length > 0 && (
-                  <TrustIndicators 
-                    items={trustItems}
-                    colorClass={mutedTextColor}
-                    iconColor="text-green-500"
-                  />
-                )}
-              </div>
-            )}
           </div>
         )}
       </div>
@@ -810,36 +504,26 @@ export const componentMeta = {
   defaultBackgroundType: 'neutral' as const,
   complexity: 'medium',
   estimatedBuildTime: '20 minutes',
-  
+
   contentFields: [
     { key: 'headline', label: 'Main Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
-    { key: 'feature_titles', label: 'Feature Titles (pipe separated)', type: 'text', required: true },
-    { key: 'feature_metrics', label: 'Metrics (pipe separated)', type: 'text', required: true },
-    { key: 'metric_labels', label: 'Metric Labels (pipe separated)', type: 'text', required: true },
-    { key: 'feature_descriptions', label: 'Feature Descriptions (pipe separated)', type: 'textarea', required: true },
+    { key: 'metrics', label: 'Metrics (array)', type: 'array', required: true },
     { key: 'roi_summary_title', label: 'ROI Summary Title', type: 'text', required: false },
-    { key: 'roi_metric_1', label: 'ROI Metric 1', type: 'text', required: false },
-    { key: 'roi_label_1', label: 'ROI Label 1', type: 'text', required: false },
-    { key: 'roi_metric_2', label: 'ROI Metric 2', type: 'text', required: false },
-    { key: 'roi_label_2', label: 'ROI Label 2', type: 'text', required: false },
-    { key: 'roi_metric_3', label: 'ROI Metric 3', type: 'text', required: false },
-    { key: 'roi_label_3', label: 'ROI Label 3', type: 'text', required: false },
-    { key: 'roi_description', label: 'ROI Description', type: 'textarea', required: false },
-    { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
-    { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
+    { key: 'roi_metrics', label: 'ROI Metrics (array)', type: 'array', required: false },
+    { key: 'roi_description', label: 'ROI Description', type: 'textarea', required: false }
   ],
-  
+
   features: [
-    'Large metric displays with gradient styling',
-    'Color-coded feature tiles',
+    'Large metric displays with theme-based colors',
+    'Theme-based card styling (warm/cool/neutral)',
     'ROI summary section',
     'Data-driven presentation',
     'Perfect for B2B decision makers',
-    'Quantifiable value propositions'
+    'Quantifiable value propositions',
+    'Up to 8 metric tiles'
   ],
-  
+
   useCases: [
     'Business efficiency platforms',
     'Cost reduction tools',

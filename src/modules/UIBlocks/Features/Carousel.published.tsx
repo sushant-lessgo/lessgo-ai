@@ -11,16 +11,16 @@ import { LayoutComponentProps } from '@/types/storeTypes';
 import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publishedTextColors';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { ImagePublished } from '@/components/published/ImagePublished';
-import { CTAButtonPublished } from '@/components/published/CTAButtonPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
-interface Feature {
+interface FeatureItem {
+  id: string;
   title: string;
   description: string;
-  visual: string;
-  tag: string;
+  visual?: string;
+  tag?: string;
 }
 
 export default function CarouselPublished(props: LayoutComponentProps) {
@@ -30,8 +30,6 @@ export default function CarouselPublished(props: LayoutComponentProps) {
   const headline = props.headline || 'Discover Amazing Features';
   const subheadline = props.subheadline || '';
   const supporting_text = props.supporting_text || '';
-  const cta_text = props.cta_text || '';
-  const trust_items = props.trust_items || '';
 
   // Extract benefit badges
   const benefit_1 = props.benefit_1 || '';
@@ -39,19 +37,8 @@ export default function CarouselPublished(props: LayoutComponentProps) {
   const benefit_icon_1 = props.benefit_icon_1 || '✅';
   const benefit_icon_2 = props.benefit_icon_2 || '⏱️';
 
-  // Extract individual features (up to 6)
-  const features: Feature[] = [];
-  for (let i = 0; i < 6; i++) {
-    const title = (props[`feature_title_${i}`] as string) || '';
-    const description = (props[`feature_description_${i}`] as string) || '';
-    const visual = (props[`feature_visual_${i}`] as string) || '';
-    const tag = (props[`feature_tag_${i}`] as string) || '';
-
-    // Only add features with content
-    if (title.trim() || description.trim() || visual.trim()) {
-      features.push({ title, description, visual, tag });
-    }
-  }
+  // Get features array - ensure it's an array
+  const features: FeatureItem[] = Array.isArray(props.features) ? props.features : [];
 
   // Detect theme
   const uiTheme: UIBlockTheme = props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
@@ -90,9 +77,6 @@ export default function CarouselPublished(props: LayoutComponentProps) {
   const bodyTypography = getPublishedTypographyStyles('body-lg', theme);
   const h3Typography = getPublishedTypographyStyles('h3', theme);
 
-  // Trust indicators
-  const trustList = trust_items ? trust_items.split('|').map((item: string) => item.trim()).filter(Boolean) : [];
-
   return (
     <SectionWrapperPublished
       sectionId={sectionId}
@@ -129,8 +113,8 @@ export default function CarouselPublished(props: LayoutComponentProps) {
         {/* Features Grid */}
         {features.length > 0 && (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature: Feature, index: number) => (
-              <div key={index} className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+            {features.map((feature: FeatureItem, index: number) => (
+              <div key={feature.id} className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
                 {/* Feature Tag */}
                 {feature.tag && (
                   <div
@@ -185,7 +169,7 @@ export default function CarouselPublished(props: LayoutComponentProps) {
                 {/* Benefit Badges (only show on first feature) */}
                 {index === 0 && (benefit_1 || benefit_2) && (
                   <div className="flex items-center space-x-4 mt-4">
-                    {benefit_1 && benefit_1 !== '___REMOVED___' && (
+                    {benefit_1 && (
                       <div className="flex items-center space-x-2">
                         <span style={{ color: benefit1Colors.text, fontSize: '1.125rem' }}>
                           {benefit_icon_1}
@@ -201,7 +185,7 @@ export default function CarouselPublished(props: LayoutComponentProps) {
                         </span>
                       </div>
                     )}
-                    {benefit_2 && benefit_2 !== '___REMOVED___' && (
+                    {benefit_2 && (
                       <div className="flex items-center space-x-2">
                         <span style={{ color: benefit2Colors.text, fontSize: '1.125rem' }}>
                           {benefit_icon_2}
@@ -224,40 +208,18 @@ export default function CarouselPublished(props: LayoutComponentProps) {
           </div>
         )}
 
-        {/* Supporting Text and CTA */}
-        {(supporting_text || cta_text || trustList.length > 0) && (
-          <div className="text-center space-y-6 mt-16">
-            {supporting_text && (
-              <TextPublished
-                value={supporting_text}
-                style={{
-                  color: textColors.body,
-                  ...bodyTypography,
-                  maxWidth: '48rem',
-                  margin: '0 auto 2rem'
-                }}
-              />
-            )}
-
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-              {cta_text && (
-                <CTAButtonPublished
-                  text={cta_text}
-                  backgroundColor={theme?.colors?.accentColor || '#3B82F6'}
-                  textColor="#FFFFFF"
-                  className="shadow-xl hover:shadow-2xl px-8 py-4 text-lg"
-                />
-              )}
-
-              {trustList.length > 0 && (
-                <div className="flex items-center space-x-2">
-                  <span className="text-green-500 text-xl">✓</span>
-                  <span style={{ color: textColors.muted, fontSize: '0.875rem' }}>
-                    {trustList.join(' • ')}
-                  </span>
-                </div>
-              )}
-            </div>
+        {/* Supporting Text */}
+        {supporting_text && (
+          <div className="text-center mt-16">
+            <TextPublished
+              value={supporting_text}
+              style={{
+                color: textColors.body,
+                ...bodyTypography,
+                maxWidth: '48rem',
+                margin: '0 auto'
+              }}
+            />
           </div>
         )}
       </div>

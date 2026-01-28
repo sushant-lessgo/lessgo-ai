@@ -45,7 +45,7 @@ export const layoutRegistry = {
   Pricing: [
     "TierCards",
     "ToggleableMonthlyYearly",
-    "SliderPricing",
+    // V3 ARCHIVED: "SliderPricing",
     "CallToQuotePlan",
   ] as const,
 

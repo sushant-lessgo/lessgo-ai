@@ -193,7 +193,7 @@ export default function StackedPainBulletsPublished(props: LayoutComponentProps)
                     style={{
                       fontWeight: 600,
                       fontSize: '1.25rem',
-                      color: '#111827',
+                      color: textColors.heading || '#111827',
                       lineHeight: '1.75rem'
                     }}
                   />
@@ -204,7 +204,7 @@ export default function StackedPainBulletsPublished(props: LayoutComponentProps)
                   <TextPublished
                     value={painItem.description}
                     style={{
-                      color: '#4b5563',
+                      color: textColors.body || '#4b5563',
                       fontSize: '1rem',
                       lineHeight: '1.75rem'
                     }}

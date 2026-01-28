@@ -26,7 +26,6 @@ interface StackedTextVisualContent {
   transition_icon?: string;
   subheadline?: string;
   summary_text?: string;
-  show_summary_box?: boolean | string;  // V2: boolean (with backward compat for string)
 }
 
 // Content schema for StackedTextVisual layout
@@ -39,7 +38,6 @@ const CONTENT_SCHEMA = {
   transition_text: { type: 'string' as const, default: '' },
   subheadline: { type: 'string' as const, default: '' },
   summary_text: { type: 'string' as const, default: '' },
-  show_summary_box: { type: 'boolean' as const, default: false },
   before_icon: {
     type: 'string' as const,
     default: '➕'
@@ -247,9 +245,10 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
                       textTransform: 'uppercase',
                       letterSpacing: '0.05em',
                       fontWeight: 600,
-                      fontSize: '0.875rem'
+                      fontSize: '1rem',
+                      color: dynamicTextColors?.body
                     }}
-                    className="text-gray-700 font-semibold mb-3 uppercase tracking-wide text-sm"
+                    className="font-semibold mb-3 uppercase tracking-wide"
                     sectionId={sectionId}
                     elementKey="before_label"
                     sectionBackground={sectionBackground}
@@ -262,7 +261,8 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
                     backgroundType={safeBackgroundType}
                     colorTokens={colorTokens}
                     variant="body"
-                    className="text-gray-700 leading-relaxed"
+                    className="leading-relaxed"
+                    textStyle={{ color: dynamicTextColors?.body, fontSize: '0.8rem' }}
                     sectionId={sectionId}
                     elementKey="before_text"
                     sectionBackground={sectionBackground}
@@ -355,10 +355,10 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
                       textTransform: 'uppercase',
                       letterSpacing: '0.05em',
                       fontWeight: 600,
-                      fontSize: '0.875rem',
+                      fontSize: '1rem',
                       color: themeColors.after.iconText
                     }}
-                    className="font-semibold mb-3 uppercase tracking-wide text-sm"
+                    className="font-semibold mb-3 uppercase tracking-wide"
                     sectionId={sectionId}
                     elementKey="after_label"
                     sectionBackground={sectionBackground}
@@ -372,7 +372,7 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
                     colorTokens={colorTokens}
                     variant="body"
                     className="leading-relaxed"
-                    textStyle={{ color: themeColors.after.iconText }}
+                    textStyle={{ color: themeColors.after.iconText, fontSize: '0.8rem' }}
                     sectionId={sectionId}
                     elementKey="after_text"
                     sectionBackground={sectionBackground}
@@ -383,63 +383,24 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
           </div>
         </div>
 
-        {/* Optional Summary Box - V2: handles both boolean and legacy string 'true'/'false' */}
-        {(() => {
-          const summaryBoxVisible = blockContent.show_summary_box === true || blockContent.show_summary_box === 'true';
-          return summaryBoxVisible && (blockContent.summary_text || mode === 'edit') && (
-            <div className={`mt-8 p-6 bg-gradient-to-r ${themeColors.summary.gradient} rounded-2xl border ${themeColors.summary.border} relative group/summary-item`}>
-              <div className="text-center">
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.summary_text || ''}
-                  onEdit={(value) => handleContentUpdate('summary_text', value)}
-                  backgroundType={safeBackgroundType}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="font-medium max-w-2xl mx-auto"
-                  style={bodyLgStyle}
-                  placeholder="Add optional summary text to reinforce the transformation..."
-                  sectionId={sectionId}
-                  elementKey="summary_text"
-                  sectionBackground={sectionBackground}
-                />
-              </div>
-
-              {/* Remove button - V2: no more ___REMOVED___ marker */}
-              {mode !== 'preview' && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleContentUpdate('summary_text', '');
-                    (handleContentUpdate as any)('show_summary_box', false);
-                  }}
-                  className="opacity-0 group-hover/summary-item:opacity-100 absolute top-2 right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm"
-                  title="Remove summary box"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              )}
-            </div>
-          );
-        })()}
-
-        {/* Add summary box button - V2: boolean check */}
-        {mode !== 'preview' && !blockContent.summary_text && !blockContent.show_summary_box && (
-          <div className="mt-8 text-center">
-            <button
-              onClick={() => {
-                handleContentUpdate('summary_text', 'Add your transformation summary here...');
-                (handleContentUpdate as any)('show_summary_box', true);
-              }}
-              className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 transition-colors mx-auto"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              <span>Add summary box</span>
-            </button>
+        {/* Optional Summary Text */}
+        {(blockContent.summary_text || mode === 'edit') && (
+          <div className="mt-10 text-center">
+            <EditableAdaptiveText
+              mode={mode}
+              value={blockContent.summary_text || ''}
+              onEdit={(value) => handleContentUpdate('summary_text', value)}
+              backgroundType={safeBackgroundType}
+              colorTokens={colorTokens}
+              variant="body"
+              className="max-w-2xl mx-auto"
+              style={getTypographyStyle('body')}
+              textStyle={{ fontStyle: 'italic' }}
+              placeholder="Add optional summary text..."
+              sectionId={sectionId}
+              elementKey="summary_text"
+              sectionBackground={sectionBackground}
+            />
           </div>
         )}
       </div>

@@ -32,8 +32,6 @@ export default function StackedTextVisualPublished(props: LayoutComponentProps) 
   const after_label = props.after_label || 'After';
   const transition_text = props.transition_text || '';
   const summary_text = props.summary_text || '';
-  // V2: boolean (with backward compat for string 'true'/'false')
-  const show_summary_box = props.show_summary_box === true || props.show_summary_box === 'true';
 
   // Extract icons (optional)
   const before_icon = props.before_icon || '➕';
@@ -129,6 +127,7 @@ export default function StackedTextVisualPublished(props: LayoutComponentProps) 
   // Typography styles
   const headlineTypography = getPublishedTypographyStyles('h2', theme);
   const bodyTypography = getPublishedTypographyStyles('body-lg', theme);
+  const summaryTypography = getPublishedTypographyStyles('body', theme);
 
   return (
     <SectionWrapperPublished
@@ -196,7 +195,7 @@ export default function StackedTextVisualPublished(props: LayoutComponentProps) 
                       textTransform: 'uppercase',
                       letterSpacing: '0.05em',
                       fontWeight: 600,
-                      fontSize: '0.875rem',
+                      fontSize: '1rem',
                       color: textColors.body,
                       marginBottom: '0.75rem'
                     }}
@@ -207,6 +206,7 @@ export default function StackedTextVisualPublished(props: LayoutComponentProps) 
                     element="p"
                     style={{
                       color: textColors.body,
+                      fontSize: '0.8rem',
                       lineHeight: '1.75rem'
                     }}
                   />
@@ -276,7 +276,7 @@ export default function StackedTextVisualPublished(props: LayoutComponentProps) 
                       textTransform: 'uppercase',
                       letterSpacing: '0.05em',
                       fontWeight: 600,
-                      fontSize: '0.875rem',
+                      fontSize: '1rem',
                       color: themeColors.after.iconText,
                       marginBottom: '0.75rem'
                     }}
@@ -287,6 +287,7 @@ export default function StackedTextVisualPublished(props: LayoutComponentProps) 
                     element="p"
                     style={{
                       color: themeColors.after.iconText,
+                      fontSize: '0.8rem',
                       lineHeight: '1.75rem'
                     }}
                   />
@@ -296,28 +297,20 @@ export default function StackedTextVisualPublished(props: LayoutComponentProps) 
           </div>
         </div>
 
-        {/* Optional Summary Box - V2: boolean check, no more ___REMOVED___ */}
-        {show_summary_box && summary_text && (
-          <div
-            className="mt-8 p-6 rounded-2xl border"
-            style={{
-              background: themeColors.summary.bg,
-              borderColor: themeColors.summary.border
-            }}
-          >
-            <div className="text-center">
-              <TextPublished
-                value={summary_text}
-                element="p"
-                style={{
-                  color: textColors.body,
-                  ...bodyTypography,
-                  fontWeight: 500,
-                  maxWidth: '32rem',
-                  margin: '0 auto'
-                }}
-              />
-            </div>
+        {/* Optional Summary Text */}
+        {summary_text && (
+          <div className="mt-10 text-center">
+            <TextPublished
+              value={summary_text}
+              element="p"
+              style={{
+                color: textColors.body,
+                ...summaryTypography,
+                fontStyle: 'italic',
+                maxWidth: '32rem',
+                margin: '0 auto'
+              }}
+            />
           </div>
         )}
       </div>

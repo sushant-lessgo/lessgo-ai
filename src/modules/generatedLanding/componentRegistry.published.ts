@@ -114,6 +114,8 @@ import MythVsRealityGridPublished from '@/modules/UIBlocks/ObjectionHandle/MythV
 
 // Pricing
 import TierCardsPublished from '@/modules/UIBlocks/Pricing/TierCards.published';
+import ToggleableMonthlyYearlyPublished from '@/modules/UIBlocks/Pricing/ToggleableMonthlyYearly.published';
+import CallToQuotePlanPublished from '@/modules/UIBlocks/Pricing/CallToQuotePlan.published';
 // V3 ARCHIVED: import CardWithTestimonialPublished from '@/modules/UIBlocks/Pricing/CardWithTestimonial.published';
 // V3 ARCHIVED: import MiniStackedCardsPublished from '@/modules/UIBlocks/Pricing/MiniStackedCards.published';
 // V3 ARCHIVED: import SegmentBasedPricingPublished from '@/modules/UIBlocks/Pricing/SegmentBasedPricing.published';
@@ -258,6 +260,8 @@ const publishedComponentRegistry: Record<string, Record<string, React.ComponentT
   },
   pricing: {
     tiercards: TierCardsPublished,
+    toggleablemonthlyearly: ToggleableMonthlyYearlyPublished,
+    calltoquoteplan: CallToQuotePlanPublished,
     // V3 ARCHIVED: cardwithtestimonial: CardWithTestimonialPublished,
     // V3 ARCHIVED: ministackedcards: MiniStackedCardsPublished,
     // V3 ARCHIVED: segmentbasedpricing: SegmentBasedPricingPublished,

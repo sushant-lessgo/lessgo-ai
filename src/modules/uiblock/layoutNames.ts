@@ -67,7 +67,7 @@ export const layoutNamesBySection: Record<string, string[]> = {
     'ToggleableMonthlyYearly',
     // V3 ARCHIVED: 'FeatureMatrix',
     // V3 ARCHIVED: 'SegmentBasedPricing',
-    'SliderPricing',
+    // V3 ARCHIVED: 'SliderPricing',
     'CallToQuotePlan',
     // V3 ARCHIVED: 'CardWithTestimonial',
     // V3 ARCHIVED: 'MiniStackedCards',

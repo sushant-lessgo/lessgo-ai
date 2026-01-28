@@ -100,7 +100,9 @@
       "Bash(do git mv \"$file\" archive/onboarding-v1/src/app/create/[token]/components/)",
       "WebSearch",
       "Bash(npm install:*)",
-      "WebFetch(domain:docs.anthropic.com)"
+      "WebFetch(domain:docs.anthropic.com)",
+      "Bash(dir:*)",
+      "Bash(findstr:*)"
     ],
     "deny": [],
     "ask": [],

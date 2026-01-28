@@ -2,70 +2,97 @@ import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
+import {
+  EditableAdaptiveHeadline,
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
-import { 
+import {
   CTAButton,
-  TrustIndicators 
+  TrustIndicators
 } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
+
+// Contact card structure
+interface ContactCard {
+  id: string;
+  title: string;
+  description: string;
+  cta: string;
+  icon: string;
+}
+
+// Trust item structure
+interface TrustItem {
+  id: string;
+  text: string;
+}
 
 interface CallToQuotePlanContent {
   headline: string;
   value_proposition: string;
-  contact_options: string;
-  contact_ctas: string;
   subheadline?: string;
   supporting_text?: string;
-  trust_items?: string;
-  // Contact icons
-  contact_icon_1?: string;
-  contact_icon_2?: string;
-  contact_icon_3?: string;
-  contact_icon_4?: string;
+  response_time?: string;
+  contact_cards: ContactCard[];
+  trust_items?: TrustItem[];
 }
 
 const CONTENT_SCHEMA = {
-  headline: { 
-    type: 'string' as const, 
-    default: 'Get a Custom Quote for Your Business' 
+  headline: {
+    type: 'string' as const,
+    default: 'Get a Custom Quote for Your Business'
   },
-  value_proposition: { 
-    type: 'string' as const, 
-    default: 'Ready to take the next step? Get personalized pricing and see how our solution can work specifically for your needs.' 
+  value_proposition: {
+    type: 'string' as const,
+    default: 'Ready to take the next step? Get personalized pricing and see how our solution can work specifically for your needs.'
   },
-  contact_options: { 
-    type: 'string' as const, 
-    default: 'Schedule a Demo|Request a Quote|Talk to Sales|Get Pricing' 
+  subheadline: {
+    type: 'string' as const,
+    default: ''
   },
-  contact_ctas: { 
-    type: 'string' as const, 
-    default: 'Book Demo|Get Quote|Contact Sales|View Pricing' 
+  supporting_text: {
+    type: 'string' as const,
+    default: ''
   },
-  subheadline: { 
-    type: 'string' as const, 
-    default: '' 
+  response_time: {
+    type: 'string' as const,
+    default: ''
   },
-  supporting_text: { 
-    type: 'string' as const, 
-    default: '' 
+  contact_cards: {
+    type: 'array' as const,
+    default: [
+      {
+        id: 'cc-1',
+        title: 'Schedule a Demo',
+        description: 'See the platform in action with a personalized walkthrough',
+        cta: 'Book Demo',
+        icon: 'calendar'
+      },
+      {
+        id: 'cc-2',
+        title: 'Request a Quote',
+        description: 'Get pricing tailored to your team size and needs',
+        cta: 'Get Quote',
+        icon: 'dollar-sign'
+      },
+      {
+        id: 'cc-3',
+        title: 'Talk to Sales',
+        description: 'Discuss your specific requirements with our enterprise team',
+        cta: 'Contact Sales',
+        icon: 'phone'
+      }
+    ]
   },
-  trust_items: { 
-    type: 'string' as const, 
-    default: '' 
-  },
-  // Contact icons
-  contact_icon_1: { type: 'string' as const, default: '🎥' },
-  contact_icon_2: { type: 'string' as const, default: '💰' },
-  contact_icon_3: { type: 'string' as const, default: '📞' },
-  contact_icon_4: { type: 'string' as const, default: '💲' }
+  trust_items: {
+    type: 'array' as const,
+    default: []
+  }
 };
 
 export default function CallToQuotePlan(props: LayoutComponentProps) {
-  
+
   const {
     sectionId,
     mode,
@@ -82,125 +109,142 @@ export default function CallToQuotePlan(props: LayoutComponentProps) {
   });
 
   const { getTextStyle: getTypographyStyle } = useTypography();
-  
+
   // Create typography styles
-  const h3Style = getTypographyStyle('h3');
   const h4Style = getTypographyStyle('h4');
+  const bodyStyle = getTypographyStyle('body');
   const bodyLgStyle = getTypographyStyle('body-lg');
 
-  const contactOptions = blockContent.contact_options 
-    ? blockContent.contact_options.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
+  // Text colors from tokens
+  const headingColor = dynamicTextColors?.heading || colorTokens.textPrimary;
+  const bodyColor = dynamicTextColors?.muted || colorTokens.textMuted;
 
-  const contactCtas = blockContent.contact_ctas 
-    ? blockContent.contact_ctas.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
+  // Ensure contact_cards is always an array
+  const contactCards: ContactCard[] = Array.isArray(blockContent.contact_cards)
+    ? blockContent.contact_cards
+    : CONTENT_SCHEMA.contact_cards.default;
 
-  const contactOptionsList = contactOptions.map((option, index) => ({
-    title: option,
-    cta: contactCtas[index] || 'Contact Us'
-  }));
-
-  const trustItems = blockContent.trust_items 
-    ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
+  // Ensure trust_items is always an array
+  const trustItems: TrustItem[] = Array.isArray(blockContent.trust_items)
+    ? blockContent.trust_items
     : [];
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
 
-  const getContactIcon = (index: number) => {
-    const iconFields = ['contact_icon_1', 'contact_icon_2', 'contact_icon_3', 'contact_icon_4'];
-    return blockContent[iconFields[index] as keyof CallToQuotePlanContent] || ['🎥', '💰', '📞', '📄'][index];
+  // Handler functions
+  const handleCardUpdate = (cardId: string, field: keyof ContactCard, value: string) => {
+    const updatedCards = contactCards.map(card =>
+      card.id === cardId ? { ...card, [field]: value } : card
+    );
+    handleContentUpdate('contact_cards', JSON.stringify(updatedCards));
   };
 
-  const ContactCard = ({ option, index }: {
-    option: typeof contactOptionsList[0];
-    index: number;
-  }) => (
-    <div className={`bg-white rounded-xl border-2 border-gray-200 p-6 hover:border-gray-300 hover:shadow-lg transition-all duration-300 relative group/contact-card-${index}`}>
+  const handleAddCard = () => {
+    if (contactCards.length >= 4) return;
+
+    const newCard: ContactCard = {
+      id: `cc-${Date.now()}`,
+      title: 'New Contact Option',
+      description: 'Add a description for this contact option',
+      cta: 'Contact Us',
+      icon: 'message-circle'
+    };
+    handleContentUpdate('contact_cards', JSON.stringify([...contactCards, newCard]));
+  };
+
+  const handleRemoveCard = (cardId: string) => {
+    if (contactCards.length <= 2) return;
+    handleContentUpdate('contact_cards', JSON.stringify(contactCards.filter(card => card.id !== cardId)));
+  };
+
+  const handleTrustItemUpdate = (itemId: string, value: string) => {
+    const updatedItems = trustItems.map(item =>
+      item.id === itemId ? { ...item, text: value } : item
+    );
+    handleContentUpdate('trust_items', JSON.stringify(updatedItems));
+  };
+
+  const handleAddTrustItem = () => {
+    if (trustItems.length >= 5) return;
+
+    const newItem: TrustItem = {
+      id: `ti-${Date.now()}`,
+      text: 'New trust indicator'
+    };
+    handleContentUpdate('trust_items', JSON.stringify([...trustItems, newItem]));
+  };
+
+  const handleRemoveTrustItem = (itemId: string) => {
+    handleContentUpdate('trust_items', JSON.stringify(trustItems.filter(item => item.id !== itemId)));
+  };
+
+  const ContactCardComponent = ({ card, index }: { card: ContactCard; index: number }) => (
+    <div className="bg-white rounded-xl border-2 border-gray-200 hover:border-gray-300 p-6 hover:shadow-lg transition-all duration-300 relative group">
       <div className="text-center">
-        <div className={`w-16 h-16 mx-auto mb-4 rounded-full ${colorTokens.ctaBg} flex items-center justify-center text-white group/icon-edit`}>
+        <div className={`w-16 h-16 mx-auto mb-4 rounded-full ${colorTokens.ctaBg} flex items-center justify-center text-white`}>
           <IconEditableText
             mode={mode}
-            value={getContactIcon(index)}
-            onEdit={(value) => handleContentUpdate(`contact_icon_${index + 1}` as keyof CallToQuotePlanContent, value)}
+            value={card.icon}
+            onEdit={(value) => handleCardUpdate(card.id, 'icon', value)}
             backgroundType="primary"
             colorTokens={colorTokens}
             iconSize="lg"
             className="text-white text-3xl"
             sectionId={sectionId}
-            elementKey={`contact_icon_${index + 1}`}
+            elementKey={`contact_cards.${card.id}.icon`}
           />
         </div>
-        
+
         {mode !== 'preview' ? (
-          <div
-            contentEditable
-            suppressContentEditableWarning
-            onBlur={(e) => {
-              const options = blockContent.contact_options.split('|');
-              options[index] = e.currentTarget.textContent || '';
-              handleContentUpdate('contact_options', options.join('|'));
-            }}
-            className="font-semibold text-gray-900 mb-3 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-50"
-            style={h3Style}
-          >
-            {option.title}
-          </div>
+          <>
+            <div
+              contentEditable
+              suppressContentEditableWarning
+              onBlur={(e) => handleCardUpdate(card.id, 'title', e.currentTarget.textContent || '')}
+              className={`font-semibold mb-2 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-50 ${headingColor}`}
+              style={h4Style}
+              data-section-id={sectionId}
+              data-element-key={`contact_cards.${card.id}.title`}
+            >
+              {card.title}
+            </div>
+            <div
+              contentEditable
+              suppressContentEditableWarning
+              onBlur={(e) => handleCardUpdate(card.id, 'description', e.currentTarget.textContent || '')}
+              className={`mb-4 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-50 ${bodyColor}`}
+              style={bodyStyle}
+              data-section-id={sectionId}
+              data-element-key={`contact_cards.${card.id}.description`}
+            >
+              {card.description}
+            </div>
+          </>
         ) : (
-          <h3 style={h3Style} className="font-semibold text-gray-900 mb-3">{option.title}</h3>
+          <>
+            <h4 style={h4Style} className={`font-semibold mb-2 ${headingColor}`}>{card.title}</h4>
+            <p style={bodyStyle} className={`mb-4 ${bodyColor}`}>{card.description}</p>
+          </>
         )}
-        
+
         <CTAButton
-          text={option.cta}
+          text={card.cta}
           colorTokens={colorTokens}
           className="w-full"
           variant={index === 0 ? "primary" : "secondary"}
           sectionId={sectionId}
-          elementKey={`contact_cta_${index}`}
+          elementKey={`contact_cards.${card.id}.cta`}
         />
       </div>
-      
-      {/* Remove contact card button - only in edit mode and when we have more than 1 card */}
-      {mode === 'edit' && contactOptionsList.length > 1 && (
+
+      {/* Remove card button - only in edit mode and when we have more than 2 cards */}
+      {mode === 'edit' && contactCards.length > 2 && (
         <button
           onClick={(e) => {
             e.stopPropagation();
-            // Remove this contact card from all pipe-separated fields
-            const removeFromPipeList = (value: string, indexToRemove: number) => {
-              const items = value.split('|');
-              items.splice(indexToRemove, 1);
-              return items.join('|');
-            };
-            
-            handleContentUpdate('contact_options', removeFromPipeList(blockContent.contact_options, index));
-            handleContentUpdate('contact_ctas', removeFromPipeList(blockContent.contact_ctas, index));
-            
-            // Update contact icons by shifting them
-            const iconFields = ['contact_icon_1', 'contact_icon_2', 'contact_icon_3', 'contact_icon_4'];
-            iconFields.forEach((field, iconIndex) => {
-              if (iconIndex === index) {
-                // Remove this icon by setting empty or shifting later icons up
-                if (iconIndex < iconFields.length - 1) {
-                  // Shift icons up
-                  const nextIconValue = blockContent[iconFields[iconIndex + 1] as keyof CallToQuotePlanContent] || '';
-                  handleContentUpdate(field as keyof CallToQuotePlanContent, nextIconValue);
-                } else {
-                  // Last icon, just clear it
-                  handleContentUpdate(field as keyof CallToQuotePlanContent, '');
-                }
-              } else if (iconIndex > index) {
-                // Shift this icon up
-                if (iconIndex < iconFields.length - 1) {
-                  const nextIconValue = blockContent[iconFields[iconIndex + 1] as keyof CallToQuotePlanContent] || '';
-                  handleContentUpdate(field as keyof CallToQuotePlanContent, nextIconValue);
-                } else {
-                  // Clear the last icon
-                  handleContentUpdate(field as keyof CallToQuotePlanContent, '');
-                }
-              }
-            });
+            handleRemoveCard(card.id);
           }}
-          className={`opacity-0 group-hover/contact-card-${index}:opacity-100 absolute -top-2 -right-2 text-red-500 hover:text-red-700 transition-opacity duration-200 z-10`}
+          className="opacity-0 group-hover:opacity-100 absolute -top-2 -right-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-opacity duration-200 z-10"
           title="Remove this contact option"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -210,7 +254,7 @@ export default function CallToQuotePlan(props: LayoutComponentProps) {
       )}
     </div>
   );
-  
+
   return (
     <LayoutSection
       sectionId={sectionId}
@@ -221,7 +265,7 @@ export default function CallToQuotePlan(props: LayoutComponentProps) {
       className={props.className}
     >
       <div className="max-w-6xl mx-auto">
-        
+
         <div className="text-center mb-16">
           <EditableAdaptiveHeadline
             mode={mode}
@@ -261,8 +305,8 @@ export default function CallToQuotePlan(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              style={bodyLgStyle}
-              className="text-gray-700 leading-relaxed"
+              style={bodyStyle}
+              className="leading-relaxed"
               sectionId={sectionId}
               elementKey="value_proposition"
               sectionBackground={sectionBackground}
@@ -270,40 +314,21 @@ export default function CallToQuotePlan(props: LayoutComponentProps) {
           </div>
         </div>
 
-        {/* Contact Options */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-          {contactOptionsList.map((option, index) => (
-            <ContactCard
-              key={index}
-              option={option}
+        {/* Contact Cards */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-16">
+          {contactCards.map((card, index) => (
+            <ContactCardComponent
+              key={card.id}
+              card={card}
               index={index}
             />
           ))}
-          
-          {/* Add contact card button - only in edit mode and when we have less than 4 cards */}
-          {mode === 'edit' && contactOptionsList.length < 4 && (
+
+          {/* Add card button - only in edit mode and when we have less than 4 cards */}
+          {mode === 'edit' && contactCards.length < 4 && (
             <div className="flex items-center justify-center">
               <button
-                onClick={() => {
-                  const options = blockContent.contact_options.split('|');
-                  const ctas = blockContent.contact_ctas.split('|');
-                  
-                  // Add smart defaults based on what we already have
-                  const cardNumber = options.length + 1;
-                  const defaultOptions = ['Schedule a Demo', 'Request a Quote', 'Talk to Sales', 'Get Pricing'];
-                  const defaultCtas = ['Book Demo', 'Get Quote', 'Contact Sales', 'View Pricing'];
-                  const defaultIcons = ['🎥', '💰', '📞', '💲'];
-                  
-                  options.push(defaultOptions[cardNumber - 1] || `Contact Option ${cardNumber}`);
-                  ctas.push(defaultCtas[cardNumber - 1] || `Contact Us`);
-                  
-                  handleContentUpdate('contact_options', options.join('|'));
-                  handleContentUpdate('contact_ctas', ctas.join('|'));
-                  
-                  // Set the appropriate icon for the new card
-                  const iconField = `contact_icon_${cardNumber}` as keyof CallToQuotePlanContent;
-                  handleContentUpdate(iconField, defaultIcons[cardNumber - 1] || '📞');
-                }}
+                onClick={handleAddCard}
                 className="px-6 py-4 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-xl font-medium transition-all duration-300 border-2 border-blue-300 hover:border-blue-400 flex items-center space-x-2 min-h-[200px]"
                 title="Add new contact option"
               >
@@ -316,7 +341,26 @@ export default function CallToQuotePlan(props: LayoutComponentProps) {
           )}
         </div>
 
-        {(blockContent.supporting_text || blockContent.trust_items || mode === 'edit') && (
+        {/* Response Time */}
+        {(blockContent.response_time || mode === 'edit') && (
+          <div className="text-center mb-8">
+            <EditableAdaptiveText
+              mode={mode}
+              value={blockContent.response_time || ''}
+              onEdit={(value) => handleContentUpdate('response_time', value)}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+              colorTokens={colorTokens}
+              variant="body"
+              className="font-medium"
+              placeholder="Add response time (e.g., 'We respond within 24 hours')..."
+              sectionId={sectionId}
+              elementKey="response_time"
+              sectionBackground={sectionBackground}
+            />
+          </div>
+        )}
+
+        {(blockContent.supporting_text || trustItems.length > 0 || mode === 'edit') && (
           <div className="text-center space-y-6">
             {(blockContent.supporting_text || mode === 'edit') && (
               <EditableAdaptiveText
@@ -335,11 +379,13 @@ export default function CallToQuotePlan(props: LayoutComponentProps) {
             )}
 
             {trustItems.length > 0 && (
-              <TrustIndicators 
-                items={trustItems}
-                colorClass={mutedTextColor}
-                iconColor="text-green-500"
-              />
+              <div className="flex justify-center">
+                <TrustIndicators
+                  items={trustItems.map(item => item.text)}
+                  colorClass={mutedTextColor}
+                  iconColor="text-green-500"
+                />
+              </div>
             )}
           </div>
         )}
@@ -356,29 +402,26 @@ export const componentMeta = {
   defaultBackgroundType: 'neutral' as const,
   complexity: 'simple',
   estimatedBuildTime: '10 minutes',
-  
+
   contentFields: [
     { key: 'headline', label: 'Main Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
     { key: 'value_proposition', label: 'Value Proposition', type: 'textarea', required: true },
-    { key: 'contact_options', label: 'Contact Options (pipe separated)', type: 'text', required: true },
-    { key: 'contact_ctas', label: 'Contact CTAs (pipe separated)', type: 'text', required: true },
+    { key: 'contact_cards', label: 'Contact Cards', type: 'array', required: true },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
-    { key: 'contact_icon_1', label: 'Contact Icon 1', type: 'text', required: false },
-    { key: 'contact_icon_2', label: 'Contact Icon 2', type: 'text', required: false },
-    { key: 'contact_icon_3', label: 'Contact Icon 3', type: 'text', required: false },
-    { key: 'contact_icon_4', label: 'Contact Icon 4', type: 'text', required: false }
+    { key: 'response_time', label: 'Response Time', type: 'text', required: false },
+    { key: 'trust_items', label: 'Trust Indicators', type: 'array', required: false }
   ],
-  
+
   features: [
-    'Multiple contact option cards',
+    'Multiple contact option cards with descriptions',
     'Customizable icons and CTAs',
     'WYSIWYG inline editing',
     'Trust indicators support',
+    'Response time indicator',
     'Responsive card layout'
   ],
-  
+
   useCases: [
     'Custom pricing requests',
     'Consultation bookings',

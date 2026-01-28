@@ -123,7 +123,7 @@ export default function LetterStyleBlockPublished(props: LayoutComponentProps) {
               level="h2"
               style={{
                 ...headlineTypography,
-                color: '#111827',
+                color: textColors.heading || '#111827',
                 textAlign: 'center',
                 fontSize: '1.5rem',
                 fontWeight: 700
@@ -137,7 +137,7 @@ export default function LetterStyleBlockPublished(props: LayoutComponentProps) {
                   value={date_text}
                   style={{
                     fontSize: '0.875rem',
-                    color: '#6B7280'
+                    color: textColors.muted || '#6B7280'
                   }}
                 />
               </div>
@@ -152,7 +152,7 @@ export default function LetterStyleBlockPublished(props: LayoutComponentProps) {
               value={letter_greeting}
               style={{
                 fontSize: '1.125rem',
-                color: '#111827',
+                color: textColors.heading || '#111827',
                 marginBottom: '1.5rem'
               }}
             />
@@ -162,7 +162,7 @@ export default function LetterStyleBlockPublished(props: LayoutComponentProps) {
               <TextPublished
                 value={letter_body}
                 style={{
-                  color: '#374151',
+                  color: textColors.body || '#374151',
                   lineHeight: '1.625',
                   whiteSpace: 'pre-line'
                 }}
@@ -191,14 +191,14 @@ export default function LetterStyleBlockPublished(props: LayoutComponentProps) {
                   style={{
                     fontSize: '1.25rem',
                     fontWeight: 600,
-                    color: '#111827'
+                    color: textColors.heading || '#111827'
                   }}
                 />
                 {(founder_title || company_name) && (
                   <TextPublished
                     value={`${founder_title || ''}${founder_title && company_name ? ', ' : ''}${company_name || ''}`}
                     style={{
-                      color: '#4B5563',
+                      color: textColors.body || '#4B5563',
                       fontSize: '0.875rem'
                     }}
                   />
@@ -215,7 +215,7 @@ export default function LetterStyleBlockPublished(props: LayoutComponentProps) {
                 <TextPublished
                   value={ps_text}
                   style={{
-                    color: '#4B5563',
+                    color: textColors.body || '#4B5563',
                     fontStyle: 'italic'
                   }}
                 />

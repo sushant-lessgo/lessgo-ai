@@ -1,105 +1,204 @@
-import React, { useState } from 'react';
+// SegmentedFAQTabs.tsx
+// V2 Schema - Clean nested array format, no numbered fields or pipe strings
+
+import React, { useState, useMemo } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
+import {
+  EditableAdaptiveHeadline,
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
+// FAQ item structure (V2 - clean array format)
+interface FAQItem {
+  id: string;
+  question: string;
+  answer: string;
+}
+
+// Tab structure with nested items
+interface Tab {
+  id: string;
+  label: string;
+  items: FAQItem[];
+}
+
+// Content interface (V2 - nested arrays, not numbered fields)
 interface SegmentedFAQTabsContent {
   headline: string;
   subheadline?: string;
-  // Individual tab labels
-  tab_label_1: string;
-  tab_label_2: string;
-  tab_label_3: string;
-  // Tab 1 Q&A (up to 4 items per tab)
-  tab1_question_1: string;
-  tab1_answer_1: string;
-  tab1_question_2: string;
-  tab1_answer_2: string;
-  tab1_question_3: string;
-  tab1_answer_3: string;
-  tab1_question_4: string;
-  tab1_answer_4: string;
-  // Tab 2 Q&A
-  tab2_question_1: string;
-  tab2_answer_1: string;
-  tab2_question_2: string;
-  tab2_answer_2: string;
-  tab2_question_3: string;
-  tab2_answer_3: string;
-  tab2_question_4: string;
-  tab2_answer_4: string;
-  // Tab 3 Q&A
-  tab3_question_1: string;
-  tab3_answer_1: string;
-  tab3_question_2: string;
-  tab3_answer_2: string;
-  tab3_question_3: string;
-  tab3_answer_3: string;
-  tab3_question_4: string;
-  tab3_answer_4: string;
-  // Legacy fields for backward compatibility
-  tab_labels?: string;
-  tab1_questions?: string;
-  tab1_answers?: string;
-  tab2_questions?: string;
-  tab2_answers?: string;
-  tab3_questions?: string;
-  tab3_answers?: string;
+  contact_prompt?: string;
+  cta_text?: string;
+  supporting_text?: string;
+  tabs: Tab[];
 }
 
+// Content schema - defines structure and defaults
 const CONTENT_SCHEMA = {
-  headline: { 
-    type: 'string' as const, 
-    default: 'Everything You Need to Know' 
+  headline: {
+    type: 'string' as const,
+    default: 'Everything You Need to Know'
   },
-  subheadline: { 
-    type: 'string' as const, 
-    default: 'Find answers organized by topic for easy navigation' 
+  subheadline: {
+    type: 'string' as const,
+    default: 'Find answers organized by topic for easy navigation'
   },
-  // Individual tab labels
-  tab_label_1: { type: 'string' as const, default: 'Getting Started' },
-  tab_label_2: { type: 'string' as const, default: 'Technical Details' },
-  tab_label_3: { type: 'string' as const, default: 'Billing & Support' },
-  // Tab 1 Q&A
-  tab1_question_1: { type: 'string' as const, default: 'How do I sign up?' },
-  tab1_answer_1: { type: 'string' as const, default: 'Simply click "Start Free Trial" and follow the guided setup process. It takes less than 2 minutes.' },
-  tab1_question_2: { type: 'string' as const, default: 'What\'s included in the free trial?' },
-  tab1_answer_2: { type: 'string' as const, default: 'Full access to all features, unlimited users, and priority support for 14 days.' },
-  tab1_question_3: { type: 'string' as const, default: 'How long does setup take?' },
-  tab1_answer_3: { type: 'string' as const, default: 'Most teams are up and running in under 10 minutes. We provide templates to get you started quickly.' },
-  tab1_question_4: { type: 'string' as const, default: 'Do I need to install anything?' },
-  tab1_answer_4: { type: 'string' as const, default: 'No downloads required. Our platform works entirely in your browser on any device.' },
-  // Tab 2 Q&A
-  tab2_question_1: { type: 'string' as const, default: 'What\'s your uptime guarantee?' },
-  tab2_answer_1: { type: 'string' as const, default: 'We guarantee 99.9% uptime with redundant infrastructure across multiple regions.' },
-  tab2_question_2: { type: 'string' as const, default: 'How is data encrypted?' },
-  tab2_answer_2: { type: 'string' as const, default: 'All data is encrypted using AES-256 at rest and TLS 1.3 in transit. We\'re SOC 2 Type II certified.' },
-  tab2_question_3: { type: 'string' as const, default: 'Which APIs do you support?' },
-  tab2_answer_3: { type: 'string' as const, default: 'We support REST, GraphQL, and webhooks. Full API documentation is available in your dashboard.' },
-  tab2_question_4: { type: 'string' as const, default: 'Can I export my data?' },
-  tab2_answer_4: { type: 'string' as const, default: 'Yes, you can export all your data anytime in JSON, CSV, or SQL format. We believe in data portability.' },
-  // Tab 3 Q&A
-  tab3_question_1: { type: 'string' as const, default: 'What payment methods do you accept?' },
-  tab3_answer_1: { type: 'string' as const, default: 'We accept all major credit cards, ACH transfers, and wire transfers for enterprise customers.' },
-  tab3_question_2: { type: 'string' as const, default: 'Can I change plans anytime?' },
-  tab3_answer_2: { type: 'string' as const, default: 'Yes, upgrade or downgrade anytime. Changes are prorated to your billing cycle.' },
-  tab3_question_3: { type: 'string' as const, default: 'Do you offer refunds?' },
-  tab3_answer_3: { type: 'string' as const, default: 'We offer a 30-day money-back guarantee if you\'re not completely satisfied.' },
-  tab3_question_4: { type: 'string' as const, default: 'How do I contact support?' },
-  tab3_answer_4: { type: 'string' as const, default: '24/7 support via live chat, email at support@company.com, or schedule a call with our team.' },
-  // Legacy fields for backward compatibility
-  tab_labels: { type: 'string' as const, default: '' },
-  tab1_questions: { type: 'string' as const, default: '' },
-  tab1_answers: { type: 'string' as const, default: '' },
-  tab2_questions: { type: 'string' as const, default: '' },
-  tab2_answers: { type: 'string' as const, default: '' },
-  tab3_questions: { type: 'string' as const, default: '' },
-  tab3_answers: { type: 'string' as const, default: '' }
+  contact_prompt: { type: 'string' as const, default: '' },
+  cta_text: { type: 'string' as const, default: '' },
+  supporting_text: { type: 'string' as const, default: '' },
+  tabs: {
+    type: 'array' as const,
+    default: [
+      {
+        id: 'tab-1',
+        label: 'Getting Started',
+        items: [
+          { id: 'tab-1-faq-1', question: 'How do I sign up?', answer: 'Simply click "Start Free Trial" and follow the guided setup process. It takes less than 2 minutes.' },
+          { id: 'tab-1-faq-2', question: 'What\'s included in the free trial?', answer: 'Full access to all features, unlimited users, and priority support for 14 days.' },
+          { id: 'tab-1-faq-3', question: 'How long does setup take?', answer: 'Most teams are up and running in under 10 minutes. We provide templates to get you started quickly.' },
+        ]
+      },
+      {
+        id: 'tab-2',
+        label: 'Technical Details',
+        items: [
+          { id: 'tab-2-faq-1', question: 'What\'s your uptime guarantee?', answer: 'We guarantee 99.9% uptime with redundant infrastructure across multiple regions.' },
+          { id: 'tab-2-faq-2', question: 'How is data encrypted?', answer: 'All data is encrypted using AES-256 at rest and TLS 1.3 in transit. We\'re SOC 2 Type II certified.' },
+          { id: 'tab-2-faq-3', question: 'Can I export my data?', answer: 'Yes, you can export all your data anytime in JSON, CSV, or SQL format. We believe in data portability.' },
+        ]
+      },
+      {
+        id: 'tab-3',
+        label: 'Billing & Support',
+        items: [
+          { id: 'tab-3-faq-1', question: 'What payment methods do you accept?', answer: 'We accept all major credit cards, ACH transfers, and wire transfers for enterprise customers.' },
+          { id: 'tab-3-faq-2', question: 'Can I change plans anytime?', answer: 'Yes, upgrade or downgrade anytime. Changes are prorated to your billing cycle.' },
+          { id: 'tab-3-faq-3', question: 'How do I contact support?', answer: '24/7 support via live chat, email at support@company.com, or schedule a call with our team.' },
+        ]
+      }
+    ]
+  }
 };
+
+// Theme-based tab colors
+const getTabColors = (theme: UIBlockTheme) => ({
+  warm: {
+    activeBg: 'bg-orange-500',
+    activeText: 'text-white',
+    inactiveBg: 'bg-transparent',
+    inactiveText: 'text-orange-700',
+    inactiveHover: 'hover:bg-orange-50',
+    cardBg: 'bg-orange-50',
+    border: 'border-orange-200',
+    divider: 'border-orange-100'
+  },
+  cool: {
+    activeBg: 'bg-blue-500',
+    activeText: 'text-white',
+    inactiveBg: 'bg-transparent',
+    inactiveText: 'text-blue-700',
+    inactiveHover: 'hover:bg-blue-50',
+    cardBg: 'bg-blue-50',
+    border: 'border-blue-200',
+    divider: 'border-blue-100'
+  },
+  neutral: {
+    activeBg: 'bg-gray-700',
+    activeText: 'text-white',
+    inactiveBg: 'bg-transparent',
+    inactiveText: 'text-gray-600',
+    inactiveHover: 'hover:bg-gray-100',
+    cardBg: 'bg-gray-50',
+    border: 'border-gray-200',
+    divider: 'border-gray-200'
+  }
+})[theme];
+
+// Individual FAQ Item Component within a tab
+const FAQTabItem = React.memo(({
+  item,
+  tabId,
+  mode,
+  colorTokens,
+  getTextStyle,
+  onQuestionEdit,
+  onAnswerEdit,
+  onRemove,
+  backgroundType,
+  sectionBackground,
+  sectionId,
+  themeColors
+}: {
+  item: FAQItem;
+  tabId: string;
+  mode: 'edit' | 'preview';
+  colorTokens: any;
+  getTextStyle: (variant: 'display' | 'hero' | 'h1' | 'h2' | 'h3' | 'body-lg' | 'body' | 'body-sm' | 'caption') => React.CSSProperties;
+  onQuestionEdit: (tabId: string, itemId: string, value: string) => void;
+  onAnswerEdit: (tabId: string, itemId: string, value: string) => void;
+  onRemove: (tabId: string, itemId: string) => void;
+  backgroundType: any;
+  sectionBackground: any;
+  sectionId: string;
+  themeColors: ReturnType<typeof getTabColors>;
+}) => {
+  return (
+    <div className={`relative group/faq-item ${themeColors.cardBg} rounded-lg p-6`}>
+      <div className="mb-3">
+        <EditableAdaptiveText
+          mode={mode}
+          value={item.question}
+          onEdit={(value) => onQuestionEdit(tabId, item.id, value)}
+          backgroundType={backgroundType}
+          colorTokens={colorTokens}
+          variant="body"
+          className={`font-semibold ${colorTokens.textPrimary}`}
+          style={getTextStyle('h3')}
+          placeholder="Enter question..."
+          sectionBackground={sectionBackground}
+          data-section-id={sectionId}
+          data-element-key={`tabs.${tabId}.items.${item.id}.question`}
+        />
+      </div>
+
+      {(item.answer || mode === 'edit') && (
+        <EditableAdaptiveText
+          mode={mode}
+          value={item.answer}
+          onEdit={(value) => onAnswerEdit(tabId, item.id, value)}
+          backgroundType={backgroundType}
+          colorTokens={colorTokens}
+          variant="body"
+          className={`leading-relaxed ${colorTokens.textSecondary}`}
+          placeholder="Enter answer..."
+          sectionBackground={sectionBackground}
+          data-section-id={sectionId}
+          data-element-key={`tabs.${tabId}.items.${item.id}.answer`}
+        />
+      )}
+
+      {/* Remove button */}
+      {mode !== 'preview' && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove(tabId, item.id);
+          }}
+          className="opacity-0 group-hover/faq-item:opacity-100 absolute top-4 right-4 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm z-10"
+          title="Remove this item"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
+    </div>
+  );
+});
+FAQTabItem.displayName = 'FAQTabItem';
 
 export default function SegmentedFAQTabs(props: LayoutComponentProps) {
   const {
@@ -117,87 +216,108 @@ export default function SegmentedFAQTabs(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
+  // Theme detection: manual override > auto-detection > neutral fallback
+  const uiBlockTheme = useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  const themeColors = getTabColors(uiBlockTheme);
+
   const [activeTab, setActiveTab] = useState(0);
 
-  // Helper function to get tab labels
-  const getTabLabels = () => {
-    const labels = [];
-    
-    // Check individual fields first (preferred)
-    for (let i = 1; i <= 3; i++) {
-      const labelKey = `tab_label_${i}` as keyof SegmentedFAQTabsContent;
-      const label = blockContent[labelKey];
-      
-      if (label && label.trim() !== '' && label !== '___REMOVED___') {
-        labels.push(label.trim());
-      }
-    }
-    
-    // Fallback to legacy format if no individual labels found
-    if (labels.length === 0 && blockContent.tab_labels) {
-      return blockContent.tab_labels.split('|').map(label => label.trim()).filter(Boolean);
-    }
-    
-    // Default labels if nothing found
-    if (labels.length === 0) {
-      return ['General', 'Technical', 'Billing'];
-    }
-    
-    return labels;
-  };
-  
-  // Helper function to get FAQ items for a specific tab
-  const getTabFAQItems = (tabNumber: number) => {
-    const items = [];
-    
-    // Check individual fields first (preferred)
-    for (let i = 1; i <= 4; i++) {
-      const questionKey = `tab${tabNumber}_question_${i}` as keyof SegmentedFAQTabsContent;
-      const answerKey = `tab${tabNumber}_answer_${i}` as keyof SegmentedFAQTabsContent;
-      
-      const question = blockContent[questionKey];
-      const answer = blockContent[answerKey];
-      
-      if (question && question.trim() !== '' && question !== '___REMOVED___') {
-        items.push({
-          question: question.trim(),
-          answer: (answer && answer !== '___REMOVED___') ? answer.trim() : '',
-          index: i,
-          tabNumber
-        });
-      }
-    }
-    
-    // Fallback to legacy format if no individual items found
-    if (items.length === 0) {
-      const questionsKey = `tab${tabNumber}_questions` as keyof SegmentedFAQTabsContent;
-      const answersKey = `tab${tabNumber}_answers` as keyof SegmentedFAQTabsContent;
-      
-      const questions = blockContent[questionsKey]?.split('|').map(q => q.trim()).filter(Boolean) || [];
-      const answers = blockContent[answersKey]?.split('|').map(a => a.trim()).filter(Boolean) || [];
-      
-      questions.forEach((question, index) => {
-        items.push({
-          question,
-          answer: answers[index] || '',
-          index: index + 1,
-          tabNumber
-        });
-      });
-    }
-    
-    return items;
-  };
-  
-  const tabLabels = getTabLabels();
-  const tabs = [
-    { items: getTabFAQItems(1) },
-    { items: getTabFAQItems(2) },
-    { items: getTabFAQItems(3) }
-  ];
+  // Get tabs from content (direct array access)
+  const tabs: Tab[] = blockContent.tabs || CONTENT_SCHEMA.tabs.default;
 
-  const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
-  const accentColor = colorTokens.ctaBg;
+  // Handler: Edit tab label
+  const handleTabLabelEdit = (tabId: string, value: string) => {
+    const updatedTabs = tabs.map(tab =>
+      tab.id === tabId ? { ...tab, label: value } : tab
+    );
+    (handleContentUpdate as any)('tabs', updatedTabs);
+  };
+
+  // Handler: Edit question
+  const handleQuestionEdit = (tabId: string, itemId: string, value: string) => {
+    const updatedTabs = tabs.map(tab =>
+      tab.id === tabId
+        ? {
+            ...tab,
+            items: tab.items.map(item =>
+              item.id === itemId ? { ...item, question: value } : item
+            )
+          }
+        : tab
+    );
+    (handleContentUpdate as any)('tabs', updatedTabs);
+  };
+
+  // Handler: Edit answer
+  const handleAnswerEdit = (tabId: string, itemId: string, value: string) => {
+    const updatedTabs = tabs.map(tab =>
+      tab.id === tabId
+        ? {
+            ...tab,
+            items: tab.items.map(item =>
+              item.id === itemId ? { ...item, answer: value } : item
+            )
+          }
+        : tab
+    );
+    (handleContentUpdate as any)('tabs', updatedTabs);
+  };
+
+  // Handler: Remove item from tab
+  const handleRemoveItem = (tabId: string, itemId: string) => {
+    const updatedTabs = tabs.map(tab =>
+      tab.id === tabId
+        ? { ...tab, items: tab.items.filter(item => item.id !== itemId) }
+        : tab
+    );
+    (handleContentUpdate as any)('tabs', updatedTabs);
+  };
+
+  // Handler: Add item to tab
+  const handleAddItem = (tabId: string) => {
+    const newId = `${tabId}-faq-${Date.now()}`;
+    const updatedTabs = tabs.map(tab =>
+      tab.id === tabId
+        ? {
+            ...tab,
+            items: [...tab.items, { id: newId, question: 'New question', answer: 'New answer' }]
+          }
+        : tab
+    );
+    (handleContentUpdate as any)('tabs', updatedTabs);
+  };
+
+  // Handler: Remove tab
+  const handleRemoveTab = (tabId: string) => {
+    const tabIndex = tabs.findIndex(t => t.id === tabId);
+    const updatedTabs = tabs.filter(tab => tab.id !== tabId);
+    (handleContentUpdate as any)('tabs', updatedTabs);
+    // Adjust active tab if needed
+    if (activeTab >= updatedTabs.length) {
+      setActiveTab(Math.max(0, updatedTabs.length - 1));
+    } else if (tabIndex <= activeTab && activeTab > 0) {
+      setActiveTab(activeTab - 1);
+    }
+  };
+
+  // Handler: Add new tab
+  const handleAddTab = () => {
+    const newId = `tab-${Date.now()}`;
+    const updatedTabs = [...tabs, {
+      id: newId,
+      label: 'New Category',
+      items: [{ id: `${newId}-faq-1`, question: 'New question', answer: 'New answer' }]
+    }];
+    (handleContentUpdate as any)('tabs', updatedTabs);
+    setActiveTab(updatedTabs.length - 1);
+  };
+
+  const currentTab = tabs[activeTab];
 
   return (
     <LayoutSection
@@ -223,7 +343,7 @@ export default function SegmentedFAQTabs(props: LayoutComponentProps) {
             elementKey="headline"
             sectionBackground={sectionBackground}
           />
-          
+
           {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
@@ -246,127 +366,156 @@ export default function SegmentedFAQTabs(props: LayoutComponentProps) {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex flex-wrap justify-center gap-2 mb-8 border-b border-gray-200 dark:border-gray-700">
-          {tabLabels.map((label, index) => (
-            <div key={index} className="relative group/tab-label">
+        <div className={`flex flex-wrap justify-center gap-4 mt-12 mb-8 pb-4 border-b ${themeColors.border}`}>
+          {tabs.map((tab, index) => (
+            <div key={tab.id} className="relative group/tab">
               <button
                 onClick={() => setActiveTab(index)}
-                className={`px-6 py-3 font-medium transition-all duration-200 border-b-2 ${
+                className={`px-6 py-3 font-medium rounded-t-lg transition-all duration-200 ${
                   activeTab === index
-                    ? `${accentColor} text-white border-transparent`
-                    : `${mutedTextColor} border-transparent hover:border-gray-300`
+                    ? `${themeColors.activeBg} ${themeColors.activeText}`
+                    : `${themeColors.inactiveBg} ${themeColors.inactiveText} ${themeColors.inactiveHover}`
                 }`}
-                style={{
-                  backgroundColor: activeTab === index ? colorTokens.ctaBg : 'transparent',
-                  color: activeTab === index ? colorTokens.ctaText : undefined
-                }}
               >
                 {mode !== 'preview' ? (
                   <EditableAdaptiveText
                     mode={mode}
-                    value={label}
-                    onEdit={(value) => handleContentUpdate(`tab_label_${index + 1}` as keyof SegmentedFAQTabsContent, value)}
+                    value={tab.label}
+                    onEdit={(value) => handleTabLabelEdit(tab.id, value)}
                     backgroundType={activeTab === index ? 'primary' : backgroundType}
                     colorTokens={activeTab === index ? {
                       ...colorTokens,
-                      textPrimary: colorTokens.ctaText || '#ffffff',
-                      textOnDark: colorTokens.ctaText || '#ffffff'
+                      textPrimary: '#ffffff',
+                      textOnDark: '#ffffff'
                     } : colorTokens}
                     variant="body"
-                    className="font-medium"
+                    className="font-medium whitespace-nowrap"
                     placeholder={`Tab ${index + 1}`}
-                    sectionBackground={activeTab === index ? colorTokens.ctaBg : sectionBackground}
+                    sectionBackground={activeTab === index ? themeColors.activeBg : sectionBackground}
                     data-section-id={sectionId}
-                    data-element-key={`tab_label_${index + 1}`}
+                    data-element-key={`tabs.${tab.id}.label`}
                   />
                 ) : (
-                  label
+                  tab.label
                 )}
               </button>
-            </div>
-          ))}
-        </div>
 
-        {/* Tab Content */}
-        <div className="space-y-6">
-          {tabs[activeTab].items.map((item) => (
-            <div key={`${item.tabNumber}-${item.index}`} className="relative group/tab-item bg-gray-50 dark:bg-gray-800/50 rounded-lg p-6">
-              <div className="mb-3">
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={item.question}
-                  onEdit={(value) => handleContentUpdate(`tab${item.tabNumber}_question_${item.index}` as keyof SegmentedFAQTabsContent, value)}
-                  backgroundType={backgroundType}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className={`font-semibold ${dynamicTextColors?.heading || colorTokens.textPrimary}`}
-                  style={getTextStyle('h3')}
-                  placeholder={`Question ${item.index} for Tab ${item.tabNumber}`}
-                  sectionBackground={sectionBackground}
-                  data-section-id={sectionId}
-                  data-element-key={`tab${item.tabNumber}_question_${item.index}`}
-                />
-              </div>
-              
-              {(item.answer || mode === 'edit') && (
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={item.answer}
-                  onEdit={(value) => handleContentUpdate(`tab${item.tabNumber}_answer_${item.index}` as keyof SegmentedFAQTabsContent, value)}
-                  backgroundType={backgroundType}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className={`leading-relaxed ${mutedTextColor}`}
-                  placeholder={`Answer ${item.index} for Tab ${item.tabNumber}...`}
-                  sectionBackground={sectionBackground}
-                  data-section-id={sectionId}
-                  data-element-key={`tab${item.tabNumber}_answer_${item.index}`}
-                />
-              )}
-              
-              {/* Remove button */}
-              {mode !== 'preview' && (
+              {/* Remove tab button */}
+              {mode !== 'preview' && tabs.length > 2 && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleContentUpdate(`tab${item.tabNumber}_question_${item.index}` as keyof SegmentedFAQTabsContent, '___REMOVED___');
-                    handleContentUpdate(`tab${item.tabNumber}_answer_${item.index}` as keyof SegmentedFAQTabsContent, '___REMOVED___');
+                    handleRemoveTab(tab.id);
                   }}
-                  className="opacity-0 group-hover/tab-item:opacity-100 absolute top-4 right-4 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm z-10"
-                  title="Remove this item"
+                  className="opacity-0 group-hover/tab:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-red-500 text-white hover:bg-red-600 transition-all duration-200 shadow-sm z-10"
+                  title="Remove this tab"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               )}
             </div>
           ))}
-          
-          {/* Add new item to current tab */}
-          {mode !== 'preview' && tabs[activeTab].items.length < 4 && (
+
+          {/* Add tab button */}
+          {mode !== 'preview' && tabs.length < 4 && (
             <button
-              onClick={() => {
-                const tabNumber = activeTab + 1;
-                // Find the first empty slot in the current tab
-                for (let i = 1; i <= 4; i++) {
-                  const questionKey = `tab${tabNumber}_question_${i}` as keyof SegmentedFAQTabsContent;
-                  if (!blockContent[questionKey] || blockContent[questionKey] === '' || blockContent[questionKey] === '___REMOVED___') {
-                    handleContentUpdate(questionKey, `New question for ${tabLabels[activeTab]}`);
-                    handleContentUpdate(`tab${tabNumber}_answer_${i}` as keyof SegmentedFAQTabsContent, 'New answer');
-                    break;
-                  }
-                }
-              }}
-              className="flex items-center space-x-2 text-sm text-blue-600 hover:text-blue-800 transition-colors mt-4 p-4 border-2 border-dashed border-blue-300 rounded-lg hover:border-blue-400 hover:bg-blue-50/50 w-full justify-center"
+              onClick={handleAddTab}
+              className={`px-4 py-3 font-medium rounded-t-lg transition-all duration-200 border-2 border-dashed ${themeColors.border} ${themeColors.inactiveText} hover:bg-gray-50`}
+              title="Add new tab"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              <span>Add item to {tabLabels[activeTab]}</span>
             </button>
           )}
         </div>
+
+        {/* Tab Content */}
+        {currentTab && (
+          <div className="space-y-6">
+            {currentTab.items.map((item) => (
+              <FAQTabItem
+                key={item.id}
+                item={item}
+                tabId={currentTab.id}
+                mode={mode}
+                colorTokens={colorTokens}
+                getTextStyle={getTextStyle}
+                onQuestionEdit={handleQuestionEdit}
+                onAnswerEdit={handleAnswerEdit}
+                onRemove={handleRemoveItem}
+                backgroundType={backgroundType}
+                sectionBackground={sectionBackground}
+                sectionId={sectionId}
+                themeColors={themeColors}
+              />
+            ))}
+
+            {/* Add new item to current tab */}
+            {mode !== 'preview' && currentTab.items.length < 5 && (
+              <button
+                onClick={() => handleAddItem(currentTab.id)}
+                className="flex items-center space-x-2 text-sm text-blue-600 hover:text-blue-800 transition-colors mt-4 p-4 border-2 border-dashed border-blue-300 rounded-lg hover:border-blue-400 hover:bg-blue-50/50 w-full justify-center"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                <span>Add item to {currentTab.label}</span>
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Contact CTA Footer */}
+        {(blockContent.contact_prompt || blockContent.cta_text || mode === 'edit') && (
+          <div className={`mt-10 pt-6 border-t ${themeColors.divider} text-center`}>
+            <EditableAdaptiveText
+              mode={mode}
+              value={blockContent.contact_prompt || ''}
+              onEdit={(value) => handleContentUpdate('contact_prompt', value)}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+              colorTokens={colorTokens}
+              variant="body"
+              className="mb-2"
+              placeholder="Still have questions?"
+              sectionId={sectionId}
+              elementKey="contact_prompt"
+              sectionBackground={sectionBackground}
+            />
+            {(blockContent.cta_text || mode === 'edit') && (
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.cta_text || ''}
+                onEdit={(value) => handleContentUpdate('cta_text', value)}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                colorTokens={colorTokens}
+                variant="body"
+                className="font-medium text-blue-600 hover:underline cursor-pointer"
+                placeholder="Contact our support team"
+                sectionId={sectionId}
+                elementKey="cta_text"
+                sectionBackground={sectionBackground}
+              />
+            )}
+            {(blockContent.supporting_text || mode === 'edit') && (
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.supporting_text || ''}
+                onEdit={(value) => handleContentUpdate('supporting_text', value)}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                colorTokens={colorTokens}
+                variant="muted"
+                className="mt-2 text-sm"
+                placeholder="We typically respond within 24 hours"
+                sectionId={sectionId}
+                elementKey="supporting_text"
+                sectionBackground={sectionBackground}
+              />
+            )}
+          </div>
+        )}
       </div>
     </LayoutSection>
   );
@@ -375,37 +524,32 @@ export default function SegmentedFAQTabs(props: LayoutComponentProps) {
 export const componentMeta = {
   name: 'SegmentedFAQTabs',
   category: 'FAQ Sections',
-  description: 'Tabbed FAQ sections for complex questions, ideal for enterprise',
-  tags: ['faq', 'tabs', 'segmented', 'enterprise', 'complex'],
+  description: 'Tabbed FAQ sections for organized questions by category, ideal for complex products',
+  tags: ['faq', 'tabs', 'segmented', 'enterprise', 'categories', 'theme-aware'],
   defaultBackgroundType: 'primary' as const,
   complexity: 'moderate',
-  estimatedBuildTime: '15 minutes',
-  
+
+  // V2 Schema - nested array format
   contentFields: [
     { key: 'headline', label: 'Section Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Section Description', type: 'textarea', required: false },
-    { key: 'tab_labels', label: 'Tab Labels (pipe separated)', type: 'text', required: true },
-    { key: 'tab1_questions', label: 'Tab 1 Questions (pipe separated)', type: 'textarea', required: true },
-    { key: 'tab1_answers', label: 'Tab 1 Answers (pipe separated)', type: 'textarea', required: true },
-    { key: 'tab2_questions', label: 'Tab 2 Questions (pipe separated)', type: 'textarea', required: true },
-    { key: 'tab2_answers', label: 'Tab 2 Answers (pipe separated)', type: 'textarea', required: true },
-    { key: 'tab3_questions', label: 'Tab 3 Questions (pipe separated)', type: 'textarea', required: true },
-    { key: 'tab3_answers', label: 'Tab 3 Answers (pipe separated)', type: 'textarea', required: true }
+    { key: 'tabs', label: 'FAQ Tabs', type: 'array', required: true }
   ],
-  
+
   features: [
-    'Organized by topic tabs',
-    'Handles complex FAQ structures',
+    'Theme-aware styling (warm/cool/neutral)',
+    'Nested tab/item structure',
+    'Add/remove tabs dynamically',
+    'Add/remove items per tab',
     'Interactive tab navigation',
-    'Accent color for active states',
-    'Enterprise-ready design'
+    'Responsive design'
   ],
-  
+
   useCases: [
     'Enterprise software documentation',
     'Complex product FAQs',
-    'Technical implementation guides',
     'Multi-category support questions',
+    'Technical implementation guides',
     'Compliance and security FAQs'
   ]
 };

@@ -1,473 +1,207 @@
 import React, { useState } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
-  EditableAdaptiveText
-} from '@/components/layout/EditableContent';
-import IconEditableText from '@/components/ui/IconEditableText';
-import { 
-  CTAButton,
-  TrustIndicators 
-} from '@/components/layout/ComponentRegistry';
+import { EditableAdaptiveText } from '@/components/layout/EditableContent';
+import { CTAButton } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { logger } from '@/lib/logger';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
-interface ToggleableMonthlyYearlyContent {
-  headline: string;
-  tier_names: string;
-  monthly_prices: string;
-  yearly_prices: string;
-  tier_descriptions: string;
-  cta_texts: string;
-  feature_lists: string;
-  popular_tiers?: string;
-  annual_discount_label?: string;
-  billing_note?: string;
-  subheadline?: string;
-  supporting_text?: string;
-  trust_items?: string;
-  // Platform features section
-  platform_feature_1?: string;
-  platform_feature_1_title?: string;
-  platform_feature_1_desc?: string;
-  platform_feature_2?: string;
-  platform_feature_2_title?: string;
-  platform_feature_2_desc?: string;
-  platform_feature_3?: string;
-  platform_feature_3_title?: string;
-  platform_feature_3_desc?: string;
-  platform_feature_4?: string;
-  platform_feature_4_title?: string;
-  platform_feature_4_desc?: string;
-  platform_features_title?: string;
-  show_platform_features?: boolean;
-  // Platform feature icons
-  platform_feature_1_icon?: string;
-  platform_feature_2_icon?: string;
-  platform_feature_3_icon?: string;
-  platform_feature_4_icon?: string;
+interface ToggleableMonthlyYearlyProps extends LayoutComponentProps {}
+
+// Tier structure
+interface Tier {
+  id: string;
+  name: string;
+  monthly_price: string;
+  yearly_price: string;
+  description: string;
+  features: string[];
+  cta_text: string;
+  is_popular: boolean;
 }
 
+// Content interface
+interface ToggleableMonthlyYearlyContent {
+  headline: string;
+  subheadline?: string;
+  annual_discount_label?: string;
+  billing_note?: string;
+  tiers: Tier[];
+}
+
+// Content schema
 const CONTENT_SCHEMA = {
-  headline: { 
-    type: 'string' as const, 
-    default: 'Choose the Perfect Plan for Your Business' 
+  headline: { type: 'string' as const, default: 'Choose the Perfect Plan for Your Business' },
+  subheadline: { type: 'string' as const, default: '' },
+  annual_discount_label: { type: 'string' as const, default: 'Save 17% with annual billing' },
+  billing_note: { type: 'string' as const, default: 'All plans include 14-day free trial. No credit card required.' },
+  tiers: {
+    type: 'array' as const,
+    default: [
+      {
+        id: 'tier-1',
+        name: 'Starter',
+        monthly_price: '$29',
+        yearly_price: '$290',
+        description: 'Perfect for small teams getting started',
+        features: ['Up to 5 team members', '10GB storage', 'Basic integrations', 'Email support'],
+        cta_text: 'Start Free Trial',
+        is_popular: false,
+      },
+      {
+        id: 'tier-2',
+        name: 'Professional',
+        monthly_price: '$79',
+        yearly_price: '$790',
+        description: 'For growing businesses that need more power',
+        features: ['Up to 25 team members', '100GB storage', 'Advanced integrations', 'Priority support', 'Custom branding'],
+        cta_text: 'Start Free Trial',
+        is_popular: true,
+      },
+      {
+        id: 'tier-3',
+        name: 'Enterprise',
+        monthly_price: '$199',
+        yearly_price: '$1990',
+        description: 'Custom solutions for large organizations',
+        features: ['Unlimited team members', 'Unlimited storage', 'Enterprise integrations', 'Dedicated support', 'Advanced security'],
+        cta_text: 'Contact Sales',
+        is_popular: false,
+      },
+    ],
   },
-  tier_names: { 
-    type: 'string' as const, 
-    default: 'Starter|Professional|Enterprise' 
-  },
-  monthly_prices: { 
-    type: 'string' as const, 
-    default: '$29|$79|$199' 
-  },
-  yearly_prices: { 
-    type: 'string' as const, 
-    default: '$290|$790|$1990' 
-  },
-  tier_descriptions: { 
-    type: 'string' as const, 
-    default: 'Perfect for small teams getting started|For growing businesses that need more power|Custom solutions for large organizations' 
-  },
-  cta_texts: { 
-    type: 'string' as const, 
-    default: 'Start Free Trial|Start Free Trial|Contact Sales' 
-  },
-  feature_lists: { 
-    type: 'string' as const, 
-    default: 'Up to 5 team members,10GB storage,Basic integrations,Email support|Up to 25 team members,100GB storage,Advanced integrations,Priority support,Custom branding|Unlimited team members,Unlimited storage,Enterprise integrations,Dedicated support,Advanced security' 
-  },
-  popular_tiers: { 
-    type: 'string' as const, 
-    default: 'false|true|false' 
-  },
-  annual_discount_label: { 
-    type: 'string' as const, 
-    default: 'Save 17% with annual billing' 
-  },
-  billing_note: { 
-    type: 'string' as const, 
-    default: 'All plans include 14-day free trial. No credit card required.' 
-  },
-  subheadline: { 
-    type: 'string' as const, 
-    default: '' 
-  },
-  supporting_text: { 
-    type: 'string' as const, 
-    default: '' 
-  },
-  trust_items: { 
-    type: 'string' as const, 
-    default: '' 
-  },
-  // Platform features section
-  platform_feature_1: { 
-    type: 'string' as const, 
-    default: 'free-trial' 
-  },
-  platform_feature_1_title: { 
-    type: 'string' as const, 
-    default: '14-Day Free Trial' 
-  },
-  platform_feature_1_desc: { 
-    type: 'string' as const, 
-    default: 'No credit card required' 
-  },
-  platform_feature_2: { 
-    type: 'string' as const, 
-    default: 'secure-reliable' 
-  },
-  platform_feature_2_title: { 
-    type: 'string' as const, 
-    default: 'Secure & Reliable' 
-  },
-  platform_feature_2_desc: { 
-    type: 'string' as const, 
-    default: 'Enterprise-grade security' 
-  },
-  platform_feature_3: { 
-    type: 'string' as const, 
-    default: 'support' 
-  },
-  platform_feature_3_title: { 
-    type: 'string' as const, 
-    default: '24/7 Support' 
-  },
-  platform_feature_3_desc: { 
-    type: 'string' as const, 
-    default: 'Always here to help' 
-  },
-  platform_feature_4: { 
-    type: 'string' as const, 
-    default: 'easy-migration' 
-  },
-  platform_feature_4_title: { 
-    type: 'string' as const, 
-    default: 'Easy Migration' 
-  },
-  platform_feature_4_desc: { 
-    type: 'string' as const, 
-    default: 'Switch plans anytime' 
-  },
-  platform_features_title: { 
-    type: 'string' as const, 
-    default: 'Why Choose Our Platform?' 
-  },
-  show_platform_features: { 
-    type: 'boolean' as const, 
-    default: true 
-  },
-  // Platform feature icons
-  platform_feature_1_icon: { type: 'string' as const, default: '✅' },
-  platform_feature_2_icon: { type: 'string' as const, default: '🛡️' },
-  platform_feature_3_icon: { type: 'string' as const, default: '💬' },
-  platform_feature_4_icon: { type: 'string' as const, default: '⚡' }
 };
 
-export default function ToggleableMonthlyYearly(props: LayoutComponentProps) {
-  
-  const {
-    sectionId,
-    mode,
-    blockContent,
-    colorTokens,
-    dynamicTextColors,
-    getTextStyle,
-    sectionBackground,
-    backgroundType,
-    handleContentUpdate
-  } = useLayoutComponent<ToggleableMonthlyYearlyContent>({
-    ...props,
-    contentSchema: CONTENT_SCHEMA
-  });
-
-  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
-
-  const tierNames = blockContent.tier_names 
-    ? blockContent.tier_names.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
-
-  const monthlyPrices = blockContent.monthly_prices 
-    ? blockContent.monthly_prices.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
-
-  const yearlyPrices = blockContent.yearly_prices 
-    ? blockContent.yearly_prices.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
-
-  const tierDescriptions = blockContent.tier_descriptions 
-    ? blockContent.tier_descriptions.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
-
-  const ctaTexts = blockContent.cta_texts 
-    ? blockContent.cta_texts.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
-
-  const featureLists = blockContent.feature_lists 
-    ? blockContent.feature_lists.split('|').map(item => item.trim().split(',').map(f => f.trim())).filter(Boolean)
-    : [];
-
-  const popularTiers = blockContent.popular_tiers 
-    ? blockContent.popular_tiers.split('|').map(item => item.trim().toLowerCase() === 'true')
-    : [];
-
-  const pricingTiers = tierNames.map((name, index) => ({
-    name,
-    monthlyPrice: monthlyPrices[index] || '',
-    yearlyPrice: yearlyPrices[index] || '',
-    description: tierDescriptions[index] || '',
-    ctaText: ctaTexts[index] || 'Get Started',
-    features: featureLists[index] || [],
-    isPopular: popularTiers[index] || false
-  }));
-
-  const trustItems = blockContent.trust_items 
-    ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
-
-  const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
-
-  // Helper function to get platform features
-  const getPlatformFeatures = () => {
-    const features = [
-      {
-        icon: blockContent.platform_feature_1_icon || '✅',
-        title: blockContent.platform_feature_1_title || '14-Day Free Trial',
-        description: blockContent.platform_feature_1_desc || 'No credit card required',
-        bgColor: 'bg-green-500'
-      },
-      {
-        icon: blockContent.platform_feature_2_icon || '🛡️',
-        title: blockContent.platform_feature_2_title || 'Secure & Reliable',
-        description: blockContent.platform_feature_2_desc || 'Enterprise-grade security',
-        bgColor: 'bg-blue-500'
-      },
-      {
-        icon: blockContent.platform_feature_3_icon || '💬',
-        title: blockContent.platform_feature_3_title || '24/7 Support',
-        description: blockContent.platform_feature_3_desc || 'Always here to help',
-        bgColor: 'bg-purple-500'
-      },
-      {
-        icon: blockContent.platform_feature_4_icon || '⚡',
-        title: blockContent.platform_feature_4_title || 'Easy Migration',
-        description: blockContent.platform_feature_4_desc || 'Switch plans anytime',
-        bgColor: 'bg-orange-500'
-      }
-    ].filter(feature => 
-      feature.title !== '___REMOVED___' && 
-      feature.description !== '___REMOVED___' && 
-      feature.icon !== '___REMOVED___' &&
-      feature.title.trim() !== '' && 
-      feature.description.trim() !== ''
-    );
-    
-    return features;
+// Get theme colors for pricing cards
+const getPricingColors = (theme: UIBlockTheme, isHighlighted: boolean) => {
+  const baseColors = {
+    warm: {
+      highlightedBorder: 'border-orange-500',
+      highlightedBadgeBg: 'bg-orange-600',
+      highlightedBadgeText: 'text-white',
+      highlightedShadow: 'shadow-orange-100',
+      checkmark: 'text-orange-500',
+      regularBorder: 'border-gray-200',
+      regularBorderHover: 'hover:border-orange-300',
+    },
+    cool: {
+      highlightedBorder: 'border-blue-500',
+      highlightedBadgeBg: 'bg-blue-600',
+      highlightedBadgeText: 'text-white',
+      highlightedShadow: 'shadow-blue-100',
+      checkmark: 'text-blue-500',
+      regularBorder: 'border-gray-200',
+      regularBorderHover: 'hover:border-blue-300',
+    },
+    neutral: {
+      highlightedBorder: 'border-gray-700',
+      highlightedBadgeBg: 'bg-gray-700',
+      highlightedBadgeText: 'text-white',
+      highlightedShadow: 'shadow-gray-100',
+      checkmark: 'text-green-500',
+      regularBorder: 'border-gray-200',
+      regularBorderHover: 'hover:border-gray-400',
+    },
   };
 
+  const colors = baseColors[theme];
 
-  const platformFeatures = getPlatformFeatures();
-  
-  // Check if any platform features exist (for edit mode)
-  const hasAnyPlatformFeatures = () => {
-    for (let i = 1; i <= 4; i++) {
-      const title = blockContent[`platform_feature_${i}_title` as keyof ToggleableMonthlyYearlyContent];
-      const desc = blockContent[`platform_feature_${i}_desc` as keyof ToggleableMonthlyYearlyContent];
-      
-      if (title !== '___REMOVED___' && title && title !== '' ||
-          desc !== '___REMOVED___' && desc && desc !== '') {
-        return true;
-      }
-    }
-    return false;
+  return {
+    border: isHighlighted ? colors.highlightedBorder : colors.regularBorder,
+    borderHover: isHighlighted ? '' : colors.regularBorderHover,
+    shadow: isHighlighted ? colors.highlightedShadow : '',
+    badgeBg: colors.highlightedBadgeBg,
+    badgeText: colors.highlightedBadgeText,
+    checkmark: colors.checkmark,
   };
+};
 
-  const calculateSavings = (monthlyPrice: string, yearlyPrice: string) => {
-    const monthly = parseFloat(monthlyPrice.replace(/[^0-9.]/g, ''));
-    const yearly = parseFloat(yearlyPrice.replace(/[^0-9.]/g, ''));
-    
-    if (monthly && yearly) {
-      const monthlyCost = monthly * 12;
-      const savings = Math.round(((monthlyCost - yearly) / monthlyCost) * 100);
-      return savings > 0 ? savings : 0;
-    }
-    return 0;
-  };
+// Calculate savings percentage
+const calculateSavings = (monthlyPrice: string, yearlyPrice: string): number => {
+  const monthly = parseFloat(monthlyPrice.replace(/[^0-9.]/g, ''));
+  const yearly = parseFloat(yearlyPrice.replace(/[^0-9.]/g, ''));
 
-  const PricingCard = ({ tier, index }: {
-    tier: typeof pricingTiers[0];
-    index: number;
-  }) => {
-    const currentPrice = billingCycle === 'monthly' ? tier.monthlyPrice : tier.yearlyPrice;
-    const savingsPercent = calculateSavings(tier.monthlyPrice, tier.yearlyPrice);
-    
-    // Helper to check if event comes from an editable element
-    const isFromEditable = (el: EventTarget | null): boolean => {
-      return el instanceof HTMLElement && (
-        el.closest('[contenteditable="true"]') !== null ||
-        el.closest('[data-editable="true"]') !== null
-      );
-    };
-    
-    // Store original values to detect actual changes
-    const originalValues = {
-      tierName: tier.name,
-      tierDescription: tier.description,
-      monthlyPrice: tier.monthlyPrice,
-      yearlyPrice: tier.yearlyPrice,
-      features: tier.features.join(', '),
-      ctaText: tier.ctaText
-    };
-    
-    // Helper to handle content updates with change detection
-    const handleSmartContentUpdate = (key: string, newValue: string, originalValue: string, updateFn: () => void) => {
-      // Only update if the value actually changed
-      if (newValue !== originalValue) {
-        logger.debug(`💾 Content changed for ${key}`, {
-          tierIndex: index,
-          oldValue: originalValue,
-          newValue: newValue,
-          changed: true
-        });
-        // Small delay to prevent mid-interaction regeneration
-        setTimeout(() => {
-          updateFn();
-        }, 100);
-      } else {
-        logger.debug(`🚫 No content change for ${key} - skipping update`, {
-          tierIndex: index,
-          value: newValue,
-          changed: false
-        });
-      }
-    };
-    
-    return (
-      <div 
-        className={`relative bg-white rounded-2xl shadow-lg border-2 transition-all duration-300 hover:shadow-xl group/pricing-card ${
-          tier.isPopular 
-            ? `border-primary scale-105` 
-            : 'border-gray-200 hover:border-gray-300'
-        }`}
-        onMouseDown={(e) => {
-          // Don't trigger section selection if clicking on editable content
-          if (isFromEditable(e.target)) {
-            logger.debug('🛡️ PricingCard Container - MouseDown BLOCKED (from editable)', {
-              tierIndex: index,
-              tierName: tier.name
-            });
-            return;
-          }
-          logger.debug('🎯 PricingCard Container - MouseDown', {
-            tierIndex: index,
-            tierName: tier.name,
-            target: (e.target as HTMLElement).tagName,
-            targetClass: (e.target as HTMLElement).className,
-            currentTarget: (e.currentTarget as HTMLElement).tagName,
-            isContentEditable: (e.target as HTMLElement).contentEditable,
-            timestamp: Date.now()
-          });
-        }}
-        onClick={(e) => {
-          // Don't trigger section selection if clicking on editable content
-          if (isFromEditable(e.target)) {
-            logger.debug('🛡️ PricingCard Container - Click BLOCKED (from editable)', {
-              tierIndex: index,
-              tierName: tier.name
-            });
-            return;
-          }
-          logger.debug('🎯 PricingCard Container - Click', {
-            tierIndex: index,
-            tierName: tier.name,
-            target: (e.target as HTMLElement).tagName,
-            targetClass: (e.target as HTMLElement).className,
-            currentTarget: (e.currentTarget as HTMLElement).tagName,
-            isContentEditable: (e.target as HTMLElement).contentEditable,
-            eventPhase: e.eventPhase,
-            bubbles: e.bubbles,
-            timestamp: Date.now()
-          });
-        }}
-        onFocusCapture={(e) => {
-          // THIS IS THE KEY FIX - Don't trigger section selection if focusing on editable content
-          if (isFromEditable(e.target)) {
-            logger.debug('🛡️ PricingCard Container - FocusCapture BLOCKED (from editable)', {
-              tierIndex: index,
-              tierName: tier.name
-            });
-            return;
-          }
-          logger.debug('🔍 PricingCard Container - FocusCapture', {
-            tierIndex: index,
-            tierName: tier.name,
-            target: (e.target as HTMLElement).tagName,
-            targetClass: (e.target as HTMLElement).className,
-            relatedTarget: e.relatedTarget ? (e.relatedTarget as HTMLElement).tagName : 'null',
-            timestamp: Date.now()
-          });
-        }}
-        onBlurCapture={(e) => {
-          // Also gate blur capture for consistency
-          if (isFromEditable(e.target)) {
-            logger.debug('🛡️ PricingCard Container - BlurCapture BLOCKED (from editable)', {
-              tierIndex: index,
-              tierName: tier.name
-            });
-            return;
-          }
-          logger.debug('💨 PricingCard Container - BlurCapture', {
-            tierIndex: index,
-            tierName: tier.name,
-            target: (e.target as HTMLElement).tagName,
-            targetClass: (e.target as HTMLElement).className,
-            relatedTarget: e.relatedTarget ? (e.relatedTarget as HTMLElement).tagName : 'null',
-            relatedTargetClass: e.relatedTarget ? (e.relatedTarget as HTMLElement).className : 'null',
-            timestamp: Date.now()
-          });
-        }}
-      >
-        
-        {/* Popular Badge */}
-        {tier.isPopular && (
-          <div className={`absolute -top-3 left-1/2 transform -translate-x-1/2 ${colorTokens.ctaBg} text-white px-4 py-1 rounded-full text-sm font-semibold`}>
+  if (monthly && yearly) {
+    const monthlyCost = monthly * 12;
+    const savings = Math.round(((monthlyCost - yearly) / monthlyCost) * 100);
+    return savings > 0 ? savings : 0;
+  }
+  return 0;
+};
+
+// Individual Pricing Card
+const PricingCard = ({
+  tier,
+  mode,
+  sectionId,
+  billingCycle,
+  onTierUpdate,
+  onRemove,
+  showRemoveButton,
+  onAddFeature,
+  onRemoveFeature,
+  onEditFeature,
+  onTogglePopular,
+  colorTokens,
+  themeColors,
+}: {
+  tier: Tier;
+  mode: 'edit' | 'preview';
+  sectionId: string;
+  billingCycle: 'monthly' | 'yearly';
+  onTierUpdate: (field: keyof Tier, value: any) => void;
+  onRemove?: () => void;
+  showRemoveButton?: boolean;
+  onAddFeature?: () => void;
+  onRemoveFeature?: (featureIndex: number) => void;
+  onEditFeature?: (featureIndex: number, value: string) => void;
+  onTogglePopular?: () => void;
+  colorTokens: any;
+  themeColors: ReturnType<typeof getPricingColors>;
+}) => {
+  const currentPrice = billingCycle === 'monthly' ? tier.monthly_price : tier.yearly_price;
+  const savingsPercent = calculateSavings(tier.monthly_price, tier.yearly_price);
+
+  return (
+    <div className={`relative ${tier.is_popular ? 'transform scale-105 z-10' : ''}`}>
+      {/* Highlighted Badge */}
+      {tier.is_popular && (
+        <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-20">
+          <span
+            className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold ${themeColors.badgeBg} ${themeColors.badgeText} shadow-lg`}
+          >
+            <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clipRule="evenodd"
+              />
+            </svg>
             Most Popular
-          </div>
-        )}
-        
-        {/* Annual Savings Badge */}
-        {billingCycle === 'yearly' && savingsPercent > 0 && (
-          <div className="absolute -top-3 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
-            Save {savingsPercent}%
-          </div>
-        )}
+          </span>
+        </div>
+      )}
 
-        {/* Remove tier button - only in edit mode and when we have at least 1 tier */}
-        {mode === 'edit' && pricingTiers.length >= 1 && (
+      {/* Annual Savings Badge */}
+      {billingCycle === 'yearly' && savingsPercent > 0 && (
+        <div className={`absolute -top-3 right-4 ${colorTokens.ctaBg} text-white px-3 py-1 rounded-full text-xs font-semibold z-20`}>
+          Save {savingsPercent}%
+        </div>
+      )}
+
+      {/* Card */}
+      <div
+        className={`relative h-full p-8 bg-white rounded-2xl shadow-lg border-2 ${themeColors.border} ${themeColors.borderHover} ${themeColors.shadow} transition-all duration-300 hover:shadow-xl`}
+      >
+        {/* Remove Button */}
+        {mode === 'edit' && showRemoveButton && onRemove && (
           <button
             onClick={(e) => {
               e.stopPropagation();
-              // Remove this tier from all pipe-separated fields
-              const removeFromPipeList = (value: string, indexToRemove: number) => {
-                const items = value.split('|');
-                items.splice(indexToRemove, 1);
-                return items.join('|');
-              };
-              
-              handleContentUpdate('tier_names', removeFromPipeList(blockContent.tier_names, index));
-              handleContentUpdate('monthly_prices', removeFromPipeList(blockContent.monthly_prices, index));
-              handleContentUpdate('yearly_prices', removeFromPipeList(blockContent.yearly_prices, index));
-              handleContentUpdate('tier_descriptions', removeFromPipeList(blockContent.tier_descriptions, index));
-              handleContentUpdate('cta_texts', removeFromPipeList(blockContent.cta_texts, index));
-              handleContentUpdate('feature_lists', removeFromPipeList(blockContent.feature_lists, index));
-              
-              if (blockContent.popular_tiers) {
-                handleContentUpdate('popular_tiers', removeFromPipeList(blockContent.popular_tiers, index));
-              }
+              onRemove();
             }}
-            className="opacity-0 group-hover/pricing-card:opacity-100 absolute top-2 right-2 text-red-500 hover:text-red-700 transition-opacity duration-200 z-10"
+            className="absolute -top-2 -right-2 p-2 rounded-full bg-red-500 hover:bg-red-600 text-white transition-all duration-200 z-30 shadow-lg"
             title="Remove this pricing tier"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -476,506 +210,341 @@ export default function ToggleableMonthlyYearly(props: LayoutComponentProps) {
           </button>
         )}
 
-        <div className="p-8">
-          {/* Tier Header */}
-          <div className="text-center mb-6">
-            {/* Editable Tier Name */}
-            {mode !== 'preview' ? (
-              <div 
+        {/* Toggle Popular */}
+        {mode === 'edit' && onTogglePopular && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onTogglePopular();
+            }}
+            className={`absolute top-2 left-2 p-1.5 rounded-full ${tier.is_popular ? 'bg-yellow-400' : 'bg-gray-200'} hover:bg-yellow-300 transition-all duration-200 z-30`}
+            title={tier.is_popular ? 'Remove highlight' : 'Set as highlighted'}
+          >
+            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+            </svg>
+          </button>
+        )}
+
+        {/* Tier Name */}
+        <div className="text-center mb-4">
+          {mode !== 'preview' ? (
+            <div
+              contentEditable
+              suppressContentEditableWarning
+              onBlur={(e) => onTierUpdate('name', e.currentTarget.textContent || '')}
+              className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 font-bold text-xl text-gray-900"
+              data-section-id={sectionId}
+              data-element-key={`tiers.${tier.id}.name`}
+            >
+              {tier.name}
+            </div>
+          ) : (
+            <h3 className="font-bold text-xl text-gray-900">{tier.name}</h3>
+          )}
+        </div>
+
+        {/* Price Display */}
+        <div className="text-center mb-4">
+          {mode !== 'preview' ? (
+            <div className="space-y-2">
+              <div className="text-sm text-gray-500">Monthly:</div>
+              <div
                 contentEditable
-                data-editable="true"
                 suppressContentEditableWarning
-                onFocus={(e) => {
-                  logger.debug('🎯 Tier Name - Focus event', {
-                    tierIndex: index,
-                    tierName: tier.name,
-                    target: e.target,
-                    currentTarget: e.currentTarget,
-                    relatedTarget: e.relatedTarget,
-                    timestamp: Date.now()
-                  });
-                }}
-                onMouseDown={(e) => {
-                  e.stopPropagation(); // Prevent section selection trigger
-                  logger.debug('🖱️ Tier Name - MouseDown event', {
-                    tierIndex: index,
-                    tierName: tier.name,
-                    button: e.button,
-                    clientX: e.clientX,
-                    clientY: e.clientY,
-                    target: e.target,
-                    currentTarget: e.currentTarget,
-                    defaultPrevented: e.defaultPrevented,
-                    timestamp: Date.now()
-                  });
-                }}
-                onClick={(e) => {
-                  e.stopPropagation(); // Prevent bubbling to container
-                  logger.debug('👆 Tier Name - Click event', {
-                    tierIndex: index,
-                    tierName: tier.name,
-                    target: e.target,
-                    currentTarget: e.currentTarget,
-                    bubbles: e.bubbles,
-                    defaultPrevented: e.defaultPrevented,
-                    timestamp: Date.now()
-                  });
-                }}
-                onBlur={(e) => {
-                  const newValue = e.currentTarget.textContent || '';
-                  logger.debug('💨 Tier Name - Blur event', {
-                    tierIndex: index,
-                    target: e.target,
-                    currentTarget: e.currentTarget,
-                    relatedTarget: e.relatedTarget,
-                    oldValue: originalValues.tierName,
-                    newValue: newValue,
-                    timestamp: Date.now()
-                  });
-                  
-                  handleSmartContentUpdate(
-                    'tier_names',
-                    newValue,
-                    originalValues.tierName,
-                    () => {
-                      const names = blockContent.tier_names.split('|');
-                      names[index] = newValue;
-                      handleContentUpdate('tier_names', names.join('|'));
-                    }
-                  );
-                }}
-                className="text-xl font-bold text-gray-900 mb-2 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-50"
+                onBlur={(e) => onTierUpdate('monthly_price', e.currentTarget.textContent || '')}
+                className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-50 text-2xl font-bold text-gray-900"
+                data-section-id={sectionId}
+                data-element-key={`tiers.${tier.id}.monthly_price`}
               >
-                {tier.name}
+                {tier.monthly_price}
               </div>
-            ) : (
-              <h3 className="text-xl font-bold text-gray-900 mb-2">{tier.name}</h3>
-            )}
-            
-            {/* Editable Tier Description */}
-            {mode !== 'preview' ? (
-              <div 
+              <div className="text-sm text-gray-500">Yearly:</div>
+              <div
                 contentEditable
-                data-editable="true"
                 suppressContentEditableWarning
-                onFocus={(e) => {
-                  logger.debug('🎯 Tier Description - Focus event', {
-                    tierIndex: index,
-                    target: e.target,
-                    currentTarget: e.currentTarget,
-                    relatedTarget: e.relatedTarget,
-                    timestamp: Date.now()
-                  });
-                }}
-                onMouseDown={(e) => {
-                  e.stopPropagation(); // Prevent section selection trigger
-                  logger.debug('🖱️ Tier Description - MouseDown event', {
-                    tierIndex: index,
-                    button: e.button,
-                    target: e.target,
-                    currentTarget: e.currentTarget,
-                    timestamp: Date.now()
-                  });
-                }}
-                onClick={(e) => {
-                  e.stopPropagation(); // Prevent bubbling to container
-                  logger.debug('👆 Tier Description - Click event', {
-                    tierIndex: index,
-                    target: e.target,
-                    currentTarget: e.currentTarget,
-                    timestamp: Date.now()
-                  });
-                }}
-                onBlur={(e) => {
-                  const newValue = e.currentTarget.textContent || '';
-                  logger.debug('💨 Tier Description - Blur event', {
-                    tierIndex: index,
-                    target: e.target,
-                    currentTarget: e.currentTarget,
-                    relatedTarget: e.relatedTarget,
-                    oldValue: originalValues.tierDescription,
-                    newValue: newValue,
-                    timestamp: Date.now()
-                  });
-                  
-                  handleSmartContentUpdate(
-                    'tier_descriptions',
-                    newValue,
-                    originalValues.tierDescription,
-                    () => {
-                      const descriptions = blockContent.tier_descriptions.split('|');
-                      descriptions[index] = newValue;
-                      handleContentUpdate('tier_descriptions', descriptions.join('|'));
-                    }
-                  );
-                }}
-                className={`text-sm ${mutedTextColor} mb-4 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-50`}
+                onBlur={(e) => onTierUpdate('yearly_price', e.currentTarget.textContent || '')}
+                className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-50 text-2xl font-bold text-gray-900"
+                data-section-id={sectionId}
+                data-element-key={`tiers.${tier.id}.yearly_price`}
               >
-                {tier.description}
+                {tier.yearly_price}
               </div>
-            ) : (
-              <p className={`text-sm ${mutedTextColor} mb-4`}>{tier.description}</p>
-            )}
-            
-            {/* Price Display */}
-            <div className="mb-4">
-              {mode !== 'preview' ? (
-                <>
-                  <div className="text-sm text-gray-500 mb-1">Monthly Price:</div>
-                  <div 
-                    contentEditable
-                    data-editable="true"
-                    suppressContentEditableWarning
-                    onFocus={(e) => {
-                      logger.debug('🎯 Monthly Price - Focus event', {
-                        tierIndex: index,
-                        price: tier.monthlyPrice,
-                        target: e.target,
-                        currentTarget: e.currentTarget,
-                        relatedTarget: e.relatedTarget,
-                        timestamp: Date.now()
-                      });
-                    }}
-                    onMouseDown={(e) => {
-                      e.stopPropagation(); // Prevent section selection trigger
-                      logger.debug('🖱️ Monthly Price - MouseDown event', {
-                        tierIndex: index,
-                        price: tier.monthlyPrice,
-                        button: e.button,
-                        target: e.target,
-                        timestamp: Date.now()
-                      });
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation(); // Prevent bubbling to container
-                      logger.debug('👆 Monthly Price - Click event', {
-                        tierIndex: index,
-                        price: tier.monthlyPrice,
-                        target: e.target,
-                        timestamp: Date.now()
-                      });
-                    }}
-                    onBlur={(e) => {
-                      const newValue = e.currentTarget.textContent || '';
-                      logger.debug('💨 Monthly Price - Blur event', {
-                        tierIndex: index,
-                        target: e.target,
-                        relatedTarget: e.relatedTarget,
-                        oldValue: originalValues.monthlyPrice,
-                        newValue: newValue,
-                        timestamp: Date.now()
-                      });
-                      
-                      handleSmartContentUpdate(
-                        'monthly_prices',
-                        newValue,
-                        originalValues.monthlyPrice,
-                        () => {
-                          const prices = blockContent.monthly_prices.split('|');
-                          prices[index] = newValue;
-                          handleContentUpdate('monthly_prices', prices.join('|'));
-                        }
-                      );
-                    }}
-                    className="font-bold text-gray-900 text-2xl mb-2 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-50"
-                  >
-                    {tier.monthlyPrice}
-                  </div>
-                  <div className="text-sm text-gray-500 mb-1">Yearly Price:</div>
-                  <div 
-                    contentEditable
-                    data-editable="true"
-                    suppressContentEditableWarning
-                    onFocus={(e) => {
-                      logger.debug('🎯 Yearly Price - Focus event', {
-                        tierIndex: index,
-                        price: tier.yearlyPrice,
-                        target: e.target,
-                        currentTarget: e.currentTarget,
-                        relatedTarget: e.relatedTarget,
-                        timestamp: Date.now()
-                      });
-                    }}
-                    onMouseDown={(e) => {
-                      e.stopPropagation(); // Prevent section selection trigger
-                      logger.debug('🖱️ Yearly Price - MouseDown event', {
-                        tierIndex: index,
-                        price: tier.yearlyPrice,
-                        button: e.button,
-                        target: e.target,
-                        timestamp: Date.now()
-                      });
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation(); // Prevent bubbling to container
-                      logger.debug('👆 Yearly Price - Click event', {
-                        tierIndex: index,
-                        price: tier.yearlyPrice,
-                        target: e.target,
-                        timestamp: Date.now()
-                      });
-                    }}
-                    onBlur={(e) => {
-                      const newValue = e.currentTarget.textContent || '';
-                      logger.debug('💨 Yearly Price - Blur event', {
-                        tierIndex: index,
-                        target: e.target,
-                        relatedTarget: e.relatedTarget,
-                        oldValue: originalValues.yearlyPrice,
-                        newValue: newValue,
-                        timestamp: Date.now()
-                      });
-                      
-                      handleSmartContentUpdate(
-                        'yearly_prices',
-                        newValue,
-                        originalValues.yearlyPrice,
-                        () => {
-                          const prices = blockContent.yearly_prices.split('|');
-                          prices[index] = newValue;
-                          handleContentUpdate('yearly_prices', prices.join('|'));
-                        }
-                      );
-                    }}
-                    className="font-bold text-gray-900 text-2xl mb-2 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-50"
-                  >
-                    {tier.yearlyPrice}
-                  </div>
-                  <div className="text-sm text-gray-400 italic">Current: {billingCycle === 'monthly' ? 'Monthly' : 'Yearly'} View</div>
-                </>
-              ) : (
-                <>
-                  <div className="flex items-baseline justify-center">
-                    <span style={{fontSize: 'clamp(2rem, 4vw, 2.5rem)'}} className="font-bold text-gray-900">
-                      {currentPrice}
-                    </span>
-                    {!currentPrice.toLowerCase().includes('contact') && (
-                      <span className={`text-lg ${mutedTextColor} ml-1`}>
-                        /{billingCycle === 'monthly' ? 'month' : 'year'}
-                      </span>
-                    )}
-                  </div>
-                  
-                  {billingCycle === 'yearly' && !currentPrice.toLowerCase().includes('contact') && (
-                    <div className={`text-sm ${mutedTextColor} mt-1`}>
-                      ${Math.round(parseFloat(currentPrice.replace(/[^0-9.]/g, '')) / 12)}/month billed annually
-                    </div>
-                  )}
-                </>
+            </div>
+          ) : (
+            <div className="flex items-baseline justify-center">
+              <span style={{ fontSize: 'clamp(2rem, 4vw, 2.5rem)' }} className="font-bold text-gray-900">
+                {currentPrice}
+              </span>
+              {!currentPrice.toLowerCase().includes('contact') && (
+                <span className="text-gray-500 ml-1">/{billingCycle === 'monthly' ? 'month' : 'year'}</span>
               )}
             </div>
-          </div>
+          )}
 
-          {/* Features */}
-          <div className="space-y-3 mb-8">
-            {mode !== 'preview' ? (
-              <>
-                <div className="text-sm text-gray-500 mb-2">Features (comma-separated):</div>
-                <div 
-                  contentEditable
-                  data-editable="true"
-                  suppressContentEditableWarning
-                  onFocus={(e) => {
-                    logger.debug('🎯 Features List - Focus event', {
-                      tierIndex: index,
-                      features: tier.features,
-                      target: e.target,
-                      currentTarget: e.currentTarget,
-                      relatedTarget: e.relatedTarget,
-                      timestamp: Date.now()
-                    });
-                  }}
-                  onMouseDown={(e) => {
-                    e.stopPropagation(); // Prevent section selection trigger
-                    logger.debug('🖱️ Features List - MouseDown event', {
-                      tierIndex: index,
-                      button: e.button,
-                      target: e.target,
-                      timestamp: Date.now()
-                    });
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent bubbling to container
-                    logger.debug('👆 Features List - Click event', {
-                      tierIndex: index,
-                      target: e.target,
-                      timestamp: Date.now()
-                    });
-                  }}
-                  onBlur={(e) => {
-                    const newValue = e.currentTarget.textContent || '';
-                    logger.debug('💨 Features List - Blur event', {
-                      tierIndex: index,
-                      target: e.target,
-                      relatedTarget: e.relatedTarget,
-                      oldValue: originalValues.features,
-                      newValue: newValue,
-                      timestamp: Date.now()
-                    });
-                    
-                    handleSmartContentUpdate(
-                      'feature_lists',
-                      newValue,
-                      originalValues.features,
-                      () => {
-                        const features = blockContent.feature_lists.split('|');
-                        features[index] = newValue;
-                        handleContentUpdate('feature_lists', features.join('|'));
-                      }
-                    );
-                  }}
-                  className="text-gray-700 text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded p-2 cursor-text hover:bg-gray-50 border border-gray-200 min-h-[100px]"
-                >
-                  {tier.features.join(', ')}
-                </div>
-              </>
-            ) : (
-              tier.features.map((feature, featureIndex) => (
-                <div key={featureIndex} className="flex items-start space-x-3">
-                  <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-gray-700 text-sm">{feature}</span>
-                </div>
-              ))
-            )}
-          </div>
+          {mode === 'preview' && billingCycle === 'yearly' && !currentPrice.toLowerCase().includes('contact') && (
+            <div className="text-sm text-gray-500 mt-1">
+              ${Math.round(parseFloat(currentPrice.replace(/[^0-9.]/g, '')) / 12)}/month billed annually
+            </div>
+          )}
+        </div>
 
-          {/* CTA Button */}
+        {/* Description */}
+        <div className="text-center mb-8">
           {mode !== 'preview' ? (
-            <>
-              <div className="text-sm text-gray-500 mb-2">Button Text:</div>
-              <div 
-                contentEditable
-                data-editable="true"
-                suppressContentEditableWarning
-                onFocus={(e) => {
-                  logger.debug('🎯 CTA Button Text - Focus event', {
-                    tierIndex: index,
-                    ctaText: tier.ctaText,
-                    target: e.target,
-                    currentTarget: e.currentTarget,
-                    relatedTarget: e.relatedTarget,
-                    timestamp: Date.now()
-                  });
-                }}
-                onMouseDown={(e) => {
-                  e.stopPropagation(); // Prevent section selection trigger
-                  logger.debug('🖱️ CTA Button Text - MouseDown event', {
-                    tierIndex: index,
-                    button: e.button,
-                    target: e.target,
-                    timestamp: Date.now()
-                  });
-                }}
-                onClick={(e) => {
-                  e.stopPropagation(); // Prevent bubbling to container
-                  logger.debug('👆 CTA Button Text - Click event', {
-                    tierIndex: index,
-                    target: e.target,
-                    timestamp: Date.now()
-                  });
-                }}
-                onBlur={(e) => {
-                  const newValue = e.currentTarget.textContent || '';
-                  logger.debug('💨 CTA Button Text - Blur event', {
-                    tierIndex: index,
-                    target: e.target,
-                    relatedTarget: e.relatedTarget,
-                    oldValue: originalValues.ctaText,
-                    newValue: newValue,
-                    timestamp: Date.now()
-                  });
-                  
-                  handleSmartContentUpdate(
-                    'cta_texts',
-                    newValue,
-                    originalValues.ctaText,
-                    () => {
-                      const ctas = blockContent.cta_texts.split('|');
-                      ctas[index] = newValue;
-                      handleContentUpdate('cta_texts', ctas.join('|'));
-                    }
-                  );
-                }}
-                className="text-center font-medium py-3 px-6 rounded-lg bg-blue-500 text-white outline-none focus:ring-2 focus:ring-blue-600 focus:ring-opacity-50 cursor-text hover:bg-blue-600"
-              >
-                {tier.ctaText}
-              </div>
-              
-              {/* Popular tier toggle */}
-              <div className="mt-4 flex items-center justify-center">
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={tier.isPopular}
-                    onChange={(e) => {
-                      const popular = blockContent.popular_tiers ? blockContent.popular_tiers.split('|') : [];
-                      popular[index] = e.target.checked ? 'true' : 'false';
-                      handleContentUpdate('popular_tiers', popular.join('|'));
-                    }}
-                    className="mr-2"
+            <div
+              contentEditable
+              suppressContentEditableWarning
+              onBlur={(e) => onTierUpdate('description', e.currentTarget.textContent || '')}
+              className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 text-gray-600"
+              data-section-id={sectionId}
+              data-element-key={`tiers.${tier.id}.description`}
+            >
+              {tier.description}
+            </div>
+          ) : (
+            <p className="text-gray-600">{tier.description}</p>
+          )}
+        </div>
+
+        {/* Features List */}
+        <div className="mb-8">
+          <ul className="space-y-3">
+            {tier.features.map((feature, index) => (
+              <li key={index} className="flex items-start group/feature-item relative">
+                <svg
+                  className={`w-5 h-5 ${themeColors.checkmark} mr-3 mt-0.5 flex-shrink-0`}
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                    clipRule="evenodd"
                   />
-                  <span className="text-sm text-gray-600">Mark as Popular</span>
-                </label>
-              </div>
-            </>
+                </svg>
+                <div className="flex-1 min-w-0 relative">
+                  {mode !== 'preview' ? (
+                    <>
+                      <EditableAdaptiveText
+                        mode={mode}
+                        value={feature}
+                        onEdit={(value) => onEditFeature?.(index, value)}
+                        backgroundType="neutral"
+                        colorTokens={colorTokens}
+                        variant="body"
+                        className="text-gray-700"
+                        placeholder={`Feature ${index + 1}`}
+                        data-section-id={sectionId}
+                        data-element-key={`tiers.${tier.id}.features.${index}`}
+                      />
+                      {onRemoveFeature && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onRemoveFeature(index);
+                          }}
+                          className="opacity-0 group-hover/feature-item:opacity-100 absolute right-0 top-0 ml-2 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                          title="Remove this feature"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      )}
+                    </>
+                  ) : (
+                    <span className="text-gray-700">{feature}</span>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          {/* Add feature button */}
+          {mode !== 'preview' && onAddFeature && tier.features.length < 8 && (
+            <button
+              onClick={onAddFeature}
+              className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 transition-colors mt-3 self-start"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Add feature</span>
+            </button>
+          )}
+        </div>
+
+        {/* CTA Button */}
+        <div className="mt-auto">
+          {mode !== 'preview' ? (
+            <div
+              contentEditable
+              suppressContentEditableWarning
+              onBlur={(e) => onTierUpdate('cta_text', e.currentTarget.textContent || '')}
+              className={`text-center font-medium py-3 px-6 rounded-lg ${tier.is_popular ? colorTokens.ctaBg + ' text-white' : 'bg-gray-100 text-gray-900'} outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 cursor-text`}
+              data-section-id={sectionId}
+              data-element-key={`tiers.${tier.id}.cta_text`}
+            >
+              {tier.cta_text}
+            </div>
           ) : (
             <CTAButton
-              text={tier.ctaText}
+              text={tier.cta_text}
               colorTokens={colorTokens}
-              className={`w-full shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 ${
-                tier.isPopular ? '' : 'opacity-90'
-              }`}
-              variant={tier.isPopular ? "primary" : "secondary"}
+              className="w-full shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
+              variant={tier.is_popular ? 'primary' : 'secondary'}
               sectionId={sectionId}
-              elementKey={`cta_${index}`}
+              elementKey={`tiers.${tier.id}.cta_text`}
             />
           )}
         </div>
       </div>
-    );
+    </div>
+  );
+};
+
+export default function ToggleableMonthlyYearly(props: ToggleableMonthlyYearlyProps) {
+  const { sectionId, mode, blockContent, colorTokens, sectionBackground, backgroundType, handleContentUpdate } =
+    useLayoutComponent<ToggleableMonthlyYearlyContent>({
+      ...props,
+      contentSchema: CONTENT_SCHEMA,
+    });
+
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
+
+  // Theme detection
+  const uiBlockTheme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Get tiers
+  const tiers: Tier[] = blockContent.tiers || CONTENT_SCHEMA.tiers.default;
+
+  // --- Tier Handlers ---
+  const handleTierUpdate = (tierId: string, field: keyof Tier, value: any) => {
+    const updated = tiers.map((t) => (t.id === tierId ? { ...t, [field]: value } : t));
+    handleContentUpdate('tiers', JSON.stringify(updated));
   };
-  
+
+  const handleAddTier = () => {
+    if (tiers.length >= 4) return;
+    const newTier: Tier = {
+      id: `tier-${Date.now()}`,
+      name: 'New Plan',
+      monthly_price: '$49',
+      yearly_price: '$490',
+      description: 'Description for this plan',
+      features: ['Feature 1', 'Feature 2', 'Feature 3'],
+      cta_text: 'Get Started',
+      is_popular: false,
+    };
+    handleContentUpdate('tiers', JSON.stringify([...tiers, newTier]));
+  };
+
+  const handleRemoveTier = (tierId: string) => {
+    if (tiers.length <= 2) return;
+    handleContentUpdate('tiers', JSON.stringify(tiers.filter((t) => t.id !== tierId)));
+  };
+
+  const handleTogglePopular = (tierId: string) => {
+    const updated = tiers.map((t) => ({
+      ...t,
+      is_popular: t.id === tierId ? !t.is_popular : t.is_popular,
+    }));
+    handleContentUpdate('tiers', JSON.stringify(updated));
+  };
+
+  // --- Feature Handlers (within tiers) ---
+  const handleAddFeature = (tierId: string) => {
+    const updated = tiers.map((t) => {
+      if (t.id === tierId && t.features.length < 8) {
+        return { ...t, features: [...t.features, 'New feature'] };
+      }
+      return t;
+    });
+    handleContentUpdate('tiers', JSON.stringify(updated));
+  };
+
+  const handleRemoveFeature = (tierId: string, featureIndex: number) => {
+    const updated = tiers.map((t) => {
+      if (t.id === tierId) {
+        return { ...t, features: t.features.filter((_, i) => i !== featureIndex) };
+      }
+      return t;
+    });
+    handleContentUpdate('tiers', JSON.stringify(updated));
+  };
+
+  const handleEditFeature = (tierId: string, featureIndex: number, value: string) => {
+    const updated = tiers.map((t) => {
+      if (t.id === tierId) {
+        return { ...t, features: t.features.map((f, i) => (i === featureIndex ? value : f)) };
+      }
+      return t;
+    });
+    handleContentUpdate('tiers', JSON.stringify(updated));
+  };
+
+  // Grid classes based on tier count
+  const gridClass =
+    tiers.length === 1
+      ? 'max-w-md mx-auto'
+      : tiers.length === 2
+        ? 'md:grid-cols-2 max-w-4xl mx-auto'
+        : tiers.length === 3
+          ? 'md:grid-cols-3 max-w-6xl mx-auto'
+          : 'md:grid-cols-2 lg:grid-cols-4 max-w-7xl mx-auto';
+
   return (
     <LayoutSection
       sectionId={sectionId}
       sectionType="ToggleableMonthlyYearly"
-      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+      backgroundType={backgroundType}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
     >
-      <div className="max-w-6xl mx-auto">
-        
+      <div className="max-w-7xl mx-auto">
+        {/* Header Section */}
         <div className="text-center mb-12">
-          <EditableAdaptiveHeadline
-            mode={mode}
-            value={blockContent.headline || ''}
-            onEdit={(value) => handleContentUpdate('headline', value)}
-            level="h2"
-            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-            colorTokens={colorTokens}
-            className="mb-4"
-            sectionId={sectionId}
-            elementKey="headline"
-            sectionBackground={sectionBackground}
-          />
+          {mode !== 'preview' ? (
+            <div
+              contentEditable
+              suppressContentEditableWarning
+              onBlur={(e) => handleContentUpdate('headline', e.currentTarget.textContent || '')}
+              className={`outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-50 mb-4 ${colorTokens.textPrimary}`}
+              style={{ fontSize: '2.25rem', fontWeight: 'bold' }}
+              data-section-id={sectionId}
+              data-element-key="headline"
+            >
+              {blockContent.headline}
+            </div>
+          ) : (
+            <h2 className={`mb-4 ${colorTokens.textPrimary}`} style={{ fontSize: '2.25rem', fontWeight: 'bold' }}>
+              {blockContent.headline}
+            </h2>
+          )}
 
+          {/* Subheadline */}
           {(blockContent.subheadline || mode === 'edit') && (
-            <EditableAdaptiveText
-              mode={mode}
-              value={blockContent.subheadline || ''}
-              onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-              colorTokens={colorTokens}
-              variant="body"
-              className="text-lg mb-8 max-w-3xl mx-auto"
-              placeholder="Add optional subheadline to introduce pricing plans..."
-              sectionId={sectionId}
-              elementKey="subheadline"
-              sectionBackground={sectionBackground}
-            />
+            mode !== 'preview' ? (
+              <div
+                contentEditable
+                suppressContentEditableWarning
+                onBlur={(e) => handleContentUpdate('subheadline', e.currentTarget.textContent || '')}
+                className={`outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-50 text-lg ${colorTokens.textSecondary} mb-8`}
+                data-section-id={sectionId}
+                data-element-key="subheadline"
+                data-placeholder="Add subheadline..."
+              >
+                {blockContent.subheadline || ''}
+              </div>
+            ) : blockContent.subheadline ? (
+              <p className={`text-lg ${colorTokens.textSecondary} mb-8`}>{blockContent.subheadline}</p>
+            ) : null
           )}
 
           {/* Billing Toggle */}
@@ -1002,263 +571,94 @@ export default function ToggleableMonthlyYearly(props: LayoutComponentProps) {
                 Yearly
               </button>
             </div>
-            
-            {blockContent.annual_discount_label && (
-              <div className="ml-4 bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium">
+
+            {blockContent.annual_discount_label && billingCycle === 'yearly' && (
+              <div
+                className="ml-4 px-3 py-1 rounded-full text-sm font-medium"
+                style={{ backgroundColor: colorTokens.accentLight, color: colorTokens.accent }}
+              >
                 {blockContent.annual_discount_label}
               </div>
             )}
           </div>
         </div>
 
+        {/* Tier Management Controls - Only in edit mode */}
+        {mode === 'edit' && (
+          <div className="mb-8 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
+                  />
+                </svg>
+                <span className="text-sm font-medium text-gray-700">
+                  Pricing Tiers: {tiers.length} {tiers.length === 1 ? 'tier' : 'tiers'}
+                </span>
+              </div>
+              {tiers.length < 4 && (
+                <button
+                  onClick={handleAddTier}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition-colors duration-200 flex items-center space-x-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  <span>Add Tier</span>
+                </button>
+              )}
+            </div>
+            <p className="text-xs text-gray-600 mt-2">
+              You can have between 2-4 pricing tiers.{' '}
+              {tiers.length === 4 ? 'Maximum tiers reached.' : `${4 - tiers.length} more tier${4 - tiers.length === 1 ? '' : 's'} available.`}
+            </p>
+          </div>
+        )}
+
         {/* Pricing Cards Grid */}
-        <div className="grid lg:grid-cols-3 gap-8 mb-12">
-          {pricingTiers.map((tier, index) => (
+        <div className={`grid gap-8 ${gridClass}`}>
+          {tiers.map((tier) => (
             <PricingCard
-              key={index}
+              key={tier.id}
               tier={tier}
-              index={index}
+              mode={mode}
+              sectionId={sectionId}
+              billingCycle={billingCycle}
+              onTierUpdate={(field, value) => handleTierUpdate(tier.id, field, value)}
+              onRemove={() => handleRemoveTier(tier.id)}
+              showRemoveButton={tiers.length > 2}
+              onAddFeature={() => handleAddFeature(tier.id)}
+              onRemoveFeature={(featureIndex) => handleRemoveFeature(tier.id, featureIndex)}
+              onEditFeature={(featureIndex, value) => handleEditFeature(tier.id, featureIndex, value)}
+              onTogglePopular={() => handleTogglePopular(tier.id)}
+              colorTokens={colorTokens}
+              themeColors={getPricingColors(uiBlockTheme, tier.is_popular)}
             />
           ))}
-          
-          {/* Add tier button - only in edit mode and when we have less than 3 tiers */}
-          {mode === 'edit' && pricingTiers.length < 3 && (
-            <div className="flex items-center justify-center">
-              <button
-                onClick={() => {
-                  // Add a new tier with default values
-                  const names = blockContent.tier_names.split('|');
-                  const monthlyPrices = blockContent.monthly_prices.split('|');
-                  const yearlyPrices = blockContent.yearly_prices.split('|');
-                  const descriptions = blockContent.tier_descriptions.split('|');
-                  const ctas = blockContent.cta_texts.split('|');
-                  const features = blockContent.feature_lists.split('|');
-                  const popularLabels = blockContent.popular_tiers ? blockContent.popular_tiers.split('|') : [];
-                  
-                  // Add smart defaults
-                  const tierNumber = names.length + 1;
-                  names.push(tierNumber === 1 ? 'Starter' : tierNumber === 2 ? 'Professional' : 'Enterprise');
-                  monthlyPrices.push(tierNumber === 1 ? '$29' : tierNumber === 2 ? '$79' : '$199');
-                  yearlyPrices.push(tierNumber === 1 ? '$290' : tierNumber === 2 ? '$790' : '$1990');
-                  descriptions.push(tierNumber === 1 ? 'Perfect for getting started' : tierNumber === 2 ? 'For growing teams' : 'Enterprise solutions');
-                  ctas.push(tierNumber === 3 ? 'Contact Sales' : 'Start Free Trial');
-                  features.push('Feature 1,Feature 2,Feature 3');
-                  popularLabels.push(tierNumber === 2 ? 'true' : 'false');
-                  
-                  handleContentUpdate('tier_names', names.join('|'));
-                  handleContentUpdate('monthly_prices', monthlyPrices.join('|'));
-                  handleContentUpdate('yearly_prices', yearlyPrices.join('|'));
-                  handleContentUpdate('tier_descriptions', descriptions.join('|'));
-                  handleContentUpdate('cta_texts', ctas.join('|'));
-                  handleContentUpdate('feature_lists', features.join('|'));
-                  handleContentUpdate('popular_tiers', popularLabels.join('|'));
-                }}
-                className="px-6 py-4 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-xl font-medium transition-all duration-300 border-2 border-dashed border-blue-300 hover:border-blue-400 flex flex-col items-center justify-center space-y-2 min-h-[400px]"
-                title="Add new pricing tier"
-              >
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                <span>Add Pricing Tier</span>
-              </button>
-            </div>
-          )}
         </div>
 
         {/* Billing Note */}
         {(blockContent.billing_note || mode === 'edit') && (
-          <div className="text-center mb-8">
-            <EditableAdaptiveText
-              mode={mode}
-              value={blockContent.billing_note || ''}
-              onEdit={(value) => handleContentUpdate('billing_note', value)}
-              backgroundType={backgroundType}
-              colorTokens={colorTokens}
-              variant="body"
-              className={`text-sm ${mutedTextColor}`}
-              placeholder="All plans include 14-day free trial. No credit card required."
-              sectionBackground={sectionBackground}
-              data-section-id={sectionId}
-              data-element-key="billing_note"
-            />
-          </div>
-        )}
-
-        {/* Trust & Support */}
-        {((blockContent.show_platform_features !== false && platformFeatures.length > 0) || (mode === 'edit' && blockContent.show_platform_features !== false && hasAnyPlatformFeatures())) && (
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-100 mb-12 relative group/platform-features-section">
-            <div className="text-center">
-              <EditableAdaptiveText
-                mode={mode}
-                value={blockContent.platform_features_title === '___REMOVED___' ? '' : (blockContent.platform_features_title || '')}
-                onEdit={(value) => handleContentUpdate('platform_features_title', value)}
-                backgroundType={backgroundType}
-                colorTokens={colorTokens}
-                variant="body"
-                className="text-lg font-semibold text-gray-900 mb-6"
-                placeholder="Platform features section title"
-                sectionBackground={sectionBackground}
+          <div className="text-center mt-8">
+            {mode !== 'preview' ? (
+              <div
+                contentEditable
+                suppressContentEditableWarning
+                onBlur={(e) => handleContentUpdate('billing_note', e.currentTarget.textContent || '')}
+                className={`outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-50 text-sm ${colorTokens.textSecondary}`}
                 data-section-id={sectionId}
-                data-element-key="platform_features_title"
-              />
-              
-              {mode !== 'preview' ? (
-                <div className="space-y-6">
-                  <div className="grid md:grid-cols-4 gap-6">
-                    {[1, 2, 3, 4].map((index) => {
-                      const rawTitle = blockContent[`platform_feature_${index}_title` as keyof ToggleableMonthlyYearlyContent];
-                      const rawDesc = blockContent[`platform_feature_${index}_desc` as keyof ToggleableMonthlyYearlyContent];
-                      const rawIcon = blockContent[`platform_feature_${index}_icon` as keyof ToggleableMonthlyYearlyContent];
-                      
-                      const featureTitle = rawTitle === '___REMOVED___' ? '' : String(rawTitle || '');
-                      const featureDesc = rawDesc === '___REMOVED___' ? '' : String(rawDesc || '');
-                      const featureIcon = rawIcon === '___REMOVED___' ? '' : String(rawIcon || ['✅', '🛡️', '💬', '⚡'][index - 1] || '🎯');
-                      
-                      // Skip completely removed features
-                      if (rawTitle === '___REMOVED___' && rawDesc === '___REMOVED___') {
-                        return null;
-                      }
-                      
-                      // Also skip if both are empty
-                      if (!featureTitle && !featureDesc) {
-                        return null;
-                      }
-                      
-                      return (
-                        <div key={index} className="text-center relative group/platform-feature">
-                          <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-gray-100 flex items-center justify-center group/icon-edit">
-                            <IconEditableText
-                              mode={mode}
-                              value={featureIcon}
-                              onEdit={(value) => handleContentUpdate(`platform_feature_${index}_icon`, value)}
-                              backgroundType="neutral"
-                              colorTokens={colorTokens}
-                              iconSize="md"
-                              className="text-2xl"
-                              sectionId={sectionId}
-                              elementKey={`platform_feature_${index}_icon`}
-                            />
-                          </div>
-                          <EditableAdaptiveText
-                            mode={mode}
-                            value={featureTitle}
-                            onEdit={(value) => handleContentUpdate(`platform_feature_${index}_title`, value)}
-                            backgroundType={backgroundType}
-                            colorTokens={colorTokens}
-                            variant="body"
-                            className="font-semibold text-gray-900 mb-2"
-                            placeholder={`Feature ${index} title`}
-                            sectionBackground={sectionBackground}
-                            data-section-id={sectionId}
-                            data-element-key={`platform_feature_${index}_title`}
-                          />
-                          <EditableAdaptiveText
-                            mode={mode}
-                            value={featureDesc}
-                            onEdit={(value) => handleContentUpdate(`platform_feature_${index}_desc`, value)}
-                            backgroundType={backgroundType}
-                            colorTokens={colorTokens}
-                            variant="body"
-                            className={`text-sm ${mutedTextColor}`}
-                            placeholder={`Feature ${index} description`}
-                            sectionBackground={sectionBackground}
-                            data-section-id={sectionId}
-                            data-element-key={`platform_feature_${index}_desc`}
-                          />
-                          
-                          {/* Remove button */}
-                          {(featureTitle || featureDesc) && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleContentUpdate(`platform_feature_${index}_title`, '___REMOVED___');
-                                handleContentUpdate(`platform_feature_${index}_desc`, '___REMOVED___');
-                                handleContentUpdate(`platform_feature_${index}`, '___REMOVED___');
-                              }}
-                              className="opacity-0 group-hover/platform-feature:opacity-100 absolute -top-2 -right-2 text-red-500 hover:text-red-700 transition-opacity duration-200 z-10"
-                              title="Remove this feature"
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                              </svg>
-                            </button>
-                          )}
-                        </div>
-                      );
-                    }).filter(Boolean)}
-                  </div>
-                </div>
-              ) : (
-                <div className="grid md:grid-cols-4 gap-6">
-                  {platformFeatures.map((feature, index) => (
-                    <div key={index} className="text-center">
-                      <div className={`w-12 h-12 mx-auto mb-3 rounded-full ${feature.bgColor} flex items-center justify-center text-white`}>
-                        <span className="text-xl">{feature.icon}</span>
-                      </div>
-                      <div className="font-semibold text-gray-900">{feature.title}</div>
-                      <div className={`text-sm ${mutedTextColor}`}>{feature.description}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            
-            {/* Remove platform features section button - only in edit mode */}
-            {mode === 'edit' && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleContentUpdate('show_platform_features', String(false));
-                  handleContentUpdate('platform_features_title', '___REMOVED___');
-                  handleContentUpdate('platform_feature_1_title', '___REMOVED___');
-                  handleContentUpdate('platform_feature_1_desc', '___REMOVED___');
-                  handleContentUpdate('platform_feature_1_icon', '___REMOVED___');
-                  handleContentUpdate('platform_feature_2_title', '___REMOVED___');
-                  handleContentUpdate('platform_feature_2_desc', '___REMOVED___');
-                  handleContentUpdate('platform_feature_2_icon', '___REMOVED___');
-                  handleContentUpdate('platform_feature_3_title', '___REMOVED___');
-                  handleContentUpdate('platform_feature_3_desc', '___REMOVED___');
-                  handleContentUpdate('platform_feature_3_icon', '___REMOVED___');
-                  handleContentUpdate('platform_feature_4_title', '___REMOVED___');
-                  handleContentUpdate('platform_feature_4_desc', '___REMOVED___');
-                  handleContentUpdate('platform_feature_4_icon', '___REMOVED___');
-                }}
-                className="opacity-0 group-hover/platform-features-section:opacity-100 absolute -top-2 -right-2 text-red-500 hover:text-red-700 transition-opacity duration-200 z-10"
-                title="Remove platform features section"
+                data-element-key="billing_note"
+                data-placeholder="Add billing note..."
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            )}
-          </div>
-        )}
-
-        {(blockContent.supporting_text || blockContent.trust_items || mode === 'edit') && (
-          <div className="text-center space-y-6">
-            {(blockContent.supporting_text || mode === 'edit') && (
-              <EditableAdaptiveText
-                mode={mode}
-                value={blockContent.supporting_text || ''}
-                onEdit={(value) => handleContentUpdate('supporting_text', value)}
-                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                colorTokens={colorTokens}
-                variant="body"
-                className="max-w-3xl mx-auto mb-8"
-                placeholder="Add optional supporting text to reinforce pricing value..."
-                sectionId={sectionId}
-                elementKey="supporting_text"
-                sectionBackground={sectionBackground}
-              />
-            )}
-
-            {trustItems.length > 0 && (
-              <TrustIndicators 
-                items={trustItems}
-                colorClass={mutedTextColor}
-                iconColor="text-green-500"
-              />
-            )}
+                {blockContent.billing_note || ''}
+              </div>
+            ) : blockContent.billing_note ? (
+              <p className={`text-sm ${colorTokens.textSecondary}`}>{blockContent.billing_note}</p>
+            ) : null}
           </div>
         )}
       </div>
@@ -1269,56 +669,22 @@ export default function ToggleableMonthlyYearly(props: LayoutComponentProps) {
 export const componentMeta = {
   name: 'ToggleableMonthlyYearly',
   category: 'Pricing',
-  description: 'Monthly/yearly toggle pricing with automatic savings calculation. Perfect for subscription products with annual discounts.',
+  description: 'Monthly/yearly toggle pricing with automatic savings calculation',
   tags: ['pricing', 'toggle', 'subscription', 'annual', 'discount'],
   defaultBackgroundType: 'neutral' as const,
   complexity: 'medium',
-  estimatedBuildTime: '25 minutes',
-  
-  contentFields: [
-    { key: 'headline', label: 'Main Headline', type: 'text', required: true },
-    { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
-    { key: 'tier_names', label: 'Tier Names (pipe separated)', type: 'text', required: true },
-    { key: 'monthly_prices', label: 'Monthly Prices (pipe separated)', type: 'text', required: true },
-    { key: 'yearly_prices', label: 'Yearly Prices (pipe separated)', type: 'text', required: true },
-    { key: 'tier_descriptions', label: 'Tier Descriptions (pipe separated)', type: 'textarea', required: true },
-    { key: 'cta_texts', label: 'CTA Button Texts (pipe separated)', type: 'text', required: true },
-    { key: 'feature_lists', label: 'Feature Lists (pipe separated tiers, comma separated features)', type: 'textarea', required: true },
-    { key: 'popular_tiers', label: 'Popular Tiers true/false (pipe separated)', type: 'text', required: false },
-    { key: 'annual_discount_label', label: 'Annual Discount Label', type: 'text', required: false },
-    { key: 'billing_note', label: 'Billing Note', type: 'text', required: false },
-    { key: 'platform_features_title', label: 'Platform Features Section Title', type: 'text', required: false },
-    { key: 'platform_feature_1_title', label: 'Platform Feature 1 Title', type: 'text', required: false },
-    { key: 'platform_feature_1_desc', label: 'Platform Feature 1 Description', type: 'text', required: false },
-    { key: 'platform_feature_2_title', label: 'Platform Feature 2 Title', type: 'text', required: false },
-    { key: 'platform_feature_2_desc', label: 'Platform Feature 2 Description', type: 'text', required: false },
-    { key: 'platform_feature_3_title', label: 'Platform Feature 3 Title', type: 'text', required: false },
-    { key: 'platform_feature_3_desc', label: 'Platform Feature 3 Description', type: 'text', required: false },
-    { key: 'platform_feature_4_title', label: 'Platform Feature 4 Title', type: 'text', required: false },
-    { key: 'platform_feature_4_desc', label: 'Platform Feature 4 Description', type: 'text', required: false },
-    { key: 'show_platform_features', label: 'Show Platform Features Section', type: 'boolean', required: false },
-    { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
-    { key: 'platform_feature_1_icon', label: 'Platform Feature 1 Icon', type: 'text', required: false },
-    { key: 'platform_feature_2_icon', label: 'Platform Feature 2 Icon', type: 'text', required: false },
-    { key: 'platform_feature_3_icon', label: 'Platform Feature 3 Icon', type: 'text', required: false },
-    { key: 'platform_feature_4_icon', label: 'Platform Feature 4 Icon', type: 'text', required: false }
-  ],
-  
   features: [
     'Monthly/yearly billing toggle',
     'Automatic savings calculation',
     'Popular plan highlighting',
     'Feature comparison lists',
-    'Trust indicators and guarantees',
-    'Responsive pricing cards'
+    'Responsive pricing cards (2-4 tiers)',
   ],
-  
-  useCases: [
-    'SaaS subscription products',
-    'Tiered pricing models',
-    'Annual discount promotions',
-    'Feature-based differentiation',
-    'Conversion-focused pricing'
-  ]
+  contentSchema: {
+    headline: 'Main heading text',
+    subheadline: 'Optional subheading text',
+    annual_discount_label: 'Label showing annual discount',
+    billing_note: 'Note about billing/trials',
+    tiers: 'Array of tier objects with name, monthly_price, yearly_price, description, features[], cta_text, is_popular',
+  },
 };
