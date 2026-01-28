@@ -18,7 +18,7 @@ import AccordionSteps from '@/modules/UIBlocks/HowItWorks/AccordionSteps';
 // V3 ARCHIVED: import AnimatedProcessLine from '@/modules/UIBlocks/HowItWorks/AnimatedProcessLine';
 // ARCHIVED: import AnimatedUpgradePath from '@/modules/UIBlocks/Comparison/AnimatedUpgradePath';
 // ARCHIVED: import AuditResultsPanel from '@/modules/UIBlocks/Security/AuditResultsPanel';
-import AvatarCarousel from '@/modules/UIBlocks/Testimonials/AvatarCarousel';
+// V3 ARCHIVED: import AvatarCarousel from '@/modules/UIBlocks/Testimonials/AvatarCarousel';
 // ARCHIVED: import BadgeCarousel from '@/modules/UIBlocks/Integration/BadgeCarousel';
 // ARCHIVED: import BasicFeatureGrid from '@/modules/UIBlocks/Comparison/BasicFeatureGrid';
 import BeforeAfterQuote from '@/modules/UIBlocks/Testimonials/BeforeAfterQuote';
@@ -233,7 +233,7 @@ export const componentRegistry: ComponentRegistry = {
   testimonials: {
     QuoteGrid: QuoteGrid,
     VideoTestimonials: VideoTestimonials,
-    AvatarCarousel: AvatarCarousel,
+    // V3 ARCHIVED: AvatarCarousel: AvatarCarousel,
     BeforeAfterQuote: BeforeAfterQuote,
     // V3 ARCHIVED: SegmentedTestimonials: SegmentedTestimonials,
     // V3 ARCHIVED: RatingCards: RatingCards,

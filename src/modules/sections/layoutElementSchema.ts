@@ -1250,123 +1250,95 @@ export const layoutElementSchema: LayoutSchema = {
     }
   },
 
-  // Testimonial Section
+  // Testimonial Section - V2 Schema
   QuoteGrid: {
-    sectionElements: [
-      { element: "headline", mandatory: true, generation: "ai_generated" },
-      { element: "verification_message", mandatory: false, generation: "ai_generated" },
-      { element: "rating_value", mandatory: false, generation: "manual_preferred" },
-      { element: "quote_mark_icon", mandatory: false, generation: "ai_generated" },
-      { element: "verification_icon", mandatory: false, generation: "ai_generated" },
-      { element: "testimonial_icon_1", mandatory: true, generation: "ai_generated" },
-      { element: "testimonial_icon_2", mandatory: true, generation: "ai_generated" },
-      { element: "testimonial_icon_3", mandatory: true, generation: "ai_generated" },
-      { element: "testimonial_icon_4", mandatory: true, generation: "ai_generated" },
-      { element: "testimonial_icon_5", mandatory: true, generation: "ai_generated" },
-      { element: "testimonial_icon_6", mandatory: true, generation: "ai_generated" }
-    ],
-    cardStructure: {
-      type: "cards",
-      elements: ["testimonial_quotes", "customer_names", "customer_titles", "customer_companies"],
-      generation: "ai_generated"
+    sectionType: "QuoteGrid",
+
+    elements: {
+      // Required AI-generated
+      headline:             { type: "string", requirement: "required", fillMode: "ai_generated" },
+
+      // Optional AI-generated
+      subheadline:          { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      verification_message: { type: "string", requirement: "optional", fillMode: "ai_generated" },
     },
-    cardRequirements: {
-      type: 'cards',
-      min: 2,
-      max: 6,
-      optimal: [3, 4],
-      description: 'Grid of testimonial quotes'
+
+    collections: {
+      testimonials: {
+        requirement: "required",
+        fillMode: "ai_generated_needs_review",
+        constraints: { min: 2, max: 6 },
+        fields: {
+          id:               { type: "string", fillMode: "system" },
+          quote:            { type: "string", fillMode: "ai_generated_needs_review" },
+          customer_name:    { type: "string", fillMode: "ai_generated_needs_review" },
+          customer_title:   { type: "string", fillMode: "ai_generated_needs_review" },
+          customer_company: { type: "string", fillMode: "ai_generated_needs_review" },
+          rating_value:     { type: "string", fillMode: "ai_generated_needs_review", default: "5" },
+        }
+      }
     }
   },
 
+  // Testimonials Section - VideoTestimonials (V2 Schema)
   VideoTestimonials: {
-    sectionElements: [
-      { element: "headline", mandatory: true, generation: "ai_generated" },
-      { element: "subheadline", mandatory: false, generation: "ai_generated" },
-      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
-      { element: "cta_text", mandatory: false, generation: "ai_generated" },
-      { element: "trust_items", mandatory: false, generation: "ai_generated" },
-      { element: "industry_leaders_title", mandatory: false, generation: "ai_generated" },
-      { element: "enterprise_customers_stat", mandatory: false, generation: "manual_preferred" },
-      { element: "enterprise_customers_label", mandatory: false, generation: "ai_generated" },
-      { element: "uptime_stat", mandatory: false, generation: "manual_preferred" },
-      { element: "uptime_label", mandatory: false, generation: "ai_generated" },
-      { element: "support_stat", mandatory: false, generation: "manual_preferred" },
-      { element: "support_label", mandatory: false, generation: "ai_generated" }
-    ],
-    cardStructure: {
-      type: "cards",
-      elements: ["video_titles", "video_descriptions", "video_urls", "video_thumbnails", "customer_names", "customer_titles", "customer_companies"],
-      generation: "ai_generated"
+    sectionType: "VideoTestimonials",
+
+    elements: {
+      headline:    { type: "string", requirement: "required", fillMode: "ai_generated" },
+      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated" },
     },
-    cardRequirements: {
-      type: 'cards',
-      min: 2,
-      max: 6,
-      optimal: [3, 4],
-      description: 'Video testimonial cards'
+
+    collections: {
+      video_testimonials: {
+        requirement: "required",
+        fillMode: "ai_generated",
+        constraints: { min: 1, max: 6 },
+        fields: {
+          id:               { type: "string", fillMode: "system" },
+          title:            { type: "string", fillMode: "ai_generated" },
+          description:      { type: "string", fillMode: "ai_generated" },
+          customer_name:    { type: "string", fillMode: "ai_generated_needs_review" },
+          customer_title:   { type: "string", fillMode: "ai_generated_needs_review" },
+          customer_company: { type: "string", fillMode: "ai_generated_needs_review" },
+          video_url:        { type: "string", fillMode: "manual_preferred", default: "" },
+          thumbnail:        { type: "string", fillMode: "manual_preferred", default: "" },
+        }
+      }
     }
   },
 
-  AvatarCarousel: {
-    sectionElements: [
-      { element: "headline", mandatory: true, generation: "ai_generated" },
-      { element: "subheadline", mandatory: false, generation: "ai_generated" },
-      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
-      { element: "cta_text", mandatory: false, generation: "ai_generated" },
-      { element: "trust_items", mandatory: false, generation: "ai_generated" },
-      { element: "community_title", mandatory: false, generation: "ai_generated" },
-      { element: "active_creators_count", mandatory: false, generation: "manual_preferred" },
-      { element: "active_creators_label", mandatory: false, generation: "ai_generated" },
-      { element: "average_rating_display", mandatory: false, generation: "manual_preferred" },
-      { element: "average_rating_label", mandatory: false, generation: "ai_generated" },
-      { element: "creations_count", mandatory: false, generation: "manual_preferred" },
-      { element: "creations_label", mandatory: false, generation: "ai_generated" },
-      { element: "auto_rotate", mandatory: false, generation: "manual_preferred" },
-      { element: "avatar_urls", mandatory: false, generation: "manual_preferred" }
-    ],
-    cardStructure: {
-      type: "cards",
-      elements: ["testimonial_quotes", "customer_names", "customer_titles", "customer_companies", "customer_avatars", "ratings"],
-      generation: "ai_generated"
-    },
-    cardRequirements: {
-      type: 'cards',
-      min: 4,
-      max: 10,
-      optimal: [6, 8],
-      description: 'Avatar carousel testimonials'
-    }
-  },
+  // V3 ARCHIVED: AvatarCarousel schema moved to archive/schemas/layoutElementSchema.archived.ts
 
+  // Testimonials Section - BeforeAfterQuote (V2 Schema)
   BeforeAfterQuote: {
-    sectionElements: [
-      { element: "headline", mandatory: true, generation: "ai_generated" },
-      { element: "subheadline", mandatory: false, generation: "ai_generated" },
-      { element: "cta_text", mandatory: false, generation: "ai_generated" },
-      { element: "before_icon", mandatory: false, generation: "ai_generated" },
-      { element: "after_icon", mandatory: false, generation: "ai_generated" },
-      { element: "before_icon_1", mandatory: true, generation: "ai_generated" },
-      { element: "before_icon_2", mandatory: true, generation: "ai_generated" },
-      { element: "before_icon_3", mandatory: true, generation: "ai_generated" },
-      { element: "before_icon_4", mandatory: true, generation: "ai_generated" },
-      { element: "after_icon_1", mandatory: true, generation: "ai_generated" },
-      { element: "after_icon_2", mandatory: true, generation: "ai_generated" },
-      { element: "after_icon_3", mandatory: true, generation: "ai_generated" },
-      { element: "after_icon_4", mandatory: true, generation: "ai_generated" },
-      { element: "avatar_urls", mandatory: false, generation: "manual_preferred" }
-    ],
-    cardStructure: {
-      type: "pairs",
-      elements: ["before_situations", "after_outcomes", "testimonial_quotes", "customer_names", "customer_titles"],
-      generation: "ai_generated"
+    sectionType: "BeforeAfterQuote",
+
+    elements: {
+      headline:    { type: "string", requirement: "required", fillMode: "ai_generated" },
+      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      before_icon: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      after_icon:  { type: "string", requirement: "optional", fillMode: "ai_generated" },
     },
-    cardRequirements: {
-      type: 'pairs',
-      min: 1,
-      max: 4,
-      optimal: [2, 3],
-      description: 'Before/after testimonial pairs'
+
+    collections: {
+      transformations: {
+        requirement: "required",
+        fillMode: "ai_generated",
+        constraints: { min: 1, max: 4 },
+        fields: {
+          id:                { type: "string", fillMode: "system" },
+          before_situation:  { type: "string", fillMode: "ai_generated" },
+          after_outcome:     { type: "string", fillMode: "ai_generated" },
+          testimonial_quote: { type: "string", fillMode: "ai_generated_needs_review" },
+          customer_name:     { type: "string", fillMode: "ai_generated_needs_review" },
+          customer_title:    { type: "string", fillMode: "ai_generated_needs_review" },
+          customer_company:  { type: "string", fillMode: "ai_generated_needs_review" },
+          before_icon:       { type: "string", fillMode: "ai_generated" },
+          after_icon:        { type: "string", fillMode: "ai_generated" },
+          avatar_url:        { type: "string", fillMode: "manual_preferred", default: "" },
+        }
+      }
     }
   },
 

@@ -128,7 +128,7 @@ import LogoWallPublished from '@/modules/UIBlocks/SocialProof/LogoWall.published
 
 // Testimonial
 import QuoteGridPublished from '@/modules/UIBlocks/Testimonials/QuoteGrid.published';
-import AvatarCarouselPublished from '@/modules/UIBlocks/Testimonials/AvatarCarousel.published';
+// V3 ARCHIVED: import AvatarCarouselPublished from '@/modules/UIBlocks/Testimonials/AvatarCarousel.published';
 // V3 ARCHIVED: import RatingCardsPublished from '@/modules/UIBlocks/Testimonials/RatingCards.published';
 import PullQuoteStackPublished from '@/modules/UIBlocks/Testimonials/PullQuoteStack.published';
 import BeforeAfterQuotePublished from '@/modules/UIBlocks/Testimonials/BeforeAfterQuote.published';
@@ -274,7 +274,7 @@ const publishedComponentRegistry: Record<string, Record<string, React.ComponentT
   },
   testimonial: {
     quotegrid: QuoteGridPublished,
-    avatarcarousel: AvatarCarouselPublished,
+    // V3 ARCHIVED: avatarcarousel: AvatarCarouselPublished,
     // V3 ARCHIVED: ratingcards: RatingCardsPublished,
     pullquotestack: PullQuoteStackPublished,
     beforeafterquote: BeforeAfterQuotePublished,

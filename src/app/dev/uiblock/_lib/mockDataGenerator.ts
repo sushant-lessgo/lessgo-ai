@@ -517,6 +517,91 @@ const realisticMockData: Record<string, Record<string, any>> = {
   },
 
   // ─────────────────────────────────────────────────────────
+  // QuoteGrid - Testimonial quote cards (V2)
+  // ─────────────────────────────────────────────────────────
+  QuoteGrid: {
+    headline: 'What Our Customers Are Saying',
+    subheadline: 'Join 10,000+ happy customers who transformed their workflow.',
+    verification_message: 'All testimonials from verified customers',
+    testimonials: [
+      {
+        id: 't1',
+        quote: 'This platform completely transformed how we handle our daily operations. What used to take hours now takes minutes, and our team can focus on what really matters.',
+        customer_name: 'Sarah Johnson',
+        customer_title: 'Operations Director',
+        customer_company: 'TechFlow Inc',
+        rating_value: '5',
+      },
+      {
+        id: 't2',
+        quote: 'The ROI was immediate and significant. Within the first month, we had already saved more than the annual subscription cost through improved efficiency.',
+        customer_name: 'Michael Chen',
+        customer_title: 'CTO',
+        customer_company: 'DataWorks',
+        rating_value: '5',
+      },
+      {
+        id: 't3',
+        quote: 'Outstanding customer support and a product that actually delivers on its promises. Rare to find both in one solution.',
+        customer_name: 'Emma Rodriguez',
+        customer_title: 'Marketing Manager',
+        customer_company: 'GrowthLab',
+        rating_value: '5',
+      },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────
+  // VideoTestimonials - Video testimonial cards (V2)
+  // ─────────────────────────────────────────────────────────
+  VideoTestimonials: {
+    headline: 'See What Our Customers Are Saying',
+    subheadline: 'Video testimonials from real customers who transformed their business.',
+    video_testimonials: [
+      {
+        id: 'vt-1',
+        title: 'How We Transformed Our Operations',
+        description: 'Learn how our platform helped TechCorp streamline their entire workflow and reduce operational costs by 60% in just 3 months.',
+        customer_name: 'Sarah Mitchell',
+        customer_title: 'VP of Operations',
+        customer_company: 'TechCorp Industries',
+        video_url: '',
+        thumbnail: '',
+      },
+      {
+        id: 'vt-2',
+        title: '500% ROI in First Quarter',
+        description: 'Discover the strategies and implementation process that delivered immediate results for this growing enterprise team.',
+        customer_name: 'James Rodriguez',
+        customer_title: 'Chief Technology Officer',
+        customer_company: 'Global Dynamics',
+        video_url: '',
+        thumbnail: '',
+      },
+      {
+        id: 'vt-3',
+        title: 'Seamless Enterprise Integration',
+        description: 'See the technical integration process and how our API seamlessly connected with their existing enterprise systems.',
+        customer_name: 'Anna Chen',
+        customer_title: 'Director of IT',
+        customer_company: 'InnovateSoft',
+        video_url: '',
+        thumbnail: '',
+      },
+      {
+        id: 'vt-4',
+        title: 'From Manual to Automated in 30 Days',
+        description: 'Watch the complete transformation journey from manual processes to full automation with measurable outcomes.',
+        customer_name: 'Michael Thompson',
+        customer_title: 'Head of Digital Transformation',
+        customer_company: 'Enterprise Solutions Inc',
+        video_url: '',
+        thumbnail: '',
+      },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────
   // CallToQuotePlan - Enterprise custom quote contact section
   // ─────────────────────────────────────────────────────────
   CallToQuotePlan: {
@@ -552,6 +637,42 @@ const realisticMockData: Record<string, Record<string, any>> = {
       { id: 'ti-1', text: 'No commitment required' },
       { id: 'ti-2', text: 'Free consultation' },
       { id: 'ti-3', text: 'Custom implementation support' },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────
+  // BeforeAfterQuote - Transformation testimonials (V2)
+  // ─────────────────────────────────────────────────────────
+  BeforeAfterQuote: {
+    headline: 'Real Results from Real Customers',
+    subheadline: 'See the transformations that convinced them to switch.',
+    before_icon: '❌',
+    after_icon: '✅',
+    transformations: [
+      {
+        id: 't-1',
+        before_situation: 'Spending 12+ hours weekly manually entering data into spreadsheets, constantly fixing formula errors',
+        after_outcome: 'Automated data sync runs in background. Team reclaimed 12 hours weekly for strategic work',
+        testimonial_quote: 'I used to dread Monday mornings because of the data entry backlog. Now I actually look forward to checking our real-time dashboard.',
+        customer_name: 'Sarah Chen',
+        customer_title: 'Operations Director',
+        customer_company: 'TechFlow Solutions',
+        before_icon: '😰',
+        after_icon: '😊',
+        avatar_url: '',
+      },
+      {
+        id: 't-2',
+        before_situation: 'Customer support tickets piling up with 48-hour average response time, frustrated customers churning',
+        after_outcome: 'AI-assisted routing cut response time to 4 hours. Customer satisfaction jumped from 72% to 94%',
+        testimonial_quote: 'Our support team went from firefighting to actually building relationships with customers. The difference is night and day.',
+        customer_name: 'Marcus Johnson',
+        customer_title: 'VP of Customer Success',
+        customer_company: 'GrowthBase',
+        before_icon: '📧',
+        after_icon: '🚀',
+        avatar_url: '',
+      },
     ],
   },
 };

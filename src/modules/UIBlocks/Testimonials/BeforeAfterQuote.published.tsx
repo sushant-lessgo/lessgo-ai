@@ -1,8 +1,9 @@
 /**
- * BeforeAfterQuote - Published Version
+ * BeforeAfterQuote - Published Version (V2 Schema)
  *
  * Server-safe before/after transformation testimonials with ZERO hook imports
  * Used by componentRegistry.published.ts for SSR rendering
+ * V2: Uses clean transformation arrays instead of pipe-separated strings
  */
 
 import React from 'react';
@@ -11,25 +12,22 @@ import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publ
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { AvatarPublished } from '@/components/published/AvatarPublished';
-import { CTAButtonPublished } from '@/components/published/CTAButtonPublished';
 
-// Helper: Parse pipe-separated data
-const parsePipeData = (data: string | undefined): string[] => {
-  if (!data) return [];
-  return data.split('|').map((item: string) => item.trim()).filter((item: string) => item !== '' && item !== '___REMOVED___');
-};
+// V2: Transformation type
+interface Transformation {
+  id: string;
+  before_situation: string;
+  after_outcome: string;
+  testimonial_quote: string;
+  customer_name: string;
+  customer_title: string;
+  customer_company: string;
+  before_icon: string;
+  after_icon: string;
+  avatar_url: string;
+}
 
-// Helper: Parse JSON avatar URLs
-const parseAvatarUrls = (avatarUrlsJson: string | undefined): Record<string, string> => {
-  if (!avatarUrlsJson) return {};
-  try {
-    return JSON.parse(avatarUrlsJson);
-  } catch {
-    return {};
-  }
-};
-
-// Helper: Theme colors (server-safe inline styles)
+// Helper: Theme colors (server-safe inline styles) per uiBlockTheme.md
 const getBeforeAfterColors = (theme: 'warm' | 'cool' | 'neutral' | undefined) => {
   const selectedTheme = theme || 'neutral';
 
@@ -37,32 +35,41 @@ const getBeforeAfterColors = (theme: 'warm' | 'cool' | 'neutral' | undefined) =>
     warm: {
       before: {
         bg: '#fff7ed', // orange-50
-        icon: '#f97316' // orange-500
+        icon: '#ffedd5', // orange-100
+        iconText: '#ea580c' // orange-600
       },
       after: {
         bg: '#fef3c7', // amber-50
-        icon: '#f59e0b' // amber-500
-      }
+        icon: '#ffedd5', // orange-100
+        iconText: '#ea580c' // orange-600
+      },
+      avatar: '#ffedd5' // orange-100
     },
     cool: {
       before: {
         bg: '#eff6ff', // blue-50
-        icon: '#3b82f6' // blue-500
+        icon: '#dbeafe', // blue-100
+        iconText: '#2563eb' // blue-600
       },
       after: {
         bg: '#ecfeff', // cyan-50
-        icon: '#06b6d4' // cyan-500
-      }
+        icon: '#dbeafe', // blue-100
+        iconText: '#2563eb' // blue-600
+      },
+      avatar: '#dbeafe' // blue-100
     },
     neutral: {
       before: {
         bg: '#f9fafb', // gray-50
-        icon: '#6b7280' // gray-500
+        icon: '#f3f4f6', // gray-100
+        iconText: '#4b5563' // gray-600
       },
       after: {
         bg: '#f8fafc', // slate-50
-        icon: '#64748b' // slate-500
-      }
+        icon: '#f3f4f6', // gray-100
+        iconText: '#4b5563' // gray-600
+      },
+      avatar: '#f3f4f6' // gray-100
     }
   };
 
@@ -75,44 +82,11 @@ export default function BeforeAfterQuotePublished(props: LayoutComponentProps) {
   // Extract content
   const headline = props.headline || 'Real Customer Transformations';
   const subheadline = props.subheadline || '';
-  const cta_text = props.cta_text || '';
+  const globalBeforeIcon = props.before_icon || '❌';
+  const globalAfterIcon = props.after_icon || '✅';
 
-  // Parse transformations
-  const beforeSituations = parsePipeData(props.before_situations);
-  const afterOutcomes = parsePipeData(props.after_outcomes);
-  const quotes = parsePipeData(props.testimonial_quotes);
-  const names = parsePipeData(props.customer_names);
-  const titles = parsePipeData(props.customer_titles);
-
-  // Parse avatar URLs
-  const avatarUrls = parseAvatarUrls(props.avatar_urls);
-
-  // Get icons
-  const beforeIcons = [
-    props.before_icon_1,
-    props.before_icon_2,
-    props.before_icon_3,
-    props.before_icon_4
-  ].filter((i: string) => i && i !== '___REMOVED___');
-
-  const afterIcons = [
-    props.after_icon_1,
-    props.after_icon_2,
-    props.after_icon_3,
-    props.after_icon_4
-  ].filter((i: string) => i && i !== '___REMOVED___');
-
-  // Build transformations (limit 4)
-  const transformations = beforeSituations.slice(0, 4).map((before: string, index: number) => ({
-    before,
-    after: afterOutcomes[index] || '',
-    quote: quotes[index] || '',
-    name: names[index] || 'Anonymous',
-    title: titles[index] || '',
-    avatar: avatarUrls[names[index]] || '',
-    beforeIcon: beforeIcons[index] || props.before_icon || '❌',
-    afterIcon: afterIcons[index] || props.after_icon || '✅'
-  }));
+  // V2: Direct array access for transformations
+  const transformations: Transformation[] = (props as any).transformations || [];
 
   // Get text colors and typography
   const textColors = getPublishedTextColors(
@@ -162,9 +136,9 @@ export default function BeforeAfterQuotePublished(props: LayoutComponentProps) {
 
         {/* Transformations Grid */}
         <div className="grid lg:grid-cols-2 gap-8 mb-12">
-          {transformations.map((transformation: { before: string; after: string; quote: string; name: string; title: string; avatar: string; beforeIcon: string; afterIcon: string }, index: number) => (
+          {transformations.map((t: Transformation) => (
             <div
-              key={index}
+              key={t.id}
               className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100"
             >
               {/* Before/After Comparison */}
@@ -173,44 +147,49 @@ export default function BeforeAfterQuotePublished(props: LayoutComponentProps) {
                 <div className="p-6" style={{ backgroundColor: colors.before.bg }}>
                   <div className="flex items-center space-x-2 mb-4">
                     <div
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm"
-                      style={{ backgroundColor: colors.before.icon }}
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-sm"
+                      style={{ backgroundColor: colors.before.icon, color: colors.before.iconText }}
                     >
-                      <span>{transformation.beforeIcon}</span>
+                      <span>{t.before_icon || globalBeforeIcon}</span>
                     </div>
                     <span className="text-sm font-semibold text-gray-700">BEFORE</span>
                   </div>
-                  <p className="text-gray-800 leading-relaxed text-sm">{transformation.before}</p>
+                  <p className="text-gray-800 leading-relaxed text-sm">{t.before_situation}</p>
                 </div>
 
                 {/* After Section */}
                 <div className="p-6" style={{ backgroundColor: colors.after.bg }}>
                   <div className="flex items-center space-x-2 mb-4">
                     <div
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm"
-                      style={{ backgroundColor: colors.after.icon }}
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-sm"
+                      style={{ backgroundColor: colors.after.icon, color: colors.after.iconText }}
                     >
-                      <span>{transformation.afterIcon}</span>
+                      <span>{t.after_icon || globalAfterIcon}</span>
                     </div>
                     <span className="text-sm font-semibold text-gray-700">AFTER</span>
                   </div>
-                  <p className="text-gray-800 leading-relaxed text-sm">{transformation.after}</p>
+                  <p className="text-gray-800 leading-relaxed text-sm">{t.after_outcome}</p>
                 </div>
               </div>
 
               {/* Testimonial Section */}
               <div className="p-6 bg-gray-50">
-                <p className="text-gray-700 italic mb-4 leading-relaxed">"{transformation.quote}"</p>
+                <p className="text-gray-700 italic mb-4 leading-relaxed">"{t.testimonial_quote}"</p>
 
                 <div className="flex items-center space-x-3">
-                  <AvatarPublished
-                    name={transformation.name}
-                    imageUrl={transformation.avatar}
-                    size={40}
-                  />
+                  <div className="rounded-full p-0.5" style={{ backgroundColor: colors.avatar }}>
+                    <AvatarPublished
+                      name={t.customer_name}
+                      imageUrl={t.avatar_url}
+                      size={40}
+                    />
+                  </div>
                   <div>
-                    <div className="font-semibold text-gray-900 text-sm">{transformation.name}</div>
-                    <div className="text-sm text-gray-600">{transformation.title}</div>
+                    <div className="font-semibold text-gray-900 text-sm">{t.customer_name}</div>
+                    <div className="text-sm text-gray-600">
+                      {t.customer_title}
+                      {t.customer_company && ` at ${t.customer_company}`}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -218,17 +197,6 @@ export default function BeforeAfterQuotePublished(props: LayoutComponentProps) {
           ))}
         </div>
 
-        {/* CTA Section */}
-        {cta_text && (
-          <div className="text-center">
-            <CTAButtonPublished
-              text={cta_text}
-              backgroundColor={theme?.colors?.accentColor || '#3b82f6'}
-              textColor="#FFFFFF"
-              className="shadow-xl hover:shadow-2xl"
-            />
-          </div>
-        )}
       </div>
     </SectionWrapperPublished>
   );

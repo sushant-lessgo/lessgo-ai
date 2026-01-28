@@ -574,8 +574,7 @@ export default function ToggleableMonthlyYearly(props: ToggleableMonthlyYearlyPr
 
             {blockContent.annual_discount_label && billingCycle === 'yearly' && (
               <div
-                className="ml-4 px-3 py-1 rounded-full text-sm font-medium"
-                style={{ backgroundColor: colorTokens.accentLight, color: colorTokens.accent }}
+                className={`ml-4 px-3 py-1 rounded-full text-sm font-medium ${colorTokens.ctaGhostHover} ${colorTokens.ctaGhost}`}
               >
                 {blockContent.annual_discount_label}
               </div>

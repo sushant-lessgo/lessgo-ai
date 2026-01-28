@@ -1,199 +1,151 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
+import {
+  EditableAdaptiveHeadline,
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
-import { 
-  CTAButton,
-  TrustIndicators 
-} from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { shadows, cardEnhancements } from '@/modules/Design/designTokens';
+
+// V2 Types
+interface VideoTestimonialItem {
+  id: string;
+  title: string;
+  description: string;
+  customer_name: string;
+  customer_title: string;
+  customer_company: string;
+  video_url?: string;
+  thumbnail?: string;
+}
 
 interface VideoTestimonialsContent {
   headline: string;
-  video_titles: string;
-  video_descriptions: string;
-  video_urls?: string;
-  video_thumbnails?: string;
-  customer_names: string;
-  customer_titles: string;
-  customer_companies: string;
   subheadline?: string;
-  supporting_text?: string;
-  cta_text?: string;
-  trust_items?: string;
-  industry_leaders_title?: string;
-  enterprise_customers_stat?: string;
-  enterprise_customers_label?: string;
-  uptime_stat?: string;
-  uptime_label?: string;
-  support_stat?: string;
-  support_label?: string;
-}
-
-// Video testimonial item structure
-interface VideoTestimonialItem {
-  id: string;
-  index: number;
-  title: string;
-  description: string;
-  videoUrl?: string;
-  thumbnail?: string;
-  customerName: string;
-  customerTitle: string;
-  customerCompany: string;
+  video_testimonials: VideoTestimonialItem[];
 }
 
 const CONTENT_SCHEMA = {
-  headline: { 
-    type: 'string' as const, 
-    default: 'See What Our Enterprise Customers Are Saying' 
-  },
-  video_titles: { 
-    type: 'string' as const, 
-    default: 'How We Transformed Our Operations|500% ROI in First Quarter|Seamless Enterprise Integration|From Manual to Automated in 30 Days' 
-  },
-  video_descriptions: { 
-    type: 'string' as const, 
-    default: 'Learn how our platform helped this Fortune 500 company streamline their entire workflow and reduce operational costs by 60%.|Discover the strategies and implementation process that delivered immediate results for this growing enterprise.|See the technical integration process and how our API seamlessly connected with their existing enterprise systems.|Watch the complete transformation journey from manual processes to full automation with measurable outcomes.' 
-  },
-  video_urls: { 
-    type: 'string' as const, 
-    default: 'https://www.youtube.com/embed/dQw4w9WgXcQ|https://www.youtube.com/embed/dQw4w9WgXcQ|https://www.youtube.com/embed/dQw4w9WgXcQ|https://www.youtube.com/embed/dQw4w9WgXcQ' 
-  },
-  video_thumbnails: { 
-    type: 'string' as const, 
-    default: '/testimonial-video-1.jpg|/testimonial-video-2.jpg|/testimonial-video-3.jpg|/testimonial-video-4.jpg' 
-  },
-  customer_names: { 
-    type: 'string' as const, 
-    default: 'Sarah Mitchell|James Rodriguez|Anna Chen|Michael Thompson' 
-  },
-  customer_titles: { 
-    type: 'string' as const, 
-    default: 'VP of Operations|Chief Technology Officer|Director of IT|Head of Digital Transformation' 
-  },
-  customer_companies: { 
-    type: 'string' as const, 
-    default: 'TechCorp Industries|Global Dynamics|InnovateSoft|Enterprise Solutions Inc' 
-  },
-  subheadline: { 
-    type: 'string' as const, 
-    default: '' 
-  },
-  supporting_text: { 
-    type: 'string' as const, 
-    default: '' 
-  },
-  cta_text: { 
-    type: 'string' as const, 
-    default: '' 
-  },
-  trust_items: { 
-    type: 'string' as const, 
-    default: '' 
-  },
-  industry_leaders_title: {
+  headline: {
     type: 'string' as const,
-    default: 'Trusted by Industry Leaders'
+    default: 'See What Our Customers Are Saying'
   },
-  enterprise_customers_stat: {
+  subheadline: {
     type: 'string' as const,
-    default: '500+'
+    default: ''
   },
-  enterprise_customers_label: {
-    type: 'string' as const,
-    default: 'Enterprise customers'
-  },
-  uptime_stat: {
-    type: 'string' as const,
-    default: '99.9%'
-  },
-  uptime_label: {
-    type: 'string' as const,
-    default: 'Uptime SLA'
-  },
-  support_stat: {
-    type: 'string' as const,
-    default: '24/7'
-  },
-  support_label: {
-    type: 'string' as const,
-    default: 'Enterprise support'
+  video_testimonials: {
+    type: 'array' as const,
+    default: [
+      {
+        id: 'vt-1',
+        title: 'How We Transformed Our Operations',
+        description: 'Learn how our platform helped streamline their entire workflow and reduce operational costs by 60%.',
+        customer_name: 'Sarah Mitchell',
+        customer_title: 'VP of Operations',
+        customer_company: 'TechCorp Industries',
+        video_url: '',
+        thumbnail: ''
+      },
+      {
+        id: 'vt-2',
+        title: '500% ROI in First Quarter',
+        description: 'Discover the strategies and implementation process that delivered immediate results for this growing enterprise.',
+        customer_name: 'James Rodriguez',
+        customer_title: 'Chief Technology Officer',
+        customer_company: 'Global Dynamics',
+        video_url: '',
+        thumbnail: ''
+      },
+      {
+        id: 'vt-3',
+        title: 'Seamless Enterprise Integration',
+        description: 'See the technical integration process and how our API seamlessly connected with their existing systems.',
+        customer_name: 'Anna Chen',
+        customer_title: 'Director of IT',
+        customer_company: 'InnovateSoft',
+        video_url: '',
+        thumbnail: ''
+      },
+      {
+        id: 'vt-4',
+        title: 'From Manual to Automated in 30 Days',
+        description: 'Watch the complete transformation journey from manual processes to full automation with measurable outcomes.',
+        customer_name: 'Michael Thompson',
+        customer_title: 'Head of Digital Transformation',
+        customer_company: 'Enterprise Solutions Inc',
+        video_url: '',
+        thumbnail: ''
+      }
+    ]
   }
 };
 
-// Parse testimonial data from pipe-separated strings
-const parseVideoTestimonialData = (blockContent: VideoTestimonialsContent): VideoTestimonialItem[] => {
-  const titles = parsePipeData(blockContent.video_titles);
-  const descriptions = parsePipeData(blockContent.video_descriptions);
-  const videoUrls = parsePipeData(blockContent.video_urls || '');
-  const thumbnails = parsePipeData(blockContent.video_thumbnails || '');
-  const customerNames = parsePipeData(blockContent.customer_names);
-  const customerTitles = parsePipeData(blockContent.customer_titles);
-  const customerCompanies = parsePipeData(blockContent.customer_companies);
-  
-  return titles.map((title, index) => ({
-    id: `video-testimonial-${index}`,
-    index,
-    title,
-    description: descriptions[index] || 'Video description not provided.',
-    videoUrl: videoUrls[index] || '',
-    thumbnail: thumbnails[index] || '',
-    customerName: customerNames[index] || 'Anonymous',
-    customerTitle: customerTitles[index] || '',
-    customerCompany: customerCompanies[index] || ''
-  }));
-};
+// Theme-based card styling (per uiBlockTheme.md)
+const getCardStyles = (theme: UIBlockTheme) => ({
+  warm: {
+    border: 'border-orange-200',
+    shadow: shadows.card.warm,
+    hover: shadows.cardHover.warm,
+    avatarGradient: 'from-orange-500 to-red-600',
+    accentColor: 'text-orange-600',
+  },
+  cool: {
+    border: 'border-blue-200',
+    shadow: shadows.card.cool,
+    hover: shadows.cardHover.cool,
+    avatarGradient: 'from-blue-500 to-indigo-600',
+    accentColor: 'text-blue-600',
+  },
+  neutral: {
+    border: 'border-gray-200',
+    shadow: shadows.card.neutral,
+    hover: shadows.cardHover.neutral,
+    avatarGradient: 'from-gray-500 to-gray-700',
+    accentColor: 'text-gray-700',
+  }
+})[theme];
 
-const VideoTestimonialCard = React.memo(({ 
+const VideoTestimonialCard = React.memo(({
   item,
   mode,
   colorTokens,
-  dynamicTextColors,
-  getTextStyle,
-  onTitleEdit,
-  onDescriptionEdit,
-  onVideoUrlEdit,
-  onCustomerNameEdit,
-  onCustomerTitleEdit,
-  onCustomerCompanyEdit,
+  mutedTextColor,
+  onUpdate,
+  onDelete,
   sectionId,
   backgroundType,
   sectionBackground,
-  showImageToolbar,
-  h4Style
+  h4Style,
+  theme,
+  canDelete
 }: {
   item: VideoTestimonialItem;
   mode: 'edit' | 'preview';
   colorTokens: any;
-  dynamicTextColors: any;
-  getTextStyle: any;
-  onTitleEdit: (index: number, value: string) => void;
-  onDescriptionEdit: (index: number, value: string) => void;
-  onVideoUrlEdit: (index: number, value: string) => void;
-  onCustomerNameEdit: (index: number, value: string) => void;
-  onCustomerTitleEdit: (index: number, value: string) => void;
-  onCustomerCompanyEdit: (index: number, value: string) => void;
+  mutedTextColor: string;
+  onUpdate: (id: string, field: keyof VideoTestimonialItem, value: string) => void;
+  onDelete: (id: string) => void;
   sectionId: string;
   backgroundType: string;
   sectionBackground: string;
-  showImageToolbar: any;
   h4Style: any;
+  theme: UIBlockTheme;
+  canDelete: boolean;
 }) => {
-  
+  const cardStyles = getCardStyles(theme);
+
   const VideoPlayer = () => {
-    if (item.videoUrl && item.videoUrl.includes('youtube')) {
+    if (item.video_url && item.video_url.includes('youtube')) {
       return (
         <iframe
-          src={item.videoUrl}
+          src={item.video_url}
           title={item.title}
-          className="w-full h-full rounded-xl"
+          className="w-full h-full rounded-t-xl"
           frameBorder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
@@ -202,36 +154,21 @@ const VideoTestimonialCard = React.memo(({
     }
 
     return (
-      <div className="relative w-full h-full bg-gradient-to-br from-blue-900 to-indigo-900 rounded-xl overflow-hidden group cursor-pointer">
+      <div className="relative w-full h-full bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900 rounded-t-xl overflow-hidden group cursor-pointer">
         {item.thumbnail && item.thumbnail !== '' ? (
           <img
             src={item.thumbnail}
             alt={item.title}
             className="w-full h-full object-cover"
-            data-image-id={`${sectionId}-video${item.index}-thumbnail`}
-            onMouseUp={(e) => {
-              // Image toolbar is only available in edit mode
-            }}
+            data-image-id={`${sectionId}-video-${item.id}-thumbnail`}
           />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <div className="text-center text-white">
-              <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-white/10 flex items-center justify-center">
-                <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div className="text-sm font-medium">{item.customerName}</div>
-              <div className="text-xs text-white/80">{item.customerCompany}</div>
-            </div>
-          </div>
-        )}
-        
+        ) : null}
+
         {/* Play Button Overlay */}
         <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors duration-300">
           <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-2xl transform group-hover:scale-110 transition-transform duration-300">
-            <svg className="w-6 h-6 text-blue-600 ml-1" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+            <svg className={`w-8 h-8 ${cardStyles.accentColor} ml-1`} fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
             </svg>
           </div>
         </div>
@@ -240,65 +177,82 @@ const VideoTestimonialCard = React.memo(({
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden hover:shadow-2xl transition-shadow duration-300">
+    <div className={`group relative bg-white ${cardEnhancements.borderRadius} border ${cardStyles.border} ${cardStyles.shadow} ${cardStyles.hover} ${cardEnhancements.hoverLift} ${cardEnhancements.transition} overflow-hidden`}>
+
+      {/* Delete Button */}
+      {mode === 'edit' && canDelete && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(item.id);
+          }}
+          className="absolute top-2 right-2 z-20 opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-700 transition-opacity duration-200"
+          title="Remove this testimonial"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
+
       {/* Video Section */}
       <div className="aspect-video">
         <VideoPlayer />
       </div>
-      
+
       {/* Content Section */}
       <div className="p-6">
         <div className="flex items-start space-x-4 mb-4">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold">
-            {item.customerName.charAt(0)}
+          <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${cardStyles.avatarGradient} flex items-center justify-center text-white font-bold flex-shrink-0`}>
+            {item.customer_name.charAt(0)}
           </div>
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <EditableAdaptiveText
               mode={mode}
-              value={item.customerName}
-              onEdit={(value) => onCustomerNameEdit(item.index, value)}
+              value={item.customer_name}
+              onEdit={(value) => onUpdate(item.id, 'customer_name', value)}
               backgroundType={backgroundType as any}
               colorTokens={colorTokens}
               variant="body"
               className="font-semibold text-gray-900"
               placeholder="Customer name..."
               sectionId={sectionId}
-              elementKey={`customer_name_${item.index}`}
+              elementKey={`video_testimonials.${item.id}.customer_name`}
               sectionBackground={sectionBackground}
             />
             <EditableAdaptiveText
               mode={mode}
-              value={item.customerTitle}
-              onEdit={(value) => onCustomerTitleEdit(item.index, value)}
+              value={item.customer_title}
+              onEdit={(value) => onUpdate(item.id, 'customer_title', value)}
               backgroundType={backgroundType as any}
               colorTokens={colorTokens}
               variant="body"
               className="text-sm text-gray-600"
               placeholder="Customer title..."
               sectionId={sectionId}
-              elementKey={`customer_title_${item.index}`}
+              elementKey={`video_testimonials.${item.id}.customer_title`}
               sectionBackground={sectionBackground}
             />
             <EditableAdaptiveText
               mode={mode}
-              value={item.customerCompany}
-              onEdit={(value) => onCustomerCompanyEdit(item.index, value)}
+              value={item.customer_company}
+              onEdit={(value) => onUpdate(item.id, 'customer_company', value)}
               backgroundType={backgroundType as any}
               colorTokens={colorTokens}
               variant="body"
-              className="text-sm text-blue-600 font-medium"
+              className={`text-sm ${cardStyles.accentColor} font-medium`}
               placeholder="Customer company..."
               sectionId={sectionId}
-              elementKey={`customer_company_${item.index}`}
+              elementKey={`video_testimonials.${item.id}.customer_company`}
               sectionBackground={sectionBackground}
             />
           </div>
         </div>
-        
+
         <EditableAdaptiveText
           mode={mode}
           value={item.title}
-          onEdit={(value) => onTitleEdit(item.index, value)}
+          onEdit={(value) => onUpdate(item.id, 'title', value)}
           backgroundType={backgroundType as any}
           colorTokens={colorTokens}
           variant="body"
@@ -309,44 +263,44 @@ const VideoTestimonialCard = React.memo(({
           className="font-bold text-gray-900 mb-3"
           placeholder="Video testimonial title..."
           sectionId={sectionId}
-          elementKey={`video_title_${item.index}`}
+          elementKey={`video_testimonials.${item.id}.title`}
           sectionBackground={sectionBackground}
         />
-        
+
         <EditableAdaptiveText
           mode={mode}
           value={item.description}
-          onEdit={(value) => onDescriptionEdit(item.index, value)}
+          onEdit={(value) => onUpdate(item.id, 'description', value)}
           backgroundType={backgroundType as any}
           colorTokens={colorTokens}
           variant="body"
-          className="text-gray-600 leading-relaxed text-sm mb-4"
+          className={`${mutedTextColor} leading-relaxed text-sm mb-4`}
           placeholder="Video testimonial description..."
           sectionId={sectionId}
-          elementKey={`video_description_${item.index}`}
+          elementKey={`video_testimonials.${item.id}.description`}
           sectionBackground={sectionBackground}
         />
-        
+
         {/* Video URL Input for Edit Mode */}
         {mode === 'edit' && (
           <div className="mb-4 p-3 bg-gray-50 rounded-lg">
             <label className="block text-xs font-medium text-gray-600 mb-1">Video URL</label>
             <EditableAdaptiveText
               mode={mode}
-              value={item.videoUrl || ''}
-              onEdit={(value) => onVideoUrlEdit(item.index, value)}
-              backgroundType={backgroundType as any}
+              value={item.video_url || ''}
+              onEdit={(value) => onUpdate(item.id, 'video_url', value)}
+              backgroundType="neutral"
               colorTokens={colorTokens}
               variant="body"
               className="text-sm text-gray-700"
               placeholder="https://www.youtube.com/embed/..."
               sectionId={sectionId}
-              elementKey={`video_url_${item.index}`}
-              sectionBackground={sectionBackground}
+              elementKey={`video_testimonials.${item.id}.video_url`}
+              sectionBackground="bg-gray-50"
             />
           </div>
         )}
-        
+
         <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-1">
@@ -364,18 +318,15 @@ const VideoTestimonialCard = React.memo(({
 });
 VideoTestimonialCard.displayName = 'VideoTestimonialCard';
 
-// Parse video testimonial data from pipe-separated strings
-
 export default function VideoTestimonials(props: LayoutComponentProps) {
   const { getTextStyle: getTypographyStyle } = useTypography();
-  
+
   const {
     sectionId,
     mode,
     blockContent,
     colorTokens,
     dynamicTextColors,
-    getTextStyle,
     sectionBackground,
     backgroundType,
     handleContentUpdate
@@ -385,56 +336,66 @@ export default function VideoTestimonials(props: LayoutComponentProps) {
   });
 
   // Create typography styles
-  const h3Style = getTypographyStyle('h3');
   const h4Style = getTypographyStyle('h4');
   const bodyLgStyle = getTypographyStyle('body-lg');
 
-  // Parse testimonial data using the new utility function
-  const testimonialItems = parseVideoTestimonialData(blockContent);
+  // Detect theme
+  const theme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
 
-  const trustItems = blockContent.trust_items 
-    ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
+  const cardStyles = getCardStyles(theme);
+
+  // V2: Arrays from content
+  const testimonials: VideoTestimonialItem[] = blockContent.video_testimonials || [];
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
-  
-  const store = useEditStore();
-  const showImageToolbar = store.showImageToolbar;
-  
-  // Individual edit handlers for testimonial fields
-  const handleTitleEdit = (index: number, value: string) => {
-    const updatedTitles = updateListData(blockContent.video_titles, index, value);
-    handleContentUpdate('video_titles', updatedTitles);
-  };
 
-  const handleDescriptionEdit = (index: number, value: string) => {
-    const updatedDescriptions = updateListData(blockContent.video_descriptions, index, value);
-    handleContentUpdate('video_descriptions', updatedDescriptions);
-  };
-
-  const handleVideoUrlEdit = (index: number, value: string) => {
-    const updatedUrls = updateListData(blockContent.video_urls || '', index, value);
-    handleContentUpdate('video_urls', updatedUrls);
-  };
-
-  const handleCustomerNameEdit = (index: number, value: string) => {
-    const updatedNames = updateListData(blockContent.customer_names, index, value);
-    handleContentUpdate('customer_names', updatedNames);
-  };
-
-  const handleCustomerTitleEdit = (index: number, value: string) => {
-    const updatedTitles = updateListData(blockContent.customer_titles, index, value);
-    handleContentUpdate('customer_titles', updatedTitles);
-  };
-
-  const handleCustomerCompanyEdit = (index: number, value: string) => {
-    const updatedCompanies = updateListData(blockContent.customer_companies, index, value);
-    handleContentUpdate('customer_companies', updatedCompanies);
-  };
-  
-  // Add safe background type to prevent type errors
+  // Safe background type
   const safeBackgroundType = props.backgroundType === 'custom' ? 'neutral' : (props.backgroundType || 'neutral');
-  
+
+  // V2: Update handlers with constraints
+  const handleTestimonialUpdate = (id: string, field: keyof VideoTestimonialItem, value: string) => {
+    const updated = testimonials.map(t =>
+      t.id === id ? { ...t, [field]: value } : t
+    );
+    (handleContentUpdate as any)('video_testimonials', updated);
+  };
+
+  const handleTestimonialDelete = (id: string) => {
+    // Enforce min constraint
+    if (testimonials.length <= 1) return;
+    const updated = testimonials.filter(t => t.id !== id);
+    (handleContentUpdate as any)('video_testimonials', updated);
+  };
+
+  const handleAddTestimonial = () => {
+    // Enforce max constraint
+    if (testimonials.length >= 6) return;
+    const newId = `vt-${Date.now()}`;
+    const newItem: VideoTestimonialItem = {
+      id: newId,
+      title: `Testimonial ${testimonials.length + 1}`,
+      description: 'Add testimonial description here',
+      customer_name: 'Customer Name',
+      customer_title: 'Title',
+      customer_company: 'Company',
+      video_url: '',
+      thumbnail: ''
+    };
+    (handleContentUpdate as any)('video_testimonials', [...testimonials, newItem]);
+  };
+
+  // Grid columns based on count
+  const getGridClass = (count: number) => {
+    if (count === 1) return 'md:grid-cols-1 max-w-xl mx-auto';
+    if (count === 2) return 'lg:grid-cols-2';
+    if (count === 3) return 'lg:grid-cols-2 xl:grid-cols-3';
+    return 'lg:grid-cols-2';
+  };
+
   return (
     <LayoutSection
       sectionId={sectionId}
@@ -445,7 +406,7 @@ export default function VideoTestimonials(props: LayoutComponentProps) {
       className={props.className}
     >
       <div className="max-w-7xl mx-auto">
-        
+
         <div className="text-center mb-16">
           <EditableAdaptiveHeadline
             mode={mode}
@@ -478,180 +439,45 @@ export default function VideoTestimonials(props: LayoutComponentProps) {
           )}
         </div>
 
-        {/* WYSIWYG Video Testimonial Cards - Always visible in both edit and preview modes */}
-        <div className="grid lg:grid-cols-2 gap-8 mb-16">
-          {testimonialItems.map((item) => (
+        {/* Video Testimonial Cards Grid */}
+        <div className={`grid ${getGridClass(testimonials.length)} gap-8`}>
+          {testimonials.map((item) => (
             <VideoTestimonialCard
               key={item.id}
               item={item}
               mode={mode}
               colorTokens={colorTokens}
-              dynamicTextColors={dynamicTextColors}
-              getTextStyle={getTextStyle}
-              onTitleEdit={handleTitleEdit}
-              onDescriptionEdit={handleDescriptionEdit}
-              onVideoUrlEdit={handleVideoUrlEdit}
-              onCustomerNameEdit={handleCustomerNameEdit}
-              onCustomerTitleEdit={handleCustomerTitleEdit}
-              onCustomerCompanyEdit={handleCustomerCompanyEdit}
+              mutedTextColor={mutedTextColor}
+              onUpdate={handleTestimonialUpdate}
+              onDelete={handleTestimonialDelete}
               sectionId={sectionId}
               backgroundType={safeBackgroundType}
               sectionBackground={sectionBackground}
-              showImageToolbar={showImageToolbar}
               h4Style={h4Style}
+              theme={theme}
+              canDelete={testimonials.length > 1}
             />
           ))}
-        </div>
 
-        {/* Enterprise Trust Indicators */}
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-100 mb-12">
-          <div className="text-center">
-            <EditableAdaptiveText
-              mode={mode}
-              value={blockContent.industry_leaders_title || ''}
-              onEdit={(value) => handleContentUpdate('industry_leaders_title', value)}
-              backgroundType={safeBackgroundType}
-              colorTokens={colorTokens}
-              variant="body"
-              style={h3Style}
-              className="font-semibold text-gray-900 mb-6"
-              placeholder="Industry leaders title..."
-              sectionId={sectionId}
-              elementKey="industry_leaders_title"
-              sectionBackground={sectionBackground}
-            />
-            
-            <div className="grid md:grid-cols-3 gap-6">
-              <div className="text-center">
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.enterprise_customers_stat || ''}
-                  onEdit={(value) => handleContentUpdate('enterprise_customers_stat', value)}
-                  backgroundType={safeBackgroundType}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="text-3xl font-bold text-blue-600 mb-2"
-                  placeholder="Enterprise customers stat..."
-                  sectionId={sectionId}
-                  elementKey="enterprise_customers_stat"
-                  sectionBackground={sectionBackground}
-                />
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.enterprise_customers_label || ''}
-                  onEdit={(value) => handleContentUpdate('enterprise_customers_label', value)}
-                  backgroundType={safeBackgroundType}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className={`text-sm ${mutedTextColor}`}
-                  placeholder="Enterprise customers label..."
-                  sectionId={sectionId}
-                  elementKey="enterprise_customers_label"
-                  sectionBackground={sectionBackground}
-                />
-              </div>
-              <div className="text-center">
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.uptime_stat || ''}
-                  onEdit={(value) => handleContentUpdate('uptime_stat', value)}
-                  backgroundType={safeBackgroundType}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="text-3xl font-bold text-green-600 mb-2"
-                  placeholder="Uptime stat..."
-                  sectionId={sectionId}
-                  elementKey="uptime_stat"
-                  sectionBackground={sectionBackground}
-                />
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.uptime_label || ''}
-                  onEdit={(value) => handleContentUpdate('uptime_label', value)}
-                  backgroundType={safeBackgroundType}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className={`text-sm ${mutedTextColor}`}
-                  placeholder="Uptime label..."
-                  sectionId={sectionId}
-                  elementKey="uptime_label"
-                  sectionBackground={sectionBackground}
-                />
-              </div>
-              <div className="text-center">
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.support_stat || ''}
-                  onEdit={(value) => handleContentUpdate('support_stat', value)}
-                  backgroundType={safeBackgroundType}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="text-3xl font-bold text-purple-600 mb-2"
-                  placeholder="Support stat..."
-                  sectionId={sectionId}
-                  elementKey="support_stat"
-                  sectionBackground={sectionBackground}
-                />
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.support_label || ''}
-                  onEdit={(value) => handleContentUpdate('support_label', value)}
-                  backgroundType={safeBackgroundType}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className={`text-sm ${mutedTextColor}`}
-                  placeholder="Support label..."
-                  sectionId={sectionId}
-                  elementKey="support_label"
-                  sectionBackground={sectionBackground}
-                />
-              </div>
+          {/* Add Testimonial Button */}
+          {mode === 'edit' && testimonials.length < 6 && (
+            <div className={`bg-white ${cardEnhancements.borderRadius} border-2 border-dashed ${cardStyles.border} ${cardStyles.hover} ${cardEnhancements.hoverLift} ${cardEnhancements.transition} flex flex-col items-center justify-center min-h-[400px]`}>
+              <button
+                onClick={handleAddTestimonial}
+                className="w-full h-full flex flex-col items-center justify-center space-y-4 text-gray-400 hover:text-gray-600 transition-colors duration-300 p-8"
+                title="Add new video testimonial"
+              >
+                <div className="w-16 h-16 rounded-xl bg-gray-100 flex items-center justify-center">
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                </div>
+                <span className="text-sm font-medium">Add Video Testimonial</span>
+                <span className="text-xs text-gray-400">{testimonials.length}/6 testimonials</span>
+              </button>
             </div>
-          </div>
+          )}
         </div>
-
-        {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
-          <div className="text-center space-y-6">
-            {(blockContent.supporting_text || mode === 'edit') && (
-              <EditableAdaptiveText
-                mode={mode}
-                value={blockContent.supporting_text || ''}
-                onEdit={(value) => handleContentUpdate('supporting_text', value)}
-                backgroundType={safeBackgroundType}
-                colorTokens={colorTokens}
-                variant="body"
-                className="max-w-3xl mx-auto mb-8"
-                placeholder="Add optional supporting text to reinforce video testimonials..."
-                sectionId={sectionId}
-                elementKey="supporting_text"
-                sectionBackground={sectionBackground}
-              />
-            )}
-
-            {(blockContent.cta_text || trustItems.length > 0) && (
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-                {blockContent.cta_text && (
-                  <CTAButton
-                    text={blockContent.cta_text}
-                    colorTokens={colorTokens}
-                    className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
-                    variant="primary"
-                    sectionId={sectionId}
-                    elementKey="cta_text"
-                  />
-                )}
-
-                {trustItems.length > 0 && (
-                  <TrustIndicators 
-                    items={trustItems}
-                    colorClass={mutedTextColor}
-                    iconColor="text-green-500"
-                  />
-                )}
-              </div>
-            )}
-          </div>
-        )}
       </div>
     </LayoutSection>
   );
@@ -660,13 +486,13 @@ export default function VideoTestimonials(props: LayoutComponentProps) {
 export const componentMeta = {
   name: 'VideoTestimonials',
   category: 'Testimonial',
-  description: 'WYSIWYG video testimonials with direct inline editing. Enterprise-focused with individual card editing and video URL input.',
+  description: 'Video testimonials with theme-based card styling. Features inline editing and add/remove capabilities.',
   tags: ['testimonial', 'video', 'enterprise', 'sales', 'trust', 'wysiwyg', 'inline-editing'],
   defaultBackgroundType: 'neutral' as const,
   complexity: 'complex',
   estimatedBuildTime: '30 minutes',
-  
-  // Element restriction information - based on IconGrid pattern
+
+  // Element restriction information
   elementRestrictions: {
     allowsUniversalElements: false,
     restrictionLevel: 'strict' as const,
@@ -675,45 +501,28 @@ export const componentMeta = {
       "Edit testimonial titles, descriptions, and customer details directly on each card",
       "Add video URLs through the textbox input in edit mode",
       "Modify the headline and subheadline for section introduction",
-      "Edit enterprise trust indicators and statistics inline",
       "Switch to a flexible content section for custom elements"
     ]
   },
-  
+
   contentFields: [
     { key: 'headline', label: 'Main Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
-    { key: 'video_titles', label: 'Video Titles (pipe separated)', type: 'textarea', required: true },
-    { key: 'video_descriptions', label: 'Video Descriptions (pipe separated)', type: 'textarea', required: true },
-    { key: 'video_urls', label: 'Video URLs (pipe separated)', type: 'textarea', required: false },
-    { key: 'video_thumbnails', label: 'Video Thumbnails (pipe separated)', type: 'textarea', required: false },
-    { key: 'customer_names', label: 'Customer Names (pipe separated)', type: 'text', required: true },
-    { key: 'customer_titles', label: 'Customer Titles (pipe separated)', type: 'text', required: true },
-    { key: 'customer_companies', label: 'Customer Companies (pipe separated)', type: 'text', required: true },
-    { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
-    { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
-    { key: 'industry_leaders_title', label: 'Industry Leaders Title', type: 'text', required: false },
-    { key: 'enterprise_customers_stat', label: 'Enterprise Customers Statistic', type: 'text', required: false },
-    { key: 'enterprise_customers_label', label: 'Enterprise Customers Label', type: 'text', required: false },
-    { key: 'uptime_stat', label: 'Uptime Statistic', type: 'text', required: false },
-    { key: 'uptime_label', label: 'Uptime Label', type: 'text', required: false },
-    { key: 'support_stat', label: 'Support Statistic', type: 'text', required: false },
-    { key: 'support_label', label: 'Support Label', type: 'text', required: false }
+    { key: 'video_testimonials', label: 'Video Testimonials (array)', type: 'array', required: true }
   ],
-  
+
   features: [
-    '✅ WYSIWYG editing - same view in edit and preview modes',
-    '✅ Direct inline editing of all testimonial text fields',
-    '✅ Individual video URL input through textboxes',
-    '✅ Real-time editable customer names, titles, and companies',
-    '✅ Professional video testimonial card layout',
-    '✅ Enterprise customer showcase with trust indicators',
-    '✅ Video thumbnail support with image toolbar integration',
-    '✅ Responsive grid layout (2 columns on desktop)',
-    '✅ Consistent editing experience like IconGrid component'
+    'V2 schema with array-based data',
+    'Theme-based card styling (warm/cool/neutral)',
+    'Add/remove testimonials with constraints (2-6)',
+    'Direct inline editing of all testimonial fields',
+    'Individual video URL input through textboxes',
+    'Real-time editable customer names, titles, and companies',
+    'Professional video testimonial card layout',
+    'Video thumbnail support',
+    'Responsive grid layout'
   ],
-  
+
   useCases: [
     'Enterprise software sales with video testimonials',
     'High-value product demonstrations requiring social proof',

@@ -21,9 +21,20 @@ interface AvatarPublishedProps {
   imageUrl?: string;
   name: string;
   size?: number;
+  theme?: 'warm' | 'cool' | 'neutral';
 }
 
-export function AvatarPublished({ imageUrl, name, size = 48 }: AvatarPublishedProps) {
+// Theme-based avatar colors
+const getAvatarBackground = (theme?: 'warm' | 'cool' | 'neutral') => {
+  const colors = {
+    warm: 'linear-gradient(135deg, #f97316, #ea580c)',
+    cool: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+    neutral: 'linear-gradient(135deg, #6b7280, #4b5563)'
+  };
+  return colors[theme || 'neutral'];
+};
+
+export function AvatarPublished({ imageUrl, name, size = 48, theme }: AvatarPublishedProps) {
   if (!imageUrl) {
     const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
     return (
@@ -32,11 +43,13 @@ export function AvatarPublished({ imageUrl, name, size = 48 }: AvatarPublishedPr
           width: `${size}px`,
           height: `${size}px`,
           borderRadius: '50%',
-          background: '#e5e7eb',
+          background: getAvatarBackground(theme),
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontWeight: 'bold'
+          fontWeight: 'bold',
+          color: 'white',
+          fontSize: `${size * 0.35}px`
         }}
       >
         {initials}

@@ -384,9 +384,9 @@ Evaluation Scope
 | 28 | Results | ResultsGallery | ⬜ Pending |
 | 29 | Results | StackedWinsList | ⬜ Pending |
 | 30 | Results | StatBlocks | ⬜ Pending |
-| 31 | Testimonials | BeforeAfterQuote | ⬜ Pending |
+| 31 | Testimonials | BeforeAfterQuote | ✅ Passed |
 | 32 | Testimonials | PullQuoteStack | ⬜ Pending |
-| 33 | Testimonials | QuoteGrid | ⬜ Pending |
+| 33 | Testimonials | QuoteGrid | ✅ Passed |
 | 34 | Testimonials | AvatarCarousel | ⬜ Pending |
 | 35 | Testimonials | VideoTestimonials | ⬜ Pending |
 | 36 | UniqueMechanism | MethodologyBreakdown | ⬜ Pending |

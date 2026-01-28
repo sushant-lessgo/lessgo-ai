@@ -76,7 +76,7 @@ export const layoutNamesBySection: Record<string, string[]> = {
   testimonials: [
     'QuoteGrid',
     'VideoTestimonials',
-    'AvatarCarousel',
+    // V3 ARCHIVED: 'AvatarCarousel',
     'BeforeAfterQuote',
     // V3 ARCHIVED: 'SegmentedTestimonials',
     // V3 ARCHIVED: 'RatingCards',

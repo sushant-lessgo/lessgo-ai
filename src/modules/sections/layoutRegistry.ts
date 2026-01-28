@@ -72,7 +72,7 @@ export const layoutRegistry = {
   Testimonial: [
     "QuoteGrid",
     "VideoTestimonials",
-    "AvatarCarousel",
+    // V3 ARCHIVED: "AvatarCarousel",
     "BeforeAfterQuote",
     "PullQuoteStack",
   ] as const,

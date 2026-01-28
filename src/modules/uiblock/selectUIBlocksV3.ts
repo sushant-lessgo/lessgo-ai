@@ -157,7 +157,7 @@ function selectTestimonials(
     case 'text':
       return isB2B ? 'QuoteGrid' : 'PullQuoteStack';
     case 'photos':
-      return isB2B ? 'QuoteGrid' : 'AvatarCarousel';
+      return 'QuoteGrid'; // V3 ARCHIVED: was AvatarCarousel for non-B2B
     case 'video':
       return 'VideoTestimonials';
     case 'transformation':

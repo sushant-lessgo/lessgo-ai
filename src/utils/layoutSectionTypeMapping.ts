@@ -56,7 +56,7 @@ export const layoutToSectionType: Record<string, string> = {
   // Testimonial layouts
   'QuoteGrid': 'testimonials',
   'VideoTestimonials': 'testimonials',
-  'AvatarCarousel': 'testimonials',
+  // V3 ARCHIVED: 'AvatarCarousel': 'testimonials',
   'BeforeAfterQuote': 'testimonials',
   'PullQuoteStack': 'testimonials',
 

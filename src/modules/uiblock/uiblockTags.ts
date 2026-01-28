@@ -82,7 +82,7 @@ const pricingTags: UIBlockTagMap = {
 const testimonialsTags: UIBlockTagMap = {
   QuoteGrid: ['text-heavy'],
   VideoTestimonials: ['image'],
-  AvatarCarousel: ['image'],
+  // V3 ARCHIVED: AvatarCarousel: ['image'],
   BeforeAfterQuote: ['text-heavy'],
   // V3 ARCHIVED: SegmentedTestimonials: ['text-heavy', 'persona-aware'],
   // V3 ARCHIVED: RatingCards: ['text-heavy'],
@@ -337,7 +337,7 @@ export const uiblockOrientations: Record<string, UIBlockOrientation> = {
   // Testimonials
   QuoteGrid: 'grid',
   PullQuoteStack: 'vertical',
-  AvatarCarousel: 'horizontal',
+  // V3 ARCHIVED: AvatarCarousel: 'horizontal',
   VideoTestimonials: 'stack',
   BeforeAfterQuote: 'vertical',
 

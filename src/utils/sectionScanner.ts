@@ -66,7 +66,7 @@ const LAYOUT_TO_SECTION_TYPE: Record<string, string> = {
   // Testimonials layouts
   QuoteGrid: 'testimonials',
   VideoTestimonials: 'testimonials',
-  AvatarCarousel: 'testimonials',
+  // V3 ARCHIVED: AvatarCarousel: 'testimonials',
   BeforeAfterQuote: 'testimonials',
   PullQuoteStack: 'testimonials',
 

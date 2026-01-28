@@ -1,17 +1,10 @@
- 1. [Minor] Card heights don't align
-  ┌─────────┐  ┌─────────┐  ┌─────────┐
-  │ Starter │  │  Pro    │  │  Ent    │
-  │ 5 items │  │ 7 items │  │ 8 items │
-  │         │  │         │  │         │
-  │ [CTA]   │  │         │  │         │
-  └─────────┘  │ [CTA]   │  │         │
-               └─────────┘  │ [CTA]   │
-                            └─────────┘
+  Issues:
 
-  1. → Fix options:
-    - Set min-height on cards to match tallest
-    - OR align CTAs at bottom with mt-auto in flex column
-    - OR accept ragged bottom (current - not terrible)
-  2. [Minor] Middle card could have stronger highlight
-    - Currently: only badge + filled CTA differentiate
-    - Optional: subtle background tint or border accent
+  1. [Major] Duplicate attribution - Name + company appears BOTH on video overlay AND below thumbnail. Redundant.
+  → Remove overlay text, keep attribution below only. Use overlay for play button only.
+  2. [Major] Play button not recognizable - Circle with small dot doesn't read as "play"
+  → Use triangle play icon (▶) inside circle
+  3. [Minor] Placeholder thumbnail styling - Gray gradient feels like dev placeholder, not polished empty state
+  → Darker gradient, or pattern, or more intentional "video coming" state
+  4. [Minor] Video area dominates - Large gray blocks overshadow the actual content
+  → Consider smaller aspect ratio (16:9 → tighter) or adding visual interest to placeholder
