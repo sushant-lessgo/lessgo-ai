@@ -26,6 +26,7 @@ import {
   getLayoutsForSection,
 } from '@/modules/uiblock/selectionPrompt';
 import { ensureValidComposition } from '@/modules/uiblock/compositionRules';
+import { isDemoMode } from '@/lib/mockMode';
 import type {
   SectionType,
   StrategyOutput,
@@ -116,6 +117,49 @@ async function uiblockSelectHandler(req: NextRequest): Promise<Response> {
     }
 
     const userId = authCheck.userId!;
+
+    // 2b. Check for demo/mock mode - return mock UIBlock selections without AI
+    if (isDemoMode(req)) {
+      logger.info('[uiblock-select] Using mock response');
+
+      // Build mock UIBlock selections based on strategy sections
+      // Note: Hero uses camelCase per componentRegistry
+      const mockSelections: Partial<Record<SectionType, string | null>> = {};
+      const defaultBlocks: Record<string, string> = {
+        Header: 'MinimalNavHeader',
+        Hero: 'leftCopyRightImage',
+        Problem: 'StackedPainBullets',
+        Features: 'IconGrid',
+        HowItWorks: 'ThreeStepHorizontal',
+        Testimonials: 'QuoteGrid',
+        SocialProof: 'LogoWall',
+        Results: 'StatBlocks',
+        Pricing: 'TierCards',
+        FAQ: 'AccordionFAQ',
+        CTA: 'CenteredHeadlineCTA',
+        Footer: 'ContactFooter',
+        BeforeAfter: 'SideBySideBlocks',
+        UniqueMechanism: 'SecretSauceReveal',
+        ObjectionHandle: 'VisualObjectionTiles',
+        UseCases: 'PersonaGrid',
+        FounderNote: 'LetterStyleBlock',
+      };
+
+      for (const section of strategy.sections) {
+        mockSelections[section as SectionType] = defaultBlocks[section] || null;
+      }
+
+      return createSecureResponse({
+        success: true,
+        data: {
+          uiblocks: mockSelections,
+          questions: [],
+          needsInput: false,
+        },
+        creditsUsed: 0,
+        creditsRemaining: 999,
+      });
+    }
 
     // 3. Build selection prompt
     const prompt = answers

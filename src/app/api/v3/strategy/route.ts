@@ -21,10 +21,14 @@ import { SimplifiedStrategyResponseSchema } from '@/lib/schemas/strategyV3.schem
 import { buildSimplifiedStrategyPrompt } from '@/modules/strategy/promptsV3';
 import { selectSectionsV3 } from '@/modules/strategy/sectionSelectionV3';
 import { selectUIBlocksV3 } from '@/modules/uiblock/selectUIBlocksV3';
+import { generateMockStrategyV3 } from '@/modules/prompt/mockResponseGeneratorV3';
 import type { LandingGoal, SimplifiedStrategyOutput, AssetAvailability } from '@/types/generation';
 import { landingGoals } from '@/types/generation';
 
 export const dynamic = 'force-dynamic';
+
+// Demo token for mock mode
+const DEMO_TOKEN = 'lessgodemomockdata';
 
 // Request schema - simplified, no IVOC
 const StrategyV3RequestSchema = z.object({
@@ -103,6 +107,36 @@ async function strategyV3Handler(req: NextRequest): Promise<Response> {
     }
 
     const userId = authCheck.userId!;
+
+    // 2b. Check for demo/mock mode
+    const authHeader = req.headers.get('authorization');
+    const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+
+    if (process.env.NEXT_PUBLIC_USE_MOCK_GPT === 'true' || token === DEMO_TOKEN) {
+      logger.info('[Strategy V3] Using mock response');
+      const mockStrategy = generateMockStrategyV3({
+        productName: data.productName,
+        oneLiner: data.oneLiner,
+        features: data.features,
+        landingGoal: data.landingGoal as LandingGoal,
+        offer: data.offer,
+        primaryAudience: data.primaryAudience,
+        otherAudiences: data.otherAudiences,
+        categories: data.categories,
+        hasTestimonials: data.hasTestimonials,
+        hasSocialProof: data.hasSocialProof,
+        hasConcreteResults: data.hasConcreteResults,
+        hasDemoVideo: data.hasDemoVideo,
+        hasMultipleAudiences: data.hasMultipleAudiences,
+      });
+
+      return createSecureResponse({
+        success: true,
+        data: mockStrategy,
+        creditsUsed: 0,
+        creditsRemaining: 999,
+      });
+    }
 
     // 3. Build simplified strategy prompt
     const prompt = buildSimplifiedStrategyPrompt({

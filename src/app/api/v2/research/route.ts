@@ -25,6 +25,7 @@ import { searchTavily, formatTavilySnippets, searchTavilyMulti, formatTavilyAdva
 import { extractIVOC, generateIVOCFallback, extractPainsOnly } from '@/lib/ivocExtractor';
 import { generatePainQueries } from '@/lib/painQueryGenerator';
 import { researchWithPerplexity, searchWithPerplexity, isLowQualityIVOC } from '@/lib/perplexity';
+import { isDemoMode } from '@/lib/mockMode';
 import type { IVOC } from '@/types/generation';
 
 export const dynamic = 'force-dynamic';
@@ -148,6 +149,53 @@ async function researchHandler(req: NextRequest): Promise<Response> {
     }
 
     const userId = authCheck.userId!;
+
+    // 4b. Check for demo/mock mode - return mock IVOC without external calls
+    if (isDemoMode(req)) {
+      logger.info('[research] Using mock response');
+      return createSecureResponse({
+        success: true,
+        data: {
+          pains: [
+            'Manual processes waste hours every week',
+            'Hard to scale operations without adding headcount',
+            'Lack of visibility into team performance',
+            'Inconsistent quality across projects',
+          ],
+          desires: [
+            'Automate repetitive tasks completely',
+            'Save 10+ hours per week',
+            'Scale without proportionally increasing costs',
+            'Real-time visibility into everything',
+          ],
+          objections: [
+            'Is my data secure with this tool?',
+            'Will my team actually adopt it?',
+            'What about integrations with existing tools?',
+            'Is it worth the learning curve?',
+          ],
+          firmBeliefs: [
+            'Quality matters more than speed',
+            'Time is the most valuable resource',
+            'The right tools make all the difference',
+          ],
+          shakableBeliefs: [
+            'Current tools are good enough',
+            'Automation is too complex to set up',
+          ],
+          commonPhrases: [
+            'streamline workflow',
+            'boost productivity',
+            'save time',
+            'reduce manual work',
+          ],
+        },
+        cached: false,
+        source: 'mock',
+        creditsUsed: 0,
+        creditsRemaining: 999,
+      });
+    }
 
     let ivocData!: IVOC;
     let source!: string;

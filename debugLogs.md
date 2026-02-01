@@ -1,408 +1,721 @@
-leftCopyRightImage:1  GET http://localhost:3000/dev/uiblock/leftCopyRightImage 500 (Internal Server Error)
-EditProvider.tsx:137  GET http://localhost:3000/api/loadDraft?tokenId=dev-leftCopyRightImage 404 (Not Found)
-eval @ EditProvider.tsx:137
-commitHookEffectListMount @ react-dom.development.js:21102
-commitHookPassiveMountEffects @ react-dom.development.js:23154
-commitPassiveMountOnFiber @ react-dom.development.js:23259
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23334
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-logger.ts:66 [2026-01-27T09:28:16.558Z] ERROR: ❌ EditProvider: Failed to load project data for token dev-leftCopyRightImage: {}
-window.console.error @ app-index.js:33
-(anonymous) @ rrweb-plugin-console-record.js:160
-error @ logger.ts:66
-eval @ EditProvider.tsx:180
-Promise.catch
-eval @ EditProvider.tsx:179
-commitHookEffectListMount @ react-dom.development.js:21102
-commitHookPassiveMountEffects @ react-dom.development.js:23154
-commitPassiveMountOnFiber @ react-dom.development.js:23259
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23334
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
+{
+  sections: [
+    'header-fa7214dd',
+    'hero-1885f152',
+    'beforeafter-14ed785b',
+    'testimonials-bb62d746',
+    'features-2c1b14af',
+    'howitworks-8fa31b04',
+    'pricing-e242a286',
+    'cta-1fbca7c5',
+    'faq-d6f4d9b9',
+    'footer-88e984c7'
+  ],
+  sectionLayouts: {
+    'cta-1fbca7c5': 'VisualCTAWithMockup',
+    'faq-d6f4d9b9': 'InlineQnAList',
+    'hero-1885f152': 'leftCopyRightImage',
+    'footer-88e984c7': 'ContactFooter',
+    'header-fa7214dd': 'MinimalNavHeader',
+    'pricing-e242a286': 'TierCards',
+    'features-2c1b14af': 'IconGrid',
+    'howitworks-8fa31b04': 'AccordionSteps',
+    'beforeafter-14ed785b': 'StackedTextVisual',
+    'testimonials-bb62d746': 'PullQuoteStack'
+  },
+  sectionSpacing: {},
+  theme: {
+    typography: {
+      bodyFont: '\'DM Sans\', sans-serif',
+      headingFont: '\'DM Sans\', sans-serif'
+    },
+    colors: {
+      states: {
+        focus: {},
+        hover: {},
+        active: {},
+        disabled: {}
+      },
+      semantic: {
+        info: 'bg-blue-500',
+        error: 'bg-red-500',
+        neutral: 'bg-gray-500',
+        success: 'bg-green-500',
+        warning: 'bg-yellow-500'
+      },
+      accentCSS: 'bg-purple-600',
+      baseColor: 'gray',
+      accentColor: 'purple',
+      sectionBackgrounds: {
+        divider: 'bg-gray-100/50',
+        neutral: 'bg-white',
+        primary: 'bg-gray-800',
+        secondary: 'bg-gray-50'
+      }
+    },
+    spacing: {
+      unit: 8,
+      scale: [
+        0,
+        4,
+        8,
+        12,
+        16,
+        20,
+        24,
+        32,
+        40,
+        48,
+        64,
+        80,
+        96,
+        128
+      ],
+      presets: {
+        lg: '1.5rem',
+        md: '1rem',
+        sm: '0.75rem',
+        xl: '2rem',
+        xs: '0.5rem',
+        xxl: '3rem'
+      }
+    },
+    corners: {
+      scale: {
+        full: 9999,
+        large: 16,
+        small: 4,
+        medium: 8
+      },
+      radius: 8
+    },
+    animations: {
+      easing: {
+        easeIn: 'cubic-bezier(0.4, 0, 1, 1)',
+        easeOut: 'cubic-bezier(0, 0, 0.2, 1)',
+        easeInOut: 'cubic-bezier(0.4, 0, 0.2, 1)'
+      },
+      enabled: true,
+      duration: {
+        fast: 150,
+        slow: 500,
+        medium: 300
+      },
+      reducedMotion: false
+    }
+  },
+  navigationConfig: {
+    items: [
+      {
+        id: 'nav-home',
+        link: '#',
+        label: 'Home',
+        order: 0,
+        isAutoGenerated: true
+      },
+      {
+        id: 'nav-features-2c1b14af',
+        link: '#features-2c1b14af',
+        label: 'Features',
+        order: 1,
+        sectionId: 'features-2c1b14af',
+        isAutoGenerated: true
+      },
+      {
+        id: 'nav-pricing-e242a286',
+        link: '#pricing-e242a286',
+        label: 'Pricing',
+        order: 2,
+        sectionId: 'pricing-e242a286',
+        isAutoGenerated: true
+      },
+      {
+        id: 'nav-testimonials-bb62d746',
+        link: '#testimonials-bb62d746',
+        label: 'Reviews',
+        order: 3,
+        sectionId: 'testimonials-bb62d746',
+        isAutoGenerated: true
+      }
+    ],
+    maxItems: 4,
+    lastUpdated: 1769926081640,
+    autoConfigured: true
+  },
+  globalSettings: {
+    maxWidth: '1200px',
+    containerPadding: '32px',
+    sectionSpacing: '64px',
+    deviceMode: 'desktop',
+    zoomLevel: 100
+  },
+  content: {
+    'cta-1fbca7c5': {
+      id: 'cta-1fbca7c5',
+      layout: 'VisualCTAWithMockup',
+      elements: {
+        cta_text: 'Start Your Free Trial Now',
+        headline: 'Ready to Stop Feeling Guilty and Start Feeling Strong?',
+        subheadline: 'Join thousands of parents who\'ve proven you can take care of yourself AND your family. Your 14-day free trial is waiting.',
+        trust_items: [
+          {
+            id: 'c1',
+            text: 'No credit card required'
+          },
+          {
+            id: 'c2',
+            text: 'Full access for 14 days'
+          },
+          {
+            id: 'c3',
+            text: 'Cancel anytime, no questions asked'
+          }
+        ]
+      },
+      aiMetadata: {
+        aiGenerated: true,
+        isCustomized: false,
+        lastGenerated: 1769926077606,
+        excludedElements: [],
+        aiGeneratedElements: [
+          'headline',
+          'subheadline',
+          'cta_text',
+          'trust_items'
+        ]
+      }
+    },
+    'faq-d6f4d9b9': {
+      id: 'faq-d6f4d9b9',
+      layout: 'InlineQnAList',
+      elements: {
+        cta_text: 'Contact Support',
+        headline: 'Questions? We\'ve Got Answers.',
+        faq_items: [
+          {
+            answer: 'Because Ray was built specifically for the reason you quit those other apps—they didn\'t fit your real life. Most fitness apps are designed for people with predictable schedules and open calendars. Ray is designed for parents with chaotic lives, unpredictable days, and exactly zero hours to spare. It adapts to your schedule daily, so when life happens (and it will), your fitness plan doesn\'t fall apart.',
+            question: 'I\'ve tried workout apps before and always quit. Why will Ray be different?'
+          },
+          {
+            answer: 'However much time you actually have. Seriously. Ray creates effective workouts for anywhere from 10 to 45 minutes, and adjusts based on what you tell us you have available each day. Most parents start with 15-20 minute sessions and build from there. The key is consistency over duration, and Ray is designed around that principle.',
+            question: 'How much time do I actually need to commit?'
+          },
+          {
+            answer: 'Nope. All Ray workouts can be done with just your bodyweight at home. If you have dumbbells or resistance bands, great—Ray can incorporate them. But they\'re absolutely not required. We get that you don\'t have time to go to a gym or money to build a home gym.',
+            question: 'Do I need equipment or a gym membership?'
+          },
+          {
+            answer: 'That\'s exactly who Ray is for. When you set up your profile, you tell us your current fitness level honestly, and Ray builds your plan accordingly. Every workout is personalized to where you are right now, not where you think you should be. You\'ll progress at a pace that\'s challenging but achievable.',
+            question: 'What if I\'m really out of shape?'
+          },
+          {
+            answer: 'Ray includes activities designed for you to do with your kids—things like park workouts, active games, family walks with fitness elements, and movement challenges you can all do together. It\'s a way to stay active while spending quality time with your children, not choosing between the two.',
+            question: 'How do the family-friendly activities work?'
+          },
+          {
+            answer: 'Absolutely nothing unless you decide to subscribe. We don\'t ask for a credit card to start your trial, so there\'s nothing to cancel if you decide Ray isn\'t for you. If you love it (and we think you will), you can choose a monthly or yearly plan. If not, your trial simply ends with no charge and no hassle.',
+            question: 'What happens after my 14-day free trial?'
+          },
+          {
+            answer: 'Yes, with one click in your account settings. No phone calls, no convincing, no guilt trips. We built Ray for busy parents—we\'re not going to waste your time if you decide to leave.',
+            question: 'Can I really cancel anytime?'
+          },
+          {
+            answer: 'About 2 minutes to set up your profile, and the app is intentionally simple to use. You won\'t need tutorials or training videos. We designed Ray for parents who don\'t have time to learn complicated software—you\'ll know everything you need within your first workout.',
+            question: 'How long does it take to set up and learn the app?'
+          }
+        ],
+        subheadline: 'We know you\'ve tried workout apps before. Here\'s why Ray is different.',
+        contact_prompt: 'Still have questions? We\'re here to help.'
+      },
+      aiMetadata: {
+        aiGenerated: true,
+        isCustomized: false,
+        lastGenerated: 1769926077606,
+        excludedElements: [],
+        aiGeneratedElements: [
+          'headline',
+          'subheadline',
+          'contact_prompt',
+          'cta_text',
+          'faq_items'
+        ]
+      }
+    },
+    'hero-1885f152': {
+      id: 'hero-1885f152',
+      layout: 'leftCopyRightImage',
+      elements: {
+        cta_text: 'Start Your Free 14-Day Trial',
+        headline: 'Finally, Workouts That Fit Your Life as a Parent—Not Someone Else\'s Perfect Schedule',
+        badge_text: 'Built by Parents, for Parents',
+        hero_image: '/hero-placeholder.jpg',
+        subheadline: 'Get stronger, feel energized, and stop choosing between your kids and your health. Ray creates workouts that adapt to your real schedule, not the other way around.',
+        trust_items: [
+          {
+            id: 't1',
+            text: '14-day free trial'
+          },
+          {
+            id: 't2',
+            text: 'No credit card required'
+          },
+          {
+            id: 't3',
+            text: 'Works around your family\'s chaos'
+          }
+        ],
+        secondary_cta_text: 'See How It Works'
+      },
+      aiMetadata: {
+        aiGenerated: true,
+        isCustomized: false,
+        lastGenerated: 1769926077606,
+        excludedElements: [],
+        aiGeneratedElements: [
+          'headline',
+          'subheadline',
+          'cta_text',
+          'secondary_cta_text',
+          'badge_text',
+          'trust_items',
+          'hero_image'
+        ]
+      }
+    },
+    'footer-88e984c7': {
+      id: 'footer-88e984c7',
+      layout: 'ContactFooter',
+      elements: {
+        newsletter_cta: 'Subscribe',
+        newsletter_title: 'Weekly Tips for Busy Parents',
+        newsletter_description: 'Get practical fitness and wellness advice that actually fits into your life. No fluff, no guilt trips.'
+      },
+      aiMetadata: {
+        aiGenerated: true,
+        isCustomized: false,
+        lastGenerated: 1769926077606,
+        excludedElements: [],
+        aiGeneratedElements: [
+          'newsletter_title',
+          'newsletter_description',
+          'newsletter_cta'
+        ]
+      }
+    },
+    'header-fa7214dd': {
+      id: 'header-fa7214dd',
+      layout: 'MinimalNavHeader',
+      elements: {},
+      aiMetadata: {
+        aiGenerated: true,
+        isCustomized: false,
+        lastGenerated: 1769926077606,
+        excludedElements: [],
+        aiGeneratedElements: []
+      }
+    },
+    'pricing-e242a286': {
+      id: 'pricing-e242a286',
+      layout: 'TierCards',
+      elements: {
+        tiers: [
+          {
+            name: 'Monthly',
+            price: 'After your free trial',
+            period: 'per month',
+            cta_text: 'Start Free Trial',
+            features: [
+              'Personalized adaptive workout plans',
+              'Unlimited schedule adjustments',
+              'Progress tracking and goal setting',
+              'Family-friendly activity library',
+              'New workouts added regularly',
+              'Email support'
+            ],
+            description: 'Perfect if you want flexibility to try Ray without a long-term commitment.'
+          },
+          {
+            name: 'Yearly',
+            price: 'After your free trial',
+            period: 'per year',
+            cta_text: 'Start Free Trial',
+            features: [
+              'Everything in Monthly',
+              'Significant savings over monthly',
+              'Priority support',
+              'Early access to new features',
+              'Advanced progress analytics',
+              'Custom workout builder'
+            ],
+            description: 'The smart choice for parents ready to commit to sustainable, long-term health.'
+          }
+        ],
+        headline: 'Try Ray Free for 14 Days—No Credit Card, No Risk, No Guilt',
+        badge_text: 'Most Popular',
+        subheadline: 'See if Ray fits your life before you pay a cent. We\'re confident it will.',
+        billing_note: 'Cancel anytime with one click. No hoops to jump through.',
+        guarantee_text: '14-day free trial, then choose the plan that works for you. No commitment during your trial.',
+        highlighted_label: 'Best Value'
+      },
+      aiMetadata: {
+        aiGenerated: true,
+        isCustomized: false,
+        lastGenerated: 1769926077606,
+        excludedElements: [],
+        aiGeneratedElements: [
+          'headline',
+          'subheadline',
+          'badge_text',
+          'billing_note',
+          'guarantee_text',
+          'highlighted_label',
+          'tiers'
+        ]
+      }
+    },
+    'features-2c1b14af': {
+      id: 'features-2c1b14af',
+      layout: 'IconGrid',
+      elements: {
+        features: [
+          {
+            id: 'f1',
+            title: 'Adaptive Scheduling',
+            description: 'Workouts that flex around your family\'s chaos—not rigid plans you\'ll quit. Got 15 minutes today instead of 30? Ray adjusts automatically.'
+          },
+          {
+            id: 'f2',
+            title: 'Personalized Plans',
+            description: 'Built for your current fitness level, available time, and actual life. No intimidating routines that assume you\'re training for a marathon.'
+          },
+          {
+            id: 'f3',
+            title: 'Family-Friendly Activities',
+            description: 'Turn quality time into active time with workouts your kids can join. Model healthy habits while making memories together.'
+          },
+          {
+            id: 'f4',
+            title: 'Progress Tracking',
+            description: 'Celebrate real wins and see how far you\'ve come. Stay motivated by tracking what matters—consistency over perfection.'
+          },
+          {
+            id: 'f5',
+            title: 'Realistic Goal Setting',
+            description: 'Set goals that fit your life as a parent, not some fitness influencer\'s fantasy. Build sustainable habits that actually stick.'
+          },
+          {
+            id: 'f6',
+            title: 'No Equipment Required',
+            description: 'Effective workouts using just your bodyweight. No expensive gear, no gym membership, no excuses.'
+          }
+        ],
+        headline: 'Everything You Need to Build Real Fitness Into Your Real Life',
+        subheadline: 'No gimmicks. No unrealistic demands. Just smart tools designed for parents who are done feeling guilty.'
+      },
+      aiMetadata: {
+        aiGenerated: true,
+        isCustomized: false,
+        lastGenerated: 1769926077606,
+        excludedElements: [],
+        aiGeneratedElements: [
+          'headline',
+          'subheadline',
+          'features'
+        ]
+      }
+    },
+    'howitworks-8fa31b04': {
+      id: 'howitworks-8fa31b04',
+      layout: 'AccordionSteps',
+      elements: {
+        steps: [
+          {
+            title: 'Tell Us About Your Real Life',
+            details: 'We ask real questions about your actual life: When do your kids nap? How much time can you realistically commit? What equipment do you have at home? Ray builds your plan around your answers, not generic assumptions.',
+            description: 'Share your schedule, fitness level, and goals—takes about 2 minutes'
+          },
+          {
+            title: 'Get Your Personalized Plan',
+            details: 'Based on what you told us, Ray designs a complete workout plan that adapts day-to-day. Got a sick kid today? Your plan adjusts. Found an extra 10 minutes? Ray\'s got a workout ready. No rigid schedules that fall apart the first time life happens.',
+            description: 'Ray creates workouts that fit your available time and current fitness level'
+          },
+          {
+            title: 'Start Moving, Keep Going',
+            details: 'Each workout is designed to fit the time you have that day. Clear instructions, progress tracking that celebrates consistency, and the flexibility to keep going even when life gets chaotic. Because it will—and Ray works with that, not against it.',
+            description: 'Follow simple workouts, track your progress, and actually stick with it'
+          }
+        ],
+        headline: 'From Exhausted to Energized in Three Simple Steps',
+        subheadline: 'Getting started takes less time than scrolling through social media. Seriously.',
+        conclusion_text: 'That\'s it. No complicated setup, no learning curve, no time wasted. Just workouts that work for your life.'
+      },
+      aiMetadata: {
+        aiGenerated: true,
+        isCustomized: false,
+        lastGenerated: 1769926077606,
+        excludedElements: [],
+        aiGeneratedElements: [
+          'headline',
+          'subheadline',
+          'conclusion_text',
+          'steps'
+        ]
+      }
+    },
+    'beforeafter-14ed785b': {
+      id: 'beforeafter-14ed785b',
+      layout: 'StackedTextVisual',
+      elements: {
+        headline: 'Stop Abandoning Fitness Plans. Start Living Like the Healthy Parent You Want to Be.',
+        after_text: 'Energized and confident, completing workouts that fit into real life, setting a healthy example for your kids, and proving you can take care of yourself AND your family',
+        after_label: 'With Ray',
+        before_text: 'Feeling exhausted and guilty, starting and quitting workout programs that demand an hour you\'ll never have, watching your fitness goals slip further away while your kids need you',
+        subheadline: 'Ray doesn\'t ask you to find time you don\'t have. It works with the time you actually have—even if that\'s just 15 minutes between bedtime and collapse.',
+        before_label: 'Before Ray',
+        summary_text: 'You don\'t need more time. You need workouts that respect the time you have.',
+        transition_text: 'The difference? Workouts designed for your actual life.'
+      },
+      aiMetadata: {
+        aiGenerated: true,
+        isCustomized: false,
+        lastGenerated: 1769926077606,
+        excludedElements: [],
+        aiGeneratedElements: [
+          'headline',
+          'subheadline',
+          'before_label',
+          'after_label',
+          'before_text',
+          'after_text',
+          'transition_text',
+          'summary_text'
+        ]
+      }
+    },
+    'testimonials-bb62d746': {
+      id: 'testimonials-bb62d746',
+      layout: 'PullQuoteStack',
+      elements: {
+        headline: 'Parents Just Like You Are Finally Making Fitness Work',
+        subheadline: 'Real stories from busy parents who stopped feeling guilty and started feeling strong.',
+        testimonials: [
+          {
+            quote: 'I thought I had to choose between being a good mom and being healthy. Ray showed me that was nonsense. I\'m doing 20-minute workouts while my daughter does her homework, and I have more energy than I\'ve had in years.',
+            customer_name: 'Sarah M.',
+            customer_title: 'Marketing Manager',
+            customer_location: 'Mother of two'
+          },
+          {
+            quote: 'Every other app wanted me to commit to hour-long sessions at 6 AM. Ray actually gets it—some days I have 15 minutes, some days I have 30. It adapts, and for the first time in three years, I\'ve stuck with something.',
+            customer_name: 'David K.',
+            customer_title: 'Software Engineer',
+            customer_location: 'Father of one'
+          },
+          {
+            quote: 'The family-friendly workouts changed everything. Now my kids join me for weekend activities, and I\'m not sacrificing time with them to take care of myself. It\'s honestly what I needed all along.',
+            customer_name: 'Jennifer L.',
+            customer_title: 'Teacher',
+            customer_location: 'Mother of three'
+          },
+          {
+            quote: 'I\'ve tried so many fitness apps and quit them all within a week. Ray is the first one that didn\'t make me feel like a failure. It meets me where I am, and I\'m actually seeing progress without the guilt.',
+            customer_name: 'Michael R.',
+            customer_title: 'Accountant',
+            customer_location: 'Father of two'
+          }
+        ]
+      },
+      aiMetadata: {
+        aiGenerated: true,
+        isCustomized: false,
+        lastGenerated: 1769926077606,
+        excludedElements: [],
+        aiGeneratedElements: [
+          'headline',
+          'subheadline',
+          'testimonials'
+        ]
+      }
+    }
+  },
+  mode: 'edit',
+  editMode: 'section',
+  generationMode: false,
+  selectedSection: 'howitworks-8fa31b04',
+  multiSelection: [],
+  isTextEditing: false,
+  formattingInProgress: false,
+  leftPanel: {
+    width: 300,
+    collapsed: false,
+    manuallyToggled: false,
+    activeTab: 'pageStructure'
+  },
+  toolbar: {
+    type: 'section',
+    visible: true,
+    position: {
+      x: 1578.75,
+      y: 493.6640625
+    },
+    targetId: 'howitworks-8fa31b04',
+    actions: [
+      'change-layout',
+      'add-element',
+      'background-settings',
+      'regenerate-section',
+      'duplicate-section',
+      'delete-section'
+    ]
+  },
+  aiGeneration: {
+    isGenerating: false,
+    currentOperation: null,
+    progress: 0,
+    status: '',
+    errors: [],
+    warnings: [],
+    context: null
+  },
+  elementVariations: {
+    visible: false,
+    variations: []
+  },
+  layoutChangeModal: {
+    visible: false
+  },
+  formData: {},
+  images: {
+    assets: {},
+    stockPhotos: {
+      searchResults: [],
+      searchQuery: '',
+      searchVisible: false
+    },
+    uploadProgress: {}
+  },
+  errors: {},
+  loadingStates: {},
+  isLoading: false,
+  queuedChanges: [],
+  history: {
+    undoStack: [],
+    redoStack: [],
+    maxHistorySize: 50
+  },
+  apiQueue: {
+    queue: [],
+    processing: false,
+    rateLimitRemaining: 100,
+    rateLimitReset: 1769926204021
+  },
+  id: '6THZOUSqnmEb',
+  title: 'Ray',
+  slug: '',
+  description: '',
+  lastUpdated: 1769927477123,
+  version: 1,
+  tokenId: '6THZOUSqnmEb',
+  onboardingData: {
+    oneLiner: '',
+    validatedFields: {},
+    featuresFromAI: [],
+    hiddenInferredFields: {},
+    confirmedFields: {}
+  },
+  publishing: {
+    isPublishReady: false
+  },
+  changeTracking: {
+    originalInputs: {},
+    currentInputs: {},
+    hasChanges: false,
+    changedFields: [],
+    lastChangeTimestamp: 1769926144021
+  },
+  forms: {},
+  formBuilderOpen: false,
+  editingFormId: null,
+  simpleForms: [],
+  formBuilder: {
+    visible: false,
+    fieldLibrary: []
+  },
+  integrations: {},
+  analytics: {},
+  persistence: {
+    isDirty: false,
+    isSaving: false,
+    isLoading: false,
+    hasActiveConflicts: false,
+    backgroundSaveEnabled: true,
+    autoSaveEnabled: true,
+    retryCount: 0,
+    metrics: {
+      totalSaves: 2,
+      successfulSaves: 2,
+      failedSaves: 0,
+      averageSaveTime: 0,
+      lastSaveTime: 1769927479099,
+      totalLoads: 0,
+      cacheHits: 0,
+      cacheMisses: 0,
+      conflictsDetected: 0,
+      conflictsResolved: 0
+    },
+    syncStatus: {
+      localVersion: 1,
+      serverVersion: 1,
+      status: 'synced',
+      pendingChanges: 0
+    },
+    lastSaved: 1769927479099
+  },
+  conflictResolution: {
+    hasConflict: false,
+    resolveStrategy: 'manual'
+  },
+  performance: {
+    saveCount: 0,
+    averageSaveTime: 0,
+    lastSaveTime: 0,
+    failedSaves: 0
+  },
+  cssVariables: {
+    phase: 'legacy',
+    featureFlags: {
+      enableVariableMode: false,
+      enableHybridMode: false,
+      enableLegacyFallbacks: true,
+      enableCustomColorPicker: false,
+      enableBackgroundCustomization: false,
+      enableMigrationDebug: false,
+      enablePerformanceLogging: false,
+      enableVisualDiff: false,
+      enableMigrationAnalytics: false,
+      rolloutPercentage: 0,
+      staffAccess: false,
+      betaAccess: false
+    },
+    customColors: {},
+    generatedVariables: {},
+    browserSupport: {
+      cssVariables: false,
+      customProperties: false,
+      fallbackRequired: true
+    },
+    metrics: {
+      cssSize: 0,
+      variableCount: 0,
+      renderTime: 0,
+      lastUpdated: 1769926143815
+    },
+    debugMode: false,
+    _cssVariableSlice: {
+      version: '1.0.0',
+      initialized: false,
+      lastMigration: 1769926144021
+    }
+  }
+}

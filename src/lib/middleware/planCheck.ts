@@ -5,6 +5,9 @@ import { logger } from '@/lib/logger';
 import { getUserPlan, hasFeature, checkLimit, PlanConfig } from '@/lib/planManager';
 import { checkCredits, consumeCredits, UsageEventType, CREDIT_COSTS } from '@/lib/creditSystem';
 
+// Demo token for mock mode testing
+const DEMO_TOKEN = 'lessgodemomockdata';
+
 /**
  * Middleware result interface
  */
@@ -16,9 +19,46 @@ export interface PlanCheckResult {
 }
 
 /**
+ * Check if request is in demo/mock mode
+ */
+async function isDemoMode(req: NextRequest): Promise<boolean> {
+  // Check environment variable
+  if (process.env.NEXT_PUBLIC_USE_MOCK_GPT === 'true') {
+    return true;
+  }
+
+  // Check Authorization header
+  const authHeader = req.headers.get('authorization');
+  const headerToken = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  if (headerToken === DEMO_TOKEN) {
+    return true;
+  }
+
+  // Check request body for tokenId/token
+  try {
+    const clonedReq = req.clone();
+    const body = await clonedReq.json();
+    const bodyToken = body?.tokenId || body?.token || null;
+    if (bodyToken === DEMO_TOKEN) {
+      return true;
+    }
+  } catch {
+    // Body parsing failed, not demo mode via body
+  }
+
+  return false;
+}
+
+/**
  * Check if user is authenticated
  */
 export async function requireAuth(req: NextRequest): Promise<PlanCheckResult> {
+  // Check for demo/mock mode FIRST - before Clerk auth
+  if (await isDemoMode(req)) {
+    logger.debug('[Auth] Demo mode detected, bypassing auth');
+    return { allowed: true, userId: 'demo-user' };
+  }
+
   try {
     const { userId } = await auth();
 

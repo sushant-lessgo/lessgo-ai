@@ -7,6 +7,19 @@ import { Check } from 'lucide-react';
 import ErrorRetry from '../shared/ErrorRetry';
 import type { SectionType, SectionCopy } from '@/types/generation';
 import { getDesignTokensForVibe } from '@/modules/Design/vibeMapping';
+import { generateBackgroundSystemForVibe } from '@/modules/Design/vibeBackgroundSystem';
+
+// Helper: map section type to background type
+function getBackgroundTypeForSection(sectionType: string): 'primary' | 'secondary' | 'neutral' {
+  const primarySections = ['hero', 'cta'];
+  const secondarySections = ['features', 'howitworks', 'testimonials', 'results', 'uniquemechanism', 'socialproof'];
+
+  const normalizedType = sectionType.toLowerCase();
+
+  if (primarySections.includes(normalizedType)) return 'primary';
+  if (secondarySections.includes(normalizedType)) return 'secondary';
+  return 'neutral';
+}
 
 const generatingMessages = [
   'Writing headlines...',
@@ -72,7 +85,6 @@ export default function GeneratingStep() {
   const generationError = useGenerationStore((s) => s.generationError);
   const setGenerationProgress = useGenerationStore((s) => s.setGenerationProgress);
   const setGenerationError = useGenerationStore((s) => s.setGenerationError);
-  const nextStep = useGenerationStore((s) => s.nextStep);
 
   // Progress simulation state
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
@@ -133,7 +145,11 @@ export default function GeneratingStep() {
         sectionLayouts[id] = strategy.uiblocks?.[sectionType] || uiblockSelections[sectionType] || 'default';
       });
 
-      // Build content map with full structure (layout, id, aiMetadata required for editor)
+      // Get complete background system from vibe
+      const backgroundSystem = generateBackgroundSystemForVibe(strategy.vibe);
+      const designTokens = getDesignTokensForVibe(strategy.vibe);
+
+      // Build content map with full structure + backgroundType
       const content: Record<string, any> = {};
       sectionIds.forEach((id, i) => {
         const sectionType = sectionOrder[i];
@@ -144,6 +160,7 @@ export default function GeneratingStep() {
           id,
           layout,
           elements: sectionCopy?.elements || {},
+          backgroundType: getBackgroundTypeForSection(sectionType),
           aiMetadata: {
             aiGenerated: true,
             isCustomized: false,
@@ -154,9 +171,6 @@ export default function GeneratingStep() {
         };
       });
 
-      // Get theme from vibe mapping
-      const designTokens = getDesignTokensForVibe(strategy.vibe);
-
       const finalContent = {
         layout: {
           sections: sectionIds,
@@ -166,7 +180,18 @@ export default function GeneratingStep() {
               headingFont: designTokens.headingFont,
               bodyFont: designTokens.bodyFont,
             },
-            // Background will be applied by the editor
+            colors: {
+              baseColor: backgroundSystem.baseColor,
+              accentColor: backgroundSystem.accentColor,
+              accentCSS: backgroundSystem.accentCSS,
+              sectionBackgrounds: {
+                primary: backgroundSystem.primary,
+                secondary: backgroundSystem.secondary,
+                neutral: backgroundSystem.neutral,
+                divider: backgroundSystem.divider,
+              },
+            },
+            vibe: strategy.vibe,
           },
           globalSettings: {},
         },
@@ -230,8 +255,8 @@ export default function GeneratingStep() {
         setCompletedSections(new Set(selectedSections));
         setGenerationProgress(100);
 
-        // Short delay then advance
-        setTimeout(() => nextStep(), 500);
+        // Short delay then redirect to magic moment
+        setTimeout(() => router.push(`/generate/${tokenId}`), 500);
       } else {
         setGenerationError(result.message || 'Generation failed');
       }
@@ -241,7 +266,7 @@ export default function GeneratingStep() {
   }, [
     strategy, understanding, uiblockSelections, productName, oneLiner,
     offer, landingGoal, saveGeneratedContent, selectedSections,
-    setGenerationProgress, setGenerationError, nextStep
+    setGenerationProgress, setGenerationError, router, tokenId
   ]);
 
   // Trigger API call on mount

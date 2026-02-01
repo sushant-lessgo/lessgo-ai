@@ -27,6 +27,7 @@ import {
   applyCanonicalOrder,
   limitProofSections,
 } from '@/modules/strategy';
+import { isDemoMode } from '@/lib/mockMode';
 import type { IVOC, LandingGoal, StrategyOutput, SectionType } from '@/types/generation';
 import { landingGoals } from '@/types/generation';
 
@@ -99,6 +100,59 @@ async function strategyHandler(req: NextRequest): Promise<Response> {
     }
 
     const userId = authCheck.userId!;
+
+    // 2b. Check for demo/mock mode - return mock strategy without AI call
+    if (isDemoMode(req)) {
+      logger.info('[strategy] Using mock response');
+      const mockStrategy: StrategyOutput = {
+        oneReader: {
+          who: `${data.primaryAudience} looking to streamline their workflow`,
+          coreDesire: 'Achieve more with less effort and time',
+          corePain: 'Wasting hours on manual, repetitive tasks',
+          beliefs: 'The right tool can transform productivity',
+          awareness: 'solution-aware',
+          sophistication: 'medium',
+          emotionalState: 'Frustrated but hopeful',
+        },
+        oneIdea: {
+          bigBenefit: 'Transform how you work and reclaim your time',
+          uniqueMechanism: 'AI-powered automation that learns your patterns',
+          reasonToBelieve: '10,000+ professionals trust our platform daily',
+        },
+        sections: [
+          'Header',
+          'Hero',
+          'Problem',
+          'Features',
+          'HowItWorks',
+          data.hasTestimonials ? 'Testimonials' : null,
+          data.hasSocialProof ? 'SocialProof' : null,
+          data.hasConcreteResults ? 'Results' : null,
+          'Pricing',
+          'FAQ',
+          'CTA',
+          'Footer',
+        ].filter(Boolean) as SectionType[],
+        vibe: 'Light Trust',
+        featureAnalysis: data.features.slice(0, 4).map((feature) => ({
+          feature,
+          benefit: `${feature} helps you work smarter`,
+          benefitOfBenefit: 'More time for what matters',
+        })),
+        objectionFlow: {
+          mainObjection: 'Is it worth the investment?',
+          counter: 'See results within the first week',
+          proofType: 'case-study',
+        },
+      };
+
+      return createSecureResponse({
+        success: true,
+        data: mockStrategy,
+        creditsUsed: 0,
+        creditsRemaining: 999,
+      });
+    }
 
     // 3. Build strategy prompt
     const prompt = buildStrategyPrompt({

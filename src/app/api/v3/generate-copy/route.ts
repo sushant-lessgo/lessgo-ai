@@ -23,10 +23,14 @@ import { CopyResponseSchema } from '@/lib/schemas';
 import { buildCopyPromptV3, buildCopyRetryPromptV3 } from '@/modules/copy/copyPromptV3';
 import { validateCompleteness } from '@/modules/copy/parseCopy';
 import { applyAllSchemaDefaults } from '@/modules/sections/layoutElementSchema';
+import { generateMockCopyV3 } from '@/modules/prompt/mockResponseGeneratorV3';
 import type { SectionCopy, SimplifiedStrategyOutput, LandingGoal } from '@/types/generation';
 import { sectionTypes, vibes, simplifiedAwarenessLevels, landingGoals } from '@/types/generation';
 
 export const dynamic = 'force-dynamic';
+
+// Demo token for mock mode
+const DEMO_TOKEN = 'lessgodemomockdata';
 
 // Max retry attempts for parsing failures
 const MAX_RETRIES = 2;
@@ -120,6 +124,30 @@ async function generateCopyV3Handler(req: NextRequest): Promise<Response> {
     }
 
     const userId = authCheck.userId!;
+
+    // 2b. Check for demo/mock mode
+    const authHeader = req.headers.get('authorization');
+    const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+
+    if (process.env.NEXT_PUBLIC_USE_MOCK_GPT === 'true' || token === DEMO_TOKEN) {
+      logger.info('[Generate Copy V3] Using mock response');
+      const mockSections = generateMockCopyV3(
+        strategy as SimplifiedStrategyOutput,
+        uiblocks,
+        { productName, oneLiner, offer }
+      );
+
+      return createSecureResponse({
+        success: true,
+        sections: mockSections,
+        creditsUsed: 0,
+        creditsRemaining: 999,
+        meta: {
+          attempts: 0,
+          complete: true,
+        },
+      });
+    }
 
     // 3. Build V3 copy prompt
     const prompt = buildCopyPromptV3({

@@ -1384,6 +1384,152 @@ const realisticMockData: Record<string, Record<string, any>> = {
       { id: 'social-3', platform: 'GitHub', url: 'https://github.com/flowtrack', icon: 'FaGithub' },
     ],
   },
+
+  // ─────────────────────────────────────────────────────────
+  // Hero - LeftCopyRightImage (camelCase key per componentRegistry)
+  // ─────────────────────────────────────────────────────────
+  leftCopyRightImage: {
+    headline: 'Ship Landing Pages That Actually Convert',
+    subheadline: 'AI-powered copywriting meets beautiful design. Launch in minutes, not weeks.',
+    cta_text: 'Start Free Trial',
+    secondary_cta_text: 'Watch Demo',
+    supporting_text: 'No credit card required • 14-day free trial',
+    hero_image: '',
+    badge_text: 'New',
+    customer_count: '10,000+ founders',
+    rating_value: '4.9/5',
+    rating_count: 'from 2,500+ reviews',
+    trust_items: [
+      { id: 'ti1', text: 'Free 14-day trial' },
+      { id: 'ti2', text: 'No credit card required' },
+      { id: 'ti3', text: 'Cancel anytime' },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────
+  // Hero - CenterStacked (camelCase key per componentRegistry)
+  // ─────────────────────────────────────────────────────────
+  centerStacked: {
+    headline: 'The Fastest Way to Launch Your Product',
+    subheadline: 'From idea to live landing page in under 15 minutes. AI handles the copywriting while you focus on your product.',
+    cta_text: 'Get Started Free',
+    secondary_cta_text: 'See Examples',
+    supporting_text: 'Join 10,000+ founders who launched this week',
+    center_hero_image: '',
+    badge_text: 'Limited Beta',
+    customer_count: '10,000+',
+    rating_value: '4.8/5',
+    rating_count: 'from 1,200+ reviews',
+    trust_items: [
+      { id: 'ti1', text: 'Setup in 5 minutes' },
+      { id: 'ti2', text: 'AI-powered copy' },
+      { id: 'ti3', text: 'Beautiful templates' },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────
+  // Hero - SplitScreen (camelCase key per componentRegistry)
+  // ─────────────────────────────────────────────────────────
+  splitScreen: {
+    headline: 'Build. Launch. Convert.',
+    subheadline: 'Professional landing pages with conversion-optimized copy, ready in minutes.',
+    cta_text: 'Start Building',
+    secondary_cta_text: 'View Templates',
+    supporting_text: 'Trusted by 50,000+ product teams worldwide',
+    split_hero_image: '',
+    badge_text: 'Pro',
+    value_proposition: 'The complete toolkit for modern founders',
+    customer_count: '50,000+',
+    rating_value: '4.9/5',
+    rating_count: 'from 3,000+ reviews',
+    trust_items: [
+      { id: 'ti1', text: 'Enterprise security' },
+      { id: 'ti2', text: 'SOC 2 certified' },
+      { id: 'ti3', text: '99.9% uptime' },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────
+  // Hero - ImageFirst (camelCase key per componentRegistry)
+  // ─────────────────────────────────────────────────────────
+  imageFirst: {
+    headline: 'See Your Product in Action',
+    subheadline: 'Let your product speak for itself with stunning hero visuals and compelling copy.',
+    cta_text: 'Try It Free',
+    secondary_cta_text: 'Learn More',
+    supporting_text: 'Trusted by 5,000+ product teams',
+    image_first_hero_image: '',
+    badge_text: 'Featured',
+    customer_count: '5,000+',
+    rating_value: '4.7/5',
+    rating_count: 'from 800+ reviews',
+    trust_items: [
+      { id: 'ti1', text: 'Easy integration' },
+      { id: 'ti2', text: '24/7 support' },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────
+  // Pricing - ToggleableMonthlyYearly
+  // ─────────────────────────────────────────────────────────
+  ToggleableMonthlyYearly: {
+    headline: 'Simple, Transparent Pricing',
+    subheadline: 'Choose the plan that fits your needs. Switch between monthly and yearly anytime.',
+    annual_discount_label: 'Save 20% with annual billing',
+    billing_note: 'All prices in USD. Cancel anytime.',
+    tiers: [
+      {
+        id: 'tier-1',
+        name: 'Starter',
+        monthly_price: '$19',
+        yearly_price: '$15',
+        description: 'Perfect for individuals and small teams getting started.',
+        features: [
+          'Up to 5 landing pages',
+          'Basic analytics',
+          'Email support',
+          'Custom domain',
+        ],
+        cta_text: 'Start Free Trial',
+        is_popular: false,
+      },
+      {
+        id: 'tier-2',
+        name: 'Professional',
+        monthly_price: '$49',
+        yearly_price: '$39',
+        description: 'For growing teams that need more power and flexibility.',
+        features: [
+          'Unlimited landing pages',
+          'Advanced analytics',
+          'Priority support',
+          'A/B testing',
+          'Custom integrations',
+          'Team collaboration',
+        ],
+        cta_text: 'Start Free Trial',
+        is_popular: true,
+      },
+      {
+        id: 'tier-3',
+        name: 'Enterprise',
+        monthly_price: '$149',
+        yearly_price: '$119',
+        description: 'Custom solutions for large organizations.',
+        features: [
+          'Everything in Pro',
+          'Dedicated account manager',
+          'Custom SLA',
+          'SSO & advanced security',
+          'Audit logs',
+          'White-label options',
+          'API access',
+        ],
+        cta_text: 'Contact Sales',
+        is_popular: false,
+      },
+    ],
+  },
 };
 
 // Placeholder text by element key patterns

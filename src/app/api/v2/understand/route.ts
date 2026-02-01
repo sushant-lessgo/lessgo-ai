@@ -17,6 +17,7 @@ import { requireAuth } from '@/lib/middleware/planCheck';
 import { consumeCredits, CREDIT_COSTS, UsageEventType } from '@/lib/creditSystem';
 import { generateWithSchema } from '@/lib/aiClient';
 import { UnderstandingResponseSchema } from '@/lib/schemas';
+import { isDemoMode } from '@/lib/mockMode';
 import type { UnderstandingData } from '@/types/generation';
 
 export const dynamic = 'force-dynamic';
@@ -75,6 +76,28 @@ async function understandHandler(req: NextRequest): Promise<Response> {
     }
 
     const userId = authCheck.userId!;
+
+    // 2b. Check for demo/mock mode - return mock data without AI call
+    if (isDemoMode(req)) {
+      logger.info('[understand] Using mock response');
+      return createSecureResponse({
+        success: true,
+        data: {
+          categories: ['SaaS', 'Productivity', 'Automation'],
+          audiences: ['Small Business Owners', 'Entrepreneurs', 'Teams'],
+          whatItDoes: 'Helps users streamline their workflow and boost productivity',
+          features: [
+            'Easy setup in minutes',
+            'Automated workflows',
+            'Real-time analytics',
+            'Team collaboration',
+            'Custom integrations',
+          ],
+        },
+        creditsUsed: 0,
+        creditsRemaining: 999,
+      });
+    }
 
     // 3. Build prompt
     const prompt = buildUnderstandPrompt(oneLiner);
