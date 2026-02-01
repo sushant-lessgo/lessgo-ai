@@ -47,6 +47,17 @@ module.exports = {
   'group-hover/feature-item:opacity-100',
   'group-hover/trust-footer-item:opacity-100',
   'group-hover/persona-card:opacity-100',
+
+  // ✅ ThreeStepHorizontal UIBlock classes
+  'from-slate-50/30', 'from-orange-50/30', 'from-blue-50/30',
+  'from-slate-50/50', 'from-orange-50/50', 'from-blue-50/50',
+  'border-t-2', 'border-dashed',
+  'border-slate-200', 'border-orange-200', 'border-blue-200',
+  'bg-slate-50', 'bg-orange-50', 'bg-blue-50',
+  'bg-slate-200', 'bg-orange-200', 'bg-blue-200',
+  'ring-slate-100', 'ring-orange-100', 'ring-blue-100',
+  'bg-slate-600', 'bg-orange-600', 'bg-blue-600',
+
   // InteractiveUseCaseMap specific patterns
   'group-hover/category-0:opacity-100',
   'group-hover/category-1:opacity-100',

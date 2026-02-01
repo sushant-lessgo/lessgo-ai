@@ -1,5 +1,6 @@
 /**
  * ProcessFlowDiagram - Published Version
+ * V2 Schema: Uses steps[] and benefits[] arrays instead of pipe-separated strings
  *
  * Server-safe component with ZERO hook imports
  * Used by componentRegistry.published.ts for SSR rendering
@@ -14,60 +15,69 @@ import { SectionWrapperPublished } from '@/components/published/SectionWrapperPu
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
+interface Step {
+  id: string;
+  title: string;
+  description: string;
+}
+
+interface Benefit {
+  id: string;
+  title: string;
+  description: string;
+  icon?: string;
+}
+
 export default function ProcessFlowDiagramPublished(props: LayoutComponentProps) {
   const { sectionId, sectionBackgroundCSS, theme, backgroundType } = props;
 
   // Extract content from props (flattened by LandingPagePublishedRenderer)
   const headline = props.headline || 'How Our Unique Process Works';
   const subheadline = props.subheadline || '';
-  const process_steps = props.process_steps || '';
-  const step_descriptions = props.step_descriptions || '';
   const benefits_title = props.benefits_title || '';
-  const benefit_titles = props.benefit_titles || '';
-  const benefit_descriptions = props.benefit_descriptions || '';
-  const benefit_icon_1 = props.benefit_icon_1 || '⚡';
-  const benefit_icon_2 = props.benefit_icon_2 || '🎯';
-  const benefit_icon_3 = props.benefit_icon_3 || '🔧';
 
-  // Parse pipe-delimited strings
-  const steps = process_steps.split('|').map((s: string) => s.trim()).filter((s: string) => s && s !== '___REMOVED___');
-  const descriptions = step_descriptions.split('|').map((d: string) => d.trim()).filter((d: string) => d && d !== '___REMOVED___');
-  const benefitTitles = benefit_titles.split('|').map((t: string) => t.trim()).filter((t: string) => t && t !== '___REMOVED___');
-  const benefitDescs = benefit_descriptions.split('|').map((d: string) => d.trim()).filter((d: string) => d && d !== '___REMOVED___');
-  const benefitIcons = [benefit_icon_1, benefit_icon_2, benefit_icon_3];
+  // Parse steps and benefits arrays
+  const steps: Step[] = Array.isArray(props.steps) ? props.steps : [];
+  const benefits: Benefit[] = Array.isArray(props.benefits) ? props.benefits : [];
 
   // Theme detection (no useMemo - direct evaluation)
   const uiTheme: UIBlockTheme = props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
 
-  // Get theme colors
+  // Get theme colors (flat design)
   const getProcessColors = (theme: UIBlockTheme) => {
     const colorMap = {
       warm: {
-        gradientBg: 'linear-gradient(135deg, #ea580c 0%, #dc2626 100%)', // orange-600 to red-600
-        glowBg: 'rgba(234, 88, 12, 0.4)', // orange-400/40
+        circleBg: '#f97316', // orange-500
         benefitsBg: '#fff7ed', // orange-50
         benefitsBorder: '#fed7aa', // orange-200
         benefitsTextPrimary: '#7c2d12', // orange-900
         benefitsTextSecondary: '#c2410c', // orange-700
-        benefitIconBg: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)', // orange-500 to orange-600
+        benefitIconBg: '#f97316', // orange-500
+        connectorColor: '#fdba74', // orange-300
+        cardShadow: '0 4px 20px rgba(249,115,22,0.15)',
+        cardHoverShadow: '0 8px 30px rgba(249,115,22,0.25)',
       },
       cool: {
-        gradientBg: 'linear-gradient(135deg, #2563eb 0%, #4f46e5 100%)', // blue-600 to indigo-700
-        glowBg: 'rgba(96, 165, 250, 0.4)', // blue-400/40
+        circleBg: '#2563eb', // blue-600
         benefitsBg: '#eff6ff', // blue-50
         benefitsBorder: '#bfdbfe', // blue-200
         benefitsTextPrimary: '#1e3a8a', // blue-900
         benefitsTextSecondary: '#1d4ed8', // blue-700
-        benefitIconBg: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', // blue-500 to blue-600
+        benefitIconBg: '#2563eb', // blue-600
+        connectorColor: '#93c5fd', // blue-300
+        cardShadow: '0 4px 20px rgba(37,99,235,0.15)',
+        cardHoverShadow: '0 8px 30px rgba(37,99,235,0.25)',
       },
       neutral: {
-        gradientBg: 'linear-gradient(135deg, #4b5563 0%, #374151 100%)', // gray-600 to gray-700
-        glowBg: 'rgba(156, 163, 175, 0.4)', // gray-400/40
+        circleBg: '#4b5563', // gray-600
         benefitsBg: '#f9fafb', // gray-50
         benefitsBorder: '#e5e7eb', // gray-200
         benefitsTextPrimary: '#111827', // gray-900
         benefitsTextSecondary: '#374151', // gray-700
-        benefitIconBg: 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)', // gray-500 to gray-600
+        benefitIconBg: '#4b5563', // gray-600
+        connectorColor: '#cbd5e1', // slate-300
+        cardShadow: '0 4px 20px rgba(100,116,139,0.15)',
+        cardHoverShadow: '0 8px 30px rgba(100,116,139,0.25)',
       }
     };
     return colorMap[theme];
@@ -94,7 +104,7 @@ export default function ProcessFlowDiagramPublished(props: LayoutComponentProps)
       case 4: return 'lg:grid-cols-4';
       case 5: return 'lg:grid-cols-5';
       case 6: return 'lg:grid-cols-6';
-      default: return 'lg:grid-cols-6';
+      default: return 'lg:grid-cols-3';
     }
   };
 
@@ -135,19 +145,28 @@ export default function ProcessFlowDiagramPublished(props: LayoutComponentProps)
         {/* Process Flow */}
         <div className="relative">
           <div className={`grid grid-cols-1 md:grid-cols-2 ${getGridCols(steps.length)} gap-12`}>
-            {steps.map((step: string, index: number) => (
+            {steps.map((step: Step, index: number) => (
               <div
-                key={index}
-                className="relative flex flex-col items-center px-4 pt-10 pb-6 rounded-3xl bg-white/80 ring-1 ring-slate-100/80 shadow-[0_18px_45px_rgba(15,23,42,0.08)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_65px_rgba(15,23,42,0.18)]"
+                key={step.id}
+                className="relative flex flex-col items-center px-4 pt-10 pb-6 rounded-3xl bg-white/80 ring-1 ring-slate-200 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1"
+                style={{ boxShadow: processColors.cardShadow }}
               >
-                {/* Step Circle */}
+                {/* Connector line to next step */}
+                {index < steps.length - 1 && (
+                  <div
+                    className="hidden lg:block absolute top-1/2 -right-6 w-12 border-t-2 border-dashed"
+                    style={{ borderColor: processColors.connectorColor }}
+                  />
+                )}
+
+                {/* Step Circle - Flat design */}
                 <div className="relative mb-5">
                   <div
                     style={{
-                      background: processColors.gradientBg,
-                      boxShadow: '0 0 30px rgba(59,130,246,0.55), 0 10px 25px rgba(15,23,42,0.35)'
+                      backgroundColor: processColors.circleBg,
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
                     }}
-                    className="relative z-10 w-24 h-24 rounded-full flex items-center justify-center text-white font-semibold text-xl ring-1 ring-white/25"
+                    className="relative z-10 w-20 h-20 rounded-full flex items-center justify-center text-white font-semibold text-xl"
                   >
                     {index + 1}
                   </div>
@@ -156,7 +175,7 @@ export default function ProcessFlowDiagramPublished(props: LayoutComponentProps)
                 {/* Step Content */}
                 <div className="text-center max-w-xs mx-auto">
                   <TextPublished
-                    value={step}
+                    value={step.title}
                     style={{
                       color: '#0f172a', // slate-900
                       fontSize: '17px',
@@ -167,9 +186,9 @@ export default function ProcessFlowDiagramPublished(props: LayoutComponentProps)
                       textAlign: 'center'
                     }}
                   />
-                  {descriptions[index] && (
+                  {step.description && (
                     <TextPublished
-                      value={descriptions[index]}
+                      value={step.description}
                       style={{
                         color: '#64748b', // slate-600
                         fontSize: '14px',
@@ -185,7 +204,7 @@ export default function ProcessFlowDiagramPublished(props: LayoutComponentProps)
         </div>
 
         {/* Key Benefits */}
-        {(benefits_title || benefitTitles.length > 0) && (
+        {(benefits_title || benefits.length > 0) && (
           <div
             style={{
               backgroundColor: processColors.benefitsBg,
@@ -206,21 +225,22 @@ export default function ProcessFlowDiagramPublished(props: LayoutComponentProps)
               />
             )}
             <div className="grid md:grid-cols-3 gap-6">
-              {benefitTitles.map((title: string, index: number) => (
-                <div key={index} className="text-center">
+              {benefits.map((benefit: Benefit) => (
+                <div key={benefit.id} className="text-center">
                   <div
                     style={{
-                      background: processColors.benefitIconBg,
-                      boxShadow: '0 4px 18px rgba(59,130,246,0.35), 0 6px 14px rgba(15,23,42,0.2)'
+                      backgroundColor: processColors.benefitIconBg,
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
                     }}
-                    className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 ring-1 ring-white/20 backdrop-blur-sm"
+                    className="w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-4"
                   >
                     <IconPublished
-                      icon={benefitIcons[index] || '✨'} color={'#ffffff'}
+                      icon={benefit.icon || '✨'}
+                      color={'#ffffff'}
                     />
                   </div>
                   <TextPublished
-                    value={title}
+                    value={benefit.title}
                     style={{
                       color: processColors.benefitsTextPrimary,
                       fontWeight: '600',
@@ -228,9 +248,9 @@ export default function ProcessFlowDiagramPublished(props: LayoutComponentProps)
                       textAlign: 'center'
                     }}
                   />
-                  {benefitDescs[index] && (
+                  {benefit.description && (
                     <TextPublished
-                      value={benefitDescs[index]}
+                      value={benefit.description}
                       style={{
                         color: processColors.benefitsTextSecondary,
                         fontSize: '0.875rem',

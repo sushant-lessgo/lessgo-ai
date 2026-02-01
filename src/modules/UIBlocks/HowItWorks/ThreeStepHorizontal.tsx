@@ -1,236 +1,180 @@
-import React, { useEffect } from 'react';
-import { generateColorTokens } from '../../Design/ColorSystem/colorTokens';
-import { useTypography } from '@/hooks/useTypography';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
-import { useOnboardingStore } from '@/hooks/useOnboardingStore';
+import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import {
   EditableAdaptiveHeadline,
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
-import {
-  LayoutComponentProps,
-  extractLayoutContent,
-  StoreElementTypes
-} from '@/types/storeTypes';
-import IconEditableText from '@/components/ui/IconEditableText';
-import { getIconFromCategory, getRandomIconFromCategory } from '@/utils/iconMapping';
+import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 interface ThreeStepHorizontalProps extends LayoutComponentProps {}
 
-// Step item structure
+// Step item structure (V2 array format)
 interface StepItem {
+  id: string;
   title: string;
   description: string;
-  id: string;
+  icon?: string;
 }
 
-// Content interface for ThreeStepHorizontal layout
+// Content interface for ThreeStepHorizontal layout (V2)
 interface ThreeStepHorizontalContent {
   headline: string;
   subheadline?: string;
-  step_titles: string;
-  step_descriptions: string;
-  step_numbers?: string;
   conclusion_text?: string;
-  // Step icons
-  step_icon_1?: string;
-  step_icon_2?: string;
-  step_icon_3?: string;
+  steps: StepItem[];
 }
+
+// Default steps for new sections
+const DEFAULT_STEPS: StepItem[] = [
+  { id: 's1', title: 'Sign Up & Connect', description: 'Create your account and connect your existing tools in just a few clicks.' },
+  { id: 's2', title: 'Customize Your Setup', description: 'Tailor the platform to your specific needs with our intuitive configuration wizard.' },
+  { id: 's3', title: 'Get Results', description: 'Watch as your automated workflows start delivering results immediately.' }
+];
 
 // Content schema for ThreeStepHorizontal layout
 const CONTENT_SCHEMA = {
   headline: { type: 'string' as const, default: 'How It Works' },
   subheadline: { type: 'string' as const, default: '' },
-  step_titles: { type: 'string' as const, default: 'Sign Up & Connect|Customize Your Setup|Get Results' },
-  step_descriptions: { type: 'string' as const, default: 'Create your account and connect your existing tools in just a few clicks.|Tailor the platform to your specific needs with our intuitive configuration wizard.|Watch as your automated workflows start delivering results immediately.' },
-  step_numbers: { type: 'string' as const, default: '' },
   conclusion_text: { type: 'string' as const, default: '' },
-  // Step icons
-  step_icon_1: { type: 'string' as const, default: '👤' },
-  step_icon_2: { type: 'string' as const, default: '⚙️' },
-  step_icon_3: { type: 'string' as const, default: '📊' }
+  steps: { type: 'array' as const, default: DEFAULT_STEPS }
 };
 
-// Parse step data from pipe-separated strings
-const parseStepData = (titles: string, descriptions: string): StepItem[] => {
-  const titleList = titles.split('|').map(t => t.trim()).filter(t => t);
-  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
-
-  return titleList.map((title, index) => ({
-    id: `step-${index}`,
-    title,
-    description: descriptionList[index] || 'Step description not provided.'
-  }));
+// Generate unique ID for new steps
+const generateStepId = (): string => {
+  return `s${Date.now().toString(36)}`;
 };
 
-// Helper function to get step icon
-const getStepIcon = (blockContent: ThreeStepHorizontalContent, index: number) => {
-  const iconFields = [
-    blockContent.step_icon_1,
-    blockContent.step_icon_2,
-    blockContent.step_icon_3
-  ];
-  return iconFields[index] || ['👤', '⚙️', '📊'][index] || '⭐';
-};
-
-// Helper function to add a new step
-const addStep = (titles: string, descriptions: string): { newTitles: string; newDescriptions: string } => {
-  const titleList = titles.split('|').map(t => t.trim()).filter(t => t);
-  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
-
-  // Add new step with default content
-  titleList.push('New Step');
-  descriptionList.push('Describe this step in your process.');
-
+// Step colors by theme
+const getStepColors = (theme: UIBlockTheme) => {
   return {
-    newTitles: titleList.join('|'),
-    newDescriptions: descriptionList.join('|')
-  };
-};
-
-// Helper function to remove a step
-const removeStep = (titles: string, descriptions: string, indexToRemove: number): { newTitles: string; newDescriptions: string } => {
-  const titleList = titles.split('|').map(t => t.trim()).filter(t => t);
-  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
-
-  // Remove the step at the specified index
-  if (indexToRemove >= 0 && indexToRemove < titleList.length) {
-    titleList.splice(indexToRemove, 1);
-  }
-  if (indexToRemove >= 0 && indexToRemove < descriptionList.length) {
-    descriptionList.splice(indexToRemove, 1);
-  }
-
-  return {
-    newTitles: titleList.join('|'),
-    newDescriptions: descriptionList.join('|')
-  };
+    warm: {
+      stepCircle: 'bg-orange-600',
+      stepCircleShadow: 'shadow-orange-300/40',
+      stepCircleRing: 'ring-orange-100',
+      stepIconFrom: 'from-orange-500',
+      stepIconTo: 'to-orange-600',
+      iconShadow: 'shadow-orange-200/50',
+      connector: 'text-orange-400',
+      connectorLine: 'bg-orange-200',
+      subtleBackground: 'from-orange-50/30',
+      addButtonBg: 'bg-orange-50',
+      addButtonHover: 'hover:bg-orange-100',
+      addButtonBorder: 'border-orange-200',
+      addButtonBorderHover: 'hover:border-orange-300',
+      addButtonText: 'text-orange-700',
+      addButtonIcon: 'text-orange-600',
+      focusRing: 'focus:ring-orange-500'
+    },
+    cool: {
+      stepCircle: 'bg-blue-600',
+      stepCircleShadow: 'shadow-blue-300/40',
+      stepCircleRing: 'ring-blue-100',
+      stepIconFrom: 'from-blue-500',
+      stepIconTo: 'to-blue-600',
+      iconShadow: 'shadow-blue-200/50',
+      connector: 'text-blue-400',
+      connectorLine: 'bg-blue-200',
+      subtleBackground: 'from-blue-50/30',
+      addButtonBg: 'bg-blue-50',
+      addButtonHover: 'hover:bg-blue-100',
+      addButtonBorder: 'border-blue-200',
+      addButtonBorderHover: 'hover:border-blue-300',
+      addButtonText: 'text-blue-700',
+      addButtonIcon: 'text-blue-600',
+      focusRing: 'focus:ring-blue-500'
+    },
+    neutral: {
+      stepCircle: 'bg-slate-600',
+      stepCircleShadow: 'shadow-slate-300/40',
+      stepCircleRing: 'ring-slate-100',
+      stepIconFrom: 'from-slate-500',
+      stepIconTo: 'to-slate-600',
+      iconShadow: 'shadow-slate-200/50',
+      connector: 'text-slate-400',
+      connectorLine: 'bg-slate-200',
+      subtleBackground: 'from-slate-50/30',
+      addButtonBg: 'bg-slate-50',
+      addButtonHover: 'hover:bg-slate-100',
+      addButtonBorder: 'border-slate-200',
+      addButtonBorderHover: 'hover:border-slate-300',
+      addButtonText: 'text-slate-700',
+      addButtonIcon: 'text-slate-600',
+      focusRing: 'focus:ring-slate-500'
+    }
+  }[theme];
 };
 
 // Individual Step Card
 const StepCard = ({
-  item,
+  step,
   mode,
   sectionId,
   index,
-  onTitleEdit,
-  onDescriptionEdit,
+  onStepUpdate,
   onRemoveStep,
   isLast = false,
-  blockContent,
-  handleContentUpdate,
-  backgroundType,
   colorTokens,
   canRemove = true,
   stepColors
 }: {
-  item: StepItem;
+  step: StepItem;
   mode: 'edit' | 'preview';
   sectionId: string;
   index: number;
-  onTitleEdit: (index: number, value: string) => void;
-  onDescriptionEdit: (index: number, value: string) => void;
+  onStepUpdate: (index: number, field: keyof StepItem, value: string) => void;
   onRemoveStep?: (index: number) => void;
   isLast?: boolean;
-  blockContent: ThreeStepHorizontalContent;
-  handleContentUpdate: (key: string, value: any) => void;
-  backgroundType: any;
   colorTokens: any;
   canRemove?: boolean;
-  stepColors: {
-    stepCircle: string;
-    stepCircleShadow: string;
-    stepCircleRing: string;
-    stepIconFrom: string;
-    stepIconTo: string;
-    iconShadow: string;
-    connector: string;
-    connectorLine: string;
-    subtleBackground: string;
-    addButtonBg: string;
-    addButtonHover: string;
-    addButtonBorder: string;
-    addButtonBorderHover: string;
-    addButtonText: string;
-    addButtonIcon: string;
-    focusRing: string;
-  };
+  stepColors: ReturnType<typeof getStepColors>;
 }) => {
-  const { getTextStyle } = useTypography();
-
   return (
-    <div className="relative flex-1 group">
-      {/* Subtle container background for depth */}
-      <div className={`relative p-6 rounded-xl bg-gradient-to-b ${stepColors.subtleBackground} to-transparent text-center`}>
+    <div className="relative flex-1 group flex flex-col">
+      {/* Card with solid background and border */}
+      <div className={`relative p-6 rounded-xl ${stepColors.addButtonBg} border ${stepColors.addButtonBorder} flex-1`}>
 
-        {/* Step Number Circle with ring and shadow */}
-        <div className="relative mb-6">
-          <div className={`w-12 h-12 ${stepColors.stepCircle} rounded-full flex items-center justify-center text-white font-bold text-lg mx-auto shadow-lg ${stepColors.stepCircleShadow} ring-4 ${stepColors.stepCircleRing}`}>
+        {/* Step Number Circle - Larger (64px) with ring and shadow */}
+        <div className="relative mb-6 flex justify-center">
+          <div className={`w-16 h-16 ${stepColors.stepCircle} rounded-full flex items-center justify-center text-white font-bold text-2xl shadow-lg ${stepColors.stepCircleShadow} ring-4 ${stepColors.stepCircleRing}`}>
             {index + 1}
-          </div>
-
-          {/* Step Icon with colored shadow */}
-          <div className="mt-4">
-            <div className={`w-16 h-16 bg-gradient-to-br ${stepColors.stepIconFrom} ${stepColors.stepIconTo} rounded-full flex items-center justify-center shadow-lg ${stepColors.iconShadow} mx-auto`}>
-              <IconEditableText
-                mode={mode}
-                value={getStepIcon(blockContent, index)}
-                onEdit={(value) => {
-                  const iconField = `step_icon_${index + 1}` as keyof ThreeStepHorizontalContent;
-                  handleContentUpdate(iconField, value);
-                }}
-                backgroundType="primary"
-                colorTokens={colorTokens}
-                iconSize="lg"
-                className="text-white text-2xl"
-                sectionId={sectionId}
-                elementKey={`step_icon_${index + 1}`}
-              />
-            </div>
           </div>
         </div>
 
-        {/* Step Title */}
-        <div className="mb-4">
+        {/* Step Title - Centered */}
+        <div className="mb-4 text-center">
           {mode !== 'preview' ? (
             <div
               contentEditable
               suppressContentEditableWarning
-              onBlur={(e) => onTitleEdit(index, e.currentTarget.textContent || '')}
+              onBlur={(e) => onStepUpdate(index, 'title', e.currentTarget.textContent || '')}
               className={`outline-none focus:ring-2 ${stepColors.focusRing} focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 font-semibold ${colorTokens.textPrimary}`}
             >
-              {item.title}
+              {step.title}
             </div>
           ) : (
-            <h3
-              className={`font-semibold ${colorTokens.textPrimary} mb-3`}
-            >
-              {item.title}
+            <h3 className={`font-semibold ${colorTokens.textPrimary} mb-3`}>
+              {step.title}
             </h3>
           )}
         </div>
 
-        {/* Step Description */}
-        <div>
+        {/* Step Description - Left aligned for readability */}
+        <div className="text-left">
           {mode !== 'preview' ? (
             <div
               contentEditable
               suppressContentEditableWarning
-              onBlur={(e) => onDescriptionEdit(index, e.currentTarget.textContent || '')}
+              onBlur={(e) => onStepUpdate(index, 'description', e.currentTarget.textContent || '')}
               className={`outline-none focus:ring-2 ${stepColors.focusRing} focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 ${colorTokens.textSecondary} leading-relaxed`}
             >
-              {item.description}
+              {step.description}
             </div>
           ) : (
-            <p
-              className={`${colorTokens.textSecondary} leading-relaxed`}
-            >
-              {item.description}
+            <p className={`${colorTokens.textSecondary} leading-relaxed`}>
+              {step.description}
             </p>
           )}
         </div>
@@ -252,38 +196,19 @@ const StepCard = ({
         )}
       </div>
 
-      {/* Enhanced Connecting Arrow (Desktop Only) - with drop shadow and thicker stroke */}
-      {!isLast && (
-        <div className="lg:block absolute top-20 -right-8 w-16 h-8 flex items-center justify-center">
-          <svg className={`w-8 h-8 ${stepColors.connector} drop-shadow-md`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-          </svg>
-        </div>
-      )}
-
-      {/* Connecting Line (Mobile) */}
-      {!isLast && (
-        <div className="lg:hidden flex justify-center mt-8 mb-8">
-          <div className={`w-1 h-12 ${stepColors.connectorLine} rounded-full`}></div>
-        </div>
-      )}
     </div>
   );
 };
 
 export default function ThreeStepHorizontal(props: ThreeStepHorizontalProps) {
-  // ✅ Use the standard useLayoutComponent hook
   const {
     sectionId,
     mode,
     blockContent,
     colorTokens,
-    dynamicTextColors,
-    getTextStyle,
     sectionBackground,
     backgroundType,
-    handleContentUpdate,
-    theme
+    handleContentUpdate
   } = useLayoutComponent<ThreeStepHorizontalContent>({
     ...props,
     contentSchema: CONTENT_SCHEMA
@@ -296,112 +221,36 @@ export default function ThreeStepHorizontal(props: ThreeStepHorizontalProps) {
     return 'neutral';
   }, [props.manualThemeOverride, props.userContext]);
 
-  // Step colors by theme
-  const getStepColors = (theme: UIBlockTheme) => {
-    return {
-      warm: {
-        stepCircle: 'bg-orange-600',
-        stepCircleShadow: 'shadow-orange-300/40',
-        stepCircleRing: 'ring-orange-100',
-        stepIconFrom: 'from-orange-500',
-        stepIconTo: 'to-orange-600',
-        iconShadow: 'shadow-orange-200/50',
-        connector: 'text-orange-400',
-        connectorLine: 'bg-orange-200',
-        subtleBackground: 'from-orange-50/30',
-        addButtonBg: 'bg-orange-50',
-        addButtonHover: 'hover:bg-orange-100',
-        addButtonBorder: 'border-orange-200',
-        addButtonBorderHover: 'hover:border-orange-300',
-        addButtonText: 'text-orange-700',
-        addButtonIcon: 'text-orange-600',
-        focusRing: 'focus:ring-orange-500'
-      },
-      cool: {
-        stepCircle: 'bg-blue-600',
-        stepCircleShadow: 'shadow-blue-300/40',
-        stepCircleRing: 'ring-blue-100',
-        stepIconFrom: 'from-blue-500',
-        stepIconTo: 'to-blue-600',
-        iconShadow: 'shadow-blue-200/50',
-        connector: 'text-blue-400',
-        connectorLine: 'bg-blue-200',
-        subtleBackground: 'from-blue-50/30',
-        addButtonBg: 'bg-blue-50',
-        addButtonHover: 'hover:bg-blue-100',
-        addButtonBorder: 'border-blue-200',
-        addButtonBorderHover: 'hover:border-blue-300',
-        addButtonText: 'text-blue-700',
-        addButtonIcon: 'text-blue-600',
-        focusRing: 'focus:ring-blue-500'
-      },
-      neutral: {
-        stepCircle: 'bg-slate-600',
-        stepCircleShadow: 'shadow-slate-300/40',
-        stepCircleRing: 'ring-slate-100',
-        stepIconFrom: 'from-slate-500',
-        stepIconTo: 'to-slate-600',
-        iconShadow: 'shadow-slate-200/50',
-        connector: 'text-slate-400',
-        connectorLine: 'bg-slate-200',
-        subtleBackground: 'from-slate-50/30',
-        addButtonBg: 'bg-slate-50',
-        addButtonHover: 'hover:bg-slate-100',
-        addButtonBorder: 'border-slate-200',
-        addButtonBorderHover: 'hover:border-slate-300',
-        addButtonText: 'text-slate-700',
-        addButtonIcon: 'text-slate-600',
-        focusRing: 'focus:ring-slate-500'
-      }
-    }[theme];
-  };
-
   const stepColors = getStepColors(uiBlockTheme);
 
-  // Parse step data
-  const stepItems = parseStepData(blockContent.step_titles, blockContent.step_descriptions);
+  // Get steps array (with fallback to default)
+  const steps: StepItem[] = Array.isArray(blockContent.steps) && blockContent.steps.length > 0
+    ? blockContent.steps
+    : DEFAULT_STEPS;
 
-  // Handle individual title/description editing
-  const handleTitleEdit = (index: number, value: string) => {
-    const titles = blockContent.step_titles.split('|');
-    titles[index] = value;
-    handleContentUpdate('step_titles', titles.join('|'));
-  };
-
-  const handleDescriptionEdit = (index: number, value: string) => {
-    const descriptions = blockContent.step_descriptions.split('|');
-    descriptions[index] = value;
-    handleContentUpdate('step_descriptions', descriptions.join('|'));
+  // Handle step field update
+  const handleStepUpdate = (index: number, field: keyof StepItem, value: string) => {
+    const updatedSteps = steps.map((step, i) =>
+      i === index ? { ...step, [field]: value } : step
+    );
+    (handleContentUpdate as any)('steps', updatedSteps);
   };
 
   // Handle adding a new step
   const handleAddStep = () => {
-    const { newTitles, newDescriptions } = addStep(blockContent.step_titles, blockContent.step_descriptions);
-    handleContentUpdate('step_titles', newTitles);
-    handleContentUpdate('step_descriptions', newDescriptions);
-
-    // Add a smart icon for the new step
-    const newStepCount = newTitles.split('|').length;
-    const iconField = `step_icon_${newStepCount}` as keyof ThreeStepHorizontalContent;
-    if (newStepCount <= 3) {
-      const defaultIcon = getRandomIconFromCategory('process');
-      handleContentUpdate(iconField, defaultIcon);
-    }
+    const newStep: StepItem = {
+      id: generateStepId(),
+      title: 'New Step',
+      description: 'Describe this step in your process.'
+    };
+    (handleContentUpdate as any)('steps', [...steps, newStep]);
   };
 
   // Handle removing a step
   const handleRemoveStep = (indexToRemove: number) => {
-    const { newTitles, newDescriptions } = removeStep(blockContent.step_titles, blockContent.step_descriptions, indexToRemove);
-    handleContentUpdate('step_titles', newTitles);
-    handleContentUpdate('step_descriptions', newDescriptions);
-
-    // Also clear the corresponding icon if it exists
-    const iconField = `step_icon_${indexToRemove + 1}` as keyof ThreeStepHorizontalContent;
-    if (blockContent[iconField]) {
-      handleContentUpdate(iconField, '');
-    }
+    const updatedSteps = steps.filter((_, i) => i !== indexToRemove);
+    (handleContentUpdate as any)('steps', updatedSteps);
   };
-
 
   return (
     <LayoutSection
@@ -428,10 +277,10 @@ export default function ThreeStepHorizontal(props: ThreeStepHorizontalProps) {
             sectionBackground={sectionBackground}
           />
 
-          {blockContent.subheadline && (
+          {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
-              value={blockContent.subheadline}
+              value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
               backgroundType={backgroundType}
               colorTokens={colorTokens}
@@ -440,35 +289,32 @@ export default function ThreeStepHorizontal(props: ThreeStepHorizontalProps) {
               sectionId={sectionId}
               elementKey="subheadline"
               sectionBackground={sectionBackground}
+              placeholder="Add a subheadline..."
             />
           )}
         </div>
 
-        {/* Steps Container */}
-        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between space-y-12 lg:space-y-0 lg:space-x-8 relative">
-          {stepItems.map((item, index) => (
+        {/* Steps Container - Horizontal layout */}
+        <div className="flex flex-col lg:flex-row lg:items-stretch lg:justify-between gap-8 relative">
+          {steps.map((step, index) => (
             <StepCard
-              key={item.id}
-              item={item}
+              key={step.id}
+              step={step}
               mode={mode}
               sectionId={sectionId}
               index={index}
-              onTitleEdit={handleTitleEdit}
-              onDescriptionEdit={handleDescriptionEdit}
+              onStepUpdate={handleStepUpdate}
               onRemoveStep={handleRemoveStep}
-              isLast={index === stepItems.length - 1}
-              blockContent={blockContent}
-              handleContentUpdate={handleContentUpdate}
-              backgroundType={backgroundType}
+              isLast={index === steps.length - 1}
               colorTokens={colorTokens}
-              canRemove={stepItems.length > 1}
+              canRemove={steps.length > 3}
               stepColors={stepColors}
             />
           ))}
         </div>
 
         {/* Add Step Button - only show in edit mode and if under max limit */}
-        {mode !== 'preview' && stepItems.length < 6 && (
+        {mode !== 'preview' && steps.length < 6 && (
           <div className="mt-12 text-center">
             <button
               onClick={handleAddStep}
@@ -500,7 +346,6 @@ export default function ThreeStepHorizontal(props: ThreeStepHorizontalProps) {
             />
           </div>
         )}
-
       </div>
     </LayoutSection>
   );
@@ -516,7 +361,7 @@ export const componentMeta = {
     'Editable step titles and descriptions',
     'Connecting arrows on desktop layout',
     'Responsive mobile stacking',
-    'Contextual step icons',
+    'Contextual step icons with smart derivation',
     'Optional conclusion text'
   ],
   props: {
@@ -526,10 +371,9 @@ export const componentMeta = {
   },
   contentSchema: {
     headline: 'Main heading text',
-    step_titles: 'Pipe-separated list of step titles',
-    step_descriptions: 'Pipe-separated list of step descriptions',
-    step_numbers: 'Optional pipe-separated custom step numbers',
-    conclusion_text: 'Optional conclusion text to summarize the process'
+    subheadline: 'Optional subheadline text',
+    conclusion_text: 'Optional conclusion text to summarize the process',
+    steps: 'Array of step objects with id, title, description, and optional icon'
   },
   examples: [
     'How it works process',

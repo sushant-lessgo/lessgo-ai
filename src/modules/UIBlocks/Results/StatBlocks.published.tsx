@@ -1,5 +1,5 @@
 /**
- * StatBlocks - Published Version
+ * StatBlocks - Published Version (V2)
  *
  * Server-safe component with ZERO hook imports
  * Used by componentRegistry.published.ts for SSR rendering
@@ -14,12 +14,31 @@ import { SectionWrapperPublished } from '@/components/published/SectionWrapperPu
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
-// Stat item structure
-interface Stat {
+// Stat item structure (V2 array format)
+interface StatItem {
+  id: string;
   value: string;
   label: string;
-  description: string;
+  description?: string;
+  icon?: string;
 }
+
+// Get contextual icon based on stat label
+const getContextualIcon = (label: string, index: number): string => {
+  const lower = label.toLowerCase();
+
+  if (lower.includes('customer') || lower.includes('user') || lower.includes('client')) return '👥';
+  if (lower.includes('satisfaction') || lower.includes('rating') || lower.includes('score') || lower.includes('love')) return '❤️';
+  if (lower.includes('revenue') || lower.includes('growth') || lower.includes('sales') || lower.includes('profit') || lower.includes('increase')) return '📈';
+  if (lower.includes('time') || lower.includes('speed') || lower.includes('fast') || lower.includes('support') || lower.includes('24')) return '⏰';
+  if (lower.includes('efficiency') || lower.includes('productivity') || lower.includes('performance') || lower.includes('boost')) return '⚡';
+  if (lower.includes('award') || lower.includes('achievement') || lower.includes('success') || lower.includes('winner')) return '🏆';
+  if (lower.includes('money') || lower.includes('cost') || lower.includes('save') || lower.includes('dollar')) return '💰';
+  if (lower.includes('goal') || lower.includes('target') || lower.includes('hit') || lower.includes('reach')) return '🎯';
+
+  // Positional fallback
+  return ['📊', '✨', '🔥', '💡', '🚀', '🎉'][index] || '📊';
+};
 
 export default function StatBlocksPublished(props: LayoutComponentProps) {
   const { sectionId, sectionBackgroundCSS, theme, backgroundType } = props;
@@ -29,44 +48,13 @@ export default function StatBlocksPublished(props: LayoutComponentProps) {
   const subheadline = props.subheadline || '';
   const achievement_footer = props.achievement_footer || '';
 
-  // Parse stat data from pipe-separated strings
-  const stat_values = props.stat_values || '';
-  const stat_labels = props.stat_labels || '';
-  const stat_descriptions = props.stat_descriptions || '';
-
-  const valueList = stat_values.split('|').map((v: string) => v.trim()).filter((v: string) => v && v !== '___REMOVED___');
-  const labelList = stat_labels.split('|').map((l: string) => l.trim());
-  const descList = stat_descriptions ? stat_descriptions.split('|').map((d: string) => d.trim()) : [];
-
-  const stats: Stat[] = valueList.map((value: string, idx: number) => ({
-    value,
-    label: labelList[idx] || 'Metric',
-    description: descList[idx] || ''
-  }));
-
-  // Get stat icon (emoji-based)
-  const getStatIcon = (index: number): string => {
-    const iconFields = ['stat_icon_1', 'stat_icon_2', 'stat_icon_3', 'stat_icon_4', 'stat_icon_5', 'stat_icon_6'];
-    const iconField = iconFields[index];
-    const iconValue = props[iconField];
-
-    // Return icon if available, otherwise use contextual fallback based on label
-    if (iconValue) return iconValue;
-
-    // Contextual icon fallback based on stat label
-    const label = stats[index]?.label?.toLowerCase() || '';
-    if (label.includes('customer') || label.includes('user') || label.includes('client')) return '👥';
-    if (label.includes('satisfaction') || label.includes('rating') || label.includes('score') || label.includes('love')) return '❤️';
-    if (label.includes('revenue') || label.includes('growth') || label.includes('sales') || label.includes('profit') || label.includes('increase')) return '📈';
-    if (label.includes('time') || label.includes('speed') || label.includes('fast') || label.includes('support') || label.includes('24')) return '⏰';
-    if (label.includes('efficiency') || label.includes('productivity') || label.includes('performance') || label.includes('boost')) return '⚡';
-    if (label.includes('award') || label.includes('achievement') || label.includes('success') || label.includes('winner')) return '🏆';
-    if (label.includes('money') || label.includes('cost') || label.includes('save') || label.includes('dollar')) return '💰';
-    if (label.includes('goal') || label.includes('target') || label.includes('hit') || label.includes('reach')) return '🎯';
-
-    // Positional fallback
-    return ['📊', '✨', '🔥', '💡', '🚀', '🎉'][index] || '📊';
-  };
+  // Get stats array directly (V2 format)
+  const stats: StatItem[] = props.stats || [
+    { id: 's1', value: '10,000+', label: 'Happy Customers', description: 'And growing daily' },
+    { id: 's2', value: '98%', label: 'Customer Satisfaction', description: 'Based on NPS surveys' },
+    { id: 's3', value: '2.5x', label: 'Revenue Growth', description: 'Average increase' },
+    { id: 's4', value: '24/7', label: 'Support Available', description: 'Always here to help' }
+  ];
 
   // Theme detection
   const uiTheme: UIBlockTheme = props.manualThemeOverride ||
@@ -82,6 +70,17 @@ export default function StatBlocksPublished(props: LayoutComponentProps) {
   };
 
   const colors = getStatCardColors(uiTheme);
+
+  // Theme colors for achievement footer (hex values for inline styles)
+  const getFooterColors = (theme: UIBlockTheme) => {
+    return {
+      warm: { bg: '#fff7ed', border: '#fed7aa', text: '#c2410c', icon: '#f97316' },
+      cool: { bg: '#eff6ff', border: '#bfdbfe', text: '#1d4ed8', icon: '#3b82f6' },
+      neutral: { bg: '#f9fafb', border: '#e5e7eb', text: '#374151', icon: '#6b7280' }
+    }[theme];
+  };
+
+  const footerColors = getFooterColors(uiTheme);
 
   // Grid layout logic
   const gridCols = stats.length === 2 ? 'md:grid-cols-2 max-w-3xl' :
@@ -134,81 +133,86 @@ export default function StatBlocksPublished(props: LayoutComponentProps) {
 
         {/* Stats Grid */}
         <div className={`grid gap-8 ${gridCols} mx-auto`}>
-          {stats.map((stat: Stat, idx: number) => (
-            <div
-              key={`stat-${idx}`}
-              className="relative text-center p-8 bg-white rounded-xl border transition-all duration-300"
-              style={{ borderColor: colors.border }}
-            >
-              {/* Icon */}
-              <div className="mb-6">
-                <div
-                  className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto"
-                  style={{
-                    backgroundColor: colors.iconBg,
-                    color: colors.iconText
-                  }}
-                >
-                  <IconPublished icon={getStatIcon(idx)} size={32} />
-                </div>
-              </div>
+          {stats.map((stat: StatItem, idx: number) => {
+            // Get icon: user-set → derived from label
+            const displayIcon = stat.icon || getContextualIcon(stat.label, idx);
 
-              {/* Value */}
-              <div className="mb-4">
-                <div
-                  style={{
-                    fontSize: '3rem',
-                    fontWeight: 'bold',
-                    color: '#111827',
-                    lineHeight: '1'
-                  }}
-                >
-                  {stat.value}
+            return (
+              <div
+                key={stat.id}
+                className="relative text-center p-8 bg-white rounded-xl border transition-all duration-300"
+                style={{ borderColor: colors.border }}
+              >
+                {/* Icon */}
+                <div className="mb-6">
+                  <div
+                    className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto"
+                    style={{
+                      backgroundColor: colors.iconBg,
+                      color: colors.iconText
+                    }}
+                  >
+                    <IconPublished icon={displayIcon} size={32} />
+                  </div>
                 </div>
-              </div>
 
-              {/* Label */}
-              <div className="mb-3">
-                <div
-                  style={{
-                    fontSize: '1.125rem',
-                    fontWeight: 600,
-                    color: '#111827'
-                  }}
-                >
-                  {stat.label}
+                {/* Value */}
+                <div className="mb-4">
+                  <div
+                    style={{
+                      fontSize: '3rem',
+                      fontWeight: 'bold',
+                      color: '#111827',
+                      lineHeight: '1'
+                    }}
+                  >
+                    {stat.value}
+                  </div>
                 </div>
-              </div>
 
-              {/* Description */}
-              {stat.description && (
-                <TextPublished
-                  value={stat.description}
-                  style={{
-                    color: '#6b7280',
-                    lineHeight: '1.75'
-                  }}
-                />
-              )}
-            </div>
-          ))}
+                {/* Label */}
+                <div className="mb-3">
+                  <div
+                    style={{
+                      fontSize: '1.125rem',
+                      fontWeight: 600,
+                      color: '#111827'
+                    }}
+                  >
+                    {stat.label}
+                  </div>
+                </div>
+
+                {/* Description */}
+                {stat.description && (
+                  <TextPublished
+                    value={stat.description}
+                    style={{
+                      color: '#6b7280',
+                      lineHeight: '1.75'
+                    }}
+                  />
+                )}
+              </div>
+            );
+          })}
         </div>
 
         {/* Achievement Footer */}
-        {achievement_footer && achievement_footer !== '___REMOVED___' && (
+        {achievement_footer && (
           <div className="mt-16 text-center">
             <div
               className="inline-flex items-center px-6 py-3 border rounded-full"
               style={{
-                backgroundColor: '#f0fdf4',
-                borderColor: '#bbf7d0',
-                color: '#166534'
+                backgroundColor: footerColors.bg,
+                borderColor: footerColors.border,
+                color: footerColors.text
               }}
             >
-              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" style={{ color: footerColors.icon }}>
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
-              <span style={{ fontWeight: 500, color: '#166534' }}>
+              <span style={{ fontWeight: 500, color: footerColors.text }}>
                 {achievement_footer}
               </span>
             </div>

@@ -3,6 +3,7 @@
  *
  * Server-safe component with ZERO hook imports
  * Used by componentRegistry.published.ts for SSR rendering
+ * V2: Clean array format for trust_items
  */
 
 import React from 'react';
@@ -17,6 +18,12 @@ import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThe
 import { FormMarkupPublished } from '@/components/published/FormMarkupPublished';
 import { InlineFormMarkupPublished } from '@/components/published/InlineFormMarkupPublished';
 import { determineFormPlacement } from '@/utils/formPlacement';
+
+// V2: Trust item type
+interface TrustItem {
+  id: string;
+  text: string;
+}
 
 // Theme colors helper (hex values for inline styles)
 const getThemeColors = (theme: UIBlockTheme) => {
@@ -75,21 +82,14 @@ export default function CenteredHeadlineCTAPublished(props: LayoutComponentProps
   const bodyLgTypography = getPublishedTypographyStyles('body-lg', theme);
   const bodyTypography = getPublishedTypographyStyles('body', theme);
 
-  // Trust items
-  const trustItems = [
-    props.trust_item_1,
-    props.trust_item_2,
-    props.trust_item_3,
-    props.trust_item_4,
-    props.trust_item_5
-  ].filter((item): item is string =>
-    Boolean(item && item.trim() !== '' && item !== '___REMOVED___')
-  );
+  // V2: Direct array access - trust_items is now TrustItem[]
+  const trustItemsRaw = (props.trust_items || []) as TrustItem[];
+  const trustItems = trustItemsRaw.map(item => item.text);
 
-  // Show social proof row if any stat exists
-  const showSocialProof = (customer_count && customer_count !== '___REMOVED___') ||
-    (rating_stat && rating_stat !== '___REMOVED___') ||
-    (uptime_stat && uptime_stat !== '___REMOVED___');
+  // Show social proof row if any stat exists (V2: no ___REMOVED___ checks)
+  const showSocialProof = (customer_count && customer_count.trim() !== '') ||
+    (rating_stat && rating_stat.trim() !== '') ||
+    (uptime_stat && uptime_stat.trim() !== '');
 
   // Extract button metadata for form detection
   const sectionData = props.content?.[sectionId];
@@ -213,8 +213,8 @@ export default function CenteredHeadlineCTAPublished(props: LayoutComponentProps
             );
           })()}
 
-          {/* Secondary CTA */}
-          {secondary_cta_text && secondary_cta_text.trim() !== '' && secondary_cta_text !== '___REMOVED___' && (
+          {/* Secondary CTA - V2: no ___REMOVED___ check */}
+          {secondary_cta_text && secondary_cta_text.trim() !== '' && (
             <CTAButtonPublished
               text={secondary_cta_text}
               backgroundColor="transparent"
@@ -245,13 +245,12 @@ export default function CenteredHeadlineCTAPublished(props: LayoutComponentProps
           </div>
         )}
 
-        {/* Social Proof Row */}
+        {/* Social Proof Row - removed divider for tighter integration */}
         {showSocialProof && (
-          <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-12 pt-8"
-            style={{ borderTop: '1px solid #e5e7eb' }}
+          <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-12 pt-4"
           >
-            {/* Customer Count */}
-            {customer_count && customer_count !== '___REMOVED___' && (
+            {/* Customer Count - V2: no ___REMOVED___ check */}
+            {customer_count && customer_count.trim() !== '' && (
               <div className="text-center">
                 <div style={{ color: textColors.heading, ...bodyTypography }} className="text-3xl font-bold">
                   {customer_count}
@@ -264,8 +263,8 @@ export default function CenteredHeadlineCTAPublished(props: LayoutComponentProps
               </div>
             )}
 
-            {/* Rating Stat */}
-            {rating_stat && rating_stat !== '___REMOVED___' && (
+            {/* Rating Stat - V2: no ___REMOVED___ check */}
+            {rating_stat && rating_stat.trim() !== '' && (
               <div className="flex items-center space-x-1">
                 {/* 5 Star Rating */}
                 {[1,2,3,4,5].map(i => (
@@ -279,8 +278,8 @@ export default function CenteredHeadlineCTAPublished(props: LayoutComponentProps
               </div>
             )}
 
-            {/* Uptime Stat */}
-            {uptime_stat && uptime_stat !== '___REMOVED___' && (
+            {/* Uptime Stat - V2: no ___REMOVED___ check */}
+            {uptime_stat && uptime_stat.trim() !== '' && (
               <div className="text-center">
                 <div style={{ color: textColors.heading, ...bodyTypography }} className="text-3xl font-bold">
                   {uptime_stat}

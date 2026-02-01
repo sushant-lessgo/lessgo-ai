@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import {
   EditableAdaptiveHeadline,
@@ -13,46 +14,32 @@ import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
-// Content interface for type safety
+// Objection item structure (V2 format)
+interface Objection {
+  id: string;
+  question: string;
+  response: string;
+  label?: string;
+  icon?: string;
+}
+
+// Content interface for type safety (V2 format)
 interface VisualObjectionTilesContent {
   headline: string;
   subheadline?: string;
-  // Pipe-separated fields for cards
-  objection_questions?: string;
-  objection_responses?: string;
-  objection_labels?: string;
-  objection_icons?: string;
-  // Individual tile fields (up to 6 tiles) - for backward compatibility
-  tile_objection_1?: string;
-  tile_response_1?: string;
-  tile_label_1?: string;
-  tile_objection_2?: string;
-  tile_response_2?: string;
-  tile_label_2?: string;
-  tile_objection_3?: string;
-  tile_response_3?: string;
-  tile_label_3?: string;
-  tile_objection_4?: string;
-  tile_response_4?: string;
-  tile_label_4?: string;
-  tile_objection_5?: string;
-  tile_response_5?: string;
-  tile_label_5?: string;
-  tile_objection_6?: string;
-  tile_response_6?: string;
-  tile_label_6?: string;
-  // Tile icons
-  tile_icon_1?: string;
-  tile_icon_2?: string;
-  tile_icon_3?: string;
-  tile_icon_4?: string;
-  tile_icon_5?: string;
-  tile_icon_6?: string;
-  // Legacy fields for backward compatibility
-  objection_tiles?: string;
-  objection_titles?: string;
-  tile_labels?: string;
+  objections: Objection[];
 }
+
+// Generate unique ID for new objections
+const generateId = () => `obj_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+// Default objections for new sections
+const DEFAULT_OBJECTIONS: Objection[] = [
+  { id: 'o1', question: '"It\'s too expensive for our budget"', response: 'Plans start at $10/mo with no hidden fees. Most teams see ROI within 30 days.', label: 'Pricing', icon: 'lucide:dollar-sign' },
+  { id: 'o2', question: '"We don\'t have time for another tool"', response: 'Setup takes under 10 minutes. No IT required. You\'ll save more time than you spend.', label: 'Time', icon: 'lucide:clock' },
+  { id: 'o3', question: '"Our team won\'t adopt it"', response: 'Designed for simplicity—if they can use email, they can use this. 94% adoption rate.', label: 'Adoption', icon: 'lucide:users' },
+  { id: 'o4', question: '"What if it doesn\'t work for us?"', response: '30-day money-back guarantee. No questions asked. Zero risk to try.', label: 'Risk', icon: 'lucide:shield-check' },
+];
 
 // Content schema - defines structure and defaults
 const CONTENT_SCHEMA = {
@@ -64,68 +51,45 @@ const CONTENT_SCHEMA = {
     type: 'string' as const,
     default: 'Here are the questions we hear most often and why they shouldn\'t hold you back.'
   },
-  // Pipe-separated fields (preferred format for AI generation)
-  objection_questions: { type: 'string' as const, default: '' },
-  objection_responses: { type: 'string' as const, default: '' },
-  objection_labels: { type: 'string' as const, default: '' },
-  objection_icons: { type: 'string' as const, default: '' },
-  // Individual tile fields
-  tile_objection_1: { type: 'string' as const, default: 'Too expensive for small teams' },
-  tile_response_1: { type: 'string' as const, default: 'Actually starts at just $10/month with no hidden fees' },
-  tile_label_1: { type: 'string' as const, default: 'Pricing' },
-  tile_objection_2: { type: 'string' as const, default: 'Takes too long to set up' },
-  tile_response_2: { type: 'string' as const, default: 'Most customers are up and running in under 10 minutes' },
-  tile_label_2: { type: 'string' as const, default: 'Setup' },
-  tile_objection_3: { type: 'string' as const, default: 'Too complex for non-technical users' },
-  tile_response_3: { type: 'string' as const, default: 'Designed with simplicity in mind - no coding required' },
-  tile_label_3: { type: 'string' as const, default: 'Ease of Use' },
-  tile_objection_4: { type: 'string' as const, default: 'Not enough integrations' },
-  tile_response_4: { type: 'string' as const, default: 'Works with 500+ popular tools out of the box' },
-  tile_label_4: { type: 'string' as const, default: 'Integrations' },
-  tile_objection_5: { type: 'string' as const, default: 'Security concerns' },
-  tile_response_5: { type: 'string' as const, default: 'Enterprise-grade security with SOC 2 compliance' },
-  tile_label_5: { type: 'string' as const, default: 'Security' },
-  tile_objection_6: { type: 'string' as const, default: 'Will slow down our workflow' },
-  tile_response_6: { type: 'string' as const, default: 'Actually speeds up processes by 3x on average' },
-  tile_label_6: { type: 'string' as const, default: 'Performance' },
-  // Tile icons
-  tile_icon_1: { type: 'string' as const, default: '💰' },
-  tile_icon_2: { type: 'string' as const, default: '⏰' },
-  tile_icon_3: { type: 'string' as const, default: '🔧' },
-  tile_icon_4: { type: 'string' as const, default: '📊' },
-  tile_icon_5: { type: 'string' as const, default: '🔒' },
-  tile_icon_6: { type: 'string' as const, default: '⚡' },
-  // Legacy fields for backward compatibility
-  objection_tiles: {
-    type: 'string' as const,
-    default: '💰|Too expensive for small teams|Actually starts at just $10/month with no hidden fees|⏰|Takes too long to set up|Most customers are up and running in under 10 minutes|🔧|Too complex for non-technical users|Designed with simplicity in mind - no coding required|📊|Not enough integrations|Works with 500+ popular tools out of the box|🔒|Security concerns|Enterprise-grade security with SOC 2 compliance|⚡|Will slow down our workflow|Actually speeds up processes by 3x on average'
+  objections: {
+    type: 'array' as const,
+    default: DEFAULT_OBJECTIONS
   }
 };
 
-// Color mapping function for theme-aware styling
-const getTileColors = (theme: UIBlockTheme) => {
-  const colorMap = {
-    warm: {
-      iconBg: 'from-orange-50 to-orange-100',
-      border: 'border-orange-200',
-      hoverBorder: 'hover:border-orange-300',
-      accent: 'from-orange-400 to-orange-500'
-    },
-    cool: {
-      iconBg: 'from-blue-50 to-indigo-100',
-      border: 'border-blue-200',
-      hoverBorder: 'hover:border-blue-300',
-      accent: 'from-blue-400 to-indigo-500'
-    },
-    neutral: {
-      iconBg: 'from-gray-50 to-gray-100',
-      border: 'border-gray-200',
-      hoverBorder: 'hover:border-gray-300',
-      accent: 'from-gray-400 to-gray-500'
-    }
-  };
-  return colorMap[theme];
+// Helper function to get default icon based on content
+const getDefaultIcon = (question: string): string => {
+  const lower = question.toLowerCase();
+  if (lower.includes('expensive') || lower.includes('cost') || lower.includes('price') || lower.includes('budget')) return 'lucide:dollar-sign';
+  if (lower.includes('time') || lower.includes('setup') || lower.includes('install')) return 'lucide:clock';
+  if (lower.includes('complex') || lower.includes('difficult') || lower.includes('hard') || lower.includes('adopt')) return 'lucide:users';
+  if (lower.includes('integration') || lower.includes('connect') || lower.includes('tool')) return 'lucide:plug';
+  if (lower.includes('security') || lower.includes('safe') || lower.includes('privacy') || lower.includes('risk')) return 'lucide:shield-check';
+  if (lower.includes('slow') || lower.includes('speed') || lower.includes('performance')) return 'lucide:zap';
+  return 'lucide:help-circle';
 };
+
+// Theme-based colors for tiles
+const getTileColors = (theme: UIBlockTheme) => ({
+  warm: {
+    iconBg: 'bg-gradient-to-br from-orange-50 to-orange-100',
+    border: 'border-orange-200',
+    hoverBorder: 'hover:border-orange-300',
+    accent: 'from-orange-400 to-orange-500'
+  },
+  cool: {
+    iconBg: 'bg-gradient-to-br from-blue-50 to-indigo-100',
+    border: 'border-blue-200',
+    hoverBorder: 'hover:border-blue-300',
+    accent: 'from-blue-400 to-indigo-500'
+  },
+  neutral: {
+    iconBg: 'bg-gradient-to-br from-gray-50 to-gray-100',
+    border: 'border-gray-200',
+    hoverBorder: 'hover:border-gray-300',
+    accent: 'from-gray-400 to-gray-500'
+  }
+}[theme]);
 
 export default function VisualObjectionTiles(props: LayoutComponentProps) {
 
@@ -135,8 +99,6 @@ export default function VisualObjectionTiles(props: LayoutComponentProps) {
     mode,
     blockContent,
     colorTokens,
-    dynamicTextColors,
-    getTextStyle,
     sectionBackground,
     handleContentUpdate
   } = useLayoutComponent<VisualObjectionTilesContent>({
@@ -144,147 +106,65 @@ export default function VisualObjectionTiles(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
-  // Detect theme: manual override > auto-detection > neutral fallback
+  // Typography hook
+  const { getTextStyle: getTypographyStyle } = useTypography();
+  const bodyLgStyle = getTypographyStyle('body-lg');
+  const bodyStyle = getTypographyStyle('body');
+
+  // Theme detection: manual override > auto-detection > neutral fallback
   const theme = React.useMemo(() => {
     if (props.manualThemeOverride) return props.manualThemeOverride;
     if (props.userContext) return selectUIBlockTheme(props.userContext);
     return 'neutral';
   }, [props.manualThemeOverride, props.userContext]);
 
-  // Debug theme detection
-  React.useEffect(() => {
-    console.log('🎨 VisualObjectionTiles theme detection:', {
-      sectionId,
-      hasManualOverride: !!props.manualThemeOverride,
-      manualTheme: props.manualThemeOverride,
-      hasUserContext: !!props.userContext,
-      userContext: props.userContext,
-      finalTheme: theme
-    });
-  }, [theme, props.manualThemeOverride, props.userContext, sectionId]);
-
   // Get theme-specific colors
   const tileColors = getTileColors(theme);
 
-  // Parse objection tiles from both individual and legacy formats
-  const parseObjectionTiles = (content: VisualObjectionTilesContent): Array<{icon: string, objection: string, answer: string, label?: string, index: number}> => {
-    const tiles: Array<{icon: string, objection: string, answer: string, label?: string, index: number}> = [];
+  // Get objections with fallback to defaults
+  const objections = blockContent.objections || DEFAULT_OBJECTIONS;
 
-    // First check for new pipe-separated format (preferred)
-    if (content.objection_questions && content.objection_responses) {
-      const questions = content.objection_questions.split('|').map(q => q.trim()).filter(q => q);
-      const responses = content.objection_responses.split('|').map(r => r.trim()).filter(r => r);
-      const labels = content.objection_labels ? content.objection_labels.split('|').map(l => l.trim()) : [];
-      const icons = content.objection_icons ? content.objection_icons.split('|').map(i => i.trim()) : [];
-
-      const maxLength = Math.min(questions.length, responses.length);
-      for (let i = 0; i < maxLength; i++) {
-        tiles.push({
-          icon: icons[i] || getDefaultTileIcon(questions[i]),
-          objection: questions[i].replace(/"/g, ''),
-          answer: responses[i],
-          label: labels[i] || undefined,
-          index: i
-        });
-      }
+  // Helper to get container classes based on count
+  const getContainerClasses = (count: number) => {
+    if (count === 4) {
+      // 2x2 grid for 4 items
+      return 'grid grid-cols-1 md:grid-cols-2 gap-8';
     }
-    // Check for individual fields (backward compatibility)
-    else {
-      const individualTiles = [
-        { objection: content.tile_objection_1, response: content.tile_response_1, label: content.tile_label_1, icon: content.tile_icon_1 },
-        { objection: content.tile_objection_2, response: content.tile_response_2, label: content.tile_label_2, icon: content.tile_icon_2 },
-        { objection: content.tile_objection_3, response: content.tile_response_3, label: content.tile_label_3, icon: content.tile_icon_3 },
-        { objection: content.tile_objection_4, response: content.tile_response_4, label: content.tile_label_4, icon: content.tile_icon_4 },
-        { objection: content.tile_objection_5, response: content.tile_response_5, label: content.tile_label_5, icon: content.tile_icon_5 },
-        { objection: content.tile_objection_6, response: content.tile_response_6, label: content.tile_label_6, icon: content.tile_icon_6 }
-      ];
-
-      // Process individual fields
-      individualTiles.forEach((tile, index) => {
-        if (tile.objection && tile.objection.trim() && tile.response && tile.response.trim()) {
-          tiles.push({
-            icon: tile.icon || getDefaultTileIcon(tile.objection),
-            objection: tile.objection.trim().replace(/"/g, ''),
-            answer: tile.response.trim(),
-            label: tile.label?.trim(),
-            index
-          });
-        }
-      });
-    }
-
-    // Fallback to legacy pipe-separated format if no tiles found
-    if (tiles.length === 0 && content.objection_tiles) {
-      const legacyTiles = content.objection_tiles.split('|').reduce((acc, item, index) => {
-        if (index % 3 === 0) {
-          acc.push({ icon: item.trim(), objection: '', answer: '', index: Math.floor(index / 3) });
-        } else if (index % 3 === 1) {
-          acc[acc.length - 1].objection = item.trim().replace(/"/g, '');
-        } else {
-          acc[acc.length - 1].answer = item.trim();
-        }
-        return acc;
-      }, [] as Array<{icon: string, objection: string, answer: string, index: number}>);
-
-      tiles.push(...legacyTiles);
-    }
-
-    return tiles;
+    // 3, 5, 6: use flex with centering for partial rows
+    return 'flex flex-wrap justify-center gap-8';
   };
 
-  // Helper function to get default tile icon based on content
-  const getDefaultTileIcon = (objection: string) => {
-    const lower = objection.toLowerCase();
-    if (lower.includes('expensive') || lower.includes('cost') || lower.includes('price')) return '💰';
-    if (lower.includes('time') || lower.includes('setup') || lower.includes('install')) return '⏰';
-    if (lower.includes('complex') || lower.includes('difficult') || lower.includes('hard')) return '🔧';
-    if (lower.includes('integration') || lower.includes('connect') || lower.includes('tool')) return '📊';
-    if (lower.includes('security') || lower.includes('safe') || lower.includes('privacy')) return '🔒';
-    if (lower.includes('slow') || lower.includes('speed') || lower.includes('performance')) return '⚡';
-    return '💡';
+  // Helper to get card width classes for flex layout
+  const getCardClasses = (count: number) => {
+    if (count === 4) return ''; // grid handles sizing
+    // For flex: ~31% width on lg (3 cols), ~48% on md (2 cols)
+    return 'w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.4rem)]';
   };
 
-  const objectionTiles = parseObjectionTiles(blockContent);
-
-  // Helper function to get next available tile slot
-  const getNextAvailableTileSlot = (content: VisualObjectionTilesContent): number => {
-    const tiles = [
-      content.tile_objection_1,
-      content.tile_objection_2,
-      content.tile_objection_3,
-      content.tile_objection_4,
-      content.tile_objection_5,
-      content.tile_objection_6
-    ];
-
-    for (let i = 0; i < tiles.length; i++) {
-      const tile = tiles[i];
-      if (!tile || tile.trim() === '') {
-        return i + 1;
-      }
-    }
-
-    return -1; // No slots available
+  // Add a new objection
+  const addObjection = () => {
+    if (objections.length >= 6) return;
+    const newObjection: Objection = {
+      id: generateId(),
+      question: '"New objection to address"',
+      response: 'Your clear, concise response here',
+      label: 'General',
+      icon: 'lucide:help-circle'
+    };
+    handleContentUpdate('objections', JSON.stringify([...objections, newObjection]));
   };
 
-  // Helper function to add a new objection tile
-  const handleAddObjectionTile = () => {
-    const nextSlot = getNextAvailableTileSlot(blockContent);
-    if (nextSlot > 0) {
-      handleContentUpdate(`tile_objection_${nextSlot}` as keyof VisualObjectionTilesContent, 'New objection');
-      handleContentUpdate(`tile_response_${nextSlot}` as keyof VisualObjectionTilesContent, 'Address this concern with a clear, concise response');
-      handleContentUpdate(`tile_icon_${nextSlot}` as keyof VisualObjectionTilesContent, '💡');
-      handleContentUpdate(`tile_label_${nextSlot}` as keyof VisualObjectionTilesContent, 'General');
-    }
+  // Remove an objection by id
+  const removeObjection = (objectionId: string) => {
+    if (objections.length <= 1) return;
+    handleContentUpdate('objections', JSON.stringify(objections.filter(o => o.id !== objectionId)));
   };
 
-  // Helper function to remove an objection tile
-  const handleRemoveObjectionTile = (indexToRemove: number) => {
-    const fieldNum = indexToRemove + 1;
-    handleContentUpdate(`tile_objection_${fieldNum}` as keyof VisualObjectionTilesContent, '');
-    handleContentUpdate(`tile_response_${fieldNum}` as keyof VisualObjectionTilesContent, '');
-    handleContentUpdate(`tile_icon_${fieldNum}` as keyof VisualObjectionTilesContent, '');
-    handleContentUpdate(`tile_label_${fieldNum}` as keyof VisualObjectionTilesContent, '');
+  // Update objection field
+  const updateObjection = (objectionId: string, field: keyof Objection, value: string) => {
+    handleContentUpdate('objections', JSON.stringify(objections.map(o =>
+      o.id === objectionId ? { ...o, [field]: value } : o
+    )));
   };
 
   return (
@@ -297,7 +177,7 @@ export default function VisualObjectionTiles(props: LayoutComponentProps) {
       className={props.className}
     >
       <div className="max-w-7xl mx-auto">
-        
+
         {/* Header Section */}
         <div className="text-center mb-16">
           <EditableAdaptiveHeadline
@@ -321,7 +201,8 @@ export default function VisualObjectionTiles(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg max-w-3xl mx-auto"
+              style={{...bodyLgStyle}}
+              className="max-w-3xl mx-auto"
               placeholder="Add a subheadline that introduces the objection handling..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -331,21 +212,21 @@ export default function VisualObjectionTiles(props: LayoutComponentProps) {
         </div>
 
         {/* Objection Tiles Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {objectionTiles.map((tile, index) => (
+        <div className={getContainerClasses(objections.length)}>
+          {objections.map((objection) => (
             <div
-              key={index}
-              className={`relative group/objection-tile-${index} bg-white/90 backdrop-blur-sm border ${tileColors.border} ${tileColors.hoverBorder} rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1`}
+              key={objection.id}
+              className={`relative group bg-white/90 backdrop-blur-sm border ${tileColors.border} ${tileColors.hoverBorder} rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 ${getCardClasses(objections.length)}`}
             >
 
-              {/* Delete button - only show in edit mode and if more than 1 tile */}
-              {mode === 'edit' && objectionTiles.length > 1 && (
+              {/* Delete button - only show in edit mode and if more than 1 objection */}
+              {mode === 'edit' && objections.length > 1 && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleRemoveObjectionTile(index);
+                    removeObjection(objection.id);
                   }}
-                  className={`absolute top-4 right-4 opacity-0 group-hover/objection-tile-${index}:opacity-100 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-200`}
+                  className="opacity-0 group-hover:opacity-100 absolute top-4 right-4 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-200 z-10"
                   title="Remove this objection"
                 >
                   <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -356,67 +237,59 @@ export default function VisualObjectionTiles(props: LayoutComponentProps) {
 
               {/* Icon */}
               <div className="text-center mb-6">
-                <div className={`inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br ${tileColors.iconBg} rounded-2xl text-3xl group-hover:scale-110 transition-transform duration-300`}>
+                <div className={`inline-flex items-center justify-center w-16 h-16 ${tileColors.iconBg} rounded-2xl text-3xl group-hover:scale-110 transition-transform duration-300`}>
                   <IconEditableText
                     mode={mode}
-                    value={tile.icon}
-                    onEdit={(value) => {
-                      const updatedTiles = (blockContent.objection_tiles || '').split('|');
-                      updatedTiles[index * 3] = value;
-                      handleContentUpdate('objection_tiles', updatedTiles.join('|'));
-                    }}
+                    value={objection.icon || getDefaultIcon(objection.question)}
+                    onEdit={(value) => updateObjection(objection.id, 'icon', value)}
                     backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                     colorTokens={colorTokens}
                     variant="body"
                     iconSize="xl"
-                    placeholder="💰"
+                    placeholder="💡"
                     sectionBackground={sectionBackground}
                     sectionId={sectionId}
-                    elementKey={`objection_icon_${index}`}
+                    elementKey={`objection_icon_${objection.id}`}
                   />
                 </div>
               </div>
 
-              {/* Objection */}
+              {/* Question (Objection) */}
               <div className="mb-4">
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={tile.objection || ''}
-                  onEdit={(value) => {
-                    const updatedTiles = (blockContent.objection_tiles || '').split('|');
-                    updatedTiles[index * 3 + 1] = `"${value}"`;
-                    handleContentUpdate('objection_tiles', updatedTiles.join('|'));
-                  }}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="text-lg font-bold text-gray-900 mb-3 text-center"
-                  placeholder="Enter objection"
-                  sectionBackground={sectionBackground}
-                  data-section-id={sectionId}
-                  data-element-key={`objection_${index}_text`}
-                />
+                {mode !== 'preview' ? (
+                  <div
+                    contentEditable
+                    suppressContentEditableWarning
+                    onBlur={(e) => updateObjection(objection.id, 'question', e.currentTarget.textContent || '')}
+                    className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[40px] cursor-text hover:bg-gray-50 text-lg font-bold text-gray-900 text-center"
+                    style={{...bodyStyle, fontWeight: 700}}
+                  >
+                    {objection.question}
+                  </div>
+                ) : (
+                  <p style={{...bodyStyle, fontWeight: 700}} className="text-lg text-gray-900 text-center">
+                    {objection.question}
+                  </p>
+                )}
               </div>
 
-              {/* Answer */}
+              {/* Response (Answer) */}
               <div className="text-center">
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={tile.answer || ''}
-                  onEdit={(value) => {
-                    const updatedTiles = (blockContent.objection_tiles || '').split('|');
-                    updatedTiles[index * 3 + 2] = value;
-                    handleContentUpdate('objection_tiles', updatedTiles.join('|'));
-                  }}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="text-gray-700 leading-relaxed"
-                  placeholder="Enter answer"
-                  sectionBackground={sectionBackground}
-                  data-section-id={sectionId}
-                  data-element-key={`objection_${index}_answer`}
-                />
+                {mode !== 'preview' ? (
+                  <div
+                    contentEditable
+                    suppressContentEditableWarning
+                    onBlur={(e) => updateObjection(objection.id, 'response', e.currentTarget.textContent || '')}
+                    className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[40px] cursor-text hover:bg-gray-50 text-gray-700 leading-relaxed"
+                    style={{...bodyStyle}}
+                  >
+                    {objection.response}
+                  </div>
+                ) : (
+                  <p style={{...bodyStyle}} className="text-gray-700 leading-relaxed">
+                    {objection.response}
+                  </p>
+                )}
               </div>
 
               {/* Bottom accent */}
@@ -430,10 +303,10 @@ export default function VisualObjectionTiles(props: LayoutComponentProps) {
         </div>
 
         {/* Add Objection Button - only show in edit mode and if under max limit */}
-        {mode === 'edit' && objectionTiles.length < 6 && (
+        {mode === 'edit' && objections.length < 6 && (
           <div className="mt-12 text-center">
             <button
-              onClick={handleAddObjectionTile}
+              onClick={addObjection}
               className="flex items-center space-x-2 mx-auto px-6 py-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-xl transition-all duration-200"
             >
               <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -456,12 +329,11 @@ export const componentMeta = {
   tags: ['objection', 'visual', 'tiles', 'interactive', 'editable'],
   defaultBackgroundType: 'primary' as const,
   complexity: 'simple',
-  estimatedBuildTime: '20 minutes',
 
   contentFields: [
     { key: 'headline', label: 'Main Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
-    { key: 'objection_tiles', label: 'Objection Tiles (pipe separated: icon|objection|answer)', type: 'textarea', required: true }
+    { key: 'objections', label: 'Objection Tiles', type: 'array', required: true }
   ],
 
   features: [
@@ -469,7 +341,8 @@ export const componentMeta = {
     'Add/remove objection tiles (1-6 limit)',
     'Hover-based delete buttons in edit mode',
     'Clean, approachable tile design',
-    'Hover animations and interactions'
+    'Hover animations and interactions',
+    'Theme-aware styling (warm/cool/neutral)'
   ],
 
   useCases: [

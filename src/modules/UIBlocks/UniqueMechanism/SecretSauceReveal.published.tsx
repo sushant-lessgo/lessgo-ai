@@ -1,5 +1,5 @@
 /**
- * SecretSauceReveal - Published Version
+ * SecretSauceReveal - Published Version (V2)
  *
  * Server-safe component with ZERO hook imports
  * Used by componentRegistry.published.ts for SSR rendering
@@ -13,38 +13,25 @@ import { IconPublished } from '@/components/published/IconPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { getIcon } from '@/lib/getIcon';
 
-// Secret item structure
+// V2 Schema: Array-based secrets
 interface SecretItem {
+  id: string;
   title: string;
   description: string;
-  icon: string;
+  icon?: string;
 }
 
 export default function SecretSauceRevealPublished(props: LayoutComponentProps) {
   const { sectionId, sectionBackgroundCSS, theme, backgroundType } = props;
 
-  // Extract content from props (flattened by LandingPagePublishedRenderer)
+  // V2: Extract content from props (flattened by LandingPagePublishedRenderer)
   const headline = props.headline || 'Our Secret Sauce Revealed';
   const subheadline = props.subheadline || '';
-  const secret_titles = props.secret_titles || '';
-  const secret_descriptions = props.secret_descriptions || '';
-  const secret_icon_1 = props.secret_icon_1 || '🔬';
-  const secret_icon_2 = props.secret_icon_2 || '🧠';
-  const secret_icon_3 = props.secret_icon_3 || '🚀';
-  const secret_icon_4 = props.secret_icon_4 || '💡';
 
-  // Parse pipe-delimited strings
-  const titles = secret_titles.split('|').map((t: string) => t.trim()).filter((t: string) => t && t !== '___REMOVED___');
-  const descriptions = secret_descriptions.split('|').map((d: string) => d.trim()).filter((d: string) => d && d !== '___REMOVED___');
-  const icons = [secret_icon_1, secret_icon_2, secret_icon_3, secret_icon_4];
-
-  // Combine into secret items
-  const secrets = titles.map((title: string, index: number) => ({
-    title,
-    description: descriptions[index] || '',
-    icon: icons[index] || '🔬'
-  }));
+  // V2: Get secrets array directly (no pipe-string parsing)
+  const secrets: SecretItem[] = props.secrets || [];
 
   // Theme detection (no useMemo - direct evaluation)
   const uiTheme: UIBlockTheme = props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
@@ -125,61 +112,69 @@ export default function SecretSauceRevealPublished(props: LayoutComponentProps) 
 
         {/* Secret Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {secrets.map((secret: SecretItem, index: number) => (
-            <div key={index} className="group relative">
-              <div
-                style={{
-                  borderColor: secretColors.cardBorder
-                }}
-                className="bg-white rounded-2xl p-8 text-center relative overflow-hidden h-full border-2 shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                {/* Accent Bar */}
+          {secrets.map((secret: SecretItem) => {
+            // V2: Get icon - use stored value or derive from title/description
+            const displayIcon = secret.icon
+              ?? getIcon(undefined, { title: secret.title, description: secret.description })
+              ?? 'lucide:flask-conical';
+
+            return (
+              <div key={secret.id} className="group relative">
                 <div
                   style={{
-                    background: secretColors.accentBar
+                    borderColor: secretColors.cardBorder
                   }}
-                  className="absolute top-0 left-0 right-0 h-1.5 rounded-t-2xl"
-                />
-
-                {/* Icon */}
-                <div className="relative z-10">
+                  className="bg-white rounded-2xl p-8 text-center relative overflow-hidden h-full border-2 shadow-lg hover:shadow-xl transition-all duration-300"
+                >
+                  {/* Accent Bar */}
                   <div
                     style={{
-                      background: secretColors.iconBg,
-                      boxShadow: secretColors.iconShadow
+                      background: secretColors.accentBar
                     }}
-                    className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4"
-                  >
-                    <IconPublished
-                      icon={secret.icon} color={'#ffffff'}
-                    />
-                  </div>
+                    className="absolute top-0 left-0 right-0 h-1.5 rounded-t-2xl"
+                  />
 
-                  {/* Title */}
-                  <h3
-                    style={{
-                      color: secretColors.titleText
-                    }}
-                    className="font-bold text-xl mb-3"
-                  >
-                    {secret.title}
-                  </h3>
-
-                  {/* Description */}
-                  {secret.description && (
-                    <TextPublished
-                      value={secret.description}
+                  {/* Icon */}
+                  <div className="relative z-10">
+                    <div
                       style={{
-                        color: textColors.body,
-                        fontSize: '1rem',
-                        lineHeight: '1.625'
+                        background: secretColors.iconBg,
+                        boxShadow: secretColors.iconShadow
                       }}
-                    />
-                  )}
+                      className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4"
+                    >
+                      <IconPublished
+                        icon={displayIcon}
+                        color={'#ffffff'}
+                      />
+                    </div>
+
+                    {/* Title */}
+                    <h3
+                      style={{
+                        color: secretColors.titleText
+                      }}
+                      className="font-bold text-xl mb-3"
+                    >
+                      {secret.title}
+                    </h3>
+
+                    {/* Description */}
+                    {secret.description && (
+                      <TextPublished
+                        value={secret.description}
+                        style={{
+                          color: textColors.body,
+                          fontSize: '1rem',
+                          lineHeight: '1.625'
+                        }}
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </SectionWrapperPublished>

@@ -1,142 +1,117 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
+import {
+  EditableAdaptiveHeadline,
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
-import { 
-  CTAButton,
-  TrustIndicators 
-} from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getIconFromCategory, getRandomIconFromCategory } from '@/utils/iconMapping';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { shadows, cardEnhancements } from '@/modules/Design/designTokens';
+import * as LucideIcons from 'lucide-react';
+
+// V2 Types
+interface DemoStatItem {
+  id: string;
+  label: string;
+  description: string;
+  icon?: string;
+}
+
+interface VideoInfoItem {
+  id: string;
+  text: string;
+  icon?: string;
+}
 
 interface VideoWalkthroughContent {
   headline: string;
   video_title: string;
   video_description: string;
   video_url?: string;
-  video_thumbnail?: string;
   video_duration?: string;
   subheadline?: string;
-  supporting_text?: string;
-  cta_text?: string;
-  trust_items?: string;
-  // Demo Stats fields
   demo_stats_heading?: string;
-  demo_stat_1_label?: string;
-  demo_stat_1_description?: string;
-  demo_stat_2_label?: string;
-  demo_stat_2_description?: string;
-  demo_stat_3_label?: string;
-  demo_stat_3_description?: string;
-  // Video Info indicators
-  video_info_1_text?: string;
-  video_info_2_text?: string;
-  show_demo_stats?: boolean;
-  show_video_info?: boolean;
+  demo_stats: DemoStatItem[];
+  video_info: VideoInfoItem[];
 }
 
 const CONTENT_SCHEMA = {
-  headline: { 
-    type: 'string' as const, 
-    default: 'See How It Works in Action' 
+  headline: {
+    type: 'string' as const,
+    default: 'See How It Works in Action'
   },
-  video_title: { 
-    type: 'string' as const, 
-    default: 'Complete Product Walkthrough' 
+  video_title: {
+    type: 'string' as const,
+    default: 'Complete Product Walkthrough'
   },
-  video_description: { 
-    type: 'string' as const, 
-    default: 'Watch our comprehensive demo showing exactly how our platform integrates with your existing workflow, processes your data, and delivers measurable results for your enterprise.' 
+  video_description: {
+    type: 'string' as const,
+    default: 'Watch our comprehensive demo showing exactly how our platform integrates with your existing workflow, processes your data, and delivers measurable results for your enterprise.'
   },
-  video_url: { 
-    type: 'string' as const, 
-    default: 'https://www.youtube.com/embed/dQw4w9WgXcQ' 
+  video_url: {
+    type: 'string' as const,
+    default: ''
   },
-  video_thumbnail: { 
-    type: 'string' as const, 
-    default: '/video-thumbnail.jpg' 
+  video_duration: {
+    type: 'string' as const,
+    default: '4:32'
   },
-  video_duration: { 
-    type: 'string' as const, 
-    default: '4:32' 
+  subheadline: {
+    type: 'string' as const,
+    default: ''
   },
-  subheadline: { 
-    type: 'string' as const, 
-    default: '' 
+  demo_stats_heading: {
+    type: 'string' as const,
+    default: 'Enterprise Demo Highlights'
   },
-  supporting_text: { 
-    type: 'string' as const, 
-    default: '' 
+  demo_stats: {
+    type: 'array' as const,
+    default: [
+      { id: 'ds-1', label: 'Real Data', description: 'Actual customer implementation', icon: '' },
+      { id: 'ds-2', label: 'Live Demo', description: 'Interactive walkthrough', icon: '' },
+      { id: 'ds-3', label: 'Q&A', description: 'Expert consultation included', icon: '' }
+    ]
   },
-  cta_text: { 
-    type: 'string' as const, 
-    default: '' 
-  },
-  trust_items: { 
-    type: 'string' as const, 
-    default: '' 
-  },
-  // Demo Stats fields
-  demo_stats_heading: { 
-    type: 'string' as const, 
-    default: 'Enterprise Demo Highlights' 
-  },
-  demo_stat_1_label: { 
-    type: 'string' as const, 
-    default: 'Real Data' 
-  },
-  demo_stat_1_description: { 
-    type: 'string' as const, 
-    default: 'Actual customer implementation' 
-  },
-  demo_stat_2_label: { 
-    type: 'string' as const, 
-    default: 'Live Demo' 
-  },
-  demo_stat_2_description: { 
-    type: 'string' as const, 
-    default: 'Interactive walkthrough' 
-  },
-  demo_stat_3_label: { 
-    type: 'string' as const, 
-    default: 'Q&A' 
-  },
-  demo_stat_3_description: { 
-    type: 'string' as const, 
-    default: 'Expert consultation included' 
-  },
-  demo_stat_1_icon: { type: 'string' as const, default: '' },
-  demo_stat_2_icon: { type: 'string' as const, default: '' },
-  demo_stat_3_icon: { type: 'string' as const, default: '' },
-  // Video Info indicators
-  video_info_1_text: { 
-    type: 'string' as const, 
-    default: 'Live demonstration' 
-  },
-  video_info_2_text: { 
-    type: 'string' as const, 
-    default: '5 min watch' 
-  },
-  video_info_1_icon: { type: 'string' as const, default: '' },
-  video_info_2_icon: { type: 'string' as const, default: '' },
-  show_demo_stats: { 
-    type: 'boolean' as const, 
-    default: true 
-  },
-  show_video_info: { 
-    type: 'boolean' as const, 
-    default: true 
+  video_info: {
+    type: 'array' as const,
+    default: [
+      { id: 'vi-1', text: 'Live demonstration', icon: '' },
+      { id: 'vi-2', text: '5 min watch', icon: '' }
+    ]
   }
 };
 
+// Theme-based styling
+const getThemeStyles = (theme: UIBlockTheme) => ({
+  warm: {
+    cardBorder: 'border-orange-200',
+    cardShadow: shadows.card.warm,
+    accentColors: ['text-orange-600', 'text-red-600', 'text-amber-600'],
+    iconBg: 'bg-orange-100',
+    iconColor: 'text-orange-600',
+  },
+  cool: {
+    cardBorder: 'border-blue-200',
+    cardShadow: shadows.card.cool,
+    accentColors: ['text-blue-600', 'text-indigo-600', 'text-cyan-600'],
+    iconBg: 'bg-blue-100',
+    iconColor: 'text-blue-600',
+  },
+  neutral: {
+    cardBorder: 'border-gray-200',
+    cardShadow: shadows.card.neutral,
+    accentColors: ['text-gray-700', 'text-slate-600', 'text-zinc-600'],
+    iconBg: 'bg-gray-100',
+    iconColor: 'text-gray-600',
+  }
+})[theme];
+
 export default function VideoWalkthrough(props: LayoutComponentProps) {
   const { getTextStyle: getTypographyStyle } = useTypography();
-  
+
   const {
     sectionId,
     mode,
@@ -151,41 +126,60 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
-  
-  // Create typography styles
+
+  // Typography styles
   const h3Style = getTypographyStyle('h3');
-
-  const trustItems = blockContent.trust_items 
-    ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
-
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
-  
-  const store = useEditStore();
-  const showImageToolbar = store.showImageToolbar;
 
-  // Icon edit handlers
-  const handleDemoStatIconEdit = (index: number, value: string) => {
-    const iconField = `demo_stat_${index + 1}_icon` as keyof VideoWalkthroughContent;
-    handleContentUpdate(iconField, value);
+  // Theme - using useMemo pattern from ThreeStepHorizontal
+  const uiBlockTheme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  const themeStyles = getThemeStyles(uiBlockTheme);
+
+  // Ensure arrays exist
+  const demoStats = Array.isArray(blockContent.demo_stats) ? blockContent.demo_stats : [];
+  const videoInfo = Array.isArray(blockContent.video_info) ? blockContent.video_info : [];
+
+  // Array handlers - cast to any for array values
+  const handleDemoStatUpdate = (id: string, field: keyof DemoStatItem, value: string) => {
+    const updated = demoStats.map(item =>
+      item.id === id ? { ...item, [field]: value } : item
+    );
+    (handleContentUpdate as any)('demo_stats', updated);
   };
 
-  const handleVideoInfoIconEdit = (index: number, value: string) => {
-    const iconField = `video_info_${index + 1}_icon` as keyof VideoWalkthroughContent;
-    handleContentUpdate(iconField, value);
+  const handleDemoStatDelete = (id: string) => {
+    const updated = demoStats.filter(item => item.id !== id);
+    (handleContentUpdate as any)('demo_stats', updated);
   };
 
-  const getDemoStatIcon = (index: number) => {
-    const iconFields = ['demo_stat_1_icon', 'demo_stat_2_icon', 'demo_stat_3_icon'];
-    return blockContent[iconFields[index] as keyof VideoWalkthroughContent] || '';
+  const handleVideoInfoUpdate = (id: string, field: keyof VideoInfoItem, value: string) => {
+    const updated = videoInfo.map(item =>
+      item.id === id ? { ...item, [field]: value } : item
+    );
+    (handleContentUpdate as any)('video_info', updated);
   };
 
-  const getVideoInfoIcon = (index: number) => {
-    const iconFields = ['video_info_1_icon', 'video_info_2_icon'];
-    return blockContent[iconFields[index] as keyof VideoWalkthroughContent] || '';
+  const handleVideoInfoDelete = (id: string) => {
+    const updated = videoInfo.filter(item => item.id !== id);
+    (handleContentUpdate as any)('video_info', updated);
+  };
+
+  // Get icon component - fallback to CheckCircle for video info
+  const getIconComponent = (iconName: string | undefined) => {
+    if (iconName) {
+      const Icon = (LucideIcons as any)[iconName];
+      if (Icon) return Icon;
+    }
+    return LucideIcons.CheckCircle;
   };
 
   const VideoPlayer = () => {
+    // YouTube embed
     if (blockContent.video_url && blockContent.video_url.includes('youtube')) {
       return (
         <iframe
@@ -199,31 +193,23 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
       );
     }
 
+    // Placeholder when no video URL
     return (
-      <div className="relative w-full h-full bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl overflow-hidden group cursor-pointer">
-        {blockContent.video_thumbnail && blockContent.video_thumbnail !== '' ? (
-          <img
-            src={blockContent.video_thumbnail}
-            alt={blockContent.video_title}
-            className="w-full h-full object-cover"
-            data-image-id={`${sectionId}-video-thumbnail`}
-            onMouseUp={(e) => {
-                        // Image toolbar is only available in edit mode
-                      }}
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <div className="text-center text-white">
-              <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-white/10 flex items-center justify-center">
-                <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div className="text-lg font-semibold">{blockContent.video_title}</div>
+      <div className="relative w-full h-full bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900 rounded-xl overflow-hidden group cursor-pointer">
+        <div className="w-full h-full flex items-center justify-center">
+          <div className="text-center text-white">
+            <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-white/10 flex items-center justify-center">
+              <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+              </svg>
             </div>
+            <div className="text-lg font-semibold">{blockContent.video_title}</div>
+            {!blockContent.video_url && isEditMode && (
+              <div className="text-sm text-white/60 mt-2">Add YouTube URL below</div>
+            )}
           </div>
-        )}
-        
+        </div>
+
         {/* Play Button Overlay */}
         <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors duration-300">
           <div className={`w-20 h-20 rounded-full ${colorTokens.ctaBg} flex items-center justify-center shadow-2xl transform group-hover:scale-110 transition-transform duration-300`}>
@@ -242,7 +228,9 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
       </div>
     );
   };
-  
+
+  const isEditMode = mode === 'edit';
+
   return (
     <LayoutSection
       sectionId={sectionId}
@@ -253,7 +241,8 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
       className={props.className}
     >
       <div className="max-w-6xl mx-auto">
-        
+
+        {/* Header */}
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
             mode={mode}
@@ -268,7 +257,7 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
 
-          {(blockContent.subheadline || mode === 'edit') && (
+          {(blockContent.subheadline || isEditMode) && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -285,417 +274,189 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode !== 'preview' ? (
-          <div className="space-y-8">
-            <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
-              <h4 className="font-semibold text-gray-700 mb-4">Video Content</h4>
-              
-              <div className="space-y-4">
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.video_title || ''}
-                  onEdit={(value) => handleContentUpdate('video_title', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Video title"
-                  sectionId={sectionId}
-                  elementKey="video_title"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.video_description || ''}
-                  onEdit={(value) => handleContentUpdate('video_description', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Video description"
-                  sectionId={sectionId}
-                  elementKey="video_description"
-                  sectionBackground={sectionBackground}
-                />
-                
+        {/* Video + Info Grid - WYSIWYG in both edit and preview */}
+        <div className="grid lg:grid-cols-2 gap-12 items-center mb-16">
+
+          {/* Video Player */}
+          <div className="order-2 lg:order-1">
+            <div className="aspect-video">
+              <VideoPlayer />
+            </div>
+            {/* Video URL Input - edit mode only */}
+            {isEditMode && (
+              <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                <div className="text-xs text-gray-500 mb-1">Video URL</div>
                 <EditableAdaptiveText
                   mode={mode}
                   value={blockContent.video_url || ''}
                   onEdit={(value) => handleContentUpdate('video_url', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                  backgroundType="neutral"
                   colorTokens={colorTokens}
                   variant="body"
-                  className="mb-2"
-                  placeholder="Video URL (YouTube embed link)"
+                  className="text-sm text-gray-700"
+                  placeholder="https://www.youtube.com/embed/..."
                   sectionId={sectionId}
                   elementKey="video_url"
                   sectionBackground={sectionBackground}
                 />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.video_duration || ''}
-                  onEdit={(value) => handleContentUpdate('video_duration', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  placeholder="Video duration (e.g., 4:32)"
-                  sectionId={sectionId}
-                  elementKey="video_duration"
-                  sectionBackground={sectionBackground}
-                />
               </div>
-            </div>
+            )}
           </div>
-        ) : (
-          <div className="grid lg:grid-cols-2 gap-12 items-center mb-16">
-            
-            {/* Video Player */}
-            <div className="order-2 lg:order-1">
-              <div className="aspect-video">
-                <VideoPlayer />
-              </div>
-            </div>
 
-            {/* Video Info */}
-            <div className="order-1 lg:order-2 space-y-6">
-              <div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                  {blockContent.video_title}
-                </h3>
-                
-                <p className="text-gray-600 leading-relaxed text-lg">
-                  {blockContent.video_description}
-                </p>
-              </div>
-              
-              {blockContent.show_video_info !== false && (
-                <div className="flex items-center space-x-6">
-                  {(blockContent.video_info_1_text && blockContent.video_info_1_text !== '___REMOVED___') && (
-                    <div className="relative group/video-info-1 flex items-center space-x-2">
-                      <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1M9 16h1m4 0h1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <EditableAdaptiveText
-                        mode={mode}
-                        value={blockContent.video_info_1_text || ''}
-                        onEdit={(value) => handleContentUpdate('video_info_1_text', value)}
-                        backgroundType={backgroundType}
-                        colorTokens={colorTokens}
-                        variant="body"
-                        className="text-gray-700 font-medium"
-                        placeholder="Video info 1"
-                        sectionBackground={sectionBackground}
-                        data-section-id={sectionId}
-                        data-element-key="video_info_1_text"
-                      />
-                      {(mode as string) === 'edit' && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleContentUpdate('video_info_1_text', '___REMOVED___');
-                          }}
-                          className="opacity-0 group-hover/video-info-1:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
-                          title="Remove video info 1"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
-                      )}
-                    </div>
-                  )}
-                  {(blockContent.video_info_2_text && blockContent.video_info_2_text !== '___REMOVED___') && (
-                    <div className="relative group/video-info-2 flex items-center space-x-2">
-                      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <EditableAdaptiveText
-                        mode={mode}
-                        value={blockContent.video_info_2_text || ''}
-                        onEdit={(value) => handleContentUpdate('video_info_2_text', value)}
-                        backgroundType={backgroundType}
-                        colorTokens={colorTokens}
-                        variant="body"
-                        className="text-gray-700 font-medium"
-                        placeholder="Video info 2"
-                        sectionBackground={sectionBackground}
-                        data-section-id={sectionId}
-                        data-element-key="video_info_2_text"
-                      />
-                      {(mode as string) === 'edit' && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleContentUpdate('video_info_2_text', '___REMOVED___');
-                          }}
-                          className="opacity-0 group-hover/video-info-2:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
-                          title="Remove video info 2"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-              
-              <div className="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-500">
-                <div className="flex items-start space-x-3">
-                  <svg className="w-5 h-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <div>
-                    <h4 className="font-semibold text-blue-900 mb-1">What you'll see:</h4>
-                    <p className="text-blue-800 text-sm">Real enterprise data, actual workflows, and measurable results from our implementation process.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Demo Stats */}
-        {blockContent.show_demo_stats !== false && (
-          <div className="bg-gradient-to-r from-gray-50 to-white rounded-2xl p-8 border border-gray-100 mb-12">
-            <div className="text-center">
-              {(blockContent.demo_stats_heading || mode === 'edit') && (
-                <div className="relative group/demo-heading">
-                  <EditableAdaptiveText
-                    mode={mode}
-                    value={blockContent.demo_stats_heading || ''}
-                    onEdit={(value) => handleContentUpdate('demo_stats_heading', value)}
-                    backgroundType={backgroundType}
-                    colorTokens={colorTokens}
-                    variant="body"
-                    className="text-xl font-semibold text-gray-900 mb-6"
-                    placeholder="Demo stats heading"
-                    sectionBackground={sectionBackground}
-                    data-section-id={sectionId}
-                    data-element-key="demo_stats_heading"
-                  />
-                  {mode !== 'preview' && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleContentUpdate('demo_stats_heading', '___REMOVED___');
-                      }}
-                      className="opacity-0 group-hover/demo-heading:opacity-100 ml-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200"
-                      title="Remove demo heading"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  )}
-                </div>
-              )}
-              
-              <div className="grid md:grid-cols-3 gap-8">
-                {(blockContent.demo_stat_1_label && blockContent.demo_stat_1_label !== '___REMOVED___') && (
-                  <div className="relative group/demo-stat-1 text-center">
-                    <EditableAdaptiveText
-                      mode={mode}
-                      value={blockContent.demo_stat_1_label || ''}
-                      onEdit={(value) => handleContentUpdate('demo_stat_1_label', value)}
-                      backgroundType={backgroundType}
-                      colorTokens={colorTokens}
-                      variant="body"
-                      className="text-blue-600 mb-2"
-                      style={{
-                        fontSize: h3Style.fontSize,
-                        fontWeight: h3Style.fontWeight,
-                        lineHeight: h3Style.lineHeight,
-                        letterSpacing: h3Style.letterSpacing,
-                        fontFamily: h3Style.fontFamily
-                      }}
-                      placeholder="Stat 1 label"
-                      sectionBackground={sectionBackground}
-                      data-section-id={sectionId}
-                      data-element-key="demo_stat_1_label"
-                    />
-                    <EditableAdaptiveText
-                      mode={mode}
-                      value={blockContent.demo_stat_1_description || ''}
-                      onEdit={(value) => handleContentUpdate('demo_stat_1_description', value)}
-                      backgroundType={backgroundType}
-                      colorTokens={colorTokens}
-                      variant="body"
-                      className={`text-sm ${mutedTextColor}`}
-                      placeholder="Stat 1 description"
-                      sectionBackground={sectionBackground}
-                      data-section-id={sectionId}
-                      data-element-key="demo_stat_1_description"
-                    />
-                    {mode !== 'preview' && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleContentUpdate('demo_stat_1_label', '___REMOVED___');
-                          handleContentUpdate('demo_stat_1_description', '___REMOVED___');
-                        }}
-                        className="opacity-0 group-hover/demo-stat-1:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200"
-                        title="Remove stat 1"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    )}
-                  </div>
-                )}
-                {(blockContent.demo_stat_2_label && blockContent.demo_stat_2_label !== '___REMOVED___') && (
-                  <div className="relative group/demo-stat-2 text-center">
-                    <EditableAdaptiveText
-                      mode={mode}
-                      value={blockContent.demo_stat_2_label || ''}
-                      onEdit={(value) => handleContentUpdate('demo_stat_2_label', value)}
-                      backgroundType={backgroundType}
-                      colorTokens={colorTokens}
-                      variant="body"
-                      className="text-green-600 mb-2"
-                      style={{
-                        fontSize: h3Style.fontSize,
-                        fontWeight: h3Style.fontWeight,
-                        lineHeight: h3Style.lineHeight,
-                        letterSpacing: h3Style.letterSpacing,
-                        fontFamily: h3Style.fontFamily
-                      }}
-                      placeholder="Stat 2 label"
-                      sectionBackground={sectionBackground}
-                      data-section-id={sectionId}
-                      data-element-key="demo_stat_2_label"
-                    />
-                    <EditableAdaptiveText
-                      mode={mode}
-                      value={blockContent.demo_stat_2_description || ''}
-                      onEdit={(value) => handleContentUpdate('demo_stat_2_description', value)}
-                      backgroundType={backgroundType}
-                      colorTokens={colorTokens}
-                      variant="body"
-                      className={`text-sm ${mutedTextColor}`}
-                      placeholder="Stat 2 description"
-                      sectionBackground={sectionBackground}
-                      data-section-id={sectionId}
-                      data-element-key="demo_stat_2_description"
-                    />
-                    {mode !== 'preview' && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleContentUpdate('demo_stat_2_label', '___REMOVED___');
-                          handleContentUpdate('demo_stat_2_description', '___REMOVED___');
-                        }}
-                        className="opacity-0 group-hover/demo-stat-2:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200"
-                        title="Remove stat 2"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    )}
-                  </div>
-                )}
-                {(blockContent.demo_stat_3_label && blockContent.demo_stat_3_label !== '___REMOVED___') && (
-                  <div className="relative group/demo-stat-3 text-center">
-                    <EditableAdaptiveText
-                      mode={mode}
-                      value={blockContent.demo_stat_3_label || ''}
-                      onEdit={(value) => handleContentUpdate('demo_stat_3_label', value)}
-                      backgroundType={backgroundType}
-                      colorTokens={colorTokens}
-                      variant="body"
-                      className="text-purple-600 mb-2"
-                      style={{
-                        fontSize: h3Style.fontSize,
-                        fontWeight: h3Style.fontWeight,
-                        lineHeight: h3Style.lineHeight,
-                        letterSpacing: h3Style.letterSpacing,
-                        fontFamily: h3Style.fontFamily
-                      }}
-                      placeholder="Stat 3 label"
-                      sectionBackground={sectionBackground}
-                      data-section-id={sectionId}
-                      data-element-key="demo_stat_3_label"
-                    />
-                    <EditableAdaptiveText
-                      mode={mode}
-                      value={blockContent.demo_stat_3_description || ''}
-                      onEdit={(value) => handleContentUpdate('demo_stat_3_description', value)}
-                      backgroundType={backgroundType}
-                      colorTokens={colorTokens}
-                      variant="body"
-                      className={`text-sm ${mutedTextColor}`}
-                      placeholder="Stat 3 description"
-                      sectionBackground={sectionBackground}
-                      data-section-id={sectionId}
-                      data-element-key="demo_stat_3_description"
-                    />
-                    {mode !== 'preview' && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleContentUpdate('demo_stat_3_label', '___REMOVED___');
-                          handleContentUpdate('demo_stat_3_description', '___REMOVED___');
-                        }}
-                        className="opacity-0 group-hover/demo-stat-3:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200"
-                        title="Remove stat 3"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
-          <div className="text-center space-y-6">
-            {(blockContent.supporting_text || mode === 'edit') && (
+          {/* Video Info */}
+          <div className="order-1 lg:order-2 space-y-6">
+            <div>
               <EditableAdaptiveText
                 mode={mode}
-                value={blockContent.supporting_text || ''}
-                onEdit={(value) => handleContentUpdate('supporting_text', value)}
+                value={blockContent.video_title || ''}
+                onEdit={(value) => handleContentUpdate('video_title', value)}
                 backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                 colorTokens={colorTokens}
                 variant="body"
-                className="max-w-3xl mx-auto mb-8"
-                placeholder="Add optional supporting text to reinforce your video content..."
+                className="text-2xl font-bold mb-4"
+                style={{ color: colorTokens.textPrimary }}
+                placeholder="Video title"
                 sectionId={sectionId}
-                elementKey="supporting_text"
+                elementKey="video_title"
                 sectionBackground={sectionBackground}
               />
-            )}
 
-            {(blockContent.cta_text || trustItems.length > 0) && (
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-                {blockContent.cta_text && (
-                  <CTAButton
-                    text={blockContent.cta_text}
-                    colorTokens={colorTokens}
-                    className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
-                    variant="primary"
-                    sectionId={sectionId}
-                    elementKey="cta_text"
-                  />
-                )}
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.video_description || ''}
+                onEdit={(value) => handleContentUpdate('video_description', value)}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                colorTokens={colorTokens}
+                variant="body"
+                className="leading-relaxed text-lg"
+                style={{ color: mutedTextColor }}
+                placeholder="Video description"
+                sectionId={sectionId}
+                elementKey="video_description"
+                sectionBackground={sectionBackground}
+              />
+            </div>
 
-                {trustItems.length > 0 && (
-                  <TrustIndicators 
-                    items={trustItems}
-                    colorClass={mutedTextColor}
-                    iconColor="text-green-500"
-                  />
-                )}
+            {/* Video Info Items */}
+            {videoInfo.length > 0 && (
+              <div className="flex items-center space-x-6">
+                {videoInfo.map((item) => {
+                  const Icon = getIconComponent(item.icon);
+                  return (
+                    <div
+                      key={item.id}
+                      className="relative group flex items-center space-x-2"
+                    >
+                      <div className={`w-8 h-8 rounded-full ${themeStyles.iconBg} flex items-center justify-center`}>
+                        <Icon className={`w-4 h-4 ${themeStyles.iconColor}`} />
+                      </div>
+                      <span
+                        className="font-medium"
+                        style={{ color: colorTokens.textPrimary }}
+                      >
+                        {item.text}
+                      </span>
+                      {isEditMode && videoInfo.length > 1 && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleVideoInfoDelete(item.id);
+                          }}
+                          className="opacity-0 group-hover:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                          title="Remove"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
+          </div>
+        </div>
+
+        {/* Demo Stats */}
+        {demoStats.length > 0 && (
+          <div className={`bg-white ${cardEnhancements.borderRadius} p-8 border ${themeStyles.cardBorder} ${themeStyles.cardShadow}`}>
+            <div className="text-center">
+              {(blockContent.demo_stats_heading || isEditMode) && (
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.demo_stats_heading || ''}
+                  onEdit={(value) => handleContentUpdate('demo_stats_heading', value)}
+                  backgroundType={backgroundType}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="text-xl font-semibold mb-8"
+                  placeholder="Demo stats heading"
+                  sectionBackground={sectionBackground}
+                  data-section-id={sectionId}
+                  data-element-key="demo_stats_heading"
+                />
+              )}
+
+              <div className="grid md:grid-cols-3 gap-8">
+                {demoStats.map((stat, index) => {
+                  const accentColor = themeStyles.accentColors[index % themeStyles.accentColors.length];
+
+                  return (
+                    <div key={stat.id} className="relative group text-center">
+                      <EditableAdaptiveText
+                        mode={mode}
+                        value={stat.label || ''}
+                        onEdit={(value) => handleDemoStatUpdate(stat.id, 'label', value)}
+                        backgroundType={backgroundType}
+                        colorTokens={colorTokens}
+                        variant="body"
+                        className={`mb-2 ${accentColor}`}
+                        style={{
+                          fontSize: h3Style.fontSize,
+                          fontWeight: h3Style.fontWeight,
+                          lineHeight: h3Style.lineHeight,
+                          letterSpacing: h3Style.letterSpacing,
+                          fontFamily: h3Style.fontFamily
+                        }}
+                        placeholder="Stat label"
+                        sectionBackground={sectionBackground}
+                        data-section-id={sectionId}
+                        data-element-key={`demo_stat_${stat.id}_label`}
+                      />
+                      <EditableAdaptiveText
+                        mode={mode}
+                        value={stat.description || ''}
+                        onEdit={(value) => handleDemoStatUpdate(stat.id, 'description', value)}
+                        backgroundType={backgroundType}
+                        colorTokens={colorTokens}
+                        variant="body"
+                        className="text-sm"
+                        style={{ color: mutedTextColor }}
+                        placeholder="Stat description"
+                        sectionBackground={sectionBackground}
+                        data-section-id={sectionId}
+                        data-element-key={`demo_stat_${stat.id}_description`}
+                      />
+                      {isEditMode && demoStats.length > 1 && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDemoStatDelete(stat.id);
+                          }}
+                          className="opacity-0 group-hover:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white hover:bg-gray-50 text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm"
+                          title="Remove stat"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -711,7 +472,7 @@ export const componentMeta = {
   defaultBackgroundType: 'neutral' as const,
   complexity: 'medium',
   estimatedBuildTime: '20 minutes',
-  
+
   contentFields: [
     { key: 'headline', label: 'Main Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
@@ -720,31 +481,20 @@ export const componentMeta = {
     { key: 'video_url', label: 'Video URL (YouTube embed)', type: 'text', required: false },
     { key: 'video_thumbnail', label: 'Video Thumbnail', type: 'image', required: false },
     { key: 'video_duration', label: 'Video Duration', type: 'text', required: false },
-    { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
-    { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
     { key: 'demo_stats_heading', label: 'Demo Stats Heading', type: 'text', required: false },
-    { key: 'demo_stat_1_label', label: 'Demo Stat 1 Label', type: 'text', required: false },
-    { key: 'demo_stat_1_description', label: 'Demo Stat 1 Description', type: 'text', required: false },
-    { key: 'demo_stat_2_label', label: 'Demo Stat 2 Label', type: 'text', required: false },
-    { key: 'demo_stat_2_description', label: 'Demo Stat 2 Description', type: 'text', required: false },
-    { key: 'demo_stat_3_label', label: 'Demo Stat 3 Label', type: 'text', required: false },
-    { key: 'demo_stat_3_description', label: 'Demo Stat 3 Description', type: 'text', required: false },
-    { key: 'video_info_1_text', label: 'Video Info 1 Text', type: 'text', required: false },
-    { key: 'video_info_2_text', label: 'Video Info 2 Text', type: 'text', required: false },
-    { key: 'show_demo_stats', label: 'Show Demo Stats', type: 'boolean', required: false },
-    { key: 'show_video_info', label: 'Show Video Info', type: 'boolean', required: false }
+    { key: 'demo_stats', label: 'Demo Stats', type: 'array', required: false },
+    { key: 'video_info', label: 'Video Info', type: 'array', required: false }
   ],
-  
+
   features: [
     'Professional video player interface',
     'Video thumbnail support',
     'Duration display and controls',
     'Enterprise demo statistics',
-    'Perfect for sales demonstrations',
+    'Theme-aware styling',
     'High-touch customer engagement'
   ],
-  
+
   useCases: [
     'Enterprise software demos',
     'Product walkthrough videos',

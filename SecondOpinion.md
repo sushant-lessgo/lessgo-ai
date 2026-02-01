@@ -1,10 +1,9 @@
-  Issues:
-
-  1. [Major] Duplicate attribution - Name + company appears BOTH on video overlay AND below thumbnail. Redundant.
-  → Remove overlay text, keep attribution below only. Use overlay for play button only.
-  2. [Major] Play button not recognizable - Circle with small dot doesn't read as "play"
-  → Use triangle play icon (▶) inside circle
-  3. [Minor] Placeholder thumbnail styling - Gray gradient feels like dev placeholder, not polished empty state
-  → Darker gradient, or pattern, or more intentional "video coming" state
-  4. [Minor] Video area dominates - Large gray blocks overshadow the actual content
-  → Consider smaller aspect ratio (16:9 → tighter) or adding visual interest to placeholder
+ Issues:
+  1. [Critical] Second CTA button text not visible, fix using color tokens
+ 
+  2. [Minor] Primary CTA should have accent background color
+ 
+  3. [Minor] Value list is center-aligned container with left-aligned text - feels slightly off
+  → Either fully left-align or use centered bullet layout
+  4. [Minor] Money-back guarantee text is very small/easy to miss
+  → Slightly increase size

@@ -3,6 +3,7 @@
  *
  * Server-safe component with ZERO hook imports
  * Used by componentRegistry.published.ts for SSR rendering
+ * V2 Schema: Uses wins[] array format
  */
 
 import React from 'react';
@@ -14,11 +15,12 @@ import { SectionWrapperPublished } from '@/components/published/SectionWrapperPu
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
-// Win item structure
-interface Win {
+// Win item structure (V2 array format)
+interface WinItem {
+  id: string;
   win: string;
-  description: string;
-  category: string;
+  description?: string;
+  category?: string;
 }
 
 export default function StackedWinsListPublished(props: LayoutComponentProps) {
@@ -27,31 +29,13 @@ export default function StackedWinsListPublished(props: LayoutComponentProps) {
   // Extract content from props (flattened by LandingPagePublishedRenderer)
   const headline = props.headline || 'Your Wins Start Adding Up Fast';
   const subheadline = props.subheadline || '';
-  const win_count = props.win_count || '';
-  const footer_title = props.footer_title || '';
   const footer_text = props.footer_text || '';
 
-  // Extract pipe-separated fields
-  const wins = props.wins || '';
-  const descriptions = props.descriptions || '';
-  const categories = props.categories || '';
+  // Icon - derive default at render time (per Icon Handling Pattern)
+  const win_icon = props.win_icon ?? '✅';
 
-  // Extract icons
-  const win_icon = props.win_icon || '✅';
-  const badge_icon = props.badge_icon || '🏆';
-  const momentum_icon = props.momentum_icon || '📈';
-
-  // Parse all arrays
-  const winList = wins.split('|').map((w: string) => w.trim()).filter((w: string) => w && w !== '___REMOVED___');
-  const descriptionList = descriptions ? descriptions.split('|').map((d: string) => d.trim()) : [];
-  const categoryList = categories ? categories.split('|').map((c: string) => c.trim()) : [];
-
-  // Build wins array
-  const winData: Win[] = winList.map((win: string, index: number) => ({
-    win,
-    description: descriptionList[index] || '',
-    category: categoryList[index] || ''
-  }));
+  // Get wins array (V2 format)
+  const wins: WinItem[] = Array.isArray(props.wins) ? props.wins : [];
 
   // Detect theme
   const uiTheme: UIBlockTheme = props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
@@ -81,13 +65,14 @@ export default function StackedWinsListPublished(props: LayoutComponentProps) {
   };
 
   // Get category colors with hex values
-  const getCategoryColor = (category: string, theme: UIBlockTheme) => {
+  const getCategoryColor = (category: string | undefined, theme: UIBlockTheme) => {
+    const defaults = {
+      warm: { bg: '#fff7ed', text: '#c2410c', border: '#fed7aa' },
+      cool: { bg: '#eff6ff', text: '#1e40af', border: '#bfdbfe' },
+      neutral: { bg: '#f9fafb', text: '#4b5563', border: '#e5e7eb' }
+    };
+
     if (!category) {
-      const defaults = {
-        warm: { bg: '#fff7ed', text: '#c2410c', border: '#fed7aa' },
-        cool: { bg: '#eff6ff', text: '#1e40af', border: '#bfdbfe' },
-        neutral: { bg: '#f9fafb', text: '#4b5563', border: '#e5e7eb' }
-      };
       return defaults[theme];
     }
 
@@ -126,20 +111,10 @@ export default function StackedWinsListPublished(props: LayoutComponentProps) {
 
     const colorSets = { warm: warmColors, cool: coolColors, neutral: neutralColors };
     const categoryKey = category.toLowerCase();
-    return colorSets[theme][categoryKey] || colorSets[theme]['productivity'];
-  };
-
-  // Get badge colors
-  const getBadgeColors = (theme: UIBlockTheme) => {
-    return {
-      warm: { bg: '#ffedd5', text: '#c2410c', border: '#fed7aa' },
-      cool: { bg: '#dbeafe', text: '#1e40af', border: '#bfdbfe' },
-      neutral: { bg: '#f3f4f6', text: '#374151', border: '#e5e7eb' }
-    }[theme];
+    return colorSets[theme][categoryKey] || defaults[theme];
   };
 
   const iconColors = getWinIconColors(uiTheme);
-  const badgeColors = getBadgeColors(uiTheme);
 
   // Get text colors
   const textColors = getPublishedTextColors(
@@ -183,38 +158,16 @@ export default function StackedWinsListPublished(props: LayoutComponentProps) {
               }}
             />
           )}
-
-          {/* Win Count Badge */}
-          {win_count && (
-            <div
-              className="inline-flex items-center px-4 py-2 border rounded-full font-medium text-sm mt-6"
-              style={{
-                backgroundColor: badgeColors.bg,
-                borderColor: badgeColors.border,
-                color: badgeColors.text
-              }}
-            >
-              <IconPublished
-                icon={badge_icon}
-                size={16}
-                className="text-sm mr-2"
-              />
-              <TextPublished
-                value={win_count}
-                style={{ fontWeight: 500 }}
-              />
-            </div>
-          )}
         </div>
 
         {/* Wins List */}
         <div className="space-y-4">
-          {winData.map((win: Win, index: number) => {
+          {wins.map((win: WinItem) => {
             const categoryColors = getCategoryColor(win.category, uiTheme);
 
             return (
               <div
-                key={`win-${index}`}
+                key={win.id}
                 className="flex items-start space-x-4 p-6 bg-white rounded-xl border transition-all duration-300"
                 style={{ borderColor: iconColors.border }}
               >
@@ -283,35 +236,19 @@ export default function StackedWinsListPublished(props: LayoutComponentProps) {
           })}
         </div>
 
-        {/* Momentum Footer */}
-        {(footer_title || footer_text) && (
-          <div className="mt-16 text-center">
-            <div className="inline-flex items-center space-x-2 mb-4">
-              <IconPublished
-                icon={momentum_icon}
-                size={24}
-                className="text-2xl"
-              />
-              {footer_title && (
-                <TextPublished
-                  value={footer_title}
-                  style={{
-                    fontSize: '1.25rem',
-                    fontWeight: 'bold',
-                    color: textColors.heading
-                  }}
-                />
-              )}
-            </div>
-            {footer_text && (
-              <TextPublished
-                value={footer_text}
-                style={{
-                  color: textColors.muted,
-                  fontSize: '1.125rem'
-                }}
-              />
-            )}
+        {/* Footer - Simple text for summary/transition */}
+        {footer_text && (
+          <div className="mt-12 text-center">
+            <TextPublished
+              value={footer_text}
+              style={{
+                color: textColors.muted,
+                ...bodyTypography,
+                maxWidth: '42rem',
+                margin: '0 auto',
+                opacity: 0.8
+              }}
+            />
           </div>
         )}
       </div>

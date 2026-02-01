@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
@@ -7,87 +7,35 @@ import { LayoutSection } from '@/components/layout/LayoutSection';
 import { EditableAdaptiveHeadline, EditableAdaptiveText } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getIconFromCategory, getRandomIconFromCategory } from '@/utils/iconMapping';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { getIcon } from '@/lib/getIcon';
+
+// V2 Schema: Array-based secrets
+interface SecretItem {
+  id: string;
+  title: string;
+  description: string;
+  icon?: string;
+}
 
 interface SecretSauceRevealContent {
   headline: string;
   subheadline?: string;
-  secret_titles: string;
-  secret_descriptions: string;
-  secret_icon_1?: string;
-  secret_icon_2?: string;
-  secret_icon_3?: string;
-  secret_icon_4?: string;
-}
-
-interface SecretItem {
-  title: string;
-  description: string;
-  id: string;
+  secrets: SecretItem[];
 }
 
 const CONTENT_SCHEMA = {
   headline: { type: 'string' as const, default: 'Our Secret Sauce Revealed' },
   subheadline: { type: 'string' as const, default: '' },
-  secret_titles: { type: 'string' as const, default: 'Quantum-Enhanced Machine Learning|Adaptive Intelligence Framework|Predictive Optimization Engine' },
-  secret_descriptions: { type: 'string' as const, default: 'We combine quantum computing principles with traditional machine learning to achieve processing speeds and accuracy levels impossible with conventional approaches.|Our system learns and adapts in real-time, continuously improving its performance based on new data and user interactions.|Advanced algorithms predict future trends and automatically optimize operations before issues arise.' },
-  secret_icon_1: { type: 'string' as const, default: '🔬' },
-  secret_icon_2: { type: 'string' as const, default: '🧠' },
-  secret_icon_3: { type: 'string' as const, default: '🚀' },
-  secret_icon_4: { type: 'string' as const, default: '💡' }
-};
-
-const parseSecretData = (titles: string, descriptions: string): SecretItem[] => {
-  const titleList = titles.split('|').map(t => t.trim()).filter(t => t);
-  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
-
-  return titleList.map((title, index) => ({
-    id: `secret-${index}`,
-    title,
-    description: descriptionList[index] || 'Description not provided.'
-  }));
-};
-
-const getSecretIcon = (blockContent: SecretSauceRevealContent, index: number) => {
-  const iconFields = [
-    blockContent.secret_icon_1,
-    blockContent.secret_icon_2,
-    blockContent.secret_icon_3,
-    blockContent.secret_icon_4
-  ];
-  return iconFields[index] || '🔬';
-};
-
-const addSecret = (titles: string, descriptions: string): { newTitles: string; newDescriptions: string } => {
-  const titleList = titles.split('|').map(t => t.trim()).filter(t => t);
-  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
-
-  titleList.push('New Secret');
-  descriptionList.push('Describe this unique aspect of your solution.');
-
-  return {
-    newTitles: titleList.join('|'),
-    newDescriptions: descriptionList.join('|')
-  };
-};
-
-const removeSecret = (titles: string, descriptions: string, indexToRemove: number): { newTitles: string; newDescriptions: string } => {
-  const titleList = titles.split('|').map(t => t.trim()).filter(t => t);
-  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
-
-  if (indexToRemove >= 0 && indexToRemove < titleList.length) {
-    titleList.splice(indexToRemove, 1);
+  secrets: {
+    type: 'array' as const,
+    default: [
+      { id: 's1', title: 'Quantum-Enhanced Machine Learning', description: 'We combine quantum computing principles with traditional machine learning to achieve processing speeds and accuracy levels impossible with conventional approaches.', icon: 'lucide:cpu' },
+      { id: 's2', title: 'Adaptive Intelligence Framework', description: 'Our system learns and adapts in real-time, continuously improving its performance based on new data and user interactions.', icon: 'lucide:brain' },
+      { id: 's3', title: 'Predictive Optimization Engine', description: 'Advanced algorithms predict future trends and automatically optimize operations before issues arise.', icon: 'lucide:trending-up' }
+    ]
   }
-  if (indexToRemove >= 0 && indexToRemove < descriptionList.length) {
-    descriptionList.splice(indexToRemove, 1);
-  }
-
-  return {
-    newTitles: titleList.join('|'),
-    newDescriptions: descriptionList.join('|')
-  };
 };
 
 const SecretCard = ({
@@ -97,10 +45,9 @@ const SecretCard = ({
   sectionId,
   onTitleEdit,
   onDescriptionEdit,
+  onIconEdit,
   onRemoveSecret,
-  blockContent,
   colorTokens,
-  handleContentUpdate,
   canRemove = true,
   sectionBackground,
   secretColors
@@ -109,12 +56,11 @@ const SecretCard = ({
   index: number;
   mode: 'edit' | 'preview';
   sectionId: string;
-  onTitleEdit: (index: number, value: string) => void;
-  onDescriptionEdit: (index: number, value: string) => void;
-  onRemoveSecret?: (index: number) => void;
-  blockContent: SecretSauceRevealContent;
+  onTitleEdit: (id: string, value: string) => void;
+  onDescriptionEdit: (id: string, value: string) => void;
+  onIconEdit: (id: string, value: string) => void;
+  onRemoveSecret?: (id: string) => void;
   colorTokens: any;
-  handleContentUpdate: (field: keyof SecretSauceRevealContent, value: string) => void;
   canRemove?: boolean;
   sectionBackground?: string;
   secretColors: {
@@ -132,7 +78,10 @@ const SecretCard = ({
     hoverShadow: string;
   };
 }) => {
-  const { getTextStyle } = useTypography();
+  // V2: Get icon - use stored value or derive from title/description
+  const displayIcon = secret.icon
+    ?? getIcon(undefined, { title: secret.title, description: secret.description })
+    ?? 'lucide:flask-conical';
 
   return (
     <div className="group relative">
@@ -142,17 +91,14 @@ const SecretCard = ({
           <div className={`w-14 h-14 ${secretColors.iconBg} ${secretColors.iconShadow} rounded-full flex items-center justify-center mx-auto mb-4`}>
             <IconEditableText
               mode={mode}
-              value={getSecretIcon(blockContent, index)}
-              onEdit={(value) => {
-                const iconField = `secret_icon_${index + 1}` as keyof SecretSauceRevealContent;
-                handleContentUpdate(iconField, value);
-              }}
+              value={displayIcon}
+              onEdit={(value) => onIconEdit(secret.id, value)}
               backgroundType="neutral"
               colorTokens={colorTokens}
               iconSize="lg"
               className={`${secretColors.iconText} text-2xl`}
               sectionId={sectionId}
-              elementKey={`secret_icon_${index + 1}`}
+              elementKey={`secret_icon_${secret.id}`}
             />
           </div>
 
@@ -161,7 +107,7 @@ const SecretCard = ({
               <div
                 contentEditable
                 suppressContentEditableWarning
-                onBlur={(e) => onTitleEdit(index, e.currentTarget.textContent || '')}
+                onBlur={(e) => onTitleEdit(secret.id, e.currentTarget.textContent || '')}
                 className={`outline-none focus:ring-2 ${secretColors.focusRing} focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text`}
               >
                 {secret.title}
@@ -176,7 +122,7 @@ const SecretCard = ({
               <div
                 contentEditable
                 suppressContentEditableWarning
-                onBlur={(e) => onDescriptionEdit(index, e.currentTarget.textContent || '')}
+                onBlur={(e) => onDescriptionEdit(secret.id, e.currentTarget.textContent || '')}
                 className={`outline-none focus:ring-2 ${secretColors.focusRing} focus:ring-opacity-50 rounded px-2 py-1 min-h-[48px] cursor-text hover:bg-gray-50 max-w-lg mx-auto`}
               >
                 {secret.description}
@@ -191,7 +137,7 @@ const SecretCard = ({
           <button
             onClick={(e) => {
               e.stopPropagation();
-              onRemoveSecret?.(index);
+              onRemoveSecret?.(secret.id);
             }}
             className="opacity-0 group-hover:opacity-100 absolute top-4 right-4 w-8 h-8 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-200"
             title="Remove this secret"
@@ -281,56 +227,45 @@ export default function SecretSauceReveal(props: LayoutComponentProps) {
 
   const secretColors = getSecretColors(theme);
 
-  // Auto-populate icons on initial generation
-  useEffect(() => {
-    if (mode === 'edit' && blockContent.secret_titles) {
-      const secrets = parseSecretData(blockContent.secret_titles, blockContent.secret_descriptions);
+  // V2: Get secrets array directly
+  const secrets = blockContent.secrets || [];
 
-      secrets.forEach((_, index) => {
-        const iconField = `secret_icon_${index + 1}` as keyof SecretSauceRevealContent;
-        if (!blockContent[iconField] || blockContent[iconField] === '') {
-          const categories = ['innovation', 'technology', 'advanced', 'quality'];
-          const icon = getRandomIconFromCategory(categories[index % categories.length]);
-          handleContentUpdate(iconField, icon);
-        }
-      });
-    }
-  }, [blockContent.secret_titles]);
-
-  const secrets = parseSecretData(
-    blockContent.secret_titles || '',
-    blockContent.secret_descriptions || ''
-  );
-
-  const handleTitleEdit = (index: number, newTitle: string) => {
-    const titles = (blockContent.secret_titles || '').split('|').map(t => t.trim());
-    titles[index] = newTitle;
-    handleContentUpdate('secret_titles', titles.join('|'));
+  // V2: Array-based edit handlers
+  const handleTitleEdit = (id: string, newTitle: string) => {
+    const updatedSecrets = secrets.map(s =>
+      s.id === id ? { ...s, title: newTitle } : s
+    );
+    (handleContentUpdate as any)('secrets', updatedSecrets);
   };
 
-  const handleDescriptionEdit = (index: number, newDescription: string) => {
-    const descriptions = (blockContent.secret_descriptions || '').split('|').map(d => d.trim());
-    descriptions[index] = newDescription;
-    handleContentUpdate('secret_descriptions', descriptions.join('|'));
+  const handleDescriptionEdit = (id: string, newDescription: string) => {
+    const updatedSecrets = secrets.map(s =>
+      s.id === id ? { ...s, description: newDescription } : s
+    );
+    (handleContentUpdate as any)('secrets', updatedSecrets);
+  };
+
+  const handleIconEdit = (id: string, newIcon: string) => {
+    const updatedSecrets = secrets.map(s =>
+      s.id === id ? { ...s, icon: newIcon } : s
+    );
+    (handleContentUpdate as any)('secrets', updatedSecrets);
   };
 
   const handleAddSecret = () => {
-    const { newTitles, newDescriptions } = addSecret(
-      blockContent.secret_titles || '',
-      blockContent.secret_descriptions || ''
-    );
-    handleContentUpdate('secret_titles', newTitles);
-    handleContentUpdate('secret_descriptions', newDescriptions);
+    if (secrets.length >= 4) return; // Enforce max:4
+    const newSecret: SecretItem = {
+      id: `s${Date.now()}`,
+      title: 'New Secret',
+      description: 'Describe this unique aspect of your solution.'
+    };
+    (handleContentUpdate as any)('secrets', [...secrets, newSecret]);
   };
 
-  const handleRemoveSecret = (index: number) => {
-    const { newTitles, newDescriptions } = removeSecret(
-      blockContent.secret_titles || '',
-      blockContent.secret_descriptions || '',
-      index
-    );
-    handleContentUpdate('secret_titles', newTitles);
-    handleContentUpdate('secret_descriptions', newDescriptions);
+  const handleRemoveSecret = (id: string) => {
+    if (secrets.length <= 2) return; // Enforce min:2
+    const updatedSecrets = secrets.filter(s => s.id !== id);
+    (handleContentUpdate as any)('secrets', updatedSecrets);
   };
 
   return (
@@ -383,10 +318,9 @@ export default function SecretSauceReveal(props: LayoutComponentProps) {
               sectionId={sectionId}
               onTitleEdit={handleTitleEdit}
               onDescriptionEdit={handleDescriptionEdit}
+              onIconEdit={handleIconEdit}
               onRemoveSecret={handleRemoveSecret}
-              blockContent={blockContent}
               colorTokens={colorTokens}
-              handleContentUpdate={handleContentUpdate}
               canRemove={secrets.length > 2}
               sectionBackground={sectionBackground}
               secretColors={secretColors}

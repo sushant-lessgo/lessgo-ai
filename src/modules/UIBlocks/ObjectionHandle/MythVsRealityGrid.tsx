@@ -2,6 +2,7 @@
 // Grid layout that contrasts myths with reality to address sophisticated market misconceptions
 
 import React from 'react';
+import { X, Check } from 'lucide-react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
@@ -9,34 +10,34 @@ import {
   EditableAdaptiveHeadline,
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
-import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
-// Content interface for type safety
+// Pair structure
+interface MythRealityPair {
+  id: string;
+  myth: string;
+  reality: string;
+}
+
+// Content interface for type safety (V2 format)
 interface MythVsRealityGridContent {
   headline: string;
   subheadline?: string;
-  // Individual myth/reality fields (up to 6 pairs)
-  myth_1: string;
-  reality_1: string;
-  myth_2: string;
-  reality_2: string;
-  myth_3: string;
-  reality_3: string;
-  myth_4: string;
-  reality_4: string;
-  myth_5: string;
-  reality_5: string;
-  myth_6: string;
-  reality_6: string;
-  // Global icons
-  myth_icon?: string;
-  reality_icon?: string;
-  // Legacy field for backward compatibility
-  myth_reality_pairs?: string;
+  pairs: MythRealityPair[];
 }
+
+// Generate unique ID for new pairs
+const generateId = () => `pair_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+// Default pairs for new sections
+const DEFAULT_PAIRS: MythRealityPair[] = [
+  { id: 'p1', myth: 'This is too complex for small teams', reality: 'Our platform is designed for teams of any size, with setup taking less than 5 minutes' },
+  { id: 'p2', myth: 'AI tools replace human creativity', reality: 'Our AI enhances your creativity by handling repetitive tasks so you can focus on strategy' },
+  { id: 'p3', myth: 'Implementation takes months', reality: 'Most customers see results within the first week' },
+  { id: 'p4', myth: 'It won\'t integrate with existing tools', reality: 'We connect seamlessly with 500+ popular business tools and platforms' },
+];
 
 // Content schema - defines structure and defaults
 const CONTENT_SCHEMA = {
@@ -48,39 +49,54 @@ const CONTENT_SCHEMA = {
     type: 'string' as const,
     default: 'Let\'s address the common misconceptions and show you what\'s actually true.'
   },
-  // Individual myth/reality pairs
-  myth_1: { type: 'string' as const, default: 'This is too complex for small teams' },
-  reality_1: { type: 'string' as const, default: 'Our platform is designed for teams of any size, with setup taking less than 5 minutes' },
-  myth_2: { type: 'string' as const, default: 'AI tools replace human creativity' },
-  reality_2: { type: 'string' as const, default: 'Our AI enhances your creativity by handling repetitive tasks so you can focus on strategy' },
-  myth_3: { type: 'string' as const, default: 'Implementation takes months' },
-  reality_3: { type: 'string' as const, default: 'Most customers see results within the first week' },
-  myth_4: { type: 'string' as const, default: 'It\'s just another analytics tool' },
-  reality_4: { type: 'string' as const, default: 'We provide actionable insights with automated recommendations, not just data' },
-  myth_5: { type: 'string' as const, default: 'You need technical expertise' },
-  reality_5: { type: 'string' as const, default: 'Our drag-and-drop interface requires zero coding knowledge' },
-  myth_6: { type: 'string' as const, default: 'It won\'t integrate with our existing tools' },
-  reality_6: { type: 'string' as const, default: 'We connect seamlessly with 500+ popular business tools and platforms' },
-  // Global icons
-  myth_icon: { type: 'string' as const, default: '❌' },
-  reality_icon: { type: 'string' as const, default: '✅' },
-  // Legacy field for backward compatibility
-  myth_reality_pairs: {
-    type: 'string' as const,
-    default: 'Myth: This is too complex for small teams|Reality: Our platform is designed for teams of any size, with setup taking less than 5 minutes|Myth: AI tools replace human creativity|Reality: Our AI enhances your creativity by handling repetitive tasks so you can focus on strategy|Myth: Implementation takes months|Reality: Most customers see results within the first week|Myth: It\'s just another analytics tool|Reality: We provide actionable insights with automated recommendations, not just data'
+  pairs: {
+    type: 'array' as const,
+    default: DEFAULT_PAIRS
   }
 };
 
+// Theme-based colors for Myth cards
+const getMythColors = (theme: UIBlockTheme) => ({
+  warm: {
+    bg: 'bg-orange-50',
+    border: 'border-orange-200',
+    iconBg: 'bg-orange-100',
+    iconColor: 'text-orange-600',
+    badgeBg: 'bg-slate-700',
+    textColor: 'text-gray-800',
+    hoverBg: 'hover:bg-orange-100',
+    focusRing: 'focus:ring-orange-500'
+  },
+  cool: {
+    bg: 'bg-blue-50',
+    border: 'border-blue-200',
+    iconBg: 'bg-blue-100',
+    iconColor: 'text-blue-600',
+    badgeBg: 'bg-slate-700',
+    textColor: 'text-gray-800',
+    hoverBg: 'hover:bg-blue-100',
+    focusRing: 'focus:ring-blue-500'
+  },
+  neutral: {
+    bg: 'bg-gray-50',
+    border: 'border-gray-200',
+    iconBg: 'bg-gray-100',
+    iconColor: 'text-gray-600',
+    badgeBg: 'bg-slate-700',
+    textColor: 'text-gray-800',
+    hoverBg: 'hover:bg-gray-100',
+    focusRing: 'focus:ring-gray-500'
+  }
+}[theme]);
+
 export default function MythVsRealityGrid(props: LayoutComponentProps) {
-  
+
   // Use the abstraction hook with background type support
   const {
     sectionId,
     mode,
     blockContent,
     colorTokens,
-    dynamicTextColors,
-    getTextStyle,
     sectionBackground,
     handleContentUpdate
   } = useLayoutComponent<MythVsRealityGridContent>({
@@ -100,192 +116,44 @@ export default function MythVsRealityGrid(props: LayoutComponentProps) {
     return 'neutral';
   }, [props.manualThemeOverride, props.userContext]);
 
-  // Theme-based color mapping
-  const getMythRealityColors = (theme: UIBlockTheme) => {
-    return {
-      warm: {
-        // Myth (left) - lighter orange
-        mythBg: 'bg-orange-50',
-        mythBorder: 'border-orange-200',
-        mythBadgeBg: 'bg-orange-500',
-        mythIconBg: 'bg-orange-500',
-        mythTextColor: 'text-orange-900',
-        mythHoverBg: 'hover:bg-orange-100',
-        mythFocusRing: 'focus:ring-orange-500',
-        // Reality (right) - darker orange
-        realityBg: 'bg-orange-100',
-        realityBorder: 'border-orange-300',
-        realityBadgeBg: 'bg-orange-600',
-        realityIconBg: 'bg-orange-600',
-        realityTextColor: 'text-orange-900',
-        realityHoverBg: 'hover:bg-orange-200',
-        realityFocusRing: 'focus:ring-orange-600'
-      },
-      cool: {
-        mythBg: 'bg-blue-50',
-        mythBorder: 'border-blue-200',
-        mythBadgeBg: 'bg-blue-500',
-        mythIconBg: 'bg-blue-500',
-        mythTextColor: 'text-blue-900',
-        mythHoverBg: 'hover:bg-blue-100',
-        mythFocusRing: 'focus:ring-blue-500',
-        realityBg: 'bg-blue-100',
-        realityBorder: 'border-blue-300',
-        realityBadgeBg: 'bg-blue-600',
-        realityIconBg: 'bg-blue-600',
-        realityTextColor: 'text-blue-900',
-        realityHoverBg: 'hover:bg-blue-200',
-        realityFocusRing: 'focus:ring-blue-600'
-      },
-      neutral: {
-        mythBg: 'bg-gray-50',
-        mythBorder: 'border-gray-200',
-        mythBadgeBg: 'bg-gray-500',
-        mythIconBg: 'bg-gray-500',
-        mythTextColor: 'text-gray-900',
-        mythHoverBg: 'hover:bg-gray-100',
-        mythFocusRing: 'focus:ring-gray-500',
-        realityBg: 'bg-gray-100',
-        realityBorder: 'border-gray-300',
-        realityBadgeBg: 'bg-gray-600',
-        realityIconBg: 'bg-gray-600',
-        realityTextColor: 'text-gray-900',
-        realityHoverBg: 'hover:bg-gray-200',
-        realityFocusRing: 'focus:ring-gray-600'
-      }
-    }[theme];
+  // Get accent color for Reality cards
+  const accentColor = props.theme?.colors?.accentColor || '#3b82f6';
+
+  // Myth colors based on theme
+  const mythColors = getMythColors(theme);
+
+  // Get pairs with fallback to defaults
+  const pairs = blockContent.pairs || DEFAULT_PAIRS;
+
+  // Add a new pair
+  const addPair = () => {
+    if (pairs.length >= 6) return;
+    const newPair: MythRealityPair = {
+      id: generateId(),
+      myth: 'New myth to address',
+      reality: 'The actual truth about this topic'
+    };
+    handleContentUpdate('pairs', JSON.stringify([...pairs, newPair]));
   };
 
-  const colors = getMythRealityColors(theme);
-
-  // Parse myth/reality pairs from both individual and legacy formats
-  const parseMythRealityPairs = (content: MythVsRealityGridContent): Array<{myth: string, reality: string, index: number}> => {
-    const pairs: Array<{myth: string, reality: string, index: number}> = [];
-
-    // Check for individual fields first (preferred format)
-    const individualPairs = [
-      { myth: content.myth_1, reality: content.reality_1 },
-      { myth: content.myth_2, reality: content.reality_2 },
-      { myth: content.myth_3, reality: content.reality_3 },
-      { myth: content.myth_4, reality: content.reality_4 },
-      { myth: content.myth_5, reality: content.reality_5 },
-      { myth: content.myth_6, reality: content.reality_6 }
-    ];
-
-    // Process individual fields
-    individualPairs.forEach((pair, index) => {
-      if (pair.myth && pair.myth.trim() && pair.reality && pair.reality.trim()) {
-        pairs.push({
-          myth: pair.myth.trim(),
-          reality: pair.reality.trim(),
-          index
-        });
-      }
-    });
-
-    // Fallback to legacy pipe-separated format if no individual fields
-    if (pairs.length === 0 && content.myth_reality_pairs) {
-      const legacyPairs = content.myth_reality_pairs.split('|').reduce((acc, item, index) => {
-        if (index % 2 === 0) {
-          acc.push({ myth: item.replace('Myth:', '').trim(), reality: '', index: Math.floor(index / 2) });
-        } else {
-          acc[acc.length - 1].reality = item.replace('Reality:', '').trim();
-        }
-        return acc;
-      }, [] as Array<{myth: string, reality: string, index: number}>);
-
-      pairs.push(...legacyPairs);
-    }
-
-    return pairs;
+  // Remove a pair by id
+  const removePair = (pairId: string) => {
+    if (pairs.length <= 1) return;
+    handleContentUpdate('pairs', JSON.stringify(pairs.filter(p => p.id !== pairId)));
   };
 
-  const mythRealityPairs = parseMythRealityPairs(blockContent);
-
-  // Helper function to get next available pair slot
-  const getNextAvailablePairSlot = (content: MythVsRealityGridContent): number => {
-    const pairs = [
-      { myth: content.myth_1, reality: content.reality_1 },
-      { myth: content.myth_2, reality: content.reality_2 },
-      { myth: content.myth_3, reality: content.reality_3 },
-      { myth: content.myth_4, reality: content.reality_4 },
-      { myth: content.myth_5, reality: content.reality_5 },
-      { myth: content.myth_6, reality: content.reality_6 }
-    ];
-
-    for (let i = 0; i < pairs.length; i++) {
-      if (!pairs[i].myth || pairs[i].myth.trim() === '') {
-        return i + 1;
-      }
-    }
-
-    return -1; // No slots available
+  // Update a pair's myth text
+  const updateMythText = (pairId: string, value: string) => {
+    handleContentUpdate('pairs', JSON.stringify(pairs.map(p =>
+      p.id === pairId ? { ...p, myth: value } : p
+    )));
   };
 
-  // Helper function to shift pairs down when removing one
-  const shiftPairsDown = (content: MythVsRealityGridContent, removedIndex: number): Partial<MythVsRealityGridContent> => {
-    const updates: Partial<MythVsRealityGridContent> = {};
-
-    // Get all pairs after filtering out empty ones
-    const allPairs = [
-      { myth: content.myth_1, reality: content.reality_1 },
-      { myth: content.myth_2, reality: content.reality_2 },
-      { myth: content.myth_3, reality: content.reality_3 },
-      { myth: content.myth_4, reality: content.reality_4 },
-      { myth: content.myth_5, reality: content.reality_5 },
-      { myth: content.myth_6, reality: content.reality_6 }
-    ];
-
-    // Filter out the removed item and empty pairs
-    const validPairs = allPairs
-      .map((pair, index) => ({ ...pair, originalIndex: index }))
-      .filter((pair, index) => index !== removedIndex && pair.myth && pair.myth.trim())
-      .slice(0, 5); // Limit to 5 since one is being removed
-
-    // Clear all fields first
-    for (let i = 1; i <= 6; i++) {
-      updates[`myth_${i}` as keyof MythVsRealityGridContent] = '';
-      updates[`reality_${i}` as keyof MythVsRealityGridContent] = '';
-    }
-
-    // Reassign remaining pairs
-    validPairs.forEach((pair, newIndex) => {
-      const fieldNum = newIndex + 1;
-      updates[`myth_${fieldNum}` as keyof MythVsRealityGridContent] = pair.myth || '';
-      updates[`reality_${fieldNum}` as keyof MythVsRealityGridContent] = pair.reality || '';
-    });
-
-    return updates;
-  };
-
-  // Helper function to add a new myth/reality pair
-  const addMythRealityPair = () => {
-    const nextSlot = getNextAvailablePairSlot(blockContent);
-    if (nextSlot > 0) {
-      handleContentUpdate(`myth_${nextSlot}` as keyof MythVsRealityGridContent, 'New myth to address');
-      handleContentUpdate(`reality_${nextSlot}` as keyof MythVsRealityGridContent, 'The actual truth about this topic');
-    }
-  };
-
-  // Helper function to remove a myth/reality pair
-  const removeMythRealityPair = (indexToRemove: number) => {
-    const updates = shiftPairsDown(blockContent, indexToRemove);
-
-    // Apply all updates at once
-    Object.entries(updates).forEach(([key, value]) => {
-      handleContentUpdate(key as keyof MythVsRealityGridContent, value as string);
-    });
-  };
-
-  // Helper function to update individual myth/reality text
-  const updateMythAtIndex = (index: number, value: string) => {
-    const fieldName = `myth_${index + 1}` as keyof MythVsRealityGridContent;
-    handleContentUpdate(fieldName, value);
-  };
-
-  const updateRealityAtIndex = (index: number, value: string) => {
-    const fieldName = `reality_${index + 1}` as keyof MythVsRealityGridContent;
-    handleContentUpdate(fieldName, value);
+  // Update a pair's reality text
+  const updateRealityText = (pairId: string, value: string) => {
+    handleContentUpdate('pairs', JSON.stringify(pairs.map(p =>
+      p.id === pairId ? { ...p, reality: value } : p
+    )));
   };
 
   return (
@@ -298,7 +166,7 @@ export default function MythVsRealityGrid(props: LayoutComponentProps) {
       className={props.className}
     >
       <div className="max-w-7xl mx-auto">
-        
+
         {/* Header Section */}
         <div className="text-center mb-16">
           <EditableAdaptiveHeadline
@@ -333,80 +201,77 @@ export default function MythVsRealityGrid(props: LayoutComponentProps) {
 
         {/* Myth vs Reality Grid */}
         <div className="space-y-8">
-          {mythRealityPairs.map((pair, index) => (
-            <div key={index} className={`relative group/myth-reality-${index}`}>
+          {pairs.map((pair) => (
+            <div key={pair.id} className="relative group">
               <div className="grid md:grid-cols-2 gap-6 lg:gap-8">
-                {/* Myth Card */}
-                <div className={`${colors.mythBg} border ${colors.mythBorder} rounded-xl p-6 relative`}>
+                {/* Myth Card - Theme-based colors */}
+                <div className={`${mythColors.bg} border ${mythColors.border} rounded-xl p-6 relative`}>
                   <div className="absolute -top-3 left-6">
-                    <span style={{...bodyStyle, fontSize: '0.875rem', fontWeight: '500'}} className={`${colors.mythBadgeBg} text-white px-3 py-1 rounded-full`}>
+                    <span style={{...bodyStyle, fontSize: '0.875rem', fontWeight: '500'}} className={`${mythColors.badgeBg} text-white px-3 py-1 rounded-full`}>
                       Myth
                     </span>
                   </div>
                   <div className="pt-4">
                     <div className="flex items-start space-x-3">
-                      <div className={`flex-shrink-0 w-8 h-8 ${colors.mythIconBg} rounded-full flex items-center justify-center mt-1`}>
-                        <IconEditableText
-                          mode={mode}
-                          value={blockContent.myth_icon || '❌'}
-                          onEdit={(value) => handleContentUpdate('myth_icon', value)}
-                          backgroundType="custom"
-                          colorTokens={{...colorTokens, primaryText: 'text-white'}}
-                          iconSize="sm"
-                          className="text-base text-white"
-                          sectionId={sectionId}
-                          elementKey="myth_icon"
-                        />
-                      </div>
+                      <X className="w-5 h-5 text-red-500 flex-shrink-0 mt-1" strokeWidth={2.5} />
                       {mode !== 'preview' ? (
                         <div
                           contentEditable
                           suppressContentEditableWarning
-                          onBlur={(e) => updateMythAtIndex(index, e.currentTarget.textContent || '')}
-                          className={`outline-none focus:ring-2 ${colors.mythFocusRing} focus:ring-opacity-50 rounded px-1 min-h-[60px] cursor-text ${colors.mythHoverBg} ${colors.mythTextColor} leading-relaxed flex-1`}
+                          onBlur={(e) => updateMythText(pair.id, e.currentTarget.textContent || '')}
+                          className={`outline-none focus:ring-2 ${mythColors.focusRing} focus:ring-opacity-50 rounded px-1 min-h-[60px] cursor-text ${mythColors.hoverBg} ${mythColors.textColor} leading-relaxed flex-1`}
+                          style={{...bodyStyle}}
                         >
                           {pair.myth}
                         </div>
                       ) : (
-                        <p style={{...bodyStyle}} className={`${colors.mythTextColor} leading-relaxed flex-1`}>{pair.myth}</p>
+                        <p style={{...bodyStyle}} className={`${mythColors.textColor} leading-relaxed flex-1`}>{pair.myth}</p>
                       )}
                     </div>
                   </div>
                 </div>
 
-                {/* Reality Card */}
-                <div className={`${colors.realityBg} border ${colors.realityBorder} rounded-xl p-6 relative`}>
+                {/* Reality Card - Accent color based */}
+                <div
+                  className="rounded-xl p-6 relative"
+                  style={{
+                    backgroundColor: `${accentColor}0A`,
+                    borderWidth: '1px',
+                    borderStyle: 'solid',
+                    borderColor: `${accentColor}30`
+                  }}
+                >
                   <div className="absolute -top-3 left-6">
-                    <span style={{...bodyStyle, fontSize: '0.875rem', fontWeight: '500'}} className={`${colors.realityBadgeBg} text-white px-3 py-1 rounded-full`}>
+                    <span
+                      style={{
+                        ...bodyStyle,
+                        fontSize: '0.875rem',
+                        fontWeight: '500',
+                        backgroundColor: accentColor
+                      }}
+                      className="text-white px-3 py-1 rounded-full"
+                    >
                       Reality
                     </span>
                   </div>
                   <div className="pt-4">
                     <div className="flex items-start space-x-3">
-                      <div className={`flex-shrink-0 w-8 h-8 ${colors.realityIconBg} rounded-full flex items-center justify-center mt-1`}>
-                        <IconEditableText
-                          mode={mode}
-                          value={blockContent.reality_icon || '✅'}
-                          onEdit={(value) => handleContentUpdate('reality_icon', value)}
-                          backgroundType="custom"
-                          colorTokens={{...colorTokens, primaryText: 'text-white'}}
-                          iconSize="sm"
-                          className="text-base text-white"
-                          sectionId={sectionId}
-                          elementKey="reality_icon"
-                        />
-                      </div>
+                      <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" strokeWidth={2.5} />
                       {mode !== 'preview' ? (
                         <div
                           contentEditable
                           suppressContentEditableWarning
-                          onBlur={(e) => updateRealityAtIndex(index, e.currentTarget.textContent || '')}
-                          className={`outline-none focus:ring-2 ${colors.realityFocusRing} focus:ring-opacity-50 rounded px-1 min-h-[60px] cursor-text ${colors.realityHoverBg} ${colors.realityTextColor} leading-relaxed flex-1`}
+                          onBlur={(e) => updateRealityText(pair.id, e.currentTarget.textContent || '')}
+                          className="outline-none focus:ring-2 focus:ring-opacity-50 rounded px-1 min-h-[60px] cursor-text text-gray-800 leading-relaxed flex-1"
+                          style={{
+                            ...bodyStyle,
+                            ['--tw-ring-color' as string]: accentColor
+                          }}
                         >
                           {pair.reality}
                         </div>
                       ) : (
-                        <p style={{...bodyStyle}} className={`${colors.realityTextColor} leading-relaxed flex-1`}>{pair.reality}</p>
+                        <p style={{...bodyStyle}} className="text-gray-800 leading-relaxed flex-1">{pair.reality}</p>
                       )}
                     </div>
                   </div>
@@ -414,13 +279,13 @@ export default function MythVsRealityGrid(props: LayoutComponentProps) {
               </div>
 
               {/* Delete button - only show in edit mode and if more than 1 pair */}
-              {mode !== 'preview' && mythRealityPairs.length > 1 && (
+              {mode !== 'preview' && pairs.length > 1 && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    removeMythRealityPair(index);
+                    removePair(pair.id);
                   }}
-                  className={`opacity-0 group-hover/myth-reality-${index}:opacity-100 absolute -top-2 right-4 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-200 z-10`}
+                  className="opacity-0 group-hover:opacity-100 absolute -top-2 right-4 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-200 z-10"
                   title="Remove this myth vs reality pair"
                 >
                   <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -433,10 +298,10 @@ export default function MythVsRealityGrid(props: LayoutComponentProps) {
         </div>
 
         {/* Add Myth vs Reality Pair Button - only show in edit mode and if under max limit */}
-        {mode !== 'preview' && mythRealityPairs.length < 6 && (
+        {mode !== 'preview' && pairs.length < 6 && (
           <div className="mt-8 text-center">
             <button
-              onClick={addMythRealityPair}
+              onClick={addPair}
               className="flex items-center space-x-2 mx-auto px-4 py-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-xl transition-all duration-200 group"
             >
               <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -460,36 +325,24 @@ export const componentMeta = {
   tags: ['objection', 'credibility', 'myth-busting', 'grid', 'comparison'],
   defaultBackgroundType: 'primary' as const,
   complexity: 'medium',
-  estimatedBuildTime: '20 minutes',
-  
+
   contentFields: [
     { key: 'headline', label: 'Main Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
-    // Individual myth/reality pairs
-    { key: 'myth_1', label: 'First Myth', type: 'text', required: true },
-    { key: 'reality_1', label: 'First Reality', type: 'textarea', required: true },
-    { key: 'myth_2', label: 'Second Myth', type: 'text', required: true },
-    { key: 'reality_2', label: 'Second Reality', type: 'textarea', required: true },
-    { key: 'myth_3', label: 'Third Myth', type: 'text', required: false },
-    { key: 'reality_3', label: 'Third Reality', type: 'textarea', required: false },
-    { key: 'myth_4', label: 'Fourth Myth', type: 'text', required: false },
-    { key: 'reality_4', label: 'Fourth Reality', type: 'textarea', required: false },
-    { key: 'myth_5', label: 'Fifth Myth', type: 'text', required: false },
-    { key: 'reality_5', label: 'Fifth Reality', type: 'textarea', required: false },
-    { key: 'myth_6', label: 'Sixth Myth', type: 'text', required: false },
-    { key: 'reality_6', label: 'Sixth Reality', type: 'textarea', required: false }
+    { key: 'pairs', label: 'Myth/Reality Pairs', type: 'array', required: true }
   ],
 
   features: [
-    'Visual contrast between myths (red) and reality (green)',
+    'Visual contrast between myths and reality cards',
     'Add/delete myth vs reality pairs (up to 6 pairs)',
     'Individual inline editing for each myth and reality',
-    'Automatic text color adaptation based on background type',
+    'Theme-aware styling for Myth cards (warm/cool/neutral)',
+    'Accent color styling for Reality cards',
+    'Lucide icons (X for myth, Check for reality)',
     'Responsive grid layout for optimal readability',
-    'Clear iconography for myths vs reality',
     'Minimum of 1 pair enforced'
   ],
-  
+
   useCases: [
     'Addressing technical misconceptions in sophisticated markets',
     'Correcting pricing or complexity assumptions',

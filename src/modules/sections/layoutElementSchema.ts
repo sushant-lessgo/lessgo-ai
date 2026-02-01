@@ -838,175 +838,174 @@ export const layoutElementSchema: LayoutSchema = {
     }
   },
 
-  // HowItWorks Section
+  // HowItWorks Section - V2 Schema
   ThreeStepHorizontal: {
-    sectionElements: [
-      { element: "headline", mandatory: true, generation: "ai_generated" },
-      { element: "subheadline", mandatory: false, generation: "ai_generated" },
-      { element: "conclusion_text", mandatory: false, generation: "ai_generated" },
-      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
-      { element: "cta_text", mandatory: false, generation: "ai_generated" },
-      { element: "trust_items", mandatory: false, generation: "ai_generated" },
-      { element: "step_numbers", mandatory: false, generation: "manual_preferred" },
-      { element: "step_icon_1", mandatory: false, generation: "ai_generated" },
-      { element: "step_icon_2", mandatory: false, generation: "ai_generated" },
-      { element: "step_icon_3", mandatory: false, generation: "ai_generated" }
-    ],
-    cardStructure: {
-      type: "cards",
-      elements: ["step_titles", "step_descriptions"],
-      generation: "ai_generated"
+    sectionType: "ThreeStepHorizontal",
+
+    elements: {
+      // Required AI-generated
+      headline:        { type: "string", requirement: "required", fillMode: "ai_generated" },
+
+      // Optional AI-generated
+      subheadline:     { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      conclusion_text: { type: "string", requirement: "optional", fillMode: "ai_generated" },
     },
-    cardRequirements: {
-      type: 'cards',
-      min: 3,
-      max: 3,
-      optimal: [3, 3],
-      description: 'Three-step process'
+
+    collections: {
+      steps: {
+        requirement: "required",
+        fillMode: "ai_generated",
+        constraints: { min: 3, max: 6 },
+        fields: {
+          id:          { type: "string", fillMode: "system" },
+          title:       { type: "string", fillMode: "ai_generated" },
+          description: { type: "string", fillMode: "ai_generated" },
+          icon:        { type: "string", fillMode: "manual_preferred" },
+        }
+      }
     }
   },
 
+  // HowItWorks Section - VerticalTimeline (V2 Schema)
   VerticalTimeline: {
-    sectionElements: [
-      { element: "headline", mandatory: true, generation: "ai_generated" },
-      { element: "subheadline", mandatory: false, generation: "ai_generated" },
-      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
-      { element: "cta_text", mandatory: false, generation: "ai_generated" },
-      { element: "trust_items", mandatory: false, generation: "ai_generated" },
-      { element: "process_summary_text", mandatory: false, generation: "ai_generated" },
-      { element: "timeline_connector_text", mandatory: false, generation: "ai_generated" },
-      { element: "use_step_icons", mandatory: false, generation: "ai_generated" },
-      { element: "step_icon_1", mandatory: false, generation: "ai_generated" },
-      { element: "step_icon_2", mandatory: false, generation: "ai_generated" },
-      { element: "step_icon_3", mandatory: false, generation: "ai_generated" },
-      { element: "step_icon_4", mandatory: false, generation: "ai_generated" }
-    ],
-    cardStructure: {
-      type: "cards",
-      elements: ["step_titles", "step_descriptions", "step_durations"],
-      generation: "ai_generated"
+    sectionType: "VerticalTimeline",
+
+    elements: {
+      headline:             { type: "string", requirement: "required", fillMode: "ai_generated" },
+      subheadline:          { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      process_summary_text: { type: "string", requirement: "optional", fillMode: "ai_generated" },
     },
-    cardRequirements: {
-      type: 'cards',
-      min: 3,
-      max: 6,
-      optimal: [4, 5],
-      description: 'Timeline process steps'
+
+    collections: {
+      steps: {
+        requirement: "required",
+        fillMode: "ai_generated",
+        constraints: { min: 3, max: 6 },
+        fields: {
+          id:          { type: "string", fillMode: "system" },
+          title:       { type: "string", fillMode: "ai_generated" },
+          description: { type: "string", fillMode: "ai_generated" },
+          duration:    { type: "string", fillMode: "ai_generated" },
+          icon:        { type: "string", fillMode: "manual_preferred" },
+        }
+      }
     }
   },
 
   AccordionSteps: {
-    sectionElements: [
-      { element: "headline", mandatory: true, generation: "ai_generated" },
-      { element: "subheadline", mandatory: false, generation: "ai_generated" },
-      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
-      { element: "cta_text", mandatory: false, generation: "ai_generated" },
-      { element: "trust_items", mandatory: false, generation: "ai_generated" },
-      { element: "tech_specs_heading", mandatory: false, generation: "ai_generated" },
-      { element: "tech_spec_1_value", mandatory: false, generation: "ai_generated" },
-      { element: "tech_spec_1_label", mandatory: false, generation: "ai_generated" },
-      { element: "tech_spec_2_value", mandatory: false, generation: "ai_generated" },
-      { element: "tech_spec_2_label", mandatory: false, generation: "ai_generated" },
-      { element: "tech_spec_3_value", mandatory: false, generation: "ai_generated" },
-      { element: "tech_spec_3_label", mandatory: false, generation: "ai_generated" },
-      { element: "tech_specs_description", mandatory: false, generation: "ai_generated" },
-      { element: "show_step_indicators", mandatory: false, generation: "manual_preferred" },
-      { element: "show_tech_specs", mandatory: false, generation: "manual_preferred" }
-    ],
-    cardStructure: {
-      type: "cards",
-      elements: ["step_titles", "step_descriptions", "step_details"],
-      generation: "ai_generated"
+    sectionType: "AccordionSteps",
+
+    elements: {
+      headline:        { type: "string", requirement: "required", fillMode: "ai_generated" },
+      subheadline:     { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      conclusion_text: { type: "string", requirement: "optional", fillMode: "ai_generated" },
     },
-    cardRequirements: {
-      type: 'cards',
-      min: 3,
-      max: 6,
-      optimal: [4, 5],
-      description: 'Technical implementation steps with details'
+
+    collections: {
+      steps: {
+        requirement: "required",
+        fillMode: "ai_generated",
+        constraints: { min: 3, max: 6 },
+        fields: {
+          id:          { type: "string", fillMode: "system" },
+          title:       { type: "string", fillMode: "ai_generated" },
+          description: { type: "string", fillMode: "ai_generated" },
+          details:     { type: "string", fillMode: "ai_generated" },
+        }
+      }
     }
   },
 
+  // HowItWorks Section - VideoWalkthrough (V2 Schema)
   VideoWalkthrough: {
-    sectionElements: [
-      { element: "headline", mandatory: true, generation: "ai_generated" },
-      { element: "video_title", mandatory: true, generation: "ai_generated" },
-      { element: "video_description", mandatory: true, generation: "ai_generated" },
-      { element: "subheadline", mandatory: false, generation: "ai_generated" },
-      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
-      { element: "cta_text", mandatory: false, generation: "ai_generated" },
-      { element: "trust_items", mandatory: false, generation: "ai_generated" },
-      { element: "demo_stats_heading", mandatory: false, generation: "ai_generated" },
-      { element: "demo_stat_1_label", mandatory: false, generation: "ai_generated" },
-      { element: "demo_stat_1_description", mandatory: false, generation: "ai_generated" },
-      { element: "demo_stat_2_label", mandatory: false, generation: "ai_generated" },
-      { element: "demo_stat_2_description", mandatory: false, generation: "ai_generated" },
-      { element: "demo_stat_3_label", mandatory: false, generation: "ai_generated" },
-      { element: "demo_stat_3_description", mandatory: false, generation: "ai_generated" },
-      { element: "video_info_1_text", mandatory: false, generation: "ai_generated" },
-      { element: "video_info_2_text", mandatory: false, generation: "ai_generated" },
-      { element: "video_duration", mandatory: false, generation: "manual_preferred" },
-      { element: "video_url", mandatory: false, generation: "manual_preferred" },
-      { element: "video_thumbnail", mandatory: false, generation: "manual_preferred" },
-      { element: "show_demo_stats", mandatory: false, generation: "manual_preferred" },
-      { element: "show_video_info", mandatory: false, generation: "manual_preferred" }
-    ],
-    cardStructure: {
-      type: "cards",
-      elements: ["chapter_titles"],
-      generation: "ai_generated"
+    sectionType: "VideoWalkthrough",
+
+    elements: {
+      // Required AI-generated
+      headline:          { type: "string", requirement: "required", fillMode: "ai_generated" },
+      video_title:       { type: "string", requirement: "required", fillMode: "ai_generated" },
+      video_description: { type: "string", requirement: "required", fillMode: "ai_generated" },
+
+      // Optional AI-generated
+      subheadline:         { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      demo_stats_heading:  { type: "string", requirement: "optional", fillMode: "ai_generated" },
+
+      // Manual preferred
+      video_url:       { type: "string", fillMode: "manual_preferred", default: "" },
+      video_duration:  { type: "string", fillMode: "manual_preferred", default: "" },
     },
-    cardRequirements: {
-      type: 'cards',
-      min: 3,
-      max: 8,
-      optimal: [4, 6],
-      description: 'Video chapter breakdown'
+
+    collections: {
+      demo_stats: {
+        requirement: "optional",
+        fillMode: "ai_generated",
+        constraints: { min: 0, max: 3 },
+        fields: {
+          id:          { type: "string", fillMode: "system" },
+          label:       { type: "string", fillMode: "ai_generated" },
+          description: { type: "string", fillMode: "ai_generated" },
+          icon:        { type: "string", fillMode: "manual_preferred" },
+        }
+      },
+      video_info: {
+        requirement: "optional",
+        fillMode: "ai_generated",
+        constraints: { min: 0, max: 2 },
+        fields: {
+          id:   { type: "string", fillMode: "system" },
+          text: { type: "string", fillMode: "ai_generated" },
+          icon: { type: "string", fillMode: "manual_preferred" },
+        }
+      }
     }
   },
 
-  // Objection Section
+  // Objection Section - MythVsRealityGrid (V2 Schema)
+  // Uses fixed Lucide icons: X for Myth, Check for Reality
   MythVsRealityGrid: {
-    sectionElements: [
-      { element: "headline", mandatory: true, generation: "ai_generated" },
-      { element: "subheadline", mandatory: false, generation: "ai_generated" },
-      { element: "myth_icon", mandatory: false, generation: "ai_generated" },
-      { element: "reality_icon", mandatory: false, generation: "ai_generated" }
-    ],
+    sectionType: "MythVsRealityGrid",
 
-    cardStructure: {
-      type: "pairs",
-      elements: ["myth_reality_pairs"],
-      generation: "ai_generated"
+    elements: {
+      headline:    { type: "string", requirement: "required", fillMode: "ai_generated" },
+      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated" },
     },
 
-    cardRequirements: {
-      type: 'pairs',
-      min: 3,
-      max: 6,
-      optimal: [4, 5],
-      description: 'Myth vs reality comparison pairs'
+    collections: {
+      pairs: {
+        requirement: "required",
+        fillMode: "ai_generated",
+        constraints: { min: 3, max: 6 },
+        fields: {
+          id:      { type: "string", fillMode: "system" },
+          myth:    { type: "string", fillMode: "ai_generated" },
+          reality: { type: "string", fillMode: "ai_generated" },
+        }
+      }
     }
   },
 
+  // Objection Section - VisualObjectionTiles (V2 Schema)
   VisualObjectionTiles: {
-    sectionElements: [
-      { element: "headline", mandatory: true, generation: "ai_generated" },
-      { element: "subheadline", mandatory: false, generation: "ai_generated" }
-    ],
+    sectionType: "VisualObjectionTiles",
 
-    cardStructure: {
-      type: "cards",
-      elements: ["objection_questions", "objection_responses", "objection_labels", "objection_icons"],
-      generation: "ai_generated"
+    elements: {
+      headline:    { type: "string", requirement: "required", fillMode: "ai_generated" },
+      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated" },
     },
 
-    cardRequirements: {
-      type: 'cards',
-      min: 4,
-      max: 8,
-      optimal: [4, 6],
-      description: 'Visual objection handling tiles'
+    collections: {
+      objections: {
+        requirement: "required",
+        fillMode: "ai_generated",
+        constraints: { min: 3, max: 6 },
+        fields: {
+          id:       { type: "string", fillMode: "system" },
+          question: { type: "string", fillMode: "ai_generated" },
+          response: { type: "string", fillMode: "ai_generated" },
+          label:    { type: "string", fillMode: "ai_generated" },
+          icon:     { type: "string", fillMode: "manual_preferred" },
+        }
+      }
     }
   },
 
@@ -1137,116 +1136,142 @@ export const layoutElementSchema: LayoutSchema = {
 
   // Results Section
   StatBlocks: {
-    sectionElements: [
-      { element: "headline", mandatory: true, generation: "ai_generated" },
-      { element: "subheadline", mandatory: false, generation: "ai_generated" },
-      { element: "achievement_footer", mandatory: false, generation: "ai_generated" },
-      { element: "stat_icon_1", mandatory: true, generation: "ai_generated" },
-      { element: "stat_icon_2", mandatory: true, generation: "ai_generated" },
-      { element: "stat_icon_3", mandatory: true, generation: "ai_generated" },
-      { element: "stat_icon_4", mandatory: true, generation: "ai_generated" },
-      { element: "stat_icon_5", mandatory: true, generation: "ai_generated" },
-      { element: "stat_icon_6", mandatory: true, generation: "ai_generated" }
-    ],
+    sectionType: "StatBlocks",
 
-    cardStructure: {
-      type: "cards",
-      elements: ["stat_values", "stat_labels", "stat_descriptions"],
-      generation: "ai_generated"
+    elements: {
+      headline:           { type: "string", requirement: "required", fillMode: "ai_generated" },
+      subheadline:        { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      achievement_footer: { type: "string", requirement: "optional", fillMode: "ai_generated" },
     },
 
-    cardRequirements: {
-      type: 'cards',
-      min: 1,
-      max: 6,
-      optimal: [3, 4],
-      description: 'Statistical result blocks'
+    collections: {
+      stats: {
+        requirement: "required",
+        fillMode: "ai_generated_needs_review",
+        constraints: { min: 2, max: 6 },
+        fields: {
+          id:          { type: "string", fillMode: "system" },
+          value:       { type: "string", fillMode: "ai_generated_needs_review" },
+          label:       { type: "string", fillMode: "ai_generated" },
+          description: { type: "string", fillMode: "ai_generated" },
+          icon:        { type: "string", fillMode: "manual_preferred" },
+        }
+      }
     }
   },
 
+  // Results Section - StackedWinsList (V2 Schema)
   StackedWinsList: {
-    sectionElements: [
-      { element: "headline", mandatory: true, generation: "ai_generated" },
-      { element: "subheadline", mandatory: false, generation: "ai_generated" },
-      { element: "win_count", mandatory: false, generation: "ai_generated" },
-      { element: "footer_title", mandatory: false, generation: "ai_generated" },
-      { element: "footer_text", mandatory: false, generation: "ai_generated" },
-      { element: "win_icon", mandatory: true, generation: "ai_generated" },
-      { element: "momentum_icon", mandatory: true, generation: "ai_generated" },
-      { element: "badge_icon", mandatory: true, generation: "ai_generated" }
-    ],
+    sectionType: "StackedWinsList",
 
-    cardStructure: {
-      type: "items",
-      elements: ["wins", "descriptions", "categories"],
-      generation: "ai_generated"
+    elements: {
+      headline:    { type: "string", requirement: "required", fillMode: "ai_generated" },
+      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      footer_text: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      // Icon: no default - derive at render time per Icon Handling Pattern
+      win_icon:    { type: "string", fillMode: "manual_preferred" },
     },
 
-    cardRequirements: {
-      type: 'items',
-      min: 3,
-      max: 8,
-      optimal: [4, 6],
-      description: 'Stacked list of wins/achievements'
+    collections: {
+      wins: {
+        requirement: "required",
+        fillMode: "ai_generated",
+        constraints: { min: 3, max: 8 },
+        fields: {
+          id:          { type: "string", fillMode: "system" },
+          win:         { type: "string", fillMode: "ai_generated" },
+          description: { type: "string", fillMode: "ai_generated" },
+          category:    { type: "string", fillMode: "ai_generated" },
+        }
+      }
     }
   },
 
+  // Results Section - ResultsGallery (V2 Schema)
   ResultsGallery: {
-    sectionElements: [
-      { element: "headline", mandatory: true, generation: "ai_generated" },
-      { element: "subheadline", mandatory: false, generation: "ai_generated" },
-      { element: "image_1", mandatory: false, generation: "manual_preferred" },
-      { element: "image_2", mandatory: false, generation: "manual_preferred" },
-      { element: "image_3", mandatory: false, generation: "manual_preferred" },
-      { element: "image_4", mandatory: false, generation: "manual_preferred" },
-      { element: "caption_1", mandatory: false, generation: "ai_generated" },
-      { element: "caption_2", mandatory: false, generation: "ai_generated" },
-      { element: "caption_3", mandatory: false, generation: "ai_generated" },
-      { element: "caption_4", mandatory: false, generation: "ai_generated" },
-    ],
+    sectionType: "ResultsGallery",
 
-    cardStructure: {
-      type: "items",
-      elements: ["images", "captions"],
-      generation: "ai_generated"
+    elements: {
+      headline:    { type: "string", requirement: "required", fillMode: "ai_generated" },
+      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated" },
     },
 
-    cardRequirements: {
-      type: 'items',
-      min: 2,
-      max: 4,
-      optimal: [4, 4],
-      description: 'Gallery of result images with captions for visual tools'
+    collections: {
+      gallery_items: {
+        requirement: "required",
+        fillMode: "ai_generated",
+        constraints: { min: 2, max: 4 },
+        fields: {
+          id:        { type: "string", fillMode: "system" },
+          image_url: { type: "string", fillMode: "manual_preferred", default: "" },
+          caption:   { type: "string", fillMode: "ai_generated" },
+        }
+      }
     }
   },
 
-  // SocialProof Section
+  // SocialProof Section - V2 Schema
+  // SocialProof Section - V2 Schema (Tiered Hierarchy)
+  // PRIMARY: Company logos | SECONDARY: Press pills | TERTIARY: Certs + Stats inline
   LogoWall: {
-    sectionElements: [
-      { element: "headline", mandatory: true, generation: "ai_generated" },
-      { element: "subheadline", mandatory: false, generation: "ai_generated" },
-      { element: "logo_urls", mandatory: false, generation: "manual_preferred" },
-      { element: "stat_1_number", mandatory: false, generation: "ai_generated" },
-      { element: "stat_1_label", mandatory: false, generation: "ai_generated" },
-      { element: "stat_2_number", mandatory: false, generation: "ai_generated" },
-      { element: "stat_2_label", mandatory: false, generation: "ai_generated" },
-      { element: "stat_3_number", mandatory: false, generation: "ai_generated" },
-      { element: "stat_3_label", mandatory: false, generation: "ai_generated" },
-      { element: "show_stats_section", mandatory: false, generation: "manual_preferred" },
-      { element: "trust_badge_text", mandatory: false, generation: "ai_generated" },
-      { element: "show_trust_badge", mandatory: false, generation: "manual_preferred" }
-    ],
-    cardStructure: {
-      type: "items",
-      elements: ["company_names"],
-      generation: "manual_preferred"
+    sectionType: "LogoWall",
+
+    elements: {
+      // Required AI-generated
+      headline:    { type: "string", requirement: "required", fillMode: "ai_generated" },
+
+      // Optional AI-generated
+      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+
+      // Tier toggles
+      show_press:  { type: "boolean", fillMode: "manual_preferred", default: true },  // Secondary tier
+      show_badges: { type: "boolean", fillMode: "manual_preferred", default: true },  // Tertiary tier (certs + stats)
     },
-    cardRequirements: {
-      type: 'items',
-      min: 4,
-      max: 12,
-      optimal: [6, 8],
-      description: 'Company logo grid'
+
+    collections: {
+      companies: {
+        requirement: "required",
+        fillMode: "manual_preferred",
+        constraints: { min: 4, max: 12 },
+        fields: {
+          id:       { type: "string", fillMode: "system" },
+          name:     { type: "string", fillMode: "manual_preferred", default: "Company Name" },
+          logo_url: { type: "string", fillMode: "manual_preferred", default: "" },
+        }
+      },
+
+      stats: {
+        requirement: "optional",
+        fillMode: "ai_generated_needs_review",
+        constraints: { min: 0, max: 3 },
+        fields: {
+          id:    { type: "string", fillMode: "system" },
+          value: { type: "string", fillMode: "ai_generated_needs_review" },
+          label: { type: "string", fillMode: "ai_generated" },
+        }
+      },
+
+      media_mentions: {
+        requirement: "optional",
+        fillMode: "ai_generated",
+        constraints: { min: 0, max: 5 },
+        fields: {
+          id:    { type: "string", fillMode: "system" },
+          name:  { type: "string", fillMode: "ai_generated" },
+          quote: { type: "string", fillMode: "ai_generated" },
+        }
+      },
+
+      certifications: {
+        requirement: "optional",
+        fillMode: "ai_generated",
+        constraints: { min: 0, max: 5 },
+        fields: {
+          id:    { type: "string", fillMode: "system" },
+          code:  { type: "string", fillMode: "ai_generated" },
+          label: { type: "string", fillMode: "ai_generated" },
+        }
+      },
     }
   },
 
@@ -1342,321 +1367,414 @@ export const layoutElementSchema: LayoutSchema = {
     }
   },
 
+  // Testimonials Section - PullQuoteStack (V2 Schema)
+  // B2C equivalent of QuoteGrid - masonry layout with color gradients
   PullQuoteStack: {
-    sectionElements: [
-      { element: "headline", mandatory: true, generation: "ai_generated" },
-      { element: "subheadline", mandatory: false, generation: "ai_generated" },
-      { element: "supporting_text", mandatory: false, generation: "ai_generated" },
-      { element: "cta_text", mandatory: false, generation: "ai_generated" },
-      { element: "trust_items", mandatory: false, generation: "ai_generated" },
-      { element: "context_icon_1", mandatory: true, generation: "ai_generated" },
-      { element: "context_icon_2", mandatory: true, generation: "ai_generated" },
-      { element: "context_icon_3", mandatory: true, generation: "ai_generated" },
-      { element: "context_icon_4", mandatory: true, generation: "ai_generated" },
-      { element: "context_icon_5", mandatory: true, generation: "ai_generated" },
-      { element: "context_icon_6", mandatory: true, generation: "ai_generated" },
-      { element: "avatar_1", mandatory: false, generation: "manual_preferred" },
-      { element: "avatar_2", mandatory: false, generation: "manual_preferred" },
-      { element: "avatar_3", mandatory: false, generation: "manual_preferred" },
-      { element: "avatar_4", mandatory: false, generation: "manual_preferred" },
-      { element: "avatar_5", mandatory: false, generation: "manual_preferred" },
-      { element: "avatar_6", mandatory: false, generation: "manual_preferred" }
-    ],
-    cardStructure: {
-      type: "cards",
-      elements: ["testimonial_quotes", "customer_names", "customer_titles", "customer_companies", "problem_contexts", "emotional_hooks"],
-      generation: "ai_generated"
+    sectionType: "PullQuoteStack",
+
+    elements: {
+      headline:    { type: "string", requirement: "required", fillMode: "ai_generated" },
+      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated" },
     },
-    cardRequirements: {
-      type: 'cards',
-      min: 2,
-      max: 5,
-      optimal: [3, 4],
-      description: 'Stacked pull quote testimonials'
+
+    collections: {
+      testimonials: {
+        requirement: "required",
+        fillMode: "ai_generated_needs_review",
+        constraints: { min: 2, max: 6 },
+        fields: {
+          id:               { type: "string", fillMode: "system" },
+          quote:            { type: "string", fillMode: "ai_generated_needs_review" },
+          customer_name:    { type: "string", fillMode: "ai_generated_needs_review" },
+          customer_title:   { type: "string", fillMode: "ai_generated_needs_review" },
+          customer_location: { type: "string", fillMode: "ai_generated_needs_review" },
+          avatar_url:       { type: "string", fillMode: "manual_preferred", default: "" },
+        }
+      }
     }
   },
 
-  // UniqueMechanism Section
+  // UniqueMechanism Section - V2 Schema
   MethodologyBreakdown: {
-    sectionElements: [
-      { element: "headline", mandatory: true, generation: "ai_generated" },
-      { element: "methodology_name", mandatory: true, generation: "manual_preferred" },
-      { element: "methodology_description", mandatory: true, generation: "ai_generated" },
-      { element: "results_title", mandatory: false, generation: "ai_generated" },
-      { element: "methodology_icon", mandatory: false, generation: "ai_generated" },
-      { element: "result_metrics", mandatory: false, generation: "ai_generated" },
-      { element: "result_labels", mandatory: false, generation: "ai_generated" }
-    ],
-    cardStructure: {
-      type: "cards",
-      elements: ["principles", "principle_details", "principle_icons"],
-      generation: "ai_generated"
+    sectionType: "MethodologyBreakdown",
+
+    elements: {
+      headline:               { type: "string", requirement: "required", fillMode: "ai_generated" },
+      methodology_name:       { type: "string", requirement: "required", fillMode: "ai_generated" },
+      methodology_description: { type: "string", requirement: "required", fillMode: "ai_generated" },
+      subheadline:            { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      results_title:          { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      methodology_icon:       { type: "string", fillMode: "manual_preferred" },
     },
-    cardRequirements: {
-      type: 'cards',
-      min: 3,
-      max: 6,
-      optimal: [3, 4],
-      description: 'Methodology breakdown steps'
+
+    collections: {
+      principles: {
+        requirement: "required",
+        fillMode: "ai_generated",
+        constraints: { min: 3, max: 6 },
+        fields: {
+          id:          { type: "string", fillMode: "system" },
+          name:        { type: "string", fillMode: "ai_generated" },
+          description: { type: "string", fillMode: "ai_generated" },
+          icon:        { type: "string", fillMode: "manual_preferred" },
+        }
+      },
+      results: {
+        requirement: "optional",
+        fillMode: "ai_generated_needs_review",
+        constraints: { min: 0, max: 4 },
+        fields: {
+          id:     { type: "string", fillMode: "system" },
+          metric: { type: "string", fillMode: "ai_generated_needs_review" },
+          label:  { type: "string", fillMode: "ai_generated" },
+        }
+      }
     }
   },
 
+  // UniqueMechanism Section - ProcessFlowDiagram (V2 Schema)
   ProcessFlowDiagram: {
-    sectionElements: [
-      { element: "headline", mandatory: true, generation: "ai_generated" },
-      { element: "subheadline", mandatory: false, generation: "ai_generated" },
-      { element: "benefits_title", mandatory: false, generation: "ai_generated" },
-      { element: "process_steps", mandatory: true, generation: "ai_generated" },
-      { element: "step_descriptions", mandatory: true, generation: "ai_generated" },
-      { element: "benefit_titles", mandatory: false, generation: "ai_generated" },
-      { element: "benefit_descriptions", mandatory: false, generation: "ai_generated" },
-      { element: "benefit_icons", mandatory: false, generation: "ai_generated" }
-    ],
-    cardRequirements: {
-      type: 'blocks',
-      min: 1,
-      max: 1,
-      optimal: [1, 1],
-      description: 'Single process flow diagram'
+    sectionType: "ProcessFlowDiagram",
+
+    elements: {
+      headline:       { type: "string", requirement: "required", fillMode: "ai_generated" },
+      subheadline:    { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      benefits_title: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+    },
+
+    collections: {
+      steps: {
+        requirement: "required",
+        fillMode: "ai_generated",
+        constraints: { min: 2, max: 6 },
+        fields: {
+          id:          { type: "string", fillMode: "system" },
+          title:       { type: "string", fillMode: "ai_generated" },
+          description: { type: "string", fillMode: "ai_generated" },
+        }
+      },
+      benefits: {
+        requirement: "optional",
+        fillMode: "ai_generated_needs_review",
+        constraints: { min: 0, max: 3 },
+        fields: {
+          id:          { type: "string", fillMode: "system" },
+          title:       { type: "string", fillMode: "ai_generated_needs_review" },
+          description: { type: "string", fillMode: "ai_generated" },
+          icon:        { type: "string", fillMode: "manual_preferred" },
+        }
+      }
     }
   },
 
   PropertyComparisonMatrix: {
-    sectionElements: [
-      { element: "headline", mandatory: true, generation: "ai_generated" },
-      { element: "feature_header", mandatory: true, generation: "ai_generated" },
-      { element: "us_header", mandatory: true, generation: "manual_preferred" },
-      { element: "competitors_header", mandatory: true, generation: "ai_generated" }
-    ],
-    cardStructure: {
-      type: "rows",
-      elements: ["properties", "us_values", "competitors_values", "property_icons"],
-      generation: "ai_generated"
+    sectionType: "PropertyComparisonMatrix",
+
+    elements: {
+      headline:           { type: "string", requirement: "required", fillMode: "ai_generated" },
+      subheadline:        { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      feature_header:     { type: "string", requirement: "required", fillMode: "ai_generated" },
+      us_header:          { type: "string", requirement: "required", fillMode: "ai_generated" },
+      competitors_header: { type: "string", requirement: "required", fillMode: "ai_generated" },
+      footer_text:        { type: "string", requirement: "optional", fillMode: "ai_generated" },
     },
-    cardRequirements: {
-      type: 'rows',
-      min: 3,
-      max: 8,
-      optimal: [4, 6],
-      description: 'Property comparison matrix rows'
+
+    collections: {
+      comparison_rows: {
+        requirement: "required",
+        fillMode: "ai_generated",
+        constraints: { min: 3, max: 8 },
+        fields: {
+          id:               { type: "string", fillMode: "system" },
+          property:         { type: "string", fillMode: "ai_generated" },
+          us_value:         { type: "string", fillMode: "ai_generated" },
+          competitor_value: { type: "string", fillMode: "ai_generated" },
+        }
+      }
     }
   },
 
   SecretSauceReveal: {
-    sectionElements: [
-      { element: "headline", mandatory: true, generation: "ai_generated" },
-      { element: "subheadline", mandatory: false, generation: "ai_generated" }
-    ],
-    cardStructure: {
-      type: "cards",
-      elements: ["secret_titles", "secret_descriptions", "secret_icons"],
-      generation: "ai_generated"
+    sectionType: "SecretSauceReveal",
+
+    elements: {
+      headline:    { type: "string", requirement: "required", fillMode: "ai_generated" },
+      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated" },
     },
-    cardRequirements: {
-      type: 'cards',
-      min: 2,
-      max: 4,
-      optimal: [3, 3],
-      description: 'Secret sauce feature reveals'
+
+    collections: {
+      secrets: {
+        requirement: "required",
+        fillMode: "ai_generated",
+        constraints: { min: 2, max: 4 },
+        fields: {
+          id:          { type: "string", fillMode: "system" },
+          title:       { type: "string", fillMode: "ai_generated" },
+          description: { type: "string", fillMode: "ai_generated" },
+          icon:        { type: "string", fillMode: "manual_preferred" },
+        }
+      }
     }
   },
 
+  // UniqueMechanism Section - StackedHighlights (V2 Schema)
   StackedHighlights: {
-    sectionElements: [
-      { element: "headline", mandatory: true, generation: "ai_generated" },
-      { element: "mechanism_name", mandatory: false, generation: "manual_preferred" },
-      { element: "footer_text", mandatory: false, generation: "ai_generated" }
-    ],
-    cardStructure: {
-      type: "cards",
-      elements: ["highlight_titles", "highlight_descriptions", "highlight_icons"],
-      generation: "ai_generated"
+    sectionType: "StackedHighlights",
+
+    elements: {
+      headline:       { type: "string", requirement: "required", fillMode: "ai_generated" },
+      subheadline:    { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      mechanism_name: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      footer_text:    { type: "string", requirement: "optional", fillMode: "ai_generated" },
     },
-    cardRequirements: {
-      type: 'cards',
-      min: 2,
-      max: 6,
-      optimal: [3, 4],
-      description: 'Unique mechanism highlight cards'
+
+    collections: {
+      highlights: {
+        requirement: "required",
+        fillMode: "ai_generated",
+        constraints: { min: 2, max: 6 },
+        fields: {
+          id:          { type: "string", fillMode: "system" },
+          title:       { type: "string", fillMode: "ai_generated" },
+          description: { type: "string", fillMode: "ai_generated" },
+          icon:        { type: "string", fillMode: "manual_preferred" },
+        }
+      }
     }
   },
 
+  // TechnicalAdvantage - V2 Schema
   TechnicalAdvantage: {
-    sectionElements: [
-      { element: "headline", mandatory: true, generation: "ai_generated" },
-      { element: "subheadline", mandatory: false, generation: "ai_generated" }
-    ],
-    cardStructure: {
-      type: "cards",
-      elements: ["advantage_titles", "advantage_descriptions", "advantage_icons"],
-      generation: "ai_generated"
+    sectionType: "TechnicalAdvantage",
+
+    elements: {
+      headline:    { type: "string", requirement: "required", fillMode: "ai_generated" },
+      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated" },
     },
-    cardRequirements: {
-      type: 'cards',
-      min: 3,
-      max: 6,
-      optimal: [3, 4],
-      description: 'Technical advantage points'
+
+    collections: {
+      advantages: {
+        requirement: "required",
+        fillMode: "ai_generated",
+        constraints: { min: 3, max: 6 },
+        fields: {
+          id:          { type: "string", fillMode: "system" },
+          title:       { type: "string", fillMode: "ai_generated" },
+          description: { type: "string", fillMode: "ai_generated" },
+          icon:        { type: "string", fillMode: "manual_preferred" },
+        }
+      }
     }
   },
 
-  // UseCase Section
+  // UseCase Section - V2 Schema
   IndustryUseCaseGrid: {
-    sectionElements: [
-      { element: "headline", mandatory: true, generation: "ai_generated" }
-    ],
-    cardStructure: {
-      type: "cards",
-      elements: ["industry_names", "use_case_descriptions", "industry_icons"],
-      generation: "ai_generated"
+    sectionType: "IndustryUseCaseGrid",
+
+    elements: {
+      headline:    { type: "string", requirement: "required", fillMode: "ai_generated" },
+      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated" },
     },
-    cardRequirements: {
-      type: 'cards',
-      min: 3,
-      max: 6,
-      optimal: [4, 6],
-      description: 'Industry-specific use cases with examples'
+
+    collections: {
+      industries: {
+        requirement: "required",
+        fillMode: "ai_generated",
+        constraints: { min: 4, max: 6 },
+        fields: {
+          id:          { type: "string", fillMode: "system" },
+          name:        { type: "string", fillMode: "ai_generated" },
+          description: { type: "string", fillMode: "ai_generated" },
+          icon:        { type: "string", fillMode: "manual_preferred" },  // No default - computed at render
+        }
+      }
     }
   },
 
+  // PersonaGrid - V2 Schema
   PersonaGrid: {
-    sectionElements: [
-      { element: "headline", mandatory: true, generation: "ai_generated" },
-      { element: "footer_text", mandatory: false, generation: "ai_generated" },
-      { element: "badge_text", mandatory: false, generation: "ai_generated" }
-    ],
-    cardStructure: {
-      type: "cards",
-      elements: ["persona_names", "persona_descriptions", "persona_icons"],
-      generation: "ai_generated"
+    sectionType: "PersonaGrid",
+
+    elements: {
+      headline:    { type: "string", requirement: "required", fillMode: "ai_generated" },
+      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      footer_text: { type: "string", requirement: "optional", fillMode: "ai_generated" },
     },
-    cardRequirements: {
-      type: 'cards',
-      min: 2,
-      max: 6,
-      optimal: [3, 4],
-      description: 'User persona cards with descriptions and roles'
+
+    collections: {
+      personas: {
+        requirement: "required",
+        fillMode: "ai_generated",
+        constraints: { min: 2, max: 6 },
+        fields: {
+          id:          { type: "string", fillMode: "system" },
+          name:        { type: "string", fillMode: "ai_generated" },
+          description: { type: "string", fillMode: "ai_generated" },
+          icon:        { type: "string", fillMode: "manual_preferred" },
+        }
+      }
     }
   },
 
   RoleBasedScenarios: {
-    sectionElements: [
-      { element: "headline", mandatory: true, generation: "ai_generated" }
-    ],
-    cardStructure: {
-      type: "cards",
-      elements: ["roles", "scenarios", "role_icons"],
-      generation: "ai_generated"
+    sectionType: "RoleBasedScenarios",
+
+    elements: {
+      headline:    { type: "string", requirement: "required", fillMode: "ai_generated" },
+      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      footer_text: { type: "string", requirement: "optional", fillMode: "ai_generated" },
     },
-    cardRequirements: {
-      type: 'cards',
-      min: 3,
-      max: 6,
-      optimal: [4, 6],
-      description: 'Role-based scenarios and use cases'
+
+    collections: {
+      scenarios: {
+        requirement: "required",
+        fillMode: "ai_generated",
+        constraints: { min: 3, max: 6 },
+        fields: {
+          id:       { type: "string", fillMode: "system" },
+          role:     { type: "string", fillMode: "ai_generated" },
+          scenario: { type: "string", fillMode: "ai_generated" },
+        }
+      }
     }
   },
 
-  // CTA Section
+  // CTA Section - V2 Schema
   CenteredHeadlineCTA: {
-    sectionElements: [
-      { element: "headline", mandatory: true, generation: "ai_generated" },
-      { element: "subheadline", mandatory: false, generation: "ai_generated" },
-      { element: "cta_text", mandatory: true, generation: "ai_generated" },
-      { element: "secondary_cta_text", mandatory: false, generation: "ai_generated" },
-      { element: "urgency_text", mandatory: false, generation: "ai_generated" },
-      { element: "trust_item_1", mandatory: true, generation: "ai_generated" },
-      { element: "trust_item_2", mandatory: true, generation: "ai_generated" },
-      { element: "trust_item_3", mandatory: true, generation: "ai_generated" },
-      { element: "trust_item_4", mandatory: false, generation: "ai_generated" },
-      { element: "trust_item_5", mandatory: false, generation: "ai_generated" },
-      { element: "customer_count", mandatory: false, generation: "manual_preferred" },
-      { element: "customer_label", mandatory: false, generation: "manual_preferred" },
-      { element: "rating_stat", mandatory: false, generation: "manual_preferred" },
-      { element: "uptime_stat", mandatory: false, generation: "manual_preferred" },
-      { element: "uptime_label", mandatory: false, generation: "manual_preferred" }
-    ],
+    sectionType: "CenteredHeadlineCTA",
 
-    cardRequirements: null
+    elements: {
+      // Required AI-generated
+      headline:           { type: "string", requirement: "required", fillMode: "ai_generated" },
+      cta_text:           { type: "string", requirement: "required", fillMode: "ai_generated" },
+
+      // Optional AI-generated
+      subheadline:        { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      secondary_cta_text: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      urgency_text:       { type: "string", requirement: "optional", fillMode: "ai_generated" },
+
+      // AI-generated needs review (user should verify these stats)
+      customer_count:     { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review" },
+      customer_label:     { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review" },
+      rating_stat:        { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review" },
+      uptime_stat:        { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review" },
+      uptime_label:       { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review" },
+    },
+
+    collections: {
+      trust_items: {
+        requirement: "optional",
+        fillMode: "ai_generated",
+        constraints: { min: 0, max: 5 },
+        fields: {
+          id:   { type: "string", fillMode: "system" },
+          text: { type: "string", fillMode: "ai_generated" },
+        }
+      }
+    }
   },
 
   VisualCTAWithMockup: {
-    sectionElements: [
-      { element: "headline", mandatory: true, generation: "ai_generated" },
-      { element: "subheadline", mandatory: false, generation: "ai_generated" },
-      { element: "cta_text", mandatory: true, generation: "ai_generated" },
-      { element: "secondary_cta", mandatory: false, generation: "ai_generated" },
-      { element: "trust_item_1", mandatory: true, generation: "ai_generated" },
-      { element: "trust_item_2", mandatory: true, generation: "ai_generated" },
-      { element: "trust_item_3", mandatory: false, generation: "ai_generated" },
-      { element: "trust_item_4", mandatory: false, generation: "ai_generated" },
-      { element: "trust_item_5", mandatory: false, generation: "ai_generated" },
-      { element: "mockup_image", mandatory: false, generation: "manual_preferred" }
-    ],
+    sectionType: "VisualCTAWithMockup",
 
-    cardRequirements: null
-  },
-
-  ValueStackCTA: {
-    sectionElements: [
-      { element: "headline", mandatory: true, generation: "ai_generated" },
-      { element: "subheadline", mandatory: false, generation: "ai_generated" },
-      { element: "cta_text", mandatory: true, generation: "ai_generated" },
-      { element: "secondary_cta_text", mandatory: false, generation: "ai_generated" },
-      { element: "final_cta_headline", mandatory: true, generation: "ai_generated" },
-      { element: "final_cta_description", mandatory: true, generation: "ai_generated" },
-      { element: "guarantee_text", mandatory: false, generation: "ai_generated" }
-    ],
-
-    cardStructure: {
-      type: "cards",
-      elements: ["value_propositions", "value_descriptions", "value_icon_1", "value_icon_2", "value_icon_3", "value_icon_4", "value_icon_5", "value_icon_6"],
-      generation: "ai_generated"
+    elements: {
+      headline:      { type: "string", requirement: "required", fillMode: "ai_generated" },
+      subheadline:   { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      cta_text:      { type: "string", requirement: "required", fillMode: "ai_generated" },
+      secondary_cta: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      urgency_text:  { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      mockup_image:  { type: "string", requirement: "optional", fillMode: "manual_preferred" },
     },
 
-    cardRequirements: {
-      type: 'cards',
-      min: 3,
-      max: 6,
-      optimal: [4, 5],
-      description: 'Value propositions with icons and detailed descriptions'
+    collections: {
+      trust_items: {
+        requirement: "optional",
+        fillMode: "ai_generated",
+        constraints: { min: 0, max: 5 },
+        fields: {
+          id:   { type: "string", fillMode: "system" },
+          text: { type: "string", fillMode: "ai_generated" },
+        }
+      }
     }
   },
 
-  // Header Section
-  MinimalNavHeader: {
-    sectionElements: [
-      { element: "nav_item_1", mandatory: true, generation: "manual_preferred" },
-      { element: "nav_item_2", mandatory: false, generation: "manual_preferred" },
-      { element: "nav_item_3", mandatory: false, generation: "manual_preferred" },
-      { element: "nav_item_4", mandatory: false, generation: "manual_preferred" },
-      { element: "nav_link_1", mandatory: false, generation: "manual_preferred" },
-      { element: "nav_link_2", mandatory: false, generation: "manual_preferred" },
-      { element: "nav_link_3", mandatory: false, generation: "manual_preferred" },
-      { element: "nav_link_4", mandatory: false, generation: "manual_preferred" }
-    ],
-    cardRequirements: null
+  ValueStackCTA: {
+    sectionType: "ValueStackCTA",
+
+    elements: {
+      headline:             { type: "string", requirement: "required", fillMode: "ai_generated" },
+      subheadline:          { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      cta_text:             { type: "string", requirement: "required", fillMode: "ai_generated" },
+      secondary_cta_text:   { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      final_cta_headline:   { type: "string", requirement: "required", fillMode: "ai_generated" },
+      final_cta_description:{ type: "string", requirement: "required", fillMode: "ai_generated" },
+      guarantee_text:       { type: "string", requirement: "optional", fillMode: "ai_generated" },
+    },
+
+    collections: {
+      value_items: {
+        requirement: "required",
+        fillMode: "ai_generated",
+        constraints: { min: 3, max: 8 },
+        fields: {
+          id:    { type: "string", fillMode: "system" },
+          text:  { type: "string", fillMode: "ai_generated" }
+        }
+      }
+    }
   },
 
-  // Footer Section
+  // Header Section - V2 Schema
+  // Note: Navigation is managed via store.navigationConfig, schema is reference only
+  MinimalNavHeader: {
+    sectionType: "MinimalNavHeader",
+
+    elements: {
+      // Logo from globalSettings.logoUrl, not stored in section content
+    },
+
+    collections: {
+      nav_items: {
+        requirement: "optional",
+        fillMode: "manual_preferred",
+        constraints: { min: 0, max: 4 },
+        fields: {
+          id:    { type: "string", fillMode: "system" },
+          label: { type: "string", fillMode: "manual_preferred", default: "Link" },
+          link:  { type: "string", fillMode: "manual_preferred", default: "#" },
+        }
+      }
+    }
+  },
+
+  // Footer Section - V2 Schema
   ContactFooter: {
-    sectionElements: [
-      { element: "copyright", mandatory: true, generation: "manual_preferred" },
-      { element: "newsletter_title", mandatory: false, generation: "ai_generated" },
-      { element: "newsletter_description", mandatory: false, generation: "ai_generated" },
-      { element: "newsletter_cta", mandatory: false, generation: "ai_generated" },
-      { element: "email", mandatory: false, generation: "manual_preferred" },
-      { element: "phone", mandatory: false, generation: "manual_preferred" },
-      { element: "address", mandatory: false, generation: "manual_preferred" },
-      { element: "link_text_1", mandatory: false, generation: "manual_preferred" },
-      { element: "link_1", mandatory: false, generation: "manual_preferred" },
-      { element: "link_text_2", mandatory: false, generation: "manual_preferred" },
-      { element: "link_2", mandatory: false, generation: "manual_preferred" },
-      { element: "link_text_3", mandatory: false, generation: "manual_preferred" },
-      { element: "link_3", mandatory: false, generation: "manual_preferred" },
-      { element: "link_text_4", mandatory: false, generation: "manual_preferred" },
-      { element: "link_4", mandatory: false, generation: "manual_preferred" }
-    ],
-    cardRequirements: null
+    sectionType: "ContactFooter",
+
+    elements: {
+      footer_style:           { type: "string", requirement: "optional", fillMode: "manual_preferred" },
+      copyright:              { type: "string", requirement: "required", fillMode: "manual_preferred" },
+      newsletter_title:       { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      newsletter_description: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      newsletter_cta:         { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      email:                  { type: "string", requirement: "optional", fillMode: "manual_preferred" },
+      phone:                  { type: "string", requirement: "optional", fillMode: "manual_preferred" },
+      address:                { type: "string", requirement: "optional", fillMode: "manual_preferred" },
+    },
+
+    collections: {
+      social_links: {
+        requirement: "optional",
+        fillMode: "manual_preferred",
+        constraints: { min: 0, max: 8 },
+        fields: {
+          id:       { type: "string", fillMode: "system" },
+          platform: { type: "string", fillMode: "manual_preferred" },
+          url:      { type: "string", fillMode: "manual_preferred" },
+          icon:     { type: "string", fillMode: "manual_preferred" },
+        }
+      }
+    }
   },
 }

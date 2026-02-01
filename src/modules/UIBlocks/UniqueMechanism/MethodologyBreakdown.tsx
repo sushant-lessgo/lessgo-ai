@@ -1,222 +1,151 @@
-import React, { useEffect } from 'react';
+// MethodologyBreakdown.tsx - V2: Clean array-based principles and results
+import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
-import { useTypography } from '@/hooks/useTypography';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
-import { useOnboardingStore } from '@/hooks/useOnboardingStore';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { EditableAdaptiveHeadline, EditableAdaptiveText } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getIconFromCategory, getRandomIconFromCategory } from '@/utils/iconMapping';
+import { getIcon } from '@/lib/getIcon';
+import { shadows, cardEnhancements } from '@/modules/Design/designTokens';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
+// V2: Principle item structure - clean array item
+interface Principle {
+  id: string;
+  name: string;
+  description: string;
+  icon?: string;
+}
+
+// V2: Result item structure - clean array item
+interface Result {
+  id: string;
+  metric: string;
+  label: string;
+}
+
+// V2: Content interface - uses clean arrays
 interface MethodologyBreakdownContent {
   headline: string;
   methodology_name: string;
   methodology_description: string;
-  principles: string;
-  principle_details: string;
-  principle_icon_1?: string;
-  principle_icon_2?: string;
-  principle_icon_3?: string;
-  principle_icon_4?: string;
-  principle_icon_5?: string;
-  principle_icon_6?: string;
-  result_metrics?: string;
-  result_labels?: string;
+  subheadline?: string;
   results_title?: string;
   methodology_icon?: string;
+  principles: Principle[];
+  results?: Result[];
 }
 
-interface PrincipleItem {
-  name: string;
-  detail: string;
-  id: string;
-}
-
-interface ResultItem {
-  metric: string;
-  label: string;
-  id: string;
-}
-
+// V2: Content schema
 const CONTENT_SCHEMA = {
   headline: { type: 'string' as const, default: 'The Science Behind Our Success' },
   methodology_name: { type: 'string' as const, default: 'Adaptive Intelligence Framework™' },
   methodology_description: { type: 'string' as const, default: 'Our proprietary methodology combines machine learning, behavioral psychology, and real-time optimization to deliver unprecedented results.' },
-  principles: { type: 'string' as const, default: 'Continuous Learning|Adaptive Optimization|Data-Driven Decisions' },
-  principle_details: { type: 'string' as const, default: 'System continuously learns from new data and user interactions|Algorithms automatically adjust strategies based on performance|Every decision backed by comprehensive data analysis' },
-  principle_icon_1: { type: 'string' as const, default: '🧠' },
-  principle_icon_2: { type: 'string' as const, default: '⚙️' },
-  principle_icon_3: { type: 'string' as const, default: '📊' },
-  principle_icon_4: { type: 'string' as const, default: '🎯' },
-  principle_icon_5: { type: 'string' as const, default: '🚀' },
-  principle_icon_6: { type: 'string' as const, default: '💡' },
-  result_metrics: { type: 'string' as const, default: '300%|85%|99.7%|24/7' },
-  result_labels: { type: 'string' as const, default: 'Performance Increase|Time Saved|Accuracy Rate|Autonomous Operation' },
+  subheadline: { type: 'string' as const, default: '' },
   results_title: { type: 'string' as const, default: 'Proven Results' },
-  methodology_icon: { type: 'string' as const, default: '🧠' }
-};
-
-const parsePrincipleData = (principles: string, details: string): PrincipleItem[] => {
-  const principleList = principles.split('|').map(p => p.trim()).filter(p => p);
-  const detailList = details.split('|').map(d => d.trim()).filter(d => d);
-
-  return principleList.map((name, index) => ({
-    id: `principle-${index}`,
-    name,
-    detail: detailList[index] || 'Detail not provided.'
-  }));
-};
-
-const parseResultData = (metrics: string, labels: string): ResultItem[] => {
-  const metricList = metrics.split('|').map(m => m.trim()).filter(m => m);
-  const labelList = labels.split('|').map(l => l.trim()).filter(l => l);
-
-  return metricList.map((metric, index) => ({
-    id: `result-${index}`,
-    metric,
-    label: labelList[index] || 'Result'
-  }));
-};
-
-const getPrincipleIcon = (blockContent: MethodologyBreakdownContent, index: number) => {
-  const iconFields = [
-    blockContent.principle_icon_1,
-    blockContent.principle_icon_2,
-    blockContent.principle_icon_3,
-    blockContent.principle_icon_4,
-    blockContent.principle_icon_5,
-    blockContent.principle_icon_6
-  ];
-  return iconFields[index] || '🎯';
-};
-
-const addPrinciple = (principles: string, details: string): { newPrinciples: string; newDetails: string } => {
-  const principleList = principles.split('|').map(p => p.trim()).filter(p => p);
-  const detailList = details.split('|').map(d => d.trim()).filter(d => d);
-
-  principleList.push('New Principle');
-  detailList.push('Describe this methodology principle.');
-
-  return {
-    newPrinciples: principleList.join('|'),
-    newDetails: detailList.join('|')
-  };
-};
-
-const removePrinciple = (principles: string, details: string, indexToRemove: number): { newPrinciples: string; newDetails: string } => {
-  const principleList = principles.split('|').map(p => p.trim()).filter(p => p);
-  const detailList = details.split('|').map(d => d.trim()).filter(d => d);
-
-  if (indexToRemove >= 0 && indexToRemove < principleList.length) {
-    principleList.splice(indexToRemove, 1);
+  methodology_icon: { type: 'string' as const, default: 'lucide:brain' },
+  principles: {
+    type: 'array' as const,
+    default: [
+      { id: 'p1', name: 'Continuous Learning', description: 'System continuously learns from new data and user interactions' },
+      { id: 'p2', name: 'Adaptive Optimization', description: 'Algorithms automatically adjust strategies based on performance' },
+      { id: 'p3', name: 'Data-Driven Decisions', description: 'Every decision backed by comprehensive data analysis' }
+    ]
+  },
+  results: {
+    type: 'array' as const,
+    default: [
+      { id: 'r1', metric: '300%', label: 'Performance Increase' },
+      { id: 'r2', metric: '85%', label: 'Time Saved' },
+      { id: 'r3', metric: '99.7%', label: 'Accuracy Rate' },
+      { id: 'r4', metric: '24/7', label: 'Autonomous Operation' }
+    ]
   }
-  if (indexToRemove >= 0 && indexToRemove < detailList.length) {
-    detailList.splice(indexToRemove, 1);
-  }
-
-  return {
-    newPrinciples: principleList.join('|'),
-    newDetails: detailList.join('|')
-  };
 };
 
-const PrincipleCard = ({
+// Theme-based color mapping (design fixes applied: stronger borders, more saturated icons)
+const getThemeColors = (theme: UIBlockTheme) => ({
+  warm: {
+    headerGradient: 'from-orange-600 to-red-600',
+    headerSubtext: 'text-orange-100',
+    cardBorder: 'border-orange-300',  // Fix: increased from 200
+    cardHover: 'hover:border-orange-400',
+    iconBg: 'bg-gradient-to-br from-orange-600 to-red-700',  // Fix: increased saturation
+    resultMetricText: 'text-orange-600',
+    resultsBg: 'bg-orange-50',
+    addButtonBg: 'bg-orange-600 hover:bg-orange-700',
+    focusRing: 'focus:ring-orange-500'
+  },
+  cool: {
+    headerGradient: 'from-blue-600 to-indigo-700',
+    headerSubtext: 'text-blue-100',
+    cardBorder: 'border-blue-300',  // Fix: increased from 200
+    cardHover: 'hover:border-blue-400',
+    iconBg: 'bg-gradient-to-br from-blue-600 to-indigo-700',  // Fix: increased saturation
+    resultMetricText: 'text-blue-600',
+    resultsBg: 'bg-blue-50',
+    addButtonBg: 'bg-blue-600 hover:bg-blue-700',
+    focusRing: 'focus:ring-blue-500'
+  },
+  neutral: {
+    headerGradient: 'from-gray-700 to-gray-800',
+    headerSubtext: 'text-gray-200',
+    cardBorder: 'border-gray-300',  // Fix: increased from 200
+    cardHover: 'hover:border-gray-400',
+    iconBg: 'bg-gradient-to-br from-gray-600 to-gray-800',  // Fix: increased saturation
+    resultMetricText: 'text-gray-700',
+    resultsBg: 'bg-gray-50',
+    addButtonBg: 'bg-gray-600 hover:bg-gray-700',
+    focusRing: 'focus:ring-gray-500'
+  }
+})[theme];
+
+// Principle Card component
+const PrincipleCard = React.memo(({
   principle,
-  index,
   mode,
-  sectionId,
-  onNameEdit,
-  onDetailEdit,
-  onRemovePrinciple,
-  blockContent,
   colorTokens,
-  handleContentUpdate,
-  canRemove = true,
+  onNameEdit,
+  onDescriptionEdit,
+  onIconEdit,
+  onRemovePrinciple,
+  sectionId,
+  backgroundType,
   sectionBackground,
-  methodologyColors
+  canRemove = true,
+  theme = 'neutral'
 }: {
-  principle: PrincipleItem;
-  index: number;
+  principle: Principle;
   mode: 'edit' | 'preview';
-  sectionId: string;
-  onNameEdit: (index: number, value: string) => void;
-  onDetailEdit: (index: number, value: string) => void;
-  onRemovePrinciple?: (index: number) => void;
-  blockContent: MethodologyBreakdownContent;
   colorTokens: any;
-  handleContentUpdate: (field: keyof MethodologyBreakdownContent, value: string) => void;
-  canRemove?: boolean;
+  onNameEdit: (id: string, value: string) => void;
+  onDescriptionEdit: (id: string, value: string) => void;
+  onIconEdit?: (id: string, value: string) => void;
+  onRemovePrinciple?: (id: string) => void;
+  sectionId: string;
+  backgroundType: string;
   sectionBackground?: string;
-  methodologyColors: {
-    headerGradient: string;
-    headerIconBg: string;
-    headerText: string;
-    headerSubtext: string;
-    principleIconBg: string;
-    principleCardBorderHover: string;
-    resultMetricText: string;
-    resultMetricHover: string;
-    addButtonBg: string;
-    focusRing: string;
-  };
+  canRemove?: boolean;
+  theme?: UIBlockTheme;
 }) => {
-  const { getTextStyle } = useTypography();
+  const themeColors = getThemeColors(theme);
+
+  // Get icon - use stored value or derive from name/description
+  const displayIcon = principle.icon
+    ?? getIcon(undefined, { title: principle.name, description: principle.description })
+    ?? 'lucide:sparkles';
 
   return (
-    <div className={`relative group/principle bg-white rounded-xl p-8 border border-gray-200 hover:shadow-lg ${methodologyColors.principleCardBorderHover} transition-all duration-300`}>
-      <div className={`w-12 h-12 bg-gradient-to-br ${methodologyColors.principleIconBg} rounded-lg flex items-center justify-center text-white font-bold text-lg mb-4`}>
-        <IconEditableText
-          mode={mode}
-          value={getPrincipleIcon(blockContent, index)}
-          onEdit={(value) => {
-            const iconField = `principle_icon_${index + 1}` as keyof MethodologyBreakdownContent;
-            handleContentUpdate(iconField, value);
-          }}
-          backgroundType="primary"
-          colorTokens={colorTokens}
-          iconSize="md"
-          className="text-white"
-          sectionId={sectionId}
-          elementKey={`principle_icon_${index + 1}`}
-        />
-      </div>
-
-      {mode !== 'preview' ? (
-        <div
-          contentEditable
-          suppressContentEditableWarning
-          onBlur={(e) => onNameEdit(index, e.currentTarget.textContent || '')}
-          className={`outline-none focus:ring-2 ${methodologyColors.focusRing} focus:ring-opacity-50 rounded px-1 mb-3 cursor-text hover:bg-gray-50 font-bold text-gray-900 text-xl`}
-        >
-          {principle.name}
-        </div>
-      ) : (
-        <h3 className="font-bold text-gray-900 text-xl mb-3">{principle.name}</h3>
-      )}
-
-      {mode !== 'preview' ? (
-        <div
-          contentEditable
-          suppressContentEditableWarning
-          onBlur={(e) => onDetailEdit(index, e.currentTarget.textContent || '')}
-          className={`outline-none focus:ring-2 ${methodologyColors.focusRing} focus:ring-opacity-50 rounded px-1 min-h-[48px] cursor-text hover:bg-gray-50 text-gray-600`}
-        >
-          {principle.detail}
-        </div>
-      ) : (
-        <p className="text-gray-600">{principle.detail}</p>
-      )}
-
-      {mode === 'edit' && canRemove && (
+    <div className={`group relative bg-white p-8 border ${themeColors.cardBorder} ${themeColors.cardHover} ${shadows.card[theme]} ${shadows.cardHover[theme]} ${cardEnhancements.hoverLift} ${cardEnhancements.transition} ${cardEnhancements.borderRadius}`}>
+      {/* Delete button */}
+      {mode !== 'preview' && onRemovePrinciple && canRemove && (
         <button
           onClick={(e) => {
             e.stopPropagation();
-            onRemovePrinciple?.(index);
+            onRemovePrinciple(principle.id);
           }}
-          className="opacity-0 group-hover/principle:opacity-100 absolute top-4 right-4 w-8 h-8 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-200"
+          className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 w-8 h-8 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-200 z-10"
           title="Remove this principle"
         >
           <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -224,9 +153,58 @@ const PrincipleCard = ({
           </svg>
         </button>
       )}
+
+      {/* Icon */}
+      <div className={`w-12 h-12 ${themeColors.iconBg} rounded-lg flex items-center justify-center text-white mb-4`}>
+        <IconEditableText
+          mode={mode}
+          value={displayIcon}
+          onEdit={(value) => onIconEdit && onIconEdit(principle.id, value)}
+          backgroundType="primary"
+          colorTokens={colorTokens}
+          iconSize="md"
+          className="text-white"
+          placeholder="lucide:sparkles"
+          sectionId={sectionId}
+          elementKey={`principle_icon_${principle.id}`}
+        />
+      </div>
+
+      {/* Principle Name */}
+      <div className="mb-3">
+        <EditableAdaptiveText
+          mode={mode}
+          value={principle.name}
+          onEdit={(value) => onNameEdit(principle.id, value)}
+          backgroundType={(backgroundType === 'custom' ? 'secondary' : (backgroundType || 'secondary')) as 'neutral' | 'primary' | 'secondary' | 'divider'}
+          colorTokens={colorTokens}
+          variant="body"
+          textStyle={{ fontWeight: 700, fontSize: '1.25rem' }}
+          className="text-gray-900"
+          sectionId={sectionId}
+          elementKey={`principle_name_${principle.id}`}
+          sectionBackground={sectionBackground}
+        />
+      </div>
+
+      {/* Principle Description */}
+      <EditableAdaptiveText
+        mode={mode}
+        value={principle.description}
+        onEdit={(value) => onDescriptionEdit(principle.id, value)}
+        backgroundType={(backgroundType === 'custom' ? 'secondary' : (backgroundType || 'secondary')) as 'neutral' | 'primary' | 'secondary' | 'divider'}
+        colorTokens={colorTokens}
+        variant="body"
+        className="text-gray-600"
+        sectionId={sectionId}
+        elementKey={`principle_description_${principle.id}`}
+        sectionBackground={sectionBackground}
+      />
     </div>
   );
-};
+});
+
+PrincipleCard.displayName = 'PrincipleCard';
 
 export default function MethodologyBreakdown(props: LayoutComponentProps) {
   const {
@@ -242,10 +220,6 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
-  const { getTextStyle: getTypographyStyle } = useTypography();
-  const store = useEditStore();
-  const onboardingStore = useOnboardingStore();
-
   // Detect theme: manual override > auto-detection > neutral fallback
   const uiTheme = React.useMemo(() => {
     if (props.manualThemeOverride) return props.manualThemeOverride;
@@ -253,104 +227,65 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
     return 'neutral';
   }, [props.manualThemeOverride, props.userContext]);
 
-  // Theme-based color mapping
-  const getMethodologyColors = (theme: UIBlockTheme) => {
-    return {
-      warm: {
-        headerGradient: 'from-orange-600 to-red-600',
-        headerIconBg: 'bg-white bg-opacity-20',
-        headerText: 'text-white',
-        headerSubtext: 'text-orange-100',
-        principleIconBg: 'from-orange-500 to-red-600',
-        principleCardBorderHover: 'hover:border-orange-200',
-        resultMetricText: 'text-orange-600',
-        resultMetricHover: 'hover:bg-orange-50',
-        addButtonBg: 'bg-orange-600 hover:bg-orange-700',
-        focusRing: 'focus:ring-orange-500'
-      },
-      cool: {
-        headerGradient: 'from-blue-600 to-indigo-700',
-        headerIconBg: 'bg-white bg-opacity-20',
-        headerText: 'text-white',
-        headerSubtext: 'text-blue-100',
-        principleIconBg: 'from-blue-500 to-indigo-600',
-        principleCardBorderHover: 'hover:border-blue-200',
-        resultMetricText: 'text-blue-600',
-        resultMetricHover: 'hover:bg-blue-50',
-        addButtonBg: 'bg-blue-600 hover:bg-blue-700',
-        focusRing: 'focus:ring-blue-500'
-      },
-      neutral: {
-        headerGradient: 'from-gray-700 to-gray-800',
-        headerIconBg: 'bg-white bg-opacity-20',
-        headerText: 'text-white',
-        headerSubtext: 'text-gray-200',
-        principleIconBg: 'from-gray-500 to-gray-700',
-        principleCardBorderHover: 'hover:border-gray-300',
-        resultMetricText: 'text-gray-700',
-        resultMetricHover: 'hover:bg-gray-50',
-        addButtonBg: 'bg-gray-600 hover:bg-gray-700',
-        focusRing: 'focus:ring-gray-500'
-      }
-    }[theme];
+  const themeColors = getThemeColors(uiTheme);
+
+  // Ensure principles is always an array
+  const principles = Array.isArray(blockContent.principles) ? blockContent.principles : [];
+  const results = Array.isArray(blockContent.results) ? blockContent.results : [];
+
+  // Get methodology icon
+  const methodologyIcon = blockContent.methodology_icon
+    ?? getIcon(undefined, { title: blockContent.methodology_name, description: blockContent.methodology_description })
+    ?? 'lucide:brain';
+
+  // V2: Array-based handlers (cast to any for array updates)
+  const handlePrincipleNameEdit = (id: string, value: string) => {
+    const updated = principles.map(p => p.id === id ? { ...p, name: value } : p);
+    (handleContentUpdate as any)('principles', updated);
   };
 
-  const methodologyColors = getMethodologyColors(uiTheme);
-
-  // Auto-populate icons on initial generation
-  useEffect(() => {
-    if (mode === 'edit' && blockContent.principles) {
-      const principles = parsePrincipleData(blockContent.principles, blockContent.principle_details);
-
-      principles.forEach((_, index) => {
-        const iconField = `principle_icon_${index + 1}` as keyof MethodologyBreakdownContent;
-        if (!blockContent[iconField] || blockContent[iconField] === '') {
-          const categories = ['method', 'process', 'optimization', 'system', 'workflow', 'efficiency'];
-          const icon = getRandomIconFromCategory(categories[index % categories.length]);
-          handleContentUpdate(iconField, icon);
-        }
-      });
-    }
-  }, [blockContent.principles]);
-
-  const principles = parsePrincipleData(
-    blockContent.principles || '',
-    blockContent.principle_details || ''
-  );
-
-  const results = blockContent.result_metrics && blockContent.result_labels
-    ? parseResultData(blockContent.result_metrics, blockContent.result_labels)
-    : [];
-
-  const handlePrincipleNameEdit = (index: number, newName: string) => {
-    const principleNames = (blockContent.principles || '').split('|').map(p => p.trim());
-    principleNames[index] = newName;
-    handleContentUpdate('principles', principleNames.join('|'));
+  const handlePrincipleDescriptionEdit = (id: string, value: string) => {
+    const updated = principles.map(p => p.id === id ? { ...p, description: value } : p);
+    (handleContentUpdate as any)('principles', updated);
   };
 
-  const handlePrincipleDetailEdit = (index: number, newDetail: string) => {
-    const details = (blockContent.principle_details || '').split('|').map(d => d.trim());
-    details[index] = newDetail;
-    handleContentUpdate('principle_details', details.join('|'));
+  const handlePrincipleIconEdit = (id: string, value: string) => {
+    const updated = principles.map(p => p.id === id ? { ...p, icon: value } : p);
+    (handleContentUpdate as any)('principles', updated);
   };
 
   const handleAddPrinciple = () => {
-    const { newPrinciples, newDetails } = addPrinciple(
-      blockContent.principles || '',
-      blockContent.principle_details || ''
-    );
-    handleContentUpdate('principles', newPrinciples);
-    handleContentUpdate('principle_details', newDetails);
+    const newId = `p${Date.now()}`;
+    const newPrinciple: Principle = {
+      id: newId,
+      name: 'New Principle',
+      description: 'Describe this methodology principle.'
+    };
+    (handleContentUpdate as any)('principles', [...principles, newPrinciple]);
   };
 
-  const handleRemovePrinciple = (index: number) => {
-    const { newPrinciples, newDetails } = removePrinciple(
-      blockContent.principles || '',
-      blockContent.principle_details || '',
-      index
-    );
-    handleContentUpdate('principles', newPrinciples);
-    handleContentUpdate('principle_details', newDetails);
+  const handleRemovePrinciple = (id: string) => {
+    const updated = principles.filter(p => p.id !== id);
+    (handleContentUpdate as any)('principles', updated);
+  };
+
+  const handleResultMetricEdit = (id: string, value: string) => {
+    const updated = results.map(r => r.id === id ? { ...r, metric: value } : r);
+    (handleContentUpdate as any)('results', updated);
+  };
+
+  const handleResultLabelEdit = (id: string, value: string) => {
+    const updated = results.map(r => r.id === id ? { ...r, label: value } : r);
+    (handleContentUpdate as any)('results', updated);
+  };
+
+  // Determine grid layout based on principle count
+  const getGridClass = (count: number) => {
+    if (count === 1) return 'grid-cols-1 max-w-2xl mx-auto';
+    if (count === 2) return 'grid-cols-1 md:grid-cols-2';
+    if (count === 3) return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3';
+    if (count === 4) return 'grid-cols-1 md:grid-cols-2';
+    return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3';
   };
 
   return (
@@ -363,6 +298,7 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
       className={props.className}
     >
       <div className="max-w-6xl mx-auto">
+        {/* Headline */}
         <div className="text-center mb-16">
           <EditableAdaptiveHeadline
             mode={mode}
@@ -371,24 +307,40 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
             level="h2"
             backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'secondary')}
             colorTokens={colorTokens}
-            className="mb-6"
+            className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
             sectionBackground={sectionBackground}
           />
+          {blockContent.subheadline && (
+            <EditableAdaptiveText
+              mode={mode}
+              value={blockContent.subheadline}
+              onEdit={(value) => handleContentUpdate('subheadline', value)}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'secondary')}
+              colorTokens={colorTokens}
+              variant="body"
+              textStyle={{ fontSize: '1.125rem', lineHeight: '1.75rem' }}
+              className="max-w-2xl mx-auto"
+              sectionId={sectionId}
+              elementKey="subheadline"
+              sectionBackground={sectionBackground}
+            />
+          )}
         </div>
 
         {/* Methodology Header */}
-        <div className={`bg-gradient-to-r ${methodologyColors.headerGradient} rounded-2xl p-12 text-white text-center mb-12`}>
+        <div className={`bg-gradient-to-r ${themeColors.headerGradient} rounded-2xl p-12 text-white text-center mb-12`}>
           <div className="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-6">
             <IconEditableText
               mode={mode}
-              value={blockContent.methodology_icon || '🧠'}
+              value={methodologyIcon}
               onEdit={(value) => handleContentUpdate('methodology_icon', value)}
               backgroundType="primary"
               colorTokens={colorTokens}
               iconSize="xl"
               className="text-white text-3xl"
+              placeholder="lucide:brain"
               sectionId={sectionId}
               elementKey="methodology_icon"
             />
@@ -403,55 +355,51 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
             className="text-white mb-4"
             sectionId={sectionId}
             elementKey="methodology_name"
-            sectionBackground="bg-purple-600"
+            sectionBackground="bg-gradient-primary"
           />
           <EditableAdaptiveText
             mode={mode}
             value={blockContent.methodology_description || ''}
             onEdit={(value) => handleContentUpdate('methodology_description', value)}
             backgroundType="primary"
-            colorTokens={{ ...colorTokens, textSecondary: methodologyColors.headerSubtext }}
+            colorTokens={{ ...colorTokens, textSecondary: themeColors.headerSubtext }}
             variant="body"
-            className={`${methodologyColors.headerSubtext} text-lg max-w-3xl mx-auto`}
+            className={`${themeColors.headerSubtext} text-lg max-w-3xl mx-auto`}
             sectionId={sectionId}
             elementKey="methodology_description"
-            sectionBackground="bg-purple-600"
+            sectionBackground="bg-gradient-primary"
           />
         </div>
 
-        {/* Key Principles */}
-        <div className={`grid gap-6 lg:gap-8 mb-12 ${
-          principles.length === 1 ? 'grid-cols-1 max-w-2xl mx-auto' :
-          principles.length === 2 ? 'grid-cols-1 md:grid-cols-2' :
-          principles.length === 3 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' :
-          principles.length === 4 ? 'grid-cols-1 md:grid-cols-2' :
-          'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
-        }`}>
-          {principles.map((principle, index) => (
-            <PrincipleCard
-              key={principle.id}
-              principle={principle}
-              index={index}
-              mode={mode}
-              sectionId={sectionId}
-              onNameEdit={handlePrincipleNameEdit}
-              onDetailEdit={handlePrincipleDetailEdit}
-              onRemovePrinciple={handleRemovePrinciple}
-              blockContent={blockContent}
-              colorTokens={colorTokens}
-              handleContentUpdate={handleContentUpdate}
-              canRemove={principles.length > 3}
-              sectionBackground={sectionBackground}
-              methodologyColors={methodologyColors}
-            />
-          ))}
-        </div>
+        {/* Principles Grid */}
+        {principles.length > 0 && (
+          <div className={`grid gap-6 lg:gap-8 mb-12 ${getGridClass(principles.length)}`}>
+            {principles.map((principle) => (
+              <PrincipleCard
+                key={principle.id}
+                principle={principle}
+                mode={mode}
+                colorTokens={colorTokens}
+                onNameEdit={handlePrincipleNameEdit}
+                onDescriptionEdit={handlePrincipleDescriptionEdit}
+                onIconEdit={handlePrincipleIconEdit}
+                onRemovePrinciple={handleRemovePrinciple}
+                sectionId={sectionId}
+                backgroundType={props.backgroundType || 'secondary'}
+                sectionBackground={sectionBackground}
+                canRemove={principles.length > 3}
+                theme={uiTheme}
+              />
+            ))}
+          </div>
+        )}
 
+        {/* Add Principle Button */}
         {mode === 'edit' && principles.length < 6 && (
           <div className="mb-12 text-center">
             <button
               onClick={handleAddPrinciple}
-              className={`inline-flex items-center gap-2 px-6 py-3 ${methodologyColors.addButtonBg} text-white rounded-lg transition-colors duration-200`}
+              className={`inline-flex items-center gap-2 px-6 py-3 ${themeColors.addButtonBg} text-white rounded-lg transition-colors duration-200`}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -461,9 +409,9 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
           </div>
         )}
 
-        {/* Proven Results Section */}
+        {/* Results Section - with container background for visual separation */}
         {results.length > 0 && (
-          <div className="mt-16">
+          <div className={`mt-16 ${themeColors.resultsBg} rounded-2xl p-8`}>
             {blockContent.results_title && (
               <EditableAdaptiveHeadline
                 mode={mode}
@@ -480,19 +428,15 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
             )}
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {results.map((result, index) => (
+              {results.map((result) => (
                 <div key={result.id} className="text-center">
-                  <div className={`text-4xl font-bold ${methodologyColors.resultMetricText} mb-2`}>
+                  <div className={`text-4xl font-bold ${themeColors.resultMetricText} mb-2`}>
                     {mode !== 'preview' ? (
                       <div
                         contentEditable
                         suppressContentEditableWarning
-                        onBlur={(e) => {
-                          const metrics = (blockContent.result_metrics || '').split('|');
-                          metrics[index] = e.currentTarget.textContent || '';
-                          handleContentUpdate('result_metrics', metrics.join('|'));
-                        }}
-                        className={`outline-none focus:ring-2 ${methodologyColors.focusRing} focus:ring-opacity-50 rounded px-1 cursor-text ${methodologyColors.resultMetricHover}`}
+                        onBlur={(e) => handleResultMetricEdit(result.id, e.currentTarget.textContent || '')}
+                        className={`outline-none focus:ring-2 ${themeColors.focusRing} focus:ring-opacity-50 rounded px-1 cursor-text`}
                       >
                         {result.metric}
                       </div>
@@ -505,12 +449,8 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
                       <div
                         contentEditable
                         suppressContentEditableWarning
-                        onBlur={(e) => {
-                          const labels = (blockContent.result_labels || '').split('|');
-                          labels[index] = e.currentTarget.textContent || '';
-                          handleContentUpdate('result_labels', labels.join('|'));
-                        }}
-                        className="outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-50"
+                        onBlur={(e) => handleResultLabelEdit(result.id, e.currentTarget.textContent || '')}
+                        className={`outline-none focus:ring-2 ${themeColors.focusRing} focus:ring-opacity-50 rounded px-1 cursor-text`}
                       >
                         {result.label}
                       </div>

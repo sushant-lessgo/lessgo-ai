@@ -1,5 +1,5 @@
 /**
- * ResultsGallery - Published Version
+ * ResultsGallery - Published Version (V2)
  *
  * Server-safe component with ZERO hook imports
  * Used by componentRegistry.published.ts for SSR rendering
@@ -13,34 +13,42 @@ import { SectionWrapperPublished } from '@/components/published/SectionWrapperPu
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
+// V2: Gallery item structure
+interface GalleryItem {
+  id: string;
+  image_url: string;
+  caption?: string;
+}
+
 export default function ResultsGalleryPublished(props: LayoutComponentProps) {
   const { sectionId, sectionBackgroundCSS, theme, backgroundType } = props;
 
-  // Extract content (flattened by LandingPagePublishedRenderer)
+  // V2: Extract content - direct array access
   const headline = props.headline || 'See What You Can Create';
   const subheadline = props.subheadline || '';
-  const image_1 = props.image_1 || '';
-  const image_2 = props.image_2 || '';
-  const image_3 = props.image_3 || '';
-  const image_4 = props.image_4 || '';
-  const caption_1 = props.caption_1 || '';
-  const caption_2 = props.caption_2 || '';
-  const caption_3 = props.caption_3 || '';
-  const caption_4 = props.caption_4 || '';
+  const rawGalleryItems = (props.gallery_items || []) as GalleryItem[];
+
+  // Filter to only show items with actual images (remove empty placeholders)
+  const galleryItems = rawGalleryItems.filter(item =>
+    item.image_url && item.image_url.trim() !== ''
+  );
+
+  // Don't render if no images
+  if (galleryItems.length === 0) return null;
 
   // Theme detection
   const uiTheme: UIBlockTheme =
     props.manualThemeOverride ||
     (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
 
-  // Text colors
+  // Text colors - using colorTokens, no hard-coded hex
   const textColors = getPublishedTextColors(
     backgroundType || 'neutral',
     theme,
     sectionBackgroundCSS
   );
 
-  // Typography
+  // Typography styles
   const headlineTypography = getPublishedTypographyStyles('h2', theme);
   const bodyTypography = getPublishedTypographyStyles('body-lg', theme);
 
@@ -63,17 +71,6 @@ export default function ResultsGalleryPublished(props: LayoutComponentProps) {
   };
 
   const colors = getThemeColors(uiTheme);
-
-  // Build images array
-  const images = [
-    { url: image_1, caption: caption_1 },
-    { url: image_2, caption: caption_2 },
-    { url: image_3, caption: caption_3 },
-    { url: image_4, caption: caption_4 }
-  ].filter(img => img.url && img.url !== '___REMOVED___' && img.url.trim() !== '');
-
-  // Don't render if no images
-  if (images.length === 0) return null;
 
   return (
     <SectionWrapperPublished
@@ -107,23 +104,23 @@ export default function ResultsGalleryPublished(props: LayoutComponentProps) {
 
         {/* 2x2 Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {images.map((img: { url: string; caption: string }, idx: number) => (
-            <div key={idx} className="space-y-3">
+          {galleryItems.map((item, idx) => (
+            <div key={item.id} className="space-y-3">
               <img
-                src={img.url}
-                alt={img.caption || `Result ${idx + 1}`}
+                src={item.image_url}
+                alt={item.caption || `Result ${idx + 1}`}
                 className="w-full h-auto object-contain rounded-lg"
                 style={{
                   boxShadow: `0 10px 30px ${colors.shadow}`,
                   border: `1px solid ${colors.border}`
                 }}
               />
-              {img.caption && (
+              {item.caption && (
                 <p
                   className="text-center text-sm font-medium"
                   style={{ color: textColors.muted }}
                 >
-                  {img.caption}
+                  {item.caption}
                 </p>
               )}
             </div>

@@ -1,8 +1,9 @@
 /**
- * IndustryUseCaseGrid - Published Version
+ * IndustryUseCaseGrid - Published Version (V2)
  *
  * Server-safe component with ZERO hook imports
  * Used by componentRegistry.published.ts for SSR rendering
+ * V2: Uses clean arrays instead of numbered fields
  */
 
 import React from 'react';
@@ -12,55 +13,26 @@ import { HeadlinePublished, TextPublished } from '@/components/published/TextPub
 import { IconPublished } from '@/components/published/IconPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { getIcon } from '@/lib/getIcon';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
-interface IndustryCard {
-  industry: string;
-  useCase: string;
-  icon: string;
+// V2: Industry structure - clean array item
+interface Industry {
+  id: string;
+  name: string;
+  description: string;
+  icon?: string;
 }
 
 export default function IndustryUseCaseGridPublished(props: LayoutComponentProps) {
   const { sectionId, sectionBackgroundCSS, theme, backgroundType } = props;
 
-  // Extract content from props (flattened by LandingPagePublishedRenderer)
+  // Extract content from props
   const headline = props.headline || 'Trusted Across Industries';
+  const subheadline = props.subheadline || '';
 
-  // Extract individual fields
-  const individualIndustries = [
-    props.industry_1,
-    props.industry_2,
-    props.industry_3,
-    props.industry_4,
-    props.industry_5,
-    props.industry_6
-  ].filter((item): item is string => Boolean(item && item.trim() !== '' && item !== '___REMOVED___'));
-
-  const individualUseCases = [
-    props.use_case_1,
-    props.use_case_2,
-    props.use_case_3,
-    props.use_case_4,
-    props.use_case_5,
-    props.use_case_6
-  ].filter((item): item is string => Boolean(item && item.trim() !== '' && item !== '___REMOVED___'));
-
-  // Extract icons with defaults
-  const icons = [
-    props.industry_icon_1 || '🏥',
-    props.industry_icon_2 || '🏦',
-    props.industry_icon_3 || '🏭',
-    props.industry_icon_4 || '🛍️',
-    props.industry_icon_5 || '🎓',
-    props.industry_icon_6 || '💻'
-  ];
-
-  // Build industry cards array
-  const industryCards: IndustryCard[] = individualIndustries.map((industry: string, index: number) => ({
-    industry,
-    useCase: individualUseCases[index] || 'Industry-specific use case',
-    icon: icons[index] || '🏢'
-  }));
+  // V2: Direct array access - no numbered fields or pipe parsing needed
+  const industries: Industry[] = props.industries || [];
 
   // Detect theme: manual override > auto-detection > neutral fallback
   const uiTheme: UIBlockTheme = props.manualThemeOverride ||
@@ -101,8 +73,8 @@ export default function IndustryUseCaseGridPublished(props: LayoutComponentProps
 
   // Typography styles
   const headlineTypography = getPublishedTypographyStyles('h2', theme);
-  const industryTypography = getPublishedTypographyStyles('h3', theme);
-  const bodyTypography = getPublishedTypographyStyles('body', theme);
+  const bodyTypography = getPublishedTypographyStyles('body-lg', theme);
+  const h3Typography = getPublishedTypographyStyles('h3', theme);
 
   return (
     <SectionWrapperPublished
@@ -111,67 +83,94 @@ export default function IndustryUseCaseGridPublished(props: LayoutComponentProps
       padding="normal"
     >
       <div className="max-w-7xl mx-auto">
-        {/* Headline */}
-        <HeadlinePublished
-          value={headline}
-          level="h2"
-          style={{
-            color: textColors.heading,
-            ...headlineTypography,
-            textAlign: 'center',
-            marginBottom: '4rem'
-          }}
-        />
+        {/* Header Section */}
+        <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+          {/* Headline */}
+          <HeadlinePublished
+            value={headline}
+            level="h2"
+            style={{
+              color: textColors.heading,
+              ...headlineTypography,
+              textAlign: 'center',
+              marginBottom: subheadline ? '1rem' : '0'
+            }}
+          />
+
+          {/* Optional Subheadline */}
+          {subheadline && (
+            <TextPublished
+              value={subheadline}
+              style={{
+                color: textColors.body,
+                ...bodyTypography,
+                maxWidth: '48rem',
+                margin: '0 auto',
+                textAlign: 'center',
+                opacity: 0.8
+              }}
+            />
+          )}
+        </div>
 
         {/* Industry Cards Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {industryCards.map((card: IndustryCard, index: number) => (
-            <div
-              key={`industry-${index}`}
-              className="bg-white p-8 rounded-xl transition-all duration-300"
-              style={{
-                border: `1px solid ${themeColors.cardBorder}`,
-                boxShadow: themeColors.cardHoverShadow
-              }}
-            >
-              {/* Icon Container - Circular with theme background */}
+          {industries.map((industry: Industry) => {
+            // V2: Get icon - use stored value or derive from name/description
+            const displayIcon = industry.icon ?? getIcon(undefined, { title: industry.name, description: industry.description }) ?? 'Building2';
+
+            return (
               <div
-                className="w-32 h-32 mx-auto flex items-center justify-center mb-6 rounded-full"
+                key={industry.id}
+                className="bg-white p-8 rounded-xl transition-all duration-300"
                 style={{
-                  backgroundColor: themeColors.iconBg
+                  border: `1px solid ${themeColors.cardBorder}`,
+                  boxShadow: themeColors.cardHoverShadow
                 }}
               >
-                <IconPublished
-                  icon={card.icon}
-                  color={themeColors.iconText}
-                  size={60}
-                />
-              </div>
-
-              {/* Industry Name */}
-              <div className="mb-4 text-center">
-                <TextPublished
-                  value={card.industry}
+                {/* Icon Container - Circular with theme background */}
+                <div
+                  className="w-32 h-32 mx-auto flex items-center justify-center mb-6 rounded-full"
                   style={{
-                    fontWeight: 700,
-                    color: '#111827',
-                    ...industryTypography
+                    backgroundColor: themeColors.iconBg
                   }}
-                />
-              </div>
+                >
+                  <IconPublished
+                    icon={displayIcon}
+                    color={themeColors.iconText}
+                    size={60}
+                  />
+                </div>
 
-              {/* Use Case Description */}
-              <div className="text-center">
-                <TextPublished
-                  value={card.useCase}
-                  style={{
-                    color: '#6b7280',
-                    ...bodyTypography
-                  }}
-                />
+                {/* Industry Name */}
+                <div className="mb-4 text-center">
+                  <h3
+                    style={{
+                      ...h3Typography,
+                      fontWeight: 700,
+                      color: textColors.heading,
+                      textAlign: 'center'
+                    }}
+                  >
+                    {industry.name}
+                  </h3>
+                </div>
+
+                {/* Use Case Description */}
+                <div className="text-center">
+                  <TextPublished
+                    value={industry.description}
+                    style={{
+                      color: textColors.muted,
+                      ...bodyTypography,
+                      textAlign: 'center',
+                      opacity: 0.8
+                    }}
+                  />
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </SectionWrapperPublished>

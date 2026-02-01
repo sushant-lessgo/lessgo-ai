@@ -1,172 +1,147 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
-import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import {
   EditableAdaptiveHeadline,
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
-import IconEditableText from '@/components/ui/IconEditableText';
-import {
-  CTAButton,
-  TrustIndicators
-} from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getIconFromCategory, getRandomIconFromCategory } from '@/utils/iconMapping';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
-interface VerticalTimelineContent {
-  headline: string;
-  step_titles: string;
-  step_descriptions: string;
-  step_durations?: string;
-  subheadline?: string;
-  supporting_text?: string;
-  cta_text?: string;
-  trust_items?: string;
-  process_summary_text?: string;
-  // Optional step icon overrides
-  step_icon_1?: string;
-  step_icon_2?: string;
-  step_icon_3?: string;
-  step_icon_4?: string;
-  use_step_icons?: boolean;
-  // Legacy fields for migration
-  process_steps_label?: string;
-  process_summary_heading?: string;
-  process_summary_description?: string;
-  process_time_label?: string;
-}
-
-const CONTENT_SCHEMA = {
-  headline: { 
-    type: 'string' as const, 
-    default: 'How Our Process Works' 
-  },
-  step_titles: { 
-    type: 'string' as const, 
-    default: 'Initial Setup|Data Import|Automation Rules|Go Live' 
-  },
-  step_descriptions: { 
-    type: 'string' as const, 
-    default: 'Connect your existing tools and configure your workspace with our guided setup wizard.|Import your data securely with our automated migration tools that preserve all your important information.|Create powerful automation rules using our visual builder - no coding required.|Launch your optimized workflows and start seeing results immediately.' 
-  },
-  step_durations: { 
-    type: 'string' as const, 
-    default: '5 minutes|10 minutes|15 minutes|Instant' 
-  },
-  subheadline: { 
-    type: 'string' as const, 
-    default: '' 
-  },
-  supporting_text: { 
-    type: 'string' as const, 
-    default: '' 
-  },
-  cta_text: { 
-    type: 'string' as const, 
-    default: '' 
-  },
-  trust_items: {
-    type: 'string' as const,
-    default: ''
-  },
-  process_summary_text: {
-    type: 'string' as const,
-    default: 'Our streamlined process gets you results faster than you thought possible'
-  },
-  // Optional step icon overrides
-  step_icon_1: { type: 'string' as const, default: '' },
-  step_icon_2: { type: 'string' as const, default: '' },
-  step_icon_3: { type: 'string' as const, default: '' },
-  step_icon_4: { type: 'string' as const, default: '' },
-  use_step_icons: { type: 'boolean' as const, default: false }
-};
-
-const TimelineStep = React.memo(({
-  title,
-  description,
-  duration,
-  index,
-  isLast,
-  colorTokens,
-  mutedTextColor,
-  blockContent,
-  handleContentUpdate,
-  mode,
-  backgroundType,
-  sectionId,
-  getStepIcon,
-  handleStepIconEdit,
-  onRemove,
-  themeColors
-}: {
+// Step item structure (V2 array format)
+interface StepItem {
+  id: string;
   title: string;
   description: string;
-  duration?: string;
+  duration: string;
+  icon?: string;
+}
+
+// Content interface for VerticalTimeline (V2)
+interface VerticalTimelineContent {
+  headline: string;
+  subheadline?: string;
+  process_summary_text?: string;
+  steps: StepItem[];
+}
+
+// Default steps for new sections
+const DEFAULT_STEPS: StepItem[] = [
+  { id: 's1', title: 'Create Your Account', description: 'Sign up with your email in under a minute. No credit card required.', duration: '1 min' },
+  { id: 's2', title: 'Connect Your Tools', description: 'Link your existing apps with our one-click integrations.', duration: '5 min' },
+  { id: 's3', title: 'Configure Workflows', description: 'Set up automated workflows using our visual builder.', duration: '10 min' },
+  { id: 's4', title: 'Go Live', description: 'Launch your optimized workflows and start seeing results.', duration: 'Instant' },
+];
+
+const CONTENT_SCHEMA = {
+  headline: { type: 'string' as const, default: 'How It Works' },
+  subheadline: { type: 'string' as const, default: '' },
+  process_summary_text: { type: 'string' as const, default: '' },
+  steps: { type: 'array' as const, default: DEFAULT_STEPS }
+};
+
+// Generate unique ID for new steps
+const generateStepId = (): string => `s${Date.now().toString(36)}`;
+
+// Theme-based color mappings
+const getThemeColors = (theme: UIBlockTheme) => {
+  return {
+    warm: {
+      stepGradients: [
+        'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
+        'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)',
+        'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
+        'linear-gradient(135deg, #EC4899 0%, #DB2777 100%)',
+        'linear-gradient(135deg, #FB923C 0%, #F97316 100%)',
+        'linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%)'
+      ],
+      timelineLine: 'bg-gradient-to-b from-orange-300 to-orange-200',
+      cardBorder: 'border-orange-100',
+      cardBg: 'bg-white hover:bg-orange-50/30',
+      cardShadow: 'shadow-lg shadow-orange-100/50 hover:shadow-xl hover:shadow-orange-200/60',
+      durationBg: 'bg-orange-100',
+      durationText: 'text-orange-700',
+      processSummaryBg: 'bg-gradient-to-r from-orange-50 via-amber-50 to-red-50',
+      processSummaryBorder: 'border-orange-100',
+      focusRing: 'focus:ring-orange-500'
+    },
+    cool: {
+      stepGradients: [
+        'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)',
+        'linear-gradient(135deg, #06B6D4 0%, #0891B2 100%)',
+        'linear-gradient(135deg, #6366F1 0%, #4F46E5 100%)',
+        'linear-gradient(135deg, #0EA5E9 0%, #0284C7 100%)',
+        'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)',
+        'linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%)'
+      ],
+      timelineLine: 'bg-gradient-to-b from-blue-300 to-blue-200',
+      cardBorder: 'border-blue-100',
+      cardBg: 'bg-white hover:bg-blue-50/30',
+      cardShadow: 'shadow-lg shadow-blue-100/50 hover:shadow-xl hover:shadow-blue-200/60',
+      durationBg: 'bg-blue-100',
+      durationText: 'text-blue-700',
+      processSummaryBg: 'bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50',
+      processSummaryBorder: 'border-blue-100',
+      focusRing: 'focus:ring-blue-500'
+    },
+    neutral: {
+      stepGradients: [
+        'linear-gradient(135deg, #64748B 0%, #475569 100%)',
+        'linear-gradient(135deg, #6B7280 0%, #4B5563 100%)',
+        'linear-gradient(135deg, #71717A 0%, #52525B 100%)',
+        'linear-gradient(135deg, #78716C 0%, #57534E 100%)',
+        'linear-gradient(135deg, #94A3B8 0%, #64748B 100%)',
+        'linear-gradient(135deg, #9CA3AF 0%, #6B7280 100%)'
+      ],
+      timelineLine: 'bg-gradient-to-b from-gray-300 to-gray-200',
+      cardBorder: 'border-gray-100',
+      cardBg: 'bg-white hover:bg-gray-50',
+      cardShadow: 'shadow-lg hover:shadow-xl',
+      durationBg: 'bg-gray-100',
+      durationText: 'text-gray-700',
+      processSummaryBg: 'bg-gradient-to-r from-slate-50 via-gray-50 to-zinc-50',
+      processSummaryBorder: 'border-gray-100',
+      focusRing: 'focus:ring-gray-500'
+    }
+  }[theme];
+};
+
+// Timeline Step Card component
+const TimelineStep = React.memo(({
+  step,
+  index,
+  isLast,
+  mode,
+  themeColors,
+  onStepUpdate,
+  onRemove,
+  canRemove
+}: {
+  step: StepItem;
   index: number;
   isLast: boolean;
-  colorTokens: any;
-  mutedTextColor: string;
-  blockContent: VerticalTimelineContent;
-  handleContentUpdate: (key: string, value: any) => void;
   mode: 'edit' | 'preview';
-  backgroundType: any;
-  sectionId: string;
-  getStepIcon: (index: number) => string;
-  handleStepIconEdit: (index: number, value: string) => void;
+  themeColors: ReturnType<typeof getThemeColors>;
+  onStepUpdate: (index: number, field: keyof StepItem, value: string) => void;
   onRemove?: () => void;
-  themeColors: {
-    stepGradients: string[];
-    timelineLine: string;
-    cardBorder: string;
-    cardBg: string;
-    cardShadow: string;
-    durationBg: string;
-    durationText: string;
-    processSummaryBg: string;
-    processSummaryBorder: string;
-  };
+  canRemove: boolean;
 }) => {
-
-  const getStepStyle = (index: number) => {
-    const gradients = themeColors.stepGradients;
-    return { background: gradients[index % gradients.length] };
-  };
+  const stepGradient = themeColors.stepGradients[index % themeColors.stepGradients.length];
 
   return (
     <div className="relative flex items-start">
-      {/* Timeline Line */}
-      {!isLast && (
-        <div className={`absolute left-6 top-16 bottom-0 w-0.5 ${themeColors.timelineLine}`} />
-      )}
-      
       {/* Step Content */}
       <div className="flex items-start space-x-6 w-full">
-        {/* Step Number/Icon */}
+        {/* Step Number */}
         <div className="flex-shrink-0 relative">
-          <div 
+          <div
             className="w-12 h-12 rounded-full shadow-lg flex items-center justify-center z-10 relative"
-            style={getStepStyle(index)}
+            style={{ background: stepGradient }}
           >
-            {blockContent.use_step_icons && getStepIcon(index) ? (
-              <IconEditableText
-                mode={mode}
-                value={getStepIcon(index) as string}
-                onEdit={(value) => handleStepIconEdit(index, value)}
-                backgroundType={backgroundType as any}
-                colorTokens={colorTokens}
-                iconSize="sm"
-                className="text-xl text-white"
-                sectionId={sectionId}
-                elementKey={`step_icon_${index + 1}`}
-              />
-            ) : (
-              <span className="text-white font-bold text-lg">{index + 1}</span>
-            )}
+            <span className="text-white font-bold text-lg">{index + 1}</span>
           </div>
           {!isLast && (
             <div className="absolute top-12 left-1/2 transform -translate-x-1/2">
@@ -176,7 +151,7 @@ const TimelineStep = React.memo(({
             </div>
           )}
         </div>
-        
+
         {/* Step Details */}
         <div className="flex-1 pb-6 relative group">
           <div className={`${themeColors.cardBg} rounded-xl px-6 py-4 ${themeColors.cardShadow} border ${themeColors.cardBorder} transition-all duration-300`}>
@@ -186,62 +161,56 @@ const TimelineStep = React.memo(({
                 <div
                   contentEditable
                   suppressContentEditableWarning
-                  onBlur={(e) => {
-                    handleContentUpdate('step_titles', e.currentTarget.textContent || '');
-                  }}
-                  className="text-xl font-bold text-gray-900 flex-1 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-50 min-h-[32px]"
+                  onBlur={(e) => onStepUpdate(index, 'title', e.currentTarget.textContent || '')}
+                  className={`text-xl font-bold text-gray-900 flex-1 outline-none ${themeColors.focusRing} focus:ring-2 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-50 min-h-[32px]`}
                   data-placeholder="Step title"
                 >
-                  {title}
+                  {step.title}
                 </div>
               ) : (
-                <h3 className="text-xl font-bold text-gray-900 flex-1">{title}</h3>
+                <h3 className="text-xl font-bold text-gray-900 flex-1">{step.title}</h3>
               )}
+
               {/* Editable Duration */}
               {mode !== 'preview' ? (
                 <div
                   contentEditable
                   suppressContentEditableWarning
-                  onBlur={(e) => {
-                    handleContentUpdate('step_durations', e.currentTarget.textContent || '');
-                  }}
-                  className={`text-sm font-medium ${themeColors.durationText} ${themeColors.durationBg} px-3 py-1 rounded-full ml-4 flex-shrink-0 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 cursor-text min-w-[60px] text-center`}
+                  onBlur={(e) => onStepUpdate(index, 'duration', e.currentTarget.textContent || '')}
+                  className={`text-sm font-semibold ${themeColors.durationText} ${themeColors.durationBg} px-3 py-1 rounded-full ml-4 flex-shrink-0 outline-none ${themeColors.focusRing} focus:ring-2 focus:ring-opacity-50 cursor-text min-w-[60px] text-center shadow-sm border border-current/10`}
                   data-placeholder="Duration"
                 >
-                  {duration || 'Duration'}
+                  {step.duration || 'Duration'}
                 </div>
               ) : (
-                duration && (
-                  <span className={`text-sm font-medium ${themeColors.durationText} ${themeColors.durationBg} px-3 py-1 rounded-full ml-4 flex-shrink-0`}>
-                    {duration}
+                step.duration && (
+                  <span className={`text-sm font-semibold ${themeColors.durationText} ${themeColors.durationBg} px-3 py-1 rounded-full ml-4 flex-shrink-0 shadow-sm border border-current/10`}>
+                    {step.duration}
                   </span>
                 )
               )}
             </div>
-            
+
             {/* Editable Step Description */}
             {mode !== 'preview' ? (
               <div
                 contentEditable
                 suppressContentEditableWarning
-                onBlur={(e) => {
-                  handleContentUpdate('step_descriptions', e.currentTarget.textContent || '');
-                }}
-                className="text-gray-600 leading-relaxed mb-4 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-50 min-h-[48px]"
+                onBlur={(e) => onStepUpdate(index, 'description', e.currentTarget.textContent || '')}
+                className={`text-gray-600 leading-relaxed mt-2 outline-none ${themeColors.focusRing} focus:ring-2 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-50 min-h-[48px]`}
                 data-placeholder="Step description"
               >
-                {description}
+                {step.description}
               </div>
             ) : (
-              <p className="text-gray-600 text-base leading-relaxed">
-                {description}
+              <p className="text-gray-600 text-base leading-relaxed mt-2">
+                {step.description}
               </p>
             )}
-            
           </div>
-          
+
           {/* Remove Step Button - only in edit mode */}
-          {mode === 'edit' && onRemove && (
+          {mode === 'edit' && onRemove && canRemove && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -263,14 +232,11 @@ const TimelineStep = React.memo(({
 TimelineStep.displayName = 'TimelineStep';
 
 export default function VerticalTimeline(props: LayoutComponentProps) {
-  
   const {
     sectionId,
     mode,
     blockContent,
     colorTokens,
-    dynamicTextColors,
-    getTextStyle,
     sectionBackground,
     backgroundType,
     handleContentUpdate
@@ -278,149 +244,46 @@ export default function VerticalTimeline(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
-  
-  const { getTextStyle: getTypographyStyle } = useTypography();
 
   // Detect theme: manual override > auto-detection > neutral fallback
-  const theme = React.useMemo(() => {
+  const uiBlockTheme = React.useMemo(() => {
     if (props.manualThemeOverride) return props.manualThemeOverride;
     if (props.userContext) return selectUIBlockTheme(props.userContext);
     return 'neutral';
   }, [props.manualThemeOverride, props.userContext]);
 
-  // Debug theme detection
-  React.useEffect(() => {
-    console.log('🎨 VerticalTimeline theme detection:', {
-      sectionId,
-      hasManualOverride: !!props.manualThemeOverride,
-      manualTheme: props.manualThemeOverride,
-      hasUserContext: !!props.userContext,
-      userContext: props.userContext,
-      finalTheme: theme
-    });
-  }, [theme, props.manualThemeOverride, props.userContext, sectionId]);
+  const themeColors = getThemeColors(uiBlockTheme);
 
-  // Theme-based color mappings
-  const getThemeColors = (theme: UIBlockTheme) => {
-    return {
-      warm: {
-        stepGradients: [
-          'linear-gradient(135deg, #F97316 0%, #EA580C 100%)', // orange
-          'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)', // red
-          'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)', // amber
-          'linear-gradient(135deg, #EC4899 0%, #DB2777 100%)', // pink
-          'linear-gradient(135deg, #FB923C 0%, #F97316 100%)', // orange-lighter
-          'linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%)'  // yellow
-        ],
-        timelineLine: 'bg-gradient-to-b from-orange-300 to-orange-200',
-        cardBorder: 'border-orange-100',
-        cardBg: 'bg-white hover:bg-orange-50/30',
-        cardShadow: 'shadow-lg shadow-orange-100/50 hover:shadow-xl hover:shadow-orange-200/60',
-        durationBg: 'bg-orange-100',
-        durationText: 'text-orange-700',
-        processSummaryBg: 'bg-gradient-to-r from-orange-50 via-amber-50 to-red-50',
-        processSummaryBorder: 'border-orange-100'
-      },
-      cool: {
-        stepGradients: [
-          'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)', // blue
-          'linear-gradient(135deg, #06B6D4 0%, #0891B2 100%)', // cyan
-          'linear-gradient(135deg, #6366F1 0%, #4F46E5 100%)', // indigo
-          'linear-gradient(135deg, #0EA5E9 0%, #0284C7 100%)', // sky
-          'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)', // violet
-          'linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%)'  // blue-lighter
-        ],
-        timelineLine: 'bg-gradient-to-b from-blue-300 to-blue-200',
-        cardBorder: 'border-blue-100',
-        cardBg: 'bg-white hover:bg-blue-50/30',
-        cardShadow: 'shadow-lg shadow-blue-100/50 hover:shadow-xl hover:shadow-blue-200/60',
-        durationBg: 'bg-blue-100',
-        durationText: 'text-blue-700',
-        processSummaryBg: 'bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50',
-        processSummaryBorder: 'border-blue-100'
-      },
-      neutral: {
-        stepGradients: [
-          'linear-gradient(135deg, #64748B 0%, #475569 100%)', // slate
-          'linear-gradient(135deg, #6B7280 0%, #4B5563 100%)', // gray
-          'linear-gradient(135deg, #71717A 0%, #52525B 100%)', // zinc
-          'linear-gradient(135deg, #78716C 0%, #57534E 100%)', // stone
-          'linear-gradient(135deg, #94A3B8 0%, #64748B 100%)', // slate-lighter
-          'linear-gradient(135deg, #9CA3AF 0%, #6B7280 100%)'  // gray-lighter
-        ],
-        timelineLine: 'bg-gradient-to-b from-gray-300 to-gray-200',
-        cardBorder: 'border-gray-100',
-        cardBg: 'bg-white hover:bg-gray-50',
-        cardShadow: 'shadow-lg hover:shadow-xl',
-        durationBg: 'bg-gray-100',
-        durationText: 'text-gray-700',
-        processSummaryBg: 'bg-gradient-to-r from-slate-50 via-gray-50 to-zinc-50',
-        processSummaryBorder: 'border-gray-100'
-      }
-    }[theme];
+  // Get steps array (with fallback to default)
+  const steps: StepItem[] = Array.isArray(blockContent.steps) && blockContent.steps.length > 0
+    ? blockContent.steps
+    : DEFAULT_STEPS;
+
+  // Handle step field update
+  const handleStepUpdate = (index: number, field: keyof StepItem, value: string) => {
+    const updatedSteps = steps.map((step, i) =>
+      i === index ? { ...step, [field]: value } : step
+    );
+    (handleContentUpdate as any)('steps', updatedSteps);
   };
 
-  const themeColors = getThemeColors(theme);
-
-  const stepTitles = blockContent.step_titles 
-    ? blockContent.step_titles.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
-
-  const stepDescriptions = blockContent.step_descriptions 
-    ? blockContent.step_descriptions.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
-
-  const stepDurations = blockContent.step_durations 
-    ? blockContent.step_durations.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
-
-  // Icon edit handlers
-  const handleStepIconEdit = (index: number, value: string) => {
-    const iconField = `step_icon_${index + 1}` as keyof VerticalTimelineContent;
-    handleContentUpdate(iconField, value);
+  // Handle adding a new step
+  const handleAddStep = () => {
+    const newStep: StepItem = {
+      id: generateStepId(),
+      title: 'New Step',
+      description: 'Describe this step in your process.',
+      duration: '5 min'
+    };
+    (handleContentUpdate as any)('steps', [...steps, newStep]);
   };
 
-  const getStepIcon = (index: number): string => {
-    const iconFields = ['step_icon_1', 'step_icon_2', 'step_icon_3', 'step_icon_4'];
-    return (blockContent[iconFields[index] as keyof VerticalTimelineContent] as string) || '';
+  // Handle removing a step
+  const handleRemoveStep = (indexToRemove: number) => {
+    const updatedSteps = steps.filter((_, i) => i !== indexToRemove);
+    (handleContentUpdate as any)('steps', updatedSteps);
   };
 
-  const steps = stepTitles.map((title, index) => ({
-    title: title || (mode === 'edit' ? `Step ${index + 1}` : ''),
-    description: stepDescriptions[index] || '',
-    duration: stepDurations[index] || ''
-  })).filter(step => step.title.trim() !== '' || mode === 'edit'); // Show empty steps in edit mode
-
-  const trustItems = blockContent.trust_items
-    ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
-
-  const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
-
-  const totalDuration = stepDurations.length > 0 ? '30 minutes' : 'Quick setup';
-
-  // Migration: Convert old fields to new process_summary_text (only once)
-  const hasMigrated = useRef(false);
-
-  useEffect(() => {
-    // Silent migration: convert old fields to process_summary_text
-    if (!hasMigrated.current &&
-        !blockContent.process_summary_text &&
-        (blockContent.process_time_label || blockContent.process_summary_heading)) {
-
-      const parts: string[] = [];
-
-      if (blockContent.process_summary_heading) parts.push(blockContent.process_summary_heading);
-      if (blockContent.process_summary_description) parts.push(blockContent.process_summary_description);
-
-      const migratedText = parts.join('. ') || 'Our streamlined process gets you results quickly and efficiently';
-
-      // Silent migration - no toast notification
-      handleContentUpdate('process_summary_text', migratedText);
-      hasMigrated.current = true;
-    }
-  }, [blockContent.process_summary_text, blockContent.process_time_label, blockContent.process_summary_heading, blockContent.process_summary_description, handleContentUpdate]);
-  
   return (
     <LayoutSection
       sectionId={sectionId}
@@ -431,7 +294,7 @@ export default function VerticalTimeline(props: LayoutComponentProps) {
       className={props.className}
     >
       <div className="max-w-4xl mx-auto mt-16">
-        
+        {/* Header Section */}
         <div className="text-center mb-16">
           <EditableAdaptiveHeadline
             mode={mode}
@@ -463,59 +326,30 @@ export default function VerticalTimeline(props: LayoutComponentProps) {
           )}
         </div>
 
-        <div className="space-y-0">
-          {steps.map((step, displayIndex) => (
+        {/* Timeline Steps */}
+        <div className="space-y-0 relative">
+          {/* Continuous Timeline Line - runs behind all step circles */}
+          {steps.length > 1 && (
+            <div
+              className={`absolute left-6 top-6 w-0.5 -translate-x-1/2 ${themeColors.timelineLine}`}
+              style={{ height: `calc(100% - 3rem)` }}
+            />
+          )}
+          {steps.map((step, index) => (
             <TimelineStep
-              key={displayIndex}
-              title={step.title}
-              description={step.description}
-              duration={step.duration}
-              index={displayIndex}
-              isLast={displayIndex === steps.length - 1}
-              colorTokens={colorTokens}
-              mutedTextColor={mutedTextColor}
-              blockContent={blockContent}
-              themeColors={themeColors}
-              handleContentUpdate={(key, value) => {
-                const stepTitles = blockContent.step_titles ? blockContent.step_titles.split('|') : [];
-                const stepDescriptions = blockContent.step_descriptions ? blockContent.step_descriptions.split('|') : [];
-                const stepDurations = blockContent.step_durations ? blockContent.step_durations.split('|') : [];
-                
-                if (key === 'step_titles') {
-                  stepTitles[displayIndex] = value;
-                  handleContentUpdate('step_titles', stepTitles.join('|'));
-                } else if (key === 'step_descriptions') {
-                  stepDescriptions[displayIndex] = value;
-                  handleContentUpdate('step_descriptions', stepDescriptions.join('|'));
-                } else if (key === 'step_durations') {
-                  stepDurations[displayIndex] = value;
-                  handleContentUpdate('step_durations', stepDurations.join('|'));
-                } else {
-                  handleContentUpdate(key, value);
-                }
-              }}
+              key={step.id}
+              step={step}
+              index={index}
+              isLast={index === steps.length - 1}
               mode={mode}
-              backgroundType={backgroundType}
-              sectionId={sectionId}
-              getStepIcon={(index) => getStepIcon(displayIndex)}
-              handleStepIconEdit={(index, value) => handleStepIconEdit(displayIndex, value)}
-              onRemove={steps.length > 1 ? () => {
-                const stepTitles = blockContent.step_titles ? blockContent.step_titles.split('|') : [];
-                const stepDescriptions = blockContent.step_descriptions ? blockContent.step_descriptions.split('|') : [];
-                const stepDurations = blockContent.step_durations ? blockContent.step_durations.split('|') : [];
-                
-                stepTitles.splice(displayIndex, 1);
-                stepDescriptions.splice(displayIndex, 1);
-                stepDurations.splice(displayIndex, 1);
-                
-                handleContentUpdate('step_titles', stepTitles.join('|'));
-                handleContentUpdate('step_descriptions', stepDescriptions.join('|'));
-                handleContentUpdate('step_durations', stepDurations.join('|'));
-              } : undefined}
+              themeColors={themeColors}
+              onStepUpdate={handleStepUpdate}
+              onRemove={() => handleRemoveStep(index)}
+              canRemove={steps.length > 3}
             />
           ))}
-          
-          {/* Add Step Button - only in edit mode */}
+
+          {/* Add Step Button - only in edit mode and under max limit */}
           {mode === 'edit' && steps.length < 6 && (
             <div className="relative flex items-start">
               <div className="flex items-start space-x-6 w-full">
@@ -526,30 +360,10 @@ export default function VerticalTimeline(props: LayoutComponentProps) {
                     </svg>
                   </div>
                 </div>
-                
+
                 <div className="flex-1 pb-12">
                   <button
-                    onClick={() => {
-                      const stepTitles = blockContent.step_titles ? blockContent.step_titles.split('|') : [];
-                      const stepDescriptions = blockContent.step_descriptions ? blockContent.step_descriptions.split('|') : [];
-                      const stepDurations = blockContent.step_durations ? blockContent.step_durations.split('|') : [];
-                      
-                      stepTitles.push(`Step ${stepTitles.length + 1}`);
-                      stepDescriptions.push('Add step description here');
-                      stepDurations.push('5 minutes');
-
-                      handleContentUpdate('step_titles', stepTitles.join('|'));
-                      handleContentUpdate('step_descriptions', stepDescriptions.join('|'));
-                      handleContentUpdate('step_durations', stepDurations.join('|'));
-
-                      // Add a smart icon for the new step
-                      const newStepCount = stepTitles.length;
-                      const iconField = `step_icon_${newStepCount}` as keyof VerticalTimelineContent;
-                      if (newStepCount <= 4) {
-                        const defaultIcon = getRandomIconFromCategory('process');
-                        handleContentUpdate(iconField, defaultIcon);
-                      }
-                    }}
+                    onClick={handleAddStep}
                     className="w-full bg-white rounded-xl p-6 border-2 border-dashed border-gray-300 hover:border-gray-400 text-gray-400 hover:text-gray-500 transition-all duration-300 hover:bg-gray-50"
                     title="Add new step"
                   >
@@ -567,64 +381,23 @@ export default function VerticalTimeline(props: LayoutComponentProps) {
         </div>
 
         {/* Process Summary */}
-        <div className={`mt-6 ${themeColors.processSummaryBg} rounded-2xl px-8 py-2 border ${themeColors.processSummaryBorder}`}>
-          <div className="text-center">
-            <EditableAdaptiveText
-              mode={mode}
-              value={blockContent.process_summary_text || ''}
-              onEdit={(value) => handleContentUpdate('process_summary_text', value)}
-              backgroundType={backgroundType}
-              colorTokens={colorTokens}
-              variant="body"
-              className="text-base font-semibold underline text-gray-900"
-              placeholder="Add process summary..."
-              sectionBackground={sectionBackground}
-              sectionId={sectionId}
-              elementKey="process_summary_text"
-            />
-          </div>
-        </div>
-
-        {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
-          <div className="text-center space-y-6 mt-16">
-            {(blockContent.supporting_text || mode === 'edit') && (
+        {(blockContent.process_summary_text || mode === 'edit') && (
+          <div className={`mt-6 ${themeColors.processSummaryBg} rounded-2xl px-8 py-2 border ${themeColors.processSummaryBorder}`}>
+            <div className="text-center">
               <EditableAdaptiveText
                 mode={mode}
-                value={blockContent.supporting_text || ''}
-                onEdit={(value) => handleContentUpdate('supporting_text', value)}
-                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                value={blockContent.process_summary_text || ''}
+                onEdit={(value) => handleContentUpdate('process_summary_text', value)}
+                backgroundType={backgroundType}
                 colorTokens={colorTokens}
                 variant="body"
-                className="max-w-3xl mx-auto mb-8"
-                placeholder="Add optional supporting text to reinforce your process benefits..."
-                sectionId={sectionId}
-                elementKey="supporting_text"
+                className="text-base font-semibold underline text-gray-900"
+                placeholder="Add process summary (e.g., 'Total setup time: under 20 minutes')..."
                 sectionBackground={sectionBackground}
+                sectionId={sectionId}
+                elementKey="process_summary_text"
               />
-            )}
-
-            {(blockContent.cta_text || trustItems.length > 0) && (
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-                {blockContent.cta_text && (
-                  <CTAButton
-                    text={blockContent.cta_text}
-                    colorTokens={colorTokens}
-                    className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
-                    variant="primary"
-                    sectionId={sectionId}
-                    elementKey="cta_text"
-                  />
-                )}
-
-                {trustItems.length > 0 && (
-                  <TrustIndicators 
-                    items={trustItems}
-                    colorClass={mutedTextColor}
-                    iconColor="text-green-500"
-                  />
-                )}
-              </div>
-            )}
+            </div>
           </div>
         )}
       </div>
@@ -635,45 +408,30 @@ export default function VerticalTimeline(props: LayoutComponentProps) {
 export const componentMeta = {
   name: 'VerticalTimeline',
   category: 'HowItWorks',
-  description: 'Vertical timeline process layout. Perfect for workflow automation and solution-aware audiences.',
-  tags: ['how-it-works', 'timeline', 'process', 'workflow', 'automation'],
+  description: 'Vertical timeline process layout with step-by-step progression.',
+  tags: ['how-it-works', 'timeline', 'process', 'workflow', 'steps'],
   defaultBackgroundType: 'neutral' as const,
-  complexity: 'medium',
-  estimatedBuildTime: '20 minutes',
-  
+
   contentFields: [
     { key: 'headline', label: 'Main Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
-    { key: 'step_titles', label: 'Step Titles (pipe separated)', type: 'textarea', required: true },
-    { key: 'step_descriptions', label: 'Step Descriptions (pipe separated)', type: 'textarea', required: true },
-    { key: 'step_durations', label: 'Step Durations (pipe separated)', type: 'text', required: false },
-    { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
-    { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
-    { key: 'process_summary_text', label: 'Process Summary Text', type: 'text', required: false },
-    { key: 'step_feature_1_text', label: 'Step Feature 1', type: 'text', required: false },
-    { key: 'step_feature_2_text', label: 'Step Feature 2', type: 'text', required: false },
-    { key: 'step_icon_1', label: 'Step 1 Icon', type: 'text', required: false },
-    { key: 'step_icon_2', label: 'Step 2 Icon', type: 'text', required: false },
-    { key: 'step_icon_3', label: 'Step 3 Icon', type: 'text', required: false },
-    { key: 'step_icon_4', label: 'Step 4 Icon', type: 'text', required: false },
-    { key: 'use_step_icons', label: 'Use Custom Step Icons', type: 'boolean', required: false }
+    { key: 'process_summary_text', label: 'Process Summary', type: 'text', required: false },
+    { key: 'steps', label: 'Timeline Steps', type: 'array', required: true },
   ],
-  
+
   features: [
     'Vertical timeline with connected steps',
     'Duration indicators for each step',
-    'Process summary with total time',
-    'Gradient step numbers with colors',
-    'Perfect for workflow processes',
-    'Guided process indicators'
+    'Process summary section',
+    'Gradient step numbers with theme colors',
+    'Add/remove steps in editor',
+    'Warm/cool/neutral theme support'
   ],
-  
+
   useCases: [
-    'Workflow automation products',
-    'Business process tools',
-    'Marketing and sales platforms',
-    'Solution-aware audiences',
-    'Desire-led copy strategies'
+    'Onboarding flows',
+    'Product setup guides',
+    'Workflow processes',
+    'Getting started tutorials'
   ]
 };

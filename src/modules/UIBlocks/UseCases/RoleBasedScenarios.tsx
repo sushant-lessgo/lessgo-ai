@@ -2,76 +2,45 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { EditableAdaptiveHeadline } from '@/components/layout/EditableContent';
-import IconEditableText from '@/components/ui/IconEditableText';
+import { EditableAdaptiveHeadline, EditableText } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { shadows, cardEnhancements } from '@/modules/Design/designTokens';
+
+interface Scenario {
+  id: string;
+  role: string;
+  scenario: string;
+}
 
 interface RoleBasedScenariosContent {
   headline: string;
-  roles: string;
-  scenarios: string;
-  // Optional role icons
-  role_icon_1?: string;
-  role_icon_2?: string;
-  role_icon_3?: string;
-  role_icon_4?: string;
-  role_icon_5?: string;
-  role_icon_6?: string;
+  subheadline?: string;
+  footer_text?: string;
+  scenarios: Scenario[];
 }
 
 const CONTENT_SCHEMA = {
   headline: { type: 'string' as const, default: 'Perfect for Every Role' },
-  roles: { type: 'string' as const, default: 'CEO|CTO|Marketing Manager|Sales Director|Operations Manager|Data Analyst' },
-  scenarios: { type: 'string' as const, default: 'Get executive dashboards and strategic insights|Monitor system performance and technical metrics|Track campaign performance and lead generation|Manage pipeline and forecast revenue|Optimize processes and resource allocation|Analyze data trends and create reports' },
-  // Optional role icons - contextually relevant defaults
-  role_icon_1: { type: 'string' as const, default: '📋' }, // CEO - dashboard
-  role_icon_2: { type: 'string' as const, default: '🔧' }, // CTO - tools
-  role_icon_3: { type: 'string' as const, default: '📊' }, // Marketing - chart
-  role_icon_4: { type: 'string' as const, default: '🎡' }, // Sales - target
-  role_icon_5: { type: 'string' as const, default: '⚙️' }, // Operations - gear
-  role_icon_6: { type: 'string' as const, default: '📈' }  // Data Analyst - trending up
-};
-
-// Helper function to add a new scenario
-const addScenario = (roles: string, scenarios: string): { newRoles: string; newScenarios: string } => {
-  const roleList = roles.split('|').map(r => r.trim()).filter(r => r);
-  const scenarioList = scenarios.split('|').map(s => s.trim()).filter(s => s);
-
-  // Add new scenario with default content
-  roleList.push('New Role');
-  scenarioList.push('Describe how this role benefits from your solution');
-
-  return {
-    newRoles: roleList.join('|'),
-    newScenarios: scenarioList.join('|')
-  };
-};
-
-// Helper function to remove a scenario
-const removeScenario = (roles: string, scenarios: string, indexToRemove: number): { newRoles: string; newScenarios: string } => {
-  const roleList = roles.split('|').map(r => r.trim()).filter(r => r);
-  const scenarioList = scenarios.split('|').map(s => s.trim()).filter(s => s);
-
-  // Remove the scenario at the specified index
-  if (indexToRemove >= 0 && indexToRemove < roleList.length) {
-    roleList.splice(indexToRemove, 1);
+  subheadline: { type: 'string' as const, default: '' },
+  footer_text: { type: 'string' as const, default: '' },
+  scenarios: {
+    type: 'array' as const,
+    default: [
+      { id: 'sc1', role: 'CEO', scenario: 'Get executive dashboards and strategic insights' },
+      { id: 'sc2', role: 'CTO', scenario: 'Monitor system performance and technical metrics' },
+      { id: 'sc3', role: 'Marketing Manager', scenario: 'Track campaign performance and lead generation' },
+      { id: 'sc4', role: 'Sales Director', scenario: 'Manage pipeline and forecast revenue' }
+    ]
   }
-  if (indexToRemove >= 0 && indexToRemove < scenarioList.length) {
-    scenarioList.splice(indexToRemove, 1);
-  }
-
-  return {
-    newRoles: roleList.join('|'),
-    newScenarios: scenarioList.join('|')
-  };
 };
 
 export default function RoleBasedScenarios(props: LayoutComponentProps) {
-  const { sectionId, mode, blockContent, colorTokens, getTextStyle, sectionBackground, handleContentUpdate } = useLayoutComponent<RoleBasedScenariosContent>({ ...props, contentSchema: CONTENT_SCHEMA });
-  const roles = blockContent.roles.split('|').map(r => r.trim()).filter(Boolean);
-  const scenarios = blockContent.scenarios.split('|').map(s => s.trim()).filter(Boolean);
+  const { sectionId, mode, blockContent, colorTokens, sectionBackground, handleContentUpdate } = useLayoutComponent<RoleBasedScenariosContent>({ ...props, contentSchema: CONTENT_SCHEMA });
+
+  // Ensure scenarios is always an array
+  const scenarios: Scenario[] = Array.isArray(blockContent.scenarios) ? blockContent.scenarios : CONTENT_SCHEMA.scenarios.default;
 
   // Theme detection with priority: manual > auto > neutral
   const uiTheme = React.useMemo(() => {
@@ -124,79 +93,55 @@ export default function RoleBasedScenarios(props: LayoutComponentProps) {
 
   const themeColors = getThemeColors(uiTheme);
 
-  // Handle individual role editing
-  const handleRoleEdit = (index: number, value: string) => {
-    const roleList = blockContent.roles.split('|');
-    roleList[index] = value;
-    handleContentUpdate('roles', roleList.join('|'));
+  // Get initials from role name
+  const getInitials = (role: string) => {
+    return role.split(' ').map(w => w[0]).join('').toUpperCase();
   };
 
-  // Handle individual scenario editing
+  // Handle role editing
+  const handleRoleEdit = (index: number, value: string) => {
+    const updated = scenarios.map((s, i) => i === index ? { ...s, role: value } : s);
+    (handleContentUpdate as any)('scenarios', updated);
+  };
+
+  // Handle scenario editing
   const handleScenarioEdit = (index: number, value: string) => {
-    const scenarioList = blockContent.scenarios.split('|');
-    scenarioList[index] = value;
-    handleContentUpdate('scenarios', scenarioList.join('|'));
+    const updated = scenarios.map((s, i) => i === index ? { ...s, scenario: value } : s);
+    (handleContentUpdate as any)('scenarios', updated);
   };
 
   // Handle adding a new scenario
   const handleAddScenario = () => {
-    const { newRoles, newScenarios } = addScenario(blockContent.roles, blockContent.scenarios);
-    handleContentUpdate('roles', newRoles);
-    handleContentUpdate('scenarios', newScenarios);
+    const newId = `sc${Date.now()}`;
+    const newScenario: Scenario = {
+      id: newId,
+      role: 'New Role',
+      scenario: 'Describe how this role benefits from your solution'
+    };
+    (handleContentUpdate as any)('scenarios', [...scenarios, newScenario]);
   };
 
   // Handle removing a scenario
-  const handleRemoveScenario = (indexToRemove: number) => {
-    const { newRoles, newScenarios } = removeScenario(blockContent.roles, blockContent.scenarios, indexToRemove);
-    handleContentUpdate('roles', newRoles);
-    handleContentUpdate('scenarios', newScenarios);
-
-    // Also clear the corresponding icon if it exists
-    const iconField = `role_icon_${indexToRemove + 1}` as keyof RoleBasedScenariosContent;
-    if (blockContent[iconField]) {
-      handleContentUpdate(iconField, '');
-    }
-  };
-
-  // Get role icon from content fields by index
-  const getRoleIcon = (index: number) => {
-    const iconFields = [
-      blockContent.role_icon_1,
-      blockContent.role_icon_2,
-      blockContent.role_icon_3,
-      blockContent.role_icon_4,
-      blockContent.role_icon_5,
-      blockContent.role_icon_6
-    ];
-    return iconFields[index];
+  const handleRemoveScenario = (index: number) => {
+    const updated = scenarios.filter((_, i) => i !== index);
+    (handleContentUpdate as any)('scenarios', updated);
   };
 
   return (
     <LayoutSection sectionId={sectionId} sectionType="RoleBasedScenarios" backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'secondary')} sectionBackground={sectionBackground} mode={mode} className={props.className}>
       <div className="max-w-6xl mx-auto">
-        <EditableAdaptiveHeadline mode={mode} value={blockContent.headline || ''} onEdit={(value) => handleContentUpdate('headline', value)} level="h2" backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'secondary')} colorTokens={colorTokens} className="text-center mb-16" sectionId={sectionId} elementKey="headline" sectionBackground={sectionBackground} />
+        <EditableAdaptiveHeadline mode={mode} value={blockContent.headline || ''} onEdit={(value) => handleContentUpdate('headline', value)} level="h2" backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'secondary')} colorTokens={colorTokens} className="text-center mb-4" sectionId={sectionId} elementKey="headline" sectionBackground={sectionBackground} />
+
+        {/* Subheadline */}
+        {(blockContent.subheadline || mode !== 'preview') && (
+          <EditableText mode={mode} value={blockContent.subheadline || ''} onEdit={(value) => handleContentUpdate('subheadline', value)} backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'secondary')} colorTokens={colorTokens} className="text-center mb-12 max-w-3xl mx-auto" sectionId={sectionId} elementKey="subheadline" sectionBackground={sectionBackground} />
+        )}
+
         <div className="space-y-8">
-          {roles.map((role, index) => (
-            <div key={index} className={`group/scenario-card-${index} relative bg-white p-8 rounded-xl border ${themeColors.cardBorder} flex items-center space-x-8`}>
-              <div className={`w-20 h-20 bg-gradient-to-br ${themeColors.gradientFrom} ${themeColors.gradientTo} rounded-full flex flex-col items-center justify-center text-white flex-shrink-0`}>
-                {getRoleIcon(index) ? (
-                  <>
-                    <div className="text-xs font-bold">{role.split(' ').map(w => w[0]).join('')}</div>
-                    <IconEditableText
-                      mode={mode}
-                      value={getRoleIcon(index) || ''}
-                      onEdit={(value) => handleContentUpdate(`role_icon_${index + 1}` as keyof RoleBasedScenariosContent, value)}
-                      backgroundType="primary"
-                      colorTokens={{ ...colorTokens, textPrimary: 'text-white' }}
-                      iconSize="md"
-                      className="text-xl text-white"
-                      sectionId={sectionId}
-                      elementKey={`role_icon_${index + 1}`}
-                    />
-                  </>
-                ) : (
-                  <span className="font-bold text-lg">{role.split(' ').map(w => w[0]).join('')}</span>
-                )}
+          {scenarios.map((item, index) => (
+            <div key={item.id} className={`group/scenario-card relative bg-white p-8 ${cardEnhancements.borderRadius} border ${themeColors.cardBorder} flex items-center space-x-8 ${cardEnhancements.hoverLift} ${cardEnhancements.transition}`} style={{ boxShadow: shadows.card[uiTheme] }}>
+              <div className={`w-20 h-20 bg-gradient-to-br ${themeColors.gradientFrom} ${themeColors.gradientTo} rounded-full flex items-center justify-center text-white flex-shrink-0`}>
+                <span className="font-bold text-lg">{getInitials(item.role)}</span>
               </div>
               <div className="flex-1">
                 {mode !== 'preview' ? (
@@ -204,34 +149,34 @@ export default function RoleBasedScenarios(props: LayoutComponentProps) {
                     contentEditable
                     suppressContentEditableWarning
                     onBlur={(e) => handleRoleEdit(index, e.currentTarget.textContent || '')}
-                    className={`outline-none focus:ring-2 ${themeColors.focusRing} focus:ring-opacity-50 rounded px-1 min-h-[28px] cursor-text hover:bg-gray-50 font-bold text-gray-900 mb-3`}
+                    className={`outline-none focus:ring-2 ${themeColors.focusRing} focus:ring-opacity-50 rounded px-1 min-h-[28px] cursor-text hover:bg-gray-50 font-bold ${colorTokens.textPrimary} mb-3`}
                   >
-                    {role}
+                    {item.role}
                   </div>
                 ) : (
-                  <h3 className="font-bold text-gray-900 mb-3">{role}</h3>
+                  <h3 className={`font-bold ${colorTokens.textPrimary} mb-3`}>{item.role}</h3>
                 )}
                 {mode !== 'preview' ? (
                   <div
                     contentEditable
                     suppressContentEditableWarning
                     onBlur={(e) => handleScenarioEdit(index, e.currentTarget.textContent || '')}
-                    className={`outline-none focus:ring-2 ${themeColors.focusRing} focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 text-gray-600`}
+                    className={`outline-none focus:ring-2 ${themeColors.focusRing} focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 ${colorTokens.textSecondary}`}
                   >
-                    {scenarios[index] || 'Role-specific scenario'}
+                    {item.scenario}
                   </div>
                 ) : (
-                  <p className="text-gray-600">{scenarios[index] || 'Role-specific scenario'}</p>
+                  <p className={colorTokens.textSecondary}>{item.scenario}</p>
                 )}
               </div>
               {/* Delete button - only show in edit mode and if more than minimum cards */}
-              {mode !== 'preview' && roles.length > 2 && (
+              {mode !== 'preview' && scenarios.length > 3 && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     handleRemoveScenario(index);
                   }}
-                  className={`absolute top-4 right-4 opacity-0 group-hover/scenario-card-${index}:opacity-100 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-200`}
+                  className="absolute top-4 right-4 opacity-0 group-hover/scenario-card:opacity-100 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-200"
                   title="Remove this scenario"
                 >
                   <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -244,7 +189,7 @@ export default function RoleBasedScenarios(props: LayoutComponentProps) {
         </div>
 
         {/* Add Scenario Button - only show in edit mode and if under max limit */}
-        {mode !== 'preview' && roles.length < 6 && (
+        {mode !== 'preview' && scenarios.length < 6 && (
           <div className="mt-8 text-center">
             <button
               onClick={handleAddScenario}
@@ -256,6 +201,11 @@ export default function RoleBasedScenarios(props: LayoutComponentProps) {
               <span className={`${themeColors.addText} font-medium`}>Add Scenario</span>
             </button>
           </div>
+        )}
+
+        {/* Footer Text */}
+        {(blockContent.footer_text || mode !== 'preview') && (
+          <EditableText mode={mode} value={blockContent.footer_text || ''} onEdit={(value) => handleContentUpdate('footer_text', value)} backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'secondary')} colorTokens={colorTokens} className="text-center mt-12 max-w-3xl mx-auto" sectionId={sectionId} elementKey="footer_text" sectionBackground={sectionBackground} />
         )}
       </div>
     </LayoutSection>

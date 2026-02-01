@@ -1,5 +1,5 @@
 /**
- * ThreeStepHorizontal - Published Version
+ * ThreeStepHorizontal - Published Version (V2)
  *
  * Server-safe component with ZERO hook imports
  * Used by componentRegistry.published.ts for SSR rendering
@@ -9,43 +9,24 @@ import React from 'react';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publishedTextColors';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
-import { IconPublished } from '@/components/published/IconPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
-// Step structure
+// Step structure (V2 array format)
 interface StepItem {
+  id: string;
   title: string;
   description: string;
-  id: string;
+  icon?: string;
 }
 
-// Parse step data from pipe-separated strings (server-safe, no hooks)
-const parseStepData = (titles: string, descriptions: string): StepItem[] => {
-  const titleList = titles.split('|').map((t: string) => t.trim()).filter((t: string) => t && t !== '___REMOVED___');
-  const descriptionList = descriptions.split('|').map((d: string) => d.trim()).filter((d: string) => d && d !== '___REMOVED___');
-
-  return titleList.map((title: string, index: number) => ({
-    id: `step-${index}`,
-    title,
-    description: descriptionList[index] || 'Step description not provided.'
-  }));
-};
-
-// Helper function to get step icon from props
-const getStepIcon = (index: number, props: LayoutComponentProps): string => {
-  const iconFields = [
-    props.step_icon_1,
-    props.step_icon_2,
-    props.step_icon_3,
-    props.step_icon_4,
-    props.step_icon_5,
-    props.step_icon_6
-  ];
-  // Fallback to step-specific defaults
-  return iconFields[index] || ['👤', '⚙️', '📊', '🎯', '✨', '🚀'][index] || '⭐';
-};
+// Default steps for fallback
+const DEFAULT_STEPS: StepItem[] = [
+  { id: 's1', title: 'Sign Up & Connect', description: 'Create your account and connect your existing tools in just a few clicks.' },
+  { id: 's2', title: 'Customize Your Setup', description: 'Tailor the platform to your specific needs with our intuitive configuration wizard.' },
+  { id: 's3', title: 'Get Results', description: 'Watch as your automated workflows start delivering results immediately.' }
+];
 
 // Theme color mapping (inline styles instead of Tailwind classes)
 const getThemeColors = (theme: UIBlockTheme) => {
@@ -54,31 +35,28 @@ const getThemeColors = (theme: UIBlockTheme) => {
       stepCircleBg: '#ea580c',
       stepCircleShadow: 'rgba(251, 146, 60, 0.4)',
       stepCircleRing: '#ffedd5',
-      stepIconGradient: 'linear-gradient(to bottom right, #f97316, #ea580c)',
-      iconShadow: 'rgba(254, 215, 170, 0.5)',
       connectorColor: '#fb923c',
       connectorLineColor: '#fed7aa',
-      subtleBackgroundGradient: 'linear-gradient(to bottom, rgba(255, 237, 213, 0.3), transparent)'
+      cardBg: '#fff7ed', // orange-50
+      cardBorder: '#fed7aa'
     },
     cool: {
       stepCircleBg: '#2563eb',
       stepCircleShadow: 'rgba(96, 165, 250, 0.4)',
       stepCircleRing: '#dbeafe',
-      stepIconGradient: 'linear-gradient(to bottom right, #3b82f6, #2563eb)',
-      iconShadow: 'rgba(191, 219, 254, 0.5)',
       connectorColor: '#60a5fa',
       connectorLineColor: '#bfdbfe',
-      subtleBackgroundGradient: 'linear-gradient(to bottom, rgba(219, 234, 254, 0.3), transparent)'
+      cardBg: '#eff6ff', // blue-50
+      cardBorder: '#bfdbfe'
     },
     neutral: {
       stepCircleBg: '#475569',
       stepCircleShadow: 'rgba(148, 163, 184, 0.4)',
       stepCircleRing: '#f1f5f9',
-      stepIconGradient: 'linear-gradient(to bottom right, #64748b, #475569)',
-      iconShadow: 'rgba(226, 232, 240, 0.5)',
       connectorColor: '#94a3b8',
       connectorLineColor: '#cbd5e1',
-      subtleBackgroundGradient: 'linear-gradient(to bottom, rgba(241, 245, 249, 0.3), transparent)'
+      cardBg: '#f8fafc', // slate-50
+      cardBorder: '#e2e8f0'
     }
   };
   return colorMap[theme];
@@ -86,20 +64,16 @@ const getThemeColors = (theme: UIBlockTheme) => {
 
 // Individual Step Card (server-safe)
 const StepCard = ({
-  item,
-  sectionId,
+  step,
   index,
   isLast,
-  icon,
   themeColors,
   textColors,
   theme
 }: {
-  item: StepItem;
-  sectionId: string;
+  step: StepItem;
   index: number;
   isLast: boolean;
-  icon: string;
   themeColors: ReturnType<typeof getThemeColors>;
   textColors: { heading: string; body: string; muted: string };
   theme: any;
@@ -108,18 +82,19 @@ const StepCard = ({
   const bodyTypography = getPublishedTypographyStyles('body', theme);
 
   return (
-    <div className="relative flex-1">
-      {/* Container with gradient background */}
+    <div className="relative flex-1 flex flex-col">
+      {/* Card with solid background and border */}
       <div
-        className="relative p-6 rounded-xl text-center"
+        className="relative p-6 rounded-xl flex-1"
         style={{
-          background: themeColors.subtleBackgroundGradient
+          backgroundColor: themeColors.cardBg,
+          border: `1px solid ${themeColors.cardBorder}`
         }}
       >
-        {/* Step Number Circle with ring and shadow */}
-        <div className="relative mb-6">
+        {/* Step Number Circle - Larger (64px) with ring and shadow */}
+        <div className="relative mb-6 flex justify-center">
           <div
-            className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg mx-auto shadow-lg"
+            className="w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-2xl shadow-lg"
             style={{
               backgroundColor: themeColors.stepCircleBg,
               boxShadow: `0 10px 15px -3px ${themeColors.stepCircleShadow}`,
@@ -130,28 +105,10 @@ const StepCard = ({
           >
             {index + 1}
           </div>
-
-          {/* Step Icon with gradient background and colored shadow */}
-          <div className="mt-4">
-            <div
-              className="w-16 h-16 rounded-full flex items-center justify-center shadow-lg mx-auto"
-              style={{
-                background: themeColors.stepIconGradient,
-                boxShadow: `0 10px 15px -3px ${themeColors.iconShadow}`
-              }}
-            >
-              <IconPublished
-                icon={icon}
-                size={32}
-                color="#ffffff"
-                className="text-2xl"
-              />
-            </div>
-          </div>
         </div>
 
-        {/* Step Title */}
-        <div className="mb-4">
+        {/* Step Title - Centered */}
+        <div className="mb-4 text-center">
           <h3
             style={{
               color: textColors.heading,
@@ -159,48 +116,23 @@ const StepCard = ({
               fontWeight: 600
             }}
           >
-            {item.title}
+            {step.title}
           </h3>
         </div>
 
-        {/* Step Description */}
+        {/* Step Description - Left aligned for readability */}
         <p
           style={{
             color: textColors.muted,
             ...bodyTypography,
-            lineHeight: '1.75rem'
+            lineHeight: '1.75rem',
+            textAlign: 'left'
           }}
         >
-          {item.description}
+          {step.description}
         </p>
       </div>
 
-      {/* Desktop Connecting Arrow - hidden on mobile, visible on lg+ screens */}
-      {!isLast && (
-        <div className="hidden lg:block absolute top-20 -right-8 w-16 h-8 flex items-center justify-center">
-          <svg
-            className="w-8 h-8 drop-shadow-md"
-            fill="none"
-            stroke={themeColors.connectorColor}
-            strokeWidth={2.5}
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-          </svg>
-        </div>
-      )}
-
-      {/* Mobile Connecting Line - visible on mobile, hidden on lg+ screens */}
-      {!isLast && (
-        <div className="lg:hidden flex justify-center mt-8 mb-8">
-          <div
-            className="w-1 h-12 rounded-full"
-            style={{
-              backgroundColor: themeColors.connectorLineColor
-            }}
-          />
-        </div>
-      )}
     </div>
   );
 };
@@ -211,12 +143,12 @@ export default function ThreeStepHorizontalPublished(props: LayoutComponentProps
   // Extract content from flattened props
   const headline = props.headline || 'How It Works';
   const subheadline = props.subheadline || '';
-  const step_titles = props.step_titles || 'Sign Up & Connect|Customize Your Setup|Get Results';
-  const step_descriptions = props.step_descriptions || 'Create your account and connect your existing tools in just a few clicks.|Tailor the platform to your specific needs with our intuitive configuration wizard.|Watch as your automated workflows start delivering results immediately.';
   const conclusion_text = props.conclusion_text || '';
 
-  // Parse step data
-  const stepItems = parseStepData(step_titles, step_descriptions);
+  // Get steps array (V2 format)
+  const steps: StepItem[] = Array.isArray(props.steps) && props.steps.length > 0
+    ? props.steps
+    : DEFAULT_STEPS;
 
   // Detect theme: manual override > auto-detection > neutral fallback
   const uiTheme: UIBlockTheme = props.manualThemeOverride ||
@@ -270,16 +202,14 @@ export default function ThreeStepHorizontalPublished(props: LayoutComponentProps
           )}
         </div>
 
-        {/* Steps Container - Responsive: vertical on mobile, horizontal on desktop */}
-        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between space-y-12 lg:space-y-0 lg:space-x-8 relative">
-          {stepItems.map((item: StepItem, index: number) => (
+        {/* Steps Container - Horizontal layout */}
+        <div className="flex flex-col lg:flex-row lg:items-stretch lg:justify-between gap-8 relative">
+          {steps.map((step: StepItem, index: number) => (
             <StepCard
-              key={item.id}
-              item={item}
-              sectionId={sectionId}
+              key={step.id}
+              step={step}
               index={index}
-              isLast={index === stepItems.length - 1}
-              icon={getStepIcon(index, props)}
+              isLast={index === steps.length - 1}
               themeColors={themeColors}
               textColors={textColors}
               theme={theme}

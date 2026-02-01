@@ -76,6 +76,7 @@ import AccordionStepsPublished from '@/modules/UIBlocks/HowItWorks/AccordionStep
 import ThreeStepHorizontalPublished from '@/modules/UIBlocks/HowItWorks/ThreeStepHorizontal.published';
 // V3 ARCHIVED: import IconCircleStepsPublished from '@/modules/UIBlocks/HowItWorks/IconCircleSteps.published';
 import VerticalTimelinePublished from '@/modules/UIBlocks/HowItWorks/VerticalTimeline.published';
+import VideoWalkthroughPublished from '@/modules/UIBlocks/HowItWorks/VideoWalkthrough.published';
 // V3 ARCHIVED: import ZigzagImageStepsPublished from '@/modules/UIBlocks/HowItWorks/ZigzagImageSteps.published';
 
 // FounderNote
@@ -222,6 +223,7 @@ const publishedComponentRegistry: Record<string, Record<string, React.ComponentT
     threestephorizontal: ThreeStepHorizontalPublished,
     // V3 ARCHIVED: iconcirclesteps: IconCircleStepsPublished,
     verticaltimeline: VerticalTimelinePublished,
+    videowalkthrough: VideoWalkthroughPublished,
     // V3 ARCHIVED: zigzagimagesteps: ZigzagImageStepsPublished,
   },
   foundernote: {

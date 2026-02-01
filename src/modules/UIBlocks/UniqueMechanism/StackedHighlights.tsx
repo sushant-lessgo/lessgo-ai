@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
+// components/layout/StackedHighlights.tsx
+// V2 Schema: Uses highlights[] array instead of pipe-separated strings
+
+import React from 'react';
 import { useTypography } from '@/hooks/useTypography';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
-import { useOnboardingStore } from '@/hooks/useOnboardingStore';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import {
@@ -9,167 +10,58 @@ import {
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
-import {
-  LayoutComponentProps,
-  extractLayoutContent,
-  StoreElementTypes
-} from '@/types/storeTypes';
-import { getIconFromCategory, getRandomIconFromCategory } from '@/utils/iconMapping';
+import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { shadows, cardEnhancements } from '@/modules/Design/designTokens';
+import { getIcon } from '@/lib/getIcon';
 
-interface StackedHighlightsProps extends LayoutComponentProps {}
-
-// Highlight item structure
-interface HighlightItem {
+interface Highlight {
+  id: string;
   title: string;
   description: string;
-  id: string;
+  icon?: string;
 }
 
-// Content interface for StackedHighlights layout
 interface StackedHighlightsContent {
   headline: string;
-  highlight_titles: string;
-  highlight_descriptions: string;
+  subheadline?: string;
   mechanism_name?: string;
   footer_text?: string;
-  highlight_icon_1?: string;
-  highlight_icon_2?: string;
-  highlight_icon_3?: string;
-  highlight_icon_4?: string;
-  highlight_icon_5?: string;
-  highlight_icon_6?: string;
+  highlights: Highlight[];
 }
 
-// Content schema for StackedHighlights layout
 const CONTENT_SCHEMA = {
-  headline: { type: 'string' as const, default: 'Our Proprietary SmartFlow System™' },
-  highlight_titles: { type: 'string' as const, default: 'Intelligent Auto-Prioritization|Dynamic Context Switching|Predictive Resource Allocation|Real-Time Quality Assurance' },
-  highlight_descriptions: { type: 'string' as const, default: 'Our AI analyzes your workflow patterns and automatically prioritizes tasks based on deadlines, dependencies, and business impact, ensuring critical work never falls through the cracks.|The system seamlessly adapts to changing priorities and contexts, maintaining efficiency even when your focus needs to shift between different projects or urgent requests.|Advanced algorithms predict resource needs and automatically allocate team capacity, preventing bottlenecks before they occur and optimizing productivity across all initiatives.|Built-in quality checks run continuously in the background, catching potential issues early and maintaining high standards without slowing down your workflow.' },
-  mechanism_name: { type: 'string' as const, default: '' },
-  footer_text: { type: 'string' as const, default: 'Our proprietary approach that you won\'t find anywhere else' },
-  highlight_icon_1: { type: 'string' as const, default: '🧠' },
-  highlight_icon_2: { type: 'string' as const, default: '🔄' },
-  highlight_icon_3: { type: 'string' as const, default: '📊' },
-  highlight_icon_4: { type: 'string' as const, default: '✅' },
-  highlight_icon_5: { type: 'string' as const, default: '⚡' },
-  highlight_icon_6: { type: 'string' as const, default: '🎯' }
-};
-
-// Parse highlight data from pipe-separated strings
-const parseHighlightData = (titles: string, descriptions: string): HighlightItem[] => {
-  const titleList = titles.split('|').map(t => t.trim()).filter(t => t);
-  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
-  
-  return titleList.map((title, index) => ({
-    id: `highlight-${index}`,
-    title,
-    description: descriptionList[index] || 'Description not provided.'
-  }));
-};
-
-
-// Helper function to get highlight icon
-  const getHighlightIcon = (blockContent: StackedHighlightsContent, index: number, highlightItems: HighlightItem[]) => {
-  const iconFields = [
-    blockContent.highlight_icon_1,
-    blockContent.highlight_icon_2,
-    blockContent.highlight_icon_3,
-    blockContent.highlight_icon_4,
-    blockContent.highlight_icon_5,
-    blockContent.highlight_icon_6
-  ];
-
-  const iconValue = iconFields[index];
-
-  // If the icon value looks like text/numbers (not an emoji), use contextual icon based on highlight title
-  if (iconValue && !isValidIcon(iconValue)) {
-    return getContextualHighlightIcon(highlightItems[index]?.title || '', index);
+  headline: {
+    type: 'string' as const,
+    default: 'Our Proprietary SmartFlow System™'
+  },
+  subheadline: {
+    type: 'string' as const,
+    default: 'Three unique capabilities that set us apart.'
+  },
+  mechanism_name: {
+    type: 'string' as const,
+    default: ''
+  },
+  footer_text: {
+    type: 'string' as const,
+    default: 'Our proprietary approach that you won\'t find anywhere else'
+  },
+  highlights: {
+    type: 'array' as const,
+    default: [
+      { id: 'h1', title: 'Intelligent Auto-Prioritization', description: 'Our AI analyzes your workflow patterns and automatically prioritizes tasks based on deadlines, dependencies, and business impact.', icon: 'lucide:brain' },
+      { id: 'h2', title: 'Dynamic Context Switching', description: 'The system seamlessly adapts to changing priorities and contexts, maintaining efficiency even when your focus needs to shift.', icon: 'lucide:refresh-cw' },
+      { id: 'h3', title: 'Predictive Resource Allocation', description: 'Advanced algorithms predict resource needs and automatically allocate team capacity, preventing bottlenecks before they occur.', icon: 'lucide:trending-up' },
+    ]
   }
-
-  return iconValue || getContextualHighlightIcon(highlightItems[index]?.title || '', index);
 };
 
-// Helper function to check if a value is a valid icon (emoji or simple icon character)
-const isValidIcon = (value: string): boolean => {
-  // Check if it's an emoji (basic check) or common icon characters
-  const iconPattern = /^[\u{1F300}-\u{1F9FF}]|^[🧠🔄📊✅⚡🎯💡🚀🔥💎⭐🏆🎨🔧⚙️🌟💪🎪⚽🏀🎾🎳🎲🎭🎪🎨🎬🎤🎧🎼🎹🥁🎺🎸🎻]|^[⭐✅✨🔔🔥🚀💡💎🌟⚙️🔧]$/u;
-  return iconPattern.test(value) || value.length <= 2;
-};
-
-// Helper function to get contextual icon based on highlight title
-const getContextualHighlightIcon = (title: string, index: number): string => {
-  const lower = title.toLowerCase();
-
-  if (lower.includes('intelligent') || lower.includes('smart') || lower.includes('ai') || lower.includes('brain') || lower.includes('analysis')) {
-    return '🧠';
-  } else if (lower.includes('auto') || lower.includes('dynamic') || lower.includes('switching') || lower.includes('context') || lower.includes('adapt')) {
-    return '🔄';
-  } else if (lower.includes('predict') || lower.includes('resource') || lower.includes('allocation') || lower.includes('data') || lower.includes('analytics')) {
-    return '📊';
-  } else if (lower.includes('quality') || lower.includes('assurance') || lower.includes('check') || lower.includes('verify') || lower.includes('validation')) {
-    return '✅';
-  } else if (lower.includes('speed') || lower.includes('fast') || lower.includes('quick') || lower.includes('performance') || lower.includes('boost')) {
-    return '⚡';
-  } else if (lower.includes('target') || lower.includes('goal') || lower.includes('focus') || lower.includes('precision') || lower.includes('accurate')) {
-    return '🎯';
-  } else if (lower.includes('innovation') || lower.includes('creative') || lower.includes('idea') || lower.includes('solution') || lower.includes('breakthrough')) {
-    return '💡';
-  } else if (lower.includes('growth') || lower.includes('scale') || lower.includes('expand') || lower.includes('launch') || lower.includes('rocket')) {
-    return '🚀';
-  } else if (lower.includes('popular') || lower.includes('trending') || lower.includes('hot') || lower.includes('demand') || lower.includes('fire')) {
-    return '🔥';
-  } else if (lower.includes('premium') || lower.includes('valuable') || lower.includes('diamond') || lower.includes('exclusive') || lower.includes('luxury')) {
-    return '💎';
-  } else if (lower.includes('rating') || lower.includes('award') || lower.includes('best') || lower.includes('top') || lower.includes('star')) {
-    return '⭐';
-  } else if (lower.includes('winner') || lower.includes('champion') || lower.includes('success') || lower.includes('achievement') || lower.includes('trophy')) {
-    return '🏆';
-  } else if (lower.includes('design') || lower.includes('creative') || lower.includes('visual') || lower.includes('art') || lower.includes('aesthetic')) {
-    return '🎨';
-  } else if (lower.includes('tool') || lower.includes('build') || lower.includes('construct') || lower.includes('develop') || lower.includes('wrench')) {
-    return '🔧';
-  } else if (lower.includes('system') || lower.includes('process') || lower.includes('workflow') || lower.includes('automation') || lower.includes('mechanism')) {
-    return '⚙️';
-  }
-
-  // Default innovation-themed icons based on position for unique mechanisms
-  return ['🚀', '💡', '⚡', '🎯', '🔥', '⭐'][index] || '✨';
-};
-
-// Helper function to add a new highlight
-const addHighlight = (titles: string, descriptions: string): { newTitles: string; newDescriptions: string } => {
-  const titleList = titles.split('|').map(t => t.trim()).filter(t => t);
-  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
-  
-  // Add new highlight with default content
-  titleList.push('New Highlight');
-  descriptionList.push('Describe this unique benefit or feature of your solution.');
-  
-  return {
-    newTitles: titleList.join('|'),
-    newDescriptions: descriptionList.join('|')
-  };
-};
-
-// Helper function to remove a highlight
-const removeHighlight = (titles: string, descriptions: string, indexToRemove: number): { newTitles: string; newDescriptions: string } => {
-  const titleList = titles.split('|').map(t => t.trim()).filter(t => t);
-  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
-  
-  // Remove the highlight at the specified index
-  if (indexToRemove >= 0 && indexToRemove < titleList.length) {
-    titleList.splice(indexToRemove, 1);
-  }
-  if (indexToRemove >= 0 && indexToRemove < descriptionList.length) {
-    descriptionList.splice(indexToRemove, 1);
-  }
-  
-  return {
-    newTitles: titleList.join('|'),
-    newDescriptions: descriptionList.join('|')
-  };
+// Helper to derive icon from highlight content
+const deriveIcon = (highlight: Highlight): string => {
+  if (highlight.icon) return highlight.icon;
+  return getIcon(undefined, { title: highlight.title, description: highlight.description }) ?? 'lucide:sparkles';
 };
 
 // Individual Highlight Card
@@ -178,107 +70,106 @@ const HighlightCard = ({
   index,
   mode,
   sectionId,
-  onTitleEdit,
-  onDescriptionEdit,
-  onRemoveHighlight,
-  blockContent,
+  onUpdate,
+  onRemove,
   colorTokens,
-  handleContentUpdate,
-  highlightItems,
-  canRemove = true,
-  highlightColors
+  canRemove,
+  highlightColors,
+  uiTheme,
+  sectionBackground,
+  backgroundType
 }: {
-  highlight: HighlightItem;
+  highlight: Highlight;
   index: number;
   mode: 'edit' | 'preview';
   sectionId: string;
-  onTitleEdit: (index: number, value: string) => void;
-  onDescriptionEdit: (index: number, value: string) => void;
-  onRemoveHighlight?: (index: number) => void;
-  blockContent: StackedHighlightsContent;
+  onUpdate: (field: keyof Highlight, value: string) => void;
+  onRemove?: () => void;
   colorTokens: any;
-  handleContentUpdate: (field: keyof StackedHighlightsContent, value: string) => void;
-  highlightItems: HighlightItem[];
-  canRemove?: boolean;
+  canRemove: boolean;
   highlightColors: any;
+  uiTheme: UIBlockTheme;
+  sectionBackground: any;
+  backgroundType: 'primary' | 'secondary' | 'neutral' | 'divider' | 'custom' | 'theme';
 }) => {
-  const { getTextStyle } = useTypography();
-  
+  const displayIcon = deriveIcon(highlight);
+
   return (
     <div className="group relative">
       {/* Connection Line (except for last item) */}
       <div className={`absolute left-8 top-20 w-0.5 h-full bg-gradient-to-b ${highlightColors.connectionLine} to-transparent hidden lg:block`}></div>
 
       {/* Highlight Card */}
-      <div className={`relative flex items-start space-x-6 p-8 bg-white rounded-xl border ${highlightColors.cardBorder} ${highlightColors.cardBorderHover} hover:shadow-lg transition-all duration-300 mb-6`}>
-
+      <div
+        className={`
+          relative flex items-start space-x-6 p-8
+          bg-white rounded-xl border
+          ${highlightColors.cardBorder}
+          ${highlightColors.cardBorderHover}
+          ${shadows.card[uiTheme]}
+          ${shadows.cardHover[uiTheme]}
+          ${cardEnhancements.transition}
+          ${cardEnhancements.hoverLift}
+          mb-6
+        `}
+      >
         {/* Icon Circle */}
         <div className={`flex-shrink-0 w-16 h-16 bg-gradient-to-br ${highlightColors.iconBg} rounded-full flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300`}>
           <IconEditableText
             mode={mode}
-            value={getHighlightIcon(blockContent, index, highlightItems)}
-            onEdit={(value) => {
-              const iconField = `highlight_icon_${index + 1}` as keyof StackedHighlightsContent;
-              handleContentUpdate(iconField, value);
-            }}
+            value={displayIcon}
+            onEdit={(value) => onUpdate('icon', value)}
             backgroundType="primary"
             colorTokens={colorTokens}
             iconSize="lg"
             className={`${highlightColors.iconText} text-2xl`}
             sectionId={sectionId}
-            elementKey={`highlight_icon_${index + 1}`}
+            elementKey={`highlight_icon_${highlight.id}`}
           />
         </div>
-        
+
         {/* Content */}
         <div className="flex-1">
           {/* Highlight Title */}
           <div className="mb-4">
-            {mode !== 'preview' ? (
-              <div 
-                contentEditable
-                suppressContentEditableWarning
-                onBlur={(e) => onTitleEdit(index, e.currentTarget.textContent || '')}
-                className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[28px] cursor-text hover:bg-gray-50 font-bold text-gray-900 text-xl"
-              >
-                {highlight.title}
-              </div>
-            ) : (
-              <h3 
-                className="font-bold text-gray-900 text-xl mb-2"
-              >
-                {highlight.title}
-              </h3>
-            )}
+            <EditableAdaptiveText
+              mode={mode}
+              value={highlight.title || ''}
+              onEdit={(value) => onUpdate('title', value)}
+              backgroundType={backgroundType === 'custom' ? 'secondary' : (backgroundType || 'neutral')}
+              colorTokens={colorTokens}
+              variant="body"
+              className="font-bold text-gray-900 text-xl"
+              formatState={{ bold: true, fontSize: '20px' } as any}
+              placeholder="Highlight title"
+              sectionId={sectionId}
+              elementKey={`highlight_title_${highlight.id}`}
+              sectionBackground={sectionBackground}
+            />
           </div>
-          
+
           {/* Highlight Description */}
-          <div>
-            {mode !== 'preview' ? (
-              <div 
-                contentEditable
-                suppressContentEditableWarning
-                onBlur={(e) => onDescriptionEdit(index, e.currentTarget.textContent || '')}
-                className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[60px] cursor-text hover:bg-gray-50 text-gray-600 leading-relaxed"
-              >
-                {highlight.description}
-              </div>
-            ) : (
-              <p 
-                className="text-gray-600 leading-relaxed"
-              >
-                {highlight.description}
-              </p>
-            )}
-          </div>
+          <EditableAdaptiveText
+            mode={mode}
+            value={highlight.description || ''}
+            onEdit={(value) => onUpdate('description', value)}
+            backgroundType={backgroundType === 'custom' ? 'secondary' : backgroundType}
+            colorTokens={colorTokens}
+            variant="body"
+            className="text-gray-600 leading-relaxed"
+            placeholder="Describe this unique benefit"
+            sectionId={sectionId}
+            elementKey={`highlight_description_${highlight.id}`}
+            sectionBackground={sectionBackground}
+          />
         </div>
-        
+
         {/* Delete button - only show in edit mode and if can remove */}
-        {mode !== 'preview' && onRemoveHighlight && canRemove && (
+        {mode !== 'preview' && onRemove && canRemove && (
           <button
             onClick={(e) => {
               e.stopPropagation();
-              onRemoveHighlight(index);
+              onRemove();
             }}
             className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-200"
             title="Remove this highlight"
@@ -288,9 +179,9 @@ const HighlightCard = ({
             </svg>
           </button>
         )}
-        
+
         {/* Unique Badge */}
-        <div className={`absolute top-4 ${mode !== 'preview' && onRemoveHighlight && canRemove ? 'right-12' : 'right-4'} opacity-60 group-hover:opacity-80 transition-opacity duration-300`}>
+        <div className={`absolute top-4 ${mode !== 'preview' && onRemove && canRemove ? 'right-12' : 'right-4'} opacity-60 group-hover:opacity-80 transition-opacity duration-300`}>
           <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center">
             <svg className="w-4 h-4 text-yellow-900" fill="currentColor" viewBox="0 0 20 20">
               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -302,25 +193,26 @@ const HighlightCard = ({
   );
 };
 
-export default function StackedHighlights(props: StackedHighlightsProps) {
-  // ✅ Use the standard useLayoutComponent hook
+export default function StackedHighlights(props: LayoutComponentProps) {
   const {
     sectionId,
     mode,
     blockContent,
     colorTokens,
-    dynamicTextColors,
-    getTextStyle,
     sectionBackground,
     backgroundType,
-    handleContentUpdate,
-    theme
+    handleContentUpdate
   } = useLayoutComponent<StackedHighlightsContent>({
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
 
-  // Detect theme: manual override > auto-detection > neutral fallback
+  // Ensure highlights is always an array
+  const highlights: Highlight[] = Array.isArray(blockContent.highlights)
+    ? blockContent.highlights
+    : CONTENT_SCHEMA.highlights.default;
+
+  // Theme detection: manual override > auto-detection > neutral fallback
   const uiTheme = React.useMemo(() => {
     if (props.manualThemeOverride) return props.manualThemeOverride;
     if (props.userContext) return selectUIBlockTheme(props.userContext);
@@ -331,28 +223,19 @@ export default function StackedHighlights(props: StackedHighlightsProps) {
   const getHighlightColors = (theme: UIBlockTheme) => {
     return {
       warm: {
-        // Connection line
         connectionLine: 'from-orange-200',
-        // Card borders
         cardBorder: 'border-orange-200',
         cardBorderHover: 'hover:border-orange-400',
-        // Icon circle
         iconBg: 'from-orange-500 to-orange-600',
         iconText: 'text-white',
-        // Unique badge
-        uniqueBadge: 'from-yellow-400 to-yellow-500',
-        uniqueBadgeIcon: 'text-yellow-900',
-        // Mechanism badge
         mechanismBg: 'bg-orange-100',
         mechanismBorder: 'border-orange-300',
         mechanismIconText: 'text-orange-600',
         mechanismText: 'text-orange-800',
-        // Add button
         addButtonBg: 'bg-orange-50 hover:bg-orange-100',
         addButtonBorder: 'border-orange-200 hover:border-orange-300',
         addButtonIcon: 'text-orange-600',
         addButtonText: 'text-orange-700',
-        // Footer
         footerBg: 'from-orange-50 to-red-50',
         footerBorder: 'border-orange-200',
         footerIcon: 'text-orange-600',
@@ -364,8 +247,6 @@ export default function StackedHighlights(props: StackedHighlightsProps) {
         cardBorderHover: 'hover:border-blue-400',
         iconBg: 'from-blue-500 to-blue-600',
         iconText: 'text-white',
-        uniqueBadge: 'from-yellow-400 to-yellow-500',
-        uniqueBadgeIcon: 'text-yellow-900',
         mechanismBg: 'bg-blue-100',
         mechanismBorder: 'border-blue-300',
         mechanismIconText: 'text-blue-600',
@@ -385,8 +266,6 @@ export default function StackedHighlights(props: StackedHighlightsProps) {
         cardBorderHover: 'hover:border-gray-400',
         iconBg: 'from-gray-500 to-gray-600',
         iconText: 'text-white',
-        uniqueBadge: 'from-yellow-400 to-yellow-500',
-        uniqueBadgeIcon: 'text-yellow-900',
         mechanismBg: 'bg-gray-100',
         mechanismBorder: 'border-gray-300',
         mechanismIconText: 'text-gray-600',
@@ -405,51 +284,31 @@ export default function StackedHighlights(props: StackedHighlightsProps) {
 
   const highlightColors = getHighlightColors(uiTheme);
 
-  // Parse highlight data
-  const highlightItems = parseHighlightData(blockContent.highlight_titles, blockContent.highlight_descriptions);
-
-  // Handle individual editing
-  const handleTitleEdit = (index: number, value: string) => {
-    const titles = blockContent.highlight_titles.split('|');
-    titles[index] = value;
-    handleContentUpdate('highlight_titles', titles.join('|'));
-  };
-
-  const handleDescriptionEdit = (index: number, value: string) => {
-    const descriptions = blockContent.highlight_descriptions.split('|');
-    descriptions[index] = value;
-    handleContentUpdate('highlight_descriptions', descriptions.join('|'));
+  // Handle highlight field update
+  const handleHighlightUpdate = (highlightId: string, field: keyof Highlight, value: string) => {
+    const updated = highlights.map(h =>
+      h.id === highlightId ? { ...h, [field]: value } : h
+    );
+    (handleContentUpdate as any)('highlights', updated);
   };
 
   // Handle adding a new highlight
   const handleAddHighlight = () => {
-    const { newTitles, newDescriptions } = addHighlight(blockContent.highlight_titles, blockContent.highlight_descriptions);
-    handleContentUpdate('highlight_titles', newTitles);
-    handleContentUpdate('highlight_descriptions', newDescriptions);
-
-    // Add a smart icon for the new highlight
-    const newHighlightCount = newTitles.split('|').length;
-    const iconField = `highlight_icon_${newHighlightCount}` as keyof StackedHighlightsContent;
-    if (newHighlightCount <= 6) {
-      // Use random icon from innovation category for new highlights
-      const defaultIcon = getRandomIconFromCategory('innovation');
-      handleContentUpdate(iconField, defaultIcon);
-    }
+    if (highlights.length >= 6) return; // Enforce max constraint
+    const newHighlight: Highlight = {
+      id: `h${Date.now()}`,
+      title: 'New Highlight',
+      description: 'Describe this unique benefit or feature of your solution.',
+    };
+    (handleContentUpdate as any)('highlights', [...highlights, newHighlight]);
   };
 
   // Handle removing a highlight
-  const handleRemoveHighlight = (indexToRemove: number) => {
-    const { newTitles, newDescriptions } = removeHighlight(blockContent.highlight_titles, blockContent.highlight_descriptions, indexToRemove);
-    handleContentUpdate('highlight_titles', newTitles);
-    handleContentUpdate('highlight_descriptions', newDescriptions);
-    
-    // Also clear the corresponding icon if it exists
-    const iconField = `highlight_icon_${indexToRemove + 1}` as keyof StackedHighlightsContent;
-    if (blockContent[iconField]) {
-      handleContentUpdate(iconField, '');
-    }
+  const handleRemoveHighlight = (highlightId: string) => {
+    if (highlights.length <= 2) return; // Enforce min constraint
+    const updated = highlights.filter(h => h.id !== highlightId);
+    (handleContentUpdate as any)('highlights', updated);
   };
-
 
   return (
     <LayoutSection
@@ -475,6 +334,23 @@ export default function StackedHighlights(props: StackedHighlightsProps) {
             elementKey="headline"
             sectionBackground={sectionBackground}
           />
+
+          {/* Optional Subheadline */}
+          {(blockContent.subheadline || mode === 'edit') && (
+            <EditableAdaptiveText
+              mode={mode}
+              value={blockContent.subheadline || ''}
+              onEdit={(value) => handleContentUpdate('subheadline', value)}
+              backgroundType={backgroundType === 'custom' ? 'secondary' : (backgroundType || 'neutral')}
+              colorTokens={colorTokens}
+              variant="body"
+              className="text-lg mb-6"
+              placeholder="Add a supporting subheadline..."
+              sectionId={sectionId}
+              elementKey="subheadline"
+              sectionBackground={sectionBackground}
+            />
+          )}
 
           {/* Optional Mechanism Name */}
           {(blockContent.mechanism_name || mode === 'edit') && (
@@ -503,28 +379,27 @@ export default function StackedHighlights(props: StackedHighlightsProps) {
 
         {/* Stacked Highlights */}
         <div className="space-y-0">
-          {highlightItems.map((highlight, index) => (
+          {highlights.map((highlight, index) => (
             <HighlightCard
               key={highlight.id}
               highlight={highlight}
               index={index}
               mode={mode}
               sectionId={sectionId}
-              onTitleEdit={handleTitleEdit}
-              onDescriptionEdit={handleDescriptionEdit}
-              onRemoveHighlight={handleRemoveHighlight}
-              blockContent={blockContent}
+              onUpdate={(field, value) => handleHighlightUpdate(highlight.id, field, value)}
+              onRemove={() => handleRemoveHighlight(highlight.id)}
               colorTokens={colorTokens}
-              handleContentUpdate={handleContentUpdate}
-              highlightItems={highlightItems}
-              canRemove={highlightItems.length > 1}
+              canRemove={highlights.length > 2}
               highlightColors={highlightColors}
+              uiTheme={uiTheme}
+              sectionBackground={sectionBackground}
+              backgroundType={backgroundType}
             />
           ))}
         </div>
 
         {/* Add Highlight Button - only show in edit mode and if under max limit */}
-        {mode !== 'preview' && highlightItems.length < 6 && (
+        {mode !== 'preview' && highlights.length < 6 && (
           <div className="mt-8 text-center">
             <button
               onClick={handleAddHighlight}
@@ -561,7 +436,6 @@ export default function StackedHighlights(props: StackedHighlightsProps) {
             </div>
           </div>
         )}
-
       </div>
     </LayoutSection>
   );
@@ -569,32 +443,10 @@ export default function StackedHighlights(props: StackedHighlightsProps) {
 
 export const componentMeta = {
   name: 'StackedHighlights',
-  category: 'Features',
-  description: 'Vertical feature highlights with adaptive text colors and unique mechanism branding',
-  tags: ['features', 'highlights', 'stacked', 'mechanism', 'adaptive-colors'],
-  features: [
-    'Automatic text color adaptation based on background type',
-    'Editable highlight titles and descriptions',
-    'Smart icons that match highlight content',
-    'Optional mechanism/brand name badge',
-    'Unique value proposition footer',
-    'Connection lines for visual flow'
-  ],
-  props: {
-    sectionId: 'string - Required section identifier',
-    backgroundType: '"primary" | "secondary" | "neutral" | "divider" - Controls text color adaptation',
-    className: 'string - Additional CSS classes'
-  },
-  contentSchema: {
-    headline: 'Main heading text',
-    highlight_titles: 'Pipe-separated list of highlight titles',
-    highlight_descriptions: 'Pipe-separated list of highlight descriptions',
-    mechanism_name: 'Optional mechanism or brand name'
-  },
-  examples: [
-    'Proprietary system features',
-    'Unique value propositions',
-    'Product capability highlights',
-    'Service differentiators'
-  ]
+  category: 'Unique Mechanism',
+  description: 'Vertical feature highlights showcasing unique mechanism capabilities',
+  tags: ['features', 'highlights', 'stacked', 'mechanism', 'unique'],
+  defaultBackgroundType: 'neutral' as const,
+  complexity: 'medium',
+  estimatedBuildTime: '20 minutes'
 };

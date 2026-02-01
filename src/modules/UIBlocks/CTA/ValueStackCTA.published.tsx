@@ -1,8 +1,8 @@
 /**
- * ValueStackCTA - Published Version
+ * ValueStackCTA - Published Version (V2)
  *
  * Server-safe component with ZERO hook imports
- * Used by componentRegistry.published.ts for SSR rendering
+ * Simplified checkmark + one-liner format
  */
 
 import React from 'react';
@@ -13,32 +13,25 @@ import { CTAButtonPublished } from '@/components/published/CTAButtonPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import { FormMarkupPublished } from '@/components/published/FormMarkupPublished';
 import { InlineFormMarkupPublished } from '@/components/published/InlineFormMarkupPublished';
 import { determineFormPlacement } from '@/utils/formPlacement';
 
-// Theme colors helper (hex values for inline styles)
+// Theme colors (hex values for inline styles)
 const getThemeColors = (theme: UIBlockTheme) => {
   return {
     warm: {
-      iconBg: '#fed7aa', // orange-200
-      cardBorder: '#e5e7eb', // gray-200 (neutral)
       gradientFrom: '#ea580c', // orange-600
       gradientTo: '#b91c1c', // red-700
       ctaLightText: '#fed7aa', // orange-100
       ctaButtonText: '#ea580c' // orange-600
     },
     cool: {
-      iconBg: '#bfdbfe', // blue-200
-      cardBorder: '#e5e7eb', // gray-200
       gradientFrom: '#2563eb', // blue-600
       gradientTo: '#4338ca', // indigo-700
       ctaLightText: '#dbeafe', // blue-100
       ctaButtonText: '#2563eb' // blue-600
     },
     neutral: {
-      iconBg: '#e5e7eb', // gray-200
-      cardBorder: '#e5e7eb', // gray-200
       gradientFrom: '#4b5563', // gray-600
       gradientTo: '#1f2937', // gray-800
       ctaLightText: '#e5e7eb', // gray-100
@@ -47,32 +40,31 @@ const getThemeColors = (theme: UIBlockTheme) => {
   }[theme];
 };
 
-// Checkmark color (universal green)
+// Green checkmark color
 const checkmarkColor = '#10b981'; // green-500
-
-// Parse value propositions from props
-const parseValueProps = (props: any) => {
-  const titles = (props.value_propositions || '').split('|').filter((t: string) => t.trim());
-  const descriptions = (props.value_descriptions || '').split('|').filter((d: string) => d.trim());
-
-  return titles.map((title: string, i: number) => ({
-    title: title.trim(),
-    description: descriptions[i]?.trim() || '',
-    icon: props[`value_icon_${i + 1}`] || ['⚡', '📈', '🤖', '📊', '🎯', '🔗'][i] || '✨'
-  }));
-};
 
 export default function ValueStackCTAPublished(props: LayoutComponentProps) {
   const { sectionId, sectionBackgroundCSS, theme, backgroundType } = props;
 
   // Extract content
-  const headline = props.headline || 'Everything You Need to Succeed';
+  const headline = props.headline || 'Everything You Get With Your Account';
   const subheadline = props.subheadline;
-  const cta_text = props.cta_text || 'Start Your Transformation';
+  const cta_text = props.cta_text || 'Start Free Trial';
   const secondary_cta_text = props.secondary_cta_text;
-  const final_cta_headline = props.final_cta_headline || 'Ready to Get Started?';
-  const final_cta_description = props.final_cta_description || 'Join thousands of businesses already transforming their operations with our platform.';
+  const final_cta_headline = props.final_cta_headline || 'Ready to Transform Your Workflow?';
+  const final_cta_description = props.final_cta_description || 'Join 10,000+ teams already saving time every day';
   const guarantee_text = props.guarantee_text;
+
+  // V2: Get value_items array directly
+  const valueItems: Array<{ id: string; text: string }> = Array.isArray(props.value_items)
+    ? props.value_items
+    : [
+        { id: 'v1', text: 'Save 20+ hours per week on repetitive tasks' },
+        { id: 'v2', text: 'Increase team productivity by 40%' },
+        { id: 'v3', text: 'Real-time analytics and reporting' },
+        { id: 'v4', text: 'Unlimited team members included' },
+        { id: 'v5', text: 'Priority 24/7 customer support' },
+      ];
 
   // Detect theme
   const uiBlockTheme: UIBlockTheme = props.manualThemeOverride ||
@@ -91,10 +83,6 @@ export default function ValueStackCTAPublished(props: LayoutComponentProps) {
   const h2Typography = getPublishedTypographyStyles('h2', theme);
   const h3Typography = getPublishedTypographyStyles('h3', theme);
   const bodyLgTypography = getPublishedTypographyStyles('body-lg', theme);
-  const bodyTypography = getPublishedTypographyStyles('body', theme);
-
-  // Parse value props
-  const valueProps = parseValueProps(props);
 
   // Extract button metadata for form detection
   const sectionData = props.content?.[sectionId];
@@ -107,9 +95,9 @@ export default function ValueStackCTAPublished(props: LayoutComponentProps) {
       background={sectionBackgroundCSS}
       padding="normal"
     >
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-5xl mx-auto">
 
-        {/* Header Section */}
+        {/* Header */}
         <div className="text-center mb-12">
           <HeadlinePublished
             value={headline}
@@ -135,46 +123,26 @@ export default function ValueStackCTAPublished(props: LayoutComponentProps) {
           )}
         </div>
 
-        {/* Value Propositions Grid */}
-        <div className="grid gap-6 mb-12">
-          {valueProps.map((valueProp: { title: string; description: string; icon: string }, index: number) => (
-            <div
-              key={index}
-              className="flex items-start space-x-4 p-6 bg-white rounded-xl"
-              style={{ border: `1px solid ${colors.cardBorder}` }}
-            >
-              {/* Icon */}
+        {/* Value Items - Simple checkmark list */}
+        <div className="space-y-4 mb-12 max-w-3xl mx-auto">
+          {valueItems.map((item) => (
+            <div key={item.id} className="flex items-start gap-3">
+              {/* Green checkmark */}
               <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 text-2xl"
-                style={{ backgroundColor: colors.iconBg }}
-              >
-                {valueProp.icon}
-              </div>
-
-              {/* Content */}
-              <div className="flex-1">
-                <div
-                  style={{ color: textColors.heading, ...bodyTypography }}
-                  className="font-bold mb-2"
-                >
-                  {valueProp.title}
-                </div>
-                <div
-                  style={{ color: textColors.muted, ...bodyTypography }}
-                  className="leading-relaxed"
-                >
-                  {valueProp.description}
-                </div>
-              </div>
-
-              {/* Checkmark */}
-              <div
-                className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
+                className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
                 style={{ backgroundColor: checkmarkColor }}
               >
                 <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
+              </div>
+
+              {/* Text */}
+              <div
+                style={{ color: textColors.body, ...bodyLgTypography }}
+                className="flex-1"
+              >
+                {item.text}
               </div>
             </div>
           ))}
@@ -211,13 +179,15 @@ export default function ValueStackCTAPublished(props: LayoutComponentProps) {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
             {/* Primary CTA */}
             {(() => {
+              const accentColor = theme?.colors?.accentColor || '#3B82F6';
+
               // Check if button is form-connected
               if (!buttonConfig || buttonConfig.type !== 'form') {
                 return (
                   <CTAButtonPublished
                     text={cta_text}
-                    backgroundColor="#ffffff"
-                    textColor={colors.ctaButtonText}
+                    backgroundColor={accentColor}
+                    textColor="#ffffff"
                     className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 px-8 py-4 text-lg"
                   />
                 );
@@ -226,12 +196,11 @@ export default function ValueStackCTAPublished(props: LayoutComponentProps) {
               // Get form from content
               const form = props.content?.forms?.[buttonConfig.formId];
               if (!form) {
-                console.warn(`Form not found: ${buttonConfig.formId}`);
                 return (
                   <CTAButtonPublished
                     text={cta_text}
-                    backgroundColor="#ffffff"
-                    textColor={colors.ctaButtonText}
+                    backgroundColor={accentColor}
+                    textColor="#ffffff"
                     className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 px-8 py-4 text-lg"
                   />
                 );
@@ -255,8 +224,8 @@ export default function ValueStackCTAPublished(props: LayoutComponentProps) {
                     size="large"
                     variant="primary"
                     colorTokens={{
-                      bg: '#ffffff',
-                      text: colors.ctaButtonText
+                      bg: accentColor,
+                      text: '#ffffff'
                     }}
                     className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 px-8 py-4 text-lg"
                   />
@@ -267,8 +236,8 @@ export default function ValueStackCTAPublished(props: LayoutComponentProps) {
               return (
                 <CTAButtonPublished
                   text={cta_text}
-                  backgroundColor="#ffffff"
-                  textColor={colors.ctaButtonText}
+                  backgroundColor={accentColor}
+                  textColor="#ffffff"
                   href={buttonConfig.behavior === 'scrollTo' ? '#form-section' : undefined}
                   className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 px-8 py-4 text-lg"
                 />
@@ -276,11 +245,11 @@ export default function ValueStackCTAPublished(props: LayoutComponentProps) {
             })()}
 
             {/* Secondary CTA */}
-            {secondary_cta_text && secondary_cta_text.trim() !== '' && secondary_cta_text !== '___REMOVED___' && (
+            {secondary_cta_text && secondary_cta_text.trim() !== '' && (
               <CTAButtonPublished
                 text={secondary_cta_text}
                 backgroundColor="transparent"
-                textColor="#ffffff"
+                textColor={theme?.colors?.accentColor || '#3B82F6'}
                 className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 px-8 py-4 text-lg border-2"
               />
             )}
@@ -291,7 +260,7 @@ export default function ValueStackCTAPublished(props: LayoutComponentProps) {
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
-                <span className="text-sm font-medium">{guarantee_text}</span>
+                <span className="text-base font-medium">{guarantee_text}</span>
               </div>
             )}
           </div>

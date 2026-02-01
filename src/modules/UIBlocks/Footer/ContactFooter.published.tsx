@@ -2,13 +2,12 @@
  * ContactFooter - Published Version
  *
  * Server-safe footer with contact info, social links, newsletter section
- * Used by componentRegistry.published.ts for SSR rendering
+ * Uses V2 array format for social_links
  */
 
 import React from 'react';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { LogoPublished } from '@/components/published/LogoPublished';
-import { getPublishedTypographyStyles } from '@/lib/publishedTextColors';
 import {
   FaEnvelope,
   FaPhone,
@@ -26,65 +25,67 @@ import {
   FaGlobe,
 } from 'react-icons/fa';
 
+interface SocialLink {
+  id: string;
+  platform: string;
+  url: string;
+  icon: string;
+}
+
+const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+  FaTwitter,
+  FaLinkedin,
+  FaGithub,
+  FaFacebook,
+  FaInstagram,
+  FaYoutube,
+  FaTiktok,
+  FaDiscord,
+  FaMedium,
+  FaDribbble,
+  FaGlobe,
+};
+
 export default function ContactFooterPublished(props: LayoutComponentProps) {
   const { theme } = props;
 
-  // Typography styles
-  const h5Typography = getPublishedTypographyStyles('h4', theme);
-  const bodySmTypography = getPublishedTypographyStyles('body-sm', theme);
-  const captionTypography = getPublishedTypographyStyles('body-sm', theme);
-
   // Extract content from props with defaults
+  const footerStyle = props.footer_style || 'dark';
+  const isDark = footerStyle === 'dark';
   const copyright = props.copyright || `© ${new Date().getFullYear()} Your Company. All rights reserved.`;
   const newsletter_title = props.newsletter_title || 'Stay Updated';
   const newsletter_description = props.newsletter_description || 'Get the latest updates and news delivered to your inbox.';
   const newsletter_cta = props.newsletter_cta || 'Subscribe';
+
+  // Color tokens based on footer style
+  const colors = {
+    bg: isDark ? '#111827' : '#F9FAFB',
+    text: isDark ? '#FFFFFF' : '#111827',
+    textMuted: isDark ? '#9CA3AF' : '#6B7280',
+    textBody: isDark ? '#D1D5DB' : '#4B5563',
+    border: isDark ? '#374151' : '#E5E7EB',
+    inputBg: isDark ? '#1F2937' : '#FFFFFF',
+    inputBorder: isDark ? '#374151' : '#D1D5DB',
+    buttonBg: isDark ? '#374151' : '#374151',
+    buttonText: '#FFFFFF',
+  };
 
   // Build contact information array
   const contactInfo = [
     { icon: FaEnvelope, text: props.email, type: 'email' },
     { icon: FaPhone, text: props.phone, type: 'phone' },
     { icon: FaMapMarkerAlt, text: props.address, type: 'address' },
-  ].filter(item => item.text && item.text !== '___REMOVED___' && item.text.trim() !== '');
+  ].filter(item => item.text && item.text.trim() !== '');
 
-  // Parse social media items from props
-  // Format: "platform|url" (e.g., "twitter|https://twitter.com/company")
-  const socialItems = [
-    props.social_item_1,
-    props.social_item_2,
-    props.social_item_3,
-    props.social_item_4,
-    props.social_item_5,
-    props.social_item_6,
-    props.social_item_7,
-    props.social_item_8,
-  ].filter((item: string) => item && item !== '___REMOVED___' && item.trim() !== '')
-    .map(item => {
-      const parts = item.split('|');
-      if (parts.length >= 2) {
-        return { platform: parts[0].toLowerCase(), url: parts.slice(1).join('|') };
-      }
-      return null;
-    })
-    .filter((item): item is { platform: string; url: string } => item !== null && item.platform && item.url);
+  // Get social_links from V2 array format
+  const socialLinks: SocialLink[] = Array.isArray(props.social_links) ? props.social_links : [];
 
-  // Social icon mapping
-  const socialIconMap: Record<string, React.ComponentType<any>> = {
-    twitter: FaTwitter,
-    linkedin: FaLinkedin,
-    github: FaGithub,
-    facebook: FaFacebook,
-    instagram: FaInstagram,
-    youtube: FaYoutube,
-    tiktok: FaTiktok,
-    discord: FaDiscord,
-    medium: FaMedium,
-    dribbble: FaDribbble,
-    website: FaGlobe,
+  const getIconComponent = (iconName: string) => {
+    return ICON_MAP[iconName] || FaGlobe;
   };
 
   return (
-    <footer className="bg-gray-900 text-white py-16">
+    <footer style={{ backgroundColor: colors.bg, color: colors.text }} className="py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Main Grid: Contact Info + Newsletter */}
         <div className="grid md:grid-cols-2 gap-12 mb-12">
@@ -95,38 +96,41 @@ export default function ContactFooterPublished(props: LayoutComponentProps) {
                 logoUrl={props.logo}
                 companyName={props.company_name || 'Company'}
                 size="md"
-                className="h-8 brightness-0 invert"
+                className={`h-8 ${isDark ? 'brightness-0 invert' : ''}`}
               />
             </div>
 
             {/* Contact Information */}
             {contactInfo.length > 0 && (
               <div className="space-y-3">
-                {contactInfo.map((item: { icon: React.ComponentType<{ className?: string }>; text: string; type: string }, index: number) => {
+                {contactInfo.map((item, index) => {
                   const Icon = item.icon;
                   return (
                     <div key={index} className="flex items-start gap-3">
-                      <Icon className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
-                      <span className="text-sm text-gray-300" style={bodySmTypography}>{item.text}</span>
+                      <Icon style={{ color: colors.textMuted }} className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                      <span style={{ color: colors.textBody }} className="text-sm">
+                        {item.text}
+                      </span>
                     </div>
                   );
                 })}
               </div>
             )}
 
-            {/* Social Media Links */}
-            {socialItems.length > 0 && (
-              <div className="mt-6 pt-4 border-t border-gray-700">
+            {/* Social Media Links - V2 Array Format */}
+            {socialLinks.length > 0 && (
+              <div style={{ borderColor: colors.border }} className="mt-6 pt-4 border-t">
                 <div className="flex items-center gap-4">
-                  {socialItems.map((social: { platform: string; url: string }, index: number) => {
-                    const IconComponent = socialIconMap[social.platform] || FaGlobe;
+                  {socialLinks.map((social) => {
+                    const IconComponent = getIconComponent(social.icon);
                     return (
                       <a
-                        key={index}
+                        key={social.id}
                         href={social.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-gray-400 hover:text-white transition-colors"
+                        style={{ color: colors.textMuted }}
+                        className="hover:opacity-80 transition-opacity"
                         aria-label={social.platform}
                       >
                         <IconComponent className="w-5 h-5" />
@@ -140,21 +144,34 @@ export default function ContactFooterPublished(props: LayoutComponentProps) {
 
           {/* Right Column: Newsletter */}
           <div>
-            <h3 className="font-semibold text-white mb-2" style={h5Typography}>{newsletter_title}</h3>
-            <p className="text-sm text-gray-300 mb-4" style={bodySmTypography}>{newsletter_description}</p>
+            <h3 style={{ color: colors.text }} className="font-semibold mb-2">
+              {newsletter_title}
+            </h3>
+            <p style={{ color: colors.textBody }} className="text-sm mb-4">
+              {newsletter_description}
+            </p>
 
-            {/* Static Newsletter Form (disabled in Phase 1) */}
+            {/* Static Newsletter Form (disabled in published) */}
             <div className="flex gap-2">
               <input
                 type="email"
                 placeholder="Enter your email"
                 disabled
-                className="flex-1 px-3 py-2 text-sm bg-gray-800 border border-gray-700 rounded-lg text-gray-400 placeholder-gray-500 cursor-not-allowed"
+                style={{
+                  backgroundColor: colors.inputBg,
+                  borderColor: colors.inputBorder,
+                  color: colors.textMuted
+                }}
+                className="flex-1 px-3 py-2 text-sm border rounded-lg cursor-not-allowed"
               />
               <button
                 disabled
-                style={{ backgroundColor: theme.colors.accentColor, opacity: 0.7 }}
-                className="px-6 py-2 text-sm rounded-lg text-white font-semibold cursor-not-allowed"
+                style={{
+                  backgroundColor: colors.buttonBg,
+                  color: colors.buttonText,
+                  opacity: 0.7
+                }}
+                className="px-4 py-2 text-sm font-medium rounded-lg cursor-not-allowed"
               >
                 {newsletter_cta}
               </button>
@@ -163,8 +180,10 @@ export default function ContactFooterPublished(props: LayoutComponentProps) {
         </div>
 
         {/* Copyright */}
-        <div className="pt-8 border-t border-gray-800 text-center">
-          <p className="text-sm text-gray-400" style={captionTypography}>{copyright}</p>
+        <div style={{ borderColor: colors.border }} className="pt-8 border-t text-center">
+          <p style={{ color: colors.textMuted }} className="text-sm">
+            {copyright}
+          </p>
         </div>
       </div>
     </footer>

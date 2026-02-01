@@ -9,43 +9,39 @@ import React from 'react';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publishedTextColors';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
-import { IconPublished } from '@/components/published/IconPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
-// Step structure
-interface Step {
+// Step structure (V2 array format)
+interface StepItem {
+  id: string;
   title: string;
   description: string;
   duration: string;
   icon?: string;
 }
 
+// Default steps for fallback
+const DEFAULT_STEPS: StepItem[] = [
+  { id: 's1', title: 'Create Your Account', description: 'Sign up with your email in under a minute.', duration: '1 min' },
+  { id: 's2', title: 'Connect Your Tools', description: 'Link your existing apps with our integrations.', duration: '5 min' },
+  { id: 's3', title: 'Configure Workflows', description: 'Set up automated workflows using our visual builder.', duration: '10 min' },
+  { id: 's4', title: 'Go Live', description: 'Launch your workflows and start seeing results.', duration: 'Instant' },
+];
+
 export default function VerticalTimelinePublished(props: LayoutComponentProps) {
   const { sectionId, sectionBackgroundCSS, theme, backgroundType } = props;
 
-  // Extract content from props (flattened by LandingPagePublishedRenderer)
-  const headline = props.headline || 'How Our Process Works';
+  // Extract content from props
+  const headline = props.headline || 'How It Works';
   const subheadline = props.subheadline || '';
-  const step_titles = props.step_titles || 'Initial Setup|Data Import|Automation Rules|Go Live';
-  const step_descriptions = props.step_descriptions || '';
-  const step_durations = props.step_durations || '5 minutes|10 minutes|15 minutes|Instant';
-  const supporting_text = props.supporting_text || '';
-  const process_summary_text = props.process_summary_text || 'Our streamlined process gets you results faster than you thought possible';
-  const use_step_icons = props.use_step_icons || false;
+  const process_summary_text = props.process_summary_text || '';
 
-  // Parse steps
-  const titleList = step_titles.split('|').map((t: string) => t.trim()).filter((t: string) => t && t !== '___REMOVED___');
-  const descriptionList = step_descriptions.split('|').map((d: string) => d.trim()).filter((d: string) => d && d !== '___REMOVED___');
-  const durationList = step_durations.split('|').map((d: string) => d.trim()).filter((d: string) => d && d !== '___REMOVED___');
-
-  const steps: Step[] = titleList.map((title: string, index: number) => ({
-    title,
-    description: descriptionList[index] || '',
-    duration: durationList[index] || '',
-    icon: use_step_icons ? (props[`step_icon_${index + 1}` as keyof typeof props] as string) : undefined
-  }));
+  // Get steps array directly (V2 format)
+  const steps: StepItem[] = Array.isArray(props.steps) && props.steps.length > 0
+    ? props.steps
+    : DEFAULT_STEPS;
 
   // Detect theme
   const uiTheme: UIBlockTheme = props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
@@ -155,26 +151,26 @@ export default function VerticalTimelinePublished(props: LayoutComponentProps) {
         </div>
 
         {/* Timeline Steps */}
-        <div className="space-y-0">
-          {steps.map((step: Step, index: number) => {
+        <div className="space-y-0 relative">
+          {/* Continuous Timeline Line - runs behind all step circles */}
+          {steps.length > 1 && (
+            <div
+              className="absolute left-6 top-6 w-0.5 -translate-x-1/2"
+              style={{
+                height: `calc(100% - 3rem)`,
+                background: themeColors.timelineLine
+              }}
+            />
+          )}
+          {steps.map((step: StepItem, index: number) => {
             const isLast = index === steps.length - 1;
             const stepGradient = themeColors.stepGradients[index % themeColors.stepGradients.length];
 
             return (
-              <div key={`step-${index}`} className="relative flex items-start">
-                {/* Timeline Line */}
-                {!isLast && (
-                  <div
-                    className="absolute left-6 top-16 bottom-0 w-0.5"
-                    style={{
-                      background: themeColors.timelineLine
-                    }}
-                  />
-                )}
-
+              <div key={step.id} className="relative flex items-start">
                 {/* Step Content */}
                 <div className="flex items-start space-x-6 w-full">
-                  {/* Step Number/Icon */}
+                  {/* Step Number */}
                   <div className="flex-shrink-0 relative">
                     <div
                       className="w-12 h-12 rounded-full shadow-lg flex items-center justify-center z-10 relative"
@@ -182,16 +178,7 @@ export default function VerticalTimelinePublished(props: LayoutComponentProps) {
                         background: stepGradient
                       }}
                     >
-                      {use_step_icons && step.icon ? (
-                        <IconPublished
-                          icon={step.icon}
-                          size={20}
-                          color="#ffffff"
-                          className="text-xl"
-                        />
-                      ) : (
-                        <span className="text-white font-bold text-lg">{index + 1}</span>
-                      )}
+                      <span className="text-white font-bold text-lg">{index + 1}</span>
                     </div>
                     {!isLast && (
                       <div className="absolute top-12 left-1/2 transform -translate-x-1/2">
@@ -217,7 +204,7 @@ export default function VerticalTimelinePublished(props: LayoutComponentProps) {
                           style={{
                             fontSize: '1.25rem',
                             fontWeight: 700,
-                            color: '#111827',
+                            color: textColors.heading,
                             flex: 1
                           }}
                         >
@@ -227,10 +214,11 @@ export default function VerticalTimelinePublished(props: LayoutComponentProps) {
                         {/* Duration */}
                         {step.duration && (
                           <span
-                            className="text-sm font-medium px-3 py-1 rounded-full ml-4 flex-shrink-0"
+                            className="text-sm font-semibold px-3 py-1 rounded-full ml-4 flex-shrink-0 shadow-sm"
                             style={{
                               backgroundColor: themeColors.durationBg,
-                              color: themeColors.durationText
+                              color: themeColors.durationText,
+                              border: '1px solid rgba(0,0,0,0.05)'
                             }}
                           >
                             {step.duration}
@@ -242,7 +230,7 @@ export default function VerticalTimelinePublished(props: LayoutComponentProps) {
                       {step.description && (
                         <p
                           style={{
-                            color: '#4b5563',
+                            color: textColors.body,
                             lineHeight: '1.75rem',
                             marginTop: '0.5rem'
                           }}
@@ -259,38 +247,25 @@ export default function VerticalTimelinePublished(props: LayoutComponentProps) {
         </div>
 
         {/* Process Summary */}
-        <div
-          className="mt-6 rounded-2xl px-8 py-2"
-          style={{
-            background: themeColors.processSummaryBg,
-            border: `1px solid ${themeColors.processSummaryBorder}`
-          }}
-        >
-          <div className="text-center">
-            <TextPublished
-              value={process_summary_text}
-              style={{
-                fontSize: '1rem',
-                fontWeight: 600,
-                color: '#111827',
-                textDecoration: 'underline'
-              }}
-            />
-          </div>
-        </div>
-
-        {/* Supporting Text */}
-        {supporting_text && (
-          <div className="text-center mt-16">
-            <TextPublished
-              value={supporting_text}
-              style={{
-                color: textColors.body,
-                ...bodyTypography,
-                maxWidth: '48rem',
-                margin: '0 auto'
-              }}
-            />
+        {process_summary_text && (
+          <div
+            className="mt-6 rounded-2xl px-8 py-2"
+            style={{
+              background: themeColors.processSummaryBg,
+              border: `1px solid ${themeColors.processSummaryBorder}`
+            }}
+          >
+            <div className="text-center">
+              <TextPublished
+                value={process_summary_text}
+                style={{
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                  color: textColors.heading,
+                  textDecoration: 'underline'
+                }}
+              />
+            </div>
           </div>
         )}
       </div>

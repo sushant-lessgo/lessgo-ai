@@ -2,121 +2,48 @@ import React, { useState } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
+import {
+  EditableAdaptiveHeadline,
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
-import { 
-  CTAButton,
-  TrustIndicators 
-} from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getIconFromCategory, getRandomIconFromCategory } from '@/utils/iconMapping';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import { shadows, cardEnhancements } from '@/modules/Design/designTokens';
 
-interface AccordionStepsContent {
-  headline: string;
-  step_titles: string;
-  step_descriptions: string;
-  step_details: string;
-  subheadline?: string;
-  supporting_text?: string;
-  cta_text?: string;
-  cta_prompt?: string;
-  trust_items?: string;
-  // Technical Specs Summary
-  tech_specs_heading?: string;
-  tech_spec_1_value?: string;
-  tech_spec_1_label?: string;
-  tech_spec_2_value?: string;
-  tech_spec_2_label?: string;
-  tech_spec_3_value?: string;
-  tech_spec_3_label?: string;
-  tech_specs_description?: string;
-  show_step_indicators?: boolean;
-  show_tech_specs?: boolean;
+// Step item structure (V2 array format)
+interface StepItem {
+  id: string;
+  title: string;
+  description: string;
+  details: string;
 }
 
+interface AccordionStepsContent {
+  headline: string;
+  subheadline?: string;
+  conclusion_text?: string;
+  steps: StepItem[];
+}
+
+// Default steps for new sections
+const DEFAULT_STEPS: StepItem[] = [
+  { id: 's1', title: 'API Integration & Setup', description: 'Seamlessly integrate with your existing systems using our comprehensive API documentation and SDKs.', details: 'Our API supports RESTful endpoints, GraphQL, and real-time webhooks. Authentication uses OAuth 2.0 with optional SAML integration.' },
+  { id: 's2', title: 'Data Migration & Validation', description: 'Migrate your data securely with automated validation and rollback capabilities.', details: 'Data migration includes schema mapping, incremental sync, and conflict resolution. All transfers use AES-256 encryption.' },
+  { id: 's3', title: 'Custom Configuration', description: 'Configure custom workflows, permissions, and business rules to match your requirements.', details: 'Custom configuration includes role-based access control, workflow automation rules, and integration mappings.' },
+  { id: 's4', title: 'Testing & Deployment', description: 'Run comprehensive testing and deploy to production with zero downtime.', details: 'Deployment uses blue-green deployment with automatic rollback on failure. We provide monitoring for all critical metrics.' }
+];
+
 const CONTENT_SCHEMA = {
-  headline: { 
-    type: 'string' as const, 
-    default: 'Technical Implementation Process' 
-  },
-  step_titles: { 
-    type: 'string' as const, 
-    default: 'API Integration & Setup|Data Migration & Validation|Custom Configuration|Testing & Deployment' 
-  },
-  step_descriptions: { 
-    type: 'string' as const, 
-    default: 'Seamlessly integrate with your existing systems using our comprehensive API documentation and SDKs.|Migrate your data securely with automated validation and rollback capabilities.|Configure custom workflows, permissions, and business rules to match your requirements.|Run comprehensive testing and deploy to production with zero downtime.' 
-  },
-  step_details: { 
-    type: 'string' as const, 
-    default: 'Our API supports RESTful endpoints, GraphQL, and real-time webhooks. We provide SDKs for Python, JavaScript, Java, and .NET with comprehensive documentation and code examples. Authentication uses OAuth 2.0 with optional SAML integration.|Data migration includes schema mapping, incremental sync, and conflict resolution. All transfers use AES-256 encryption with audit logging. We support rollback to any previous state and provide data integrity verification.|Custom configuration includes role-based access control, workflow automation rules, custom fields, and integration mappings. All changes are version controlled and can be deployed across environments.|Testing includes unit tests, integration tests, and load testing. Deployment uses blue-green deployment with automatic rollback on failure. We provide monitoring and alerting for all critical metrics.' 
-  },
-  subheadline: { 
-    type: 'string' as const, 
-    default: '' 
-  },
-  supporting_text: { 
-    type: 'string' as const, 
-    default: '' 
-  },
-  cta_text: {
-    type: 'string' as const,
-    default: ''
-  },
-  cta_prompt: {
-    type: 'string' as const,
-    default: 'Ready to streamline your workflow?'
-  },
-  trust_items: {
-    type: 'string' as const,
-    default: ''
-  },
-  // Technical Specs Summary
-  tech_specs_heading: { 
-    type: 'string' as const, 
-    default: 'Enterprise-Grade Implementation' 
-  },
-  tech_spec_1_value: { 
-    type: 'string' as const, 
-    default: '99.9%' 
-  },
-  tech_spec_1_label: { 
-    type: 'string' as const, 
-    default: 'Uptime SLA' 
-  },
-  tech_spec_2_value: { 
-    type: 'string' as const, 
-    default: 'API-First' 
-  },
-  tech_spec_2_label: { 
-    type: 'string' as const, 
-    default: 'Architecture' 
-  },
-  tech_spec_3_value: { 
-    type: 'string' as const, 
-    default: 'SOC 2' 
-  },
-  tech_spec_3_label: { 
-    type: 'string' as const, 
-    default: 'Compliant' 
-  },
-  tech_specs_description: { 
-    type: 'string' as const, 
-    default: 'Built for enterprise requirements with comprehensive security, scalability, and integration capabilities' 
-  },
-  show_step_indicators: { 
-    type: 'boolean' as const, 
-    default: true 
-  },
-  show_tech_specs: { 
-    type: 'boolean' as const, 
-    default: true 
-  }
+  headline: { type: 'string' as const, default: 'Technical Implementation Process' },
+  subheadline: { type: 'string' as const, default: '' },
+  conclusion_text: { type: 'string' as const, default: '' },
+  steps: { type: 'array' as const, default: DEFAULT_STEPS }
+};
+
+// Generate unique ID for new steps
+const generateStepId = (): string => {
+  return `s${Date.now().toString(36)}`;
 };
 
 export default function AccordionSteps(props: LayoutComponentProps) {
@@ -163,12 +90,8 @@ export default function AccordionSteps(props: LayoutComponentProps) {
         border: 'border-orange-200',
         borderHover: 'hover:border-orange-300',
         contentBorder: 'border-orange-100',
-        techDetailsBg: 'bg-orange-50',
-        techDetailsBorder: 'border-l-4 border-orange-500',
-        techSpecGradient: 'bg-gradient-to-r from-orange-950 to-orange-900',
-        spec1Color: 'text-orange-400',
-        spec2Color: 'text-amber-400',
-        spec3Color: 'text-yellow-400',
+        detailsBg: 'bg-orange-50',
+        detailsBorder: 'border-l-4 border-orange-500',
         focusRing: 'focus:ring-orange-500',
         stepIndicator: 'bg-orange-500',
         stepIndicatorOpen: 'bg-white/20'
@@ -177,12 +100,8 @@ export default function AccordionSteps(props: LayoutComponentProps) {
         border: 'border-blue-200',
         borderHover: 'hover:border-blue-300',
         contentBorder: 'border-blue-100',
-        techDetailsBg: 'bg-blue-50',
-        techDetailsBorder: 'border-l-4 border-blue-500',
-        techSpecGradient: 'bg-gradient-to-r from-blue-950 to-blue-900',
-        spec1Color: 'text-blue-400',
-        spec2Color: 'text-cyan-400',
-        spec3Color: 'text-indigo-400',
+        detailsBg: 'bg-blue-50',
+        detailsBorder: 'border-l-4 border-blue-500',
         focusRing: 'focus:ring-blue-500',
         stepIndicator: 'bg-blue-500',
         stepIndicatorOpen: 'bg-white/20'
@@ -191,12 +110,8 @@ export default function AccordionSteps(props: LayoutComponentProps) {
         border: 'border-amber-200',
         borderHover: 'hover:border-amber-300',
         contentBorder: 'border-amber-100',
-        techDetailsBg: 'bg-amber-50',
-        techDetailsBorder: 'border-l-4 border-amber-500',
-        techSpecGradient: 'bg-gradient-to-r from-slate-900 to-slate-800',
-        spec1Color: 'text-amber-400',
-        spec2Color: 'text-slate-400',
-        spec3Color: 'text-stone-400',
+        detailsBg: 'bg-amber-50',
+        detailsBorder: 'border-l-4 border-amber-500',
         focusRing: 'focus:ring-amber-500',
         stepIndicator: 'bg-slate-500',
         stepIndicatorOpen: 'bg-white/20'
@@ -207,33 +122,16 @@ export default function AccordionSteps(props: LayoutComponentProps) {
 
   const accordionColors = getAccordionColors(theme);
 
-  const stepTitles = blockContent.step_titles 
-    ? blockContent.step_titles.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
-    
   // Typography styles
   const h3Style = getTypographyStyle('h3');
   const bodyStyle = getTypographyStyle('body-lg');
 
-  const stepDescriptions = blockContent.step_descriptions 
-    ? blockContent.step_descriptions.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
-
-  const stepDetails = blockContent.step_details 
-    ? blockContent.step_details.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
-
-  const steps = stepTitles.map((title, index) => ({
-    title,
-    description: stepDescriptions[index] || '',
-    details: stepDetails[index] || ''
-  }));
+  // Get steps array (with fallback to default)
+  const steps: StepItem[] = Array.isArray(blockContent.steps) && blockContent.steps.length > 0
+    ? blockContent.steps
+    : DEFAULT_STEPS;
 
   const [openStep, setOpenStep] = useState<number | null>(0);
-
-  const trustItems = blockContent.trust_items 
-    ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
 
@@ -241,38 +139,67 @@ export default function AccordionSteps(props: LayoutComponentProps) {
     setOpenStep(openStep === index ? null : index);
   };
 
+  // Handle step field update
+  const handleStepUpdate = (index: number, field: keyof StepItem, value: string) => {
+    const updatedSteps = steps.map((step, i) =>
+      i === index ? { ...step, [field]: value } : step
+    );
+    (handleContentUpdate as any)('steps', updatedSteps);
+  };
 
-  const AccordionStep = ({ step, index, isOpen, onToggle, blockContent, handleContentUpdate, mode, backgroundType, colorTokens, sectionId, onRemove, theme, accordionColors }: {
-    step: { title: string; description: string; details: string };
+  // Handle adding a new step
+  const handleAddStep = () => {
+    const newStep: StepItem = {
+      id: generateStepId(),
+      title: 'New Step',
+      description: 'Describe this step in your process.',
+      details: 'Add technical details for this step.'
+    };
+    (handleContentUpdate as any)('steps', [...steps, newStep]);
+    setOpenStep(steps.length); // Open the newly added step
+  };
+
+  // Handle removing a step
+  const handleRemoveStep = (indexToRemove: number) => {
+    const updatedSteps = steps.filter((_, i) => i !== indexToRemove);
+    (handleContentUpdate as any)('steps', updatedSteps);
+    // Reset open step if we're removing the currently open one
+    if (openStep === indexToRemove) {
+      setOpenStep(null);
+    } else if (openStep !== null && openStep > indexToRemove) {
+      setOpenStep(openStep - 1);
+    }
+  };
+
+  const AccordionStep = ({ step, index, isOpen, onToggle, onStepUpdate, mode, colorTokens, onRemove, theme, accordionColors, canRemove }: {
+    step: StepItem;
     index: number;
     isOpen: boolean;
     onToggle: () => void;
-    blockContent: AccordionStepsContent;
-    handleContentUpdate: (key: string, value: any) => void;
+    onStepUpdate: (index: number, field: keyof StepItem, value: string) => void;
     mode: 'edit' | 'preview';
-    backgroundType: any;
     colorTokens: any;
-    sectionId: string;
     onRemove?: () => void;
     theme: UIBlockTheme;
     accordionColors: ReturnType<typeof getAccordionColors>;
+    canRemove: boolean;
   }) => (
     <div className={`relative border ${accordionColors.border} ${accordionColors.borderHover} rounded-lg overflow-hidden ${cardEnhancements.transition} ${isOpen ? 'shadow-lg' : shadows.cardHover[theme]} ${shadows.card[theme]} group`}>
       <button
         onClick={onToggle}
         className={`w-full p-6 text-left transition-all duration-300 ${
           isOpen && mode === 'preview'
-            ? `${colorTokens.ctaBg} text-white` 
+            ? `${colorTokens.ctaBg} text-white`
             : 'bg-white hover:bg-gray-50 text-gray-900'
         }`}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4 flex-1">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+            <div className={`${isOpen ? 'w-10 h-10 ring-4 ring-white/30' : 'w-8 h-8'} rounded-full flex items-center justify-center font-bold text-sm ${
               isOpen && mode === 'preview'
                 ? accordionColors.stepIndicatorOpen
                 : accordionColors.stepIndicator
-            } text-white`}>
+            } text-white transition-all duration-200`}>
               {index + 1}
             </div>
             <div className="flex-1">
@@ -281,11 +208,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
                   contentEditable
                   suppressContentEditableWarning
                   onClick={(e) => e.stopPropagation()}
-                  onBlur={(e) => {
-                    const stepTitles = blockContent.step_titles ? blockContent.step_titles.split('|') : [];
-                    stepTitles[index] = e.currentTarget.textContent || '';
-                    handleContentUpdate('step_titles', stepTitles.join('|'));
-                  }}
+                  onBlur={(e) => onStepUpdate(index, 'title', e.currentTarget.textContent || '')}
                   className={`text-lg font-semibold outline-none focus:ring-2 focus:ring-opacity-50 rounded px-2 py-1 cursor-text min-h-[32px] text-gray-900 ${accordionColors.focusRing} hover:bg-gray-100`}
                   data-placeholder="Step title"
                 >
@@ -301,7 +224,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
               )}
             </div>
           </div>
-          
+
           <div className={`transform transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -309,7 +232,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
           </div>
         </div>
       </button>
-      
+
       {isOpen && (
         <div className={`p-6 bg-white border-t ${accordionColors.contentBorder}`}>
           <div className="space-y-4">
@@ -317,11 +240,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
               <div
                 contentEditable
                 suppressContentEditableWarning
-                onBlur={(e) => {
-                  const stepDescriptions = blockContent.step_descriptions ? blockContent.step_descriptions.split('|') : [];
-                  stepDescriptions[index] = e.currentTarget.textContent || '';
-                  handleContentUpdate('step_descriptions', stepDescriptions.join('|'));
-                }}
+                onBlur={(e) => onStepUpdate(index, 'description', e.currentTarget.textContent || '')}
                 className={`text-gray-700 leading-relaxed text-lg outline-none focus:ring-2 ${accordionColors.focusRing} focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-50 min-h-[48px]`}
                 data-placeholder="Step description"
               >
@@ -332,19 +251,15 @@ export default function AccordionSteps(props: LayoutComponentProps) {
                 {step.description}
               </p>
             )}
-            
+
             {(step.details || mode === 'edit') && (
-              <div className={`rounded-lg p-4 ${accordionColors.techDetailsBg} ${accordionColors.techDetailsBorder}`}>
-                
+              <div className={`mt-2 rounded-lg p-4 ${accordionColors.detailsBg} ${accordionColors.detailsBorder}`}>
+
                 {mode !== 'preview' ? (
                   <div
                     contentEditable
                     suppressContentEditableWarning
-                    onBlur={(e) => {
-                      const stepDetails = blockContent.step_details ? blockContent.step_details.split('|') : [];
-                      stepDetails[index] = e.currentTarget.textContent || '';
-                      handleContentUpdate('step_details', stepDetails.join('|'));
-                    }}
+                    onBlur={(e) => onStepUpdate(index, 'details', e.currentTarget.textContent || '')}
                     className={`text-gray-600 text-sm leading-relaxed outline-none focus:ring-2 ${accordionColors.focusRing} focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-white min-h-[48px]`}
                     data-placeholder="Technical details for this step"
                   >
@@ -362,9 +277,9 @@ export default function AccordionSteps(props: LayoutComponentProps) {
           </div>
         </div>
       )}
-      
+
       {/* Remove Step Button - only in edit mode */}
-      {mode === 'edit' && onRemove && (
+      {mode === 'edit' && onRemove && canRemove && (
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -423,66 +338,30 @@ export default function AccordionSteps(props: LayoutComponentProps) {
           )}
         </div>
 
-        {/* Accordion Steps - Always visible in both modes */}
+        {/* Accordion Steps */}
         <div className="space-y-4">
           {steps.map((step, index) => (
             <AccordionStep
-              key={index}
+              key={step.id}
               step={step}
               index={index}
               isOpen={openStep === index}
               onToggle={() => toggleStep(index)}
-              blockContent={blockContent}
-              handleContentUpdate={handleContentUpdate}
+              onStepUpdate={handleStepUpdate}
               mode={mode}
-              backgroundType={backgroundType}
               colorTokens={colorTokens}
-              sectionId={sectionId}
               theme={theme}
               accordionColors={accordionColors}
-              onRemove={steps.length > 1 ? () => {
-                const stepTitles = blockContent.step_titles ? blockContent.step_titles.split('|') : [];
-                const stepDescriptions = blockContent.step_descriptions ? blockContent.step_descriptions.split('|') : [];
-                const stepDetails = blockContent.step_details ? blockContent.step_details.split('|') : [];
-                
-                stepTitles.splice(index, 1);
-                stepDescriptions.splice(index, 1);
-                stepDetails.splice(index, 1);
-                
-                handleContentUpdate('step_titles', stepTitles.join('|'));
-                handleContentUpdate('step_descriptions', stepDescriptions.join('|'));
-                handleContentUpdate('step_details', stepDetails.join('|'));
-                
-                // Reset open step if we're removing the currently open one
-                if (openStep === index) {
-                  setOpenStep(null);
-                } else if (openStep !== null && openStep > index) {
-                  setOpenStep(openStep - 1);
-                }
-              } : undefined}
+              onRemove={() => handleRemoveStep(index)}
+              canRemove={steps.length > 3}
             />
           ))}
-          
+
           {/* Add Step Button - only in edit mode */}
           {mode === 'edit' && steps.length < 6 && (
             <div className="flex items-center justify-center">
               <button
-                onClick={() => {
-                  const stepTitles = blockContent.step_titles ? blockContent.step_titles.split('|') : [];
-                  const stepDescriptions = blockContent.step_descriptions ? blockContent.step_descriptions.split('|') : [];
-                  const stepDetails = blockContent.step_details ? blockContent.step_details.split('|') : [];
-                  
-                  stepTitles.push(`Step ${stepTitles.length + 1}`);
-                  stepDescriptions.push('Add your step description here');
-                  stepDetails.push('Add technical details for this step');
-                  
-                  handleContentUpdate('step_titles', stepTitles.join('|'));
-                  handleContentUpdate('step_descriptions', stepDescriptions.join('|'));
-                  handleContentUpdate('step_details', stepDetails.join('|'));
-                  
-                  // Open the newly added step
-                  setOpenStep(stepTitles.length - 1);
-                }}
+                onClick={handleAddStep}
                 className="w-full max-w-lg p-4 border-2 border-dashed border-gray-300 hover:border-gray-400 text-gray-400 hover:text-gray-500 transition-all duration-300 flex items-center justify-center bg-gray-50 hover:bg-gray-100 rounded-lg"
                 title="Add new accordion step"
               >
@@ -495,202 +374,25 @@ export default function AccordionSteps(props: LayoutComponentProps) {
           )}
         </div>
 
-        {/* Technical Specs Summary */}
-        {blockContent.show_tech_specs !== false && (
-          <div className={`${accordionColors.techSpecGradient} rounded-2xl p-8 text-white mb-8`}>
-            <div className="text-center">
-              {(blockContent.tech_specs_heading || mode === 'edit') && (
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.tech_specs_heading || ''}
-                  onEdit={(value) => handleContentUpdate('tech_specs_heading', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="text-xl font-semibold mb-6 text-white"
-                  placeholder="Technical specs heading"
-                  sectionBackground={sectionBackground}
-                  data-section-id={sectionId}
-                  data-element-key="tech_specs_heading"
-                />
-              )}
-              
-              <div className="grid md:grid-cols-3 gap-6">
-                <div className="text-center">
-                  <EditableAdaptiveText
-                    mode={mode}
-                    value={blockContent.tech_spec_1_value || ''}
-                    onEdit={(value) => handleContentUpdate('tech_spec_1_value', value)}
-                    backgroundType={props.backgroundType || 'neutral'}
-                    colorTokens={colorTokens}
-                    variant="body"
-                    className={`text-3xl font-bold ${accordionColors.spec1Color} mb-2`}
-                    placeholder="Spec 1 value"
-                    sectionBackground={sectionBackground}
-                    data-section-id={sectionId}
-                    data-element-key="tech_spec_1_value"
-                  />
-                  <EditableAdaptiveText
-                    mode={mode}
-                    value={blockContent.tech_spec_1_label || ''}
-                    onEdit={(value) => handleContentUpdate('tech_spec_1_label', value)}
-                    backgroundType={props.backgroundType || 'neutral'}
-                    colorTokens={colorTokens}
-                    variant="body"
-                    className="text-gray-300 text-sm"
-                    placeholder="Spec 1 label"
-                    sectionBackground={sectionBackground}
-                    data-section-id={sectionId}
-                    data-element-key="tech_spec_1_label"
-                  />
-                </div>
-                <div className="text-center">
-                  <EditableAdaptiveText
-                    mode={mode}
-                    value={blockContent.tech_spec_2_value || ''}
-                    onEdit={(value) => handleContentUpdate('tech_spec_2_value', value)}
-                    backgroundType={props.backgroundType || 'neutral'}
-                    colorTokens={colorTokens}
-                    variant="body"
-                    className={`text-3xl font-bold ${accordionColors.spec2Color} mb-2`}
-                    placeholder="Spec 2 value"
-                    sectionBackground={sectionBackground}
-                    data-section-id={sectionId}
-                    data-element-key="tech_spec_2_value"
-                  />
-                  <EditableAdaptiveText
-                    mode={mode}
-                    value={blockContent.tech_spec_2_label || ''}
-                    onEdit={(value) => handleContentUpdate('tech_spec_2_label', value)}
-                    backgroundType={props.backgroundType || 'neutral'}
-                    colorTokens={colorTokens}
-                    variant="body"
-                    className="text-gray-300 text-sm"
-                    placeholder="Spec 2 label"
-                    sectionBackground={sectionBackground}
-                    data-section-id={sectionId}
-                    data-element-key="tech_spec_2_label"
-                  />
-                </div>
-                <div className="text-center">
-                  <EditableAdaptiveText
-                    mode={mode}
-                    value={blockContent.tech_spec_3_value || ''}
-                    onEdit={(value) => handleContentUpdate('tech_spec_3_value', value)}
-                    backgroundType={props.backgroundType || 'neutral'}
-                    colorTokens={colorTokens}
-                    variant="body"
-                    className={`text-3xl font-bold ${accordionColors.spec3Color} mb-2`}
-                    placeholder="Spec 3 value"
-                    sectionBackground={sectionBackground}
-                    data-section-id={sectionId}
-                    data-element-key="tech_spec_3_value"
-                  />
-                  <EditableAdaptiveText
-                    mode={mode}
-                    value={blockContent.tech_spec_3_label || ''}
-                    onEdit={(value) => handleContentUpdate('tech_spec_3_label', value)}
-                    backgroundType={props.backgroundType || 'neutral'}
-                    colorTokens={colorTokens}
-                    variant="body"
-                    className="text-gray-300 text-sm"
-                    placeholder="Spec 3 label"
-                    sectionBackground={sectionBackground}
-                    data-section-id={sectionId}
-                    data-element-key="tech_spec_3_label"
-                  />
-                </div>
-              </div>
-              
-              {(blockContent.tech_specs_description || mode === 'edit') && (
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.tech_specs_description || ''}
-                  onEdit={(value) => handleContentUpdate('tech_specs_description', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mt-6 text-gray-300 max-w-2xl mx-auto"
-                  placeholder="Technical specs description"
-                  sectionBackground={sectionBackground}
-                  data-section-id={sectionId}
-                  data-element-key="tech_specs_description"
-                />
-              )}
-            </div>
+        {/* Optional Conclusion Text */}
+        {(blockContent.conclusion_text || mode === 'edit') && (
+          <div className="mt-12 text-center">
+            <EditableAdaptiveText
+              mode={mode}
+              value={blockContent.conclusion_text || ''}
+              onEdit={(value) => handleContentUpdate('conclusion_text', value)}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+              colorTokens={colorTokens}
+              variant="body"
+              className="max-w-2xl mx-auto"
+              placeholder="Add optional conclusion text to summarize the process..."
+              sectionId={sectionId}
+              elementKey="conclusion_text"
+              sectionBackground={sectionBackground}
+            />
           </div>
         )}
-
-        {/* {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
-          <div className="space-y-8"> */}
-            {/* Divider */}
-            {/* <div className="flex items-center justify-center">
-              <div className="h-px w-32 bg-gradient-to-r from-transparent via-blue-300 to-transparent"></div>
-            </div> */}
-
-            {/* CTA Container - matches accordion width */}
-            {/* <div className="max-w-4xl mx-auto space-y-6"> */}
-
-              {/* CTA Prompt */}
-              {/* {(blockContent.cta_prompt || mode === 'edit') && (
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.cta_prompt || ''}
-                  onEdit={(value) => handleContentUpdate('cta_prompt', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="text-center text-xl font-medium"
-                  placeholder="Ready to try it?"
-                  sectionId={sectionId}
-                  elementKey="cta_prompt"
-                  sectionBackground={sectionBackground}
-                />
-              )} */}
-
-              {/* Full-Width Button */}
-              {/* {blockContent.cta_text && (
-                <CTAButton
-                  text={blockContent.cta_text}
-                  colorTokens={colorTokens}
-                  className="w-full shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
-                  variant="primary"
-                  sectionId={sectionId}
-                  elementKey="cta_text"
-                />
-              )} */}
-
-              {/* Trust Indicators - Below Button */}
-              {/* {trustItems.length > 0 && (
-                <div className="flex justify-center pt-4">
-                  <TrustIndicators
-                    items={trustItems}
-                    colorClass={mutedTextColor}
-                    iconColor="text-green-500"
-                  />
-                </div>
-              )} */}
-
-              {/* Supporting Text - Optional fine print */}
-              {(blockContent.supporting_text || mode === 'edit') && (
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.supporting_text || ''}
-                  onEdit={(value) => handleContentUpdate('supporting_text', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="text-center text-sm opacity-80"
-                  placeholder="Add optional fine print..."
-                  sectionId={sectionId}
-                  elementKey="supporting_text"
-                  sectionBackground={sectionBackground}
-                />
-              )}
-            </div>
-          {/* </div> */}
-        {/* )} */}
-      {/* </div> */}
+      </div>
     </LayoutSection>
   );
 }
@@ -701,40 +403,22 @@ export const componentMeta = {
   description: 'Detailed accordion steps for complex technical processes. Perfect for builder/enterprise audiences.',
   tags: ['how-it-works', 'accordion', 'technical', 'detailed', 'enterprise'],
   defaultBackgroundType: 'neutral' as const,
-  complexity: 'complex',
-  estimatedBuildTime: '25 minutes',
-  
-  contentFields: [
-    { key: 'headline', label: 'Main Headline', type: 'text', required: true },
-    { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
-    { key: 'step_titles', label: 'Step Titles (pipe separated)', type: 'textarea', required: true },
-    { key: 'step_descriptions', label: 'Step Descriptions (pipe separated)', type: 'textarea', required: true },
-    { key: 'step_details', label: 'Technical Details (pipe separated)', type: 'textarea', required: true },
-    { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
-    { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: false },
-    { key: 'cta_prompt', label: 'CTA Prompt', type: 'text', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
-    { key: 'tech_specs_heading', label: 'Technical Specs Heading', type: 'text', required: false },
-    { key: 'tech_spec_1_value', label: 'Tech Spec 1 Value', type: 'text', required: false },
-    { key: 'tech_spec_1_label', label: 'Tech Spec 1 Label', type: 'text', required: false },
-    { key: 'tech_spec_2_value', label: 'Tech Spec 2 Value', type: 'text', required: false },
-    { key: 'tech_spec_2_label', label: 'Tech Spec 2 Label', type: 'text', required: false },
-    { key: 'tech_spec_3_value', label: 'Tech Spec 3 Value', type: 'text', required: false },
-    { key: 'tech_spec_3_label', label: 'Tech Spec 3 Label', type: 'text', required: false },
-    { key: 'tech_specs_description', label: 'Technical Specs Description', type: 'textarea', required: false },
-    { key: 'show_step_indicators', label: 'Show Step Indicators', type: 'boolean', required: false },
-    { key: 'show_tech_specs', label: 'Show Technical Specs', type: 'boolean', required: false }
-  ],
-  
+
+  contentSchema: {
+    headline: 'Main heading text',
+    subheadline: 'Optional subheadline text',
+    conclusion_text: 'Optional conclusion text to summarize the process',
+    steps: 'Array of step objects with id, title, description, and details'
+  },
+
   features: [
     'Interactive accordion interface',
     'Detailed technical explanations',
     'Enterprise-grade presentation',
-    'Technical specs summary',
     'Perfect for complex products',
     'Builder/developer focused'
   ],
-  
+
   useCases: [
     'Technical product implementations',
     'API and integration explanations',

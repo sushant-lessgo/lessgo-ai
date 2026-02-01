@@ -66,6 +66,8 @@
 8. Remove legacy code (pipe parsing, numbered field loops, `___REMOVED___` checks)
 9. Verify prompt generation includes correct elements
 10. Verify rendering works with AI output
+11. Make sure realistic data in src\app\dev\uiblock\_lib\mockDataGenerator.ts 
+12. Make sure you use colorTokens and flexible font tokens as much as possible. Dont hard-code CSS
 
 ### Phase 3: Design
 11. Check uiBlockTheme.md is applied
@@ -368,42 +370,42 @@ Evaluation Scope
 | 12 | BeforeAfter | SplitCard | ✅ Passed |
 | 13 | BeforeAfter | StackedTextVisual | ✅ Passed  |
 | 14 | FAQ | AccordionFAQ | ✅ Passed |
-| 15 | FAQ | InlineQnAList | ⬜ Pending |
-| 16 | FAQ | SegmentedFAQTabs | ⬜ Pending |
+| 15 | FAQ | InlineQnAList | ✅ Passed |
+| 16 | FAQ | SegmentedFAQTabs | ✅ Passed|
 | 17 | FAQ | TwoColumnFAQ | ✅ Passed |
-| 18 | HowItWorks | AccordionSteps | ⬜ Pending |
-| 19 | HowItWorks | ThreeStepHorizontal | ⬜ Pending |
-| 20 | HowItWorks | VerticalTimeline | ⬜ Pending |
+| 18 | HowItWorks | AccordionSteps | ✅ Passed |
+| 19 | HowItWorks | ThreeStepHorizontal | ✅ Passed |
+| 20 | HowItWorks | VerticalTimeline | ✅ Passed |
 | 21 | HowItWorks | VideoWalkthrough | ⬜ Pending |
-| 22 | ObjectionHandle | MythVsRealityGrid | ⬜ Pending |
-| 23 | ObjectionHandle | VisualObjectionTiles | ⬜ Pending |
+| 22 | ObjectionHandle | MythVsRealityGrid | ✅ Passed |
+| 23 | ObjectionHandle | VisualObjectionTiles | ✅ Passed |
 | 24 | Pricing | TierCards | ✅ Passed |
 | 25 | Pricing | CallToQuotePlan | ✅ Passed |
 | 26 | Pricing | SliderPricing | ⬜ Pending |
 | 27 | Pricing | ToggleableMonthlyYearly | ⬜ Pending |
-| 28 | Results | ResultsGallery | ⬜ Pending |
-| 29 | Results | StackedWinsList | ⬜ Pending |
-| 30 | Results | StatBlocks | ⬜ Pending |
+| 28 | Results | ResultsGallery | ✅ Passed |
+| 29 | Results | StackedWinsList | ✅ Passed |
+| 30 | Results | StatBlocks | ✅ Passed |
 | 31 | Testimonials | BeforeAfterQuote | ✅ Passed |
-| 32 | Testimonials | PullQuoteStack | ⬜ Pending |
+| 32 | Testimonials | PullQuoteStack | ✅ Passed |
 | 33 | Testimonials | QuoteGrid | ✅ Passed |
-| 34 | Testimonials | AvatarCarousel | ⬜ Pending |
-| 35 | Testimonials | VideoTestimonials | ⬜ Pending |
-| 36 | UniqueMechanism | MethodologyBreakdown | ⬜ Pending |
-| 37 | UniqueMechanism | ProcessFlowDiagram | ⬜ Pending |
-| 38 | UniqueMechanism | PropertyComparisonMatrix | ⬜ Pending |
+// Archived | 34 | Testimonials | AvatarCarousel | ⬜ Pending |
+| 35 | Testimonials | VideoTestimonials | ✅ Passed |
+| 36 | UniqueMechanism | MethodologyBreakdown | ✅ Passed |
+| 37 | UniqueMechanism | ProcessFlowDiagram | ✅ Passed |
+| 38 | UniqueMechanism | PropertyComparisonMatrix | ✅ Passed |
 | 39 | UniqueMechanism | SecretSauceReveal | ⬜ Pending |
 | 40 | UniqueMechanism | StackedHighlights | ⬜ Pending |
-| 41 | UniqueMechanism | TechnicalAdvantage | ⬜ Pending |
-| 42 | UseCases | IndustryUseCaseGrid | ⬜ Pending |
-| 43 | UseCases | PersonaGrid | ⬜ Pending |
+| 41 | UniqueMechanism | TechnicalAdvantage | ✅ Passed |
+| 42 | UseCases | IndustryUseCaseGrid | ✅ Passed |
+| 43 | UseCases | PersonaGrid | ✅ Passed |
 | 44 | UseCases | RoleBasedScenarios | ⬜ Pending |
-| 45 | CTA | CenteredHeadlineCTA | ⬜ Pending |
+| 45 | CTA | CenteredHeadlineCTA | ✅ Passed |
 | 46 | CTA | ValueStackCTA | ⬜ Pending |
 | 47 | CTA | VisualCTAWithMockup | ⬜ Pending |
 | 48 | SocialProof | LogoWall | ⬜ Pending |
-| 49 | Header | MinimalNavHeader | ⬜ Pending |
-| 50 | Footer | ContactFooter | ⬜ Pending |
+| 49 | Header | MinimalNavHeader | ✅ Passed |
+| 50 | Footer | ContactFooter | ✅ Passed |
 
 **Legend:**
 - ✅ Passed - Audit complete, V2 compliant

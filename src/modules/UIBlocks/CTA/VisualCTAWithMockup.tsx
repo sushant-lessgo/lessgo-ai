@@ -1,5 +1,6 @@
 // components/layout/VisualCTAWithMockup.tsx
 // Production-ready visual CTA with product mockup using abstraction system
+// V2: Clean array format for trust_items
 
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
@@ -7,70 +8,65 @@ import { useTypography } from '@/hooks/useTypography';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useImageToolbar } from '@/hooks/useImageToolbar';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
-  EditableAdaptiveText 
+import {
+  EditableAdaptiveHeadline,
+  EditableAdaptiveText,
+  EditableBadge
 } from '@/components/layout/EditableContent';
 import { CTAButton } from '@/components/layout/ComponentRegistry';
 import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { createCTAClickHandler } from '@/utils/ctaHandler';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
-// Content interface for type safety
+// V2: Trust item type
+interface TrustItem {
+  id: string;
+  text: string;
+}
+
+// Content interface for type safety (V2)
 interface VisualCTAWithMockupContent {
   headline: string;
   subheadline?: string;
   cta_text: string;
   secondary_cta?: string;
+  urgency_text?: string;
   mockup_image?: string;
-  trust_item_1?: string;
-  trust_item_2?: string;
-  trust_item_3?: string;
-  trust_item_4?: string;
-  trust_item_5?: string;
+  trust_items?: TrustItem[];
 }
 
-// Content schema - defines structure and defaults
+// V2 Content schema - uses clean arrays
 const CONTENT_SCHEMA = {
-  headline: { 
-    type: 'string' as const, 
-    default: 'See It in Action' 
+  headline: {
+    type: 'string' as const,
+    default: 'See It in Action'
   },
-  subheadline: { 
-    type: 'string' as const, 
-    default: 'Experience the power of our platform with a live demo. No installation required.' 
+  subheadline: {
+    type: 'string' as const,
+    default: 'Experience the power of our platform with a live demo. No installation required.'
   },
-  cta_text: { 
-    type: 'string' as const, 
-    default: 'Start Free Trial' 
+  cta_text: {
+    type: 'string' as const,
+    default: 'Start Free Trial'
   },
-  secondary_cta: { 
-    type: 'string' as const, 
-    default: 'Watch Demo' 
+  secondary_cta: {
+    type: 'string' as const,
+    default: 'Watch Demo'
   },
-  mockup_image: { 
-    type: 'string' as const, 
-    default: '' 
+  urgency_text: {
+    type: 'string' as const,
+    default: ''
   },
-  trust_item_1: { 
-    type: 'string' as const, 
-    default: 'Free 14-day trial' 
+  mockup_image: {
+    type: 'string' as const,
+    default: ''
   },
-  trust_item_2: { 
-    type: 'string' as const, 
-    default: 'No credit card required' 
-  },
-  trust_item_3: { 
-    type: 'string' as const, 
-    default: '' 
-  },
-  trust_item_4: { 
-    type: 'string' as const, 
-    default: '' 
-  },
-  trust_item_5: { 
-    type: 'string' as const, 
-    default: '' 
+  // V2: Array format - empty by default
+  trust_items: {
+    type: 'array' as const,
+    default: []
   }
 };
 
@@ -160,7 +156,7 @@ ProductMockup.displayName = 'ProductMockup';
 
 export default function VisualCTAWithMockup(props: LayoutComponentProps) {
   const { getTextStyle: getTypographyStyle } = useTypography();
-  
+
   const {
     sectionId,
     mode,
@@ -175,6 +171,22 @@ export default function VisualCTAWithMockup(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
+  // V2: Theme detection with priority
+  const uiBlockTheme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Theme-based colors for urgency badge
+  const themeColors = React.useMemo(() => ({
+    urgencyBadge: {
+      warm: 'bg-orange-100 text-orange-700 border border-orange-200',
+      cool: 'bg-blue-100 text-blue-700 border border-blue-200',
+      neutral: 'bg-gray-100 text-gray-700 border border-gray-200'
+    }[uiBlockTheme]
+  }), [uiBlockTheme]);
+
   // Create typography styles
   const bodyLgStyle = getTypographyStyle('body-lg');
 
@@ -186,6 +198,9 @@ export default function VisualCTAWithMockup(props: LayoutComponentProps) {
 
   // Add safe background type to prevent type errors
   const safeBackgroundType = props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'secondary');
+
+  // V2: Direct array access
+  const trustItems = blockContent.trust_items || [];
 
   return (
     <LayoutSection
@@ -201,6 +216,22 @@ export default function VisualCTAWithMockup(props: LayoutComponentProps) {
           
           {/* Left Column - CTA Content */}
           <div className="space-y-8">
+            {/* Urgency Badge */}
+            {(blockContent.urgency_text || mode === 'edit') && (
+              <div className="mb-4">
+                <EditableBadge
+                  mode={mode}
+                  value={blockContent.urgency_text || ''}
+                  onEdit={(value) => handleContentUpdate('urgency_text', value)}
+                  colorTokens={{ accent: themeColors.urgencyBadge }}
+                  placeholder="🔥 Limited Time: 50% Off"
+                  className="animate-pulse"
+                  sectionId={sectionId}
+                  elementKey="urgency_text"
+                />
+              </div>
+            )}
+
             <EditableAdaptiveHeadline
               mode={mode}
               value={blockContent.headline || ''}
@@ -243,8 +274,8 @@ export default function VisualCTAWithMockup(props: LayoutComponentProps) {
                 onClick={createCTAClickHandler(sectionId, "cta_text")}
               />
 
-              {/* Secondary CTA */}
-              {(blockContent.secondary_cta && blockContent.secondary_cta !== '___REMOVED___' && blockContent.secondary_cta.trim() !== '') && (
+              {/* Secondary CTA - V2: no ___REMOVED___ check */}
+              {blockContent.secondary_cta && blockContent.secondary_cta.trim() !== '' && (
                 <CTAButton
                   text={blockContent.secondary_cta || 'Watch Demo'}
                   colorTokens={colorTokens}
@@ -258,38 +289,29 @@ export default function VisualCTAWithMockup(props: LayoutComponentProps) {
               )}
             </div>
 
-            {/* Trust indicators */}
+            {/* Trust indicators - V2: array format */}
             <div>
               <EditableTrustIndicators
                 mode={mode}
-                trustItems={[
-                  blockContent.trust_item_1 || '',
-                  blockContent.trust_item_2 || '',
-                  blockContent.trust_item_3 || '',
-                  blockContent.trust_item_4 || '',
-                  blockContent.trust_item_5 || ''
-                ]}
+                trustItems={trustItems.map(item => item.text)}
                 onTrustItemChange={(index, value) => {
-                  const fieldKey = `trust_item_${index + 1}` as keyof VisualCTAWithMockupContent;
-                  handleContentUpdate(fieldKey, value);
+                  const updated = trustItems.map((item, i) =>
+                    i === index ? { ...item, text: value } : item
+                  );
+                  (handleContentUpdate as any)('trust_items', updated);
                 }}
                 onAddTrustItem={() => {
-                  const emptyIndex = [
-                    blockContent.trust_item_1,
-                    blockContent.trust_item_2,
-                    blockContent.trust_item_3,
-                    blockContent.trust_item_4,
-                    blockContent.trust_item_5
-                  ].findIndex(item => !item || item.trim() === '' || item === '___REMOVED___');
-                  
-                  if (emptyIndex !== -1) {
-                    const fieldKey = `trust_item_${emptyIndex + 1}` as keyof VisualCTAWithMockupContent;
-                    handleContentUpdate(fieldKey, 'New trust item');
+                  if (trustItems.length < 5) {
+                    const newItem: TrustItem = {
+                      id: `t${Date.now()}`,
+                      text: 'New trust item'
+                    };
+                    (handleContentUpdate as any)('trust_items', [...trustItems, newItem]);
                   }
                 }}
                 onRemoveTrustItem={(index) => {
-                  const fieldKey = `trust_item_${index + 1}` as keyof VisualCTAWithMockupContent;
-                  handleContentUpdate(fieldKey, '___REMOVED___');
+                  const updated = trustItems.filter((_, i) => i !== index);
+                  (handleContentUpdate as any)('trust_items', updated);
                 }}
                 colorTokens={colorTokens}
                 sectionBackground={sectionBackground}
@@ -360,32 +382,31 @@ export const componentMeta = {
   name: 'VisualCTAWithMockup',
   category: 'CTA Sections',
   description: 'Visual CTA with product mockup for demonstrating value',
-  tags: ['cta', 'mockup', 'visual', 'demo', 'adaptive-colors'],
+  tags: ['cta', 'mockup', 'visual', 'demo', 'adaptive-colors', 'v2'],
   defaultBackgroundType: 'secondary' as const,
   complexity: 'medium',
   estimatedBuildTime: '25 minutes',
-  
+
   features: [
     'Automatic text color adaptation based on background type',
     'Interactive product mockup',
     'Primary and secondary CTA buttons',
     'Built-in animated demo interface',
-    'Trust indicators'
+    'Trust indicators (V2 array format)',
+    'Urgency badge for conversions',
+    'UIBlockTheme support'
   ],
-  
+
   contentFields: [
     { key: 'headline', label: 'CTA Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'cta_text', label: 'Primary Button Text', type: 'text', required: true },
     { key: 'secondary_cta', label: 'Secondary Button Text', type: 'text', required: false },
+    { key: 'urgency_text', label: 'Urgency Text', type: 'text', required: false },
     { key: 'mockup_image', label: 'Product Mockup Image', type: 'image', required: false },
-    { key: 'trust_item_1', label: 'Trust Item 1', type: 'text', required: false },
-    { key: 'trust_item_2', label: 'Trust Item 2', type: 'text', required: false },
-    { key: 'trust_item_3', label: 'Trust Item 3', type: 'text', required: false },
-    { key: 'trust_item_4', label: 'Trust Item 4', type: 'text', required: false },
-    { key: 'trust_item_5', label: 'Trust Item 5', type: 'text', required: false }
+    { key: 'trust_items', label: 'Trust Items (array)', type: 'array', required: false }
   ],
-  
+
   useCases: [
     'Product demo sections',
     'Software landing pages',

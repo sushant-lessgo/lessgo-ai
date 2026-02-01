@@ -1,15 +1,16 @@
 // components/layout/CenteredHeadlineCTA.tsx
 // Production-ready centered CTA section using abstraction system
+// V2: Clean array format for trust_items
 
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
+import {
+  EditableAdaptiveHeadline,
   EditableAdaptiveText,
-  EditableBadge 
+  EditableBadge
 } from '@/components/layout/EditableContent';
 import {
   CTAButton,
@@ -20,24 +21,26 @@ import {
 import { FormConnectedButton } from '@/components/forms/FormConnectedButton';
 import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { parsePipeData } from '@/utils/dataParsingUtils';
 import { createCTAClickHandler } from '@/utils/ctaHandler';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
-// Content interface for type safety
+// V2: Trust item type
+interface TrustItem {
+  id: string;
+  text: string;
+}
+
+// Content interface for type safety (V2)
 interface CenteredHeadlineCTAContent {
   headline: string;
   subheadline?: string;
   cta_text: string;
   secondary_cta_text?: string;
   urgency_text?: string;
-  trust_items?: string;
-  trust_item_1?: string;
-  trust_item_2?: string;
-  trust_item_3?: string;
-  trust_item_4?: string;
-  trust_item_5?: string;
+  // V2: Clean array format
+  trust_items?: TrustItem[];
+  // Social proof stats
   customer_count?: string;
   customer_label?: string;
   rating_stat?: string;
@@ -45,15 +48,15 @@ interface CenteredHeadlineCTAContent {
   uptime_label?: string;
 }
 
-// Content schema - defines structure and defaults
+// V2 Content schema - uses clean arrays
 const CONTENT_SCHEMA = {
-  headline: { 
-    type: 'string' as const, 
-    default: 'Ready to Transform Your Business?' 
+  headline: {
+    type: 'string' as const,
+    default: 'Ready to Transform Your Business?'
   },
-  subheadline: { 
-    type: 'string' as const, 
-    default: 'Join thousands of companies already using our platform to streamline operations and boost productivity.' 
+  subheadline: {
+    type: 'string' as const,
+    default: 'Join thousands of companies already using our platform to streamline operations and boost productivity.'
   },
   cta_text: {
     type: 'string' as const,
@@ -63,53 +66,34 @@ const CONTENT_SCHEMA = {
     type: 'string' as const,
     default: 'Watch Demo'
   },
-  urgency_text: { 
-    type: 'string' as const, 
-    default: '' 
+  urgency_text: {
+    type: 'string' as const,
+    default: ''
   },
-  trust_items: { 
-    type: 'string' as const, 
-    default: 'Free 14-day trial|No credit card required|Cancel anytime' 
+  // V2: Array format - empty by default (only exists if AI generated or user added)
+  trust_items: {
+    type: 'array' as const,
+    default: []
   },
-  trust_item_1: { 
-    type: 'string' as const, 
-    default: 'Free 14-day trial' 
+  customer_count: {
+    type: 'string' as const,
+    default: '10,000+'
   },
-  trust_item_2: { 
-    type: 'string' as const, 
-    default: 'No credit card required' 
+  customer_label: {
+    type: 'string' as const,
+    default: 'Happy customers'
   },
-  trust_item_3: { 
-    type: 'string' as const, 
-    default: 'Cancel anytime' 
+  rating_stat: {
+    type: 'string' as const,
+    default: '4.8/5 stars'
   },
-  trust_item_4: { 
-    type: 'string' as const, 
-    default: '' 
+  uptime_stat: {
+    type: 'string' as const,
+    default: '99.9% uptime'
   },
-  trust_item_5: { 
-    type: 'string' as const, 
-    default: '' 
-  },
-  customer_count: { 
-    type: 'string' as const, 
-    default: '10,000+' 
-  },
-  customer_label: { 
-    type: 'string' as const, 
-    default: 'Happy customers' 
-  },
-  rating_stat: { 
-    type: 'string' as const, 
-    default: '4.8/5 stars' 
-  },
-  uptime_stat: { 
-    type: 'string' as const, 
-    default: '99.9% uptime' 
-  },
-  uptime_label: { 
-    type: 'string' as const, 
-    default: 'SOC 2 Compliant' 
+  uptime_label: {
+    type: 'string' as const,
+    default: 'SOC 2 Compliant'
   }
 };
 
@@ -165,26 +149,8 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
 
   const themeColors = getThemeColors(uiBlockTheme);
 
-  // Handle trust items - support both legacy pipe-separated format and individual fields
-  const getTrustItems = (): string[] => {
-    const individualItems = [
-      blockContent.trust_item_1,
-      blockContent.trust_item_2, 
-      blockContent.trust_item_3,
-      blockContent.trust_item_4,
-      blockContent.trust_item_5
-    ].filter((item): item is string => Boolean(item && item.trim() !== '' && item !== '___REMOVED___'));
-    
-    if (individualItems.length > 0) {
-      return individualItems;
-    }
-    
-    return blockContent.trust_items 
-      ? parsePipeData(blockContent.trust_items)
-      : ['Free trial', 'No credit card', 'Cancel anytime'];
-  };
-  
-  const trustItems = getTrustItems();
+  // V2: Direct array access - no legacy parsing needed
+  const trustItems = blockContent.trust_items || [];
 
   return (
     <LayoutSection
@@ -299,7 +265,7 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
           })()}
 
           {/* Secondary CTA */}
-          {(blockContent.secondary_cta_text && blockContent.secondary_cta_text !== '___REMOVED___' && blockContent.secondary_cta_text.trim() !== '') && (() => {
+          {(blockContent.secondary_cta_text && blockContent.secondary_cta_text.trim() !== '') && (() => {
             const secondaryButtonConfig = content[sectionId]?.elements?.secondary_cta_text?.metadata?.buttonConfig;
             const secondaryClassName = "text-xl px-12 py-6 shadow-2xl hover:shadow-3xl";
 
@@ -346,40 +312,31 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
           })()}
         </div>
 
-        {/* Trust Indicators */}
+        {/* Trust Indicators - V2: Array format */}
         {(trustItems.length > 0 || mode === 'edit') && (
-          <div className="mb-8">
+          <div className="mb-8 flex justify-center">
             {mode !== 'preview' ? (
               <EditableTrustIndicators
                 mode={mode}
-                trustItems={[
-                  blockContent.trust_item_1 || '',
-                  blockContent.trust_item_2 || '',
-                  blockContent.trust_item_3 || '',
-                  blockContent.trust_item_4 || '',
-                  blockContent.trust_item_5 || ''
-                ]}
+                trustItems={trustItems.map(item => item.text)}
                 onTrustItemChange={(index, value) => {
-                  const fieldKey = `trust_item_${index + 1}` as keyof CenteredHeadlineCTAContent;
-                  handleContentUpdate(fieldKey, value);
+                  const updatedItems = trustItems.map((item, i) =>
+                    i === index ? { ...item, text: value } : item
+                  );
+                  (handleContentUpdate as any)('trust_items', updatedItems);
                 }}
                 onAddTrustItem={() => {
-                  const emptyIndex = [
-                    blockContent.trust_item_1,
-                    blockContent.trust_item_2,
-                    blockContent.trust_item_3,
-                    blockContent.trust_item_4,
-                    blockContent.trust_item_5
-                  ].findIndex(item => !item || item.trim() === '' || item === '___REMOVED___');
-                  
-                  if (emptyIndex !== -1) {
-                    const fieldKey = `trust_item_${emptyIndex + 1}` as keyof CenteredHeadlineCTAContent;
-                    handleContentUpdate(fieldKey, 'New trust item');
+                  if (trustItems.length < 5) {
+                    const newItem: TrustItem = {
+                      id: `t${Date.now()}`,
+                      text: 'New trust item'
+                    };
+                    (handleContentUpdate as any)('trust_items', [...trustItems, newItem]);
                   }
                 }}
                 onRemoveTrustItem={(index) => {
-                  const fieldKey = `trust_item_${index + 1}` as keyof CenteredHeadlineCTAContent;
-                  handleContentUpdate(fieldKey, '___REMOVED___');
+                  const updatedItems = trustItems.filter((_, i) => i !== index);
+                  (handleContentUpdate as any)('trust_items', updatedItems);
                 }}
                 colorTokens={colorTokens}
                 sectionBackground={sectionBackground}
@@ -389,8 +346,8 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
                 colorClass={colorTokens.textMuted}
               />
             ) : (
-              <TrustIndicators 
-                items={trustItems}
+              <TrustIndicators
+                items={trustItems.map(item => item.text)}
                 colorClass={colorTokens.textMuted}
                 iconColor="text-green-500"
               />
@@ -398,8 +355,8 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
           </div>
         )}
 
-        {/* Simple Social Proof */}
-        <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-12 pt-8 border-t border-gray-200">
+        {/* Simple Social Proof - removed divider for tighter integration */}
+        <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-12 pt-4">
           {(blockContent.customer_count || mode === 'edit') && (
             <div className="text-center relative group/customer-item">
               {mode !== 'preview' ? (
@@ -431,11 +388,12 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
                     data-element-key="customer_label"
                   />
                   
-                  {/* Remove button for customer count */}
+                  {/* Remove button for customer count - V2: delete by setting to empty */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleContentUpdate('customer_count', '___REMOVED___');
+                      handleContentUpdate('customer_count', '');
+                      handleContentUpdate('customer_label', '');
                     }}
                     className="opacity-0 group-hover/customer-item:opacity-100 ml-2 text-red-500 hover:text-red-700 transition-opacity duration-200"
                     title="Remove customer count"
@@ -455,7 +413,7 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
             </div>
           )}
           
-          {(blockContent.rating_stat || mode === 'edit') && blockContent.rating_stat !== '___REMOVED___' && (
+          {(blockContent.rating_stat || mode === 'edit') && (
             <div className="relative group/rating-item">
               {mode !== 'preview' ? (
                 <div className="flex items-center space-x-1">
@@ -478,11 +436,11 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
                     data-element-key="rating_stat"
                   />
                   
-                  {/* Remove button for rating */}
+                  {/* Remove button for rating - V2: delete by setting to empty */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleContentUpdate('rating_stat', '___REMOVED___');
+                      handleContentUpdate('rating_stat', '');
                     }}
                     className="opacity-0 group-hover/rating-item:opacity-100 ml-2 text-red-500 hover:text-red-700 transition-opacity duration-200"
                     title="Remove rating"
@@ -505,7 +463,7 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
             </div>
           )}
 
-          {(blockContent.uptime_stat || mode === 'edit') && blockContent.uptime_stat !== '___REMOVED___' && (
+          {(blockContent.uptime_stat || mode === 'edit') && (
             <div className="text-center relative group/uptime-item">
               {mode !== 'preview' ? (
                 <div>
@@ -536,11 +494,12 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
                     data-element-key="uptime_label"
                   />
                   
-                  {/* Remove button for uptime */}
+                  {/* Remove button for uptime - V2: delete by setting to empty */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleContentUpdate('uptime_stat', '___REMOVED___');
+                      handleContentUpdate('uptime_stat', '');
+                      handleContentUpdate('uptime_label', '');
                     }}
                     className="opacity-0 group-hover/uptime-item:opacity-100 ml-2 text-red-500 hover:text-red-700 transition-opacity duration-200"
                     title="Remove uptime stat"
@@ -574,19 +533,15 @@ export const componentMeta = {
   complexity: 'simple',
   estimatedBuildTime: '15 minutes',
   
-  // ✅ ENHANCED: Schema for component generation tools
+  // V2: Schema for component generation tools
   contentFields: [
     { key: 'headline', label: 'Main Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: true },
     { key: 'secondary_cta_text', label: 'Secondary CTA Button Text', type: 'text', required: false },
     { key: 'urgency_text', label: 'Urgency Text', type: 'text', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
-    { key: 'trust_item_1', label: 'Trust Item 1', type: 'text', required: false },
-    { key: 'trust_item_2', label: 'Trust Item 2', type: 'text', required: false },
-    { key: 'trust_item_3', label: 'Trust Item 3', type: 'text', required: false },
-    { key: 'trust_item_4', label: 'Trust Item 4', type: 'text', required: false },
-    { key: 'trust_item_5', label: 'Trust Item 5', type: 'text', required: false },
+    // V2: Array format - not editable via simple form, use inline editing
+    { key: 'trust_items', label: 'Trust Items (array)', type: 'array', required: false },
     { key: 'customer_count', label: 'Customer Count', type: 'text', required: false },
     { key: 'customer_label', label: 'Customer Count Label', type: 'text', required: false },
     { key: 'rating_stat', label: 'Rating Statistic', type: 'text', required: false },

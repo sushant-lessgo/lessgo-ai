@@ -3,6 +3,7 @@
  *
  * Server-safe component with ZERO hook imports
  * Used by componentRegistry.published.ts for SSR rendering
+ * V2: Clean array format for trust_items
  */
 
 import React from 'react';
@@ -15,6 +16,12 @@ import { CheckmarkIconPublished } from '@/components/published/CheckmarkIconPubl
 import { FormMarkupPublished } from '@/components/published/FormMarkupPublished';
 import { InlineFormMarkupPublished } from '@/components/published/InlineFormMarkupPublished';
 import { determineFormPlacement } from '@/utils/formPlacement';
+
+// V2: Trust item type
+interface TrustItem {
+  id: string;
+  text: string;
+}
 
 // Product Mockup Component (server-safe, no hooks)
 const ProductMockup = () => (
@@ -107,18 +114,12 @@ export default function VisualCTAWithMockupPublished(props: LayoutComponentProps
   const subheadline = props.subheadline || 'Experience the power of our platform with a live demo. No installation required.';
   const cta_text = props.cta_text || 'Start Free Trial';
   const secondary_cta = props.secondary_cta || '';
+  const urgency_text = props.urgency_text || '';
   const mockup_image = props.mockup_image || '';
 
-  // Extract trust items
-  const trust_item_1 = props.trust_item_1 || '';
-  const trust_item_2 = props.trust_item_2 || '';
-  const trust_item_3 = props.trust_item_3 || '';
-  const trust_item_4 = props.trust_item_4 || '';
-  const trust_item_5 = props.trust_item_5 || '';
-
-  // Parse trust items
-  const trustItems = [trust_item_1, trust_item_2, trust_item_3, trust_item_4, trust_item_5]
-    .filter((item: string) => item && item.trim() !== '' && item !== '___REMOVED___');
+  // V2: Direct array access - trust_items is now TrustItem[]
+  const trustItemsRaw = (props.trust_items || []) as TrustItem[];
+  const trustItems = trustItemsRaw.map(item => item.text);
 
   // Get text colors
   const textColors = getPublishedTextColors(
@@ -147,6 +148,19 @@ export default function VisualCTAWithMockupPublished(props: LayoutComponentProps
 
           {/* Left Column - CTA Content */}
           <div className="space-y-8">
+            {/* Urgency Badge */}
+            {urgency_text && urgency_text.trim() !== '' && (
+              <div
+                className="inline-block mb-4 px-4 py-2 rounded-full text-sm font-medium animate-pulse"
+                style={{
+                  backgroundColor: (theme.colors?.accentColor || '#3b82f6') + '20',
+                  color: theme.colors?.accentColor || '#3b82f6'
+                }}
+              >
+                {urgency_text}
+              </div>
+            )}
+
             <HeadlinePublished
               value={headline}
               level="h2"
@@ -236,8 +250,8 @@ export default function VisualCTAWithMockupPublished(props: LayoutComponentProps
                 );
               })()}
 
-              {/* Secondary CTA */}
-              {secondary_cta && secondary_cta !== '___REMOVED___' && (
+              {/* Secondary CTA - V2: no ___REMOVED___ check */}
+              {secondary_cta && secondary_cta.trim() !== '' && (
                 <CTAButtonPublished
                   text={secondary_cta}
                   backgroundColor="transparent"

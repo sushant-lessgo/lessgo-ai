@@ -1,5 +1,5 @@
 // components/layout/PersonaGrid.tsx
-// Production-ready persona grid using abstraction system
+// V2 Schema - Array-based persona grid
 
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
@@ -10,134 +10,73 @@ import {
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
-// Content interface for type safety
-interface PersonaGridContent {
-  headline: string;
-  persona_names: string;
-  persona_descriptions: string;
-  footer_text?: string;
-  // Optional persona icon overrides
-  persona_icon_1?: string;
-  persona_icon_2?: string;
-  persona_icon_3?: string;
-  persona_icon_4?: string;
-  persona_icon_5?: string;
-  persona_icon_6?: string;
-}
-
-// Persona structure
+// V2 Types
 interface Persona {
   id: string;
-  index: number;
   name: string;
   description: string;
+  icon?: string;
 }
 
-// Content schema - defines structure and defaults
+interface PersonaGridContent {
+  headline: string;
+  subheadline?: string;
+  footer_text?: string;
+  personas: Persona[];
+}
+
+// Content schema - V2 array format
 const CONTENT_SCHEMA = {
-  headline: { 
-    type: 'string' as const, 
-    default: 'Built for Every Team Member' 
+  headline: {
+    type: 'string' as const,
+    default: 'Built for Every Team Member'
   },
-  persona_names: { 
-    type: 'string' as const, 
-    default: 'Marketing Manager|Sales Director|Operations Lead|Product Manager|Customer Success Manager|Finance Director' 
-  },
-  persona_descriptions: { 
-    type: 'string' as const, 
-    default: 'Track campaign performance, manage content calendars, and coordinate cross-team marketing initiatives with real-time visibility into ROI and engagement metrics.|Monitor sales pipeline, forecast revenue, and optimize team performance while maintaining clear visibility into customer interactions and deal progression.|Streamline processes, manage resource allocation, and ensure smooth day-to-day operations with automated workflows and performance tracking.|Coordinate product development, manage feature requests, and track user feedback while keeping stakeholders aligned on roadmap priorities.|Manage customer relationships, track satisfaction metrics, and proactively address issues while ensuring seamless onboarding and retention.|Oversee budgets, generate financial reports, and maintain fiscal oversight with real-time spending tracking and automated approval workflows.' 
+  subheadline: {
+    type: 'string' as const,
+    default: ''
   },
   footer_text: {
     type: 'string' as const,
-    default: 'Add a summary statement about your target users and how your product serves them...'
+    default: ''
   },
-  // Optional persona icon overrides (empty by default to show initials)
-  persona_icon_1: { type: 'string' as const, default: '' },
-  persona_icon_2: { type: 'string' as const, default: '' },
-  persona_icon_3: { type: 'string' as const, default: '' },
-  persona_icon_4: { type: 'string' as const, default: '' },
-  persona_icon_5: { type: 'string' as const, default: '' },
-  persona_icon_6: { type: 'string' as const, default: '' }
-};
-
-// Parse persona data from pipe-separated strings
-const parsePersonaData = (names: string, descriptions: string): Persona[] => {
-  const nameList = parsePipeData(names);
-  const descriptionList = parsePipeData(descriptions);
-
-  return nameList.map((name, index) => ({
-    id: `persona-${index}`,
-    index,
-    name: name.trim(),
-    description: descriptionList[index] || 'Persona description not provided.'
-  }));
-};
-
-// Helper function to add a new persona
-const addPersona = (names: string, descriptions: string): { newNames: string; newDescriptions: string } => {
-  const nameList = names.split('|').map(n => n.trim()).filter(n => n);
-  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
-
-  // Add new persona with default content
-  nameList.push('New Team Member');
-  descriptionList.push('Describe how this persona benefits from your solution.');
-
-  return {
-    newNames: nameList.join('|'),
-    newDescriptions: descriptionList.join('|')
-  };
-};
-
-// Helper function to remove a persona
-const removePersona = (names: string, descriptions: string, indexToRemove: number): { newNames: string; newDescriptions: string } => {
-  const nameList = names.split('|').map(n => n.trim()).filter(n => n);
-  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
-
-  // Remove the persona at the specified index
-  if (indexToRemove >= 0 && indexToRemove < nameList.length) {
-    nameList.splice(indexToRemove, 1);
+  personas: {
+    type: 'array' as const,
+    default: [
+      { id: 'p1', name: 'Marketing Manager', description: 'Track campaign performance, manage content calendars, and coordinate cross-team marketing initiatives with real-time visibility into ROI and engagement metrics.' },
+      { id: 'p2', name: 'Sales Director', description: 'Monitor sales pipeline, forecast revenue, and optimize team performance while maintaining clear visibility into customer interactions and deal progression.' },
+      { id: 'p3', name: 'Product Manager', description: 'Coordinate product development, manage feature requests, and track user feedback while keeping stakeholders aligned on roadmap priorities.' },
+      { id: 'p4', name: 'Customer Success', description: 'Manage customer relationships, track satisfaction metrics, and proactively address issues while ensuring seamless onboarding and retention.' }
+    ]
   }
-  if (indexToRemove >= 0 && indexToRemove < descriptionList.length) {
-    descriptionList.splice(indexToRemove, 1);
-  }
-
-  return {
-    newNames: nameList.join('|'),
-    newDescriptions: descriptionList.join('|')
-  };
 };
+
+// Generate unique ID
+const generateId = () => `p${Date.now().toString(36)}`;
 
 // Persona Avatar Component
 const PersonaAvatar = React.memo(({
   name,
-  iconOverride,
+  icon,
   mode,
   colorTokens,
   sectionId,
-  index,
+  personaId,
   onIconEdit,
   themeColors
 }: {
   name: string;
-  iconOverride?: string;
+  icon?: string;
   mode: 'edit' | 'preview';
   colorTokens: any;
   sectionId: string;
-  index: number;
-  onIconEdit: (index: number, value: string) => void;
+  personaId: string;
+  onIconEdit: (personaId: string, value: string) => void;
   themeColors: {
     avatarGradient: string;
     avatarRing: string;
-    cardBorder: string;
-    cardHover: string;
-    addButtonBg: string;
-    addButtonBorder: string;
-    addButtonHover: string;
-    addButtonText: string;
   };
 }) => {
   // Generate initials from name
@@ -150,19 +89,18 @@ const PersonaAvatar = React.memo(({
 
   return (
     <div className="relative mb-4">
-      {/* Main Avatar Circle */}
       <div className={`w-16 h-16 bg-gradient-to-br ${themeColors.avatarGradient} rounded-full flex items-center justify-center text-white shadow-[0_6px_18px_rgba(15,23,42,0.18)] ${themeColors.avatarRing} ring-1 backdrop-blur-sm mx-auto transition-all duration-300 group-hover:shadow-[0_12px_32px_rgba(15,23,42,0.22)] group-hover:-translate-y-0.5`}>
-        {iconOverride ? (
+        {icon ? (
           <IconEditableText
             mode={mode}
-            value={iconOverride}
-            onEdit={(value) => onIconEdit(index, value)}
+            value={icon}
+            onEdit={(value) => onIconEdit(personaId, value)}
             backgroundType="primary"
             colorTokens={{ ...colorTokens, textPrimary: 'text-white' }}
             iconSize="lg"
             className="text-2xl text-white"
             sectionId={sectionId}
-            elementKey={`persona_icon_${index + 1}`}
+            elementKey={`persona_icon_${personaId}`}
           />
         ) : (
           <span className="font-bold text-lg">{initials}</span>
@@ -170,9 +108,9 @@ const PersonaAvatar = React.memo(({
       </div>
 
       {/* Icon Override Button for Edit Mode */}
-      {mode !== 'preview' && !iconOverride && (
+      {mode !== 'preview' && !icon && (
         <button
-          onClick={() => onIconEdit(index, '👤')}
+          onClick={() => onIconEdit(personaId, '👤')}
           className="absolute top-0 right-0 w-6 h-6 bg-blue-600 hover:bg-blue-700 text-white rounded-full text-xs shadow-md opacity-0 group-hover:opacity-100 transition-all duration-200"
           title="Add custom icon"
         >
@@ -189,87 +127,80 @@ const PersonaCard = React.memo(({
   persona,
   mode,
   colorTokens,
-  backgroundType,
-  sectionBackground,
   sectionId,
-  iconOverride,
   onNameEdit,
   onDescriptionEdit,
   onIconEdit,
   onRemovePersona,
   canRemove = true,
-  themeColors
+  themeColors,
+  sectionBackground
 }: {
   persona: Persona;
   mode: 'edit' | 'preview';
   colorTokens: any;
-  backgroundType: any;
-  sectionBackground: any;
   sectionId: string;
-  iconOverride?: string;
-  onNameEdit: (index: number, value: string) => void;
-  onDescriptionEdit: (index: number, value: string) => void;
-  onIconEdit: (index: number, value: string) => void;
-  onRemovePersona?: (index: number) => void;
+  onNameEdit: (personaId: string, value: string) => void;
+  onDescriptionEdit: (personaId: string, value: string) => void;
+  onIconEdit: (personaId: string, value: string) => void;
+  onRemovePersona?: (personaId: string) => void;
   canRemove?: boolean;
   themeColors: {
     avatarGradient: string;
     avatarRing: string;
     cardBorder: string;
     cardHover: string;
-    addButtonBg: string;
-    addButtonBorder: string;
-    addButtonHover: string;
-    addButtonText: string;
+    cardBg: string;
   };
+  sectionBackground: string;
 }) => {
 
   return (
-    <div className={`group/persona-card relative bg-white p-6 rounded-2xl border ${themeColors.cardBorder} shadow-lg ${themeColors.cardHover} hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center`}>
+    <div className={`group/persona-card relative ${themeColors.cardBg} p-6 rounded-2xl border ${themeColors.cardBorder} shadow-lg ${themeColors.cardHover} hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center`}>
 
       {/* Persona Avatar */}
       <PersonaAvatar
         name={persona.name}
-        iconOverride={iconOverride}
+        icon={persona.icon}
         mode={mode}
         colorTokens={colorTokens}
         sectionId={sectionId}
-        index={persona.index}
+        personaId={persona.id}
         onIconEdit={onIconEdit}
         themeColors={themeColors}
       />
-      
+
       {/* Persona Name */}
       <div className="mb-4">
         <EditableAdaptiveText
           mode={mode}
           value={persona.name}
-          onEdit={(value) => onNameEdit(persona.index, value)}
+          onEdit={(value) => onNameEdit(persona.id, value)}
           backgroundType="neutral"
           colorTokens={colorTokens}
           variant="body"
           className="font-bold text-center"
           placeholder="Enter persona name..."
           sectionId={sectionId}
-          elementKey={`persona_name_${persona.index}`}
+          elementKey={`persona_name_${persona.id}`}
           sectionBackground="bg-white"
           formatState={{ textAlign: 'center', bold: true } as any}
         />
       </div>
-      
+
       {/* Persona Description */}
       <div className="mb-4">
         <EditableAdaptiveText
           mode={mode}
           value={persona.description}
-          onEdit={(value) => onDescriptionEdit(persona.index, value)}
+          onEdit={(value) => onDescriptionEdit(persona.id, value)}
           backgroundType="neutral"
           colorTokens={colorTokens}
           variant="body"
-          className="leading-relaxed text-center text-gray-600"
+          className={`leading-relaxed text-center ${colorTokens?.textSecondary || 'text-gray-600'}`}
           placeholder="Enter persona description..."
           sectionId={sectionId}
-          elementKey={`persona_description_${persona.index}`}
+          elementKey={`persona_description_${persona.id}`}
           sectionBackground="bg-white"
           formatState={{ textAlign: 'center', fontSize: '14px' } as any}
         />
@@ -280,7 +211,7 @@ const PersonaCard = React.memo(({
         <button
           onClick={(e) => {
             e.stopPropagation();
-            onRemovePersona(persona.index);
+            onRemovePersona(persona.id);
           }}
           className="absolute top-2 right-2 opacity-0 group-hover/persona-card:opacity-100 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-200"
           title="Remove this persona"
@@ -296,16 +227,13 @@ const PersonaCard = React.memo(({
 PersonaCard.displayName = 'PersonaCard';
 
 export default function PersonaGrid(props: LayoutComponentProps) {
-  // Use the abstraction hook for all common functionality
   const {
     sectionId,
     mode,
     blockContent,
     colorTokens,
-    getTextStyle,
     sectionBackground,
     handleContentUpdate,
-    dynamicTextColors,
     backgroundType
   } = useLayoutComponent<PersonaGridContent>({
     ...props,
@@ -327,6 +255,7 @@ export default function PersonaGrid(props: LayoutComponentProps) {
         avatarRing: 'ring-orange-200',
         cardBorder: 'border-orange-100',
         cardHover: 'hover:border-orange-200',
+        cardBg: 'bg-white',
         addButtonBg: 'from-orange-50 to-red-50',
         addButtonBorder: 'border-orange-200',
         addButtonHover: 'hover:border-orange-300',
@@ -337,6 +266,7 @@ export default function PersonaGrid(props: LayoutComponentProps) {
         avatarRing: 'ring-blue-200',
         cardBorder: 'border-blue-100',
         cardHover: 'hover:border-blue-200',
+        cardBg: 'bg-white',
         addButtonBg: 'from-blue-50 to-indigo-50',
         addButtonBorder: 'border-blue-200',
         addButtonHover: 'hover:border-blue-300',
@@ -347,6 +277,7 @@ export default function PersonaGrid(props: LayoutComponentProps) {
         avatarRing: 'ring-gray-200',
         cardBorder: 'border-gray-200',
         cardHover: 'hover:border-gray-300',
+        cardBg: 'bg-white',
         addButtonBg: 'from-gray-50 to-slate-50',
         addButtonBorder: 'border-gray-200',
         addButtonHover: 'hover:border-gray-300',
@@ -357,56 +288,55 @@ export default function PersonaGrid(props: LayoutComponentProps) {
 
   const themeColors = getThemeColors(uiTheme);
 
-  // Parse persona data
-  const personas = parsePersonaData(blockContent.persona_names, blockContent.persona_descriptions);
+  // Get personas array (with fallback)
+  const personas: Persona[] = blockContent.personas || CONTENT_SCHEMA.personas.default;
 
-  // Get persona icon from content fields by index
-  const getPersonaIcon = (index: number) => {
-    const iconFields = [
-      blockContent.persona_icon_1,
-      blockContent.persona_icon_2,
-      blockContent.persona_icon_3,
-      blockContent.persona_icon_4,
-      blockContent.persona_icon_5,
-      blockContent.persona_icon_6
-    ];
-    return iconFields[index];
+  // Handle editing (cast to any for array updates)
+  const handleNameEdit = (personaId: string, value: string) => {
+    const updated = personas.map(p =>
+      p.id === personaId ? { ...p, name: value } : p
+    );
+    (handleContentUpdate as any)('personas', updated);
   };
 
-  // Handle individual editing
-  const handleNameEdit = (index: number, value: string) => {
-    const updatedNames = updateListData(blockContent.persona_names, index, value);
-    handleContentUpdate('persona_names', updatedNames);
+  const handleDescriptionEdit = (personaId: string, value: string) => {
+    const updated = personas.map(p =>
+      p.id === personaId ? { ...p, description: value } : p
+    );
+    (handleContentUpdate as any)('personas', updated);
   };
 
-  const handleDescriptionEdit = (index: number, value: string) => {
-    const updatedDescriptions = updateListData(blockContent.persona_descriptions, index, value);
-    handleContentUpdate('persona_descriptions', updatedDescriptions);
-  };
-
-  const handleIconEdit = (index: number, value: string) => {
-    const iconField = `persona_icon_${index + 1}` as keyof PersonaGridContent;
-    handleContentUpdate(iconField, value);
+  const handleIconEdit = (personaId: string, value: string) => {
+    const updated = personas.map(p =>
+      p.id === personaId ? { ...p, icon: value } : p
+    );
+    (handleContentUpdate as any)('personas', updated);
   };
 
   // Handle adding a new persona
   const handleAddPersona = () => {
-    const { newNames, newDescriptions } = addPersona(blockContent.persona_names, blockContent.persona_descriptions);
-    handleContentUpdate('persona_names', newNames);
-    handleContentUpdate('persona_descriptions', newDescriptions);
+    const newPersona: Persona = {
+      id: generateId(),
+      name: 'New Team Member',
+      description: 'Describe how this persona benefits from your solution.'
+    };
+    (handleContentUpdate as any)('personas', [...personas, newPersona]);
   };
 
   // Handle removing a persona
-  const handleRemovePersona = (indexToRemove: number) => {
-    const { newNames, newDescriptions } = removePersona(blockContent.persona_names, blockContent.persona_descriptions, indexToRemove);
-    handleContentUpdate('persona_names', newNames);
-    handleContentUpdate('persona_descriptions', newDescriptions);
+  const handleRemovePersona = (personaId: string) => {
+    const updated = personas.filter(p => p.id !== personaId);
+    (handleContentUpdate as any)('personas', updated);
+  };
 
-    // Also clear the corresponding icon if it exists
-    const iconField = `persona_icon_${indexToRemove + 1}` as keyof PersonaGridContent;
-    if (blockContent[iconField]) {
-      handleContentUpdate(iconField, '');
-    }
+  // Grid classes based on persona count
+  const getGridClasses = (count: number) => {
+    if (count === 1) return 'max-w-md mx-auto';
+    if (count === 2) return 'md:grid-cols-2 max-w-3xl mx-auto';
+    if (count === 3) return 'md:grid-cols-2 lg:grid-cols-3';
+    if (count === 4) return 'md:grid-cols-2 lg:grid-cols-4';
+    if (count === 5) return 'md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5';
+    return 'md:grid-cols-2 lg:grid-cols-3';
   };
 
   return (
@@ -433,33 +363,41 @@ export default function PersonaGrid(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
             className="mb-4"
           />
+
+          {/* Subheadline */}
+          {(blockContent.subheadline || mode !== 'preview') && (
+            <EditableAdaptiveText
+              mode={mode}
+              value={blockContent.subheadline || ''}
+              onEdit={(value) => handleContentUpdate('subheadline', value)}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+              colorTokens={colorTokens}
+              variant="body"
+              className="text-lg max-w-3xl mx-auto"
+              placeholder="Add a subheadline..."
+              sectionId={sectionId}
+              elementKey="subheadline"
+              sectionBackground={sectionBackground}
+            />
+          )}
         </div>
 
         {/* Persona Grid */}
-        <div className={`grid gap-8 ${
-          personas.length === 1 ? 'max-w-md mx-auto' :
-          personas.length === 2 ? 'md:grid-cols-2 max-w-3xl mx-auto' :
-          personas.length === 3 ? 'md:grid-cols-2 lg:grid-cols-3' :
-          personas.length === 4 ? 'md:grid-cols-2 lg:grid-cols-4' :
-          personas.length === 5 ? 'md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5' :
-          'md:grid-cols-2 lg:grid-cols-3'
-        }`}>
+        <div className={`grid gap-8 ${getGridClasses(personas.length)}`}>
           {personas.map((persona) => (
             <PersonaCard
               key={persona.id}
               persona={persona}
               mode={mode}
               colorTokens={colorTokens}
-              backgroundType={backgroundType}
-              sectionBackground={sectionBackground}
               sectionId={sectionId}
-              iconOverride={getPersonaIcon(persona.index)}
               onNameEdit={handleNameEdit}
               onDescriptionEdit={handleDescriptionEdit}
               onIconEdit={handleIconEdit}
               onRemovePersona={handleRemovePersona}
               canRemove={personas.length > 1}
               themeColors={themeColors}
+              sectionBackground={sectionBackground}
             />
           ))}
         </div>
@@ -469,7 +407,7 @@ export default function PersonaGrid(props: LayoutComponentProps) {
           <div className="mt-8 text-center">
             <button
               onClick={handleAddPersona}
-              className={`flex items-center space-x-2 mx-auto px-6 py-3 bg-gradient-to-r ${themeColors.addButtonBg} hover:from-${uiTheme === 'warm' ? 'orange' : uiTheme === 'cool' ? 'blue' : 'gray'}-100 hover:to-${uiTheme === 'warm' ? 'red' : uiTheme === 'cool' ? 'indigo' : 'slate'}-100 border-2 border-dashed ${themeColors.addButtonBorder} ${themeColors.addButtonHover} rounded-2xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 group`}
+              className={`flex items-center space-x-2 mx-auto px-6 py-3 bg-gradient-to-r ${themeColors.addButtonBg} border-2 border-dashed ${themeColors.addButtonBorder} ${themeColors.addButtonHover} rounded-2xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 group`}
             >
               <svg className={`w-5 h-5 ${themeColors.addButtonText}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -479,56 +417,55 @@ export default function PersonaGrid(props: LayoutComponentProps) {
           </div>
         )}
 
-        {/* Summary Statement */}
-        <div className="mt-16 text-center mb-16">
-          <EditableAdaptiveText
-            mode={mode}
-            value={blockContent.footer_text || ''}
-            onEdit={(value) => handleContentUpdate('footer_text', value)}
-            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-            colorTokens={colorTokens}
-            variant="body"
-            className="text-lg leading-relaxed max-w-5xl mx-auto text-center"
-            placeholder="Add a summary statement about your target users and how your product serves them..."
-            sectionId={sectionId}
-            elementKey="footer_text"
-            sectionBackground={sectionBackground}
-            formatState={{ textAlign: 'center' } as any}
-          />
-        </div>
+        {/* Footer Text */}
+        {(blockContent.footer_text || mode !== 'preview') && (
+          <div className="mt-16 text-center mb-16">
+            <EditableAdaptiveText
+              mode={mode}
+              value={blockContent.footer_text || ''}
+              onEdit={(value) => handleContentUpdate('footer_text', value)}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+              colorTokens={colorTokens}
+              variant="body"
+              className="text-lg leading-relaxed max-w-5xl mx-auto text-center"
+              placeholder="Add a summary statement about your target users..."
+              sectionId={sectionId}
+              elementKey="footer_text"
+              sectionBackground={sectionBackground}
+              formatState={{ textAlign: 'center' } as any}
+            />
+          </div>
+        )}
 
       </div>
     </LayoutSection>
   );
 }
 
-// Export additional metadata for the component registry
+// Export component metadata
 export const componentMeta = {
   name: 'PersonaGrid',
-  category: 'Feature Sections',
-  description: 'Show how your product serves different user personas with adaptive text colors',
-  tags: ['personas', 'users', 'grid', 'targeting', 'adaptive-colors'],
+  category: 'Use Cases',
+  description: 'Show how your product serves different user personas',
+  tags: ['personas', 'users', 'grid', 'targeting', 'use-cases'],
   defaultBackgroundType: 'neutral' as const,
   complexity: 'medium',
-  estimatedBuildTime: '20 minutes',
-  
-  // Key features
+
   features: [
-    'Automatic text color adaptation based on background type',
-    'Role-based persona avatars',
-    'Editable persona descriptions',
-    'Professional role indicators',
+    'V2 array-based persona data',
+    'Role-based persona avatars with initials',
+    'Optional custom icons per persona',
+    'Theme-aware styling (warm/cool/neutral)',
     'Responsive grid layout'
   ],
-  
-  // Schema for component generation tools
+
   contentFields: [
     { key: 'headline', label: 'Section Headline', type: 'text', required: true },
-    { key: 'persona_names', label: 'Persona Names (pipe separated)', type: 'textarea', required: true },
-    { key: 'persona_descriptions', label: 'Persona Descriptions (pipe separated)', type: 'textarea', required: true }
+    { key: 'subheadline', label: 'Subheadline', type: 'text', required: false },
+    { key: 'personas', label: 'Personas', type: 'array', required: true },
+    { key: 'footer_text', label: 'Footer Text', type: 'text', required: false }
   ],
-  
-  // Usage examples
+
   useCases: [
     'Target audience showcase',
     'User persona section',

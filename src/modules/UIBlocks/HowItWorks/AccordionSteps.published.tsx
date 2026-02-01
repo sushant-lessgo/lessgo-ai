@@ -1,5 +1,5 @@
 /**
- * AccordionSteps - Published Version
+ * AccordionSteps - Published Version (V2 Array Format)
  *
  * Server-safe component with ZERO hook imports
  * Used by componentRegistry.published.ts for SSR rendering
@@ -13,12 +13,21 @@ import { SectionWrapperPublished } from '@/components/published/SectionWrapperPu
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
-// Step structure
-interface Step {
+// Step structure (V2 array format)
+interface StepItem {
+  id: string;
   title: string;
   description: string;
   details: string;
 }
+
+// Default steps fallback
+const DEFAULT_STEPS: StepItem[] = [
+  { id: 's1', title: 'API Integration & Setup', description: 'Seamlessly integrate with your existing systems using our comprehensive API documentation and SDKs.', details: 'Our API supports RESTful endpoints, GraphQL, and real-time webhooks. Authentication uses OAuth 2.0 with optional SAML integration.' },
+  { id: 's2', title: 'Data Migration & Validation', description: 'Migrate your data securely with automated validation and rollback capabilities.', details: 'Data migration includes schema mapping, incremental sync, and conflict resolution. All transfers use AES-256 encryption.' },
+  { id: 's3', title: 'Custom Configuration', description: 'Configure custom workflows, permissions, and business rules to match your requirements.', details: 'Custom configuration includes role-based access control, workflow automation rules, and integration mappings.' },
+  { id: 's4', title: 'Testing & Deployment', description: 'Run comprehensive testing and deploy to production with zero downtime.', details: 'Deployment uses blue-green deployment with automatic rollback on failure. We provide monitoring for all critical metrics.' }
+];
 
 export default function AccordionStepsPublished(props: LayoutComponentProps) {
   const { sectionId, sectionBackgroundCSS, theme, backgroundType } = props;
@@ -26,32 +35,12 @@ export default function AccordionStepsPublished(props: LayoutComponentProps) {
   // Extract content from props (flattened by LandingPagePublishedRenderer)
   const headline = props.headline || 'Technical Implementation Process';
   const subheadline = props.subheadline || '';
-  const step_titles = props.step_titles || '';
-  const step_descriptions = props.step_descriptions || '';
-  const step_details = props.step_details || '';
-  const supporting_text = props.supporting_text || '';
+  const conclusion_text = props.conclusion_text || '';
 
-  // Tech specs
-  const show_tech_specs = props.show_tech_specs !== false;
-  const tech_specs_heading = props.tech_specs_heading || 'Enterprise-Grade Implementation';
-  const tech_spec_1_value = props.tech_spec_1_value || '99.9%';
-  const tech_spec_1_label = props.tech_spec_1_label || 'Uptime SLA';
-  const tech_spec_2_value = props.tech_spec_2_value || 'API-First';
-  const tech_spec_2_label = props.tech_spec_2_label || 'Architecture';
-  const tech_spec_3_value = props.tech_spec_3_value || 'SOC 2';
-  const tech_spec_3_label = props.tech_spec_3_label || 'Compliant';
-  const tech_specs_description = props.tech_specs_description || 'Built for enterprise requirements with comprehensive security, scalability, and integration capabilities';
-
-  // Parse steps
-  const titleList = step_titles.split('|').map((t: string) => t.trim()).filter((t: string) => t && t !== '___REMOVED___');
-  const descriptionList = step_descriptions.split('|').map((d: string) => d.trim()).filter((d: string) => d && d !== '___REMOVED___');
-  const detailsList = step_details.split('|').map((d: string) => d.trim()).filter((d: string) => d && d !== '___REMOVED___');
-
-  const steps: Step[] = titleList.map((title: string, index: number) => ({
-    title,
-    description: descriptionList[index] || '',
-    details: detailsList[index] || ''
-  }));
+  // Get steps array (with fallback to default)
+  const steps: StepItem[] = Array.isArray(props.steps) && props.steps.length > 0
+    ? props.steps
+    : DEFAULT_STEPS;
 
   // Detect theme
   const uiTheme: UIBlockTheme = props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
@@ -62,34 +51,22 @@ export default function AccordionStepsPublished(props: LayoutComponentProps) {
       warm: {
         border: '#fed7aa',
         contentBorder: '#ffedd5',
-        techDetailsBg: '#fff7ed',
-        techDetailsBorder: '#f97316',
-        techSpecGradient: 'linear-gradient(to right, #431407, #78350f)',
-        spec1Color: '#fb923c',
-        spec2Color: '#fbbf24',
-        spec3Color: '#facc15',
+        detailsBg: '#fff7ed',
+        detailsBorder: '#f97316',
         stepIndicator: '#f97316'
       },
       cool: {
         border: '#bfdbfe',
         contentBorder: '#dbeafe',
-        techDetailsBg: '#eff6ff',
-        techDetailsBorder: '#3b82f6',
-        techSpecGradient: 'linear-gradient(to right, #172554, #1e3a8a)',
-        spec1Color: '#60a5fa',
-        spec2Color: '#22d3ee',
-        spec3Color: '#818cf8',
+        detailsBg: '#eff6ff',
+        detailsBorder: '#3b82f6',
         stepIndicator: '#3b82f6'
       },
       neutral: {
         border: '#fde68a',
         contentBorder: '#fef3c7',
-        techDetailsBg: '#fffbeb',
-        techDetailsBorder: '#f59e0b',
-        techSpecGradient: 'linear-gradient(to right, #0f172a, #1e293b)',
-        spec1Color: '#fbbf24',
-        spec2Color: '#94a3b8',
-        spec3Color: '#a8a29e',
+        detailsBg: '#fffbeb',
+        detailsBorder: '#f59e0b',
         stepIndicator: '#64748b'
       }
     };
@@ -147,9 +124,9 @@ export default function AccordionStepsPublished(props: LayoutComponentProps) {
 
         {/* Steps - All Expanded */}
         <div className="space-y-4">
-          {steps.map((step: Step, index: number) => (
+          {steps.map((step: StepItem, index: number) => (
             <div
-              key={`step-${index}`}
+              key={step.id}
               className="border rounded-lg overflow-hidden shadow-md"
               style={{
                 borderColor: themeColors.border
@@ -159,7 +136,7 @@ export default function AccordionStepsPublished(props: LayoutComponentProps) {
               <div className="p-6 bg-white">
                 <div className="flex items-center space-x-4">
                   <div
-                    className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm text-white"
+                    className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm text-white ring-4 ring-white/30"
                     style={{
                       backgroundColor: themeColors.stepIndicator
                     }}
@@ -188,7 +165,7 @@ export default function AccordionStepsPublished(props: LayoutComponentProps) {
                 <div className="space-y-4">
                   <p
                     style={{
-                      color: '#374151',
+                      color: textColors.body,
                       lineHeight: '1.75rem',
                       fontSize: '1.125rem'
                     }}
@@ -199,15 +176,15 @@ export default function AccordionStepsPublished(props: LayoutComponentProps) {
                   {/* Technical Details */}
                   {step.details && (
                     <div
-                      className="rounded-lg p-4"
+                      className="mt-2 rounded-lg p-4"
                       style={{
-                        backgroundColor: themeColors.techDetailsBg,
-                        borderLeft: `4px solid ${themeColors.techDetailsBorder}`
+                        backgroundColor: themeColors.detailsBg,
+                        borderLeft: `4px solid ${themeColors.detailsBorder}`
                       }}
                     >
                       <p
                         style={{
-                          color: '#4b5563',
+                          color: textColors.muted,
                           fontSize: '0.875rem',
                           lineHeight: '1.75rem'
                         }}
@@ -222,114 +199,16 @@ export default function AccordionStepsPublished(props: LayoutComponentProps) {
           ))}
         </div>
 
-        {/* Technical Specs Summary */}
-        {show_tech_specs && (
-          <div
-            className="rounded-2xl p-8 text-white mt-8"
-            style={{
-              background: themeColors.techSpecGradient
-            }}
-          >
-            <div className="text-center">
-              {tech_specs_heading && (
-                <TextPublished
-                  value={tech_specs_heading}
-                  style={{
-                    fontSize: '1.25rem',
-                    fontWeight: 600,
-                    marginBottom: '1.5rem',
-                    color: '#ffffff'
-                  }}
-                />
-              )}
-
-              <div className="grid md:grid-cols-3 gap-6">
-                <div className="text-center">
-                  <div
-                    style={{
-                      fontSize: '1.875rem',
-                      fontWeight: 700,
-                      color: themeColors.spec1Color,
-                      marginBottom: '0.5rem'
-                    }}
-                  >
-                    {tech_spec_1_value}
-                  </div>
-                  <div
-                    style={{
-                      color: '#d1d5db',
-                      fontSize: '0.875rem'
-                    }}
-                  >
-                    {tech_spec_1_label}
-                  </div>
-                </div>
-                <div className="text-center">
-                  <div
-                    style={{
-                      fontSize: '1.875rem',
-                      fontWeight: 700,
-                      color: themeColors.spec2Color,
-                      marginBottom: '0.5rem'
-                    }}
-                  >
-                    {tech_spec_2_value}
-                  </div>
-                  <div
-                    style={{
-                      color: '#d1d5db',
-                      fontSize: '0.875rem'
-                    }}
-                  >
-                    {tech_spec_2_label}
-                  </div>
-                </div>
-                <div className="text-center">
-                  <div
-                    style={{
-                      fontSize: '1.875rem',
-                      fontWeight: 700,
-                      color: themeColors.spec3Color,
-                      marginBottom: '0.5rem'
-                    }}
-                  >
-                    {tech_spec_3_value}
-                  </div>
-                  <div
-                    style={{
-                      color: '#d1d5db',
-                      fontSize: '0.875rem'
-                    }}
-                  >
-                    {tech_spec_3_label}
-                  </div>
-                </div>
-              </div>
-
-              {tech_specs_description && (
-                <TextPublished
-                  value={tech_specs_description}
-                  style={{
-                    marginTop: '1.5rem',
-                    color: '#d1d5db',
-                    maxWidth: '42rem',
-                    margin: '1.5rem auto 0'
-                  }}
-                />
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Supporting Text */}
-        {supporting_text && (
-          <div className="text-center mt-8">
+        {/* Conclusion Text */}
+        {conclusion_text && (
+          <div className="text-center mt-12">
             <TextPublished
-              value={supporting_text}
+              value={conclusion_text}
               style={{
-                color: textColors.muted,
-                fontSize: '0.875rem',
-                opacity: 0.8
+                color: textColors.body,
+                ...bodyTypography,
+                maxWidth: '42rem',
+                margin: '0 auto'
               }}
             />
           </div>

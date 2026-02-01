@@ -52,29 +52,35 @@ const PlaceholderLogo = () => (
 // Main Component
 // ============================================================================
 
-export default function MinimalNavHeaderPublished(props: LayoutComponentProps) {
-  // Extract navigation items (4 total - smallest of all headers)
-  const nav_item_1 = props.nav_item_1 || 'Home';
-  const nav_item_2 = props.nav_item_2 || 'Features';
-  const nav_item_3 = props.nav_item_3 || 'Pricing';
-  const nav_item_4 = props.nav_item_4 || 'Contact';
+// V2 NavItem interface
+interface NavItem {
+  id: string;
+  label: string;
+  link: string;
+}
 
-  // Extract navigation links (4 total)
-  const nav_link_1 = props.nav_link_1 || '#';
-  const nav_link_2 = props.nav_link_2 || '#features';
-  const nav_link_3 = props.nav_link_3 || '#pricing';
-  const nav_link_4 = props.nav_link_4 || '#contact';
+// Default nav items when none provided
+const DEFAULT_NAV_ITEMS: NavItem[] = [
+  { id: 'nav-1', label: 'Home', link: '#' },
+  { id: 'nav-2', label: 'Features', link: '#features' },
+  { id: 'nav-3', label: 'Pricing', link: '#pricing' },
+  { id: 'nav-4', label: 'Contact', link: '#contact' },
+];
+
+export default function MinimalNavHeaderPublished(props: LayoutComponentProps) {
+  // V2 format: nav_items array
+  const rawNavItems = (props.nav_items as NavItem[]) || [];
+
+  // Use provided nav_items or defaults, max 4 items
+  const navItems = (rawNavItems.length > 0 ? rawNavItems : DEFAULT_NAV_ITEMS)
+    .slice(0, 4)
+    .filter(item => item.label && item.label.trim() !== '');
 
   // Logo from props (passed from parent via globalSettings)
-  const logo = props.logo || '';
+  const logo = props.logo as string || '';
 
-  // Build nav items array
-  const navItems = [
-    { label: nav_item_1, link: nav_link_1 },
-    { label: nav_item_2, link: nav_link_2 },
-    { label: nav_item_3, link: nav_link_3 },
-    { label: nav_item_4, link: nav_link_4 },
-  ].filter(item => item.label && item.label !== '___REMOVED___' && item.label.trim() !== '');
+  // ColorTokens for theme-aware styling
+  const colorTokens = props.colorTokens as { text?: string } | undefined;
 
   /**
    * Handle navigation click with smooth scroll for anchors
@@ -97,30 +103,29 @@ export default function MinimalNavHeaderPublished(props: LayoutComponentProps) {
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b">
       <div className="container mx-auto px-4">
-        <nav className="flex items-center justify-between py-2 md:py-3">
-          {/* Logo on left with mr-8 spacing */}
-          <div className="flex items-center">
-            {logo && logo !== '___REMOVED___' ? (
+        <nav className="relative flex items-center justify-center py-2 md:py-3">
+          {/* Logo - absolute left */}
+          <div className="absolute left-0 flex items-center">
+            {logo ? (
               <img
                 src={logo}
                 alt="Logo"
-                className="h-8 md:h-10 w-auto object-contain mr-8"
+                className="h-8 md:h-10 w-auto object-contain"
               />
             ) : (
-              <div className="mr-8">
-                <PlaceholderLogo />
-              </div>
+              <PlaceholderLogo />
             )}
           </div>
 
-          {/* Navigation on right */}
+          {/* Navigation - centered */}
           <div className="flex items-center gap-4">
             <ul className="flex items-center gap-4 md:gap-5">
-              {navItems.map((navItem: { label: string; link: string }, index: number) => (
-                <li key={index}>
+              {navItems.map((navItem) => (
+                <li key={navItem.id}>
                   <a
                     href={navItem.link}
-                    className="text-sm font-medium text-gray-700 hover:text-primary-600 transition-colors cursor-pointer"
+                    className="text-sm font-medium transition-colors cursor-pointer hover:opacity-80"
+                    style={{ color: colorTokens?.text || '#374151' }}
                     onClick={(e) => handleNavClick(e, navItem.link)}
                   >
                     {navItem.label}

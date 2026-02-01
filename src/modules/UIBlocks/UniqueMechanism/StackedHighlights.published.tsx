@@ -1,5 +1,6 @@
 /**
  * StackedHighlights - Published Version
+ * V2 Schema: Uses highlights[] array instead of pipe-separated strings
  *
  * Server-safe component with ZERO hook imports
  * Used by componentRegistry.published.ts for SSR rendering
@@ -14,11 +15,11 @@ import { SectionWrapperPublished } from '@/components/published/SectionWrapperPu
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
-// Highlight item structure
-interface HighlightItem {
+interface Highlight {
+  id: string;
   title: string;
   description: string;
-  icon: string;
+  icon?: string;
 }
 
 export default function StackedHighlightsPublished(props: LayoutComponentProps) {
@@ -26,32 +27,14 @@ export default function StackedHighlightsPublished(props: LayoutComponentProps) 
 
   // Extract content from props (flattened by LandingPagePublishedRenderer)
   const headline = props.headline || 'Our Proprietary SmartFlow System™';
-  const highlight_titles = props.highlight_titles || '';
-  const highlight_descriptions = props.highlight_descriptions || '';
+  const subheadline = props.subheadline || '';
   const mechanism_name = props.mechanism_name || '';
   const footer_text = props.footer_text || '';
 
-  // Extract icons
-  const highlight_icon_1 = props.highlight_icon_1 || '🧠';
-  const highlight_icon_2 = props.highlight_icon_2 || '🔄';
-  const highlight_icon_3 = props.highlight_icon_3 || '📊';
-  const highlight_icon_4 = props.highlight_icon_4 || '✅';
-  const highlight_icon_5 = props.highlight_icon_5 || '⚡';
-  const highlight_icon_6 = props.highlight_icon_6 || '🎯';
+  // Parse highlights array
+  const highlights: Highlight[] = Array.isArray(props.highlights) ? props.highlights : [];
 
-  const icons = [highlight_icon_1, highlight_icon_2, highlight_icon_3, highlight_icon_4, highlight_icon_5, highlight_icon_6];
-
-  // Parse data
-  const titleList = highlight_titles.split('|').map((t: string) => t.trim()).filter((t: string) => t && t !== '___REMOVED___');
-  const descriptionList = highlight_descriptions.split('|').map((d: string) => d.trim());
-
-  const highlightItems: HighlightItem[] = titleList.map((title: string, index: number) => ({
-    title,
-    description: descriptionList[index] || '',
-    icon: icons[index] || '✨'
-  }));
-
-  // Detect theme
+  // Theme detection (no useMemo - direct evaluation)
   const uiTheme: UIBlockTheme = props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
 
   // Get theme colors
@@ -68,7 +51,8 @@ export default function StackedHighlightsPublished(props: LayoutComponentProps) 
         footerBg: 'linear-gradient(90deg, #fff7ed 0%, #fef2f2 100%)',
         footerBorder: '#fed7aa',
         footerIcon: '#ea580c',
-        footerText: '#9a3412'
+        footerText: '#9a3412',
+        cardShadow: '0 4px 20px rgba(249,115,22,0.15)',
       },
       cool: {
         connectionLine: '#bfdbfe',
@@ -81,7 +65,8 @@ export default function StackedHighlightsPublished(props: LayoutComponentProps) 
         footerBg: 'linear-gradient(90deg, #eff6ff 0%, #f5f3ff 100%)',
         footerBorder: '#bfdbfe',
         footerIcon: '#2563eb',
-        footerText: '#1e40af'
+        footerText: '#1e40af',
+        cardShadow: '0 4px 20px rgba(37,99,235,0.15)',
       },
       neutral: {
         connectionLine: '#e5e7eb',
@@ -94,7 +79,8 @@ export default function StackedHighlightsPublished(props: LayoutComponentProps) 
         footerBg: 'linear-gradient(90deg, #f9fafb 0%, #f3f4f6 100%)',
         footerBorder: '#e5e7eb',
         footerIcon: '#4b5563',
-        footerText: '#1f2937'
+        footerText: '#1f2937',
+        cardShadow: '0 4px 20px rgba(100,116,139,0.15)',
       }
     };
     return colorMap[theme];
@@ -132,6 +118,19 @@ export default function StackedHighlightsPublished(props: LayoutComponentProps) 
             }}
           />
 
+          {/* Optional Subheadline */}
+          {subheadline && (
+            <TextPublished
+              value={subheadline}
+              style={{
+                color: textColors.body,
+                ...bodyTypography,
+                fontSize: '1.125rem',
+                marginBottom: '1.5rem'
+              }}
+            />
+          )}
+
           {/* Optional Mechanism Name */}
           {mechanism_name && (
             <div
@@ -162,10 +161,10 @@ export default function StackedHighlightsPublished(props: LayoutComponentProps) 
 
         {/* Stacked Highlights */}
         <div className="space-y-0">
-          {highlightItems.map((highlight: HighlightItem, index: number) => (
-            <div key={`highlight-${index}`} className="group relative">
+          {highlights.map((highlight: Highlight, index: number) => (
+            <div key={highlight.id} className="group relative">
               {/* Connection Line (except for last item) */}
-              {index < highlightItems.length - 1 && (
+              {index < highlights.length - 1 && (
                 <div
                   className="absolute left-8 top-20 w-0.5 h-full hidden lg:block"
                   style={{
@@ -176,20 +175,21 @@ export default function StackedHighlightsPublished(props: LayoutComponentProps) 
 
               {/* Highlight Card */}
               <div
-                className="relative flex items-start space-x-6 p-8 bg-white rounded-xl border hover:shadow-lg transition-all duration-300 mb-6"
+                className="relative flex items-start space-x-6 p-8 bg-white rounded-xl border transition-all duration-300 hover:-translate-y-1 mb-6"
                 style={{
-                  borderColor: themeColors.cardBorder
+                  borderColor: themeColors.cardBorder,
+                  boxShadow: themeColors.cardShadow
                 }}
               >
                 {/* Icon Circle */}
                 <div
-                  className="flex-shrink-0 w-16 h-16 rounded-full flex items-center justify-center shadow-lg transition-all duration-300"
+                  className="flex-shrink-0 w-16 h-16 rounded-full flex items-center justify-center shadow-lg"
                   style={{
                     background: themeColors.iconBgGradient
                   }}
                 >
                   <IconPublished
-                    icon={highlight.icon}
+                    icon={highlight.icon || 'lucide:sparkles'}
                     size={32}
                     className="text-2xl text-white"
                   />
@@ -224,7 +224,7 @@ export default function StackedHighlightsPublished(props: LayoutComponentProps) 
                 </div>
 
                 {/* Unique Badge */}
-                <div className="absolute top-4 right-4 opacity-60 transition-opacity duration-300">
+                <div className="absolute top-4 right-4 opacity-60">
                   <div
                     className="w-8 h-8 rounded-full flex items-center justify-center"
                     style={{

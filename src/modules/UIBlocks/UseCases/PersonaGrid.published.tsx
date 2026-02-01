@@ -1,8 +1,8 @@
 /**
- * PersonaGrid - Published Version
+ * PersonaGrid - Published Version (V2 Schema)
  *
  * Server-safe component with ZERO hook imports
- * Used by componentRegistry.published.ts for SSR rendering
+ * Uses array-based personas data format
  */
 
 import React from 'react';
@@ -14,46 +14,34 @@ import { SectionWrapperPublished } from '@/components/published/SectionWrapperPu
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
-interface PersonaCard {
+// V2 Type
+interface Persona {
+  id: string;
   name: string;
   description: string;
   icon?: string;
-  initials: string;
 }
 
 export default function PersonaGridPublished(props: LayoutComponentProps) {
   const { sectionId, sectionBackgroundCSS, theme, backgroundType } = props;
 
-  // Extract headline and footer
+  // Extract content
   const headline = props.headline || 'Built for Every Team Member';
+  const subheadline = props.subheadline;
   const footerText = props.footer_text;
 
-  // Parse pipe-separated data
-  const names = (props.persona_names || '').split('|').map((n: string) => n.trim()).filter(Boolean);
-  const descriptions = (props.persona_descriptions || '').split('|').map((d: string) => d.trim()).filter(Boolean);
+  // Get personas array (V2 format)
+  const personas: Persona[] = props.personas || [];
 
-  // Extract persona icon overrides
-  const icons = [
-    props.persona_icon_1,
-    props.persona_icon_2,
-    props.persona_icon_3,
-    props.persona_icon_4,
-    props.persona_icon_5,
-    props.persona_icon_6
-  ];
-
-  // Build persona cards
-  const personas: PersonaCard[] = names.map((name: string, index: number) => ({
-    name,
-    description: descriptions[index] || 'Persona description not provided.',
-    icon: icons[index],
-    initials: name
+  // Generate initials from name
+  const getInitials = (name: string) => {
+    return name
       .split(' ')
       .map(word => word.charAt(0))
       .join('')
       .substring(0, 2)
-      .toUpperCase()
-  }));
+      .toUpperCase();
+  };
 
   // Detect theme: manual override > auto-detection > neutral fallback
   const uiTheme: UIBlockTheme = props.manualThemeOverride ||
@@ -78,7 +66,7 @@ export default function PersonaGridPublished(props: LayoutComponentProps) {
         avatarGradientStart: '#6b7280',  // gray-500
         avatarGradientEnd: '#475569',    // slate-600
         avatarRing: '#e5e7eb',           // gray-200
-        cardBorder: '#f3f4f6'            // gray-100
+        cardBorder: '#e5e7eb'            // gray-200
       }
     }[theme];
   };
@@ -115,16 +103,31 @@ export default function PersonaGridPublished(props: LayoutComponentProps) {
             color: textColors.heading,
             ...headlineTypography,
             textAlign: 'center',
-            marginBottom: '4rem',
+            marginBottom: subheadline ? '1rem' : '4rem',
             marginTop: '2rem'
           }}
         />
 
+        {/* Subheadline */}
+        {subheadline && (
+          <TextPublished
+            value={subheadline}
+            style={{
+              color: textColors.body,
+              fontSize: '1.125rem',
+              lineHeight: '1.75rem',
+              textAlign: 'center',
+              maxWidth: '48rem',
+              margin: '0 auto 4rem auto'
+            }}
+          />
+        )}
+
         {/* Persona Grid */}
         <div className={`grid gap-8 ${gridClasses}`}>
-          {personas.map((persona: PersonaCard, index: number) => (
+          {personas.map((persona: Persona) => (
             <div
-              key={index}
+              key={persona.id}
               className="bg-white p-6 rounded-2xl shadow-lg transition-all duration-300 group"
               style={{ border: `1px solid ${themeColors.cardBorder}` }}
             >
@@ -141,7 +144,7 @@ export default function PersonaGridPublished(props: LayoutComponentProps) {
                   {persona.icon ? (
                     <IconPublished icon={persona.icon} color="#ffffff" size={28} />
                   ) : (
-                    <span className="font-bold text-lg">{persona.initials}</span>
+                    <span className="font-bold text-lg">{getInitials(persona.name)}</span>
                   )}
                 </div>
               </div>
@@ -163,7 +166,7 @@ export default function PersonaGridPublished(props: LayoutComponentProps) {
                 <TextPublished
                   value={persona.description}
                   style={{
-                    color: '#6b7280',
+                    color: textColors.muted,
                     fontSize: '0.875rem',
                     lineHeight: '1.5rem',
                     textAlign: 'center'

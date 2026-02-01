@@ -1,275 +1,106 @@
 // components/layout/ValueStackCTA.tsx
-// Production-ready benefits-stacked CTA using abstraction system
+// Simplified value-stack CTA with checkmark + one-liner format (V2)
 
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { 
-  EditableAdaptiveHeadline, 
-  EditableAdaptiveText 
+import {
+  EditableAdaptiveHeadline,
+  EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import { CTAButton } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { createCTAClickHandler } from '@/utils/ctaHandler';
-import IconEditableText from '@/components/ui/IconEditableText';
-import { getRandomIconFromCategory } from '@/utils/iconMapping';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
-// Content interface for type safety
+// V2 Content interface - simplified with value_items array
 interface ValueStackCTAContent {
   headline: string;
   subheadline?: string;
-  value_propositions: string;
-  value_descriptions: string;
   cta_text: string;
   secondary_cta_text?: string;
   final_cta_headline: string;
   final_cta_description: string;
   guarantee_text?: string;
-  // Icon fields for value propositions
-  value_icon_1?: string;
-  value_icon_2?: string;
-  value_icon_3?: string;
-  value_icon_4?: string;
-  value_icon_5?: string;
-  value_icon_6?: string;
+  value_items: Array<{ id: string; text: string }>;
 }
 
 // Content schema - defines structure and defaults
 const CONTENT_SCHEMA = {
-  headline: { 
-    type: 'string' as const, 
-    default: 'Everything You Need to Succeed' 
+  headline: {
+    type: 'string' as const,
+    default: 'Everything You Get With Your Account'
   },
-  subheadline: { 
-    type: 'string' as const, 
-    default: 'Get all the tools, support, and resources you need to transform your business.' 
-  },
-  value_propositions: { 
-    type: 'string' as const, 
-    default: 'Save 20+ Hours Per Week|Increase Team Productivity by 40%|Automate Repetitive Tasks|Get Real-Time Analytics|24/7 Expert Support|Seamless Integrations' 
-  },
-  value_descriptions: { 
-    type: 'string' as const, 
-    default: 'Eliminate manual work with intelligent automation workflows that handle routine tasks automatically.|Boost your team\'s efficiency with streamlined processes and collaboration tools.|Set up workflows once and let them run automatically, freeing up time for strategic work.|Track performance in real-time with comprehensive dashboards and detailed reports.|Access expert help whenever you need it with our dedicated customer success team.|Connect with 1000+ apps and tools your team already uses.' 
+  subheadline: {
+    type: 'string' as const,
+    default: 'One subscription, unlimited value'
   },
   cta_text: {
     type: 'string' as const,
-    default: 'Start Your Transformation'
+    default: 'Start Free Trial'
   },
   secondary_cta_text: {
     type: 'string' as const,
-    default: 'Watch Demo'
+    default: 'Compare Plans'
   },
-  final_cta_headline: { 
-    type: 'string' as const, 
-    default: 'Ready to Get Started?' 
+  final_cta_headline: {
+    type: 'string' as const,
+    default: 'Ready to Transform Your Workflow?'
   },
-  final_cta_description: { 
-    type: 'string' as const, 
-    default: 'Join thousands of businesses already transforming their operations with our platform.' 
+  final_cta_description: {
+    type: 'string' as const,
+    default: 'Join 10,000+ teams already saving time every day'
   },
-  guarantee_text: { 
-    type: 'string' as const, 
-    default: '30-day money-back guarantee' 
+  guarantee_text: {
+    type: 'string' as const,
+    default: '30-day money-back guarantee'
   },
-  // Icon fields for value propositions
-  value_icon_1: { type: 'string' as const, default: '⚡' },
-  value_icon_2: { type: 'string' as const, default: '📈' },
-  value_icon_3: { type: 'string' as const, default: '🤖' },
-  value_icon_4: { type: 'string' as const, default: '📊' },
-  value_icon_5: { type: 'string' as const, default: '🎯' },
-  value_icon_6: { type: 'string' as const, default: '🔗' }
-};
-
-// Value Proposition Interface
-interface ValueProp {
-  id: string;
-  title: string;
-  description: string;
-  icon: string;
-}
-
-// Parse value propositions
-const parseValueProps = (titles: string, descriptions: string, content: ValueStackCTAContent): ValueProp[] => {
-  const titleList = titles.split('|').map(t => t.trim()).filter(Boolean);
-  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(Boolean);
-  
-  // Get icons from content schema or fallback to defaults
-  const getIcon = (index: number): string => {
-    const iconFields: (keyof ValueStackCTAContent)[] = [
-      'value_icon_1', 'value_icon_2', 'value_icon_3', 
-      'value_icon_4', 'value_icon_5', 'value_icon_6'
-    ];
-    const fallbackIcons = ['⚡', '📈', '🤖', '📊', '🎯', '🔗', '💡', '🚀'];
-    
-    return content[iconFields[index] as keyof ValueStackCTAContent] as string || fallbackIcons[index % fallbackIcons.length];
-  };
-  
-  return titleList.map((title, index) => ({
-    id: `value-${index}`,
-    title,
-    description: descriptionList[index] || 'No description provided.',
-    icon: getIcon(index)
-  }));
-};
-
-// Helper function to add a new value proposition
-const addValueProp = (titles: string, descriptions: string): { newTitles: string; newDescriptions: string } => {
-  const titleList = titles.split('|').map(t => t.trim()).filter(Boolean);
-  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(Boolean);
-
-  // Add new value proposition with default content
-  titleList.push('New Value Proposition');
-  descriptionList.push('Describe the unique benefit or value this feature provides to your customers.');
-
-  return {
-    newTitles: titleList.join('|'),
-    newDescriptions: descriptionList.join('|')
-  };
-};
-
-// Helper function to remove a value proposition
-const removeValueProp = (titles: string, descriptions: string, indexToRemove: number): { newTitles: string; newDescriptions: string } => {
-  const titleList = titles.split('|').map(t => t.trim()).filter(Boolean);
-  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(Boolean);
-
-  // Remove the value proposition at the specified index
-  if (indexToRemove >= 0 && indexToRemove < titleList.length) {
-    titleList.splice(indexToRemove, 1);
+  value_items: {
+    type: 'array' as const,
+    default: [
+      { id: 'v1', text: 'Save 20+ hours per week on repetitive tasks' },
+      { id: 'v2', text: 'Increase team productivity by 40%' },
+      { id: 'v3', text: 'Real-time analytics and reporting' },
+      { id: 'v4', text: 'Unlimited team members included' },
+      { id: 'v5', text: 'Priority 24/7 customer support' },
+    ]
   }
-  if (indexToRemove >= 0 && indexToRemove < descriptionList.length) {
-    descriptionList.splice(indexToRemove, 1);
-  }
-
-  return {
-    newTitles: titleList.join('|'),
-    newDescriptions: descriptionList.join('|')
-  };
 };
 
-// Value Proposition Card
-const ValuePropCard = React.memo(({
-  valueProp,
-  index,
-  colorTokens,
-  getTextStyle,
-  mode,
-  sectionId,
-  backgroundType,
-  sectionBackground,
-  onIconEdit,
-  onTitleEdit,
-  onDescriptionEdit,
-  onRemoveValueProp,
-  canRemove = true,
-  themeColors
-}: {
-  valueProp: ValueProp;
-  index: number;
-  colorTokens: any;
-  getTextStyle: any;
-  mode: 'edit' | 'preview';
-  sectionId: string;
-  backgroundType: string;
-  sectionBackground: string;
-  onIconEdit: (index: number, value: string) => void;
-  onTitleEdit: (index: number, value: string) => void;
-  onDescriptionEdit: (index: number, value: string) => void;
-  onRemoveValueProp?: (index: number) => void;
-  canRemove?: boolean;
-  themeColors: any;
-}) => {
-  return (
-    <div className={`group relative flex items-start space-x-4 p-6 bg-white rounded-xl border border-gray-200 ${themeColors.borderHover} hover:shadow-lg transition-all duration-300`}>
-
-      {/* Icon */}
-      <div className={`w-12 h-12 ${themeColors.iconBg} rounded-xl flex items-center justify-center flex-shrink-0`}>
-        <IconEditableText
-          mode={mode}
-          value={valueProp.icon}
-          onEdit={(value) => onIconEdit(index, value)}
-          backgroundType={backgroundType as any}
-          colorTokens={colorTokens}
-          iconSize="lg"
-          className="text-2xl"
-          sectionId={sectionId}
-          elementKey={`value_icon_${index + 1}`}
-          sectionBackground={sectionBackground}
-        />
-      </div>
-      
-      {/* Content */}
-      <div className="flex-1">
-        <EditableAdaptiveText
-          mode={mode}
-          value={valueProp.title}
-          onEdit={(value) => onTitleEdit(index, value)}
-          backgroundType={backgroundType as any}
-          colorTokens={colorTokens}
-          variant="body"
-          className="font-bold text-gray-900 mb-2 block"
-          sectionId={sectionId}
-          elementKey={`value_title_${index + 1}`}
-          sectionBackground={sectionBackground}
-          placeholder="Value proposition title"
-        />
-        <EditableAdaptiveText
-          mode={mode}
-          value={valueProp.description}
-          onEdit={(value) => onDescriptionEdit(index, value)}
-          backgroundType={backgroundType as any}
-          colorTokens={colorTokens}
-          variant="body"
-          className="text-gray-600 leading-relaxed block"
-          sectionId={sectionId}
-          elementKey={`value_description_${index + 1}`}
-          sectionBackground={sectionBackground}
-          placeholder="Value proposition description"
-        />
-      </div>
-      
-      {/* Checkmark */}
-      <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-        </svg>
-      </div>
-
-      {/* Delete button - only show in edit mode and if can remove */}
-      {mode !== 'preview' && onRemoveValueProp && canRemove && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onRemoveValueProp(index);
-          }}
-          className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-200"
-          title="Remove this value proposition"
-        >
-          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      )}
-    </div>
-  );
-});
-ValuePropCard.displayName = 'ValuePropCard';
+// Theme-aware color mappings for CTA box
+const getThemeColors = (theme: UIBlockTheme) => {
+  return {
+    warm: {
+      gradientFrom: 'from-orange-600',
+      gradientTo: 'to-red-700',
+      ctaLightText: 'text-orange-100',
+      ctaButtonText: 'text-orange-600'
+    },
+    cool: {
+      gradientFrom: 'from-blue-600',
+      gradientTo: 'to-indigo-700',
+      ctaLightText: 'text-blue-100',
+      ctaButtonText: 'text-blue-600'
+    },
+    neutral: {
+      gradientFrom: 'from-gray-600',
+      gradientTo: 'to-gray-800',
+      ctaLightText: 'text-gray-100',
+      ctaButtonText: 'text-gray-600'
+    }
+  }[theme];
+};
 
 export default function ValueStackCTA(props: LayoutComponentProps) {
   const { getTextStyle: getTypographyStyle } = useTypography();
-  const { content } = useEditStore();
-  
+
   const {
     sectionId,
     mode,
     blockContent,
     colorTokens,
-    dynamicTextColors,
-    getTextStyle,
     sectionBackground,
     handleContentUpdate
   } = useLayoutComponent<ValueStackCTAContent>({
@@ -277,122 +108,43 @@ export default function ValueStackCTA(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
-  // Create typography styles
+  // Typography styles
   const h2Style = getTypographyStyle('h2');
   const bodyLgStyle = getTypographyStyle('body-lg');
 
-  // Theme detection with priority: manualThemeOverride > autoDetectedTheme > neutral
+  // Theme detection: manual override > auto-detection > neutral
   const uiBlockTheme = React.useMemo(() => {
     if (props.manualThemeOverride) return props.manualThemeOverride;
     if (props.userContext) return selectUIBlockTheme(props.userContext);
     return 'neutral';
   }, [props.manualThemeOverride, props.userContext]);
 
-  // Theme-aware color mappings
-  // Note: Checkmarks always stay green (universal trust signal)
-  const getThemeColors = (theme: UIBlockTheme) => {
-    return {
-      warm: {
-        // Value prop cards
-        iconBg: 'bg-orange-100',
-        borderHover: 'hover:border-orange-300',
-        // Add button
-        addButtonBg: 'bg-orange-50',
-        addButtonHover: 'hover:bg-orange-100',
-        addButtonBorder: 'border-orange-200',
-        addButtonText: 'text-orange-700',
-        addButtonIcon: 'text-orange-600',
-        // CTA section
-        gradientFrom: 'from-orange-600',
-        gradientTo: 'to-red-700',
-        ctaLightText: 'text-orange-100',
-        ctaButtonText: 'text-orange-600'
-      },
-      cool: {
-        // Value prop cards
-        iconBg: 'bg-blue-100',
-        borderHover: 'hover:border-blue-300',
-        // Add button
-        addButtonBg: 'bg-blue-50',
-        addButtonHover: 'hover:bg-blue-100',
-        addButtonBorder: 'border-blue-200',
-        addButtonText: 'text-blue-700',
-        addButtonIcon: 'text-blue-600',
-        // CTA section
-        gradientFrom: 'from-blue-600',
-        gradientTo: 'to-indigo-700',
-        ctaLightText: 'text-blue-100',
-        ctaButtonText: 'text-blue-600'
-      },
-      neutral: {
-        // Value prop cards
-        iconBg: 'bg-gray-100',
-        borderHover: 'hover:border-gray-300',
-        // Add button
-        addButtonBg: 'bg-gray-50',
-        addButtonHover: 'hover:bg-gray-100',
-        addButtonBorder: 'border-gray-200',
-        addButtonText: 'text-gray-700',
-        addButtonIcon: 'text-gray-600',
-        // CTA section
-        gradientFrom: 'from-gray-600',
-        gradientTo: 'to-gray-800',
-        ctaLightText: 'text-gray-100',
-        ctaButtonText: 'text-gray-600'
-      }
-    }[theme];
-  };
-
   const themeColors = getThemeColors(uiBlockTheme);
 
-  // Parse value propositions
-  const valueProps = parseValueProps(blockContent.value_propositions, blockContent.value_descriptions, blockContent);
+  // Ensure value_items is always an array
+  const valueItems = Array.isArray(blockContent.value_items)
+    ? blockContent.value_items
+    : CONTENT_SCHEMA.value_items.default;
 
-  // Icon edit handlers
-  const handleIconEdit = (index: number, value: string) => {
-    const iconField = `value_icon_${index + 1}` as keyof ValueStackCTAContent;
-    handleContentUpdate(iconField, value);
+  // Add new value item
+  const handleAddItem = () => {
+    const newItem = {
+      id: `v${Date.now()}`,
+      text: 'New value proposition'
+    };
+    (handleContentUpdate as any)('value_items', [...valueItems, newItem]);
   };
 
-  const handleTitleEdit = (index: number, value: string) => {
-    const titles = blockContent.value_propositions.split('|').map(t => t.trim());
-    titles[index] = value;
-    handleContentUpdate('value_propositions', titles.join('|'));
+  // Remove value item
+  const handleRemoveItem = (idToRemove: string) => {
+    (handleContentUpdate as any)('value_items', valueItems.filter(item => item.id !== idToRemove));
   };
 
-  const handleDescriptionEdit = (index: number, value: string) => {
-    const descriptions = blockContent.value_descriptions.split('|').map(d => d.trim());
-    descriptions[index] = value;
-    handleContentUpdate('value_descriptions', descriptions.join('|'));
-  };
-
-  // Handle adding a new value proposition
-  const handleAddValueProp = () => {
-    const { newTitles, newDescriptions } = addValueProp(blockContent.value_propositions, blockContent.value_descriptions);
-    handleContentUpdate('value_propositions', newTitles);
-    handleContentUpdate('value_descriptions', newDescriptions);
-
-    // Add a smart icon for the new value proposition
-    const newValuePropCount = newTitles.split('|').length;
-    const iconField = `value_icon_${newValuePropCount}` as keyof ValueStackCTAContent;
-    if (newValuePropCount <= 6) {
-      // Use random icon from innovation category for new value props
-      const defaultIcon = getRandomIconFromCategory('innovation');
-      handleContentUpdate(iconField, defaultIcon);
-    }
-  };
-
-  // Handle removing a value proposition
-  const handleRemoveValueProp = (indexToRemove: number) => {
-    const { newTitles, newDescriptions } = removeValueProp(blockContent.value_propositions, blockContent.value_descriptions, indexToRemove);
-    handleContentUpdate('value_propositions', newTitles);
-    handleContentUpdate('value_descriptions', newDescriptions);
-
-    // Also clear the corresponding icon if it exists
-    const iconField = `value_icon_${indexToRemove + 1}` as keyof ValueStackCTAContent;
-    if (blockContent[iconField]) {
-      handleContentUpdate(iconField, '');
-    }
+  // Update value item text
+  const handleUpdateItemText = (id: string, newText: string) => {
+    (handleContentUpdate as any)('value_items', valueItems.map(item =>
+      item.id === id ? { ...item, text: newText } : item
+    ));
   };
 
   return (
@@ -405,9 +157,9 @@ export default function ValueStackCTA(props: LayoutComponentProps) {
       className={props.className}
     >
       <div className="max-w-5xl mx-auto">
-        
+
         {/* Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-12">
           <EditableAdaptiveHeadline
             mode={mode}
             value={blockContent.headline || ''}
@@ -415,7 +167,7 @@ export default function ValueStackCTA(props: LayoutComponentProps) {
             level="h2"
             backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
             colorTokens={colorTokens}
-            className="mb-6"
+            className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
             sectionBackground={sectionBackground}
@@ -438,40 +190,63 @@ export default function ValueStackCTA(props: LayoutComponentProps) {
           )}
         </div>
 
-        {/* Value Propositions Grid */}
-        <div className="grid gap-6 mb-12">
-          {valueProps.map((valueProp, index) => (
-            <ValuePropCard
-              key={valueProp.id}
-              valueProp={valueProp}
-              index={index}
-              colorTokens={colorTokens}
-              getTextStyle={getTextStyle}
-              mode={mode}
-              sectionId={sectionId}
-              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-              sectionBackground={sectionBackground}
-              onIconEdit={handleIconEdit}
-              onTitleEdit={handleTitleEdit}
-              onDescriptionEdit={handleDescriptionEdit}
-              onRemoveValueProp={handleRemoveValueProp}
-              canRemove={valueProps.length > 1}
-              themeColors={themeColors}
-            />
+        {/* Value Items - Simple checkmark list */}
+        <div className="space-y-4 mb-12 max-w-3xl mx-auto">
+          {valueItems.map((item) => (
+            <div
+              key={item.id}
+              className="group relative flex items-start gap-3"
+            >
+              {/* Green checkmark */}
+              <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              </div>
+
+              {/* Text */}
+              <EditableAdaptiveText
+                mode={mode}
+                value={item.text}
+                onEdit={(value) => handleUpdateItemText(item.id, value)}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                colorTokens={colorTokens}
+                variant="body"
+                className="flex-1"
+                style={bodyLgStyle}
+                sectionId={sectionId}
+                elementKey={`value_item_${item.id}`}
+                sectionBackground={sectionBackground}
+                placeholder="Value proposition"
+              />
+
+              {/* Remove button - only in edit mode and if > min (3) */}
+              {mode !== 'preview' && valueItems.length > 3 && (
+                <button
+                  onClick={() => handleRemoveItem(item.id)}
+                  className="opacity-0 group-hover:opacity-100 w-5 h-5 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-opacity"
+                  title="Remove"
+                >
+                  <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
           ))}
         </div>
 
-        {/* Add Value Proposition Button - only show in edit mode and if under max limit */}
-        {mode !== 'preview' && valueProps.length < 6 && (
+        {/* Add button - only in edit mode and if < max (8) */}
+        {mode !== 'preview' && valueItems.length < 8 && (
           <div className="mb-12 text-center">
             <button
-              onClick={handleAddValueProp}
-              className={`flex items-center space-x-2 mx-auto px-4 py-3 ${themeColors.addButtonBg} ${themeColors.addButtonHover} border-2 ${themeColors.addButtonBorder} rounded-xl transition-all duration-200 group`}
+              onClick={handleAddItem}
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-gray-900 border border-dashed border-gray-300 hover:border-gray-400 rounded-lg transition-colors"
             >
-              <svg className={`w-5 h-5 ${themeColors.addButtonIcon}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              <span className={`${themeColors.addButtonText} font-medium`}>Add Value Proposition</span>
+              Add Value
             </button>
           </div>
         )}
@@ -504,11 +279,11 @@ export default function ValueStackCTA(props: LayoutComponentProps) {
             elementKey="final_cta_description"
             sectionBackground="bg-blue-600"
           />
-          
+
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
             <CTAButton
               text={blockContent.cta_text}
-              colorTokens={{ ...colorTokens, ctaBg: 'bg-white', ctaText: themeColors.ctaButtonText, ctaHover: 'hover:bg-gray-100' }}
+              colorTokens={colorTokens}
               className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
               variant="primary"
               size="large"
@@ -518,12 +293,12 @@ export default function ValueStackCTA(props: LayoutComponentProps) {
             />
 
             {/* Secondary CTA */}
-            {(blockContent.secondary_cta_text && blockContent.secondary_cta_text !== '___REMOVED___' && blockContent.secondary_cta_text.trim() !== '') && (
+            {blockContent.secondary_cta_text && blockContent.secondary_cta_text.trim() !== '' && (
               <CTAButton
-                text={blockContent.secondary_cta_text || 'Watch Demo'}
-                colorTokens={{ ...colorTokens, ctaBg: 'bg-transparent', ctaText: 'text-white', ctaHover: 'hover:bg-white/10', ctaBorder: 'border-2 border-white' }}
+                text={blockContent.secondary_cta_text}
+                colorTokens={colorTokens}
                 className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
-                variant="outline"
+                variant="secondary"
                 size="large"
                 sectionId={sectionId}
                 elementKey="secondary_cta_text"
@@ -543,7 +318,7 @@ export default function ValueStackCTA(props: LayoutComponentProps) {
                   backgroundType="primary"
                   colorTokens={{ ...colorTokens, textSecondary: themeColors.ctaLightText }}
                   variant="body"
-                  className="text-sm font-medium"
+                  className="text-base font-medium"
                   sectionId={sectionId}
                   elementKey="guarantee_text"
                   sectionBackground="bg-blue-600"
@@ -558,47 +333,11 @@ export default function ValueStackCTA(props: LayoutComponentProps) {
   );
 }
 
-// Export additional metadata for the component registry
+// Export metadata
 export const componentMeta = {
   name: 'ValueStackCTA',
   category: 'CTA Sections',
-  description: 'Benefits-stacked CTA showcasing value propositions',
-  tags: ['cta', 'benefits', 'value-stack', 'features', 'conversion'],
+  description: 'Value-reinforcement CTA with checkmark list',
+  tags: ['cta', 'value-stack', 'conversion'],
   defaultBackgroundType: 'neutral' as const,
-  complexity: 'medium',
-  estimatedBuildTime: '25 minutes',
-  
-  features: [
-    'Stacked value propositions',
-    'Editable icons with visual picker',
-    'Editable value proposition text',
-    'Gradient CTA section',
-    'Guarantee display',
-    'Checkmark validation'
-  ],
-  
-  contentFields: [
-    { key: 'headline', label: 'Section Headline', type: 'text', required: true },
-    { key: 'subheadline', label: 'Supporting Text', type: 'textarea', required: false },
-    { key: 'value_propositions', label: 'Value Proposition Titles (pipe separated)', type: 'textarea', required: true },
-    { key: 'value_descriptions', label: 'Value Descriptions (pipe separated)', type: 'textarea', required: true },
-    { key: 'value_icon_1', label: 'Value Icon 1', type: 'text', required: false },
-    { key: 'value_icon_2', label: 'Value Icon 2', type: 'text', required: false },
-    { key: 'value_icon_3', label: 'Value Icon 3', type: 'text', required: false },
-    { key: 'value_icon_4', label: 'Value Icon 4', type: 'text', required: false },
-    { key: 'value_icon_5', label: 'Value Icon 5', type: 'text', required: false },
-    { key: 'value_icon_6', label: 'Value Icon 6', type: 'text', required: false },
-    { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: true },
-    { key: 'secondary_cta_text', label: 'Secondary CTA Button Text', type: 'text', required: false },
-    { key: 'final_cta_headline', label: 'Final CTA Headline', type: 'text', required: true },
-    { key: 'final_cta_description', label: 'Final CTA Description', type: 'textarea', required: true },
-    { key: 'guarantee_text', label: 'Guarantee Text', type: 'text', required: false }
-  ],
-  
-  useCases: [
-    'Feature-rich product CTAs',
-    'Service benefits showcase',
-    'Comprehensive solution pitches',
-    'Value-driven conversions'
-  ]
 };

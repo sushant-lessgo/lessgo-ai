@@ -1,10 +1,10 @@
 // src/modules/UIBlocks/normalizers/mythRealityNormalizer.ts
-// Normalizer for MythVsRealityGrid - converts any input format to canonical array
+// Normalizer for MythVsRealityGrid - converts any input format to V2 pairs array
 
 const MAX_PAIRS = 6;
 
-// Canonical type with id per item
-export type MythRealityItem = {
+// V2 Canonical type
+export type MythRealityPair = {
   id: string;
   myth: string;
   reality: string;
@@ -15,23 +15,26 @@ export type MythRealityCanonical = {
   subheadline?: string;
   myth_icon?: string;
   reality_icon?: string;
-  items: MythRealityItem[];
+  pairs: MythRealityPair[];
 };
 
-// Incoming type - supports all formats
+// Incoming type - supports all formats for backward compatibility
 export type MythRealityIncoming = {
   headline?: string;
   subheadline?: string;
   myth_icon?: string;
   reality_icon?: string;
 
-  // AI / canonical format (array)
+  // V2 format (preferred)
+  pairs?: Array<{ id?: string; myth: string; reality: string }>;
+
+  // Legacy formats
   myth_reality_items?: Array<{ myth: string; reality: string; id?: string }>;
   myth_reality_pairs?:
-    | Array<{ myth: string; reality: string; id?: string }>  // AI array
+    | Array<{ myth: string; reality: string; id?: string }>
     | string;  // Legacy pipe-separated
 
-  // Individual fields (legacy/manual)
+  // Individual fields (legacy)
   myth_1?: string; reality_1?: string;
   myth_2?: string; reality_2?: string;
   myth_3?: string; reality_3?: string;
@@ -41,7 +44,7 @@ export type MythRealityIncoming = {
 };
 
 /**
- * Normalize any MythReality format to canonical array
+ * Normalize any MythReality format to V2 canonical (pairs array)
  * Single gate - call this once at boundary
  */
 export function normalizeMythReality(content: MythRealityIncoming): MythRealityCanonical {
@@ -50,7 +53,25 @@ export function normalizeMythReality(content: MythRealityIncoming): MythRealityC
   const myth_icon = content.myth_icon;
   const reality_icon = content.reality_icon;
 
-  // 1) Check for myth_reality_items array first (preferred canonical)
+  // 1) Check for V2 pairs array first (preferred)
+  if (Array.isArray(content.pairs)) {
+    const arr = content.pairs.filter(x => x?.myth && x?.reality);
+    if (arr.length) {
+      return {
+        headline,
+        subheadline,
+        myth_icon,
+        reality_icon,
+        pairs: arr.slice(0, MAX_PAIRS).map((x, i) => ({
+          id: x.id ?? `p${i + 1}`,
+          myth: x.myth,
+          reality: x.reality,
+        })),
+      };
+    }
+  }
+
+  // 2) Check for myth_reality_items array (legacy)
   if (Array.isArray(content.myth_reality_items)) {
     const arr = content.myth_reality_items.filter(x => x?.myth && x?.reality);
     if (arr.length) {
@@ -59,8 +80,8 @@ export function normalizeMythReality(content: MythRealityIncoming): MythRealityC
         subheadline,
         myth_icon,
         reality_icon,
-        items: arr.slice(0, MAX_PAIRS).map((x, i) => ({
-          id: x.id ?? `mr_${i}`,
+        pairs: arr.slice(0, MAX_PAIRS).map((x, i) => ({
+          id: x.id ?? `p${i + 1}`,
           myth: x.myth,
           reality: x.reality,
         })),
@@ -68,9 +89,9 @@ export function normalizeMythReality(content: MythRealityIncoming): MythRealityC
     }
   }
 
-  // 2) Check for myth_reality_pairs (could be array or pipe-separated string)
+  // 3) Check for myth_reality_pairs (could be array or pipe-separated string)
   if (content.myth_reality_pairs) {
-    // 2a) If it's an array
+    // 3a) If it's an array
     if (Array.isArray(content.myth_reality_pairs)) {
       const arr = content.myth_reality_pairs.filter(x => x?.myth && x?.reality);
       if (arr.length) {
@@ -79,83 +100,62 @@ export function normalizeMythReality(content: MythRealityIncoming): MythRealityC
           subheadline,
           myth_icon,
           reality_icon,
-          items: arr.slice(0, MAX_PAIRS).map((x, i) => ({
-            id: x.id ?? `mr_${i}`,
+          pairs: arr.slice(0, MAX_PAIRS).map((x, i) => ({
+            id: x.id ?? `p${i + 1}`,
             myth: x.myth,
             reality: x.reality,
           })),
         };
       }
     }
-    // 2b) If it's a pipe-separated string
+    // 3b) If it's a pipe-separated string (legacy)
     else if (typeof content.myth_reality_pairs === 'string') {
       const parts = content.myth_reality_pairs.split('|');
-      const items: MythRealityItem[] = [];
+      const pairs: MythRealityPair[] = [];
 
       for (let i = 0; i < parts.length - 1; i += 2) {
         const myth = parts[i].replace(/^Myth:\s*/i, '').trim();
         const reality = parts[i + 1].replace(/^Reality:\s*/i, '').trim();
         if (myth && reality) {
-          items.push({ id: `mr_${items.length}`, myth, reality });
+          pairs.push({ id: `p${pairs.length + 1}`, myth, reality });
         }
       }
 
-      if (items.length) {
+      if (pairs.length) {
         return {
           headline,
           subheadline,
           myth_icon,
           reality_icon,
-          items: items.slice(0, MAX_PAIRS),
+          pairs: pairs.slice(0, MAX_PAIRS),
         };
       }
     }
   }
 
-  // 3) Fall back to individual numbered fields
-  const items: MythRealityItem[] = [];
+  // 4) Fall back to individual numbered fields (legacy)
+  const pairs: MythRealityPair[] = [];
   for (let i = 1; i <= MAX_PAIRS; i++) {
     const myth = (content as Record<string, unknown>)[`myth_${i}`];
     const reality = (content as Record<string, unknown>)[`reality_${i}`];
     if (typeof myth === 'string' && myth.trim() &&
         typeof reality === 'string' && reality.trim()) {
-      items.push({ id: `mr_${i - 1}`, myth: myth.trim(), reality: reality.trim() });
+      pairs.push({ id: `p${i}`, myth: myth.trim(), reality: reality.trim() });
     }
   }
 
-  return { headline, subheadline, myth_icon, reality_icon, items };
+  return { headline, subheadline, myth_icon, reality_icon, pairs };
 }
 
 /**
- * Convert canonical format back to individual fields for save
- * Keeps both formats in sync during migration
+ * Convert V2 canonical format to flat object for component props
  */
-export function toIndividualFields(canonical: MythRealityCanonical): Record<string, string> {
-  const fields: Record<string, string> = {
+export function toComponentProps(canonical: MythRealityCanonical): Record<string, unknown> {
+  return {
     headline: canonical.headline,
+    subheadline: canonical.subheadline,
+    myth_icon: canonical.myth_icon,
+    reality_icon: canonical.reality_icon,
+    pairs: canonical.pairs,
   };
-
-  if (canonical.subheadline) {
-    fields.subheadline = canonical.subheadline;
-  }
-  if (canonical.myth_icon) {
-    fields.myth_icon = canonical.myth_icon;
-  }
-  if (canonical.reality_icon) {
-    fields.reality_icon = canonical.reality_icon;
-  }
-
-  // Clear all first
-  for (let i = 1; i <= MAX_PAIRS; i++) {
-    fields[`myth_${i}`] = '';
-    fields[`reality_${i}`] = '';
-  }
-
-  // Set from canonical items
-  canonical.items.forEach((item, index) => {
-    fields[`myth_${index + 1}`] = item.myth;
-    fields[`reality_${index + 1}`] = item.reality;
-  });
-
-  return fields;
 }

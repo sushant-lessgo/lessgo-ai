@@ -1,28 +1,31 @@
-import React, { useRef, useState } from 'react';
+// ResultsGallery.tsx - V2: Clean array-based gallery items
+import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useImageToolbar } from '@/hooks/useImageToolbar';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import {
   EditableAdaptiveHeadline,
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
+// V2: Gallery item structure
+interface GalleryItem {
+  id: string;
+  image_url: string;
+  caption?: string;
+}
+
+// V2: Content interface - uses clean arrays
 interface ResultsGalleryContent {
   headline: string;
   subheadline?: string;
-  image_1?: string;
-  image_2?: string;
-  image_3?: string;
-  image_4?: string;
-  caption_1?: string;
-  caption_2?: string;
-  caption_3?: string;
-  caption_4?: string;
+  gallery_items: GalleryItem[];
 }
 
+// V2: Content schema - uses clean arrays
 const CONTENT_SCHEMA = {
   headline: {
     type: 'string' as const,
@@ -32,167 +35,82 @@ const CONTENT_SCHEMA = {
     type: 'string' as const,
     default: ''
   },
-  image_1: {
-    type: 'string' as const,
-    default: ''
-  },
-  image_2: {
-    type: 'string' as const,
-    default: ''
-  },
-  image_3: {
-    type: 'string' as const,
-    default: ''
-  },
-  image_4: {
-    type: 'string' as const,
-    default: ''
-  },
-  caption_1: {
-    type: 'string' as const,
-    default: ''
-  },
-  caption_2: {
-    type: 'string' as const,
-    default: ''
-  },
-  caption_3: {
-    type: 'string' as const,
-    default: ''
-  },
-  caption_4: {
-    type: 'string' as const,
-    default: ''
-  },
+  gallery_items: {
+    type: 'array' as const,
+    default: [
+      { id: 'g1', image_url: '', caption: '' },
+      { id: 'g2', image_url: '', caption: '' },
+      { id: 'g3', image_url: '', caption: '' },
+      { id: 'g4', image_url: '', caption: '' },
+    ]
+  }
 };
 
-export default function ResultsGallery(props: LayoutComponentProps) {
-  const {
-    sectionId,
-    mode,
-    blockContent,
-    colorTokens,
-    handleContentUpdate,
-    sectionBackground,
-    backgroundType
-  } = useLayoutComponent<ResultsGalleryContent>({
-    ...props,
-    contentSchema: CONTENT_SCHEMA
-  });
-
-  // Store for image upload
-  const store = useEditStore();
-
-  // Upload state management
-  const [uploadingImages, setUploadingImages] = useState<Record<string, boolean>>({});
-  const [uploadErrors, setUploadErrors] = useState<Record<string, string>>({});
-
-  // Refs for file inputs
-  const fileInputRef1 = useRef<HTMLInputElement>(null);
-  const fileInputRef2 = useRef<HTMLInputElement>(null);
-  const fileInputRef3 = useRef<HTMLInputElement>(null);
-  const fileInputRef4 = useRef<HTMLInputElement>(null);
-
-  // Safe background type (filter out 'custom')
-  const safeBackgroundType = props.backgroundType === 'custom' ? 'neutral' : (props.backgroundType || 'neutral');
-
-  // Detect theme: manual override > auto-detection > neutral fallback
-  const theme = React.useMemo(() => {
-    if (props.manualThemeOverride) return props.manualThemeOverride;
-    if (props.userContext) return selectUIBlockTheme(props.userContext);
-    return 'neutral';
-  }, [props.manualThemeOverride, props.userContext]);
-
-  // Theme-aware color functions
-  const getPlaceholderColors = (theme: UIBlockTheme) => {
-    return {
+// Gallery Item Component
+const GalleryItemCard = React.memo(({
+  item,
+  index,
+  sectionId,
+  mode,
+  colorTokens,
+  onCaptionEdit,
+  onRemove,
+  handleImageToolbar,
+  theme,
+  canRemove
+}: {
+  item: GalleryItem;
+  index: number;
+  sectionId: string;
+  mode: string;
+  colorTokens: any;
+  onCaptionEdit: (value: string) => void;
+  onRemove?: () => void;
+  handleImageToolbar: (imageId: string, position: { x: number; y: number }) => void;
+  theme: UIBlockTheme;
+  canRemove: boolean;
+}) => {
+  // Theme-based styles
+  const getPlaceholderGradient = () => {
+    const gradients = {
       warm: 'from-orange-50 to-red-100',
-      cool: 'from-blue-50 to-purple-100',
+      cool: 'from-blue-50 to-indigo-100',
       neutral: 'from-gray-50 to-slate-100'
-    }[theme];
+    };
+    return gradients[theme];
   };
 
-  const getIconColors = (theme: UIBlockTheme) => {
-    return {
+  const getIconColor = () => {
+    const colors = {
       warm: 'text-orange-400',
       cool: 'text-blue-400',
       neutral: 'text-gray-400'
-    }[theme];
+    };
+    return colors[theme];
   };
 
-  const getShadowColors = (theme: UIBlockTheme) => {
-    return {
+  const getShadowStyle = () => {
+    const shadows = {
       warm: 'shadow-lg hover:shadow-xl hover:shadow-orange-200/40',
       cool: 'shadow-lg hover:shadow-xl hover:shadow-blue-200/40',
       neutral: 'shadow-lg hover:shadow-xl'
-    }[theme];
+    };
+    return shadows[theme];
   };
 
-  const placeholderGradient = getPlaceholderColors(theme);
-  const iconColor = getIconColors(theme);
-  const imageShadow = getShadowColors(theme);
-
-  // Handle file upload
-  const handleFileUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-    imageKey: string
-  ) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      setUploadErrors(prev => ({ ...prev, [imageKey]: 'Please select a valid image file' }));
-      return;
-    }
-
-    // Validate file size (5MB limit)
-    if (file.size > 5 * 1024 * 1024) {
-      setUploadErrors(prev => ({ ...prev, [imageKey]: 'Image must be smaller than 5MB' }));
-      return;
-    }
-
-    // Clear previous error
-    setUploadErrors(prev => {
-      const newErrors = { ...prev };
-      delete newErrors[imageKey];
-      return newErrors;
-    });
-
-    // Set uploading state
-    setUploadingImages(prev => ({ ...prev, [imageKey]: true }));
-
-    try {
-      // Upload to server and update content
-      await store.uploadImage(file, {
-        sectionId,
-        elementKey: imageKey
-      });
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Upload failed. Please try again.';
-      setUploadErrors(prev => ({ ...prev, [imageKey]: errorMessage }));
-    } finally {
-      setUploadingImages(prev => {
-        const newState = { ...prev };
-        delete newState[imageKey];
-        return newState;
-      });
-    }
-
-    // Reset file input
-    event.target.value = '';
-  };
+  // V2: Image ID format with item.id
+  const imageId = `${sectionId}.gallery_items.${item.id}.image_url`;
 
   // Image placeholder component
-  const ImagePlaceholder = ({ onClick }: { onClick?: () => void }) => (
+  const ImagePlaceholder = ({ onClick }: { onClick?: (e: React.MouseEvent) => void }) => (
     <div
-      className={`relative w-full h-64 rounded-lg overflow-hidden bg-gradient-to-br ${placeholderGradient} cursor-pointer hover:opacity-90 transition-all`}
+      className={`relative w-full h-64 rounded-lg overflow-hidden bg-gradient-to-br ${getPlaceholderGradient()} cursor-pointer hover:opacity-90 transition-all`}
       onClick={onClick}
     >
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="text-center">
           <svg
-            className={`w-12 h-12 ${iconColor} mx-auto mb-2`}
+            className={`w-12 h-12 ${getIconColor()} mx-auto mb-2`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -210,104 +128,156 @@ export default function ResultsGallery(props: LayoutComponentProps) {
     </div>
   );
 
-  // Render individual image slot
-  const renderImageSlot = (
-    imageKey: 'image_1' | 'image_2' | 'image_3' | 'image_4',
-    captionKey: 'caption_1' | 'caption_2' | 'caption_3' | 'caption_4',
-    fileInputRef: React.RefObject<HTMLInputElement>,
-    index: number
-  ) => {
-    const imageUrl = blockContent[imageKey];
-    const caption = blockContent[captionKey] || '';
-    const isUploading = uploadingImages[imageKey];
-    const uploadError = uploadErrors[imageKey];
+  return (
+    <div className="space-y-3 relative group">
+      {/* Image or placeholder */}
+      <div className="relative">
+        {item.image_url && item.image_url !== '' ? (
+          <img
+            src={item.image_url}
+            alt={item.caption || `Result ${index + 1}`}
+            className={`w-full h-auto object-contain rounded-lg ${getShadowStyle()} cursor-pointer transition-all duration-300`}
+            data-image-id={imageId}
+            onMouseUp={(e) => {
+              if (mode === 'edit') {
+                e.stopPropagation();
+                e.preventDefault();
+                const rect = e.currentTarget.getBoundingClientRect();
+                const position = {
+                  x: rect.left + rect.width / 2,
+                  y: rect.top - 10
+                };
+                handleImageToolbar(imageId, position);
+              }
+            }}
+            onClick={(e) => {
+              if (mode === 'edit') {
+                e.stopPropagation();
+                e.preventDefault();
+              }
+            }}
+          />
+        ) : mode === 'edit' ? (
+          <ImagePlaceholder
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              const rect = e.currentTarget.getBoundingClientRect();
+              const position = {
+                x: rect.left + rect.width / 2,
+                y: rect.top - 10
+              };
+              handleImageToolbar(imageId, position);
+            }}
+          />
+        ) : null}
+      </div>
 
-    return (
-      <div className="space-y-3 relative">
-        {/* Hidden file input */}
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={(e) => handleFileUpload(e, imageKey)}
-          disabled={isUploading}
-        />
-
-        {/* Image or placeholder */}
-        <div className="relative">
-          {imageUrl ? (
+      {/* Caption */}
+      {(item.caption || mode === 'edit') && (
+        <div className="text-center">
+          {mode !== 'preview' ? (
             <div
-              className="relative group cursor-pointer"
-              onClick={() => mode === 'edit' && !isUploading && fileInputRef.current?.click()}
+              contentEditable
+              suppressContentEditableWarning
+              onBlur={(e) => onCaptionEdit(e.currentTarget.textContent || '')}
+              className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 py-1 min-h-[28px] cursor-text hover:bg-gray-50/50 text-sm"
+              style={{
+                color: colorTokens.textSecondary,
+                fontWeight: 500
+              }}
+              data-section-id={sectionId}
+              data-element-key={`gallery_items.${item.id}.caption`}
             >
-              <img
-                src={imageUrl}
-                alt={caption || `Result ${index}`}
-                className={`w-full h-auto object-contain rounded-lg ${imageShadow}`}
-                data-section-id={sectionId}
-                data-element-key={imageKey}
-              />
-              {mode === 'edit' && !isUploading && (
-                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
-                  <div className="text-white text-sm font-medium bg-black bg-opacity-50 px-3 py-1 rounded">
-                    Click to change
-                  </div>
-                </div>
-              )}
+              {item.caption || 'Add caption...'}
             </div>
-          ) : mode === 'edit' ? (
-            <ImagePlaceholder onClick={() => !isUploading && fileInputRef.current?.click()} />
-          ) : null}
-
-          {/* Upload progress overlay */}
-          {isUploading && (
-            <div className="absolute inset-0 bg-white bg-opacity-90 rounded-lg flex items-center justify-center">
-              <div className="text-center">
-                <div className="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                <div className="text-sm font-medium text-gray-700">Uploading...</div>
-              </div>
-            </div>
+          ) : (
+            <p
+              className="text-sm font-medium"
+              style={{ color: colorTokens.textSecondary }}
+            >
+              {item.caption}
+            </p>
           )}
         </div>
+      )}
 
-        {/* Error message */}
-        {uploadError && (
-          <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">
-            {uploadError}
-          </div>
-        )}
+      {/* Remove button in edit mode */}
+      {mode === 'edit' && canRemove && onRemove && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove();
+          }}
+          className="opacity-0 group-hover:opacity-100 absolute -top-2 -right-2 text-red-500 hover:text-red-700 transition-opacity duration-200 z-10 bg-white rounded-full p-1 shadow-md"
+          title="Remove this gallery item"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
+    </div>
+  );
+});
+GalleryItemCard.displayName = 'GalleryItemCard';
 
-        {/* Caption */}
-        {(caption || mode === 'edit') && (
-          <div className="text-center">
-            {mode !== 'preview' ? (
-              <div
-                contentEditable
-                suppressContentEditableWarning
-                onBlur={(e) => handleContentUpdate(captionKey, e.currentTarget.textContent || '')}
-                className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 py-1 min-h-[28px] cursor-text hover:bg-gray-50/50 text-sm"
-                style={{
-                  color: colorTokens.textSecondary,
-                  fontWeight: 500
-                }}
-                data-section-id={sectionId}
-                data-element-key={captionKey}
-              >
-                {caption || 'Add caption...'}
-              </div>
-            ) : (
-              <p
-                className="text-sm font-medium"
-                style={{ color: colorTokens.textSecondary }}
-              >
-                {caption}
-              </p>
-            )}
-          </div>
-        )}
-      </div>
+export default function ResultsGallery(props: LayoutComponentProps) {
+  const {
+    sectionId,
+    mode,
+    blockContent,
+    colorTokens,
+    handleContentUpdate,
+    sectionBackground,
+    backgroundType
+  } = useLayoutComponent<ResultsGalleryContent>({
+    ...props,
+    contentSchema: CONTENT_SCHEMA
+  });
+
+  // Safe background type (filter out 'custom')
+  const safeBackgroundType = props.backgroundType === 'custom' ? 'neutral' : (props.backgroundType || 'neutral');
+
+  // Detect theme: manual override > auto-detection > neutral fallback
+  const uiBlockTheme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Initialize image toolbar hook
+  const handleImageToolbar = useImageToolbar();
+
+  // V2: Direct array access
+  const galleryItems = blockContent.gallery_items || [];
+
+  // V2: Handle caption editing - update array item
+  const handleCaptionEdit = (id: string, value: string) => {
+    const updatedItems = galleryItems.map(item =>
+      item.id === id ? { ...item, caption: value } : item
     );
+    (handleContentUpdate as any)('gallery_items', updatedItems);
+  };
+
+  // V2: Handle adding a new gallery item
+  const handleAddItem = () => {
+    if (galleryItems.length < 4) {
+      const newItem: GalleryItem = {
+        id: `g${Date.now()}`,
+        image_url: '',
+        caption: ''
+      };
+      (handleContentUpdate as any)('gallery_items', [...galleryItems, newItem]);
+    }
+  };
+
+  // V2: Handle removing a gallery item
+  const handleRemoveItem = (id: string) => {
+    if (galleryItems.length > 2) {
+      const updatedItems = galleryItems.filter(item => item.id !== id);
+      (handleContentUpdate as any)('gallery_items', updatedItems);
+    }
   };
 
   return (
@@ -354,11 +324,38 @@ export default function ResultsGallery(props: LayoutComponentProps) {
 
         {/* 2x2 Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {renderImageSlot('image_1', 'caption_1', fileInputRef1, 1)}
-          {renderImageSlot('image_2', 'caption_2', fileInputRef2, 2)}
-          {renderImageSlot('image_3', 'caption_3', fileInputRef3, 3)}
-          {renderImageSlot('image_4', 'caption_4', fileInputRef4, 4)}
+          {galleryItems.map((item, idx) => (
+            <GalleryItemCard
+              key={item.id}
+              item={item}
+              index={idx}
+              sectionId={sectionId}
+              mode={mode}
+              colorTokens={colorTokens}
+              onCaptionEdit={(value) => handleCaptionEdit(item.id, value)}
+              onRemove={() => handleRemoveItem(item.id)}
+              handleImageToolbar={handleImageToolbar}
+              theme={uiBlockTheme}
+              canRemove={galleryItems.length > 2}
+            />
+          ))}
         </div>
+
+        {/* Add Item Button - only in edit mode, under max limit */}
+        {mode === 'edit' && galleryItems.length < 4 && (
+          <div className="flex justify-center mt-8">
+            <button
+              onClick={handleAddItem}
+              className="px-6 py-3 border-2 border-dashed border-gray-300 hover:border-gray-400 text-gray-500 hover:text-gray-600 transition-all duration-300 flex items-center space-x-3 bg-gray-50 hover:bg-gray-100 rounded-2xl"
+              title="Add new gallery item"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span className="font-medium">Add Gallery Item</span>
+            </button>
+          </div>
+        )}
       </div>
     </LayoutSection>
   );
@@ -376,24 +373,17 @@ export const componentMeta = {
   contentFields: [
     { key: 'headline', label: 'Main Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
-    { key: 'image_1', label: 'Image 1', type: 'image', required: false },
-    { key: 'image_2', label: 'Image 2', type: 'image', required: false },
-    { key: 'image_3', label: 'Image 3', type: 'image', required: false },
-    { key: 'image_4', label: 'Image 4', type: 'image', required: false },
-    { key: 'caption_1', label: 'Caption 1', type: 'text', required: false },
-    { key: 'caption_2', label: 'Caption 2', type: 'text', required: false },
-    { key: 'caption_3', label: 'Caption 3', type: 'text', required: false },
-    { key: 'caption_4', label: 'Caption 4', type: 'text', required: false }
+    { key: 'gallery_items', label: 'Gallery Items (array)', type: 'array', required: true }
   ],
 
   features: [
     'Headline and subheadline support',
-    'Four image upload areas with placeholders',
+    'V2: Clean array-based gallery items',
+    'Image toolbar integration for uploads',
     'Optional image captions with inline editing',
+    'Add/remove gallery items in edit mode (2-4 items)',
     'Responsive 2x2 grid layout (1 column mobile, 2 columns desktop)',
-    'Edit and preview modes',
-    'Image upload validation (type and size)',
-    'Smooth hover effects and transitions',
+    'Theme-aware styling (warm/cool/neutral)',
     'Perfect for showcasing AI-generated images'
   ],
 

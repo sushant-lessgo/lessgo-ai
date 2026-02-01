@@ -1,179 +1,133 @@
-import React, { useEffect } from 'react';
+// TechnicalAdvantage.tsx - V2: Clean array-based advantages
+import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
-import { useOnboardingStore } from '@/hooks/useOnboardingStore';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { EditableAdaptiveHeadline, EditableAdaptiveText } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getIconFromCategory, getRandomIconFromCategory } from '@/utils/iconMapping';
+import { getIcon } from '@/lib/getIcon';
+import { shadows, cardEnhancements } from '@/modules/Design/designTokens';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
+// V2: Advantage item structure - clean array item
+interface Advantage {
+  id: string;
+  title: string;
+  description: string;
+  icon?: string;
+}
+
+// V2: Content interface - uses clean arrays
 interface TechnicalAdvantageContent {
   headline: string;
   subheadline?: string;
-  advantage_titles: string;
-  advantage_descriptions: string;
-  advantage_icon_1?: string;
-  advantage_icon_2?: string;
-  advantage_icon_3?: string;
-  advantage_icon_4?: string;
-  advantage_icon_5?: string;
-  advantage_icon_6?: string;
+  advantages: Advantage[];
 }
 
-interface AdvantageItem {
-  title: string;
-  description: string;
-  id: string;
-}
-
+// V2: Content schema - uses clean arrays
 const CONTENT_SCHEMA = {
-  headline: { type: 'string' as const, default: 'Technical Advantages That Set Us Apart' },
-  subheadline: { type: 'string' as const, default: '' },
-  advantage_titles: { type: 'string' as const, default: '10x Processing Speed|Quantum-Resistant Security|Zero-Knowledge Architecture|Self-Healing Infrastructure' },
-  advantage_descriptions: { type: 'string' as const, default: 'Our parallel processing engine handles millions of transactions per second with sub-millisecond latency.|Military-grade encryption with post-quantum cryptography ensures future-proof security.|Complete data privacy with zero-knowledge proofs - we never see your sensitive information.|Intelligent monitoring and automated recovery systems ensure 99.999% uptime.' },
-  advantage_icon_1: { type: 'string' as const, default: '⚡' },
-  advantage_icon_2: { type: 'string' as const, default: '🔒' },
-  advantage_icon_3: { type: 'string' as const, default: '🛡️' },
-  advantage_icon_4: { type: 'string' as const, default: '🔧' },
-  advantage_icon_5: { type: 'string' as const, default: '🚀' },
-  advantage_icon_6: { type: 'string' as const, default: '💫' }
-};
-
-const parseAdvantageData = (titles: string, descriptions: string): AdvantageItem[] => {
-  const titleList = titles.split('|').map(t => t.trim()).filter(t => t);
-  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
-
-  return titleList.map((title, index) => ({
-    id: `advantage-${index}`,
-    title,
-    description: descriptionList[index] || 'Description not provided.'
-  }));
-};
-
-const getAdvantageIcon = (blockContent: TechnicalAdvantageContent, index: number) => {
-  const iconFields = [
-    blockContent.advantage_icon_1,
-    blockContent.advantage_icon_2,
-    blockContent.advantage_icon_3,
-    blockContent.advantage_icon_4,
-    blockContent.advantage_icon_5,
-    blockContent.advantage_icon_6
-  ];
-  return iconFields[index] || '⚡';
-};
-
-const addAdvantage = (titles: string, descriptions: string): { newTitles: string; newDescriptions: string } => {
-  const titleList = titles.split('|').map(t => t.trim()).filter(t => t);
-  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
-
-  titleList.push('New Advantage');
-  descriptionList.push('Describe this technical advantage.');
-
-  return {
-    newTitles: titleList.join('|'),
-    newDescriptions: descriptionList.join('|')
-  };
-};
-
-const removeAdvantage = (titles: string, descriptions: string, indexToRemove: number): { newTitles: string; newDescriptions: string } => {
-  const titleList = titles.split('|').map(t => t.trim()).filter(t => t);
-  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
-
-  if (indexToRemove >= 0 && indexToRemove < titleList.length) {
-    titleList.splice(indexToRemove, 1);
+  headline: {
+    type: 'string' as const,
+    default: 'Technical Advantages That Set Us Apart'
+  },
+  subheadline: {
+    type: 'string' as const,
+    default: ''
+  },
+  advantages: {
+    type: 'array' as const,
+    default: [
+      { id: 'a1', title: '10x Processing Speed', description: 'Our parallel processing engine handles millions of transactions per second with sub-millisecond latency.' },
+      { id: 'a2', title: 'Quantum-Resistant Security', description: 'Military-grade encryption with post-quantum cryptography ensures future-proof security.' },
+      { id: 'a3', title: 'Zero-Knowledge Architecture', description: 'Complete data privacy with zero-knowledge proofs - we never see your sensitive information.' },
+      { id: 'a4', title: 'Self-Healing Infrastructure', description: 'Intelligent monitoring and automated recovery systems ensure 99.999% uptime.' }
+    ]
   }
-  if (indexToRemove >= 0 && indexToRemove < descriptionList.length) {
-    descriptionList.splice(indexToRemove, 1);
-  }
-
-  return {
-    newTitles: titleList.join('|'),
-    newDescriptions: descriptionList.join('|')
-  };
 };
 
+// Theme-based gradient colors (intentional - not using colorTokens for differentiation)
 const getAdvantageColors = (theme: UIBlockTheme) => {
   return {
     warm: {
       cardBg: 'from-orange-50 to-red-50',
       iconBg: 'from-orange-500 to-red-600',
-      hoverShadow: 'hover:shadow-orange-200/50'
+      cardBorder: 'border-orange-200',
     },
     cool: {
       cardBg: 'from-blue-50 to-indigo-50',
       iconBg: 'from-blue-500 to-indigo-600',
-      hoverShadow: 'hover:shadow-blue-200/50'
+      cardBorder: 'border-blue-200',
     },
     neutral: {
       cardBg: 'from-gray-50 to-slate-50',
       iconBg: 'from-gray-500 to-slate-600',
-      hoverShadow: 'hover:shadow-gray-200/50'
+      cardBorder: 'border-gray-200',
     }
   }[theme];
 };
 
-const AdvantageCard = ({
+// Advantage Card component
+const AdvantageCard = React.memo(({
   advantage,
-  index,
   mode,
-  sectionId,
+  colorTokens,
   onTitleEdit,
   onDescriptionEdit,
+  onIconEdit,
   onRemoveAdvantage,
-  blockContent,
-  colorTokens,
-  handleContentUpdate,
+  sectionId,
   canRemove = true,
-  sectionBackground,
-  themeColors
+  themeColors,
+  theme = 'neutral'
 }: {
-  advantage: AdvantageItem;
-  index: number;
+  advantage: Advantage;
   mode: 'edit' | 'preview';
-  sectionId: string;
-  onTitleEdit: (index: number, value: string) => void;
-  onDescriptionEdit: (index: number, value: string) => void;
-  onRemoveAdvantage?: (index: number) => void;
-  blockContent: TechnicalAdvantageContent;
   colorTokens: any;
-  handleContentUpdate: (field: keyof TechnicalAdvantageContent, value: string) => void;
+  onTitleEdit: (id: string, value: string) => void;
+  onDescriptionEdit: (id: string, value: string) => void;
+  onIconEdit?: (id: string, value: string) => void;
+  onRemoveAdvantage?: (id: string) => void;
+  sectionId: string;
   canRemove?: boolean;
-  sectionBackground?: string;
-  themeColors: any;
+  themeColors: ReturnType<typeof getAdvantageColors>;
+  theme?: UIBlockTheme;
 }) => {
   const { getTextStyle } = useTypography();
 
+  // Icon derivation: stored value → smart default → fallback
+  const displayIcon = advantage.icon
+    ?? getIcon(undefined, { title: advantage.title, description: advantage.description })
+    ?? 'lucide:sparkles';
+
   return (
     <div className="group relative">
-      <div className={`bg-gradient-to-br ${themeColors.cardBg} rounded-xl p-6 hover:shadow-lg transition-all duration-300 h-full`}>
+      <div className={`bg-gradient-to-br ${themeColors.cardBg} border ${themeColors.cardBorder} rounded-xl p-6 h-full ${shadows.card[theme]} ${cardEnhancements.hoverLift} ${cardEnhancements.transition}`}>
         <div className="flex items-start space-x-4">
+          {/* Icon Container */}
           <div className={`flex-shrink-0 w-14 h-14 bg-gradient-to-br ${themeColors.iconBg} rounded-lg flex items-center justify-center shadow-md`}>
             <IconEditableText
               mode={mode}
-              value={getAdvantageIcon(blockContent, index)}
-              onEdit={(value) => {
-                const iconField = `advantage_icon_${index + 1}` as keyof TechnicalAdvantageContent;
-                handleContentUpdate(iconField, value);
-              }}
+              value={displayIcon}
+              onEdit={(value) => onIconEdit && onIconEdit(advantage.id, value)}
               backgroundType="primary"
               colorTokens={colorTokens}
               iconSize="lg"
               className="text-white text-2xl"
+              placeholder="lucide:sparkles"
               sectionId={sectionId}
-              elementKey={`advantage_icon_${index + 1}`}
+              elementKey={`advantage_icon_${advantage.id}`}
             />
           </div>
 
+          {/* Content */}
           <div className="flex-1">
             {mode !== 'preview' ? (
               <div
                 contentEditable
                 suppressContentEditableWarning
-                onBlur={(e) => onTitleEdit(index, e.currentTarget.textContent || '')}
+                onBlur={(e) => onTitleEdit(advantage.id, e.currentTarget.textContent || '')}
                 className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 mb-2 cursor-text hover:bg-white hover:bg-opacity-50 font-bold text-gray-900 text-lg"
               >
                 {advantage.title}
@@ -186,7 +140,7 @@ const AdvantageCard = ({
               <div
                 contentEditable
                 suppressContentEditableWarning
-                onBlur={(e) => onDescriptionEdit(index, e.currentTarget.textContent || '')}
+                onBlur={(e) => onDescriptionEdit(advantage.id, e.currentTarget.textContent || '')}
                 className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[48px] cursor-text hover:bg-white hover:bg-opacity-50 text-gray-600 text-sm"
               >
                 {advantage.description}
@@ -197,11 +151,12 @@ const AdvantageCard = ({
           </div>
         </div>
 
-        {mode === 'edit' && canRemove && (
+        {/* Delete button - only show in edit mode and if can remove */}
+        {mode === 'edit' && canRemove && onRemoveAdvantage && (
           <button
             onClick={(e) => {
               e.stopPropagation();
-              onRemoveAdvantage?.(index);
+              onRemoveAdvantage(advantage.id);
             }}
             className="opacity-0 group-hover:opacity-100 absolute top-4 right-4 w-8 h-8 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-200"
             title="Remove this advantage"
@@ -214,7 +169,9 @@ const AdvantageCard = ({
       </div>
     </div>
   );
-};
+});
+
+AdvantageCard.displayName = 'AdvantageCard';
 
 export default function TechnicalAdvantage(props: LayoutComponentProps) {
   const {
@@ -230,10 +187,6 @@ export default function TechnicalAdvantage(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
-  const { getTextStyle: getTypographyStyle } = useTypography();
-  const store = useEditStore();
-  const onboardingStore = useOnboardingStore();
-
   // Detect theme: manual override > auto-detection > neutral fallback
   const uiTheme = React.useMemo(() => {
     if (props.manualThemeOverride) return props.manualThemeOverride;
@@ -241,58 +194,51 @@ export default function TechnicalAdvantage(props: LayoutComponentProps) {
     return 'neutral';
   }, [props.manualThemeOverride, props.userContext]);
 
-  const colors = getAdvantageColors(uiTheme);
+  const themeColors = getAdvantageColors(uiTheme);
 
-  // Auto-populate icons on initial generation
-  useEffect(() => {
-    if (mode === 'edit' && blockContent.advantage_titles) {
-      const advantages = parseAdvantageData(blockContent.advantage_titles, blockContent.advantage_descriptions);
+  // V2: Direct array access
+  const advantages = blockContent.advantages || [];
 
-      advantages.forEach((_, index) => {
-        const iconField = `advantage_icon_${index + 1}` as keyof TechnicalAdvantageContent;
-        if (!blockContent[iconField] || blockContent[iconField] === '') {
-          const categories = ['speed', 'security', 'technology', 'performance', 'optimization', 'advanced'];
-          const icon = getRandomIconFromCategory(categories[index % categories.length]);
-          handleContentUpdate(iconField, icon);
-        }
-      });
-    }
-  }, [blockContent.advantage_titles]);
-
-  const advantages = parseAdvantageData(
-    blockContent.advantage_titles || '',
-    blockContent.advantage_descriptions || ''
-  );
-
-  const handleTitleEdit = (index: number, newTitle: string) => {
-    const titles = (blockContent.advantage_titles || '').split('|').map(t => t.trim());
-    titles[index] = newTitle;
-    handleContentUpdate('advantage_titles', titles.join('|'));
+  // V2: Direct array update handlers - use (handleContentUpdate as any) for array types
+  const handleTitleEdit = (id: string, newTitle: string) => {
+    const updated = advantages.map(a =>
+      a.id === id ? { ...a, title: newTitle } : a
+    );
+    (handleContentUpdate as any)('advantages', updated);
   };
 
-  const handleDescriptionEdit = (index: number, newDescription: string) => {
-    const descriptions = (blockContent.advantage_descriptions || '').split('|').map(d => d.trim());
-    descriptions[index] = newDescription;
-    handleContentUpdate('advantage_descriptions', descriptions.join('|'));
+  const handleDescriptionEdit = (id: string, newDescription: string) => {
+    const updated = advantages.map(a =>
+      a.id === id ? { ...a, description: newDescription } : a
+    );
+    (handleContentUpdate as any)('advantages', updated);
   };
 
+  const handleIconEdit = (id: string, newIcon: string) => {
+    const updated = advantages.map(a =>
+      a.id === id ? { ...a, icon: newIcon } : a
+    );
+    (handleContentUpdate as any)('advantages', updated);
+  };
+
+  // V2: Direct array push
   const handleAddAdvantage = () => {
-    const { newTitles, newDescriptions } = addAdvantage(
-      blockContent.advantage_titles || '',
-      blockContent.advantage_descriptions || ''
-    );
-    handleContentUpdate('advantage_titles', newTitles);
-    handleContentUpdate('advantage_descriptions', newDescriptions);
+    const newId = `a${Date.now()}`;
+    const updated = [
+      ...advantages,
+      {
+        id: newId,
+        title: 'New Advantage',
+        description: 'Describe this technical advantage.'
+      }
+    ];
+    (handleContentUpdate as any)('advantages', updated);
   };
 
-  const handleRemoveAdvantage = (index: number) => {
-    const { newTitles, newDescriptions } = removeAdvantage(
-      blockContent.advantage_titles || '',
-      blockContent.advantage_descriptions || '',
-      index
-    );
-    handleContentUpdate('advantage_titles', newTitles);
-    handleContentUpdate('advantage_descriptions', newDescriptions);
+  // V2: Direct array filter
+  const handleRemoveAdvantage = (id: string) => {
+    const updated = advantages.filter(a => a.id !== id);
+    (handleContentUpdate as any)('advantages', updated);
   };
 
   return (
@@ -305,6 +251,7 @@ export default function TechnicalAdvantage(props: LayoutComponentProps) {
       className={props.className}
     >
       <div className="max-w-6xl mx-auto">
+        {/* Header Section */}
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
             mode={mode}
@@ -335,6 +282,7 @@ export default function TechnicalAdvantage(props: LayoutComponentProps) {
           )}
         </div>
 
+        {/* Advantage Cards Grid */}
         <div className={`grid gap-6 ${
           advantages.length === 1 ? 'grid-cols-1 max-w-2xl mx-auto' :
           advantages.length === 2 ? 'grid-cols-1 md:grid-cols-2' :
@@ -342,26 +290,25 @@ export default function TechnicalAdvantage(props: LayoutComponentProps) {
           advantages.length === 4 ? 'grid-cols-1 md:grid-cols-2' :
           'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
         }`}>
-          {advantages.map((advantage, index) => (
+          {advantages.map((advantage) => (
             <AdvantageCard
               key={advantage.id}
               advantage={advantage}
-              index={index}
               mode={mode}
-              sectionId={sectionId}
+              colorTokens={colorTokens}
               onTitleEdit={handleTitleEdit}
               onDescriptionEdit={handleDescriptionEdit}
+              onIconEdit={handleIconEdit}
               onRemoveAdvantage={handleRemoveAdvantage}
-              blockContent={blockContent}
-              colorTokens={colorTokens}
-              handleContentUpdate={handleContentUpdate}
+              sectionId={sectionId}
               canRemove={advantages.length > 3}
-              sectionBackground={sectionBackground}
-              themeColors={colors}
+              themeColors={themeColors}
+              theme={uiTheme}
             />
           ))}
         </div>
 
+        {/* Add Button - enforce max:6 */}
         {mode === 'edit' && advantages.length < 6 && (
           <div className="mt-8 text-center">
             <button

@@ -12,41 +12,42 @@ import { HeadlinePublished, TextPublished } from '@/components/published/TextPub
 import { IconPublished } from '@/components/published/IconPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 
-// Tile structure
-interface ObjectionTile {
-  icon: string;
-  objection: string;
-  answer: string;
+// Objection item structure (V2 format)
+interface Objection {
+  id: string;
+  question: string;
+  response: string;
   label?: string;
+  icon?: string;
 }
 
-// Parse objection tiles from props
-const parseObjectionTiles = (props: any): ObjectionTile[] => {
-  const tiles: ObjectionTile[] = [];
+// Helper function to get default icon based on content
+const getDefaultIcon = (question: string): string => {
+  const lower = question.toLowerCase();
+  if (lower.includes('expensive') || lower.includes('cost') || lower.includes('price') || lower.includes('budget')) return 'lucide:dollar-sign';
+  if (lower.includes('time') || lower.includes('setup') || lower.includes('install')) return 'lucide:clock';
+  if (lower.includes('complex') || lower.includes('difficult') || lower.includes('hard') || lower.includes('adopt')) return 'lucide:users';
+  if (lower.includes('integration') || lower.includes('connect') || lower.includes('tool')) return 'lucide:plug';
+  if (lower.includes('security') || lower.includes('safe') || lower.includes('privacy') || lower.includes('risk')) return 'lucide:shield-check';
+  if (lower.includes('slow') || lower.includes('speed') || lower.includes('performance')) return 'lucide:zap';
+  return 'lucide:help-circle';
+};
 
-  // Process individual fields
-  const individualTiles = [
-    { objection: props.tile_objection_1, response: props.tile_response_1, label: props.tile_label_1, icon: props.tile_icon_1 },
-    { objection: props.tile_objection_2, response: props.tile_response_2, label: props.tile_label_2, icon: props.tile_icon_2 },
-    { objection: props.tile_objection_3, response: props.tile_response_3, label: props.tile_label_3, icon: props.tile_icon_3 },
-    { objection: props.tile_objection_4, response: props.tile_response_4, label: props.tile_label_4, icon: props.tile_icon_4 },
-    { objection: props.tile_objection_5, response: props.tile_response_5, label: props.tile_label_5, icon: props.tile_icon_5 },
-    { objection: props.tile_objection_6, response: props.tile_response_6, label: props.tile_label_6, icon: props.tile_icon_6 }
-  ];
+// Helper to get container classes based on count
+const getContainerClasses = (count: number) => {
+  if (count === 4) {
+    // 2x2 grid for 4 items
+    return 'grid grid-cols-1 md:grid-cols-2 gap-8';
+  }
+  // 3, 5, 6: use flex with centering for partial rows
+  return 'flex flex-wrap justify-center gap-8';
+};
 
-  individualTiles.forEach((tile) => {
-    if (tile.objection && tile.objection.trim() && tile.objection !== '___REMOVED___' &&
-        tile.response && tile.response.trim() && tile.response !== '___REMOVED___') {
-      tiles.push({
-        icon: tile.icon || '💡',
-        objection: tile.objection.trim().replace(/"/g, ''),
-        answer: tile.response.trim(),
-        label: tile.label?.trim()
-      });
-    }
-  });
-
-  return tiles;
+// Helper to get card width classes for flex layout
+const getCardWidthClasses = (count: number) => {
+  if (count === 4) return ''; // grid handles sizing
+  // For flex: ~31% width on lg (3 cols), ~48% on md (2 cols)
+  return 'w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.4rem)]';
 };
 
 // Get theme colors based on theme prop
@@ -58,7 +59,7 @@ const getTileColors = (theme: 'warm' | 'cool' | 'neutral') => {
       accent: { from: '#fb923c', to: '#f97316' } // orange-400 to orange-500
     },
     cool: {
-      iconBg: { from: '#eff6ff', to: '#dbeafe' }, // blue-50 to indigo-100
+      iconBg: { from: '#eff6ff', to: '#e0e7ff' }, // blue-50 to indigo-100
       border: '#bfdbfe', // blue-200
       accent: { from: '#60a5fa', to: '#6366f1' } // blue-400 to indigo-500
     },
@@ -78,8 +79,8 @@ export default function VisualObjectionTilesPublished(props: LayoutComponentProp
   const headline = props.headline || 'Common Concerns? We\'ve Got You Covered';
   const subheadline = props.subheadline || '';
 
-  // Parse objection tiles
-  const objectionTiles = parseObjectionTiles(props);
+  // Get objections array from props (V2 format)
+  const objections: Objection[] = props.objections || [];
 
   // Determine theme
   const uiBlockTheme = (props.manualThemeOverride || 'neutral') as 'warm' | 'cool' | 'neutral';
@@ -132,11 +133,11 @@ export default function VisualObjectionTilesPublished(props: LayoutComponentProp
         </div>
 
         {/* Objection Tiles Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {objectionTiles.map((tile: ObjectionTile, index: number) => (
+        <div className={getContainerClasses(objections.length)}>
+          {objections.map((objection: Objection) => (
             <div
-              key={index}
-              className="bg-white/90 backdrop-blur-sm border rounded-2xl p-8 shadow-lg"
+              key={objection.id}
+              className={`bg-white/90 backdrop-blur-sm border rounded-2xl p-8 shadow-lg ${getCardWidthClasses(objections.length)}`}
               style={{
                 borderColor: colors.border
               }}
@@ -149,23 +150,27 @@ export default function VisualObjectionTilesPublished(props: LayoutComponentProp
                     background: `linear-gradient(to bottom right, ${colors.iconBg.from}, ${colors.iconBg.to})`
                   }}
                 >
-                  <IconPublished icon={tile.icon} size={32} />
+                  <IconPublished icon={objection.icon || getDefaultIcon(objection.question)} size={32} />
                 </div>
               </div>
 
-              {/* Objection */}
+              {/* Question (Objection) */}
               <div className="mb-4">
                 <h3
-                  className="text-lg font-bold text-gray-900 mb-3 text-center"
+                  className="text-lg font-bold text-gray-900 text-center"
+                  style={bodyTypography}
                 >
-                  {tile.objection}
+                  {objection.question}
                 </h3>
               </div>
 
-              {/* Answer */}
+              {/* Response (Answer) */}
               <div className="text-center">
-                <p className="text-gray-700 leading-relaxed">
-                  {tile.answer}
+                <p
+                  className="text-gray-700 leading-relaxed"
+                  style={bodyTypography}
+                >
+                  {objection.response}
                 </p>
               </div>
 

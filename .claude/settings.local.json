@@ -102,7 +102,16 @@
       "Bash(npm install:*)",
       "WebFetch(domain:docs.anthropic.com)",
       "Bash(dir:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(for block in \"BeforeAfter/SideBySideBlock\" \"BeforeAfter/SplitCard\" \"BeforeAfter/StackedTextVisual\" \"FAQ/AccordionFAQ\" \"FAQ/InlineQnAList\" \"FAQ/SegmentedFAQTabs\" \"FAQ/TwoColumnFAQ\" \"Pricing/TierCards\" \"Pricing/CallToQuotePlan\" \"Testimonials/BeforeAfterQuote\" \"Testimonials/QuoteGrid\" \"Testimonials/VideoTestimonials\")",
+      "Bash(do)",
+      "Bash(echo:*)",
+      "Bash(if [ -f \"src/modules/UIBlocks/$block.tsx\" ])",
+      "Bash([ -f \"src/modules/UIBlocks/$block.published.tsx\" ])",
+      "Bash(then)",
+      "Bash(else)",
+      "Bash(fi)",
+      "Bash(npx eslint:*)"
     ],
     "deny": [],
     "ask": [],

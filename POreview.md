@@ -1,42 +1,34 @@
- Missing Items
+1. Add constraint enforcement code:
+  // min:3 enforcement
+  canRemove={value_items.length > 3}
 
-  1. CSS Pattern - Add:
-  Use colorTokens for section content
-  Keep theme-based before/after colors (warm/cool/neutral)
-  2. key={} usage - Add explicitly:
-  {transformations.map(t => <TransformationCard key={t.id} />)}
-  3. data-element-key pattern:
-  transformations.${t.id}.before_situation
-  transformations.${t.id}.after_outcome
-  transformations.${t.id}.testimonial_quote
-  transformations.${t.id}.customer_name
-  transformations.${t.id}.customer_title
-  transformations.${t.id}.customer_company
-  4. Handler functions - Show explicitly:
-  const handleTransformationUpdate = (id: string, field: keyof Transformation, value: string) => {
-    const updated = transformations.map(t =>
-      t.id === id ? { ...t, [field]: value } : t
-    );
-    handleContentUpdate('transformations', JSON.stringify(updated));
-  };
+  // max:8 enforcement
+  {mode === 'edit' && value_items.length < 8 && ( <AddButton /> )}
 
-  const handleAddTransformation = () => {
-    if (transformations.length >= 4) return;
-    const newT = { id: `t-${Date.now()}`, ... };
-    handleContentUpdate('transformations', JSON.stringify([...transformations, newT]));
-  };
-
-  const handleRemoveTransformation = (id: string) => {
-    if (transformations.length <= 1) return;
-    handleContentUpdate('transformations', JSON.stringify(transformations.filter(t => t.id !== id)));
-  };
-  5. Constraints enforcement - Note min: 1, max: 4 checks in handlers
-  6. mockDataGenerator.ts - Add entry for BeforeAfterQuote
-  7. CONTENT_SCHEMA defaults - Show array structure:
-  transformations: {
-    type: 'array' as const,
-    default: [
-      { id: 't-1', before_situation: '...', after_outcome: '...', ... },
-      { id: 't-2', ... }
-    ]
+  2. Add mock data block:
+  ValueStackCTA: {
+    headline: "Everything You Get With Your Account",
+    subheadline: "One subscription, unlimited value",
+    cta_text: "Start Free Trial",
+    secondary_cta_text: "Compare Plans",
+    final_cta_headline: "Ready to Transform Your Workflow?",
+    final_cta_description: "Join 10,000+ teams already saving time every day",
+    guarantee_text: "30-day money-back guarantee",
+    value_items: [
+      { id: "v1", text: "Save 20+ hours per week on repetitive tasks" },
+      { id: "v2", text: "Increase team productivity by 40%" },
+      { id: "v3", text: "Real-time analytics and reporting" },
+      { id: "v4", text: "Unlimited team members included" },
+      { id: "v5", text: "Priority 24/7 customer support" },
+    ],
   }
+
+  3. Add UIBlockTheme for CTA box:
+  // Theme detection
+  const uiBlockTheme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // CTA box gradient based on theme

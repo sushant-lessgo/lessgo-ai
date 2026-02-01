@@ -394,15 +394,14 @@ function generateMockContent(context: BusinessContext, requestedSections: string
 
     results: {
       headline: "Real Results from Real Customers",
-      stat_values: randomChoices(contentVariations.stats, 4),
-      stat_labels: randomChoices(contentVariations.statLabels, 4),
-      improvement_metrics: [
-        "50% faster processing",
-        "90% reduction in errors",
-        "3x productivity increase",
-        "85% cost savings"
-      ],
-      supporting_text: "Join thousands of teams already seeing these results."
+      subheadline: "Numbers that speak for themselves",
+      achievement_footer: "Results measured across thousands of customers",
+      stats: [
+        { id: "s1", value: "10,000+", label: "Happy Customers", description: "And growing every day" },
+        { id: "s2", value: "98%", label: "Customer Satisfaction", description: "Based on quarterly NPS surveys" },
+        { id: "s3", value: "2.5x", label: "Revenue Growth", description: "Average increase within 6 months" },
+        { id: "s4", value: "24/7", label: "Support Available", description: "Dedicated team always ready" }
+      ]
     },
 
     testimonials: {
