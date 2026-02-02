@@ -149,6 +149,11 @@ export default function GeneratingStep() {
       const backgroundSystem = generateBackgroundSystemForVibe(strategy.vibe);
       const designTokens = getDesignTokensForVibe(strategy.vibe);
 
+      // DEBUG: Verify what's being generated
+      console.log('🎨 [DEBUG-BUG1] Vibe:', strategy.vibe);
+      console.log('🎨 [DEBUG-BUG1] BackgroundSystem:', JSON.stringify(backgroundSystem, null, 2));
+      console.log('🎨 [DEBUG-BUG1] DesignTokens:', JSON.stringify(designTokens, null, 2));
+
       // Build content map with full structure + backgroundType
       const content: Record<string, any> = {};
       sectionIds.forEach((id, i) => {
@@ -206,6 +211,9 @@ export default function GeneratingStep() {
         },
         generatedAt: Date.now(),
       };
+
+      // DEBUG: Verify what's being saved
+      console.log('💾 [DEBUG-BUG1] Saving theme.colors:', JSON.stringify(finalContent.layout.theme.colors, null, 2));
 
       // Save to API
       await fetch('/api/saveDraft', {

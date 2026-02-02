@@ -33,18 +33,8 @@ const vibeOptions: Vibe[] = ['Dark Tech', 'Light Trust', 'Warm Friendly', 'Bold 
 export function generateMockStrategyV3(input: StrategyV3Input): SimplifiedStrategyOutput {
   logger.debug('[MockV3] Generating mock strategy for:', input.productName);
 
-  // Determine vibe based on categories/context
-  let vibe: Vibe = 'Light Trust';
-  const categories = input.categories?.join(' ').toLowerCase() || '';
-  if (categories.includes('tech') || categories.includes('ai') || categories.includes('dev')) {
-    vibe = 'Dark Tech';
-  } else if (categories.includes('health') || categories.includes('wellness')) {
-    vibe = 'Warm Friendly';
-  } else if (categories.includes('startup') || categories.includes('growth')) {
-    vibe = 'Bold Energy';
-  } else if (categories.includes('enterprise') || categories.includes('finance')) {
-    vibe = 'Calm Minimal';
-  }
+  // Random vibe for mock mode
+  const vibe: Vibe = vibeOptions[Math.floor(Math.random() * vibeOptions.length)];
 
   // Build sections based on assets and goal
   const sections: SectionType[] = ['Header', 'Hero'];

@@ -130,11 +130,16 @@ export function createPersistenceActions(set: any, get: any) {
           // Restore theme and settings if available (check both new and legacy paths)
           const theme = contentToLoad?.theme ?? contentToLoad?.layout?.theme;
           if (contentToLoad && theme) {
+            // DEBUG: Verify shallow merge issue
+            console.log('🔍 [DEBUG-BUG2] Theme BEFORE merge:', JSON.stringify(state.theme.colors, null, 2));
+            console.log('🔍 [DEBUG-BUG2] Theme from API:', JSON.stringify(theme?.colors, null, 2));
 
             const mergedTheme = { ...state.theme, ...theme };
             state.theme = mergedTheme;
 
+            console.log('🔍 [DEBUG-BUG2] Theme AFTER merge:', JSON.stringify(state.theme.colors, null, 2));
           } else {
+            console.log('🔍 [DEBUG-BUG2] No theme in contentToLoad');
           }
 
           const globalSettings = contentToLoad?.globalSettings ?? contentToLoad?.layout?.globalSettings;
