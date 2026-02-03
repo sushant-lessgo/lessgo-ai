@@ -299,12 +299,12 @@ const CarouselSlide = React.memo(({
       </div>
 
       {/* Visual Side */}
-      <div className="relative">
+      <div className="relative aspect-[4/3] overflow-hidden">
         {feature.visual && feature.visual !== '' ? (
           <img
             src={feature.visual}
             alt={feature.title}
-            className="w-full h-auto rounded-xl shadow-lg cursor-pointer hover:shadow-xl transition-shadow duration-300"
+            className="absolute inset-0 w-full h-full object-cover object-center rounded-xl shadow-lg cursor-pointer hover:shadow-xl transition-shadow duration-300"
             data-image-id={`${sectionId}.features.${feature.id}.visual`}
             onMouseUp={(e) => {
               if (mode === 'edit') {

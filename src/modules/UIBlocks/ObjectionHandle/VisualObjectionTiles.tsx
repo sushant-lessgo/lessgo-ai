@@ -13,6 +13,7 @@ import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { inferIconFromText } from '@/lib/iconCategoryMap';
 
 // Objection item structure (V2 format)
 interface Objection {
@@ -35,10 +36,10 @@ const generateId = () => `obj_${Date.now()}_${Math.random().toString(36).substr(
 
 // Default objections for new sections
 const DEFAULT_OBJECTIONS: Objection[] = [
-  { id: 'o1', question: '"It\'s too expensive for our budget"', response: 'Plans start at $10/mo with no hidden fees. Most teams see ROI within 30 days.', label: 'Pricing', icon: 'lucide:dollar-sign' },
-  { id: 'o2', question: '"We don\'t have time for another tool"', response: 'Setup takes under 10 minutes. No IT required. You\'ll save more time than you spend.', label: 'Time', icon: 'lucide:clock' },
-  { id: 'o3', question: '"Our team won\'t adopt it"', response: 'Designed for simplicity—if they can use email, they can use this. 94% adoption rate.', label: 'Adoption', icon: 'lucide:users' },
-  { id: 'o4', question: '"What if it doesn\'t work for us?"', response: '30-day money-back guarantee. No questions asked. Zero risk to try.', label: 'Risk', icon: 'lucide:shield-check' },
+  { id: 'o1', question: '"It\'s too expensive for our budget"', response: 'Plans start at $10/mo with no hidden fees. Most teams see ROI within 30 days.', label: 'Pricing', icon: 'DollarSign' },
+  { id: 'o2', question: '"We don\'t have time for another tool"', response: 'Setup takes under 10 minutes. No IT required. You\'ll save more time than you spend.', label: 'Time', icon: 'Clock' },
+  { id: 'o3', question: '"Our team won\'t adopt it"', response: 'Designed for simplicity—if they can use email, they can use this. 94% adoption rate.', label: 'Adoption', icon: 'Users' },
+  { id: 'o4', question: '"What if it doesn\'t work for us?"', response: '30-day money-back guarantee. No questions asked. Zero risk to try.', label: 'Risk', icon: 'ShieldCheck' },
 ];
 
 // Content schema - defines structure and defaults
@@ -57,17 +58,6 @@ const CONTENT_SCHEMA = {
   }
 };
 
-// Helper function to get default icon based on content
-const getDefaultIcon = (question: string): string => {
-  const lower = question.toLowerCase();
-  if (lower.includes('expensive') || lower.includes('cost') || lower.includes('price') || lower.includes('budget')) return 'lucide:dollar-sign';
-  if (lower.includes('time') || lower.includes('setup') || lower.includes('install')) return 'lucide:clock';
-  if (lower.includes('complex') || lower.includes('difficult') || lower.includes('hard') || lower.includes('adopt')) return 'lucide:users';
-  if (lower.includes('integration') || lower.includes('connect') || lower.includes('tool')) return 'lucide:plug';
-  if (lower.includes('security') || lower.includes('safe') || lower.includes('privacy') || lower.includes('risk')) return 'lucide:shield-check';
-  if (lower.includes('slow') || lower.includes('speed') || lower.includes('performance')) return 'lucide:zap';
-  return 'lucide:help-circle';
-};
 
 // Theme-based colors for tiles
 const getTileColors = (theme: UIBlockTheme) => ({
@@ -149,7 +139,7 @@ export default function VisualObjectionTiles(props: LayoutComponentProps) {
       question: '"New objection to address"',
       response: 'Your clear, concise response here',
       label: 'General',
-      icon: 'lucide:help-circle'
+      icon: 'HelpCircle'
     };
     handleContentUpdate('objections', JSON.stringify([...objections, newObjection]));
   };
@@ -240,7 +230,7 @@ export default function VisualObjectionTiles(props: LayoutComponentProps) {
                 <div className={`inline-flex items-center justify-center w-16 h-16 ${tileColors.iconBg} rounded-2xl text-3xl group-hover:scale-110 transition-transform duration-300`}>
                   <IconEditableText
                     mode={mode}
-                    value={objection.icon || getDefaultIcon(objection.question)}
+                    value={objection.icon || inferIconFromText(objection.question, objection.response)}
                     onEdit={(value) => updateObjection(objection.id, 'icon', value)}
                     backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                     colorTokens={colorTokens}

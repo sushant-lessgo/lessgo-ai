@@ -5,7 +5,7 @@ import { LayoutSection } from '@/components/layout/LayoutSection';
 import { EditableAdaptiveHeadline, EditableAdaptiveText } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getIcon } from '@/lib/getIcon';
+import { inferIconFromText } from '@/lib/iconCategoryMap';
 import { shadows, cardEnhancements } from '@/modules/Design/designTokens';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
@@ -44,7 +44,7 @@ const CONTENT_SCHEMA = {
   methodology_description: { type: 'string' as const, default: 'Our proprietary methodology combines machine learning, behavioral psychology, and real-time optimization to deliver unprecedented results.' },
   subheadline: { type: 'string' as const, default: '' },
   results_title: { type: 'string' as const, default: 'Proven Results' },
-  methodology_icon: { type: 'string' as const, default: 'lucide:brain' },
+  methodology_icon: { type: 'string' as const, default: 'Brain' },
   principles: {
     type: 'array' as const,
     default: [
@@ -132,9 +132,7 @@ const PrincipleCard = React.memo(({
   const themeColors = getThemeColors(theme);
 
   // Get icon - use stored value or derive from name/description
-  const displayIcon = principle.icon
-    ?? getIcon(undefined, { title: principle.name, description: principle.description })
-    ?? 'lucide:sparkles';
+  const displayIcon = principle.icon || inferIconFromText(principle.name, principle.description);
 
   return (
     <div className={`group relative bg-white p-8 border ${themeColors.cardBorder} ${themeColors.cardHover} ${shadows.card[theme]} ${shadows.cardHover[theme]} ${cardEnhancements.hoverLift} ${cardEnhancements.transition} ${cardEnhancements.borderRadius}`}>
@@ -164,7 +162,7 @@ const PrincipleCard = React.memo(({
           colorTokens={colorTokens}
           iconSize="md"
           className="text-white"
-          placeholder="lucide:sparkles"
+          placeholder="Sparkles"
           sectionId={sectionId}
           elementKey={`principle_icon_${principle.id}`}
         />
@@ -234,9 +232,7 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
   const results = Array.isArray(blockContent.results) ? blockContent.results : [];
 
   // Get methodology icon
-  const methodologyIcon = blockContent.methodology_icon
-    ?? getIcon(undefined, { title: blockContent.methodology_name, description: blockContent.methodology_description })
-    ?? 'lucide:brain';
+  const methodologyIcon = blockContent.methodology_icon || inferIconFromText(blockContent.methodology_name, blockContent.methodology_description);
 
   // V2: Array-based handlers (cast to any for array updates)
   const handlePrincipleNameEdit = (id: string, value: string) => {
@@ -340,7 +336,7 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
               colorTokens={colorTokens}
               iconSize="xl"
               className="text-white text-3xl"
-              placeholder="lucide:brain"
+              placeholder="Brain"
               sectionId={sectionId}
               elementKey="methodology_icon"
             />

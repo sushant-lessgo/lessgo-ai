@@ -13,6 +13,7 @@ import { IconPublished } from '@/components/published/IconPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { inferIconFromText } from '@/lib/iconCategoryMap';
 
 // Stat item structure (V2 array format)
 interface StatItem {
@@ -23,22 +24,6 @@ interface StatItem {
   icon?: string;
 }
 
-// Get contextual icon based on stat label
-const getContextualIcon = (label: string, index: number): string => {
-  const lower = label.toLowerCase();
-
-  if (lower.includes('customer') || lower.includes('user') || lower.includes('client')) return '👥';
-  if (lower.includes('satisfaction') || lower.includes('rating') || lower.includes('score') || lower.includes('love')) return '❤️';
-  if (lower.includes('revenue') || lower.includes('growth') || lower.includes('sales') || lower.includes('profit') || lower.includes('increase')) return '📈';
-  if (lower.includes('time') || lower.includes('speed') || lower.includes('fast') || lower.includes('support') || lower.includes('24')) return '⏰';
-  if (lower.includes('efficiency') || lower.includes('productivity') || lower.includes('performance') || lower.includes('boost')) return '⚡';
-  if (lower.includes('award') || lower.includes('achievement') || lower.includes('success') || lower.includes('winner')) return '🏆';
-  if (lower.includes('money') || lower.includes('cost') || lower.includes('save') || lower.includes('dollar')) return '💰';
-  if (lower.includes('goal') || lower.includes('target') || lower.includes('hit') || lower.includes('reach')) return '🎯';
-
-  // Positional fallback
-  return ['📊', '✨', '🔥', '💡', '🚀', '🎉'][index] || '📊';
-};
 
 export default function StatBlocksPublished(props: LayoutComponentProps) {
   const { sectionId, sectionBackgroundCSS, theme, backgroundType } = props;
@@ -135,7 +120,7 @@ export default function StatBlocksPublished(props: LayoutComponentProps) {
         <div className={`grid gap-8 ${gridCols} mx-auto`}>
           {stats.map((stat: StatItem, idx: number) => {
             // Get icon: user-set → derived from label
-            const displayIcon = stat.icon || getContextualIcon(stat.label, idx);
+            const displayIcon = stat.icon || inferIconFromText(stat.label, stat.description);
 
             return (
               <div

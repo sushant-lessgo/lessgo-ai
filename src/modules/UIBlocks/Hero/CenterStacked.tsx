@@ -633,11 +633,11 @@ export default function CenterStacked(props: LayoutComponentProps) {
               const imageSrc = isValidImagePath && imageValue !== '' ? imageValue : '/hero-placeholder.jpg';
 
               return imageSrc ? (
-                <div className="relative w-[70%] lg:w-[80%] aspect-video mx-auto">
+                <div className="relative w-[70%] lg:w-[80%] aspect-video mx-auto overflow-hidden">
                   <img
                     src={imageSrc}
                     alt="Hero"
-                    className="w-full h-full object-cover rounded-2xl shadow-2xl cursor-pointer"
+                    className="absolute inset-0 w-full h-full object-cover object-center rounded-2xl shadow-2xl cursor-pointer"
                     data-image-id={`${sectionId}-center-hero-image`}
                   onMouseUp={(e) => {
                     if (mode !== 'preview') {

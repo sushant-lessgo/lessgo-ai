@@ -282,12 +282,12 @@ export default function VisualCTAWithMockupPublished(props: LayoutComponentProps
           </div>
 
           {/* Right Column - Product Mockup */}
-          <div className="relative">
+          <div className="relative aspect-video overflow-hidden">
             {mockup_image && mockup_image !== '' ? (
               <img
                 src={mockup_image}
                 alt="Product Demo"
-                className="w-full h-auto rounded-2xl shadow-2xl"
+                className="absolute inset-0 w-full h-full object-cover object-center rounded-2xl shadow-2xl"
               />
             ) : (
               <ProductMockup />

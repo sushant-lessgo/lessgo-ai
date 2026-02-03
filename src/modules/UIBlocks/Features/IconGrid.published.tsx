@@ -13,7 +13,7 @@ import { HeadlinePublished, TextPublished } from '@/components/published/TextPub
 import { IconPublished } from '@/components/published/IconPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import { getIcon } from '@/lib/getIcon';
+import { inferIconFromText } from '@/lib/iconCategoryMap';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 // V2: Feature structure - clean array item
@@ -137,7 +137,7 @@ export default function IconGridPublished(props: LayoutComponentProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
           {features.map((feature: Feature) => {
             // V2: Get icon - use stored value or derive from title/description
-            const displayIcon = feature.icon ?? getIcon(undefined, { title: feature.title, description: feature.description }) ?? '⭐';
+            const displayIcon = feature.icon || inferIconFromText(feature.title, feature.description);
 
             return (
               <div

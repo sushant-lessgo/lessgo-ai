@@ -9,8 +9,6 @@ import {
 import IconEditableText from '@/components/ui/IconEditableText';
 import AvatarEditableComponent from '@/components/ui/AvatarEditableComponent';
 import { LayoutComponentProps } from '@/types/storeTypes';
-// V2: Legacy parsing utils no longer needed - using clean arrays
-import { getRandomIconFromCategory } from '@/utils/iconMapping';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
@@ -49,11 +47,11 @@ const CONTENT_SCHEMA = {
   },
   before_icon: {
     type: 'string' as const,
-    default: '❌'
+    default: 'XCircle'
   },
   after_icon: {
     type: 'string' as const,
-    default: '✅'
+    default: 'CheckCircle'
   },
   transformations: {
     type: 'array' as const,
@@ -160,8 +158,8 @@ export default function BeforeAfterQuote(props: LayoutComponentProps) {
       customer_name: 'New Customer',
       customer_title: 'Role Title',
       customer_company: 'Company Name',
-      before_icon: getRandomIconFromCategory('problem'),
-      after_icon: getRandomIconFromCategory('success'),
+      before_icon: 'XCircle',
+      after_icon: 'CheckCircle',
       avatar_url: ''
     };
     (handleContentUpdate as any)('transformations', [...transformations, newT]);

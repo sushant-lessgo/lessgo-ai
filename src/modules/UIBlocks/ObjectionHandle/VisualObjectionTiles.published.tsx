@@ -11,6 +11,7 @@ import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publ
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { IconPublished } from '@/components/published/IconPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
+import { inferIconFromText } from '@/lib/iconCategoryMap';
 
 // Objection item structure (V2 format)
 interface Objection {
@@ -21,17 +22,6 @@ interface Objection {
   icon?: string;
 }
 
-// Helper function to get default icon based on content
-const getDefaultIcon = (question: string): string => {
-  const lower = question.toLowerCase();
-  if (lower.includes('expensive') || lower.includes('cost') || lower.includes('price') || lower.includes('budget')) return 'lucide:dollar-sign';
-  if (lower.includes('time') || lower.includes('setup') || lower.includes('install')) return 'lucide:clock';
-  if (lower.includes('complex') || lower.includes('difficult') || lower.includes('hard') || lower.includes('adopt')) return 'lucide:users';
-  if (lower.includes('integration') || lower.includes('connect') || lower.includes('tool')) return 'lucide:plug';
-  if (lower.includes('security') || lower.includes('safe') || lower.includes('privacy') || lower.includes('risk')) return 'lucide:shield-check';
-  if (lower.includes('slow') || lower.includes('speed') || lower.includes('performance')) return 'lucide:zap';
-  return 'lucide:help-circle';
-};
 
 // Helper to get container classes based on count
 const getContainerClasses = (count: number) => {
@@ -150,7 +140,7 @@ export default function VisualObjectionTilesPublished(props: LayoutComponentProp
                     background: `linear-gradient(to bottom right, ${colors.iconBg.from}, ${colors.iconBg.to})`
                   }}
                 >
-                  <IconPublished icon={objection.icon || getDefaultIcon(objection.question)} size={32} />
+                  <IconPublished icon={objection.icon || inferIconFromText(objection.question, objection.response)} size={32} />
                 </div>
               </div>
 

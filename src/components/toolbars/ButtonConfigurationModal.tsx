@@ -13,7 +13,6 @@ import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { Plus, X, AlertCircle, Info } from 'lucide-react';
 import type { ElementSelection } from '@/types/store/state';
 import IconPicker from '@/components/ui/IconPicker';
-import { decodeIcon, lucideNameToPascalCase } from '@/lib/iconStorage';
 import * as LucideIcons from 'lucide-react';
 import { getDisabledBehaviorOptions } from '@/utils/formPlacement';
 import { hasPrimaryCTASection } from '@/utils/sectionHelpers';
@@ -316,19 +315,23 @@ export function ButtonConfigurationModal({
   };
 
   // Helper to render icon preview
-  const renderIconPreview = (encodedIcon: string) => {
-    const { name, type } = decodeIcon(encodedIcon);
+  const renderIconPreview = (iconValue: string) => {
+    if (!iconValue) return null;
 
-    if (type === 'emoji') {
-      return <span className="text-lg">{name}</span>;
-    }
-
-    if (type === 'lucide') {
-      const IconComponent = (LucideIcons as any)[lucideNameToPascalCase(name)];
+    // PascalCase Lucide icon
+    if (/^[A-Z][a-zA-Z0-9]*$/.test(iconValue)) {
+      const IconComponent = (LucideIcons as any)[iconValue];
       if (IconComponent) {
         return <IconComponent size={18} />;
       }
+      return <LucideIcons.Sparkles size={18} className="text-gray-400" />;
     }
+
+    // Emoji
+    if (/\p{Emoji}/u.test(iconValue)) {
+      return <span className="text-lg">{iconValue}</span>;
+    }
+
     return null;
   };
 

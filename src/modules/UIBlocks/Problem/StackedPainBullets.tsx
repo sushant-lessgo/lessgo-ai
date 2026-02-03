@@ -9,6 +9,7 @@ import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { inferIconFromText } from '@/lib/iconCategoryMap';
 
 // Pain item structure (V2 - array based)
 interface PainItem {
@@ -41,45 +42,6 @@ const CONTENT_SCHEMA = {
   pain_items: { type: 'array' as const, default: DEFAULT_PAIN_ITEMS },
 };
 
-// Derive icon from pain point text - maps keywords to Lucide icons
-const getPainIconFromText = (point: string, description?: string): string => {
-  const text = `${point} ${description || ''}`.toLowerCase();
-
-  // Time-related pain
-  if (text.includes('time') || text.includes('hour') || text.includes('slow') || text.includes('wait')) {
-    return 'Clock';
-  }
-  // Disconnection/integration issues
-  if (text.includes('disconnect') || text.includes('integration') || text.includes('sync') || text.includes('talk to each other')) {
-    return 'Unlink';
-  }
-  // Deadlines/urgency
-  if (text.includes('deadline') || text.includes('miss') || text.includes('late') || text.includes('urgent')) {
-    return 'AlertTriangle';
-  }
-  // Burnout/fatigue
-  if (text.includes('burn') || text.includes('exhaust') || text.includes('tired') || text.includes('overwhelm')) {
-    return 'Battery';
-  }
-  // Loss/decline
-  if (text.includes('losing') || text.includes('lost') || text.includes('decline') || text.includes('drop')) {
-    return 'TrendingDown';
-  }
-  // Chaos/disorganization
-  if (text.includes('chaos') || text.includes('mess') || text.includes('scattered') || text.includes('disorganiz')) {
-    return 'Shuffle';
-  }
-  // Manual work
-  if (text.includes('manual') || text.includes('repetitive') || text.includes('tedious')) {
-    return 'Hand';
-  }
-  // Customer issues
-  if (text.includes('customer') || text.includes('client') || text.includes('response')) {
-    return 'Users';
-  }
-  // Default pain icon
-  return 'AlertCircle';
-};
 
 // Individual Pain Point Item
 const PainPointItem = ({
@@ -134,7 +96,7 @@ const PainPointItem = ({
           className="text-2xl"
           sectionId={sectionId}
           elementKey={`pain_items.${index}.icon`}
-          placeholder={getPainIconFromText(painItem.point, painItem.description)}
+          placeholder={inferIconFromText(painItem.point, painItem.description)}
         />
       </div>
 

@@ -14,7 +14,7 @@ import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import { shadows, cardEnhancements } from '@/modules/Design/designTokens';
-import { getIcon } from '@/lib/getIcon';
+import { inferIconFromText } from '@/lib/iconCategoryMap';
 
 interface Highlight {
   id: string;
@@ -51,18 +51,13 @@ const CONTENT_SCHEMA = {
   highlights: {
     type: 'array' as const,
     default: [
-      { id: 'h1', title: 'Intelligent Auto-Prioritization', description: 'Our AI analyzes your workflow patterns and automatically prioritizes tasks based on deadlines, dependencies, and business impact.', icon: 'lucide:brain' },
-      { id: 'h2', title: 'Dynamic Context Switching', description: 'The system seamlessly adapts to changing priorities and contexts, maintaining efficiency even when your focus needs to shift.', icon: 'lucide:refresh-cw' },
-      { id: 'h3', title: 'Predictive Resource Allocation', description: 'Advanced algorithms predict resource needs and automatically allocate team capacity, preventing bottlenecks before they occur.', icon: 'lucide:trending-up' },
+      { id: 'h1', title: 'Intelligent Auto-Prioritization', description: 'Our AI analyzes your workflow patterns and automatically prioritizes tasks based on deadlines, dependencies, and business impact.', icon: 'Brain' },
+      { id: 'h2', title: 'Dynamic Context Switching', description: 'The system seamlessly adapts to changing priorities and contexts, maintaining efficiency even when your focus needs to shift.', icon: 'RefreshCw' },
+      { id: 'h3', title: 'Predictive Resource Allocation', description: 'Advanced algorithms predict resource needs and automatically allocate team capacity, preventing bottlenecks before they occur.', icon: 'TrendingUp' },
     ]
   }
 };
 
-// Helper to derive icon from highlight content
-const deriveIcon = (highlight: Highlight): string => {
-  if (highlight.icon) return highlight.icon;
-  return getIcon(undefined, { title: highlight.title, description: highlight.description }) ?? 'lucide:sparkles';
-};
 
 // Individual Highlight Card
 const HighlightCard = ({
@@ -92,7 +87,7 @@ const HighlightCard = ({
   sectionBackground: any;
   backgroundType: 'primary' | 'secondary' | 'neutral' | 'divider' | 'custom' | 'theme';
 }) => {
-  const displayIcon = deriveIcon(highlight);
+  const displayIcon = highlight.icon || inferIconFromText(highlight.title, highlight.description);
 
   return (
     <div className="group relative">

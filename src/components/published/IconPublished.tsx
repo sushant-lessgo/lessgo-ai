@@ -2,33 +2,45 @@
  * Published-safe icon component for server-side rendering.
  *
  * @remarks
- * - Supports emojis and Lucide icons
- * - Uses decodeIcon from iconStorage for parsing
- * - Tree-shaking: Lucide icons imported dynamically
+ * - Supports PascalCase Lucide icons (system default)
+ * - Supports emojis (user choice)
  * - No client-side hooks or state
  *
  * @example
  * ```tsx
- * <IconPublished icon="🎯" size={24} color="#14B8A6" />
- * <IconPublished icon="lucide:arrow-right" size={20} color="#9333EA" />
+ * <IconPublished icon="Clock" size={24} color="#14B8A6" />
+ * <IconPublished icon="🎯" size={20} color="#9333EA" />
  * ```
  */
 
-import { decodeIcon, lucideNameToPascalCase } from '@/lib/iconStorage';
 import * as LucideIcons from 'lucide-react';
 
 interface IconPublishedProps {
-  icon: string; // Encoded format: '🎯' or 'lucide:arrow-right'
+  icon: string; // PascalCase Lucide name ('Clock') or emoji ('🎯')
   color?: string;
   size?: number;
   className?: string;
 }
 
 export function IconPublished({ icon, color, size = 24, className }: IconPublishedProps) {
-  const decoded = decodeIcon(icon);
+  if (!icon) {
+    return <LucideIcons.Sparkles size={size} color={color} className={className} />;
+  }
 
-  // Handle emoji icons
-  if (decoded.type === 'emoji') {
+  // Case 1: PascalCase Lucide icon (system default)
+  if (/^[A-Z][a-zA-Z0-9]*$/.test(icon)) {
+    const LucideIcon = LucideIcons[icon as keyof typeof LucideIcons] as React.ComponentType<any>;
+
+    if (LucideIcon && typeof LucideIcon !== 'string') {
+      return <LucideIcon size={size} color={color} className={className} />;
+    }
+
+    // Fallback for invalid PascalCase name
+    return <LucideIcons.Sparkles size={size} color={color} className={className} />;
+  }
+
+  // Case 2: Emoji (user choice - supported but not encouraged)
+  if (/\p{Emoji}/u.test(icon)) {
     return (
       <span
         style={{
@@ -38,25 +50,11 @@ export function IconPublished({ icon, color, size = 24, className }: IconPublish
         }}
         className={className}
       >
-        {decoded.name}
+        {icon}
       </span>
     );
   }
 
-  // Handle Lucide icons
-  if (decoded.type === 'lucide') {
-    const iconName = lucideNameToPascalCase(decoded.name);
-    const LucideIcon = LucideIcons[iconName as keyof typeof LucideIcons] as React.ComponentType<any>;
-
-    if (LucideIcon && typeof LucideIcon !== 'string') {
-      const IconComponent = LucideIcon;
-      return <IconComponent size={size} color={color} className={className} />;
-    }
-
-    // Fallback if Lucide icon not found
-    console.warn(`Lucide icon not found: ${iconName}`);
-  }
-
-  // Fallback for svg type or unknown icons
-  return <span className={className}>{icon}</span>;
+  // Fallback for any other format
+  return <LucideIcons.Sparkles size={size} color={color} className={className} />;
 }

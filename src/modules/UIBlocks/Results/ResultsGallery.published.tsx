@@ -106,15 +106,17 @@ export default function ResultsGalleryPublished(props: LayoutComponentProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {galleryItems.map((item, idx) => (
             <div key={item.id} className="space-y-3">
-              <img
-                src={item.image_url}
-                alt={item.caption || `Result ${idx + 1}`}
-                className="w-full h-auto object-contain rounded-lg"
-                style={{
-                  boxShadow: `0 10px 30px ${colors.shadow}`,
-                  border: `1px solid ${colors.border}`
-                }}
-              />
+              <div className="relative aspect-[4/3] overflow-hidden">
+                <img
+                  src={item.image_url}
+                  alt={item.caption || `Result ${idx + 1}`}
+                  className="absolute inset-0 w-full h-full object-cover object-center rounded-lg"
+                  style={{
+                    boxShadow: `0 10px 30px ${colors.shadow}`,
+                    border: `1px solid ${colors.border}`
+                  }}
+                />
+              </div>
               {item.caption && (
                 <p
                   className="text-center text-sm font-medium"

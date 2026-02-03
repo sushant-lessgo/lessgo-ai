@@ -212,12 +212,12 @@ const FeatureRow = React.memo(({
         </div>
       </div>
 
-      <div className={`${isEven ? 'lg:order-2' : 'lg:order-1'}`}>
+      <div className={`${isEven ? 'lg:order-2' : 'lg:order-1'} relative aspect-[4/3] overflow-hidden`}>
         {feature.visual && feature.visual !== '' ? (
           <img
             src={feature.visual}
             alt={feature.title}
-            className="w-full h-80 object-cover rounded-xl shadow-2xl cursor-pointer hover:shadow-3xl transition-shadow duration-300"
+            className="absolute inset-0 w-full h-full object-cover object-center rounded-xl shadow-2xl cursor-pointer hover:shadow-3xl transition-shadow duration-300"
             data-image-id={imageId}
             onMouseUp={(e) => {
               if (mode === 'edit') {

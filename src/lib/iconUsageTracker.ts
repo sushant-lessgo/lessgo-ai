@@ -5,7 +5,7 @@
  * Device-specific tracking (not synced across devices).
  */
 
-import { IconType } from './iconStorage';
+import { IconType } from './iconCategoryMap';
 
 const STORAGE_KEY = 'lessgo_icon_usage';
 const MAX_RECENT = 15;

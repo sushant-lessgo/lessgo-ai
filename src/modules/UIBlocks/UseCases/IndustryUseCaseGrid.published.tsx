@@ -13,7 +13,7 @@ import { HeadlinePublished, TextPublished } from '@/components/published/TextPub
 import { IconPublished } from '@/components/published/IconPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import { getIcon } from '@/lib/getIcon';
+import { inferIconFromText } from '@/lib/iconCategoryMap';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 // V2: Industry structure - clean array item
@@ -117,7 +117,7 @@ export default function IndustryUseCaseGridPublished(props: LayoutComponentProps
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {industries.map((industry: Industry) => {
             // V2: Get icon - use stored value or derive from name/description
-            const displayIcon = industry.icon ?? getIcon(undefined, { title: industry.name, description: industry.description }) ?? 'Building2';
+            const displayIcon = industry.icon || inferIconFromText(industry.name, industry.description);
 
             return (
               <div

@@ -82,6 +82,9 @@ export default function MinimalNavHeaderPublished(props: LayoutComponentProps) {
   // ColorTokens for theme-aware styling
   const colorTokens = props.colorTokens as { text?: string } | undefined;
 
+  // Section background from theme
+  const sectionBackground = props.sectionBackground as string || '';
+
   /**
    * Handle navigation click with smooth scroll for anchors
    * Uses native scrollIntoView (simpler than manual offset calculation)
@@ -101,9 +104,9 @@ export default function MinimalNavHeaderPublished(props: LayoutComponentProps) {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b">
+    <header className="sticky top-0 z-50" style={{ background: sectionBackground }}>
       <div className="container mx-auto px-4">
-        <nav className="relative flex items-center justify-center py-2 md:py-3">
+        <nav className="relative flex items-center justify-center py-3 md:py-4">
           {/* Logo - absolute left */}
           <div className="absolute left-0 flex items-center">
             {logo ? (

@@ -5,7 +5,7 @@
  * Uses indexed search with ranking for best results.
  */
 
-import { IconType } from './iconStorage';
+import { IconType } from './iconCategoryMap';
 import { buildIconRegistry, IconMetadata } from './lucideIconRegistry';
 import { EMOJI_ICONS } from './lucideIconCategories';
 

@@ -13,6 +13,7 @@ import { IconPublished } from '@/components/published/IconPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { inferIconFromText } from '@/lib/iconCategoryMap';
 
 // V2: Principle item structure
 interface Principle {
@@ -73,7 +74,7 @@ export default function MethodologyBreakdownPublished(props: LayoutComponentProp
   const headline = props.headline || 'The Science Behind Our Success';
   const methodology_name = props.methodology_name || 'Adaptive Intelligence Framework™';
   const methodology_description = props.methodology_description || '';
-  const methodology_icon = props.methodology_icon || 'lucide:brain';
+  const methodology_icon = props.methodology_icon || 'Brain';
   const subheadline = props.subheadline || '';
   const results_title = props.results_title || '';
 
@@ -184,7 +185,7 @@ export default function MethodologyBreakdownPublished(props: LayoutComponentProp
         {principles.length > 0 && (
           <div className={`grid gap-6 lg:gap-8 mb-12 ${getGridClass(principles.length)}`}>
             {principles.map((principle) => {
-              const displayIcon = principle.icon || 'lucide:sparkles';
+              const displayIcon = principle.icon || inferIconFromText(principle.name, principle.description);
 
               return (
                 <div

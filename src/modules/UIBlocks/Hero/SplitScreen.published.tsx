@@ -271,11 +271,11 @@ export default function SplitScreenPublished(props: LayoutComponentProps) {
       background={sectionBackgroundCSS}
       padding="normal"
     >
-      <div className="min-h-screen flex items-center">
-        <div className="w-full grid lg:grid-cols-2 gap-4 md:gap-8 lg:gap-12 min-h-[700px]">
+      <div className="flex items-center">
+        <div className="w-full grid lg:grid-cols-2 gap-4 md:gap-8 lg:gap-12 items-stretch h-[clamp(600px,85vh,900px)]">
 
           {/* Left Column: Content */}
-          <div className="flex items-center justify-center p-8 md:p-10 lg:p-16">
+          <div className="flex flex-col justify-center p-8 md:p-10 lg:p-16">
             <div className="max-w-lg space-y-8 md:space-y-10 lg:space-y-12">
 
               {/* Badge */}
@@ -483,11 +483,11 @@ export default function SplitScreenPublished(props: LayoutComponentProps) {
           {/* Right Column: Image */}
           <div className="flex items-center justify-center p-4 md:p-6 lg:p-8">
             {imageSrc && imageSrc !== '/hero-placeholder.jpg' ? (
-              <div className="relative w-full h-full min-h-[600px]">
+              <div className="relative w-full h-full overflow-hidden">
                 <img
                   src={imageSrc}
                   alt="Hero"
-                  className="w-full h-full object-cover rounded-2xl shadow-2xl"
+                  className="absolute inset-0 w-full h-full object-cover object-center rounded-2xl shadow-2xl"
                 />
               </div>
             ) : (

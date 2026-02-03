@@ -13,6 +13,7 @@ import { HeadlinePublished, TextPublished } from '@/components/published/TextPub
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { inferIconFromText } from '@/lib/iconCategoryMap';
 
 // Pain item structure (V2)
 interface PainItem {
@@ -22,36 +23,6 @@ interface PainItem {
   icon?: string;
 }
 
-// Derive icon from pain point text
-const getPainIconFromText = (point: string, description?: string): string => {
-  const text = `${point} ${description || ''}`.toLowerCase();
-
-  if (text.includes('time') || text.includes('hour') || text.includes('slow') || text.includes('wait')) {
-    return 'Clock';
-  }
-  if (text.includes('disconnect') || text.includes('integration') || text.includes('sync') || text.includes('talk to each other')) {
-    return 'Unlink';
-  }
-  if (text.includes('deadline') || text.includes('miss') || text.includes('late') || text.includes('urgent')) {
-    return 'AlertTriangle';
-  }
-  if (text.includes('burn') || text.includes('exhaust') || text.includes('tired') || text.includes('overwhelm')) {
-    return 'Battery';
-  }
-  if (text.includes('losing') || text.includes('lost') || text.includes('decline') || text.includes('drop')) {
-    return 'TrendingDown';
-  }
-  if (text.includes('chaos') || text.includes('mess') || text.includes('scattered') || text.includes('disorganiz')) {
-    return 'Shuffle';
-  }
-  if (text.includes('manual') || text.includes('repetitive') || text.includes('tedious')) {
-    return 'Hand';
-  }
-  if (text.includes('customer') || text.includes('client') || text.includes('response')) {
-    return 'Users';
-  }
-  return 'AlertCircle';
-};
 
 export default function StackedPainBulletsPublished(props: LayoutComponentProps) {
   const { sectionId, sectionBackgroundCSS, theme, backgroundType } = props;
@@ -125,7 +96,7 @@ export default function StackedPainBulletsPublished(props: LayoutComponentProps)
 
   // Render icon component
   const renderIcon = (item: PainItem) => {
-    const iconName = item.icon || getPainIconFromText(item.point, item.description);
+    const iconName = item.icon || inferIconFromText(item.point, item.description);
     const IconComponent = (LucideIcons as any)[iconName] ?? LucideIcons.AlertCircle;
     return <IconComponent size={24} strokeWidth={2} />;
   };

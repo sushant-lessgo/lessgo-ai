@@ -172,10 +172,10 @@ export default function LeftCopyRightImagePublished(props: LayoutComponentProps)
     >
       {/* Two-column grid: copy left, image right (desktop) */}
       {/* Mobile: image first (order-1), copy second (order-2) */}
-      <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center min-h-[600px]">
+      <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-stretch h-[clamp(600px,85vh,900px)]">
 
         {/* LEFT COLUMN - Copy/Content (order-2 on mobile, order-1 on desktop) */}
-        <div className="order-2 lg:order-1 max-w-xl">
+        <div className="order-2 lg:order-1 max-w-xl flex flex-col justify-center">
 
           {/* Badge */}
           {badge_text && badge_text !== '___REMOVED___' && badge_text.trim() !== '' && (
@@ -393,7 +393,7 @@ export default function LeftCopyRightImagePublished(props: LayoutComponentProps)
         {/* RIGHT COLUMN - Image (order-1 on mobile, order-2 on desktop) */}
         <div className="order-1 lg:order-2">
           {imageSrc ? (
-            <div className="relative w-full h-full min-h-[500px] lg:min-h-[600px]">
+            <div className="relative w-full h-full overflow-hidden">
               {/* Decorative gradient blob behind image - uses theme accent color */}
               <div
                 className="absolute -inset-4 rounded-3xl blur-2xl opacity-30"
@@ -404,7 +404,7 @@ export default function LeftCopyRightImagePublished(props: LayoutComponentProps)
               <img
                 src={imageSrc}
                 alt="Hero"
-                className="relative z-10 w-full h-full object-cover rounded-2xl shadow-2xl"
+                className="absolute inset-0 z-10 w-full h-full object-cover object-center rounded-2xl shadow-2xl"
               />
             </div>
           ) : (

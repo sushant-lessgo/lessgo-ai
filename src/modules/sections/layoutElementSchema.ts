@@ -307,8 +307,8 @@ export const layoutElementSchema: LayoutSchema = {
       after_description:  { type: "string", requirement: "optional", fillMode: "ai_generated" },
       subheadline:        { type: "string", requirement: "optional", fillMode: "ai_generated" },
       summary_text:       { type: "string", requirement: "optional", fillMode: "ai_generated" },  // Transition copy below cards
-      before_icon:        { type: "string", requirement: "optional", fillMode: "manual_preferred", default: "❌" },
-      after_icon:         { type: "string", requirement: "optional", fillMode: "manual_preferred", default: "✅" },
+      before_icon:        { type: "string", requirement: "optional", fillMode: "manual_preferred", default: "XCircle" },
+      after_icon:         { type: "string", requirement: "optional", fillMode: "manual_preferred", default: "CheckCircle" },
     },
 
     collections: {
@@ -590,8 +590,8 @@ export const layoutElementSchema: LayoutSchema = {
       // Benefits shown per slide (section-level, same on all slides)
       benefit_1:       { type: "string", requirement: "optional", fillMode: "ai_generated" },
       benefit_2:       { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      benefit_icon_1:  { type: "string", fillMode: "manual_preferred", default: "✅" },
-      benefit_icon_2:  { type: "string", fillMode: "manual_preferred", default: "⏱️" },
+      benefit_icon_1:  { type: "string", fillMode: "manual_preferred", default: "Check" },
+      benefit_icon_2:  { type: "string", fillMode: "manual_preferred", default: "Clock" },
     },
 
     collections: {

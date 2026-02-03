@@ -352,10 +352,10 @@ export default function SplitScreen(props: LayoutComponentProps) {
       mode={mode}
       className={props.className}
     >
-      <div className="min-h-screen flex items-center">
-        <div className="w-full grid lg:grid-cols-2 gap-4 md:gap-8 lg:gap-12 min-h-[700px]">
-          
-          <div className="flex items-center justify-center p-8 md:p-10 lg:p-16">
+      <div className="flex items-center">
+        <div className="w-full grid lg:grid-cols-2 gap-4 md:gap-8 lg:gap-12 items-stretch h-[clamp(600px,85vh,900px)]">
+
+          <div className="flex flex-col justify-center p-8 md:p-10 lg:p-16">
             <div className="max-w-lg space-y-8 md:space-y-10 lg:space-y-12">
               
               {blockContent.badge_text &&
@@ -714,11 +714,11 @@ export default function SplitScreen(props: LayoutComponentProps) {
 
           <div className="flex items-center justify-center p-4 md:p-6 lg:p-8">
             {reactiveHeroImage ? (
-              <div className="relative w-full h-full min-h-[600px]">
+              <div className="relative w-full h-full overflow-hidden">
                 <img
                   src={String(reactiveHeroImage)}
                   alt="Hero"
-                  className="w-full h-full object-cover rounded-2xl shadow-2xl cursor-pointer"
+                  className="absolute inset-0 w-full h-full object-cover object-center rounded-2xl shadow-2xl cursor-pointer"
                   data-image-id={`${sectionId}-split-hero-image`}
                   onMouseUp={(e) => {
                     if (mode !== 'preview') {

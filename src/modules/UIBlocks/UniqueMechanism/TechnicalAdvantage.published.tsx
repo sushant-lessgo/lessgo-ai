@@ -13,7 +13,7 @@ import { IconPublished } from '@/components/published/IconPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import { getIcon } from '@/lib/getIcon';
+import { inferIconFromText } from '@/lib/iconCategoryMap';
 
 // V2: Advantage item structure
 interface Advantage {
@@ -114,10 +114,8 @@ export default function TechnicalAdvantagePublished(props: LayoutComponentProps)
           'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
         }`}>
           {advantages.map((advantage: Advantage) => {
-            // Icon derivation: stored value → smart default → fallback
-            const displayIcon = advantage.icon
-              ?? getIcon(undefined, { title: advantage.title, description: advantage.description })
-              ?? 'lucide:sparkles';
+            // Icon derivation: stored value → smart default
+            const displayIcon = advantage.icon || inferIconFromText(advantage.title, advantage.description);
 
             return (
               <div

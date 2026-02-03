@@ -5,7 +5,7 @@ import { LayoutSection } from '@/components/layout/LayoutSection';
 import { EditableAdaptiveHeadline, EditableAdaptiveText } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getIcon } from '@/lib/getIcon';
+import { inferIconFromText } from '@/lib/iconCategoryMap';
 import { shadows, cardEnhancements } from '@/modules/Design/designTokens';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
@@ -77,7 +77,7 @@ const IndustryCard = React.memo(({
   theme?: UIBlockTheme;
 }) => {
   // Get icon - use stored value or derive from name/description
-  const displayIcon = industry.icon ?? getIcon(undefined, { title: industry.name, description: industry.description }) ?? 'lucide:building-2';
+  const displayIcon = industry.icon || inferIconFromText(industry.name, industry.description);
 
   // Theme-based color mapping
   const themeColors = {
@@ -129,7 +129,7 @@ const IndustryCard = React.memo(({
           colorTokens={colorTokens}
           iconSize="xl"
           className="text-6xl"
-          placeholder="lucide:building-2"
+          placeholder="Building2"
           sectionId={sectionId}
           elementKey={`industry_icon_${industry.id}`}
         />

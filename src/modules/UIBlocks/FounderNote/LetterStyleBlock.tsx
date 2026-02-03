@@ -241,12 +241,12 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
             {/* Signature Section - Full image with name below */}
             <div className="mt-12">
               {/* Founder Image - Portrait style */}
-              <div className="mb-4">
+              <div className="mb-4 relative w-32 aspect-square overflow-hidden">
                 {blockContent.founder_image && blockContent.founder_image !== '' ? (
                   <img
                     src={blockContent.founder_image}
                     alt="Founder"
-                    className="w-32 h-40 rounded-lg object-cover cursor-pointer shadow-md hover:shadow-lg transition-shadow"
+                    className="absolute inset-0 w-full h-full object-cover object-center rounded-lg cursor-pointer shadow-md hover:shadow-lg transition-shadow"
                     data-image-id={`${sectionId}-founder_image`}
                     onMouseUp={(e) => {
                       if (mode === 'edit') {

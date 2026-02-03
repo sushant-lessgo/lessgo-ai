@@ -1,7 +1,6 @@
 
 // @ts-nocheck - Temporary disable type checking due to extensive string|string[] union type issues
 import { logger } from '@/lib/logger';
-import { getIconsFromCategories, getIconFromCategory } from '@/utils/iconMapping';
 
 interface ParsedResponse {
   success: boolean

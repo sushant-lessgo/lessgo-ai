@@ -9,7 +9,7 @@ import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import { getIcon } from '@/lib/getIcon';
+import { inferIconFromText } from '@/lib/iconCategoryMap';
 
 // V2 Schema: Array-based secrets
 interface SecretItem {
@@ -31,9 +31,9 @@ const CONTENT_SCHEMA = {
   secrets: {
     type: 'array' as const,
     default: [
-      { id: 's1', title: 'Quantum-Enhanced Machine Learning', description: 'We combine quantum computing principles with traditional machine learning to achieve processing speeds and accuracy levels impossible with conventional approaches.', icon: 'lucide:cpu' },
-      { id: 's2', title: 'Adaptive Intelligence Framework', description: 'Our system learns and adapts in real-time, continuously improving its performance based on new data and user interactions.', icon: 'lucide:brain' },
-      { id: 's3', title: 'Predictive Optimization Engine', description: 'Advanced algorithms predict future trends and automatically optimize operations before issues arise.', icon: 'lucide:trending-up' }
+      { id: 's1', title: 'Quantum-Enhanced Machine Learning', description: 'We combine quantum computing principles with traditional machine learning to achieve processing speeds and accuracy levels impossible with conventional approaches.', icon: 'Cpu' },
+      { id: 's2', title: 'Adaptive Intelligence Framework', description: 'Our system learns and adapts in real-time, continuously improving its performance based on new data and user interactions.', icon: 'Brain' },
+      { id: 's3', title: 'Predictive Optimization Engine', description: 'Advanced algorithms predict future trends and automatically optimize operations before issues arise.', icon: 'TrendingUp' }
     ]
   }
 };
@@ -79,9 +79,7 @@ const SecretCard = ({
   };
 }) => {
   // V2: Get icon - use stored value or derive from title/description
-  const displayIcon = secret.icon
-    ?? getIcon(undefined, { title: secret.title, description: secret.description })
-    ?? 'lucide:flask-conical';
+  const displayIcon = secret.icon || inferIconFromText(secret.title, secret.description);
 
   return (
     <div className="group relative">

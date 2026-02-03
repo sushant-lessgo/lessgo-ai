@@ -5,7 +5,7 @@
  * Includes emoji icons and dynamically populated categories (Popular, Recent).
  */
 
-import { IconType } from './iconStorage';
+import { IconType } from './iconCategoryMap';
 
 export interface EmojiIconData {
   emoji: string;

@@ -13,7 +13,7 @@ import { IconPublished } from '@/components/published/IconPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import { getIcon } from '@/lib/getIcon';
+import { inferIconFromText } from '@/lib/iconCategoryMap';
 
 // V2 Schema: Array-based secrets
 interface SecretItem {
@@ -114,9 +114,7 @@ export default function SecretSauceRevealPublished(props: LayoutComponentProps) 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {secrets.map((secret: SecretItem) => {
             // V2: Get icon - use stored value or derive from title/description
-            const displayIcon = secret.icon
-              ?? getIcon(undefined, { title: secret.title, description: secret.description })
-              ?? 'lucide:flask-conical';
+            const displayIcon = secret.icon || inferIconFromText(secret.title, secret.description);
 
             return (
               <div key={secret.id} className="group relative">

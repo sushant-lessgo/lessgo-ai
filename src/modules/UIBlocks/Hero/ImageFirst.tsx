@@ -317,7 +317,7 @@ export default function ImageFirst(props: LayoutComponentProps) {
       className={props.className}
     >
       <div className="max-w-6xl mx-auto">
-        <div className="flex flex-col space-y-12 min-h-[700px]">
+        <div className="flex flex-col space-y-12">
           
           <div className="w-full">
             {(() => {
@@ -334,11 +334,11 @@ export default function ImageFirst(props: LayoutComponentProps) {
               const imageSrc = isValidImagePath && imageValue !== '' ? imageValue : '/hero-placeholder.jpg';
 
               return imageSrc ? (
-                <div className="relative w-full h-full min-h-[500px] lg:min-h-[600px]">
+                <div className="relative w-full aspect-video overflow-hidden">
                   <img
                     src={imageSrc}
                   alt="Hero"
-                  className="w-full h-full object-cover rounded-2xl shadow-2xl cursor-pointer"
+                  className="absolute inset-0 w-full h-full object-cover object-center rounded-2xl shadow-2xl cursor-pointer"
                   data-image-id={`${sectionId}-image-first-hero-image`}
                   onMouseUp={(e) => {
                     if (mode !== 'preview') {

@@ -1,9 +1,6 @@
 import React, { useState, useRef } from 'react';
 import * as LucideIcons from 'lucide-react';
-import { EditableAdaptiveText } from '@/components/layout/EditableContent';
 import IconPicker from './IconPicker';
-import { decodeIcon } from '@/lib/iconStorage';
-import { lucideNameToPascalCase } from '@/lib/iconStorage';
 
 interface IconEditableTextProps {
   mode: 'edit' | 'preview';
@@ -65,53 +62,32 @@ const IconEditableText: React.FC<IconEditableTextProps> = ({
     setShowIconPicker(false);
   };
 
-  // Render icon value (emoji or Lucide component)
+  // Render icon value (PascalCase Lucide or emoji)
   const renderIconValue = (iconValue: string) => {
     if (!iconValue) {
       return null;
     }
 
-    const decoded = decodeIcon(iconValue);
+    const sizeMap = { sm: 16, md: 24, lg: 32, xl: 48 };
+    const size = sizeMap[iconSize];
 
-    // Case 1: Lucide icon
-    if (decoded.type === 'lucide') {
-      const componentName = lucideNameToPascalCase(decoded.name);
-      const IconComponent = (LucideIcons as any)[componentName];
-
+    // Case 1: PascalCase Lucide icon (system default)
+    if (/^[A-Z][a-zA-Z0-9]*$/.test(iconValue)) {
+      const IconComponent = (LucideIcons as any)[iconValue];
       if (IconComponent) {
-        const sizeMap = { sm: 16, md: 24, lg: 32, xl: 48 };
-        const size = sizeMap[iconSize];
         return <IconComponent size={size} strokeWidth={2} className="inline-block" />;
-      } else {
-        // Fallback for missing Lucide icon
-        if (process.env.NODE_ENV === 'development') {
-          console.warn(`[IconEditableText] Lucide icon not found: ${decoded.name}`);
-        }
-        return <span title={`Missing icon: ${decoded.name}`}>❓</span>;
       }
+      // Fallback for invalid PascalCase name
+      return <LucideIcons.Sparkles size={size} strokeWidth={2} className="inline-block text-gray-400" />;
     }
 
-    // Case 2: Legacy SVG format - convert to emoji fallback
-    if (decoded.type === 'svg') {
-      const svgToEmojiMap: Record<string, string> = {
-        'target': '🎯',
-        'bolt': '⚡',
-        'lock-closed': '🔒',
-        'star': '⭐',
-        'check-circle': '✅',
-        'color-swatch': '🎨',
-        'link': '🔗',
-        'light-bulb': '💡',
-        'rocket': '🚀',
-        'currency-dollar': '💰',
-        'chart-bar': '📊',
-        'wrench': '🔧'
-      };
-      return <span>{svgToEmojiMap[decoded.name] || '⭐'}</span>;
+    // Case 2: Emoji (user choice - supported but not encouraged)
+    if (/\p{Emoji}/u.test(iconValue)) {
+      return <span className="text-current" style={{ fontSize: `${size}px`, lineHeight: 1 }}>{iconValue}</span>;
     }
 
-    // Case 3: Emoji (direct render)
-    return <span>{decoded.name}</span>;
+    // Fallback for any other format
+    return <LucideIcons.Sparkles size={size} strokeWidth={2} className="inline-block text-gray-400" />;
   };
 
   // Enhanced className for icon display

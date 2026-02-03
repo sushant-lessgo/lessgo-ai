@@ -7,6 +7,7 @@ module.exports = {
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/modules/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/styles/**/*.css", // Include CSS files for pattern detection
     "./src/utils/tailwind-seed.js", // Include seed file for arbitrary patterns
   ],

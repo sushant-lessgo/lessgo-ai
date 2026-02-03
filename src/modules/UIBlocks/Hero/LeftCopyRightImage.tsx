@@ -354,13 +354,13 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
       backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
       sectionBackground={sectionBackground}
       mode={mode}
-      className={props.className}
+      className={`${props.className || ''} overflow-hidden`}
     >
       <div className="max-w-7xl mx-auto">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center min-h-[600px]">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-stretch h-[clamp(600px,85vh,900px)]">
           
           {/* Left Column - Copy Content */}
-          <div className="order-2 lg:order-1 max-w-xl">
+          <div className="order-2 lg:order-1 max-w-xl flex flex-col justify-center">
 
             {/* V2: Optional Badge with Accent Colors */}
             {blockContent.badge_text && blockContent.badge_text.trim() !== '' && (
@@ -672,7 +672,7 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
               const imageSrc = isValidImagePath && imageValue !== '' ? imageValue : '/hero-placeholder.jpg';
 
               return imageSrc ? (
-                <div className="relative w-full h-full min-h-[500px] lg:min-h-[600px]">
+                <div className="relative w-full h-full overflow-hidden">
                   {/* Decorative gradient blob behind image - uses theme accent color */}
                   <div
                     className="absolute -inset-4 rounded-3xl blur-2xl opacity-30"
@@ -683,7 +683,7 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
                   <img
                     src={imageSrc}
                     alt="Hero"
-                    className="relative z-10 w-full h-full object-cover rounded-2xl shadow-2xl cursor-pointer"
+                    className="absolute inset-0 z-10 w-full h-full object-cover rounded-2xl shadow-2xl cursor-pointer"
                     data-image-id={`${sectionId}-hero-image`}
                     onMouseUp={(e) => {
                       if (mode !== 'preview') {

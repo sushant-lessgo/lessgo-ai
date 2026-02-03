@@ -14,6 +14,7 @@ import { IconPublished } from '@/components/published/IconPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { inferIconFromText } from '@/lib/iconCategoryMap';
 
 interface Highlight {
   id: string;
@@ -189,7 +190,7 @@ export default function StackedHighlightsPublished(props: LayoutComponentProps) 
                   }}
                 >
                   <IconPublished
-                    icon={highlight.icon || 'lucide:sparkles'}
+                    icon={highlight.icon || inferIconFromText(highlight.title, highlight.description)}
                     size={32}
                     className="text-2xl text-white"
                   />

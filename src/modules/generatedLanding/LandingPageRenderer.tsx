@@ -446,6 +446,9 @@ const finalSections: OrderedSection[] = processedSections
       }
       
       // Choose rendering method based on feature flags
+      // Detect header sections for sticky positioning
+      const isHeaderSection = sectionId.includes('header') || layout?.includes('Header');
+
       if (shouldUseVariableSystem) {
         return (
           <SectionTracker
@@ -454,7 +457,7 @@ const finalSections: OrderedSection[] = processedSections
             sectionType={layout}
           >
             <div
-              className="relative"
+              className={`relative ${isHeaderSection ? 'sticky top-0 z-50' : ''}`}
               style={{
                 background: customBackgroundStyle?.background || sectionBackgroundCSS,
                 ...customBackgroundStyle

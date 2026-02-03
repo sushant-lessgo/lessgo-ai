@@ -10,7 +10,7 @@ import {
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getIcon } from '@/lib/getIcon';
+import { inferIconFromText } from '@/lib/iconCategoryMap';
 import { shadows, cardEnhancements } from '@/modules/Design/designTokens';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
@@ -96,7 +96,7 @@ const FeatureCard = React.memo(({
   theme?: UIBlockTheme;
 }) => {
   // Get icon - use stored value or derive from title/description
-  const displayIcon = feature.icon ?? getIcon(undefined, { title: feature.title, description: feature.description }) ?? '⭐';
+  const displayIcon = feature.icon || inferIconFromText(feature.title, feature.description);
 
   // Get card background based on section background
   const cardBackground = backgroundType === 'primary'

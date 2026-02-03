@@ -9,6 +9,7 @@ import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { inferIconFromText } from '@/lib/iconCategoryMap';
 
 interface StatBlocksProps extends LayoutComponentProps {}
 
@@ -48,22 +49,6 @@ const CONTENT_SCHEMA = {
 // Generate unique ID for new stats
 const generateStatId = (): string => `s${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-// Get contextual icon based on stat label
-const getContextualIcon = (label: string, index: number): string => {
-  const lower = label.toLowerCase();
-
-  if (lower.includes('customer') || lower.includes('user') || lower.includes('client')) return '👥';
-  if (lower.includes('satisfaction') || lower.includes('rating') || lower.includes('score') || lower.includes('love')) return '❤️';
-  if (lower.includes('revenue') || lower.includes('growth') || lower.includes('sales') || lower.includes('profit') || lower.includes('increase')) return '📈';
-  if (lower.includes('time') || lower.includes('speed') || lower.includes('fast') || lower.includes('support') || lower.includes('24')) return '⏰';
-  if (lower.includes('efficiency') || lower.includes('productivity') || lower.includes('performance') || lower.includes('boost')) return '⚡';
-  if (lower.includes('award') || lower.includes('achievement') || lower.includes('success') || lower.includes('winner')) return '🏆';
-  if (lower.includes('money') || lower.includes('cost') || lower.includes('save') || lower.includes('dollar')) return '💰';
-  if (lower.includes('goal') || lower.includes('target') || lower.includes('hit') || lower.includes('reach')) return '🎯';
-
-  // Default icons based on position
-  return ['📊', '✨', '🔥', '💡', '🚀', '🎉'][index] || '📊';
-};
 
 // Type definitions for color objects
 type StatCardColors = {
@@ -112,7 +97,7 @@ const StatBlock = ({
   const { getTextStyle } = useTypography();
 
   // Get icon: user-set → derived from label
-  const displayIcon = stat.icon || getContextualIcon(stat.label, index);
+  const displayIcon = stat.icon || inferIconFromText(stat.label, stat.description);
 
   return (
     <div className={`group/stat-${index} relative text-center p-8 ${cardColors.bg} rounded-xl border ${cardColors.border} ${cardColors.borderHover} ${cardColors.shadow} transition-all duration-300`}>

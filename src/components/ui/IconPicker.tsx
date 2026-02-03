@@ -4,8 +4,14 @@ import * as LucideIcons from 'lucide-react';
 import { searchIcons, getIconsByCategory, IconSearchEntry } from '@/lib/iconSearchIndex';
 import { ICON_CATEGORIES, getCategoryById } from '@/lib/lucideIconCategories';
 import { trackUsage, getRecentIcons, getPopularIcons, IconUsage } from '@/lib/iconUsageTracker';
-import { encodeIcon } from '@/lib/iconStorage';
-import { lucideNameToPascalCase } from '@/lib/iconStorage';
+
+// Convert kebab-case to PascalCase for Lucide component lookup
+const toPascalCase = (name: string): string => {
+  return name
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join('');
+};
 
 interface IconPickerProps {
   value: string;
@@ -125,7 +131,12 @@ export default function IconPicker({ value, onChange, onClose, triggerRect, plac
   };
 
   const handleIconSelect = (icon: IconSearchEntry) => {
-    const iconValue = encodeIcon(icon.name, icon.type);
+    // Return raw name - no encoding
+    // Lucide: PascalCase (e.g., "Clock")
+    // Emoji: raw character (e.g., "🎯")
+    const iconValue = icon.type === 'lucide'
+      ? toPascalCase(icon.name)  // kebab → PascalCase
+      : icon.name;  // emoji as-is
 
     // Track usage
     trackUsage(icon.name, icon.type);
@@ -138,14 +149,14 @@ export default function IconPicker({ value, onChange, onClose, triggerRect, plac
     if (icon.type === 'emoji') {
       return <span className="text-2xl">{icon.name}</span>;
     } else if (icon.type === 'lucide') {
-      const componentName = lucideNameToPascalCase(icon.name);
+      const componentName = toPascalCase(icon.name);
       const IconComponent = (LucideIcons as any)[componentName];
 
       if (IconComponent) {
         return <IconComponent size={24} strokeWidth={2} className="text-gray-700" />;
       } else {
         // Fallback for missing icon
-        return <span className="text-xs text-gray-400">?</span>;
+        return <LucideIcons.Sparkles size={24} strokeWidth={2} className="text-gray-400" />;
       }
     }
 

@@ -326,11 +326,11 @@ export default function VisualCTAWithMockup(props: LayoutComponentProps) {
           {/* Right Column - Product Mockup */}
           <div className="relative">
             {blockContent.mockup_image && blockContent.mockup_image !== '' ? (
-              <div className="relative">
+              <div className="relative aspect-video overflow-hidden">
                 <img
                   src={blockContent.mockup_image}
                   alt="Product Demo"
-                  className="w-full h-auto rounded-2xl shadow-2xl cursor-pointer"
+                  className="absolute inset-0 w-full h-full object-cover object-center rounded-2xl shadow-2xl cursor-pointer"
                   data-image-id={`${sectionId}-mockup_image`}
                   onMouseUp={(e) => {
                     if (mode !== 'preview') {

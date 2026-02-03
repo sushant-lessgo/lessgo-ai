@@ -418,11 +418,11 @@ export default function CenterStackedPublished(props: LayoutComponentProps) {
         {/* Hero Image */}
         <div className="w-full">
           {imageSrc && imageSrc !== '' ? (
-            <div className="relative w-[70%] lg:w-[80%] aspect-video mx-auto">
+            <div className="relative w-[70%] lg:w-[80%] aspect-video mx-auto overflow-hidden">
               <img
                 src={imageSrc}
                 alt="Hero"
-                className="w-full h-full object-cover rounded-2xl shadow-2xl"
+                className="absolute inset-0 w-full h-full object-cover object-center rounded-2xl shadow-2xl"
               />
             </div>
           ) : (

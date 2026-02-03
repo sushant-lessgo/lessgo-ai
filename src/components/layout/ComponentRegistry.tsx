@@ -5,7 +5,6 @@ import React from 'react';
 import { logger } from '@/lib/logger';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { decodeIcon, lucideNameToPascalCase } from '@/lib/iconStorage';
 import * as LucideIcons from 'lucide-react';
 import { scrollToEmailForm } from '@/utils/emailFormDetector';
 // Enhanced Trust Indicators Component
@@ -102,20 +101,24 @@ export function CTAButton({
   };
 
   // Icon rendering helper
-  const renderIcon = (encodedIcon: string, iconSize?: 'xs' | 'sm' | 'md' | 'lg' | 'xl') => {
-    const { name, type } = decodeIcon(encodedIcon);
+  const renderIcon = (iconValue: string, iconSize?: 'xs' | 'sm' | 'md' | 'lg' | 'xl') => {
+    if (!iconValue) return null;
     const pixelSize = getIconSize(iconSize);
 
-    if (type === 'emoji') {
-      return <span style={{ fontSize: pixelSize }}>{name}</span>;
-    }
-
-    if (type === 'lucide') {
-      const IconComponent = (LucideIcons as any)[lucideNameToPascalCase(name)];
+    // PascalCase Lucide icon
+    if (/^[A-Z][a-zA-Z0-9]*$/.test(iconValue)) {
+      const IconComponent = (LucideIcons as any)[iconValue];
       if (IconComponent) {
         return <IconComponent size={pixelSize} color="currentColor" />;
       }
+      return <LucideIcons.Sparkles size={pixelSize} color="currentColor" />;
     }
+
+    // Emoji
+    if (/\p{Emoji}/u.test(iconValue)) {
+      return <span style={{ fontSize: pixelSize }}>{iconValue}</span>;
+    }
+
     return null;
   };
 

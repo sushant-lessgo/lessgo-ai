@@ -131,12 +131,12 @@ const GalleryItemCard = React.memo(({
   return (
     <div className="space-y-3 relative group">
       {/* Image or placeholder */}
-      <div className="relative">
+      <div className="relative aspect-[4/3] overflow-hidden">
         {item.image_url && item.image_url !== '' ? (
           <img
             src={item.image_url}
             alt={item.caption || `Result ${index + 1}`}
-            className={`w-full h-auto object-contain rounded-lg ${getShadowStyle()} cursor-pointer transition-all duration-300`}
+            className={`absolute inset-0 w-full h-full object-cover object-center rounded-lg ${getShadowStyle()} cursor-pointer transition-all duration-300`}
             data-image-id={imageId}
             onMouseUp={(e) => {
               if (mode === 'edit') {

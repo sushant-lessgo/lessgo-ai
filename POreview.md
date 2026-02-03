@@ -1,31 +1,29 @@
- ❌ Issues to Fix
+ Questions/Gaps
 
-  1. Missing API route
+  1. iconSearchIndex.ts - Missing from plan
 
-  Verification mentions /api/images/search but it's not in "Files to Create". Pexels calls need server-side route to protect API key.
+  We said "verify before archive". What's the verdict? Does IconPicker depend on it?
 
-  Files to Create:
-    + src/app/api/images/search/route.ts  ← MISSING
+  2. Step 6: ".published.tsx" files
 
-  2. UIBlock name casing inconsistent
+  Priority list shows .published.tsx but "Other UIBlocks" list doesn't. Confirm all ~46 includes both editor AND published variants?
 
-  // Plan has mixed casing:
-  'leftCopyRightImage'     // camelCase
-  'SplitCard'              // PascalCase
-  'VisualCTAWithMockup'    // PascalCase
+  3. Step 6: "~46 files" seems high
 
-  Should match component registry exactly. Verify actual names.
+  UIBlocks list shows ~20 components. With .published.tsx = ~40. Where's the other 6? Just want accuracy.
 
 
-  4. understanding.categories availability
 
-  Is this in GeneratingStep's scope? Need to verify. Might need:
-  const categories = useGenerationStore((s) => s.understanding?.categories);
+  ---
+  Suggested Addition
 
-  5. No rate limit handling for parallel calls
+  Step 2.5: Remove dead imports
 
-  4-5 simultaneous Pexels requests could trigger 429. Add small stagger:
-  // Stagger by 100ms each
-  await Promise.all(slots.map((slot, i) =>
-    delay(i * 100).then(() => fetchImage(slot))
-  ));
+  After updating IconEditableText/IconPublished, grep for remaining iconStorage imports and remove them. Otherwise build will fail when archived.
+
+  ---
+  Verdict
+
+  Approve with clarifications above.
+
+  Fix the gaps, then execute.

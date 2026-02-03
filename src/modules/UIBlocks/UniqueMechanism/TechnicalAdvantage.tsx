@@ -6,7 +6,7 @@ import { LayoutSection } from '@/components/layout/LayoutSection';
 import { EditableAdaptiveHeadline, EditableAdaptiveText } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getIcon } from '@/lib/getIcon';
+import { inferIconFromText } from '@/lib/iconCategoryMap';
 import { shadows, cardEnhancements } from '@/modules/Design/designTokens';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
@@ -96,10 +96,8 @@ const AdvantageCard = React.memo(({
 }) => {
   const { getTextStyle } = useTypography();
 
-  // Icon derivation: stored value → smart default → fallback
-  const displayIcon = advantage.icon
-    ?? getIcon(undefined, { title: advantage.title, description: advantage.description })
-    ?? 'lucide:sparkles';
+  // Icon derivation: stored value → smart default
+  const displayIcon = advantage.icon || inferIconFromText(advantage.title, advantage.description);
 
   return (
     <div className="group relative">
@@ -115,7 +113,7 @@ const AdvantageCard = React.memo(({
               colorTokens={colorTokens}
               iconSize="lg"
               className="text-white text-2xl"
-              placeholder="lucide:sparkles"
+              placeholder="Sparkles"
               sectionId={sectionId}
               elementKey={`advantage_icon_${advantage.id}`}
             />

@@ -174,16 +174,18 @@ export default function ImageFirstPublished(props: LayoutComponentProps) {
       padding="normal"
     >
       <div className="max-w-6xl mx-auto">
-        <div className="flex flex-col space-y-12 min-h-[700px]">
+        <div className="flex flex-col space-y-12">
 
           {/* 1. HERO IMAGE FIRST - Full width at top */}
           <div className="w-full">
             {imageSrc ? (
-              <img
-                src={imageSrc}
-                alt="Hero"
-                className="w-full min-h-[500px] lg:min-h-[600px] object-cover rounded-2xl shadow-2xl"
-              />
+              <div className="relative w-full aspect-video overflow-hidden">
+                <img
+                  src={imageSrc}
+                  alt="Hero"
+                  className="absolute inset-0 w-full h-full object-cover object-center rounded-2xl shadow-2xl"
+                />
+              </div>
             ) : (
               <DashboardPlaceholder />
             )}
