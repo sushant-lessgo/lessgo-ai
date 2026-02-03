@@ -107,6 +107,7 @@ const MinimalNavHeader: React.FC<LayoutComponentProps> = (props) => {
       sectionBackground={sectionBackground}
       mode={mode}
       className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b"
+      noPadding
     >
       <nav className="relative flex items-center justify-center py-2 md:py-3">
         {/* Logo - absolute left */}

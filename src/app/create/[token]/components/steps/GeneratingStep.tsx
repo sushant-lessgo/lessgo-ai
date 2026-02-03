@@ -8,6 +8,7 @@ import ErrorRetry from '../shared/ErrorRetry';
 import type { SectionType, SectionCopy } from '@/types/generation';
 import { getDesignTokensForVibe } from '@/modules/Design/vibeMapping';
 import { generateBackgroundSystemForVibe } from '@/modules/Design/vibeBackgroundSystem';
+import { fetchPexelsImagesParallel, type ImageFetchResult } from '@/lib/generation/fetchImages';
 
 // Helper: map section type to background type
 function getBackgroundTypeForSection(sectionType: string): 'primary' | 'secondary' | 'neutral' {
@@ -19,6 +20,29 @@ function getBackgroundTypeForSection(sectionType: string): 'primary' | 'secondar
   if (primarySections.includes(normalizedType)) return 'primary';
   if (secondarySections.includes(normalizedType)) return 'secondary';
   return 'neutral';
+}
+
+// Helper: merge fetched images into section copy
+function mergeImagesIntoSections(
+  sections: Record<string, SectionCopy>,
+  imageResults: Map<string, ImageFetchResult>
+): Record<string, SectionCopy> {
+  const merged = { ...sections };
+
+  for (const [, result] of imageResults) {
+    const { sectionType, elementKey, imageUrl } = result;
+    if (imageUrl && merged[sectionType]?.elements) {
+      merged[sectionType] = {
+        ...merged[sectionType],
+        elements: {
+          ...merged[sectionType].elements,
+          [elementKey]: imageUrl,
+        },
+      };
+    }
+  }
+
+  return merged;
 }
 
 const generatingMessages = [
@@ -229,35 +253,47 @@ export default function GeneratingStep() {
     [strategy, uiblockSelections, productName, tokenId]
   );
 
-  // API call
+  // API call - copy generation + image fetching in parallel
   const callGenerateCopyAPI = useCallback(async () => {
     if (!strategy || !understanding) return;
 
     try {
       // @ts-expect-error - V3 strategy has uiblocks embedded
       const uiblocks = strategy.uiblocks || uiblockSelections;
+      const categories = understanding.categories || [];
 
-      const response = await fetch('/api/v3/generate-copy', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          strategy,
-          uiblocks,
-          productName: productName || 'Your Product',
-          oneLiner,
-          offer,
-          landingGoal,
-          features: understanding.features,
-        }),
-      });
+      // Run copy generation and image fetching in PARALLEL
+      const [copyResponse, imageResults] = await Promise.all([
+        // Copy generation
+        fetch('/api/v3/generate-copy', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            strategy,
+            uiblocks,
+            productName: productName || 'Your Product',
+            oneLiner,
+            offer,
+            landingGoal,
+            features: understanding.features,
+          }),
+        }).then(r => r.json()),
 
-      const result = await response.json();
+        // Image fetching (parallel, staggered internally)
+        fetchPexelsImagesParallel(categories, uiblocks as Record<string, string>),
+      ]);
 
-      if (result.success) {
+      if (copyResponse.success) {
         setApiComplete(true);
 
-        // Save generated content
-        await saveGeneratedContent(result.sections);
+        // Merge fetched images into section copy
+        const sectionsWithImages = mergeImagesIntoSections(
+          copyResponse.sections,
+          imageResults
+        );
+
+        // Save generated content with images
+        await saveGeneratedContent(sectionsWithImages);
 
         // Complete progress
         setCompletedSections(new Set(selectedSections));
@@ -266,7 +302,7 @@ export default function GeneratingStep() {
         // Short delay then redirect to magic moment
         setTimeout(() => router.push(`/generate/${tokenId}`), 500);
       } else {
-        setGenerationError(result.message || 'Generation failed');
+        setGenerationError(copyResponse.message || 'Generation failed');
       }
     } catch (error) {
       setGenerationError('Network error. Please try again.');
