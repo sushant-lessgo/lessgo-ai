@@ -40,7 +40,13 @@ export const LayoutSection = forwardRef<HTMLElement, LayoutSectionProps>(({
   const spacingValue = sectionSpacing?.[sectionId];
   
   // Enhanced spacing with responsive values
-  const getSpacingClass = (spacing?: string): string => {
+  const getSpacingClass = (spacing?: string, sectionType?: string): string => {
+    // CTA sections get generous padding
+    if (sectionType === 'cta' || sectionType === 'CenteredHeadlineCTA' ||
+        sectionType === 'ValueStackCTA' || sectionType === 'VisualCTAWithMockup') {
+      return 'py-16 md:py-20 lg:py-24';
+    }
+
     switch (spacing) {
       case 'compact':
         return 'py-4 md:py-4 lg:py-4'; // 32px -> 40px -> 48px
@@ -54,7 +60,7 @@ export const LayoutSection = forwardRef<HTMLElement, LayoutSectionProps>(({
     }
   };
 
-  const spacingClass = noPadding ? '' : getSpacingClass(spacingValue);
+  const spacingClass = noPadding ? '' : getSpacingClass(spacingValue, sectionType);
 
   // ✅ SIMPLIFIED: Always apply background as inline style (sectionBackground is now always a CSS value)
   const inlineStyle: React.CSSProperties = {

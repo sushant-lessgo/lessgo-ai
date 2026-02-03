@@ -128,7 +128,7 @@ const MinimalNavHeader: React.FC<LayoutComponentProps> = (props) => {
                   <a 
                     href={navItem.link}
                     className="text-sm font-medium transition-colors cursor-pointer"
-                    style={{ color: colorTokens?.text || '#374151' }}
+                    style={{ color: colorTokens?.textPrimary || '#374151' }}
                     onClick={(e) => handleNavClick(e, navItem.link)}
                   >
                     {navItem.label || `Nav Item ${index + 1}`}

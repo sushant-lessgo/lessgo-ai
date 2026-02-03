@@ -36,7 +36,7 @@ const getAvatarBackground = (theme?: 'warm' | 'cool' | 'neutral') => {
 
 export function AvatarPublished({ imageUrl, name, size = 48, theme }: AvatarPublishedProps) {
   if (!imageUrl) {
-    const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
+    const initials = (name || 'Guest').split(' ').map(n => n[0]).join('').toUpperCase();
     return (
       <div
         style={{

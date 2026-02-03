@@ -29,6 +29,7 @@ function mergeImagesIntoSections(
 ): Record<string, SectionCopy> {
   const merged = { ...sections };
 
+  // Merge Pexels images
   for (const [, result] of imageResults) {
     const { sectionType, elementKey, imageUrl } = result;
     if (imageUrl && merged[sectionType]?.elements) {
@@ -40,6 +41,15 @@ function mergeImagesIntoSections(
         },
       };
     }
+  }
+
+  // Populate ResultsGallery placeholders (user uploads later)
+  if (merged['Results']?.elements?.gallery_items) {
+    const items = merged['Results'].elements.gallery_items as Array<{id: string; image_url: string; caption: string}>;
+    merged['Results'].elements.gallery_items = items.map(item => ({
+      ...item,
+      image_url: item.image_url || '/results-placeholder.jpg'
+    }));
   }
 
   return merged;

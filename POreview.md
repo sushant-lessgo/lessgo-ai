@@ -1,29 +1,37 @@
- Questions/Gaps
+---
+  Questions
 
-  1. iconSearchIndex.ts - Missing from plan
+  1. sectionList structure
 
-  We said "verify before archive". What's the verdict? Does IconPicker depend on it?
+  Code uses:
+  const sectionMeta = sectionList.find(s => s.id === sectionId);
 
-  2. Step 6: ".published.tsx" files
+  Verify sectionList is an array with .find(). From earlier exploration it looked keyed by order numbers. May need:
+  const sectionMeta = sectionList[sectionId];
+  // or
+  const sectionMeta = Object.values(sectionList).find(s => s.id === sectionId);
 
-  Priority list shows .published.tsx but "Other UIBlocks" list doesn't. Confirm all ~46 includes both editor AND published variants?
+  2. mixedBackgroundLogic.ts
 
-  3. Step 6: "~46 files" seems high
+  Plan mentions archiving it (500 lines) but doesn't explain:
+  - What does it do?
+  - Is it actually unused?
+  - Any imports to remove?
 
-  UIBlocks list shows ~20 components. With .published.tsx = ~40. Where's the other 6? Just want accuracy.
+  Confirm it's safe to archive.
 
+  3. Divider handling
 
+  Rhythm rule checks primary and secondary for consecutiveness. What about divider?
+
+  Example: Features(secondary) → SocialProof(divider) → Pricing(secondary)
+
+  Does divider reset the consecutive count? Current code says yes (line 51-52: only increments for primary/secondary). Confirm this is intended.
 
   ---
-  Suggested Addition
+  Minor
 
-  Step 2.5: Remove dead imports
+  Line numbers in call sites:
+  src/hooks/editStore/generationActions.ts:61,227,299,410
 
-  After updating IconEditableText/IconPublished, grep for remaining iconStorage imports and remove them. Otherwise build will fail when archived.
-
-  ---
-  Verdict
-
-  Approve with clarifications above.
-
-  Fix the gaps, then execute.
+  4 different call sites in one file? Just verify these are all using the same function that gets simplified.

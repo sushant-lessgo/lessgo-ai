@@ -139,11 +139,9 @@ async function strategyHandler(req: NextRequest): Promise<Response> {
           benefit: `${feature} helps you work smarter`,
           benefitOfBenefit: 'More time for what matters',
         })),
-        objectionFlow: {
-          mainObjection: 'Is it worth the investment?',
-          counter: 'See results within the first week',
-          proofType: 'case-study',
-        },
+        objections: [
+          { thought: 'Is it worth the investment?', section: 'SocialProof' },
+        ],
       };
 
       return createSecureResponse({

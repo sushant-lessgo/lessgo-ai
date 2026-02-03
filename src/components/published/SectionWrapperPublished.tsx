@@ -24,7 +24,7 @@ interface SectionWrapperPublishedProps {
   children: React.ReactNode;
   sectionId?: string;
   background?: string;
-  padding?: 'compact' | 'normal' | 'spacious' | 'extra';
+  padding?: 'compact' | 'normal' | 'spacious' | 'extra' | 'cta';
   className?: string;
 }
 
@@ -39,7 +39,8 @@ export function SectionWrapperPublished({
     compact: 'py-4 md:py-4 lg:py-4',
     normal: 'py-12 md:py-14 lg:py-16',
     spacious: 'py-8 md:py-12 lg:py-12',
-    extra: 'py-20 md:py-24 lg:py-32'
+    extra: 'py-20 md:py-24 lg:py-32',
+    cta: 'py-16 md:py-20 lg:py-24'
   };
 
   return (

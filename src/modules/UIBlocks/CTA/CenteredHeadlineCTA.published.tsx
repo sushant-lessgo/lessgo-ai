@@ -100,7 +100,7 @@ export default function CenteredHeadlineCTAPublished(props: LayoutComponentProps
     <SectionWrapperPublished
       sectionId={sectionId}
       background={sectionBackgroundCSS}
-      padding="normal"
+      padding="cta"
     >
       <div className="max-w-4xl mx-auto text-center">
 

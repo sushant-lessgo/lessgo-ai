@@ -2,7 +2,7 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { EditableAdaptiveHeadline, EditableAdaptiveText } from '@/components/layout/EditableContent';
+import { EditableAdaptiveHeadline, EditableAdaptiveText, EditableText } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { inferIconFromText } from '@/lib/iconCategoryMap';
@@ -353,17 +353,17 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
             elementKey="methodology_name"
             sectionBackground="bg-gradient-primary"
           />
-          <EditableAdaptiveText
+          <EditableText
             mode={mode}
             value={blockContent.methodology_description || ''}
             onEdit={(value) => handleContentUpdate('methodology_description', value)}
-            backgroundType="primary"
-            colorTokens={{ ...colorTokens, textSecondary: themeColors.headerSubtext }}
-            variant="body"
-            className={`${themeColors.headerSubtext} text-lg max-w-3xl mx-auto`}
+            colorClass={themeColors.headerSubtext}
+            textStyle={{ fontSize: '1.125rem', lineHeight: '1.75rem' }}
+            className="max-w-3xl mx-auto"
             sectionId={sectionId}
             elementKey="methodology_description"
-            sectionBackground="bg-gradient-primary"
+            backgroundType="primary"
+            colorTokens={colorTokens}
           />
         </div>
 

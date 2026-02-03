@@ -4,7 +4,7 @@
 import React from 'react';
 import { CTAPreview } from './CTAPreview';
 import { TextHierarchyPreview } from './TextHierarchyPreview';
-import { getTextColorForBackground } from '@/modules/Design/background/enhancedBackgroundLogic';
+import { getTextColorForBackground } from '@/modules/Design/background/backgroundIntegration';
 import { getSmartTextColor } from '@/utils/improvedTextColors';
 import { analyzeBackground } from '@/utils/backgroundAnalysis';
 import type { ColorTokens, BackgroundSystem } from '@/types/core';

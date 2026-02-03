@@ -141,7 +141,7 @@ export default function VisualCTAWithMockupPublished(props: LayoutComponentProps
     <SectionWrapperPublished
       sectionId={sectionId}
       background={sectionBackgroundCSS}
-      padding="normal"
+      padding="cta"
     >
       <div className="max-w-7xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">

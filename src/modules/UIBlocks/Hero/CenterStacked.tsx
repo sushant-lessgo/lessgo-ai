@@ -257,7 +257,7 @@ export default function CenterStacked(props: LayoutComponentProps) {
       backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
       sectionBackground={sectionBackground}
       mode={mode}
-      className={`!pt-0 ${props.className || ''}`}
+      className={props.className || ''}
     >
       <div className="flex flex-col items-center space-y-8 min-h-[600px] justify-start">
         <div className="max-w-5xl mx-auto text-center w-full flex flex-col items-center">

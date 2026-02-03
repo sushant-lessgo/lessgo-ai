@@ -3,7 +3,7 @@ import { InlineTextEditorV2 } from '@/app/edit/[token]/components/editor/InlineT
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useTypography } from '@/hooks/useTypography';
 import { generateAccessibleBadgeColors } from '@/utils/textContrastUtils';
-import { getTextColorForBackground } from '@/modules/Design/background/enhancedBackgroundLogic';
+import { getTextColorForBackground } from '@/modules/Design/background/backgroundIntegration';
 import { getSmartTextColor } from '@/utils/improvedTextColors';
 import { analyzeBackground } from '@/utils/backgroundAnalysis';
 import type { BackgroundType } from '@/types/sectionBackground';

@@ -9,7 +9,7 @@ import {
   extractLayoutContent,
   StoreElementTypes 
 } from '@/types/storeTypes';
-import { getTextColorForBackground } from '@/modules/Design/background/enhancedBackgroundLogic';
+import { getTextColorForBackground } from '@/modules/Design/background/backgroundIntegration';
 import { validateTextBackgroundContrast } from '@/utils/textContrastUtils';
 import { getSmartTextColor } from '@/utils/improvedTextColors';
 import { analyzeBackground } from '@/utils/backgroundAnalysis';

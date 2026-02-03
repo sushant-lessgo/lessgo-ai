@@ -56,9 +56,10 @@ const CONTENT_SCHEMA = {
 };
 
 // Parse rating for star rendering
-const parseRating = (rating: string | undefined): number => {
-  if (!rating) return 5;
-  const match = rating.match(/([\d.]+)/);
+const parseRating = (rating: string | number | undefined): number => {
+  if (rating === undefined || rating === null) return 5;
+  if (typeof rating === 'number') return Math.min(5, Math.max(0, rating));
+  const match = String(rating).match(/([\d.]+)/);
   return match ? Math.min(5, Math.max(0, parseFloat(match[1]))) : 5;
 };
 

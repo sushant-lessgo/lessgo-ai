@@ -57,7 +57,7 @@ const AvatarEditableComponent: React.FC<AvatarEditableComponentProps> = ({
     return { initials, colorClass };
   };
 
-  const { initials, colorClass } = generateCustomerPlaceholder(customerName);
+  const { initials, colorClass } = generateCustomerPlaceholder(customerName || 'Guest');
 
   // Handle file upload
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {

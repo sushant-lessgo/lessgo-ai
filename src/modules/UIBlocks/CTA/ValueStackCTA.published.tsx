@@ -93,7 +93,7 @@ export default function ValueStackCTAPublished(props: LayoutComponentProps) {
     <SectionWrapperPublished
       sectionId={sectionId}
       background={sectionBackgroundCSS}
-      padding="normal"
+      padding="cta"
     >
       <div className="max-w-5xl mx-auto">
 
