@@ -485,7 +485,6 @@ export function validateBackgroundVariation(
     primary: variation.tailwindClass,
     secondary: `bg-${variation.baseColor}-50`,
     neutral: 'bg-white',
-    divider: `bg-${variation.baseColor}-100/50`,
     baseColor: variation.baseColor,
     accentColor: variation.baseColor,
     accentCSS: `bg-${variation.baseColor}-600`,

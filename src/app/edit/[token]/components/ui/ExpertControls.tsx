@@ -78,7 +78,6 @@ export function ExpertControls({
         { key: 'bgPrimary', label: 'Primary Background', type: 'background', critical: true },
         { key: 'bgSecondary', label: 'Secondary Background', type: 'background', critical: true },
         { key: 'bgNeutral', label: 'Neutral Background', type: 'background', critical: false },
-        { key: 'bgDivider', label: 'Divider Background', type: 'background', critical: false },
       ],
     },
     {

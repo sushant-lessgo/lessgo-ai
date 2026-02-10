@@ -9,12 +9,13 @@
 
 import React, { useState } from 'react';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publishedTextColors';
+import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardStyles } from '@/lib/publishedTextColors';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { CTAButtonPublished } from '@/components/published/CTAButtonPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { analyzeBackground } from '@/utils/backgroundAnalysis';
 
 // Tier structure
 interface Tier {
@@ -28,37 +29,23 @@ interface Tier {
   is_popular: boolean;
 }
 
-// Get theme colors (hex values for inline styles)
-const getPricingColors = (theme: UIBlockTheme, isHighlighted: boolean) => {
-  const baseColors = {
+// Theme-specific accents (badge and checkmark - not card styling)
+const getPricingAccents = (theme: UIBlockTheme) => {
+  const colorMap = {
     warm: {
-      highlightedBorder: '#f97316', // orange-500
-      highlightedBadgeBg: '#ea580c', // orange-600
+      badgeBg: '#ea580c', // orange-600
       checkmark: '#f97316', // orange-500
-      regularBorder: '#e5e7eb', // gray-200
     },
     cool: {
-      highlightedBorder: '#3b82f6', // blue-500
-      highlightedBadgeBg: '#2563eb', // blue-600
+      badgeBg: '#2563eb', // blue-600
       checkmark: '#3b82f6', // blue-500
-      regularBorder: '#e5e7eb', // gray-200
     },
     neutral: {
-      highlightedBorder: '#374151', // gray-700
-      highlightedBadgeBg: '#374151', // gray-700
+      badgeBg: '#374151', // gray-700
       checkmark: '#10b981', // green-500
-      regularBorder: '#e5e7eb', // gray-200
     },
   };
-
-  const colors = baseColors[theme];
-
-  return {
-    border: isHighlighted ? colors.highlightedBorder : colors.regularBorder,
-    badgeBg: colors.highlightedBadgeBg,
-    checkmark: colors.checkmark,
-    shadow: isHighlighted ? '0 10px 25px -5px rgba(0, 0, 0, 0.1)' : '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-  };
+  return colorMap[theme];
 };
 
 // Calculate savings percentage
@@ -124,6 +111,12 @@ export default function ToggleableMonthlyYearlyPublished(props: LayoutComponentP
   // Detect theme
   const uiBlockTheme: UIBlockTheme =
     props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+
+  // Get luminance from section background
+  const { luminance } = analyzeBackground(sectionBackgroundCSS || '');
+
+  // Get theme-specific accents (badge, checkmark)
+  const pricingAccents = getPricingAccents(uiBlockTheme);
 
   // Text colors
   const textColors = getPublishedTextColors(backgroundType || 'neutral', theme, sectionBackgroundCSS);
@@ -226,18 +219,19 @@ export default function ToggleableMonthlyYearlyPublished(props: LayoutComponentP
         {/* Pricing Cards Grid */}
         <div className={`grid gap-8 ${gridClass}`}>
           {tiers.map((tier: Tier) => {
-            const colors = getPricingColors(uiBlockTheme, tier.is_popular);
+            // Get adaptive card styles for this tier
+            const cardStyles = getPublishedCardStyles(luminance, uiBlockTheme, tier.is_popular);
             const currentPrice = billingCycle === 'monthly' ? tier.monthly_price : tier.yearly_price;
             const savingsPercent = calculateSavings(tier.monthly_price, tier.yearly_price);
 
             return (
-              <div key={tier.id} className={`relative ${tier.is_popular ? 'transform scale-105 z-10' : ''}`}>
+              <div key={tier.id} className={`relative h-full ${tier.is_popular ? 'transform scale-105 z-10' : ''}`}>
                 {/* Popular Badge */}
                 {tier.is_popular && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-20">
                     <span
                       style={{
-                        background: colors.badgeBg,
+                        background: pricingAccents.badgeBg,
                         color: '#ffffff',
                       }}
                       className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold shadow-lg"
@@ -273,10 +267,15 @@ export default function ToggleableMonthlyYearlyPublished(props: LayoutComponentP
 
                 {/* Card */}
                 <div
-                  className="relative h-full p-8 bg-white rounded-2xl border-2 transition-all duration-300"
+                  className="relative h-full flex flex-col p-8 rounded-2xl transition-all duration-300 hover:-translate-y-1"
                   style={{
-                    borderColor: colors.border,
-                    boxShadow: colors.shadow,
+                    backgroundColor: cardStyles.bg,
+                    borderColor: cardStyles.borderColor,
+                    borderWidth: cardStyles.borderWidth,
+                    borderStyle: cardStyles.borderStyle,
+                    backdropFilter: cardStyles.backdropFilter,
+                    WebkitBackdropFilter: cardStyles.backdropFilter,
+                    boxShadow: cardStyles.boxShadow,
                   }}
                 >
                   {/* Tier Name */}
@@ -285,7 +284,7 @@ export default function ToggleableMonthlyYearlyPublished(props: LayoutComponentP
                       style={{
                         ...h3Typography,
                         fontWeight: 'bold',
-                        color: textColors.heading,
+                        color: cardStyles.textHeading,
                       }}
                     >
                       {tier.name}
@@ -299,19 +298,19 @@ export default function ToggleableMonthlyYearlyPublished(props: LayoutComponentP
                         style={{
                           fontSize: 'clamp(2rem, 4vw, 2.5rem)',
                           fontWeight: 'bold',
-                          color: textColors.heading,
+                          color: cardStyles.textHeading,
                         }}
                       >
                         {currentPrice}
                       </span>
                       {!currentPrice.toLowerCase().includes('contact') && (
-                        <span style={{ color: textColors.muted, marginLeft: '4px' }}>
+                        <span style={{ color: cardStyles.textMuted, marginLeft: '4px' }}>
                           /{billingCycle === 'monthly' ? 'month' : 'year'}
                         </span>
                       )}
                     </div>
                     {billingCycle === 'yearly' && !currentPrice.toLowerCase().includes('contact') && (
-                      <div style={{ fontSize: '0.875rem', color: textColors.muted, marginTop: '4px' }}>
+                      <div style={{ fontSize: '0.875rem', color: cardStyles.textMuted, marginTop: '4px' }}>
                         ${Math.round(parseFloat(currentPrice.replace(/[^0-9.]/g, '')) / 12)}/month billed annually
                       </div>
                     )}
@@ -322,7 +321,7 @@ export default function ToggleableMonthlyYearlyPublished(props: LayoutComponentP
                     <TextPublished
                       value={tier.description}
                       style={{
-                        color: textColors.muted,
+                        color: cardStyles.textMuted,
                         textAlign: 'center',
                       }}
                     />
@@ -337,7 +336,7 @@ export default function ToggleableMonthlyYearlyPublished(props: LayoutComponentP
                             className="w-5 h-5 mr-3 mt-0.5 flex-shrink-0"
                             fill="currentColor"
                             viewBox="0 0 20 20"
-                            style={{ color: colors.checkmark }}
+                            style={{ color: pricingAccents.checkmark }}
                           >
                             <path
                               fillRule="evenodd"
@@ -345,7 +344,7 @@ export default function ToggleableMonthlyYearlyPublished(props: LayoutComponentP
                               clipRule="evenodd"
                             />
                           </svg>
-                          <span style={{ ...bodyTypography, color: textColors.body }}>{feature}</span>
+                          <span style={{ ...bodyTypography, color: cardStyles.textBody }}>{feature}</span>
                         </li>
                       ))}
                     </ul>

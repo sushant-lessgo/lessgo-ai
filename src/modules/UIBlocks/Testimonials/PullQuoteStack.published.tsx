@@ -11,6 +11,7 @@ import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publ
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { AvatarPublished } from '@/components/published/AvatarPublished';
+import { getDynamicCardLayout } from '@/utils/dynamicCardLayout';
 
 // V2: Testimonial interface
 interface Testimonial {
@@ -98,13 +99,16 @@ export default function PullQuoteStackPublished(props: LayoutComponentProps) {
   const h3Typography = getPublishedTypographyStyles('h3', theme);
   const bodyLgTypography = getPublishedTypographyStyles('body-lg', theme);
 
+  // Dynamic card layout for container width
+  const layout = getDynamicCardLayout(testimonials.length);
+
   return (
     <SectionWrapperPublished
       sectionId={sectionId}
       background={sectionBackgroundCSS}
       padding="normal"
     >
-      <div className="max-w-6xl mx-auto">
+      <div className={layout.containerClass}>
         {/* Header */}
         <div className="text-center mb-16">
           <HeadlinePublished

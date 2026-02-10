@@ -36,20 +36,14 @@ const inferElementType = (elementKey: string) => {
 
 // Mock function - will be replaced with actual rule-based engine integration
 const generateCompleteBackgroundSystem = (onboardingData: any): BackgroundSystem => {
-  // This is a placeholder that generates a basic background system
-  // In production, this would use the sophisticated rule-based engine
-  
-  const baseColors = ['blue', 'purple', 'green', 'orange', 'red', 'teal'];
-  const baseColor = baseColors[Math.floor(Math.random() * baseColors.length)];
-  
+  // Placeholder — uses ice-blue palette defaults
   return {
-    primary: `bg-gradient-to-r from-${baseColor}-500 to-${baseColor}-600`,
-    secondary: `bg-${baseColor}-50`,
-    neutral: 'bg-white',
-    divider: 'bg-gray-100/50',
-    baseColor,
-    accentColor: baseColor,
-    accentCSS: `bg-${baseColor}-600`
+    primary: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+    secondary: 'rgba(219, 234, 254, 0.85)',
+    neutral: '#f8fafc',
+    baseColor: 'blue',
+    accentColor: 'purple',
+    accentCSS: 'bg-purple-500'
   };
 };
 
@@ -484,7 +478,6 @@ moveSection: (sectionId: string, direction: 'up' | 'down') =>
         state.theme.colors.sectionBackgrounds.primary = backgroundSystem.primary;
         state.theme.colors.sectionBackgrounds.secondary = backgroundSystem.secondary;
         state.theme.colors.sectionBackgrounds.neutral = backgroundSystem.neutral;
-        state.theme.colors.sectionBackgrounds.divider = backgroundSystem.divider;
         
         // ✅ CLEAR CUSTOM SECTION BACKGROUND OVERRIDES
         // When global background changes, reset all sections to use the new global theme
@@ -628,7 +621,6 @@ getTypographyForSection: (sectionId: string) => {
         state.theme.colors.sectionBackgrounds.primary = originalBackgroundSystem.primary;
         state.theme.colors.sectionBackgrounds.secondary = originalBackgroundSystem.secondary;
         state.theme.colors.sectionBackgrounds.neutral = originalBackgroundSystem.neutral;
-        state.theme.colors.sectionBackgrounds.divider = originalBackgroundSystem.divider;
         
         // Reset typography to default (if we had original typography, we'd use that)
         // For now, keeping current typography since we don't have original typography stored
@@ -732,8 +724,7 @@ getTypographyForSection: (sectionId: string) => {
         const backgroundSystemData: BackgroundSystem = {
           primary: theme.colors.sectionBackgrounds.primary!,
           secondary: theme.colors.sectionBackgrounds.secondary!,
-          neutral: theme.colors.sectionBackgrounds.neutral || 'bg-white',
-          divider: theme.colors.sectionBackgrounds.divider || 'bg-gray-100/50',
+          neutral: theme.colors.sectionBackgrounds.neutral || '#ffffff',
           baseColor: theme.colors.baseColor,
           accentColor: theme.colors.accentColor,
           accentCSS: theme.colors.accentCSS
@@ -749,7 +740,6 @@ getTypographyForSection: (sectionId: string) => {
             primary: backgroundSystemData.primary,
             secondary: backgroundSystemData.secondary,
             neutral: backgroundSystemData.neutral,
-            divider: backgroundSystemData.divider
           },
           storedTextColors: theme.colors.textColors // Use stored text colors
         });
@@ -813,8 +803,7 @@ getTypographyForSection: (sectionId: string) => {
       const newTextColors = {
         primary: calculateForBackground(theme.colors.sectionBackgrounds.primary || 'bg-gradient-to-br from-blue-500 to-blue-600'),
         secondary: calculateForBackground(theme.colors.sectionBackgrounds.secondary || 'bg-gray-50'),
-        neutral: calculateForBackground(theme.colors.sectionBackgrounds.neutral || 'bg-white'),
-        divider: calculateForBackground(theme.colors.sectionBackgrounds.divider || 'bg-gray-100/50'),
+        neutral: calculateForBackground(theme.colors.sectionBackgrounds.neutral || '#ffffff'),
       };
       
       set((state: EditStore) => {

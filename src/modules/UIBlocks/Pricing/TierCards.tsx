@@ -7,6 +7,7 @@ import { CTAButton } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { getCardStyles, type CardStyles } from '@/modules/Design/cardStyles';
 
 interface TierCardsProps extends LayoutComponentProps {}
 
@@ -78,52 +79,27 @@ const CONTENT_SCHEMA = {
   },
 };
 
-// Get theme colors for pricing cards
-const getPricingColors = (theme: UIBlockTheme, isHighlighted: boolean) => {
-  const baseColors = {
+// Get theme-specific accent colors for pricing (badge, checkmark)
+const getPricingAccents = (theme: UIBlockTheme) => {
+  const accentColors = {
     warm: {
-      highlightedBorder: 'border-orange-500',
-      highlightedBg: 'bg-orange-50',
-      highlightedBadgeBg: 'bg-orange-600',
-      highlightedBadgeText: 'text-white',
-      highlightedShadow: 'shadow-orange-100',
+      badgeBg: 'bg-orange-600',
+      badgeText: 'text-white',
       checkmark: 'text-orange-500',
-      regularBorder: 'border-gray-200',
-      regularBorderHover: 'hover:border-orange-300',
     },
     cool: {
-      highlightedBorder: 'border-blue-500',
-      highlightedBg: 'bg-blue-50',
-      highlightedBadgeBg: 'bg-blue-600',
-      highlightedBadgeText: 'text-white',
-      highlightedShadow: 'shadow-blue-100',
+      badgeBg: 'bg-blue-600',
+      badgeText: 'text-white',
       checkmark: 'text-blue-500',
-      regularBorder: 'border-gray-200',
-      regularBorderHover: 'hover:border-blue-300',
     },
     neutral: {
-      highlightedBorder: 'border-gray-700',
-      highlightedBg: 'bg-gray-50',
-      highlightedBadgeBg: 'bg-gray-700',
-      highlightedBadgeText: 'text-white',
-      highlightedShadow: 'shadow-gray-100',
+      badgeBg: 'bg-gray-700',
+      badgeText: 'text-white',
       checkmark: 'text-green-500',
-      regularBorder: 'border-gray-200',
-      regularBorderHover: 'hover:border-gray-400',
     },
   };
 
-  const colors = baseColors[theme];
-
-  return {
-    border: isHighlighted ? colors.highlightedBorder : colors.regularBorder,
-    borderHover: isHighlighted ? '' : colors.regularBorderHover,
-    shadow: isHighlighted ? colors.highlightedShadow : '',
-    badgeBg: colors.highlightedBadgeBg,
-    badgeText: colors.highlightedBadgeText,
-    checkmark: colors.checkmark,
-    bg: isHighlighted ? colors.highlightedBg : 'bg-white',
-  };
+  return accentColors[theme];
 };
 
 // Individual Pricing Card
@@ -139,7 +115,8 @@ const PricingCard = ({
   onEditFeature,
   onToggleHighlighted,
   colorTokens,
-  themeColors,
+  cardStyles,
+  pricingAccents,
   highlightedLabel,
   onHighlightedLabelEdit,
 }: {
@@ -154,7 +131,8 @@ const PricingCard = ({
   onEditFeature?: (featureIndex: number, value: string) => void;
   onToggleHighlighted?: () => void;
   colorTokens: any;
-  themeColors: ReturnType<typeof getPricingColors>;
+  cardStyles: CardStyles;
+  pricingAccents: ReturnType<typeof getPricingAccents>;
   highlightedLabel: string;
   onHighlightedLabelEdit?: (value: string) => void;
 }) => {
@@ -170,7 +148,7 @@ const PricingCard = ({
               contentEditable
               suppressContentEditableWarning
               onBlur={(e) => onHighlightedLabelEdit(e.currentTarget.textContent || 'Most Popular')}
-              className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold ${themeColors.badgeBg} ${themeColors.badgeText} shadow-lg outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50 cursor-text`}
+              className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold ${pricingAccents.badgeBg} ${pricingAccents.badgeText} shadow-lg outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50 cursor-text`}
               data-section-id={sectionId}
               data-element-key="highlighted_label"
             >
@@ -185,7 +163,7 @@ const PricingCard = ({
             </div>
           ) : (
             <span
-              className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold ${themeColors.badgeBg} ${themeColors.badgeText} shadow-lg`}
+              className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold ${pricingAccents.badgeBg} ${pricingAccents.badgeText} shadow-lg`}
             >
               <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                 <path
@@ -202,7 +180,7 @@ const PricingCard = ({
 
       {/* Card */}
       <div
-        className={`relative h-full flex flex-col p-8 ${themeColors.bg} rounded-2xl shadow-lg border-2 ${themeColors.border} ${themeColors.borderHover} ${themeColors.shadow} transition-all duration-300 hover:shadow-xl`}
+        className={`relative h-full flex flex-col p-8 ${cardStyles.bg} ${cardStyles.blur} rounded-2xl ${cardStyles.shadow} border-2 ${cardStyles.border} ${cardStyles.hoverEffect} transition-all duration-300`}
       >
         {/* Remove Button - Only in edit mode and when allowed */}
         {mode === 'edit' && showRemoveButton && onRemove && (
@@ -313,7 +291,7 @@ const PricingCard = ({
             {tier.features.map((feature, index) => (
               <li key={index} className="flex items-start group/feature-item relative">
                 <svg
-                  className={`w-5 h-5 ${themeColors.checkmark} mr-3 mt-0.5 flex-shrink-0`}
+                  className={`w-5 h-5 ${pricingAccents.checkmark} mr-3 mt-0.5 flex-shrink-0`}
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -396,7 +374,7 @@ const PricingCard = ({
 };
 
 export default function TierCards(props: TierCardsProps) {
-  const { sectionId, mode, blockContent, colorTokens, dynamicTextColors, sectionBackground, backgroundType, handleContentUpdate } =
+  const { sectionId, mode, blockContent, colorTokens, sectionBackground, backgroundType, handleContentUpdate } =
     useLayoutComponent<TierCardsContent>({
       ...props,
       contentSchema: CONTENT_SCHEMA,
@@ -408,6 +386,18 @@ export default function TierCards(props: TierCardsProps) {
     if (props.userContext) return selectUIBlockTheme(props.userContext);
     return 'neutral';
   }, [props.manualThemeOverride, props.userContext]);
+
+  // Get adaptive card styles based on section background luminance
+  const getCardStylesForTier = React.useCallback((highlighted: boolean) => {
+    return getCardStyles({
+      sectionBackgroundCSS: sectionBackground || '',
+      theme: uiBlockTheme,
+      highlighted
+    });
+  }, [sectionBackground, uiBlockTheme]);
+
+  // Get theme-specific accent colors
+  const pricingAccents = getPricingAccents(uiBlockTheme);
 
   // Accent color for badge (matches Hero pattern)
   const accentColor = props.theme?.colors?.accentColor || '#3b82f6';
@@ -634,7 +624,8 @@ export default function TierCards(props: TierCardsProps) {
               onEditFeature={(featureIndex, value) => handleEditFeature(tier.id, featureIndex, value)}
               onToggleHighlighted={() => handleToggleHighlighted(tier.id)}
               colorTokens={colorTokens}
-              themeColors={getPricingColors(uiBlockTheme, tier.highlighted)}
+              cardStyles={getCardStylesForTier(tier.highlighted)}
+              pricingAccents={pricingAccents}
               highlightedLabel={blockContent.highlighted_label || 'Most Popular'}
               onHighlightedLabelEdit={(value) => handleContentUpdate('highlighted_label', value)}
             />
@@ -707,7 +698,7 @@ export const componentMeta = {
   ],
   props: {
     sectionId: 'string - Required section identifier',
-    backgroundType: '"primary" | "secondary" | "neutral" | "divider" - Controls text color adaptation',
+    backgroundType: '"primary" | "secondary" | "neutral" - Controls text color adaptation',
     className: 'string - Additional CSS classes',
   },
   contentSchema: {

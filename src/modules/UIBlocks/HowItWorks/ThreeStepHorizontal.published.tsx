@@ -12,6 +12,8 @@ import { HeadlinePublished, TextPublished } from '@/components/published/TextPub
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { analyzeBackground } from '@/utils/backgroundAnalysis';
+import { getPublishedCardStyles, PublishedCardStyles } from '@/lib/publishedTextColors';
 
 // Step structure (V2 array format)
 interface StepItem {
@@ -69,7 +71,8 @@ const StepCard = ({
   isLast,
   themeColors,
   textColors,
-  theme
+  theme,
+  cardStyles
 }: {
   step: StepItem;
   index: number;
@@ -77,18 +80,24 @@ const StepCard = ({
   themeColors: ReturnType<typeof getThemeColors>;
   textColors: { heading: string; body: string; muted: string };
   theme: any;
+  cardStyles: PublishedCardStyles;
 }) => {
   const h3Typography = getPublishedTypographyStyles('h3', theme);
   const bodyTypography = getPublishedTypographyStyles('body', theme);
 
   return (
-    <div className="relative flex-1 flex flex-col">
-      {/* Card with solid background and border */}
+    <div className="relative flex-1 flex flex-col transition-all duration-300 hover:-translate-y-1">
+      {/* Card with adaptive background and border */}
       <div
         className="relative p-6 rounded-xl flex-1"
         style={{
-          backgroundColor: themeColors.cardBg,
-          border: `1px solid ${themeColors.cardBorder}`
+          backgroundColor: cardStyles.bg,
+          backdropFilter: cardStyles.backdropFilter,
+          WebkitBackdropFilter: cardStyles.backdropFilter,
+          borderWidth: cardStyles.borderWidth,
+          borderStyle: cardStyles.borderStyle,
+          borderColor: cardStyles.borderColor,
+          boxShadow: cardStyles.boxShadow
         }}
       >
         {/* Step Number Circle - Larger (64px) with ring and shadow */}
@@ -111,7 +120,7 @@ const StepCard = ({
         <div className="mb-4 text-center">
           <h3
             style={{
-              color: textColors.heading,
+              color: cardStyles.textHeading,
               ...h3Typography,
               fontWeight: 600
             }}
@@ -123,7 +132,7 @@ const StepCard = ({
         {/* Step Description - Left aligned for readability */}
         <p
           style={{
-            color: textColors.muted,
+            color: cardStyles.textBody,
             ...bodyTypography,
             lineHeight: '1.75rem',
             textAlign: 'left'
@@ -154,8 +163,12 @@ export default function ThreeStepHorizontalPublished(props: LayoutComponentProps
   const uiTheme: UIBlockTheme = props.manualThemeOverride ||
     (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
 
-  // Get theme colors
+  // Get theme colors (for step circles and accents)
   const themeColors = getThemeColors(uiTheme);
+
+  // Adaptive card styles based on section background luminance
+  const { luminance } = analyzeBackground(sectionBackgroundCSS || '');
+  const cardStyles = getPublishedCardStyles(luminance, uiTheme);
 
   // Get text colors
   const textColors = getPublishedTextColors(
@@ -213,6 +226,7 @@ export default function ThreeStepHorizontalPublished(props: LayoutComponentProps
               themeColors={themeColors}
               textColors={textColors}
               theme={theme}
+              cardStyles={cardStyles}
             />
           ))}
         </div>

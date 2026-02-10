@@ -40,15 +40,15 @@ const CONTENT_SCHEMA = {
   summary_text: { type: 'string' as const, default: '' },
   before_icon: {
     type: 'string' as const,
-    default: '➕'
+    default: 'Plus'
   },
   after_icon: {
     type: 'string' as const,
-    default: '⚡'
+    default: 'Zap'
   },
   transition_icon: {
     type: 'string' as const,
-    default: '⬇️'
+    default: 'ArrowDown'
   }
 };
 
@@ -221,7 +221,7 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
                 >
                   <IconEditableText
                     mode={mode}
-                    value={blockContent.before_icon || '➕'}
+                    value={blockContent.before_icon || 'Plus'}
                     onEdit={(value) => handleContentUpdate('before_icon', value)}
                     backgroundType={safeBackgroundType}
                     colorTokens={colorTokens}
@@ -282,7 +282,7 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
               >
                 <IconEditableText
                   mode={mode}
-                  value={blockContent.transition_icon || '⬇️'}
+                  value={blockContent.transition_icon || 'ArrowDown'}
                   onEdit={(value) => handleContentUpdate('transition_icon', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
@@ -331,7 +331,7 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
                 >
                   <IconEditableText
                     mode={mode}
-                    value={blockContent.after_icon || '⚡'}
+                    value={blockContent.after_icon || 'Zap'}
                     onEdit={(value) => handleContentUpdate('after_icon', value)}
                     backgroundType={safeBackgroundType}
                     colorTokens={colorTokens}
@@ -423,7 +423,7 @@ export const componentMeta = {
   ],
   props: {
     sectionId: 'string - Required section identifier',
-    backgroundType: '"primary" | "secondary" | "neutral" | "divider" - Controls text color adaptation',
+    backgroundType: '"primary" | "secondary" | "neutral" - Controls text color adaptation',
     className: 'string - Additional CSS classes'
   },
   contentSchema: {

@@ -10,7 +10,7 @@ import {
   type LayoutElement,
   type CardRequirements,
 } from '@/modules/sections/layoutElementSchema';
-import { getToneProfileForVibe } from '@/modules/Design/vibeMapping';
+import { getToneProfileForVibe } from '@/modules/Design/vibeDesignTokens';
 
 export interface CopyPromptInput {
   strategy: StrategyOutput;

@@ -6,9 +6,11 @@ import { EditableAdaptiveHeadline, EditableAdaptiveText, EditableText } from '@/
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { inferIconFromText } from '@/lib/iconCategoryMap';
-import { shadows, cardEnhancements } from '@/modules/Design/designTokens';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { getDynamicCardLayout, isSplitLayout } from '@/utils/dynamicCardLayout';
+import { cn } from '@/lib/utils';
+import { getCardStyles, CardStyles } from '@/modules/Design/cardStyles';
 
 // V2: Principle item structure - clean array item
 interface Principle {
@@ -64,14 +66,11 @@ const CONTENT_SCHEMA = {
   }
 };
 
-// Theme-based color mapping (design fixes applied: stronger borders, more saturated icons)
-const getThemeColors = (theme: UIBlockTheme) => ({
+// Theme-based extras (non-card elements: headers, results, buttons)
+const getThemeExtras = (theme: UIBlockTheme) => ({
   warm: {
     headerGradient: 'from-orange-600 to-red-600',
     headerSubtext: 'text-orange-100',
-    cardBorder: 'border-orange-300',  // Fix: increased from 200
-    cardHover: 'hover:border-orange-400',
-    iconBg: 'bg-gradient-to-br from-orange-600 to-red-700',  // Fix: increased saturation
     resultMetricText: 'text-orange-600',
     resultsBg: 'bg-orange-50',
     addButtonBg: 'bg-orange-600 hover:bg-orange-700',
@@ -80,9 +79,6 @@ const getThemeColors = (theme: UIBlockTheme) => ({
   cool: {
     headerGradient: 'from-blue-600 to-indigo-700',
     headerSubtext: 'text-blue-100',
-    cardBorder: 'border-blue-300',  // Fix: increased from 200
-    cardHover: 'hover:border-blue-400',
-    iconBg: 'bg-gradient-to-br from-blue-600 to-indigo-700',  // Fix: increased saturation
     resultMetricText: 'text-blue-600',
     resultsBg: 'bg-blue-50',
     addButtonBg: 'bg-blue-600 hover:bg-blue-700',
@@ -91,9 +87,6 @@ const getThemeColors = (theme: UIBlockTheme) => ({
   neutral: {
     headerGradient: 'from-gray-700 to-gray-800',
     headerSubtext: 'text-gray-200',
-    cardBorder: 'border-gray-300',  // Fix: increased from 200
-    cardHover: 'hover:border-gray-400',
-    iconBg: 'bg-gradient-to-br from-gray-600 to-gray-800',  // Fix: increased saturation
     resultMetricText: 'text-gray-700',
     resultsBg: 'bg-gray-50',
     addButtonBg: 'bg-gray-600 hover:bg-gray-700',
@@ -114,7 +107,8 @@ const PrincipleCard = React.memo(({
   backgroundType,
   sectionBackground,
   canRemove = true,
-  theme = 'neutral'
+  cardStyles,
+  cardClassName
 }: {
   principle: Principle;
   mode: 'edit' | 'preview';
@@ -127,15 +121,23 @@ const PrincipleCard = React.memo(({
   backgroundType: string;
   sectionBackground?: string;
   canRemove?: boolean;
-  theme?: UIBlockTheme;
+  cardStyles: CardStyles;
+  cardClassName?: string;
 }) => {
-  const themeColors = getThemeColors(theme);
-
   // Get icon - use stored value or derive from name/description
   const displayIcon = principle.icon || inferIconFromText(principle.name, principle.description);
 
   return (
-    <div className={`group relative bg-white p-8 border ${themeColors.cardBorder} ${themeColors.cardHover} ${shadows.card[theme]} ${shadows.cardHover[theme]} ${cardEnhancements.hoverLift} ${cardEnhancements.transition} ${cardEnhancements.borderRadius}`}>
+    <div className={cn(
+      'group relative rounded-2xl',
+      cardStyles.bg,
+      cardStyles.blur,
+      cardStyles.border,
+      cardStyles.shadow,
+      cardStyles.hoverEffect,
+      'transition-all duration-300 hover:-translate-y-1',
+      cardClassName || 'p-8'
+    )}>
       {/* Delete button */}
       {mode !== 'preview' && onRemovePrinciple && canRemove && (
         <button
@@ -153,7 +155,7 @@ const PrincipleCard = React.memo(({
       )}
 
       {/* Icon */}
-      <div className={`w-12 h-12 ${themeColors.iconBg} rounded-lg flex items-center justify-center text-white mb-4`}>
+      <div className={`w-12 h-12 ${cardStyles.iconBg} rounded-lg flex items-center justify-center mb-4`}>
         <IconEditableText
           mode={mode}
           value={displayIcon}
@@ -161,7 +163,7 @@ const PrincipleCard = React.memo(({
           backgroundType="primary"
           colorTokens={colorTokens}
           iconSize="md"
-          className="text-white"
+          className={cardStyles.iconColor}
           placeholder="Sparkles"
           sectionId={sectionId}
           elementKey={`principle_icon_${principle.id}`}
@@ -174,11 +176,11 @@ const PrincipleCard = React.memo(({
           mode={mode}
           value={principle.name}
           onEdit={(value) => onNameEdit(principle.id, value)}
-          backgroundType={(backgroundType === 'custom' ? 'secondary' : (backgroundType || 'secondary')) as 'neutral' | 'primary' | 'secondary' | 'divider'}
+          backgroundType={(backgroundType === 'custom' ? 'secondary' : (backgroundType || 'secondary')) as 'neutral' | 'primary' | 'secondary'}
           colorTokens={colorTokens}
           variant="body"
           textStyle={{ fontWeight: 700, fontSize: '1.25rem' }}
-          className="text-gray-900"
+          className={cardStyles.textHeading}
           sectionId={sectionId}
           elementKey={`principle_name_${principle.id}`}
           sectionBackground={sectionBackground}
@@ -190,10 +192,10 @@ const PrincipleCard = React.memo(({
         mode={mode}
         value={principle.description}
         onEdit={(value) => onDescriptionEdit(principle.id, value)}
-        backgroundType={(backgroundType === 'custom' ? 'secondary' : (backgroundType || 'secondary')) as 'neutral' | 'primary' | 'secondary' | 'divider'}
+        backgroundType={(backgroundType === 'custom' ? 'secondary' : (backgroundType || 'secondary')) as 'neutral' | 'primary' | 'secondary'}
         colorTokens={colorTokens}
         variant="body"
-        className="text-gray-600"
+        className={cardStyles.textBody}
         sectionId={sectionId}
         elementKey={`principle_description_${principle.id}`}
         sectionBackground={sectionBackground}
@@ -225,7 +227,15 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
     return 'neutral';
   }, [props.manualThemeOverride, props.userContext]);
 
-  const themeColors = getThemeColors(uiTheme);
+  const themeExtras = getThemeExtras(uiTheme);
+
+  // Card styles from luminance-based system
+  const cardStyles = React.useMemo(() => {
+    return getCardStyles({
+      sectionBackgroundCSS: sectionBackground || '',
+      theme: uiTheme
+    });
+  }, [sectionBackground, uiTheme]);
 
   // Ensure principles is always an array
   const principles = Array.isArray(blockContent.principles) ? blockContent.principles : [];
@@ -275,14 +285,28 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
     (handleContentUpdate as any)('results', updated);
   };
 
-  // Determine grid layout based on principle count
-  const getGridClass = (count: number) => {
-    if (count === 1) return 'grid-cols-1 max-w-2xl mx-auto';
-    if (count === 2) return 'grid-cols-1 md:grid-cols-2';
-    if (count === 3) return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3';
-    if (count === 4) return 'grid-cols-1 md:grid-cols-2';
-    return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3';
-  };
+  // Dynamic card layout
+  const layout = getDynamicCardLayout(principles.length);
+
+  // Helper to render principle card
+  const renderPrincipleCard = (principle: Principle, cardClass: string) => (
+    <PrincipleCard
+      key={principle.id}
+      principle={principle}
+      mode={mode}
+      colorTokens={colorTokens}
+      onNameEdit={handlePrincipleNameEdit}
+      onDescriptionEdit={handlePrincipleDescriptionEdit}
+      onIconEdit={handlePrincipleIconEdit}
+      onRemovePrinciple={handleRemovePrinciple}
+      sectionId={sectionId}
+      backgroundType={props.backgroundType || 'secondary'}
+      sectionBackground={sectionBackground}
+      canRemove={principles.length > 3}
+      cardStyles={cardStyles}
+      cardClassName={cardClass}
+    />
+  );
 
   return (
     <LayoutSection
@@ -326,7 +350,7 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
         </div>
 
         {/* Methodology Header */}
-        <div className={`bg-gradient-to-r ${themeColors.headerGradient} rounded-2xl p-12 text-white text-center mb-12`}>
+        <div className={`bg-gradient-to-r ${themeExtras.headerGradient} rounded-2xl p-12 text-white text-center mb-12`}>
           <div className="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-6">
             <IconEditableText
               mode={mode}
@@ -357,7 +381,7 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
             mode={mode}
             value={blockContent.methodology_description || ''}
             onEdit={(value) => handleContentUpdate('methodology_description', value)}
-            colorClass={themeColors.headerSubtext}
+            colorClass={themeExtras.headerSubtext}
             textStyle={{ fontSize: '1.125rem', lineHeight: '1.75rem' }}
             className="max-w-3xl mx-auto"
             sectionId={sectionId}
@@ -369,25 +393,28 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
 
         {/* Principles Grid */}
         {principles.length > 0 && (
-          <div className={`grid gap-6 lg:gap-8 mb-12 ${getGridClass(principles.length)}`}>
-            {principles.map((principle) => (
-              <PrincipleCard
-                key={principle.id}
-                principle={principle}
-                mode={mode}
-                colorTokens={colorTokens}
-                onNameEdit={handlePrincipleNameEdit}
-                onDescriptionEdit={handlePrincipleDescriptionEdit}
-                onIconEdit={handlePrincipleIconEdit}
-                onRemovePrinciple={handleRemovePrinciple}
-                sectionId={sectionId}
-                backgroundType={props.backgroundType || 'secondary'}
-                sectionBackground={sectionBackground}
-                canRemove={principles.length > 3}
-                theme={uiTheme}
-              />
-            ))}
-          </div>
+          isSplitLayout(principles.length) && layout.splitLayout ? (
+            <div className={`mb-12 ${layout.containerClass}`}>
+              <div className={layout.splitLayout.firstRowGrid}>
+                {principles.slice(0, layout.splitLayout.firstRowCount).map((principle) =>
+                  renderPrincipleCard(principle, layout.splitLayout!.firstRowCard)
+                )}
+              </div>
+              <div className={layout.splitLayout.secondRowGrid}>
+                {principles.slice(layout.splitLayout.firstRowCount).map((principle) =>
+                  renderPrincipleCard(principle, layout.splitLayout!.secondRowCard)
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className={`mb-12 ${layout.containerClass}`}>
+              <div className={layout.gridClass}>
+                {principles.map((principle) =>
+                  renderPrincipleCard(principle, layout.cardClass)
+                )}
+              </div>
+            </div>
+          )
         )}
 
         {/* Add Principle Button */}
@@ -395,7 +422,7 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
           <div className="mb-12 text-center">
             <button
               onClick={handleAddPrinciple}
-              className={`inline-flex items-center gap-2 px-6 py-3 ${themeColors.addButtonBg} text-white rounded-lg transition-colors duration-200`}
+              className={`inline-flex items-center gap-2 px-6 py-3 ${themeExtras.addButtonBg} text-white rounded-lg transition-colors duration-200`}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -407,7 +434,7 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
 
         {/* Results Section - with container background for visual separation */}
         {results.length > 0 && (
-          <div className={`mt-16 ${themeColors.resultsBg} rounded-2xl p-8`}>
+          <div className={`mt-16 ${themeExtras.resultsBg} rounded-2xl p-8`}>
             {blockContent.results_title && (
               <EditableAdaptiveHeadline
                 mode={mode}
@@ -426,13 +453,13 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {results.map((result) => (
                 <div key={result.id} className="text-center">
-                  <div className={`text-4xl font-bold ${themeColors.resultMetricText} mb-2`}>
+                  <div className={`text-4xl font-bold ${themeExtras.resultMetricText} mb-2`}>
                     {mode !== 'preview' ? (
                       <div
                         contentEditable
                         suppressContentEditableWarning
                         onBlur={(e) => handleResultMetricEdit(result.id, e.currentTarget.textContent || '')}
-                        className={`outline-none focus:ring-2 ${themeColors.focusRing} focus:ring-opacity-50 rounded px-1 cursor-text`}
+                        className={`outline-none focus:ring-2 ${themeExtras.focusRing} focus:ring-opacity-50 rounded px-1 cursor-text`}
                       >
                         {result.metric}
                       </div>
@@ -446,7 +473,7 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
                         contentEditable
                         suppressContentEditableWarning
                         onBlur={(e) => handleResultLabelEdit(result.id, e.currentTarget.textContent || '')}
-                        className={`outline-none focus:ring-2 ${themeColors.focusRing} focus:ring-opacity-50 rounded px-1 cursor-text`}
+                        className={`outline-none focus:ring-2 ${themeExtras.focusRing} focus:ring-opacity-50 rounded px-1 cursor-text`}
                       >
                         {result.label}
                       </div>

@@ -8,12 +8,14 @@
 
 import React from 'react';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publishedTextColors';
+import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardStyles } from '@/lib/publishedTextColors';
+import { analyzeBackground } from '@/utils/backgroundAnalysis';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { AvatarPublished } from '@/components/published/AvatarPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { getDynamicCardLayout, isSplitLayout } from '@/utils/dynamicCardLayout';
 
 // V2: Testimonial structure - clean array item
 interface Testimonial {
@@ -77,26 +79,20 @@ export default function QuoteGridPublished(props: LayoutComponentProps) {
   // Detect theme
   const uiTheme: UIBlockTheme = props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
 
-  // Get theme colors
-  const getThemeColors = (theme: UIBlockTheme) => {
-    const colorMap = {
-      warm: {
-        border: '#fed7aa',
-        quoteColor: '#fdba74'
-      },
-      cool: {
-        border: '#bfdbfe',
-        quoteColor: '#93c5fd'
-      },
-      neutral: {
-        border: '#e5e7eb',
-        quoteColor: '#d1d5db'
-      }
-    };
-    return colorMap[theme];
-  };
+  // Get luminance from section background
+  const { luminance } = analyzeBackground(sectionBackgroundCSS || '');
 
-  const themeColors = getThemeColors(uiTheme);
+  // Get adaptive card styles
+  const cardStyles = getPublishedCardStyles(luminance, uiTheme);
+
+  // Theme colors for quote mark only
+  const getQuoteColor = (theme: UIBlockTheme) => ({
+    warm: '#fdba74',
+    cool: '#93c5fd',
+    neutral: '#d1d5db'
+  })[theme];
+
+  const quoteColor = getQuoteColor(uiTheme);
 
   // Get text colors
   const textColors = getPublishedTextColors(
@@ -108,6 +104,96 @@ export default function QuoteGridPublished(props: LayoutComponentProps) {
   // Typography styles
   const headlineTypography = getPublishedTypographyStyles('h2', theme);
   const bodyLgTypography = getPublishedTypographyStyles('body-lg', theme);
+
+  // Dynamic card layout
+  const layout = getDynamicCardLayout(testimonials.length);
+
+  // Helper to render testimonial card
+  const renderTestimonialCard = (testimonial: Testimonial, cardClass: string) => (
+    <div
+      key={testimonial.id}
+      className={`rounded-xl transition-all duration-300 hover:-translate-y-1 relative ${cardClass}`}
+      style={{
+        backgroundColor: cardStyles.bg,
+        backdropFilter: cardStyles.backdropFilter,
+        WebkitBackdropFilter: cardStyles.backdropFilter,
+        borderColor: cardStyles.borderColor,
+        borderWidth: cardStyles.borderWidth,
+        borderStyle: cardStyles.borderStyle,
+        boxShadow: cardStyles.boxShadow
+      }}
+    >
+      {/* Quote Mark */}
+      <div
+        className="absolute top-6 right-6 opacity-20 text-5xl font-serif"
+        style={{ color: quoteColor }}
+      >
+        "
+      </div>
+
+      {/* Testimonial Quote */}
+      <blockquote
+        className="mb-6 leading-relaxed italic text-lg"
+        style={{ color: cardStyles.textBody }}
+      >
+        "{testimonial.quote}"
+      </blockquote>
+
+      {/* Customer Attribution */}
+      <div className="flex items-center space-x-4">
+        {/* Customer Avatar */}
+        <AvatarPublished
+          name={testimonial.customer_name}
+          size={48}
+          theme={uiTheme}
+        />
+
+        {/* Customer Details */}
+        <div className="flex-1">
+          {/* Customer Name */}
+          <div
+            className="font-semibold mb-1"
+            style={{ color: cardStyles.textHeading }}
+          >
+            {testimonial.customer_name}
+          </div>
+
+          {/* Customer Title */}
+          {testimonial.customer_title && (
+            <div
+              className="text-sm mb-1"
+              style={{ color: cardStyles.textMuted }}
+            >
+              {testimonial.customer_title}
+            </div>
+          )}
+
+          {/* Customer Company */}
+          {testimonial.customer_company && (
+            <div
+              className="text-sm font-medium"
+              style={{ color: theme?.colors?.accentColor || '#3b82f6' }}
+            >
+              {testimonial.customer_company}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Star Rating - only show number when < 5 */}
+      <div className="mt-4 flex items-center space-x-2">
+        {renderStars(testimonial.rating_value)}
+        {parseRating(testimonial.rating_value) < 5 && (
+          <span
+            className="text-sm font-medium"
+            style={{ color: textColors.body }}
+          >
+            {testimonial.rating_value}
+          </span>
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <SectionWrapperPublished
@@ -143,90 +229,28 @@ export default function QuoteGridPublished(props: LayoutComponentProps) {
         </div>
 
         {/* Testimonials Grid */}
-        <div className={`grid gap-8 ${
-          testimonials.length === 1 ? 'max-w-2xl mx-auto' :
-          testimonials.length === 2 ? 'md:grid-cols-2 max-w-4xl mx-auto' :
-          testimonials.length === 3 ? 'md:grid-cols-2 lg:grid-cols-3' :
-          'md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-2 xl:max-w-5xl xl:mx-auto'
-        }`}>
-          {testimonials.map((testimonial: Testimonial) => (
-            <div
-              key={testimonial.id}
-              className="bg-white p-8 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 relative"
-              style={{ borderWidth: '1px', borderColor: themeColors.border }}
-            >
-              {/* Quote Mark */}
-              <div
-                className="absolute top-6 right-6 opacity-20 text-5xl font-serif"
-                style={{ color: themeColors.quoteColor }}
-              >
-                "
-              </div>
-
-              {/* Testimonial Quote */}
-              <blockquote
-                className="mb-6 leading-relaxed italic text-lg"
-                style={{ color: textColors.body }}
-              >
-                "{testimonial.quote}"
-              </blockquote>
-
-              {/* Customer Attribution */}
-              <div className="flex items-center space-x-4">
-                {/* Customer Avatar */}
-                <AvatarPublished
-                  name={testimonial.customer_name}
-                  size={48}
-                  theme={uiTheme}
-                />
-
-                {/* Customer Details */}
-                <div className="flex-1">
-                  {/* Customer Name */}
-                  <div
-                    className="font-semibold mb-1"
-                    style={{ color: textColors.heading }}
-                  >
-                    {testimonial.customer_name}
-                  </div>
-
-                  {/* Customer Title */}
-                  {testimonial.customer_title && (
-                    <div
-                      className="text-sm mb-1"
-                      style={{ color: textColors.muted }}
-                    >
-                      {testimonial.customer_title}
-                    </div>
-                  )}
-
-                  {/* Customer Company */}
-                  {testimonial.customer_company && (
-                    <div
-                      className="text-sm font-medium"
-                      style={{ color: theme?.colors?.accentColor || '#3b82f6' }}
-                    >
-                      {testimonial.customer_company}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Star Rating - only show number when < 5 */}
-              <div className="mt-4 flex items-center space-x-2">
-                {renderStars(testimonial.rating_value)}
-                {parseRating(testimonial.rating_value) < 5 && (
-                  <span
-                    className="text-sm font-medium"
-                    style={{ color: textColors.body }}
-                  >
-                    {testimonial.rating_value}
-                  </span>
-                )}
-              </div>
+        {isSplitLayout(testimonials.length) && layout.splitLayout ? (
+          <div className={layout.containerClass}>
+            <div className={layout.splitLayout.firstRowGrid}>
+              {testimonials.slice(0, layout.splitLayout.firstRowCount).map((testimonial: Testimonial) =>
+                renderTestimonialCard(testimonial, layout.splitLayout!.firstRowCard)
+              )}
             </div>
-          ))}
-        </div>
+            <div className={layout.splitLayout.secondRowGrid}>
+              {testimonials.slice(layout.splitLayout.firstRowCount).map((testimonial: Testimonial) =>
+                renderTestimonialCard(testimonial, layout.splitLayout!.secondRowCard)
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className={layout.containerClass}>
+            <div className={layout.gridClass}>
+              {testimonials.map((testimonial: Testimonial) =>
+                renderTestimonialCard(testimonial, layout.cardClass)
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Trust Reinforcement - simple line */}
         {verification_message && (

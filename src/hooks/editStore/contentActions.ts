@@ -173,15 +173,10 @@ export function createContentActions(set: any, get: any): ContentActions {
           return; // Early return - arrays handled, skip string processing
         }
 
-        // If element doesn't exist, create it (for cases like hero_image)
+        // If element doesn't exist, create it as empty string (direct format)
         if (!state.content[sectionId].elements[elementKey]) {
           logger.debug(`Creating missing element: ${elementKey} in section ${sectionId}`);
-          state.content[sectionId].elements[elementKey] = {
-            content: '',
-            type: elementKey.includes('image') ? 'image' : 'text',
-            isEditable: true,
-            editMode: 'inline',
-          };
+          state.content[sectionId].elements[elementKey] = '';
         }
 
         const element = state.content[sectionId].elements[elementKey];
@@ -201,22 +196,9 @@ export function createContentActions(set: any, get: any): ContentActions {
           stringContent = JSON.stringify(stringContent);
         }
         
-        // Handle different content structures
-        let oldValue;
-        if (typeof element === 'string') {
-          // Element is directly a string (legacy format)
-          oldValue = element;
-          // Ensure we store a pure string, not an object
-          (state.content[sectionId].elements[elementKey] as any) = stringContent;
-        } else if (element && typeof element === 'object') {
-          // Element is an object with content property
-          oldValue = element.content;
-          // Ensure we store a pure string in the content property
-          element.content = stringContent;
-        } else {
-          logger.warn(`Unexpected element structure for ${elementKey}:`, element);
-          return;
-        }
+        // V2: Always store directly (no wrapped format)
+        const oldValue = state.content[sectionId].elements[elementKey];
+        (state.content[sectionId].elements[elementKey] as any) = stringContent;
         
 
         // Mark as customized (initialize aiMetadata if missing)

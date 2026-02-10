@@ -12,6 +12,7 @@ import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { getCardStyles } from '@/modules/Design/cardStyles';
 
 interface FeatureItem {
   id: string;
@@ -41,8 +42,8 @@ const CONTENT_SCHEMA = {
   auto_play: { type: 'boolean' as const, default: false },
   benefit_1: { type: 'string' as const, default: '' },
   benefit_2: { type: 'string' as const, default: '' },
-  benefit_icon_1: { type: 'string' as const, default: '✅' },
-  benefit_icon_2: { type: 'string' as const, default: '⏱️' },
+  benefit_icon_1: { type: 'string' as const, default: 'CheckCircle' },
+  benefit_icon_2: { type: 'string' as const, default: 'Clock' },
   features: { type: 'array' as const, default: [] },
 };
 
@@ -207,7 +208,7 @@ const CarouselSlide = React.memo(({
             <div className={`flex items-center space-x-2 ${getBenefitColors(0).text} group/benefit-item relative`}>
               <IconEditableText
                 mode={mode}
-                value={benefit_icon_1 || '✅'}
+                value={benefit_icon_1 || 'CheckCircle'}
                 onEdit={(value) => onUpdateBenefit('benefit_icon_1', value)}
                 backgroundType="neutral"
                 colorTokens={colorTokens}
@@ -253,7 +254,7 @@ const CarouselSlide = React.memo(({
             <div className={`flex items-center space-x-2 ${getBenefitColors(1).text} group/benefit-item relative`}>
               <IconEditableText
                 mode={mode}
-                value={benefit_icon_2 || '⏱️'}
+                value={benefit_icon_2 || 'Clock'}
                 onEdit={(value) => onUpdateBenefit('benefit_icon_2', value)}
                 backgroundType="neutral"
                 colorTokens={colorTokens}
@@ -392,6 +393,14 @@ export default function Carousel(props: LayoutComponentProps) {
     return 'neutral';
   }, [props.manualThemeOverride, props.userContext]);
 
+  // Adaptive card styles based on section background luminance
+  const cardStyles = React.useMemo(() => {
+    return getCardStyles({
+      sectionBackgroundCSS: sectionBackground || '',
+      theme: uiBlockTheme
+    });
+  }, [sectionBackground, uiBlockTheme]);
+
   // Theme-based benefit colors
   const getBenefitColors = (index: number) => {
     const colorSets = {
@@ -525,7 +534,7 @@ export default function Carousel(props: LayoutComponentProps) {
 
         <div className="relative">
           {/* Main Carousel with WYSIWYG editing */}
-          <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+          <div className={`${cardStyles.bg} ${cardStyles.blur} rounded-2xl ${cardStyles.shadow} p-8 ${cardStyles.border}`}>
             {features.length > 0 && features[activeSlide] && (
               <CarouselSlide
                 feature={features[activeSlide]}

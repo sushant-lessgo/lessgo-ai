@@ -8,12 +8,13 @@
 import React from 'react';
 import * as LucideIcons from 'lucide-react';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publishedTextColors';
+import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardStyles } from '@/lib/publishedTextColors';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import { inferIconFromText } from '@/lib/iconCategoryMap';
+import { analyzeBackground } from '@/utils/backgroundAnalysis';
 
 // Pain item structure (V2)
 interface PainItem {
@@ -44,44 +45,41 @@ export default function StackedPainBulletsPublished(props: LayoutComponentProps)
   // Detect theme
   const uiTheme: UIBlockTheme = props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
 
-  // Get theme colors
-  const getThemeColors = (theme: UIBlockTheme) => {
+  // Get luminance from section background
+  const { luminance } = analyzeBackground(sectionBackgroundCSS || '');
+
+  // Get adaptive card styles based on luminance and theme
+  const cardStyles = getPublishedCardStyles(luminance, uiTheme);
+
+  // Theme-specific colors for conclusion badge and dot (not part of card styling)
+  const getThemeAccentColors = (theme: UIBlockTheme) => {
     const colorMap = {
       warm: {
-        border: '#fed7aa',
-        borderHover: '#fdba74',
-        iconBg: '#ffedd5',
-        iconText: '#ea580c',
         conclusionBg: '#fff7ed',
         conclusionBorder: '#fed7aa',
         conclusionText: '#9a3412',
+        conclusionIconText: '#ea580c',
         dotColor: '#fb923c'
       },
       cool: {
-        border: '#bfdbfe',
-        borderHover: '#93c5fd',
-        iconBg: '#dbeafe',
-        iconText: '#2563eb',
         conclusionBg: '#eff6ff',
         conclusionBorder: '#bfdbfe',
         conclusionText: '#1e40af',
+        conclusionIconText: '#2563eb',
         dotColor: '#60a5fa'
       },
       neutral: {
-        border: '#fde68a',
-        borderHover: '#fcd34d',
-        iconBg: '#fef3c7',
-        iconText: '#d97706',
         conclusionBg: '#fffbeb',
         conclusionBorder: '#fde68a',
         conclusionText: '#92400e',
+        conclusionIconText: '#d97706',
         dotColor: '#fbbf24'
       }
     };
     return colorMap[theme];
   };
 
-  const themeColors = getThemeColors(uiTheme);
+  const themeAccentColors = getThemeAccentColors(uiTheme);
 
   // Get text colors
   const textColors = getPublishedTextColors(
@@ -139,17 +137,23 @@ export default function StackedPainBulletsPublished(props: LayoutComponentProps)
           {painItems.map((painItem: PainItem) => (
             <div
               key={painItem.id}
-              className="group flex items-start space-x-4 p-6 bg-white rounded-lg border hover:shadow-md transition-all duration-300"
+              className="group flex items-start space-x-4 p-6 rounded-lg transition-all duration-300 hover:-translate-y-1"
               style={{
-                borderColor: themeColors.border
+                backgroundColor: cardStyles.bg,
+                backdropFilter: cardStyles.backdropFilter,
+                WebkitBackdropFilter: cardStyles.backdropFilter,
+                borderColor: cardStyles.borderColor,
+                borderWidth: cardStyles.borderWidth,
+                borderStyle: cardStyles.borderStyle,
+                boxShadow: cardStyles.boxShadow
               }}
             >
               {/* Pain Icon */}
               <div
                 className="flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center transition-colors duration-300"
                 style={{
-                  backgroundColor: themeColors.iconBg,
-                  color: themeColors.iconText
+                  backgroundColor: cardStyles.iconBg,
+                  color: cardStyles.iconColor
                 }}
               >
                 {renderIcon(painItem)}
@@ -164,7 +168,7 @@ export default function StackedPainBulletsPublished(props: LayoutComponentProps)
                     style={{
                       fontWeight: 600,
                       fontSize: '1.25rem',
-                      color: textColors.heading || '#111827',
+                      color: cardStyles.textHeading,
                       lineHeight: '1.75rem'
                     }}
                   />
@@ -175,7 +179,7 @@ export default function StackedPainBulletsPublished(props: LayoutComponentProps)
                   <TextPublished
                     value={painItem.description}
                     style={{
-                      color: textColors.body || '#4b5563',
+                      color: cardStyles.textBody,
                       fontSize: '1rem',
                       lineHeight: '1.75rem'
                     }}
@@ -187,7 +191,7 @@ export default function StackedPainBulletsPublished(props: LayoutComponentProps)
               <div
                 className="flex-shrink-0 w-2 h-2 rounded-full transition-colors duration-300"
                 style={{
-                  backgroundColor: themeColors.dotColor
+                  backgroundColor: themeAccentColors.dotColor
                 }}
               />
             </div>
@@ -199,14 +203,14 @@ export default function StackedPainBulletsPublished(props: LayoutComponentProps)
           <div
             className="inline-flex items-center px-6 py-3 rounded-full border"
             style={{
-              backgroundColor: themeColors.conclusionBg,
-              borderColor: themeColors.conclusionBorder,
-              color: themeColors.conclusionText
+              backgroundColor: themeAccentColors.conclusionBg,
+              borderColor: themeAccentColors.conclusionBorder,
+              color: themeAccentColors.conclusionText
             }}
           >
             <svg
               className="w-5 h-5 mr-2"
-              style={{ color: themeColors.iconText }}
+              style={{ color: themeAccentColors.conclusionIconText }}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"

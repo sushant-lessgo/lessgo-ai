@@ -111,7 +111,11 @@
       "Bash(then)",
       "Bash(else)",
       "Bash(fi)",
-      "Bash(npx eslint:*)"
+      "Bash(npx eslint:*)",
+      "WebFetch(domain:www.saasframe.io)",
+      "WebFetch(domain:www.designstudiouiux.com)",
+      "Bash(head:*)",
+      "Bash(wc:*)"
     ],
     "deny": [],
     "ask": [],

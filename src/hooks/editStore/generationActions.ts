@@ -585,7 +585,6 @@ export function createGenerationActions(set: any, get: any) {
       state.theme.colors.sectionBackgrounds.primary = backgroundSystem.primary;
       state.theme.colors.sectionBackgrounds.secondary = backgroundSystem.secondary;
       state.theme.colors.sectionBackgrounds.neutral = backgroundSystem.neutral;
-      state.theme.colors.sectionBackgrounds.divider = backgroundSystem.divider;
       
       state.persistence.isDirty = true;
       
@@ -634,8 +633,7 @@ export function createGenerationActions(set: any, get: any) {
       const backgroundSystemData: BackgroundSystem = {
         primary: theme.colors.sectionBackgrounds.primary!,
         secondary: theme.colors.sectionBackgrounds.secondary!,
-        neutral: theme.colors.sectionBackgrounds.neutral || 'bg-white',
-        divider: theme.colors.sectionBackgrounds.divider || 'bg-gray-100/50',
+        neutral: theme.colors.sectionBackgrounds.neutral || '#ffffff',
         baseColor: theme.colors.baseColor,
         accentColor: theme.colors.accentColor,
         accentCSS: theme.colors.accentCSS

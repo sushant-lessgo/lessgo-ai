@@ -143,32 +143,25 @@ export function ButtonConfigurationModal({
     setIsSaving(true);
 
     try {
-      // Store button configuration in element metadata
+      // V2: Store button text directly, metadata in elementMetadata
       const currentSection = content[elementSelection.sectionId];
-      if (currentSection?.elements[elementSelection.elementKey]) {
-        const element = currentSection.elements[elementSelection.elementKey];
-        const updatedElement = {
-          ...element,
-          content: config.text,  // ✅ FIX: Explicitly set fresh content with spaces preserved
-          metadata: {
-            ...element.metadata,
-            buttonConfig: {
-              type: config.type,
-              ctaType: config.ctaType, // NEW: Save CTA type
-              ...(config.type === 'link' && { url: config.url }),
-              ...(config.type === 'link-with-input' && {
-                url: config.url,
-                inputConfig: config.inputConfig
-              }),
-              ...(config.type === 'form' && {
-                formId: config.formId,
-                behavior: config.behavior
-              }),
-              leadingIcon: config.leadingIcon,
-              trailingIcon: config.trailingIcon,
-              iconConfig: config.iconConfig,
-            }
-          }
+      if (currentSection?.elements[elementSelection.elementKey] !== undefined) {
+        // Build buttonConfig object
+        const buttonConfig = {
+          type: config.type,
+          ctaType: config.ctaType,
+          ...(config.type === 'link' && { url: config.url }),
+          ...(config.type === 'link-with-input' && {
+            url: config.url,
+            inputConfig: config.inputConfig
+          }),
+          ...(config.type === 'form' && {
+            formId: config.formId,
+            behavior: config.behavior
+          }),
+          leadingIcon: config.leadingIcon,
+          trailingIcon: config.trailingIcon,
+          iconConfig: config.iconConfig,
         };
 
         // Create ctaConfig for compatibility with HeroSection
@@ -181,41 +174,30 @@ export function ButtonConfigurationModal({
           inputConfig: config.type === 'link-with-input' ? config.inputConfig : undefined,
         };
 
-        // Update the element in store using setSection, including ctaConfig
+        // V2: Elements stored directly (no wrapper)
         const updatedElements = {
           ...currentSection.elements,
-          [elementSelection.elementKey]: updatedElement
+          [elementSelection.elementKey]: config.text  // Direct string, no spread
         };
-        
-        // Also store cta_url or cta_embed directly in elements for backward compatibility
+
+        // V2: Store cta_url/cta_embed as direct strings
         if (config.type === 'link' && config.url) {
-          updatedElements.cta_url = {
-            type: 'text' as const,
-            content: config.url,
-            isEditable: false,
-            editMode: 'inline' as const,
-            metadata: {}
-          };
+          updatedElements.cta_url = config.url;
         } else if (config.type === 'link-with-input' && config.url) {
-          updatedElements.cta_url = {
-            type: 'text' as const,
-            content: config.url,
-            isEditable: false,
-            editMode: 'inline' as const,
-            metadata: { inputConfig: config.inputConfig }
-          };
+          updatedElements.cta_url = config.url;
         } else if (config.type === 'form' && config.formId) {
-          updatedElements.cta_embed = {
-            type: 'text' as const,
-            content: `form:${config.formId}`,
-            isEditable: false,
-            editMode: 'inline' as const,
-            metadata: { behavior: config.behavior }
-          };
+          updatedElements.cta_embed = `form:${config.formId}`;
         }
-        
+
+        // V2: Store buttonConfig in elementMetadata (separate from element)
+        const updatedElementMetadata = {
+          ...currentSection.elementMetadata,
+          [elementSelection.elementKey]: { buttonConfig }
+        };
+
         setSection(elementSelection.sectionId, {
           elements: updatedElements,
+          elementMetadata: updatedElementMetadata,
           // Also save ctaConfig at section level for easy access by CTA handler
           cta: {
             ...ctaConfig,

@@ -12,6 +12,9 @@ import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { getDynamicCardLayout, isSplitLayout } from '@/utils/dynamicCardLayout';
+import { cn } from '@/lib/utils';
+import { getCardStyles, type CardStyles } from '@/modules/Design/cardStyles';
 
 // V2 Types
 interface Persona {
@@ -134,7 +137,9 @@ const PersonaCard = React.memo(({
   onRemovePersona,
   canRemove = true,
   themeColors,
-  sectionBackground
+  cardStyles,
+  sectionBackground,
+  cardClassName
 }: {
   persona: Persona;
   mode: 'edit' | 'preview';
@@ -148,15 +153,18 @@ const PersonaCard = React.memo(({
   themeColors: {
     avatarGradient: string;
     avatarRing: string;
-    cardBorder: string;
-    cardHover: string;
-    cardBg: string;
+    addButtonBg: string;
+    addButtonBorder: string;
+    addButtonHover: string;
+    addButtonText: string;
   };
+  cardStyles: CardStyles;
   sectionBackground: string;
+  cardClassName?: string;
 }) => {
 
   return (
-    <div className={`group/persona-card relative ${themeColors.cardBg} p-6 rounded-2xl border ${themeColors.cardBorder} shadow-lg ${themeColors.cardHover} hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center`}>
+    <div className={cn(`group/persona-card relative ${cardStyles.bg} ${cardStyles.blur} rounded-2xl border ${cardStyles.border} ${cardStyles.shadow} ${cardStyles.hoverEffect} hover:-translate-y-1 transition-all duration-300 text-center`, cardClassName || 'p-6')}>
 
       {/* Persona Avatar */}
       <PersonaAvatar
@@ -179,11 +187,11 @@ const PersonaCard = React.memo(({
           backgroundType="neutral"
           colorTokens={colorTokens}
           variant="body"
-          className="font-bold text-center"
+          className={`font-bold text-center ${cardStyles.textHeading}`}
           placeholder="Enter persona name..."
           sectionId={sectionId}
           elementKey={`persona_name_${persona.id}`}
-          sectionBackground="bg-white"
+          sectionBackground={sectionBackground}
           formatState={{ textAlign: 'center', bold: true } as any}
         />
       </div>
@@ -197,11 +205,11 @@ const PersonaCard = React.memo(({
           backgroundType="neutral"
           colorTokens={colorTokens}
           variant="body"
-          className={`leading-relaxed text-center ${colorTokens?.textSecondary || 'text-gray-600'}`}
+          className={`leading-relaxed text-center ${cardStyles.textBody}`}
           placeholder="Enter persona description..."
           sectionId={sectionId}
           elementKey={`persona_description_${persona.id}`}
-          sectionBackground="bg-white"
+          sectionBackground={sectionBackground}
           formatState={{ textAlign: 'center', fontSize: '14px' } as any}
         />
       </div>
@@ -247,15 +255,20 @@ export default function PersonaGrid(props: LayoutComponentProps) {
     return 'neutral';
   }, [props.manualThemeOverride, props.userContext]);
 
-  // Get theme-specific colors
+  // Get adaptive card styles based on section background luminance
+  const cardStyles = React.useMemo(() => {
+    return getCardStyles({
+      sectionBackgroundCSS: sectionBackground || '',
+      theme: uiTheme
+    });
+  }, [sectionBackground, uiTheme]);
+
+  // Get theme-specific colors (avatar gradients and add button only - card styling from cardStyles)
   const getThemeColors = (theme: UIBlockTheme) => {
     return {
       warm: {
         avatarGradient: 'from-orange-500 to-red-600',
         avatarRing: 'ring-orange-200',
-        cardBorder: 'border-orange-100',
-        cardHover: 'hover:border-orange-200',
-        cardBg: 'bg-white',
         addButtonBg: 'from-orange-50 to-red-50',
         addButtonBorder: 'border-orange-200',
         addButtonHover: 'hover:border-orange-300',
@@ -264,9 +277,6 @@ export default function PersonaGrid(props: LayoutComponentProps) {
       cool: {
         avatarGradient: 'from-blue-500 to-indigo-600',
         avatarRing: 'ring-blue-200',
-        cardBorder: 'border-blue-100',
-        cardHover: 'hover:border-blue-200',
-        cardBg: 'bg-white',
         addButtonBg: 'from-blue-50 to-indigo-50',
         addButtonBorder: 'border-blue-200',
         addButtonHover: 'hover:border-blue-300',
@@ -275,9 +285,6 @@ export default function PersonaGrid(props: LayoutComponentProps) {
       neutral: {
         avatarGradient: 'from-gray-500 to-slate-600',
         avatarRing: 'ring-gray-200',
-        cardBorder: 'border-gray-200',
-        cardHover: 'hover:border-gray-300',
-        cardBg: 'bg-white',
         addButtonBg: 'from-gray-50 to-slate-50',
         addButtonBorder: 'border-gray-200',
         addButtonHover: 'hover:border-gray-300',
@@ -329,15 +336,28 @@ export default function PersonaGrid(props: LayoutComponentProps) {
     (handleContentUpdate as any)('personas', updated);
   };
 
-  // Grid classes based on persona count
-  const getGridClasses = (count: number) => {
-    if (count === 1) return 'max-w-md mx-auto';
-    if (count === 2) return 'md:grid-cols-2 max-w-3xl mx-auto';
-    if (count === 3) return 'md:grid-cols-2 lg:grid-cols-3';
-    if (count === 4) return 'md:grid-cols-2 lg:grid-cols-4';
-    if (count === 5) return 'md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5';
-    return 'md:grid-cols-2 lg:grid-cols-3';
-  };
+  // Dynamic card layout
+  const layout = getDynamicCardLayout(personas.length);
+
+  // Helper to render persona card
+  const renderPersonaCard = (persona: Persona, cardClass: string) => (
+    <PersonaCard
+      key={persona.id}
+      persona={persona}
+      mode={mode}
+      colorTokens={colorTokens}
+      sectionId={sectionId}
+      onNameEdit={handleNameEdit}
+      onDescriptionEdit={handleDescriptionEdit}
+      onIconEdit={handleIconEdit}
+      onRemovePersona={handleRemovePersona}
+      canRemove={personas.length > 1}
+      themeColors={themeColors}
+      cardStyles={cardStyles}
+      sectionBackground={sectionBackground}
+      cardClassName={cardClass}
+    />
+  );
 
   return (
     <LayoutSection
@@ -383,24 +403,28 @@ export default function PersonaGrid(props: LayoutComponentProps) {
         </div>
 
         {/* Persona Grid */}
-        <div className={`grid gap-8 ${getGridClasses(personas.length)}`}>
-          {personas.map((persona) => (
-            <PersonaCard
-              key={persona.id}
-              persona={persona}
-              mode={mode}
-              colorTokens={colorTokens}
-              sectionId={sectionId}
-              onNameEdit={handleNameEdit}
-              onDescriptionEdit={handleDescriptionEdit}
-              onIconEdit={handleIconEdit}
-              onRemovePersona={handleRemovePersona}
-              canRemove={personas.length > 1}
-              themeColors={themeColors}
-              sectionBackground={sectionBackground}
-            />
-          ))}
-        </div>
+        {isSplitLayout(personas.length) && layout.splitLayout ? (
+          <div className={layout.containerClass}>
+            <div className={layout.splitLayout.firstRowGrid}>
+              {personas.slice(0, layout.splitLayout.firstRowCount).map((persona) =>
+                renderPersonaCard(persona, layout.splitLayout!.firstRowCard)
+              )}
+            </div>
+            <div className={layout.splitLayout.secondRowGrid}>
+              {personas.slice(layout.splitLayout.firstRowCount).map((persona) =>
+                renderPersonaCard(persona, layout.splitLayout!.secondRowCard)
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className={layout.containerClass}>
+            <div className={layout.gridClass}>
+              {personas.map((persona) =>
+                renderPersonaCard(persona, layout.cardClass)
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Add Persona Button - only show in edit mode and if under max limit */}
         {mode !== 'preview' && personas.length < 6 && (

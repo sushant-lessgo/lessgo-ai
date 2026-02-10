@@ -26,7 +26,6 @@ export const defaultTheme: Theme = {
       primary: 'bg-gradient-to-br from-gray-900 to-gray-800',
       secondary: 'bg-gray-50',
       neutral: 'bg-white',
-      divider: 'bg-gray-100/50',
     },
     semantic: {
       success: 'bg-green-500',

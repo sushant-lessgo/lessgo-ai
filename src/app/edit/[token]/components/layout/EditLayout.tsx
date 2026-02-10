@@ -59,7 +59,6 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
       primary: theme.colors.sectionBackgrounds.primary || 'bg-gray-800',
       secondary: theme.colors.sectionBackgrounds.secondary || 'bg-gray-50',
       neutral: theme.colors.sectionBackgrounds.neutral || 'bg-white',
-      divider: theme.colors.sectionBackgrounds.divider || 'bg-gray-100/50',
       baseColor: theme.colors.baseColor,
       accentColor: theme.colors.accentColor,
       accentCSS: theme.colors.accentCSS || 'bg-purple-600',

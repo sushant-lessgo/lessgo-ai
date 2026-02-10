@@ -288,17 +288,11 @@ export function SectionBackgroundModal({ isOpen, onClose, sectionId }: SectionBa
                       cssClass: theme?.colors?.sectionBackgrounds?.secondary || 'bg-blue-50',
                       fallbackColor: '#eff6ff'
                     },
-                    { 
-                      key: 'neutral', 
-                      label: 'Neutral', 
+                    {
+                      key: 'neutral',
+                      label: 'Neutral',
                       cssClass: theme?.colors?.sectionBackgrounds?.neutral || 'bg-white',
                       fallbackColor: '#ffffff'
-                    },
-                    { 
-                      key: 'divider', 
-                      label: 'Divider', 
-                      cssClass: theme?.colors?.sectionBackgrounds?.divider || 'bg-gray-100/50',
-                      fallbackColor: '#f3f4f6'
                     }
                   ].map((themeOption) => {
                     const isSelected = localBackground.themeColor === themeOption.key;

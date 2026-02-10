@@ -57,17 +57,15 @@ export const createFormActions = (
         }
       });
 
-      // Clean up button metadata connections
+      // V2: Clean up button metadata connections from elementMetadata
       Object.keys(state.content).forEach(sectionId => {
         const section = state.content[sectionId];
-        if (section?.elements) {
-          Object.entries(section.elements).forEach(([elementKey, element]: [string, any]) => {
-            if (element?.metadata?.buttonConfig?.formId === id) {
-              if (element.metadata.buttonConfig) {
-                element.metadata.buttonConfig.type = 'link';
-                delete element.metadata.buttonConfig.formId;
-                delete element.metadata.buttonConfig.behavior;
-              }
+        if (section?.elementMetadata) {
+          Object.entries(section.elementMetadata).forEach(([elementKey, meta]: [string, any]) => {
+            if (meta?.buttonConfig?.formId === id) {
+              meta.buttonConfig.type = 'link';
+              delete meta.buttonConfig.formId;
+              delete meta.buttonConfig.behavior;
             }
           });
         }

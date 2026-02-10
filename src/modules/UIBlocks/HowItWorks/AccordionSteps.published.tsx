@@ -7,11 +7,12 @@
 
 import React from 'react';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publishedTextColors';
+import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardStyles } from '@/lib/publishedTextColors';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { analyzeBackground } from '@/utils/backgroundAnalysis';
 
 // Step structure (V2 array format)
 interface StepItem {
@@ -45,25 +46,28 @@ export default function AccordionStepsPublished(props: LayoutComponentProps) {
   // Detect theme
   const uiTheme: UIBlockTheme = props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
 
-  // Get theme colors
-  const getThemeColors = (theme: UIBlockTheme) => {
+  // Get luminance from section background
+  const { luminance } = analyzeBackground(sectionBackgroundCSS || '');
+
+  // Get adaptive card styles based on luminance and theme
+  const cardStyles = getPublishedCardStyles(luminance, uiTheme);
+
+  // Accordion-specific accent colors (not part of card styling)
+  const getAccordionAccents = (theme: UIBlockTheme) => {
     const colorMap = {
       warm: {
-        border: '#fed7aa',
         contentBorder: '#ffedd5',
         detailsBg: '#fff7ed',
         detailsBorder: '#f97316',
         stepIndicator: '#f97316'
       },
       cool: {
-        border: '#bfdbfe',
         contentBorder: '#dbeafe',
         detailsBg: '#eff6ff',
         detailsBorder: '#3b82f6',
         stepIndicator: '#3b82f6'
       },
       neutral: {
-        border: '#fde68a',
         contentBorder: '#fef3c7',
         detailsBg: '#fffbeb',
         detailsBorder: '#f59e0b',
@@ -73,7 +77,7 @@ export default function AccordionStepsPublished(props: LayoutComponentProps) {
     return colorMap[theme];
   };
 
-  const themeColors = getThemeColors(uiTheme);
+  const accordionAccents = getAccordionAccents(uiTheme);
 
   // Get text colors
   const textColors = getPublishedTextColors(
@@ -127,18 +131,24 @@ export default function AccordionStepsPublished(props: LayoutComponentProps) {
           {steps.map((step: StepItem, index: number) => (
             <div
               key={step.id}
-              className="border rounded-lg overflow-hidden shadow-md"
+              className="rounded-lg overflow-hidden transition-all duration-300 hover:-translate-y-1"
               style={{
-                borderColor: themeColors.border
+                backgroundColor: cardStyles.bg,
+                backdropFilter: cardStyles.backdropFilter,
+                WebkitBackdropFilter: cardStyles.backdropFilter,
+                borderColor: cardStyles.borderColor,
+                borderWidth: cardStyles.borderWidth,
+                borderStyle: cardStyles.borderStyle,
+                boxShadow: cardStyles.boxShadow
               }}
             >
               {/* Step Header */}
-              <div className="p-6 bg-white">
+              <div className="p-6">
                 <div className="flex items-center space-x-4">
                   <div
                     className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm text-white ring-4 ring-white/30"
                     style={{
-                      backgroundColor: themeColors.stepIndicator
+                      backgroundColor: accordionAccents.stepIndicator
                     }}
                   >
                     {index + 1}
@@ -147,7 +157,8 @@ export default function AccordionStepsPublished(props: LayoutComponentProps) {
                     style={{
                       ...h3Typography,
                       fontSize: '1.125rem',
-                      fontWeight: 600
+                      fontWeight: 600,
+                      color: cardStyles.textHeading
                     }}
                   >
                     {step.title}
@@ -157,15 +168,15 @@ export default function AccordionStepsPublished(props: LayoutComponentProps) {
 
               {/* Step Content */}
               <div
-                className="p-6 bg-white border-t"
+                className="p-6 border-t"
                 style={{
-                  borderTopColor: themeColors.contentBorder
+                  borderTopColor: accordionAccents.contentBorder
                 }}
               >
                 <div className="space-y-4">
                   <p
                     style={{
-                      color: textColors.body,
+                      color: cardStyles.textBody,
                       lineHeight: '1.75rem',
                       fontSize: '1.125rem'
                     }}
@@ -178,13 +189,13 @@ export default function AccordionStepsPublished(props: LayoutComponentProps) {
                     <div
                       className="mt-2 rounded-lg p-4"
                       style={{
-                        backgroundColor: themeColors.detailsBg,
-                        borderLeft: `4px solid ${themeColors.detailsBorder}`
+                        backgroundColor: accordionAccents.detailsBg,
+                        borderLeft: `4px solid ${accordionAccents.detailsBorder}`
                       }}
                     >
                       <p
                         style={{
-                          color: textColors.muted,
+                          color: cardStyles.textMuted,
                           fontSize: '0.875rem',
                           lineHeight: '1.75rem'
                         }}

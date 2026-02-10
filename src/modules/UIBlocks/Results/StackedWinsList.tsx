@@ -9,6 +9,7 @@ import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { getCardStyles, type CardStyles } from '@/modules/Design/cardStyles';
 
 interface StackedWinsListProps extends LayoutComponentProps {}
 
@@ -94,24 +95,12 @@ const getCategoryColor = (category: string | undefined, theme: UIBlockTheme): { 
   return colorSets[theme][categoryKey] || colorSets[theme]['productivity'];
 };
 
-// Get theme-based colors for win checkmark/icon
-const getWinIconColors = (theme: UIBlockTheme) => {
+// Get theme-based colors for win checkmark/icon gradient only
+const getWinIconGradient = (theme: UIBlockTheme) => {
   return {
-    warm: {
-      gradient: 'from-orange-400 to-red-500',
-      border: 'border-orange-200',
-      borderHover: 'hover:border-orange-300'
-    },
-    cool: {
-      gradient: 'from-blue-400 to-cyan-500',
-      border: 'border-blue-200',
-      borderHover: 'hover:border-blue-300'
-    },
-    neutral: {
-      gradient: 'from-gray-400 to-slate-500',
-      border: 'border-gray-200',
-      borderHover: 'hover:border-gray-300'
-    }
+    warm: 'from-orange-400 to-red-500',
+    cool: 'from-blue-400 to-cyan-500',
+    neutral: 'from-gray-400 to-slate-500'
   }[theme];
 };
 
@@ -123,6 +112,7 @@ const WinItemComponent = ({
   sectionId,
   theme,
   winIcon,
+  cardStyles,
   onWinUpdate,
   onRemoveWin,
   handleContentUpdate,
@@ -134,20 +124,21 @@ const WinItemComponent = ({
   sectionId: string;
   theme: UIBlockTheme;
   winIcon: string;
+  cardStyles: CardStyles;
   onWinUpdate: (index: number, field: keyof WinItem, value: string) => void;
   onRemoveWin?: (index: number) => void;
   handleContentUpdate: (key: string, value: any) => void;
   canRemove?: boolean;
 }) => {
   const categoryColors = getCategoryColor(win.category, theme);
-  const iconColors = getWinIconColors(theme);
+  const iconGradient = getWinIconGradient(theme);
 
   return (
-    <div className={`group relative flex items-start space-x-4 p-6 bg-white rounded-xl border ${iconColors.border} ${iconColors.borderHover} hover:shadow-lg transition-all duration-300`}>
+    <div className={`group relative flex items-start space-x-4 p-6 rounded-xl border ${cardStyles.bg} ${cardStyles.blur} ${cardStyles.border} ${cardStyles.shadow} ${cardStyles.hoverEffect} transition-all duration-300`}>
 
       {/* Checkmark Icon */}
       <div className="flex-shrink-0 mt-1">
-        <div className={`w-8 h-8 bg-gradient-to-br ${iconColors.gradient} rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+        <div className={`w-8 h-8 bg-gradient-to-br ${iconGradient} rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
           <IconEditableText
             mode={mode}
             value={winIcon}
@@ -192,12 +183,12 @@ const WinItemComponent = ({
               contentEditable
               suppressContentEditableWarning
               onBlur={(e) => onWinUpdate(index, 'win', e.currentTarget.textContent || '')}
-              className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[28px] cursor-text hover:bg-gray-50 font-bold text-gray-900"
+              className={`outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[28px] cursor-text font-bold ${cardStyles.textHeading}`}
             >
               {win.win}
             </div>
           ) : (
-            <h3 className="font-bold text-gray-900">
+            <h3 className={`font-bold ${cardStyles.textHeading}`}>
               {win.win}
             </h3>
           )}
@@ -211,12 +202,12 @@ const WinItemComponent = ({
                 contentEditable
                 suppressContentEditableWarning
                 onBlur={(e) => onWinUpdate(index, 'description', e.currentTarget.textContent || '')}
-                className={`outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[20px] cursor-text hover:bg-gray-50 text-gray-600 leading-relaxed ${!win.description ? 'opacity-50 italic' : ''}`}
+                className={`outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[20px] cursor-text ${cardStyles.textBody} leading-relaxed ${!win.description ? 'opacity-50 italic' : ''}`}
               >
                 {win.description || 'Add optional description...'}
               </div>
             ) : win.description && (
-              <p className="text-gray-600 leading-relaxed">
+              <p className={`${cardStyles.textBody} leading-relaxed`}>
                 {win.description}
               </p>
             )}
@@ -264,8 +255,16 @@ export default function StackedWinsList(props: StackedWinsListProps) {
     return 'neutral';
   }, [props.manualThemeOverride, props.userContext]);
 
+  // Get adaptive card styles based on section background luminance
+  const cardStyles = React.useMemo(() => {
+    return getCardStyles({
+      sectionBackgroundCSS: sectionBackground || '',
+      theme
+    });
+  }, [sectionBackground, theme]);
+
   // Icon default at render time (per Icon Handling Pattern)
-  const winIcon = blockContent.win_icon ?? '✅';
+  const winIcon = blockContent.win_icon ?? 'CheckCircle';
 
   // Get wins array (ensure it's always an array)
   const wins: WinItem[] = Array.isArray(blockContent.wins) ? blockContent.wins : CONTENT_SCHEMA.wins.default;
@@ -346,6 +345,7 @@ export default function StackedWinsList(props: StackedWinsListProps) {
               sectionId={sectionId}
               theme={theme}
               winIcon={winIcon}
+              cardStyles={cardStyles}
               onWinUpdate={handleWinUpdate}
               onRemoveWin={handleRemoveWin}
               handleContentUpdate={handleContentUpdate}
@@ -415,7 +415,7 @@ export const componentMeta = {
   ],
   props: {
     sectionId: 'string - Required section identifier',
-    backgroundType: '"primary" | "secondary" | "neutral" | "divider" - Controls text color adaptation',
+    backgroundType: '"primary" | "secondary" | "neutral" - Controls text color adaptation',
     className: 'string - Additional CSS classes'
   },
   contentSchema: {

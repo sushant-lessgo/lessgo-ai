@@ -88,7 +88,10 @@ export type SectionType =
 export interface SectionData {
   id: string;
   layout: string;
-  elements: Record<string, EditableElement>;
+  // V2: Direct format - elements stored as values directly (string, array, etc.)
+  elements: Record<string, any>;
+  // V2: Button metadata stored separately (buttonConfig, etc.)
+  elementMetadata?: Record<string, { buttonConfig?: any }>;
   backgroundType?: BackgroundType;
   sectionBackground?: SectionBackground;
   media?: SectionMedia;
@@ -328,7 +331,6 @@ export interface SectionBackgrounds {
   primary?: string;
   secondary?: string;
   neutral?: string;
-  divider?: string;
 }
 
 export interface SemanticColors {
@@ -356,7 +358,6 @@ export interface TextColorsForBackgrounds {
   primary: TextColorSet;
   secondary: TextColorSet;
   neutral: TextColorSet;
-  divider: TextColorSet;
   // For custom backgrounds
   custom?: TextColorSet;
 }
@@ -413,8 +414,6 @@ export interface BackgroundSystem {
   secondary: string;
   /** Neutral background (testimonials, white sections) */
   neutral: string;
-  /** Divider background (subtle separators) */
-  divider: string;
   /** Base color name (e.g., "blue", "purple") */
   baseColor: string;
   /** Accent color name (e.g., "purple", "orange") */

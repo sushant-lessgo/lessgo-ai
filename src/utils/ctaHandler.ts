@@ -15,10 +15,10 @@ export function createCTAClickHandler(sectionId: string, elementKey?: string) {
     
     // First try to find CTA config in section.cta (legacy)
     let ctaConfig = sectionData?.cta;
-    
-    // If not found, look for button config in element metadata (new approach)
-    if (!ctaConfig && elementKey && sectionData?.elements?.[elementKey]?.metadata?.buttonConfig) {
-      const buttonConfig = sectionData.elements[elementKey].metadata.buttonConfig;
+
+    // V2: Look for button config in elementMetadata
+    if (!ctaConfig && elementKey && sectionData?.elementMetadata?.[elementKey]?.buttonConfig) {
+      const buttonConfig = sectionData.elementMetadata[elementKey].buttonConfig;
       ctaConfig = {
         label: buttonConfig.label || 'Click Here',
         type: buttonConfig.type,
@@ -29,21 +29,19 @@ export function createCTAClickHandler(sectionId: string, elementKey?: string) {
         size: (buttonConfig.size as 'small' | 'medium' | 'large') || 'medium'
       };
     }
-    
-    // Also check if there's a CTA button element we can infer config from
-    if (!ctaConfig && sectionData?.elements) {
-      // Look for CTA-related elements
-      const ctaElement = sectionData.elements['cta_text'] || sectionData.elements['cta'];
-      if (ctaElement?.metadata?.buttonConfig) {
-        const buttonConfig = ctaElement.metadata.buttonConfig;
+
+    // Also check cta_text in elementMetadata
+    if (!ctaConfig && sectionData?.elementMetadata) {
+      const ctaButtonConfig = sectionData.elementMetadata['cta_text']?.buttonConfig || sectionData.elementMetadata['cta']?.buttonConfig;
+      if (ctaButtonConfig) {
         ctaConfig = {
-          label: buttonConfig.label || 'Click Here',
-          type: buttonConfig.type,
-          url: buttonConfig.url,
-          formId: buttonConfig.formId,
-          behavior: buttonConfig.behavior,
-          variant: (buttonConfig.variant as 'primary' | 'secondary' | 'outline' | 'ghost') || 'primary',
-          size: (buttonConfig.size as 'small' | 'medium' | 'large') || 'medium'
+          label: ctaButtonConfig.label || 'Click Here',
+          type: ctaButtonConfig.type,
+          url: ctaButtonConfig.url,
+          formId: ctaButtonConfig.formId,
+          behavior: ctaButtonConfig.behavior,
+          variant: (ctaButtonConfig.variant as 'primary' | 'secondary' | 'outline' | 'ghost') || 'primary',
+          size: (ctaButtonConfig.size as 'small' | 'medium' | 'large') || 'medium'
         };
       }
     }

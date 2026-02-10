@@ -150,7 +150,6 @@ function GeneratePageContent({ tokenId }: { tokenId: string }) {
             primary: currentState.theme?.colors?.sectionBackgrounds?.primary,
             secondary: currentState.theme?.colors?.sectionBackgrounds?.secondary,
             neutral: currentState.theme?.colors?.sectionBackgrounds?.neutral,
-            divider: currentState.theme?.colors?.sectionBackgrounds?.divider
           }
         }
       });
@@ -186,7 +185,6 @@ function GeneratePageContent({ tokenId }: { tokenId: string }) {
           primary: stateAfterSave.theme?.colors?.sectionBackgrounds?.primary,
           secondary: stateAfterSave.theme?.colors?.sectionBackgrounds?.secondary,
           neutral: stateAfterSave.theme?.colors?.sectionBackgrounds?.neutral,
-          divider: stateAfterSave.theme?.colors?.sectionBackgrounds?.divider
         }
       });
       

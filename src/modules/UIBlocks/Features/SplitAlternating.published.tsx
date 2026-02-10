@@ -99,7 +99,7 @@ export default function SplitAlternatingPublished(props: LayoutComponentProps) {
           <div className="space-y-24">
             {features.map((feature: Feature, idx: number) => {
               const isEven = idx % 2 === 0;
-              const displayIcon = feature.icon || '🎯';
+              const displayIcon = feature.icon || 'Target';
 
               return (
                 <div

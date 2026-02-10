@@ -17,24 +17,14 @@ import { getComponent, extractSectionType } from './componentRegistry.published'
 
 /**
  * Extract content fields from elements structure
- * Converts: { elements: { headline: { content: "text" } } }
- * To: { headline: "text" }
- * Also includes forms from fullContent for form-connected buttons
+ * V2: Direct passthrough - elements are already in correct format
  */
 function extractContentFields(sectionData: any, fullContent?: any): Record<string, any> {
-  const { elements, ...systemProps } = sectionData;
-  const contentProps: Record<string, any> = {};
+  const { elements, elementMetadata, ...systemProps } = sectionData;
 
-  // Extract .content from each element
-  if (elements && typeof elements === 'object') {
-    for (const [key, element] of Object.entries(elements)) {
-      if (element && typeof element === 'object' && 'content' in element) {
-        contentProps[key] = (element as any).content;
-      }
-    }
-  }
-
-  return { ...systemProps, ...contentProps };
+  // Direct passthrough - elements are stored in direct format
+  // Also pass through elementMetadata for button configs
+  return { ...systemProps, ...elements, elementMetadata };
 }
 
 interface LandingPagePublishedRendererProps {
@@ -108,10 +98,9 @@ export function LandingPagePublishedRenderer({
           sectionBackgroundCSS = theme.colors?.sectionBackgrounds?.primary || '#FFFFFF';
         } else if (backgroundType === 'secondary') {
           sectionBackgroundCSS = theme.colors?.sectionBackgrounds?.secondary || '#F9FAFB';
-        } else if (backgroundType === 'neutral') {
+        } else {
+          // neutral fallback
           sectionBackgroundCSS = theme.colors?.sectionBackgrounds?.neutral || '#F3F4F6';
-        } else if (backgroundType === 'divider') {
-          sectionBackgroundCSS = theme.colors?.sectionBackgrounds?.divider || '#E5E7EB';
         }
 
         // Custom background override

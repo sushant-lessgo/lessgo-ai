@@ -49,7 +49,7 @@ const loadGoogleFonts = () => {
 };
 
 // ... (types remain the same)
-type SectionBackground = 'neutral' | 'primary-highlight' | 'secondary-highlight' | 'divider-zone';
+type SectionBackground = 'neutral' | 'primary-highlight' | 'secondary-highlight';
 
 type OrderedSection = {
   id: string;
@@ -96,11 +96,10 @@ const MissingLayoutComponent: React.FC<{ sectionId: string; layout: string }> = 
   );
 };
 
-const backgroundTypeMapping: Record<SectionBackground, 'primary' | 'secondary' | 'neutral' | 'divider'> = {
+const backgroundTypeMapping: Record<SectionBackground, 'primary' | 'secondary' | 'neutral'> = {
   'primary-highlight': 'primary',
   'secondary-highlight': 'secondary',
   'neutral': 'neutral',
-  'divider-zone': 'divider',
 };
 
 
@@ -304,7 +303,6 @@ const finalSections: OrderedSection[] = processedSections
   switch(effectiveBackgroundType) {
     case 'primary': background = 'primary-highlight'; break;
     case 'secondary': background = 'secondary-highlight'; break;
-    case 'divider': background = 'divider-zone'; break;
     case 'custom': background = 'neutral'; break; // ✅ Handle custom backgrounds
     default: background = 'neutral';
   }
@@ -359,8 +357,6 @@ const finalSections: OrderedSection[] = processedSections
           return backgrounds.primary || 'linear-gradient(to bottom right, #3b82f6, #2563eb)';
         case 'secondary':
           return backgrounds.secondary || 'rgba(249, 250, 251, 0.7)';
-        case 'divider':
-          return backgrounds.divider || 'rgba(243, 244, 246, 0.5)';
         default:
           return backgrounds.neutral || '#ffffff';
       }
@@ -595,7 +591,6 @@ const finalSections: OrderedSection[] = processedSections
       primary: theme.colors.sectionBackgrounds.primary || 'linear-gradient(to bottom right, #3b82f6, #2563eb)',
       secondary: theme.colors.sectionBackgrounds.secondary || 'rgba(249, 250, 251, 0.7)',
       neutral: theme.colors.sectionBackgrounds.neutral || '#ffffff',
-      divider: theme.colors.sectionBackgrounds.divider || 'rgba(243, 244, 246, 0.5)',
       baseColor: theme.colors.baseColor || 'blue',
       accentColor: theme.colors.accentColor || 'blue',
       accentCSS: theme.colors.accentCSS || 'bg-blue-600',
@@ -672,7 +667,6 @@ const finalSections: OrderedSection[] = processedSections
             --color-bg-primary: ${colorTokens.bgPrimary};
             --color-bg-secondary: ${colorTokens.bgSecondary};
             --color-bg-neutral: ${colorTokens.bgNeutral};
-            --color-bg-divider: ${colorTokens.bgDivider};
             --color-text-primary: ${colorTokens.textPrimary};
             --color-text-secondary: ${colorTokens.textSecondary};
             --color-text-muted: ${colorTokens.textMuted};
@@ -780,7 +774,6 @@ const finalSections: OrderedSection[] = processedSections
                     <span className={`${
                       section.background === 'secondary-highlight' ? 'text-purple-400' :
                       section.background === 'primary-highlight' ? 'text-blue-400' :
-                      section.background === 'divider-zone' ? 'text-orange-400' :
                       'text-gray-400'
                     }`}>
                       {section.background}

@@ -2989,8 +2989,8 @@ export interface ColorTokens {
   textPrimary: string; textSecondary: string; textMuted: string;
   textOnLight: string; textOnDark: string; textOnAccent: string; textInverse: string;
   
-  // Backgrounds (4 tokens)
-  bgPrimary: string; bgSecondary: string; bgNeutral: string; bgDivider: string;
+  // Backgrounds (3 tokens)
+  bgPrimary: string; bgSecondary: string; bgNeutral: string;
   
   // Surfaces & Borders (7 tokens)
   surfaceCard: string; surfaceElevated: string; surfaceSection: string; surfaceOverlay: string;

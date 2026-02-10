@@ -54,7 +54,6 @@ export function useBackgroundSelector(tokenId: string) {
           primary: sectionBgs.primary,
           secondary: sectionBgs.secondary,
           neutral: sectionBgs.neutral || 'bg-white',
-          divider: sectionBgs.divider || 'bg-gray-100/50',
           baseColor: theme.colors.baseColor,
           accentColor: theme.colors.accentColor,
           accentCSS: theme.colors.accentCSS || `bg-${theme.colors.accentColor}-600`,
@@ -80,7 +79,6 @@ export function useBackgroundSelector(tokenId: string) {
       primary: 'bg-gradient-to-br from-blue-500 to-blue-600',
       secondary: 'bg-blue-50',
       neutral: 'bg-white',
-      divider: 'bg-gray-100/50',
       baseColor: 'blue',
       accentColor: 'blue',
       accentCSS: 'bg-blue-600',
@@ -285,7 +283,6 @@ export function useBackgroundSelector(tokenId: string) {
         baseColor: backgroundToApply.baseColor,
         accentColor: backgroundToApply.accentColor,
         neutral: backgroundToApply.neutral,
-        divider: backgroundToApply.divider,
         accentCSS: backgroundToApply.accentCSS
       } : 'null',
       timestamp: new Date().toISOString()
@@ -321,7 +318,6 @@ export function useBackgroundSelector(tokenId: string) {
             primary: backgroundToApply.primary,
             secondary: backgroundToApply.secondary,
             neutral: backgroundToApply.neutral,
-            divider: backgroundToApply.divider,
             baseColor: backgroundToApply.baseColor,
             accentColor: backgroundToApply.accentColor,
             accentCSS: backgroundToApply.accentCSS,

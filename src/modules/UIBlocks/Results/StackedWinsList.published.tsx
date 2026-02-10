@@ -8,7 +8,8 @@
 
 import React from 'react';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publishedTextColors';
+import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardStyles } from '@/lib/publishedTextColors';
+import { analyzeBackground } from '@/utils/backgroundAnalysis';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { IconPublished } from '@/components/published/IconPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
@@ -32,7 +33,7 @@ export default function StackedWinsListPublished(props: LayoutComponentProps) {
   const footer_text = props.footer_text || '';
 
   // Icon - derive default at render time (per Icon Handling Pattern)
-  const win_icon = props.win_icon ?? '✅';
+  const win_icon = props.win_icon ?? 'CheckCircle';
 
   // Get wins array (V2 format)
   const wins: WinItem[] = Array.isArray(props.wins) ? props.wins : [];
@@ -40,27 +41,18 @@ export default function StackedWinsListPublished(props: LayoutComponentProps) {
   // Detect theme
   const uiTheme: UIBlockTheme = props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
 
-  // Get theme-based win icon gradient colors
-  const getWinIconColors = (theme: UIBlockTheme) => {
+  // Get luminance from section background
+  const { luminance } = analyzeBackground(sectionBackgroundCSS || '');
+
+  // Get adaptive card styles
+  const cardStyles = getPublishedCardStyles(luminance, uiTheme);
+
+  // Get theme-based win icon gradient colors (for checkmark icon only)
+  const getWinIconGradient = (theme: UIBlockTheme) => {
     return {
-      warm: {
-        gradientFrom: '#fb923c',
-        gradientTo: '#ef4444',
-        border: '#fed7aa',
-        iconBg: 'linear-gradient(to bottom right, #fb923c, #ef4444)'
-      },
-      cool: {
-        gradientFrom: '#60a5fa',
-        gradientTo: '#06b6d4',
-        border: '#bfdbfe',
-        iconBg: 'linear-gradient(to bottom right, #60a5fa, #06b6d4)'
-      },
-      neutral: {
-        gradientFrom: '#9ca3af',
-        gradientTo: '#64748b',
-        border: '#e5e7eb',
-        iconBg: 'linear-gradient(to bottom right, #9ca3af, #64748b)'
-      }
+      warm: 'linear-gradient(to bottom right, #fb923c, #ef4444)',
+      cool: 'linear-gradient(to bottom right, #60a5fa, #06b6d4)',
+      neutral: 'linear-gradient(to bottom right, #9ca3af, #64748b)'
     }[theme];
   };
 
@@ -114,7 +106,7 @@ export default function StackedWinsListPublished(props: LayoutComponentProps) {
     return colorSets[theme][categoryKey] || defaults[theme];
   };
 
-  const iconColors = getWinIconColors(uiTheme);
+  const iconGradient = getWinIconGradient(uiTheme);
 
   // Get text colors
   const textColors = getPublishedTextColors(
@@ -168,16 +160,22 @@ export default function StackedWinsListPublished(props: LayoutComponentProps) {
             return (
               <div
                 key={win.id}
-                className="flex items-start space-x-4 p-6 bg-white rounded-xl border transition-all duration-300"
-                style={{ borderColor: iconColors.border }}
+                className="flex items-start space-x-4 p-6 rounded-xl transition-all duration-300 hover:-translate-y-1"
+                style={{
+                  backgroundColor: cardStyles.bg,
+                  backdropFilter: cardStyles.backdropFilter,
+                  WebkitBackdropFilter: cardStyles.backdropFilter,
+                  borderColor: cardStyles.borderColor,
+                  borderWidth: cardStyles.borderWidth,
+                  borderStyle: cardStyles.borderStyle,
+                  boxShadow: cardStyles.boxShadow
+                }}
               >
                 {/* Checkmark Icon */}
                 <div className="flex-shrink-0 mt-1">
                   <div
                     className="w-8 h-8 rounded-full flex items-center justify-center"
-                    style={{
-                      background: iconColors.iconBg
-                    }}
+                    style={{ background: iconGradient }}
                   >
                     <IconPublished
                       icon={win_icon}
@@ -212,7 +210,7 @@ export default function StackedWinsListPublished(props: LayoutComponentProps) {
                       style={{
                         fontSize: '1.125rem',
                         fontWeight: 600,
-                        color: '#111827',
+                        color: cardStyles.textHeading,
                         lineHeight: '1.5'
                       }}
                     />
@@ -224,7 +222,7 @@ export default function StackedWinsListPublished(props: LayoutComponentProps) {
                       <TextPublished
                         value={win.description}
                         style={{
-                          color: '#6b7280',
+                          color: cardStyles.textBody,
                           lineHeight: '1.75'
                         }}
                       />

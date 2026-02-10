@@ -14,6 +14,9 @@ import { ImagePublished } from '@/components/published/ImagePublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { getDynamicCardLayout, isSplitLayout } from '@/utils/dynamicCardLayout';
+import { analyzeBackground } from '@/utils/backgroundAnalysis';
+import { getPublishedCardStyles } from '@/lib/publishedTextColors';
 
 interface FeatureItem {
   id: string;
@@ -34,14 +37,18 @@ export default function CarouselPublished(props: LayoutComponentProps) {
   // Extract benefit badges
   const benefit_1 = props.benefit_1 || '';
   const benefit_2 = props.benefit_2 || '';
-  const benefit_icon_1 = props.benefit_icon_1 || '✅';
-  const benefit_icon_2 = props.benefit_icon_2 || '⏱️';
+  const benefit_icon_1 = props.benefit_icon_1 || 'CheckCircle';
+  const benefit_icon_2 = props.benefit_icon_2 || 'Clock';
 
   // Get features array - ensure it's an array
   const features: FeatureItem[] = Array.isArray(props.features) ? props.features : [];
 
   // Detect theme
   const uiTheme: UIBlockTheme = props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+
+  // Adaptive card styles based on section background luminance
+  const { luminance } = analyzeBackground(sectionBackgroundCSS || '');
+  const cardStyles = getPublishedCardStyles(luminance, uiTheme);
 
   // Theme-based benefit colors
   const getBenefitColors = (index: number) => {
@@ -77,13 +84,16 @@ export default function CarouselPublished(props: LayoutComponentProps) {
   const bodyTypography = getPublishedTypographyStyles('body-lg', theme);
   const h3Typography = getPublishedTypographyStyles('h3', theme);
 
+  // Dynamic card layout based on feature count
+  const layout = getDynamicCardLayout(features.length);
+
   return (
     <SectionWrapperPublished
       sectionId={sectionId}
       background={sectionBackgroundCSS}
       padding="normal"
     >
-      <div className="max-w-6xl mx-auto">
+      <div className={layout.containerClass}>
 
         {/* Header */}
         <div className="text-center mb-12">
@@ -112,9 +122,21 @@ export default function CarouselPublished(props: LayoutComponentProps) {
 
         {/* Features Grid */}
         {features.length > 0 && (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className={layout.gridClass}>
             {features.map((feature: FeatureItem, index: number) => (
-              <div key={feature.id} className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+              <div
+                key={feature.id}
+                className={`rounded-2xl transition-all duration-300 hover:-translate-y-1 ${layout.cardClass}`}
+                style={{
+                  backgroundColor: cardStyles.bg,
+                  backdropFilter: cardStyles.backdropFilter,
+                  WebkitBackdropFilter: cardStyles.backdropFilter,
+                  boxShadow: cardStyles.boxShadow,
+                  borderWidth: cardStyles.borderWidth,
+                  borderStyle: cardStyles.borderStyle,
+                  borderColor: cardStyles.borderColor
+                }}
+              >
                 {/* Feature Tag */}
                 {feature.tag && (
                   <div
@@ -143,7 +165,7 @@ export default function CarouselPublished(props: LayoutComponentProps) {
                 {feature.title && (
                   <h3
                     style={{
-                      color: textColors.heading,
+                      color: cardStyles.textHeading,
                       ...h3Typography,
                       marginBottom: '0.75rem'
                     }}
@@ -157,7 +179,7 @@ export default function CarouselPublished(props: LayoutComponentProps) {
                 {feature.description && (
                   <p
                     style={{
-                      color: textColors.body,
+                      color: cardStyles.textBody,
                       ...bodyTypography
                     }}
                     className="leading-relaxed"

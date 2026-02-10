@@ -141,7 +141,7 @@ function generateThemeVariables(theme: any): Record<string, string> {
   if (backgrounds.primary) vars['--bg-primary-base'] = backgrounds.primary;
   if (backgrounds.secondary) vars['--bg-secondary-base'] = backgrounds.secondary;
   if (backgrounds.neutral) vars['--bg-neutral-base'] = backgrounds.neutral;
-  if (backgrounds.divider) vars['--bg-divider-base'] = backgrounds.divider;
+
 
   // Accent colors
   const accentColor = theme?.colors?.accentColor;

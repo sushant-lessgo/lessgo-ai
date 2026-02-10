@@ -242,7 +242,6 @@ const handleDesignAndCopyRegeneration = async (
         primary: newBackgroundSystem.primary,
         secondary: newBackgroundSystem.secondary,
         neutral: newBackgroundSystem.neutral,
-        divider: newBackgroundSystem.divider,
       };
       
       

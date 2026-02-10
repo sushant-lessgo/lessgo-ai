@@ -8,6 +8,7 @@ import {
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { getCardStyles, CardStyles } from '@/modules/Design/cardStyles';
 
 interface ThreeStepHorizontalProps extends LayoutComponentProps {}
 
@@ -118,7 +119,8 @@ const StepCard = ({
   isLast = false,
   colorTokens,
   canRemove = true,
-  stepColors
+  stepColors,
+  cardStyles
 }: {
   step: StepItem;
   mode: 'edit' | 'preview';
@@ -130,11 +132,12 @@ const StepCard = ({
   colorTokens: any;
   canRemove?: boolean;
   stepColors: ReturnType<typeof getStepColors>;
+  cardStyles: CardStyles;
 }) => {
   return (
     <div className="relative flex-1 group flex flex-col">
-      {/* Card with solid background and border */}
-      <div className={`relative p-6 rounded-xl ${stepColors.addButtonBg} border ${stepColors.addButtonBorder} flex-1`}>
+      {/* Card with adaptive background and border */}
+      <div className={`relative p-6 rounded-xl ${cardStyles.bg} ${cardStyles.blur} ${cardStyles.border} ${cardStyles.shadow} flex-1`}>
 
         {/* Step Number Circle - Larger (64px) with ring and shadow */}
         <div className="relative mb-6 flex justify-center">
@@ -150,12 +153,12 @@ const StepCard = ({
               contentEditable
               suppressContentEditableWarning
               onBlur={(e) => onStepUpdate(index, 'title', e.currentTarget.textContent || '')}
-              className={`outline-none focus:ring-2 ${stepColors.focusRing} focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 font-semibold ${colorTokens.textPrimary}`}
+              className={`outline-none focus:ring-2 ${stepColors.focusRing} focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-white/10 font-semibold ${cardStyles.textHeading}`}
             >
               {step.title}
             </div>
           ) : (
-            <h3 className={`font-semibold ${colorTokens.textPrimary} mb-3`}>
+            <h3 className={`font-semibold ${cardStyles.textHeading} mb-3`}>
               {step.title}
             </h3>
           )}
@@ -168,12 +171,12 @@ const StepCard = ({
               contentEditable
               suppressContentEditableWarning
               onBlur={(e) => onStepUpdate(index, 'description', e.currentTarget.textContent || '')}
-              className={`outline-none focus:ring-2 ${stepColors.focusRing} focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 ${colorTokens.textSecondary} leading-relaxed`}
+              className={`outline-none focus:ring-2 ${stepColors.focusRing} focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-white/10 ${cardStyles.textBody} leading-relaxed`}
             >
               {step.description}
             </div>
           ) : (
-            <p className={`${colorTokens.textSecondary} leading-relaxed`}>
+            <p className={`${cardStyles.textBody} leading-relaxed`}>
               {step.description}
             </p>
           )}
@@ -222,6 +225,14 @@ export default function ThreeStepHorizontal(props: ThreeStepHorizontalProps) {
   }, [props.manualThemeOverride, props.userContext]);
 
   const stepColors = getStepColors(uiBlockTheme);
+
+  // Adaptive card styles based on section background luminance
+  const cardStyles = React.useMemo(() => {
+    return getCardStyles({
+      sectionBackgroundCSS: sectionBackground || '',
+      theme: uiBlockTheme
+    });
+  }, [sectionBackground, uiBlockTheme]);
 
   // Get steps array (with fallback to default)
   const steps: StepItem[] = Array.isArray(blockContent.steps) && blockContent.steps.length > 0
@@ -309,6 +320,7 @@ export default function ThreeStepHorizontal(props: ThreeStepHorizontalProps) {
               colorTokens={colorTokens}
               canRemove={steps.length > 3}
               stepColors={stepColors}
+              cardStyles={cardStyles}
             />
           ))}
         </div>
@@ -366,7 +378,7 @@ export const componentMeta = {
   ],
   props: {
     sectionId: 'string - Required section identifier',
-    backgroundType: '"primary" | "secondary" | "neutral" | "divider" - Controls text color adaptation',
+    backgroundType: '"primary" | "secondary" | "neutral" - Controls text color adaptation',
     className: 'string - Additional CSS classes'
   },
   contentSchema: {

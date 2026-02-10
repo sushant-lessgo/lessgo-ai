@@ -10,6 +10,9 @@ import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import { inferIconFromText } from '@/lib/iconCategoryMap';
+import { getDynamicCardLayout, isSplitLayout } from '@/utils/dynamicCardLayout';
+import { cn } from '@/lib/utils';
+import { getCardStyles, type CardStyles } from '@/modules/Design/cardStyles';
 
 interface StatBlocksProps extends LayoutComponentProps {}
 
@@ -50,49 +53,33 @@ const CONTENT_SCHEMA = {
 const generateStatId = (): string => `s${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
 
-// Type definitions for color objects
-type StatCardColors = {
-  bg: string;
-  border: string;
-  borderHover: string;
-  shadow: string;
-};
-
-type IconColors = {
-  bg: string;
-  bgHover: string;
-  text: string;
-};
-
 // Individual Stat Block
 const StatBlock = ({
   stat,
   index,
   mode,
   sectionId,
-  theme,
-  cardColors,
-  iconColors,
+  cardStyles,
   onValueEdit,
   onLabelEdit,
   onDescriptionEdit,
   onIconEdit,
   onRemoveStat,
-  canRemove = true
+  canRemove = true,
+  cardClassName
 }: {
   stat: StatItem;
   index: number;
   mode: 'edit' | 'preview';
   sectionId: string;
-  theme: UIBlockTheme;
-  cardColors: StatCardColors;
-  iconColors: IconColors;
+  cardStyles: CardStyles;
   onValueEdit: (id: string, value: string) => void;
   onLabelEdit: (id: string, value: string) => void;
   onDescriptionEdit: (id: string, value: string) => void;
   onIconEdit: (id: string, value: string) => void;
   onRemoveStat?: (id: string) => void;
   canRemove?: boolean;
+  cardClassName?: string;
 }) => {
   const { getTextStyle } = useTypography();
 
@@ -100,11 +87,11 @@ const StatBlock = ({
   const displayIcon = stat.icon || inferIconFromText(stat.label, stat.description);
 
   return (
-    <div className={`group/stat-${index} relative text-center p-8 ${cardColors.bg} rounded-xl border ${cardColors.border} ${cardColors.borderHover} ${cardColors.shadow} transition-all duration-300`}>
+    <div className={cn(`group/stat-${index} relative text-center rounded-xl border ${cardStyles.bg} ${cardStyles.blur} ${cardStyles.border} ${cardStyles.shadow} ${cardStyles.hoverEffect} transition-all duration-300`, cardClassName || 'p-8')}>
 
       {/* Stat Icon */}
       <div className="mb-6">
-        <div className={`w-16 h-16 ${iconColors.bg} rounded-2xl flex items-center justify-center ${iconColors.text} mx-auto ${iconColors.bgHover} group-hover:scale-110 transition-all duration-300`}>
+        <div className={`w-16 h-16 ${cardStyles.iconBg} rounded-2xl flex items-center justify-center ${cardStyles.iconColor} mx-auto group-hover:scale-110 transition-all duration-300`}>
           <IconEditableText
             mode={mode}
             value={displayIcon}
@@ -112,7 +99,7 @@ const StatBlock = ({
             backgroundType="neutral"
             colorTokens={{}}
             iconSize="lg"
-            className={`${iconColors.text} text-2xl`}
+            className={`${cardStyles.iconColor} text-2xl`}
             sectionId={sectionId}
             elementKey={`stat_icon_${stat.id}`}
           />
@@ -126,14 +113,12 @@ const StatBlock = ({
             contentEditable
             suppressContentEditableWarning
             onBlur={(e) => onValueEdit(stat.id, e.currentTarget.textContent || '')}
-            className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[48px] cursor-text hover:bg-gray-50 text-4xl md:text-5xl font-bold text-gray-900"
+            className={`outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[48px] cursor-text text-4xl md:text-5xl font-bold ${cardStyles.textHeading}`}
           >
             {stat.value}
           </div>
         ) : (
-          <div
-            className="text-4xl md:text-5xl font-bold text-gray-900"
-          >
+          <div className={`text-4xl md:text-5xl font-bold ${cardStyles.textHeading}`}>
             {stat.value}
           </div>
         )}
@@ -146,14 +131,12 @@ const StatBlock = ({
             contentEditable
             suppressContentEditableWarning
             onBlur={(e) => onLabelEdit(stat.id, e.currentTarget.textContent || '')}
-            className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 font-semibold text-gray-900"
+            className={`outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text font-semibold ${cardStyles.textHeading}`}
           >
             {stat.label}
           </div>
         ) : (
-          <h3
-            className="font-semibold text-gray-900"
-          >
+          <h3 className={`font-semibold ${cardStyles.textHeading}`}>
             {stat.label}
           </h3>
         )}
@@ -167,14 +150,12 @@ const StatBlock = ({
               contentEditable
               suppressContentEditableWarning
               onBlur={(e) => onDescriptionEdit(stat.id, e.currentTarget.textContent || '')}
-              className={`outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[20px] cursor-text hover:bg-gray-50 text-gray-600 leading-relaxed ${!stat.description ? 'opacity-50 italic text-sm' : ''}`}
+              className={`outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[20px] cursor-text ${cardStyles.textBody} leading-relaxed ${!stat.description ? 'opacity-50 italic text-sm' : ''}`}
             >
               {stat.description || 'Add optional description...'}
             </div>
           ) : stat.description && (
-            <p
-              className="text-gray-600 leading-relaxed"
-            >
+            <p className={`${cardStyles.textBody} leading-relaxed`}>
               {stat.description}
             </p>
           )}
@@ -223,50 +204,13 @@ export default function StatBlocks(props: StatBlocksProps) {
     return 'neutral';
   }, [props.manualThemeOverride, props.userContext]);
 
-  // Get theme-based colors for stat cards
-  const getStatCardColors = (theme: UIBlockTheme) => {
-    return {
-      warm: {
-        bg: 'bg-white',
-        border: 'border-orange-200',
-        borderHover: 'hover:border-orange-300',
-        shadow: 'hover:shadow-lg hover:shadow-orange-100/20'
-      },
-      cool: {
-        bg: 'bg-white',
-        border: 'border-blue-200',
-        borderHover: 'hover:border-blue-300',
-        shadow: 'hover:shadow-lg hover:shadow-blue-100/20'
-      },
-      neutral: {
-        bg: 'bg-white',
-        border: 'border-gray-200',
-        borderHover: 'hover:border-gray-300',
-        shadow: 'hover:shadow-lg'
-      }
-    }[theme];
-  };
-
-  // Get theme-based colors for icon backgrounds
-  const getIconColors = (theme: UIBlockTheme) => {
-    return {
-      warm: {
-        bg: 'bg-orange-100',
-        bgHover: 'group-hover:bg-orange-200',
-        text: 'text-orange-600'
-      },
-      cool: {
-        bg: 'bg-blue-100',
-        bgHover: 'group-hover:bg-blue-200',
-        text: 'text-blue-600'
-      },
-      neutral: {
-        bg: 'bg-gray-100',
-        bgHover: 'group-hover:bg-gray-200',
-        text: 'text-gray-600'
-      }
-    }[theme];
-  };
+  // Get adaptive card styles based on section background luminance
+  const cardStyles = React.useMemo(() => {
+    return getCardStyles({
+      sectionBackgroundCSS: sectionBackground || '',
+      theme
+    });
+  }, [sectionBackground, theme]);
 
   // Get theme-based colors for add button
   const getAddButtonColors = (theme: UIBlockTheme) => {
@@ -319,8 +263,6 @@ export default function StatBlocks(props: StatBlocksProps) {
     }[theme];
   };
 
-  const cardColors = getStatCardColors(theme);
-  const iconColors = getIconColors(theme);
   const addButtonColors = getAddButtonColors(theme);
   const footerColors = getFooterColors(theme);
 
@@ -356,6 +298,28 @@ export default function StatBlocks(props: StatBlocksProps) {
     const updatedStats = stats.filter(stat => stat.id !== id);
     (handleContentUpdate as any)('stats', updatedStats);
   };
+
+  // Dynamic card layout
+  const layout = getDynamicCardLayout(stats.length);
+
+  // Helper to render stat block
+  const renderStatBlock = (stat: StatItem, index: number, cardClass: string) => (
+    <StatBlock
+      key={stat.id}
+      stat={stat}
+      index={index}
+      mode={mode}
+      sectionId={sectionId}
+      cardStyles={cardStyles}
+      onValueEdit={handleValueEdit}
+      onLabelEdit={handleLabelEdit}
+      onDescriptionEdit={handleDescriptionEdit}
+      onIconEdit={handleIconEdit}
+      onRemoveStat={handleRemoveStat}
+      canRemove={stats.length > 2}
+      cardClassName={cardClass}
+    />
+  );
 
   return (
     <section
@@ -398,31 +362,28 @@ export default function StatBlocks(props: StatBlocksProps) {
         </div>
 
         {/* Stats Grid */}
-        <div className={`grid gap-8 ${
-          stats.length === 2 ? 'md:grid-cols-2 max-w-3xl mx-auto' :
-          stats.length === 3 ? 'md:grid-cols-3 max-w-5xl mx-auto' :
-          stats.length === 4 ? 'md:grid-cols-2 lg:grid-cols-4' :
-          'md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
-        }`}>
-          {stats.map((stat, index) => (
-            <StatBlock
-              key={stat.id}
-              stat={stat}
-              index={index}
-              mode={mode}
-              sectionId={sectionId}
-              theme={theme}
-              cardColors={cardColors}
-              iconColors={iconColors}
-              onValueEdit={handleValueEdit}
-              onLabelEdit={handleLabelEdit}
-              onDescriptionEdit={handleDescriptionEdit}
-              onIconEdit={handleIconEdit}
-              onRemoveStat={handleRemoveStat}
-              canRemove={stats.length > 2}
-            />
-          ))}
-        </div>
+        {isSplitLayout(stats.length) && layout.splitLayout ? (
+          <div className={layout.containerClass}>
+            <div className={layout.splitLayout.firstRowGrid}>
+              {stats.slice(0, layout.splitLayout.firstRowCount).map((stat, index) =>
+                renderStatBlock(stat, index, layout.splitLayout!.firstRowCard)
+              )}
+            </div>
+            <div className={layout.splitLayout.secondRowGrid}>
+              {stats.slice(layout.splitLayout.firstRowCount).map((stat, index) =>
+                renderStatBlock(stat, index + layout.splitLayout!.firstRowCount, layout.splitLayout!.secondRowCard)
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className={layout.containerClass}>
+            <div className={layout.gridClass}>
+              {stats.map((stat, index) =>
+                renderStatBlock(stat, index, layout.cardClass)
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Add Stat Button - only show in edit mode and if under max limit */}
         {mode !== 'preview' && stats.length < 6 && (
@@ -498,7 +459,7 @@ export const componentMeta = {
   ],
   props: {
     sectionId: 'string - Required section identifier',
-    backgroundType: '"primary" | "secondary" | "neutral" | "divider" - Controls text color adaptation',
+    backgroundType: '"primary" | "secondary" | "neutral" - Controls text color adaptation',
     className: 'string - Additional CSS classes'
   },
   contentSchema: {

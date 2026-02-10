@@ -235,7 +235,6 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
         primary: theme?.colors?.sectionBackgrounds?.primary,
         secondary: theme?.colors?.sectionBackgrounds?.secondary,
         neutral: theme?.colors?.sectionBackgrounds?.neutral,
-        divider: theme?.colors?.sectionBackgrounds?.divider
       },
       accentColors: {
         baseColor: theme?.colors?.baseColor,

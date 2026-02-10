@@ -9,7 +9,8 @@ import {
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import { shadows, cardEnhancements } from '@/modules/Design/designTokens';
+import { cardEnhancements } from '@/modules/Design/designTokens';
+import { getCardStyles, type CardStyles } from '@/modules/Design/cardStyles';
 
 // Step item structure (V2 array format)
 interface StepItem {
@@ -53,7 +54,6 @@ export default function AccordionSteps(props: LayoutComponentProps) {
     mode,
     blockContent,
     colorTokens,
-    dynamicTextColors,
     getTextStyle,
     sectionBackground,
     backgroundType,
@@ -72,23 +72,18 @@ export default function AccordionSteps(props: LayoutComponentProps) {
     return 'neutral';
   }, [props.manualThemeOverride, props.userContext]);
 
-  // Debug theme detection
-  React.useEffect(() => {
-    console.log('🎨 AccordionSteps theme detection:', {
-      sectionId,
-      hasManualOverride: !!props.manualThemeOverride,
-      manualTheme: props.manualThemeOverride,
-      hasUserContext: !!props.userContext,
-      userContext: props.userContext,
-      finalTheme: theme
+  // Get adaptive card styles based on section background luminance
+  const cardStyles = React.useMemo(() => {
+    return getCardStyles({
+      sectionBackgroundCSS: sectionBackground || '',
+      theme
     });
-  }, [theme, props.manualThemeOverride, props.userContext, sectionId]);
+  }, [sectionBackground, theme]);
 
-  const getAccordionColors = (theme: UIBlockTheme) => {
+  // Accordion-specific theme accents (not part of card styling)
+  const getAccordionAccents = (theme: UIBlockTheme) => {
     const colorMap = {
       warm: {
-        border: 'border-orange-200',
-        borderHover: 'hover:border-orange-300',
         contentBorder: 'border-orange-100',
         detailsBg: 'bg-orange-50',
         detailsBorder: 'border-l-4 border-orange-500',
@@ -97,8 +92,6 @@ export default function AccordionSteps(props: LayoutComponentProps) {
         stepIndicatorOpen: 'bg-white/20'
       },
       cool: {
-        border: 'border-blue-200',
-        borderHover: 'hover:border-blue-300',
         contentBorder: 'border-blue-100',
         detailsBg: 'bg-blue-50',
         detailsBorder: 'border-l-4 border-blue-500',
@@ -107,8 +100,6 @@ export default function AccordionSteps(props: LayoutComponentProps) {
         stepIndicatorOpen: 'bg-white/20'
       },
       neutral: {
-        border: 'border-amber-200',
-        borderHover: 'hover:border-amber-300',
         contentBorder: 'border-amber-100',
         detailsBg: 'bg-amber-50',
         detailsBorder: 'border-l-4 border-amber-500',
@@ -120,7 +111,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
     return colorMap[theme];
   };
 
-  const accordionColors = getAccordionColors(theme);
+  const accordionAccents = getAccordionAccents(theme);
 
   // Typography styles
   const h3Style = getTypographyStyle('h3');
@@ -133,7 +124,6 @@ export default function AccordionSteps(props: LayoutComponentProps) {
 
   const [openStep, setOpenStep] = useState<number | null>(0);
 
-  const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
 
   const toggleStep = (index: number) => {
     setOpenStep(openStep === index ? null : index);
@@ -171,7 +161,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
     }
   };
 
-  const AccordionStep = ({ step, index, isOpen, onToggle, onStepUpdate, mode, colorTokens, onRemove, theme, accordionColors, canRemove }: {
+  const AccordionStep = ({ step, index, isOpen, onToggle, onStepUpdate, mode, colorTokens, onRemove, cardStyles, accordionAccents, canRemove }: {
     step: StepItem;
     index: number;
     isOpen: boolean;
@@ -180,25 +170,25 @@ export default function AccordionSteps(props: LayoutComponentProps) {
     mode: 'edit' | 'preview';
     colorTokens: any;
     onRemove?: () => void;
-    theme: UIBlockTheme;
-    accordionColors: ReturnType<typeof getAccordionColors>;
+    cardStyles: CardStyles;
+    accordionAccents: ReturnType<typeof getAccordionAccents>;
     canRemove: boolean;
   }) => (
-    <div className={`relative border ${accordionColors.border} ${accordionColors.borderHover} rounded-lg overflow-hidden ${cardEnhancements.transition} ${isOpen ? 'shadow-lg' : shadows.cardHover[theme]} ${shadows.card[theme]} group`}>
+    <div className={`relative ${cardStyles.bg} ${cardStyles.blur} ${cardStyles.border} rounded-lg overflow-hidden ${cardEnhancements.transition} ${isOpen ? 'shadow-lg' : ''} ${cardStyles.shadow} ${cardStyles.hoverEffect} group`}>
       <button
         onClick={onToggle}
         className={`w-full p-6 text-left transition-all duration-300 ${
           isOpen && mode === 'preview'
             ? `${colorTokens.ctaBg} text-white`
-            : 'bg-white hover:bg-gray-50 text-gray-900'
+            : `${cardStyles.textHeading}`
         }`}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4 flex-1">
             <div className={`${isOpen ? 'w-10 h-10 ring-4 ring-white/30' : 'w-8 h-8'} rounded-full flex items-center justify-center font-bold text-sm ${
               isOpen && mode === 'preview'
-                ? accordionColors.stepIndicatorOpen
-                : accordionColors.stepIndicator
+                ? accordionAccents.stepIndicatorOpen
+                : accordionAccents.stepIndicator
             } text-white transition-all duration-200`}>
               {index + 1}
             </div>
@@ -209,23 +199,23 @@ export default function AccordionSteps(props: LayoutComponentProps) {
                   suppressContentEditableWarning
                   onClick={(e) => e.stopPropagation()}
                   onBlur={(e) => onStepUpdate(index, 'title', e.currentTarget.textContent || '')}
-                  className={`text-lg font-semibold outline-none focus:ring-2 focus:ring-opacity-50 rounded px-2 py-1 cursor-text min-h-[32px] text-gray-900 ${accordionColors.focusRing} hover:bg-gray-100`}
+                  className={`text-lg font-semibold outline-none focus:ring-2 focus:ring-opacity-50 rounded px-2 py-1 cursor-text min-h-[32px] ${cardStyles.textHeading} ${accordionAccents.focusRing}`}
                   data-placeholder="Step title"
                 >
                   {step.title}
                 </div>
               ) : (
-                <h3 style={h3Style} className="text-lg font-semibold">{step.title}</h3>
+                <h3 style={h3Style} className={`text-lg font-semibold ${cardStyles.textHeading}`}>{step.title}</h3>
               )}
               {!isOpen && (
-                <p className={`text-sm mt-1 ${isOpen ? 'text-white/80' : mutedTextColor}`}>
+                <p className={`text-sm mt-1 ${isOpen ? 'text-white/80' : cardStyles.textMuted}`}>
                   {step.description.substring(0, 80)}...
                 </p>
               )}
             </div>
           </div>
 
-          <div className={`transform transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
+          <div className={`transform transition-transform duration-300 ${isOpen ? 'rotate-180' : ''} ${cardStyles.textMuted}`}>
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
@@ -234,40 +224,40 @@ export default function AccordionSteps(props: LayoutComponentProps) {
       </button>
 
       {isOpen && (
-        <div className={`p-6 bg-white border-t ${accordionColors.contentBorder}`}>
+        <div className={`p-6 border-t ${accordionAccents.contentBorder}`}>
           <div className="space-y-4">
             {mode !== 'preview' ? (
               <div
                 contentEditable
                 suppressContentEditableWarning
                 onBlur={(e) => onStepUpdate(index, 'description', e.currentTarget.textContent || '')}
-                className={`text-gray-700 leading-relaxed text-lg outline-none focus:ring-2 ${accordionColors.focusRing} focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-50 min-h-[48px]`}
+                className={`${cardStyles.textBody} leading-relaxed text-lg outline-none focus:ring-2 ${accordionAccents.focusRing} focus:ring-opacity-50 rounded px-2 py-1 cursor-text min-h-[48px]`}
                 data-placeholder="Step description"
               >
                 {step.description}
               </div>
             ) : (
-              <p className="text-gray-700 leading-relaxed text-lg">
+              <p className={`${cardStyles.textBody} leading-relaxed text-lg`}>
                 {step.description}
               </p>
             )}
 
             {(step.details || mode === 'edit') && (
-              <div className={`mt-2 rounded-lg p-4 ${accordionColors.detailsBg} ${accordionColors.detailsBorder}`}>
+              <div className={`mt-2 rounded-lg p-4 ${accordionAccents.detailsBg} ${accordionAccents.detailsBorder}`}>
 
                 {mode !== 'preview' ? (
                   <div
                     contentEditable
                     suppressContentEditableWarning
                     onBlur={(e) => onStepUpdate(index, 'details', e.currentTarget.textContent || '')}
-                    className={`text-gray-600 text-sm leading-relaxed outline-none focus:ring-2 ${accordionColors.focusRing} focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-white min-h-[48px]`}
+                    className={`${cardStyles.textMuted} text-sm leading-relaxed outline-none focus:ring-2 ${accordionAccents.focusRing} focus:ring-opacity-50 rounded px-2 py-1 cursor-text min-h-[48px]`}
                     data-placeholder="Technical details for this step"
                   >
                     {step.details}
                   </div>
                 ) : (
                   step.details && (
-                    <p className="text-gray-600 text-sm leading-relaxed">
+                    <p className={`${cardStyles.textMuted} text-sm leading-relaxed`}>
                       {step.details}
                     </p>
                   )
@@ -350,8 +340,8 @@ export default function AccordionSteps(props: LayoutComponentProps) {
               onStepUpdate={handleStepUpdate}
               mode={mode}
               colorTokens={colorTokens}
-              theme={theme}
-              accordionColors={accordionColors}
+              cardStyles={cardStyles}
+              accordionAccents={accordionAccents}
               onRemove={() => handleRemoveStep(index)}
               canRemove={steps.length > 3}
             />

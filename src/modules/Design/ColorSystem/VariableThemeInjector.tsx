@@ -360,7 +360,6 @@ export function VariableThemeTest({ tokenId }: { tokenId: string }) {
         primary: 'bg-gradient-to-r from-blue-500 to-purple-600',
         secondary: 'bg-blue-50',
         neutral: 'bg-white',
-        divider: 'bg-gray-100',
         baseColor: 'blue',
         accentColor: 'purple',
         accentCSS: 'bg-purple-600'

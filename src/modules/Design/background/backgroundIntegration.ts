@@ -1,256 +1,117 @@
-// backgroundIntegration.ts - Simplified Background System
-import { selectPrimaryBackground } from './backgroundSelection';
+// backgroundIntegration.ts — v3 palette-first background system
+// Position-based section mapping, no per-section config.
+
+import { type Palette, getDefaultPaletteForVibe, getPaletteById } from './palettes';
 import { accentOptions } from '../ColorSystem/accentOptions';
-import { selectAccentOption } from '../ColorSystem/selectAccentFromTags';
-import { getSecondaryBackground } from './simpleSecondaryBackgrounds';
-import { sectionList } from '@/modules/sections/sectionList';
 import { logger } from '@/lib/logger';
 
-import type {
-  InputVariables,
-  HiddenInferredFields
-} from '@/types/core/content';
-
-type OnboardingDataInput = InputVariables & Partial<HiddenInferredFields>;
-type BackgroundType = 'primary' | 'secondary' | 'neutral' | 'divider';
+type BackgroundType = 'primary' | 'secondary' | 'neutral';
 
 export interface BackgroundSystem {
   primary: string;
   secondary: string;
   neutral: string;
-  divider: string;
   baseColor: string;
   accentColor: string;
   accentCSS: string;
 }
 
-// ===== SIMPLE BACKGROUND ASSIGNMENT =====
+// ===== SECTION TYPE EXTRACTION =====
 
-const BACKGROUND_MAP: Record<string, BackgroundType> = {
-  'primary-highlight': 'primary',
-  'secondary-highlight': 'secondary',
-  'divider-zone': 'divider',
-  'neutral': 'neutral',
-};
+const PRIMARY_SECTIONS = new Set(['hero', 'cta', 'closesection']);
+const CHROME_SECTIONS = new Set(['header', 'footer']);
 
-/**
- * Simple sectionList lookup + rhythm enforcement
- * Replaces 400+ lines of profile-based logic
- */
+function extractSectionType(sectionId: string): string {
+  return sectionId.split('-')[0].toLowerCase();
+}
+
+// ===== POSITION-BASED SECTION MAPPING =====
+
 export function assignSectionBackgrounds(
   sections: string[]
 ): Record<string, BackgroundType> {
   const result: Record<string, BackgroundType> = {};
-  let consecutiveHighlights = 0;
+  let contentIndex = 0;
 
   for (const sectionId of sections) {
-    const sectionMeta = sectionList.find(s => s.id === sectionId);
-    const baseline = sectionMeta?.background || 'neutral';
-    let bg = BACKGROUND_MAP[baseline] || 'neutral';
+    const sType = extractSectionType(sectionId);
 
-    const isHighlight = bg === 'primary' || bg === 'secondary';
-
-    // Rhythm: max 2 consecutive highlights (hero/cta protected)
-    if (isHighlight && consecutiveHighlights >= 2) {
-      if (sectionId !== 'hero' && sectionId !== 'cta') {
-        bg = 'neutral';
-      }
-    }
-
-    if (bg === 'primary' || bg === 'secondary') {
-      consecutiveHighlights++;
+    if (CHROME_SECTIONS.has(sType)) {
+      result[sectionId] = 'neutral';
+    } else if (PRIMARY_SECTIONS.has(sType)) {
+      result[sectionId] = 'primary';
     } else {
-      consecutiveHighlights = 0;
+      result[sectionId] = contentIndex % 2 === 0 ? 'secondary' : 'neutral';
+      contentIndex++;
     }
-
-    result[sectionId] = bg;
   }
 
   return result;
 }
 
-// ===== PRIMARY BACKGROUND SELECTION =====
+// ===== ACCENT SELECTION =====
 
-export function selectPrimaryVariation(onboardingData: OnboardingDataInput): {
-  variationId: string;
-  css: string;
-  baseColor: string;
-} {
-  const selected = selectPrimaryBackground(onboardingData);
+function selectAccentFromPalette(palette: Palette): { accentColor: string; accentCSS: string } {
+  const options = accentOptions.filter(o =>
+    palette.compatibleAccents.includes(o.accentColor)
+  );
+  const selected = options.find(o => o.tags.includes('high-contrast')) || options[0];
 
-  logger.debug('✅ Selected primary background:', {
-    id: selected.id,
-    label: selected.label,
-    baseColor: selected.baseColor,
-    category: selected.category,
-  });
-
-  return {
-    variationId: selected.id,
-    css: selected.css,
-    baseColor: selected.baseColor,
-  };
-}
-
-export function getAccentColor(baseColor: string, onboardingData: OnboardingDataInput): {
-  accentColor: string;
-  accentCSS: string;
-} {
-  try {
-    const { getSmartAccentColor } = require('@/utils/colorHarmony');
-
-    const businessContext = {
-      marketCategory: onboardingData.marketCategory,
-      targetAudience: onboardingData.targetAudience,
-      landingPageGoals: onboardingData.landingPageGoals,
-      toneProfile: onboardingData.toneProfile,
-      awarenessLevel: onboardingData.awarenessLevel,
-      marketSophisticationLevel: onboardingData.marketSophisticationLevel
-    };
-
-    logger.debug('🎨 Using smart color harmony accent selection system');
-    const smartAccent = getSmartAccentColor(baseColor, businessContext);
-
-    if (smartAccent && smartAccent.confidence > 0.5) {
-      logger.debug('✅ Smart accent selection successful:', smartAccent);
-      return {
-        accentColor: smartAccent.accentColor,
-        accentCSS: smartAccent.accentCSS,
-      };
-    }
-
-    logger.debug('⚠️ Smart accent had low confidence, trying legacy system');
-
-    const userContext = {
-      marketCategory: onboardingData.marketCategory || '',
-      targetAudience: onboardingData.targetAudience || '',
-      landingPageGoals: onboardingData.landingPageGoals || '',
-      startupStage: onboardingData.startupStage || '',
-      toneProfile: onboardingData.toneProfile || 'friendly-helpful',
-      awarenessLevel: onboardingData.awarenessLevel || 'solution-aware',
-      pricingModel: onboardingData.pricingModel || '',
-    };
-
-    const selectedAccent = selectAccentOption(userContext, baseColor);
-
-    if (selectedAccent) {
-      return {
-        accentColor: selectedAccent.accentColor,
-        accentCSS: selectedAccent.tailwind,
-      };
-    }
-  } catch (error) {
-    logger.warn('Error in accent selection systems:', error);
+  if (selected) {
+    return { accentColor: selected.accentColor, accentCSS: selected.tailwind };
   }
+  return { accentColor: 'blue', accentCSS: 'bg-blue-500' };
+}
 
-  logger.warn(`No accent options found for base color ${baseColor}, using fallback`);
-  const fallbackOptions = accentOptions?.filter(option => option.baseColor === baseColor);
-  if (fallbackOptions && fallbackOptions.length > 0) {
-    const fallback = fallbackOptions[0];
-    return {
-      accentColor: fallback.accentColor,
-      accentCSS: fallback.tailwind,
-    };
-  }
+// ===== BACKGROUND SYSTEM GENERATION =====
 
+export function generateBackgroundSystemFromPalette(palette: Palette): BackgroundSystem {
+  const accent = selectAccentFromPalette(palette);
   return {
-    accentColor: "gray",
-    accentCSS: "bg-gray-500",
+    primary: palette.primary,
+    secondary: palette.secondary,
+    neutral: palette.neutral,
+    baseColor: palette.baseColor,
+    accentColor: accent.accentColor,
+    accentCSS: accent.accentCSS,
   };
 }
 
-export function calculateOtherBackgrounds(baseColor: string): {
-  neutral: string;
-  divider: string;
-} {
-  const dividerColorMap: Record<string, string> = {
-    blue: "rgba(219, 234, 254, 0.5)",
-    sky: "rgba(224, 242, 254, 0.5)",
-    indigo: "rgba(224, 231, 255, 0.5)",
-    purple: "rgba(243, 232, 255, 0.5)",
-    pink: "rgba(252, 231, 243, 0.5)",
-    red: "rgba(254, 226, 226, 0.5)",
-    orange: "rgba(255, 237, 213, 0.5)",
-    amber: "rgba(254, 243, 199, 0.5)",
-    yellow: "rgba(254, 249, 195, 0.5)",
-    lime: "rgba(236, 252, 203, 0.5)",
-    green: "rgba(220, 252, 231, 0.5)",
-    emerald: "rgba(209, 250, 229, 0.5)",
-    teal: "rgba(204, 251, 241, 0.5)",
-    cyan: "rgba(207, 250, 254, 0.5)",
-    gray: "rgba(243, 244, 246, 0.5)",
-    slate: "rgba(241, 245, 249, 0.5)",
-    zinc: "rgba(244, 244, 245, 0.5)",
-    neutral: "rgba(245, 245, 245, 0.5)",
-    stone: "rgba(245, 245, 244, 0.5)",
-  };
-
-  return {
-    neutral: "#ffffff",
-    divider: dividerColorMap[baseColor] || "rgba(243, 244, 246, 0.5)",
-  };
+export function generateBackgroundSystemForVibe(vibe: string): BackgroundSystem {
+  const palette = getDefaultPaletteForVibe(vibe);
+  logger.debug('🎨 [BG-V3] Palette for vibe:', { vibe, paletteId: palette.id, mode: palette.mode });
+  return generateBackgroundSystemFromPalette(palette);
 }
 
-export function generateCompleteBackgroundSystem(onboardingData: OnboardingDataInput): BackgroundSystem {
-  try {
-    const primaryVariation = selectPrimaryVariation(onboardingData);
-    const accentResult = getAccentColor(primaryVariation.baseColor, onboardingData);
-    const secondaryBackground = getSecondaryBackground(primaryVariation.baseColor);
-    const otherBackgrounds = calculateOtherBackgrounds(primaryVariation.baseColor);
-
-    return {
-      primary: primaryVariation.css,
-      secondary: secondaryBackground,
-      neutral: otherBackgrounds.neutral,
-      divider: otherBackgrounds.divider,
-      baseColor: primaryVariation.baseColor,
-      accentColor: accentResult.accentColor,
-      accentCSS: accentResult.accentCSS,
-    };
-
-  } catch (error) {
-    logger.error('❌ Failed to generate background system:', error);
-
-    return {
-      primary: "linear-gradient(to bottom right, #3b82f6, #2563eb)",
-      secondary: "rgba(239, 246, 255, 0.7)",
-      neutral: "#ffffff",
-      divider: "rgba(243, 244, 246, 0.5)",
-      baseColor: "blue",
-      accentColor: "purple",
-      accentCSS: "bg-purple-500",
-    };
-  }
+export function generateCompleteBackgroundSystem(_onboardingData?: any): BackgroundSystem {
+  // Legacy compat: no vibe context available, use default
+  const palette = getPaletteById('ice-blue') || getDefaultPaletteForVibe('Light Trust');
+  return generateBackgroundSystemFromPalette(palette);
 }
 
-// ===== SECTION BACKGROUND TYPE FUNCTIONS =====
+// ===== COMPAT WRAPPERS =====
 
-/**
- * Get background type for a single section
- * Uses simple sectionList lookup with rhythm enforcement
- */
 export function getSectionBackgroundType(
   sectionId: string,
   allSections?: string[],
   _currentIndex?: number,
-  _onboardingData?: OnboardingDataInput
+  _onboardingData?: any
 ): BackgroundType {
-  // If we have all sections, use full assignment with rhythm
   if (allSections && allSections.length > 0) {
     const assignments = assignSectionBackgrounds(allSections);
     return assignments[sectionId] || 'neutral';
   }
-
-  // Fallback: single section lookup (no rhythm possible)
-  const sectionMeta = sectionList.find(s => s.id === sectionId);
-  const baseline = sectionMeta?.background || 'neutral';
-  return BACKGROUND_MAP[baseline] || 'neutral';
+  // Single section fallback
+  const sType = extractSectionType(sectionId);
+  if (PRIMARY_SECTIONS.has(sType)) return 'primary';
+  if (CHROME_SECTIONS.has(sType)) return 'neutral';
+  return 'secondary';
 }
 
 export function getSectionBackgroundTypeWithContext(
   sectionId: string,
   allSections: string[],
-  _onboardingData?: OnboardingDataInput
+  _onboardingData?: any
 ): BackgroundType {
   return getSectionBackgroundType(sectionId, allSections);
 }
@@ -258,7 +119,7 @@ export function getSectionBackgroundTypeWithContext(
 export function getEnhancedSectionBackgroundType(
   sectionId: string,
   allSections: string[],
-  _onboardingData: OnboardingDataInput
+  _onboardingData: any
 ): BackgroundType {
   return getSectionBackgroundType(sectionId, allSections);
 }
@@ -266,14 +127,14 @@ export function getEnhancedSectionBackgroundType(
 export function getSectionBackgroundTypeWithEnhancedLogic(
   sectionId: string,
   allSections: string[],
-  _onboardingData: OnboardingDataInput
+  _onboardingData: any
 ): BackgroundType {
   return getSectionBackgroundType(sectionId, allSections);
 }
 
 export function assignEnhancedBackgroundsToAllSections(
   sections: string[],
-  _onboardingData: OnboardingDataInput
+  _onboardingData: any
 ): Record<string, BackgroundType> {
   return assignSectionBackgrounds(sections);
 }
@@ -282,13 +143,14 @@ export function getSectionBackgroundCSS(
   sectionId: string,
   backgroundSystem: BackgroundSystem,
   allSections?: string[],
-  _onboardingData?: OnboardingDataInput
+  _onboardingData?: any
 ): string {
   const backgroundType = getSectionBackgroundType(sectionId, allSections);
   return backgroundSystem[backgroundType];
 }
 
-// ===== TEXT COLOR HELPERS =====
+// ===== TEXT COLOR RE-EXPORTS =====
+
 export {
   getTextColorForBackground,
   getBodyColorForBackground,

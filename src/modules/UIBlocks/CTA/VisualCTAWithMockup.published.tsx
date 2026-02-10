@@ -132,10 +132,9 @@ export default function VisualCTAWithMockupPublished(props: LayoutComponentProps
   const headlineTypography = getPublishedTypographyStyles('h2', theme);
   const bodyLgTypography = getPublishedTypographyStyles('body-lg', theme);
 
-  // Extract button metadata for form detection
+  // V2: Extract button metadata from elementMetadata (not element.metadata)
   const sectionData = props.content?.[sectionId];
-  const ctaElement = sectionData?.elements?.cta_text;
-  const buttonConfig = ctaElement?.metadata?.buttonConfig;
+  const buttonConfig = sectionData?.elementMetadata?.cta_text?.buttonConfig || props.elementMetadata?.cta_text?.buttonConfig;
 
   return (
     <SectionWrapperPublished

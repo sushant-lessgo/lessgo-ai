@@ -7,9 +7,11 @@ import { EditableAdaptiveHeadline, EditableAdaptiveText } from '@/components/lay
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { inferIconFromText } from '@/lib/iconCategoryMap';
-import { shadows, cardEnhancements } from '@/modules/Design/designTokens';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { getDynamicCardLayout, isSplitLayout } from '@/utils/dynamicCardLayout';
+import { cn } from '@/lib/utils';
+import { getCardStyles, CardStyles } from '@/modules/Design/cardStyles';
 
 // V2: Advantage item structure - clean array item
 interface Advantage {
@@ -47,25 +49,11 @@ const CONTENT_SCHEMA = {
   }
 };
 
-// Theme-based gradient colors (intentional - not using colorTokens for differentiation)
-const getAdvantageColors = (theme: UIBlockTheme) => {
-  return {
-    warm: {
-      cardBg: 'from-orange-50 to-red-50',
-      iconBg: 'from-orange-500 to-red-600',
-      cardBorder: 'border-orange-200',
-    },
-    cool: {
-      cardBg: 'from-blue-50 to-indigo-50',
-      iconBg: 'from-blue-500 to-indigo-600',
-      cardBorder: 'border-blue-200',
-    },
-    neutral: {
-      cardBg: 'from-gray-50 to-slate-50',
-      iconBg: 'from-gray-500 to-slate-600',
-      cardBorder: 'border-gray-200',
-    }
-  }[theme];
+// Theme-based gradient icon backgrounds (component-specific brand element)
+const themeIconGradients = {
+  warm: 'from-orange-500 to-red-600',
+  cool: 'from-blue-500 to-indigo-600',
+  neutral: 'from-gray-500 to-slate-600',
 };
 
 // Advantage Card component
@@ -79,8 +67,9 @@ const AdvantageCard = React.memo(({
   onRemoveAdvantage,
   sectionId,
   canRemove = true,
-  themeColors,
-  theme = 'neutral'
+  cardStyles,
+  iconGradient,
+  cardClassName
 }: {
   advantage: Advantage;
   mode: 'edit' | 'preview';
@@ -91,8 +80,9 @@ const AdvantageCard = React.memo(({
   onRemoveAdvantage?: (id: string) => void;
   sectionId: string;
   canRemove?: boolean;
-  themeColors: ReturnType<typeof getAdvantageColors>;
-  theme?: UIBlockTheme;
+  cardStyles: CardStyles;
+  iconGradient: string;
+  cardClassName?: string;
 }) => {
   const { getTextStyle } = useTypography();
 
@@ -101,10 +91,18 @@ const AdvantageCard = React.memo(({
 
   return (
     <div className="group relative">
-      <div className={`bg-gradient-to-br ${themeColors.cardBg} border ${themeColors.cardBorder} rounded-xl p-6 h-full ${shadows.card[theme]} ${cardEnhancements.hoverLift} ${cardEnhancements.transition}`}>
+      <div className={cn(
+        cardStyles.bg,
+        cardStyles.blur,
+        cardStyles.border,
+        cardStyles.shadow,
+        cardStyles.hoverEffect,
+        'rounded-xl h-full transition-all duration-300 hover:-translate-y-1',
+        cardClassName || 'p-6'
+      )}>
         <div className="flex items-start space-x-4">
-          {/* Icon Container */}
-          <div className={`flex-shrink-0 w-14 h-14 bg-gradient-to-br ${themeColors.iconBg} rounded-lg flex items-center justify-center shadow-md`}>
+          {/* Icon Container - gradient preserved as brand element */}
+          <div className={`flex-shrink-0 w-14 h-14 bg-gradient-to-br ${iconGradient} rounded-lg flex items-center justify-center shadow-md`}>
             <IconEditableText
               mode={mode}
               value={displayIcon}
@@ -126,12 +124,12 @@ const AdvantageCard = React.memo(({
                 contentEditable
                 suppressContentEditableWarning
                 onBlur={(e) => onTitleEdit(advantage.id, e.currentTarget.textContent || '')}
-                className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 mb-2 cursor-text hover:bg-white hover:bg-opacity-50 font-bold text-gray-900 text-lg"
+                className={`outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 mb-2 cursor-text font-bold text-lg ${cardStyles.textHeading}`}
               >
                 {advantage.title}
               </div>
             ) : (
-              <h3 className="font-bold text-gray-900 text-lg mb-2">{advantage.title}</h3>
+              <h3 className={`font-bold text-lg mb-2 ${cardStyles.textHeading}`}>{advantage.title}</h3>
             )}
 
             {mode !== 'preview' ? (
@@ -139,12 +137,12 @@ const AdvantageCard = React.memo(({
                 contentEditable
                 suppressContentEditableWarning
                 onBlur={(e) => onDescriptionEdit(advantage.id, e.currentTarget.textContent || '')}
-                className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[48px] cursor-text hover:bg-white hover:bg-opacity-50 text-gray-600 text-sm"
+                className={`outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[48px] cursor-text text-sm ${cardStyles.textBody}`}
               >
                 {advantage.description}
               </div>
             ) : (
-              <p className="text-gray-600 text-sm">{advantage.description}</p>
+              <p className={`text-sm ${cardStyles.textBody}`}>{advantage.description}</p>
             )}
           </div>
         </div>
@@ -192,7 +190,15 @@ export default function TechnicalAdvantage(props: LayoutComponentProps) {
     return 'neutral';
   }, [props.manualThemeOverride, props.userContext]);
 
-  const themeColors = getAdvantageColors(uiTheme);
+  // Card styles from luminance-based system
+  const cardStyles = React.useMemo(() => {
+    return getCardStyles({
+      sectionBackgroundCSS: sectionBackground || '',
+      theme: uiTheme
+    });
+  }, [sectionBackground, uiTheme]);
+
+  const iconGradient = themeIconGradients[uiTheme];
 
   // V2: Direct array access
   const advantages = blockContent.advantages || [];
@@ -281,14 +287,9 @@ export default function TechnicalAdvantage(props: LayoutComponentProps) {
         </div>
 
         {/* Advantage Cards Grid */}
-        <div className={`grid gap-6 ${
-          advantages.length === 1 ? 'grid-cols-1 max-w-2xl mx-auto' :
-          advantages.length === 2 ? 'grid-cols-1 md:grid-cols-2' :
-          advantages.length === 3 ? 'grid-cols-1 md:grid-cols-3' :
-          advantages.length === 4 ? 'grid-cols-1 md:grid-cols-2' :
-          'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
-        }`}>
-          {advantages.map((advantage) => (
+        {(() => {
+          const layout = getDynamicCardLayout(advantages.length);
+          const renderCard = (advantage: Advantage, cardClass: string) => (
             <AdvantageCard
               key={advantage.id}
               advantage={advantage}
@@ -300,11 +301,32 @@ export default function TechnicalAdvantage(props: LayoutComponentProps) {
               onRemoveAdvantage={handleRemoveAdvantage}
               sectionId={sectionId}
               canRemove={advantages.length > 3}
-              themeColors={themeColors}
-              theme={uiTheme}
+              cardStyles={cardStyles}
+              iconGradient={iconGradient}
+              cardClassName={cardClass}
             />
-          ))}
-        </div>
+          );
+          return isSplitLayout(advantages.length) && layout.splitLayout ? (
+            <div className={layout.containerClass}>
+              <div className={layout.splitLayout.firstRowGrid}>
+                {advantages.slice(0, layout.splitLayout.firstRowCount).map((advantage) =>
+                  renderCard(advantage, layout.splitLayout!.firstRowCard)
+                )}
+              </div>
+              <div className={layout.splitLayout.secondRowGrid}>
+                {advantages.slice(layout.splitLayout.firstRowCount).map((advantage) =>
+                  renderCard(advantage, layout.splitLayout!.secondRowCard)
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className={layout.containerClass}>
+              <div className={layout.gridClass}>
+                {advantages.map((advantage) => renderCard(advantage, layout.cardClass))}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Add Button - enforce max:6 */}
         {mode === 'edit' && advantages.length < 6 && (

@@ -11,9 +11,12 @@ import {
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { inferIconFromText } from '@/lib/iconCategoryMap';
-import { shadows, cardEnhancements } from '@/modules/Design/designTokens';
+import { cardEnhancements } from '@/modules/Design/designTokens';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { getDynamicCardLayout, isSplitLayout } from '@/utils/dynamicCardLayout';
+import { cn } from '@/lib/utils';
+import { getCardStyles, type CardStyles } from '@/modules/Design/cardStyles';
 
 // V2: Feature item structure - clean array item
 interface Feature {
@@ -68,7 +71,6 @@ const FeatureCard = React.memo(({
   feature,
   mode,
   colorTokens,
-  dynamicTextColors,
   getTextStyle,
   onTitleEdit,
   onDescriptionEdit,
@@ -78,12 +80,12 @@ const FeatureCard = React.memo(({
   backgroundType,
   sectionBackground,
   canRemove = true,
-  theme = 'neutral'
+  cardStyles,
+  cardClassName
 }: {
   feature: Feature;
   mode: 'edit' | 'preview';
   colorTokens: any;
-  dynamicTextColors: any;
   getTextStyle: (variant: 'display' | 'hero' | 'h1' | 'h2' | 'h3' | 'body-lg' | 'body' | 'body-sm' | 'caption') => React.CSSProperties;
   onTitleEdit: (id: string, value: string) => void;
   onDescriptionEdit: (id: string, value: string) => void;
@@ -93,22 +95,24 @@ const FeatureCard = React.memo(({
   backgroundType: string;
   sectionBackground: string;
   canRemove?: boolean;
-  theme?: UIBlockTheme;
+  cardStyles: CardStyles;
+  cardClassName?: string;
 }) => {
   // Get icon - use stored value or derive from title/description
   const displayIcon = feature.icon || inferIconFromText(feature.title, feature.description);
 
-  // Get card background based on section background
-  const cardBackground = backgroundType === 'primary'
-    ? 'bg-white/10 backdrop-blur-sm border-white/20'
-    : 'bg-white border-gray-200';
-
-  const cardHover = backgroundType === 'primary'
-    ? 'hover:bg-white/20 hover:border-white/30'
-    : `hover:border-${theme === 'warm' ? 'orange' : theme === 'cool' ? 'blue' : 'slate'}-300`;
-
   return (
-    <div className={`group relative p-6 rounded-xl border ${cardBackground} ${cardHover} ${shadows.card[theme]} ${shadows.cardHover[theme]} ${cardEnhancements.hoverLift} ${cardEnhancements.transition}`}>
+    <div className={cn(
+      'group relative rounded-xl',
+      cardStyles.bg,
+      cardStyles.blur,
+      cardStyles.border,
+      cardStyles.shadow,
+      cardStyles.hoverEffect,
+      cardEnhancements.hoverLift,
+      cardEnhancements.transition,
+      cardClassName || 'p-6'
+    )}>
       {/* Delete button - only show in edit mode and if can remove */}
       {mode !== 'preview' && onRemoveFeature && canRemove && (
         <button
@@ -127,7 +131,7 @@ const FeatureCard = React.memo(({
 
       {/* Icon */}
       <div className="mb-4">
-        <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg ${theme === 'warm' ? 'bg-orange-500' : theme === 'cool' ? 'bg-blue-500' : 'bg-slate-500'} bg-opacity-10 group-hover:bg-opacity-20 group-hover:scale-110 transition-all duration-300`}>
+        <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg ${cardStyles.iconBg} group-hover:scale-110 transition-all duration-300`}>
           <IconEditableText
             mode={mode}
             value={displayIcon}
@@ -135,8 +139,8 @@ const FeatureCard = React.memo(({
             backgroundType={backgroundType as any}
             colorTokens={colorTokens}
             iconSize="md"
-            className="text-2xl group-hover:scale-110 transition-transform duration-300"
-            placeholder="🎯"
+            className={`text-2xl ${cardStyles.iconColor} group-hover:scale-110 transition-transform duration-300`}
+            placeholder="Target"
             sectionId={sectionId}
             elementKey={`feature_icon_${feature.id}`}
           />
@@ -148,14 +152,14 @@ const FeatureCard = React.memo(({
         mode={mode}
         value={feature.title}
         onEdit={(value) => onTitleEdit(feature.id, value)}
-        backgroundType={(backgroundType === 'custom' ? 'secondary' : (backgroundType || 'secondary')) as 'neutral' | 'primary' | 'secondary' | 'divider'}
+        backgroundType={(backgroundType === 'custom' ? 'secondary' : (backgroundType || 'secondary')) as 'neutral' | 'primary' | 'secondary'}
         colorTokens={colorTokens}
         variant="body"
         textStyle={{
           ...getTextStyle('h3'),
           fontWeight: 600
         }}
-        className="mb-3"
+        className={`mb-3 ${cardStyles.textHeading}`}
         placeholder="Feature title..."
         sectionId={sectionId}
         elementKey={`feature_title_${feature.id}`}
@@ -167,10 +171,10 @@ const FeatureCard = React.memo(({
         mode={mode}
         value={feature.description}
         onEdit={(value) => onDescriptionEdit(feature.id, value)}
-        backgroundType={(backgroundType === 'custom' ? 'secondary' : (backgroundType || 'secondary')) as 'neutral' | 'primary' | 'secondary' | 'divider'}
+        backgroundType={(backgroundType === 'custom' ? 'secondary' : (backgroundType || 'secondary')) as 'neutral' | 'primary' | 'secondary'}
         colorTokens={colorTokens}
         variant="body"
-        className="leading-relaxed opacity-90"
+        className={`leading-relaxed ${cardStyles.textBody}`}
         placeholder="Describe this feature..."
         sectionId={sectionId}
         elementKey={`feature_description_${feature.id}`}
@@ -188,7 +192,6 @@ export default function IconGrid(props: LayoutComponentProps) {
     mode,
     blockContent,
     colorTokens,
-    dynamicTextColors,
     getTextStyle,
     sectionBackground,
     backgroundType,
@@ -204,6 +207,14 @@ export default function IconGrid(props: LayoutComponentProps) {
     if (props.userContext) return selectUIBlockTheme(props.userContext);
     return 'neutral';
   }, [props.manualThemeOverride, props.userContext]);
+
+  // Get adaptive card styles based on section background luminance
+  const cardStyles = React.useMemo(() => {
+    return getCardStyles({
+      sectionBackgroundCSS: sectionBackground || '',
+      theme
+    });
+  }, [sectionBackground, theme]);
 
   // V2: Direct array access
   const features = blockContent.features || [];
@@ -250,6 +261,30 @@ export default function IconGrid(props: LayoutComponentProps) {
     (handleContentUpdate as any)('features', updatedFeatures);
   };
 
+  // Dynamic card layout based on feature count
+  const layout = getDynamicCardLayout(features.length);
+
+  // Helper to render a single FeatureCard
+  const renderFeatureCard = (feature: Feature, cardClass: string) => (
+    <FeatureCard
+      key={feature.id}
+      feature={feature}
+      mode={mode}
+      colorTokens={colorTokens}
+      getTextStyle={getTextStyle}
+      onTitleEdit={handleTitleEdit}
+      onDescriptionEdit={handleDescriptionEdit}
+      onIconEdit={handleIconEdit}
+      onRemoveFeature={handleRemoveFeature}
+      sectionId={sectionId}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+      sectionBackground={sectionBackground}
+      canRemove={features.length > 1}
+      cardStyles={cardStyles}
+      cardClassName={cardClass}
+    />
+  );
+
   return (
     <LayoutSection
       sectionId={sectionId}
@@ -259,7 +294,7 @@ export default function IconGrid(props: LayoutComponentProps) {
       mode={mode}
       className={props.className}
     >
-      <div className="max-w-7xl mx-auto">
+      <div className={layout.containerClass}>
         {/* Header Section */}
         <div className="text-center mb-12">
           {/* Badge Text - optional section label */}
@@ -327,27 +362,24 @@ export default function IconGrid(props: LayoutComponentProps) {
         </div>
 
         {/* Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {features.map((feature) => (
-            <FeatureCard
-              key={feature.id}
-              feature={feature}
-              mode={mode}
-              colorTokens={colorTokens}
-              dynamicTextColors={dynamicTextColors}
-              getTextStyle={getTextStyle}
-              onTitleEdit={handleTitleEdit}
-              onDescriptionEdit={handleDescriptionEdit}
-              onIconEdit={handleIconEdit}
-              onRemoveFeature={handleRemoveFeature}
-              sectionId={sectionId}
-              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-              sectionBackground={sectionBackground}
-              canRemove={features.length > 1}
-              theme={theme}
-            />
-          ))}
-        </div>
+        {isSplitLayout(features.length) && layout.splitLayout ? (
+          <>
+            <div className={layout.splitLayout.firstRowGrid}>
+              {features.slice(0, layout.splitLayout.firstRowCount).map((feature) =>
+                renderFeatureCard(feature, layout.splitLayout!.firstRowCard)
+              )}
+            </div>
+            <div className={layout.splitLayout.secondRowGrid}>
+              {features.slice(layout.splitLayout.firstRowCount).map((feature) =>
+                renderFeatureCard(feature, layout.splitLayout!.secondRowCard)
+              )}
+            </div>
+          </>
+        ) : (
+          <div className={layout.gridClass}>
+            {features.map((feature) => renderFeatureCard(feature, layout.cardClass))}
+          </div>
+        )}
 
         {/* Supporting Text - post-grid summary */}
         {(blockContent.supporting_text || mode === 'edit') && (

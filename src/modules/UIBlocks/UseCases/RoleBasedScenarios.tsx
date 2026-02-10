@@ -6,7 +6,7 @@ import { EditableAdaptiveHeadline, EditableText } from '@/components/layout/Edit
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import { shadows, cardEnhancements } from '@/modules/Design/designTokens';
+import { getCardStyles } from '@/modules/Design/cardStyles';
 
 interface Scenario {
   id: string;
@@ -49,14 +49,21 @@ export default function RoleBasedScenarios(props: LayoutComponentProps) {
     return 'neutral';
   }, [props.manualThemeOverride, props.userContext]);
 
-  // Get theme-specific colors
+  // Get adaptive card styles based on section background luminance
+  const cardStyles = React.useMemo(() => {
+    return getCardStyles({
+      sectionBackgroundCSS: sectionBackground || '',
+      theme: uiTheme
+    });
+  }, [sectionBackground, uiTheme]);
+
+  // Get theme-specific colors (avatar gradient and add button only - card styling from cardStyles)
   const getThemeColors = (theme: UIBlockTheme) => {
     return {
       warm: {
         gradientFrom: 'from-orange-500',
         gradientTo: 'to-orange-600',
         focusRing: 'focus:ring-orange-500',
-        cardBorder: 'border-orange-200',
         addBg: 'bg-orange-50',
         addHoverBg: 'hover:bg-orange-100',
         addBorder: 'border-orange-200',
@@ -68,7 +75,6 @@ export default function RoleBasedScenarios(props: LayoutComponentProps) {
         gradientFrom: 'from-blue-500',
         gradientTo: 'to-indigo-600',
         focusRing: 'focus:ring-blue-500',
-        cardBorder: 'border-gray-200',
         addBg: 'bg-blue-50',
         addHoverBg: 'hover:bg-blue-100',
         addBorder: 'border-blue-200',
@@ -80,7 +86,6 @@ export default function RoleBasedScenarios(props: LayoutComponentProps) {
         gradientFrom: 'from-gray-500',
         gradientTo: 'to-gray-600',
         focusRing: 'focus:ring-gray-500',
-        cardBorder: 'border-gray-200',
         addBg: 'bg-gray-50',
         addHoverBg: 'hover:bg-gray-100',
         addBorder: 'border-gray-200',
@@ -139,7 +144,7 @@ export default function RoleBasedScenarios(props: LayoutComponentProps) {
 
         <div className="space-y-8">
           {scenarios.map((item, index) => (
-            <div key={item.id} className={`group/scenario-card relative bg-white p-8 ${cardEnhancements.borderRadius} border ${themeColors.cardBorder} flex items-center space-x-8 ${cardEnhancements.hoverLift} ${cardEnhancements.transition}`} style={{ boxShadow: shadows.card[uiTheme] }}>
+            <div key={item.id} className={`group/scenario-card relative p-8 rounded-xl border flex items-center space-x-8 ${cardStyles.bg} ${cardStyles.blur} ${cardStyles.border} ${cardStyles.shadow} ${cardStyles.hoverEffect} hover:-translate-y-1 transition-all duration-300`}>
               <div className={`w-20 h-20 bg-gradient-to-br ${themeColors.gradientFrom} ${themeColors.gradientTo} rounded-full flex items-center justify-center text-white flex-shrink-0`}>
                 <span className="font-bold text-lg">{getInitials(item.role)}</span>
               </div>
@@ -149,24 +154,24 @@ export default function RoleBasedScenarios(props: LayoutComponentProps) {
                     contentEditable
                     suppressContentEditableWarning
                     onBlur={(e) => handleRoleEdit(index, e.currentTarget.textContent || '')}
-                    className={`outline-none focus:ring-2 ${themeColors.focusRing} focus:ring-opacity-50 rounded px-1 min-h-[28px] cursor-text hover:bg-gray-50 font-bold ${colorTokens.textPrimary} mb-3`}
+                    className={`outline-none focus:ring-2 ${themeColors.focusRing} focus:ring-opacity-50 rounded px-1 min-h-[28px] cursor-text font-bold ${cardStyles.textHeading} mb-3`}
                   >
                     {item.role}
                   </div>
                 ) : (
-                  <h3 className={`font-bold ${colorTokens.textPrimary} mb-3`}>{item.role}</h3>
+                  <h3 className={`font-bold ${cardStyles.textHeading} mb-3`}>{item.role}</h3>
                 )}
                 {mode !== 'preview' ? (
                   <div
                     contentEditable
                     suppressContentEditableWarning
                     onBlur={(e) => handleScenarioEdit(index, e.currentTarget.textContent || '')}
-                    className={`outline-none focus:ring-2 ${themeColors.focusRing} focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 ${colorTokens.textSecondary}`}
+                    className={`outline-none focus:ring-2 ${themeColors.focusRing} focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text ${cardStyles.textBody}`}
                   >
                     {item.scenario}
                   </div>
                 ) : (
-                  <p className={colorTokens.textSecondary}>{item.scenario}</p>
+                  <p className={cardStyles.textBody}>{item.scenario}</p>
                 )}
               </div>
               {/* Delete button - only show in edit mode and if more than minimum cards */}

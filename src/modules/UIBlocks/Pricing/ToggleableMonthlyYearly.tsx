@@ -6,6 +6,7 @@ import { CTAButton } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { getCardStyles, type CardStyles } from '@/modules/Design/cardStyles';
 
 interface ToggleableMonthlyYearlyProps extends LayoutComponentProps {}
 
@@ -73,48 +74,27 @@ const CONTENT_SCHEMA = {
   },
 };
 
-// Get theme colors for pricing cards
-const getPricingColors = (theme: UIBlockTheme, isHighlighted: boolean) => {
-  const baseColors = {
+// Get theme-specific accent colors for pricing (badge, checkmark - not card styling)
+const getPricingAccents = (theme: UIBlockTheme) => {
+  const accentColors = {
     warm: {
-      highlightedBorder: 'border-orange-500',
-      highlightedBadgeBg: 'bg-orange-600',
-      highlightedBadgeText: 'text-white',
-      highlightedShadow: 'shadow-orange-100',
+      badgeBg: 'bg-orange-600',
+      badgeText: 'text-white',
       checkmark: 'text-orange-500',
-      regularBorder: 'border-gray-200',
-      regularBorderHover: 'hover:border-orange-300',
     },
     cool: {
-      highlightedBorder: 'border-blue-500',
-      highlightedBadgeBg: 'bg-blue-600',
-      highlightedBadgeText: 'text-white',
-      highlightedShadow: 'shadow-blue-100',
+      badgeBg: 'bg-blue-600',
+      badgeText: 'text-white',
       checkmark: 'text-blue-500',
-      regularBorder: 'border-gray-200',
-      regularBorderHover: 'hover:border-blue-300',
     },
     neutral: {
-      highlightedBorder: 'border-gray-700',
-      highlightedBadgeBg: 'bg-gray-700',
-      highlightedBadgeText: 'text-white',
-      highlightedShadow: 'shadow-gray-100',
+      badgeBg: 'bg-gray-700',
+      badgeText: 'text-white',
       checkmark: 'text-green-500',
-      regularBorder: 'border-gray-200',
-      regularBorderHover: 'hover:border-gray-400',
     },
   };
 
-  const colors = baseColors[theme];
-
-  return {
-    border: isHighlighted ? colors.highlightedBorder : colors.regularBorder,
-    borderHover: isHighlighted ? '' : colors.regularBorderHover,
-    shadow: isHighlighted ? colors.highlightedShadow : '',
-    badgeBg: colors.highlightedBadgeBg,
-    badgeText: colors.highlightedBadgeText,
-    checkmark: colors.checkmark,
-  };
+  return accentColors[theme];
 };
 
 // Calculate savings percentage
@@ -144,7 +124,8 @@ const PricingCard = ({
   onEditFeature,
   onTogglePopular,
   colorTokens,
-  themeColors,
+  cardStyles,
+  pricingAccents,
 }: {
   tier: Tier;
   mode: 'edit' | 'preview';
@@ -158,7 +139,8 @@ const PricingCard = ({
   onEditFeature?: (featureIndex: number, value: string) => void;
   onTogglePopular?: () => void;
   colorTokens: any;
-  themeColors: ReturnType<typeof getPricingColors>;
+  cardStyles: CardStyles;
+  pricingAccents: ReturnType<typeof getPricingAccents>;
 }) => {
   const currentPrice = billingCycle === 'monthly' ? tier.monthly_price : tier.yearly_price;
   const savingsPercent = calculateSavings(tier.monthly_price, tier.yearly_price);
@@ -169,7 +151,7 @@ const PricingCard = ({
       {tier.is_popular && (
         <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-20">
           <span
-            className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold ${themeColors.badgeBg} ${themeColors.badgeText} shadow-lg`}
+            className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold ${pricingAccents.badgeBg} ${pricingAccents.badgeText} shadow-lg`}
           >
             <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
               <path
@@ -192,7 +174,7 @@ const PricingCard = ({
 
       {/* Card */}
       <div
-        className={`relative h-full p-8 bg-white rounded-2xl shadow-lg border-2 ${themeColors.border} ${themeColors.borderHover} ${themeColors.shadow} transition-all duration-300 hover:shadow-xl`}
+        className={`relative h-full flex flex-col p-8 ${cardStyles.bg} ${cardStyles.blur} rounded-2xl ${cardStyles.shadow} border-2 ${cardStyles.border} ${cardStyles.hoverEffect} transition-all duration-300`}
       >
         {/* Remove Button */}
         {mode === 'edit' && showRemoveButton && onRemove && (
@@ -313,7 +295,7 @@ const PricingCard = ({
             {tier.features.map((feature, index) => (
               <li key={index} className="flex items-start group/feature-item relative">
                 <svg
-                  className={`w-5 h-5 ${themeColors.checkmark} mr-3 mt-0.5 flex-shrink-0`}
+                  className={`w-5 h-5 ${pricingAccents.checkmark} mr-3 mt-0.5 flex-shrink-0`}
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -419,6 +401,18 @@ export default function ToggleableMonthlyYearly(props: ToggleableMonthlyYearlyPr
     if (props.userContext) return selectUIBlockTheme(props.userContext);
     return 'neutral';
   }, [props.manualThemeOverride, props.userContext]);
+
+  // Get adaptive card styles based on section background luminance
+  const getCardStylesForTier = React.useCallback((highlighted: boolean) => {
+    return getCardStyles({
+      sectionBackgroundCSS: sectionBackground || '',
+      theme: uiBlockTheme,
+      highlighted
+    });
+  }, [sectionBackground, uiBlockTheme]);
+
+  // Get theme-specific accent colors
+  const pricingAccents = getPricingAccents(uiBlockTheme);
 
   // Get tiers
   const tiers: Tier[] = blockContent.tiers || CONTENT_SCHEMA.tiers.default;
@@ -635,7 +629,8 @@ export default function ToggleableMonthlyYearly(props: ToggleableMonthlyYearlyPr
               onEditFeature={(featureIndex, value) => handleEditFeature(tier.id, featureIndex, value)}
               onTogglePopular={() => handleTogglePopular(tier.id)}
               colorTokens={colorTokens}
-              themeColors={getPricingColors(uiBlockTheme, tier.is_popular)}
+              cardStyles={getCardStylesForTier(tier.is_popular)}
+              pricingAccents={pricingAccents}
             />
           ))}
         </div>

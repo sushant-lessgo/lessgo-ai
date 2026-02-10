@@ -7,11 +7,14 @@
 
 import React from 'react';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publishedTextColors';
+import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardStyles } from '@/lib/publishedTextColors';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { IconPublished } from '@/components/published/IconPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { inferIconFromText } from '@/lib/iconCategoryMap';
+import { analyzeBackground } from '@/utils/backgroundAnalysis';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 // Objection item structure (V2 format)
 interface Objection {
@@ -40,27 +43,21 @@ const getCardWidthClasses = (count: number) => {
   return 'w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.4rem)]';
 };
 
-// Get theme colors based on theme prop
-const getTileColors = (theme: 'warm' | 'cool' | 'neutral') => {
-  const colorMap = {
-    warm: {
-      iconBg: { from: '#fff7ed', to: '#ffedd5' }, // orange-50 to orange-100
-      border: '#fed7aa', // orange-200
-      accent: { from: '#fb923c', to: '#f97316' } // orange-400 to orange-500
-    },
-    cool: {
-      iconBg: { from: '#eff6ff', to: '#e0e7ff' }, // blue-50 to indigo-100
-      border: '#bfdbfe', // blue-200
-      accent: { from: '#60a5fa', to: '#6366f1' } // blue-400 to indigo-500
-    },
-    neutral: {
-      iconBg: { from: '#f9fafb', to: '#f3f4f6' }, // gray-50 to gray-100
-      border: '#e5e7eb', // gray-200
-      accent: { from: '#9ca3af', to: '#6b7280' } // gray-400 to gray-500
-    }
-  };
-  return colorMap[theme];
-};
+// Theme extras - accent elements (icons, gradients) that stay themed
+const getThemeExtras = (theme: UIBlockTheme) => ({
+  warm: {
+    iconBg: { from: '#fff7ed', to: '#ffedd5' }, // orange-50 to orange-100
+    accent: { from: '#fb923c', to: '#f97316' } // orange-400 to orange-500
+  },
+  cool: {
+    iconBg: { from: '#eff6ff', to: '#e0e7ff' }, // blue-50 to indigo-100
+    accent: { from: '#60a5fa', to: '#6366f1' } // blue-400 to indigo-500
+  },
+  neutral: {
+    iconBg: { from: '#f9fafb', to: '#f3f4f6' }, // gray-50 to gray-100
+    accent: { from: '#9ca3af', to: '#6b7280' } // gray-400 to gray-500
+  }
+}[theme]);
 
 export default function VisualObjectionTilesPublished(props: LayoutComponentProps) {
   const { sectionId, sectionBackgroundCSS, theme, backgroundType } = props;
@@ -72,9 +69,15 @@ export default function VisualObjectionTilesPublished(props: LayoutComponentProp
   // Get objections array from props (V2 format)
   const objections: Objection[] = props.objections || [];
 
-  // Determine theme
-  const uiBlockTheme = (props.manualThemeOverride || 'neutral') as 'warm' | 'cool' | 'neutral';
-  const colors = getTileColors(uiBlockTheme);
+  // Theme detection
+  const uiTheme: UIBlockTheme = props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+
+  // Card styles from luminance-based system
+  const { luminance } = analyzeBackground(sectionBackgroundCSS || '');
+  const cardStyles = getPublishedCardStyles(luminance, uiTheme);
+
+  // Theme extras for accent elements
+  const themeExtras = getThemeExtras(uiTheme);
 
   // Get text colors
   const textColors = getPublishedTextColors(
@@ -127,9 +130,15 @@ export default function VisualObjectionTilesPublished(props: LayoutComponentProp
           {objections.map((objection: Objection) => (
             <div
               key={objection.id}
-              className={`bg-white/90 backdrop-blur-sm border rounded-2xl p-8 shadow-lg ${getCardWidthClasses(objections.length)}`}
+              className={`rounded-2xl p-8 transition-all duration-300 hover:-translate-y-1 ${getCardWidthClasses(objections.length)}`}
               style={{
-                borderColor: colors.border
+                backgroundColor: cardStyles.bg,
+                backdropFilter: cardStyles.backdropFilter,
+                WebkitBackdropFilter: cardStyles.backdropFilter,
+                borderColor: cardStyles.borderColor,
+                borderWidth: cardStyles.borderWidth,
+                borderStyle: cardStyles.borderStyle,
+                boxShadow: cardStyles.boxShadow
               }}
             >
               {/* Icon */}
@@ -137,7 +146,7 @@ export default function VisualObjectionTilesPublished(props: LayoutComponentProp
                 <div
                   className="inline-flex items-center justify-center w-16 h-16 rounded-2xl text-3xl"
                   style={{
-                    background: `linear-gradient(to bottom right, ${colors.iconBg.from}, ${colors.iconBg.to})`
+                    background: `linear-gradient(to bottom right, ${themeExtras.iconBg.from}, ${themeExtras.iconBg.to})`
                   }}
                 >
                   <IconPublished icon={objection.icon || inferIconFromText(objection.question, objection.response)} size={32} />
@@ -147,8 +156,8 @@ export default function VisualObjectionTilesPublished(props: LayoutComponentProp
               {/* Question (Objection) */}
               <div className="mb-4">
                 <h3
-                  className="text-lg font-bold text-gray-900 text-center"
-                  style={bodyTypography}
+                  className="text-lg font-bold text-center"
+                  style={{ ...bodyTypography, color: cardStyles.textHeading }}
                 >
                   {objection.question}
                 </h3>
@@ -157,8 +166,8 @@ export default function VisualObjectionTilesPublished(props: LayoutComponentProp
               {/* Response (Answer) */}
               <div className="text-center">
                 <p
-                  className="text-gray-700 leading-relaxed"
-                  style={bodyTypography}
+                  className="leading-relaxed"
+                  style={{ ...bodyTypography, color: cardStyles.textBody }}
                 >
                   {objection.response}
                 </p>
@@ -170,7 +179,7 @@ export default function VisualObjectionTilesPublished(props: LayoutComponentProp
                   <div
                     className="w-8 h-1 rounded-full"
                     style={{
-                      background: `linear-gradient(to right, ${colors.accent.from}, ${colors.accent.to})`
+                      background: `linear-gradient(to right, ${themeExtras.accent.from}, ${themeExtras.accent.to})`
                     }}
                   ></div>
                 </div>

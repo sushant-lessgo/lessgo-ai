@@ -7,11 +7,12 @@
 
 import React from 'react';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publishedTextColors';
+import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardStyles } from '@/lib/publishedTextColors';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { analyzeBackground } from '@/utils/backgroundAnalysis';
 
 // Step structure (V2 array format)
 interface StepItem {
@@ -46,8 +47,14 @@ export default function VerticalTimelinePublished(props: LayoutComponentProps) {
   // Detect theme
   const uiTheme: UIBlockTheme = props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
 
-  // Get theme colors - inline style values
-  const getThemeColors = (theme: UIBlockTheme) => {
+  // Get luminance from section background
+  const { luminance } = analyzeBackground(sectionBackgroundCSS || '');
+
+  // Get adaptive card styles based on luminance and theme
+  const cardStyles = getPublishedCardStyles(luminance, uiTheme);
+
+  // Get theme accent colors (non-card elements)
+  const getThemeAccents = (theme: UIBlockTheme) => {
     const colorMap = {
       warm: {
         stepGradients: [
@@ -59,8 +66,6 @@ export default function VerticalTimelinePublished(props: LayoutComponentProps) {
           'linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%)'
         ],
         timelineLine: 'linear-gradient(to bottom, #fdba74, #fed7aa)',
-        cardBorder: '#fed7aa',
-        cardBg: '#ffffff',
         durationBg: '#ffedd5',
         durationText: '#c2410c',
         processSummaryBg: 'linear-gradient(to right, #fff7ed, #fffbeb, #fef2f2)',
@@ -76,8 +81,6 @@ export default function VerticalTimelinePublished(props: LayoutComponentProps) {
           'linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%)'
         ],
         timelineLine: 'linear-gradient(to bottom, #93c5fd, #bfdbfe)',
-        cardBorder: '#bfdbfe',
-        cardBg: '#ffffff',
         durationBg: '#dbeafe',
         durationText: '#1d4ed8',
         processSummaryBg: 'linear-gradient(to right, #eff6ff, #eef2ff, #f5f3ff)',
@@ -93,8 +96,6 @@ export default function VerticalTimelinePublished(props: LayoutComponentProps) {
           'linear-gradient(135deg, #9CA3AF 0%, #6B7280 100%)'
         ],
         timelineLine: 'linear-gradient(to bottom, #d1d5db, #e5e7eb)',
-        cardBorder: '#f3f4f6',
-        cardBg: '#ffffff',
         durationBg: '#f3f4f6',
         durationText: '#374151',
         processSummaryBg: 'linear-gradient(to right, #f8fafc, #f9fafb, #fafafa)',
@@ -104,7 +105,7 @@ export default function VerticalTimelinePublished(props: LayoutComponentProps) {
     return colorMap[theme];
   };
 
-  const themeColors = getThemeColors(uiTheme);
+  const themeAccents = getThemeAccents(uiTheme);
 
   // Get text colors
   const textColors = getPublishedTextColors(
@@ -158,13 +159,13 @@ export default function VerticalTimelinePublished(props: LayoutComponentProps) {
               className="absolute left-6 top-6 w-0.5 -translate-x-1/2"
               style={{
                 height: `calc(100% - 3rem)`,
-                background: themeColors.timelineLine
+                background: themeAccents.timelineLine
               }}
             />
           )}
           {steps.map((step: StepItem, index: number) => {
             const isLast = index === steps.length - 1;
-            const stepGradient = themeColors.stepGradients[index % themeColors.stepGradients.length];
+            const stepGradient = themeAccents.stepGradients[index % themeAccents.stepGradients.length];
 
             return (
               <div key={step.id} className="relative flex items-start">
@@ -192,10 +193,15 @@ export default function VerticalTimelinePublished(props: LayoutComponentProps) {
                   {/* Step Details */}
                   <div className="flex-1 pb-6">
                     <div
-                      className="rounded-xl px-6 py-4 shadow-lg transition-all duration-300"
+                      className="rounded-xl px-6 py-4 transition-all duration-300 hover:-translate-y-1"
                       style={{
-                        backgroundColor: themeColors.cardBg,
-                        border: `1px solid ${themeColors.cardBorder}`
+                        backgroundColor: cardStyles.bg,
+                        backdropFilter: cardStyles.backdropFilter,
+                        WebkitBackdropFilter: cardStyles.backdropFilter,
+                        borderColor: cardStyles.borderColor,
+                        borderWidth: cardStyles.borderWidth,
+                        borderStyle: cardStyles.borderStyle,
+                        boxShadow: cardStyles.boxShadow
                       }}
                     >
                       <div className="flex items-start justify-between">
@@ -204,7 +210,7 @@ export default function VerticalTimelinePublished(props: LayoutComponentProps) {
                           style={{
                             fontSize: '1.25rem',
                             fontWeight: 700,
-                            color: textColors.heading,
+                            color: cardStyles.textHeading,
                             flex: 1
                           }}
                         >
@@ -216,8 +222,8 @@ export default function VerticalTimelinePublished(props: LayoutComponentProps) {
                           <span
                             className="text-sm font-semibold px-3 py-1 rounded-full ml-4 flex-shrink-0 shadow-sm"
                             style={{
-                              backgroundColor: themeColors.durationBg,
-                              color: themeColors.durationText,
+                              backgroundColor: themeAccents.durationBg,
+                              color: themeAccents.durationText,
                               border: '1px solid rgba(0,0,0,0.05)'
                             }}
                           >
@@ -230,7 +236,7 @@ export default function VerticalTimelinePublished(props: LayoutComponentProps) {
                       {step.description && (
                         <p
                           style={{
-                            color: textColors.body,
+                            color: cardStyles.textBody,
                             lineHeight: '1.75rem',
                             marginTop: '0.5rem'
                           }}
@@ -251,8 +257,8 @@ export default function VerticalTimelinePublished(props: LayoutComponentProps) {
           <div
             className="mt-6 rounded-2xl px-8 py-2"
             style={{
-              background: themeColors.processSummaryBg,
-              border: `1px solid ${themeColors.processSummaryBorder}`
+              background: themeAccents.processSummaryBg,
+              border: `1px solid ${themeAccents.processSummaryBorder}`
             }}
           >
             <div className="text-center">

@@ -6,21 +6,11 @@ import { useGenerationStore } from '@/hooks/useGenerationStore';
 import { Check } from 'lucide-react';
 import ErrorRetry from '../shared/ErrorRetry';
 import type { SectionType, SectionCopy } from '@/types/generation';
-import { getDesignTokensForVibe } from '@/modules/Design/vibeMapping';
-import { generateBackgroundSystemForVibe } from '@/modules/Design/vibeBackgroundSystem';
+import { getDesignTokensForVibe } from '@/modules/Design/vibeDesignTokens';
+import { generateBackgroundSystemForVibe, assignSectionBackgrounds } from '@/modules/Design/background/backgroundIntegration';
 import { fetchPexelsImagesParallel, type ImageFetchResult } from '@/lib/generation/fetchImages';
 
-// Helper: map section type to background type
-function getBackgroundTypeForSection(sectionType: string): 'primary' | 'secondary' | 'neutral' {
-  const primarySections = ['hero', 'cta'];
-  const secondarySections = ['features', 'howitworks', 'testimonials', 'results', 'uniquemechanism', 'socialproof'];
-
-  const normalizedType = sectionType.toLowerCase();
-
-  if (primarySections.includes(normalizedType)) return 'primary';
-  if (secondarySections.includes(normalizedType)) return 'secondary';
-  return 'neutral';
-}
+// Background type now assigned via position-based mapping (assignSectionBackgrounds)
 
 // Helper: merge fetched images into section copy
 function mergeImagesIntoSections(
@@ -188,7 +178,8 @@ export default function GeneratingStep() {
       console.log('🎨 [DEBUG-BUG1] BackgroundSystem:', JSON.stringify(backgroundSystem, null, 2));
       console.log('🎨 [DEBUG-BUG1] DesignTokens:', JSON.stringify(designTokens, null, 2));
 
-      // Build content map with full structure + backgroundType
+      // Build content map with full structure + backgroundType (position-based)
+      const bgAssignments = assignSectionBackgrounds(sectionIds);
       const content: Record<string, any> = {};
       sectionIds.forEach((id, i) => {
         const sectionType = sectionOrder[i];
@@ -199,7 +190,7 @@ export default function GeneratingStep() {
           id,
           layout,
           elements: sectionCopy?.elements || {},
-          backgroundType: getBackgroundTypeForSection(sectionType),
+          backgroundType: bgAssignments[id] || 'neutral',
           aiMetadata: {
             aiGenerated: true,
             isCustomized: false,
@@ -227,7 +218,6 @@ export default function GeneratingStep() {
                 primary: backgroundSystem.primary,
                 secondary: backgroundSystem.secondary,
                 neutral: backgroundSystem.neutral,
-                divider: backgroundSystem.divider,
               },
             },
             vibe: strategy.vibe,

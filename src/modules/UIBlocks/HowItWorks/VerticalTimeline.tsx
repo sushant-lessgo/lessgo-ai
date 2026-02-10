@@ -10,6 +10,7 @@ import {
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { getCardStyles, type CardStyles } from '@/modules/Design/cardStyles';
 
 // Step item structure (V2 array format)
 interface StepItem {
@@ -46,8 +47,8 @@ const CONTENT_SCHEMA = {
 // Generate unique ID for new steps
 const generateStepId = (): string => `s${Date.now().toString(36)}`;
 
-// Theme-based color mappings
-const getThemeColors = (theme: UIBlockTheme) => {
+// Theme-based color mappings (non-card elements only)
+const getThemeAccents = (theme: UIBlockTheme) => {
   return {
     warm: {
       stepGradients: [
@@ -59,9 +60,6 @@ const getThemeColors = (theme: UIBlockTheme) => {
         'linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%)'
       ],
       timelineLine: 'bg-gradient-to-b from-orange-300 to-orange-200',
-      cardBorder: 'border-orange-100',
-      cardBg: 'bg-white hover:bg-orange-50/30',
-      cardShadow: 'shadow-lg shadow-orange-100/50 hover:shadow-xl hover:shadow-orange-200/60',
       durationBg: 'bg-orange-100',
       durationText: 'text-orange-700',
       processSummaryBg: 'bg-gradient-to-r from-orange-50 via-amber-50 to-red-50',
@@ -78,9 +76,6 @@ const getThemeColors = (theme: UIBlockTheme) => {
         'linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%)'
       ],
       timelineLine: 'bg-gradient-to-b from-blue-300 to-blue-200',
-      cardBorder: 'border-blue-100',
-      cardBg: 'bg-white hover:bg-blue-50/30',
-      cardShadow: 'shadow-lg shadow-blue-100/50 hover:shadow-xl hover:shadow-blue-200/60',
       durationBg: 'bg-blue-100',
       durationText: 'text-blue-700',
       processSummaryBg: 'bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50',
@@ -97,9 +92,6 @@ const getThemeColors = (theme: UIBlockTheme) => {
         'linear-gradient(135deg, #9CA3AF 0%, #6B7280 100%)'
       ],
       timelineLine: 'bg-gradient-to-b from-gray-300 to-gray-200',
-      cardBorder: 'border-gray-100',
-      cardBg: 'bg-white hover:bg-gray-50',
-      cardShadow: 'shadow-lg hover:shadow-xl',
       durationBg: 'bg-gray-100',
       durationText: 'text-gray-700',
       processSummaryBg: 'bg-gradient-to-r from-slate-50 via-gray-50 to-zinc-50',
@@ -115,7 +107,8 @@ const TimelineStep = React.memo(({
   index,
   isLast,
   mode,
-  themeColors,
+  themeAccents,
+  cardStyles,
   onStepUpdate,
   onRemove,
   canRemove
@@ -124,12 +117,13 @@ const TimelineStep = React.memo(({
   index: number;
   isLast: boolean;
   mode: 'edit' | 'preview';
-  themeColors: ReturnType<typeof getThemeColors>;
+  themeAccents: ReturnType<typeof getThemeAccents>;
+  cardStyles: CardStyles;
   onStepUpdate: (index: number, field: keyof StepItem, value: string) => void;
   onRemove?: () => void;
   canRemove: boolean;
 }) => {
-  const stepGradient = themeColors.stepGradients[index % themeColors.stepGradients.length];
+  const stepGradient = themeAccents.stepGradients[index % themeAccents.stepGradients.length];
 
   return (
     <div className="relative flex items-start">
@@ -154,7 +148,7 @@ const TimelineStep = React.memo(({
 
         {/* Step Details */}
         <div className="flex-1 pb-6 relative group">
-          <div className={`${themeColors.cardBg} rounded-xl px-6 py-4 ${themeColors.cardShadow} border ${themeColors.cardBorder} transition-all duration-300`}>
+          <div className={`${cardStyles.bg} ${cardStyles.blur} rounded-xl px-6 py-4 ${cardStyles.shadow} ${cardStyles.border} ${cardStyles.hoverEffect} transition-all duration-300`}>
             <div className="flex items-start justify-between">
               {/* Editable Step Title */}
               {mode !== 'preview' ? (
@@ -162,13 +156,13 @@ const TimelineStep = React.memo(({
                   contentEditable
                   suppressContentEditableWarning
                   onBlur={(e) => onStepUpdate(index, 'title', e.currentTarget.textContent || '')}
-                  className={`text-xl font-bold text-gray-900 flex-1 outline-none ${themeColors.focusRing} focus:ring-2 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-50 min-h-[32px]`}
+                  className={`text-xl font-bold ${cardStyles.textHeading} flex-1 outline-none ${themeAccents.focusRing} focus:ring-2 focus:ring-opacity-50 rounded px-2 py-1 cursor-text min-h-[32px]`}
                   data-placeholder="Step title"
                 >
                   {step.title}
                 </div>
               ) : (
-                <h3 className="text-xl font-bold text-gray-900 flex-1">{step.title}</h3>
+                <h3 className={`text-xl font-bold ${cardStyles.textHeading} flex-1`}>{step.title}</h3>
               )}
 
               {/* Editable Duration */}
@@ -177,14 +171,14 @@ const TimelineStep = React.memo(({
                   contentEditable
                   suppressContentEditableWarning
                   onBlur={(e) => onStepUpdate(index, 'duration', e.currentTarget.textContent || '')}
-                  className={`text-sm font-semibold ${themeColors.durationText} ${themeColors.durationBg} px-3 py-1 rounded-full ml-4 flex-shrink-0 outline-none ${themeColors.focusRing} focus:ring-2 focus:ring-opacity-50 cursor-text min-w-[60px] text-center shadow-sm border border-current/10`}
+                  className={`text-sm font-semibold ${themeAccents.durationText} ${themeAccents.durationBg} px-3 py-1 rounded-full ml-4 flex-shrink-0 outline-none ${themeAccents.focusRing} focus:ring-2 focus:ring-opacity-50 cursor-text min-w-[60px] text-center shadow-sm border border-current/10`}
                   data-placeholder="Duration"
                 >
                   {step.duration || 'Duration'}
                 </div>
               ) : (
                 step.duration && (
-                  <span className={`text-sm font-semibold ${themeColors.durationText} ${themeColors.durationBg} px-3 py-1 rounded-full ml-4 flex-shrink-0 shadow-sm border border-current/10`}>
+                  <span className={`text-sm font-semibold ${themeAccents.durationText} ${themeAccents.durationBg} px-3 py-1 rounded-full ml-4 flex-shrink-0 shadow-sm border border-current/10`}>
                     {step.duration}
                   </span>
                 )
@@ -197,13 +191,13 @@ const TimelineStep = React.memo(({
                 contentEditable
                 suppressContentEditableWarning
                 onBlur={(e) => onStepUpdate(index, 'description', e.currentTarget.textContent || '')}
-                className={`text-gray-600 leading-relaxed mt-2 outline-none ${themeColors.focusRing} focus:ring-2 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-50 min-h-[48px]`}
+                className={`${cardStyles.textBody} leading-relaxed mt-2 outline-none ${themeAccents.focusRing} focus:ring-2 focus:ring-opacity-50 rounded px-2 py-1 cursor-text min-h-[48px]`}
                 data-placeholder="Step description"
               >
                 {step.description}
               </div>
             ) : (
-              <p className="text-gray-600 text-base leading-relaxed mt-2">
+              <p className={`${cardStyles.textBody} text-base leading-relaxed mt-2`}>
                 {step.description}
               </p>
             )}
@@ -252,7 +246,15 @@ export default function VerticalTimeline(props: LayoutComponentProps) {
     return 'neutral';
   }, [props.manualThemeOverride, props.userContext]);
 
-  const themeColors = getThemeColors(uiBlockTheme);
+  const themeAccents = getThemeAccents(uiBlockTheme);
+
+  // Get adaptive card styles based on section background luminance
+  const cardStyles = React.useMemo(() => {
+    return getCardStyles({
+      sectionBackgroundCSS: sectionBackground || '',
+      theme: uiBlockTheme
+    });
+  }, [sectionBackground, uiBlockTheme]);
 
   // Get steps array (with fallback to default)
   const steps: StepItem[] = Array.isArray(blockContent.steps) && blockContent.steps.length > 0
@@ -331,7 +333,7 @@ export default function VerticalTimeline(props: LayoutComponentProps) {
           {/* Continuous Timeline Line - runs behind all step circles */}
           {steps.length > 1 && (
             <div
-              className={`absolute left-6 top-6 w-0.5 -translate-x-1/2 ${themeColors.timelineLine}`}
+              className={`absolute left-6 top-6 w-0.5 -translate-x-1/2 ${themeAccents.timelineLine}`}
               style={{ height: `calc(100% - 3rem)` }}
             />
           )}
@@ -342,7 +344,8 @@ export default function VerticalTimeline(props: LayoutComponentProps) {
               index={index}
               isLast={index === steps.length - 1}
               mode={mode}
-              themeColors={themeColors}
+              themeAccents={themeAccents}
+              cardStyles={cardStyles}
               onStepUpdate={handleStepUpdate}
               onRemove={() => handleRemoveStep(index)}
               canRemove={steps.length > 3}
@@ -382,7 +385,7 @@ export default function VerticalTimeline(props: LayoutComponentProps) {
 
         {/* Process Summary */}
         {(blockContent.process_summary_text || mode === 'edit') && (
-          <div className={`mt-6 ${themeColors.processSummaryBg} rounded-2xl px-8 py-2 border ${themeColors.processSummaryBorder}`}>
+          <div className={`mt-6 ${themeAccents.processSummaryBg} rounded-2xl px-8 py-2 border ${themeAccents.processSummaryBorder}`}>
             <div className="text-center">
               <EditableAdaptiveText
                 mode={mode}

@@ -9,9 +9,11 @@ import {
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { shadows, cardEnhancements } from '@/modules/Design/designTokens';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { getDynamicCardLayout, isSplitLayout } from '@/utils/dynamicCardLayout';
+import { cn } from '@/lib/utils';
+import { getCardStyles, type CardStyles } from '@/modules/Design/cardStyles';
 
 // V2: Testimonial item structure - clean array item
 interface Testimonial {
@@ -108,11 +110,9 @@ const CustomerAvatar = React.memo(({ name, theme }: { name: string; theme: UIBlo
 });
 CustomerAvatar.displayName = 'CustomerAvatar';
 
-// Theme color mapping
+// Theme color mapping (for quote mark and add button only - card styling from cardStyles)
 const getThemeColors = (theme: UIBlockTheme) => ({
   warm: {
-    border: 'border-orange-200',
-    borderHover: 'hover:border-orange-300',
     quoteText: 'text-orange-300',
     buttonBg: 'bg-orange-50 hover:bg-orange-100',
     buttonBorder: 'border-orange-200 hover:border-orange-300',
@@ -120,8 +120,6 @@ const getThemeColors = (theme: UIBlockTheme) => ({
     buttonIcon: 'text-orange-500'
   },
   cool: {
-    border: 'border-blue-200',
-    borderHover: 'hover:border-blue-300',
     quoteText: 'text-blue-300',
     buttonBg: 'bg-blue-50 hover:bg-blue-100',
     buttonBorder: 'border-blue-200 hover:border-blue-300',
@@ -129,8 +127,6 @@ const getThemeColors = (theme: UIBlockTheme) => ({
     buttonIcon: 'text-blue-500'
   },
   neutral: {
-    border: 'border-gray-200',
-    borderHover: 'hover:border-gray-300',
     quoteText: 'text-gray-300',
     buttonBg: 'bg-gray-50 hover:bg-gray-100',
     buttonBorder: 'border-gray-200 hover:border-gray-300',
@@ -150,7 +146,9 @@ const TestimonialCard = React.memo(({
   sectionId,
   sectionBackground,
   themeColors,
-  theme
+  cardStyles,
+  theme,
+  cardClassName
 }: {
   testimonial: Testimonial;
   mode: 'edit' | 'preview';
@@ -161,11 +159,13 @@ const TestimonialCard = React.memo(({
   sectionId: string;
   sectionBackground: string;
   themeColors: ReturnType<typeof getThemeColors>;
+  cardStyles: CardStyles;
   theme: UIBlockTheme;
+  cardClassName?: string;
 }) => {
   return (
     <div
-      className={`group relative bg-white p-8 rounded-xl border ${themeColors.border} ${themeColors.borderHover} ${shadows.card[theme]} ${shadows.cardHover[theme]} ${cardEnhancements.hoverLift} ${cardEnhancements.transition}`}
+      className={cn(`group relative rounded-xl border ${cardStyles.bg} ${cardStyles.blur} ${cardStyles.border} ${cardStyles.shadow} ${cardStyles.hoverEffect} hover:-translate-y-1 transition-all duration-300`, cardClassName || 'p-8')}
       data-element-key={`testimonials.${testimonial.id}`}
     >
       {/* Quote Mark */}
@@ -320,6 +320,14 @@ export default function QuoteGrid(props: LayoutComponentProps) {
 
   const themeColors = getThemeColors(theme);
 
+  // Get adaptive card styles based on section background luminance
+  const cardStyles = React.useMemo(() => {
+    return getCardStyles({
+      sectionBackgroundCSS: sectionBackground || '',
+      theme
+    });
+  }, [sectionBackground, theme]);
+
   // V2: Direct array access with JSON parse fallback
   const testimonials: Testimonial[] = React.useMemo(() => {
     const raw = blockContent.testimonials;
@@ -360,6 +368,28 @@ export default function QuoteGrid(props: LayoutComponentProps) {
     };
     (handleContentUpdate as any)('testimonials', [...testimonials, newTestimonial]);
   };
+
+  // Dynamic card layout
+  const layout = getDynamicCardLayout(testimonials.length);
+
+  // Helper to render testimonial card
+  const renderTestimonialCard = (testimonial: Testimonial, cardClass: string) => (
+    <TestimonialCard
+      key={testimonial.id}
+      testimonial={testimonial}
+      mode={mode}
+      colorTokens={colorTokens}
+      onUpdate={handleTestimonialUpdate}
+      onRemove={handleRemoveTestimonial}
+      canRemove={testimonials.length > 2}
+      sectionId={sectionId}
+      sectionBackground={sectionBackground}
+      themeColors={themeColors}
+      cardStyles={cardStyles}
+      theme={theme}
+      cardClassName={cardClass}
+    />
+  );
 
   return (
     <LayoutSection
@@ -406,28 +436,28 @@ export default function QuoteGrid(props: LayoutComponentProps) {
         </div>
 
         {/* Testimonials Grid */}
-        <div className={`grid gap-8 ${
-          testimonials.length === 1 ? 'max-w-2xl mx-auto' :
-          testimonials.length === 2 ? 'md:grid-cols-2 max-w-4xl mx-auto' :
-          testimonials.length === 3 ? 'md:grid-cols-2 lg:grid-cols-3' :
-          'md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-2 xl:max-w-5xl xl:mx-auto'
-        }`}>
-          {testimonials.map((testimonial) => (
-            <TestimonialCard
-              key={testimonial.id}
-              testimonial={testimonial}
-              mode={mode}
-              colorTokens={colorTokens}
-              onUpdate={handleTestimonialUpdate}
-              onRemove={handleRemoveTestimonial}
-              canRemove={testimonials.length > 2}
-              sectionId={sectionId}
-              sectionBackground={sectionBackground}
-              themeColors={themeColors}
-              theme={theme}
-            />
-          ))}
-        </div>
+        {isSplitLayout(testimonials.length) && layout.splitLayout ? (
+          <div className={layout.containerClass}>
+            <div className={layout.splitLayout.firstRowGrid}>
+              {testimonials.slice(0, layout.splitLayout.firstRowCount).map((testimonial) =>
+                renderTestimonialCard(testimonial, layout.splitLayout!.firstRowCard)
+              )}
+            </div>
+            <div className={layout.splitLayout.secondRowGrid}>
+              {testimonials.slice(layout.splitLayout.firstRowCount).map((testimonial) =>
+                renderTestimonialCard(testimonial, layout.splitLayout!.secondRowCard)
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className={layout.containerClass}>
+            <div className={layout.gridClass}>
+              {testimonials.map((testimonial) =>
+                renderTestimonialCard(testimonial, layout.cardClass)
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Add Testimonial Button */}
         {mode !== 'preview' && testimonials.length < 6 && (

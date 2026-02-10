@@ -10,6 +10,9 @@ import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import { inferIconFromText } from '@/lib/iconCategoryMap';
+import { getDynamicCardLayout } from '@/utils/dynamicCardLayout';
+import { cn } from '@/lib/utils';
+import { getCardStyles, CardStyles } from '@/modules/Design/cardStyles';
 
 // V2 Schema: Array-based secrets
 interface SecretItem {
@@ -49,8 +52,10 @@ const SecretCard = ({
   onRemoveSecret,
   colorTokens,
   canRemove = true,
-  sectionBackground,
-  secretColors
+  cardStyles,
+  accentBar,
+  focusRing,
+  cardClassName
 }: {
   secret: SecretItem;
   index: number;
@@ -62,31 +67,29 @@ const SecretCard = ({
   onRemoveSecret?: (id: string) => void;
   colorTokens: any;
   canRemove?: boolean;
-  sectionBackground?: string;
-  secretColors: {
-    cardBg: string;
-    cardBorder: string;
-    cardHoverBorder: string;
-    iconBg: string;
-    iconShadow: string;
-    iconText: string;
-    titleText: string;
-    accentBar: string;
-    addButtonBg: string;
-    addButtonHover: string;
-    focusRing: string;
-    hoverShadow: string;
-  };
+  cardStyles: CardStyles;
+  accentBar: string;
+  focusRing: string;
+  cardClassName?: string;
 }) => {
   // V2: Get icon - use stored value or derive from title/description
   const displayIcon = secret.icon || inferIconFromText(secret.title, secret.description);
 
   return (
     <div className="group relative">
-      <div className={`${secretColors.cardBg} rounded-2xl p-8 text-center relative overflow-hidden h-full border-2 ${secretColors.cardBorder} ${secretColors.cardHoverBorder} shadow-lg ${secretColors.hoverShadow} transition-all duration-300`}>
-        <div className={`absolute top-0 left-0 right-0 h-1.5 ${secretColors.accentBar} rounded-t-2xl`}></div>
+      <div className={cn(
+        cardStyles.bg,
+        cardStyles.blur,
+        cardStyles.border,
+        cardStyles.shadow,
+        cardStyles.hoverEffect,
+        'rounded-2xl text-center relative overflow-hidden h-full',
+        'transition-all duration-300 hover:-translate-y-1',
+        cardClassName || 'p-8'
+      )}>
+        <div className={`absolute top-0 left-0 right-0 h-1.5 ${accentBar} rounded-t-2xl`}></div>
         <div className="relative z-10">
-          <div className={`w-14 h-14 ${secretColors.iconBg} ${secretColors.iconShadow} rounded-full flex items-center justify-center mx-auto mb-4`}>
+          <div className={`w-14 h-14 ${cardStyles.iconBg} rounded-full flex items-center justify-center mx-auto mb-4`}>
             <IconEditableText
               mode={mode}
               value={displayIcon}
@@ -94,19 +97,19 @@ const SecretCard = ({
               backgroundType="neutral"
               colorTokens={colorTokens}
               iconSize="lg"
-              className={`${secretColors.iconText} text-2xl`}
+              className={`${cardStyles.iconColor} text-2xl`}
               sectionId={sectionId}
               elementKey={`secret_icon_${secret.id}`}
             />
           </div>
 
-          <h3 className={`${secretColors.titleText} font-bold text-xl mb-3`}>
+          <h3 className={`${cardStyles.textHeading} font-bold text-xl mb-3`}>
             {mode !== 'preview' ? (
               <div
                 contentEditable
                 suppressContentEditableWarning
                 onBlur={(e) => onTitleEdit(secret.id, e.currentTarget.textContent || '')}
-                className={`outline-none focus:ring-2 ${secretColors.focusRing} focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text`}
+                className={`outline-none focus:ring-2 ${focusRing} focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text`}
               >
                 {secret.title}
               </div>
@@ -115,13 +118,13 @@ const SecretCard = ({
             )}
           </h3>
 
-          <div className="text-gray-600">
+          <div className={cardStyles.textBody}>
             {mode !== 'preview' ? (
               <div
                 contentEditable
                 suppressContentEditableWarning
                 onBlur={(e) => onDescriptionEdit(secret.id, e.currentTarget.textContent || '')}
-                className={`outline-none focus:ring-2 ${secretColors.focusRing} focus:ring-opacity-50 rounded px-2 py-1 min-h-[48px] cursor-text hover:bg-gray-50 max-w-lg mx-auto`}
+                className={`outline-none focus:ring-2 ${focusRing} focus:ring-opacity-50 rounded px-2 py-1 min-h-[48px] cursor-text max-w-lg mx-auto`}
               >
                 {secret.description}
               </div>
@@ -169,61 +172,41 @@ export default function SecretSauceReveal(props: LayoutComponentProps) {
   const onboardingStore = useOnboardingStore();
 
   // Detect theme: manual override > auto-detection > neutral fallback
-  const theme = React.useMemo(() => {
+  const uiTheme = React.useMemo(() => {
     if (props.manualThemeOverride) return props.manualThemeOverride;
     if (props.userContext) return selectUIBlockTheme(props.userContext);
     return 'neutral';
   }, [props.manualThemeOverride, props.userContext]);
 
-  // Secret card colors by theme
-  const getSecretColors = (theme: UIBlockTheme) => {
-    return {
-      warm: {
-        cardBg: 'bg-white',
-        cardBorder: 'border-orange-200',
-        cardHoverBorder: 'hover:border-orange-400',
-        iconBg: 'bg-gradient-to-br from-orange-400 to-red-500',
-        iconShadow: 'shadow-lg shadow-orange-200',
-        iconText: 'text-white',
-        titleText: 'text-orange-900',
-        accentBar: 'bg-gradient-to-r from-orange-400 to-red-500',
-        addButtonBg: 'bg-orange-600',
-        addButtonHover: 'hover:bg-orange-700',
-        focusRing: 'focus:ring-orange-300',
-        hoverShadow: 'hover:shadow-xl'
-      },
-      cool: {
-        cardBg: 'bg-white',
-        cardBorder: 'border-blue-200',
-        cardHoverBorder: 'hover:border-blue-400',
-        iconBg: 'bg-gradient-to-br from-blue-400 to-indigo-500',
-        iconShadow: 'shadow-lg shadow-blue-200',
-        iconText: 'text-white',
-        titleText: 'text-blue-900',
-        accentBar: 'bg-gradient-to-r from-blue-400 to-indigo-500',
-        addButtonBg: 'bg-blue-600',
-        addButtonHover: 'hover:bg-blue-700',
-        focusRing: 'focus:ring-blue-300',
-        hoverShadow: 'hover:shadow-xl'
-      },
-      neutral: {
-        cardBg: 'bg-white',
-        cardBorder: 'border-purple-200',
-        cardHoverBorder: 'hover:border-purple-400',
-        iconBg: 'bg-gradient-to-br from-purple-400 to-indigo-500',
-        iconShadow: 'shadow-lg shadow-purple-200',
-        iconText: 'text-white',
-        titleText: 'text-purple-900',
-        accentBar: 'bg-gradient-to-r from-purple-400 to-indigo-500',
-        addButtonBg: 'bg-purple-600',
-        addButtonHover: 'hover:bg-purple-700',
-        focusRing: 'focus:ring-purple-300',
-        hoverShadow: 'hover:shadow-xl'
-      }
-    }[theme];
-  };
+  // Card styles from luminance-based system
+  const cardStyles = React.useMemo(() => {
+    return getCardStyles({
+      sectionBackgroundCSS: sectionBackground || '',
+      theme: uiTheme
+    });
+  }, [sectionBackground, uiTheme]);
 
-  const secretColors = getSecretColors(theme);
+  // Theme-specific extras (accent bar, buttons, focus ring)
+  const themeExtras = {
+    warm: {
+      accentBar: 'bg-gradient-to-r from-orange-400 to-red-500',
+      addButtonBg: 'bg-orange-600',
+      addButtonHover: 'hover:bg-orange-700',
+      focusRing: 'focus:ring-orange-300'
+    },
+    cool: {
+      accentBar: 'bg-gradient-to-r from-blue-400 to-indigo-500',
+      addButtonBg: 'bg-blue-600',
+      addButtonHover: 'hover:bg-blue-700',
+      focusRing: 'focus:ring-blue-300'
+    },
+    neutral: {
+      accentBar: 'bg-gradient-to-r from-purple-400 to-indigo-500',
+      addButtonBg: 'bg-purple-600',
+      addButtonHover: 'hover:bg-purple-700',
+      focusRing: 'focus:ring-purple-300'
+    }
+  }[uiTheme];
 
   // V2: Get secrets array directly
   const secrets = blockContent.secrets || [];
@@ -266,6 +249,8 @@ export default function SecretSauceReveal(props: LayoutComponentProps) {
     (handleContentUpdate as any)('secrets', updatedSecrets);
   };
 
+  const layout = getDynamicCardLayout(secrets.length);
+
   return (
     <LayoutSection
       sectionId={sectionId}
@@ -275,7 +260,7 @@ export default function SecretSauceReveal(props: LayoutComponentProps) {
       mode={mode}
       className={props.className}
     >
-      <div className="max-w-6xl mx-auto">
+      <div className={layout.containerClass}>
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
             mode={mode}
@@ -306,7 +291,7 @@ export default function SecretSauceReveal(props: LayoutComponentProps) {
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className={layout.gridClass}>
           {secrets.map((secret, index) => (
             <SecretCard
               key={secret.id}
@@ -320,8 +305,10 @@ export default function SecretSauceReveal(props: LayoutComponentProps) {
               onRemoveSecret={handleRemoveSecret}
               colorTokens={colorTokens}
               canRemove={secrets.length > 2}
-              sectionBackground={sectionBackground}
-              secretColors={secretColors}
+              cardStyles={cardStyles}
+              accentBar={themeExtras.accentBar}
+              focusRing={themeExtras.focusRing}
+              cardClassName={layout.cardClass}
             />
           ))}
         </div>
@@ -330,7 +317,7 @@ export default function SecretSauceReveal(props: LayoutComponentProps) {
           <div className="mt-8 text-center">
             <button
               onClick={handleAddSecret}
-              className={`inline-flex items-center gap-2 px-6 py-3 ${secretColors.addButtonBg} ${secretColors.addButtonHover} text-white rounded-lg transition-colors duration-200`}
+              className={`inline-flex items-center gap-2 px-6 py-3 ${themeExtras.addButtonBg} ${themeExtras.addButtonHover} text-white rounded-lg transition-colors duration-200`}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />

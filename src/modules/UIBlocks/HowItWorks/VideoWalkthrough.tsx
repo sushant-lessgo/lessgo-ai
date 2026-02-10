@@ -11,6 +11,7 @@ import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockTh
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import { shadows, cardEnhancements } from '@/modules/Design/designTokens';
 import * as LucideIcons from 'lucide-react';
+import { getDynamicCardLayout } from '@/utils/dynamicCardLayout';
 
 // V2 Types
 interface DemoStatItem {
@@ -379,7 +380,9 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
         </div>
 
         {/* Demo Stats */}
-        {demoStats.length > 0 && (
+        {demoStats.length > 0 && (() => {
+          const demoStatsLayout = getDynamicCardLayout(demoStats.length);
+          return (
           <div className={`bg-white ${cardEnhancements.borderRadius} p-8 border ${themeStyles.cardBorder} ${themeStyles.cardShadow}`}>
             <div className="text-center">
               {(blockContent.demo_stats_heading || isEditMode) && (
@@ -398,7 +401,7 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
                 />
               )}
 
-              <div className="grid md:grid-cols-3 gap-8">
+              <div className={demoStatsLayout.gridClass}>
                 {demoStats.map((stat, index) => {
                   const accentColor = themeStyles.accentColors[index % themeStyles.accentColors.length];
 
@@ -458,7 +461,8 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
               </div>
             </div>
           </div>
-        )}
+          );
+        })()}
       </div>
     </LayoutSection>
   );

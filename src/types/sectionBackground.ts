@@ -3,12 +3,12 @@
 /**
  * Theme color options for background
  */
-export type ThemeColorType = 'primary' | 'secondary' | 'neutral' | 'divider';
+export type ThemeColorType = 'primary' | 'secondary' | 'neutral';
 
 /**
  * Enhanced background type including both legacy theme colors and new custom option
  * During transition period, backgroundType can be either:
- * - Legacy: theme color directly ('primary', 'secondary', 'neutral', 'divider')
+ * - Legacy: theme color directly ('primary', 'secondary', 'neutral')
  * - New: 'theme' (uses sectionBackground.themeColor) or 'custom' (uses sectionBackground.custom)
  */
 export type BackgroundType = ThemeColorType | 'theme' | 'custom';

@@ -90,7 +90,6 @@ export function extractDominantColor(background: SectionBackground): string {
     primary: '#3B82F6',
     secondary: '#F8FAFC',
     neutral: '#FFFFFF',
-    divider: '#F3F4F6',
   };
   
   return presetColors[background.type as keyof typeof presetColors] || '#000000';

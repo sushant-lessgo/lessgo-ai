@@ -31,8 +31,8 @@ export default function SideBySideBlockPublished(props: LayoutComponentProps) {
   const summary_text = (props as any).summary_text || '';
 
   // Extract icons with defaults
-  const before_icon = props.before_icon || '❌';
-  const after_icon = props.after_icon || '✅';
+  const before_icon = props.before_icon || 'XCircle';
+  const after_icon = props.after_icon || 'CheckCircle';
 
   // Parse before_points from V2 clean arrays
   const beforePoints = ((props as any).before_points || []).map((item: any) =>
@@ -60,13 +60,13 @@ export default function SideBySideBlockPublished(props: LayoutComponentProps) {
         bg: '#fef2f2',
         border: '#fecaca',
         labelColor: '#dc2626',
-        pointIcon: '❌'
+        pointIcon: 'XCircle'
       },
       after: {
         bg: accentColorLight,
         border: accentColorMedium,
         labelColor: accentColor,
-        pointIcon: '✅'
+        pointIcon: 'CheckCircle'
       },
       arrow: '#f97316'
     },
@@ -75,13 +75,13 @@ export default function SideBySideBlockPublished(props: LayoutComponentProps) {
         bg: '#fef2f2',
         border: '#fecaca',
         labelColor: '#dc2626',
-        pointIcon: '❌'
+        pointIcon: 'XCircle'
       },
       after: {
         bg: accentColorLight,
         border: accentColorMedium,
         labelColor: accentColor,
-        pointIcon: '✅'
+        pointIcon: 'CheckCircle'
       },
       arrow: accentColor
     },
@@ -90,13 +90,13 @@ export default function SideBySideBlockPublished(props: LayoutComponentProps) {
         bg: '#f9fafb',
         border: '#d1d5db',
         labelColor: '#6b7280',
-        pointIcon: '❌'
+        pointIcon: 'XCircle'
       },
       after: {
         bg: accentColorLight,
         border: accentColorMedium,
         labelColor: accentColor,
-        pointIcon: '✅'
+        pointIcon: 'CheckCircle'
       },
       arrow: accentColor
     }

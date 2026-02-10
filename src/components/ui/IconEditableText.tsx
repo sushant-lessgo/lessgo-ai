@@ -6,7 +6,7 @@ interface IconEditableTextProps {
   mode: 'edit' | 'preview';
   value: string;
   onEdit: (value: string) => void;
-  backgroundType?: 'neutral' | 'primary' | 'secondary' | 'divider' | 'theme' | 'custom';
+  backgroundType?: 'neutral' | 'primary' | 'secondary' | 'theme' | 'custom';
   colorTokens?: any;
   variant?: 'body' | 'muted';
   className?: string;

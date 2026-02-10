@@ -8,13 +8,14 @@
 
 import React from 'react';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publishedTextColors';
+import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardStyles } from '@/lib/publishedTextColors';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { IconPublished } from '@/components/published/IconPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import { inferIconFromText } from '@/lib/iconCategoryMap';
+import { analyzeBackground } from '@/utils/backgroundAnalysis';
 
 interface Highlight {
   id: string;
@@ -38,56 +39,49 @@ export default function StackedHighlightsPublished(props: LayoutComponentProps) 
   // Theme detection (no useMemo - direct evaluation)
   const uiTheme: UIBlockTheme = props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
 
-  // Get theme colors
-  const getThemeColors = (theme: UIBlockTheme) => {
-    const colorMap = {
-      warm: {
-        connectionLine: '#fed7aa',      // orange-200
-        cardBorder: '#fed7aa',
-        iconBgGradient: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
-        mechanismBg: '#ffedd5',         // orange-100
-        mechanismBorder: '#fdba74',     // orange-300
-        mechanismIcon: '#ea580c',       // orange-600
-        mechanismText: '#9a3412',       // orange-800
-        footerBg: 'linear-gradient(90deg, #fff7ed 0%, #fef2f2 100%)',
-        footerBorder: '#fed7aa',
-        footerIcon: '#ea580c',
-        footerText: '#9a3412',
-        cardShadow: '0 4px 20px rgba(249,115,22,0.15)',
-      },
-      cool: {
-        connectionLine: '#bfdbfe',
-        cardBorder: '#bfdbfe',
-        iconBgGradient: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-        mechanismBg: '#dbeafe',
-        mechanismBorder: '#93c5fd',
-        mechanismIcon: '#2563eb',
-        mechanismText: '#1e40af',
-        footerBg: 'linear-gradient(90deg, #eff6ff 0%, #f5f3ff 100%)',
-        footerBorder: '#bfdbfe',
-        footerIcon: '#2563eb',
-        footerText: '#1e40af',
-        cardShadow: '0 4px 20px rgba(37,99,235,0.15)',
-      },
-      neutral: {
-        connectionLine: '#e5e7eb',
-        cardBorder: '#e5e7eb',
-        iconBgGradient: 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)',
-        mechanismBg: '#f3f4f6',
-        mechanismBorder: '#d1d5db',
-        mechanismIcon: '#4b5563',
-        mechanismText: '#1f2937',
-        footerBg: 'linear-gradient(90deg, #f9fafb 0%, #f3f4f6 100%)',
-        footerBorder: '#e5e7eb',
-        footerIcon: '#4b5563',
-        footerText: '#1f2937',
-        cardShadow: '0 4px 20px rgba(100,116,139,0.15)',
-      }
-    };
-    return colorMap[theme];
-  };
+  // Card styles from luminance-based system
+  const { luminance } = analyzeBackground(sectionBackgroundCSS || '');
+  const cardStyles = getPublishedCardStyles(luminance, uiTheme);
 
-  const themeColors = getThemeColors(uiTheme);
+  // Theme-based extras (non-card elements)
+  const themeExtras = {
+    warm: {
+      connectionLine: '#fed7aa',
+      iconBgGradient: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
+      mechanismBg: '#ffedd5',
+      mechanismBorder: '#fdba74',
+      mechanismIcon: '#ea580c',
+      mechanismText: '#9a3412',
+      footerBg: 'linear-gradient(90deg, #fff7ed 0%, #fef2f2 100%)',
+      footerBorder: '#fed7aa',
+      footerIcon: '#ea580c',
+      footerText: '#9a3412',
+    },
+    cool: {
+      connectionLine: '#bfdbfe',
+      iconBgGradient: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+      mechanismBg: '#dbeafe',
+      mechanismBorder: '#93c5fd',
+      mechanismIcon: '#2563eb',
+      mechanismText: '#1e40af',
+      footerBg: 'linear-gradient(90deg, #eff6ff 0%, #f5f3ff 100%)',
+      footerBorder: '#bfdbfe',
+      footerIcon: '#2563eb',
+      footerText: '#1e40af',
+    },
+    neutral: {
+      connectionLine: '#e5e7eb',
+      iconBgGradient: 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)',
+      mechanismBg: '#f3f4f6',
+      mechanismBorder: '#d1d5db',
+      mechanismIcon: '#4b5563',
+      mechanismText: '#1f2937',
+      footerBg: 'linear-gradient(90deg, #f9fafb 0%, #f3f4f6 100%)',
+      footerBorder: '#e5e7eb',
+      footerIcon: '#4b5563',
+      footerText: '#1f2937',
+    }
+  }[uiTheme];
 
   // Get text colors
   const textColors = getPublishedTextColors(
@@ -137,13 +131,13 @@ export default function StackedHighlightsPublished(props: LayoutComponentProps) 
             <div
               className="inline-flex items-center px-4 py-2 rounded-full border"
               style={{
-                backgroundColor: themeColors.mechanismBg,
-                borderColor: themeColors.mechanismBorder
+                backgroundColor: themeExtras.mechanismBg,
+                borderColor: themeExtras.mechanismBorder
               }}
             >
               <svg
                 className="w-4 h-4 mr-2"
-                style={{ color: themeColors.mechanismIcon }}
+                style={{ color: themeExtras.mechanismIcon }}
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
@@ -153,7 +147,7 @@ export default function StackedHighlightsPublished(props: LayoutComponentProps) 
                 value={mechanism_name}
                 style={{
                   fontWeight: 600,
-                  color: themeColors.mechanismText
+                  color: themeExtras.mechanismText
                 }}
               />
             </div>
@@ -169,24 +163,29 @@ export default function StackedHighlightsPublished(props: LayoutComponentProps) 
                 <div
                   className="absolute left-8 top-20 w-0.5 h-full hidden lg:block"
                   style={{
-                    background: `linear-gradient(to bottom, ${themeColors.connectionLine}, transparent)`
+                    background: `linear-gradient(to bottom, ${themeExtras.connectionLine}, transparent)`
                   }}
                 />
               )}
 
               {/* Highlight Card */}
               <div
-                className="relative flex items-start space-x-6 p-8 bg-white rounded-xl border transition-all duration-300 hover:-translate-y-1 mb-6"
+                className="relative flex items-start space-x-6 p-8 rounded-xl transition-all duration-300 hover:-translate-y-1 mb-6"
                 style={{
-                  borderColor: themeColors.cardBorder,
-                  boxShadow: themeColors.cardShadow
+                  backgroundColor: cardStyles.bg,
+                  backdropFilter: cardStyles.backdropFilter,
+                  WebkitBackdropFilter: cardStyles.backdropFilter,
+                  borderColor: cardStyles.borderColor,
+                  borderWidth: cardStyles.borderWidth,
+                  borderStyle: cardStyles.borderStyle,
+                  boxShadow: cardStyles.boxShadow
                 }}
               >
-                {/* Icon Circle */}
+                {/* Icon Circle - gradient preserved as brand element */}
                 <div
                   className="flex-shrink-0 w-16 h-16 rounded-full flex items-center justify-center shadow-lg"
                   style={{
-                    background: themeColors.iconBgGradient
+                    background: themeExtras.iconBgGradient
                   }}
                 >
                   <IconPublished
@@ -205,7 +204,7 @@ export default function StackedHighlightsPublished(props: LayoutComponentProps) 
                       style={{
                         fontWeight: 700,
                         fontSize: '1.25rem',
-                        color: '#111827',
+                        color: cardStyles.textHeading,
                         lineHeight: '1.75rem'
                       }}
                     />
@@ -216,7 +215,7 @@ export default function StackedHighlightsPublished(props: LayoutComponentProps) 
                     <TextPublished
                       value={highlight.description}
                       style={{
-                        color: '#4b5563',
+                        color: cardStyles.textBody,
                         fontSize: '1rem',
                         lineHeight: '1.75rem'
                       }}
@@ -248,13 +247,13 @@ export default function StackedHighlightsPublished(props: LayoutComponentProps) 
             <div
               className="inline-flex items-center px-6 py-3 rounded-full border"
               style={{
-                background: themeColors.footerBg,
-                borderColor: themeColors.footerBorder
+                background: themeExtras.footerBg,
+                borderColor: themeExtras.footerBorder
               }}
             >
               <svg
                 className="w-5 h-5 mr-2"
-                style={{ color: themeColors.footerIcon }}
+                style={{ color: themeExtras.footerIcon }}
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
@@ -268,7 +267,7 @@ export default function StackedHighlightsPublished(props: LayoutComponentProps) 
                 value={footer_text}
                 style={{
                   fontWeight: 500,
-                  color: themeColors.footerText
+                  color: themeExtras.footerText
                 }}
               />
             </div>

@@ -54,7 +54,6 @@ const defaultTheme: Theme = {
       primary: 'bg-gray-800',
       secondary: 'bg-gray-50',
       neutral: 'bg-white',
-      divider: 'bg-gray-100/50',
     },
     semantic: {
       success: 'bg-green-500',

@@ -63,7 +63,7 @@ export interface BusinessColorContext {
  * Get enhanced text colors for any background type with proper validation
  */
 export function getEnhancedTextColors(
-  backgroundType: 'primary' | 'secondary' | 'neutral' | 'divider',
+  backgroundType: 'primary' | 'secondary' | 'neutral',
   backgroundCSS: string,
   businessContext: BusinessColorContext = {},
   options: TextColorOptions = {}
@@ -255,7 +255,7 @@ function addTextShadowIfNeeded(color: string, isLightBackground: boolean): strin
  * Create safe fallback when all else fails
  */
 function createSafeTextColorFallback(
-  backgroundType: 'primary' | 'secondary' | 'neutral' | 'divider',
+  backgroundType: 'primary' | 'secondary' | 'neutral',
   businessContext: BusinessColorContext
 ): EnhancedTextColors {
   
@@ -303,7 +303,7 @@ function createSafeTextColorFallback(
  * Utility function to replace the old getTextColorForBackground function
  */
 export function getTextColorForBackground(
-  backgroundType: 'primary' | 'secondary' | 'neutral' | 'divider',
+  backgroundType: 'primary' | 'secondary' | 'neutral',
   backgroundSystem: any,
   businessContext: BusinessColorContext = {},
   options: TextColorOptions = {}
@@ -336,7 +336,7 @@ export function getTextColorForBackground(
  * Quick utility for getting just body text color (backward compatibility)
  */
 export function getBodyColorForBackground(
-  backgroundType: 'primary' | 'secondary' | 'neutral' | 'divider',
+  backgroundType: 'primary' | 'secondary' | 'neutral',
   backgroundSystem: any,
   businessContext?: BusinessColorContext
 ): string {
@@ -348,7 +348,7 @@ export function getBodyColorForBackground(
  * Quick utility for getting just muted text color (backward compatibility)
  */
 export function getMutedColorForBackground(
-  backgroundType: 'primary' | 'secondary' | 'neutral' | 'divider',
+  backgroundType: 'primary' | 'secondary' | 'neutral',
   backgroundSystem: any,
   businessContext?: BusinessColorContext
 ): string {

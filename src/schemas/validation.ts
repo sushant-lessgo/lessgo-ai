@@ -89,7 +89,7 @@ export const EditModeSchema = z.enum([
 ]);
 
 export const BackgroundTypeSchema = z.enum([
-  'primary', 'secondary', 'neutral', 'divider'
+  'primary', 'secondary', 'neutral'
 ]);
 
 export const EditableElementSchema = z.object({
@@ -189,7 +189,6 @@ export const ThemeSchema = z.object({
       primary: z.string().optional(),
       secondary: z.string().optional(),
       neutral: z.string().optional(),
-      divider: z.string().optional()
     }),
     semantic: z.object({
       success: z.string().default('#10b981'),

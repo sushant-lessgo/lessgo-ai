@@ -6,9 +6,11 @@ import { EditableAdaptiveHeadline, EditableAdaptiveText } from '@/components/lay
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { inferIconFromText } from '@/lib/iconCategoryMap';
-import { shadows, cardEnhancements } from '@/modules/Design/designTokens';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { getDynamicCardLayout, isSplitLayout } from '@/utils/dynamicCardLayout';
+import { cn } from '@/lib/utils';
+import { getCardStyles, type CardStyles } from '@/modules/Design/cardStyles';
 
 // V2: Industry item structure - clean array item
 interface Industry {
@@ -60,7 +62,8 @@ const IndustryCard = React.memo(({
   backgroundType,
   sectionBackground,
   canRemove = true,
-  theme = 'neutral'
+  cardStyles,
+  cardClassName
 }: {
   industry: Industry;
   mode: 'edit' | 'preview';
@@ -74,35 +77,23 @@ const IndustryCard = React.memo(({
   backgroundType: string;
   sectionBackground: string;
   canRemove?: boolean;
-  theme?: UIBlockTheme;
+  cardStyles: CardStyles;
+  cardClassName?: string;
 }) => {
   // Get icon - use stored value or derive from name/description
   const displayIcon = industry.icon || inferIconFromText(industry.name, industry.description);
 
-  // Theme-based color mapping
-  const themeColors = {
-    warm: {
-      cardBorder: 'border-orange-200',
-      cardHover: 'hover:border-orange-300',
-      iconBg: 'bg-orange-50',
-      iconText: 'text-orange-600'
-    },
-    cool: {
-      cardBorder: 'border-blue-200',
-      cardHover: 'hover:border-blue-300',
-      iconBg: 'bg-blue-50',
-      iconText: 'text-blue-600'
-    },
-    neutral: {
-      cardBorder: 'border-gray-200',
-      cardHover: 'hover:border-gray-300',
-      iconBg: 'bg-gray-50',
-      iconText: 'text-gray-600'
-    }
-  }[theme];
-
   return (
-    <div className={`group relative bg-white p-8 rounded-xl border ${themeColors.cardBorder} ${themeColors.cardHover} ${shadows.card[theme]} ${shadows.cardHover[theme]} ${cardEnhancements.hoverLift} ${cardEnhancements.transition}`}>
+    <div className={cn(
+      'group relative rounded-xl border',
+      cardStyles.bg,
+      cardStyles.blur,
+      cardStyles.border,
+      cardStyles.shadow,
+      cardStyles.hoverEffect,
+      'hover:-translate-y-1 transition-all duration-300',
+      cardClassName || 'p-8'
+    )}>
       {/* Delete button - only show in edit mode and if can remove */}
       {mode !== 'preview' && onRemoveIndustry && canRemove && (
         <button
@@ -120,7 +111,7 @@ const IndustryCard = React.memo(({
       )}
 
       {/* Icon Container - Circular */}
-      <div className={`${themeColors.iconBg} ${themeColors.iconText} p-6 rounded-full w-32 h-32 mx-auto flex items-center justify-center mb-6`}>
+      <div className={`${cardStyles.iconBg} ${cardStyles.iconColor} p-6 rounded-full w-32 h-32 mx-auto flex items-center justify-center mb-6`}>
         <IconEditableText
           mode={mode}
           value={displayIcon}
@@ -141,7 +132,7 @@ const IndustryCard = React.memo(({
           mode={mode}
           value={industry.name}
           onEdit={(value) => onNameEdit(industry.id, value)}
-          backgroundType={(backgroundType === 'custom' ? 'secondary' : (backgroundType || 'neutral')) as 'neutral' | 'primary' | 'secondary' | 'divider'}
+          backgroundType={(backgroundType === 'custom' ? 'secondary' : (backgroundType || 'neutral')) as 'neutral' | 'primary' | 'secondary'}
           colorTokens={colorTokens}
           variant="body"
           textStyle={{
@@ -149,6 +140,7 @@ const IndustryCard = React.memo(({
             fontWeight: 700,
             textAlign: 'center'
           }}
+          className={cardStyles.textHeading}
           placeholder="Industry name"
           sectionBackground={sectionBackground}
           sectionId={sectionId}
@@ -162,14 +154,14 @@ const IndustryCard = React.memo(({
           mode={mode}
           value={industry.description}
           onEdit={(value) => onDescriptionEdit(industry.id, value)}
-          backgroundType={(backgroundType === 'custom' ? 'secondary' : (backgroundType || 'neutral')) as 'neutral' | 'primary' | 'secondary' | 'divider'}
+          backgroundType={(backgroundType === 'custom' ? 'secondary' : (backgroundType || 'neutral')) as 'neutral' | 'primary' | 'secondary'}
           colorTokens={colorTokens}
           variant="body"
           textStyle={{
             ...getTextStyle('body'),
             textAlign: 'center'
           }}
-          className="opacity-80"
+          className={cardStyles.textBody}
           placeholder="Describe how your solution helps this industry"
           sectionBackground={sectionBackground}
           sectionId={sectionId}
@@ -202,6 +194,14 @@ export default function IndustryUseCaseGrid(props: LayoutComponentProps) {
     if (props.userContext) return selectUIBlockTheme(props.userContext);
     return 'neutral';
   }, [props.manualThemeOverride, props.userContext]);
+
+  // Get adaptive card styles based on section background luminance
+  const cardStyles = React.useMemo(() => {
+    return getCardStyles({
+      sectionBackgroundCSS: sectionBackground || '',
+      theme
+    });
+  }, [sectionBackground, theme]);
 
   // V2: Direct array access
   const industries = blockContent.industries || [];
@@ -255,6 +255,30 @@ export default function IndustryUseCaseGrid(props: LayoutComponentProps) {
     neutral: { bg: 'bg-gray-50 hover:bg-gray-100', border: 'border-gray-200 hover:border-gray-300', icon: 'text-gray-600', text: 'text-gray-700' }
   }[theme];
 
+  // Dynamic card layout based on industry count
+  const layout = getDynamicCardLayout(industries.length);
+
+  // Helper to render a single IndustryCard
+  const renderIndustryCard = (industry: Industry, cardClass: string) => (
+    <IndustryCard
+      key={industry.id}
+      industry={industry}
+      mode={mode}
+      colorTokens={colorTokens}
+      getTextStyle={getTextStyle}
+      onNameEdit={handleNameEdit}
+      onDescriptionEdit={handleDescriptionEdit}
+      onIconEdit={handleIconEdit}
+      onRemoveIndustry={handleRemoveIndustry}
+      sectionId={sectionId}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+      sectionBackground={sectionBackground}
+      canRemove={industries.length > 4}
+      cardStyles={cardStyles}
+      cardClassName={cardClass}
+    />
+  );
+
   return (
     <LayoutSection
       sectionId={sectionId}
@@ -264,7 +288,7 @@ export default function IndustryUseCaseGrid(props: LayoutComponentProps) {
       mode={mode}
       className={props.className}
     >
-      <div className="max-w-7xl mx-auto">
+      <div className={layout.containerClass}>
         {/* Header Section */}
         <div className="text-center mb-16">
           {/* Headline */}
@@ -308,26 +332,24 @@ export default function IndustryUseCaseGrid(props: LayoutComponentProps) {
         </div>
 
         {/* Industry Cards Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {industries.map((industry) => (
-            <IndustryCard
-              key={industry.id}
-              industry={industry}
-              mode={mode}
-              colorTokens={colorTokens}
-              getTextStyle={getTextStyle}
-              onNameEdit={handleNameEdit}
-              onDescriptionEdit={handleDescriptionEdit}
-              onIconEdit={handleIconEdit}
-              onRemoveIndustry={handleRemoveIndustry}
-              sectionId={sectionId}
-              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-              sectionBackground={sectionBackground}
-              canRemove={industries.length > 4}
-              theme={theme}
-            />
-          ))}
-        </div>
+        {isSplitLayout(industries.length) && layout.splitLayout ? (
+          <>
+            <div className={layout.splitLayout.firstRowGrid}>
+              {industries.slice(0, layout.splitLayout.firstRowCount).map((industry) =>
+                renderIndustryCard(industry, layout.splitLayout!.firstRowCard)
+              )}
+            </div>
+            <div className={layout.splitLayout.secondRowGrid}>
+              {industries.slice(layout.splitLayout.firstRowCount).map((industry) =>
+                renderIndustryCard(industry, layout.splitLayout!.secondRowCard)
+              )}
+            </div>
+          </>
+        ) : (
+          <div className={layout.gridClass}>
+            {industries.map((industry) => renderIndustryCard(industry, layout.cardClass))}
+          </div>
+        )}
 
         {/* Add Industry Button - only show in edit mode and if under max limit */}
         {mode !== 'preview' && industries.length < 6 && (

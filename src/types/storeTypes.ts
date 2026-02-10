@@ -190,7 +190,6 @@ export interface SectionBackgroundInput {
   primary: string;
   secondary: string;
   neutral: string;
-  divider: string;
 }
 
 // Updated page store interface
@@ -322,7 +321,7 @@ export interface LayoutComponentProps {
   sectionId: string;
   mode?: 'edit' | 'preview' | 'published'; // ✅ UPDATED (Phase 1.1.5): Rendering mode for UIBlocks
   className?: string;
-  backgroundType?: 'primary' | 'secondary' | 'neutral' | 'divider' | 'custom';
+  backgroundType?: 'primary' | 'secondary' | 'neutral' | 'custom';
   sectionBackgroundCSS?: string; // ✅ NEW: CSS class calculated in renderer
   theme?: any; // ✅ NEW (Phase 1.1.5): Theme object for published mode
   userContext?: {  // ✅ NEW: Full taxonomy context for theme selection

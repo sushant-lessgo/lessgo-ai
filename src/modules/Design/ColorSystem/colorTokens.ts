@@ -24,10 +24,9 @@ import type {
 } from '@/modules/inference/taxonomy';
 
 export type SectionBackgroundInput = {
-  primary?: string;    // From bgVariations (hero sections)
-  secondary?: string;  // From accentOptions.tailwind (features, testimonials)
-  neutral?: string;    // Simple white/light backgrounds
-  divider?: string;    // Subtle separator backgrounds
+  primary?: string;    // Hero + CTA sections
+  secondary?: string;  // Alternating content sections
+  neutral?: string;    // Chrome + alternating content sections
 }
 
 export function generateColorTokens({
@@ -129,7 +128,6 @@ export function generateColorTokens({
       sectionBackgrounds.primary,
       sectionBackgrounds.secondary,
       sectionBackgrounds.neutral,
-      sectionBackgrounds.divider
     ].filter(Boolean);
     
     let safeCTABg = smartAccentCSS;
@@ -209,7 +207,6 @@ export function generateColorTokens({
     bgPrimary: sectionBackgrounds.primary || `bg-gradient-to-br from-${baseColor}-400 to-${baseColor}-500`,
     bgSecondary: sectionBackgrounds.secondary || `bg-${baseColor}-50`,  // ✅ This gets sophisticated accent backgrounds
     bgNeutral: sectionBackgrounds.neutral || "bg-white",
-    bgDivider: sectionBackgrounds.divider || `bg-${baseColor}-100/50`,
 
     // 📘 Text Colors - ENHANCED: Smart, context-aware text colors with WCAG compliance
     textOnLight: hexToTailwindClass(getSmartTextColor('#ffffff', 'body')),                     // Smart text color for light backgrounds
@@ -224,7 +221,6 @@ export function generateColorTokens({
     textOnPrimary: hexToTailwindClass(getSmartTextColor(sectionBackgrounds.primary || `bg-${baseColor}-500`, 'body')),
     textOnSecondary: hexToTailwindClass(getSmartTextColor(sectionBackgrounds.secondary || `bg-${baseColor}-50`, 'body')),
     textOnNeutral: hexToTailwindClass(getSmartTextColor(sectionBackgrounds.neutral || 'bg-white', 'body')),
-    textOnDivider: hexToTailwindClass(getSmartTextColor(sectionBackgrounds.divider || `bg-${baseColor}-100`, 'body')),
 
     // 📦 Surface Colors - Based on baseColor
     surfaceCard: "bg-white",                   // Card backgrounds
@@ -277,31 +273,26 @@ function calculateTextColorsForBackgrounds(
   return {
     primary: calculateForBackground(sectionBackgrounds.primary, 'bg-gradient-to-br from-blue-500 to-blue-600'),
     secondary: calculateForBackground(sectionBackgrounds.secondary, 'bg-gray-50'),
-    neutral: calculateForBackground(sectionBackgrounds.neutral, 'bg-white'),
-    divider: calculateForBackground(sectionBackgrounds.divider, 'bg-gray-100/50'),
+    neutral: calculateForBackground(sectionBackgrounds.neutral, '#ffffff'),
   };
 }
 
-// ✅ NEW: Helper function to integrate with backgroundIntegration system
 export function generateColorTokensFromBackgroundSystem(backgroundSystem: {
   primary: string;
-  secondary: string; 
+  secondary: string;
   neutral: string;
-  divider: string;
   baseColor: string;
   accentColor: string;
   accentCSS: string;
 }) {
-  
   return generateColorTokens({
     baseColor: backgroundSystem.baseColor,
     accentColor: backgroundSystem.accentColor,
-    accentCSS: backgroundSystem.accentCSS,  // ✅ Now properly passed for CTAs
+    accentCSS: backgroundSystem.accentCSS,
     sectionBackgrounds: {
-      primary: backgroundSystem.primary,      // From bgVariations
-      secondary: backgroundSystem.secondary,  // ✅ From accentOptions.tailwind  
+      primary: backgroundSystem.primary,
+      secondary: backgroundSystem.secondary,
       neutral: backgroundSystem.neutral,
-      divider: backgroundSystem.divider
     }
   });
 }

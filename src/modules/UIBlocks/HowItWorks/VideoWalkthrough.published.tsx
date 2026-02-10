@@ -12,6 +12,7 @@ import { HeadlinePublished, TextPublished } from '@/components/published/TextPub
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { getDynamicCardLayout } from '@/utils/dynamicCardLayout';
 
 // V2 Types
 interface DemoStatItem {
@@ -266,55 +267,58 @@ export default function VideoWalkthroughPublished(props: LayoutComponentProps) {
         </div>
 
         {/* Demo Stats */}
-        {demo_stats.length > 0 && (
-          <div
-            className="rounded-xl p-8"
-            style={{
-              backgroundColor: themeColors.cardBg,
-              border: `1px solid ${themeColors.cardBorder}`
-            }}
-          >
-            <div className="text-center">
-              {demo_stats_heading && demo_stats_heading.trim() !== '' && (
-                <div
-                  style={{
-                    color: textColors.heading,
-                    fontSize: '1.25rem',
-                    fontWeight: 600,
-                    marginBottom: '2rem'
-                  }}
-                >
-                  {demo_stats_heading}
-                </div>
-              )}
-
-              <div className="grid md:grid-cols-3 gap-8">
-                {demo_stats.map((stat, index) => (
-                  <div key={stat.id} className="text-center">
-                    <div
-                      style={{
-                        color: themeColors.accentColors[index % themeColors.accentColors.length],
-                        ...h3Typography,
-                        fontWeight: 700,
-                        marginBottom: '0.5rem'
-                      }}
-                    >
-                      {stat.label}
-                    </div>
-                    <div
-                      style={{
-                        color: textColors.muted,
-                        fontSize: '0.875rem'
-                      }}
-                    >
-                      {stat.description}
-                    </div>
+        {demo_stats.length > 0 && (() => {
+          const demoStatsLayout = getDynamicCardLayout(demo_stats.length);
+          return (
+            <div
+              className="rounded-xl p-8"
+              style={{
+                backgroundColor: themeColors.cardBg,
+                border: `1px solid ${themeColors.cardBorder}`
+              }}
+            >
+              <div className="text-center">
+                {demo_stats_heading && demo_stats_heading.trim() !== '' && (
+                  <div
+                    style={{
+                      color: textColors.heading,
+                      fontSize: '1.25rem',
+                      fontWeight: 600,
+                      marginBottom: '2rem'
+                    }}
+                  >
+                    {demo_stats_heading}
                   </div>
-                ))}
+                )}
+
+                <div className={demoStatsLayout.gridClass}>
+                  {demo_stats.map((stat, index) => (
+                    <div key={stat.id} className="text-center">
+                      <div
+                        style={{
+                          color: themeColors.accentColors[index % themeColors.accentColors.length],
+                          ...h3Typography,
+                          fontWeight: 700,
+                          marginBottom: '0.5rem'
+                        }}
+                      >
+                        {stat.label}
+                      </div>
+                      <div
+                        style={{
+                          color: textColors.muted,
+                          fontSize: '0.875rem'
+                        }}
+                      >
+                        {stat.description}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
     </SectionWrapperPublished>
   );

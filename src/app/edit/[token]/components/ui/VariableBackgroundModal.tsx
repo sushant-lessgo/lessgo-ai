@@ -381,16 +381,16 @@ export function VariableBackgroundModal({
                     </div>
                   </div>
 
-                  {/* Divider Color */}
+                  {/* Neutral Color */}
                   <div className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
                     <div
                       className="w-10 h-10 rounded-md border border-gray-300 flex-shrink-0"
-                      style={{ background: selectedBackground.divider }}
+                      style={{ background: selectedBackground.neutral }}
                     />
                     <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium text-gray-900">Divider</div>
+                      <div className="text-sm font-medium text-gray-900">Neutral</div>
                       <div className="text-xs text-gray-500 mt-0.5">
-                        Subtle color for separators and borders between sections
+                        Clean background for content sections
                       </div>
                     </div>
                   </div>
@@ -499,7 +499,6 @@ export function VariableBackgroundModal({
                     primary: background.primary,
                     secondary: background.secondary,
                     neutral: background.neutral,
-                    divider: background.divider,
                     baseColor: background.baseColor,
                     accentColor: background.accentColor,
                     accentCSS: background.accentCSS,

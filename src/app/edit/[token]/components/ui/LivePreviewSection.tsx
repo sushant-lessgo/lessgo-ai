@@ -30,7 +30,6 @@ export function LivePreviewSection({
     { type: 'primary' as const, label: 'Primary (Hero)', bg: backgroundSystem?.primary || 'bg-gradient-to-r from-blue-500 to-blue-600' },
     { type: 'secondary' as const, label: 'Secondary (Features)', bg: backgroundSystem?.secondary || 'bg-blue-50' },
     { type: 'neutral' as const, label: 'Neutral (Content)', bg: backgroundSystem?.neutral || 'bg-white' },
-    { type: 'divider' as const, label: 'Divider (Separator)', bg: backgroundSystem?.divider || 'bg-gray-100/50' },
   ];
 
   return (

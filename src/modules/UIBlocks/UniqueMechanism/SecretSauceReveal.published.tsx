@@ -7,13 +7,15 @@
 
 import React from 'react';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publishedTextColors';
+import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardStyles } from '@/lib/publishedTextColors';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { IconPublished } from '@/components/published/IconPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import { inferIconFromText } from '@/lib/iconCategoryMap';
+import { getDynamicCardLayout } from '@/utils/dynamicCardLayout';
+import { analyzeBackground } from '@/utils/backgroundAnalysis';
 
 // V2 Schema: Array-based secrets
 interface SecretItem {
@@ -36,35 +38,17 @@ export default function SecretSauceRevealPublished(props: LayoutComponentProps) 
   // Theme detection (no useMemo - direct evaluation)
   const uiTheme: UIBlockTheme = props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
 
-  // Get theme colors (matching base component - note neutral uses PURPLE)
-  const getSecretColors = (theme: UIBlockTheme) => {
-    const colorMap = {
-      warm: {
-        cardBorder: '#fed7aa',           // orange-200
-        iconBg: 'linear-gradient(135deg, #fb923c 0%, #ef4444 100%)', // orange-400 to red-500
-        iconShadow: '0 10px 15px -3px rgba(254, 215, 170, 0.5)', // shadow-lg shadow-orange-200
-        titleText: '#7c2d12',            // orange-900
-        accentBar: 'linear-gradient(90deg, #fb923c 0%, #ef4444 100%)', // orange-400 to red-500
-      },
-      cool: {
-        cardBorder: '#bfdbfe',           // blue-200
-        iconBg: 'linear-gradient(135deg, #60a5fa 0%, #6366f1 100%)', // blue-400 to indigo-500
-        iconShadow: '0 10px 15px -3px rgba(191, 219, 254, 0.5)', // shadow-lg shadow-blue-200
-        titleText: '#1e3a8a',            // blue-900
-        accentBar: 'linear-gradient(90deg, #60a5fa 0%, #6366f1 100%)', // blue-400 to indigo-500
-      },
-      neutral: {
-        cardBorder: '#e9d5ff',           // purple-200
-        iconBg: 'linear-gradient(135deg, #c084fc 0%, #6366f1 100%)', // purple-400 to indigo-500
-        iconShadow: '0 10px 15px -3px rgba(233, 213, 255, 0.5)', // shadow-lg shadow-purple-200
-        titleText: '#581c87',            // purple-900
-        accentBar: 'linear-gradient(90deg, #c084fc 0%, #6366f1 100%)', // purple-400 to indigo-500
-      }
-    };
-    return colorMap[theme];
-  };
+  // Card styles from luminance-based system
+  const { luminance } = analyzeBackground(sectionBackgroundCSS || '');
+  const cardStyles = getPublishedCardStyles(luminance, uiTheme);
 
-  const secretColors = getSecretColors(uiTheme);
+  // Theme-specific accent bars (component-specific brand elements)
+  const accentBars = {
+    warm: 'linear-gradient(90deg, #fb923c 0%, #ef4444 100%)',
+    cool: 'linear-gradient(90deg, #60a5fa 0%, #6366f1 100%)',
+    neutral: 'linear-gradient(90deg, #c084fc 0%, #6366f1 100%)'
+  };
+  const accentBar = accentBars[uiTheme];
 
   // Get text colors
   const textColors = getPublishedTextColors(
@@ -77,13 +61,16 @@ export default function SecretSauceRevealPublished(props: LayoutComponentProps) 
   const h2Typography = getPublishedTypographyStyles('h2', theme);
   const bodyTypography = getPublishedTypographyStyles('body-lg', theme);
 
+  // Dynamic card layout based on count
+  const layout = getDynamicCardLayout(secrets.length);
+
   return (
     <SectionWrapperPublished
       sectionId={sectionId}
       background={sectionBackgroundCSS}
       padding="normal"
     >
-      <div className="max-w-7xl mx-auto">
+      <div className={layout.containerClass}>
         {/* Header */}
         <div className="text-center mb-12">
           <HeadlinePublished
@@ -111,7 +98,7 @@ export default function SecretSauceRevealPublished(props: LayoutComponentProps) 
         </div>
 
         {/* Secret Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className={layout.gridClass}>
           {secrets.map((secret: SecretItem) => {
             // V2: Get icon - use stored value or derive from title/description
             const displayIcon = secret.icon || inferIconFromText(secret.title, secret.description);
@@ -119,39 +106,38 @@ export default function SecretSauceRevealPublished(props: LayoutComponentProps) 
             return (
               <div key={secret.id} className="group relative">
                 <div
+                  className={`rounded-2xl text-center relative overflow-hidden h-full transition-all duration-300 hover:-translate-y-1 ${layout.cardClass}`}
                   style={{
-                    borderColor: secretColors.cardBorder
+                    backgroundColor: cardStyles.bg,
+                    backdropFilter: cardStyles.backdropFilter,
+                    WebkitBackdropFilter: cardStyles.backdropFilter,
+                    borderColor: cardStyles.borderColor,
+                    borderWidth: cardStyles.borderWidth,
+                    borderStyle: cardStyles.borderStyle,
+                    boxShadow: cardStyles.boxShadow
                   }}
-                  className="bg-white rounded-2xl p-8 text-center relative overflow-hidden h-full border-2 shadow-lg hover:shadow-xl transition-all duration-300"
                 >
                   {/* Accent Bar */}
                   <div
-                    style={{
-                      background: secretColors.accentBar
-                    }}
+                    style={{ background: accentBar }}
                     className="absolute top-0 left-0 right-0 h-1.5 rounded-t-2xl"
                   />
 
                   {/* Icon */}
                   <div className="relative z-10">
                     <div
-                      style={{
-                        background: secretColors.iconBg,
-                        boxShadow: secretColors.iconShadow
-                      }}
+                      style={{ backgroundColor: cardStyles.iconBg }}
                       className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4"
                     >
                       <IconPublished
                         icon={displayIcon}
-                        color={'#ffffff'}
+                        color={cardStyles.iconColor}
                       />
                     </div>
 
                     {/* Title */}
                     <h3
-                      style={{
-                        color: secretColors.titleText
-                      }}
+                      style={{ color: cardStyles.textHeading }}
                       className="font-bold text-xl mb-3"
                     >
                       {secret.title}
@@ -162,7 +148,7 @@ export default function SecretSauceRevealPublished(props: LayoutComponentProps) 
                       <TextPublished
                         value={secret.description}
                         style={{
-                          color: textColors.body,
+                          color: cardStyles.textBody,
                           fontSize: '1rem',
                           lineHeight: '1.625'
                         }}

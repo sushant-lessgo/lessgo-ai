@@ -769,11 +769,9 @@ export function EditableAdaptiveHeadline({
       const mapping: Record<string, string> = {
         'primary-highlight': 'primary',
         'secondary-highlight': 'secondary',
-        'divider-zone': 'divider',
         'neutral': 'neutral',
         'primary': 'primary',
         'secondary': 'secondary',
-        'divider': 'divider'
       };
       const storageKey = mapping[backgroundType] || backgroundType;
       const storedTextColors = colorTokens.textColors[storageKey as keyof typeof colorTokens.textColors];
@@ -918,11 +916,9 @@ export function EditableAdaptiveText({
       const mapping: Record<string, string> = {
         'primary-highlight': 'primary',
         'secondary-highlight': 'secondary',
-        'divider-zone': 'divider',
         'neutral': 'neutral',
         'primary': 'primary',
         'secondary': 'secondary',
-        'divider': 'divider'
       };
       const storageKey = mapping[backgroundType] || backgroundType;
       const storedTextColors = colorTokens.textColors[storageKey as keyof typeof colorTokens.textColors];

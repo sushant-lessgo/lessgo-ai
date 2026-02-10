@@ -8,13 +8,15 @@
 
 import React from 'react';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publishedTextColors';
+import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardStyles } from '@/lib/publishedTextColors';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { IconPublished } from '@/components/published/IconPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import { inferIconFromText } from '@/lib/iconCategoryMap';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { getDynamicCardLayout, isSplitLayout } from '@/utils/dynamicCardLayout';
+import { analyzeBackground } from '@/utils/backgroundAnalysis';
 
 // V2: Feature structure - clean array item
 interface Feature {
@@ -39,34 +41,11 @@ export default function IconGridPublished(props: LayoutComponentProps) {
   // Detect theme
   const uiTheme: UIBlockTheme = props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
 
-  // Get theme colors
-  const getThemeColors = (theme: UIBlockTheme) => {
-    const colorMap = {
-      warm: {
-        iconBg: 'rgba(249, 115, 22, 0.1)',
-        iconBgHover: 'rgba(249, 115, 22, 0.2)',
-        iconColor: '#f97316'
-      },
-      cool: {
-        iconBg: 'rgba(59, 130, 246, 0.1)',
-        iconBgHover: 'rgba(59, 130, 246, 0.2)',
-        iconColor: '#3b82f6'
-      },
-      neutral: {
-        iconBg: 'rgba(100, 116, 139, 0.1)',
-        iconBgHover: 'rgba(100, 116, 139, 0.2)',
-        iconColor: '#64748b'
-      }
-    };
-    return colorMap[theme];
-  };
+  // Get luminance from section background
+  const { luminance } = analyzeBackground(sectionBackgroundCSS || '');
 
-  const themeColors = getThemeColors(uiTheme);
-
-  // Card styling based on backgroundType
-  const isPrimaryBg = backgroundType === 'primary';
-  const cardBg = isPrimaryBg ? 'rgba(255, 255, 255, 0.1)' : '#ffffff';
-  const cardBorder = isPrimaryBg ? 'rgba(255, 255, 255, 0.2)' : '#e5e7eb';
+  // Get adaptive card styles based on luminance and theme
+  const cardStyles = getPublishedCardStyles(luminance, uiTheme);
 
   // Get text colors
   const textColors = getPublishedTextColors(
@@ -80,13 +59,78 @@ export default function IconGridPublished(props: LayoutComponentProps) {
   const bodyTypography = getPublishedTypographyStyles('body-lg', theme);
   const h3Typography = getPublishedTypographyStyles('h3', theme);
 
+  // Dynamic card layout based on feature count
+  const layout = getDynamicCardLayout(features.length);
+
+  // Helper to render a single feature card
+  const renderFeatureCard = (feature: Feature, cardClass: string) => {
+    const displayIcon = feature.icon || inferIconFromText(feature.title, feature.description);
+    return (
+      <div
+        key={feature.id}
+        className={`group rounded-xl transition-all duration-300 hover:-translate-y-1 ${cardClass}`}
+        style={{
+          backgroundColor: cardStyles.bg,
+          borderColor: cardStyles.borderColor,
+          borderWidth: cardStyles.borderWidth,
+          borderStyle: cardStyles.borderStyle,
+          backdropFilter: cardStyles.backdropFilter,
+          WebkitBackdropFilter: cardStyles.backdropFilter,
+          boxShadow: cardStyles.boxShadow
+        }}
+      >
+        {/* Icon */}
+        <div className="mb-4">
+          <div
+            className="inline-flex items-center justify-center w-12 h-12 rounded-lg group-hover:scale-110 transition-all duration-300"
+            style={{
+              backgroundColor: cardStyles.iconBg
+            }}
+          >
+            <IconPublished
+              icon={displayIcon}
+              size={24}
+              className="text-2xl"
+              color={cardStyles.iconColor}
+            />
+          </div>
+        </div>
+
+        {/* Title */}
+        <div className="mb-3">
+          <h3
+            style={{
+              ...h3Typography,
+              fontWeight: 600,
+              color: cardStyles.textHeading
+            }}
+          >
+            {feature.title}
+          </h3>
+        </div>
+
+        {/* Description */}
+        <div>
+          <p
+            style={{
+              color: cardStyles.textBody,
+              lineHeight: '1.75rem'
+            }}
+          >
+            {feature.description}
+          </p>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <SectionWrapperPublished
       sectionId={sectionId}
       background={sectionBackgroundCSS}
       padding="normal"
     >
-      <div className="max-w-7xl mx-auto">
+      <div className={layout.containerClass}>
         {/* Header Section */}
         <div className="text-center mb-12">
           {/* Badge Text */}
@@ -94,7 +138,7 @@ export default function IconGridPublished(props: LayoutComponentProps) {
             <div style={{ marginBottom: '1rem' }}>
               <span
                 style={{
-                  color: themeColors.iconColor,
+                  color: cardStyles.iconColor,
                   fontSize: '0.875rem',
                   fontWeight: 600,
                   textTransform: 'uppercase',
@@ -134,66 +178,24 @@ export default function IconGridPublished(props: LayoutComponentProps) {
         </div>
 
         {/* Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {features.map((feature: Feature) => {
-            // V2: Get icon - use stored value or derive from title/description
-            const displayIcon = feature.icon || inferIconFromText(feature.title, feature.description);
-
-            return (
-              <div
-                key={feature.id}
-                className="group p-6 rounded-xl border hover:shadow-lg transition-all duration-300"
-                style={{
-                  backgroundColor: cardBg,
-                  borderColor: cardBorder,
-                  backdropFilter: isPrimaryBg ? 'blur(12px)' : undefined
-                }}
-              >
-                {/* Icon */}
-                <div className="mb-4">
-                  <div
-                    className="inline-flex items-center justify-center w-12 h-12 rounded-lg group-hover:scale-110 transition-all duration-300"
-                    style={{
-                      backgroundColor: themeColors.iconBg
-                    }}
-                  >
-                    <IconPublished
-                      icon={displayIcon}
-                      size={24}
-                      className="text-2xl"
-                    />
-                  </div>
-                </div>
-
-                {/* Title */}
-                <div className="mb-3">
-                  <h3
-                    style={{
-                      ...h3Typography,
-                      fontWeight: 600,
-                      color: textColors.heading
-                    }}
-                  >
-                    {feature.title}
-                  </h3>
-                </div>
-
-                {/* Description */}
-                <div>
-                  <p
-                    style={{
-                      color: textColors.muted,
-                      lineHeight: '1.75rem',
-                      opacity: 0.9
-                    }}
-                  >
-                    {feature.description}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        {isSplitLayout(features.length) && layout.splitLayout ? (
+          <>
+            <div className={layout.splitLayout.firstRowGrid}>
+              {features.slice(0, layout.splitLayout.firstRowCount).map((feature: Feature) =>
+                renderFeatureCard(feature, layout.splitLayout!.firstRowCard)
+              )}
+            </div>
+            <div className={layout.splitLayout.secondRowGrid}>
+              {features.slice(layout.splitLayout.firstRowCount).map((feature: Feature) =>
+                renderFeatureCard(feature, layout.splitLayout!.secondRowCard)
+              )}
+            </div>
+          </>
+        ) : (
+          <div className={layout.gridClass}>
+            {features.map((feature: Feature) => renderFeatureCard(feature, layout.cardClass))}
+          </div>
+        )}
 
         {/* Supporting Text */}
         {supporting_text && (

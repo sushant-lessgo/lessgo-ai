@@ -221,7 +221,7 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
         {/* Primary CTA Button */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
           {(() => {
-            const buttonConfig = content[sectionId]?.elements?.cta_text?.metadata?.buttonConfig;
+            const buttonConfig = content[sectionId]?.elementMetadata?.cta_text?.buttonConfig;
             const primaryClassName = "text-xl px-12 py-6 shadow-2xl hover:shadow-3xl";
 
             if (buttonConfig?.type === 'link-with-input') {
@@ -266,7 +266,7 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
 
           {/* Secondary CTA */}
           {(blockContent.secondary_cta_text && blockContent.secondary_cta_text.trim() !== '') && (() => {
-            const secondaryButtonConfig = content[sectionId]?.elements?.secondary_cta_text?.metadata?.buttonConfig;
+            const secondaryButtonConfig = content[sectionId]?.elementMetadata?.secondary_cta_text?.buttonConfig;
             const secondaryClassName = "text-xl px-12 py-6 shadow-2xl hover:shadow-3xl";
 
             if (secondaryButtonConfig?.type === 'link-with-input') {

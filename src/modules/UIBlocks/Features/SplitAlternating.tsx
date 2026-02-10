@@ -47,10 +47,10 @@ const CONTENT_SCHEMA = {
   features: {
     type: 'array' as const,
     default: [
-      { id: 'f1', title: 'Intelligent Automation', description: 'Our AI-powered automation engine learns from your workflows and optimizes processes automatically, reducing manual work by up to 80%.', visual: '', icon: '🎯' },
-      { id: 'f2', title: 'Real-Time Analytics', description: 'Monitor performance metrics in real-time with customizable dashboards that give you instant insights into what matters most.', visual: '', icon: '⚡' },
-      { id: 'f3', title: 'Advanced Security', description: 'Enterprise-grade security with end-to-end encryption, SOC 2 compliance, and advanced threat detection to keep your data safe.', visual: '', icon: '📈' },
-      { id: 'f4', title: 'Seamless Integration', description: 'Connect with over 1000+ tools through our robust API and pre-built integrations, creating a seamless workflow ecosystem.', visual: '', icon: '🔧' }
+      { id: 'f1', title: 'Intelligent Automation', description: 'Our AI-powered automation engine learns from your workflows and optimizes processes automatically, reducing manual work by up to 80%.', visual: '', icon: 'Target' },
+      { id: 'f2', title: 'Real-Time Analytics', description: 'Monitor performance metrics in real-time with customizable dashboards that give you instant insights into what matters most.', visual: '', icon: 'Zap' },
+      { id: 'f3', title: 'Advanced Security', description: 'Enterprise-grade security with end-to-end encryption, SOC 2 compliance, and advanced threat detection to keep your data safe.', visual: '', icon: 'TrendingUp' },
+      { id: 'f4', title: 'Seamless Integration', description: 'Connect with over 1000+ tools through our robust API and pre-built integrations, creating a seamless workflow ecosystem.', visual: '', icon: 'Wrench' }
     ]
   }
 };
@@ -108,7 +108,7 @@ const FeatureRow = React.memo(({
     return gradients[theme];
   };
 
-  const displayIcon = feature.icon || '🎯';
+  const displayIcon = feature.icon || 'Target';
 
   const VisualPlaceholder = React.memo(({ onClick }: { onClick?: (e: React.MouseEvent) => void }) => (
     <div
@@ -329,13 +329,13 @@ export default function SplitAlternating(props: LayoutComponentProps) {
   // V2: Handle adding a new feature - simple array push
   const handleAddFeature = () => {
     if (features.length < 6) {
-      const defaultIcons = ['🎯', '⚡', '📈', '🔧', '🚀', '✨'];
+      const defaultIcons = ['Target', 'Zap', 'TrendingUp', 'Wrench', 'Rocket', 'Sparkles'];
       const newFeature: Feature = {
         id: `f${Date.now()}`,
         title: `Feature ${features.length + 1}`,
         description: 'Add feature description here',
         visual: '',
-        icon: defaultIcons[features.length] || '🎯'
+        icon: defaultIcons[features.length] || 'Target'
       };
       (handleContentUpdate as any)('features', [...features, newFeature]);
     }

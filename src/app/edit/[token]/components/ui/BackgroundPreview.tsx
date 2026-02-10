@@ -7,7 +7,6 @@ interface BackgroundSystem {
   primary: string;
   secondary: string;
   neutral: string;
-  divider: string;
   baseColor: string;
   accentColor: string;
   accentCSS: string;
@@ -230,8 +229,6 @@ export function LivePagePreview({
       case 'testimonials':
       case 'faq':
         return background.neutral;
-      case 'divider':
-        return background.divider;
       default:
         return background.neutral;
     }

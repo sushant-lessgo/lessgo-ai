@@ -20,7 +20,7 @@ interface SmartCTAColors {
 /**
  * Hook to get smart text colors for a given background type
  */
-export function useSmartTextColors(backgroundType: 'primary' | 'secondary' | 'neutral' | 'divider'): SmartTextColors {
+export function useSmartTextColors(backgroundType: 'primary' | 'secondary' | 'neutral'): SmartTextColors {
   const { theme } = useEditStore();
   
   return useMemo(() => {
@@ -43,9 +43,7 @@ export function useSmartTextColors(backgroundType: 'primary' | 'secondary' | 'ne
           return backgrounds.primary || 'bg-gradient-to-br from-blue-500 to-blue-600';
         case 'secondary': 
           return backgrounds.secondary || 'bg-gray-50';
-        case 'divider': 
-          return backgrounds.divider || 'bg-gray-100/50';
-        default: 
+        default:
           return backgrounds.neutral || 'bg-white';
       }
     })();
@@ -103,7 +101,7 @@ export function useSmartTextColorsForSection(sectionId: string): SmartTextColors
   // In the future, this could be enhanced to track actual background assignments
   const backgroundType = useMemo(() => {
     if (sectionId.includes('hero') || sectionId.includes('cta')) return 'primary';
-    if (sectionId.includes('faq')) return 'divider';
+    if (sectionId.includes('faq')) return 'neutral';
     // This is a simplified approach - in reality, we'd want to access the actual
     // background assignment from the LandingPageRenderer or store it in the store
     return 'secondary' as const;
@@ -115,7 +113,7 @@ export function useSmartTextColorsForSection(sectionId: string): SmartTextColors
 /**
  * Hook to get CSS custom properties for smart text colors
  */
-export function useSmartTextColorVars(backgroundType: 'primary' | 'secondary' | 'neutral' | 'divider') {
+export function useSmartTextColorVars(backgroundType: 'primary' | 'secondary' | 'neutral') {
   const colors = useSmartTextColors(backgroundType);
   
   return useMemo(() => ({

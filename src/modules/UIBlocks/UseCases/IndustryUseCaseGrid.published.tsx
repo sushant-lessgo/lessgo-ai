@@ -8,13 +8,15 @@
 
 import React from 'react';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publishedTextColors';
+import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardStyles } from '@/lib/publishedTextColors';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { IconPublished } from '@/components/published/IconPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import { inferIconFromText } from '@/lib/iconCategoryMap';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { getDynamicCardLayout, isSplitLayout } from '@/utils/dynamicCardLayout';
+import { analyzeBackground } from '@/utils/backgroundAnalysis';
 
 // V2: Industry structure - clean array item
 interface Industry {
@@ -38,31 +40,11 @@ export default function IndustryUseCaseGridPublished(props: LayoutComponentProps
   const uiTheme: UIBlockTheme = props.manualThemeOverride ||
     (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
 
-  // Theme color mapping (HEX values for inline styles)
-  const getThemeColors = (theme: UIBlockTheme) => {
-    return {
-      warm: {
-        cardBorder: '#fed7aa',                                    // orange-200
-        cardHoverShadow: '0 10px 15px -3px rgba(251, 146, 60, 0.1), 0 4px 6px -2px rgba(251, 146, 60, 0.05)',
-        iconBg: '#fff7ed',                                        // orange-50
-        iconText: '#ea580c'                                       // orange-600
-      },
-      cool: {
-        cardBorder: '#bfdbfe',                                    // blue-200
-        cardHoverShadow: '0 10px 15px -3px rgba(59, 130, 246, 0.1), 0 4px 6px -2px rgba(59, 130, 246, 0.05)',
-        iconBg: '#eff6ff',                                        // blue-50
-        iconText: '#2563eb'                                       // blue-600
-      },
-      neutral: {
-        cardBorder: '#e5e7eb',                                    // gray-200
-        cardHoverShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-        iconBg: '#f9fafb',                                        // gray-50
-        iconText: '#4b5563'                                       // gray-600
-      }
-    }[theme];
-  };
+  // Get luminance from section background
+  const { luminance } = analyzeBackground(sectionBackgroundCSS || '');
 
-  const themeColors = getThemeColors(uiTheme);
+  // Get adaptive card styles
+  const cardStyles = getPublishedCardStyles(luminance, uiTheme);
 
   // Get text colors
   const textColors = getPublishedTextColors(
@@ -76,13 +58,76 @@ export default function IndustryUseCaseGridPublished(props: LayoutComponentProps
   const bodyTypography = getPublishedTypographyStyles('body-lg', theme);
   const h3Typography = getPublishedTypographyStyles('h3', theme);
 
+  // Dynamic card layout based on industry count
+  const layout = getDynamicCardLayout(industries.length);
+
+  // Helper to render a single industry card
+  const renderIndustryCard = (industry: Industry, cardClass: string) => {
+    const displayIcon = industry.icon || inferIconFromText(industry.name, industry.description);
+    return (
+      <div
+        key={industry.id}
+        className={`rounded-xl transition-all duration-300 hover:-translate-y-1 ${cardClass}`}
+        style={{
+          backgroundColor: cardStyles.bg,
+          backdropFilter: cardStyles.backdropFilter,
+          WebkitBackdropFilter: cardStyles.backdropFilter,
+          borderColor: cardStyles.borderColor,
+          borderWidth: cardStyles.borderWidth,
+          borderStyle: cardStyles.borderStyle,
+          boxShadow: cardStyles.boxShadow
+        }}
+      >
+        {/* Icon Container - Circular with theme background */}
+        <div
+          className="w-32 h-32 mx-auto flex items-center justify-center mb-6 rounded-full"
+          style={{
+            backgroundColor: cardStyles.iconBg
+          }}
+        >
+          <IconPublished
+            icon={displayIcon}
+            color={cardStyles.iconColor}
+            size={60}
+          />
+        </div>
+
+        {/* Industry Name */}
+        <div className="mb-4 text-center">
+          <h3
+            style={{
+              ...h3Typography,
+              fontWeight: 700,
+              color: cardStyles.textHeading,
+              textAlign: 'center'
+            }}
+          >
+            {industry.name}
+          </h3>
+        </div>
+
+        {/* Use Case Description */}
+        <div className="text-center">
+          <TextPublished
+            value={industry.description}
+            style={{
+              color: cardStyles.textBody,
+              ...bodyTypography,
+              textAlign: 'center'
+            }}
+          />
+        </div>
+      </div>
+    );
+  };
+
   return (
     <SectionWrapperPublished
       sectionId={sectionId}
       background={sectionBackgroundCSS}
       padding="normal"
     >
-      <div className="max-w-7xl mx-auto">
+      <div className={layout.containerClass}>
         {/* Header Section */}
         <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
           {/* Headline */}
@@ -114,64 +159,24 @@ export default function IndustryUseCaseGridPublished(props: LayoutComponentProps
         </div>
 
         {/* Industry Cards Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {industries.map((industry: Industry) => {
-            // V2: Get icon - use stored value or derive from name/description
-            const displayIcon = industry.icon || inferIconFromText(industry.name, industry.description);
-
-            return (
-              <div
-                key={industry.id}
-                className="bg-white p-8 rounded-xl transition-all duration-300"
-                style={{
-                  border: `1px solid ${themeColors.cardBorder}`,
-                  boxShadow: themeColors.cardHoverShadow
-                }}
-              >
-                {/* Icon Container - Circular with theme background */}
-                <div
-                  className="w-32 h-32 mx-auto flex items-center justify-center mb-6 rounded-full"
-                  style={{
-                    backgroundColor: themeColors.iconBg
-                  }}
-                >
-                  <IconPublished
-                    icon={displayIcon}
-                    color={themeColors.iconText}
-                    size={60}
-                  />
-                </div>
-
-                {/* Industry Name */}
-                <div className="mb-4 text-center">
-                  <h3
-                    style={{
-                      ...h3Typography,
-                      fontWeight: 700,
-                      color: textColors.heading,
-                      textAlign: 'center'
-                    }}
-                  >
-                    {industry.name}
-                  </h3>
-                </div>
-
-                {/* Use Case Description */}
-                <div className="text-center">
-                  <TextPublished
-                    value={industry.description}
-                    style={{
-                      color: textColors.muted,
-                      ...bodyTypography,
-                      textAlign: 'center',
-                      opacity: 0.8
-                    }}
-                  />
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        {isSplitLayout(industries.length) && layout.splitLayout ? (
+          <>
+            <div className={layout.splitLayout.firstRowGrid}>
+              {industries.slice(0, layout.splitLayout.firstRowCount).map((industry: Industry) =>
+                renderIndustryCard(industry, layout.splitLayout!.firstRowCard)
+              )}
+            </div>
+            <div className={layout.splitLayout.secondRowGrid}>
+              {industries.slice(layout.splitLayout.firstRowCount).map((industry: Industry) =>
+                renderIndustryCard(industry, layout.splitLayout!.secondRowCard)
+              )}
+            </div>
+          </>
+        ) : (
+          <div className={layout.gridClass}>
+            {industries.map((industry: Industry) => renderIndustryCard(industry, layout.cardClass))}
+          </div>
+        )}
       </div>
     </SectionWrapperPublished>
   );

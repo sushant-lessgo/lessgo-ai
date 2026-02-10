@@ -76,7 +76,6 @@ interface BackgroundSystem {
   primary: string;
   secondary: string;
   neutral: string;
-  divider: string;
   baseColor: string;
   accentColor: string;
   accentCSS: string;
@@ -327,21 +326,21 @@ export function PreviewSection({
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <div className="text-xs text-gray-600">FAQ</div>
-              <div className="text-xs text-gray-400">• Divider</div>
+              <div className="text-xs text-gray-400">• Neutral</div>
             </div>
             <div className="flex items-center space-x-2">
-              <div 
-                className="w-4 h-4 rounded border border-gray-200" 
-                style={getBackgroundStyle(currentBackground.divider)}
+              <div
+                className="w-4 h-4 rounded border border-gray-200"
+                style={getBackgroundStyle(currentBackground.neutral)}
               ></div>
               {backgroundToPreview && (
                 <>
                   <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
-                  <div 
-                    className="w-4 h-4 rounded border border-gray-200" 
-                    style={getBackgroundStyle(backgroundToPreview.divider)}
+                  <div
+                    className="w-4 h-4 rounded border border-gray-200"
+                    style={getBackgroundStyle(backgroundToPreview.neutral)}
                   ></div>
                 </>
               )}

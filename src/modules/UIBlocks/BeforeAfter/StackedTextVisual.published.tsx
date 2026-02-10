@@ -34,9 +34,9 @@ export default function StackedTextVisualPublished(props: LayoutComponentProps) 
   const summary_text = props.summary_text || '';
 
   // Extract icons (optional)
-  const before_icon = props.before_icon || '➕';
-  const after_icon = props.after_icon || '⚡';
-  const transition_icon = props.transition_icon || '⬇️';
+  const before_icon = props.before_icon || 'Plus';
+  const after_icon = props.after_icon || 'Zap';
+  const transition_icon = props.transition_icon || 'ArrowDown';
 
   // Detect UIBlock theme
   const uiTheme: UIBlockTheme = props.manualThemeOverride ||

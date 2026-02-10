@@ -304,8 +304,7 @@ export function ColorSystemModalMVP({ isOpen, onClose, tokenId }: ColorSystemMod
       backgroundsPreserved: {
         primary: updatedColors.sectionBackgrounds?.primary,
         secondary: updatedColors.sectionBackgrounds?.secondary,
-        neutral: updatedColors.sectionBackgrounds?.neutral,
-        divider: updatedColors.sectionBackgrounds?.divider
+        neutral: updatedColors.sectionBackgrounds?.neutral
       }
     });
 

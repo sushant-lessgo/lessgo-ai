@@ -5,10 +5,8 @@ export interface CustomColors {
   primary: string;
   secondary: string;
   neutral: string;
-  divider: string;
   isSecondaryAuto: boolean;
   isNeutralAuto: boolean;
-  isDividerAuto: boolean;
 }
 
 /**
@@ -120,23 +118,6 @@ export function calculateNeutralColor(primary: string): string {
   }
 }
 
-/**
- * Calculate divider color based on primary and neutral
- * Strategy: Semi-transparent version of primary over neutral
- */
-export function calculateDividerColor(primary: string, neutral: string): string {
-  try {
-    const [primaryH, primaryS, primaryL] = hexToHsl(primary);
-    
-    // Create a very light version of the primary color
-    const dividerLightness = Math.max(0.85, primaryL * 1.5);
-    const dividerSaturation = Math.max(0.1, primaryS * 0.2);
-    
-    return hslToHex(primaryH, dividerSaturation, dividerLightness);
-  } catch (error) {
-    return '#E5E7EB'; // Light gray fallback
-  }
-}
 
 /**
  * Validate that a color provides sufficient contrast
@@ -160,16 +141,12 @@ export function validateColorContrast(foreground: string, background: string): b
 export function generateCustomColorScheme(primary: string): CustomColors {
   const secondary = calculateSecondaryColor(primary);
   const neutral = calculateNeutralColor(primary);
-  const divider = calculateDividerColor(primary, neutral);
-
   return {
     primary,
     secondary,
     neutral,
-    divider,
     isSecondaryAuto: true,
     isNeutralAuto: true,
-    isDividerAuto: true,
   };
 }
 
@@ -178,7 +155,7 @@ export function generateCustomColorScheme(primary: string): CustomColors {
  */
 export function updateColorScheme(
   currentScheme: CustomColors,
-  colorType: 'primary' | 'secondary' | 'neutral' | 'divider',
+  colorType: 'primary' | 'secondary' | 'neutral',
   newColor: string,
   isManual: boolean = true
 ): CustomColors {
@@ -190,7 +167,6 @@ export function updateColorScheme(
   // Mark as manual if user changed it directly
   if (colorType === 'secondary') updatedScheme.isSecondaryAuto = !isManual;
   if (colorType === 'neutral') updatedScheme.isNeutralAuto = !isManual;
-  if (colorType === 'divider') updatedScheme.isDividerAuto = !isManual;
 
   // If primary changed, recalculate auto colors
   if (colorType === 'primary') {
@@ -200,14 +176,6 @@ export function updateColorScheme(
     if (updatedScheme.isNeutralAuto) {
       updatedScheme.neutral = calculateNeutralColor(newColor);
     }
-    if (updatedScheme.isDividerAuto) {
-      updatedScheme.divider = calculateDividerColor(newColor, updatedScheme.neutral);
-    }
-  }
-
-  // If neutral changed and divider is auto, recalculate divider
-  if (colorType === 'neutral' && updatedScheme.isDividerAuto) {
-    updatedScheme.divider = calculateDividerColor(updatedScheme.primary, newColor);
   }
 
   return updatedScheme;

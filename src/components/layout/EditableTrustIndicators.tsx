@@ -12,7 +12,7 @@ interface EditableTrustIndicatorsProps {
   sectionId: string;
   iconColor?: string;
   colorClass?: string;
-  backgroundType?: 'primary' | 'secondary' | 'custom' | 'neutral' | 'divider' | 'theme' | string;
+  backgroundType?: 'primary' | 'secondary' | 'custom' | 'neutral' | 'theme' | string;
   maxItems?: number;
   showAddButton?: boolean;
 }

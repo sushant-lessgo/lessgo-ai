@@ -7,12 +7,12 @@
 
 import React from 'react';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publishedTextColors';
+import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardStyles } from '@/lib/publishedTextColors';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import { shadows, cardEnhancements } from '@/modules/Design/designTokens';
+import { analyzeBackground } from '@/utils/backgroundAnalysis';
 
 interface Scenario {
   id: string;
@@ -45,23 +45,26 @@ export default function RoleBasedScenariosPublished(props: LayoutComponentProps)
   const uiTheme: UIBlockTheme = props.manualThemeOverride ||
     (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
 
-  // Get theme-specific colors (HEX for inline styles)
+  // Get luminance from section background
+  const { luminance } = analyzeBackground(sectionBackgroundCSS || '');
+
+  // Get adaptive card styles
+  const cardStyles = getPublishedCardStyles(luminance, uiTheme);
+
+  // Get theme-specific colors for avatar gradient only
   const getThemeColors = (theme: UIBlockTheme) => {
     return {
       warm: {
         gradientStart: '#f97316',    // orange-500
         gradientEnd: '#ea580c',      // orange-600
-        cardBorder: '#fed7aa',       // orange-200
       },
       cool: {
         gradientStart: '#3b82f6',    // blue-500
         gradientEnd: '#4f46e5',      // indigo-600
-        cardBorder: '#e5e7eb',       // gray-200
       },
       neutral: {
         gradientStart: '#6b7280',    // gray-500
         gradientEnd: '#4b5563',      // gray-600
-        cardBorder: '#e5e7eb',       // gray-200
       }
     }[theme];
   };
@@ -111,8 +114,16 @@ export default function RoleBasedScenariosPublished(props: LayoutComponentProps)
           {scenarios.map((item: Scenario) => (
             <div
               key={item.id}
-              className={`bg-white p-8 ${cardEnhancements.borderRadius} flex items-center space-x-8 border ${cardEnhancements.hoverLift} ${cardEnhancements.transition}`}
-              style={{ borderColor: themeColors.cardBorder, boxShadow: shadows.card[uiTheme] }}
+              className="p-8 rounded-xl flex items-center space-x-8 transition-all duration-300 hover:-translate-y-1"
+              style={{
+                backgroundColor: cardStyles.bg,
+                backdropFilter: cardStyles.backdropFilter,
+                WebkitBackdropFilter: cardStyles.backdropFilter,
+                borderColor: cardStyles.borderColor,
+                borderWidth: cardStyles.borderWidth,
+                borderStyle: cardStyles.borderStyle,
+                boxShadow: cardStyles.boxShadow
+              }}
             >
               {/* Role Avatar Circle - Initials only */}
               <div
@@ -131,7 +142,7 @@ export default function RoleBasedScenariosPublished(props: LayoutComponentProps)
                 <h3
                   className="font-bold mb-3"
                   style={{
-                    color: textColors.heading,
+                    color: cardStyles.textHeading,
                     fontSize: '1.125rem'
                   }}
                 >
@@ -142,7 +153,7 @@ export default function RoleBasedScenariosPublished(props: LayoutComponentProps)
                 <TextPublished
                   value={item.scenario}
                   style={{
-                    color: textColors.muted,
+                    color: cardStyles.textBody,
                     lineHeight: '1.5rem'
                   }}
                 />

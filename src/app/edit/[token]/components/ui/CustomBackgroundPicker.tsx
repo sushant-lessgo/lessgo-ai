@@ -93,7 +93,6 @@ export function CustomBackgroundPicker({
           primary: primaryCSS,
           secondary: localColors.secondary,
           neutral: localColors.neutral,
-          divider: localColors.divider,
           baseColor: baseColor,
           accentColor: baseColor,
           accentCSS: localColors.primary // Direct CSS value for accent
@@ -105,7 +104,7 @@ export function CustomBackgroundPicker({
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [localColors.primary, localColors.secondary, localColors.neutral, localColors.divider, customBackground, pickerMode]);
+  }, [localColors.primary, localColors.secondary, localColors.neutral, customBackground, pickerMode]);
 
   // Handle solid color change
   const handleSolidColorChange = useCallback((color: string) => {
@@ -130,9 +129,9 @@ export function CustomBackgroundPicker({
     }
   }, [localColors]);
 
-  // Handle individual color overrides for secondary/neutral/divider
+  // Handle individual color overrides for secondary/neutral
   const handleColorOverride = useCallback((
-    colorType: 'secondary' | 'neutral' | 'divider',
+    colorType: 'secondary' | 'neutral',
     color: string
   ) => {
     const updatedScheme = updateColorScheme(localColors, colorType, color, true);
@@ -313,13 +312,6 @@ export function CustomBackgroundPicker({
               color={localColors.neutral}
               isAuto={localColors.isNeutralAuto}
               onOverride={(color) => handleColorOverride('neutral', color)}
-              disabled={disabled}
-            />
-            <ColorPreview
-              label="Divider"
-              color={localColors.divider}
-              isAuto={localColors.isDividerAuto}
-              onOverride={(color) => handleColorOverride('divider', color)}
               disabled={disabled}
             />
           </div>

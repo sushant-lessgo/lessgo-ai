@@ -9,7 +9,7 @@ import type { ColorTokens, BackgroundSystem } from '@/types/core';
 
 interface TextHierarchyPreviewProps {
   colorTokens: ColorTokens;
-  backgroundType: 'primary' | 'secondary' | 'neutral' | 'divider';
+  backgroundType: 'primary' | 'secondary' | 'neutral';
   backgroundSystem: BackgroundSystem | null;
   size?: 'minimal' | 'compact' | 'full';
   showLabels?: boolean;
@@ -75,12 +75,6 @@ export function TextHierarchyPreview({
           heading: size === 'minimal' ? 'Content Section' : 'How It Works',
           body: size === 'minimal' ? 'Body content here' : 'Our three-step process makes it easy to get started and see results quickly.',
           muted: size === 'minimal' ? 'Additional info' : 'Average setup time: 5 minutes',
-        };
-      case 'divider':
-        return {
-          heading: size === 'minimal' ? 'Separator' : 'Ready to Get Started?',
-          body: size === 'minimal' ? 'Call to action' : 'Join thousands of satisfied customers and transform your workflow today.',
-          muted: size === 'minimal' ? 'Terms apply' : '30-day money-back guarantee',
         };
       default:
         return {

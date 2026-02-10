@@ -7,13 +7,15 @@
 
 import React from 'react';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publishedTextColors';
+import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardStyles } from '@/lib/publishedTextColors';
+import { analyzeBackground } from '@/utils/backgroundAnalysis';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { IconPublished } from '@/components/published/IconPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import { inferIconFromText } from '@/lib/iconCategoryMap';
+import { getDynamicCardLayout, isSplitLayout } from '@/utils/dynamicCardLayout';
 
 // Stat item structure (V2 array format)
 interface StatItem {
@@ -45,16 +47,11 @@ export default function StatBlocksPublished(props: LayoutComponentProps) {
   const uiTheme: UIBlockTheme = props.manualThemeOverride ||
                                  (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
 
-  // Theme colors (hex values for inline styles)
-  const getStatCardColors = (theme: UIBlockTheme) => {
-    return {
-      warm: { border: '#fed7aa', iconBg: '#ffedd5', iconText: '#ea580c' },
-      cool: { border: '#bfdbfe', iconBg: '#dbeafe', iconText: '#2563eb' },
-      neutral: { border: '#e5e7eb', iconBg: '#f3f4f6', iconText: '#6b7280' }
-    }[theme];
-  };
+  // Get luminance from section background
+  const { luminance } = analyzeBackground(sectionBackgroundCSS || '');
 
-  const colors = getStatCardColors(uiTheme);
+  // Get adaptive card styles
+  const cardStyles = getPublishedCardStyles(luminance, uiTheme);
 
   // Theme colors for achievement footer (hex values for inline styles)
   const getFooterColors = (theme: UIBlockTheme) => {
@@ -67,11 +64,79 @@ export default function StatBlocksPublished(props: LayoutComponentProps) {
 
   const footerColors = getFooterColors(uiTheme);
 
-  // Grid layout logic
-  const gridCols = stats.length === 2 ? 'md:grid-cols-2 max-w-3xl' :
-                   stats.length === 3 ? 'md:grid-cols-3 max-w-5xl' :
-                   stats.length === 4 ? 'md:grid-cols-2 lg:grid-cols-4' :
-                   'md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4';
+  // Dynamic card layout
+  const layout = getDynamicCardLayout(stats.length);
+
+  // Helper to render stat card
+  const renderStatCard = (stat: StatItem, cardClass: string) => {
+    const displayIcon = stat.icon || inferIconFromText(stat.label, stat.description);
+    return (
+      <div
+        key={stat.id}
+        className={`relative text-center rounded-xl transition-all duration-300 hover:-translate-y-1 ${cardClass}`}
+        style={{
+          backgroundColor: cardStyles.bg,
+          backdropFilter: cardStyles.backdropFilter,
+          WebkitBackdropFilter: cardStyles.backdropFilter,
+          borderColor: cardStyles.borderColor,
+          borderWidth: cardStyles.borderWidth,
+          borderStyle: cardStyles.borderStyle,
+          boxShadow: cardStyles.boxShadow
+        }}
+      >
+        {/* Icon */}
+        <div className="mb-6">
+          <div
+            className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto"
+            style={{
+              backgroundColor: cardStyles.iconBg,
+              color: cardStyles.iconColor
+            }}
+          >
+            <IconPublished icon={displayIcon} size={32} color={cardStyles.iconColor} />
+          </div>
+        </div>
+
+        {/* Value */}
+        <div className="mb-4">
+          <div
+            style={{
+              fontSize: '3rem',
+              fontWeight: 'bold',
+              color: cardStyles.textHeading,
+              lineHeight: '1'
+            }}
+          >
+            {stat.value}
+          </div>
+        </div>
+
+        {/* Label */}
+        <div className="mb-3">
+          <div
+            style={{
+              fontSize: '1.125rem',
+              fontWeight: 600,
+              color: cardStyles.textHeading
+            }}
+          >
+            {stat.label}
+          </div>
+        </div>
+
+        {/* Description */}
+        {stat.description && (
+          <TextPublished
+            value={stat.description}
+            style={{
+              color: cardStyles.textBody,
+              lineHeight: '1.75'
+            }}
+          />
+        )}
+      </div>
+    );
+  };
 
   // Text colors
   const textColors = getPublishedTextColors(
@@ -117,71 +182,28 @@ export default function StatBlocksPublished(props: LayoutComponentProps) {
         </div>
 
         {/* Stats Grid */}
-        <div className={`grid gap-8 ${gridCols} mx-auto`}>
-          {stats.map((stat: StatItem, idx: number) => {
-            // Get icon: user-set → derived from label
-            const displayIcon = stat.icon || inferIconFromText(stat.label, stat.description);
-
-            return (
-              <div
-                key={stat.id}
-                className="relative text-center p-8 bg-white rounded-xl border transition-all duration-300"
-                style={{ borderColor: colors.border }}
-              >
-                {/* Icon */}
-                <div className="mb-6">
-                  <div
-                    className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto"
-                    style={{
-                      backgroundColor: colors.iconBg,
-                      color: colors.iconText
-                    }}
-                  >
-                    <IconPublished icon={displayIcon} size={32} />
-                  </div>
-                </div>
-
-                {/* Value */}
-                <div className="mb-4">
-                  <div
-                    style={{
-                      fontSize: '3rem',
-                      fontWeight: 'bold',
-                      color: '#111827',
-                      lineHeight: '1'
-                    }}
-                  >
-                    {stat.value}
-                  </div>
-                </div>
-
-                {/* Label */}
-                <div className="mb-3">
-                  <div
-                    style={{
-                      fontSize: '1.125rem',
-                      fontWeight: 600,
-                      color: '#111827'
-                    }}
-                  >
-                    {stat.label}
-                  </div>
-                </div>
-
-                {/* Description */}
-                {stat.description && (
-                  <TextPublished
-                    value={stat.description}
-                    style={{
-                      color: '#6b7280',
-                      lineHeight: '1.75'
-                    }}
-                  />
-                )}
-              </div>
-            );
-          })}
-        </div>
+        {isSplitLayout(stats.length) && layout.splitLayout ? (
+          <div className={layout.containerClass}>
+            <div className={layout.splitLayout.firstRowGrid}>
+              {stats.slice(0, layout.splitLayout.firstRowCount).map((stat: StatItem) =>
+                renderStatCard(stat, layout.splitLayout!.firstRowCard)
+              )}
+            </div>
+            <div className={layout.splitLayout.secondRowGrid}>
+              {stats.slice(layout.splitLayout.firstRowCount).map((stat: StatItem) =>
+                renderStatCard(stat, layout.splitLayout!.secondRowCard)
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className={layout.containerClass}>
+            <div className={layout.gridClass}>
+              {stats.map((stat: StatItem) =>
+                renderStatCard(stat, layout.cardClass)
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Achievement Footer */}
         {achievement_footer && (

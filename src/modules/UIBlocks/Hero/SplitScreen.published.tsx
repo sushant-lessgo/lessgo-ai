@@ -213,10 +213,9 @@ HeroImagePlaceholder.displayName = 'HeroImagePlaceholder';
 export default function SplitScreenPublished(props: LayoutComponentProps) {
   const { sectionId, sectionBackgroundCSS, theme, backgroundType, publishedPageId, pageOwnerId } = props;
 
-  // Extract button metadata for form detection
+  // V2: Extract button metadata from elementMetadata (not element.metadata)
   const sectionData = props.content?.[sectionId];
-  const ctaElement = sectionData?.elements?.cta_text;
-  const buttonConfig = ctaElement?.metadata?.buttonConfig;
+  const buttonConfig = sectionData?.elementMetadata?.cta_text?.buttonConfig || props.elementMetadata?.cta_text?.buttonConfig;
 
   // Extract content from props (flattened by LandingPagePublishedRenderer)
   const headline = props.headline || 'Transform Your Business with Smart Automation';

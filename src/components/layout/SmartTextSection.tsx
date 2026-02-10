@@ -27,7 +27,7 @@ export function SmartTextSection({
   // Convert new BackgroundType to the expected theme color type
   const themeColorType = (backgroundType === 'theme' || backgroundType === 'custom') 
     ? 'primary' 
-    : backgroundType as 'primary' | 'secondary' | 'neutral' | 'divider';
+    : backgroundType as 'primary' | 'secondary' | 'neutral';
   
   const smartColors = useSmartTextColors(themeColorType);
   

@@ -527,8 +527,6 @@ export interface BackgroundSystem {
   secondary: string;
   /** Neutral background (testimonials, white sections) */
   neutral: string;
-  /** Divider background (subtle separators) */
-  divider: string;
   /** Base color name (e.g., "blue", "purple") */
   baseColor: string;
   /** Accent color name (e.g., "purple", "orange") */

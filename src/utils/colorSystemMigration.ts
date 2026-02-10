@@ -54,7 +54,7 @@ export class ColorSystemManager {
    * Get text colors with migration support
    */
   getTextColors(
-    backgroundType: 'primary' | 'secondary' | 'neutral' | 'divider',
+    backgroundType: 'primary' | 'secondary' | 'neutral',
     backgroundCSS: string,
     businessContext: BusinessColorContext = {},
     brandColors?: BrandColors
@@ -222,7 +222,7 @@ export class ColorSystemManager {
    * Compare enhanced vs legacy results for A/B testing
    */
   compareResults(
-    backgroundType: 'primary' | 'secondary' | 'neutral' | 'divider',
+    backgroundType: 'primary' | 'secondary' | 'neutral',
     backgroundCSS: string,
     businessContext: BusinessColorContext = {}
   ): {
@@ -286,7 +286,7 @@ export class ColorSystemManager {
   }
 
   private getEnhancedColors(
-    backgroundType: 'primary' | 'secondary' | 'neutral' | 'divider',
+    backgroundType: 'primary' | 'secondary' | 'neutral',
     backgroundCSS: string,
     businessContext: BusinessColorContext
   ) {
@@ -317,7 +317,7 @@ export class ColorSystemManager {
   }
 
   private getLegacyTextColors(
-    backgroundType: 'primary' | 'secondary' | 'neutral' | 'divider',
+    backgroundType: 'primary' | 'secondary' | 'neutral',
     backgroundCSS: string,
     businessContext: BusinessColorContext
   ): { heading: string; body: string; muted: string; source: 'legacy' } {

@@ -82,8 +82,8 @@ export default function BeforeAfterQuotePublished(props: LayoutComponentProps) {
   // Extract content
   const headline = props.headline || 'Real Customer Transformations';
   const subheadline = props.subheadline || '';
-  const globalBeforeIcon = props.before_icon || '❌';
-  const globalAfterIcon = props.after_icon || '✅';
+  const globalBeforeIcon = props.before_icon || 'XCircle';
+  const globalAfterIcon = props.after_icon || 'CheckCircle';
 
   // V2: Direct array access for transformations
   const transformations: Transformation[] = (props as any).transformations || [];

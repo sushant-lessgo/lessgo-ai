@@ -39,7 +39,7 @@ export function CustomColorPicker({ colors, onColorsChange, disabled = false }: 
 
   // Handle individual color overrides
   const handleColorOverride = (
-    colorType: 'secondary' | 'neutral' | 'divider',
+    colorType: 'secondary' | 'neutral',
     color: string
   ) => {
     const updatedScheme = updateColorScheme(localColors, colorType, color, true);
@@ -47,19 +47,9 @@ export function CustomColorPicker({ colors, onColorsChange, disabled = false }: 
   };
 
   // Reset color to auto-calculated
-  const resetToAuto = (colorType: 'secondary' | 'neutral' | 'divider') => {
-    let autoColor: string;
-    
-    if (colorType === 'secondary') {
-      const { secondary } = generateCustomColorScheme(localColors.primary);
-      autoColor = secondary;
-    } else if (colorType === 'neutral') {
-      const { neutral } = generateCustomColorScheme(localColors.primary);
-      autoColor = neutral;
-    } else {
-      const { divider } = generateCustomColorScheme(localColors.primary);
-      autoColor = divider;
-    }
+  const resetToAuto = (colorType: 'secondary' | 'neutral') => {
+    const scheme = generateCustomColorScheme(localColors.primary);
+    const autoColor = colorType === 'secondary' ? scheme.secondary : scheme.neutral;
 
     const updatedScheme = updateColorScheme(localColors, colorType, autoColor, false);
     setLocalColors(updatedScheme);
@@ -170,15 +160,6 @@ export function CustomColorPicker({ colors, onColorsChange, disabled = false }: 
           disabled={disabled}
         />
 
-        {/* Divider Color */}
-        <ColorRow
-          label="Divider Color"
-          color={localColors.divider}
-          isAuto={localColors.isDividerAuto}
-          onColorChange={(color) => handleColorOverride('divider', color)}
-          onResetToAuto={() => resetToAuto('divider')}
-          disabled={disabled}
-        />
       </div>
 
       {/* Color Preview */}
@@ -203,11 +184,6 @@ export function CustomColorPicker({ colors, onColorsChange, disabled = false }: 
           >
             Neutral
           </div>
-          <div 
-            className="w-12 h-8 rounded border border-gray-200"
-            style={{ backgroundColor: localColors.divider }}
-            title="Divider"
-          />
         </div>
       </div>
     </div>

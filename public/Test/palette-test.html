@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Palette Test — v3 Background System</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #0a0a0a; color: #e5e5e5; }
+
+  /* ── Control Bar ── */
+  .control-bar {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,10,10,0.92); backdrop-filter: blur(12px);
+    border-bottom: 1px solid #222;
+    padding: 12px 24px;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  .control-bar label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+  .control-bar select {
+    padding: 6px 12px; border-radius: 6px; border: 1px solid #333;
+    background: #1a1a1a; color: #e5e5e5; font-size: 13px; cursor: pointer;
+    min-width: 200px;
+  }
+  .control-bar select:hover { border-color: #555; }
+  .meta-tags { display: flex; gap: 6px; margin-left: auto; }
+  .meta-tag {
+    font-size: 11px; padding: 3px 10px; border-radius: 4px;
+    border: 1px solid #2a2a2a; background: #151515;
+  }
+  .meta-tag.dark { color: #c084fc; border-color: #3a2050; }
+  .meta-tag.light { color: #a3e635; border-color: #2a4020; }
+  .meta-tag.cool { color: #67e8f9; }
+  .meta-tag.warm { color: #fbbf24; }
+  .meta-tag.neutral-t { color: #a1a1aa; }
+  .meta-tag.calm { color: #94a3b8; }
+  .meta-tag.bold { color: #f97316; }
+
+  /* ── Accent Swatches Row ── */
+  .accent-bar {
+    background: #111; border-bottom: 1px solid #1a1a1a;
+    padding: 8px 24px; display: flex; align-items: center; gap: 8px;
+  }
+  .accent-bar .label { font-size: 11px; color: #666; }
+  .accent-swatch {
+    width: 22px; height: 22px; border-radius: 5px;
+    border: 1px solid rgba(255,255,255,0.1);
+    display: inline-block; position: relative; cursor: default;
+  }
+  .accent-swatch-label { font-size: 10px; color: #555; margin-left: 2px; margin-right: 8px; }
+  .accent-role { font-size: 10px; color: #444; font-style: italic; margin-right: 6px; }
+
+  /* ── Raw Values Panel ── */
+  .raw-values {
+    background: #0d0d0d; border-bottom: 1px solid #1a1a1a;
+    padding: 6px 24px; font-family: 'Fira Code', 'Cascadia Code', monospace;
+    font-size: 11px; color: #555; display: flex; gap: 24px; flex-wrap: wrap;
+  }
+  .raw-values span { color: #777; }
+  .raw-values code { color: #999; }
+
+  /* ── Mockup Container ── */
+  .mockup-container { max-width: 100%; min-height: calc(100vh - 120px); }
+
+  /* ── Mockup Sections ── */
+  .mock-section { width: 100%; position: relative; transition: background 0.2s; }
+  .mock-section .section-label {
+    position: absolute; top: 8px; left: 12px;
+    font-size: 9px; text-transform: uppercase; letter-spacing: 1px;
+    opacity: 0.5; font-weight: 600; pointer-events: none;
+  }
+
+  /* Header */
+  .mock-header { padding: 16px 48px; display: flex; align-items: center; justify-content: space-between; }
+  .mock-header .logo { font-size: 16px; font-weight: 700; letter-spacing: -0.5px; }
+  .mock-header .nav { display: flex; gap: 24px; font-size: 13px; opacity: 0.7; }
+
+  /* Hero */
+  .mock-hero { padding: 80px 48px; text-align: center; }
+  .mock-hero h1 { font-size: 48px; font-weight: 800; letter-spacing: -1.5px; line-height: 1.1; margin-bottom: 16px; }
+  .mock-hero p { font-size: 18px; max-width: 560px; margin: 0 auto 32px; line-height: 1.6; }
+  .mock-hero .cta-btn {
+    display: inline-block; padding: 14px 36px; border-radius: 8px;
+    font-size: 15px; font-weight: 600; cursor: default; transition: all 0.15s;
+    border: none;
+  }
+
+  /* Content Sections */
+  .mock-content { padding: 64px 48px; }
+  .mock-content h2 { font-size: 32px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 12px; text-align: center; }
+  .mock-content .subtitle { font-size: 15px; text-align: center; margin-bottom: 40px; max-width: 480px; margin-left: auto; margin-right: auto; }
+  .card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 960px; margin: 0 auto; }
+
+  /* Cards */
+  .mock-card { padding: 28px; border-radius: 12px; transition: all 0.15s; }
+  .mock-card:hover { transform: translateY(-2px); }
+  .mock-card .icon-circle { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; font-size: 18px; }
+  .mock-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+  .mock-card p { font-size: 13px; line-height: 1.6; }
+
+  /* CTA Section */
+  .mock-cta { padding: 72px 48px; text-align: center; }
+  .mock-cta h2 { font-size: 36px; font-weight: 800; letter-spacing: -1px; margin-bottom: 16px; }
+  .mock-cta p { font-size: 16px; margin-bottom: 28px; }
+
+  /* Footer */
+  .mock-footer { padding: 20px 48px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; opacity: 0.5; }
+
+  /* ── Luminance Debug ── */
+  .lum-badge {
+    position: absolute; top: 8px; right: 12px;
+    font-size: 9px; font-family: monospace; opacity: 0.4;
+    padding: 2px 6px; border-radius: 3px;
+    background: rgba(128,128,128,0.2);
+  }
+</style>
+</head>
+<body>
+
+<!-- Control Bar -->
+<div class="control-bar">
+  <div>
+    <label>Palette</label><br>
+    <select id="palette-select"></select>
+  </div>
+  <div>
+    <label>CTA Accent</label><br>
+    <select id="cta-accent-select"></select>
+  </div>
+  <div>
+    <label>Icon Theme</label><br>
+    <select id="theme-select">
+      <option value="auto">Auto (from palette)</option>
+      <option value="warm">Warm</option>
+      <option value="cool">Cool</option>
+      <option value="neutral">Neutral</option>
+    </select>
+  </div>
+  <div>
+    <label>Texture</label><br>
+    <select id="texture-select"></select>
+  </div>
+  <div class="meta-tags" id="meta-tags"></div>
+</div>
+
+<!-- Accent Bar -->
+<div class="accent-bar" id="accent-bar"></div>
+
+<!-- Raw Values -->
+<div class="raw-values" id="raw-values"></div>
+
+<!-- Mockup -->
+<div class="mockup-container" id="mockup"></div>
+
+<script>
+// ════════════════════════════════════════════════════════════
+//  COLOR ENGINE (ported from codebase)
+// ════════════════════════════════════════════════════════════
+
+const ACCENT_HEX = {
+  cyan:'#22d3ee', sky:'#38bdf8', blue:'#3b82f6', indigo:'#6366f1',
+  purple:'#a855f7', emerald:'#34d399', teal:'#2dd4bf', green:'#22c55e',
+  amber:'#fbbf24', orange:'#f97316', cream:'#fef3c7'
+};
+
+function parseColor(color) {
+  if (!color || typeof color !== 'string') return null;
+  const c = color.trim().toLowerCase();
+  // Hex
+  const hex = c.match(/^#([a-f0-9]{3}|[a-f0-9]{6})$/);
+  if (hex) {
+    const h = hex[1];
+    if (h.length === 3) return { r: parseInt(h[0]+h[0],16), g: parseInt(h[1]+h[1],16), b: parseInt(h[2]+h[2],16) };
+    return { r: parseInt(h.substring(0,2),16), g: parseInt(h.substring(2,4),16), b: parseInt(h.substring(4,6),16) };
+  }
+  // RGB/RGBA
+  const rgb = c.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+  if (rgb) return { r: parseInt(rgb[1]), g: parseInt(rgb[2]), b: parseInt(rgb[3]) };
+  return null;
+}
+
+function calcLuminance(rgb) {
+  const gamma = v => v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  const r = gamma(rgb.r / 255), g = gamma(rgb.g / 255), b = gamma(rgb.b / 255);
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+function bgLuminance(cssStr) {
+  if (!cssStr) return 0.95; // fallback white
+  const colors = cssStr.match(/#[a-f0-9]{3,6}|rgba?\([^)]+\)/gi) || [];
+  const rgbs = colors.map(parseColor).filter(Boolean);
+  if (rgbs.length === 0) return 0.95;
+  const lums = rgbs.map(calcLuminance);
+  return lums.reduce((a, b) => a + b, 0) / lums.length;
+}
+
+// ════════════════════════════════════════════════════════════
+//  CARD STYLES (ported from getPublishedCardStyles)
+// ════════════════════════════════════════════════════════════
+
+function getCardStyles(lum) {
+  if (lum <= 0.25) return {
+    bg:'rgba(255,255,255,0.15)', blur:'blur(16px)', border:'rgba(255,255,255,0.1)',
+    shadow:'0 20px 25px -5px rgba(0,0,0,0.1)',
+    heading:'#ffffff', body:'#e5e7eb', muted:'#d1d5db'
+  };
+  if (lum <= 0.45) return {
+    bg:'rgba(255,255,255,0.10)', blur:'blur(12px)', border:'rgba(255,255,255,0.1)',
+    shadow:'0 10px 15px -3px rgba(0,0,0,0.1)',
+    heading:'#ffffff', body:'#e5e7eb', muted:'#d1d5db'
+  };
+  if (lum <= 0.55) return {
+    bg:'rgba(249,250,251,0.8)', blur:'none', border:'#e5e7eb',
+    shadow:'0 4px 6px -1px rgba(0,0,0,0.1)',
+    heading:'#111827', body:'#374151', muted:'#6b7280'
+  };
+  if (lum <= 0.75) return {
+    bg:'rgba(255,255,255,0.95)', blur:'none', border:'#f3f4f6',
+    shadow:'0 1px 3px rgba(0,0,0,0.1)',
+    heading:'#111827', body:'#374151', muted:'#6b7280'
+  };
+  return {
+    bg:'#ffffff', blur:'none', border:'#e5e7eb',
+    shadow:'0 4px 6px -1px rgba(0,0,0,0.1)',
+    heading:'#111827', body:'#374151', muted:'#6b7280'
+  };
+}
+
+// ════════════════════════════════════════════════════════════
+//  TEXT COLORS (ported from getSmartTextColor)
+// ════════════════════════════════════════════════════════════
+
+function getTextColors(lum) {
+  if (lum > 0.5) return { heading:'#111827', body:'#374151', muted:'#6b7280' };
+  return { heading:'#f9fafb', body:'#e5e7eb', muted:'#d1d5db' };
+}
+
+// ════════════════════════════════════════════════════════════
+//  ICON THEMING (ported from publishedTextColors.ts)
+// ════════════════════════════════════════════════════════════
+
+const ICON_THEMES = {
+  warm:    { darkBg:'rgba(255,255,255,0.4)', darkColor:'#ffffff', lightBg:'#ffedd5', lightColor:'#ea580c' },
+  cool:    { darkBg:'rgba(255,255,255,0.4)', darkColor:'#ffffff', lightBg:'#dbeafe', lightColor:'#2563eb' },
+  neutral: { darkBg:'rgba(255,255,255,0.4)', darkColor:'#ffffff', lightBg:'#f3f4f6', lightColor:'#4b5563' }
+};
+
+function getIconStyle(lum, theme) {
+  const t = ICON_THEMES[theme] || ICON_THEMES.neutral;
+  const isDark = lum <= 0.45;
+  return { bg: isDark ? t.darkBg : t.lightBg, color: isDark ? t.darkColor : t.lightColor };
+}
+
+// ════════════════════════════════════════════════════════════
+//  CTA BUTTON TEXT COLOR
+// ════════════════════════════════════════════════════════════
+
+function getButtonTextColor(accentHex) {
+  const rgb = parseColor(accentHex);
+  if (!rgb) return '#ffffff';
+  const lum = calcLuminance(rgb);
+  return lum > 0.45 ? '#111827' : '#ffffff';
+}
+
+// ════════════════════════════════════════════════════════════
+//  PALETTE DATA (from newBG.md)
+// ════════════════════════════════════════════════════════════
+
+const P = [
+  // DARK - Cool
+  { id:1, name:'Midnight Slate', mode:'dark', temp:'cool', energy:'calm',
+    primary:'linear-gradient(135deg, #0f172a, #1e3a5f)', secondary:'#1a2332', neutral:'#0f172a',
+    accents:['cyan','sky','emerald','purple'], desc:'Classic dark tech. Deep navy.' },
+  { id:2, name:'Deep Indigo', mode:'dark', temp:'cool', energy:'bold',
+    primary:'linear-gradient(135deg, #1e1b4b, #312e81)', secondary:'#1e1b4b', neutral:'#0f0d2e',
+    accents:['cyan','emerald','amber','sky'], desc:'Rich purple-blue. AI/ML products.' },
+  { id:3, name:'Ocean Abyss', mode:'dark', temp:'cool', energy:'calm',
+    primary:'linear-gradient(135deg, #0c4a6e, #164e63)', secondary:'#0e3a52', neutral:'#0a2540',
+    accents:['cyan','teal','emerald','amber'], desc:'Deep ocean blue-teal. Data platforms.' },
+  { id:4, name:'Arctic Night', mode:'dark', temp:'cool', energy:'calm',
+    primary:'linear-gradient(to bottom right, #111827, #1f2937, #111827)', secondary:'#1a1f2e', neutral:'#111827',
+    accents:['sky','blue','emerald','orange'], desc:'Cool gray-dark. Infrastructure, DevOps.' },
+  { id:5, name:'Steel Midnight', mode:'dark', temp:'cool', energy:'calm',
+    primary:'radial-gradient(ellipse at top, #1e293b, #0f172a)', secondary:'#162032', neutral:'#0f172a',
+    accents:['sky','cyan','purple','emerald'], desc:'Subtle gradient. Enterprise dark mode.' },
+
+  // DARK - Neutral
+  { id:6, name:'Graphite', mode:'dark', temp:'neutral', energy:'calm',
+    primary:'linear-gradient(135deg, #1f2937, #374151)', secondary:'#1a2030', neutral:'#111827',
+    accents:['orange','emerald','sky','purple'], desc:'Pure gray-dark. No color bias.' },
+  { id:7, name:'Obsidian', mode:'dark', temp:'neutral', energy:'bold',
+    primary:'radial-gradient(ellipse at top right, #1c1917, #292524)', secondary:'#1c1917', neutral:'#0c0a09',
+    accents:['orange','amber','emerald','sky'], desc:'Near-black warm undertone. Premium.' },
+  { id:8, name:'Charcoal', mode:'dark', temp:'neutral', energy:'calm',
+    primary:'linear-gradient(to bottom, #18181b, #27272a)', secondary:'#1e1e22', neutral:'#18181b',
+    accents:['emerald','sky','purple','orange'], desc:'Zinc-dark. Modern minimal.' },
+
+  // DARK - Warm
+  { id:9, name:'Espresso', mode:'dark', temp:'warm', energy:'calm',
+    primary:'linear-gradient(135deg, #1c1210, #2c1d18)', secondary:'#1a1412', neutral:'#120e0c',
+    accents:['amber','orange','emerald','sky'], desc:'Dark brown. Finance, luxury.' },
+  { id:10, name:'Dark Terracotta', mode:'dark', temp:'warm', energy:'bold',
+    primary:'linear-gradient(135deg, #2a1810, #3d2418)', secondary:'#231610', neutral:'#1a100c',
+    accents:['amber','orange','cream','emerald'], desc:'Warm rust-dark. Creative agencies.' },
+  { id:11, name:'Dark Forest', mode:'dark', temp:'warm', energy:'calm',
+    primary:'linear-gradient(135deg, #0a1f15, #14332a)', secondary:'#0e1a14', neutral:'#0a140f',
+    accents:['emerald','amber','sky','orange'], desc:'Deep green-dark. Sustainability.' },
+
+  // LIGHT - Cool
+  { id:12, name:'Ice Blue', mode:'light', temp:'cool', energy:'calm',
+    primary:'linear-gradient(135deg, #3b82f6, #2563eb)', secondary:'rgba(239,246,255,0.8)', neutral:'#ffffff',
+    accents:['indigo','purple','orange','emerald'], desc:'Classic SaaS blue. B2B default.' },
+  { id:13, name:'Trust Blue', mode:'light', temp:'cool', energy:'bold',
+    primary:'linear-gradient(135deg, #2563eb, #1d4ed8)', secondary:'rgba(219,234,254,0.7)', neutral:'#f8fafc',
+    accents:['purple','orange','emerald','amber'], desc:'Deeper blue. Enterprise, finance.' },
+  { id:14, name:'Soft Lavender', mode:'light', temp:'cool', energy:'bold',
+    primary:'linear-gradient(135deg, #7c3aed, #6d28d9)', secondary:'rgba(245,243,255,0.8)', neutral:'#fafafe',
+    accents:['orange','emerald','sky','amber'], desc:'Purple primary. Creative, AI.' },
+  { id:15, name:'Sky Bright', mode:'light', temp:'cool', energy:'calm',
+    primary:'linear-gradient(135deg, #0ea5e9, #0284c7)', secondary:'rgba(240,249,255,0.8)', neutral:'#ffffff',
+    accents:['orange','purple','emerald','amber'], desc:'Light sky blue. Friendly SaaS.' },
+  { id:16, name:'Ocean', mode:'light', temp:'cool', energy:'bold',
+    primary:'linear-gradient(to top right, #3b82f6, #60a5fa, #7dd3fc)', secondary:'rgba(219,234,254,0.6)', neutral:'#ffffff',
+    accents:['orange','amber','emerald','purple'], desc:'Multi-stop blue. Startups.' },
+  { id:17, name:'Teal Fresh', mode:'light', temp:'cool', energy:'calm',
+    primary:'linear-gradient(135deg, #14b8a6, #0d9488)', secondary:'rgba(240,253,250,0.8)', neutral:'#ffffff',
+    accents:['orange','amber','purple','sky'], desc:'Teal. Growth, health, productivity.' },
+  { id:18, name:'Emerald Clean', mode:'light', temp:'cool', energy:'calm',
+    primary:'linear-gradient(135deg, #10b981, #059669)', secondary:'rgba(236,253,245,0.8)', neutral:'#fafffe',
+    accents:['orange','purple','sky','amber'], desc:'Green. Fintech, sustainability.' },
+
+  // LIGHT - Neutral
+  { id:19, name:'Cloud White', mode:'light', temp:'neutral', energy:'calm',
+    primary:'linear-gradient(135deg, #6b7280, #4b5563)', secondary:'rgba(249,250,251,0.8)', neutral:'#ffffff',
+    accents:['blue','emerald','purple','orange'], desc:'Gray primary. Ultra-minimal.' },
+  { id:20, name:'Pearl Gray', mode:'light', temp:'neutral', energy:'calm',
+    primary:'linear-gradient(135deg, #64748b, #475569)', secondary:'rgba(248,250,252,0.7)', neutral:'#ffffff',
+    accents:['blue','orange','emerald','purple'], desc:'Slate primary. Corporate.' },
+  { id:21, name:'Steel', mode:'light', temp:'neutral', energy:'calm',
+    primary:'linear-gradient(to top right, #e2e8f0, #cbd5e1)', secondary:'rgba(248,250,252,0.8)', neutral:'#ffffff',
+    accents:['blue','emerald','purple','orange'], desc:'Light gray gradient. Content-first.' },
+  { id:22, name:'Soft Stone', mode:'light', temp:'neutral', energy:'calm',
+    primary:'linear-gradient(135deg, #78716c, #57534e)', secondary:'rgba(250,250,249,0.7)', neutral:'#fffffe',
+    accents:['orange','amber','emerald','blue'], desc:'Warm gray. Consulting.' },
+  { id:23, name:'Zinc Modern', mode:'light', temp:'neutral', energy:'calm',
+    primary:'linear-gradient(135deg, #52525b, #3f3f46)', secondary:'rgba(250,250,250,0.8)', neutral:'#ffffff',
+    accents:['purple','sky','emerald','orange'], desc:'Cool modern gray. Dev tools.' },
+
+  // LIGHT - Warm
+  { id:24, name:'Warm Sand', mode:'light', temp:'warm', energy:'calm',
+    primary:'linear-gradient(135deg, #d97706, #b45309)', secondary:'rgba(255,251,235,0.8)', neutral:'#fffdf7',
+    accents:['sky','emerald','indigo','purple'], desc:'Amber on cream. Ecommerce.' },
+  { id:25, name:'Coral', mode:'light', temp:'warm', energy:'bold',
+    primary:'linear-gradient(135deg, #f97316, #ea580c)', secondary:'rgba(255,247,237,0.8)', neutral:'#fffbf5',
+    accents:['sky','emerald','indigo','purple'], desc:'Orange. High energy. Conversion.' },
+  { id:26, name:'Sunset', mode:'light', temp:'warm', energy:'bold',
+    primary:'linear-gradient(to top right, #f59e0b, #f97316)', secondary:'rgba(255,251,235,0.7)', neutral:'#fffdf5',
+    accents:['sky','indigo','emerald','purple'], desc:'Amber-to-orange. SMB, freelancer.' },
+  { id:27, name:'Blush', mode:'light', temp:'warm', energy:'bold',
+    primary:'linear-gradient(135deg, #e11d48, #be123c)', secondary:'rgba(255,241,242,0.8)', neutral:'#fffbfb',
+    accents:['sky','emerald','purple','indigo'], desc:'Rose/pink. Consumer, lifestyle.' },
+  { id:28, name:'Rose Soft', mode:'light', temp:'warm', energy:'calm',
+    primary:'linear-gradient(135deg, #fb7185, #f43f5e)', secondary:'rgba(255,241,242,0.7)', neutral:'#fffcfc',
+    accents:['sky','emerald','indigo','amber'], desc:'Softer pink. Creator tools.' },
+  { id:29, name:'Mint Warm', mode:'light', temp:'warm', energy:'calm',
+    primary:'linear-gradient(to top right, #34d399, #6ee7b7, #a7f3d0)', secondary:'rgba(236,253,245,0.7)', neutral:'#fafffe',
+    accents:['orange','purple','sky','amber'], desc:'Light green gradient. Startup.' },
+  { id:30, name:'Golden Hour', mode:'light', temp:'warm', energy:'bold',
+    primary:'linear-gradient(135deg, #ca8a04, #a16207)', secondary:'rgba(254,252,232,0.7)', neutral:'#fffef5',
+    accents:['sky','indigo','emerald','purple'], desc:'Gold. Luxury SaaS, financial.' },
+];
+
+// ════════════════════════════════════════════════════════════
+//  ICON SVGs (simple inline)
+// ════════════════════════════════════════════════════════════
+
+const ICONS = [
+  // Lightning bolt
+  `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
+  // Shield
+  `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
+  // Chart
+  `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`,
+  // Star
+  `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+  // Globe
+  `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
+  // Layers
+  `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>`,
+  // Rocket
+  `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/></svg>`,
+  // Zap
+  `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>`,
+  // Check circle
+  `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
+];
+
+const CARD_TITLES = [
+  'Lightning Fast', 'Enterprise Security', 'Real-time Analytics',
+  'Smart Automation', 'Global Scale', 'Seamless Integration',
+  'Launch Ready', 'Full Commerce', 'Verified Results',
+];
+const CARD_DESCS = [
+  'Deploy in seconds with zero-config setup and instant rollbacks.',
+  'SOC2 compliant with end-to-end encryption and role-based access.',
+  'Track every metric that matters with customizable dashboards.',
+  'Automate repetitive tasks and focus on what moves the needle.',
+  'Serve users worldwide with edge-optimized infrastructure.',
+  'Connect your existing tools with our 200+ native integrations.',
+  'Go from idea to production in minutes, not months.',
+  'Built-in checkout, subscriptions, and revenue analytics.',
+  'Every claim backed by real data and customer outcomes.',
+];
+
+// ════════════════════════════════════════════════════════════
+//  TEXTURES (from newBG.md spec — primary only, rendered as overlay div)
+// ════════════════════════════════════════════════════════════
+
+// Generate noise grain via canvas → data URL (real random specks like film grain)
+function generateNoiseDataURL(mode) {
+  const size = 100;
+  const c = document.createElement('canvas');
+  c.width = size; c.height = size;
+  const ctx = c.getContext('2d');
+  const imageData = ctx.createImageData(size, size);
+  const d = imageData.data;
+  const isDark = mode === 'dark';
+  for (let i = 0; i < d.length; i += 4) {
+    if (isDark) {
+      // White specks on transparent — film grain on dark
+      d[i] = 255; d[i+1] = 255; d[i+2] = 255;
+      d[i+3] = Math.random() < 0.5 ? Math.floor(Math.random() * 30) : 0;
+    } else {
+      // Dark specks on transparent — subtle grain on light
+      d[i] = 0; d[i+1] = 0; d[i+2] = 0;
+      d[i+3] = Math.random() < 0.45 ? Math.floor(Math.random() * 22) : 0;
+    }
+  }
+  ctx.putImageData(imageData, 0, 0);
+  return c.toDataURL('image/png');
+}
+
+// Cache
+let _noiseDarkURL = null;
+let _noiseLightURL = null;
+function getNoiseURL(mode) {
+  if (mode === 'dark') return _noiseDarkURL || (_noiseDarkURL = generateNoiseDataURL('dark'));
+  return _noiseLightURL || (_noiseLightURL = generateNoiseDataURL('light'));
+}
+
+// Texture overlay HTML generator — returns an absolutely positioned div
+// This is rendered INSIDE the primary section, on top of the gradient
+const TEXTURES = [
+  { id:'none', label:'None', modes:['dark','light'],
+    overlay: () => '' },
+
+  { id:'dot-grid', label:'Dot Grid', modes:['dark'],
+    overlay: () => `<div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px);background-size:20px 20px;"></div>` },
+
+  { id:'line-grid', label:'Line Grid', modes:['dark'],
+    overlay: () => `<div style="position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0 1px, transparent 1px 30px), repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0 1px, transparent 1px 30px);"></div>` },
+
+  { id:'noise-dark', label:'Noise / Grain', modes:['dark'],
+    overlay: () => `<div style="position:absolute;inset:0;pointer-events:none;background-image:url('${getNoiseURL('dark')}');background-repeat:repeat;"></div>` },
+
+  { id:'noise-light', label:'Noise / Grain', modes:['light'],
+    overlay: () => `<div style="position:absolute;inset:0;pointer-events:none;background-image:url('${getNoiseURL('light')}');background-repeat:repeat;"></div>` },
+
+  { id:'paper', label:'Paper', modes:['light'],
+    overlay: () => `<div style="position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(119deg, rgba(0,0,0,0.04) 0px, transparent 1px, transparent 3px, rgba(0,0,0,0.03) 4px),repeating-linear-gradient(28deg, rgba(0,0,0,0.03) 0px, transparent 1px, transparent 5px, rgba(0,0,0,0.025) 6px),repeating-linear-gradient(170deg, rgba(0,0,0,0.025) 0px, transparent 1px, transparent 7px, rgba(0,0,0,0.02) 8px);"></div>` },
+];
+
+// ════════════════════════════════════════════════════════════
+//  RENDER
+// ════════════════════════════════════════════════════════════
+
+const paletteSel = document.getElementById('palette-select');
+const themeSel = document.getElementById('theme-select');
+const ctaAccentSel = document.getElementById('cta-accent-select');
+const textureSel = document.getElementById('texture-select');
+
+// Populate palette dropdown
+P.forEach(p => {
+  const opt = document.createElement('option');
+  opt.value = p.id;
+  opt.textContent = `#${p.id} ${p.name} — ${p.mode}/${p.temp}/${p.energy}`;
+  paletteSel.appendChild(opt);
+});
+
+function populateAccentDropdowns(palette) {
+  ctaAccentSel.innerHTML = '';
+  palette.accents.forEach((a, i) => {
+    const o1 = document.createElement('option');
+    o1.value = a; o1.textContent = a; o1.style.color = ACCENT_HEX[a];
+    if (i === 0) o1.selected = true;
+    ctaAccentSel.appendChild(o1);
+  });
+}
+
+function populateTextureDropdown(palette) {
+  textureSel.innerHTML = '';
+  TEXTURES.filter(t => t.modes.includes(palette.mode)).forEach(t => {
+    const opt = document.createElement('option');
+    opt.value = t.id; opt.textContent = t.label;
+    textureSel.appendChild(opt);
+  });
+}
+
+function getActiveTheme(palette) {
+  const sel = themeSel.value;
+  return sel === 'auto' ? palette.temp : sel;
+}
+
+function getSelectedCTAAccent() { return ACCENT_HEX[ctaAccentSel.value] || '#3b82f6'; }
+function getTextureOverlay() {
+  const t = TEXTURES.find(t => t.id === textureSel.value);
+  return t ? t.overlay() : '';
+}
+function hasTexture() { return textureSel.value !== 'none'; }
+
+function renderAccentBar(palette) {
+  const bar = document.getElementById('accent-bar');
+  bar.innerHTML = `
+    <span class="label">Compatible accents:</span>
+    ${palette.accents.map(a => `<span class="accent-swatch" style="background:${ACCENT_HEX[a]}" title="${a}"></span><span class="accent-swatch-label">${a}</span>`).join('')}
+  `;
+}
+
+function renderMeta(palette) {
+  document.getElementById('meta-tags').innerHTML = `
+    <span class="meta-tag ${palette.mode}">${palette.mode}</span>
+    <span class="meta-tag ${palette.temp === 'neutral' ? 'neutral-t' : palette.temp}">${palette.temp}</span>
+    <span class="meta-tag ${palette.energy}">${palette.energy}</span>
+  `;
+}
+
+function renderRawValues(palette) {
+  const pLum = bgLuminance(palette.primary).toFixed(3);
+  const sLum = bgLuminance(palette.secondary).toFixed(3);
+  const nLum = bgLuminance(palette.neutral).toFixed(3);
+  document.getElementById('raw-values').innerHTML = `
+    <div><span>primary:</span> <code>${palette.primary}</code> <span>(L=${pLum})</span></div>
+    <div><span>secondary:</span> <code>${palette.secondary}</code> <span>(L=${sLum})</span></div>
+    <div><span>neutral:</span> <code>${palette.neutral}</code> <span>(L=${nLum})</span></div>
+  `;
+}
+
+function renderSection(bgCSS, sectionBgForRGBA, label, content) {
+  const lum = bgLuminance(bgCSS);
+  const tc = getTextColors(lum);
+  // For rgba secondaries, we render on a base that approximates the blend
+  const bgStyle = bgCSS.startsWith('rgba') || bgCSS.startsWith('linear') || bgCSS.startsWith('radial')
+    ? `background: ${bgCSS};`
+    : `background: ${bgCSS};`;
+  return `
+    <div class="mock-section" style="${bgStyle}">
+      <span class="section-label" style="color:${tc.muted}">${label}</span>
+      <span class="lum-badge" style="color:${tc.muted}">L=${lum.toFixed(3)}</span>
+      ${content(tc, lum)}
+    </div>`;
+}
+
+function cardHTML(lum, theme, idx) {
+  const cs = getCardStyles(lum);
+  const is = getIconStyle(lum, theme);
+
+  const cardStyle = `
+    background:${cs.bg};
+    ${cs.blur !== 'none' ? `backdrop-filter:${cs.blur};-webkit-backdrop-filter:${cs.blur};` : ''}
+    border:1px solid ${cs.border};
+    box-shadow:${cs.shadow};
+  `;
+  return `
+    <div class="mock-card" style="${cardStyle}">
+      <div class="icon-circle" style="background:${is.bg};color:${is.color};">
+        ${ICONS[idx % ICONS.length]}
+      </div>
+      <h3 style="color:${cs.heading}">${CARD_TITLES[idx]}</h3>
+      <p style="color:${cs.body}">${CARD_DESCS[idx]}</p>
+    </div>`;
+}
+
+function render() {
+  const palette = P.find(p => p.id === parseInt(paletteSel.value));
+  if (!palette) return;
+
+  const theme = getActiveTheme(palette);
+  const ctaHex = getSelectedCTAAccent();
+  const textureOverlay = getTextureOverlay();
+  const textured = hasTexture();
+  const btnTextColor = getButtonTextColor(ctaHex);
+
+  renderMeta(palette);
+  renderAccentBar(palette);
+  renderRawValues(palette);
+
+  const secIsRGBA = palette.secondary.startsWith('rgba');
+  const mockup = document.getElementById('mockup');
+  let html = '';
+
+  // Header — neutral
+  html += renderSection(palette.neutral, null, 'header — neutral', (tc) => `
+    <div class="mock-header">
+      <div class="logo" style="color:${tc.heading}">YourBrand</div>
+      <div class="nav" style="color:${tc.body}">
+        <span>Features</span><span>Pricing</span><span>About</span><span>Blog</span>
+      </div>
+    </div>
+  `);
+
+  // Hero — primary (with texture overlay)
+  const heroLum = bgLuminance(palette.primary);
+  const heroTC = getTextColors(heroLum);
+  html += `
+    <div class="mock-section" style="background:${palette.primary};position:relative;">
+      ${textureOverlay}
+      <span class="section-label" style="color:${heroTC.muted};position:relative;z-index:1;">hero — primary${textured ? ' + texture' : ''}</span>
+      <span class="lum-badge" style="color:${heroTC.muted};position:relative;z-index:1;">L=${heroLum.toFixed(3)}</span>
+      <div class="mock-hero" style="position:relative;z-index:1;">
+        <h1 style="color:${heroTC.heading}">Ship faster.<br>Scale smarter.</h1>
+        <p style="color:${heroTC.body}">The all-in-one platform that helps teams build, deploy, and iterate on products 10x faster than traditional workflows.</p>
+        <div class="cta-btn" style="background:${ctaHex};color:${btnTextColor};">Get Started Free</div>
+      </div>
+    </div>`;
+
+  // Section 1 — secondary (3 cards)
+  const secStyle = secIsRGBA
+    ? `background:${palette.neutral};position:relative;`
+    : `background:${palette.secondary};`;
+
+  html += `<div class="mock-section" style="${secStyle}">`;
+  if (secIsRGBA) {
+    html += `<div style="position:absolute;inset:0;background:${palette.secondary};pointer-events:none;"></div>`;
+  }
+  const secLum = secIsRGBA ? bgLuminance(palette.neutral) : bgLuminance(palette.secondary);
+  const secTC = getTextColors(secLum);
+  html += `
+    <span class="section-label" style="color:${secTC.muted};position:relative;z-index:1;">section 1 — secondary</span>
+    <span class="lum-badge" style="color:${secTC.muted};position:relative;z-index:1;">L=${secLum.toFixed(3)}</span>
+    <div class="mock-content" style="position:relative;z-index:1;">
+      <h2 style="color:${secTC.heading}">Powerful Features</h2>
+      <p class="subtitle" style="color:${secTC.body}">Everything you need to go from zero to production.</p>
+      <div class="card-grid">
+        ${cardHTML(secLum, theme, 0)}
+        ${cardHTML(secLum, theme, 1)}
+        ${cardHTML(secLum, theme, 2)}
+      </div>
+    </div>`;
+  html += `</div>`;
+
+  // Section 2 — neutral (3 cards)
+  html += renderSection(palette.neutral, null, 'section 2 — neutral', (tc, lum) => `
+    <div class="mock-content">
+      <h2 style="color:${tc.heading}">Built for Teams</h2>
+      <p class="subtitle" style="color:${tc.body}">Collaboration tools that actually work.</p>
+      <div class="card-grid">
+        ${cardHTML(lum, theme, 3)}
+        ${cardHTML(lum, theme, 4)}
+        ${cardHTML(lum, theme, 5)}
+      </div>
+    </div>
+  `);
+
+  // Section 3 — secondary (3 cards)
+  html += `<div class="mock-section" style="${secStyle}">`;
+  if (secIsRGBA) {
+    html += `<div style="position:absolute;inset:0;background:${palette.secondary};pointer-events:none;"></div>`;
+  }
+  html += `
+    <span class="section-label" style="color:${secTC.muted};position:relative;z-index:1;">section 3 — secondary</span>
+    <span class="lum-badge" style="color:${secTC.muted};position:relative;z-index:1;">L=${secLum.toFixed(3)}</span>
+    <div class="mock-content" style="position:relative;z-index:1;">
+      <h2 style="color:${secTC.heading}">Results That Speak</h2>
+      <p class="subtitle" style="color:${secTC.body}">See why thousands of teams made the switch.</p>
+      <div class="card-grid">
+        ${cardHTML(secLum, theme, 6)}
+        ${cardHTML(secLum, theme, 7)}
+        ${cardHTML(secLum, theme, 8)}
+      </div>
+    </div>`;
+  html += `</div>`;
+
+  // CTA — primary (with texture overlay)
+  const ctaLum = heroLum;
+  const ctaTC = heroTC;
+  html += `
+    <div class="mock-section" style="background:${palette.primary};position:relative;">
+      ${textureOverlay}
+      <span class="section-label" style="color:${ctaTC.muted};position:relative;z-index:1;">cta — primary${textured ? ' + texture' : ''}</span>
+      <span class="lum-badge" style="color:${ctaTC.muted};position:relative;z-index:1;">L=${ctaLum.toFixed(3)}</span>
+      <div class="mock-cta" style="position:relative;z-index:1;">
+        <h2 style="color:${ctaTC.heading}">Ready to get started?</h2>
+        <p style="color:${ctaTC.body}">Join 5,000+ teams already shipping faster.</p>
+        <div class="cta-btn" style="background:${ctaHex};color:${btnTextColor};display:inline-block;padding:14px 36px;border-radius:8px;font-size:15px;font-weight:600;">Start Free Trial</div>
+      </div>
+    </div>`;
+
+  // Footer — neutral
+  html += renderSection(palette.neutral, null, 'footer — neutral', (tc) => `
+    <div class="mock-footer" style="color:${tc.muted}">
+      <span>YourBrand Inc.</span>
+      <span>Privacy &middot; Terms &middot; Contact</span>
+    </div>
+  `);
+
+  mockup.innerHTML = html;
+}
+
+// ════════════════════════════════════════════════════════════
+//  INIT + EVENTS
+// ════════════════════════════════════════════════════════════
+
+function onPaletteChange() {
+  const palette = P.find(p => p.id === parseInt(paletteSel.value));
+  if (!palette) return;
+  populateAccentDropdowns(palette);
+  populateTextureDropdown(palette);
+  render();
+}
+
+paletteSel.addEventListener('change', onPaletteChange);
+themeSel.addEventListener('change', render);
+ctaAccentSel.addEventListener('change', render);
+textureSel.addEventListener('change', render);
+
+// Initial setup
+const initPalette = P[0];
+populateAccentDropdowns(initPalette);
+populateTextureDropdown(initPalette);
+render();
+</script>
+</body>
+</html>

@@ -7,11 +7,13 @@
 
 import React from 'react';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publishedTextColors';
+import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardStyles } from '@/lib/publishedTextColors';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { getDynamicCardLayout } from '@/utils/dynamicCardLayout';
+import { analyzeBackground } from '@/utils/backgroundAnalysis';
 
 // V2 Types (no icon - metrics draw attention on their own)
 interface MetricItem {
@@ -27,25 +29,6 @@ interface RoiMetricItem {
   metric: string;
   label: string;
 }
-
-// Theme-based card styling (inline for SSR)
-const getCardStyles = (theme: UIBlockTheme) => ({
-  warm: {
-    border: '#fed7aa', // orange-200
-    shadow: '0 4px 20px rgba(249,115,22,0.15)',
-    shadowHover: '0 8px 30px rgba(249,115,22,0.25)',
-  },
-  cool: {
-    border: '#bfdbfe', // blue-200
-    shadow: '0 4px 20px rgba(37,99,235,0.15)',
-    shadowHover: '0 8px 30px rgba(37,99,235,0.25)',
-  },
-  neutral: {
-    border: '#e5e7eb', // gray-200
-    shadow: '0 4px 20px rgba(100,116,139,0.15)',
-    shadowHover: '0 8px 30px rgba(100,116,139,0.25)',
-  }
-})[theme];
 
 // Theme-based metric text color (solid, not gradient - bg-clip-text unreliable)
 const getMetricTextColor = (theme: UIBlockTheme) => ({
@@ -72,7 +55,10 @@ export default function MetricTilesPublished(props: LayoutComponentProps) {
 
   // Detect theme
   const uiTheme: UIBlockTheme = props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
-  const cardStyles = getCardStyles(uiTheme);
+
+  // Adaptive card styles based on section background luminance
+  const { luminance } = analyzeBackground(sectionBackgroundCSS || '');
+  const cardStyles = getPublishedCardStyles(luminance, uiTheme);
 
   // ROI section background gradient
   const getRoiBgGradient = () => {
@@ -116,15 +102,8 @@ export default function MetricTilesPublished(props: LayoutComponentProps) {
   const h3Typography = getPublishedTypographyStyles('h3', theme);
   const bodyLgTypography = getPublishedTypographyStyles('body-lg', theme);
 
-  // Grid columns based on count
-  const getGridStyle = (count: number) => {
-    if (count === 1) return '1fr';
-    if (count === 2) return 'repeat(2, 1fr)';
-    if (count === 3) return 'repeat(auto-fit, minmax(280px, 1fr))';
-    if (count === 4) return 'repeat(auto-fit, minmax(260px, 1fr))';
-    if (count <= 6) return 'repeat(auto-fit, minmax(280px, 1fr))';
-    return 'repeat(auto-fit, minmax(240px, 1fr))';
-  };
+  // Dynamic card layout
+  const layout = getDynamicCardLayout(metrics.length);
 
   return (
     <SectionWrapperPublished
@@ -162,21 +141,19 @@ export default function MetricTilesPublished(props: LayoutComponentProps) {
 
         {/* Metric Tiles Grid */}
         {metrics.length > 0 && (
-          <div
-            className="grid gap-6"
-            style={{
-              gridTemplateColumns: getGridStyle(metrics.length)
-            }}
-          >
+          <div className={layout.gridClass}>
             {metrics.map((tile) => (
               <div
                 key={tile.id}
-                className="bg-white rounded-2xl p-8 h-full flex flex-col transition-all duration-300 hover:-translate-y-1"
+                className={`rounded-2xl h-full flex flex-col transition-all duration-300 hover:-translate-y-1 ${layout.cardClass}`}
                 style={{
-                  boxShadow: cardStyles.shadow,
-                  borderWidth: '1px',
-                  borderStyle: 'solid',
-                  borderColor: cardStyles.border
+                  backgroundColor: cardStyles.bg,
+                  backdropFilter: cardStyles.backdropFilter,
+                  WebkitBackdropFilter: cardStyles.backdropFilter,
+                  boxShadow: cardStyles.boxShadow,
+                  borderWidth: cardStyles.borderWidth,
+                  borderStyle: cardStyles.borderStyle,
+                  borderColor: cardStyles.borderColor
                 }}
               >
                 {/* Title */}
@@ -184,7 +161,7 @@ export default function MetricTilesPublished(props: LayoutComponentProps) {
                   style={{
                     ...h3Typography,
                     fontWeight: 'bold',
-                    color: textColors.heading,
+                    color: cardStyles.textHeading,
                     marginBottom: '1rem'
                   }}
                 >
@@ -214,7 +191,7 @@ export default function MetricTilesPublished(props: LayoutComponentProps) {
                   <TextPublished
                     value={tile.description}
                     style={{
-                      color: textColors.muted,
+                      color: cardStyles.textMuted,
                       fontSize: '0.875rem',
                       lineHeight: '1.75'
                     }}

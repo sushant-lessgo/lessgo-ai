@@ -191,10 +191,9 @@ export default function CenterStackedPublished(props: LayoutComponentProps) {
   // Detect theme for placeholder (simplified - default to neutral)
   const placeholderTheme: 'warm' | 'cool' | 'neutral' = 'neutral';
 
-  // Extract button metadata for form detection
+  // V2: Extract button metadata from elementMetadata (not element.metadata)
   const sectionData = props.content?.[sectionId];
-  const ctaElement = sectionData?.elements?.cta_text;
-  const buttonConfig = ctaElement?.metadata?.buttonConfig;
+  const buttonConfig = sectionData?.elementMetadata?.cta_text?.buttonConfig || props.elementMetadata?.cta_text?.buttonConfig;
 
   return (
     <SectionWrapperPublished

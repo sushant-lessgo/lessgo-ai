@@ -421,13 +421,13 @@ export default function SplitScreen(props: LayoutComponentProps) {
                 />
               )}
 
-              {content[sectionId]?.elements?.cta_text?.metadata?.buttonConfig?.type === 'link-with-input' ? (
+              {content[sectionId]?.elementMetadata?.cta_text?.buttonConfig?.type === 'link-with-input' ? (
                 // Link-with-input: Vertical layout (input + button, then trust items below)
                 <div className="flex flex-col gap-6 mt-4">
                   <CTAButtonWithInput
                     text={blockContent.cta_text}
                     colorTokens={colorTokens}
-                    buttonConfig={content[sectionId].elements.cta_text.metadata.buttonConfig}
+                    buttonConfig={content[sectionId].elementMetadata.cta_text.buttonConfig}
                     className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 text-lg px-8 py-4"
                     variant="primary"
                     sectionId={sectionId}

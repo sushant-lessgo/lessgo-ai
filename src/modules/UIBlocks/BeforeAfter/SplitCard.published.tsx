@@ -148,9 +148,9 @@ export default function SplitCardPublished(props: LayoutComponentProps) {
   const upgrade_text = props.upgrade_text || 'Upgrade';
 
   // Extract icons
-  const before_icon = props.before_icon || '⚠️';
-  const after_icon = props.after_icon || '⭐';
-  const upgrade_icon = props.upgrade_icon || '➡️';
+  const before_icon = props.before_icon || 'AlertTriangle';
+  const after_icon = props.after_icon || 'Star';
+  const upgrade_icon = props.upgrade_icon || 'ArrowRight';
 
   // Detect UIBlock theme
   const uiTheme: UIBlockTheme = props.manualThemeOverride ||

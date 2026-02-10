@@ -13,6 +13,7 @@ import AvatarEditableComponent from '@/components/ui/AvatarEditableComponent';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { getDynamicCardLayout } from '@/utils/dynamicCardLayout';
 
 // V2: Testimonial item structure - clean array item
 interface Testimonial {
@@ -258,6 +259,9 @@ export default function PullQuoteStack(props: LayoutComponentProps) {
     );
   };
 
+  // Dynamic card layout for container width
+  const layout = getDynamicCardLayout(testimonials.length);
+
   return (
     <LayoutSection
       sectionId={sectionId}
@@ -267,7 +271,7 @@ export default function PullQuoteStack(props: LayoutComponentProps) {
       mode={mode}
       className={props.className}
     >
-      <div className="max-w-6xl mx-auto">
+      <div className={layout.containerClass}>
         {/* Header */}
         <div className="text-center mb-16">
           <EditableAdaptiveHeadline

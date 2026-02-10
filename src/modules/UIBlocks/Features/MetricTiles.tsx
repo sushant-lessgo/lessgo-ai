@@ -9,7 +9,10 @@ import {
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import { shadows, cardEnhancements } from '@/modules/Design/designTokens';
+import { cardEnhancements } from '@/modules/Design/designTokens';
+import { getCardStyles, CardStyles } from '@/modules/Design/cardStyles';
+import { getDynamicCardLayout, isSplitLayout } from '@/utils/dynamicCardLayout';
+import { cn } from '@/lib/utils';
 
 // V2 Types (no icon - metrics draw attention on their own)
 interface MetricItem {
@@ -76,25 +79,6 @@ const CONTENT_SCHEMA = {
   }
 };
 
-// Theme-based card styling (per uiBlockTheme.md)
-const getCardStyles = (theme: UIBlockTheme) => ({
-  warm: {
-    border: 'border-orange-200',
-    shadow: shadows.card.warm,
-    hover: shadows.cardHover.warm,
-  },
-  cool: {
-    border: 'border-blue-200',
-    shadow: shadows.card.cool,
-    hover: shadows.cardHover.cool,
-  },
-  neutral: {
-    border: 'border-gray-200',
-    shadow: shadows.card.neutral,
-    hover: shadows.cardHover.neutral,
-  }
-})[theme];
-
 // Theme-based metric text color
 const getMetricTextColor = (theme: UIBlockTheme) => ({
   warm: 'text-orange-600',
@@ -134,7 +118,9 @@ const MetricTile = React.memo(({
   sectionId,
   backgroundType,
   sectionBackground,
-  theme
+  theme,
+  cardClassName,
+  cardStyles
 }: {
   item: MetricItem;
   colorTokens: any;
@@ -147,11 +133,11 @@ const MetricTile = React.memo(({
   backgroundType: string;
   sectionBackground: string;
   theme: UIBlockTheme;
+  cardClassName?: string;
+  cardStyles: CardStyles;
 }) => {
-  const cardStyles = getCardStyles(theme);
-
   return (
-    <div className={`group/metric-tile relative bg-white ${cardEnhancements.borderRadius} p-8 border ${cardStyles.border} ${cardStyles.shadow} ${cardStyles.hover} ${cardEnhancements.hoverLift} ${cardEnhancements.transition} h-full flex flex-col`}>
+    <div className={cn(`group/metric-tile relative ${cardStyles.bg} ${cardStyles.blur} ${cardEnhancements.borderRadius} ${cardStyles.border} ${cardStyles.shadow} ${cardStyles.hoverEffect} ${cardEnhancements.hoverLift} ${cardEnhancements.transition} h-full flex flex-col`, cardClassName || 'p-8')}>
 
       {/* Delete Button */}
       {mode === 'edit' && (
@@ -267,7 +253,14 @@ export default function MetricTiles(props: LayoutComponentProps) {
   }, [props.manualThemeOverride, props.userContext]);
 
   const themeColors = getMetricTilesThemeColors(theme);
-  const cardStyles = getCardStyles(theme);
+
+  // Adaptive card styles based on section background luminance
+  const cardStyles = React.useMemo(() => {
+    return getCardStyles({
+      sectionBackgroundCSS: sectionBackground || '',
+      theme
+    });
+  }, [sectionBackground, theme]);
 
   // Arrays from content
   const metrics: MetricItem[] = blockContent.metrics || [];
@@ -312,15 +305,8 @@ export default function MetricTiles(props: LayoutComponentProps) {
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
 
-  // Grid columns based on count
-  const getGridClass = (count: number) => {
-    if (count === 1) return 'md:grid-cols-1 justify-items-center';
-    if (count === 2) return 'md:grid-cols-2';
-    if (count === 3) return 'md:grid-cols-2 lg:grid-cols-3';
-    if (count === 4) return 'md:grid-cols-2 lg:grid-cols-4';
-    if (count <= 6) return 'md:grid-cols-2 lg:grid-cols-3';
-    return 'md:grid-cols-2 lg:grid-cols-4';
-  };
+  // Dynamic card layout
+  const layout = getDynamicCardLayout(metrics.length);
 
   return (
     <LayoutSection
@@ -365,7 +351,7 @@ export default function MetricTiles(props: LayoutComponentProps) {
           )}
         </div>
 
-        <div className={`grid ${getGridClass(metrics.length)} gap-6`}>
+        <div className={layout.gridClass}>
           {metrics.map((item) => (
             <MetricTile
               key={item.id}
@@ -380,12 +366,14 @@ export default function MetricTiles(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               sectionBackground={sectionBackground}
               theme={theme}
+              cardClassName={layout.cardClass}
+              cardStyles={cardStyles}
             />
           ))}
 
           {/* Add Metric Tile Button */}
           {mode === 'edit' && metrics.length < 8 && (
-            <div className={`bg-white ${cardEnhancements.borderRadius} p-8 border-2 border-dashed ${cardStyles.border} ${cardStyles.hover} ${cardEnhancements.hoverLift} ${cardEnhancements.transition} h-full flex flex-col items-center justify-center min-h-[250px]`}>
+            <div className={cn(`${cardStyles.bg} ${cardStyles.blur} ${cardEnhancements.borderRadius} border-2 border-dashed ${cardStyles.border} ${cardStyles.hoverEffect} ${cardEnhancements.hoverLift} ${cardEnhancements.transition} h-full flex flex-col items-center justify-center min-h-[250px]`, layout.cardClass)}>
               <button
                 onClick={handleAddMetric}
                 className="w-full h-full flex flex-col items-center justify-center space-y-4 text-gray-400 hover:text-gray-600 transition-colors duration-300"

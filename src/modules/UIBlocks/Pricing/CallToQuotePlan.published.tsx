@@ -7,10 +7,13 @@
 
 import React from 'react';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publishedTextColors';
+import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardStyles } from '@/lib/publishedTextColors';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { CTAButtonPublished } from '@/components/published/CTAButtonPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { analyzeBackground } from '@/utils/backgroundAnalysis';
 import * as LucideIcons from 'lucide-react';
 
 // Contact card structure
@@ -78,6 +81,16 @@ export default function CallToQuotePlanPublished(props: LayoutComponentProps) {
   const contact_cards: ContactCard[] = props.contact_cards || DEFAULT_CONTACT_CARDS;
   const trust_items: TrustItem[] = props.trust_items || [];
 
+  // Detect theme
+  const uiBlockTheme: UIBlockTheme =
+    props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+
+  // Get luminance from section background
+  const { luminance } = analyzeBackground(sectionBackgroundCSS || '');
+
+  // Get adaptive card styles
+  const cardStyles = getPublishedCardStyles(luminance, uiBlockTheme);
+
   // Get accent color from theme
   const accentColor = theme?.colors?.accentColor || '#3b82f6';
 
@@ -144,19 +157,24 @@ export default function CallToQuotePlanPublished(props: LayoutComponentProps) {
           {contact_cards.map((card: ContactCard, index: number) => (
             <div
               key={card.id}
-              className="relative p-6 bg-white rounded-xl border-2 transition-all duration-300"
+              className="relative p-6 rounded-xl transition-all duration-300 hover:-translate-y-1"
               style={{
-                borderColor: '#e5e7eb',
-                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                backgroundColor: cardStyles.bg,
+                borderColor: cardStyles.borderColor,
+                borderWidth: cardStyles.borderWidth,
+                borderStyle: cardStyles.borderStyle,
+                backdropFilter: cardStyles.backdropFilter,
+                WebkitBackdropFilter: cardStyles.backdropFilter,
+                boxShadow: cardStyles.boxShadow,
               }}
             >
               <div className="text-center">
                 {/* Icon */}
                 <div
                   className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: accentColor }}
+                  style={{ backgroundColor: cardStyles.iconBg, color: cardStyles.iconColor }}
                 >
-                  <IconComponent name={card.icon} className="w-8 h-8 text-white" />
+                  <IconComponent name={card.icon} className="w-8 h-8" />
                 </div>
 
                 {/* Title */}
@@ -164,7 +182,7 @@ export default function CallToQuotePlanPublished(props: LayoutComponentProps) {
                   style={{
                     ...h4Typography,
                     fontWeight: '600',
-                    color: '#111827', // gray-900
+                    color: cardStyles.textHeading,
                     marginBottom: '0.5rem',
                   }}
                 >
@@ -175,7 +193,7 @@ export default function CallToQuotePlanPublished(props: LayoutComponentProps) {
                 <p
                   style={{
                     ...bodyTypography,
-                    color: '#4b5563', // gray-600
+                    color: cardStyles.textBody,
                     marginBottom: '1rem',
                   }}
                 >

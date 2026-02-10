@@ -10,6 +10,7 @@ import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import { inferIconFromText } from '@/lib/iconCategoryMap';
+import { getCardStyles, type CardStyles } from '@/modules/Design/cardStyles';
 
 // Pain item structure (V2 - array based)
 interface PainItem {
@@ -50,31 +51,26 @@ const PainPointItem = ({
   mode,
   sectionId,
   colorTokens,
-  dynamicTextColors,
   backgroundType,
   sectionBackground,
   onItemUpdate,
   onRemove,
   canRemove,
-  painColors
+  cardStyles,
+  themeColors
 }: {
   painItem: PainItem;
   index: number;
   mode: 'edit' | 'preview';
   sectionId: string;
   colorTokens: any;
-  dynamicTextColors?: { heading?: string; body?: string; muted?: string };
   backgroundType: any;
   sectionBackground: any;
   onItemUpdate: (index: number, field: keyof PainItem, value: string) => void;
   onRemove: (index: number) => void;
   canRemove: boolean;
-  painColors: {
-    border: string;
-    borderHover: string;
-    iconBg: string;
-    iconBgHover: string;
-    iconText: string;
+  cardStyles: CardStyles;
+  themeColors: {
     dotColor: string;
     conclusionBg: string;
     conclusionBorder: string;
@@ -82,10 +78,10 @@ const PainPointItem = ({
   };
 }) => {
   return (
-    <div className={`group flex items-start space-x-4 p-6 bg-white rounded-lg border ${painColors.border} ${painColors.borderHover} hover:shadow-md transition-all duration-300`}>
+    <div className={`group flex items-start space-x-4 p-6 rounded-lg ${cardStyles.bg} ${cardStyles.blur} ${cardStyles.border} ${cardStyles.shadow} ${cardStyles.hoverEffect} transition-all duration-300`}>
 
       {/* Pain Icon */}
-      <div className={`flex-shrink-0 w-12 h-12 ${painColors.iconBg} rounded-lg flex items-center justify-center ${painColors.iconText} ${painColors.iconBgHover} transition-colors duration-300 group/icon-edit relative`}>
+      <div className={`flex-shrink-0 w-12 h-12 ${cardStyles.iconBg} rounded-lg flex items-center justify-center ${cardStyles.iconColor} transition-colors duration-300 group/icon-edit relative`}>
         <IconEditableText
           mode={mode}
           value={painItem.icon || ''}
@@ -111,8 +107,7 @@ const PainPointItem = ({
             backgroundType={backgroundType}
             colorTokens={colorTokens}
             variant="body"
-            className="font-semibold text-xl leading-relaxed"
-            textStyle={{ color: dynamicTextColors?.heading || '#111827' }}
+            className={`font-semibold text-xl leading-relaxed ${cardStyles.textHeading}`}
             placeholder="Enter pain point..."
             sectionBackground={sectionBackground}
             data-section-id={sectionId}
@@ -130,8 +125,7 @@ const PainPointItem = ({
               backgroundType={backgroundType}
               colorTokens={colorTokens}
               variant="body"
-              className={`text-base leading-relaxed ${!painItem.description && mode === 'edit' ? 'opacity-50 italic' : ''}`}
-              textStyle={{ color: dynamicTextColors?.body || '#4b5563' }}
+              className={`text-base leading-relaxed ${cardStyles.textBody} ${!painItem.description && mode === 'edit' ? 'opacity-50 italic' : ''}`}
               placeholder="Add optional description to elaborate on this pain point..."
               sectionBackground={sectionBackground}
               data-section-id={sectionId}
@@ -161,7 +155,7 @@ const PainPointItem = ({
       )}
 
       {/* Emphasis Indicator */}
-      <div className={`flex-shrink-0 w-2 h-2 ${painColors.dotColor} rounded-full group-hover:opacity-80 transition-colors duration-300`}></div>
+      <div className={`flex-shrink-0 w-2 h-2 ${themeColors.dotColor} rounded-full group-hover:opacity-80 transition-colors duration-300`}></div>
     </div>
   );
 };
@@ -172,7 +166,6 @@ export default function StackedPainBullets(props: LayoutComponentProps) {
     mode,
     blockContent,
     colorTokens,
-    dynamicTextColors,
     sectionBackground,
     backgroundType,
     handleContentUpdate
@@ -188,46 +181,42 @@ export default function StackedPainBullets(props: LayoutComponentProps) {
     return 'neutral';
   }, [props.manualThemeOverride, props.userContext]);
 
-  // Pain colors by theme
-  const getPainColors = (theme: UIBlockTheme) => {
+  // Get adaptive card styles based on section background luminance
+  const cardStyles = React.useMemo(() => {
+    return getCardStyles({
+      sectionBackgroundCSS: sectionBackground || '',
+      theme
+    });
+  }, [sectionBackground, theme]);
+
+  // Theme-specific colors for conclusion badge and dot indicator
+  const getThemeColors = (theme: UIBlockTheme) => {
     return {
       warm: {
-        border: 'border-orange-200',
-        borderHover: 'hover:border-orange-300',
-        iconBg: 'bg-orange-100',
-        iconBgHover: 'group-hover:bg-orange-200',
-        iconText: 'text-orange-600',
         conclusionBg: 'bg-orange-50',
         conclusionBorder: 'border-orange-200',
         conclusionText: 'text-orange-800',
-        dotColor: 'bg-orange-400'
+        dotColor: 'bg-orange-400',
+        iconTextForBadge: 'text-orange-600'
       },
       cool: {
-        border: 'border-blue-200',
-        borderHover: 'hover:border-blue-300',
-        iconBg: 'bg-blue-100',
-        iconBgHover: 'group-hover:bg-blue-200',
-        iconText: 'text-blue-600',
         conclusionBg: 'bg-blue-50',
         conclusionBorder: 'border-blue-200',
         conclusionText: 'text-blue-800',
-        dotColor: 'bg-blue-400'
+        dotColor: 'bg-blue-400',
+        iconTextForBadge: 'text-blue-600'
       },
       neutral: {
-        border: 'border-amber-200',
-        borderHover: 'hover:border-amber-300',
-        iconBg: 'bg-amber-100',
-        iconBgHover: 'group-hover:bg-amber-200',
-        iconText: 'text-amber-600',
         conclusionBg: 'bg-amber-50',
         conclusionBorder: 'border-amber-200',
         conclusionText: 'text-amber-800',
-        dotColor: 'bg-amber-400'
+        dotColor: 'bg-amber-400',
+        iconTextForBadge: 'text-amber-600'
       }
     }[theme];
   };
 
-  const painColors = getPainColors(theme);
+  const themeColors = getThemeColors(theme);
 
   // Get pain items from content (array-based)
   const painItems: PainItem[] = Array.isArray(blockContent.pain_items)
@@ -315,13 +304,13 @@ export default function StackedPainBullets(props: LayoutComponentProps) {
               mode={mode}
               sectionId={sectionId}
               colorTokens={colorTokens}
-              dynamicTextColors={dynamicTextColors}
               backgroundType={backgroundType}
               sectionBackground={sectionBackground}
               onItemUpdate={handleItemUpdate}
               onRemove={removePainItem}
               canRemove={painItems.length > 1}
-              painColors={painColors}
+              cardStyles={cardStyles}
+              themeColors={themeColors}
             />
           ))}
         </div>
@@ -331,7 +320,7 @@ export default function StackedPainBullets(props: LayoutComponentProps) {
           <div className="mt-6 flex justify-center">
             <button
               onClick={addPainItem}
-              className={`flex items-center space-x-2 px-4 py-2 text-sm ${painColors.iconText} hover:opacity-80 border ${painColors.border} ${painColors.borderHover} rounded-lg hover:${painColors.conclusionBg} transition-all duration-200`}
+              className={`flex items-center space-x-2 px-4 py-2 text-sm ${cardStyles.iconColor} hover:opacity-80 ${cardStyles.border} rounded-lg transition-all duration-200`}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -343,8 +332,8 @@ export default function StackedPainBullets(props: LayoutComponentProps) {
 
         {/* Emotional Conclusion */}
         <div className="mt-16 text-center mb-8">
-          <div className={`inline-flex items-center px-6 py-3 ${painColors.conclusionBg} border ${painColors.conclusionBorder} rounded-full ${painColors.conclusionText}`}>
-            <svg className={`w-5 h-5 mr-2 ${painColors.iconText}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className={`inline-flex items-center px-6 py-3 ${themeColors.conclusionBg} border ${themeColors.conclusionBorder} rounded-full ${themeColors.conclusionText}`}>
+            <svg className={`w-5 h-5 mr-2 ${themeColors.iconTextForBadge}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
             <EditableAdaptiveText

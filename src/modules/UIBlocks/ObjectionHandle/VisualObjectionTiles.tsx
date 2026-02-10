@@ -14,6 +14,8 @@ import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import { inferIconFromText } from '@/lib/iconCategoryMap';
+import { getCardStyles, CardStyles } from '@/modules/Design/cardStyles';
+import { cn } from '@/lib/utils';
 
 // Objection item structure (V2 format)
 interface Objection {
@@ -59,24 +61,18 @@ const CONTENT_SCHEMA = {
 };
 
 
-// Theme-based colors for tiles
-const getTileColors = (theme: UIBlockTheme) => ({
+// Theme extras - accent elements (icons, gradients) that stay themed
+const getThemeExtras = (theme: UIBlockTheme) => ({
   warm: {
     iconBg: 'bg-gradient-to-br from-orange-50 to-orange-100',
-    border: 'border-orange-200',
-    hoverBorder: 'hover:border-orange-300',
     accent: 'from-orange-400 to-orange-500'
   },
   cool: {
     iconBg: 'bg-gradient-to-br from-blue-50 to-indigo-100',
-    border: 'border-blue-200',
-    hoverBorder: 'hover:border-blue-300',
     accent: 'from-blue-400 to-indigo-500'
   },
   neutral: {
     iconBg: 'bg-gradient-to-br from-gray-50 to-gray-100',
-    border: 'border-gray-200',
-    hoverBorder: 'hover:border-gray-300',
     accent: 'from-gray-400 to-gray-500'
   }
 }[theme]);
@@ -102,14 +98,22 @@ export default function VisualObjectionTiles(props: LayoutComponentProps) {
   const bodyStyle = getTypographyStyle('body');
 
   // Theme detection: manual override > auto-detection > neutral fallback
-  const theme = React.useMemo(() => {
+  const uiTheme = React.useMemo(() => {
     if (props.manualThemeOverride) return props.manualThemeOverride;
     if (props.userContext) return selectUIBlockTheme(props.userContext);
     return 'neutral';
   }, [props.manualThemeOverride, props.userContext]);
 
-  // Get theme-specific colors
-  const tileColors = getTileColors(theme);
+  // Card styles from luminance-based system
+  const cardStyles = React.useMemo(() => {
+    return getCardStyles({
+      sectionBackgroundCSS: sectionBackground || '',
+      theme: uiTheme
+    });
+  }, [sectionBackground, uiTheme]);
+
+  // Theme extras for accent elements
+  const themeExtras = getThemeExtras(uiTheme);
 
   // Get objections with fallback to defaults
   const objections = blockContent.objections || DEFAULT_OBJECTIONS;
@@ -206,7 +210,15 @@ export default function VisualObjectionTiles(props: LayoutComponentProps) {
           {objections.map((objection) => (
             <div
               key={objection.id}
-              className={`relative group bg-white/90 backdrop-blur-sm border ${tileColors.border} ${tileColors.hoverBorder} rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 ${getCardClasses(objections.length)}`}
+              className={cn(
+                'relative group rounded-2xl p-8 transition-all duration-300',
+                cardStyles.bg,
+                cardStyles.blur,
+                cardStyles.border,
+                cardStyles.shadow,
+                cardStyles.hoverEffect,
+                getCardClasses(objections.length)
+              )}
             >
 
               {/* Delete button - only show in edit mode and if more than 1 objection */}
@@ -227,7 +239,7 @@ export default function VisualObjectionTiles(props: LayoutComponentProps) {
 
               {/* Icon */}
               <div className="text-center mb-6">
-                <div className={`inline-flex items-center justify-center w-16 h-16 ${tileColors.iconBg} rounded-2xl text-3xl group-hover:scale-110 transition-transform duration-300`}>
+                <div className={`inline-flex items-center justify-center w-16 h-16 ${themeExtras.iconBg} rounded-2xl text-3xl group-hover:scale-110 transition-transform duration-300`}>
                   <IconEditableText
                     mode={mode}
                     value={objection.icon || inferIconFromText(objection.question, objection.response)}
@@ -236,7 +248,7 @@ export default function VisualObjectionTiles(props: LayoutComponentProps) {
                     colorTokens={colorTokens}
                     variant="body"
                     iconSize="xl"
-                    placeholder="💡"
+                    placeholder="Lightbulb"
                     sectionBackground={sectionBackground}
                     sectionId={sectionId}
                     elementKey={`objection_icon_${objection.id}`}
@@ -251,13 +263,13 @@ export default function VisualObjectionTiles(props: LayoutComponentProps) {
                     contentEditable
                     suppressContentEditableWarning
                     onBlur={(e) => updateObjection(objection.id, 'question', e.currentTarget.textContent || '')}
-                    className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[40px] cursor-text hover:bg-gray-50 text-lg font-bold text-gray-900 text-center"
+                    className={`outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[40px] cursor-text text-lg font-bold text-center ${cardStyles.textHeading}`}
                     style={{...bodyStyle, fontWeight: 700}}
                   >
                     {objection.question}
                   </div>
                 ) : (
-                  <p style={{...bodyStyle, fontWeight: 700}} className="text-lg text-gray-900 text-center">
+                  <p style={{...bodyStyle, fontWeight: 700}} className={`text-lg text-center ${cardStyles.textHeading}`}>
                     {objection.question}
                   </p>
                 )}
@@ -270,13 +282,13 @@ export default function VisualObjectionTiles(props: LayoutComponentProps) {
                     contentEditable
                     suppressContentEditableWarning
                     onBlur={(e) => updateObjection(objection.id, 'response', e.currentTarget.textContent || '')}
-                    className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[40px] cursor-text hover:bg-gray-50 text-gray-700 leading-relaxed"
+                    className={`outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[40px] cursor-text leading-relaxed ${cardStyles.textBody}`}
                     style={{...bodyStyle}}
                   >
                     {objection.response}
                   </div>
                 ) : (
-                  <p style={{...bodyStyle}} className="text-gray-700 leading-relaxed">
+                  <p style={{...bodyStyle}} className={`leading-relaxed ${cardStyles.textBody}`}>
                     {objection.response}
                   </p>
                 )}
@@ -285,7 +297,7 @@ export default function VisualObjectionTiles(props: LayoutComponentProps) {
               {/* Bottom accent */}
               <div className="mt-6 pt-4 border-t border-gray-100">
                 <div className="flex items-center justify-center">
-                  <div className={`w-8 h-1 bg-gradient-to-r ${tileColors.accent} rounded-full group-hover:w-12 transition-all duration-300`}></div>
+                  <div className={`w-8 h-1 bg-gradient-to-r ${themeExtras.accent} rounded-full group-hover:w-12 transition-all duration-300`}></div>
                 </div>
               </div>
             </div>

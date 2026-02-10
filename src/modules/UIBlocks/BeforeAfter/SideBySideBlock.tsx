@@ -43,8 +43,8 @@ const CONTENT_SCHEMA = {
   summary_text: { type: 'string' as const, default: '' },
   before_points: { type: 'array' as const, default: [] },
   after_points: { type: 'array' as const, default: [] },
-  before_icon: { type: 'string' as const, default: '❌' },
-  after_icon: { type: 'string' as const, default: '✅' }
+  before_icon: { type: 'string' as const, default: 'XCircle' },
+  after_icon: { type: 'string' as const, default: 'CheckCircle' }
 };
 
 export default function SideBySideBlocks(props: LayoutComponentProps) {
@@ -83,13 +83,13 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
         bg: '#fef2f2',
         border: '#fecaca',
         labelColor: '#dc2626',
-        pointIcon: '❌'
+        pointIcon: 'XCircle'
       },
       after: {
         bg: accentColorLight,
         border: accentColorMedium,
         labelColor: accentColor,
-        pointIcon: '✅'
+        pointIcon: 'CheckCircle'
       },
       arrow: '#f97316'
     },
@@ -98,13 +98,13 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
         bg: '#fef2f2',
         border: '#fecaca',
         labelColor: '#dc2626',
-        pointIcon: '❌'
+        pointIcon: 'XCircle'
       },
       after: {
         bg: accentColorLight,
         border: accentColorMedium,
         labelColor: accentColor,
-        pointIcon: '✅'
+        pointIcon: 'CheckCircle'
       },
       arrow: accentColor
     },
@@ -113,13 +113,13 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
         bg: '#f9fafb',
         border: '#d1d5db',
         labelColor: '#6b7280',
-        pointIcon: '❌'
+        pointIcon: 'XCircle'
       },
       after: {
         bg: accentColorLight,
         border: accentColorMedium,
         labelColor: accentColor,
-        pointIcon: '✅'
+        pointIcon: 'CheckCircle'
       },
       arrow: accentColor
     }
@@ -241,7 +241,7 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
               <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
                 <IconEditableText
                   mode={mode}
-                  value={blockContent.before_icon || '❌'}
+                  value={blockContent.before_icon || 'XCircle'}
                   onEdit={(value) => handleContentUpdate('before_icon', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
@@ -343,7 +343,7 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
               <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
                 <IconEditableText
                   mode={mode}
-                  value={blockContent.after_icon || '✅'}
+                  value={blockContent.after_icon || 'CheckCircle'}
                   onEdit={(value) => handleContentUpdate('after_icon', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}

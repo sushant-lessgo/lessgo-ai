@@ -44,7 +44,6 @@ const FALLBACK_COLOR_TOKENS: ColorTokens = {
   bgPrimary: 'bg-white',
   bgSecondary: 'bg-gray-50',
   bgNeutral: 'bg-white',
-  bgDivider: 'bg-gray-200',
   surfaceCard: 'bg-white',
   surfaceElevated: 'bg-white',
   surfaceSection: 'bg-gray-50',

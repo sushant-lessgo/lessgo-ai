@@ -7,13 +7,15 @@
 
 import React from 'react';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publishedTextColors';
+import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardStyles } from '@/lib/publishedTextColors';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { IconPublished } from '@/components/published/IconPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import { inferIconFromText } from '@/lib/iconCategoryMap';
+import { getDynamicCardLayout, isSplitLayout } from '@/utils/dynamicCardLayout';
+import { analyzeBackground } from '@/utils/backgroundAnalysis';
 
 // V2: Principle item structure
 interface Principle {
@@ -30,40 +32,25 @@ interface Result {
   label: string;
 }
 
-// Theme-based inline styles (SSR safe)
-const getThemeStyles = (theme: UIBlockTheme) => ({
+// Theme-based extras (non-card elements: headers, results)
+const getThemeExtras = (theme: UIBlockTheme) => ({
   warm: {
     headerGradient: 'linear-gradient(to right, #ea580c, #dc2626)',
     headerSubtext: '#ffedd5',
-    iconGradient: 'linear-gradient(135deg, #ea580c, #b91c1c)', // Fix: increased saturation
-    cardBorder: '#fdba74', // Fix: stronger border (was #fed7aa)
-    cardBorderHover: '#fb923c',
     resultMetricColor: '#ea580c',
-    resultsBg: '#fff7ed', // Fix: results section background
-    cardShadow: '0 4px 20px rgba(249,115,22,0.15)',
-    cardShadowHover: '0 8px 30px rgba(249,115,22,0.25)',
+    resultsBg: '#fff7ed',
   },
   cool: {
     headerGradient: 'linear-gradient(to right, #2563eb, #4338ca)',
     headerSubtext: '#dbeafe',
-    iconGradient: 'linear-gradient(135deg, #2563eb, #4338ca)', // Fix: increased saturation
-    cardBorder: '#93c5fd', // Fix: stronger border (was #bfdbfe)
-    cardBorderHover: '#60a5fa',
     resultMetricColor: '#2563eb',
-    resultsBg: '#eff6ff', // Fix: results section background
-    cardShadow: '0 4px 20px rgba(37,99,235,0.15)',
-    cardShadowHover: '0 8px 30px rgba(37,99,235,0.25)',
+    resultsBg: '#eff6ff',
   },
   neutral: {
     headerGradient: 'linear-gradient(to right, #374151, #1f2937)',
     headerSubtext: '#e5e7eb',
-    iconGradient: 'linear-gradient(135deg, #4b5563, #1f2937)', // Fix: increased saturation
-    cardBorder: '#d1d5db', // Fix: stronger border (was #e5e7eb)
-    cardBorderHover: '#9ca3af',
     resultMetricColor: '#374151',
-    resultsBg: '#f9fafb', // Fix: results section background
-    cardShadow: '0 4px 20px rgba(100,116,139,0.15)',
-    cardShadowHover: '0 8px 30px rgba(100,116,139,0.25)',
+    resultsBg: '#f9fafb',
   },
 })[theme];
 
@@ -86,7 +73,11 @@ export default function MethodologyBreakdownPublished(props: LayoutComponentProp
   const uiTheme: UIBlockTheme = props.manualThemeOverride ||
     (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
 
-  const themeStyles = getThemeStyles(uiTheme);
+  const themeExtras = getThemeExtras(uiTheme);
+
+  // Card styles from luminance-based system
+  const { luminance } = analyzeBackground(sectionBackgroundCSS || '');
+  const cardStyles = getPublishedCardStyles(luminance, uiTheme);
 
   // Get text colors for headline
   const textColors = getPublishedTextColors(
@@ -97,13 +88,55 @@ export default function MethodologyBreakdownPublished(props: LayoutComponentProp
 
   const headlineTypography = getPublishedTypographyStyles('h2', theme);
 
-  // Determine grid layout based on principle count
-  const getGridClass = (count: number) => {
-    if (count === 1) return 'grid-cols-1 max-w-2xl mx-auto';
-    if (count === 2) return 'grid-cols-1 md:grid-cols-2';
-    if (count === 3) return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3';
-    if (count === 4) return 'grid-cols-1 md:grid-cols-2';
-    return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3';
+  // Dynamic card layout
+  const layout = getDynamicCardLayout(principles.length);
+
+  // Helper to render principle card
+  const renderPrincipleCard = (principle: Principle, cardClass: string) => {
+    const displayIcon = principle.icon || inferIconFromText(principle.name, principle.description);
+    return (
+      <div
+        key={principle.id}
+        className={`relative rounded-2xl transition-all duration-300 hover:-translate-y-1 ${cardClass}`}
+        style={{
+          backgroundColor: cardStyles.bg,
+          backdropFilter: cardStyles.backdropFilter,
+          WebkitBackdropFilter: cardStyles.backdropFilter,
+          borderColor: cardStyles.borderColor,
+          borderWidth: cardStyles.borderWidth,
+          borderStyle: cardStyles.borderStyle,
+          boxShadow: cardStyles.boxShadow,
+        }}
+      >
+        {/* Principle icon */}
+        <div
+          className="w-12 h-12 rounded-lg flex items-center justify-center mb-4"
+          style={{ backgroundColor: cardStyles.iconBg }}
+        >
+          <IconPublished icon={displayIcon} size={24} color={cardStyles.iconColor} />
+        </div>
+
+        {/* Principle name */}
+        <TextPublished
+          value={principle.name}
+          style={{
+            fontWeight: 700,
+            fontSize: '1.25rem',
+            color: cardStyles.textHeading,
+            marginBottom: '0.75rem'
+          }}
+        />
+
+        {/* Principle description */}
+        <TextPublished
+          value={principle.description}
+          style={{
+            color: cardStyles.textBody,
+            lineHeight: '1.5'
+          }}
+        />
+      </div>
+    );
   };
 
   return (
@@ -142,7 +175,7 @@ export default function MethodologyBreakdownPublished(props: LayoutComponentProp
         {/* Methodology Header */}
         <div
           className="rounded-2xl p-12 text-white text-center mb-12"
-          style={{ background: themeStyles.headerGradient }}
+          style={{ background: themeExtras.headerGradient }}
         >
           <div
             className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
@@ -170,7 +203,7 @@ export default function MethodologyBreakdownPublished(props: LayoutComponentProp
             <TextPublished
               value={methodology_description}
               style={{
-                color: themeStyles.headerSubtext,
+                color: themeExtras.headerSubtext,
                 fontSize: '1.125rem',
                 lineHeight: '1.75rem',
                 maxWidth: '48rem',
@@ -183,57 +216,35 @@ export default function MethodologyBreakdownPublished(props: LayoutComponentProp
 
         {/* Principles Grid */}
         {principles.length > 0 && (
-          <div className={`grid gap-6 lg:gap-8 mb-12 ${getGridClass(principles.length)}`}>
-            {principles.map((principle) => {
-              const displayIcon = principle.icon || inferIconFromText(principle.name, principle.description);
-
-              return (
-                <div
-                  key={principle.id}
-                  className="relative bg-white rounded-2xl p-8 transition-all duration-300 hover:-translate-y-1"
-                  style={{
-                    border: `1px solid ${themeStyles.cardBorder}`,
-                    boxShadow: themeStyles.cardShadow,
-                  }}
-                >
-                  {/* Principle icon */}
-                  <div
-                    className="w-12 h-12 rounded-lg flex items-center justify-center text-white mb-4"
-                    style={{ background: themeStyles.iconGradient }}
-                  >
-                    <IconPublished icon={displayIcon} size={24} />
-                  </div>
-
-                  {/* Principle name */}
-                  <TextPublished
-                    value={principle.name}
-                    style={{
-                      fontWeight: 700,
-                      fontSize: '1.25rem',
-                      color: textColors.heading,
-                      marginBottom: '0.75rem'
-                    }}
-                  />
-
-                  {/* Principle description */}
-                  <TextPublished
-                    value={principle.description}
-                    style={{
-                      color: textColors.muted,
-                      lineHeight: '1.5'
-                    }}
-                  />
-                </div>
-              );
-            })}
-          </div>
+          isSplitLayout(principles.length) && layout.splitLayout ? (
+            <div className={`mb-12 ${layout.containerClass}`}>
+              <div className={layout.splitLayout.firstRowGrid}>
+                {principles.slice(0, layout.splitLayout.firstRowCount).map((principle: Principle) =>
+                  renderPrincipleCard(principle, layout.splitLayout!.firstRowCard)
+                )}
+              </div>
+              <div className={layout.splitLayout.secondRowGrid}>
+                {principles.slice(layout.splitLayout.firstRowCount).map((principle: Principle) =>
+                  renderPrincipleCard(principle, layout.splitLayout!.secondRowCard)
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className={`mb-12 ${layout.containerClass}`}>
+              <div className={layout.gridClass}>
+                {principles.map((principle: Principle) =>
+                  renderPrincipleCard(principle, layout.cardClass)
+                )}
+              </div>
+            </div>
+          )
         )}
 
         {/* Results Section */}
         {results.length > 0 && (
           <div
             className="mt-16 rounded-2xl p-8"
-            style={{ backgroundColor: themeStyles.resultsBg }}
+            style={{ backgroundColor: themeExtras.resultsBg }}
           >
             {results_title && (
               <HeadlinePublished
@@ -257,7 +268,7 @@ export default function MethodologyBreakdownPublished(props: LayoutComponentProp
                     style={{
                       fontSize: '2.25rem',
                       fontWeight: 700,
-                      color: themeStyles.resultMetricColor,
+                      color: themeExtras.resultMetricColor,
                       marginBottom: '0.5rem'
                     }}
                   />

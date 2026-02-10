@@ -91,10 +91,9 @@ export default function CenteredHeadlineCTAPublished(props: LayoutComponentProps
     (rating_stat && rating_stat.trim() !== '') ||
     (uptime_stat && uptime_stat.trim() !== '');
 
-  // Extract button metadata for form detection
+  // V2: Extract button metadata from elementMetadata (not element.metadata)
   const sectionData = props.content?.[sectionId];
-  const ctaElement = sectionData?.elements?.cta_text;
-  const buttonConfig = ctaElement?.metadata?.buttonConfig;
+  const buttonConfig = sectionData?.elementMetadata?.cta_text?.buttonConfig || props.elementMetadata?.cta_text?.buttonConfig;
 
   return (
     <SectionWrapperPublished

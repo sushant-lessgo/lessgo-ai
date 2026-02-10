@@ -32,7 +32,6 @@ const backgroundCSS: Record<string, string> = {
   primary: 'bg-gradient-to-br from-gray-900 to-gray-800',
   secondary: 'bg-gray-50',
   neutral: 'bg-white',
-  divider: 'bg-gray-100/50',
 };
 
 export default function UIBlockTestPage() {
@@ -59,7 +58,7 @@ function UIBlockTestContent() {
   const searchParams = useSearchParams();
 
   const blockType = params.blockType as string;
-  const bgType = (searchParams.get('bg') || 'neutral') as 'primary' | 'secondary' | 'neutral' | 'divider';
+  const bgType = (searchParams.get('bg') || 'neutral') as 'primary' | 'secondary' | 'neutral';
   const mode = (searchParams.get('mode') || 'edit') as 'edit' | 'preview';
   const scenario = (searchParams.get('scenario') || 'default') as 'default' | 'minimal' | 'full';
 
@@ -102,7 +101,7 @@ function UIBlockTestContent() {
         {/* Quick controls */}
         <div className="mt-4 flex flex-wrap gap-2 text-sm">
           <span className="text-gray-500">Background:</span>
-          {['neutral', 'primary', 'secondary', 'divider'].map((bg) => (
+          {['neutral', 'primary', 'secondary'].map((bg) => (
             <a
               key={bg}
               href={`?bg=${bg}&mode=${mode}&scenario=${scenario}`}
@@ -253,7 +252,7 @@ function ComponentWrapper({
   Component: React.ComponentType<any>;
   sectionId: string;
   mockData: Record<string, any>;
-  bgType: 'primary' | 'secondary' | 'neutral' | 'divider';
+  bgType: 'primary' | 'secondary' | 'neutral';
   mode: 'edit' | 'preview';
 }) {
   const props = {
@@ -284,8 +283,6 @@ function ComponentWrapper({
             ? 'linear-gradient(135deg, #1f2937 0%, #111827 100%)'
             : bgType === 'secondary'
             ? '#f9fafb'
-            : bgType === 'divider'
-            ? '#f3f4f6'
             : '#ffffff',
       }}
     >

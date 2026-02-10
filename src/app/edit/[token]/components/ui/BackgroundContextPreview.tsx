@@ -61,13 +61,6 @@ export function BackgroundContextPreview({
         background: backgroundSystem.neutral,
         textColor: previewTokens.textOnLight,
       },
-      {
-        id: 'divider',
-        label: 'Divider Background',
-        description: 'Separators, subtle sections',
-        background: backgroundSystem.divider,
-        textColor: previewTokens.textOnLight,
-      },
     ];
   };
 
@@ -176,7 +169,6 @@ export function BackgroundContextPreview({
           <li>• Primary: Hero sections, main call-to-action areas</li>
           <li>• Secondary: Feature sections, content blocks</li>
           <li>• Neutral: Cards, testimonials, clean sections</li>
-          <li>• Divider: Separators, subtle background elements</li>
         </ul>
       </div>
 

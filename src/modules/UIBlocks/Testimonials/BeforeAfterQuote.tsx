@@ -64,8 +64,8 @@ const CONTENT_SCHEMA = {
         customer_name: 'Sarah Chen',
         customer_title: 'Operations Manager',
         customer_company: 'TechCorp',
-        before_icon: '😰',
-        after_icon: '😊',
+        before_icon: 'Frown',
+        after_icon: 'Smile',
         avatar_url: ''
       },
       {
@@ -76,8 +76,8 @@ const CONTENT_SCHEMA = {
         customer_name: 'Michael Rodriguez',
         customer_title: 'CEO',
         customer_company: 'GrowthStart Inc',
-        before_icon: '⏳',
-        after_icon: '⚡',
+        before_icon: 'Clock',
+        after_icon: 'Zap',
         avatar_url: ''
       }
     ]
@@ -218,7 +218,7 @@ export default function BeforeAfterQuote(props: LayoutComponentProps) {
               <div className={`w-8 h-8 rounded-full ${colors.before.icon} ${colors.before.iconText} flex items-center justify-center group/icon-edit relative`}>
                 <IconEditableText
                   mode={mode}
-                  value={transformation.before_icon || blockContent.before_icon || '❌'}
+                  value={transformation.before_icon || blockContent.before_icon || 'XCircle'}
                   onEdit={(value) => handleTransformationUpdate(tId, 'before_icon', value)}
                   backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
@@ -251,7 +251,7 @@ export default function BeforeAfterQuote(props: LayoutComponentProps) {
               <div className={`w-8 h-8 rounded-full ${colors.after.icon} ${colors.after.iconText} flex items-center justify-center group/icon-edit relative`}>
                 <IconEditableText
                   mode={mode}
-                  value={transformation.after_icon || blockContent.after_icon || '✅'}
+                  value={transformation.after_icon || blockContent.after_icon || 'CheckCircle'}
                   onEdit={(value) => handleTransformationUpdate(tId, 'after_icon', value)}
                   backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}

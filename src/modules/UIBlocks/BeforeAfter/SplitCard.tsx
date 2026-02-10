@@ -43,9 +43,9 @@ const CONTENT_SCHEMA = {
   upgrade_text: { type: 'string' as const, default: 'Upgrade' },
   before_placeholder_text: { type: 'string' as const, default: 'Current State' },
   after_placeholder_text: { type: 'string' as const, default: 'Premium Result' },
-  before_icon: { type: 'string' as const, default: '⚠️' },
-  after_icon: { type: 'string' as const, default: '⭐' },
-  upgrade_icon: { type: 'string' as const, default: '➡️' }
+  before_icon: { type: 'string' as const, default: 'AlertTriangle' },
+  after_icon: { type: 'string' as const, default: 'Star' },
+  upgrade_icon: { type: 'string' as const, default: 'ArrowRight' }
 };
 
 const PremiumCard = React.memo(({
@@ -76,7 +76,7 @@ const PremiumCard = React.memo(({
   handleContentUpdate: (key: string, value: string) => void;
   colorTokens: any;
   dynamicTextColors?: { heading?: string; body?: string; muted?: string };
-  backgroundType: 'custom' | 'neutral' | 'primary' | 'secondary' | 'divider' | 'theme';
+  backgroundType: 'custom' | 'neutral' | 'primary' | 'secondary' | 'theme';
   sectionBackground: any;
   blockContent: SplitCardContent;
   handleImageToolbar: (imageId: string, position: { x: number; y: number }) => void;
@@ -109,8 +109,8 @@ const PremiumCard = React.memo(({
           <IconEditableText
             mode={mode}
             value={type === 'before' ?
-              (blockContent.before_icon || '⚠️') :
-              (blockContent.after_icon || '⭐')
+              (blockContent.before_icon || 'AlertTriangle') :
+              (blockContent.after_icon || 'Star')
             }
             onEdit={(value) => handleContentUpdate(type === 'before' ? 'before_icon' : 'after_icon', value)}
             backgroundType={backgroundType}
@@ -341,7 +341,7 @@ export default function SplitCard(props: LayoutComponentProps) {
               <div className="inline-flex items-center space-x-2 bg-white rounded-full shadow-lg px-6 py-3">
                 <IconEditableText
                   mode={mode}
-                  value={blockContent.upgrade_icon || '➡️'}
+                  value={blockContent.upgrade_icon || 'ArrowRight'}
                   onEdit={(value) => handleContentUpdate('upgrade_icon', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
@@ -371,7 +371,7 @@ export default function SplitCard(props: LayoutComponentProps) {
               <div className="flex flex-col items-center space-y-2 bg-white rounded-full shadow-lg px-4 py-6">
                 <IconEditableText
                   mode={mode}
-                  value={blockContent.upgrade_icon || '➡️'}
+                  value={blockContent.upgrade_icon || 'ArrowRight'}
                   onEdit={(value) => handleContentUpdate('upgrade_icon', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}

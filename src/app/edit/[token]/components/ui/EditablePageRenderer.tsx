@@ -51,13 +51,12 @@ const MissingLayoutComponent: React.FC<{ sectionId: string; layout: string }> = 
   </section>
 );
 
-const getBackgroundTypeFromSection = (sectionId: string): 'primary' | 'secondary' | 'neutral' | 'divider' => {
+const getBackgroundTypeFromSection = (sectionId: string): 'primary' | 'secondary' | 'neutral' => {
   const sectionMeta = sectionList.find(s => s.id === sectionId);
-  
+
   if (sectionId === 'hero' || sectionId === 'cta') return 'primary';
   if (sectionId === 'features' || sectionId === 'benefits') return 'secondary';
-  if (sectionId === 'faq' || sectionId === 'about') return 'divider';
-  
+
   return 'neutral';
 };
 

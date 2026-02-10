@@ -12,6 +12,8 @@ import {
   TrustIndicators
 } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { getCardStyles } from '@/modules/Design/cardStyles';
 
 // Contact card structure
 interface ContactCard {
@@ -110,6 +112,21 @@ export default function CallToQuotePlan(props: LayoutComponentProps) {
 
   const { getTextStyle: getTypographyStyle } = useTypography();
 
+  // Theme detection
+  const uiBlockTheme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Get adaptive card styles based on section background luminance
+  const cardStyles = React.useMemo(() => {
+    return getCardStyles({
+      sectionBackgroundCSS: sectionBackground || '',
+      theme: uiBlockTheme
+    });
+  }, [sectionBackground, uiBlockTheme]);
+
   // Create typography styles
   const h4Style = getTypographyStyle('h4');
   const bodyStyle = getTypographyStyle('body');
@@ -179,9 +196,9 @@ export default function CallToQuotePlan(props: LayoutComponentProps) {
   };
 
   const ContactCardComponent = ({ card, index }: { card: ContactCard; index: number }) => (
-    <div className="bg-white rounded-xl border-2 border-gray-200 hover:border-gray-300 p-6 hover:shadow-lg transition-all duration-300 relative group">
+    <div className={`${cardStyles.bg} ${cardStyles.blur} rounded-xl border-2 ${cardStyles.border} ${cardStyles.shadow} ${cardStyles.hoverEffect} p-6 transition-all duration-300 relative group`}>
       <div className="text-center">
-        <div className={`w-16 h-16 mx-auto mb-4 rounded-full ${colorTokens.ctaBg} flex items-center justify-center text-white`}>
+        <div className={`w-16 h-16 mx-auto mb-4 rounded-full ${cardStyles.iconBg} flex items-center justify-center ${cardStyles.iconColor}`}>
           <IconEditableText
             mode={mode}
             value={card.icon}
@@ -189,7 +206,7 @@ export default function CallToQuotePlan(props: LayoutComponentProps) {
             backgroundType="primary"
             colorTokens={colorTokens}
             iconSize="lg"
-            className="text-white text-3xl"
+            className="text-3xl"
             sectionId={sectionId}
             elementKey={`contact_cards.${card.id}.icon`}
           />
@@ -201,7 +218,7 @@ export default function CallToQuotePlan(props: LayoutComponentProps) {
               contentEditable
               suppressContentEditableWarning
               onBlur={(e) => handleCardUpdate(card.id, 'title', e.currentTarget.textContent || '')}
-              className={`font-semibold mb-2 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-50 ${headingColor}`}
+              className={`font-semibold mb-2 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text ${cardStyles.textHeading}`}
               style={h4Style}
               data-section-id={sectionId}
               data-element-key={`contact_cards.${card.id}.title`}
@@ -212,7 +229,7 @@ export default function CallToQuotePlan(props: LayoutComponentProps) {
               contentEditable
               suppressContentEditableWarning
               onBlur={(e) => handleCardUpdate(card.id, 'description', e.currentTarget.textContent || '')}
-              className={`mb-4 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-50 ${bodyColor}`}
+              className={`mb-4 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text ${cardStyles.textBody}`}
               style={bodyStyle}
               data-section-id={sectionId}
               data-element-key={`contact_cards.${card.id}.description`}
@@ -222,8 +239,8 @@ export default function CallToQuotePlan(props: LayoutComponentProps) {
           </>
         ) : (
           <>
-            <h4 style={h4Style} className={`font-semibold mb-2 ${headingColor}`}>{card.title}</h4>
-            <p style={bodyStyle} className={`mb-4 ${bodyColor}`}>{card.description}</p>
+            <h4 style={h4Style} className={`font-semibold mb-2 ${cardStyles.textHeading}`}>{card.title}</h4>
+            <p style={bodyStyle} className={`mb-4 ${cardStyles.textBody}`}>{card.description}</p>
           </>
         )}
 

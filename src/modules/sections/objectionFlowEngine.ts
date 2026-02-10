@@ -1759,12 +1759,6 @@ export function calculateSectionSpacing(sections: string[]): Record<string, Sect
       spacing = 'normal';
     }
     
-    // Rule 9: Consecutive sections with same background get compact spacing
-    if (currentSection?.background === nextSection?.background && 
-        currentSection?.background !== 'primary-highlight') {
-      spacing = 'compact';
-    }
-    
     spacingMap[sectionId] = spacing;
   });
   

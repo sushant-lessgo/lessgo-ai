@@ -150,13 +150,11 @@ export function useLayoutComponent<T = Record<string, any>>({
             return backgrounds.primary || 'bg-gradient-to-br from-blue-500 to-blue-600';
           case 'secondary': 
             return backgrounds.secondary || 'bg-gray-50';
-          case 'divider': 
-            return backgrounds.divider || 'bg-gray-100/50';
-          default: 
+          default:
             return backgrounds.neutral || 'bg-white';
         }
       })();
-      
+
       //   storedBackgroundType: currentBackgroundType,
       //   calculatedCSS: editModeCSS
       // });
@@ -206,13 +204,11 @@ export function useLayoutComponent<T = Record<string, any>>({
           return backgrounds.primary || 'bg-gradient-to-br from-blue-500 to-blue-600';
         case 'secondary': 
           return backgrounds.secondary || 'bg-gray-50';
-        case 'divider': 
-          return backgrounds.divider || 'bg-gray-100/50';
-        default: 
+        default:
           return backgrounds.neutral || 'bg-white';
       }
     })();
-    
+
     return fallbackCSS;
   };
 
@@ -285,12 +281,9 @@ export function useLayoutComponent<T = Record<string, any>>({
     const mapping: Record<string, string> = {
       'primary-highlight': 'primary',
       'secondary-highlight': 'secondary',
-      'divider-zone': 'divider',
       'neutral': 'neutral',
-      // Direct mappings
       'primary': 'primary',
-      'secondary': 'secondary',
-      'divider': 'divider'
+      'secondary': 'secondary'
     };
     return mapping[bgType] || bgType;
   };

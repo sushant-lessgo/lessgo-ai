@@ -165,11 +165,6 @@ export function getSafeTextColorsForBackground(backgroundType: string): {
       heading: 'text-gray-900',
       body: 'text-gray-700',
       muted: 'text-gray-500'
-    },
-    divider: {
-      heading: 'text-gray-900',
-      body: 'text-gray-700',
-      muted: 'text-gray-500'
     }
   };
   

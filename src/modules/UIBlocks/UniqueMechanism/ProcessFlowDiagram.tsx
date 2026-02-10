@@ -10,7 +10,7 @@ import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import { shadows, cardEnhancements } from '@/modules/Design/designTokens';
+import { getCardStyles } from '@/modules/Design/cardStyles';
 
 interface Step {
   id: string;
@@ -91,46 +91,50 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
     return 'neutral';
   }, [props.manualThemeOverride, props.userContext]);
 
-  // Theme-based color mapping (flat design)
-  const getProcessColors = (theme: UIBlockTheme) => {
-    return {
-      warm: {
-        circleBg: 'bg-orange-500',
-        benefitsBg: 'bg-orange-50',
-        benefitsBorder: 'border-orange-200',
-        benefitsTextPrimary: 'text-orange-900',
-        benefitsTextSecondary: 'text-orange-700',
-        benefitIconBg: 'bg-orange-500',
-        addButtonBg: 'bg-orange-600',
-        addButtonHover: 'hover:bg-orange-700',
-        connectorColor: 'border-orange-300'
-      },
-      cool: {
-        circleBg: 'bg-blue-600',
-        benefitsBg: 'bg-blue-50',
-        benefitsBorder: 'border-blue-200',
-        benefitsTextPrimary: 'text-blue-900',
-        benefitsTextSecondary: 'text-blue-700',
-        benefitIconBg: 'bg-blue-600',
-        addButtonBg: 'bg-blue-600',
-        addButtonHover: 'hover:bg-blue-700',
-        connectorColor: 'border-blue-300'
-      },
-      neutral: {
-        circleBg: 'bg-gray-600',
-        benefitsBg: 'bg-gray-50',
-        benefitsBorder: 'border-gray-200',
-        benefitsTextPrimary: 'text-gray-900',
-        benefitsTextSecondary: 'text-gray-700',
-        benefitIconBg: 'bg-gray-600',
-        addButtonBg: 'bg-gray-600',
-        addButtonHover: 'hover:bg-gray-700',
-        connectorColor: 'border-slate-300'
-      }
-    }[theme];
-  };
+  // Card styles from luminance-based system
+  const cardStyles = React.useMemo(() => {
+    return getCardStyles({
+      sectionBackgroundCSS: sectionBackground || '',
+      theme: uiTheme
+    });
+  }, [sectionBackground, uiTheme]);
 
-  const processColors = getProcessColors(uiTheme);
+  // Theme-based extras (non-card elements)
+  const themeExtras = {
+    warm: {
+      circleBg: 'bg-orange-500',
+      benefitsBg: 'bg-orange-50',
+      benefitsBorder: 'border-orange-200',
+      benefitsTextPrimary: 'text-orange-900',
+      benefitsTextSecondary: 'text-orange-700',
+      benefitIconBg: 'bg-orange-500',
+      addButtonBg: 'bg-orange-600',
+      addButtonHover: 'hover:bg-orange-700',
+      connectorColor: 'border-orange-300'
+    },
+    cool: {
+      circleBg: 'bg-blue-600',
+      benefitsBg: 'bg-blue-50',
+      benefitsBorder: 'border-blue-200',
+      benefitsTextPrimary: 'text-blue-900',
+      benefitsTextSecondary: 'text-blue-700',
+      benefitIconBg: 'bg-blue-600',
+      addButtonBg: 'bg-blue-600',
+      addButtonHover: 'hover:bg-blue-700',
+      connectorColor: 'border-blue-300'
+    },
+    neutral: {
+      circleBg: 'bg-gray-600',
+      benefitsBg: 'bg-gray-50',
+      benefitsBorder: 'border-gray-200',
+      benefitsTextPrimary: 'text-gray-900',
+      benefitsTextSecondary: 'text-gray-700',
+      benefitIconBg: 'bg-gray-600',
+      addButtonBg: 'bg-gray-600',
+      addButtonHover: 'hover:bg-gray-700',
+      connectorColor: 'border-slate-300'
+    }
+  }[uiTheme];
 
   // Helper function to get appropriate grid class based on step count
   const getGridCols = (stepCount: number) => {
@@ -234,18 +238,17 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
                   flex flex-col items-center
                   px-4 pt-10 pb-6
                   rounded-3xl
-                  bg-white/80
-                  ring-1 ring-slate-200
-                  ${shadows.card[uiTheme]}
-                  ${shadows.cardHover[uiTheme]}
-                  backdrop-blur-xl
-                  ${cardEnhancements.transition}
-                  ${cardEnhancements.hoverLift}
+                  ${cardStyles.bg}
+                  ${cardStyles.blur}
+                  ${cardStyles.border}
+                  ${cardStyles.shadow}
+                  ${cardStyles.hoverEffect}
+                  transition-all duration-300 hover:-translate-y-1
                 `}
               >
                 {/* Connector line to next step */}
                 {index < steps.length - 1 && (
-                  <div className={`hidden lg:block absolute top-1/2 -right-6 w-12 border-t-2 border-dashed ${processColors.connectorColor}`} />
+                  <div className={`hidden lg:block absolute top-1/2 -right-6 w-12 border-t-2 border-dashed ${themeExtras.connectorColor}`} />
                 )}
 
                 {/* Step Circle - Flat design */}
@@ -255,7 +258,7 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
                       relative z-10 w-20 h-20
                       rounded-full flex items-center justify-center
                       text-white font-semibold text-xl
-                      ${processColors.circleBg}
+                      ${themeExtras.circleBg}
                       shadow-md
                     `}
                   >
@@ -308,7 +311,7 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
                     }
                     colorTokens={colorTokens}
                     variant="body"
-                    className="mb-2 text-[17px] font-semibold leading-snug tracking-tight text-slate-900"
+                    className={`mb-2 text-[17px] font-semibold leading-snug tracking-tight ${cardStyles.textHeading}`}
                     formatState={{
                       bold: true,
                       fontSize: '17px',
@@ -332,7 +335,7 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
                     }
                     colorTokens={colorTokens}
                     variant="body"
-                    className="text-[14px] leading-relaxed text-slate-600"
+                    className={`text-[14px] leading-relaxed ${cardStyles.textBody}`}
                     formatState={{
                       fontSize: '14px',
                       textAlign: 'center',
@@ -356,7 +359,7 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
           <div className="flex justify-center mt-8">
             <button
               onClick={handleAddStep}
-              className={`flex items-center space-x-2 px-4 py-2 ${processColors.addButtonBg} text-white rounded-lg ${processColors.addButtonHover} transition-colors duration-200`}
+              className={`flex items-center space-x-2 px-4 py-2 ${themeExtras.addButtonBg} text-white rounded-lg ${themeExtras.addButtonHover} transition-colors duration-200`}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -368,25 +371,25 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
 
         {/* Key Benefits */}
         {(blockContent.benefits_title || benefits.length > 0 || mode === 'edit') && (
-          <div className={`mt-16 ${processColors.benefitsBg} rounded-2xl p-8 border ${processColors.benefitsBorder}`}>
+          <div className={`mt-16 ${themeExtras.benefitsBg} rounded-2xl p-8 border ${themeExtras.benefitsBorder}`}>
             <EditableAdaptiveHeadline
               mode={mode}
               value={blockContent.benefits_title || ''}
               onEdit={(value) => handleContentUpdate('benefits_title', value)}
               level="h3"
               backgroundType="neutral"
-              colorTokens={{ ...colorTokens, textPrimary: processColors.benefitsTextPrimary }}
-              className={`text-center font-bold ${processColors.benefitsTextPrimary} mb-6`}
+              colorTokens={{ ...colorTokens, textPrimary: themeExtras.benefitsTextPrimary }}
+              className={`text-center font-bold ${themeExtras.benefitsTextPrimary} mb-6`}
               sectionId={sectionId}
               elementKey="benefits_title"
-              sectionBackground={processColors.benefitsBg}
+              sectionBackground={themeExtras.benefitsBg}
             />
             <div className="grid md:grid-cols-3 gap-6">
               {benefits.map((benefit, index) => (
                   <div key={benefit.id} className="text-center">
                     <div className={`w-14 h-14 rounded-xl
                         flex items-center justify-center mx-auto mb-4
-                        ${processColors.benefitIconBg}
+                        ${themeExtras.benefitIconBg}
                         shadow-md
                         text-white`}>
                       <IconEditableText
@@ -397,7 +400,7 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
                         colorTokens={colorTokens}
                         iconSize="lg"
                         className="text-white text-2xl"
-                        placeholder="✨"
+                        placeholder="Sparkles"
                         sectionId={sectionId}
                         elementKey={`benefit_icon_${benefit.id}`}
                       />
@@ -407,14 +410,14 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
                       value={benefit.title || ''}
                       onEdit={(value) => handleBenefitUpdate(benefit.id, 'title', value)}
                       backgroundType="neutral"
-                      colorTokens={{ ...colorTokens, textPrimary: processColors.benefitsTextPrimary }}
+                      colorTokens={{ ...colorTokens, textPrimary: themeExtras.benefitsTextPrimary }}
                       variant="body"
                       className="font-semibold mb-2"
                       formatState={{ textAlign: 'center' } as any}
                       placeholder={`Benefit ${index + 1} title`}
                       sectionId={sectionId}
                       elementKey={`benefit_title_${benefit.id}`}
-                      sectionBackground={processColors.benefitsBg}
+                      sectionBackground={themeExtras.benefitsBg}
                       data-section-id={sectionId}
                       data-element-key={`benefit_title_${benefit.id}`}
                     />
@@ -423,14 +426,14 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
                       value={benefit.description || ''}
                       onEdit={(value) => handleBenefitUpdate(benefit.id, 'description', value)}
                       backgroundType="neutral"
-                      colorTokens={{ ...colorTokens, textSecondary: processColors.benefitsTextSecondary }}
+                      colorTokens={{ ...colorTokens, textSecondary: themeExtras.benefitsTextSecondary }}
                       variant="body"
                       className="text-sm"
                       formatState={{ textAlign: 'center' } as any}
                       placeholder={`Benefit ${index + 1} description`}
                       sectionId={sectionId}
                       elementKey={`benefit_description_${benefit.id}`}
-                      sectionBackground={processColors.benefitsBg}
+                      sectionBackground={themeExtras.benefitsBg}
                       data-section-id={sectionId}
                       data-element-key={`benefit_description_${benefit.id}`}
                     />

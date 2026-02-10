@@ -288,7 +288,7 @@ function validateBrandTextColors(
   
   const issues: BrandColorValidation['issues'] = [];
   const adaptedText: NonNullable<BrandColors['text']> = { ...textColors };
-  const backgroundTypes = ['primary', 'secondary', 'neutral', 'divider'];
+  const backgroundTypes = ['primary', 'secondary', 'neutral'];
   let totalScore = 0;
   let testCount = 0;
 
