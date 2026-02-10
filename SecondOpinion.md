@@ -1,143 +1,220 @@
-The Real Problem
-                                                                                                                                                                               
-  Neither the current system nor the junior's proposal addresses the core issue:
 
-  The page is designed as "1 hero background + white everything else."
+# Phase 2 UX Refinement — Design Questions Flow
 
-  - Current system: primary is a gradient, the other 3 are just math (tint, white, lighter tint)
-  - Junior's proposal: makes primary fancier (layers! textures! glows!) but secondary/neutral/divider are still unaddressed
+## Problem
 
-  A midnight hero followed by white features followed by white testimonials looks like someone stitched two different websites together. The junior's plan makes the hero even 
-  more dramatic, which makes this gap worse.
+User tested the Q1-Q4 design questions flow. Four UX issues:
 
-  ---
-  My Redesign: Palette-First, Not Primary-First
+1. **Bottom progress strip not visual enough** — tiny `Loader2` icon + "Creating your landing page..." doesn't communicate AI is actively working
+2. **"Your page is ready!" text color** — uses `text-green-600` / `bg-green-100`, not brand-compatible (`brand-accentPrimary` = `#FF814A`)
+3. **Q1 Dark/Light choice not clear** — user doesn't realize more options follow; thinks they're picking the final look
+4. **No context about WHY** — user lands on design questions cold, doesn't understand purpose
 
-  Core Shift
+### Bonus opportunity
 
-  Stop thinking "pick a primary, derive the rest." Start thinking "design all 4 backgrounds as a cohesive set."
+5. **StrategyStep "Continuing..." is wasted** — strategy API takes ~3s, currently shows generic messages then flashes "Continuing..." before advancing. Should prime the user for design questions.
 
-  OLD MENTAL MODEL:
-    Primary → (math) → secondary, neutral, divider
+---
 
-  NEW MENTAL MODEL:
-    Palette = { primary, secondary, neutral, divider, accent, cardSurface }
-    All 6 designed together as a unit.
+## Changes (4 files)
 
-  Page Modes
+### 1. StrategyStep.tsx (lines 8-13, 163)
 
-  Every palette lives in one of 3 modes:
-  ┌─────────┬──────────────────────┬──────────────────────┬────────────────────────┬─────────────────────────┐
-  │  Mode   │       Neutral        │      Secondary       │        Primary         │      Who it's for       │
-  ├─────────┼──────────────────────┼──────────────────────┼────────────────────────┼─────────────────────────┤
-  │ Light   │ White/off-white      │ Light tint           │ Bold gradient or color │ Most SaaS, trust-heavy  │
-  ├─────────┼──────────────────────┼──────────────────────┼────────────────────────┼─────────────────────────┤
-  │ Dark    │ Near-black (#0f172a) │ Dark shade (#1e293b) │ Darker gradient + glow │ Dev tools, AI, tech     │
-  ├─────────┼──────────────────────┼──────────────────────┼────────────────────────┼─────────────────────────┤
-  │ Vibrant │ Tinted white         │ Medium tint          │ Saturated gradient     │ Creative, bold startups │
-  └─────────┴──────────────────────┴──────────────────────┴────────────────────────┴─────────────────────────┘
-  This alone fixes the biggest problem — dark pages stay dark throughout, not just in the hero.
+**Messages during API call** — Replace generic messages with audience-aware ones:
 
-  What a Palette Looks Like
+```ts
+const strategyMessages = [
+  'Analyzing your market position...',
+  'Identifying what converts your audience...',
+  'Designing the perfect page flow...',
+  'Selecting high-converting sections...',
+];
+```
 
-  // Example: "Midnight Tech" (dark mode, cool)
-  {
-    mode: 'dark',
-    primary:     'linear-gradient(135deg, #0f172a, #1e3a5f)',  // deep navy
-    secondary:   '#1a2332',                                      // dark blue-gray
-    neutral:     '#0f172a',                                      // near-black
-    divider:     '#162032',                                      // subtle shift
-    accent:      '#22d3ee',                                      // cyan pop
-    cardSurface: 'rgba(255,255,255,0.05)',                       // glass card
-    textColor:   'light',                                        // white text throughout
-  }
+**Transition message** — Replace "Continuing..." (line 163) with a bridge that primes user for design questions:
 
-  // Example: "Clean Trust" (light mode, cool)
-  {
-    mode: 'light',
-    primary:     'linear-gradient(135deg, #3b82f6, #2563eb)',  // blue gradient
-    secondary:   'rgba(239, 246, 255, 0.8)',                    // blue tint
-    neutral:     '#ffffff',                                      // white
-    divider:     '#f8fafc',                                      // barely-there blue
-    accent:      '#7c3aed',                                      // purple pop
-    cardSurface: '#ffffff',                                      // white card
-    textColor:   'dark',                                        // dark text (except on primary)
-  }
+```ts
+// line 163: replace
+return <LoadingOverlay messages={['Continuing...']} />;
+// with
+return <LoadingOverlay messages={['Now let\u2019s design your page...']} skeletonCount={0} />;
+```
 
-  // Example: "Warm Energy" (vibrant mode, warm)
-  {
-    mode: 'vibrant',
-    primary:     'linear-gradient(135deg, #f97316, #ea580c)',  // orange blast
-    secondary:   'rgba(255, 247, 237, 0.9)',                    // warm cream
-    neutral:     '#fffbf5',                                      // warm white
-    divider:     '#fff7ed',                                      // peach whisper
-    accent:      '#0ea5e9',                                      // sky blue contrast
-    cardSurface: '#ffffff',                                      // clean card
-    textColor:   'dark',
-  }
+`skeletonCount={0}` — no skeleton cards for a brief transition moment.
 
-  Palette Count: Quality Over Combinatorics
+---
 
-  The junior wants 1,200 combos. I'd want ~25 hand-curated palettes:
+### 2. DesignQuestionsFlow.tsx — 4 changes
 
-  5 vibes × 3 modes × ~2 temperature variations = ~30 max
-  Minus bad combos (vibrant + neutral temp is awkward) = ~25
+#### 2a. Add intro context block (before Q1 cards, after step header)
 
-  Every palette ships having been visually reviewed as a complete page, not just as isolated swatches. 1,200 random combos guarantees garbage. 25 reviewed palettes guarantees 
-  quality.
+Insert between the step header `<div>` (line 213-236) and the Q1 cards render (line 239):
 
-  Where Texture/Glow Fits
+```tsx
+{/* Intro context — only on step 1 */}
+{step === 1 && (
+  <p className="text-sm text-gray-500 text-center mb-6 max-w-md">
+    While AI writes your copy, pick the look and feel for your page.
+    You'll choose colors and textures in the next few steps.
+  </p>
+)}
+```
 
-  The junior's layer idea isn't wrong — it's just premature as the foundation. It works as an optional enhancement layer on top of palettes:
+This answers "WHY am I doing this?" and "what comes next?" in one shot.
 
-  FinalBackground = Palette.primary + TextureOverlay (optional) + GlowOverlay (optional)
+#### 2b. Q1 step header — add subtitle
 
-  But this only applies to primary. Secondary/neutral/divider should stay clean — their job is to be quiet. I'd ship with maybe 4-5 textures max (dot-grid, noise, paper, mesh,
-   none). The glow positions idea is good — keep it.
+Currently Q1 shows just "Choose your style" (line 92). Add a subtitle below the main header block (after line 236) that only shows for step 1:
 
-  cardSurface: The Missing Piece
+Actually — simpler: just update STEP_HEADERS to include the context OR add a `STEP_SUBTITLES` map:
 
-  Neither system accounts for this. Cards (feature cards, pricing cards, testimonials) sit on top of section backgrounds. You need a defined card surface color per palette:   
+```ts
+const STEP_SUBTITLES: Record<number, string> = {
+  1: 'This is just the starting point — you\'ll refine next',
+  2: 'Each family has palette variations you can explore',
+  3: 'Pick the exact shade for your page',
+  4: 'Optional — adds subtle depth to backgrounds',
+};
+```
 
-  - Light mode: white cards on tinted secondary = clean
-  - Dark mode: rgba(255,255,255,0.05) glass cards on dark secondary = premium
-  - Vibrant mode: white cards on warm secondary = readable
+Render below step header (after line 225):
+```tsx
+{STEP_SUBTITLES[step] && (
+  <p className="text-xs text-gray-400 mt-0.5">{STEP_SUBTITLES[step]}</p>
+)}
+```
 
-  Without this, dark-mode cards either look invisible or require per-component hacks.
+#### 2c. Bottom progress strip — more visual
 
-  Section Mapping: Keep As-Is
+Current (lines 358-380): tiny `Loader2` + text on left, skip link on right.
 
-  The current role assignment logic (sectionList.ts) is fine. Hero→primary, Features→secondary, etc. The rhythm rule (max 2 highlights) is smart. Don't change this.
+Replace with a more communicative strip:
 
-  Migration Path
+```tsx
+{/* Bottom bar: progress + skip */}
+<div className="mt-8 w-full">
+  {/* Progress indicator */}
+  <div className="flex items-center gap-3 mb-3">
+    {apiComplete ? (
+      <>
+        <div className="w-5 h-5 rounded-full bg-brand-accentPrimary/10 flex items-center justify-center">
+          <Check className="w-3 h-3 text-brand-accentPrimary" />
+        </div>
+        <span className="text-sm text-brand-accentPrimary font-medium">
+          Your copy is ready — finish picking to see your page
+        </span>
+      </>
+    ) : (
+      <>
+        <div className="relative w-5 h-5">
+          <div className="absolute inset-0 rounded-full border-2 border-gray-200 border-t-brand-accentPrimary animate-spin" />
+        </div>
+        <div className="flex-1">
+          <p className="text-sm text-gray-600">AI is writing your copy...</p>
+          <div className="mt-1 h-1 w-full bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-full bg-brand-accentPrimary/40 rounded-full animate-pulse" style={{ width: '60%' }} />
+          </div>
+        </div>
+      </>
+    )}
+  </div>
 
-  Phase 1: Build palette system with 25 curated palettes
-           Map current 65 primaries → closest palette
-           Add cardSurface + textColor to BackgroundSystem
+  {/* Skip link */}
+  <div className="flex justify-end">
+    <button
+      type="button"
+      onClick={onSkip}
+      className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+    >
+      Skip, use defaults &rarr;
+    </button>
+  </div>
+</div>
+```
 
-  Phase 2: Add optional texture/glow on primary only
+Key differences from current:
+- Spinner matches brand color (`border-t-brand-accentPrimary`)
+- Thin progress bar below "AI is writing your copy..." adds visual weight
+- Check icon uses brand orange instead of generic green
+- "Your copy is ready" not "Your page is ready" — more accurate (design isn't done yet)
 
-  Phase 3: Let users customize palettes (editor feature)
+#### 2d. Step dots — use brand color for active
 
-  ---
-  Summary: Current vs Junior vs My Take
-  ┌─────────────────┬─────────────────────────┬──────────────────────────────────┬───────────────────────────┐
-  │                 │         Current         │         Junior Proposal          │        My Proposal        │
-  ├─────────────────┼─────────────────────────┼──────────────────────────────────┼───────────────────────────┤
-  │ Core unit       │ 1 primary + derived     │ 1 primary (composable) + derived │ Complete 6-value palette  │
-  ├─────────────────┼─────────────────────────┼──────────────────────────────────┼───────────────────────────┤
-  │ Dark pages      │ Broken (white sections) │ Still broken                     │ Native dark/vibrant modes │
-  ├─────────────────┼─────────────────────────┼──────────────────────────────────┼───────────────────────────┤
-  │ Variety         │ 65 options              │ ~1,200 combos                    │ ~25 curated sets          │
-  ├─────────────────┼─────────────────────────┼──────────────────────────────────┼───────────────────────────┤
-  │ Quality control │ Curated                 │ Uncurated combos                 │ Curated                   │
-  ├─────────────────┼─────────────────────────┼──────────────────────────────────┼───────────────────────────┤
-  │ Cards           │ No system               │ No system                        │ cardSurface per palette   │
-  ├─────────────────┼─────────────────────────┼──────────────────────────────────┼───────────────────────────┤
-  │ Texture/glow    │ None                    │ Core architecture                │ Optional enhancement      │
-  ├─────────────────┼─────────────────────────┼──────────────────────────────────┼───────────────────────────┤
-  │ Section mapping │ Good                    │ Proposed alternative             │ Keep current              │
-  ├─────────────────┼─────────────────────────┼──────────────────────────────────┼───────────────────────────┤
-  │ Complexity      │ Simple                  │ High                             │ Medium                    │
-  └─────────────────┴─────────────────────────┴──────────────────────────────────┴───────────────────────────┘
-  The junior is solving "how to make more backgrounds." The real problem is "how to make whole pages feel cohesive."
+Current (lines 226-235): active dots are `bg-gray-800`. Change to brand:
+
+```tsx
+className={`w-1.5 h-1.5 rounded-full transition-colors ${
+  s <= step ? 'bg-brand-accentPrimary' : 'bg-gray-200'
+}`}
+```
+
+---
+
+### 3. GeneratingStep.tsx — brand colors (lines 346-363)
+
+#### 3a. "Almost ready..." state (lines 346-353)
+
+Replace `text-gray-400` spinner with brand spinner:
+
+```tsx
+if (userDone && !apiComplete) {
+  return (
+    <div className="flex flex-col items-center justify-center py-16 space-y-4">
+      <div className="w-10 h-10 rounded-full border-4 border-gray-200 border-t-brand-accentPrimary animate-spin" />
+      <p className="text-sm text-gray-600">Almost ready...</p>
+    </div>
+  );
+}
+```
+
+Replace `Loader2` with CSS spinner matching brand color.
+
+#### 3b. "Your page is ready!" state (lines 356-363)
+
+Replace green with brand accent:
+
+```tsx
+return (
+  <div className="flex flex-col items-center justify-center py-16 space-y-4">
+    <div className="w-12 h-12 rounded-full bg-brand-accentPrimary/10 flex items-center justify-center">
+      <Check className="w-6 h-6 text-brand-accentPrimary" />
+    </div>
+    <p className="text-sm text-gray-700 font-medium">Your page is ready!</p>
+  </div>
+);
+```
+
+Changes: `bg-green-100` → `bg-brand-accentPrimary/10`, `text-green-600` → `text-brand-accentPrimary`, `text-gray-600` → `text-gray-700 font-medium`.
+
+---
+
+## Summary of all changes
+
+| File | What | Lines |
+|------|------|-------|
+| StrategyStep.tsx | Better API messages | 8-13 |
+| StrategyStep.tsx | Transition text | 163 |
+| DesignQuestionsFlow.tsx | Intro context paragraph | Insert after 236, before 239 |
+| DesignQuestionsFlow.tsx | Step subtitles | Add constant + render after 225 |
+| DesignQuestionsFlow.tsx | Bottom progress strip | 358-380 (full replace) |
+| DesignQuestionsFlow.tsx | Step dots brand color | 230 |
+| GeneratingStep.tsx | "Almost ready" brand spinner | 346-353 |
+| GeneratingStep.tsx | "Your page is ready" brand colors | 356-363 |
+
+## Don't touch
+
+- PalettePreviewCard.tsx — working correctly
+- LoadingOverlay.tsx — component is fine, just receives better messages
+- Q2/Q3/Q4 render logic — working correctly
+- Back navigation — working correctly
+- Dual-ready effect, inactivity timer, save logic — all correct
+
+## Verify after
+
+1. Strategy step shows "Analyzing your market position..." then transitions with "Now let's design your page..."
+2. Q1 shows intro context + subtitle clarifying more options follow
+3. Bottom bar shows brand-colored spinner + progress bar during generation
+4. Bottom bar shows brand-colored check + "Your copy is ready" when API done
+5. "Almost ready..." and "Your page is ready!" states use brand accent (#FF814A)
+6. Step dots use brand orange for active steps
+7. Full flow feels like one continuous experience, not disjointed steps

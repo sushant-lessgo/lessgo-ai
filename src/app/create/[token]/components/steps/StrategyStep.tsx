@@ -1,16 +1,9 @@
 'use client';
 
-import { useEffect, useCallback, useState, useRef } from 'react';
+import { useEffect, useCallback, useState, useRef, useMemo } from 'react';
 import { useGenerationStore } from '@/hooks/useGenerationStore';
 import LoadingOverlay from '../shared/LoadingOverlay';
 import ErrorRetry from '../shared/ErrorRetry';
-
-const strategyMessages = [
-  'Building your conversion strategy...',
-  'Crafting your unique angle...',
-  'Designing the perfect page flow...',
-  'Selecting optimal sections...',
-];
 
 const MAX_RETRIES = 3;
 
@@ -19,6 +12,17 @@ export default function StrategyStep() {
   const productName = useGenerationStore((s) => s.productName);
   const oneLiner = useGenerationStore((s) => s.oneLiner);
   const understanding = useGenerationStore((s) => s.understanding);
+
+  const audience = understanding?.audiences?.[0] || '';
+  const name = productName || 'your product';
+
+  const strategyMessages = useMemo(() => [
+    audience ? `Analyzing the ${audience} market...` : 'Analyzing your market position...',
+    `Figuring out what converts for ${name}...`,
+    audience ? `Designing the perfect page for ${audience}...` : 'Designing the perfect page flow...',
+    `Selecting high-converting sections for ${name}...`,
+    'Almost there...',
+  ], [audience, name]);
   const landingGoal = useGenerationStore((s) => s.landingGoal);
   const offer = useGenerationStore((s) => s.offer);
   const assetAvailability = useGenerationStore((s) => s.assetAvailability);
@@ -139,7 +143,7 @@ export default function StrategyStep() {
 
   // Loading state
   if (strategyLoading && !strategy) {
-    return <LoadingOverlay messages={strategyMessages} />;
+    return <LoadingOverlay messages={strategyMessages} messageInterval={3000} />;
   }
 
   // Error state
@@ -160,5 +164,5 @@ export default function StrategyStep() {
   }
 
   // If we have strategy, this step should auto-advance
-  return <LoadingOverlay messages={['Continuing...']} />;
+  return <LoadingOverlay messages={strategyMessages} messageInterval={3000} skeletonCount={0} />;
 }

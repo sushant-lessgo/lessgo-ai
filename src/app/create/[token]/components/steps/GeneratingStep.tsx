@@ -5,21 +5,49 @@ import { useParams, useRouter } from 'next/navigation';
 import { useGenerationStore } from '@/hooks/useGenerationStore';
 import { Check } from 'lucide-react';
 import ErrorRetry from '../shared/ErrorRetry';
-import type { SectionType, SectionCopy } from '@/types/generation';
+import type { SectionCopy } from '@/types/generation';
 import { getDesignTokensForVibe } from '@/modules/Design/vibeDesignTokens';
-import { generateBackgroundSystemForVibe, assignSectionBackgrounds } from '@/modules/Design/background/backgroundIntegration';
+import { generateBackgroundSystemFromPalette, assignSectionBackgrounds } from '@/modules/Design/background/backgroundIntegration';
+import { getPaletteById, getDefaultPaletteForVibe } from '@/modules/Design/background/palettes';
+import { compileBackground } from '@/modules/Design/background/textures';
 import { fetchPexelsImagesParallel, type ImageFetchResult } from '@/lib/generation/fetchImages';
+import DesignQuestionsFlow, { type DesignChoices } from './DesignQuestionsFlow';
 
-// Background type now assigned via position-based mapping (assignSectionBackgrounds)
+// ─── Constants ───
 
-// Helper: merge fetched images into section copy
+const DEFAULT_POOLS: Record<string, string[]> = {
+  'Dark Tech':     ['midnight-slate', 'deep-indigo', 'ocean-abyss', 'arctic-night', 'graphite'],
+  'Light Trust':   ['trust-blue', 'sky-bright', 'ocean', 'emerald-clean', 'steel'],
+  'Warm Friendly': ['coral', 'sunset', 'mint-warm', 'rose-soft', 'warm-sand'],
+  'Bold Energy':   ['blush', 'sky-bright', 'ocean', 'golden-hour', 'soft-lavender'],
+  'Calm Minimal':  ['soft-stone', 'steel', 'teal-fresh', 'emerald-clean', 'trust-blue'],
+};
+
+function getRandomFromPool(vibe: string): string {
+  const pool = DEFAULT_POOLS[vibe] || DEFAULT_POOLS['Light Trust'];
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function deriveCTAText(goal: string): string {
+  const map: Record<string, string> = {
+    waitlist: 'Join Waitlist',
+    signup: 'Get Started Free',
+    'free-trial': 'Start Free Trial',
+    buy: 'Get Started',
+    demo: 'Book a Demo',
+    download: 'Download Now',
+  };
+  return map[goal] || 'Get Started';
+}
+
+// ─── Helper: merge fetched images into section copy ───
+
 function mergeImagesIntoSections(
   sections: Record<string, SectionCopy>,
   imageResults: Map<string, ImageFetchResult>
 ): Record<string, SectionCopy> {
   const merged = { ...sections };
 
-  // Merge Pexels images
   for (const [, result] of imageResults) {
     const { sectionType, elementKey, imageUrl } = result;
     if (imageUrl && merged[sectionType]?.elements) {
@@ -33,7 +61,6 @@ function mergeImagesIntoSections(
     }
   }
 
-  // Populate ResultsGallery placeholders (user uploads later)
   if (merged['Results']?.elements?.gallery_items) {
     const items = merged['Results'].elements.gallery_items as Array<{id: string; image_url: string; caption: string}>;
     merged['Results'].elements.gallery_items = items.map(item => ({
@@ -45,52 +72,7 @@ function mergeImagesIntoSections(
   return merged;
 }
 
-const generatingMessages = [
-  'Writing headlines...',
-  'Crafting your story...',
-  'Polishing copy...',
-  'Adding finishing touches...',
-];
-
-/**
- * Section progress item in the checklist
- */
-function SectionProgressItem({
-  name,
-  done,
-  active,
-}: {
-  name: string;
-  done: boolean;
-  active: boolean;
-}) {
-  return (
-    <div
-      className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${
-        active ? 'bg-orange-50' : done ? 'bg-green-50' : 'bg-gray-50'
-      }`}
-    >
-      <div
-        className={`w-5 h-5 rounded-full flex items-center justify-center ${
-          done
-            ? 'bg-green-500'
-            : active
-            ? 'bg-brand-accentPrimary animate-pulse'
-            : 'bg-gray-200'
-        }`}
-      >
-        {done && <Check className="w-3 h-3 text-white" />}
-      </div>
-      <span
-        className={`text-sm ${
-          done ? 'text-green-700' : active ? 'text-orange-700' : 'text-gray-500'
-        }`}
-      >
-        {name}
-      </span>
-    </div>
-  );
-}
+// ─── Component ───
 
 export default function GeneratingStep() {
   const params = useParams();
@@ -100,6 +82,7 @@ export default function GeneratingStep() {
   const productName = useGenerationStore((s) => s.productName);
   const oneLiner = useGenerationStore((s) => s.oneLiner);
   const understanding = useGenerationStore((s) => s.understanding);
+  const audience = understanding?.audiences?.[0] || '';
   const landingGoal = useGenerationStore((s) => s.landingGoal);
   const offer = useGenerationStore((s) => s.offer);
   const strategy = useGenerationStore((s) => s.strategy);
@@ -110,58 +93,27 @@ export default function GeneratingStep() {
   const setGenerationProgress = useGenerationStore((s) => s.setGenerationProgress);
   const setGenerationError = useGenerationStore((s) => s.setGenerationError);
 
-  // Progress simulation state
-  const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
-  const [completedSections, setCompletedSections] = useState<Set<string>>(new Set());
-  const [messageIndex, setMessageIndex] = useState(0);
+  // Design questions state
   const [apiComplete, setApiComplete] = useState(false);
+  const [userDone, setUserDone] = useState(false);
+  const [designChoices, setDesignChoices] = useState<DesignChoices | null>(null);
 
-  // Ref guard to prevent double API calls (React Strict Mode)
+  // Refs
   const hasCalledApi = useRef(false);
+  const copyResultRef = useRef<{ sections: Record<string, SectionCopy> } | null>(null);
+  const inactivityRef = useRef<ReturnType<typeof setTimeout>>();
 
-  // Rotate messages
-  useEffect(() => {
-    if (generationProgress >= 100) return;
-    const interval = setInterval(() => {
-      setMessageIndex((prev) => (prev + 1) % generatingMessages.length);
-    }, 800);
-    return () => clearInterval(interval);
-  }, [generationProgress]);
+  // ─── Save generated content to draft ───
 
-  // Progress simulation - distribute across sections
-  useEffect(() => {
-    if (generationProgress >= 95 || apiComplete) return;
-
-    const sections = selectedSections;
-    if (sections.length === 0) return;
-
-    const intervalTime = 15000 / sections.length; // ~15s total
-
-    const timer = setInterval(() => {
-      setCurrentSectionIndex((prev) => {
-        const next = Math.min(prev + 1, sections.length - 1);
-        setCompletedSections((s) => new Set([...s, sections[prev]]));
-        const progress = Math.round(((next + 1) / sections.length) * 90); // Cap at 90%
-        setGenerationProgress(Math.min(progress, 90));
-        return next;
-      });
-    }, intervalTime);
-
-    return () => clearInterval(timer);
-  }, [selectedSections, apiComplete, generationProgress, setGenerationProgress]);
-
-  // Save generated content to draft
   const saveGeneratedContent = useCallback(
     async (sections: Record<string, SectionCopy>) => {
       if (!strategy) return;
 
-      // Build section IDs
       const sectionOrder = strategy.sections;
       const sectionIds = sectionOrder.map(
         (type) => `${type.toLowerCase()}-${crypto.randomUUID().slice(0, 8)}`
       );
 
-      // Build sectionLayouts map (V3 strategy has uiblocks embedded)
       const sectionLayouts: Record<string, string> = {};
       sectionIds.forEach((id, i) => {
         const sectionType = sectionOrder[i];
@@ -169,16 +121,18 @@ export default function GeneratingStep() {
         sectionLayouts[id] = strategy.uiblocks?.[sectionType] || uiblockSelections[sectionType] || 'default';
       });
 
-      // Get complete background system from vibe
-      const backgroundSystem = generateBackgroundSystemForVibe(strategy.vibe);
+      // Get palette from user's design choices (or random fallback)
+      const paletteId = designChoices?.paletteId || getRandomFromPool(strategy.vibe);
+      const palette = getPaletteById(paletteId) || getDefaultPaletteForVibe(strategy.vibe);
+      const backgroundSystem = generateBackgroundSystemFromPalette(palette);
       const designTokens = getDesignTokensForVibe(strategy.vibe);
 
-      // DEBUG: Verify what's being generated
-      console.log('🎨 [DEBUG-BUG1] Vibe:', strategy.vibe);
-      console.log('🎨 [DEBUG-BUG1] BackgroundSystem:', JSON.stringify(backgroundSystem, null, 2));
-      console.log('🎨 [DEBUG-BUG1] DesignTokens:', JSON.stringify(designTokens, null, 2));
+      // Apply texture
+      const textureId = designChoices?.textureId || 'none';
 
-      // Build content map with full structure + backgroundType (position-based)
+      console.log('🎨 [BG-V3] Palette:', palette.id, '| Texture:', textureId);
+      console.log('🎨 [BG-V3] BackgroundSystem:', JSON.stringify(backgroundSystem, null, 2));
+
       const bgAssignments = assignSectionBackgrounds(sectionIds);
       const content: Record<string, any> = {};
       sectionIds.forEach((id, i) => {
@@ -215,9 +169,9 @@ export default function GeneratingStep() {
               accentColor: backgroundSystem.accentColor,
               accentCSS: backgroundSystem.accentCSS,
               sectionBackgrounds: {
-                primary: backgroundSystem.primary,
-                secondary: backgroundSystem.secondary,
-                neutral: backgroundSystem.neutral,
+                primary: compileBackground(palette, textureId, 'primary'),
+                secondary: compileBackground(palette, textureId, 'secondary'),
+                neutral: palette.neutral,
               },
             },
             vibe: strategy.vibe,
@@ -236,10 +190,8 @@ export default function GeneratingStep() {
         generatedAt: Date.now(),
       };
 
-      // DEBUG: Verify what's being saved
-      console.log('💾 [DEBUG-BUG1] Saving theme.colors:', JSON.stringify(finalContent.layout.theme.colors, null, 2));
+      console.log('💾 [BG-V3] Saving theme.colors:', JSON.stringify(finalContent.layout.theme.colors, null, 2));
 
-      // Save to API
       await fetch('/api/saveDraft', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -250,10 +202,15 @@ export default function GeneratingStep() {
         }),
       });
     },
-    [strategy, uiblockSelections, productName, tokenId]
+    [strategy, uiblockSelections, productName, tokenId, designChoices]
   );
 
-  // API call - copy generation + image fetching in parallel
+  // Keep saveRef always fresh for the dual-ready effect
+  const saveRef = useRef(saveGeneratedContent);
+  saveRef.current = saveGeneratedContent;
+
+  // ─── API call — copy generation + image fetching in parallel ───
+
   const callGenerateCopyAPI = useCallback(async () => {
     if (!strategy || !understanding) return;
 
@@ -262,9 +219,7 @@ export default function GeneratingStep() {
       const uiblocks = strategy.uiblocks || uiblockSelections;
       const categories = understanding.categories || [];
 
-      // Run copy generation and image fetching in PARALLEL
       const [copyResponse, imageResults] = await Promise.all([
-        // Copy generation
         fetch('/api/v3/generate-copy', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -279,28 +234,17 @@ export default function GeneratingStep() {
           }),
         }).then(r => r.json()),
 
-        // Image fetching (parallel, staggered internally)
         fetchPexelsImagesParallel(categories, uiblocks as Record<string, string>),
       ]);
 
       if (copyResponse.success) {
-        setApiComplete(true);
-
-        // Merge fetched images into section copy
         const sectionsWithImages = mergeImagesIntoSections(
           copyResponse.sections,
           imageResults
         );
-
-        // Save generated content with images
-        await saveGeneratedContent(sectionsWithImages);
-
-        // Complete progress
-        setCompletedSections(new Set(selectedSections));
-        setGenerationProgress(100);
-
-        // Short delay then redirect to magic moment
-        setTimeout(() => router.push(`/generate/${tokenId}`), 500);
+        copyResultRef.current = { sections: sectionsWithImages };
+        setApiComplete(true);
+        // Save deferred — dual-ready effect handles it
       } else {
         setGenerationError(copyResponse.message || 'Generation failed');
       }
@@ -309,19 +253,69 @@ export default function GeneratingStep() {
     }
   }, [
     strategy, understanding, uiblockSelections, productName, oneLiner,
-    offer, landingGoal, saveGeneratedContent, selectedSections,
-    setGenerationProgress, setGenerationError, router, tokenId
+    offer, landingGoal, selectedSections,
+    setGenerationError,
   ]);
 
-  // Trigger API call on mount
+  // ─── Trigger API call on mount ───
+
   useEffect(() => {
     if (generationProgress === 0 && !generationError && !apiComplete && !hasCalledApi.current) {
       hasCalledApi.current = true;
       callGenerateCopyAPI();
     }
-  }, []); // Only on mount
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Error state - redirect to editor with empty sections
+  // ─── Dual-ready effect: save + redirect when both API and user are done ───
+
+  useEffect(() => {
+    if (!apiComplete || !userDone || !copyResultRef.current) return;
+    const doSave = async () => {
+      await saveRef.current(copyResultRef.current!.sections);
+      setGenerationProgress(100);
+      setTimeout(() => router.push(`/generate/${tokenId}`), 500);
+    };
+    doSave();
+  }, [apiComplete, userDone, setGenerationProgress, router, tokenId]);
+
+  // ─── Inactivity timer (45s) ───
+
+  const resetInactivity = useCallback(() => {
+    clearTimeout(inactivityRef.current);
+    inactivityRef.current = setTimeout(() => {
+      if (apiComplete && !userDone) {
+        // Auto-skip with defaults
+        const pool = DEFAULT_POOLS[strategy?.vibe || ''] || DEFAULT_POOLS['Light Trust'];
+        const pid = pool[Math.floor(Math.random() * pool.length)];
+        setDesignChoices({ paletteId: pid, textureId: 'none' });
+        setUserDone(true);
+      }
+    }, 45000);
+  }, [apiComplete, userDone, strategy?.vibe]);
+
+  // Start inactivity timer on mount
+  useEffect(() => {
+    resetInactivity();
+    return () => clearTimeout(inactivityRef.current);
+  }, [resetInactivity]);
+
+  // ─── Handlers ───
+
+  const ctaText = deriveCTAText(landingGoal || '');
+
+  function handleDesignComplete(choices: DesignChoices) {
+    setDesignChoices(choices);
+    setUserDone(true);
+  }
+
+  function handleSkip() {
+    const pool = DEFAULT_POOLS[strategy?.vibe || ''] || DEFAULT_POOLS['Light Trust'];
+    const paletteId = pool[Math.floor(Math.random() * pool.length)];
+    handleDesignComplete({ paletteId, textureId: 'none' });
+  }
+
+  // ─── Render ───
+
   if (generationError) {
     return (
       <ErrorRetry
@@ -333,48 +327,40 @@ export default function GeneratingStep() {
     );
   }
 
+  // User still picking
+  if (!userDone) {
+    return (
+      <DesignQuestionsFlow
+        productName={productName}
+        oneLiner={oneLiner}
+        ctaText={ctaText}
+        audience={audience}
+        vibe={strategy?.vibe || ''}
+        apiComplete={apiComplete}
+        onComplete={handleDesignComplete}
+        onSkip={handleSkip}
+        onInteraction={resetInactivity}
+      />
+    );
+  }
+
+  // User done, waiting for API
+  if (userDone && !apiComplete) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 space-y-4">
+        <div className="w-10 h-10 rounded-full border-4 border-gray-200 border-t-brand-accentPrimary animate-spin" />
+        <p className="text-sm text-gray-600">Almost ready...</p>
+      </div>
+    );
+  }
+
+  // Both done — saving in progress (dual-ready effect handles redirect)
   return (
-    <div className="flex flex-col items-center justify-center py-16 space-y-8">
-      {/* Spinner or checkmark */}
-      {generationProgress < 100 ? (
-        <div className="w-16 h-16 border-4 border-gray-200 border-t-brand-accentPrimary rounded-full animate-spin" />
-      ) : (
-        <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
-          <Check className="w-8 h-8 text-green-600" />
-        </div>
-      )}
-
-      {/* Progress bar */}
-      <div className="w-full max-w-xs">
-        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-brand-accentPrimary transition-all duration-500"
-            style={{ width: `${generationProgress}%` }}
-          />
-        </div>
-        <p className="text-center text-sm text-gray-500 mt-2">
-          {generationProgress < 100
-            ? generatingMessages[messageIndex]
-            : 'Your page is ready!'}
-        </p>
+    <div className="flex flex-col items-center justify-center py-16 space-y-4">
+      <div className="w-12 h-12 rounded-full bg-brand-accentPrimary/10 flex items-center justify-center">
+        <Check className="w-6 h-6 text-brand-accentPrimary" />
       </div>
-
-      {/* Section checklist */}
-      <div className="w-full max-w-sm space-y-2">
-        {selectedSections.slice(0, 6).map((section, i) => (
-          <SectionProgressItem
-            key={section}
-            name={section}
-            done={completedSections.has(section)}
-            active={i === currentSectionIndex && !completedSections.has(section)}
-          />
-        ))}
-        {selectedSections.length > 6 && (
-          <p className="text-center text-xs text-gray-400">
-            +{selectedSections.length - 6} more sections
-          </p>
-        )}
-      </div>
+      <p className="text-sm text-gray-700 font-medium">Your page is ready!</p>
     </div>
   );
 }

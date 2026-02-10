@@ -14,6 +14,7 @@ const BACK_ALLOWED_STEPS = ['understanding', 'landingGoal', 'offer', 'assetAvail
 export default function StepContainer({ children }: StepContainerProps) {
   const currentStep = useGenerationStore((s) => s.currentStep);
   const stepIndex = useGenerationStore((s) => s.stepIndex);
+  const isWideStep = currentStep === 'generating';
   const prevStep = useGenerationStore((s) => s.prevStep);
   const resetFrom = useGenerationStore((s) => s.resetFrom);
 
@@ -47,7 +48,7 @@ export default function StepContainer({ children }: StepContainerProps) {
 
       {/* Main content with card wrapper */}
       <div className="pt-24 pb-16 px-4">
-        <div className="max-w-xl mx-auto">
+        <div className={`${isWideStep ? 'max-w-5xl' : 'max-w-xl'} mx-auto`}>
           {/* Back button */}
           {showBack && (
             <Button
@@ -62,7 +63,7 @@ export default function StepContainer({ children }: StepContainerProps) {
           )}
 
           {/* Card wrapper */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-8">
+          <div className={`bg-white rounded-xl shadow-sm border border-gray-200 ${isWideStep ? 'p-4 md:p-5' : 'p-6 md:p-8'}`}>
             {children}
           </div>
         </div>
