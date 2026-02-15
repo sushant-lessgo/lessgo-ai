@@ -69,24 +69,26 @@ export function createAIActions(set: any, get: any) {
         // Update the section content
         set((state: EditStore) => {
           if (state.content[sectionId] && data.content) {
-            // Snapshot image/non-text elements before merge
             const existingElements = state.content[sectionId].elements;
-            const imageKeys = Object.entries(existingElements)
-              .filter(([key, el]: [string, any]) =>
-                el?.type === 'image' ||
-                key.includes('image') || key.includes('avatar') ||
-                key.includes('visual') || key.includes('mockup') ||
-                key.includes('logo')
-              )
-              .map(([key, el]) => [key, { ...el as any }] as const);
-
-            // Preserve existing structure but update element content
             const updatedElements = { ...existingElements };
 
-            // Merge new content with existing elements
+            // Helpers: detect image elements to preserve during copy regen
+            const isImageValue = (val: unknown): boolean => {
+              const str = typeof val === 'string' ? val : (val as any)?.content;
+              return typeof str === 'string' && (
+                str.startsWith('/') || str.startsWith('http') || str.startsWith('blob:') || str.startsWith('data:image')
+              );
+            };
+            const isImageKey = (key: string): boolean =>
+              key.includes('image') || key.includes('avatar') ||
+              key.includes('visual') || key.includes('mockup') ||
+              key.includes('logo');
+
+            // Merge new content — skip image elements
             Object.entries(data.content).forEach(([key, value]: [string, any]) => {
+              if (isImageValue(existingElements[key]) || isImageKey(key)) return;
+
               if (updatedElements[key]) {
-                // Update existing element
                 if (typeof value === 'object' && value.content !== undefined) {
                   updatedElements[key] = {
                     ...updatedElements[key],
@@ -94,27 +96,15 @@ export function createAIActions(set: any, get: any) {
                     ...(value.type && { type: value.type })
                   };
                 } else if (typeof value === 'string') {
-                  // Handle simple string content
                   if (typeof updatedElements[key] === 'object') {
                     updatedElements[key].content = value;
                   } else {
-                    updatedElements[key] = {
-                      content: value,
-                      type: 'text',
-                      isEditable: true,
-                      editMode: 'inline'
-                    };
+                    updatedElements[key] = value;
                   }
                 }
               } else {
-                // Add new element
                 updatedElements[key] = value;
               }
-            });
-
-            // Restore image elements that may have been overwritten
-            imageKeys.forEach(([key, snapshot]) => {
-              updatedElements[key] = snapshot;
             });
 
             // Update the section
