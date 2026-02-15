@@ -9,6 +9,7 @@ import {
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { getCardStyles as getAdaptiveCardStyles, type CardStyles } from '@/modules/Design/cardStyles';
 import { shadows, cardEnhancements } from '@/modules/Design/designTokens';
 
 // V2 Types

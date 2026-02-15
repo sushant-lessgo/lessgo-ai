@@ -1,7 +1,7 @@
 // components/layout/InlineQnAList.tsx
 // V2 Schema - Clean array format, no numbered fields or pipe strings
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import {
@@ -9,6 +9,8 @@ import {
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { getCardStyles } from '@/modules/Design/cardStyles';
 
 // FAQ item structure (V2 - clean array format)
 interface FAQItem {
@@ -65,6 +67,18 @@ export default function InlineQnAList(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Theme detection: manual override > auto-detection > neutral fallback
+  const uiBlockTheme = useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  const cardStyles = useMemo(() => getCardStyles({
+    sectionBackgroundCSS: sectionBackground || '',
+    theme: uiBlockTheme
+  }), [sectionBackground, uiBlockTheme]);
 
   // Get FAQ items from content (direct array access)
   const faqItems: FAQItem[] = blockContent.faq_items || CONTENT_SCHEMA.faq_items.default;
@@ -151,7 +165,7 @@ export default function InlineQnAList(props: LayoutComponentProps) {
         {/* Simple Q&A List */}
         <div className="space-y-6">
           {faqItems.map((item) => (
-            <div key={item.id} className={`relative group/faq-item border-b pb-6 last:border-0 ${dynamicTextColors?.muted ? 'border-current/20' : 'border-gray-200'}`}>
+            <div key={item.id} className={`relative group/faq-item border-b pb-6 last:border-0 ${cardStyles.border}`}>
               <div className="mb-2">
                 <EditableAdaptiveText
                   mode={mode}
@@ -160,7 +174,7 @@ export default function InlineQnAList(props: LayoutComponentProps) {
                   backgroundType={backgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  className={`font-medium ${dynamicTextColors?.heading || colorTokens.textPrimary}`}
+                  className={`font-medium ${cardStyles.textHeading}`}
                   style={getTextStyle('h3')}
                   placeholder="Enter question..."
                   sectionBackground={sectionBackground}
@@ -177,7 +191,7 @@ export default function InlineQnAList(props: LayoutComponentProps) {
                   backgroundType={backgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  className={`leading-relaxed ${dynamicTextColors?.muted || colorTokens.textMuted}`}
+                  className={`leading-relaxed ${cardStyles.textBody}`}
                   placeholder="Enter answer..."
                   sectionBackground={sectionBackground}
                   data-section-id={sectionId}

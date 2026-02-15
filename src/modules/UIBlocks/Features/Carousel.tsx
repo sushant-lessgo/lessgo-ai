@@ -63,7 +63,8 @@ const CarouselSlide = React.memo(({
   benefit_2,
   benefit_icon_1,
   benefit_icon_2,
-  onUpdateBenefit
+  onUpdateBenefit,
+  cardStyles
 }: {
   feature: FeatureItem;
   sectionId: string;
@@ -80,6 +81,7 @@ const CarouselSlide = React.memo(({
   benefit_icon_1?: string;
   benefit_icon_2?: string;
   onUpdateBenefit: (field: string, value: string) => void;
+  cardStyles: ReturnType<typeof getCardStyles>;
 }) => {
 
   const VisualPlaceholder = React.memo(({ onClick }: { onClick?: (e: React.MouseEvent) => void }) => (
@@ -177,13 +179,13 @@ const CarouselSlide = React.memo(({
             onBlur={(e) => {
               onUpdateFeature(feature.id, 'title', e.currentTarget.textContent || '');
             }}
-            className={`text-2xl font-bold ${colorTokens.textPrimary} outline-none focus:ring-2 focus:ring-pink-500 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-50 min-h-[40px]`}
+            className={`text-2xl font-bold ${cardStyles.textHeading} outline-none focus:ring-2 focus:ring-pink-500 focus:ring-opacity-50 rounded px-2 py-1 cursor-text min-h-[40px]`}
             data-placeholder="Feature title"
           >
             {feature.title}
           </div>
         ) : (
-          <h3 style={h2Style} className={`font-bold ${colorTokens.textPrimary}`}>
+          <h3 style={h2Style} className={`font-bold ${cardStyles.textHeading}`}>
             {feature.title}
           </h3>
         )}
@@ -196,13 +198,13 @@ const CarouselSlide = React.memo(({
             onBlur={(e) => {
               onUpdateFeature(feature.id, 'description', e.currentTarget.textContent || '');
             }}
-            className={`${colorTokens.textSecondary} leading-relaxed outline-none focus:ring-2 focus:ring-pink-500 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-50 min-h-[60px]`}
+            className={`${cardStyles.textBody} leading-relaxed outline-none focus:ring-2 focus:ring-pink-500 focus:ring-opacity-50 rounded px-2 py-1 cursor-text min-h-[60px]`}
             data-placeholder="Feature description"
           >
             {feature.description}
           </div>
         ) : (
-          <p style={bodyLgStyle} className={`${colorTokens.textSecondary} leading-relaxed`}>
+          <p style={bodyLgStyle} className={`${cardStyles.textBody} leading-relaxed`}>
             {feature.description}
           </p>
         )}
@@ -556,6 +558,7 @@ export default function Carousel(props: LayoutComponentProps) {
                 benefit_icon_1={blockContent.benefit_icon_1}
                 benefit_icon_2={blockContent.benefit_icon_2}
                 onUpdateBenefit={handleUpdateBenefit}
+                cardStyles={cardStyles}
                 onRemove={features.length > 1 ? () => handleRemoveFeature(features[activeSlide].id) : undefined}
               />
             )}
@@ -566,9 +569,9 @@ export default function Carousel(props: LayoutComponentProps) {
             <div className="flex items-center justify-between mt-8">
               <button
                 onClick={prevSlide}
-                className={`p-3 rounded-full ${colorTokens.surfaceElevated} border border-gray-200 hover:shadow-md transition-all duration-200`}
+                className={`p-3 rounded-full ${cardStyles.bg} ${cardStyles.border} hover:shadow-md transition-all duration-200`}
               >
-                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className={`w-5 h-5 ${cardStyles.textBody}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
@@ -591,9 +594,9 @@ export default function Carousel(props: LayoutComponentProps) {
 
               <button
                 onClick={nextSlide}
-                className={`p-3 rounded-full ${colorTokens.surfaceElevated} border border-gray-200 hover:shadow-md transition-all duration-200`}
+                className={`p-3 rounded-full ${cardStyles.bg} ${cardStyles.border} hover:shadow-md transition-all duration-200`}
               >
-                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className={`w-5 h-5 ${cardStyles.textBody}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </button>
@@ -618,11 +621,11 @@ export default function Carousel(props: LayoutComponentProps) {
                   }`}
                   style={activeSlide === index && isHexColor(colorTokens.ctaBg) ? { borderColor: colorTokens.ctaBg } : undefined}
                 >
-                  <div className="text-sm font-medium text-gray-900 truncate">
+                  <div className={`text-sm font-medium ${cardStyles.textHeading} truncate`}>
                     {feature.title}
                   </div>
                   {feature.tag && (
-                    <div className="text-xs text-gray-500 mt-1 truncate">
+                    <div className={`text-xs ${cardStyles.textMuted} mt-1 truncate`}>
                       {feature.tag}
                     </div>
                   )}

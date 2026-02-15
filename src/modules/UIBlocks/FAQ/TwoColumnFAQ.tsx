@@ -1,7 +1,7 @@
 // components/layout/TwoColumnFAQ.tsx
 // V2 Schema - Clean array format, no numbered fields or pipe strings
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import {
@@ -9,6 +9,8 @@ import {
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { getCardStyles, type CardStyles } from '@/modules/Design/cardStyles';
 
 // FAQ item structure (V2 - clean array format)
 interface FAQItem {
@@ -78,6 +80,18 @@ export default function TwoColumnFAQ(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
+  // Theme detection: manual override > auto-detection > neutral fallback
+  const uiBlockTheme = useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  const cardStyles = useMemo(() => getCardStyles({
+    sectionBackgroundCSS: sectionBackground || '',
+    theme: uiBlockTheme
+  }), [sectionBackground, uiBlockTheme]);
+
   // Get FAQ items from content (direct array access)
   const faqItems: FAQItem[] = blockContent.faq_items || CONTENT_SCHEMA.faq_items.default;
 
@@ -119,11 +133,9 @@ export default function TwoColumnFAQ(props: LayoutComponentProps) {
     (handleContentUpdate as any)('faq_items', updatedItems);
   };
 
-  const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
-
   // Render a single FAQ item with divider
   const renderFAQItem = (item: FAQItem) => (
-    <div key={item.id} className="relative group/faq-item space-y-3 pb-6 border-b border-gray-200 last:border-b-0 last:pb-0">
+    <div key={item.id} className={`relative group/faq-item space-y-3 pb-6 border-b last:border-b-0 last:pb-0 ${cardStyles.border}`}>
       <EditableAdaptiveText
         mode={mode}
         value={item.question}
@@ -131,7 +143,7 @@ export default function TwoColumnFAQ(props: LayoutComponentProps) {
         backgroundType={backgroundType}
         colorTokens={colorTokens}
         variant="body"
-        className={`font-semibold ${dynamicTextColors?.heading || colorTokens.textPrimary}`}
+        className={`font-semibold ${cardStyles.textHeading}`}
         style={getTextStyle('h3')}
         placeholder="Enter question..."
         sectionBackground={sectionBackground}
@@ -147,7 +159,7 @@ export default function TwoColumnFAQ(props: LayoutComponentProps) {
           backgroundType={backgroundType}
           colorTokens={colorTokens}
           variant="body"
-          className={`leading-relaxed ${mutedTextColor}`}
+          className={`leading-relaxed ${cardStyles.textBody}`}
           placeholder="Enter answer..."
           sectionBackground={sectionBackground}
           data-section-id={sectionId}

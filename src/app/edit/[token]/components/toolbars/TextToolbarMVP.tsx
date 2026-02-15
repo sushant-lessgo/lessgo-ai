@@ -499,8 +499,8 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
         style={{
           left: finalPosition.x,
           top: finalPosition.y,
-          width: '320px', // Widened for sparkle button
           height: '52px', // Fixed MVP height
+          whiteSpace: 'nowrap',
           opacity: isVisible ? 1 : 0,
           pointerEvents: isVisible ? 'auto' : 'none',
           userSelect: 'none', // Prevent text selection on toolbar

@@ -7,11 +7,12 @@
 
 import React from 'react';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publishedTextColors';
+import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardStyles } from '@/lib/publishedTextColors';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { analyzeBackground } from '@/utils/backgroundAnalysis';
 
 interface ComparisonRow {
   id: string;
@@ -82,6 +83,10 @@ export default function PropertyComparisonMatrixPublished(props: LayoutComponent
 
   const themeColors = getThemeColors(uiTheme);
 
+  // Card styles from luminance-based system
+  const { luminance } = analyzeBackground(sectionBackgroundCSS || '');
+  const cardStyles = getPublishedCardStyles(luminance, uiTheme);
+
   // Get text colors
   const textColors = getPublishedTextColors(
     backgroundType || 'neutral',
@@ -131,10 +136,12 @@ export default function PropertyComparisonMatrixPublished(props: LayoutComponent
 
         {/* Comparison Table */}
         <div
-          className="bg-white rounded-xl overflow-hidden"
+          className="rounded-xl overflow-hidden"
           style={{
-            border: `1px solid ${themeColors.cardBorder}`,
-            boxShadow: themeColors.cardShadow
+            backgroundColor: cardStyles.bg,
+            backdropFilter: cardStyles.backdropFilter,
+            border: `${cardStyles.borderWidth} ${cardStyles.borderStyle} ${cardStyles.borderColor}`,
+            boxShadow: cardStyles.boxShadow
           }}
         >
           {/* Header Row - stronger border */}
@@ -150,7 +157,7 @@ export default function PropertyComparisonMatrixPublished(props: LayoutComponent
               style={{
                 padding: '1.25rem',
                 fontWeight: 700,
-                color: '#111827',
+                color: cardStyles.textHeading,
                 ...bodyTypography
               }}
             >
@@ -177,7 +184,7 @@ export default function PropertyComparisonMatrixPublished(props: LayoutComponent
               style={{
                 padding: '1.25rem',
                 fontWeight: 700,
-                color: '#6b7280',
+                color: cardStyles.textMuted,
                 ...bodyTypography
               }}
             >
@@ -199,7 +206,7 @@ export default function PropertyComparisonMatrixPublished(props: LayoutComponent
                 style={{
                   padding: '1.25rem',
                   fontWeight: 500,
-                  color: '#111827',
+                  color: cardStyles.textHeading,
                   ...bodyTypography
                 }}
               >
@@ -225,7 +232,7 @@ export default function PropertyComparisonMatrixPublished(props: LayoutComponent
                 className="text-center"
                 style={{
                   padding: '1.25rem',
-                  color: '#6b7280',
+                  color: cardStyles.textMuted,
                   ...bodyTypography
                 }}
               >

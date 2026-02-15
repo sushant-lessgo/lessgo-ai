@@ -11,7 +11,8 @@
 
 import React from 'react';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publishedTextColors';
+import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardStyles } from '@/lib/publishedTextColors';
+import { analyzeBackground } from '@/utils/backgroundAnalysis';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { IconPublished } from '@/components/published/IconPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
@@ -47,6 +48,10 @@ export default function SideBySideBlockPublished(props: LayoutComponentProps) {
   // Detect UIBlock theme
   const uiTheme: UIBlockTheme = props.manualThemeOverride ||
     (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+
+  // Get adaptive card styles
+  const { luminance } = analyzeBackground(sectionBackgroundCSS || '');
+  const cardStyles = getPublishedCardStyles(luminance, uiTheme);
 
   // Get accent color from theme
   const accentColor = theme?.colors?.accentColor || '#3b82f6';
@@ -158,7 +163,8 @@ export default function SideBySideBlockPublished(props: LayoutComponentProps) {
             <div
               className="rounded-xl p-4 sm:p-6 md:p-8 h-full transition-all duration-300 hover:shadow-lg"
               style={{
-                backgroundColor: themeColors.before.bg,
+                backgroundColor: cardStyles.bg,
+                backdropFilter: cardStyles.backdropFilter,
                 border: `2px dashed ${themeColors.before.border}`
               }}
             >
@@ -205,7 +211,7 @@ export default function SideBySideBlockPublished(props: LayoutComponentProps) {
                       <span style={{ color: themeColors.before.labelColor }} className="flex-shrink-0 mt-0.5">
                         {themeColors.before.pointIcon}
                       </span>
-                      <span style={{ color: textColors.body }}>{point}</span>
+                      <span style={{ color: cardStyles.textBody }}>{point}</span>
                     </div>
                   ))}
                 </div>
@@ -232,7 +238,8 @@ export default function SideBySideBlockPublished(props: LayoutComponentProps) {
             <div
               className="rounded-xl p-4 sm:p-6 md:p-8 h-full transition-all duration-300 hover:shadow-lg"
               style={{
-                backgroundColor: themeColors.after.bg,
+                backgroundColor: cardStyles.bg,
+                backdropFilter: cardStyles.backdropFilter,
                 border: `2px solid ${themeColors.after.border}`
               }}
             >
@@ -279,7 +286,7 @@ export default function SideBySideBlockPublished(props: LayoutComponentProps) {
                       <span style={{ color: themeColors.after.labelColor }} className="flex-shrink-0 mt-0.5">
                         {themeColors.after.pointIcon}
                       </span>
-                      <span style={{ color: textColors.body }}>{point}</span>
+                      <span style={{ color: cardStyles.textBody }}>{point}</span>
                     </div>
                   ))}
                 </div>

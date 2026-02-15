@@ -10,10 +10,11 @@ import { useImageToolbar } from '@/hooks/useImageToolbar';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import { 
-  EditableAdaptiveHeadline, 
-  EditableAdaptiveText, 
-  AccentBadge 
+import { getCardStyles, type CardStyles } from '@/modules/Design/cardStyles';
+import {
+  EditableAdaptiveHeadline,
+  EditableAdaptiveText,
+  AccentBadge
 } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
@@ -147,6 +148,11 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
 
   const themeColors = getThemeColors(uiBlockTheme);
 
+  const cardStyles = React.useMemo(() => getCardStyles({
+    sectionBackgroundCSS: sectionBackground || '',
+    theme: uiBlockTheme
+  }), [sectionBackground, uiBlockTheme]);
+
   const { getTextStyle: getTypographyStyle } = useTypography();
   
   // Get showImageToolbar for handling image clicks
@@ -167,7 +173,7 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
     >
       <div className="max-w-4xl mx-auto">
         {/* Letter Container */}
-        <div className="bg-white shadow-2xl rounded-lg overflow-hidden border" style={{ borderColor: themeColors.letterBorder }}>
+        <div className={`${cardStyles.bg} ${cardStyles.blur} ${cardStyles.border} ${cardStyles.shadow} rounded-lg overflow-hidden`}>
           
           {/* Letter Header */}
           <div className="px-8 py-6 border-b" style={{ backgroundColor: themeColors.headerBg, borderColor: themeColors.headerBorder }}>
@@ -178,8 +184,8 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
               level="h2"
               backgroundType="neutral"
               colorTokens={colorTokens}
-              textStyle={{ fontSize: '1.5rem', fontWeight: '700', color: dynamicTextColors?.heading || '#111827' }}
-              className="text-center"
+              textStyle={{ fontSize: '1.5rem', fontWeight: '700' }}
+              className={`text-center ${cardStyles.textHeading}`}
               sectionId={sectionId}
               elementKey="letter_header"
               sectionBackground="bg-gray-50"
@@ -194,7 +200,8 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
                 backgroundType="neutral"
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={{ fontSize: '0.875rem', color: dynamicTextColors?.muted || '#6B7280' }}
+                textStyle={{ fontSize: '0.875rem' }}
+                className={cardStyles.textMuted}
                 placeholder="Add date..."
                 sectionId={sectionId}
                 elementKey="date_text"
@@ -214,7 +221,8 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
               backgroundType="neutral"
               colorTokens={colorTokens}
               variant="body"
-              textStyle={{ fontSize: '1.125rem', color: dynamicTextColors?.heading || '#111827', marginBottom: '1.5rem' }}
+              textStyle={{ fontSize: '1.125rem', marginBottom: '1.5rem' }}
+              className={cardStyles.textHeading}
               placeholder="Dear [Audience],"
               sectionId={sectionId}
               elementKey="letter_greeting"
@@ -230,7 +238,8 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
                 backgroundType="neutral"
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={{ color: dynamicTextColors?.body || '#374151', lineHeight: '1.625', whiteSpace: 'pre-line' }}
+                textStyle={{ lineHeight: '1.625', whiteSpace: 'pre-line' }}
+                className={cardStyles.textBody}
                 placeholder="Write your personal story and connection with the audience..."
                 sectionId={sectionId}
                 elementKey="letter_body"
@@ -297,7 +306,8 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
                   backgroundType="neutral"
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={{ fontSize: '1.25rem', fontWeight: '600', color: dynamicTextColors?.heading || '#111827' }}
+                  textStyle={{ fontSize: '1.25rem', fontWeight: '600' }}
+                  className={cardStyles.textHeading}
                   placeholder="Your Name"
                   sectionId={sectionId}
                   elementKey="letter_signature"
@@ -319,7 +329,7 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
                   backgroundType="neutral"
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={{ color: dynamicTextColors?.body || '#4B5563' }}
+                  className={cardStyles.textBody}
                   placeholder="Title, Company"
                   sectionId={sectionId}
                   elementKey="founder_title"
@@ -338,7 +348,8 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
                   backgroundType="neutral"
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={{ color: dynamicTextColors?.body || '#4B5563', fontStyle: 'italic' }}
+                  textStyle={{ fontStyle: 'italic' }}
+                  className={cardStyles.textBody}
                   placeholder="P.S. Add a personal note or special offer..."
                   sectionId={sectionId}
                   elementKey="ps_text"

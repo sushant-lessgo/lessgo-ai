@@ -10,6 +10,7 @@ import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { getCardStyles, type CardStyles } from '@/modules/Design/cardStyles';
 
 interface StackedTextVisualProps extends LayoutComponentProps {}
 
@@ -79,6 +80,12 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
   // Detect UIBlock theme - warm/cool/neutral
   const uiTheme: UIBlockTheme = props.manualThemeOverride ||
     (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+
+  // Get adaptive card styles
+  const cardStyles = React.useMemo(() => getCardStyles({
+    sectionBackgroundCSS: sectionBackground || '',
+    theme: uiTheme
+  }), [sectionBackground, uiTheme]);
 
   // Get accent color for After block
   const accentColor = colorTokens.ctaBg || '#3b82f6';
@@ -207,9 +214,8 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
           {/* Before Block */}
           <div className="relative">
             <div
-              className="border-l-4 rounded-lg p-8 shadow-sm"
+              className={`${cardStyles.bg} ${cardStyles.blur} border-l-4 rounded-lg p-8 shadow-sm`}
               style={{
-                backgroundColor: themeColors.before.bg,
                 borderLeftColor: themeColors.before.border
               }}
             >
@@ -245,10 +251,9 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
                       textTransform: 'uppercase',
                       letterSpacing: '0.05em',
                       fontWeight: 600,
-                      fontSize: '1rem',
-                      color: dynamicTextColors?.body
+                      fontSize: '1rem'
                     }}
-                    className="font-semibold mb-3 uppercase tracking-wide"
+                    className={`font-semibold mb-3 uppercase tracking-wide ${cardStyles.textHeading}`}
                     sectionId={sectionId}
                     elementKey="before_label"
                     sectionBackground={sectionBackground}
@@ -261,8 +266,8 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
                     backgroundType={safeBackgroundType}
                     colorTokens={colorTokens}
                     variant="body"
-                    className="leading-relaxed"
-                    textStyle={{ color: dynamicTextColors?.body, fontSize: '0.8rem' }}
+                    className={`leading-relaxed ${cardStyles.textBody}`}
+                    textStyle={{ fontSize: '0.8rem' }}
                     sectionId={sectionId}
                     elementKey="before_text"
                     sectionBackground={sectionBackground}
@@ -317,9 +322,8 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
           {/* After Block */}
           <div className="relative">
             <div
-              className="border-l-4 rounded-lg p-8 shadow-sm"
+              className={`${cardStyles.bg} ${cardStyles.blur} border-l-4 rounded-lg p-8 shadow-sm`}
               style={{
-                backgroundColor: themeColors.after.bg,
                 borderLeftColor: themeColors.after.border
               }}
             >
@@ -355,10 +359,9 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
                       textTransform: 'uppercase',
                       letterSpacing: '0.05em',
                       fontWeight: 600,
-                      fontSize: '1rem',
-                      color: themeColors.after.iconText
+                      fontSize: '1rem'
                     }}
-                    className="font-semibold mb-3 uppercase tracking-wide"
+                    className={`font-semibold mb-3 uppercase tracking-wide ${cardStyles.textHeading}`}
                     sectionId={sectionId}
                     elementKey="after_label"
                     sectionBackground={sectionBackground}
@@ -371,8 +374,8 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
                     backgroundType={safeBackgroundType}
                     colorTokens={colorTokens}
                     variant="body"
-                    className="leading-relaxed"
-                    textStyle={{ color: themeColors.after.iconText, fontSize: '0.8rem' }}
+                    className={`leading-relaxed ${cardStyles.textBody}`}
+                    textStyle={{ fontSize: '0.8rem' }}
                     sectionId={sectionId}
                     elementKey="after_text"
                     sectionBackground={sectionBackground}

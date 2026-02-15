@@ -35,6 +35,7 @@ export function ElementToggleModal({
     sections,
     sectionLayouts,
     setSection,
+    updateElementContent,
   } = useEditStore();
   const onboardingStore = useOnboardingStore();
 
@@ -86,6 +87,11 @@ export function ElementToggleModal({
         // Turn ON — remove from excludedElements
         const excluded = currentExcluded.filter((e: string) => e !== elementName);
         setSection(sectionId, { aiMetadata: { ...meta, excludedElements: excluded } });
+
+        // Create placeholder content if element has no content in store
+        if (!(elementName in (sectionData?.elements || {}))) {
+          updateElementContent(sectionId, elementName, formatElementLabel(elementName));
+        }
       } else {
         // Turn OFF — add to excludedElements
         if (!currentExcluded.includes(elementName)) {
@@ -94,7 +100,7 @@ export function ElementToggleModal({
         }
       }
     },
-    [sectionId, sectionData, setSection]
+    [sectionId, sectionData, setSection, updateElementContent]
   );
 
   return (

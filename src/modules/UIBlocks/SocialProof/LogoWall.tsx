@@ -11,6 +11,8 @@ import {
 import { LayoutComponentProps } from '@/types/storeTypes';
 import LogoEditableComponent from '@/components/ui/LogoEditableComponent';
 import { Check } from 'lucide-react';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { getCardStyles, type CardStyles } from '@/modules/Design/cardStyles';
 
 // V2 Type definitions
 interface Company {
@@ -111,6 +113,19 @@ export default function LogoWall(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
+  // Theme detection
+  const uiBlockTheme = React.useMemo(() => {
+    if (props.manualThemeOverride) return props.manualThemeOverride;
+    if (props.userContext) return selectUIBlockTheme(props.userContext);
+    return 'neutral';
+  }, [props.manualThemeOverride, props.userContext]);
+
+  // Adaptive card styles based on section background
+  const cardStyles = React.useMemo(() => getCardStyles({
+    sectionBackgroundCSS: sectionBackground || '',
+    theme: uiBlockTheme
+  }), [sectionBackground, uiBlockTheme]);
+
   // Collections with fallbacks
   const companies = blockContent.companies || [];
   const stats = blockContent.stats || [];
@@ -203,7 +218,7 @@ export default function LogoWall(props: LayoutComponentProps) {
               sectionId={sectionId}
               elementKey="subheadline"
               sectionBackground={sectionBackground}
-              className="max-w-2xl mx-auto text-gray-600"
+              className={`max-w-2xl mx-auto ${cardStyles.textBody}`}
               placeholder="Add subheadline..."
             />
           )}
@@ -214,7 +229,7 @@ export default function LogoWall(props: LayoutComponentProps) {
           {companies.map((company) => (
             <div
               key={company.id}
-              className="group relative w-32 h-20 bg-white rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all flex items-center justify-center"
+              className={`group relative w-32 h-20 ${cardStyles.bg} ${cardStyles.blur} rounded-lg ${cardStyles.border} ${cardStyles.shadow} ${cardStyles.hoverEffect} transition-all flex items-center justify-center`}
             >
               <LogoEditableComponent
                 mode={mode}
@@ -242,7 +257,7 @@ export default function LogoWall(props: LayoutComponentProps) {
                   contentEditable
                   suppressContentEditableWarning
                   onBlur={(e) => handleUpdateCompany(company.id, 'name', e.currentTarget.textContent || '')}
-                  className="absolute bottom-1 left-1 right-1 text-center text-xs text-gray-500 outline-none focus:bg-white focus:ring-1 focus:ring-blue-300 rounded px-1 truncate"
+                  className={`absolute bottom-1 left-1 right-1 text-center text-xs ${cardStyles.textMuted} outline-none focus:ring-1 focus:ring-blue-300 rounded px-1 truncate`}
                 >
                   {company.name}
                 </div>
@@ -264,7 +279,7 @@ export default function LogoWall(props: LayoutComponentProps) {
         {/* SECONDARY: Press Mentions - Subtle Pills */}
         {showSecondary && (
           <div className="flex flex-wrap items-center justify-center gap-3 mb-6">
-            <span className="text-sm text-gray-400 mr-2">Featured in</span>
+            <span className={`text-sm ${cardStyles.textMuted} mr-2`}>Featured in</span>
             {mediaMentions.map((mention) => (
               <div key={mention.id} className="group relative">
                 {mode !== 'preview' ? (
@@ -273,7 +288,7 @@ export default function LogoWall(props: LayoutComponentProps) {
                       contentEditable
                       suppressContentEditableWarning
                       onBlur={(e) => handleUpdateMedia(mention.id, 'name', e.currentTarget.textContent || '')}
-                      className="px-3 py-1 text-sm text-gray-600 bg-gray-50 hover:bg-gray-100 rounded-full outline-none focus:ring-1 focus:ring-blue-300"
+                      className={`px-3 py-1 text-sm ${cardStyles.textBody} ${cardStyles.bg} rounded-full outline-none focus:ring-1 focus:ring-blue-300`}
                     >
                       {mention.name}
                     </div>
@@ -285,7 +300,7 @@ export default function LogoWall(props: LayoutComponentProps) {
                     </button>
                   </div>
                 ) : (
-                  <span className="px-3 py-1 text-sm text-gray-600 bg-gray-50 rounded-full">
+                  <span className={`px-3 py-1 text-sm ${cardStyles.textBody} ${cardStyles.bg} rounded-full`}>
                     {mention.name}
                   </span>
                 )}
@@ -304,7 +319,7 @@ export default function LogoWall(props: LayoutComponentProps) {
 
         {/* TERTIARY: Certs + Stats - Inline Row */}
         {showTertiary && (
-          <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-gray-500">
+          <div className={`flex flex-wrap items-center justify-center gap-4 text-sm ${cardStyles.textMuted}`}>
             {/* Certifications as small badges */}
             {certifications.map((cert, idx) => (
               <React.Fragment key={cert.id}>

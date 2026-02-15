@@ -8,9 +8,10 @@
 import React from 'react';
 import { X, Check } from 'lucide-react';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publishedTextColors';
+import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardStyles } from '@/lib/publishedTextColors';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
+import { analyzeBackground } from '@/utils/backgroundAnalysis';
 
 // Pair structure (V2 format)
 interface MythRealityPair {
@@ -65,6 +66,10 @@ export default function MythVsRealityGridPublished(props: LayoutComponentProps) 
   // Theme for Myth cards
   const uiBlockTheme = (props.manualThemeOverride || 'neutral') as 'warm' | 'cool' | 'neutral';
   const mythColors = getMythColors(uiBlockTheme);
+
+  // Card styles from luminance-based system
+  const { luminance } = analyzeBackground(sectionBackgroundCSS || '');
+  const cardStyles = getPublishedCardStyles(luminance, uiBlockTheme);
 
   // Accent color for Reality cards
   const accentColor = props.theme?.colors?.accentColor || '#3b82f6';
@@ -147,7 +152,7 @@ export default function MythVsRealityGridPublished(props: LayoutComponentProps) 
                     />
                     <p
                       style={{
-                        color: '#1f2937', // gray-800
+                        color: cardStyles.textHeading,
                         ...bodyTypography
                       }}
                       className="leading-relaxed flex-1"
@@ -189,7 +194,7 @@ export default function MythVsRealityGridPublished(props: LayoutComponentProps) 
                     />
                     <p
                       style={{
-                        color: '#1f2937', // gray-800
+                        color: cardStyles.textHeading,
                         ...bodyTypography
                       }}
                       className="leading-relaxed flex-1"

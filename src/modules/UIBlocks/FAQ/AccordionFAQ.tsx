@@ -11,6 +11,7 @@ import {
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { getCardStyles, type CardStyles } from '@/modules/Design/cardStyles';
 
 // FAQ item structure (V2 - clean array format)
 interface FAQItem {
@@ -52,27 +53,21 @@ const CONTENT_SCHEMA = {
   supporting_text: { type: 'string' as const, default: '' }
 };
 
-// Theme-based accordion colors
-const getAccordionColors = (theme: UIBlockTheme) => ({
+// Theme-based accordion accent colors (decorative borders only)
+const getAccordionAccents = (theme: UIBlockTheme) => ({
   warm: {
     border: 'border-orange-200',
     borderHover: 'hover:border-orange-300',
-    questionBg: 'bg-white',
-    answerBg: 'bg-orange-50',
     divider: 'border-orange-100'
   },
   cool: {
     border: 'border-blue-200',
     borderHover: 'hover:border-blue-300',
-    questionBg: 'bg-white',
-    answerBg: 'bg-blue-50',
     divider: 'border-blue-100'
   },
   neutral: {
     border: 'border-gray-200',
     borderHover: 'hover:border-gray-300',
-    questionBg: 'bg-white',
-    answerBg: 'bg-gray-50',
     divider: 'border-gray-200'
   }
 })[theme];
@@ -91,7 +86,8 @@ const FAQAccordionItem = React.memo(({
   sectionBackground,
   sectionId,
   onRemove,
-  themeColors
+  themeAccents,
+  cardStyles
 }: {
   item: FAQItem;
   isOpen: boolean;
@@ -105,15 +101,16 @@ const FAQAccordionItem = React.memo(({
   sectionBackground: any;
   sectionId: string;
   onRemove: (id: string) => void;
-  themeColors: ReturnType<typeof getAccordionColors>;
+  themeAccents: ReturnType<typeof getAccordionAccents>;
+  cardStyles: CardStyles;
 }) => {
 
   return (
-    <div className={`relative group/faq-item border ${themeColors.border} ${themeColors.borderHover} rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-200`}>
+    <div className={`relative group/faq-item ${cardStyles.bg} ${cardStyles.blur} ${cardStyles.border} ${themeAccents.border} ${themeAccents.borderHover} rounded-lg overflow-hidden ${cardStyles.shadow} hover:shadow-md transition-all duration-200`}>
       {/* Question Header */}
       <button
         onClick={onToggle}
-        className={`w-full px-6 py-4 text-left ${themeColors.questionBg} focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset transition-colors duration-200`}
+        className={`w-full px-6 py-4 text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset transition-colors duration-200`}
         aria-expanded={isOpen}
       >
         <div className="flex items-center justify-between">
@@ -125,7 +122,7 @@ const FAQAccordionItem = React.memo(({
               backgroundType={backgroundType}
               colorTokens={colorTokens}
               variant="body"
-              className={`font-semibold ${colorTokens.textOnLight || colorTokens.textPrimary} transition-colors duration-200`}
+              className={`font-semibold ${cardStyles.textHeading} transition-colors duration-200`}
               placeholder="Enter question..."
               sectionBackground={sectionBackground}
               data-section-id={sectionId}
@@ -135,7 +132,7 @@ const FAQAccordionItem = React.memo(({
 
           {/* Expand/Collapse Icon */}
           <div className="flex-shrink-0">
-            <div className={`transform transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
+            <div className={`transform transition-transform duration-300 ${isOpen ? 'rotate-180' : ''} ${cardStyles.textMuted}`}>
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
@@ -146,7 +143,7 @@ const FAQAccordionItem = React.memo(({
 
       {/* Answer Content - conditional render for proper collapse */}
       {isOpen && (
-        <div className={`px-6 py-4 ${themeColors.answerBg} border-t ${themeColors.divider}`}>
+        <div className={`px-6 py-4 border-t ${themeAccents.divider}`}>
           <EditableAdaptiveText
             mode={mode}
             value={item.answer}
@@ -154,7 +151,7 @@ const FAQAccordionItem = React.memo(({
             backgroundType={backgroundType}
             colorTokens={colorTokens}
             variant="body"
-            className={`${colorTokens.textSecondary} leading-relaxed`}
+            className={`${cardStyles.textBody} leading-relaxed`}
             placeholder="Enter answer..."
             sectionBackground={sectionBackground}
             data-section-id={sectionId}
@@ -207,7 +204,12 @@ export default function AccordionFAQ(props: LayoutComponentProps) {
     return 'neutral';
   }, [props.manualThemeOverride, props.userContext]);
 
-  const themeColors = getAccordionColors(uiBlockTheme);
+  const themeAccents = getAccordionAccents(uiBlockTheme);
+
+  const cardStyles = React.useMemo(() => getCardStyles({
+    sectionBackgroundCSS: sectionBackground || '',
+    theme: uiBlockTheme
+  }), [sectionBackground, uiBlockTheme]);
 
   // State for accordion open/closed items
   const [openItems, setOpenItems] = useState<Set<string>>(new Set(['faq-1']));
@@ -329,7 +331,8 @@ export default function AccordionFAQ(props: LayoutComponentProps) {
               sectionBackground={sectionBackground}
               sectionId={sectionId}
               onRemove={handleRemoveItem}
-              themeColors={themeColors}
+              themeAccents={themeAccents}
+              cardStyles={cardStyles}
             />
           ))}
 
@@ -349,7 +352,7 @@ export default function AccordionFAQ(props: LayoutComponentProps) {
 
         {/* Contact CTA Footer - subtle, no big button */}
         {(blockContent.contact_prompt || blockContent.cta_text || mode === 'edit') && (
-          <div className={`mt-10 pt-6 border-t ${themeColors.divider} text-center`}>
+          <div className={`mt-10 pt-6 border-t ${themeAccents.divider} text-center`}>
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.contact_prompt || ''}
@@ -371,7 +374,7 @@ export default function AccordionFAQ(props: LayoutComponentProps) {
                 backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                 colorTokens={colorTokens}
                 variant="body"
-                className={`font-medium ${themeColors.border.replace('border-', 'text-').replace('-200', '-600')} hover:underline cursor-pointer`}
+                className={`font-medium ${themeAccents.border.replace('border-', 'text-').replace('-200', '-600')} hover:underline cursor-pointer`}
                 placeholder="Contact our support team"
                 sectionId={sectionId}
                 elementKey="cta_text"

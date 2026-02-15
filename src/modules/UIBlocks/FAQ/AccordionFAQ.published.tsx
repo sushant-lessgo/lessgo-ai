@@ -8,9 +8,10 @@
 
 import React from 'react';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publishedTextColors';
+import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardStyles } from '@/lib/publishedTextColors';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
+import { analyzeBackground } from '@/utils/backgroundAnalysis';
 
 // FAQ item structure (V2)
 interface FAQItem {
@@ -18,28 +19,6 @@ interface FAQItem {
   question: string;
   answer: string;
 }
-
-// Theme-based accordion colors (static for SSR)
-const getAccordionColors = (theme: 'warm' | 'cool' | 'neutral') => ({
-  warm: {
-    border: '#fed7aa', // orange-200
-    answerBg: '#fff7ed', // orange-50
-    divider: '#ffedd5', // orange-100
-    link: '#ea580c' // orange-600
-  },
-  cool: {
-    border: '#bfdbfe', // blue-200
-    answerBg: '#eff6ff', // blue-50
-    divider: '#dbeafe', // blue-100
-    link: '#2563eb' // blue-600
-  },
-  neutral: {
-    border: '#e5e7eb', // gray-200
-    answerBg: '#f9fafb', // gray-50
-    divider: '#e5e7eb', // gray-200
-    link: '#4b5563' // gray-600
-  }
-})[theme];
 
 export default function AccordionFAQPublished(props: LayoutComponentProps) {
   const { sectionId, sectionBackgroundCSS, theme, backgroundType, manualThemeOverride } = props;
@@ -56,7 +35,10 @@ export default function AccordionFAQPublished(props: LayoutComponentProps) {
 
   // Determine UIBlock theme
   const uiBlockTheme: 'warm' | 'cool' | 'neutral' = manualThemeOverride || 'neutral';
-  const themeColors = getAccordionColors(uiBlockTheme);
+
+  // Get luminance and card styles
+  const { luminance } = analyzeBackground(sectionBackgroundCSS || '');
+  const cardStyles = getPublishedCardStyles(luminance, uiBlockTheme);
 
   // Get text colors
   const textColors = getPublishedTextColors(
@@ -109,23 +91,23 @@ export default function AccordionFAQPublished(props: LayoutComponentProps) {
           {faqItems.map((item) => (
             <div
               key={item.id}
-              className="border rounded-lg overflow-hidden shadow-sm"
+              className="rounded-lg overflow-hidden"
               style={{
-                borderColor: themeColors.border
+                backgroundColor: cardStyles.bg,
+                backdropFilter: cardStyles.backdropFilter,
+                borderColor: cardStyles.borderColor,
+                borderWidth: cardStyles.borderWidth,
+                borderStyle: cardStyles.borderStyle,
+                boxShadow: cardStyles.boxShadow
               }}
             >
               {/* Question */}
-              <div
-                className="px-6 py-4"
-                style={{
-                  backgroundColor: '#ffffff'
-                }}
-              >
+              <div className="px-6 py-4">
                 <TextPublished
                   value={item.question}
                   style={{
                     fontWeight: 600,
-                    color: textColors.heading
+                    color: cardStyles.textHeading
                   }}
                 />
               </div>
@@ -134,14 +116,13 @@ export default function AccordionFAQPublished(props: LayoutComponentProps) {
               <div
                 className="px-6 py-4 border-t"
                 style={{
-                  backgroundColor: themeColors.answerBg,
-                  borderTopColor: themeColors.divider
+                  borderTopColor: cardStyles.borderColor
                 }}
               >
                 <TextPublished
                   value={item.answer}
                   style={{
-                    color: textColors.body,
+                    color: cardStyles.textBody,
                     lineHeight: '1.75rem'
                   }}
                 />
@@ -154,7 +135,7 @@ export default function AccordionFAQPublished(props: LayoutComponentProps) {
         {(contactPrompt || ctaText) && (
           <div
             className="mt-10 pt-6 text-center"
-            style={{ borderTop: `1px solid ${themeColors.divider}` }}
+            style={{ borderTop: `1px solid ${cardStyles.borderColor}` }}
           >
             {contactPrompt && (
               <TextPublished
@@ -169,7 +150,7 @@ export default function AccordionFAQPublished(props: LayoutComponentProps) {
               <TextPublished
                 value={ctaText}
                 style={{
-                  color: themeColors.link,
+                  color: cardStyles.textHeading,
                   fontWeight: 500,
                   cursor: 'pointer'
                 }}

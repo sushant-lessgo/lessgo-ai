@@ -11,6 +11,7 @@ import {
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { getCardStyles, type CardStyles } from '@/modules/Design/cardStyles';
 
 // FAQ item structure (V2 - clean array format)
 interface FAQItem {
@@ -83,7 +84,7 @@ const CONTENT_SCHEMA = {
   }
 };
 
-// Theme-based tab colors
+// Theme-based tab accent colors (decorative only, not structural bg/text)
 const getTabColors = (theme: UIBlockTheme) => ({
   warm: {
     activeBg: 'bg-orange-500',
@@ -91,7 +92,6 @@ const getTabColors = (theme: UIBlockTheme) => ({
     inactiveBg: 'bg-transparent',
     inactiveText: 'text-orange-700',
     inactiveHover: 'hover:bg-orange-50',
-    cardBg: 'bg-orange-50',
     border: 'border-orange-200',
     divider: 'border-orange-100'
   },
@@ -101,7 +101,6 @@ const getTabColors = (theme: UIBlockTheme) => ({
     inactiveBg: 'bg-transparent',
     inactiveText: 'text-blue-700',
     inactiveHover: 'hover:bg-blue-50',
-    cardBg: 'bg-blue-50',
     border: 'border-blue-200',
     divider: 'border-blue-100'
   },
@@ -111,7 +110,6 @@ const getTabColors = (theme: UIBlockTheme) => ({
     inactiveBg: 'bg-transparent',
     inactiveText: 'text-gray-600',
     inactiveHover: 'hover:bg-gray-100',
-    cardBg: 'bg-gray-50',
     border: 'border-gray-200',
     divider: 'border-gray-200'
   }
@@ -130,7 +128,8 @@ const FAQTabItem = React.memo(({
   backgroundType,
   sectionBackground,
   sectionId,
-  themeColors
+  themeColors,
+  cardStyles
 }: {
   item: FAQItem;
   tabId: string;
@@ -144,9 +143,10 @@ const FAQTabItem = React.memo(({
   sectionBackground: any;
   sectionId: string;
   themeColors: ReturnType<typeof getTabColors>;
+  cardStyles: CardStyles;
 }) => {
   return (
-    <div className={`relative group/faq-item ${themeColors.cardBg} rounded-lg p-6`}>
+    <div className={`relative group/faq-item ${cardStyles.bg} ${cardStyles.blur} ${cardStyles.border} rounded-lg p-6 ${cardStyles.shadow}`}>
       <div className="mb-3">
         <EditableAdaptiveText
           mode={mode}
@@ -155,7 +155,7 @@ const FAQTabItem = React.memo(({
           backgroundType={backgroundType}
           colorTokens={colorTokens}
           variant="body"
-          className={`font-semibold ${colorTokens.textPrimary}`}
+          className={`font-semibold ${cardStyles.textHeading}`}
           style={getTextStyle('h3')}
           placeholder="Enter question..."
           sectionBackground={sectionBackground}
@@ -172,7 +172,7 @@ const FAQTabItem = React.memo(({
           backgroundType={backgroundType}
           colorTokens={colorTokens}
           variant="body"
-          className={`leading-relaxed ${colorTokens.textSecondary}`}
+          className={`leading-relaxed ${cardStyles.textBody}`}
           placeholder="Enter answer..."
           sectionBackground={sectionBackground}
           data-section-id={sectionId}
@@ -224,6 +224,11 @@ export default function SegmentedFAQTabs(props: LayoutComponentProps) {
   }, [props.manualThemeOverride, props.userContext]);
 
   const themeColors = getTabColors(uiBlockTheme);
+
+  const cardStyles = React.useMemo(() => getCardStyles({
+    sectionBackgroundCSS: sectionBackground || '',
+    theme: uiBlockTheme
+  }), [sectionBackground, uiBlockTheme]);
 
   const [activeTab, setActiveTab] = useState(0);
 
@@ -450,6 +455,7 @@ export default function SegmentedFAQTabs(props: LayoutComponentProps) {
                 sectionBackground={sectionBackground}
                 sectionId={sectionId}
                 themeColors={themeColors}
+                cardStyles={cardStyles}
               />
             ))}
 

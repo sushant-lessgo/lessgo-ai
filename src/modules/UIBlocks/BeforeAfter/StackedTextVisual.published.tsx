@@ -13,7 +13,8 @@
 
 import React from 'react';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publishedTextColors';
+import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardStyles } from '@/lib/publishedTextColors';
+import { analyzeBackground } from '@/utils/backgroundAnalysis';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { IconPublished } from '@/components/published/IconPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
@@ -41,6 +42,10 @@ export default function StackedTextVisualPublished(props: LayoutComponentProps) 
   // Detect UIBlock theme
   const uiTheme: UIBlockTheme = props.manualThemeOverride ||
     (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+
+  // Get adaptive card styles
+  const { luminance } = analyzeBackground(sectionBackgroundCSS || '');
+  const cardStyles = getPublishedCardStyles(luminance, uiTheme);
 
   // Get accent color for After block
   const accentColor = theme?.colors?.accentColor || '#3b82f6';
@@ -171,7 +176,8 @@ export default function StackedTextVisualPublished(props: LayoutComponentProps) 
             <div
               className="border-l-4 rounded-lg p-8 shadow-sm"
               style={{
-                backgroundColor: themeColors.before.bg,
+                backgroundColor: cardStyles.bg,
+                backdropFilter: cardStyles.backdropFilter,
                 borderLeftColor: themeColors.before.border
               }}
             >
@@ -196,7 +202,7 @@ export default function StackedTextVisualPublished(props: LayoutComponentProps) 
                       letterSpacing: '0.05em',
                       fontWeight: 600,
                       fontSize: '1rem',
-                      color: textColors.body,
+                      color: cardStyles.textHeading,
                       marginBottom: '0.75rem'
                     }}
                   />
@@ -205,7 +211,7 @@ export default function StackedTextVisualPublished(props: LayoutComponentProps) 
                     value={before_text}
                     element="p"
                     style={{
-                      color: textColors.body,
+                      color: cardStyles.textBody,
                       fontSize: '0.8rem',
                       lineHeight: '1.75rem'
                     }}
@@ -252,7 +258,8 @@ export default function StackedTextVisualPublished(props: LayoutComponentProps) 
             <div
               className="border-l-4 rounded-lg p-8 shadow-sm"
               style={{
-                backgroundColor: themeColors.after.bg,
+                backgroundColor: cardStyles.bg,
+                backdropFilter: cardStyles.backdropFilter,
                 borderLeftColor: themeColors.after.border
               }}
             >
@@ -277,7 +284,7 @@ export default function StackedTextVisualPublished(props: LayoutComponentProps) 
                       letterSpacing: '0.05em',
                       fontWeight: 600,
                       fontSize: '1rem',
-                      color: themeColors.after.iconText,
+                      color: cardStyles.textHeading,
                       marginBottom: '0.75rem'
                     }}
                   />
@@ -286,7 +293,7 @@ export default function StackedTextVisualPublished(props: LayoutComponentProps) 
                     value={after_text}
                     element="p"
                     style={{
-                      color: themeColors.after.iconText,
+                      color: cardStyles.textBody,
                       fontSize: '0.8rem',
                       lineHeight: '1.75rem'
                     }}

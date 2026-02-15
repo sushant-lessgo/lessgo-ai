@@ -367,7 +367,7 @@ export default function VerticalTimeline(props: LayoutComponentProps) {
                 <div className="flex-1 pb-12">
                   <button
                     onClick={handleAddStep}
-                    className="w-full bg-white rounded-xl p-6 border-2 border-dashed border-gray-300 hover:border-gray-400 text-gray-400 hover:text-gray-500 transition-all duration-300 hover:bg-gray-50"
+                    className={`w-full ${cardStyles.bg} rounded-xl p-6 border-2 border-dashed ${cardStyles.border} ${cardStyles.textMuted} transition-all duration-300`}
                     title="Add new step"
                   >
                     <div className="text-center">
@@ -394,7 +394,7 @@ export default function VerticalTimeline(props: LayoutComponentProps) {
                 backgroundType={backgroundType}
                 colorTokens={colorTokens}
                 variant="body"
-                className="text-base font-semibold underline text-gray-900"
+                className={`text-base font-semibold underline ${cardStyles.textHeading}`}
                 placeholder="Add process summary (e.g., 'Total setup time: under 20 minutes')..."
                 sectionBackground={sectionBackground}
                 sectionId={sectionId}

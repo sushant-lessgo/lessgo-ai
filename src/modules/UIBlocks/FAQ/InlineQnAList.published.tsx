@@ -8,9 +8,10 @@
 
 import React from 'react';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publishedTextColors';
+import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardStyles } from '@/lib/publishedTextColors';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
+import { analyzeBackground } from '@/utils/backgroundAnalysis';
 
 // FAQ item structure (V2 - clean array format)
 interface FAQItem {
@@ -20,7 +21,7 @@ interface FAQItem {
 }
 
 export default function InlineQnAListPublished(props: LayoutComponentProps) {
-  const { sectionId, sectionBackgroundCSS, theme, backgroundType } = props;
+  const { sectionId, sectionBackgroundCSS, theme, backgroundType, manualThemeOverride } = props;
 
   // Extract content from props (flattened by LandingPagePublishedRenderer)
   const headline = props.headline || 'Quick Questions & Answers';
@@ -38,6 +39,13 @@ export default function InlineQnAListPublished(props: LayoutComponentProps) {
 
   const faqItems = getFAQItems();
 
+  // Determine UIBlock theme
+  const uiBlockTheme: 'warm' | 'cool' | 'neutral' = manualThemeOverride || 'neutral';
+
+  // Get luminance and card styles
+  const { luminance } = analyzeBackground(sectionBackgroundCSS || '');
+  const cardStyles = getPublishedCardStyles(luminance, uiBlockTheme);
+
   // Get text colors based on background
   const textColors = getPublishedTextColors(
     backgroundType || 'primary',
@@ -49,11 +57,6 @@ export default function InlineQnAListPublished(props: LayoutComponentProps) {
   const headlineTypography = getPublishedTypographyStyles('h2', theme);
   const bodyTypography = getPublishedTypographyStyles('body-lg', theme);
   const questionTypography = getPublishedTypographyStyles('h3', theme);
-
-  // Border color based on background
-  const borderColor = backgroundType === 'primary' || !backgroundType
-    ? 'rgba(229, 231, 235, 1)' // gray-200
-    : 'rgba(255, 255, 255, 0.2)'; // light border for dark backgrounds
 
   return (
     <SectionWrapperPublished
@@ -93,14 +96,14 @@ export default function InlineQnAListPublished(props: LayoutComponentProps) {
               key={item.id}
               className="pb-6 last:border-0"
               style={{
-                borderBottom: idx === faqItems.length - 1 ? 'none' : `1px solid ${borderColor}`
+                borderBottom: idx === faqItems.length - 1 ? 'none' : `1px solid ${cardStyles.borderColor}`
               }}
             >
               <div className="mb-2">
                 <TextPublished
                   value={item.question}
                   style={{
-                    color: textColors.heading,
+                    color: cardStyles.textHeading,
                     ...questionTypography,
                     fontWeight: 500
                   }}
@@ -111,7 +114,7 @@ export default function InlineQnAListPublished(props: LayoutComponentProps) {
                 <TextPublished
                   value={item.answer}
                   style={{
-                    color: textColors.muted,
+                    color: cardStyles.textMuted,
                     lineHeight: '1.75'
                   }}
                 />
@@ -138,7 +141,7 @@ export default function InlineQnAListPublished(props: LayoutComponentProps) {
               <TextPublished
                 value={cta_text}
                 style={{
-                  color: '#2563eb', // blue-600 link color
+                  color: cardStyles.textHeading,
                   fontWeight: 500,
                   cursor: 'pointer'
                 }}

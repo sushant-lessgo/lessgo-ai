@@ -10,6 +10,7 @@ import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import { shadows, cardEnhancements } from '@/modules/Design/designTokens';
+import { getCardStyles, type CardStyles } from '@/modules/Design/cardStyles';
 import { isHexColor } from '@/utils/colorUtils';
 import * as LucideIcons from 'lucide-react';
 import { getDynamicCardLayout } from '@/utils/dynamicCardLayout';
@@ -141,6 +142,12 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
   }, [props.manualThemeOverride, props.userContext]);
 
   const themeStyles = getThemeStyles(uiBlockTheme);
+
+  // Adaptive card styles based on section background luminance
+  const cardStyles = React.useMemo(() => getCardStyles({
+    sectionBackgroundCSS: sectionBackground || '',
+    theme: uiBlockTheme
+  }), [sectionBackground, uiBlockTheme]);
 
   // Ensure arrays exist
   const demoStats = Array.isArray(blockContent.demo_stats) ? blockContent.demo_stats : [];
@@ -318,8 +325,7 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
                 backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                 colorTokens={colorTokens}
                 variant="body"
-                className="text-2xl font-bold mb-4"
-                style={{ color: colorTokens.textPrimary }}
+                className={`text-2xl font-bold mb-4 ${dynamicTextColors?.heading || cardStyles.textHeading}`}
                 placeholder="Video title"
                 sectionId={sectionId}
                 elementKey="video_title"
@@ -333,8 +339,7 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
                 backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                 colorTokens={colorTokens}
                 variant="body"
-                className="leading-relaxed text-lg"
-                style={{ color: mutedTextColor }}
+                className={`leading-relaxed text-lg ${dynamicTextColors?.muted || cardStyles.textMuted}`}
                 placeholder="Video description"
                 sectionId={sectionId}
                 elementKey="video_description"
@@ -356,8 +361,7 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
                         <Icon className={`w-4 h-4 ${themeStyles.iconColor}`} />
                       </div>
                       <span
-                        className="font-medium"
-                        style={{ color: colorTokens.textPrimary }}
+                        className={`font-medium ${dynamicTextColors?.heading || cardStyles.textHeading}`}
                       >
                         {item.text}
                       </span>
@@ -387,7 +391,7 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
         {demoStats.length > 0 && (() => {
           const demoStatsLayout = getDynamicCardLayout(demoStats.length);
           return (
-          <div className={`bg-white ${cardEnhancements.borderRadius} p-8 border ${themeStyles.cardBorder} ${themeStyles.cardShadow}`}>
+          <div className={`${cardStyles.bg} ${cardStyles.blur} ${cardEnhancements.borderRadius} p-8 ${cardStyles.border} ${cardStyles.shadow}`}>
             <div className="text-center">
               {(blockContent.demo_stats_heading || isEditMode) && (
                 <EditableAdaptiveText
@@ -438,8 +442,7 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
                         backgroundType={backgroundType}
                         colorTokens={colorTokens}
                         variant="body"
-                        className="text-sm"
-                        style={{ color: mutedTextColor }}
+                        className={`text-sm ${cardStyles.textMuted}`}
                         placeholder="Stat description"
                         sectionBackground={sectionBackground}
                         data-section-id={sectionId}

@@ -354,7 +354,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
             <div className="flex items-center justify-center">
               <button
                 onClick={handleAddStep}
-                className="w-full max-w-lg p-4 border-2 border-dashed border-gray-300 hover:border-gray-400 text-gray-400 hover:text-gray-500 transition-all duration-300 flex items-center justify-center bg-gray-50 hover:bg-gray-100 rounded-lg"
+                className={`w-full max-w-lg p-4 border-2 border-dashed ${cardStyles.border} ${cardStyles.textMuted} transition-all duration-300 flex items-center justify-center ${cardStyles.bg} rounded-lg`}
                 title="Add new accordion step"
               >
                 <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

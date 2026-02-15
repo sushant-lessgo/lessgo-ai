@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publishedTextColors';
+import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardStyles } from '@/lib/publishedTextColors';
+import { analyzeBackground } from '@/utils/backgroundAnalysis';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
@@ -25,28 +26,19 @@ interface VideoTestimonialItem {
   thumbnail?: string;
 }
 
-// Theme-based card styling (inline for SSR)
-const getCardStyles = (theme: UIBlockTheme) => ({
+// Theme-based decorative accents (avatars, accent colors)
+const getCardAccents = (theme: UIBlockTheme) => ({
   warm: {
-    border: '#fed7aa', // orange-200
-    shadow: '0 4px 20px rgba(249,115,22,0.15)',
-    shadowHover: '0 8px 30px rgba(249,115,22,0.25)',
     avatarGradient: 'linear-gradient(135deg, #f97316 0%, #dc2626 100%)',
-    accentColor: '#ea580c', // orange-600
+    accentColor: '#ea580c',
   },
   cool: {
-    border: '#bfdbfe', // blue-200
-    shadow: '0 4px 20px rgba(37,99,235,0.15)',
-    shadowHover: '0 8px 30px rgba(37,99,235,0.25)',
     avatarGradient: 'linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)',
-    accentColor: '#2563eb', // blue-600
+    accentColor: '#2563eb',
   },
   neutral: {
-    border: '#e5e7eb', // gray-200
-    shadow: '0 4px 20px rgba(100,116,139,0.15)',
-    shadowHover: '0 8px 30px rgba(100,116,139,0.25)',
     avatarGradient: 'linear-gradient(135deg, #6b7280 0%, #374151 100%)',
-    accentColor: '#374151', // gray-700
+    accentColor: '#374151',
   }
 })[theme];
 
@@ -62,7 +54,11 @@ export default function VideoTestimonialsPublished(props: LayoutComponentProps) 
 
   // Detect theme
   const uiTheme: UIBlockTheme = props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
-  const cardStyles = getCardStyles(uiTheme);
+  const cardAccents = getCardAccents(uiTheme);
+
+  // Get adaptive card styles
+  const { luminance } = analyzeBackground(sectionBackgroundCSS || '');
+  const cardStyles = getPublishedCardStyles(luminance, uiTheme);
 
   // Get text colors
   const textColors = getPublishedTextColors(
@@ -129,12 +125,14 @@ export default function VideoTestimonialsPublished(props: LayoutComponentProps) 
             {testimonials.map((item) => (
               <div
                 key={item.id}
-                className="bg-white rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1"
+                className="rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1"
                 style={{
-                  boxShadow: cardStyles.shadow,
-                  borderWidth: '1px',
-                  borderStyle: 'solid',
-                  borderColor: cardStyles.border
+                  backgroundColor: cardStyles.bg,
+                  backdropFilter: cardStyles.backdropFilter,
+                  boxShadow: cardStyles.boxShadow,
+                  borderWidth: cardStyles.borderWidth,
+                  borderStyle: cardStyles.borderStyle,
+                  borderColor: cardStyles.borderColor
                 }}
               >
                 {/* Video Section */}
@@ -166,7 +164,7 @@ export default function VideoTestimonialsPublished(props: LayoutComponentProps) 
                         <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-2xl">
                           <svg
                             className="w-8 h-8 ml-1"
-                            style={{ color: cardStyles.accentColor }}
+                            style={{ color: cardAccents.accentColor }}
                             fill="currentColor"
                             viewBox="0 0 24 24"
                           >
@@ -183,16 +181,16 @@ export default function VideoTestimonialsPublished(props: LayoutComponentProps) 
                   <div className="flex items-start space-x-4 mb-4">
                     <div
                       className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0"
-                      style={{ background: cardStyles.avatarGradient }}
+                      style={{ background: cardAccents.avatarGradient }}
                     >
                       {item.customer_name.charAt(0)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-gray-900">{item.customer_name}</div>
-                      <div className="text-sm text-gray-600">{item.customer_title}</div>
+                      <div className="font-semibold" style={{ color: cardStyles.textHeading }}>{item.customer_name}</div>
+                      <div className="text-sm" style={{ color: cardStyles.textBody }}>{item.customer_title}</div>
                       <div
                         className="text-sm font-medium"
-                        style={{ color: cardStyles.accentColor }}
+                        style={{ color: cardAccents.accentColor }}
                       >
                         {item.customer_company}
                       </div>
@@ -203,7 +201,7 @@ export default function VideoTestimonialsPublished(props: LayoutComponentProps) 
                     style={{
                       ...h4Typography,
                       fontWeight: 700,
-                      color: textColors.heading,
+                      color: cardStyles.textHeading,
                       marginBottom: '0.75rem'
                     }}
                   >
@@ -213,7 +211,7 @@ export default function VideoTestimonialsPublished(props: LayoutComponentProps) 
                   <TextPublished
                     value={item.description}
                     style={{
-                      color: textColors.muted,
+                      color: cardStyles.textMuted,
                       fontSize: '0.875rem',
                       lineHeight: '1.75',
                       marginBottom: '1rem'
@@ -222,15 +220,15 @@ export default function VideoTestimonialsPublished(props: LayoutComponentProps) 
 
                   <div
                     className="pt-4 flex items-center justify-between"
-                    style={{ borderTop: '1px solid #f3f4f6' }}
+                    style={{ borderTop: `1px solid ${cardStyles.borderColor}` }}
                   >
                     <div className="flex items-center space-x-1">
                       <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      <span className="text-xs text-gray-500">Verified customer</span>
+                      <span className="text-xs" style={{ color: cardStyles.textMuted }}>Verified customer</span>
                     </div>
-                    <span className="text-xs text-gray-400">3 min watch</span>
+                    <span className="text-xs" style={{ color: cardStyles.textMuted }}>3 min watch</span>
                   </div>
                 </div>
               </div>

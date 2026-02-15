@@ -11,6 +11,7 @@ import AvatarEditableComponent from '@/components/ui/AvatarEditableComponent';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { getCardStyles, type CardStyles } from '@/modules/Design/cardStyles';
 
 // V2: Transformation type for clean array structure
 interface Transformation {
@@ -108,6 +109,11 @@ export default function BeforeAfterQuote(props: LayoutComponentProps) {
     return 'neutral';
   }, [props.manualThemeOverride, props.userContext]);
 
+  const cardStyles = React.useMemo(() => getCardStyles({
+    sectionBackgroundCSS: sectionBackground || '',
+    theme
+  }), [sectionBackground, theme]);
+
   // Theme-based before/after colors per uiBlockTheme.md
   const getBeforeAfterColors = (theme: UIBlockTheme) => {
     const themeColors = {
@@ -173,14 +179,7 @@ export default function BeforeAfterQuote(props: LayoutComponentProps) {
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
 
-  // Get card background based on section background
-  const cardBackground = backgroundType === 'primary'
-    ? 'bg-white/10 backdrop-blur-sm border-white/20'
-    : 'bg-white border-gray-200';
-
-  const cardHover = backgroundType === 'primary'
-    ? 'hover:bg-white/20 hover:border-white/30'
-    : 'hover:border-blue-300 hover:shadow-lg';
+  // Card container styles from card system
 
   // V2: TransformationCard using clean transformation object
   const TransformationCard = React.memo(({ transformation, canRemove, colors }: {
@@ -191,7 +190,7 @@ export default function BeforeAfterQuote(props: LayoutComponentProps) {
     const tId = transformation.id;
 
     return (
-      <div className={`group relative ${cardBackground} ${cardHover} rounded-2xl shadow-xl border overflow-hidden transition-all duration-300`}>
+      <div className={`group relative ${cardStyles.bg} ${cardStyles.blur} ${cardStyles.border} ${cardStyles.shadow} ${cardStyles.hoverEffect} rounded-2xl overflow-hidden transition-all duration-300`}>
 
         {/* Delete button - only show in edit mode and if can remove */}
         {mode === 'edit' && canRemove && (
@@ -237,7 +236,7 @@ export default function BeforeAfterQuote(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-gray-700 leading-relaxed text-sm"
+              className={`${cardStyles.textBody} leading-relaxed text-sm`}
               placeholder="Describe the before situation..."
               sectionId={sectionId}
               elementKey={`transformations.${tId}.before_situation`}
@@ -270,7 +269,7 @@ export default function BeforeAfterQuote(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-gray-700 leading-relaxed text-sm"
+              className={`${cardStyles.textBody} leading-relaxed text-sm`}
               placeholder="Describe the after outcome..."
               sectionId={sectionId}
               elementKey={`transformations.${tId}.after_outcome`}
@@ -280,8 +279,8 @@ export default function BeforeAfterQuote(props: LayoutComponentProps) {
         </div>
 
         {/* Testimonial Quote */}
-        <div className="p-6 bg-gray-50">
-          <blockquote className="text-gray-800 italic mb-4 text-sm leading-relaxed">
+        <div className="p-6">
+          <blockquote className={`${cardStyles.textHeading} italic mb-4 text-sm leading-relaxed`}>
             <EditableAdaptiveText
               mode={mode}
               value={transformation.testimonial_quote ? `"${transformation.testimonial_quote}"` : ''}
@@ -316,13 +315,13 @@ export default function BeforeAfterQuote(props: LayoutComponentProps) {
                 backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                 colorTokens={colorTokens}
                 variant="body"
-                className="font-semibold text-gray-900 text-sm"
+                className={`font-semibold ${cardStyles.textHeading} text-sm`}
                 placeholder="Customer name..."
                 sectionId={sectionId}
                 elementKey={`transformations.${tId}.customer_name`}
                 sectionBackground={sectionBackground}
               />
-              <div className="flex items-center space-x-1 text-xs text-gray-600">
+              <div className={`flex items-center space-x-1 text-xs ${cardStyles.textBody}`}>
                 <EditableAdaptiveText
                   mode={mode}
                   value={transformation.customer_title}
@@ -330,7 +329,7 @@ export default function BeforeAfterQuote(props: LayoutComponentProps) {
                   backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  className="text-xs text-gray-600"
+                  className={`text-xs ${cardStyles.textBody}`}
                   placeholder="Title"
                   sectionId={sectionId}
                   elementKey={`transformations.${tId}.customer_title`}
@@ -338,7 +337,7 @@ export default function BeforeAfterQuote(props: LayoutComponentProps) {
                 />
                 {transformation.customer_company && (
                   <>
-                    <span className="text-gray-400">at</span>
+                    <span className={cardStyles.textMuted}>at</span>
                     <EditableAdaptiveText
                       mode={mode}
                       value={transformation.customer_company}
@@ -346,7 +345,7 @@ export default function BeforeAfterQuote(props: LayoutComponentProps) {
                       backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                       colorTokens={colorTokens}
                       variant="body"
-                      className="text-xs text-gray-600"
+                      className={`text-xs ${cardStyles.textBody}`}
                       placeholder="Company"
                       sectionId={sectionId}
                       elementKey={`transformations.${tId}.customer_company`}
@@ -356,7 +355,7 @@ export default function BeforeAfterQuote(props: LayoutComponentProps) {
                 )}
                 {!transformation.customer_company && mode === 'edit' && (
                   <>
-                    <span className="text-gray-400">at</span>
+                    <span className={cardStyles.textMuted}>at</span>
                     <EditableAdaptiveText
                       mode={mode}
                       value=""
@@ -364,7 +363,7 @@ export default function BeforeAfterQuote(props: LayoutComponentProps) {
                       backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                       colorTokens={colorTokens}
                       variant="body"
-                      className="text-xs text-gray-600"
+                      className={`text-xs ${cardStyles.textBody}`}
                       placeholder="Company"
                       sectionId={sectionId}
                       elementKey={`transformations.${tId}.customer_company`}

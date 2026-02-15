@@ -467,7 +467,7 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
                       <span>{result.metric}</span>
                     )}
                   </div>
-                  <div className="text-gray-600">
+                  <div className={cardStyles.textBody}>
                     {mode !== 'preview' ? (
                       <div
                         contentEditable

@@ -169,7 +169,13 @@ export default function MetricTilesPublished(props: LayoutComponentProps) {
                 </h3>
 
                 {/* Metric Display */}
-                <div className="text-center bg-gray-50 rounded-lg p-4 mb-4">
+                <div className="text-center rounded-lg p-4 mb-4"
+                  style={{
+                    backgroundColor: cardStyles.bg,
+                    backdropFilter: cardStyles.backdropFilter,
+                    WebkitBackdropFilter: cardStyles.backdropFilter,
+                  }}
+                >
                   <div
                     className="text-4xl font-bold"
                     style={{
@@ -180,7 +186,7 @@ export default function MetricTilesPublished(props: LayoutComponentProps) {
                   </div>
                   <div
                     className="text-sm font-medium uppercase tracking-wide"
-                    style={{ color: textColors.muted }}
+                    style={{ color: cardStyles.textMuted }}
                   >
                     {tile.label}
                   </div>

@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publishedTextColors';
+import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardStyles } from '@/lib/publishedTextColors';
+import { analyzeBackground } from '@/utils/backgroundAnalysis';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
@@ -83,6 +84,10 @@ export default function LetterStyleBlockPublished(props: LayoutComponentProps) {
   const uiTheme: UIBlockTheme = props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
   const themeColors = getThemeColors(uiTheme);
 
+  // Card styles
+  const { luminance } = analyzeBackground(sectionBackgroundCSS || '');
+  const cardStyles = getPublishedCardStyles(luminance, uiTheme);
+
   // Get text colors
   const textColors = getPublishedTextColors(
     backgroundType || 'neutral',
@@ -103,10 +108,14 @@ export default function LetterStyleBlockPublished(props: LayoutComponentProps) {
       <div className="max-w-4xl mx-auto">
         {/* Letter Container */}
         <div
-          className="shadow-2xl rounded-lg overflow-hidden border"
+          className="rounded-lg overflow-hidden"
           style={{
-            backgroundColor: '#ffffff',
-            borderColor: themeColors.letterBorder
+            backgroundColor: cardStyles.bg,
+            backdropFilter: cardStyles.backdropFilter,
+            borderWidth: cardStyles.borderWidth,
+            borderStyle: cardStyles.borderStyle,
+            borderColor: cardStyles.borderColor,
+            boxShadow: cardStyles.boxShadow
           }}
         >
 
@@ -123,7 +132,7 @@ export default function LetterStyleBlockPublished(props: LayoutComponentProps) {
               level="h2"
               style={{
                 ...headlineTypography,
-                color: textColors.heading || '#111827',
+                color: cardStyles.textHeading,
                 textAlign: 'center',
                 fontSize: '1.5rem',
                 fontWeight: 700
@@ -137,7 +146,7 @@ export default function LetterStyleBlockPublished(props: LayoutComponentProps) {
                   value={date_text}
                   style={{
                     fontSize: '0.875rem',
-                    color: textColors.muted || '#6B7280'
+                    color: cardStyles.textMuted
                   }}
                 />
               </div>
@@ -152,7 +161,7 @@ export default function LetterStyleBlockPublished(props: LayoutComponentProps) {
               value={letter_greeting}
               style={{
                 fontSize: '1.125rem',
-                color: textColors.heading || '#111827',
+                color: cardStyles.textHeading,
                 marginBottom: '1.5rem'
               }}
             />
@@ -162,7 +171,7 @@ export default function LetterStyleBlockPublished(props: LayoutComponentProps) {
               <TextPublished
                 value={letter_body}
                 style={{
-                  color: textColors.body || '#374151',
+                  color: cardStyles.textBody,
                   lineHeight: '1.625',
                   whiteSpace: 'pre-line'
                 }}
@@ -191,14 +200,14 @@ export default function LetterStyleBlockPublished(props: LayoutComponentProps) {
                   style={{
                     fontSize: '1.25rem',
                     fontWeight: 600,
-                    color: textColors.heading || '#111827'
+                    color: cardStyles.textHeading
                   }}
                 />
                 {(founder_title || company_name) && (
                   <TextPublished
                     value={`${founder_title || ''}${founder_title && company_name ? ', ' : ''}${company_name || ''}`}
                     style={{
-                      color: textColors.body || '#4B5563',
+                      color: cardStyles.textBody,
                       fontSize: '0.875rem'
                     }}
                   />
@@ -215,7 +224,7 @@ export default function LetterStyleBlockPublished(props: LayoutComponentProps) {
                 <TextPublished
                   value={ps_text}
                   style={{
-                    color: textColors.body || '#4B5563',
+                    color: cardStyles.textBody,
                     fontStyle: 'italic'
                   }}
                 />

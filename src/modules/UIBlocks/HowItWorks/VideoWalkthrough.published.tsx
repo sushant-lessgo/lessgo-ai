@@ -7,13 +7,14 @@
 
 import React from 'react';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publishedTextColors';
+import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardStyles } from '@/lib/publishedTextColors';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import { getDynamicCardLayout } from '@/utils/dynamicCardLayout';
 import { isHexColor } from '@/utils/colorUtils';
+import { analyzeBackground } from '@/utils/backgroundAnalysis';
 
 // V2 Types
 interface DemoStatItem {
@@ -95,6 +96,10 @@ export default function VideoWalkthroughPublished(props: LayoutComponentProps) {
     (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
 
   const themeColors = getThemeColors(uiTheme);
+
+  // Adaptive card styles based on section background luminance
+  const { luminance } = analyzeBackground(sectionBackgroundCSS || '');
+  const cardStyles = getPublishedCardStyles(luminance, uiTheme);
 
   // Text colors
   const textColors = getPublishedTextColors(
@@ -278,15 +283,20 @@ export default function VideoWalkthroughPublished(props: LayoutComponentProps) {
             <div
               className="rounded-xl p-8"
               style={{
-                backgroundColor: themeColors.cardBg,
-                border: `1px solid ${themeColors.cardBorder}`
+                backgroundColor: cardStyles.bg,
+                backdropFilter: cardStyles.backdropFilter,
+                WebkitBackdropFilter: cardStyles.backdropFilter,
+                borderWidth: cardStyles.borderWidth,
+                borderStyle: cardStyles.borderStyle,
+                borderColor: cardStyles.borderColor,
+                boxShadow: cardStyles.boxShadow
               }}
             >
               <div className="text-center">
                 {demo_stats_heading && demo_stats_heading.trim() !== '' && (
                   <div
                     style={{
-                      color: textColors.heading,
+                      color: cardStyles.textHeading,
                       fontSize: '1.25rem',
                       fontWeight: 600,
                       marginBottom: '2rem'
@@ -311,7 +321,7 @@ export default function VideoWalkthroughPublished(props: LayoutComponentProps) {
                       </div>
                       <div
                         style={{
-                          color: textColors.muted,
+                          color: cardStyles.textMuted,
                           fontSize: '0.875rem'
                         }}
                       >

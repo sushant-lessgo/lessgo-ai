@@ -7,6 +7,7 @@ import { EditableAdaptiveHeadline, EditableAdaptiveText } from '@/components/lay
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { getCardStyles, type CardStyles } from '@/modules/Design/cardStyles';
 
 interface ComparisonRow {
   id: string;
@@ -95,6 +96,12 @@ export default function PropertyComparisonMatrix(props: LayoutComponentProps) {
 
   const themeColors = getThemeColors(uiTheme);
 
+  // Card styles from luminance-based system
+  const cardStyles = React.useMemo(() => getCardStyles({
+    sectionBackgroundCSS: sectionBackground || '',
+    theme: uiTheme
+  }), [sectionBackground, uiTheme]);
+
   // Get comparison rows from content
   const comparisonRows = blockContent.comparison_rows || DEFAULT_ROWS;
 
@@ -148,10 +155,10 @@ export default function PropertyComparisonMatrix(props: LayoutComponentProps) {
           />
         )}
 
-        <div className={`bg-white rounded-xl overflow-hidden border ${themeColors.cardBorder} ${themeColors.cardShadow}`}>
+        <div className={`${cardStyles.bg} ${cardStyles.blur} rounded-xl overflow-hidden ${cardStyles.border} ${cardStyles.shadow}`}>
           {/* Header Row - stronger border */}
           <div className={`grid grid-cols-3 ${themeColors.headerBg} border-b-2 ${themeColors.headerBorder}`}>
-            <div style={bodyStyle} className="p-5 font-bold text-gray-900">
+            <div style={bodyStyle} className={`p-5 font-bold ${cardStyles.textHeading}`}>
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.feature_header || ''}
@@ -181,7 +188,7 @@ export default function PropertyComparisonMatrix(props: LayoutComponentProps) {
                 data-element-key="us_header"
               />
             </div>
-            <div style={bodyStyle} className="p-5 font-bold text-gray-500 text-center">
+            <div style={bodyStyle} className={`p-5 font-bold ${cardStyles.textMuted} text-center`}>
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.competitors_header || ''}
@@ -200,7 +207,7 @@ export default function PropertyComparisonMatrix(props: LayoutComponentProps) {
           {/* Data Rows - with "Us" column highlight */}
           {comparisonRows.map((row) => (
             <div key={row.id} className={`relative group grid grid-cols-3 border-b ${themeColors.rowBorder} last:border-b-0`}>
-              <div style={bodyStyle} className="p-5 font-medium text-gray-900">
+              <div style={bodyStyle} className={`p-5 font-medium ${cardStyles.textHeading}`}>
                 <EditableAdaptiveText
                   mode={mode}
                   value={row.property}
@@ -230,7 +237,7 @@ export default function PropertyComparisonMatrix(props: LayoutComponentProps) {
                   data-element-key={`us_value_${row.id}`}
                 />
               </div>
-              <div style={bodyStyle} className="p-5 text-center text-gray-500 relative">
+              <div style={bodyStyle} className={`p-5 text-center ${cardStyles.textMuted} relative`}>
                 <EditableAdaptiveText
                   mode={mode}
                   value={row.competitor_value}
@@ -238,7 +245,7 @@ export default function PropertyComparisonMatrix(props: LayoutComponentProps) {
                   backgroundType="neutral"
                   colorTokens={colorTokens}
                   variant="body"
-                  className="text-center text-gray-500"
+                  className={`text-center ${cardStyles.textMuted}`}
                   placeholder="Competitor value"
                   sectionBackground={sectionBackground}
                   data-section-id={sectionId}

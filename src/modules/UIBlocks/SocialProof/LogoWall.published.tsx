@@ -7,11 +7,13 @@
 
 import React from 'react';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publishedTextColors';
+import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardStyles } from '@/lib/publishedTextColors';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { LogoPublished } from '@/components/published/LogoPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { Check } from 'lucide-react';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { analyzeBackground } from '@/utils/backgroundAnalysis';
 
 // V2 Type definitions
 interface Company {
@@ -66,6 +68,14 @@ export default function LogoWallPublished(props: LayoutComponentProps) {
   const headlineTypography = getPublishedTypographyStyles('h2', theme);
   const bodyTypography = getPublishedTypographyStyles('body-lg', theme);
 
+  // Theme detection
+  const uiBlockTheme =
+    props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+
+  // Card styles
+  const { luminance } = analyzeBackground(sectionBackgroundCSS || '');
+  const cardStyles = getPublishedCardStyles(luminance, uiBlockTheme);
+
   // Visibility
   const showSecondary = show_press && media_mentions.length > 0;
   const showTertiary = show_badges && (certifications.length > 0 || stats.length > 0);
@@ -107,7 +117,15 @@ export default function LogoWallPublished(props: LayoutComponentProps) {
             {companies.map((company) => (
               <div
                 key={company.id}
-                className="w-32 h-20 bg-white rounded-lg border border-gray-200 flex items-center justify-center"
+                className="w-32 h-20 rounded-lg flex items-center justify-center"
+                style={{
+                  backgroundColor: cardStyles.bg,
+                  borderColor: cardStyles.borderColor,
+                  borderWidth: cardStyles.borderWidth,
+                  borderStyle: cardStyles.borderStyle,
+                  backdropFilter: cardStyles.backdropFilter,
+                  WebkitBackdropFilter: cardStyles.backdropFilter,
+                }}
               >
                 <LogoPublished
                   logoUrl={company.logo_url}
@@ -122,11 +140,12 @@ export default function LogoWallPublished(props: LayoutComponentProps) {
         {/* SECONDARY: Press Mentions - Subtle Pills */}
         {showSecondary && (
           <div className="flex flex-wrap items-center justify-center gap-3 mb-6">
-            <span className="text-sm text-gray-400 mr-2">Featured in</span>
+            <span className="text-sm mr-2" style={{ color: cardStyles.textMuted }}>Featured in</span>
             {media_mentions.map((mention) => (
               <span
                 key={mention.id}
-                className="px-3 py-1 text-sm text-gray-600 bg-gray-50 rounded-full"
+                className="px-3 py-1 text-sm rounded-full"
+                style={{ color: cardStyles.textBody, backgroundColor: cardStyles.bg }}
               >
                 {mention.name}
               </span>
@@ -136,7 +155,7 @@ export default function LogoWallPublished(props: LayoutComponentProps) {
 
         {/* TERTIARY: Certs + Stats - Inline Row */}
         {showTertiary && (
-          <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-gray-500">
+          <div className="flex flex-wrap items-center justify-center gap-4 text-sm" style={{ color: cardStyles.textMuted }}>
             {/* Certifications */}
             {certifications.map((cert, idx) => (
               <React.Fragment key={cert.id}>
@@ -145,7 +164,7 @@ export default function LogoWallPublished(props: LayoutComponentProps) {
                   {cert.label}
                 </span>
                 {(idx < certifications.length - 1 || stats.length > 0) && (
-                  <span className="text-gray-300">•</span>
+                  <span style={{ color: cardStyles.textMuted, opacity: 0.5 }}>•</span>
                 )}
               </React.Fragment>
             ))}
@@ -157,7 +176,7 @@ export default function LogoWallPublished(props: LayoutComponentProps) {
                   <strong>{stat.value}</strong> {stat.label}
                 </span>
                 {idx < stats.length - 1 && (
-                  <span className="text-gray-300">•</span>
+                  <span style={{ color: cardStyles.textMuted, opacity: 0.5 }}>•</span>
                 )}
               </React.Fragment>
             ))}

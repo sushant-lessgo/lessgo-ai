@@ -13,6 +13,7 @@ import AvatarEditableComponent from '@/components/ui/AvatarEditableComponent';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { getCardStyles, type CardStyles } from '@/modules/Design/cardStyles';
 import { getDynamicCardLayout } from '@/utils/dynamicCardLayout';
 
 // V2: Testimonial item structure - clean array item
@@ -105,6 +106,11 @@ export default function PullQuoteStack(props: LayoutComponentProps) {
     return 'neutral';
   }, [props.manualThemeOverride, props.userContext]);
 
+  const cardStyles = React.useMemo(() => getCardStyles({
+    sectionBackgroundCSS: sectionBackground || '',
+    theme
+  }), [sectionBackground, theme]);
+
   // Typography styles
   const h3Style = getTypographyStyle('h3');
   const bodyLgStyle = getTypographyStyle('body-lg');
@@ -161,12 +167,12 @@ export default function PullQuoteStack(props: LayoutComponentProps) {
     return (
       <div className={`${isLarge ? 'md:col-span-2' : ''}`}>
         <div
-          className={`group relative bg-gradient-to-br ${color.bg} rounded-2xl p-6 border-2 ${color.border} hover:shadow-xl transition-all duration-300 h-full`}
+          className={`group relative ${cardStyles.bg} ${cardStyles.blur} ${cardStyles.border} ${cardStyles.shadow} rounded-2xl p-6 hover:shadow-xl transition-all duration-300 h-full`}
           data-element-key={`testimonials.${testimonial.id}`}
         >
           {/* Quote */}
           <blockquote className="leading-relaxed mb-6 font-medium relative">
-            <svg className="w-8 h-8 text-gray-400 mb-2" fill="currentColor" viewBox="0 0 24 24">
+            <svg className={`w-8 h-8 ${cardStyles.textMuted} mb-2`} fill="currentColor" viewBox="0 0 24 24">
               <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h4v10h-10z"/>
             </svg>
             <EditableAdaptiveText
@@ -177,7 +183,7 @@ export default function PullQuoteStack(props: LayoutComponentProps) {
               colorTokens={colorTokens}
               variant="body"
               textStyle={isLarge ? h3Style : bodyLgStyle}
-              className="text-gray-800"
+              className={cardStyles.textHeading}
               placeholder="Customer testimonial quote..."
               sectionId={sectionId}
               elementKey={`testimonials.${testimonial.id}.quote`}
@@ -202,7 +208,7 @@ export default function PullQuoteStack(props: LayoutComponentProps) {
                 backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                 colorTokens={colorTokens}
                 variant="body"
-                className="font-semibold text-gray-900 mb-1"
+                className={`font-semibold ${cardStyles.textHeading} mb-1`}
                 placeholder="Customer name..."
                 sectionId={sectionId}
                 elementKey={`testimonials.${testimonial.id}.customer_name`}
@@ -215,7 +221,7 @@ export default function PullQuoteStack(props: LayoutComponentProps) {
                 backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                 colorTokens={colorTokens}
                 variant="body"
-                className="text-sm text-gray-600 mb-1"
+                className={`text-sm ${cardStyles.textBody} mb-1`}
                 placeholder="Customer title..."
                 sectionId={sectionId}
                 elementKey={`testimonials.${testimonial.id}.customer_title`}

@@ -400,66 +400,28 @@ export const extractLayoutContent = <T extends Record<string, any>>(
   }
   
   for (const [key, config] of Object.entries(contentSchema)) {
+    // PRIORITY 0: Check exclusions FIRST — applies to ALL elements regardless of content
+    const isExcluded = excludedElements?.includes(key) || false;
+    if (isExcluded) {
+      logger.dev(`❌ EXCLUDED: Skipping element "${key}" - toggled off by user`);
+      continue;
+    }
+
     const elementValue = elements[key as keyof StoreElementTypes];
-    
-    // ENHANCED FIX: For undefined elements, prioritize exclusions above all else
+
     if (elementValue === undefined) {
       const isMandatory = layout ? isElementMandatory(layout, key) : false;
       const isInSchema = layout ? isElementInSchema(layout, key) : false;
-      const isExcluded = excludedElements?.includes(key) || false;
 
-      // DEBUG: Log what's happening with undefined elements
-      logger.dev(`🔍 extractLayoutContent DEBUG: element "${key}" is undefined`, {
-        layout,
-        isMandatory,
-        isInSchema,
-        isExcluded,
-        hasLayout: !!layout,
-        defaultValue: config.default
-      });
-
-      // PRIORITY 1: Always respect exclusions first, regardless of schema detection
-      if (isExcluded) {
-        logger.dev(`❌ EXCLUDED: Skipping element "${key}" - will not appear in UI (exclusion enforced)`);
-        continue; // Skip adding this key to result object, leaving it undefined
-      }
-
-      // PRIORITY 2: Handle mandatory elements (must appear even if schema detection fails)
       if (isMandatory) {
-        if (config.type === 'string') {
-          result[key as keyof T] = config.default as T[keyof T];
-        } else if (config.type === 'array') {
-          result[key as keyof T] = config.default as T[keyof T];
-        } else if (config.type === 'boolean') {
-          result[key as keyof T] = config.default as T[keyof T];
-        } else if (config.type === 'number') {
-          result[key as keyof T] = config.default as T[keyof T];
-        }
-        logger.dev(`✅ MANDATORY: Using default for mandatory element "${key}":`, config.default);
-      }
-      // PRIORITY 3: ✅ CRITICAL FIX: Only include optional elements if they're in schema AND not excluded
-      else if (isInSchema) {
-        // Only include optional elements that are explicitly in the schema
-        if (config.type === 'string') {
-          result[key as keyof T] = config.default as T[keyof T];
-        } else if (config.type === 'array') {
-          result[key as keyof T] = config.default as T[keyof T];
-        } else if (config.type === 'boolean') {
-          result[key as keyof T] = config.default as T[keyof T];
-        } else if (config.type === 'number') {
-          result[key as keyof T] = config.default as T[keyof T];
-        }
-        logger.dev(`✨ OPTIONAL: Using default for included optional element "${key}":`, config.default);
-      }
-      // PRIORITY 4: ✅ NEW: Skip undefined optional elements that aren't in schema or are excluded
-      else {
-        logger.dev(`🚫 SKIPPED: Element "${key}" not in schema or excluded - will not appear in UI`);
-        continue; // Don't add to result, leaving it undefined
+        result[key as keyof T] = config.default as T[keyof T];
+      } else if (isInSchema) {
+        result[key as keyof T] = config.default as T[keyof T];
       }
       continue;
     }
-    
-    // Element exists in content, so include it (with default if empty)
+
+    // Element exists and not excluded — include it
     // DEBUG: Log existing elements for step_titles specifically
     if (key === 'step_titles' || key === 'step_descriptions') {
       logger.dev(`🎯 extractLayoutContent: Found existing "${key}":`, {

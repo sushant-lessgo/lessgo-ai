@@ -8,9 +8,10 @@
 
 import React from 'react';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publishedTextColors';
+import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardStyles } from '@/lib/publishedTextColors';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
+import { analyzeBackground } from '@/utils/backgroundAnalysis';
 
 // FAQ item structure (V2 - clean array format)
 interface FAQItem {
@@ -20,7 +21,7 @@ interface FAQItem {
 }
 
 export default function TwoColumnFAQPublished(props: LayoutComponentProps) {
-  const { sectionId, sectionBackgroundCSS, theme, backgroundType } = props;
+  const { sectionId, sectionBackgroundCSS, theme, backgroundType, manualThemeOverride } = props;
 
   // Extract content from props (flattened by LandingPagePublishedRenderer)
   const headline = props.headline || 'Frequently Asked Questions';
@@ -37,6 +38,13 @@ export default function TwoColumnFAQPublished(props: LayoutComponentProps) {
   const leftItems = faqItems.slice(0, midpoint);
   const rightItems = faqItems.slice(midpoint);
 
+  // Determine UIBlock theme
+  const uiBlockTheme: 'warm' | 'cool' | 'neutral' = manualThemeOverride || 'neutral';
+
+  // Get luminance and card styles
+  const { luminance } = analyzeBackground(sectionBackgroundCSS || '');
+  const cardStyles = getPublishedCardStyles(luminance, uiBlockTheme);
+
   // Get text colors based on background
   const textColors = getPublishedTextColors(
     backgroundType || 'primary',
@@ -51,11 +59,15 @@ export default function TwoColumnFAQPublished(props: LayoutComponentProps) {
 
   // Render a single FAQ item with divider
   const renderFAQItem = (item: FAQItem) => (
-    <div key={item.id} className="space-y-3 pb-6 border-b border-gray-200 last:border-b-0 last:pb-0">
+    <div
+      key={item.id}
+      className="space-y-3 pb-6 border-b last:border-b-0 last:pb-0"
+      style={{ borderBottomColor: cardStyles.borderColor }}
+    >
       <TextPublished
         value={item.question}
         style={{
-          color: textColors.heading,
+          color: cardStyles.textHeading,
           ...questionTypography,
           fontWeight: 600
         }}
@@ -65,7 +77,7 @@ export default function TwoColumnFAQPublished(props: LayoutComponentProps) {
         <TextPublished
           value={item.answer}
           style={{
-            color: textColors.muted,
+            color: cardStyles.textMuted,
             lineHeight: '1.75'
           }}
         />
@@ -136,7 +148,7 @@ export default function TwoColumnFAQPublished(props: LayoutComponentProps) {
               <TextPublished
                 value={cta_text}
                 style={{
-                  color: '#2563eb',
+                  color: cardStyles.textHeading,
                   fontWeight: 500,
                   cursor: 'pointer'
                 }}

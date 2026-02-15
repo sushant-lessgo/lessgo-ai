@@ -10,6 +10,7 @@ import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { getCardStyles, type CardStyles } from '@/modules/Design/cardStyles';
 
 // V2 clean array interfaces
 interface PointItem {
@@ -70,6 +71,12 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
   // Detect UIBlock theme
   const uiTheme: UIBlockTheme = props.manualThemeOverride ||
     (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+
+  // Get adaptive card styles
+  const cardStyles = React.useMemo(() => getCardStyles({
+    sectionBackgroundCSS: sectionBackground || '',
+    theme: uiTheme
+  }), [sectionBackground, uiTheme]);
 
   // Get accent color for After card (light tint)
   const accentColor = colorTokens.ctaBg || '#3b82f6';
@@ -157,11 +164,10 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
               );
               (handleContentUpdate as any)(isAfter ? 'after_points' : 'before_points', updatedPoints);
             }}
-            className="flex-1 bg-transparent border-none outline-none focus:ring-1 focus:ring-blue-300 rounded px-1"
-            style={{ color: dynamicTextColors?.body || colorTokens.textPrimary }}
+            className={`flex-1 bg-transparent border-none outline-none focus:ring-1 focus:ring-blue-300 rounded px-1 ${cardStyles.textBody}`}
           />
         ) : (
-          <span style={{ color: dynamicTextColors?.body || colorTokens.textPrimary }}>{point.text}</span>
+          <span className={cardStyles.textBody}>{point.text}</span>
         )}
         {mode === 'edit' && (
           <button
@@ -230,9 +236,8 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
           {/* Before Card */}
           <div className="group min-w-0">
             <div
-              className="rounded-xl p-4 sm:p-6 md:p-8 border-2 h-full transition-all duration-300 hover:shadow-lg"
+              className={`${cardStyles.bg} ${cardStyles.blur} rounded-xl p-4 sm:p-6 md:p-8 border-2 h-full transition-all duration-300 hover:shadow-lg`}
               style={{
-                backgroundColor: themeColors.before.bg,
                 borderColor: themeColors.before.border,
                 borderStyle: 'dashed'
               }}
@@ -332,9 +337,8 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
           {/* After Card */}
           <div className="group min-w-0">
             <div
-              className="rounded-xl p-4 sm:p-6 md:p-8 border-2 h-full transition-all duration-300 hover:shadow-lg"
+              className={`${cardStyles.bg} ${cardStyles.blur} rounded-xl p-4 sm:p-6 md:p-8 border-2 h-full transition-all duration-300 hover:shadow-lg`}
               style={{
-                backgroundColor: themeColors.after.bg,
                 borderColor: themeColors.after.border,
                 borderStyle: 'solid'
               }}

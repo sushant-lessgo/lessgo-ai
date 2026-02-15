@@ -11,7 +11,8 @@
 
 import React from 'react';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publishedTextColors';
+import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardStyles } from '@/lib/publishedTextColors';
+import { analyzeBackground } from '@/utils/backgroundAnalysis';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { IconPublished } from '@/components/published/IconPublished';
 import { ImagePublished } from '@/components/published/ImagePublished';
@@ -31,7 +32,8 @@ function PremiumCardPublished({
   bodyTypography,
   accentColor,
   paletteMode,
-  paletteTemperature
+  paletteTemperature,
+  cardStyles
 }: {
   type: 'before' | 'after';
   label: string;
@@ -51,6 +53,7 @@ function PremiumCardPublished({
   accentColor: string;
   paletteMode?: 'dark' | 'light';
   paletteTemperature?: 'cool' | 'neutral' | 'warm';
+  cardStyles: ReturnType<typeof getPublishedCardStyles>;
 }) {
 
   // Visual Placeholder Component
@@ -84,14 +87,16 @@ function PremiumCardPublished({
 
   return (
     <div
-      className={`group relative bg-white rounded-xl shadow-xl border transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 ${
+      className={`group relative rounded-xl transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 ${
         type === 'after' ? 'ring-2' : ''
       }`}
       style={{
+        backgroundColor: cardStyles.bg,
+        backdropFilter: cardStyles.backdropFilter,
         borderColor: type === 'before' ? themeColors.beforeBorder : `${accentColor}40`,
-        ...(type === 'after' && {
-          boxShadow: `0 0 0 2px ${accentColor}20`
-        })
+        borderWidth: cardStyles.borderWidth,
+        borderStyle: cardStyles.borderStyle,
+        boxShadow: type === 'after' ? `0 0 0 2px ${accentColor}20` : cardStyles.boxShadow
       }}
     >
 
@@ -129,7 +134,7 @@ function PremiumCardPublished({
           value={description}
           element="p"
           style={{
-            color: textColors.body,
+            color: cardStyles.textBody,
             lineHeight: '1.75rem'
           }}
         />
@@ -164,6 +169,10 @@ export default function SplitCardPublished(props: LayoutComponentProps) {
 
   // Get accent color from theme
   const accentColor = theme?.colors?.accentColor || '#3b82f6';
+
+  // Get adaptive card styles
+  const { luminance } = analyzeBackground(sectionBackgroundCSS || '');
+  const cardStyles = getPublishedCardStyles(luminance, uiTheme);
 
   // Theme colors (Before uses theme, After uses accent)
   const getCardColors = (themeType: UIBlockTheme) => ({
@@ -258,15 +267,16 @@ export default function SplitCardPublished(props: LayoutComponentProps) {
               accentColor={accentColor}
               paletteMode={theme?.colors?.paletteMode}
               paletteTemperature={theme?.colors?.paletteTemperature}
+              cardStyles={cardStyles}
             />
 
             {/* Upgrade Indicator (Mobile) */}
             <div className="text-center lg:hidden">
-              <div className="inline-flex items-center space-x-2 bg-white rounded-full shadow-lg px-6 py-3">
+              <div className="inline-flex items-center space-x-2 rounded-full px-6 py-3" style={{ backgroundColor: cardStyles.bg, backdropFilter: cardStyles.backdropFilter, boxShadow: cardStyles.boxShadow }}>
                 <IconPublished
                   icon={upgrade_icon}
                   size={16}
-                  className="text-lg text-gray-400"
+                  color={cardStyles.textMuted}
                 />
                 <TextPublished
                   value={upgrade_text}
@@ -285,11 +295,11 @@ export default function SplitCardPublished(props: LayoutComponentProps) {
           <div className="relative">
             {/* Upgrade Indicator (Desktop) */}
             <div className="hidden lg:block absolute -left-8 top-1/2 transform -translate-y-1/2">
-              <div className="flex flex-col items-center space-y-2 bg-white rounded-full shadow-lg px-4 py-6">
+              <div className="flex flex-col items-center space-y-2 rounded-full px-4 py-6" style={{ backgroundColor: cardStyles.bg, backdropFilter: cardStyles.backdropFilter, boxShadow: cardStyles.boxShadow }}>
                 <IconPublished
                   icon={upgrade_icon}
                   size={24}
-                  className="text-xl text-gray-400"
+                  color={cardStyles.textMuted}
                 />
                 <div
                   className="text-sm font-medium"
@@ -312,6 +322,7 @@ export default function SplitCardPublished(props: LayoutComponentProps) {
               accentColor={accentColor}
               paletteMode={theme?.colors?.paletteMode}
               paletteTemperature={theme?.colors?.paletteTemperature}
+              cardStyles={cardStyles}
             />
           </div>
         </div>

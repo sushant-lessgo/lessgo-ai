@@ -175,32 +175,32 @@ const MetricTile = React.memo(({
       />
 
       {/* Metric Box */}
-      <div className="text-center bg-gray-50 rounded-lg p-4 mb-4">
+      <div className={`text-center ${cardStyles.bg} rounded-lg p-4 mb-4`}>
         <EditableAdaptiveText
           mode={mode}
           value={item.metric}
           onEdit={(value) => onUpdate(item.id, 'metric', value)}
-          backgroundType="neutral"
+          backgroundType={backgroundType === 'custom' ? 'secondary' : (backgroundType as any || 'neutral')}
           colorTokens={colorTokens}
           variant="body"
           className={`text-4xl font-bold ${getMetricTextColor(theme)}`}
           placeholder="Metric..."
           sectionId={sectionId}
           elementKey={`metric_value_${item.id}`}
-          sectionBackground="bg-gray-50"
+          sectionBackground={sectionBackground}
         />
         <EditableAdaptiveText
           mode={mode}
           value={item.label}
           onEdit={(value) => onUpdate(item.id, 'label', value)}
-          backgroundType="neutral"
+          backgroundType={backgroundType === 'custom' ? 'secondary' : (backgroundType as any || 'neutral')}
           colorTokens={colorTokens}
           variant="body"
-          className={`text-sm font-medium ${mutedTextColor} uppercase tracking-wide`}
+          className={`text-sm font-medium ${cardStyles.textMuted} uppercase tracking-wide`}
           placeholder="Metric label..."
           sectionId={sectionId}
           elementKey={`metric_label_${item.id}`}
-          sectionBackground="bg-gray-50"
+          sectionBackground={sectionBackground}
         />
       </div>
 
@@ -213,7 +213,7 @@ const MetricTile = React.memo(({
           backgroundType={backgroundType === 'custom' ? 'secondary' : (backgroundType as any || 'neutral')}
           colorTokens={colorTokens}
           variant="body"
-          className={`${mutedTextColor} leading-relaxed text-sm`}
+          className={`${cardStyles.textMuted} leading-relaxed text-sm`}
           placeholder="Feature description..."
           sectionId={sectionId}
           elementKey={`metric_description_${item.id}`}
@@ -392,7 +392,7 @@ export default function MetricTiles(props: LayoutComponentProps) {
 
         {/* ROI Summary */}
         {blockContent.show_roi_summary !== false && (blockContent.roi_summary_title || roiMetrics.length > 0 || mode === 'edit') && (
-          <div className={`mt-12 bg-gradient-to-r ${themeColors.roiBgGradient} rounded-2xl p-8 border ${themeColors.roiBorder}`}>
+          <div className={`mt-12 ${cardStyles.bg} ${cardStyles.blur} rounded-2xl p-8 ${cardStyles.border} ${cardStyles.shadow}`}>
             <div className="text-center">
               <EditableAdaptiveText
                 mode={mode}
@@ -435,7 +435,7 @@ export default function MetricTiles(props: LayoutComponentProps) {
                       backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                       colorTokens={colorTokens}
                       variant="body"
-                      className={`text-sm ${mutedTextColor}`}
+                      className={`text-sm ${cardStyles.textMuted}`}
                       placeholder="Label"
                       sectionBackground={sectionBackground}
                       data-section-id={sectionId}
@@ -468,7 +468,7 @@ export default function MetricTiles(props: LayoutComponentProps) {
                     backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                     colorTokens={colorTokens}
                     variant="body"
-                    className={`${mutedTextColor} max-w-2xl mx-auto`}
+                    className={`${cardStyles.textMuted} max-w-2xl mx-auto`}
                     placeholder="ROI description..."
                     sectionBackground={sectionBackground}
                     data-section-id={sectionId}

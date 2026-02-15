@@ -8,10 +8,13 @@
 
 import React from 'react';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publishedTextColors';
+import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardStyles } from '@/lib/publishedTextColors';
+import { analyzeBackground } from '@/utils/backgroundAnalysis';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { AvatarPublished } from '@/components/published/AvatarPublished';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 
 // V2: Transformation type
 interface Transformation {
@@ -88,6 +91,13 @@ export default function BeforeAfterQuotePublished(props: LayoutComponentProps) {
   // V2: Direct array access for transformations
   const transformations: Transformation[] = (props as any).transformations || [];
 
+  // Detect UIBlock theme
+  const uiTheme: UIBlockTheme = props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+
+  // Card styles
+  const { luminance } = analyzeBackground(sectionBackgroundCSS || '');
+  const cardStyles = getPublishedCardStyles(luminance, uiTheme);
+
   // Get text colors and typography
   const textColors = getPublishedTextColors(
     backgroundType || 'primary',
@@ -139,7 +149,15 @@ export default function BeforeAfterQuotePublished(props: LayoutComponentProps) {
           {transformations.map((t: Transformation) => (
             <div
               key={t.id}
-              className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100"
+              className="rounded-2xl overflow-hidden"
+              style={{
+                backgroundColor: cardStyles.bg,
+                backdropFilter: cardStyles.backdropFilter,
+                borderWidth: cardStyles.borderWidth,
+                borderStyle: cardStyles.borderStyle,
+                borderColor: cardStyles.borderColor,
+                boxShadow: cardStyles.boxShadow
+              }}
             >
               {/* Before/After Comparison */}
               <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-200">
@@ -152,9 +170,9 @@ export default function BeforeAfterQuotePublished(props: LayoutComponentProps) {
                     >
                       <span>{t.before_icon || globalBeforeIcon}</span>
                     </div>
-                    <span className="text-sm font-semibold text-gray-700">BEFORE</span>
+                    <span className="text-sm font-semibold" style={{ color: cardStyles.textBody }}>BEFORE</span>
                   </div>
-                  <p className="text-gray-800 leading-relaxed text-sm">{t.before_situation}</p>
+                  <p className="leading-relaxed text-sm" style={{ color: cardStyles.textHeading }}>{t.before_situation}</p>
                 </div>
 
                 {/* After Section */}
@@ -166,15 +184,15 @@ export default function BeforeAfterQuotePublished(props: LayoutComponentProps) {
                     >
                       <span>{t.after_icon || globalAfterIcon}</span>
                     </div>
-                    <span className="text-sm font-semibold text-gray-700">AFTER</span>
+                    <span className="text-sm font-semibold" style={{ color: cardStyles.textBody }}>AFTER</span>
                   </div>
-                  <p className="text-gray-800 leading-relaxed text-sm">{t.after_outcome}</p>
+                  <p className="leading-relaxed text-sm" style={{ color: cardStyles.textHeading }}>{t.after_outcome}</p>
                 </div>
               </div>
 
               {/* Testimonial Section */}
-              <div className="p-6 bg-gray-50">
-                <p className="text-gray-700 italic mb-4 leading-relaxed">"{t.testimonial_quote}"</p>
+              <div className="p-6">
+                <p className="italic mb-4 leading-relaxed" style={{ color: cardStyles.textBody }}>"{t.testimonial_quote}"</p>
 
                 <div className="flex items-center space-x-3">
                   <div className="rounded-full p-0.5" style={{ backgroundColor: colors.avatar }}>
@@ -185,8 +203,8 @@ export default function BeforeAfterQuotePublished(props: LayoutComponentProps) {
                     />
                   </div>
                   <div>
-                    <div className="font-semibold text-gray-900 text-sm">{t.customer_name}</div>
-                    <div className="text-sm text-gray-600">
+                    <div className="font-semibold text-sm" style={{ color: cardStyles.textHeading }}>{t.customer_name}</div>
+                    <div className="text-sm" style={{ color: cardStyles.textBody }}>
                       {t.customer_title}
                       {t.customer_company && ` at ${t.customer_company}`}
                     </div>

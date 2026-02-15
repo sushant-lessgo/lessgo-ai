@@ -12,6 +12,7 @@ import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { getCardStyles, type CardStyles } from '@/modules/Design/cardStyles';
 
 // V2: Feature item structure
 interface Feature {
@@ -70,7 +71,8 @@ const FeatureRow = React.memo(({
   onRemove,
   handleImageToolbar,
   theme,
-  dynamicTextColors
+  dynamicTextColors,
+  cardStyles
 }: {
   feature: Feature;
   index: number;
@@ -86,6 +88,7 @@ const FeatureRow = React.memo(({
   handleImageToolbar: (imageId: string, position: { x: number; y: number }) => void;
   theme: UIBlockTheme;
   dynamicTextColors: any;
+  cardStyles: CardStyles;
 }) => {
   const isEven = index % 2 === 0;
 
@@ -164,14 +167,13 @@ const FeatureRow = React.memo(({
                   contentEditable
                   suppressContentEditableWarning
                   onBlur={(e) => onTitleEdit(e.currentTarget.textContent || '')}
-                  className="text-2xl font-bold mb-4 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-50 min-h-[40px]"
-                  style={{ color: dynamicTextColors?.heading }}
+                  className={`text-2xl font-bold mb-4 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 py-1 cursor-text min-h-[40px] ${dynamicTextColors?.heading || cardStyles.textHeading}`}
                   data-placeholder="Feature title"
                 >
                   {feature.title}
                 </div>
               ) : (
-                <h3 className="text-2xl font-bold mb-4" style={{ color: dynamicTextColors?.heading }}>{feature.title}</h3>
+                <h3 className={`text-2xl font-bold mb-4 ${dynamicTextColors?.heading || cardStyles.textHeading}`}>{feature.title}</h3>
               )}
 
               {/* Editable Feature Description */}
@@ -180,14 +182,13 @@ const FeatureRow = React.memo(({
                   contentEditable
                   suppressContentEditableWarning
                   onBlur={(e) => onDescriptionEdit(e.currentTarget.textContent || '')}
-                  className="leading-relaxed text-lg outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-50 min-h-[60px]"
-                  style={{ color: dynamicTextColors?.body }}
+                  className={`leading-relaxed text-lg outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 py-1 cursor-text min-h-[60px] ${dynamicTextColors?.body || cardStyles.textBody}`}
                   data-placeholder="Feature description"
                 >
                   {feature.description}
                 </div>
               ) : (
-                <p className="leading-relaxed text-lg" style={{ color: dynamicTextColors?.body }}>
+                <p className={`leading-relaxed text-lg ${dynamicTextColors?.body || cardStyles.textBody}`}>
                   {feature.description}
                 </p>
               )}
@@ -284,6 +285,12 @@ export default function SplitAlternating(props: LayoutComponentProps) {
     if (props.userContext) return selectUIBlockTheme(props.userContext);
     return 'neutral';
   }, [props.manualThemeOverride, props.userContext]);
+
+  // Adaptive card styles based on section background luminance
+  const cardStyles = React.useMemo(() => getCardStyles({
+    sectionBackgroundCSS: sectionBackground || '',
+    theme: uiBlockTheme
+  }), [sectionBackground, uiBlockTheme]);
 
   // Create typography styles
   const bodyLgStyle = getTypographyStyle('body-lg');
@@ -407,6 +414,7 @@ export default function SplitAlternating(props: LayoutComponentProps) {
               handleImageToolbar={handleImageToolbar}
               theme={uiBlockTheme}
               dynamicTextColors={dynamicTextColors}
+              cardStyles={cardStyles}
               onRemove={features.length > 1 ? () => handleRemoveFeature(feature.id) : undefined}
             />
           ))}

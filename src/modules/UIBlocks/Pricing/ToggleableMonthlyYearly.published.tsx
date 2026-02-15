@@ -118,6 +118,9 @@ export default function ToggleableMonthlyYearlyPublished(props: LayoutComponentP
   // Get theme-specific accents (badge, checkmark)
   const pricingAccents = getPricingAccents(uiBlockTheme);
 
+  // Base card styles for toggle area (non-highlighted)
+  const baseCardStyles = getPublishedCardStyles(luminance, uiBlockTheme);
+
   // Text colors
   const textColors = getPublishedTextColors(backgroundType || 'neutral', theme, sectionBackgroundCSS);
 
@@ -163,7 +166,7 @@ export default function ToggleableMonthlyYearlyPublished(props: LayoutComponentP
 
           {/* Billing Toggle */}
           <div className="flex items-center justify-center mb-8">
-            <div style={{ backgroundColor: '#f3f4f6', borderRadius: '9999px', padding: '4px', display: 'flex' }}>
+            <div style={{ backgroundColor: baseCardStyles.bg, backdropFilter: baseCardStyles.backdropFilter, WebkitBackdropFilter: baseCardStyles.backdropFilter, borderRadius: '9999px', padding: '4px', display: 'flex' }}>
               <button
                 onClick={() => setBillingCycle('monthly')}
                 style={{
@@ -171,8 +174,8 @@ export default function ToggleableMonthlyYearlyPublished(props: LayoutComponentP
                   borderRadius: '9999px',
                   fontWeight: '500',
                   transition: 'all 0.3s',
-                  backgroundColor: billingCycle === 'monthly' ? '#ffffff' : 'transparent',
-                  color: billingCycle === 'monthly' ? '#111827' : '#6b7280',
+                  backgroundColor: billingCycle === 'monthly' ? baseCardStyles.bg : 'transparent',
+                  color: billingCycle === 'monthly' ? baseCardStyles.textHeading : baseCardStyles.textMuted,
                   boxShadow: billingCycle === 'monthly' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
                   border: 'none',
                   cursor: 'pointer',
@@ -187,8 +190,8 @@ export default function ToggleableMonthlyYearlyPublished(props: LayoutComponentP
                   borderRadius: '9999px',
                   fontWeight: '500',
                   transition: 'all 0.3s',
-                  backgroundColor: billingCycle === 'yearly' ? '#ffffff' : 'transparent',
-                  color: billingCycle === 'yearly' ? '#111827' : '#6b7280',
+                  backgroundColor: billingCycle === 'yearly' ? baseCardStyles.bg : 'transparent',
+                  color: billingCycle === 'yearly' ? baseCardStyles.textHeading : baseCardStyles.textMuted,
                   boxShadow: billingCycle === 'yearly' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
                   border: 'none',
                   cursor: 'pointer',

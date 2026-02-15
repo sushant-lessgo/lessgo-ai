@@ -219,14 +219,14 @@ const PricingCard = ({
               contentEditable
               suppressContentEditableWarning
               onBlur={(e) => onTierUpdate('name', e.currentTarget.textContent || '')}
-              className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 font-bold text-xl text-gray-900"
+              className={`outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text font-bold text-xl ${cardStyles.textHeading}`}
               data-section-id={sectionId}
               data-element-key={`tiers.${tier.id}.name`}
             >
               {tier.name}
             </div>
           ) : (
-            <h3 className="font-bold text-xl text-gray-900">{tier.name}</h3>
+            <h3 className={`font-bold text-xl ${cardStyles.textHeading}`}>{tier.name}</h3>
           )}
         </div>
 
@@ -234,23 +234,23 @@ const PricingCard = ({
         <div className="text-center mb-4">
           {mode !== 'preview' ? (
             <div className="space-y-2">
-              <div className="text-sm text-gray-500">Monthly:</div>
+              <div className={`text-sm ${cardStyles.textMuted}`}>Monthly:</div>
               <div
                 contentEditable
                 suppressContentEditableWarning
                 onBlur={(e) => onTierUpdate('monthly_price', e.currentTarget.textContent || '')}
-                className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-50 text-2xl font-bold text-gray-900"
+                className={`outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text text-2xl font-bold ${cardStyles.textHeading}`}
                 data-section-id={sectionId}
                 data-element-key={`tiers.${tier.id}.monthly_price`}
               >
                 {tier.monthly_price}
               </div>
-              <div className="text-sm text-gray-500">Yearly:</div>
+              <div className={`text-sm ${cardStyles.textMuted}`}>Yearly:</div>
               <div
                 contentEditable
                 suppressContentEditableWarning
                 onBlur={(e) => onTierUpdate('yearly_price', e.currentTarget.textContent || '')}
-                className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-50 text-2xl font-bold text-gray-900"
+                className={`outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text text-2xl font-bold ${cardStyles.textHeading}`}
                 data-section-id={sectionId}
                 data-element-key={`tiers.${tier.id}.yearly_price`}
               >
@@ -259,17 +259,17 @@ const PricingCard = ({
             </div>
           ) : (
             <div className="flex items-baseline justify-center">
-              <span style={{ fontSize: 'clamp(2rem, 4vw, 2.5rem)' }} className="font-bold text-gray-900">
+              <span style={{ fontSize: 'clamp(2rem, 4vw, 2.5rem)' }} className={`font-bold ${cardStyles.textHeading}`}>
                 {currentPrice}
               </span>
               {!currentPrice.toLowerCase().includes('contact') && (
-                <span className="text-gray-500 ml-1">/{billingCycle === 'monthly' ? 'month' : 'year'}</span>
+                <span className={`${cardStyles.textMuted} ml-1`}>/{billingCycle === 'monthly' ? 'month' : 'year'}</span>
               )}
             </div>
           )}
 
           {mode === 'preview' && billingCycle === 'yearly' && !currentPrice.toLowerCase().includes('contact') && (
-            <div className="text-sm text-gray-500 mt-1">
+            <div className={`text-sm ${cardStyles.textMuted} mt-1`}>
               ${Math.round(parseFloat(currentPrice.replace(/[^0-9.]/g, '')) / 12)}/month billed annually
             </div>
           )}
@@ -282,14 +282,14 @@ const PricingCard = ({
               contentEditable
               suppressContentEditableWarning
               onBlur={(e) => onTierUpdate('description', e.currentTarget.textContent || '')}
-              className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 text-gray-600"
+              className={`outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text ${cardStyles.textBody}`}
               data-section-id={sectionId}
               data-element-key={`tiers.${tier.id}.description`}
             >
               {tier.description}
             </div>
           ) : (
-            <p className="text-gray-600">{tier.description}</p>
+            <p className={cardStyles.textBody}>{tier.description}</p>
           )}
         </div>
 
@@ -319,7 +319,7 @@ const PricingCard = ({
                         backgroundType="neutral"
                         colorTokens={colorTokens}
                         variant="body"
-                        className="text-gray-700"
+                        className={cardStyles.textBody}
                         placeholder={`Feature ${index + 1}`}
                         data-section-id={sectionId}
                         data-element-key={`tiers.${tier.id}.features.${index}`}
@@ -340,7 +340,7 @@ const PricingCard = ({
                       )}
                     </>
                   ) : (
-                    <span className="text-gray-700">{feature}</span>
+                    <span className={cardStyles.textBody}>{feature}</span>
                   )}
                 </div>
               </li>
@@ -368,7 +368,7 @@ const PricingCard = ({
               contentEditable
               suppressContentEditableWarning
               onBlur={(e) => onTierUpdate('cta_text', e.currentTarget.textContent || '')}
-              className={`text-center font-medium py-3 px-6 rounded-lg ${tier.is_popular ? (isHexColor(colorTokens.ctaBg) ? '' : colorTokens.ctaBg) + ' text-white' : 'bg-gray-100 text-gray-900'} outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 cursor-text`}
+              className={`text-center font-medium py-3 px-6 rounded-lg ${tier.is_popular ? (isHexColor(colorTokens.ctaBg) ? '' : colorTokens.ctaBg) + ' text-white' : `${cardStyles.bg} ${cardStyles.textHeading}`} outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 cursor-text`}
               style={tier.is_popular && isHexColor(colorTokens.ctaBg) ? { backgroundColor: colorTokens.ctaBg } : undefined}
               data-section-id={sectionId}
               data-element-key={`tiers.${tier.id}.cta_text`}
@@ -415,6 +415,12 @@ export default function ToggleableMonthlyYearly(props: ToggleableMonthlyYearlyPr
       highlighted
     });
   }, [sectionBackground, uiBlockTheme]);
+
+  // Get base card styles (non-highlighted) for toggle area and shared text
+  const cardStyles = React.useMemo(() => getCardStyles({
+    sectionBackgroundCSS: sectionBackground || '',
+    theme: uiBlockTheme
+  }), [sectionBackground, uiBlockTheme]);
 
   // Get theme-specific accent colors
   const pricingAccents = getPricingAccents(uiBlockTheme);
@@ -548,13 +554,13 @@ export default function ToggleableMonthlyYearly(props: ToggleableMonthlyYearlyPr
 
           {/* Billing Toggle */}
           <div className="flex items-center justify-center mb-8">
-            <div className="bg-gray-100 rounded-full p-1 flex">
+            <div className={`${cardStyles.bg} ${cardStyles.blur} rounded-full p-1 flex`}>
               <button
                 onClick={() => setBillingCycle('monthly')}
                 className={`px-6 py-2 rounded-full font-medium transition-all duration-300 ${
                   billingCycle === 'monthly'
-                    ? 'bg-white text-gray-900 shadow-md'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? `${cardStyles.bg} ${cardStyles.textHeading} shadow-md`
+                    : `${cardStyles.textMuted}`
                 }`}
               >
                 Monthly
@@ -563,8 +569,8 @@ export default function ToggleableMonthlyYearly(props: ToggleableMonthlyYearlyPr
                 onClick={() => setBillingCycle('yearly')}
                 className={`px-6 py-2 rounded-full font-medium transition-all duration-300 ${
                   billingCycle === 'yearly'
-                    ? 'bg-white text-gray-900 shadow-md'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? `${cardStyles.bg} ${cardStyles.textHeading} shadow-md`
+                    : `${cardStyles.textMuted}`
                 }`}
               >
                 Yearly

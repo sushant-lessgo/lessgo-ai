@@ -13,6 +13,7 @@ import {
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { getCardStyles } from '@/modules/Design/cardStyles';
 
 // Pair structure
 interface MythRealityPair {
@@ -115,6 +116,12 @@ export default function MythVsRealityGrid(props: LayoutComponentProps) {
     if (props.userContext) return selectUIBlockTheme(props.userContext);
     return 'neutral';
   }, [props.manualThemeOverride, props.userContext]);
+
+  // Card styles from luminance-based system
+  const cardStyles = React.useMemo(() => getCardStyles({
+    sectionBackgroundCSS: sectionBackground || '',
+    theme
+  }), [sectionBackground, theme]);
 
   // Get accent color for Reality cards
   const accentColor = props.theme?.colors?.accentColor || '#3b82f6';
@@ -262,7 +269,7 @@ export default function MythVsRealityGrid(props: LayoutComponentProps) {
                           contentEditable
                           suppressContentEditableWarning
                           onBlur={(e) => updateRealityText(pair.id, e.currentTarget.textContent || '')}
-                          className="outline-none focus:ring-2 focus:ring-opacity-50 rounded px-1 min-h-[60px] cursor-text text-gray-800 leading-relaxed flex-1"
+                          className={`outline-none focus:ring-2 focus:ring-opacity-50 rounded px-1 min-h-[60px] cursor-text ${cardStyles.textHeading} leading-relaxed flex-1`}
                           style={{
                             ...bodyStyle,
                             ['--tw-ring-color' as string]: accentColor
@@ -271,7 +278,7 @@ export default function MythVsRealityGrid(props: LayoutComponentProps) {
                           {pair.reality}
                         </div>
                       ) : (
-                        <p style={{...bodyStyle}} className="text-gray-800 leading-relaxed flex-1">{pair.reality}</p>
+                        <p style={{...bodyStyle}} className={`${cardStyles.textHeading} leading-relaxed flex-1`}>{pair.reality}</p>
                       )}
                     </div>
                   </div>

@@ -11,6 +11,7 @@ import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import { getCardStyles, type CardStyles } from '@/modules/Design/cardStyles';
 
 interface SplitCardContent {
   headline: string;
@@ -58,13 +59,13 @@ const PremiumCard = React.memo(({
   bodyLgStyle,
   handleContentUpdate,
   colorTokens,
-  dynamicTextColors,
   backgroundType,
   sectionBackground,
   blockContent,
   handleImageToolbar,
   themeColors,
-  accentColor
+  accentColor,
+  cardStyles
 }: {
   type: 'before' | 'after';
   label: string;
@@ -75,7 +76,6 @@ const PremiumCard = React.memo(({
   bodyLgStyle: React.CSSProperties;
   handleContentUpdate: (key: string, value: string) => void;
   colorTokens: any;
-  dynamicTextColors?: { heading?: string; body?: string; muted?: string };
   backgroundType: 'custom' | 'neutral' | 'primary' | 'secondary' | 'theme';
   sectionBackground: any;
   blockContent: SplitCardContent;
@@ -92,6 +92,7 @@ const PremiumCard = React.memo(({
     afterPlaceholderIcon: string;
   };
   accentColor: string;
+  cardStyles: CardStyles;
 }) => {
 
   const VisualPlaceholder = () => (
@@ -127,7 +128,7 @@ const PremiumCard = React.memo(({
 
   return (
     <div
-      className={`group relative bg-white rounded-xl shadow-xl border transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 ${
+      className={`group relative ${cardStyles.bg} ${cardStyles.blur} ${cardStyles.border} ${cardStyles.shadow} rounded-xl transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 ${
         type === 'after' ? 'ring-2' : ''
       }`}
       style={{
@@ -189,8 +190,7 @@ const PremiumCard = React.memo(({
           backgroundType={backgroundType}
           colorTokens={colorTokens}
           variant="body"
-          className="leading-relaxed"
-          textStyle={{ color: dynamicTextColors?.body || '#4b5563' }}
+          className={`leading-relaxed ${cardStyles.textBody}`}
           sectionId={sectionId}
           elementKey={type === 'before' ? 'before_description' : 'after_description'}
           sectionBackground={sectionBackground}
@@ -224,6 +224,12 @@ export default function SplitCard(props: LayoutComponentProps) {
   // Detect UIBlock theme
   const uiTheme: UIBlockTheme = props.manualThemeOverride ||
     (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+
+  // Get adaptive card styles
+  const cardStyles = React.useMemo(() => getCardStyles({
+    sectionBackgroundCSS: sectionBackground || '',
+    theme: uiTheme
+  }), [sectionBackground, uiTheme]);
 
   // Get accent color for After card
   const accentColor = colorTokens.ctaBg || '#3b82f6';
@@ -328,17 +334,17 @@ export default function SplitCard(props: LayoutComponentProps) {
               bodyLgStyle={bodyLgStyle}
               handleContentUpdate={handleContentUpdate}
               colorTokens={colorTokens}
-              dynamicTextColors={dynamicTextColors}
               backgroundType={safeBackgroundType}
               sectionBackground={sectionBackground}
               blockContent={blockContent}
               handleImageToolbar={handleImageToolbar}
               themeColors={themeColors}
               accentColor={accentColor}
+              cardStyles={cardStyles}
             />
 
             <div className="text-center lg:hidden">
-              <div className="inline-flex items-center space-x-2 bg-white rounded-full shadow-lg px-6 py-3">
+              <div className={`inline-flex items-center space-x-2 ${cardStyles.bg} ${cardStyles.blur} rounded-full ${cardStyles.shadow} px-6 py-3`}>
                 <IconEditableText
                   mode={mode}
                   value={blockContent.upgrade_icon || 'ArrowRight'}
@@ -346,7 +352,7 @@ export default function SplitCard(props: LayoutComponentProps) {
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   iconSize="sm"
-                  className="text-lg text-gray-400"
+                  className={`text-lg ${cardStyles.textMuted}`}
                   sectionId={sectionId}
                   elementKey="upgrade_icon_mobile"
                 />
@@ -368,7 +374,7 @@ export default function SplitCard(props: LayoutComponentProps) {
 
           <div className="relative">
             <div className="hidden lg:block absolute -left-8 top-1/2 transform -translate-y-1/2">
-              <div className="flex flex-col items-center space-y-2 bg-white rounded-full shadow-lg px-4 py-6">
+              <div className={`flex flex-col items-center space-y-2 ${cardStyles.bg} ${cardStyles.blur} rounded-full ${cardStyles.shadow} px-4 py-6`}>
                 <IconEditableText
                   mode={mode}
                   value={blockContent.upgrade_icon || 'ArrowRight'}
@@ -376,7 +382,7 @@ export default function SplitCard(props: LayoutComponentProps) {
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   iconSize="md"
-                  className="text-xl text-gray-400"
+                  className={`text-xl ${cardStyles.textMuted}`}
                   sectionId={sectionId}
                   elementKey="upgrade_icon_desktop"
                 />
@@ -405,13 +411,13 @@ export default function SplitCard(props: LayoutComponentProps) {
               bodyLgStyle={bodyLgStyle}
               handleContentUpdate={handleContentUpdate}
               colorTokens={colorTokens}
-              dynamicTextColors={dynamicTextColors}
               backgroundType={safeBackgroundType}
               sectionBackground={sectionBackground}
               blockContent={blockContent}
               handleImageToolbar={handleImageToolbar}
               themeColors={themeColors}
               accentColor={accentColor}
+              cardStyles={cardStyles}
             />
           </div>
         </div>

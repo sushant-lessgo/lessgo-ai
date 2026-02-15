@@ -115,7 +115,8 @@
       "WebFetch(domain:www.saasframe.io)",
       "WebFetch(domain:www.designstudiouiux.com)",
       "Bash(head:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(git -C \"C:\\\\Users\\\\susha\\\\lessgo-ai\" diff --name-only)"
     ],
     "deny": [],
     "ask": [],

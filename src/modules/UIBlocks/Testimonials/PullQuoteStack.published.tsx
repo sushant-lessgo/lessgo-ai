@@ -7,10 +7,13 @@
 
 import React from 'react';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publishedTextColors';
+import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardStyles } from '@/lib/publishedTextColors';
+import { analyzeBackground } from '@/utils/backgroundAnalysis';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { AvatarPublished } from '@/components/published/AvatarPublished';
+import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import { getDynamicCardLayout } from '@/utils/dynamicCardLayout';
 
 // V2: Testimonial interface
@@ -88,6 +91,13 @@ export default function PullQuoteStackPublished(props: LayoutComponentProps) {
     }
   }
 
+  // Detect UIBlock theme
+  const uiTheme: UIBlockTheme = props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+
+  // Card styles
+  const { luminance } = analyzeBackground(sectionBackgroundCSS || '');
+  const cardStyles = getPublishedCardStyles(luminance, uiTheme);
+
   // Get text colors and typography
   const textColors = getPublishedTextColors(
     backgroundType || 'primary',
@@ -147,24 +157,28 @@ export default function PullQuoteStackPublished(props: LayoutComponentProps) {
             return (
               <div key={testimonial.id || index} className={isLarge ? 'md:col-span-2' : ''}>
                 <div
-                  className="rounded-2xl p-6 border-2 hover:shadow-xl transition-all duration-300 h-full"
+                  className="rounded-2xl p-6 hover:shadow-xl transition-all duration-300 h-full"
                   style={{
-                    background: colors.bg,
-                    borderColor: colors.border
+                    backgroundColor: cardStyles.bg,
+                    backdropFilter: cardStyles.backdropFilter,
+                    borderWidth: cardStyles.borderWidth,
+                    borderStyle: cardStyles.borderStyle,
+                    borderColor: cardStyles.borderColor,
+                    boxShadow: cardStyles.boxShadow
                   }}
                 >
                   {/* Quote */}
                   <blockquote className="leading-relaxed mb-6 font-medium relative">
                     <svg
-                      className="w-8 h-8 text-gray-400 mb-2"
+                      className="w-8 h-8 mb-2"
+                      style={{ color: cardStyles.textMuted }}
                       fill="currentColor"
                       viewBox="0 0 24 24"
                     >
                       <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h4v10h-10z" />
                     </svg>
                     <div
-                      className="text-gray-800"
-                      style={isLarge ? h3Typography : bodyLgTypography}
+                      style={{ ...isLarge ? h3Typography : bodyLgTypography, color: cardStyles.textHeading }}
                     >
                       {testimonial.quote}
                     </div>
@@ -178,10 +192,10 @@ export default function PullQuoteStackPublished(props: LayoutComponentProps) {
                       size={48}
                     />
                     <div className="flex-1">
-                      <div className="font-semibold text-gray-900 mb-1">
+                      <div className="font-semibold mb-1" style={{ color: cardStyles.textHeading }}>
                         {testimonial.customer_name}
                       </div>
-                      <div className="text-sm text-gray-600 mb-1">
+                      <div className="text-sm mb-1" style={{ color: cardStyles.textBody }}>
                         {testimonial.customer_title}
                       </div>
                       {testimonial.customer_location && (

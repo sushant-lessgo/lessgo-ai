@@ -10,9 +10,10 @@
 
 import React from 'react';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publishedTextColors';
+import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardStyles } from '@/lib/publishedTextColors';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
+import { analyzeBackground } from '@/utils/backgroundAnalysis';
 
 // FAQ item structure (V2)
 interface FAQItem {
@@ -28,32 +29,11 @@ interface Tab {
   items: FAQItem[];
 }
 
-// Theme-based tab colors (static for SSR)
-const getTabColors = (theme: 'warm' | 'cool' | 'neutral') => ({
-  warm: {
-    activeBg: '#f97316', // orange-500
-    activeText: '#ffffff',
-    cardBg: '#fff7ed', // orange-50
-    border: '#fed7aa', // orange-200
-    divider: '#ffedd5', // orange-100
-    link: '#ea580c' // orange-600
-  },
-  cool: {
-    activeBg: '#3b82f6', // blue-500
-    activeText: '#ffffff',
-    cardBg: '#eff6ff', // blue-50
-    border: '#bfdbfe', // blue-200
-    divider: '#dbeafe', // blue-100
-    link: '#2563eb' // blue-600
-  },
-  neutral: {
-    activeBg: '#374151', // gray-700
-    activeText: '#ffffff',
-    cardBg: '#f9fafb', // gray-50
-    border: '#e5e7eb', // gray-200
-    divider: '#e5e7eb', // gray-200
-    link: '#4b5563' // gray-600
-  }
+// Theme-based accent colors for active tab indicator (keep themed)
+const getTabAccentColors = (theme: 'warm' | 'cool' | 'neutral') => ({
+  warm: { activeBg: '#f97316', activeText: '#ffffff' },
+  cool: { activeBg: '#3b82f6', activeText: '#ffffff' },
+  neutral: { activeBg: '#374151', activeText: '#ffffff' }
 })[theme];
 
 export default function SegmentedFAQTabsPublished(props: LayoutComponentProps) {
@@ -71,7 +51,11 @@ export default function SegmentedFAQTabsPublished(props: LayoutComponentProps) {
 
   // Determine UIBlock theme
   const uiBlockTheme: 'warm' | 'cool' | 'neutral' = manualThemeOverride || 'neutral';
-  const themeColors = getTabColors(uiBlockTheme);
+  const tabAccent = getTabAccentColors(uiBlockTheme);
+
+  // Get luminance and card styles
+  const { luminance } = analyzeBackground(sectionBackgroundCSS || '');
+  const cardStyles = getPublishedCardStyles(luminance, uiBlockTheme);
 
   // Get text colors
   const textColors = getPublishedTextColors(
@@ -123,7 +107,7 @@ export default function SegmentedFAQTabsPublished(props: LayoutComponentProps) {
         <div
           className="flex flex-wrap justify-center gap-4 mt-12 mb-8 pb-4"
           style={{
-            borderBottom: `1px solid ${themeColors.border}`
+            borderBottom: `1px solid ${cardStyles.borderColor}`
           }}
         >
           {tabs.map((tab, index) => (
@@ -131,8 +115,8 @@ export default function SegmentedFAQTabsPublished(props: LayoutComponentProps) {
               key={tab.id}
               className="px-6 py-3 font-medium rounded-t-lg"
               style={{
-                backgroundColor: index === 0 ? themeColors.activeBg : 'transparent',
-                color: index === 0 ? themeColors.activeText : textColors.body
+                backgroundColor: index === 0 ? tabAccent.activeBg : 'transparent',
+                color: index === 0 ? tabAccent.activeText : textColors.body
               }}
             >
               {tab.label}
@@ -154,7 +138,7 @@ export default function SegmentedFAQTabsPublished(props: LayoutComponentProps) {
                   ...h3Typography,
                   marginBottom: '1.5rem',
                   paddingTop: '1rem',
-                  borderTop: `1px solid ${themeColors.divider}`
+                  borderTop: `1px solid ${cardStyles.borderColor}`
                 }}
               >
                 {tab.label}
@@ -168,14 +152,19 @@ export default function SegmentedFAQTabsPublished(props: LayoutComponentProps) {
                   key={item.id}
                   className="rounded-lg p-6"
                   style={{
-                    backgroundColor: themeColors.cardBg
+                    backgroundColor: cardStyles.bg,
+                    backdropFilter: cardStyles.backdropFilter,
+                    borderColor: cardStyles.borderColor,
+                    borderWidth: cardStyles.borderWidth,
+                    borderStyle: cardStyles.borderStyle,
+                    boxShadow: cardStyles.boxShadow
                   }}
                 >
                   <div className="mb-3">
                     <TextPublished
                       value={item.question}
                       style={{
-                        color: textColors.heading,
+                        color: cardStyles.textHeading,
                         ...h3Typography,
                         fontWeight: 600
                       }}
@@ -186,7 +175,7 @@ export default function SegmentedFAQTabsPublished(props: LayoutComponentProps) {
                     <TextPublished
                       value={item.answer}
                       style={{
-                        color: textColors.body,
+                        color: cardStyles.textBody,
                         lineHeight: '1.75rem'
                       }}
                     />
@@ -201,7 +190,7 @@ export default function SegmentedFAQTabsPublished(props: LayoutComponentProps) {
         {(contactPrompt || ctaText) && (
           <div
             className="mt-10 pt-6 text-center"
-            style={{ borderTop: `1px solid ${themeColors.divider}` }}
+            style={{ borderTop: `1px solid ${cardStyles.borderColor}` }}
           >
             {contactPrompt && (
               <TextPublished
@@ -216,7 +205,7 @@ export default function SegmentedFAQTabsPublished(props: LayoutComponentProps) {
               <TextPublished
                 value={ctaText}
                 style={{
-                  color: themeColors.link,
+                  color: cardStyles.textHeading,
                   fontWeight: 500,
                   cursor: 'pointer'
                 }}
