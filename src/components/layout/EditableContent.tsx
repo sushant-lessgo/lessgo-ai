@@ -6,6 +6,7 @@ import { generateAccessibleBadgeColors } from '@/utils/textContrastUtils';
 import { getTextColorForBackground } from '@/modules/Design/background/backgroundIntegration';
 import { getSmartTextColor } from '@/utils/improvedTextColors';
 import { analyzeBackground } from '@/utils/backgroundAnalysis';
+import { isHexColor } from '@/utils/colorUtils';
 import type { BackgroundType } from '@/types/sectionBackground';
 
 import { logger } from '@/lib/logger';
@@ -583,16 +584,35 @@ export function EditableBadge({
   let badgeClasses = '';
   
   if (accentBased && colorTokens?.ctaBg) {
-    const accentColorMatch = colorTokens.ctaBg.match(/bg-(\w+)-\d+/);
-    const accentColorName = accentColorMatch ? accentColorMatch[1] : 'blue';
-    
-    // ✅ NEW: Use generateAccessibleBadgeColors for safe badge colors
-    badgeClasses = generateAccessibleBadgeColors(accentColorName);
+    if (isHexColor(colorTokens.ctaBg)) {
+      // Hex accent: use inline styles instead of Tailwind classes
+      // badgeClasses left empty; inline style applied below via badgeInlineStyle
+    } else {
+      const accentColorMatch = colorTokens.ctaBg.match(/bg-(\w+)-\d+/);
+      const accentColorName = accentColorMatch ? accentColorMatch[1] : 'blue';
+
+      // ✅ NEW: Use generateAccessibleBadgeColors for safe badge colors
+      badgeClasses = generateAccessibleBadgeColors(accentColorName);
+    }
   } else {
     // ✅ NEW: Use safe default badge colors
     badgeClasses = 'bg-blue-50 text-blue-900 border-blue-200 border';
   }
   
+  // For hex accent colors, compute inline badge styles
+  const badgeInlineStyle = useMemo(() => {
+    if (accentBased && colorTokens?.ctaBg && isHexColor(colorTokens.ctaBg)) {
+      return {
+        backgroundColor: colorTokens.ctaBg + '1a', // ~10% opacity bg
+        color: colorTokens.ctaBg,
+        borderColor: colorTokens.ctaBg + '33', // ~20% opacity border
+        borderWidth: '1px',
+        borderStyle: 'solid' as const,
+      };
+    }
+    return {};
+  }, [accentBased, colorTokens]);
+
   const badgeFormatState = useMemo(() => ({
     bold: false,
     italic: false,
@@ -627,7 +647,7 @@ export function EditableBadge({
         inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
         ${badgeClasses}
       `}
-      style={textStyle}
+      style={{ ...badgeInlineStyle, ...textStyle }}
       sectionId={sectionId}
       elementKey={elementKey}
       formatState={badgeFormatState}

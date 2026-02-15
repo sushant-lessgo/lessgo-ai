@@ -75,7 +75,7 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
     anchor,
     position: anchorPosition,
     hasValidPosition 
-  } = useToolbarVisibility('text', { width: 280, height: 52 }); // Smaller MVP size
+  } = useToolbarVisibility('text', { width: 320, height: 52 }); // Widened for sparkle button
 
   const [formatState, setFormatState] = useState<MVPFormatState>({
     bold: false,
@@ -92,8 +92,18 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
   const toolbarRef = useRef<HTMLDivElement>(null);
   const colorPickerRef = useRef<HTMLDivElement>(null);
   const fontSizePickerRef = useRef<HTMLDivElement>(null);
+  const variationsRef = useRef<HTMLDivElement>(null);
 
-  const { updateElementContent } = useEditStore();
+  const {
+    updateElementContent,
+    regenerateElementWithVariations,
+    elementVariations,
+    applyVariation,
+    hideElementVariations,
+    setVariationSelection,
+    aiGeneration,
+    announceLiveRegion,
+  } = useEditStore();
   const setFormattingInProgress = useEditStore.getState().setFormattingInProgress; // Get directly, no subscription
   const { saveSelection, restoreSelection, hasSelection, cleanup: cleanupSelection } = useSelectionPreserver();
 
@@ -384,6 +394,47 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
     setShowColorPicker(false);
   };
 
+  // AI Sparkle: generate text variations
+  const handleSparkle = async () => {
+    if (!elementSelection || aiGeneration.isGenerating) return;
+    try {
+      await regenerateElementWithVariations(
+        elementSelection.sectionId,
+        elementSelection.elementKey,
+        5
+      );
+      announceLiveRegion('Generated text variations');
+    } catch {
+      announceLiveRegion('Failed to generate variations');
+    }
+  };
+
+  const handleApplyVariation = () => {
+    const variation = elementVariations.variations[elementVariations.selectedIndex];
+    if (!variation) return;
+
+    applyVariation(
+      elementVariations.sectionId,
+      elementVariations.elementKey,
+      elementVariations.selectedIndex
+    );
+
+    // Force DOM sync — InlineTextEditorV2 won't sync while isEditing=true
+    // data-element-key is directly on the contenteditable div, no child query needed
+    const el = document.querySelector(
+      `[data-section-id="${elementVariations.sectionId}"] [data-element-key="${elementVariations.elementKey}"]`
+    ) as HTMLElement;
+    if (el) {
+      if (/<[^>]*>/g.test(variation)) {
+        el.innerHTML = variation;
+      } else {
+        el.textContent = variation;
+      }
+    }
+
+    announceLiveRegion(`Applied variation ${elementVariations.selectedIndex + 1}`);
+  };
+
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -408,6 +459,22 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Close variations panel on click outside
+  useEffect(() => {
+    if (!elementVariations.visible) return;
+    const handleVariationsClickOutside = (event: MouseEvent) => {
+      if (
+        variationsRef.current &&
+        !variationsRef.current.contains(event.target as Node) &&
+        !toolbarRef.current?.contains(event.target as Node)
+      ) {
+        hideElementVariations();
+      }
+    };
+    document.addEventListener('mousedown', handleVariationsClickOutside);
+    return () => document.removeEventListener('mousedown', handleVariationsClickOutside);
+  }, [elementVariations.visible, hideElementVariations]);
+
   // Cleanup on unmount (Fix #4: Hard Cleanup)
   useEffect(() => {
     return () => {
@@ -415,9 +482,10 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
       debouncedFormat.cancel();
       // Perform hard cleanup of selection state
       cleanupSelection();
-      logger.dev('🧹 TextToolbarMVP cleanup completed');
+      hideElementVariations();
+      logger.dev('TextToolbarMVP cleanup completed');
     };
-  }, [debouncedFormat, cleanupSelection]);
+  }, [debouncedFormat, cleanupSelection, hideElementVariations]);
 
   // Use anchor positioning or fallback
   const finalPosition = hasValidPosition && anchorPosition ? anchorPosition : position;
@@ -431,7 +499,7 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
         style={{
           left: finalPosition.x,
           top: finalPosition.y,
-          width: '280px', // Fixed MVP width
+          width: '320px', // Widened for sparkle button
           height: '52px', // Fixed MVP height
           opacity: isVisible ? 1 : 0,
           pointerEvents: isVisible ? 'auto' : 'none',
@@ -714,9 +782,108 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
                 </div>
               )}
             </div>
+
+            {/* Divider + AI Sparkle */}
+            <div className="w-px h-6 bg-gray-300" />
+            <button
+              onMouseDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+              onClick={handleSparkle}
+              disabled={aiGeneration.isGenerating}
+              className={`p-1.5 rounded transition-colors select-none ${
+                aiGeneration.isGenerating
+                  ? 'text-yellow-500 bg-yellow-50 animate-pulse'
+                  : elementVariations.visible
+                    ? 'bg-purple-100 text-purple-700 border border-purple-200'
+                    : 'text-gray-600 hover:bg-gray-100'
+              }`}
+              title="AI text variations"
+            >
+              <SparkleIcon />
+            </button>
           </div>
         </div>
       </div>
+
+      {/* Variations Panel */}
+      {elementVariations.visible && (
+        <div
+          ref={variationsRef}
+          className="fixed z-50 bg-white border border-gray-200 rounded-lg shadow-lg"
+          style={{
+            left: finalPosition.x,
+            top: (finalPosition.y || 0) + 60,
+            width: 380,
+            maxHeight: 300,
+          }}
+          onMouseDown={(e) => e.stopPropagation()}
+        >
+          <div className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-medium text-gray-900">Choose Variation</h3>
+              <button
+                onClick={() => hideElementVariations()}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="space-y-2 max-h-48 overflow-y-auto">
+              {elementVariations.variations.map((variation: any, index: number) => (
+                <div
+                  key={index}
+                  className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                    elementVariations.selectedIndex === index
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                  onClick={() => setVariationSelection(index)}
+                >
+                  <div className="flex items-start space-x-2">
+                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mt-0.5 ${
+                      elementVariations.selectedIndex === index
+                        ? 'border-blue-500 bg-blue-500'
+                        : 'border-gray-300'
+                    }`}>
+                      {elementVariations.selectedIndex === index && (
+                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-xs font-medium text-gray-700 mb-1">
+                        {index === 0 ? 'Current' : `Variation ${index}`}
+                      </div>
+                      <div className="text-sm text-gray-600 line-clamp-2">
+                        {variation}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-200">
+              <button
+                onClick={() => hideElementVariations()}
+                className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleApplyVariation}
+                className="px-4 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                Apply Variation
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
@@ -791,6 +958,15 @@ function ChevronDownIcon() {
   return (
     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+    </svg>
+  );
+}
+
+function SparkleIcon() {
+  return (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+        d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
     </svg>
   );
 }

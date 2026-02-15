@@ -252,6 +252,26 @@ export function createContentActions(set: any, get: any): ContentActions {
         if (state.content[sectionId]) {
           const oldSection = { ...state.content[sectionId] };
           
+          // Deep-merge known nested objects to prevent shallow overwrite
+          if (sectionData.aiMetadata && state.content[sectionId].aiMetadata) {
+            sectionData = {
+              ...sectionData,
+              aiMetadata: {
+                ...state.content[sectionId].aiMetadata,
+                ...sectionData.aiMetadata,
+              },
+            };
+          }
+          if (sectionData.editMetadata && state.content[sectionId].editMetadata) {
+            sectionData = {
+              ...sectionData,
+              editMetadata: {
+                ...state.content[sectionId].editMetadata,
+                ...sectionData.editMetadata,
+              },
+            };
+          }
+
           // Merge new data
           Object.assign(state.content[sectionId], sectionData);
           

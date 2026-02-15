@@ -527,23 +527,26 @@ export function createGenerationActions(set: any, get: any) {
       const sections = state.sections;
       let completed = 0;
       
-      await Promise.all(
-        sections.map(async (sectionId: string) => {
-          try {
-            await state.regenerateSection(sectionId);
-            completed++;
-            
-            set((draft: EditStore) => {
-              draft.aiGeneration.progress = Math.round((completed / sections.length) * 100);
-            });
-          } catch (error) {
-            logger.error(`Failed to regenerate section ${sectionId}:`, error);
-            set((draft: EditStore) => {
-              draft.aiGeneration.errors.push(`Failed to regenerate ${sectionId}: ${error instanceof Error ? error.message : 'Unknown error'}`);
-            });
+      // Sequential to avoid parallel store write race conditions
+      for (const sectionId of sections) {
+        try {
+          await state.regenerateSection(sectionId);
+          completed++;
+
+          set((draft: EditStore) => {
+            draft.aiGeneration.progress = Math.round((completed / sections.length) * 100);
+          });
+          // Rate limit: wait 800ms between requests to avoid 429
+          if (completed < sections.length) {
+            await new Promise(resolve => setTimeout(resolve, 800));
           }
-        })
-      );
+        } catch (error) {
+          logger.error(`Failed to regenerate section ${sectionId}:`, error);
+          set((draft: EditStore) => {
+            draft.aiGeneration.errors.push(`Failed to regenerate ${sectionId}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          });
+        }
+      }
       
       set((draft: EditStore) => {
         draft.aiGeneration.isGenerating = false;

@@ -328,7 +328,8 @@ export default function SplitScreen(props: LayoutComponentProps) {
   logger.debug('🔄 Store selector called for split hero image:', { sectionId, url: heroImageUrl, timestamp: Date.now() });
 
   // Check if the image value is a valid URL or path
-  const imageValue = String(heroImageUrl || blockContent.split_hero_image || '');
+  const rawSplitImage = heroImageUrl || blockContent.split_hero_image || '';
+  const imageValue = typeof rawSplitImage === 'string' ? rawSplitImage : (rawSplitImage as any)?.content || (rawSplitImage as any)?.url || '';
   const isValidImagePath = imageValue.startsWith('/') ||
                           imageValue.startsWith('http://') ||
                           imageValue.startsWith('https://') ||

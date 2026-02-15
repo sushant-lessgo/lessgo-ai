@@ -427,7 +427,9 @@ export const FIELD_DISPLAY_NAMES: Record<string, string> = {
   keyProblem: 'Key Problem Getting Solved',
   startupStage: 'Startup Stage',
   landingPageGoals: 'Landing Page Goals',
-  pricingModel: 'Pricing Category and Model'
+  pricingModel: 'Pricing Category and Model',
+  productName: 'Product Name',
+  offer: 'Offer',
 } as const;
 
 export const DISPLAY_TO_CANONICAL = {
@@ -454,7 +456,9 @@ export const HIDDEN_FIELD_DISPLAY_NAMES: Record<string, string> = {
   copyIntent: 'Copy Intent',
   toneProfile: 'Tone Profile',
   marketSophisticationLevel: 'Market Sophistication',
-  problemType: 'Problem Type'
+  problemType: 'Problem Type',
+  categories: 'Categories',
+  whatItDoes: 'What It Does',
 };
 
 export type CanonicalFieldName = typeof CANONICAL_FIELD_NAMES[number];

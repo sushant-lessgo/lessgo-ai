@@ -10,6 +10,7 @@ import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import { shadows, cardEnhancements } from '@/modules/Design/designTokens';
+import { isHexColor } from '@/utils/colorUtils';
 import * as LucideIcons from 'lucide-react';
 import { getDynamicCardLayout } from '@/utils/dynamicCardLayout';
 
@@ -213,7 +214,10 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
 
         {/* Play Button Overlay */}
         <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors duration-300">
-          <div className={`w-20 h-20 rounded-full ${colorTokens.ctaBg} flex items-center justify-center shadow-2xl transform group-hover:scale-110 transition-transform duration-300`}>
+          <div
+            className={`w-20 h-20 rounded-full ${isHexColor(colorTokens.ctaBg) ? '' : colorTokens.ctaBg} flex items-center justify-center shadow-2xl transform group-hover:scale-110 transition-transform duration-300`}
+            style={isHexColor(colorTokens.ctaBg) ? { backgroundColor: colorTokens.ctaBg } : undefined}
+          >
             <svg className="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
             </svg>

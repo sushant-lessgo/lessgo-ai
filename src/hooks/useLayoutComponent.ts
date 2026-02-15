@@ -120,38 +120,38 @@ export function useLayoutComponent<T = Record<string, any>>({
         if (custom.solid) {
           // Solid color background - handle both {color: '#hex'} and '#hex' formats
           const solidColor = typeof custom.solid === 'string' ? custom.solid : (custom.solid as any).color;
-          customCSS = `bg-[${solidColor}]`;
+          customCSS = solidColor;
         } else if (custom.gradient) {
           // Gradient background
           const { type, angle, stops } = custom.gradient as any;
           const gradientStops = stops.map((stop: any) => `${stop.color} ${stop.position}%`).join(', ');
-          
+
           if (type === 'linear') {
-            customCSS = `bg-[linear-gradient(${angle}deg, ${gradientStops})]`;
+            customCSS = `linear-gradient(${angle}deg, ${gradientStops})`;
           } else if (type === 'radial') {
-            customCSS = `bg-[radial-gradient(circle, ${gradientStops})]`;
+            customCSS = `radial-gradient(circle, ${gradientStops})`;
           }
         }
-        
+
         //   custom,
         //   generatedCSS: customCSS
         // });
         return customCSS;
       }
-      
+
       if (!backgrounds) {
         logger.warn('No section backgrounds found in theme, using fallback');
-        return 'bg-white';
+        return '#ffffff';
       }
 
       const editModeCSS = (() => {
         switch(currentBackgroundType) {
           case 'primary': 
-            return backgrounds.primary || 'bg-gradient-to-br from-blue-500 to-blue-600';
-          case 'secondary': 
-            return backgrounds.secondary || 'bg-gray-50';
+            return backgrounds.primary || 'linear-gradient(135deg, #3b82f6, #2563eb)';
+          case 'secondary':
+            return backgrounds.secondary || '#f9fafb';
           default:
-            return backgrounds.neutral || 'bg-white';
+            return backgrounds.neutral || '#ffffff';
         }
       })();
 
@@ -160,32 +160,32 @@ export function useLayoutComponent<T = Record<string, any>>({
       // });
       return editModeCSS;
     }
-    
+
     // ✅ In preview mode, use the CSS class from renderer for performance
     if (sectionBackgroundCSS) {
       return sectionBackgroundCSS;
     }
-    
+
     // ✅ Fallback to local calculation (for standalone component usage)
     const customBackground = sectionContent?.sectionBackground;
-    
+
     // ✅ Handle custom backgrounds in fallback mode too
     if (backgroundType === 'custom' && customBackground?.type === 'custom' && customBackground.custom) {
       const custom = customBackground.custom;
       let customCSS = '';
-      
+
       if (custom.solid) {
         // Handle both {color: '#hex'} and '#hex' formats
         const solidColor = typeof custom.solid === 'string' ? custom.solid : (custom.solid as any).color;
-        customCSS = `bg-[${solidColor}]`;
+        customCSS = solidColor;
       } else if (custom.gradient) {
         const { type, angle, stops } = custom.gradient as any;
         const gradientStops = stops.map((stop: any) => `${stop.color} ${stop.position}%`).join(', ');
-        
+
         if (type === 'linear') {
-          customCSS = `bg-[linear-gradient(${angle}deg, ${gradientStops})]`;
+          customCSS = `linear-gradient(${angle}deg, ${gradientStops})`;
         } else if (type === 'radial') {
-          customCSS = `bg-[radial-gradient(circle, ${gradientStops})]`;
+          customCSS = `radial-gradient(circle, ${gradientStops})`;
         }
       }
       
@@ -195,17 +195,17 @@ export function useLayoutComponent<T = Record<string, any>>({
     const backgrounds = theme?.colors?.sectionBackgrounds;
     if (!backgrounds) {
       logger.warn('No section backgrounds found in theme, using fallback');
-      return 'bg-white';
+      return '#ffffff';
     }
 
     const fallbackCSS = (() => {
       switch(backgroundType) {
-        case 'primary': 
-          return backgrounds.primary || 'bg-gradient-to-br from-blue-500 to-blue-600';
-        case 'secondary': 
-          return backgrounds.secondary || 'bg-gray-50';
+        case 'primary':
+          return backgrounds.primary || 'linear-gradient(135deg, #3b82f6, #2563eb)';
+        case 'secondary':
+          return backgrounds.secondary || '#f9fafb';
         default:
-          return backgrounds.neutral || 'bg-white';
+          return backgrounds.neutral || '#ffffff';
       }
     })();
 

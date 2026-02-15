@@ -3,6 +3,7 @@
 
 import React from 'react';
 import type { ColorTokens, BackgroundSystem } from '@/types/core';
+import { isHexColor } from '@/utils/colorUtils';
 
 interface BackgroundContextPreviewProps {
   currentTokens: ColorTokens;
@@ -85,7 +86,10 @@ export function BackgroundContextPreview({
 
         {/* Interactive Elements */}
         <div className="space-y-2">
-          <button className={`${tokens.ctaBg} ${tokens.ctaText} px-4 py-2 rounded-lg text-sm font-medium transition-colors hover:${tokens.ctaHover}`}>
+          <button
+            className={`${isHexColor(tokens.ctaBg) ? '' : tokens.ctaBg} ${tokens.ctaText} px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isHexColor(tokens.ctaBg) ? '' : `hover:${tokens.ctaHover}`}`}
+            style={isHexColor(tokens.ctaBg) ? { backgroundColor: tokens.ctaBg } : undefined}
+          >
             Primary CTA
           </button>
           

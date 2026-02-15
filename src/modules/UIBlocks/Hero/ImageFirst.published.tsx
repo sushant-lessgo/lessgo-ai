@@ -154,7 +154,8 @@ export default function ImageFirstPublished(props: LayoutComponentProps) {
   const accentColor = theme?.colors?.accentColor || '#3B82F6';
 
   // Image validation
-  const imageValue = image_first_hero_image || '';
+  const rawImage = image_first_hero_image || '';
+  const imageValue = typeof rawImage === 'string' ? rawImage : (rawImage as any)?.content || (rawImage as any)?.url || '';
   const isValidImagePath = imageValue.startsWith('/') ||
                           imageValue.startsWith('http://') ||
                           imageValue.startsWith('https://') ||

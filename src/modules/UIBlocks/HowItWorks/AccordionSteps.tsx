@@ -11,6 +11,7 @@ import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockTh
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import { cardEnhancements } from '@/modules/Design/designTokens';
 import { getCardStyles, type CardStyles } from '@/modules/Design/cardStyles';
+import { isHexColor } from '@/utils/colorUtils';
 
 // Step item structure (V2 array format)
 interface StepItem {
@@ -179,9 +180,10 @@ export default function AccordionSteps(props: LayoutComponentProps) {
         onClick={onToggle}
         className={`w-full p-6 text-left transition-all duration-300 ${
           isOpen && mode === 'preview'
-            ? `${colorTokens.ctaBg} text-white`
+            ? `${isHexColor(colorTokens.ctaBg) ? '' : colorTokens.ctaBg} text-white`
             : `${cardStyles.textHeading}`
         }`}
+        style={isOpen && mode === 'preview' && isHexColor(colorTokens.ctaBg) ? { backgroundColor: colorTokens.ctaBg } : undefined}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4 flex-1">

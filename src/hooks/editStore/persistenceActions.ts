@@ -217,13 +217,14 @@ export function createPersistenceActions(set: any, get: any) {
           state.title = apiResponse.title || 'Untitled Project';
           state.tokenId = apiResponse.tokenId || urlTokenId || '';
           
-          // Restore onboarding data
+          // Restore onboarding data — check API top-level first, then contentToLoad fallback
+          const onboardingFromContent = contentToLoad?.onboardingData;
           state.onboardingData = {
-            oneLiner: apiResponse.inputText || '',
-            validatedFields: apiResponse.validatedFields || {},
-            featuresFromAI: apiResponse.featuresFromAI || [],
-            hiddenInferredFields: apiResponse.hiddenInferredFields || {},
-            confirmedFields: apiResponse.confirmedFields || {}
+            oneLiner: onboardingFromContent?.oneLiner || apiResponse.inputText || '',
+            validatedFields: onboardingFromContent?.validatedFields || apiResponse.validatedFields || {},
+            featuresFromAI: onboardingFromContent?.featuresFromAI || apiResponse.featuresFromAI || [],
+            hiddenInferredFields: onboardingFromContent?.hiddenInferredFields || apiResponse.hiddenInferredFields || {},
+            confirmedFields: onboardingFromContent?.confirmedFields || apiResponse.confirmedFields || {},
           };
           
           state.lastUpdated = Date.now();

@@ -5,6 +5,7 @@ import { CheckCircle, AlertCircle, Loader2, ArrowRight } from 'lucide-react';
 import posthog from 'posthog-js';
 import type { MVPForm, MVPFormField } from '@/types/core/forms';
 import { logger } from '@/lib/logger';
+import { isHexColor } from '@/utils/colorUtils';
 
 /**
  * InlineFormInput Component
@@ -229,18 +230,22 @@ export function InlineFormInput({
         </div>
 
         {/* Submit Button */}
+        {(() => {
+          const buttonColors = getButtonColorClasses(variant, colorTokens);
+          return (
         <button
           type="submit"
           disabled={isSubmitting}
           className={`
             ${sizeClasses.button}
-            ${getButtonColorClasses(variant, colorTokens)}
+            ${buttonColors.className}
             rounded-lg font-semibold transition-all duration-200
             shadow-xl hover:shadow-2xl
             transform hover:-translate-y-0.5
             flex items-center justify-center gap-2
             ${isSubmitting ? 'opacity-60 cursor-not-allowed' : ''}
           `}
+          style={buttonColors.style}
         >
           {isSubmitting ? (
             <>
@@ -254,6 +259,8 @@ export function InlineFormInput({
             </>
           )}
         </button>
+          );
+        })()}
       </div>
 
       {/* Form-level Error */}
@@ -300,24 +307,28 @@ function getSizeClasses(size: 'small' | 'medium' | 'large') {
 }
 
 /**
- * Get button color classes based on variant and color tokens
- * Matches CTAButton styling from ComponentRegistry
+ * Get button color classes and optional inline style based on variant and color tokens.
+ * Handles raw hex values for ctaBg by returning them as inline style instead of className.
  */
 function getButtonColorClasses(
   variant: 'primary' | 'secondary',
   colorTokens?: any
-): string {
+): { className: string; style?: React.CSSProperties } {
   if (variant === 'secondary') {
     const bgClass = colorTokens?.surfaceElevated || 'bg-gray-100';
     const textClass = colorTokens?.textPrimary || 'text-gray-900';
     const hoverClass = colorTokens?.surfaceSection || 'bg-gray-200';
-    return `${bgClass} ${textClass} hover:${hoverClass}`;
+    return { className: `${bgClass} ${textClass} hover:${hoverClass}` };
   }
 
   // Primary variant - use validated CTA colors (matches CTAButton pattern)
   const primaryBg = colorTokens?.ctaBg || colorTokens?.accent || 'bg-blue-600';
   const primaryText = colorTokens?.ctaText || 'text-white';
   const primaryHover = colorTokens?.ctaHover || colorTokens?.accentHover || 'bg-blue-700';
+  const hexBg = isHexColor(primaryBg);
 
-  return `${primaryBg} ${primaryText} hover:${primaryHover}`;
+  return {
+    className: `${hexBg ? '' : primaryBg} ${primaryText} ${hexBg ? '' : `hover:${primaryHover}`}`,
+    style: hexBg ? { backgroundColor: primaryBg } : undefined,
+  };
 }

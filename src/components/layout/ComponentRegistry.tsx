@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import * as LucideIcons from 'lucide-react';
 import { scrollToEmailForm } from '@/utils/emailFormDetector';
+import { isHexColor } from '@/utils/colorUtils';
 // Enhanced Trust Indicators Component
 export function TrustIndicators({ 
   items = ['Free trial', 'No credit card'], 
@@ -129,33 +130,37 @@ export function CTAButton({
   };
 
   // ✅ FIXED: Use actual accent colors from the generated system
+  const primaryBg = colorTokens.ctaBg || colorTokens.accent || 'bg-blue-600';
+  const hexBg = isHexColor(primaryBg);
+
   const getVariantClasses = () => {
-    // Debug logging for CTA button colors (reduced)
-    
     if (variant === 'outline') {
       const borderClass = colorTokens.accentBorder || colorTokens.borderFocus || 'border-blue-600';
       const textClass = colorTokens.dynamicBody || colorTokens.textPrimary || 'text-gray-900';
       const hoverBg = colorTokens.ctaBg || 'bg-blue-600';
       const hoverText = colorTokens.ctaText || 'text-white';
-      
+
+      if (isHexColor(hoverBg)) {
+        return `border-2 ${isHexColor(borderClass) ? '' : borderClass} ${textClass} bg-transparent transition-all duration-200`;
+      }
       return `border-2 ${borderClass} ${textClass} bg-transparent hover:${hoverBg} hover:${hoverText} transition-all duration-200`;
     }
-    
+
     if (variant === 'secondary') {
       const bgClass = colorTokens.surfaceElevated || 'bg-gray-100';
       const textClass = colorTokens.textPrimary || 'text-gray-900';
       const hoverClass = colorTokens.surfaceSection || 'bg-gray-200';
-      
+
       return `${bgClass} ${textClass} hover:${hoverClass} transition-all duration-200`;
     }
-    
-    // ✅ PRIMARY: Use the generated accent colors (e.g., bg-purple-600)
-    const primaryBg = colorTokens.ctaBg || colorTokens.accent || 'bg-blue-600';
+
+    // ✅ PRIMARY: Use the generated accent colors
     const primaryText = colorTokens.ctaText || 'text-white';
     const primaryHover = colorTokens.ctaHover || colorTokens.accentHover || 'bg-blue-700';
-    
-    
-    
+
+    if (hexBg) {
+      return `${primaryText} transition-all duration-200`;
+    }
     return `${primaryBg} ${primaryText} hover:${primaryHover} transition-all duration-200`;
   };
 
@@ -191,7 +196,7 @@ export function CTAButton({
         ${disabled || loading ? 'opacity-50 cursor-not-allowed transform-none hover:scale-100' : ''}
         ${className}
       `}
-      style={textStyle}
+      style={{ ...textStyle, ...(hexBg ? { backgroundColor: primaryBg } : {}) }}
     >
       {loading && (
         <svg className="animate-spin -ml-1 mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24">
@@ -515,15 +520,20 @@ export function AccentBadge({
   };
 
   // ✅ Use accent colors for badge background
-  const accentBg = colorTokens?.ctaBg?.replace('bg-', 'bg-')?.replace('-600', '-100') || 'bg-blue-100';
-  const accentText = colorTokens?.ctaBg?.replace('bg-', 'text-')?.replace('-600', '-800') || 'text-blue-800';
+  const ctaBg = colorTokens?.ctaBg || '';
+  const hexCtaBg = isHexColor(ctaBg);
+  const accentBg = hexCtaBg ? '' : (ctaBg.replace('bg-', 'bg-')?.replace('-600', '-100') || 'bg-blue-100');
+  const accentText = hexCtaBg ? '' : (ctaBg.replace('bg-', 'text-')?.replace('-600', '-800') || 'text-blue-800');
 
   return (
-    <span className={`
-      inline-flex items-center font-medium rounded-full
-      ${sizeClasses[size]} ${accentBg} ${accentText}
-      ${className}
-    `}>
+    <span
+      className={`
+        inline-flex items-center font-medium rounded-full
+        ${sizeClasses[size]} ${accentBg} ${accentText}
+        ${className}
+      `}
+      style={hexCtaBg ? { backgroundColor: ctaBg + '20', color: ctaBg } : undefined}
+    >
       {text}
     </span>
   );
@@ -577,14 +587,20 @@ export function NumberBadge({
     large: 'w-16 h-16 text-xl'
   };
 
+  const numBg = colorTokens?.ctaBg || 'bg-blue-600';
+  const numHex = isHexColor(numBg);
+
   return (
-    <div className={`
-      ${sizeClasses[size]} rounded-full flex items-center justify-center 
-      text-white font-bold shadow-lg
-      ${colorTokens?.ctaBg || 'bg-blue-600'} 
-      ${animated ? 'animate-pulse' : ''}
-      ${className}
-    `}>
+    <div
+      className={`
+        ${sizeClasses[size]} rounded-full flex items-center justify-center
+        text-white font-bold shadow-lg
+        ${numHex ? '' : numBg}
+        ${animated ? 'animate-pulse' : ''}
+        ${className}
+      `}
+      style={numHex ? { backgroundColor: numBg } : undefined}
+    >
       {number}
     </div>
   );
@@ -662,12 +678,18 @@ export function FeatureIcon({
     }
   };
 
+  const iconBg = colorTokens?.ctaBg || 'bg-blue-600';
+  const iconHex = isHexColor(iconBg);
+
   return (
-    <div className={`
-      ${sizeClasses[size]} rounded-lg flex items-center justify-center text-white
-      ${colorTokens?.ctaBg || 'bg-blue-600'} 
-      ${className}
-    `}>
+    <div
+      className={`
+        ${sizeClasses[size]} rounded-lg flex items-center justify-center text-white
+        ${iconHex ? '' : iconBg}
+        ${className}
+      `}
+      style={iconHex ? { backgroundColor: iconBg } : undefined}
+    >
       {getIcon()}
     </div>
   );
@@ -758,9 +780,9 @@ export function ProgressBar({
         )}
       </div>
       <div className="w-full bg-gray-200 rounded-full h-2">
-        <div 
-          className={`h-2 rounded-full transition-all duration-300 ${colorTokens?.ctaBg || 'bg-blue-600'}`}
-          style={{ width: `${Math.min(Math.max(progress, 0), 100)}%` }}
+        <div
+          className={`h-2 rounded-full transition-all duration-300 ${isHexColor(colorTokens?.ctaBg) ? '' : (colorTokens?.ctaBg || 'bg-blue-600')}`}
+          style={{ width: `${Math.min(Math.max(progress, 0), 100)}%`, ...(isHexColor(colorTokens?.ctaBg) ? { backgroundColor: colorTokens.ctaBg } : {}) }}
         ></div>
       </div>
     </div>

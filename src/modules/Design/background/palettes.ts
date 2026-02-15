@@ -525,6 +525,14 @@ export function getColorFamilies(mode: 'dark' | 'light'): { family: string; pale
   return Array.from(familyMap.entries()).map(([family, pals]) => ({ family, palettes: pals }));
 }
 
+export function getSiblingPalettes(paletteId: string): Palette[] {
+  const palette = getPaletteById(paletteId);
+  if (!palette) return [];
+  return palettes.filter(
+    p => p.mode === palette.mode && p.colorFamily === palette.colorFamily && p.id !== paletteId
+  );
+}
+
 export function getDefaultPaletteForVibe(vibe: string): Palette {
   const id = VIBE_DEFAULT_PALETTE[vibe] || 'ice-blue';
   return getPaletteById(id) || iceBlue;

@@ -13,6 +13,7 @@ import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import { getCardStyles } from '@/modules/Design/cardStyles';
+import { isHexColor } from '@/utils/colorUtils';
 
 interface FeatureItem {
   id: string;
@@ -124,13 +125,17 @@ const CarouselSlide = React.memo(({
                     onBlur={(e) => {
                       onUpdateFeature(feature.id, 'tag', e.currentTarget.textContent || '');
                     }}
-                    className={`inline-block text-sm font-semibold px-4 py-2 rounded-full ${colorTokens.ctaBg} text-white outline-none focus:ring-2 focus:ring-pink-500 focus:ring-opacity-50 cursor-text hover:opacity-80 transition-opacity min-w-[80px] text-center`}
+                    className={`inline-block text-sm font-semibold px-4 py-2 rounded-full ${isHexColor(colorTokens.ctaBg) ? '' : colorTokens.ctaBg} text-white outline-none focus:ring-2 focus:ring-pink-500 focus:ring-opacity-50 cursor-text hover:opacity-80 transition-opacity min-w-[80px] text-center`}
+                    style={isHexColor(colorTokens.ctaBg) ? { backgroundColor: colorTokens.ctaBg } : undefined}
                     data-placeholder="Feature tag"
                   >
                     {feature.tag}
                   </div>
                 ) : (
-                  <span className={`inline-block text-sm font-semibold px-4 py-2 rounded-full ${colorTokens.ctaBg} text-white`}>
+                  <span
+                    className={`inline-block text-sm font-semibold px-4 py-2 rounded-full ${isHexColor(colorTokens.ctaBg) ? '' : colorTokens.ctaBg} text-white`}
+                    style={isHexColor(colorTokens.ctaBg) ? { backgroundColor: colorTokens.ctaBg } : undefined}
+                  >
                     {feature.tag}
                   </span>
                 )}
@@ -576,9 +581,10 @@ export default function Carousel(props: LayoutComponentProps) {
                     onClick={() => goToSlide(index)}
                     className={`w-3 h-3 rounded-full transition-all duration-200 ${
                       activeSlide === index
-                        ? `${colorTokens.ctaBg} transform scale-125`
+                        ? `${isHexColor(colorTokens.ctaBg) ? '' : colorTokens.ctaBg} transform scale-125`
                         : 'bg-gray-300 hover:bg-gray-400'
                     }`}
+                    style={activeSlide === index && isHexColor(colorTokens.ctaBg) ? { backgroundColor: colorTokens.ctaBg } : undefined}
                   />
                 ))}
               </div>
@@ -607,9 +613,10 @@ export default function Carousel(props: LayoutComponentProps) {
                   onClick={() => goToSlide(index)}
                   className={`p-4 rounded-lg border transition-all duration-200 text-left ${
                     activeSlide === index
-                      ? `${colorTokens.ctaBg.replace('bg-', 'border-')} ${colorTokens.surfaceElevated}`
+                      ? `${isHexColor(colorTokens.ctaBg) ? '' : colorTokens.ctaBg.replace('bg-', 'border-')} ${colorTokens.surfaceElevated}`
                       : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'
                   }`}
+                  style={activeSlide === index && isHexColor(colorTokens.ctaBg) ? { borderColor: colorTokens.ctaBg } : undefined}
                 >
                   <div className="text-sm font-medium text-gray-900 truncate">
                     {feature.title}

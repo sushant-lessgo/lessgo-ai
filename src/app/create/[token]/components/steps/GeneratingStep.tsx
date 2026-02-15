@@ -165,6 +165,8 @@ export default function GeneratingStep() {
               bodyFont: designTokens.bodyFont,
             },
             colors: {
+              paletteId: palette.id,
+              textureId: textureId,
               baseColor: backgroundSystem.baseColor,
               accentColor: backgroundSystem.accentColor,
               accentCSS: backgroundSystem.accentCSS,
@@ -186,6 +188,20 @@ export default function GeneratingStep() {
           lastUpdated: Date.now(),
           version: 1,
           tokenId,
+        },
+        onboardingData: {
+          oneLiner: oneLiner || '',
+          validatedFields: {
+            productName: productName || '',
+            targetAudience: audience || '',
+            landingPageGoals: landingGoal || '',
+            offer: offer || '',
+          },
+          hiddenInferredFields: {
+            categories: understanding?.categories?.join(', ') || '',
+            whatItDoes: understanding?.whatItDoes || '',
+          },
+          featuresFromAI: (understanding?.features || []).map(f => ({ feature: f, benefit: '' })),
         },
         generatedAt: Date.now(),
       };

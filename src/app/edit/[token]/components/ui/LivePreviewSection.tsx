@@ -8,6 +8,7 @@ import { getTextColorForBackground } from '@/modules/Design/background/backgroun
 import { getSmartTextColor } from '@/utils/improvedTextColors';
 import { analyzeBackground } from '@/utils/backgroundAnalysis';
 import type { ColorTokens, BackgroundSystem } from '@/types/core';
+import { isHexColor } from '@/utils/colorUtils';
 
 interface LivePreviewSectionProps {
   currentTokens: ColorTokens;
@@ -138,12 +139,13 @@ export function LivePreviewSection({
                 {/* CTA on Background (for primary/secondary only) */}
                 {['primary', 'secondary'].includes(bgType.type) && (
                   <div className="pt-2">
-                    <button 
+                    <button
                       className={`
-                        ${previewTokens.ctaBg} ${previewTokens.ctaText} 
+                        ${isHexColor(previewTokens.ctaBg) ? '' : previewTokens.ctaBg} ${previewTokens.ctaText}
                         px-3 py-1.5 text-xs font-medium rounded-md
-                        hover:${previewTokens.ctaHover} transition-colors
+                        ${isHexColor(previewTokens.ctaBg) ? '' : `hover:${previewTokens.ctaHover}`} transition-colors
                       `}
+                      style={isHexColor(previewTokens.ctaBg) ? { backgroundColor: previewTokens.ctaBg } : undefined}
                     >
                       Call to Action
                     </button>
@@ -179,12 +181,13 @@ export function LivePreviewSection({
             <span className="text-xs text-gray-500">Buttons</span>
             <div className="space-y-2">
               {/* Primary CTA */}
-              <button 
+              <button
                 className={`
-                  ${previewTokens.ctaBg} ${previewTokens.ctaText} 
+                  ${isHexColor(previewTokens.ctaBg) ? '' : previewTokens.ctaBg} ${previewTokens.ctaText}
                   w-full px-3 py-2 text-sm font-medium rounded-lg
-                  hover:${previewTokens.ctaHover} transition-colors
+                  ${isHexColor(previewTokens.ctaBg) ? '' : `hover:${previewTokens.ctaHover}`} transition-colors
                 `}
+                style={isHexColor(previewTokens.ctaBg) ? { backgroundColor: previewTokens.ctaBg } : undefined}
               >
                 Primary CTA
               </button>

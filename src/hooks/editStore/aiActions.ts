@@ -69,9 +69,20 @@ export function createAIActions(set: any, get: any) {
         // Update the section content
         set((state: EditStore) => {
           if (state.content[sectionId] && data.content) {
+            // Snapshot image/non-text elements before merge
+            const existingElements = state.content[sectionId].elements;
+            const imageKeys = Object.entries(existingElements)
+              .filter(([key, el]: [string, any]) =>
+                el?.type === 'image' ||
+                key.includes('image') || key.includes('avatar') ||
+                key.includes('visual') || key.includes('mockup') ||
+                key.includes('logo')
+              )
+              .map(([key, el]) => [key, { ...el as any }] as const);
+
             // Preserve existing structure but update element content
-            const updatedElements = { ...state.content[sectionId].elements };
-            
+            const updatedElements = { ...existingElements };
+
             // Merge new content with existing elements
             Object.entries(data.content).forEach(([key, value]: [string, any]) => {
               if (updatedElements[key]) {
@@ -100,7 +111,12 @@ export function createAIActions(set: any, get: any) {
                 updatedElements[key] = value;
               }
             });
-            
+
+            // Restore image elements that may have been overwritten
+            imageKeys.forEach(([key, snapshot]) => {
+              updatedElements[key] = snapshot;
+            });
+
             // Update the section
             state.content[sectionId].elements = updatedElements;
             

@@ -13,6 +13,7 @@ import { SectionWrapperPublished } from '@/components/published/SectionWrapperPu
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import { getDynamicCardLayout } from '@/utils/dynamicCardLayout';
+import { isHexColor } from '@/utils/colorUtils';
 
 // V2 Types
 interface DemoStatItem {
@@ -110,6 +111,7 @@ export default function VideoWalkthroughPublished(props: LayoutComponentProps) {
 
   // CTA background color for play button
   const ctaBg = colorTokens?.ctaBg || 'bg-blue-600';
+  const ctaBgIsHex = isHexColor(ctaBg);
 
   // Video Player Component
   const VideoPlayer = () => {
@@ -145,7 +147,10 @@ export default function VideoWalkthroughPublished(props: LayoutComponentProps) {
         {/* Play Button Overlay */}
         <div className="absolute inset-0 flex items-center justify-center"
           style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}>
-          <div className={`w-20 h-20 rounded-full ${ctaBg} flex items-center justify-center shadow-2xl`}>
+          <div
+            className={`w-20 h-20 rounded-full ${ctaBgIsHex ? '' : ctaBg} flex items-center justify-center shadow-2xl`}
+            style={ctaBgIsHex ? { backgroundColor: ctaBg } : undefined}
+          >
             <svg className="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
             </svg>

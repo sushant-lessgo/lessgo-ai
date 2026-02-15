@@ -9,6 +9,7 @@ import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import posthog from 'posthog-js';
 import type { MVPForm, MVPFormField } from '@/types/core/forms';
 import { logger } from '@/lib/logger';
+import { isHexColor } from '@/utils/colorUtils';
 
 interface FormRendererProps {
   form: MVPForm;
@@ -263,7 +264,8 @@ export function FormRenderer({ form, mode = 'inline', className = '', userId, pu
         <Button
           type="submit"
           disabled={isSubmitting}
-          className={`w-full ${colorTokens?.ctaBg || colorTokens?.accent || 'bg-primary'} ${colorTokens?.ctaText || 'text-white'} hover:${colorTokens?.ctaHover || colorTokens?.accentHover || 'bg-primary/90'}`}
+          className={`w-full ${isHexColor(colorTokens?.ctaBg) ? '' : (colorTokens?.ctaBg || colorTokens?.accent || 'bg-primary')} ${colorTokens?.ctaText || 'text-white'} ${isHexColor(colorTokens?.ctaBg) ? '' : `hover:${colorTokens?.ctaHover || colorTokens?.accentHover || 'bg-primary/90'}`}`}
+          style={isHexColor(colorTokens?.ctaBg) ? { backgroundColor: colorTokens.ctaBg } : undefined}
           size="lg"
           data-section-id={sectionId}
           data-element-key={submitButtonElementKey}

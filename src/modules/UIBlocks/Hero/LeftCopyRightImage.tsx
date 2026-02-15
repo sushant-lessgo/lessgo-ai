@@ -660,7 +660,8 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
             {/* Show actual image (either uploaded or default) */}
             {(() => {
               // Check if hero_image is a valid URL or path
-              const imageValue = blockContent.hero_image || '';
+              const rawImage = blockContent.hero_image || '';
+              const imageValue = typeof rawImage === 'string' ? rawImage : (rawImage as any)?.content || (rawImage as any)?.url || '';
               const isValidImagePath = imageValue.startsWith('/') ||
                                       imageValue.startsWith('http://') ||
                                       imageValue.startsWith('https://') ||

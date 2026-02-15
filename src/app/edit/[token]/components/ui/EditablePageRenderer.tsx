@@ -16,6 +16,7 @@ interface TextSelection {
 }
 
 import { logger } from '@/lib/logger';
+import { isHexColor } from '@/utils/colorUtils';
 interface EditablePageRendererProps {
   sectionId: string;
   sectionData: any;
@@ -633,15 +634,19 @@ const EditableButtonContent: React.FC<{
     );
   }
 
+  const ctaBg = colorTokens?.ctaBg || 'bg-blue-600';
+  const ctaHex = isHexColor(ctaBg);
+
   return (
     <button
       onClick={handleClick}
       className={`
-        ${colorTokens?.ctaBg || 'bg-blue-600'} 
-        ${colorTokens?.ctaText || 'text-white'} 
+        ${ctaHex ? '' : ctaBg}
+        ${colorTokens?.ctaText || 'text-white'}
         px-6 py-2 rounded-lg font-medium transition-colors
         ${mode !== 'preview' ? 'hover:opacity-80 cursor-pointer' : ''}
       `}
+      style={ctaHex ? { backgroundColor: ctaBg } : undefined}
       disabled={mode !== 'preview'}
     >
       {content || 'Button Text'}

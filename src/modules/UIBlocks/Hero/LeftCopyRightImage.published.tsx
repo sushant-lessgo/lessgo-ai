@@ -151,7 +151,8 @@ export default function LeftCopyRightImagePublished(props: LayoutComponentProps)
   const accentColor = theme?.colors?.accentColor || '#3B82F6';
 
   // Image validation
-  const imageValue = hero_image || '';
+  const rawImage = hero_image || '';
+  const imageValue = typeof rawImage === 'string' ? rawImage : (rawImage as any)?.content || (rawImage as any)?.url || '';
   const isValidImagePath = imageValue.startsWith('/') ||
                           imageValue.startsWith('http://') ||
                           imageValue.startsWith('https://') ||

@@ -1,451 +1,32 @@
-  GET http://localhost:3000/p/test365 500 (Internal Server Error)
-processMessage @ webpack-internal:///…oader-client.js:274
-handler @ webpack-internal:///…oader-client.js:395
-react-dom.development.js:9439 Uncaught Error: Objects are not valid as a React child (found: object with keys {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, content, metadata}). If you meant to render a collection of children, use an array instead.
-    at throwOnInvalidObjectType (react-dom.development.js:9439:9)
-    at reconcileChildFibersImpl (react-dom.development.js:10548:7)
-    at reconcileChildFibers (react-dom.development.js:10573:27)
-    at reconcileChildren (react-dom.development.js:15802:28)
-    at updateHostComponent$1 (react-dom.development.js:16687:3)
-    at beginWork$1 (react-dom.development.js:18503:14)
-    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
-    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
-    at invokeGuardedCallback (react-dom.development.js:20689:29)
-    at beginWork (react-dom.development.js:26949:7)
-    at performUnitOfWork (react-dom.development.js:25748:12)
-    at workLoopSync (react-dom.development.js:25464:5)
-    at renderRootSync (react-dom.development.js:25419:7)
-    at performConcurrentWorkOnRoot (react-dom.development.js:24504:74)
-    at workLoop (scheduler.development.js:256:34)
-    at flushWork (scheduler.development.js:225:14)
-    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-throwOnInvalidObjectType @ react-dom.development.js:9439
-reconcileChildFibersImpl @ react-dom.development.js:10548
-reconcileChildFibers @ react-dom.development.js:10573
-reconcileChildren @ react-dom.development.js:15802
-updateHostComponent$1 @ react-dom.development.js:16687
-beginWork$1 @ react-dom.development.js:18503
-callCallback @ react-dom.development.js:20565
-invokeGuardedCallbackImpl @ react-dom.development.js:20614
-invokeGuardedCallback @ react-dom.development.js:20689
-beginWork @ react-dom.development.js:26949
-performUnitOfWork @ react-dom.development.js:25748
-workLoopSync @ react-dom.development.js:25464
-renderRootSync @ react-dom.development.js:25419
-performConcurrentWorkOnRoot @ react-dom.development.js:24504
-workLoop @ scheduler.development.js:256
-flushWork @ scheduler.development.js:225
-performWorkUntilDeadline @ scheduler.development.js:534
-redirect-boundary.js:57 Uncaught Error: Objects are not valid as a React child (found: object with keys {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, content, metadata}). If you meant to render a collection of children, use an array instead.
-    at throwOnInvalidObjectType (react-dom.development.js:9439:9)
-    at reconcileChildFibersImpl (react-dom.development.js:10548:7)
-    at reconcileChildFibers (react-dom.development.js:10573:27)
-    at reconcileChildren (react-dom.development.js:15802:28)
-    at updateHostComponent$1 (react-dom.development.js:16687:3)
-    at beginWork$1 (react-dom.development.js:18503:14)
-    at beginWork (react-dom.development.js:26927:14)
-    at performUnitOfWork (react-dom.development.js:25748:12)
-    at workLoopSync (react-dom.development.js:25464:5)
-    at renderRootSync (react-dom.development.js:25419:7)
-    at performConcurrentWorkOnRoot (react-dom.development.js:24504:74)
-    at workLoop (scheduler.development.js:256:34)
-    at flushWork (scheduler.development.js:225:14)
-    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-throwOnInvalidObjectType @ react-dom.development.js:9439
-reconcileChildFibersImpl @ react-dom.development.js:10548
-reconcileChildFibers @ react-dom.development.js:10573
-reconcileChildren @ react-dom.development.js:15802
-updateHostComponent$1 @ react-dom.development.js:16687
-beginWork$1 @ react-dom.development.js:18503
-beginWork @ react-dom.development.js:26927
-performUnitOfWork @ react-dom.development.js:25748
-workLoopSync @ react-dom.development.js:25464
-renderRootSync @ react-dom.development.js:25419
-performConcurrentWorkOnRoot @ react-dom.development.js:24504
-workLoop @ scheduler.development.js:256
-flushWork @ scheduler.development.js:225
-performWorkUntilDeadline @ scheduler.development.js:534
-redirect-boundary.js:57 Uncaught Error: Objects are not valid as a React child (found: object with keys {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, content, metadata}). If you meant to render a collection of children, use an array instead.
-    at throwOnInvalidObjectType (react-dom.development.js:9439:9)
-    at reconcileChildFibersImpl (react-dom.development.js:10548:7)
-    at reconcileChildFibers (react-dom.development.js:10573:27)
-    at reconcileChildren (react-dom.development.js:15802:28)
-    at updateHostComponent$1 (react-dom.development.js:16687:3)
-    at beginWork$1 (react-dom.development.js:18503:14)
-    at beginWork (react-dom.development.js:26927:14)
-    at performUnitOfWork (react-dom.development.js:25748:12)
-    at workLoopSync (react-dom.development.js:25464:5)
-    at renderRootSync (react-dom.development.js:25419:7)
-    at performConcurrentWorkOnRoot (react-dom.development.js:24504:74)
-    at workLoop (scheduler.development.js:256:34)
-    at flushWork (scheduler.development.js:225:14)
-    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-throwOnInvalidObjectType @ react-dom.development.js:9439
-reconcileChildFibersImpl @ react-dom.development.js:10548
-reconcileChildFibers @ react-dom.development.js:10573
-reconcileChildren @ react-dom.development.js:15802
-updateHostComponent$1 @ react-dom.development.js:16687
-beginWork$1 @ react-dom.development.js:18503
-beginWork @ react-dom.development.js:26927
-performUnitOfWork @ react-dom.development.js:25748
-workLoopSync @ react-dom.development.js:25464
-renderRootSync @ react-dom.development.js:25419
-performConcurrentWorkOnRoot @ react-dom.development.js:24504
-workLoop @ scheduler.development.js:256
-flushWork @ scheduler.development.js:225
-performWorkUntilDeadline @ scheduler.development.js:534
-redirect-boundary.js:57 Uncaught Error: Objects are not valid as a React child (found: object with keys {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, content, metadata}). If you meant to render a collection of children, use an array instead.
-    at throwOnInvalidObjectType (react-dom.development.js:9439:9)
-    at reconcileChildFibersImpl (react-dom.development.js:10548:7)
-    at reconcileChildFibers (react-dom.development.js:10573:27)
-    at reconcileChildren (react-dom.development.js:15802:28)
-    at updateHostComponent$1 (react-dom.development.js:16687:3)
-    at beginWork$1 (react-dom.development.js:18503:14)
-    at beginWork (react-dom.development.js:26927:14)
-    at performUnitOfWork (react-dom.development.js:25748:12)
-    at workLoopSync (react-dom.development.js:25464:5)
-    at renderRootSync (react-dom.development.js:25419:7)
-    at performConcurrentWorkOnRoot (react-dom.development.js:24504:74)
-    at workLoop (scheduler.development.js:256:34)
-    at flushWork (scheduler.development.js:225:14)
-    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-throwOnInvalidObjectType @ react-dom.development.js:9439
-reconcileChildFibersImpl @ react-dom.development.js:10548
-reconcileChildFibers @ react-dom.development.js:10573
-reconcileChildren @ react-dom.development.js:15802
-updateHostComponent$1 @ react-dom.development.js:16687
-beginWork$1 @ react-dom.development.js:18503
-beginWork @ react-dom.development.js:26927
-performUnitOfWork @ react-dom.development.js:25748
-workLoopSync @ react-dom.development.js:25464
-renderRootSync @ react-dom.development.js:25419
-performConcurrentWorkOnRoot @ react-dom.development.js:24504
-workLoop @ scheduler.development.js:256
-flushWork @ scheduler.development.js:225
-performWorkUntilDeadline @ scheduler.development.js:534
-not-found-boundary.js:37 Uncaught Error: Objects are not valid as a React child (found: object with keys {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, content, metadata}). If you meant to render a collection of children, use an array instead.
-    at throwOnInvalidObjectType (react-dom.development.js:9439:9)
-    at reconcileChildFibersImpl (react-dom.development.js:10548:7)
-    at reconcileChildFibers (react-dom.development.js:10573:27)
-    at reconcileChildren (react-dom.development.js:15802:28)
-    at updateHostComponent$1 (react-dom.development.js:16687:3)
-    at beginWork$1 (react-dom.development.js:18503:14)
-    at beginWork (react-dom.development.js:26927:14)
-    at performUnitOfWork (react-dom.development.js:25748:12)
-    at workLoopSync (react-dom.development.js:25464:5)
-    at renderRootSync (react-dom.development.js:25419:7)
-    at performConcurrentWorkOnRoot (react-dom.development.js:24504:74)
-    at workLoop (scheduler.development.js:256:34)
-    at flushWork (scheduler.development.js:225:14)
-    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-throwOnInvalidObjectType @ react-dom.development.js:9439
-reconcileChildFibersImpl @ react-dom.development.js:10548
-reconcileChildFibers @ react-dom.development.js:10573
-reconcileChildren @ react-dom.development.js:15802
-updateHostComponent$1 @ react-dom.development.js:16687
-beginWork$1 @ react-dom.development.js:18503
-beginWork @ react-dom.development.js:26927
-performUnitOfWork @ react-dom.development.js:25748
-workLoopSync @ react-dom.development.js:25464
-renderRootSync @ react-dom.development.js:25419
-performConcurrentWorkOnRoot @ react-dom.development.js:24504
-workLoop @ scheduler.development.js:256
-flushWork @ scheduler.development.js:225
-performWorkUntilDeadline @ scheduler.development.js:534
-redirect-boundary.js:57 Uncaught Error: Objects are not valid as a React child (found: object with keys {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, content, metadata}). If you meant to render a collection of children, use an array instead.
-    at throwOnInvalidObjectType (react-dom.development.js:9439:9)
-    at reconcileChildFibersImpl (react-dom.development.js:10548:7)
-    at reconcileChildFibers (react-dom.development.js:10573:27)
-    at reconcileChildren (react-dom.development.js:15802:28)
-    at updateHostComponent$1 (react-dom.development.js:16687:3)
-    at beginWork$1 (react-dom.development.js:18503:14)
-    at beginWork (react-dom.development.js:26927:14)
-    at performUnitOfWork (react-dom.development.js:25748:12)
-    at workLoopSync (react-dom.development.js:25464:5)
-    at renderRootSync (react-dom.development.js:25419:7)
-    at performConcurrentWorkOnRoot (react-dom.development.js:24504:74)
-    at workLoop (scheduler.development.js:256:34)
-    at flushWork (scheduler.development.js:225:14)
-    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-throwOnInvalidObjectType @ react-dom.development.js:9439
-reconcileChildFibersImpl @ react-dom.development.js:10548
-reconcileChildFibers @ react-dom.development.js:10573
-reconcileChildren @ react-dom.development.js:15802
-updateHostComponent$1 @ react-dom.development.js:16687
-beginWork$1 @ react-dom.development.js:18503
-beginWork @ react-dom.development.js:26927
-performUnitOfWork @ react-dom.development.js:25748
-workLoopSync @ react-dom.development.js:25464
-renderRootSync @ react-dom.development.js:25419
-performConcurrentWorkOnRoot @ react-dom.development.js:24504
-workLoop @ scheduler.development.js:256
-flushWork @ scheduler.development.js:225
-performWorkUntilDeadline @ scheduler.development.js:534
-not-found-boundary.js:37 Uncaught Error: Objects are not valid as a React child (found: object with keys {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, content, metadata}). If you meant to render a collection of children, use an array instead.
-    at throwOnInvalidObjectType (react-dom.development.js:9439:9)
-    at reconcileChildFibersImpl (react-dom.development.js:10548:7)
-    at reconcileChildFibers (react-dom.development.js:10573:27)
-    at reconcileChildren (react-dom.development.js:15802:28)
-    at updateHostComponent$1 (react-dom.development.js:16687:3)
-    at beginWork$1 (react-dom.development.js:18503:14)
-    at beginWork (react-dom.development.js:26927:14)
-    at performUnitOfWork (react-dom.development.js:25748:12)
-    at workLoopSync (react-dom.development.js:25464:5)
-    at renderRootSync (react-dom.development.js:25419:7)
-    at performConcurrentWorkOnRoot (react-dom.development.js:24504:74)
-    at workLoop (scheduler.development.js:256:34)
-    at flushWork (scheduler.development.js:225:14)
-    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-throwOnInvalidObjectType @ react-dom.development.js:9439
-reconcileChildFibersImpl @ react-dom.development.js:10548
-reconcileChildFibers @ react-dom.development.js:10573
-reconcileChildren @ react-dom.development.js:15802
-updateHostComponent$1 @ react-dom.development.js:16687
-beginWork$1 @ react-dom.development.js:18503
-beginWork @ react-dom.development.js:26927
-performUnitOfWork @ react-dom.development.js:25748
-workLoopSync @ react-dom.development.js:25464
-renderRootSync @ react-dom.development.js:25419
-performConcurrentWorkOnRoot @ react-dom.development.js:24504
-workLoop @ scheduler.development.js:256
-flushWork @ scheduler.development.js:225
-performWorkUntilDeadline @ scheduler.development.js:534
-react-dom.development.js:9439 Uncaught Error: Objects are not valid as a React child (found: object with keys {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, content, metadata}). If you meant to render a collection of children, use an array instead.
-    at throwOnInvalidObjectType (react-dom.development.js:9439:9)
-    at reconcileChildFibersImpl (react-dom.development.js:10548:7)
-    at reconcileChildFibers (react-dom.development.js:10573:27)
-    at reconcileChildren (react-dom.development.js:15802:28)
-    at updateHostComponent$1 (react-dom.development.js:16687:3)
-    at beginWork$1 (react-dom.development.js:18503:14)
-    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
-    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
-    at invokeGuardedCallback (react-dom.development.js:20689:29)
-    at beginWork (react-dom.development.js:26949:7)
-    at performUnitOfWork (react-dom.development.js:25748:12)
-    at workLoopSync (react-dom.development.js:25464:5)
-    at renderRootSync (react-dom.development.js:25419:7)
-    at recoverFromConcurrentError (react-dom.development.js:24597:20)
-    at performConcurrentWorkOnRoot (react-dom.development.js:24542:26)
-    at workLoop (scheduler.development.js:256:34)
-    at flushWork (scheduler.development.js:225:14)
-    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-throwOnInvalidObjectType @ react-dom.development.js:9439
-reconcileChildFibersImpl @ react-dom.development.js:10548
-reconcileChildFibers @ react-dom.development.js:10573
-reconcileChildren @ react-dom.development.js:15802
-updateHostComponent$1 @ react-dom.development.js:16687
-beginWork$1 @ react-dom.development.js:18503
-callCallback @ react-dom.development.js:20565
-invokeGuardedCallbackImpl @ react-dom.development.js:20614
-invokeGuardedCallback @ react-dom.development.js:20689
-beginWork @ react-dom.development.js:26949
-performUnitOfWork @ react-dom.development.js:25748
-workLoopSync @ react-dom.development.js:25464
-renderRootSync @ react-dom.development.js:25419
-recoverFromConcurrentError @ react-dom.development.js:24597
-performConcurrentWorkOnRoot @ react-dom.development.js:24542
-workLoop @ scheduler.development.js:256
-flushWork @ scheduler.development.js:225
-performWorkUntilDeadline @ scheduler.development.js:534
-redirect-boundary.js:57 Uncaught Error: Objects are not valid as a React child (found: object with keys {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, content, metadata}). If you meant to render a collection of children, use an array instead.
-    at throwOnInvalidObjectType (react-dom.development.js:9439:9)
-    at reconcileChildFibersImpl (react-dom.development.js:10548:7)
-    at reconcileChildFibers (react-dom.development.js:10573:27)
-    at reconcileChildren (react-dom.development.js:15802:28)
-    at updateHostComponent$1 (react-dom.development.js:16687:3)
-    at beginWork$1 (react-dom.development.js:18503:14)
-    at beginWork (react-dom.development.js:26927:14)
-    at performUnitOfWork (react-dom.development.js:25748:12)
-    at workLoopSync (react-dom.development.js:25464:5)
-    at renderRootSync (react-dom.development.js:25419:7)
-    at recoverFromConcurrentError (react-dom.development.js:24597:20)
-    at performConcurrentWorkOnRoot (react-dom.development.js:24542:26)
-    at workLoop (scheduler.development.js:256:34)
-    at flushWork (scheduler.development.js:225:14)
-    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-throwOnInvalidObjectType @ react-dom.development.js:9439
-reconcileChildFibersImpl @ react-dom.development.js:10548
-reconcileChildFibers @ react-dom.development.js:10573
-reconcileChildren @ react-dom.development.js:15802
-updateHostComponent$1 @ react-dom.development.js:16687
-beginWork$1 @ react-dom.development.js:18503
-beginWork @ react-dom.development.js:26927
-performUnitOfWork @ react-dom.development.js:25748
-workLoopSync @ react-dom.development.js:25464
-renderRootSync @ react-dom.development.js:25419
-recoverFromConcurrentError @ react-dom.development.js:24597
-performConcurrentWorkOnRoot @ react-dom.development.js:24542
-workLoop @ scheduler.development.js:256
-flushWork @ scheduler.development.js:225
-performWorkUntilDeadline @ scheduler.development.js:534
-redirect-boundary.js:57 Uncaught Error: Objects are not valid as a React child (found: object with keys {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, content, metadata}). If you meant to render a collection of children, use an array instead.
-    at throwOnInvalidObjectType (react-dom.development.js:9439:9)
-    at reconcileChildFibersImpl (react-dom.development.js:10548:7)
-    at reconcileChildFibers (react-dom.development.js:10573:27)
-    at reconcileChildren (react-dom.development.js:15802:28)
-    at updateHostComponent$1 (react-dom.development.js:16687:3)
-    at beginWork$1 (react-dom.development.js:18503:14)
-    at beginWork (react-dom.development.js:26927:14)
-    at performUnitOfWork (react-dom.development.js:25748:12)
-    at workLoopSync (react-dom.development.js:25464:5)
-    at renderRootSync (react-dom.development.js:25419:7)
-    at recoverFromConcurrentError (react-dom.development.js:24597:20)
-    at performConcurrentWorkOnRoot (react-dom.development.js:24542:26)
-    at workLoop (scheduler.development.js:256:34)
-    at flushWork (scheduler.development.js:225:14)
-    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-throwOnInvalidObjectType @ react-dom.development.js:9439
-reconcileChildFibersImpl @ react-dom.development.js:10548
-reconcileChildFibers @ react-dom.development.js:10573
-reconcileChildren @ react-dom.development.js:15802
-updateHostComponent$1 @ react-dom.development.js:16687
-beginWork$1 @ react-dom.development.js:18503
-beginWork @ react-dom.development.js:26927
-performUnitOfWork @ react-dom.development.js:25748
-workLoopSync @ react-dom.development.js:25464
-renderRootSync @ react-dom.development.js:25419
-recoverFromConcurrentError @ react-dom.development.js:24597
-performConcurrentWorkOnRoot @ react-dom.development.js:24542
-workLoop @ scheduler.development.js:256
-flushWork @ scheduler.development.js:225
-performWorkUntilDeadline @ scheduler.development.js:534
-redirect-boundary.js:57 Uncaught Error: Objects are not valid as a React child (found: object with keys {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, content, metadata}). If you meant to render a collection of children, use an array instead.
-    at throwOnInvalidObjectType (react-dom.development.js:9439:9)
-    at reconcileChildFibersImpl (react-dom.development.js:10548:7)
-    at reconcileChildFibers (react-dom.development.js:10573:27)
-    at reconcileChildren (react-dom.development.js:15802:28)
-    at updateHostComponent$1 (react-dom.development.js:16687:3)
-    at beginWork$1 (react-dom.development.js:18503:14)
-    at beginWork (react-dom.development.js:26927:14)
-    at performUnitOfWork (react-dom.development.js:25748:12)
-    at workLoopSync (react-dom.development.js:25464:5)
-    at renderRootSync (react-dom.development.js:25419:7)
-    at recoverFromConcurrentError (react-dom.development.js:24597:20)
-    at performConcurrentWorkOnRoot (react-dom.development.js:24542:26)
-    at workLoop (scheduler.development.js:256:34)
-    at flushWork (scheduler.development.js:225:14)
-    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-throwOnInvalidObjectType @ react-dom.development.js:9439
-reconcileChildFibersImpl @ react-dom.development.js:10548
-reconcileChildFibers @ react-dom.development.js:10573
-reconcileChildren @ react-dom.development.js:15802
-updateHostComponent$1 @ react-dom.development.js:16687
-beginWork$1 @ react-dom.development.js:18503
-beginWork @ react-dom.development.js:26927
-performUnitOfWork @ react-dom.development.js:25748
-workLoopSync @ react-dom.development.js:25464
-renderRootSync @ react-dom.development.js:25419
-recoverFromConcurrentError @ react-dom.development.js:24597
-performConcurrentWorkOnRoot @ react-dom.development.js:24542
-workLoop @ scheduler.development.js:256
-flushWork @ scheduler.development.js:225
-performWorkUntilDeadline @ scheduler.development.js:534
-not-found-boundary.js:37 Uncaught Error: Objects are not valid as a React child (found: object with keys {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, content, metadata}). If you meant to render a collection of children, use an array instead.
-    at throwOnInvalidObjectType (react-dom.development.js:9439:9)
-    at reconcileChildFibersImpl (react-dom.development.js:10548:7)
-    at reconcileChildFibers (react-dom.development.js:10573:27)
-    at reconcileChildren (react-dom.development.js:15802:28)
-    at updateHostComponent$1 (react-dom.development.js:16687:3)
-    at beginWork$1 (react-dom.development.js:18503:14)
-    at beginWork (react-dom.development.js:26927:14)
-    at performUnitOfWork (react-dom.development.js:25748:12)
-    at workLoopSync (react-dom.development.js:25464:5)
-    at renderRootSync (react-dom.development.js:25419:7)
-    at recoverFromConcurrentError (react-dom.development.js:24597:20)
-    at performConcurrentWorkOnRoot (react-dom.development.js:24542:26)
-    at workLoop (scheduler.development.js:256:34)
-    at flushWork (scheduler.development.js:225:14)
-    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-throwOnInvalidObjectType @ react-dom.development.js:9439
-reconcileChildFibersImpl @ react-dom.development.js:10548
-reconcileChildFibers @ react-dom.development.js:10573
-reconcileChildren @ react-dom.development.js:15802
-updateHostComponent$1 @ react-dom.development.js:16687
-beginWork$1 @ react-dom.development.js:18503
-beginWork @ react-dom.development.js:26927
-performUnitOfWork @ react-dom.development.js:25748
-workLoopSync @ react-dom.development.js:25464
-renderRootSync @ react-dom.development.js:25419
-recoverFromConcurrentError @ react-dom.development.js:24597
-performConcurrentWorkOnRoot @ react-dom.development.js:24542
-workLoop @ scheduler.development.js:256
-flushWork @ scheduler.development.js:225
-performWorkUntilDeadline @ scheduler.development.js:534
-redirect-boundary.js:57 Uncaught Error: Objects are not valid as a React child (found: object with keys {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, content, metadata}). If you meant to render a collection of children, use an array instead.
-    at throwOnInvalidObjectType (react-dom.development.js:9439:9)
-    at reconcileChildFibersImpl (react-dom.development.js:10548:7)
-    at reconcileChildFibers (react-dom.development.js:10573:27)
-    at reconcileChildren (react-dom.development.js:15802:28)
-    at updateHostComponent$1 (react-dom.development.js:16687:3)
-    at beginWork$1 (react-dom.development.js:18503:14)
-    at beginWork (react-dom.development.js:26927:14)
-    at performUnitOfWork (react-dom.development.js:25748:12)
-    at workLoopSync (react-dom.development.js:25464:5)
-    at renderRootSync (react-dom.development.js:25419:7)
-    at recoverFromConcurrentError (react-dom.development.js:24597:20)
-    at performConcurrentWorkOnRoot (react-dom.development.js:24542:26)
-    at workLoop (scheduler.development.js:256:34)
-    at flushWork (scheduler.development.js:225:14)
-    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-throwOnInvalidObjectType @ react-dom.development.js:9439
-reconcileChildFibersImpl @ react-dom.development.js:10548
-reconcileChildFibers @ react-dom.development.js:10573
-reconcileChildren @ react-dom.development.js:15802
-updateHostComponent$1 @ react-dom.development.js:16687
-beginWork$1 @ react-dom.development.js:18503
-beginWork @ react-dom.development.js:26927
-performUnitOfWork @ react-dom.development.js:25748
-workLoopSync @ react-dom.development.js:25464
-renderRootSync @ react-dom.development.js:25419
-recoverFromConcurrentError @ react-dom.development.js:24597
-performConcurrentWorkOnRoot @ react-dom.development.js:24542
-workLoop @ scheduler.development.js:256
-flushWork @ scheduler.development.js:225
-performWorkUntilDeadline @ scheduler.development.js:534
-not-found-boundary.js:37 Uncaught Error: Objects are not valid as a React child (found: object with keys {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, content, metadata}). If you meant to render a collection of children, use an array instead.
-    at throwOnInvalidObjectType (react-dom.development.js:9439:9)
-    at reconcileChildFibersImpl (react-dom.development.js:10548:7)
-    at reconcileChildFibers (react-dom.development.js:10573:27)
-    at reconcileChildren (react-dom.development.js:15802:28)
-    at updateHostComponent$1 (react-dom.development.js:16687:3)
-    at beginWork$1 (react-dom.development.js:18503:14)
-    at beginWork (react-dom.development.js:26927:14)
-    at performUnitOfWork (react-dom.development.js:25748:12)
-    at workLoopSync (react-dom.development.js:25464:5)
-    at renderRootSync (react-dom.development.js:25419:7)
-    at recoverFromConcurrentError (react-dom.development.js:24597:20)
-    at performConcurrentWorkOnRoot (react-dom.development.js:24542:26)
-    at workLoop (scheduler.development.js:256:34)
-    at flushWork (scheduler.development.js:225:14)
-    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-throwOnInvalidObjectType @ react-dom.development.js:9439
-reconcileChildFibersImpl @ react-dom.development.js:10548
-reconcileChildFibers @ react-dom.development.js:10573
-reconcileChildren @ react-dom.development.js:15802
-updateHostComponent$1 @ react-dom.development.js:16687
-beginWork$1 @ react-dom.development.js:18503
-beginWork @ react-dom.development.js:26927
-performUnitOfWork @ react-dom.development.js:25748
-workLoopSync @ react-dom.development.js:25464
-renderRootSync @ react-dom.development.js:25419
-recoverFromConcurrentError @ react-dom.development.js:24597
-performConcurrentWorkOnRoot @ react-dom.development.js:24542
-workLoop @ scheduler.development.js:256
-flushWork @ scheduler.development.js:225
-performWorkUntilDeadline @ scheduler.development.js:534
-app-index.js:33 The above error occurred in the <NotFoundErrorBoundary> component:
-
-    at button
-    at CTAButtonPublished (Server)
+app-index.js:33 Warning: Cannot update a component (`HotReload`) while rendering a different component (`CenterStacked`). To locate the bad setState() call inside `CenterStacked`, follow the stack trace as described in https://reactjs.org/link/setstate-in-render
+    at CenterStacked (webpack-internal:///(app-pages-browser)/./src/modules/UIBlocks/Hero/CenterStacked.tsx:235:117)
+    at div
+    at EnhancedLayoutWrapper (webpack-internal:///(app-pages-browser)/./src/app/edit/[token]/components/ui/EditablePageRenderer.tsx:367:11)
+    at div
+    at EditablePageRenderer (webpack-internal:///(app-pages-browser)/./src/app/edit/[token]/components/ui/EditablePageRenderer.tsx:131:11)
+    at div
+    at div
+    at ElementDetector (webpack-internal:///(app-pages-browser)/./src/app/edit/[token]/components/selection/ElementDetector.tsx:19:11)
     at div
     at div
     at div
-    at section
-    at SectionWrapperPublished (Server)
-    at CenterStackedPublished (Server)
+    at main
     at div
-    at LandingPagePublishedRenderer (Server)
-    at PublishedPage (Server)
+    at SelectionSystem (webpack-internal:///(app-pages-browser)/./src/app/edit/[token]/components/selection/SelectionSystem.tsx:19:11)
+    at MainContent (webpack-internal:///(app-pages-browser)/./src/app/edit/[token]/components/layout/MainContent.tsx:58:11)
+    at div
+    at div
+    at div
+    at div
+    at VariableThemeInjector (webpack-internal:///(app-pages-browser)/./src/modules/Design/ColorSystem/VariableThemeInjector.tsx:37:11)
+    at EditLayout (webpack-internal:///(app-pages-browser)/./src/app/edit/[token]/components/layout/EditLayout.tsx:39:11)
+    at EditPageContent (webpack-internal:///(app-pages-browser)/./src/app/edit/[token]/page.tsx:103:11)
+    at EditLayoutErrorBoundaryClass (webpack-internal:///(app-pages-browser)/./src/app/edit/[token]/components/layout/EditLayoutErrorBoundary.tsx:57:9)
+    at EditLayoutErrorBoundary (webpack-internal:///(app-pages-browser)/./src/app/edit/[token]/components/layout/EditLayoutErrorBoundary.tsx:303:11)
+    at EditErrorBoundary (webpack-internal:///(app-pages-browser)/./src/components/EditErrorBoundary.tsx:87:9)
+    at EditProvider (webpack-internal:///(app-pages-browser)/./src/components/EditProvider.tsx:135:11)
+    at EditPage (webpack-internal:///(app-pages-browser)/./src/app/edit/[token]/page.tsx:21:78)
+    at ClientPageRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/client-page.js:14:11)
     at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
     at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
     at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
@@ -465,103 +46,137 @@ app-index.js:33 The above error occurred in the <NotFoundErrorBoundary> componen
     at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
     at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
     at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
-    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
-    at body
-    at html
-    at PublishedLayout (Server)
-    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
-    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
-    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
-    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
-    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
-    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
-    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
-    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
-    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
-    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
-    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
-    at PostHogProvider (webpack-internal:///(app-pages-browser)/./node_modules/posthog-js/react/dist/esm/index.js:51:23)
-    at PostHogProvider (webpack-internal:///(app-pages-browser)/./src/providers/ph-provider.tsx:20:11)
-    at Provider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-context/dist/index.mjs:34:15)
-    at TooltipProvider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-tooltip/dist/index.mjs:58:13)
-    at body
-    at html
-    at __experimental_CheckoutProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/shared/dist/react/index.mjs:117:42)
-    at SWRConfig (webpack-internal:///(app-pages-browser)/./node_modules/swr/dist/_internal/config-context-client-BoS53ST9.mjs:554:13)
-    at OrganizationProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/shared/dist/react/index.mjs:129:3)
-    at ClerkContextProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:1448:11)
-    at ClerkProviderBase (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:1540:11)
-    at Hoc (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/chunk-3664V5SS.mjs:81:5)
-    at ClerkNextOptionsProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/client-boundary/NextOptionsContext.js:17:11)
-    at NextClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:60:13)
-    at ClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:127:13)
-    at ClerkProvider (Server)
-    at RootLayout (Server)
-    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
-    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
-    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
-    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
-    at DevRootNotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/dev-root-not-found-boundary.js:33:11)
-    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
-    at HotReload (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:321:11)
-    at Router (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:207:11)
-    at ErrorBoundaryHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
-    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
-    at AppRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:585:13)
-    at ServerRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:112:27)
-    at Root (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:117:11)
-    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
-
-React will try to recreate this component tree from scratch using the error boundary you provided, ReactDevOverlay.
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/c
 window.console.error @ app-index.js:33
-logCapturedError @ react-dom.development.js:15295
-callback @ react-dom.development.js:15357
-callCallback @ react-dom.development.js:8696
-commitCallbacks @ react-dom.development.js:8743
-commitClassCallbacks @ react-dom.development.js:21323
-commitLayoutEffectOnFiber @ react-dom.development.js:21425
-recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
-commitLayoutEffectOnFiber @ react-dom.development.js:21407
-recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
-commitLayoutEffectOnFiber @ react-dom.development.js:21577
-recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
-commitLayoutEffectOnFiber @ react-dom.development.js:21577
-recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
-commitLayoutEffectOnFiber @ react-dom.development.js:21577
-recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
-commitLayoutEffectOnFiber @ react-dom.development.js:21577
-recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
-commitLayoutEffectOnFiber @ react-dom.development.js:21577
-recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
-commitLayoutEffectOnFiber @ react-dom.development.js:21577
-recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
-commitLayoutEffectOnFiber @ react-dom.development.js:21407
-recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
-commitLayoutEffectOnFiber @ react-dom.development.js:21418
-recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
-commitLayoutEffectOnFiber @ react-dom.development.js:21407
-recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
-commitLayoutEffectOnFiber @ react-dom.development.js:21407
-recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
-commitLayoutEffectOnFiber @ react-dom.development.js:21407
-recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
-commitLayoutEffectOnFiber @ react-dom.development.js:21407
-recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
-commitLayoutEffectOnFiber @ react-dom.development.js:21577
-recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
-commitLayoutEffectOnFiber @ react-dom.development.js:21577
-recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
-commitLayoutEffectOnFiber @ react-dom.development.js:21577
-recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
-commitLayoutEffectOnFiber @ react-dom.development.js:21418
-recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
-commitLayoutEffectOnFiber @ react-dom.development.js:21437
-commitLayoutEffects @ react-dom.development.js:22912
-commitRootImpl @ react-dom.development.js:26226
-commitRoot @ react-dom.development.js:26077
-commitRootWhenReady @ react-dom.development.js:24749
-finishConcurrentRender @ react-dom.development.js:24714
-performConcurrentWorkOnRoot @ react-dom.development.js:24559
-workLoop @ scheduler.development.js:256
-flushWork @ scheduler.development.js:225
-performWorkUntilDeadline @ scheduler.development.js:534
+CenterStacked.tsx:625 Uncaught TypeError: imageValue.startsWith is not a function
+    at eval (CenterStacked.tsx:625:51)
+    at CenterStacked (CenterStacked.tsx:658:11)
+    at renderWithHooks (react-dom.development.js:11121:18)
+    at updateFunctionComponent (react-dom.development.js:16290:20)
+    at beginWork$1 (react-dom.development.js:18472:16)
+    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
+    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
+    at invokeGuardedCallback (react-dom.development.js:20689:29)
+    at beginWork (react-dom.development.js:26949:7)
+    at performUnitOfWork (react-dom.development.js:25748:12)
+    at workLoopSync (react-dom.development.js:25464:5)
+    at renderRootSync (react-dom.development.js:25419:7)
+    at performSyncWorkOnRoot (react-dom.development.js:24887:20)
+    at flushSyncWorkAcrossRoots_impl (react-dom.development.js:7758:13)
+    at flushSyncWorkOnAllRoots (react-dom.development.js:7718:3)
+    at processRootScheduleInMicrotask (react-dom.development.js:7863:3)
+    at eval (react-dom.development.js:8034:7)
+CenterStacked.tsx:625 Uncaught TypeError: imageValue.startsWith is not a function
+    at eval (CenterStacked.tsx:625:51)
+    at CenterStacked (CenterStacked.tsx:658:11)
+    at renderWithHooks (react-dom.development.js:11121:18)
+    at updateFunctionComponent (react-dom.development.js:16290:20)
+    at beginWork$1 (react-dom.development.js:18472:16)
+    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
+    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
+    at invokeGuardedCallback (react-dom.development.js:20689:29)
+    at beginWork (react-dom.development.js:26949:7)
+    at performUnitOfWork (react-dom.development.js:25748:12)
+    at workLoopSync (react-dom.development.js:25464:5)
+    at renderRootSync (react-dom.development.js:25419:7)
+    at recoverFromConcurrentError (react-dom.development.js:24597:20)
+    at performSyncWorkOnRoot (react-dom.development.js:24899:20)
+    at flushSyncWorkAcrossRoots_impl (react-dom.development.js:7758:13)
+    at flushSyncWorkOnAllRoots (react-dom.development.js:7718:3)
+    at processRootScheduleInMicrotask (react-dom.development.js:7863:3)
+    at eval (react-dom.development.js:8034:7)
+app-index.js:33 The above error occurred in the <CenterStacked> component:
+
+    at CenterStacked (webpack-internal:///(app-pages-browser)/./src/modules/UIBlocks/Hero/CenterStacked.tsx:235:117)
+    at div
+    at EnhancedLayoutWrapper (webpack-internal:///(app-pages-browser)/./src/app/edit/[token]/components/ui/EditablePageRenderer.tsx:367:11)
+    at div
+    at EditablePageRenderer (webpack-internal:///(app-pages-browser)/./src/app/edit/[token]/components/ui/EditablePageRenderer.tsx:131:11)
+    at div
+    at div
+    at ElementDetector (webpack-internal:///(app-pages-browser)/./src/app/edit/[token]/components/selection/ElementDetector.tsx:19:11)
+    at div
+    at div
+    at div
+    at main
+    at div
+    at SelectionSystem (webpack-internal:///(app-pages-browser)/./src/app/edit/[token]/components/selection/SelectionSystem.tsx:19:11)
+    at MainContent (webpack-internal:///(app-pages-browser)/./src/app/edit/[token]/components/layout/MainContent.tsx:58:11)
+    at div
+    at div
+    at div
+    at div
+    at VariableThemeInjector (webpack-internal:///(app-pages-browser)/./src/modules/Design/ColorSystem/VariableThemeInjector.tsx:37:11)
+    at EditLayout (webpack-internal:///(app-pages-browser)/./src/app/edit/[token]/components/layout/EditLayout.tsx:39:11)
+    at EditPageContent (webpack-internal:///(app-pages-browser)/./src/app/edit/[token]/page.tsx:103:11)
+    at EditLayoutErrorBoundaryClass (webpack-internal:///(app-pages-browser)/./src/app/edit/[token]/components/layout/EditLayoutErrorBoundary.tsx:57:9)
+    at EditLayoutErrorBoundary (webpack-internal:///(app-pages-browser)/./src/app/edit/[token]/components/layout/EditLayoutErrorBoundary.tsx:303:11)
+    at EditErrorBoundary (webpack-internal:///(app-pages-browser)/./src/components/EditErrorBoundary.tsx:87:9)
+    at EditProvider (webpack-internal:///(app-pages-browser)/./src/components/EditProvider.tsx:135:11)
+    at EditPage (webpack-internal:///(app-pages-browser)/./src/app/edit/[token]/page.tsx:21:78)
+    at ClientPageRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/client-page.js:14:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at Redi
+window.console.error @ app-index.js:33
+app-index.js:33 🚨 EditLayout Error Boundary caught an error: Object
+window.console.error @ app-index.js:33
+:3000/api/regenerate-section:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+app-index.js:33 [2026-02-12T15:36:08.327Z] ERROR: Section regeneration error: {}
+window.console.error @ app-index.js:33
+app-index.js:33 [2026-02-12T15:36:08.329Z] ERROR: Failed to regenerate section uniquemechanism-883a4623: {}
+window.console.error @ app-index.js:33
+:3000/api/regenerate-section:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+app-index.js:33 [2026-02-12T15:36:08.369Z] ERROR: Section regeneration error: {}
+window.console.error @ app-index.js:33
+app-index.js:33 [2026-02-12T15:36:08.370Z] ERROR: Failed to regenerate section foundernote-d246bb6f: {}
+window.console.error @ app-index.js:33
+:3000/api/regenerate-section:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+app-index.js:33 [2026-02-12T15:36:08.414Z] ERROR: Section regeneration error: {}
+window.console.error @ app-index.js:33
+app-index.js:33 [2026-02-12T15:36:08.415Z] ERROR: Failed to regenerate section features-71e68f2d: {}
+window.console.error @ app-index.js:33
+:3000/api/regenerate-section:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+app-index.js:33 [2026-02-12T15:36:08.453Z] ERROR: Section regeneration error: {}
+window.console.error @ app-index.js:33
+app-index.js:33 [2026-02-12T15:36:08.454Z] ERROR: Failed to regenerate section howitworks-59c32e90: {}
+window.console.error @ app-index.js:33
+:3000/api/regenerate-section:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+app-index.js:33 [2026-02-12T15:36:08.498Z] ERROR: Section regeneration error: {}
+window.console.error @ app-index.js:33
+app-index.js:33 [2026-02-12T15:36:08.499Z] ERROR: Failed to regenerate section pricing-98bd47a4: {}
+window.console.error @ app-index.js:33
+:3000/api/regenerate-section:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+app-index.js:33 [2026-02-12T15:36:08.541Z] ERROR: Section regeneration error: {}
+window.console.error @ app-index.js:33
+app-index.js:33 [2026-02-12T15:36:08.542Z] ERROR: Failed to regenerate section cta-98b12f81: {}
+window.console.error @ app-index.js:33
+:3000/api/regenerate-section:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+app-index.js:33 [2026-02-12T15:36:08.582Z] ERROR: Section regeneration error: {}
+window.console.error @ app-index.js:33
+app-index.js:33 [2026-02-12T15:36:08.583Z] ERROR: Failed to regenerate section faq-78bff276: {}
+window.console.error @ app-index.js:33
+:3000/api/regenerate-section:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+app-index.js:33 [2026-02-12T15:36:08.625Z] ERROR: Section regeneration error: {}
+window.console.error @ app-index.js:33
+app-index.js:33 [2026-02-12T15:36:08.627Z] ERROR: Failed to regenerate section footer-8c8e4a9c: {}
+window.console.error @ app-index.js:33

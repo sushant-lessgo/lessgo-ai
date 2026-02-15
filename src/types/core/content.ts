@@ -317,6 +317,8 @@ export interface FontWeights {
 }
 
 export interface ColorSystem {
+  paletteId?: string;
+  textureId?: string;
   baseColor: string;
   accentColor: string;
   accentCSS?: string;

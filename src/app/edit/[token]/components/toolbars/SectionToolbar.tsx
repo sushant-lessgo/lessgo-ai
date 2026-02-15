@@ -1,9 +1,6 @@
 // app/edit/[token]/components/toolbars/SectionToolbar.tsx - Priority-Resolved Section Toolbar
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
-import { useOnboardingStore } from '@/hooks/useOnboardingStore';
-
-import { useElementPicker } from '@/hooks/useElementPicker';
 import { useSectionCRUD } from '@/hooks/useSectionCRUD';
 import { useToolbarVisibility } from '@/hooks/useSelectionPriority';
 import { calculateArrowPosition } from '@/utils/toolbarPositioning';
@@ -13,8 +10,8 @@ import { showBackgroundModal } from '../ui/GlobalModals';
 import LoadingButtonBar from '@/components/shared/LoadingButtonBar';
 import type { SectionType } from '@/types/core/content';
 import { logger } from '@/lib/logger';
-import { getSectionElementRequirements, mapStoreToVariables } from '@/modules/sections/elementDetermination';
 import { getSectionTypeFromLayout } from '@/utils/layoutSectionTypeMapping';
+import { ElementToggleModal } from '../ui/ElementToggleModal';
 
 interface SectionToolbarProps {
   sectionId: string;
@@ -27,6 +24,7 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
   const { isVisible, reason } = useToolbarVisibility('section');
   
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showElementToggle, setShowElementToggle] = useState(false);
   const toolbarRef = useRef<HTMLDivElement>(null);
   const advancedRef = useRef<HTMLDivElement>(null);
   const advancedTriggerRef = useRef<HTMLButtonElement>(null);
@@ -60,10 +58,6 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
     aiGeneration,
     showLayoutChangeModal,
   } = useEditStore();
-
-  const onboardingStore = useOnboardingStore();
-
-  const { showElementPicker } = useElementPicker();
 
   // Handle layout change action
   const handleChangeLayout = (sectionId: string) => {
@@ -103,40 +97,6 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
   const section = content[sectionId];
   const sectionIndex = sections.indexOf(sectionId);
 
-  // Calculate if section has optional elements that can be added
-  const canAddElements = useMemo(() => {
-    try {
-      const sectionData = content[sectionId];
-      const layoutType = sectionData?.layout;
-
-      if (!layoutType) return false;
-
-      // Map store data to variables for element determination
-      const variables = mapStoreToVariables(onboardingStore, {
-        layout: { sections, sectionLayouts },
-        meta: { onboardingData: {
-          oneLiner: onboardingStore.oneLiner,
-          validatedFields: onboardingStore.validatedFields,
-          featuresFromAI: onboardingStore.featuresFromAI,
-        } }
-      });
-
-      // Get element requirements including excluded elements
-      const requirements = getSectionElementRequirements(sectionId, layoutType, variables);
-
-      // Filter out elements already in section
-      const existingElementKeys = Object.keys(sectionData?.elements || {});
-      const availableElements = requirements.optionalElements.filter(elementName =>
-        !existingElementKeys.includes(elementName)
-      );
-
-      return availableElements.length > 0;
-    } catch (error) {
-      logger.error('Error calculating canAddElements:', error);
-      return false;
-    }
-  }, [sectionId, content, sections, sectionLayouts, onboardingStore]);
-  
   // Get validation status from existing metadata (read-only)
   const validation = useMemo(() => {
     if (!section) return null;
@@ -193,79 +153,6 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
     }
   }, [showAdvanced]);
 
-  // Handle Add Element action - Show element picker with optional elements
-  const handleAddElement = () => {
-    try {
-      // Get section information
-      const sectionData = content[sectionId];
-      const sectionType = sectionId;
-      const layoutType = sectionData?.layout;
-
-      // Calculate picker position
-      const buttonElement = document.querySelector('[data-action="add-element"]');
-      let pickerPosition = { x: 0, y: 0 };
-
-      if (buttonElement) {
-        const rect = buttonElement.getBoundingClientRect();
-        pickerPosition = {
-          x: rect.left,
-          y: rect.bottom + 8,
-        };
-      }
-
-      // Map store data to variables for element determination
-      const variables = mapStoreToVariables(onboardingStore, {
-        layout: { sections, sectionLayouts },
-        meta: {
-          onboardingData: {
-            oneLiner: onboardingStore.oneLiner,
-            validatedFields: onboardingStore.validatedFields,
-            featuresFromAI: onboardingStore.featuresFromAI,
-          }
-        }
-      });
-
-      // Get element requirements including excluded (optional) elements
-      const requirements = getSectionElementRequirements(sectionId, layoutType, variables);
-
-      // Filter out elements already in section (unless empty/removed)
-      const existingElementKeys = Object.keys(sectionData?.elements || {});
-      const availableOptionalElements = requirements.optionalElements.filter(elementName => {
-        // Element not in section → can add
-        if (!existingElementKeys.includes(elementName)) return true;
-
-        // Element exists but is empty/removed → can re-add
-        const elementValue = sectionData.elements[elementName];
-        const isEmpty =
-          !elementValue ||
-          (typeof elementValue === 'object' &&
-           (elementValue.content === undefined ||
-            elementValue.content === '' ||
-            elementValue.content === '___REMOVED___'));
-
-        return isEmpty;
-      });
-
-      logger.debug('🎯 Showing element picker:', {
-        sectionId,
-        layoutType,
-        availableOptionalElements,
-        pickerPosition
-      });
-
-      // Show element picker with optional elements
-      showElementPicker(sectionId, pickerPosition, {
-        autoFocus: true,
-        optionalElements: availableOptionalElements,
-        sectionType,
-        layoutType,
-        sectionId,
-      });
-    } catch (error) {
-      logger.error('Error in handleAddElement:', error);
-    }
-  };
-
   // Primary Actions with enhanced functionality
   const primaryActions = [
     {
@@ -276,11 +163,9 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
     },
     {
       id: 'add-element',
-      label: 'Add Element',
+      label: 'Elements',
       icon: 'plus',
-      handler: handleAddElement,
-      disabled: !canAddElements,
-      tooltip: canAddElements ? 'Add optional elements' : 'No optional elements available',
+      handler: () => setShowElementToggle(true),
     },
     {
       id: 'move-up',
@@ -477,7 +362,7 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
                     ? 'text-red-600 hover:bg-red-50'
                     : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
                 }`}
-                title={action.tooltip || action.label}
+                title={action.label}
               >
                 <ActionIcon icon={action.icon} />
                 <span>{action.label}</span>
@@ -522,6 +407,12 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
           isVisible={showAdvanced}
         />
       )}
+
+      <ElementToggleModal
+        sectionId={sectionId}
+        open={showElementToggle}
+        onOpenChange={setShowElementToggle}
+      />
     </>
   );
 }

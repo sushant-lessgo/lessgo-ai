@@ -7,6 +7,7 @@ import { LayoutComponentProps } from '@/types/storeTypes';
 import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import { getCardStyles, type CardStyles } from '@/modules/Design/cardStyles';
+import { isHexColor } from '@/utils/colorUtils';
 
 interface ToggleableMonthlyYearlyProps extends LayoutComponentProps {}
 
@@ -167,7 +168,10 @@ const PricingCard = ({
 
       {/* Annual Savings Badge */}
       {billingCycle === 'yearly' && savingsPercent > 0 && (
-        <div className={`absolute -top-3 right-4 ${colorTokens.ctaBg} text-white px-3 py-1 rounded-full text-xs font-semibold z-20`}>
+        <div
+          className={`absolute -top-3 right-4 ${isHexColor(colorTokens.ctaBg) ? '' : colorTokens.ctaBg} text-white px-3 py-1 rounded-full text-xs font-semibold z-20`}
+          style={isHexColor(colorTokens.ctaBg) ? { backgroundColor: colorTokens.ctaBg } : undefined}
+        >
           Save {savingsPercent}%
         </div>
       )}
@@ -364,7 +368,8 @@ const PricingCard = ({
               contentEditable
               suppressContentEditableWarning
               onBlur={(e) => onTierUpdate('cta_text', e.currentTarget.textContent || '')}
-              className={`text-center font-medium py-3 px-6 rounded-lg ${tier.is_popular ? colorTokens.ctaBg + ' text-white' : 'bg-gray-100 text-gray-900'} outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 cursor-text`}
+              className={`text-center font-medium py-3 px-6 rounded-lg ${tier.is_popular ? (isHexColor(colorTokens.ctaBg) ? '' : colorTokens.ctaBg) + ' text-white' : 'bg-gray-100 text-gray-900'} outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 cursor-text`}
+              style={tier.is_popular && isHexColor(colorTokens.ctaBg) ? { backgroundColor: colorTokens.ctaBg } : undefined}
               data-section-id={sectionId}
               data-element-key={`tiers.${tier.id}.cta_text`}
             >

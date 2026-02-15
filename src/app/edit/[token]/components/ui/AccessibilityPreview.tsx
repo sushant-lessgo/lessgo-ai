@@ -4,6 +4,7 @@
 import React, { useMemo } from 'react';
 import { analyzeColorAccessibility, calculateContrastRatio, checkWCAGCompliance } from './colorAccessibilityUtils';
 import type { ColorTokens, BackgroundSystem } from '@/types/core';
+import { isHexColor } from '@/utils/colorUtils';
 
 interface AccessibilityPreviewProps {
   tokens: ColorTokens;
@@ -76,7 +77,10 @@ export function AccessibilityPreview({
         background: tokens.ctaBg.replace('bg-', ''),
         isLargeText: false,
         element: (
-          <button className={`${tokens.ctaBg} ${tokens.ctaText} px-6 py-3 rounded-lg font-medium`}>
+          <button
+            className={`${isHexColor(tokens.ctaBg) ? '' : tokens.ctaBg} ${tokens.ctaText} px-6 py-3 rounded-lg font-medium`}
+            style={isHexColor(tokens.ctaBg) ? { backgroundColor: tokens.ctaBg } : undefined}
+          >
             Get Started Today
           </button>
         ),

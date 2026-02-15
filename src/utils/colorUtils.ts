@@ -443,3 +443,33 @@ export function validateColorAccessibility(
     suggestions
   };
 }
+
+/**
+ * Detects if a color token is a raw hex value vs a Tailwind class.
+ * Returns className + inline style so consumers handle both cases.
+ */
+export function applyBgColorToken(
+  token: string | undefined,
+  fallback = 'bg-blue-600'
+): { className: string; style: Record<string, string> } {
+  const value = token || fallback;
+  if (value.startsWith('#')) {
+    return { className: '', style: { backgroundColor: value } };
+  }
+  return { className: value, style: {} };
+}
+
+export function applyBorderColorToken(
+  token: string | undefined,
+  fallback = 'border-blue-600'
+): { className: string; style: Record<string, string> } {
+  const value = token || fallback;
+  if (value.startsWith('#')) {
+    return { className: '', style: { borderColor: value } };
+  }
+  return { className: value, style: {} };
+}
+
+export function isHexColor(value: string | undefined): boolean {
+  return !!value && value.startsWith('#');
+}

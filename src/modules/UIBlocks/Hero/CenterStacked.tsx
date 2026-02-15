@@ -621,7 +621,8 @@ export default function CenterStacked(props: LayoutComponentProps) {
         <div className="w-full">
             {(() => {
               // Check if center_hero_image is a valid URL or path
-              const imageValue = blockContent.center_hero_image || '';
+              const rawImage = blockContent.center_hero_image || '';
+              const imageValue = typeof rawImage === 'string' ? rawImage : (rawImage as any)?.content || (rawImage as any)?.url || '';
               const isValidImagePath = imageValue.startsWith('/') ||
                                       imageValue.startsWith('http://') ||
                                       imageValue.startsWith('https://') ||

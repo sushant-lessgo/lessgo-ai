@@ -322,7 +322,8 @@ export default function ImageFirst(props: LayoutComponentProps) {
           <div className="w-full">
             {(() => {
               // Check if image_first_hero_image is a valid URL or path
-              const imageValue = blockContent.image_first_hero_image || '';
+              const rawImage = blockContent.image_first_hero_image || '';
+              const imageValue = typeof rawImage === 'string' ? rawImage : (rawImage as any)?.content || (rawImage as any)?.url || '';
               const isValidImagePath = imageValue.startsWith('/') ||
                                       imageValue.startsWith('http://') ||
                                       imageValue.startsWith('https://') ||
