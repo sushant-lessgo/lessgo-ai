@@ -323,6 +323,8 @@ export interface ColorSystem {
   accentColor: string;
   accentCSS?: string;
   sectionBackgrounds: SectionBackgrounds;
+  paletteMode?: 'dark' | 'light';
+  paletteTemperature?: 'cool' | 'neutral' | 'warm';
   semantic: SemanticColors;
   states: StateColors;
   // Text colors for each background type - calculated once during generation

@@ -59,6 +59,7 @@ export interface StockPhoto {
   alt: string;
   width: number;
   height: number;
+  avgColor: string;
   author: string;
   authorUrl: string;
   downloadUrl: string;
@@ -179,6 +180,7 @@ class PexelsApiService {
       alt: photo.alt || `Photo by ${photo.photographer}`,
       width: photo.width,
       height: photo.height,
+      avgColor: photo.avg_color,
       author: photo.photographer,
       authorUrl: photo.photographer_url,
       downloadUrl: photo.src.large,

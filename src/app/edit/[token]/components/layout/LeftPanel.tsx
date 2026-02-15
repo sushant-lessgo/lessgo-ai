@@ -110,10 +110,10 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
 
   return (
     <div
-      className="flex bg-white border-r border-gray-200 transition-all duration-300"
+      className="flex h-full bg-white border-r border-gray-200 transition-all duration-300"
       style={{ width: `${leftPanel.width}px` }}
     >
-      <div className="flex-1 flex flex-col h-full max-h-screen">
+      <div className="flex-1 flex flex-col h-full">
         {/* Header */}
         <div className="h-12 border-b border-gray-200 flex items-center justify-between px-4 flex-shrink-0">
           <h2 className="text-sm font-semibold text-gray-900">Page</h2>

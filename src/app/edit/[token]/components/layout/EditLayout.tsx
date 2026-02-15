@@ -1,7 +1,7 @@
 // /app/edit/[token]/components/layout/EditLayout.tsx
 "use client";
 
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState, useRef } from 'react';
 import { useEditStoreContext, useStoreState } from '@/components/EditProvider';
 import { useEditor } from '@/hooks/useEditor';
 import { GlobalAppHeader } from './GlobalAppHeader';
@@ -28,7 +28,33 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
   // Use selectors for state
   const leftPanel = useStoreState(state => state.leftPanel);
   const mode = useStoreState(state => state.mode);
-  
+  const aiGeneration = useStoreState(state => state.aiGeneration);
+
+  // Progress bar fade-out logic
+  const isPageRegen = (aiGeneration?.isGenerating && aiGeneration?.currentOperation === 'page') ?? false;
+  const progress = aiGeneration?.progress ?? 0;
+  const [showProgressBar, setShowProgressBar] = useState(false);
+  const [fadingOut, setFadingOut] = useState(false);
+  const prevIsPageRegen = useRef(isPageRegen);
+
+  useEffect(() => {
+    if (isPageRegen && !prevIsPageRegen.current) {
+      // Started regenerating
+      setShowProgressBar(true);
+      setFadingOut(false);
+    } else if (!isPageRegen && prevIsPageRegen.current) {
+      // Finished — hold at 100% then fade out
+      setFadingOut(true);
+      const timer = setTimeout(() => {
+        setShowProgressBar(false);
+        setFadingOut(false);
+      }, 800);
+      prevIsPageRegen.current = isPageRegen;
+      return () => clearTimeout(timer);
+    }
+    prevIsPageRegen.current = isPageRegen;
+  }, [isPageRegen]);
+
   // Get actions from store
   const storeState = store?.getState();
   const {
@@ -157,7 +183,17 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
         <div className="flex-1 flex flex-col min-w-0">
           {/* Edit Header */}
           <EditHeader tokenId={tokenId} />
-          
+
+          {/* Regen Copy Progress Bar */}
+          {showProgressBar && (
+            <div className={`h-0.5 bg-gray-200 w-full flex-shrink-0 transition-opacity duration-300 ${fadingOut ? 'opacity-0' : 'opacity-100'}`}>
+              <div
+                className="h-full bg-amber-500 transition-all duration-500 ease-out"
+                style={{ width: `${fadingOut ? 100 : progress}%` }}
+              />
+            </div>
+          )}
+
           {/* Main Content Area */}
           <MainContent tokenId={tokenId} />
         </div>

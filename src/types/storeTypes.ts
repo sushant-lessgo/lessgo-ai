@@ -162,6 +162,8 @@ export type Theme = {
     accentColor: string;      // "purple", "blue", "emerald"
     accentCSS?: string;       // "bg-purple-600"
     sectionBackgrounds: SectionBackgroundInput;
+    paletteMode?: 'dark' | 'light';
+    paletteTemperature?: 'cool' | 'neutral' | 'warm';
   };
   spacing: {
     unit: number;

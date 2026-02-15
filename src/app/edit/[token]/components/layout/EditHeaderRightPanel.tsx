@@ -65,10 +65,13 @@ function RegenCopyConfirmModal({
 }
 
 export function EditHeaderRightPanel({ tokenId }: EditHeaderRightPanelProps) {
-  const { regenerateAllContent, aiGeneration } = useEditStore();
+  const { regenerateAllContent, aiGeneration, sections } = useEditStore();
   const [showConfirm, setShowConfirm] = useState(false);
 
   const isGenerating = aiGeneration?.isGenerating ?? false;
+  const progress = aiGeneration?.progress ?? 0;
+  const totalSections = sections?.length ?? 0;
+  const completedSections = Math.round((progress / 100) * totalSections);
   const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const prevGenerating = useRef(isGenerating);
 
@@ -115,7 +118,11 @@ export function EditHeaderRightPanel({ tokenId }: EditHeaderRightPanelProps) {
               <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           )}
-          <span>{isGenerating ? 'Generating...' : 'Regen Copy'}</span>
+          <span>{isGenerating
+            ? (progress > 0 && totalSections > 0
+                ? `Regenerating ${completedSections}/${totalSections}...`
+                : 'Regenerating...')
+            : 'Regen Copy'}</span>
         </button>
 
         <UndoRedoButtons />

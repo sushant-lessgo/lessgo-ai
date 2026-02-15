@@ -17,12 +17,25 @@
  * ```
  */
 
+import { getImageFilter } from '@/lib/generation/imageColorTreatment';
+
 interface ImagePublishedProps {
   src: string;
   alt: string;
   className?: string;
+  paletteMode?: 'dark' | 'light';
+  paletteTemperature?: 'cool' | 'neutral' | 'warm';
 }
 
-export function ImagePublished({ src, alt, className }: ImagePublishedProps) {
-  return <img src={src} alt={alt} className={className} loading="lazy" />;
+export function ImagePublished({ src, alt, className, paletteMode, paletteTemperature }: ImagePublishedProps) {
+  const filter = getImageFilter(paletteMode, paletteTemperature);
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      style={filter ? { filter } : undefined}
+      loading="lazy"
+    />
+  );
 }

@@ -25,6 +25,7 @@ import { CheckmarkIconPublished } from '@/components/published/CheckmarkIconPubl
 import { AvatarPublished } from '@/components/published/AvatarPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { getPublishedTextColors, getPublishedTypographyStyles } from '@/lib/publishedTextColors';
+import { getImageFilter } from '@/lib/generation/imageColorTreatment';
 import { FormMarkupPublished } from '@/components/published/FormMarkupPublished';
 import { InlineFormMarkupPublished } from '@/components/published/InlineFormMarkupPublished';
 import { determineFormPlacement } from '@/utils/formPlacement';
@@ -254,6 +255,7 @@ export default function SplitScreenPublished(props: LayoutComponentProps) {
 
   // Accent color for badge and buttons
   const accentColor = theme?.colors?.accentColor || '#3B82F6';
+  const imgFilter = getImageFilter(theme?.colors?.paletteMode, theme?.colors?.paletteTemperature);
 
   // Image validation
   const rawImage = split_hero_image || '';
@@ -488,6 +490,7 @@ export default function SplitScreenPublished(props: LayoutComponentProps) {
                   src={imageSrc}
                   alt="Hero"
                   className="absolute inset-0 w-full h-full object-cover object-center rounded-2xl shadow-2xl"
+                  style={imgFilter ? { filter: imgFilter } : undefined}
                 />
               </div>
             ) : (

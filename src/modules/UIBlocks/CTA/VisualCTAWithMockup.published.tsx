@@ -16,6 +16,7 @@ import { CheckmarkIconPublished } from '@/components/published/CheckmarkIconPubl
 import { FormMarkupPublished } from '@/components/published/FormMarkupPublished';
 import { InlineFormMarkupPublished } from '@/components/published/InlineFormMarkupPublished';
 import { determineFormPlacement } from '@/utils/formPlacement';
+import { getImageFilter } from '@/lib/generation/imageColorTreatment';
 
 // V2: Trust item type
 interface TrustItem {
@@ -116,6 +117,7 @@ export default function VisualCTAWithMockupPublished(props: LayoutComponentProps
   const secondary_cta = props.secondary_cta || '';
   const urgency_text = props.urgency_text || '';
   const mockup_image = props.mockup_image || '';
+  const imgFilter = getImageFilter(theme?.colors?.paletteMode, theme?.colors?.paletteTemperature);
 
   // V2: Direct array access - trust_items is now TrustItem[]
   const trustItemsRaw = (props.trust_items || []) as TrustItem[];
@@ -287,6 +289,7 @@ export default function VisualCTAWithMockupPublished(props: LayoutComponentProps
                 src={mockup_image}
                 alt="Product Demo"
                 className="absolute inset-0 w-full h-full object-cover object-center rounded-2xl shadow-2xl"
+                style={imgFilter ? { filter: imgFilter } : undefined}
               />
             ) : (
               <ProductMockup />

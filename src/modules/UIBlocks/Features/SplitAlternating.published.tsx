@@ -159,6 +159,8 @@ export default function SplitAlternatingPublished(props: LayoutComponentProps) {
                       src={feature.visual || ''}
                       alt={feature.title || 'Feature visual'}
                       className="w-full h-80 object-cover rounded-xl shadow-2xl"
+                      paletteMode={theme?.colors?.paletteMode}
+                      paletteTemperature={theme?.colors?.paletteTemperature}
                     />
                   </div>
                 </div>

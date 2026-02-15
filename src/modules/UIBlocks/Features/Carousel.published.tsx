@@ -157,6 +157,8 @@ export default function CarouselPublished(props: LayoutComponentProps) {
                       src={feature.visual}
                       alt={feature.title || 'Feature'}
                       className="w-full h-auto rounded-xl"
+                      paletteMode={theme?.colors?.paletteMode}
+                      paletteTemperature={theme?.colors?.paletteTemperature}
                     />
                   </div>
                 )}

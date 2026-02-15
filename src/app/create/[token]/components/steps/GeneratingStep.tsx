@@ -10,7 +10,7 @@ import { getDesignTokensForVibe } from '@/modules/Design/vibeDesignTokens';
 import { generateBackgroundSystemFromPalette, assignSectionBackgrounds } from '@/modules/Design/background/backgroundIntegration';
 import { getPaletteById, getDefaultPaletteForVibe } from '@/modules/Design/background/palettes';
 import { compileBackground } from '@/modules/Design/background/textures';
-import { fetchPexelsImagesParallel, type ImageFetchResult } from '@/lib/generation/fetchImages';
+import { fetchPexelsImagesParallel, pickBestImage, type ImageFetchResult } from '@/lib/generation/fetchImages';
 import DesignQuestionsFlow, { type DesignChoices } from './DesignQuestionsFlow';
 
 // ─── Constants ───
@@ -44,12 +44,16 @@ function deriveCTAText(goal: string): string {
 
 function mergeImagesIntoSections(
   sections: Record<string, SectionCopy>,
-  imageResults: Map<string, ImageFetchResult>
+  imageResults: Map<string, ImageFetchResult>,
+  palette?: { mode: 'dark' | 'light'; temperature: 'cool' | 'neutral' | 'warm'; baseColor: string }
 ): Record<string, SectionCopy> {
   const merged = { ...sections };
 
   for (const [, result] of imageResults) {
-    const { sectionType, elementKey, imageUrl } = result;
+    const { sectionType, elementKey } = result;
+    const imageUrl = palette
+      ? pickBestImage(result, palette.mode, palette.temperature, palette.baseColor)
+      : result.imageUrl;
     if (imageUrl && merged[sectionType]?.elements) {
       merged[sectionType] = {
         ...merged[sectionType],
@@ -100,7 +104,10 @@ export default function GeneratingStep() {
 
   // Refs
   const hasCalledApi = useRef(false);
-  const copyResultRef = useRef<{ sections: Record<string, SectionCopy> } | null>(null);
+  const copyResultRef = useRef<{
+    sections: Record<string, SectionCopy>;
+    imageResults?: Map<string, ImageFetchResult>;
+  } | null>(null);
   const inactivityRef = useRef<ReturnType<typeof setTimeout>>();
 
   // ─── Save generated content to draft ───
@@ -130,8 +137,19 @@ export default function GeneratingStep() {
       // Apply texture
       const textureId = designChoices?.textureId || 'none';
 
-      console.log('🎨 [BG-V3] Palette:', palette.id, '| Texture:', textureId);
-      console.log('🎨 [BG-V3] BackgroundSystem:', JSON.stringify(backgroundSystem, null, 2));
+      console.log('[BG-V3] Palette:', palette.id, '| Texture:', textureId);
+      console.log('[BG-V3] BackgroundSystem:', JSON.stringify(backgroundSystem, null, 2));
+
+      // Score and pick best images now that palette is known
+      const imageResults = copyResultRef.current?.imageResults;
+      if (imageResults) {
+        const scored = mergeImagesIntoSections(sections, imageResults, {
+          mode: palette.mode,
+          temperature: palette.temperature,
+          baseColor: palette.baseColor,
+        });
+        Object.assign(sections, scored);
+      }
 
       const bgAssignments = assignSectionBackgrounds(sectionIds);
       const content: Record<string, any> = {};
@@ -175,6 +193,8 @@ export default function GeneratingStep() {
                 secondary: compileBackground(palette, textureId, 'secondary'),
                 neutral: palette.neutral,
               },
+              paletteMode: palette.mode,
+              paletteTemperature: palette.temperature,
             },
             vibe: strategy.vibe,
           },
@@ -250,15 +270,11 @@ export default function GeneratingStep() {
           }),
         }).then(r => r.json()),
 
-        fetchPexelsImagesParallel(categories, uiblocks as Record<string, string>),
+        fetchPexelsImagesParallel(categories, uiblocks as Record<string, string>, strategy.vibe),
       ]);
 
       if (copyResponse.success) {
-        const sectionsWithImages = mergeImagesIntoSections(
-          copyResponse.sections,
-          imageResults
-        );
-        copyResultRef.current = { sections: sectionsWithImages };
+        copyResultRef.current = { sections: copyResponse.sections, imageResults };
         setApiComplete(true);
         // Save deferred — dual-ready effect handles it
       } else {

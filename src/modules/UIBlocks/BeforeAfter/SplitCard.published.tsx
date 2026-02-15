@@ -29,7 +29,9 @@ function PremiumCardPublished({
   themeColors,
   textColors,
   bodyTypography,
-  accentColor
+  accentColor,
+  paletteMode,
+  paletteTemperature
 }: {
   type: 'before' | 'after';
   label: string;
@@ -47,6 +49,8 @@ function PremiumCardPublished({
   textColors: { heading: string; body: string; muted: string };
   bodyTypography: React.CSSProperties;
   accentColor: string;
+  paletteMode?: 'dark' | 'light';
+  paletteTemperature?: 'cool' | 'neutral' | 'warm';
 }) {
 
   // Visual Placeholder Component
@@ -98,6 +102,8 @@ function PremiumCardPublished({
             src={visual}
             alt={type === 'before' ? 'Current challenge visualization' : 'Premium solution result'}
             className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105"
+            paletteMode={paletteMode}
+            paletteTemperature={paletteTemperature}
           />
         ) : (
           <VisualPlaceholderPublished />
@@ -250,6 +256,8 @@ export default function SplitCardPublished(props: LayoutComponentProps) {
               textColors={textColors}
               bodyTypography={bodyTypography}
               accentColor={accentColor}
+              paletteMode={theme?.colors?.paletteMode}
+              paletteTemperature={theme?.colors?.paletteTemperature}
             />
 
             {/* Upgrade Indicator (Mobile) */}
@@ -302,6 +310,8 @@ export default function SplitCardPublished(props: LayoutComponentProps) {
               textColors={textColors}
               bodyTypography={bodyTypography}
               accentColor={accentColor}
+              paletteMode={theme?.colors?.paletteMode}
+              paletteTemperature={theme?.colors?.paletteTemperature}
             />
           </div>
         </div>
