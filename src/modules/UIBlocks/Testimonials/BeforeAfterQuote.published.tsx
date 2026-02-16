@@ -13,8 +13,7 @@ import { analyzeBackground } from '@/utils/backgroundAnalysis';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { AvatarPublished } from '@/components/published/AvatarPublished';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 
 // V2: Transformation type
 interface Transformation {
@@ -92,7 +91,7 @@ export default function BeforeAfterQuotePublished(props: LayoutComponentProps) {
   const transformations: Transformation[] = (props as any).transformations || [];
 
   // Detect UIBlock theme
-  const uiTheme: UIBlockTheme = props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+  const uiTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   // Card styles
   const { luminance } = analyzeBackground(sectionBackgroundCSS || '');

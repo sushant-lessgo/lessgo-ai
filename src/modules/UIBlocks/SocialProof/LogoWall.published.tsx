@@ -12,8 +12,8 @@ import { HeadlinePublished, TextPublished } from '@/components/published/TextPub
 import { LogoPublished } from '@/components/published/LogoPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { Check } from 'lucide-react';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import { analyzeBackground } from '@/utils/backgroundAnalysis';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 
 // V2 Type definitions
 interface Company {
@@ -69,8 +69,7 @@ export default function LogoWallPublished(props: LayoutComponentProps) {
   const bodyTypography = getPublishedTypographyStyles('body-lg', theme);
 
   // Theme detection
-  const uiBlockTheme =
-    props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+  const uiBlockTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   // Card styles
   const { luminance } = analyzeBackground(sectionBackgroundCSS || '');

@@ -10,8 +10,7 @@ import {
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 import { getCardStyles } from '@/modules/Design/cardStyles';
 import { isHexColor } from '@/utils/colorUtils';
 
@@ -394,11 +393,7 @@ export default function Carousel(props: LayoutComponentProps) {
   const bodyLgStyle = getTypographyStyle('body-lg');
 
   // Detect theme: manual override > auto-detection > neutral fallback
-  const uiBlockTheme = React.useMemo(() => {
-    if (props.manualThemeOverride) return props.manualThemeOverride;
-    if (props.userContext) return selectUIBlockTheme(props.userContext);
-    return 'neutral';
-  }, [props.manualThemeOverride, props.userContext]);
+  const uiBlockTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   // Adaptive card styles based on section background luminance
   const cardStyles = React.useMemo(() => {

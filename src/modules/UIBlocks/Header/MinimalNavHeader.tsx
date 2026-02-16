@@ -30,6 +30,7 @@ const MinimalNavHeader: React.FC<LayoutComponentProps> = (props) => {
     mode,
     blockContent,
     colorTokens,
+    dynamicTextColors,
     sectionBackground,
     backgroundType,
     handleContentUpdate
@@ -127,8 +128,7 @@ const MinimalNavHeader: React.FC<LayoutComponentProps> = (props) => {
                 <li key={navItem.id}>
                   <a 
                     href={navItem.link}
-                    className="text-sm font-medium transition-colors cursor-pointer"
-                    style={{ color: colorTokens?.textPrimary || '#374151' }}
+                    className={`text-sm font-medium transition-colors cursor-pointer ${dynamicTextColors?.heading || 'text-gray-700'}`}
                     onClick={(e) => handleNavClick(e, navItem.link)}
                   >
                     {navItem.label || `Nav Item ${index + 1}`}

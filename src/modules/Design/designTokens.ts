@@ -1,4 +1,4 @@
-import type { UIBlockTheme } from './ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from './ColorSystem/uiBlockTheme';
 
 /**
  * Unified Design Tokens for UIBlock Visual Polish

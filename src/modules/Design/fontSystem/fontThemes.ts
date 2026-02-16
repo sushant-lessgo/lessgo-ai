@@ -1,97 +1,31 @@
-export type FontTheme = {
-  toneId: string;
-  headingFont: string; // CSS font-family value
-  bodyFont: string;    // CSS font-family value
-};
+// fontThemes.ts — Font combo definitions split by loading strategy
+// Optimized = self-hosted in /public/fonts/ (Inter, Sora, DM Sans, Playfair Display)
+// Google = loaded from Google Fonts API on demand
 
-export const fontThemesByTone: Record<string, FontTheme[]> = {
-  "confident-playful": [
-    {
-      toneId: "confident-playful",
-      headingFont: "'Bricolage Grotesque', sans-serif",
-      bodyFont: "'Inter', sans-serif"
-    },
-    {
-      toneId: "confident-playful",
-      headingFont: "'Poppins', sans-serif",
-      bodyFont: "'Open Sans', sans-serif"
-    },
-    {
-      toneId: "confident-playful",
-      headingFont: "'Rubik', sans-serif",
-      bodyFont: "'Inter', sans-serif"
-    }
-  ],
+import type { FontTheme } from '@/types/core/index';
 
-  "minimal-technical": [
-    {
-      toneId: "minimal-technical",
-      headingFont: "'Inter', sans-serif",
-      bodyFont: "'Inter', sans-serif"
-    },
-    {
-      toneId: "minimal-technical",
-      headingFont: "'Manrope', sans-serif",
-      bodyFont: "'Inter', sans-serif"
-    },
-    {
-      toneId: "minimal-technical",
-      headingFont: "'Sora', sans-serif",
-      bodyFont: "'Inter', sans-serif"
-    }
-  ],
+export type { FontTheme };
 
-  "bold-persuasive": [
-    {
-      toneId: "bold-persuasive",
-      headingFont: "'Space Grotesk', sans-serif",
-      bodyFont: "'DM Sans', sans-serif"
-    },
-    {
-      toneId: "bold-persuasive",
-      headingFont: "'Plus Jakarta Sans', sans-serif",
-      bodyFont: "'DM Sans', sans-serif"
-    },
-    {
-      toneId: "bold-persuasive",
-      headingFont: "'Outfit', sans-serif",
-      bodyFont: "'Inter', sans-serif"
-    }
-  ],
+/** Self-hosted font combos — zero external requests, fastest LCP */
+export const optimizedFontThemes: FontTheme[] = [
+  { headingFont: "'Sora', sans-serif", bodyFont: "'Inter', sans-serif" },
+  { headingFont: "'Inter', sans-serif", bodyFont: "'Inter', sans-serif" },
+  { headingFont: "'DM Sans', sans-serif", bodyFont: "'DM Sans', sans-serif" },
+  { headingFont: "'Sora', sans-serif", bodyFont: "'DM Sans', sans-serif" },
+  { headingFont: "'Playfair Display', serif", bodyFont: "'Inter', sans-serif" },
+  { headingFont: "'DM Sans', sans-serif", bodyFont: "'Inter', sans-serif" },
+  { headingFont: "'Playfair Display', serif", bodyFont: "'DM Sans', sans-serif" },
+];
 
-  "friendly-helpful": [
-    {
-      toneId: "friendly-helpful",
-      headingFont: "'Poppins', sans-serif",
-      bodyFont: "'Open Sans', sans-serif"
-    },
-    {
-      toneId: "friendly-helpful",
-      headingFont: "'Rubik', sans-serif",
-      bodyFont: "'Inter', sans-serif"
-    },
-    {
-      toneId: "friendly-helpful",
-      headingFont: "'Nunito', sans-serif",
-      bodyFont: "'Inter', sans-serif"
-    }
-  ],
+/** Google Font combos — require external load */
+export const googleFontThemes: FontTheme[] = [
+  { headingFont: "'Bricolage Grotesque', sans-serif", bodyFont: "'Inter', sans-serif" },
+  { headingFont: "'Space Grotesk', sans-serif", bodyFont: "'DM Sans', sans-serif" },
+  { headingFont: "'DM Serif Display', serif", bodyFont: "'Inter', sans-serif" },
+  { headingFont: "'Raleway', sans-serif", bodyFont: "'Open Sans', sans-serif" },
+  { headingFont: "'Manrope', sans-serif", bodyFont: "'Inter', sans-serif" },
+  { headingFont: "'Rubik', sans-serif", bodyFont: "'Inter', sans-serif" },
+];
 
-  "luxury-expert": [
-    {
-      toneId: "luxury-expert",
-      headingFont: "'Playfair Display', serif",
-      bodyFont: "'Inter', sans-serif"
-    },
-    {
-      toneId: "luxury-expert",
-      headingFont: "'DM Serif Display', serif",
-      bodyFont: "'Inter', sans-serif"
-    },
-    {
-      toneId: "luxury-expert",
-      headingFont: "'Raleway', sans-serif",
-      bodyFont: "'Open Sans', sans-serif"
-    }
-  ]
-};
+/** All font themes combined */
+export const allFontThemes: FontTheme[] = [...optimizedFontThemes, ...googleFontThemes];

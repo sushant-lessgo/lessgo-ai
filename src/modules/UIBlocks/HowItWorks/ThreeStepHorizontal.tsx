@@ -6,8 +6,7 @@ import {
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 import { getCardStyles, CardStyles } from '@/modules/Design/cardStyles';
 
 interface ThreeStepHorizontalProps extends LayoutComponentProps {}
@@ -218,11 +217,7 @@ export default function ThreeStepHorizontal(props: ThreeStepHorizontalProps) {
   });
 
   // Detect theme: manual override > auto-detection > neutral fallback
-  const uiBlockTheme = React.useMemo(() => {
-    if (props.manualThemeOverride) return props.manualThemeOverride;
-    if (props.userContext) return selectUIBlockTheme(props.userContext);
-    return 'neutral';
-  }, [props.manualThemeOverride, props.userContext]);
+  const uiBlockTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   const stepColors = getStepColors(uiBlockTheme);
 

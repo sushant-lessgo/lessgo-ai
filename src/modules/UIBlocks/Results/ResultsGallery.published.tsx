@@ -10,8 +10,7 @@ import { LayoutComponentProps } from '@/types/storeTypes';
 import { getPublishedTextColors, getPublishedTypographyStyles } from '@/lib/publishedTextColors';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 
 // V2: Gallery item structure
 interface GalleryItem {
@@ -37,9 +36,7 @@ export default function ResultsGalleryPublished(props: LayoutComponentProps) {
   if (galleryItems.length === 0) return null;
 
   // Theme detection
-  const uiTheme: UIBlockTheme =
-    props.manualThemeOverride ||
-    (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+  const uiTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   // Text colors - using colorTokens, no hard-coded hex
   const textColors = getPublishedTextColors(

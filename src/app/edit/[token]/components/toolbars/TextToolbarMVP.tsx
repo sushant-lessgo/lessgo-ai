@@ -818,7 +818,7 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
             width: 380,
             maxHeight: 300,
           }}
-          onMouseDown={(e) => e.stopPropagation()}
+          onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
         >
           <div className="p-4">
             <div className="flex items-center justify-between mb-3">

@@ -9,8 +9,7 @@ import {
 import IconEditableText from '@/components/ui/IconEditableText';
 import AvatarEditableComponent from '@/components/ui/AvatarEditableComponent';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 import { getCardStyles, type CardStyles } from '@/modules/Design/cardStyles';
 
 // V2: Transformation type for clean array structure
@@ -103,11 +102,7 @@ export default function BeforeAfterQuote(props: LayoutComponentProps) {
   });
 
   // Theme detection: manual override > auto-detection > neutral fallback
-  const theme = React.useMemo(() => {
-    if (props.manualThemeOverride) return props.manualThemeOverride;
-    if (props.userContext) return selectUIBlockTheme(props.userContext);
-    return 'neutral';
-  }, [props.manualThemeOverride, props.userContext]);
+  const theme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   const cardStyles = React.useMemo(() => getCardStyles({
     sectionBackgroundCSS: sectionBackground || '',

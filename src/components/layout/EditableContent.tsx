@@ -783,39 +783,40 @@ export function EditableAdaptiveHeadline({
   // Debug logging (reduced)
   
   const getAdaptiveTextColor = () => {
-    // ✅ PRIORITY: Check for stored text colors from colorTokens first
-    if (colorTokens?.textColors && backgroundType && backgroundType !== 'custom') {
-      // Map background types to storage keys
-      const mapping: Record<string, string> = {
-        'primary-highlight': 'primary',
-        'secondary-highlight': 'secondary',
-        'neutral': 'neutral',
-        'primary': 'primary',
-        'secondary': 'secondary',
-      };
-      const storageKey = mapping[backgroundType] || backgroundType;
-      const storedTextColors = colorTokens.textColors[storageKey as keyof typeof colorTokens.textColors];
-      if (storedTextColors && storedTextColors.heading) {
-        const smartColor = storedTextColors.heading;
-        const colorClass = hexToTailwindClass(smartColor);
-        return { class: colorClass, value: smartColor };
-      }
+    // Use the already-correct dynamic text colors from useLayoutComponent
+    // These are computed using the actual section backgroundType from store,
+    // not the potentially-wrong backgroundType prop
+    if (colorTokens?.dynamicHeading) {
+      const colorClass = colorTokens.dynamicHeading;
+      const value = tailwindClassToHex(colorClass);
+      return { class: colorClass, value };
     }
-    
-    // ✅ FALLBACK: Use dynamic text color calculation
+
+    // Fallback: calculate from actual section background
     const sectionBackground = props.sectionBackground || colorTokens?.bgPrimary || 'bg-white';
     const smartColor = getSmartTextColor(sectionBackground, 'heading');
-    
-    // Generate CSS class name from color (simplified mapping) - ✅ FIX: Added text-gray-50
-    const colorClass = smartColor === '#ffffff' ? 'text-white' : 
-                      smartColor === '#e5e7eb' ? 'text-gray-200' :
-                      smartColor === '#374151' ? 'text-gray-700' : 
-                      smartColor === '#111827' ? 'text-gray-900' : 
-                      smartColor === '#f9fafb' ? 'text-gray-50' : 'text-gray-900';
-    
+    const colorClass = hexToTailwindClass(smartColor);
     return { class: colorClass, value: smartColor };
   };
-  
+
+  const tailwindClassToHex = (cls: string): string => {
+    const map: Record<string, string> = {
+      'text-white': '#ffffff',
+      'text-gray-50': '#f9fafb',
+      'text-gray-100': '#f3f4f6',
+      'text-gray-200': '#e5e7eb',
+      'text-gray-300': '#d1d5db',
+      'text-gray-400': '#9ca3af',
+      'text-gray-500': '#6b7280',
+      'text-gray-600': '#4b5563',
+      'text-gray-700': '#374151',
+      'text-gray-800': '#1f2937',
+      'text-gray-900': '#111827',
+      'text-black': '#000000',
+    };
+    return map[cls] || '#111827';
+  };
+
   // Helper function to convert hex to Tailwind classes for headlines
   const hexToTailwindClass = (hex: string): string => {
     const colorMap: Record<string, string> = {
@@ -834,7 +835,7 @@ export function EditableAdaptiveHeadline({
     };
     return colorMap[hex] || 'text-gray-900';
   };
-  
+
   // Helper function to extract hex values from Tailwind classes
   const extractColorValue = (colorClass: string): string => {
     if (colorClass.includes('text-gray-900')) return '#111827';
@@ -928,41 +929,43 @@ export function EditableAdaptiveText({
   }, [value]);
 
   const getAdaptiveTextColor = () => {
-    // ✅ PRIORITY: Check for stored text colors from colorTokens first
     const textType = variant === 'muted' ? 'muted' : 'body';
-    
-    if (colorTokens?.textColors && backgroundType && backgroundType !== 'custom') {
-      // Map background types to storage keys
-      const mapping: Record<string, string> = {
-        'primary-highlight': 'primary',
-        'secondary-highlight': 'secondary',
-        'neutral': 'neutral',
-        'primary': 'primary',
-        'secondary': 'secondary',
-      };
-      const storageKey = mapping[backgroundType] || backgroundType;
-      const storedTextColors = colorTokens.textColors[storageKey as keyof typeof colorTokens.textColors];
-      if (storedTextColors && storedTextColors[textType]) {
-        const smartColor = storedTextColors[textType];
-        const colorClass = hexToTailwindClass(smartColor);
-        return { class: colorClass, value: smartColor };
-      }
+    const dynamicKey = variant === 'muted' ? 'dynamicMuted' : 'dynamicBody';
+
+    // Use the already-correct dynamic text colors from useLayoutComponent
+    // These are computed using the actual section backgroundType from store,
+    // not the potentially-wrong backgroundType prop
+    if (colorTokens?.[dynamicKey]) {
+      const colorClass = colorTokens[dynamicKey];
+      const value = tailwindClassToHex(colorClass);
+      return { class: colorClass, value };
     }
-    
-    // ✅ FALLBACK: Use dynamic text color calculation
+
+    // Fallback: calculate from actual section background
     const sectionBackground = props.sectionBackground || colorTokens?.bgPrimary || 'bg-white';
     const smartColor = getSmartTextColor(sectionBackground, textType);
-    
-    // Generate CSS class name from color (simplified mapping)
-    const colorClass = smartColor === '#ffffff' ? 'text-white' : 
-                      smartColor === '#e5e7eb' ? 'text-gray-200' :
-                      smartColor === '#6b7280' ? 'text-gray-500' :
-                      smartColor === '#374151' ? 'text-gray-700' : 
-                      smartColor === '#111827' ? 'text-gray-900' : 'text-gray-700';
-    
+    const colorClass = hexToTailwindClass(smartColor);
     return { class: colorClass, value: smartColor };
   };
-  
+
+  const tailwindClassToHex = (cls: string): string => {
+    const map: Record<string, string> = {
+      'text-white': '#ffffff',
+      'text-gray-50': '#f9fafb',
+      'text-gray-100': '#f3f4f6',
+      'text-gray-200': '#e5e7eb',
+      'text-gray-300': '#d1d5db',
+      'text-gray-400': '#9ca3af',
+      'text-gray-500': '#6b7280',
+      'text-gray-600': '#4b5563',
+      'text-gray-700': '#374151',
+      'text-gray-800': '#1f2937',
+      'text-gray-900': '#111827',
+      'text-black': '#000000',
+    };
+    return map[cls] || '#111827';
+  };
+
   // Helper function to convert hex to Tailwind classes for text
   const hexToTailwindClass = (hex: string): string => {
     const colorMap: Record<string, string> = {
@@ -981,7 +984,7 @@ export function EditableAdaptiveText({
     };
     return colorMap[hex] || 'text-gray-700';
   };
-  
+
   // Helper function to extract hex values from Tailwind classes
   const extractColorValue = (colorClass: string): string => {
     if (colorClass.includes('text-gray-900')) return '#111827';

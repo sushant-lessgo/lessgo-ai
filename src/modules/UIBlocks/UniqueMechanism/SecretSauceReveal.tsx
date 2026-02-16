@@ -7,8 +7,7 @@ import { LayoutSection } from '@/components/layout/LayoutSection';
 import { EditableAdaptiveHeadline, EditableAdaptiveText } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 import { inferIconFromText } from '@/lib/iconCategoryMap';
 import { getDynamicCardLayout } from '@/utils/dynamicCardLayout';
 import { cn } from '@/lib/utils';
@@ -172,11 +171,7 @@ export default function SecretSauceReveal(props: LayoutComponentProps) {
   const onboardingStore = useOnboardingStore();
 
   // Detect theme: manual override > auto-detection > neutral fallback
-  const uiTheme = React.useMemo(() => {
-    if (props.manualThemeOverride) return props.manualThemeOverride;
-    if (props.userContext) return selectUIBlockTheme(props.userContext);
-    return 'neutral';
-  }, [props.manualThemeOverride, props.userContext]);
+  const uiTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   // Card styles from luminance-based system
   const cardStyles = React.useMemo(() => {

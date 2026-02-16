@@ -7,8 +7,7 @@ import {
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 import { shadows, cardEnhancements } from '@/modules/Design/designTokens';
 import { getCardStyles, type CardStyles } from '@/modules/Design/cardStyles';
 import { isHexColor } from '@/utils/colorUtils';
@@ -135,11 +134,7 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
 
   // Theme - using useMemo pattern from ThreeStepHorizontal
-  const uiBlockTheme = React.useMemo(() => {
-    if (props.manualThemeOverride) return props.manualThemeOverride;
-    if (props.userContext) return selectUIBlockTheme(props.userContext);
-    return 'neutral';
-  }, [props.manualThemeOverride, props.userContext]);
+  const uiBlockTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   const themeStyles = getThemeStyles(uiBlockTheme);
 

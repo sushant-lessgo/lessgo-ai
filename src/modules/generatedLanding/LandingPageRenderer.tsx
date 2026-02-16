@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useOnboardingStore } from '@/hooks/useOnboardingStore';
@@ -136,22 +136,7 @@ export default function LandingPageRenderer({ className = '', tokenId, published
   // Get onboarding data for dynamic backgrounds
   const { validatedFields, hiddenInferredFields } = useOnboardingStore();
 
-  // Build userContext from taxonomy data for UIBlock theme detection
-  const userContext = React.useMemo(() => {
-    if (!validatedFields || !hiddenInferredFields) return undefined;
-
-    return {
-      marketCategory: validatedFields.marketCategory,
-      targetAudience: validatedFields.targetAudience,
-      landingPageGoals: validatedFields.landingPageGoals,
-      startupStage: validatedFields.startupStage,
-      toneProfile: hiddenInferredFields.toneProfile,
-      awarenessLevel: hiddenInferredFields.awarenessLevel,
-      pricingModel: validatedFields.pricingModel,
-    };
-  }, [validatedFields, hiddenInferredFields]);
-
-  // Extract manual theme override for UIBlocks
+  // Extract manual theme override for UIBlocks (future: set via edit header toggle)
   const manualThemeOverride = theme?.uiBlockTheme;
 
   // ✅ Generate dynamic background system (unchanged)
@@ -193,12 +178,15 @@ export default function LandingPageRenderer({ className = '', tokenId, published
     return null;
   }
 }, [validatedFields, hiddenInferredFields]);
-  // ✅ Sync background system with store theme
+  // ✅ Sync background system with store theme (only if no saved backgrounds exist)
+  const hasInitializedBg = useRef(false);
   useEffect(() => {
-    if (dynamicBackgroundSystem) {
-     // Syncing background system with store theme
-      updateFromBackgroundSystem(dynamicBackgroundSystem);
-    // Background system synced with store theme
+    if (dynamicBackgroundSystem && !hasInitializedBg.current) {
+      const existing = theme?.colors?.sectionBackgrounds?.primary;
+      if (!existing) {
+        updateFromBackgroundSystem(dynamicBackgroundSystem);
+      }
+      hasInitializedBg.current = true;
     }
   }, [dynamicBackgroundSystem, updateFromBackgroundSystem]);
 
@@ -466,7 +454,7 @@ const finalSections: OrderedSection[] = processedSections
                 sectionBackgroundCSS={sectionBackgroundCSS}
                 className=""
                 isEditable={mode !== 'preview'}
-                userContext={userContext}
+
                 manualThemeOverride={manualThemeOverride}
                 publishedPageId={publishedPageId}
                 pageOwnerId={pageOwnerId}
@@ -502,7 +490,7 @@ const finalSections: OrderedSection[] = processedSections
                 sectionBackgroundCSS={sectionBackgroundCSS}
                 className=""
                 isEditable={mode !== 'preview'}
-                userContext={userContext}
+
                 manualThemeOverride={manualThemeOverride}
                 publishedPageId={publishedPageId}
                 pageOwnerId={pageOwnerId}

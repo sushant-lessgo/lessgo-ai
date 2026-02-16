@@ -17,8 +17,7 @@ import { HeadlinePublished, TextPublished } from '@/components/published/TextPub
 import { IconPublished } from '@/components/published/IconPublished';
 import { ImagePublished } from '@/components/published/ImagePublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 
 // Premium Card Component (server-safe)
 function PremiumCardPublished({
@@ -124,7 +123,7 @@ function PremiumCardPublished({
             element="span"
             style={{
               ...bodyTypography,
-              color: type === 'before' ? themeColors.beforeLabel : accentColor
+              color: type === 'before' ? cardStyles.textHeading : accentColor
             }}
           />
         </div>
@@ -164,8 +163,7 @@ export default function SplitCardPublished(props: LayoutComponentProps) {
   const upgrade_icon = props.upgrade_icon || 'ArrowRight';
 
   // Detect UIBlock theme
-  const uiTheme: UIBlockTheme = props.manualThemeOverride ||
-    (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+  const uiTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   // Get accent color from theme
   const accentColor = theme?.colors?.accentColor || '#3b82f6';

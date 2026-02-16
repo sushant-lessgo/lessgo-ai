@@ -13,8 +13,7 @@ import { analyzeBackground } from '@/utils/backgroundAnalysis';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { IconPublished } from '@/components/published/IconPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 
 // Win item structure (V2 array format)
 interface WinItem {
@@ -39,7 +38,7 @@ export default function StackedWinsListPublished(props: LayoutComponentProps) {
   const wins: WinItem[] = Array.isArray(props.wins) ? props.wins : [];
 
   // Detect theme
-  const uiTheme: UIBlockTheme = props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+  const uiTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   // Get luminance from section background
   const { luminance } = analyzeBackground(sectionBackgroundCSS || '');

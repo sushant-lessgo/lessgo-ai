@@ -7,8 +7,7 @@ import {
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 import { inferIconFromText } from '@/lib/iconCategoryMap';
 import { getDynamicCardLayout, isSplitLayout } from '@/utils/dynamicCardLayout';
 import { cn } from '@/lib/utils';
@@ -198,11 +197,7 @@ export default function StatBlocks(props: StatBlocksProps) {
   });
 
   // Theme detection: manual override > auto-detection > neutral fallback
-  const theme = React.useMemo(() => {
-    if (props.manualThemeOverride) return props.manualThemeOverride;
-    if (props.userContext) return selectUIBlockTheme(props.userContext);
-    return 'neutral';
-  }, [props.manualThemeOverride, props.userContext]);
+  const theme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   // Get adaptive card styles based on section background luminance
   const cardStyles = React.useMemo(() => {

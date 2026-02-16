@@ -6,8 +6,7 @@ import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { logger } from '@/lib/logger';
 import { shadows } from '@/modules/Design/designTokens';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 import { 
   EditableAdaptiveHeadline, 
   EditableAdaptiveText, 
@@ -55,7 +54,7 @@ const CONTENT_SCHEMA = {
   },
   secondary_cta_text: {
     type: 'string' as const,
-    default: 'Watch Demo'
+    default: ''
   },
   subheadline: {
     type: 'string' as const,
@@ -124,7 +123,7 @@ const HeroImagePlaceholder = React.memo(({ theme = 'neutral' }: { theme?: UIBloc
   };
 
   return (
-    <div className="relative w-[70%] lg:w-[80%] aspect-[16/9] mx-auto">
+    <div className="relative w-[60%] lg:w-[65%] aspect-[16/9] mx-auto">
       <div className={`absolute inset-0 bg-gradient-to-br ${gradients[theme]} rounded-2xl shadow-2xl overflow-hidden transform hover:scale-[1.02] transition-transform duration-500`}>
 
         {/* Simplified centered content */}
@@ -179,11 +178,7 @@ export default function CenterStacked(props: LayoutComponentProps) {
   });
 
   // Detect theme: manual override > auto-detection > neutral fallback
-  const theme = React.useMemo(() => {
-    if (props.manualThemeOverride) return props.manualThemeOverride;
-    if (props.userContext) return selectUIBlockTheme(props.userContext);
-    return 'neutral';
-  }, [props.manualThemeOverride, props.userContext]);
+  const theme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   // Create typography styles
   const bodyLgStyle = getTypographyStyle('body-lg');
@@ -634,7 +629,7 @@ export default function CenterStacked(props: LayoutComponentProps) {
               const imageSrc = isValidImagePath && imageValue !== '' ? imageValue : '/hero-placeholder.jpg';
 
               return imageSrc ? (
-                <div className="relative w-[70%] lg:w-[80%] aspect-video mx-auto overflow-hidden">
+                <div className="relative w-[60%] lg:w-[65%] aspect-video mx-auto overflow-hidden">
                   <img
                     src={imageSrc}
                     alt="Hero"

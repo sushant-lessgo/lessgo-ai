@@ -11,8 +11,7 @@ import {
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 import { getCardStyles } from '@/modules/Design/cardStyles';
 
 // Pair structure
@@ -111,11 +110,7 @@ export default function MythVsRealityGrid(props: LayoutComponentProps) {
   const bodyStyle = getTypographyStyle('body');
 
   // Theme detection: manual override > auto-detection > neutral fallback
-  const theme = React.useMemo(() => {
-    if (props.manualThemeOverride) return props.manualThemeOverride;
-    if (props.userContext) return selectUIBlockTheme(props.userContext);
-    return 'neutral';
-  }, [props.manualThemeOverride, props.userContext]);
+  const theme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   // Card styles from luminance-based system
   const cardStyles = React.useMemo(() => getCardStyles({

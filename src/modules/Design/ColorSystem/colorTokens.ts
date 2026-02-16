@@ -12,16 +12,6 @@ import {
 import { generateAccentCandidates } from '@/utils/colorHarmony';
 import { analyzeBackground } from '@/utils/backgroundAnalysis';
 import { calculateLuminance, parseColor } from '@/utils/colorUtils';
-import { selectUIBlockTheme } from './selectUIBlockThemeFromTags';
-import type {
-  MarketCategory,
-  TargetAudience,
-  LandingGoalType,
-  StartupStage,
-  ToneProfile,
-  AwarenessLevel,
-  PricingModel
-} from '@/modules/inference/taxonomy';
 
 export type SectionBackgroundInput = {
   primary?: string;    // Hero + CTA sections
@@ -34,23 +24,13 @@ export function generateColorTokens({
   accentColor = "purple",
   accentCSS,  // ✅ Now properly used for CTAs
   sectionBackgrounds = {},
-  storedTextColors,  // ✅ NEW: Use stored text colors if available
-  userContext  // ✅ NEW: Full taxonomy context for theme detection
+  storedTextColors,
 }: {
   baseColor?: string;         // From bgVariations (e.g., "blue", "sky")
   accentColor?: string;       // From accentOptions (e.g., "purple", "indigo") - for CTAs
   accentCSS?: string;         // From accentOptions - for CTAs (e.g., "bg-purple-600")
   sectionBackgrounds?: SectionBackgroundInput; // From backgroundIntegration system
-  storedTextColors?: import('@/types/core/content').TextColorsForBackgrounds; // ✅ NEW: Stored text colors from theme
-  userContext?: {  // ✅ NEW: Full taxonomy context for theme selection
-    marketCategory: MarketCategory;
-    targetAudience: TargetAudience;
-    landingPageGoals: LandingGoalType;
-    startupStage: StartupStage;
-    toneProfile: ToneProfile;
-    awarenessLevel: AwarenessLevel;
-    pricingModel: PricingModel;
-  };
+  storedTextColors?: import('@/types/core/content').TextColorsForBackgrounds;
 }) {
   
   // Helper function to convert hex to Tailwind bg class
@@ -59,11 +39,8 @@ export function generateColorTokens({
     return `bg-[${hex}]`; // Use arbitrary value syntax for exact hex colors
   };
 
-  // ✅ ENHANCED: Smart accent CSS generation using color harmony with theme detection
-  // Auto-detect theme from user context if available, otherwise default to neutral
-  const detectedTheme = userContext ? selectUIBlockTheme(userContext) : 'neutral';
   const businessContext = {
-    industry: detectedTheme,  // Use detected theme instead of hardcoded 'tech'
+    industry: 'neutral' as const,
     tone: 'professional' as const
   };
   const accentCandidates = generateAccentCandidates(baseColor, businessContext);

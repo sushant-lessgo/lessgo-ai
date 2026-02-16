@@ -5,7 +5,7 @@ import type { Theme, ColorTokens } from '@/types/core/index';
 // ✅ CORRECT
 import type { EditStore, EditHistoryEntry } from '@/types/store';
 import type { LayoutActions } from '@/types/store';
-import { pickFontFromOnboarding } from '@/modules/Design/fontSystem/pickFont';
+// pickFont archived — vibe not persisted, reset uses hardcoded Sora+Inter
 import type { FontTheme, TypographyState } from '@/types/core/index';
 
 import { logger } from '@/lib/logger';
@@ -557,15 +557,13 @@ updateTypographyTheme: (newTheme: FontTheme) =>
 resetTypographyToGenerated: () =>
   set((state: EditStore) => {
     const oldTypography = { ...state.theme.typography };
-    
-    // Generate original typography from onboarding data
-    const originalFont = pickFontFromOnboarding();
-    
-    state.theme.typography.headingFont = originalFont.headingFont;
-    state.theme.typography.bodyFont = originalFont.bodyFont;
-    
+
+    // Vibe not persisted on theme, so reset to most neutral default
+    state.theme.typography.headingFont = "'Sora', sans-serif";
+    state.theme.typography.bodyFont = "'Inter', sans-serif";
+
     state.persistence.isDirty = true;
-    
+
     // Add to history
     state.history.undoStack.push({
       type: 'theme',
@@ -574,13 +572,8 @@ resetTypographyToGenerated: () =>
       beforeState: { typography: oldTypography },
       afterState: { typography: state.theme.typography },
     });
-    
+
     state.history.redoStack = [];
-    
-    //   originalFont,
-    //   headingFont: originalFont.headingFont,
-    //   bodyFont: originalFont.bodyFont,
-    // });
   }),
 
 getTypographyForSection: (sectionId: string) => {
@@ -589,7 +582,6 @@ getTypographyForSection: (sectionId: string) => {
   // Check for section-level customizations first
   // For now, return global typography (section customizations can be added later)
   return {
-    toneId: state.onboardingData?.hiddenInferredFields?.toneProfile || 'minimal-technical',
     headingFont: state.theme.typography.headingFont,
     bodyFont: state.theme.typography.bodyFont,
   } as FontTheme;

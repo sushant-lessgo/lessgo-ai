@@ -458,7 +458,6 @@ export interface BrandColors {
  * ===== TYPOGRAPHY TYPES =====
  */
 export interface FontTheme {
-  toneId: string;
   headingFont: string; // CSS font-family value
   bodyFont: string;    // CSS font-family value
 }

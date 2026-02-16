@@ -10,8 +10,7 @@ import { LayoutComponentProps } from '@/types/storeTypes';
 import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardStyles } from '@/lib/publishedTextColors';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 import { analyzeBackground } from '@/utils/backgroundAnalysis';
 
 interface Scenario {
@@ -42,8 +41,7 @@ export default function RoleBasedScenariosPublished(props: LayoutComponentProps)
   };
 
   // Detect theme: manual override > auto-detection > neutral fallback
-  const uiTheme: UIBlockTheme = props.manualThemeOverride ||
-    (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+  const uiTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   // Get luminance from section background
   const { luminance } = analyzeBackground(sectionBackgroundCSS || '');

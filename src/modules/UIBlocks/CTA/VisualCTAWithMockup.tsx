@@ -17,8 +17,7 @@ import { CTAButton } from '@/components/layout/ComponentRegistry';
 import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { createCTAClickHandler } from '@/utils/ctaHandler';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 
 // V2: Trust item type
 interface TrustItem {
@@ -53,7 +52,7 @@ const CONTENT_SCHEMA = {
   },
   secondary_cta: {
     type: 'string' as const,
-    default: 'Watch Demo'
+    default: ''
   },
   urgency_text: {
     type: 'string' as const,
@@ -172,11 +171,7 @@ export default function VisualCTAWithMockup(props: LayoutComponentProps) {
   });
 
   // V2: Theme detection with priority
-  const uiBlockTheme = React.useMemo(() => {
-    if (props.manualThemeOverride) return props.manualThemeOverride;
-    if (props.userContext) return selectUIBlockTheme(props.userContext);
-    return 'neutral';
-  }, [props.manualThemeOverride, props.userContext]);
+  const uiBlockTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   // Theme-based colors for urgency badge
   const themeColors = React.useMemo(() => ({
@@ -219,15 +214,19 @@ export default function VisualCTAWithMockup(props: LayoutComponentProps) {
             {/* Urgency Badge */}
             {(blockContent.urgency_text || mode === 'edit') && (
               <div className="mb-4">
-                <EditableBadge
+                <EditableAdaptiveText
                   mode={mode}
                   value={blockContent.urgency_text || ''}
                   onEdit={(value) => handleContentUpdate('urgency_text', value)}
-                  colorTokens={{ accent: themeColors.urgencyBadge }}
+                  backgroundType={safeBackgroundType}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  textStyle={{ fontSize: '0.875rem', fontWeight: 500 }}
+                  className="inline-flex items-center px-3 py-1 rounded-full animate-pulse"
                   placeholder="🔥 Limited Time: 50% Off"
-                  className="animate-pulse"
                   sectionId={sectionId}
                   elementKey="urgency_text"
+                  sectionBackground={sectionBackground}
                 />
               </div>
             )}

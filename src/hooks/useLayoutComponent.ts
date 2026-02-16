@@ -272,10 +272,6 @@ export function useLayoutComponent<T = Record<string, any>>({
   // ✅ ENHANCED: Use new smart text color system with WCAG validation
   const sectionBackground = getSectionBackground();
 
-  // DEBUG: Verify what reaches UIBlocks
-  console.log('🖼️ [DEBUG-BUG3]', sectionId, '| backgroundType:', backgroundType, '| sectionBackground:', sectionBackground);
-  console.log('🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds:', JSON.stringify(theme?.colors?.sectionBackgrounds, null, 2));
-
   // Map background types to storage keys
   const mapBackgroundTypeToStorageKey = (bgType: string): string => {
     const mapping: Record<string, string> = {

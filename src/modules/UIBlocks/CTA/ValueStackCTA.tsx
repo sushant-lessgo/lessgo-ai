@@ -12,8 +12,7 @@ import {
 import { CTAButton } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { createCTAClickHandler } from '@/utils/ctaHandler';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 
 // V2 Content interface - simplified with value_items array
 interface ValueStackCTAContent {
@@ -43,7 +42,7 @@ const CONTENT_SCHEMA = {
   },
   secondary_cta_text: {
     type: 'string' as const,
-    default: 'Compare Plans'
+    default: ''
   },
   final_cta_headline: {
     type: 'string' as const,
@@ -113,11 +112,7 @@ export default function ValueStackCTA(props: LayoutComponentProps) {
   const bodyLgStyle = getTypographyStyle('body-lg');
 
   // Theme detection: manual override > auto-detection > neutral
-  const uiBlockTheme = React.useMemo(() => {
-    if (props.manualThemeOverride) return props.manualThemeOverride;
-    if (props.userContext) return selectUIBlockTheme(props.userContext);
-    return 'neutral';
-  }, [props.manualThemeOverride, props.userContext]);
+  const uiBlockTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   const themeColors = getThemeColors(uiBlockTheme);
 

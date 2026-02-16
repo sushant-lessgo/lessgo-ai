@@ -6,8 +6,7 @@ import { EditableAdaptiveHeadline, EditableAdaptiveText, EditableText } from '@/
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { inferIconFromText } from '@/lib/iconCategoryMap';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 import { getDynamicCardLayout, isSplitLayout } from '@/utils/dynamicCardLayout';
 import { cn } from '@/lib/utils';
 import { getCardStyles, CardStyles } from '@/modules/Design/cardStyles';
@@ -221,11 +220,7 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
   });
 
   // Detect theme: manual override > auto-detection > neutral fallback
-  const uiTheme = React.useMemo(() => {
-    if (props.manualThemeOverride) return props.manualThemeOverride;
-    if (props.userContext) return selectUIBlockTheme(props.userContext);
-    return 'neutral';
-  }, [props.manualThemeOverride, props.userContext]);
+  const uiTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   const themeExtras = getThemeExtras(uiTheme);
 

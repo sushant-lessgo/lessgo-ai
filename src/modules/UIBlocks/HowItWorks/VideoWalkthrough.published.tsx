@@ -10,8 +10,7 @@ import { LayoutComponentProps } from '@/types/storeTypes';
 import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardStyles } from '@/lib/publishedTextColors';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 import { getDynamicCardLayout } from '@/utils/dynamicCardLayout';
 import { isHexColor } from '@/utils/colorUtils';
 import { analyzeBackground } from '@/utils/backgroundAnalysis';
@@ -92,8 +91,7 @@ export default function VideoWalkthroughPublished(props: LayoutComponentProps) {
     : DEFAULT_VIDEO_INFO;
 
   // Theme detection
-  const uiTheme: UIBlockTheme = props.manualThemeOverride ||
-    (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+  const uiTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   const themeColors = getThemeColors(uiTheme);
 

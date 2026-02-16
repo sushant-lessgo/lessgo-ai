@@ -13,8 +13,7 @@ import { analyzeBackground } from '@/utils/backgroundAnalysis';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { AvatarPublished } from '@/components/published/AvatarPublished';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 import { getDynamicCardLayout, isSplitLayout } from '@/utils/dynamicCardLayout';
 
 // V2: Testimonial structure - clean array item
@@ -77,7 +76,7 @@ export default function QuoteGridPublished(props: LayoutComponentProps) {
   })();
 
   // Detect theme
-  const uiTheme: UIBlockTheme = props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+  const uiTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   // Get luminance from section background
   const { luminance } = analyzeBackground(sectionBackgroundCSS || '');

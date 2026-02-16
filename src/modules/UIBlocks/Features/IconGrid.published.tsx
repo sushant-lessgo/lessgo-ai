@@ -12,9 +12,8 @@ import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardS
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { IconPublished } from '@/components/published/IconPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import { inferIconFromText } from '@/lib/iconCategoryMap';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 import { getDynamicCardLayout, isSplitLayout } from '@/utils/dynamicCardLayout';
 import { analyzeBackground } from '@/utils/backgroundAnalysis';
 
@@ -39,7 +38,7 @@ export default function IconGridPublished(props: LayoutComponentProps) {
   const features: Feature[] = props.features || [];
 
   // Detect theme
-  const uiTheme: UIBlockTheme = props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+  const uiTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   // Get luminance from section background
   const { luminance } = analyzeBackground(sectionBackgroundCSS || '');

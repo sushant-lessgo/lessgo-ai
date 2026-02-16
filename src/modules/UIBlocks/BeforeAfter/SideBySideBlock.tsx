@@ -8,8 +8,7 @@ import {
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 import { getCardStyles, type CardStyles } from '@/modules/Design/cardStyles';
 
 // V2 clean array interfaces
@@ -69,8 +68,7 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
   const bodyLgStyle = getTypographyStyle('body-lg');
 
   // Detect UIBlock theme
-  const uiTheme: UIBlockTheme = props.manualThemeOverride ||
-    (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+  const uiTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   // Get adaptive card styles
   const cardStyles = React.useMemo(() => getCardStyles({

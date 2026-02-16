@@ -1,35 +1,22 @@
-// /app/edit/[token]/components/ui/typography/typographyCompatibility.ts
-import { fontThemesByTone, type FontTheme } from '@/modules/Design/fontSystem/fontThemes';
+// typographyCompatibility.ts — Font combo access + display helpers
 
-export const compatibleTones = {
-  'confident-playful': ['friendly-helpful', 'bold-persuasive'],
-  'minimal-technical': ['bold-persuasive', 'luxury-expert'],   
-  'bold-persuasive': ['confident-playful', 'minimal-technical'],
-  'friendly-helpful': ['confident-playful', 'minimal-technical'],
-  'luxury-expert': ['minimal-technical', 'bold-persuasive']
-};
+import { optimizedFontThemes, googleFontThemes } from '@/modules/Design/fontSystem/fontThemes';
+import type { FontTheme } from '@/types/core/index';
 
-export function getCompatibleTones(currentTone: string): string[] {
-  return compatibleTones[currentTone as keyof typeof compatibleTones] || [];
+export function getOptimizedOptions(): FontTheme[] {
+  return optimizedFontThemes;
 }
 
-export function getTypographyOptions(currentTone: string): FontTheme[] {
-  const primaryOptions = fontThemesByTone[currentTone] || [];
-  
-  const compatibleToneIds = getCompatibleTones(currentTone);
-  const secondaryOptions = compatibleToneIds.flatMap(tone => 
-    (fontThemesByTone[tone] || []).slice(0, 1)
-  );
-  
-  return [...primaryOptions, ...secondaryOptions];
+export function getGoogleOptions(): FontTheme[] {
+  return googleFontThemes;
 }
 
 export function generateFontPairName(theme: FontTheme): string {
   const headingName = extractFontName(theme.headingFont);
   const bodyName = extractFontName(theme.bodyFont);
-  
+
   if (headingName === bodyName) {
-    return `${headingName} Mono`;
+    return headingName;
   }
   return `${headingName} + ${bodyName}`;
 }

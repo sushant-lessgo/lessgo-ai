@@ -9,8 +9,8 @@ import {
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import { getCardStyles, type CardStyles } from '@/modules/Design/cardStyles';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 
 // FAQ item structure (V2 - clean array format)
 interface FAQItem {
@@ -81,11 +81,7 @@ export default function TwoColumnFAQ(props: LayoutComponentProps) {
   });
 
   // Theme detection: manual override > auto-detection > neutral fallback
-  const uiBlockTheme = useMemo(() => {
-    if (props.manualThemeOverride) return props.manualThemeOverride;
-    if (props.userContext) return selectUIBlockTheme(props.userContext);
-    return 'neutral';
-  }, [props.manualThemeOverride, props.userContext]);
+  const uiBlockTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   const cardStyles = useMemo(() => getCardStyles({
     sectionBackgroundCSS: sectionBackground || '',

@@ -8,8 +8,7 @@ import { useTypography } from '@/hooks/useTypography';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useImageToolbar } from '@/hooks/useImageToolbar';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 import { getCardStyles, type CardStyles } from '@/modules/Design/cardStyles';
 import {
   EditableAdaptiveHeadline,
@@ -140,11 +139,7 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
   });
 
   // Detect theme: manual override > auto-detection > neutral fallback
-  const uiBlockTheme = React.useMemo(() => {
-    if (props.manualThemeOverride) return props.manualThemeOverride;
-    if (props.userContext) return selectUIBlockTheme(props.userContext);
-    return 'neutral';
-  }, [props.manualThemeOverride, props.userContext]);
+  const uiBlockTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   const themeColors = getThemeColors(uiBlockTheme);
 
@@ -184,11 +179,10 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
               level="h2"
               backgroundType="neutral"
               colorTokens={colorTokens}
-              textStyle={{ fontSize: '1.5rem', fontWeight: '700' }}
-              className={`text-center ${cardStyles.textHeading}`}
+              textStyle={{ fontSize: '1.5rem', fontWeight: '700', color: '#111827' }}
+              className="text-center text-gray-900"
               sectionId={sectionId}
               elementKey="letter_header"
-              sectionBackground="bg-gray-50"
             />
             
             {/* Date */}
@@ -200,12 +194,11 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
                 backgroundType="neutral"
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={{ fontSize: '0.875rem' }}
-                className={cardStyles.textMuted}
+                textStyle={{ fontSize: '0.875rem', color: '#6b7280' }}
+                className="text-gray-500"
                 placeholder="Add date..."
                 sectionId={sectionId}
                 elementKey="date_text"
-                sectionBackground="bg-gray-50"
               />
             </div>
           </div>

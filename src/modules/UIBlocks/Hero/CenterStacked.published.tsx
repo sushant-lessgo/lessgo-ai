@@ -102,7 +102,7 @@ function HeroImagePlaceholder({ theme = 'neutral' }: { theme?: 'warm' | 'cool' |
   };
 
   return (
-    <div className="relative w-[70%] lg:w-[80%] aspect-[16/9] mx-auto">
+    <div className="relative w-[60%] lg:w-[65%] aspect-[16/9] mx-auto">
       <div className={`absolute inset-0 bg-gradient-to-br ${gradients[theme]} rounded-2xl shadow-2xl overflow-hidden`}>
         {/* Centered content */}
         <div className="absolute inset-0 flex items-center justify-center p-8">
@@ -420,7 +420,7 @@ export default function CenterStackedPublished(props: LayoutComponentProps) {
         {/* Hero Image */}
         <div className="w-full">
           {imageSrc && imageSrc !== '' ? (
-            <div className="relative w-[70%] lg:w-[80%] aspect-video mx-auto overflow-hidden">
+            <div className="relative w-[60%] lg:w-[65%] aspect-video mx-auto overflow-hidden">
               <img
                 src={imageSrc}
                 alt="Hero"

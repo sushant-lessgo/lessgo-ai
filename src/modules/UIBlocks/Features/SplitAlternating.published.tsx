@@ -12,8 +12,7 @@ import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publ
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { ImagePublished } from '@/components/published/ImagePublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 
 // V2: Feature item structure
 interface Feature {
@@ -37,7 +36,7 @@ export default function SplitAlternatingPublished(props: LayoutComponentProps) {
   const features = rawFeatures.filter(f => f.visual && f.visual.trim() !== '');
 
   // Detect theme
-  const uiTheme: UIBlockTheme = props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+  const uiTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   // Theme-based gradient styles (inline for SSR)
   const getIconGradientStyle = () => {

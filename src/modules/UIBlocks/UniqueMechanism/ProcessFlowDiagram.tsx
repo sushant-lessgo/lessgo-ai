@@ -8,8 +8,7 @@ import { LayoutSection } from '@/components/layout/LayoutSection';
 import { EditableAdaptiveHeadline, EditableAdaptiveText } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 import { getCardStyles } from '@/modules/Design/cardStyles';
 
 interface Step {
@@ -85,11 +84,7 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
   const benefits: Benefit[] = Array.isArray(blockContent.benefits) ? blockContent.benefits : [];
 
   // Theme detection: manual override > auto-detection > neutral fallback
-  const uiTheme = React.useMemo(() => {
-    if (props.manualThemeOverride) return props.manualThemeOverride;
-    if (props.userContext) return selectUIBlockTheme(props.userContext);
-    return 'neutral';
-  }, [props.manualThemeOverride, props.userContext]);
+  const uiTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   // Card styles from luminance-based system
   const cardStyles = React.useMemo(() => {

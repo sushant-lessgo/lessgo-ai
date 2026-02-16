@@ -17,6 +17,7 @@
 
 import React from 'react';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { getPublishedTextColors } from '@/lib/publishedTextColors';
 
 // ============================================================================
 // Helper Components
@@ -85,7 +86,10 @@ export default function MinimalNavHeaderPublished(props: LayoutComponentProps) {
   const colorTokens = props.colorTokens as { text?: string } | undefined;
 
   // Section background from theme
-  const sectionBackground = props.sectionBackground as string || '';
+  const sectionBackground = props.sectionBackgroundCSS as string || props.sectionBackground as string || '';
+
+  // Compute text colors from actual background (header is always neutral)
+  const textColors = getPublishedTextColors('neutral', props.theme, sectionBackground);
 
   /**
    * Handle navigation click with smooth scroll for anchors
@@ -130,7 +134,7 @@ export default function MinimalNavHeaderPublished(props: LayoutComponentProps) {
                   <a
                     href={navItem.link}
                     className="text-sm font-medium transition-colors cursor-pointer hover:opacity-80"
-                    style={{ color: colorTokens?.text || '#374151' }}
+                    style={{ color: textColors.heading }}
                     onClick={(e) => handleNavClick(e, navItem.link)}
                   >
                     {navItem.label}

@@ -65,7 +65,7 @@ const CONTENT_SCHEMA = {
   },
   secondary_cta_text: {
     type: 'string' as const,
-    default: 'Watch Demo'
+    default: ''
   },
   subheadline: {
     type: 'string' as const,

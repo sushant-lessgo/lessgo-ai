@@ -12,8 +12,8 @@ import {
   TrustIndicators
 } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import { getCardStyles } from '@/modules/Design/cardStyles';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 
 // Contact card structure
 interface ContactCard {
@@ -113,11 +113,7 @@ export default function CallToQuotePlan(props: LayoutComponentProps) {
   const { getTextStyle: getTypographyStyle } = useTypography();
 
   // Theme detection
-  const uiBlockTheme = React.useMemo(() => {
-    if (props.manualThemeOverride) return props.manualThemeOverride;
-    if (props.userContext) return selectUIBlockTheme(props.userContext);
-    return 'neutral';
-  }, [props.manualThemeOverride, props.userContext]);
+  const uiBlockTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   // Get adaptive card styles based on section background luminance
   const cardStyles = React.useMemo(() => {

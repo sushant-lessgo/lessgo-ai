@@ -13,8 +13,7 @@ import { IconPublished } from '@/components/published/IconPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { inferIconFromText } from '@/lib/iconCategoryMap';
 import { analyzeBackground } from '@/utils/backgroundAnalysis';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 
 // Objection item structure (V2 format)
 interface Objection {
@@ -70,7 +69,7 @@ export default function VisualObjectionTilesPublished(props: LayoutComponentProp
   const objections: Objection[] = props.objections || [];
 
   // Theme detection
-  const uiTheme: UIBlockTheme = props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+  const uiTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   // Card styles from luminance-based system
   const { luminance } = analyzeBackground(sectionBackgroundCSS || '');

@@ -11,8 +11,7 @@ import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardS
 import { analyzeBackground } from '@/utils/backgroundAnalysis';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 
 // Theme color function (inline styles for SSR)
 const getThemeColors = (theme: UIBlockTheme) => {
@@ -81,7 +80,7 @@ export default function LetterStyleBlockPublished(props: LayoutComponentProps) {
   const founder_image = props.founder_image || '/images/founder.jpg';
 
   // Detect theme
-  const uiTheme: UIBlockTheme = props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+  const uiTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';
   const themeColors = getThemeColors(uiTheme);
 
   // Card styles
@@ -132,7 +131,7 @@ export default function LetterStyleBlockPublished(props: LayoutComponentProps) {
               level="h2"
               style={{
                 ...headlineTypography,
-                color: cardStyles.textHeading,
+                color: '#111827',
                 textAlign: 'center',
                 fontSize: '1.5rem',
                 fontWeight: 700
@@ -146,7 +145,7 @@ export default function LetterStyleBlockPublished(props: LayoutComponentProps) {
                   value={date_text}
                   style={{
                     fontSize: '0.875rem',
-                    color: cardStyles.textMuted
+                    color: '#6b7280'
                   }}
                 />
               </div>

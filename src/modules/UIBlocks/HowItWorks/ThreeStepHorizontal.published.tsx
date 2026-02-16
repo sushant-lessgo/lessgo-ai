@@ -10,8 +10,7 @@ import { LayoutComponentProps } from '@/types/storeTypes';
 import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publishedTextColors';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 import { analyzeBackground } from '@/utils/backgroundAnalysis';
 import { getPublishedCardStyles, PublishedCardStyles } from '@/lib/publishedTextColors';
 
@@ -160,8 +159,7 @@ export default function ThreeStepHorizontalPublished(props: LayoutComponentProps
     : DEFAULT_STEPS;
 
   // Detect theme: manual override > auto-detection > neutral fallback
-  const uiTheme: UIBlockTheme = props.manualThemeOverride ||
-    (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+  const uiTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   // Get theme colors (for step circles and accents)
   const themeColors = getThemeColors(uiTheme);

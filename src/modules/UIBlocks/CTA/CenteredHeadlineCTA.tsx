@@ -22,8 +22,7 @@ import { FormConnectedButton } from '@/components/forms/FormConnectedButton';
 import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { createCTAClickHandler } from '@/utils/ctaHandler';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 
 // V2: Trust item type
 interface TrustItem {
@@ -64,7 +63,7 @@ const CONTENT_SCHEMA = {
   },
   secondary_cta_text: {
     type: 'string' as const,
-    default: 'Watch Demo'
+    default: ''
   },
   urgency_text: {
     type: 'string' as const,
@@ -119,11 +118,7 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
   const { getTextStyle: getTypographyStyle } = useTypography();
 
   // Theme detection with priority: manualThemeOverride > autoDetectedTheme > neutral
-  const uiBlockTheme = React.useMemo(() => {
-    if (props.manualThemeOverride) return props.manualThemeOverride;
-    if (props.userContext) return selectUIBlockTheme(props.userContext);
-    return 'neutral';
-  }, [props.manualThemeOverride, props.userContext]);
+  const uiBlockTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   // Theme-aware color mappings
   // Note: Trust checkmarks always stay green (universal trust signal)

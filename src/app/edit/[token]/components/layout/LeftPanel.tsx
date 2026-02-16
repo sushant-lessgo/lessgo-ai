@@ -23,6 +23,13 @@ const sanitizeValue = (value: unknown): string => {
   return String(value || '');
 };
 
+const SECTION_ICONS: Record<string, string> = {
+  header: '🔝', hero: '🚀', features: '✨', testimonials: '💬',
+  cta: '🎯', faq: '❓', footer: '🔚', pricing: '💰',
+  results: '📊', objection: '🛡️', howitworks: '⚙️', founder: '👤',
+  beforeafter: '🔄', custom: '🔧',
+};
+
 export function LeftPanel({ tokenId }: LeftPanelProps) {
   const router = useRouter();
   const { store } = useEditStoreContext();
@@ -138,10 +145,13 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
                 <button
                   key={sectionId}
                   onClick={() => handleSectionClick(sectionId)}
-                  className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-gray-100 transition-colors text-gray-700"
+                  className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-brand-highlightBG transition-colors text-brand-text group flex items-center gap-2.5"
                 >
-                  <span className="text-gray-400 mr-2 text-xs">{index + 1}.</span>
-                  {getSectionLabel(sectionId)}
+                  <span className="w-6 h-6 flex items-center justify-center rounded-md bg-gray-100 group-hover:bg-white text-xs flex-shrink-0">
+                    {SECTION_ICONS[sectionId.split('-')[0].toLowerCase()] || '📄'}
+                  </span>
+                  <span className="truncate font-medium">{getSectionLabel(sectionId)}</span>
+                  <span className="ml-auto text-[10px] text-brand-mutedText font-mono opacity-0 group-hover:opacity-100 transition-opacity">{index + 1}</span>
                 </button>
               ))}
             </div>
@@ -154,43 +164,48 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
           <div className="p-3">
             <button
               onClick={() => setInputsExpanded(!inputsExpanded)}
-              className="w-full flex items-center justify-between px-2 py-2 text-sm font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-700 transition-colors"
+              className="w-full flex items-center justify-between px-2 py-2 hover:text-brand-text transition-colors"
             >
-              <span className="text-xs">Your Inputs</span>
-              <svg
-                className={`w-4 h-4 transition-transform ${inputsExpanded ? 'rotate-180' : ''}`}
-                fill="none" stroke="currentColor" viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-              </svg>
+              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Your Inputs</span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-brand-mutedText font-normal normal-case tracking-normal">
+                  {validatedEntries.length + hiddenEntries.length + (features.length > 0 ? 1 : 0)} fields
+                </span>
+                <svg
+                  className={`w-4 h-4 text-gray-400 transition-transform ${inputsExpanded ? 'rotate-180' : ''}`}
+                  fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
             </button>
 
             {inputsExpanded && (
               <div className="mt-2 space-y-3 px-1">
                 {/* Product Description */}
                 {onboardingData.oneLiner && (
-                  <div className="bg-gray-50 rounded-lg p-3">
-                    <div className="text-xs font-medium text-gray-500 mb-1">Product Description</div>
-                    <p className="text-sm text-gray-900 leading-relaxed">{onboardingData.oneLiner}</p>
+                  <div className="bg-brand-highlightBG border border-orange-100 rounded-lg p-3">
+                    <div className="text-[10px] font-semibold text-brand-mutedText uppercase tracking-wider mb-1.5">Product Description</div>
+                    <p className="text-sm text-brand-text leading-relaxed">{onboardingData.oneLiner}</p>
                   </div>
                 )}
 
                 {/* Validated Fields */}
                 {validatedEntries.map(({ label, value }) => (
-                  <div key={label} className="px-1">
-                    <div className="text-xs font-medium text-gray-500 mb-0.5">{label}</div>
-                    <p className="text-sm text-gray-900">{value}</p>
+                  <div key={label} className="px-1 py-1.5 border-b border-gray-100 last:border-b-0">
+                    <div className="text-[10px] font-semibold text-brand-mutedText uppercase tracking-wider mb-0.5">{label}</div>
+                    <p className="text-sm text-gray-800">{value}</p>
                   </div>
                 ))}
 
                 {/* Hidden Inferred Fields */}
                 {hiddenEntries.map(({ label, value }) => (
-                  <div key={label} className="px-1">
-                    <div className="text-xs font-medium text-gray-500 mb-0.5 flex items-center gap-1">
+                  <div key={label} className="px-1 py-1.5 border-b border-gray-100 last:border-b-0">
+                    <div className="text-[10px] font-semibold text-brand-mutedText uppercase tracking-wider mb-0.5 flex items-center gap-1.5">
                       {label}
-                      <span className="text-[10px] text-purple-600 bg-purple-50 px-1 py-0 rounded">AI</span>
+                      <span className="text-[9px] font-bold text-brand-logo bg-blue-50 px-1 py-px rounded tracking-wide">AI</span>
                     </div>
-                    <p className="text-sm text-gray-900">{value}</p>
+                    <p className="text-sm text-gray-800">{value}</p>
                   </div>
                 ))}
 
@@ -200,7 +215,7 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
                     <div className="text-xs font-medium text-gray-500 mb-1">Features</div>
                     <div className="flex flex-wrap gap-1.5">
                       {features.map((f, i) => (
-                        <span key={i} className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full">
+                        <span key={i} className="text-xs bg-gray-50 text-brand-text border border-gray-200 px-2.5 py-1 rounded-full font-medium">
                           {f.feature}
                         </span>
                       ))}
@@ -211,7 +226,7 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
                 {/* Change inputs & regenerate */}
                 <button
                   onClick={() => router.push(`/create/${tokenId}`)}
-                  className="w-full mt-3 px-3 py-2.5 text-sm text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors text-center font-medium"
+                  className="w-full mt-4 px-3 py-2.5 text-sm text-white bg-brand-accentPrimary hover:bg-orange-500 rounded-lg transition-colors text-center font-medium shadow-sm"
                 >
                   Change inputs & regenerate
                 </button>
@@ -223,11 +238,11 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
 
       {/* Resize Handle */}
       <div
-        className="w-2 bg-gray-200 hover:bg-blue-300 cursor-ew-resize transition-colors flex items-center justify-center"
+        className="w-1.5 bg-gray-100 hover:bg-brand-highlightText cursor-ew-resize transition-colors flex items-center justify-center"
         onMouseDown={handleMouseDown}
         title="Resize panel"
       >
-        <div className="w-0.5 h-8 bg-gray-400 rounded-full"></div>
+        <div className="w-px h-6 bg-gray-300 rounded-full"></div>
       </div>
     </div>
   );

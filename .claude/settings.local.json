@@ -116,7 +116,9 @@
       "WebFetch(domain:www.designstudiouiux.com)",
       "Bash(head:*)",
       "Bash(wc:*)",
-      "Bash(git -C \"C:\\\\Users\\\\susha\\\\lessgo-ai\" diff --name-only)"
+      "Bash(git -C \"C:\\\\Users\\\\susha\\\\lessgo-ai\" diff --name-only)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)"
     ],
     "deny": [],
     "ask": [],

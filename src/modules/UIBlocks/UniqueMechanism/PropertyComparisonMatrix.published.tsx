@@ -10,8 +10,7 @@ import { LayoutComponentProps } from '@/types/storeTypes';
 import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardStyles } from '@/lib/publishedTextColors';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 import { analyzeBackground } from '@/utils/backgroundAnalysis';
 
 interface ComparisonRow {
@@ -42,8 +41,7 @@ export default function PropertyComparisonMatrixPublished(props: LayoutComponent
   const comparison_rows: ComparisonRow[] = props.comparison_rows || DEFAULT_ROWS;
 
   // Detect theme: manual override > auto-detection > neutral fallback
-  const uiTheme: UIBlockTheme = props.manualThemeOverride ||
-    (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+  const uiTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   // Theme color mapping (HEX values for inline styles) - with "Us" column highlight
   const getThemeColors = (themeVal: UIBlockTheme) => {

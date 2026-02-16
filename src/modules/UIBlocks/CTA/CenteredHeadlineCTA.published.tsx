@@ -13,8 +13,7 @@ import { HeadlinePublished, TextPublished } from '@/components/published/TextPub
 import { CTAButtonPublished } from '@/components/published/CTAButtonPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
 import { CheckmarkIconPublished } from '@/components/published/CheckmarkIconPublished';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 import { FormMarkupPublished } from '@/components/published/FormMarkupPublished';
 import { InlineFormMarkupPublished } from '@/components/published/InlineFormMarkupPublished';
 import { determineFormPlacement } from '@/utils/formPlacement';
@@ -65,8 +64,7 @@ export default function CenteredHeadlineCTAPublished(props: LayoutComponentProps
   const uptime_label = props.uptime_label;
 
   // Detect theme
-  const uiBlockTheme: UIBlockTheme = props.manualThemeOverride ||
-    (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+  const uiBlockTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   const colors = getThemeColors(uiBlockTheme);
 

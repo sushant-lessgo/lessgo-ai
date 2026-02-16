@@ -8,7 +8,7 @@ import {
   generateColorTokensFromBackgroundSystem, 
   type BackgroundSystem
 } from '@/modules/Design/ColorSystem/colorTokens';
-import { pickFontFromOnboarding } from '@/modules/Design/fontSystem/pickFont';
+// pickFont archived — updateFontsFromTone uses hardcoded defaults
 
 import { logger } from '@/lib/logger';
 // AI Generation Status type
@@ -566,54 +566,53 @@ export function createGenerationActions(set: any, get: any) {
   },
 
   // ✅ Background System Integration from PageStore
-  updateFromBackgroundSystem: (backgroundSystem: BackgroundSystem) =>
+  updateFromBackgroundSystem: (backgroundSystem: BackgroundSystem) => {
     set((state: EditStore) => {
       logger.debug('🔄 [STORE DEBUG] EditStore: BEFORE update:', {
         oldPrimary: state.theme.colors.sectionBackgrounds.primary,
         oldSecondary: state.theme.colors.sectionBackgrounds.secondary,
         oldBaseColor: state.theme.colors.baseColor
       });
-      
+
       logger.debug('🔄 [STORE DEBUG] EditStore: Updating with new background system:', {
         newPrimary: backgroundSystem.primary,
         newSecondary: backgroundSystem.secondary,
         newBaseColor: backgroundSystem.baseColor,
         newAccentColor: backgroundSystem.accentColor
       });
-      
+
       state.theme.colors.baseColor = backgroundSystem.baseColor;
       state.theme.colors.accentColor = backgroundSystem.accentColor;
       state.theme.colors.accentCSS = backgroundSystem.accentCSS;
-      
+
       state.theme.colors.sectionBackgrounds.primary = backgroundSystem.primary;
       state.theme.colors.sectionBackgrounds.secondary = backgroundSystem.secondary;
       state.theme.colors.sectionBackgrounds.neutral = backgroundSystem.neutral;
-      
+
       state.persistence.isDirty = true;
-      
+
       logger.debug('✅ [STORE DEBUG] EditStore: AFTER update:', {
         actualPrimary: state.theme.colors.sectionBackgrounds.primary,
         actualSecondary: state.theme.colors.sectionBackgrounds.secondary,
         actualBaseColor: state.theme.colors.baseColor,
         isDirty: state.persistence.isDirty
       });
-    }),
+    });
+    // Recalculate text colors for new backgrounds
+    get().recalculateTextColors();
+  },
 
-  // ✅ Font System Integration from PageStore
+  // Font safety net — only applies defaults if no fonts loaded from draft
   updateFontsFromTone: () => {
-    try {
-      const fontTheme = pickFontFromOnboarding();
-      set((state: EditStore) => {
-        state.theme.typography.headingFont = fontTheme.headingFont;
-        state.theme.typography.bodyFont = fontTheme.bodyFont;
-        state.persistence.isDirty = true;
-      });
-    } catch (error) {
-      logger.error('Failed to update fonts from tone:', error);
-      set((state: EditStore) => {
-        state.errors['fontUpdate'] = 'Failed to update fonts from tone';
-      });
-    }
+    const state = get();
+    // Don't overwrite fonts already loaded from draft
+    if (state.theme.typography.headingFont) return;
+
+    set((state: EditStore) => {
+      state.theme.typography.headingFont = "'Sora', sans-serif";
+      state.theme.typography.bodyFont = "'Inter', sans-serif";
+      state.persistence.isDirty = true;
+    });
   },
 
   // ✅ Custom Fonts Setter

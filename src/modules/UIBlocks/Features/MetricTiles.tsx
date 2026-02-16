@@ -7,8 +7,7 @@ import {
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 import { cardEnhancements } from '@/modules/Design/designTokens';
 import { getCardStyles, CardStyles } from '@/modules/Design/cardStyles';
 import { getDynamicCardLayout, isSplitLayout } from '@/utils/dynamicCardLayout';
@@ -246,11 +245,7 @@ export default function MetricTiles(props: LayoutComponentProps) {
   const bodyLgStyle = getTypographyStyle('body-lg');
 
   // Detect theme
-  const theme = React.useMemo(() => {
-    if (props.manualThemeOverride) return props.manualThemeOverride;
-    if (props.userContext) return selectUIBlockTheme(props.userContext);
-    return 'neutral';
-  }, [props.manualThemeOverride, props.userContext]);
+  const theme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   const themeColors = getMetricTilesThemeColors(theme);
 

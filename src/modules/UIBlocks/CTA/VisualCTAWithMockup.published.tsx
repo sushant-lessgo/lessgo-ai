@@ -155,7 +155,7 @@ export default function VisualCTAWithMockupPublished(props: LayoutComponentProps
                 className="inline-block mb-4 px-4 py-2 rounded-full text-sm font-medium animate-pulse"
                 style={{
                   backgroundColor: (theme.colors?.accentColor || '#3b82f6') + '20',
-                  color: theme.colors?.accentColor || '#3b82f6'
+                  color: textColors.heading
                 }}
               >
                 {urgency_text}

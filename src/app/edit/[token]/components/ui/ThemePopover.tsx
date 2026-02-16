@@ -1,16 +1,16 @@
 "use client";
 
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { StyleBrowserModal } from './StyleBrowserModal';
+import { usePaletteSwap } from './usePaletteSwap';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import {
   getPaletteById,
   getSiblingPalettes,
-  type Palette,
 } from '@/modules/Design/background/palettes';
 import { getCompatibleTextures, compileBackground } from '@/modules/Design/background/textures';
 import { accentOptions } from '@/modules/Design/ColorSystem/accentOptions';
-import { generateBackgroundSystemFromPalette } from '@/modules/Design/background/backgroundIntegration';
 import { parseColor, calculateContrastRatio } from '@/utils/colorUtils';
 
 // Hex values for accent swatch rendering (Tailwind 500-level)
@@ -52,13 +52,16 @@ export function ThemePopover() {
   const {
     theme,
     updateTheme,
-    updateFromBackgroundSystem,
     recalculateTextColors,
   } = useEditStore();
 
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [customHex, setCustomHex] = useState('#3b82f6');
   const [contrastWarning, setContrastWarning] = useState<number | null>(null);
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const [styleBrowserOpen, setStyleBrowserOpen] = useState(false);
+
+  const handlePaletteSwap = usePaletteSwap();
 
   const paletteId = theme?.colors?.paletteId;
   const textureId = theme?.colors?.textureId || 'none';
@@ -110,40 +113,6 @@ export function ThemePopover() {
   }, [customHex, showCustomInput, theme?.colors?.sectionBackgrounds?.primary]);
 
   // ─── Handlers ───
-
-  const handlePaletteSwap = useCallback(
-    (newPalette: Palette) => {
-      // Check texture compatibility with new palette
-      const newCompatible = getCompatibleTextures(newPalette);
-      const textureStillValid = newCompatible.some((t) => t.id === textureId);
-      const finalTextureId = textureStillValid ? textureId : 'none';
-
-      // Generate background system (auto-selects accent)
-      const bgSystem = generateBackgroundSystemFromPalette(newPalette);
-
-      // Compile with texture
-      const compiledPrimary = compileBackground(newPalette, finalTextureId, 'primary');
-      const compiledSecondary = compileBackground(newPalette, finalTextureId, 'secondary');
-
-      // Update store
-      updateFromBackgroundSystem({
-        ...bgSystem,
-        primary: compiledPrimary,
-        secondary: compiledSecondary,
-      });
-
-      updateTheme({
-        colors: {
-          ...theme.colors,
-          paletteId: newPalette.id,
-          textureId: finalTextureId,
-        },
-      });
-
-      recalculateTextColors();
-    },
-    [textureId, theme.colors, updateFromBackgroundSystem, updateTheme, recalculateTextColors]
-  );
 
   const handleAccentChange = useCallback(
     (accentName: string, tailwindCSS: string) => {
@@ -219,7 +188,8 @@ export function ThemePopover() {
   }
 
   return (
-    <Popover>
+    <>
+    <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
       <PopoverTrigger asChild>
         <button
           className="flex items-center space-x-2 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors border border-gray-200"
@@ -361,17 +331,23 @@ export function ThemePopover() {
 
           {/* ─── Browse all styles ─── */}
           <button
-            disabled
-            className="w-full text-left text-sm text-gray-400 cursor-not-allowed flex items-center justify-between"
-            title="Coming soon"
+            onClick={() => {
+              setPopoverOpen(false);
+              setStyleBrowserOpen(true);
+            }}
+            className="w-full text-left text-sm text-gray-600 hover:text-gray-900 flex items-center justify-between transition-colors"
           >
             <span>Browse all styles</span>
-            <span className="text-xs bg-gray-100 text-gray-400 px-1.5 py-0.5 rounded">
-              Soon
-            </span>
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
           </button>
         </div>
       </PopoverContent>
+
     </Popover>
+
+      <StyleBrowserModal open={styleBrowserOpen} onOpenChange={setStyleBrowserOpen} />
+    </>
   );
 }

@@ -85,7 +85,7 @@ export default function ContactFooterPublished(props: LayoutComponentProps) {
   };
 
   return (
-    <footer style={{ backgroundColor: colors.bg, color: colors.text }} className="py-16">
+    <footer style={{ backgroundColor: colors.bg, color: colors.text }} className="py-12 md:py-16 lg:py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Main Grid: Contact Info + Newsletter */}
         <div className="grid md:grid-cols-2 gap-12 mb-12">

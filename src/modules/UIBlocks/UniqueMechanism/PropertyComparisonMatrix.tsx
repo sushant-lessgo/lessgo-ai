@@ -5,8 +5,7 @@ import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { EditableAdaptiveHeadline, EditableAdaptiveText } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 import { getCardStyles, type CardStyles } from '@/modules/Design/cardStyles';
 
 interface ComparisonRow {
@@ -49,11 +48,7 @@ export default function PropertyComparisonMatrix(props: LayoutComponentProps) {
   const { getTextStyle: getTypographyStyle } = useTypography();
 
   // Detect theme: manual override > auto-detection > neutral fallback
-  const uiTheme = React.useMemo(() => {
-    if (props.manualThemeOverride) return props.manualThemeOverride;
-    if (props.userContext) return selectUIBlockTheme(props.userContext);
-    return 'neutral';
-  }, [props.manualThemeOverride, props.userContext]);
+  const uiTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   // Theme-based color mapping - now with theme-aware "Us" column + background highlight
   const getThemeColors = (theme: UIBlockTheme) => {

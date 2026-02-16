@@ -12,8 +12,7 @@ import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardS
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { IconPublished } from '@/components/published/IconPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 import { analyzeBackground } from '@/utils/backgroundAnalysis';
 
 interface Step {
@@ -42,7 +41,7 @@ export default function ProcessFlowDiagramPublished(props: LayoutComponentProps)
   const benefits: Benefit[] = Array.isArray(props.benefits) ? props.benefits : [];
 
   // Theme detection (no useMemo - direct evaluation)
-  const uiTheme: UIBlockTheme = props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+  const uiTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   // Card styles from luminance-based system
   const { luminance } = analyzeBackground(sectionBackgroundCSS || '');

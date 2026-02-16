@@ -11,8 +11,8 @@ import {
 import { LayoutComponentProps } from '@/types/storeTypes';
 import LogoEditableComponent from '@/components/ui/LogoEditableComponent';
 import { Check } from 'lucide-react';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
 import { getCardStyles, type CardStyles } from '@/modules/Design/cardStyles';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 
 // V2 Type definitions
 interface Company {
@@ -114,11 +114,7 @@ export default function LogoWall(props: LayoutComponentProps) {
   });
 
   // Theme detection
-  const uiBlockTheme = React.useMemo(() => {
-    if (props.manualThemeOverride) return props.manualThemeOverride;
-    if (props.userContext) return selectUIBlockTheme(props.userContext);
-    return 'neutral';
-  }, [props.manualThemeOverride, props.userContext]);
+  const uiBlockTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   // Adaptive card styles based on section background
   const cardStyles = React.useMemo(() => getCardStyles({

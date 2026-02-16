@@ -13,8 +13,7 @@ import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardS
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { CTAButtonPublished } from '@/components/published/CTAButtonPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 import { analyzeBackground } from '@/utils/backgroundAnalysis';
 
 // Tier structure
@@ -109,8 +108,7 @@ export default function ToggleableMonthlyYearlyPublished(props: LayoutComponentP
   const tiers: Tier[] = props.tiers || DEFAULT_TIERS;
 
   // Detect theme
-  const uiBlockTheme: UIBlockTheme =
-    props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+  const uiBlockTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   // Get luminance from section background
   const { luminance } = analyzeBackground(sectionBackgroundCSS || '');

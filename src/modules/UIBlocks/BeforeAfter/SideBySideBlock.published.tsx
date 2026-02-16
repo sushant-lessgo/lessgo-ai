@@ -16,8 +16,7 @@ import { analyzeBackground } from '@/utils/backgroundAnalysis';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { IconPublished } from '@/components/published/IconPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 
 export default function SideBySideBlockPublished(props: LayoutComponentProps) {
   const { sectionId, sectionBackgroundCSS, theme, backgroundType } = props;
@@ -46,8 +45,7 @@ export default function SideBySideBlockPublished(props: LayoutComponentProps) {
   ).filter((text: string) => text && text.trim() !== '');
 
   // Detect UIBlock theme
-  const uiTheme: UIBlockTheme = props.manualThemeOverride ||
-    (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+  const uiTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   // Get adaptive card styles
   const { luminance } = analyzeBackground(sectionBackgroundCSS || '');

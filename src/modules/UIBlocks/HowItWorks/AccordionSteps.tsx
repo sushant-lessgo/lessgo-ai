@@ -7,8 +7,7 @@ import {
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 import { cardEnhancements } from '@/modules/Design/designTokens';
 import { getCardStyles, type CardStyles } from '@/modules/Design/cardStyles';
 import { isHexColor } from '@/utils/colorUtils';
@@ -67,11 +66,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
   const { getTextStyle: getTypographyStyle } = useTypography();
 
   // Detect theme: manual override > auto-detection > neutral fallback
-  const theme = React.useMemo(() => {
-    if (props.manualThemeOverride) return props.manualThemeOverride;
-    if (props.userContext) return selectUIBlockTheme(props.userContext);
-    return 'neutral';
-  }, [props.manualThemeOverride, props.userContext]);
+  const theme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   // Get adaptive card styles based on section background luminance
   const cardStyles = React.useMemo(() => {

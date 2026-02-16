@@ -10,6 +10,7 @@ import { getDesignTokensForVibe } from '@/modules/Design/vibeDesignTokens';
 import { generateBackgroundSystemFromPalette, assignSectionBackgrounds } from '@/modules/Design/background/backgroundIntegration';
 import { getPaletteById, getDefaultPaletteForVibe } from '@/modules/Design/background/palettes';
 import { compileBackground } from '@/modules/Design/background/textures';
+import { getSmartTextColor } from '@/utils/improvedTextColors';
 import { fetchPexelsImagesParallel, pickBestImage, type ImageFetchResult } from '@/lib/generation/fetchImages';
 import DesignQuestionsFlow, { type DesignChoices } from './DesignQuestionsFlow';
 
@@ -173,6 +174,22 @@ export default function GeneratingStep() {
         };
       });
 
+      // Pre-compile backgrounds & derive text colors from compiled values
+      const compiledPrimary = compileBackground(palette, textureId, 'primary');
+      const compiledSecondary = compileBackground(palette, textureId, 'secondary');
+
+      const calculateForBackground = (bg: string) => ({
+        heading: getSmartTextColor(bg, 'heading'),
+        body: getSmartTextColor(bg, 'body'),
+        muted: getSmartTextColor(bg, 'muted'),
+      });
+
+      const textColors = {
+        primary: calculateForBackground(compiledPrimary),
+        secondary: calculateForBackground(compiledSecondary),
+        neutral: calculateForBackground(palette.neutral),
+      };
+
       const finalContent = {
         layout: {
           sections: sectionIds,
@@ -189,10 +206,11 @@ export default function GeneratingStep() {
               accentColor: backgroundSystem.accentColor,
               accentCSS: backgroundSystem.accentCSS,
               sectionBackgrounds: {
-                primary: compileBackground(palette, textureId, 'primary'),
-                secondary: compileBackground(palette, textureId, 'secondary'),
+                primary: compiledPrimary,
+                secondary: compiledSecondary,
                 neutral: palette.neutral,
               },
+              textColors,
               paletteMode: palette.mode,
               paletteTemperature: palette.temperature,
             },

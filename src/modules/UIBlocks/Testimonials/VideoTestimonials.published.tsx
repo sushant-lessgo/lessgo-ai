@@ -11,8 +11,7 @@ import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardS
 import { analyzeBackground } from '@/utils/backgroundAnalysis';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 
 // V2 Types
 interface VideoTestimonialItem {
@@ -53,7 +52,7 @@ export default function VideoTestimonialsPublished(props: LayoutComponentProps) 
   const testimonials: VideoTestimonialItem[] = props.video_testimonials || [];
 
   // Detect theme
-  const uiTheme: UIBlockTheme = props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+  const uiTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';
   const cardAccents = getCardAccents(uiTheme);
 
   // Get adaptive card styles

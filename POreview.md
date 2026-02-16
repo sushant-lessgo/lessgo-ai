@@ -1,29 +1,35 @@
- Verdict: APPROVED — root cause correct, fix is sound, 1 clarification
+. "detectedTheme computation was dead code — never called with userContext" — Misleadingly stated
 
-  Root Cause 1 — CONFIRMED
+  The plan says the detectedTheme computation in colorTokens.ts is dead code because "never called with userContext by any caller." This is functionally true (no caller      
+  passes userContext), but the plan then says to "hardcode 'neutral' for businessContext.industry".
 
-  Lines 74-81: el?.type === 'image' always false because images are plain URL strings (confirmed: mergeImagesIntoSections stores [elementKey]: imageUrl at line 62). The { ...el
-   as any } on a string creates garbage like {0: 'h', 1: 't', 2: 't', 3: 'p', ...}.
+  The actual bug is more interesting: detectedTheme returns 'warm'|'cool'|'neutral', which gets passed as businessContext.industry. But INDUSTRY_COLOR_PREFERENCES in
+  colorHarmony.ts has keys like finance, healthcare, technology — not warm/cool/neutral. So even if userContext WERE passed, the industry preference scoring would be skipped 
+  because the key never matches. This is a pre-existing bug that makes the entire chain doubly dead.
 
-  Lines 115-118 then RESTORES this garbage over the original clean URL strings.
+  Plan's fix (hardcode 'neutral') is fine — it was already effectively 'neutral' since no caller provides userContext. But the plan should note that removing the userContext 
+  param also kills the (already broken) industry→accent scoring path.
 
-  Root Cause 2 — PARTIALLY CORRECT
+  2. "~86 UIBlock files" — actual count is 79 unique files
 
-  Plan says merge (lines 96-107) overwrites images. This is only true if the AI response includes image keys. More likely the damage comes entirely from Root Cause 1: the      
-  restore at line 116-118 puts garbage objects back. Either way, the fix handles both paths.
+  Minor. Plan says ~86, actual is 79. Close enough for estimation but dev should grep to get the real list.
 
-  Fix — CORRECT
+  3. Two different patterns in UIBlocks, not one
 
-  Skip-during-merge is cleaner than snapshot/restore:
-  - isImageValue: checks URL prefixes (/, http, blob:, data:image) — correct for all image storage formats in this codebase
-  - isImageKey: belt-and-suspenders key name check — same patterns as original (line 77-79)
-  - Skipping is safer than snapshot+restore — no string spreading, no garbage objects
+  Plan shows only the useMemo pattern. Actually:
+  - ~14 files use React.useMemo(() => { ... }) pattern
+  - ~65 files use direct assignment: const uiTheme: UIBlockTheme = props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');      
 
-  Single code path — CONFIRMED
+  Both need the same replacement, but a dev doing find-and-replace needs to know there are 2 patterns.
 
-  regenerateAllContent → loops regenerateSection (generationActions.ts:533) → same aiActions.ts function. Fix covers both section-level and page-level regen.
+  4. "Check if EditablePageRenderer.tsx exists" — Plan shouldn't have unknowns
 
-  1 minor note
+  This should have been verified before writing the plan. (It doesn't exist — LandingPageRenderer handles both edit and preview modes via isEditable prop, as we established  
+  earlier.)
 
-  isImageValue matching str.startsWith('/') is slightly broad — would match any path-like string. In practice safe since element text content never starts with /, but a tighter
-   check like str.match(/\.(jpg|png|svg|webp)/) || str.startsWith('http') would be more precise. Non-blocking — current approach works.
+  Risk assessment:
+
+  Medium risk due to volume — 79 files is a lot of mechanical changes. Each is trivial but the blast radius is wide. A single missed file = build error (which is good — TS   
+  will catch it).
+
+  The approach of relying on build errors to discover the full list (noted under "Unresolved") is actually the right strategy for 79 files.

@@ -9,8 +9,7 @@ import {
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 import { getCardStyles, type CardStyles } from '@/modules/Design/cardStyles';
 
 interface SplitCardContent {
@@ -174,7 +173,7 @@ const PremiumCard = React.memo(({
             variant="body"
             textStyle={{
               ...bodyLgStyle,
-              color: type === 'before' ? themeColors.beforeLabel : accentColor
+              color: type === 'after' ? accentColor : undefined
             }}
             className=""
             sectionId={sectionId}
@@ -222,8 +221,7 @@ export default function SplitCard(props: LayoutComponentProps) {
   const bodyLgStyle = getTypographyStyle('body-lg');
 
   // Detect UIBlock theme
-  const uiTheme: UIBlockTheme = props.manualThemeOverride ||
-    (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+  const uiTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   // Get adaptive card styles
   const cardStyles = React.useMemo(() => getCardStyles({

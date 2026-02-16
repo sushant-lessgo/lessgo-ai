@@ -12,8 +12,7 @@ import { analyzeBackground } from '@/utils/backgroundAnalysis';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { IconPublished } from '@/components/published/IconPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 import { inferIconFromText } from '@/lib/iconCategoryMap';
 import { getDynamicCardLayout, isSplitLayout } from '@/utils/dynamicCardLayout';
 
@@ -44,8 +43,7 @@ export default function StatBlocksPublished(props: LayoutComponentProps) {
   ];
 
   // Theme detection
-  const uiTheme: UIBlockTheme = props.manualThemeOverride ||
-                                 (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+  const uiTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   // Get luminance from section background
   const { luminance } = analyzeBackground(sectionBackgroundCSS || '');

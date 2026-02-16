@@ -10,8 +10,7 @@ import { LayoutComponentProps } from '@/types/storeTypes';
 import { getPublishedTypographyStyles, getPublishedTextColors, getPublishedCardStyles } from '@/lib/publishedTextColors';
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 import { getDynamicCardLayout } from '@/utils/dynamicCardLayout';
 import { analyzeBackground } from '@/utils/backgroundAnalysis';
 
@@ -54,7 +53,7 @@ export default function MetricTilesPublished(props: LayoutComponentProps) {
   const roiMetrics: RoiMetricItem[] = props.roi_metrics || [];
 
   // Detect theme
-  const uiTheme: UIBlockTheme = props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+  const uiTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   // Adaptive card styles based on section background luminance
   const { luminance } = analyzeBackground(sectionBackgroundCSS || '');

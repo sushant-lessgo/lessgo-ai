@@ -11,8 +11,7 @@ import { getPublishedTypographyStyles, getPublishedTextColors } from '@/lib/publ
 import { HeadlinePublished, TextPublished } from '@/components/published/TextPublished';
 import { CTAButtonPublished } from '@/components/published/CTAButtonPublished';
 import { SectionWrapperPublished } from '@/components/published/SectionWrapperPublished';
-import { selectUIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
-import type { UIBlockTheme } from '@/modules/Design/ColorSystem/selectUIBlockThemeFromTags';
+import type { UIBlockTheme } from '@/modules/Design/ColorSystem/uiBlockTheme';
 import { InlineFormMarkupPublished } from '@/components/published/InlineFormMarkupPublished';
 import { determineFormPlacement } from '@/utils/formPlacement';
 
@@ -67,8 +66,7 @@ export default function ValueStackCTAPublished(props: LayoutComponentProps) {
       ];
 
   // Detect theme
-  const uiBlockTheme: UIBlockTheme = props.manualThemeOverride ||
-    (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');
+  const uiBlockTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';
 
   const colors = getThemeColors(uiBlockTheme);
 

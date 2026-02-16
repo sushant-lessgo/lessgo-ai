@@ -37,10 +37,10 @@ export function SectionWrapperPublished({
 }: SectionWrapperPublishedProps) {
   const paddingClasses = {
     compact: 'py-4 md:py-4 lg:py-4',
-    normal: 'py-12 md:py-14 lg:py-16',
-    spacious: 'py-8 md:py-12 lg:py-12',
+    normal: 'py-16 md:py-20 lg:py-24',
+    spacious: 'py-12 md:py-16 lg:py-20',
     extra: 'py-20 md:py-24 lg:py-32',
-    cta: 'py-16 md:py-20 lg:py-24'
+    cta: 'py-20 md:py-24 lg:py-32'
   };
 
   return (
