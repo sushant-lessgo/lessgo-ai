@@ -1,924 +1,660 @@
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] header-9dbcb2cf | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] header-9dbcb2cf | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] hero-0a4ba321 | backgroundType: neutral | sectionBackground: linear-gradient(135deg, #fb7185, #f43f5e)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] hero-0a4ba321 | backgroundType: neutral | sectionBackground: linear-gradient(135deg, #fb7185, #f43f5e)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] beforeafter-ca4b4396 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] beforeafter-ca4b4396 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] uniquemechanism-1f8f20d0 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] uniquemechanism-1f8f20d0 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] foundernote-694fdb11 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] foundernote-694fdb11 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] features-8442309f | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] features-8442309f | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] howitworks-d38f66df | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] howitworks-d38f66df | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] pricing-6fd3ecb7 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] pricing-6fd3ecb7 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] cta-393b85af | backgroundType: neutral | sectionBackground: linear-gradient(135deg, #fb7185, #f43f5e)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] cta-393b85af | backgroundType: neutral | sectionBackground: linear-gradient(135deg, #fb7185, #f43f5e)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] faq-ebc64b66 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] faq-ebc64b66 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] footer-29392152 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] footer-29392152 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] header-9dbcb2cf | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] header-9dbcb2cf | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] hero-0a4ba321 | backgroundType: neutral | sectionBackground: linear-gradient(135deg, #fb7185, #f43f5e)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] hero-0a4ba321 | backgroundType: neutral | sectionBackground: linear-gradient(135deg, #fb7185, #f43f5e)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] beforeafter-ca4b4396 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] beforeafter-ca4b4396 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] uniquemechanism-1f8f20d0 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] uniquemechanism-1f8f20d0 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] foundernote-694fdb11 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] foundernote-694fdb11 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] features-8442309f | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] features-8442309f | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] howitworks-d38f66df | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] howitworks-d38f66df | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] pricing-6fd3ecb7 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] pricing-6fd3ecb7 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] cta-393b85af | backgroundType: neutral | sectionBackground: linear-gradient(135deg, #fb7185, #f43f5e)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] cta-393b85af | backgroundType: neutral | sectionBackground: linear-gradient(135deg, #fb7185, #f43f5e)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] faq-ebc64b66 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] faq-ebc64b66 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] footer-29392152 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] footer-29392152 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] header-9dbcb2cf | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] header-9dbcb2cf | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] hero-0a4ba321 | backgroundType: neutral | sectionBackground: linear-gradient(135deg, #fb7185, #f43f5e)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] hero-0a4ba321 | backgroundType: neutral | sectionBackground: linear-gradient(135deg, #fb7185, #f43f5e)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] beforeafter-ca4b4396 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] beforeafter-ca4b4396 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] uniquemechanism-1f8f20d0 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] uniquemechanism-1f8f20d0 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] foundernote-694fdb11 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] foundernote-694fdb11 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] features-8442309f | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] features-8442309f | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] howitworks-d38f66df | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] howitworks-d38f66df | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] pricing-6fd3ecb7 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] pricing-6fd3ecb7 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] cta-393b85af | backgroundType: neutral | sectionBackground: linear-gradient(135deg, #fb7185, #f43f5e)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] cta-393b85af | backgroundType: neutral | sectionBackground: linear-gradient(135deg, #fb7185, #f43f5e)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] faq-ebc64b66 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] faq-ebc64b66 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] footer-29392152 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] footer-29392152 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] header-9dbcb2cf | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] header-9dbcb2cf | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] hero-0a4ba321 | backgroundType: neutral | sectionBackground: linear-gradient(135deg, #fb7185, #f43f5e)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] hero-0a4ba321 | backgroundType: neutral | sectionBackground: linear-gradient(135deg, #fb7185, #f43f5e)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] beforeafter-ca4b4396 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] beforeafter-ca4b4396 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] uniquemechanism-1f8f20d0 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] uniquemechanism-1f8f20d0 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] foundernote-694fdb11 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] foundernote-694fdb11 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] features-8442309f | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] features-8442309f | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] howitworks-d38f66df | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] howitworks-d38f66df | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] pricing-6fd3ecb7 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] pricing-6fd3ecb7 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] cta-393b85af | backgroundType: neutral | sectionBackground: linear-gradient(135deg, #fb7185, #f43f5e)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] cta-393b85af | backgroundType: neutral | sectionBackground: linear-gradient(135deg, #fb7185, #f43f5e)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] faq-ebc64b66 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] faq-ebc64b66 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] footer-29392152 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] footer-29392152 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] header-9dbcb2cf | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] header-9dbcb2cf | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] hero-0a4ba321 | backgroundType: neutral | sectionBackground: linear-gradient(135deg, #fb7185, #f43f5e)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] hero-0a4ba321 | backgroundType: neutral | sectionBackground: linear-gradient(135deg, #fb7185, #f43f5e)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] beforeafter-ca4b4396 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] beforeafter-ca4b4396 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] uniquemechanism-1f8f20d0 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] uniquemechanism-1f8f20d0 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] foundernote-694fdb11 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] foundernote-694fdb11 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] features-8442309f | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] features-8442309f | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] howitworks-d38f66df | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] howitworks-d38f66df | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] pricing-6fd3ecb7 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] pricing-6fd3ecb7 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] cta-393b85af | backgroundType: neutral | sectionBackground: linear-gradient(135deg, #fb7185, #f43f5e)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] cta-393b85af | backgroundType: neutral | sectionBackground: linear-gradient(135deg, #fb7185, #f43f5e)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] faq-ebc64b66 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] faq-ebc64b66 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] footer-29392152 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] footer-29392152 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] header-9dbcb2cf | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] header-9dbcb2cf | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] hero-0a4ba321 | backgroundType: neutral | sectionBackground: linear-gradient(135deg, #fb7185, #f43f5e)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] hero-0a4ba321 | backgroundType: neutral | sectionBackground: linear-gradient(135deg, #fb7185, #f43f5e)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] beforeafter-ca4b4396 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] beforeafter-ca4b4396 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] uniquemechanism-1f8f20d0 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] uniquemechanism-1f8f20d0 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] foundernote-694fdb11 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] foundernote-694fdb11 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] features-8442309f | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] features-8442309f | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] howitworks-d38f66df | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] howitworks-d38f66df | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] pricing-6fd3ecb7 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] pricing-6fd3ecb7 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] cta-393b85af | backgroundType: neutral | sectionBackground: linear-gradient(135deg, #fb7185, #f43f5e)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] cta-393b85af | backgroundType: neutral | sectionBackground: linear-gradient(135deg, #fb7185, #f43f5e)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] faq-ebc64b66 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] faq-ebc64b66 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] footer-29392152 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] footer-29392152 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] header-9dbcb2cf | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] header-9dbcb2cf | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] hero-0a4ba321 | backgroundType: neutral | sectionBackground: linear-gradient(135deg, #fb7185, #f43f5e)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] hero-0a4ba321 | backgroundType: neutral | sectionBackground: linear-gradient(135deg, #fb7185, #f43f5e)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] beforeafter-ca4b4396 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] beforeafter-ca4b4396 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] uniquemechanism-1f8f20d0 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] uniquemechanism-1f8f20d0 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] foundernote-694fdb11 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] foundernote-694fdb11 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] features-8442309f | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] features-8442309f | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] howitworks-d38f66df | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] howitworks-d38f66df | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] pricing-6fd3ecb7 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] pricing-6fd3ecb7 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] cta-393b85af | backgroundType: neutral | sectionBackground: linear-gradient(135deg, #fb7185, #f43f5e)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] cta-393b85af | backgroundType: neutral | sectionBackground: linear-gradient(135deg, #fb7185, #f43f5e)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] faq-ebc64b66 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] faq-ebc64b66 | backgroundType: neutral | sectionBackground: rgba(255, 241, 242, 0.7)
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] footer-29392152 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
-}
-useLayoutComponent.ts:276 🖼️ [DEBUG-BUG3] footer-29392152 | backgroundType: neutral | sectionBackground: #fffcfc
-useLayoutComponent.ts:277 🖼️ [DEBUG-BUG3] theme.colors.sectionBackgrounds: {
-  "neutral": "#fffcfc",
-  "primary": "linear-gradient(135deg, #fb7185, #f43f5e)",
-  "secondary": "rgba(255, 241, 242, 0.7)"
+{
+  sections: [
+    'header-e8ffb50b',
+    'hero-fe7df4de',
+    'beforeafter-c3cfe3ef',
+    'results-27ac0095',
+    'features-94c922e2',
+    'howitworks-51427da1',
+    'pricing-aeb25bbd',
+    'cta-79389f9e',
+    'faq-d1501566',
+    'footer-3d2d3201'
+  ],
+  sectionLayouts: {
+    'cta-79389f9e': 'VisualCTAWithMockup',
+    'faq-d1501566': 'InlineQnAList',
+    'hero-fe7df4de': 'centerStacked',
+    'footer-3d2d3201': 'ContactFooter',
+    'header-e8ffb50b': 'MinimalNavHeader',
+    'pricing-aeb25bbd': 'TierCards',
+    'results-27ac0095': 'ResultsGallery',
+    'features-94c922e2': 'IconGrid',
+    'howitworks-51427da1': 'AccordionSteps',
+    'beforeafter-c3cfe3ef': 'SplitCard'
+  },
+  sectionSpacing: {},
+  theme: {
+    typography: {
+      bodyFont: '\'DM Sans\', sans-serif',
+      headingFont: '\'DM Sans\', sans-serif'
+    },
+    colors: {
+      accentCSS: 'bg-orange-500',
+      baseColor: 'emerald',
+      paletteId: 'mint-warm',
+      textureId: 'noise',
+      textColors: {
+        neutral: {
+          body: '#374151',
+          muted: '#4b5563',
+          heading: '#111827'
+        },
+        primary: {
+          body: '#e5e7eb',
+          muted: '#d1d5db',
+          heading: '#f9fafb'
+        },
+        secondary: {
+          body: '#374151',
+          muted: '#4b5563',
+          heading: '#111827'
+        }
+      },
+      accentColor: 'orange',
+      paletteMode: 'light',
+      paletteTemperature: 'warm',
+      sectionBackgrounds: {
+        neutral: '#fafffe',
+        primary: 'radial-gradient(circle at 25% 25%, rgba(0,0,0,0.05) 1px, transparent 1px) 0 0/8px 8px, radial-gradient(circle at 75% 75%, rgba(0,0,0,0.04) 1px, transparent 1px) 4px 4px/8px 8px, radial-gradient(circle at 50% 10%, rgba(0,0,0,0.03) 1px, transparent 1px) 2px 6px/12px 12px, linear-gradient(to top right, #34d399, #6ee7b7, #a7f3d0)',
+        secondary: 'rgba(236, 253, 245, 0.7)'
+      }
+    },
+    spacing: {
+      unit: 8,
+      scale: [
+        0,
+        4,
+        8,
+        12,
+        16,
+        20,
+        24,
+        32,
+        40,
+        48,
+        64,
+        80,
+        96,
+        128
+      ],
+      presets: {
+        lg: '1.5rem',
+        md: '1rem',
+        sm: '0.75rem',
+        xl: '2rem',
+        xs: '0.5rem',
+        xxl: '3rem'
+      }
+    },
+    corners: {
+      scale: {
+        full: 9999,
+        large: 16,
+        small: 4,
+        medium: 8
+      },
+      radius: 8
+    },
+    animations: {
+      easing: {
+        easeIn: 'cubic-bezier(0.4, 0, 1, 1)',
+        easeOut: 'cubic-bezier(0, 0, 0.2, 1)',
+        easeInOut: 'cubic-bezier(0.4, 0, 0.2, 1)'
+      },
+      enabled: true,
+      duration: {
+        fast: 150,
+        slow: 500,
+        medium: 300
+      },
+      reducedMotion: false
+    },
+    vibe: 'Warm Friendly'
+  },
+  navigationConfig: {
+    items: [
+      {
+        id: 'nav-home',
+        link: '#',
+        label: 'Home',
+        order: 0,
+        isAutoGenerated: true
+      },
+      {
+        id: 'nav-features-94c922e2',
+        link: '#features-94c922e2',
+        label: 'Features',
+        order: 1,
+        sectionId: 'features-94c922e2',
+        isAutoGenerated: true
+      },
+      {
+        id: 'nav-pricing-aeb25bbd',
+        link: '#pricing-aeb25bbd',
+        label: 'Pricing',
+        order: 2,
+        sectionId: 'pricing-aeb25bbd',
+        isAutoGenerated: true
+      },
+      {
+        id: 'nav-faq-d1501566',
+        link: '#faq-d1501566',
+        label: 'FAQ',
+        order: 3,
+        sectionId: 'faq-d1501566',
+        isAutoGenerated: true
+      }
+    ],
+    maxItems: 4,
+    lastUpdated: 1771244771975,
+    autoConfigured: true
+  },
+  globalSettings: {
+    maxWidth: '1200px',
+    containerPadding: '32px',
+    sectionSpacing: '64px',
+    deviceMode: 'desktop',
+    zoomLevel: 100
+  },
+  content: {
+    'cta-79389f9e': {
+      id: 'cta-79389f9e',
+      layout: 'VisualCTAWithMockup',
+      elements: {
+        cta_text: 'Get Started with Your Free Trial Today!',
+        headline: 'Ready to Simplify Your Invoicing?',
+        mockup_image: 'https://images.pexels.com/photos/5474295/pexels-photo-5474295.jpeg?auto=compress&cs=tinysrgb&h=650&w=940',
+        urgency_text: 'No credit card needed, start now!'
+      },
+      aiMetadata: {
+        aiGenerated: true,
+        isCustomized: false,
+        lastGenerated: 1771244765739,
+        excludedElements: [],
+        aiGeneratedElements: [
+          'headline',
+          'cta_text',
+          'urgency_text',
+          'mockup_image'
+        ]
+      },
+      backgroundType: 'primary'
+    },
+    'faq-d1501566': {
+      id: 'faq-d1501566',
+      layout: 'InlineQnAList',
+      elements: {
+        headline: 'Frequently Asked Questions',
+        faq_items: [
+          {
+            answer: 'Absolutely! No credit card required for the first 14 days.',
+            question: 'Is it really free to try?'
+          },
+          {
+            answer: 'We take your data security seriously with encryption and strict privacy policies.',
+            question: 'Is my client data safe?'
+          },
+          {
+            answer: 'You can get started within minutes—it\'s that easy!',
+            question: 'How quickly can I set this up?'
+          }
+        ]
+      },
+      aiMetadata: {
+        aiGenerated: true,
+        isCustomized: false,
+        lastGenerated: 1771244765739,
+        excludedElements: [],
+        aiGeneratedElements: [
+          'headline',
+          'faq_items'
+        ]
+      },
+      backgroundType: 'neutral'
+    },
+    'hero-fe7df4de': {
+      id: 'hero-fe7df4de',
+      layout: 'centerStacked',
+      elements: {
+        cta_text: 'Start Your Free Trial',
+        headline: 'Ditch the Invoice Headache!',
+        subheadline: 'Transform your invoicing process and get back to what you love—designing!',
+        trust_items: [
+          {
+            id: 't1',
+            text: '14-Day Free Trial'
+          },
+          {
+            id: 't2',
+            text: 'No Credit Card Needed'
+          }
+        ],
+        center_hero_image: 'https://images.pexels.com/photos/7926666/pexels-photo-7926666.jpeg?auto=compress&cs=tinysrgb&h=650&w=940'
+      },
+      aiMetadata: {
+        aiGenerated: true,
+        isCustomized: false,
+        lastGenerated: 1771244765739,
+        excludedElements: [],
+        aiGeneratedElements: [
+          'headline',
+          'subheadline',
+          'cta_text',
+          'trust_items',
+          'center_hero_image'
+        ]
+      },
+      backgroundType: 'primary'
+    },
+    'footer-3d2d3201': {
+      id: 'footer-3d2d3201',
+      layout: 'ContactFooter',
+      elements: {},
+      aiMetadata: {
+        aiGenerated: true,
+        isCustomized: false,
+        lastGenerated: 1771244765739,
+        excludedElements: [],
+        aiGeneratedElements: []
+      },
+      backgroundType: 'neutral'
+    },
+    'header-e8ffb50b': {
+      id: 'header-e8ffb50b',
+      layout: 'MinimalNavHeader',
+      elements: {},
+      aiMetadata: {
+        aiGenerated: true,
+        isCustomized: false,
+        lastGenerated: 1771244765739,
+        excludedElements: [],
+        aiGeneratedElements: []
+      },
+      backgroundType: 'neutral'
+    },
+    'pricing-aeb25bbd': {
+      id: 'pricing-aeb25bbd',
+      layout: 'TierCards',
+      elements: {
+        tiers: [
+          {
+            cta: 'Start Free Trial',
+            name: 'Free Trial',
+            price: '$0',
+            period: '14 days',
+            features: [
+              'All features included',
+              'No credit card needed'
+            ],
+            description: 'Try us out with zero commitment.'
+          },
+          {
+            cta: 'Start Now',
+            name: 'Freelancer Plan',
+            price: '$10',
+            period: 'per month',
+            features: [
+              'Unlimited invoices',
+              'Client management features'
+            ],
+            description: 'For the busy designer who wants to stay organized.'
+          }
+        ],
+        headline: 'Choose Your Plan'
+      },
+      aiMetadata: {
+        aiGenerated: true,
+        isCustomized: false,
+        lastGenerated: 1771244765739,
+        excludedElements: [],
+        aiGeneratedElements: [
+          'headline',
+          'tiers'
+        ]
+      },
+      backgroundType: 'secondary'
+    },
+    'results-27ac0095': {
+      id: 'results-27ac0095',
+      layout: 'ResultsGallery',
+      elements: {
+        headline: 'Real Results for Real Freelancers',
+        gallery_items: [
+          {
+            caption: 'More time for design, less time stressing!',
+            image_url: '/results-placeholder.jpg'
+          },
+          {
+            caption: 'Impressive invoices that get noticed.',
+            image_url: '/results-placeholder.jpg'
+          },
+          {
+            caption: 'No more manual tax calculations—stress-free!',
+            image_url: '/results-placeholder.jpg'
+          }
+        ]
+      },
+      aiMetadata: {
+        aiGenerated: true,
+        isCustomized: false,
+        lastGenerated: 1771244765739,
+        excludedElements: [],
+        aiGeneratedElements: [
+          'headline',
+          'gallery_items'
+        ]
+      },
+      backgroundType: 'neutral'
+    },
+    'features-94c922e2': {
+      id: 'features-94c922e2',
+      layout: 'IconGrid',
+      elements: {
+        features: [
+          {
+            id: 'f1',
+            title: 'Customizable Templates',
+            description: 'Create invoices that reflect your unique style and impress your clients.'
+          },
+          {
+            id: 'f2',
+            title: 'Automated Calculations',
+            description: 'Never stress about math again—your invoice totals are calculated automatically.'
+          },
+          {
+            id: 'f3',
+            title: 'PDF Export',
+            description: 'Send professional, easy-to-read invoices to clients that they\'ll love.'
+          },
+          {
+            id: 'f4',
+            title: 'Client Management',
+            description: 'Keep all client information organized and easy to access.'
+          },
+          {
+            id: 'f5',
+            title: 'Multi-Language Support',
+            description: 'Easily invoice clients from around the world, in their preferred language.'
+          }
+        ],
+        headline: 'Why Choose Us?'
+      },
+      aiMetadata: {
+        aiGenerated: true,
+        isCustomized: false,
+        lastGenerated: 1771244765739,
+        excludedElements: [],
+        aiGeneratedElements: [
+          'headline',
+          'features'
+        ]
+      },
+      backgroundType: 'secondary'
+    },
+    'howitworks-51427da1': {
+      id: 'howitworks-51427da1',
+      layout: 'AccordionSteps',
+      elements: {
+        steps: [
+          {
+            title: 'Sign Up',
+            details: 'Just an email and a password.',
+            description: 'Create your account in seconds, no credit card required!'
+          },
+          {
+            title: 'Customize Your Invoice',
+            details: 'Add your logo and client info.',
+            description: 'Choose a template and fill in your details—it\'s super easy!'
+          },
+          {
+            title: 'Send & Get Paid',
+            details: 'Track outstanding invoices with just a glance.',
+            description: 'Email your newly designed invoice to clients and watch your payments roll in!'
+          }
+        ],
+        headline: 'Simple as 1-2-3!'
+      },
+      aiMetadata: {
+        aiGenerated: true,
+        isCustomized: false,
+        lastGenerated: 1771244765739,
+        excludedElements: [],
+        aiGeneratedElements: [
+          'headline',
+          'steps'
+        ]
+      },
+      backgroundType: 'neutral'
+    },
+    'beforeafter-c3cfe3ef': {
+      id: 'beforeafter-c3cfe3ef',
+      layout: 'SplitCard',
+      elements: {
+        headline: 'From Frustration to Freedom',
+        after_label: 'After',
+        after_visual: 'https://images.pexels.com/photos/12357524/pexels-photo-12357524.jpeg?auto=compress&cs=tinysrgb&h=650&w=940',
+        before_label: 'Before',
+        before_visual: 'https://images.pexels.com/photos/6289036/pexels-photo-6289036.jpeg?auto=compress&cs=tinysrgb&h=650&w=940',
+        after_description: 'Automated invoicing that lets you focus on creativity, while payments track themselves!',
+        before_description: 'Spending hours on tedious invoicing, worrying if your clients will even pay.'
+      },
+      aiMetadata: {
+        aiGenerated: true,
+        isCustomized: false,
+        lastGenerated: 1771244765739,
+        excludedElements: [],
+        aiGeneratedElements: [
+          'headline',
+          'before_label',
+          'after_label',
+          'before_description',
+          'after_description',
+          'before_visual',
+          'after_visual'
+        ]
+      },
+      backgroundType: 'secondary'
+    }
+  },
+  mode: 'edit',
+  editMode: 'section',
+  generationMode: false,
+  multiSelection: [],
+  isTextEditing: false,
+  formattingInProgress: false,
+  leftPanel: {
+    width: 300,
+    collapsed: false,
+    manuallyToggled: false,
+    activeTab: 'pageStructure'
+  },
+  toolbar: {
+    type: null,
+    visible: false,
+    position: {
+      x: 0,
+      y: 0
+    },
+    targetId: null,
+    actions: []
+  },
+  aiGeneration: {
+    isGenerating: false,
+    currentOperation: null,
+    progress: 0,
+    status: '',
+    errors: [],
+    warnings: [],
+    context: null
+  },
+  elementVariations: {
+    visible: false,
+    variations: []
+  },
+  layoutChangeModal: {
+    visible: false
+  },
+  formData: {},
+  images: {
+    assets: {},
+    stockPhotos: {
+      searchResults: [],
+      searchQuery: '',
+      searchVisible: false
+    },
+    uploadProgress: {}
+  },
+  errors: {},
+  loadingStates: {},
+  isLoading: false,
+  queuedChanges: [],
+  history: {
+    undoStack: [],
+    redoStack: [],
+    maxHistorySize: 50
+  },
+  apiQueue: {
+    queue: [],
+    processing: false,
+    rateLimitRemaining: 100,
+    rateLimitReset: 1771244830302
+  },
+  id: '80VyylsDeZxi',
+  title: 'Untitled Landing Page',
+  slug: '',
+  description: '',
+  lastUpdated: 1771244789171,
+  version: 1,
+  tokenId: '80VyylsDeZxi',
+  onboardingData: {
+    oneLiner: 'Invoice generator for freelancers',
+    validatedFields: {
+      offer: '14-day free trial, no credit card required',
+      productName: '',
+      targetAudience: 'Freelancers',
+      landingPageGoals: 'free-trial'
+    },
+    featuresFromAI: [
+      {
+        benefit: '',
+        feature: 'Customizable templates'
+      },
+      {
+        benefit: '',
+        feature: 'Automated calculations'
+      },
+      {
+        benefit: '',
+        feature: 'PDF export'
+      },
+      {
+        benefit: '',
+        feature: 'Client management'
+      },
+      {
+        benefit: '',
+        feature: 'Multi-language support'
+      }
+    ],
+    hiddenInferredFields: {
+      categories: 'Invoicing, Finance, Productivity',
+      whatItDoes: 'Generates invoices for freelancers to manage their billing easily.'
+    },
+    confirmedFields: {}
+  },
+  publishing: {
+    isPublishReady: false
+  },
+  changeTracking: {
+    originalInputs: {},
+    currentInputs: {},
+    hasChanges: false,
+    changedFields: [],
+    lastChangeTimestamp: 1771244770302
+  },
+  forms: {},
+  formBuilderOpen: false,
+  editingFormId: null,
+  simpleForms: [],
+  formBuilder: {
+    visible: false,
+    fieldLibrary: []
+  },
+  integrations: {},
+  analytics: {},
+  persistence: {
+    isDirty: false,
+    isSaving: false,
+    isLoading: false,
+    hasActiveConflicts: false,
+    backgroundSaveEnabled: true,
+    autoSaveEnabled: true,
+    retryCount: 0,
+    metrics: {
+      totalSaves: 1,
+      successfulSaves: 1,
+      failedSaves: 0,
+      averageSaveTime: 0,
+      lastSaveTime: 1771244782510,
+      totalLoads: 0,
+      cacheHits: 0,
+      cacheMisses: 0,
+      conflictsDetected: 0,
+      conflictsResolved: 0
+    },
+    syncStatus: {
+      localVersion: 1,
+      serverVersion: 1,
+      status: 'synced',
+      pendingChanges: 0
+    },
+    lastSaved: 1771244782510
+  },
+  conflictResolution: {
+    hasConflict: false,
+    resolveStrategy: 'manual'
+  },
+  performance: {
+    saveCount: 0,
+    averageSaveTime: 0,
+    lastSaveTime: 0,
+    failedSaves: 0
+  },
+  cssVariables: {
+    phase: 'legacy',
+    featureFlags: {
+      enableVariableMode: false,
+      enableHybridMode: false,
+      enableLegacyFallbacks: true,
+      enableCustomColorPicker: false,
+      enableBackgroundCustomization: false,
+      enableMigrationDebug: false,
+      enablePerformanceLogging: false,
+      enableVisualDiff: false,
+      enableMigrationAnalytics: false,
+      rolloutPercentage: 0,
+      staffAccess: false,
+      betaAccess: false
+    },
+    customColors: {},
+    generatedVariables: {},
+    browserSupport: {
+      cssVariables: false,
+      customProperties: false,
+      fallbackRequired: true
+    },
+    metrics: {
+      cssSize: 0,
+      variableCount: 0,
+      renderTime: 0,
+      lastUpdated: 1771244769940
+    },
+    debugMode: false,
+    _cssVariableSlice: {
+      version: '1.0.0',
+      initialized: false,
+      lastMigration: 1771244770302
+    }
+  }
 }

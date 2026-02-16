@@ -326,6 +326,26 @@ export function ThemePopover() {
             </div>
           </div>
 
+          {/* ─── Card Style ─── */}
+          <div>
+            <p className="text-xs font-medium text-gray-500 mb-2">Card Style</p>
+            <div className="flex gap-2">
+              {(['neutral', 'warm', 'cool'] as const).map((t) => (
+                <button
+                  key={t}
+                  onClick={() => updateTheme({ uiBlockTheme: t })}
+                  className={`px-3 py-1.5 text-xs rounded-md border transition-all ${
+                    (theme?.uiBlockTheme || 'neutral') === t
+                      ? 'border-blue-500 bg-blue-50 text-blue-700 font-medium'
+                      : 'border-gray-200 text-gray-600 hover:border-gray-400'
+                  }`}
+                >
+                  {t.charAt(0).toUpperCase() + t.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* ─── Divider ─── */}
           <div className="border-t border-gray-100" />
 

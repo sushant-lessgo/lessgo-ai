@@ -1,35 +1,123 @@
-. "detectedTheme computation was dead code — never called with userContext" — Misleadingly stated
+# PO Review — Text Color Bug on Dark Primary Backgrounds
 
-  The plan says the detectedTheme computation in colorTokens.ts is dead code because "never called with userContext by any caller." This is functionally true (no caller      
-  passes userContext), but the plan then says to "hardcode 'neutral' for businessContext.industry".
+## Reject: curious-zooming-turtle.md
 
-  The actual bug is more interesting: detectedTheme returns 'warm'|'cool'|'neutral', which gets passed as businessContext.industry. But INDUSTRY_COLOR_PREFERENCES in
-  colorHarmony.ts has keys like finance, healthcare, technology — not warm/cool/neutral. So even if userContext WERE passed, the industry preference scoring would be skipped 
-  because the key never matches. This is a pre-existing bug that makes the entire chain doubly dead.
+Plan patches the symptom, doesn't fix the root cause. The real bug is in luminance calculation, not in which component reads what.
 
-  Plan's fix (hardcode 'neutral') is fine — it was already effectively 'neutral' since no caller provides userContext. But the plan should note that removing the userContext 
-  param also kills the (already broken) industry→accent scoring path.
+---
 
-  2. "~86 UIBlock files" — actual count is 79 unique files
+## The Actual Bug
 
-  Minor. Plan says ~86, actual is 79. Close enough for estimation but dev should grep to get the real list.
+`parseColor()` in `colorUtils.ts:71` strips alpha from rgba colors:
 
-  3. Two different patterns in UIBlocks, not one
+```ts
+// rgba(0,0,0,0.06) → { r:0, g:0, b:0 }  ← pure black, alpha ignored
+const rgbMatch = cleanColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)/);
+```
 
-  Plan shows only the useMemo pattern. Actually:
-  - ~14 files use React.useMemo(() => { ... }) pattern
-  - ~65 files use direct assignment: const uiTheme: UIBlockTheme = props.manualThemeOverride || (props.userContext ? selectUIBlockTheme(props.userContext) : 'neutral');      
+When textures are compiled into backgrounds, the stored CSS looks like:
 
-  Both need the same replacement, but a dev doing find-and-replace needs to know there are 2 patterns.
+```
+"radial-gradient(...rgba(0,0,0,0.06)..., transparent...),
+ radial-gradient(...rgba(0,0,0,0.04)..., transparent...),
+ ...3 more texture overlays...,
+ linear-gradient(to top right, #34d399, #6ee7b7, #a7f3d0)"
+```
 
-  4. "Check if EditablePageRenderer.tsx exists" — Plan shouldn't have unknowns
+`analyzeBackground()` extracts ALL colors from combined string → 5 texture `rgba(0,0,0,0.0x)` parsed as **solid black** + 3 mint greens → average luminance drops below 0.5 → `isDark: true` → white text on light mint background.
 
-  This should have been verified before writing the plan. (It doesn't exist — LandingPageRenderer handles both edit and preview modes via isEditable prop, as we established  
-  earlier.)
+**This is why it only breaks with textures active.** Raw palette backgrounds analyze correctly.
 
-  Risk assessment:
+## The Fix
 
-  Medium risk due to volume — 79 files is a lot of mechanical changes. Each is trivial but the blast radius is wide. A single missed file = build error (which is good — TS   
-  will catch it).
+Two options, pick ONE:
 
-  The approach of relying on build errors to discover the full list (noted under "Unresolved") is actually the right strategy for 79 files.
+### Option A: Don't analyze compiled CSS (recommended)
+
+`recalculateTextColors()` in `layoutActions.ts:785` reads `theme.colors.sectionBackgrounds.primary` which is the compiled (texture + palette) CSS. Instead, resolve the raw palette background for luminance analysis:
+
+```ts
+recalculateTextColors: () => {
+  const { theme } = get();
+  const palette = getPaletteById(theme.colors.paletteId);
+
+  const calculateForBackground = (bg: string) => ({
+    heading: getSmartTextColor(bg, 'heading'),
+    body: getSmartTextColor(bg, 'body'),
+    muted: getSmartTextColor(bg, 'muted')
+  });
+
+  const newTextColors = {
+    primary: calculateForBackground(palette?.primary || theme.colors.sectionBackgrounds.primary),
+    secondary: calculateForBackground(palette?.secondary || theme.colors.sectionBackgrounds.secondary),
+    neutral: calculateForBackground(palette?.neutral || theme.colors.sectionBackgrounds.neutral || '#ffffff'),
+  };
+
+  set((state) => {
+    state.theme.colors.textColors = newTextColors;
+    state.persistence.isDirty = true;
+    state.lastUpdated = Date.now();
+  });
+},
+```
+
+Same fix in `useLayoutComponent.ts` — `getEffectiveTextColor`'s last-resort `getSmartTextColor(sectionBackground, type)` call also receives compiled CSS. Pass raw palette background instead.
+
+### Option B: Make parseColor alpha-aware
+
+In `colorUtils.ts`, premultiply against white for light-mode, black for dark-mode:
+
+```ts
+const rgbMatch = cleanColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+if (rgbMatch) {
+  const alpha = rgbMatch[4] !== undefined ? parseFloat(rgbMatch[4]) : 1;
+  // Premultiply against white (assumes light composite surface)
+  return {
+    r: Math.round(parseInt(rgbMatch[1]) * alpha + 255 * (1 - alpha)),
+    g: Math.round(parseInt(rgbMatch[2]) * alpha + 255 * (1 - alpha)),
+    b: Math.round(parseInt(rgbMatch[3]) * alpha + 255 * (1 - alpha)),
+  };
+}
+```
+
+This makes `rgba(0,0,0,0.06)` → `{r:240, g:240, b:240}` (near-white) instead of `{r:0, g:0, b:0}` (black). Correct, but assumes white composite surface — wrong for dark palettes.
+
+**Option A is cleaner** — text color decisions should be based on the palette, not the composited visual.
+
+---
+
+## Separately: Eliminate the Re-derivation Chain
+
+After the luminance bug is fixed, simplify the consumer side. Currently:
+
+```
+useLayoutComponent computes hex → converts to Tailwind class → puts on colorTokens
+EditableAdaptiveHeadline receives colorTokens → re-derives from backgroundType → gets wrong answer
+Plan says: use colorTokens.dynamicHeading instead → adds tailwindClassToHex to convert BACK to hex
+```
+
+hex → class → hex is a circle. Clean path:
+
+1. `useLayoutComponent` returns text colors as **hex** (it already computes hex in `smartTextColors`, just stops converting to Tailwind classes)
+2. `EditableAdaptiveHeadline/Text` apply hex via `style={{ color }}` — no `getAdaptiveTextColor()`, no `backgroundType` lookup, no conversion
+3. Delete `getAdaptiveTextColor()` from both components entirely
+
+This is a separate change from the luminance fix. Do the luminance fix first.
+
+---
+
+## Files to Change
+
+| File | What |
+|------|------|
+| `layoutActions.ts:785` | `recalculateTextColors` — use raw palette, not compiled CSS |
+| `useLayoutComponent.ts:306` | `getSmartTextColor` fallback — same: use raw palette |
+| `palettes.ts` | Import `getPaletteById` where needed |
+
+## Verification
+
+1. Apply dot-grid texture + mint-warm palette → hero text should be dark
+2. Apply paper texture + rose-soft palette → hero text should be dark
+3. No texture + any dark palette → hero text should be white/light
+4. Switch textures on/off → text color stays correct
+5. `npm run build` passes

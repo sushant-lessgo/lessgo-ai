@@ -784,18 +784,23 @@ getTypographyForSection: (sectionId: string) => {
     // ✅ NEW: Update stored text colors when backgrounds change
     recalculateTextColors: () => {
       const { theme } = get();
+      const { getPaletteById } = require('@/modules/Design/background/palettes');
       const { getSmartTextColor } = require('@/utils/improvedTextColors');
-      
+      const palette = getPaletteById(theme.colors.paletteId);
+
       const calculateForBackground = (bg: string) => ({
         heading: getSmartTextColor(bg, 'heading'),
         body: getSmartTextColor(bg, 'body'),
         muted: getSmartTextColor(bg, 'muted')
       });
-      
+
+      // Use raw palette backgrounds (not compiled CSS with textures)
+      // Texture rgba overlays like rgba(0,0,0,0.06) get parsed as solid black,
+      // poisoning the luminance average and producing wrong text colors
       const newTextColors = {
-        primary: calculateForBackground(theme.colors.sectionBackgrounds.primary || 'bg-gradient-to-br from-blue-500 to-blue-600'),
-        secondary: calculateForBackground(theme.colors.sectionBackgrounds.secondary || 'bg-gray-50'),
-        neutral: calculateForBackground(theme.colors.sectionBackgrounds.neutral || '#ffffff'),
+        primary: calculateForBackground(palette?.primary || theme.colors.sectionBackgrounds.primary),
+        secondary: calculateForBackground(palette?.secondary || theme.colors.sectionBackgrounds.secondary),
+        neutral: calculateForBackground(palette?.neutral || theme.colors.sectionBackgrounds.neutral || '#ffffff'),
       };
       
       set((state: EditStore) => {

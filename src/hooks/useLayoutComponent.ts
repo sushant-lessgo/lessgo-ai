@@ -302,9 +302,14 @@ export function useLayoutComponent<T = Record<string, any>>({
       return (theme as any).textColorOverrides[type];
     }
     
-    // Last resort: Calculate colors (for custom backgrounds or missing stored colors)
+    // Last resort: Calculate from RAW palette (not compiled CSS with textures)
+    // Texture rgba overlays poison luminance when parsed without alpha
+    const { getPaletteById } = require('@/modules/Design/background/palettes');
     const { getSmartTextColor } = require('@/utils/improvedTextColors');
-    const baseColor = getSmartTextColor(sectionBackground, type);
+    const palette = getPaletteById(theme?.colors?.paletteId);
+    const bgKey = mapBackgroundTypeToStorageKey(currentBackgroundType) as 'primary' | 'secondary' | 'neutral';
+    const rawBg = palette?.[bgKey] || sectionBackground;
+    const baseColor = getSmartTextColor(rawBg, type);
     
     // Apply contrast level adjustment if specified
     const contrastLevel = (theme as any)?.textContrastLevel || 50;

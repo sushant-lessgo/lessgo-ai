@@ -184,9 +184,12 @@ export default function GeneratingStep() {
         muted: getSmartTextColor(bg, 'muted'),
       });
 
+      // Use raw palette backgrounds (not compiled CSS with textures)
+      // Texture rgba overlays like rgba(0,0,0,0.06) get parsed as solid black,
+      // poisoning the luminance average and producing wrong text colors
       const textColors = {
-        primary: calculateForBackground(compiledPrimary),
-        secondary: calculateForBackground(compiledSecondary),
+        primary: calculateForBackground(palette.primary),
+        secondary: calculateForBackground(palette.secondary),
         neutral: calculateForBackground(palette.neutral),
       };
 
