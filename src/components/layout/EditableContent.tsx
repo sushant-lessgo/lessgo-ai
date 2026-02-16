@@ -277,7 +277,7 @@ export function EditableContent({
         sectionId={sectionId}
         enterBehavior={enterBehavior}
         className={className}
-        style={style}
+        style={previewStyle}
         placeholder={placeholder}
         backgroundType={backgroundType}
         colorTokens={colorTokens}
@@ -286,7 +286,7 @@ export function EditableContent({
       />
     );
   }
-  
+
   // Fallback to original simple contentEditable for edit mode
   if (mode !== 'preview') {
     const editableElement = (
@@ -295,12 +295,12 @@ export function EditableContent({
         suppressContentEditableWarning
         onBlur={(e) => onEdit(e.currentTarget.textContent || '')}
         className={`
-          outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 
-          rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 
-          ${!value && 'opacity-50'} 
+          outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50
+          rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50
+          ${!value && 'opacity-50'}
           ${className}
         `}
-        style={style}
+        style={previewStyle}
         data-placeholder={placeholder || 'Click to edit'}
         data-section-id={sectionId}
         data-element-key={elementKey}
