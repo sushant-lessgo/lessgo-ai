@@ -399,8 +399,8 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
                   className="text-xl font-semibold mb-8"
                   placeholder="Demo stats heading"
                   sectionBackground={sectionBackground}
-                  data-section-id={sectionId}
-                  data-element-key="demo_stats_heading"
+                  sectionId={sectionId}
+                  elementKey="demo_stats_heading"
                 />
               )}
 
@@ -427,8 +427,8 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
                         }}
                         placeholder="Stat label"
                         sectionBackground={sectionBackground}
-                        data-section-id={sectionId}
-                        data-element-key={`demo_stat_${stat.id}_label`}
+                        sectionId={sectionId}
+                        elementKey={`demo_stat_${stat.id}_label`}
                       />
                       <EditableAdaptiveText
                         mode={mode}
@@ -440,8 +440,8 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
                         className={`text-sm ${cardStyles.textMuted}`}
                         placeholder="Stat description"
                         sectionBackground={sectionBackground}
-                        data-section-id={sectionId}
-                        data-element-key={`demo_stat_${stat.id}_description`}
+                        sectionId={sectionId}
+                        elementKey={`demo_stat_${stat.id}_description`}
                       />
                       {isEditMode && demoStats.length > 1 && (
                         <button

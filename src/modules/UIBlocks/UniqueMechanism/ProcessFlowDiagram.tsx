@@ -316,8 +316,6 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
                     sectionId={sectionId}
                     elementKey={`step_title_${step.id}`}
                     sectionBackground={sectionBackground}
-                    data-section-id={sectionId}
-                    data-element-key={`step_title_${step.id}`}
                   />
                   <EditableAdaptiveText
                     mode={mode}
@@ -339,8 +337,6 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
                     sectionId={sectionId}
                     elementKey={`step_description_${step.id}`}
                     sectionBackground={sectionBackground}
-                    data-section-id={sectionId}
-                    data-element-key={`step_description_${step.id}`}
                   />
                 </div>
               </div>
@@ -413,8 +409,6 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
                       sectionId={sectionId}
                       elementKey={`benefit_title_${benefit.id}`}
                       sectionBackground={themeExtras.benefitsBg}
-                      data-section-id={sectionId}
-                      data-element-key={`benefit_title_${benefit.id}`}
                     />
                     <EditableAdaptiveText
                       mode={mode}
@@ -429,8 +423,6 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
                       sectionId={sectionId}
                       elementKey={`benefit_description_${benefit.id}`}
                       sectionBackground={themeExtras.benefitsBg}
-                      data-section-id={sectionId}
-                      data-element-key={`benefit_description_${benefit.id}`}
                     />
                   </div>
               ))}

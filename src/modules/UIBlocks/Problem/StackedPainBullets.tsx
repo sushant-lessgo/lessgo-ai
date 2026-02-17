@@ -109,8 +109,8 @@ const PainPointItem = ({
             className={`font-semibold text-xl leading-relaxed ${cardStyles.textHeading}`}
             placeholder="Enter pain point..."
             sectionBackground={sectionBackground}
-            data-section-id={sectionId}
-            data-element-key={`pain_items.${index}.point`}
+            sectionId={sectionId}
+            elementKey={`pain_items.${index}.point`}
           />
         </div>
 
@@ -127,8 +127,8 @@ const PainPointItem = ({
               className={`text-base leading-relaxed ${cardStyles.textBody} ${!painItem.description && mode === 'edit' ? 'opacity-50 italic' : ''}`}
               placeholder="Add optional description to elaborate on this pain point..."
               sectionBackground={sectionBackground}
-              data-section-id={sectionId}
-              data-element-key={`pain_items.${index}.description`}
+              sectionId={sectionId}
+              elementKey={`pain_items.${index}.description`}
             />
           </div>
         )}
@@ -341,8 +341,8 @@ export default function StackedPainBullets(props: LayoutComponentProps) {
               className="font-semibold"
               placeholder="Sound familiar? You're not alone."
               sectionBackground={sectionBackground}
-              data-section-id={sectionId}
-              data-element-key="conclusion_text"
+              sectionId={sectionId}
+              elementKey="conclusion_text"
             />
           </div>
         </div>

@@ -174,8 +174,8 @@ export default function InlineQnAList(props: LayoutComponentProps) {
                   style={getTextStyle('h3')}
                   placeholder="Enter question..."
                   sectionBackground={sectionBackground}
-                  data-section-id={sectionId}
-                  data-element-key={`faq_items.${item.id}.question`}
+                  sectionId={sectionId}
+                  elementKey={`faq_items.${item.id}.question`}
                 />
               </div>
 
@@ -190,8 +190,8 @@ export default function InlineQnAList(props: LayoutComponentProps) {
                   className={`leading-relaxed ${cardStyles.textBody}`}
                   placeholder="Enter answer..."
                   sectionBackground={sectionBackground}
-                  data-section-id={sectionId}
-                  data-element-key={`faq_items.${item.id}.answer`}
+                  sectionId={sectionId}
+                  elementKey={`faq_items.${item.id}.answer`}
                 />
               )}
 

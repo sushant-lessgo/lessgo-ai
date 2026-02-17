@@ -5,6 +5,7 @@ import React from 'react';
 import { ThemePopover } from '../ui/ThemePopover';
 import { TypographyControls } from '../ui/TypographyControls';
 import { EditHeaderRightPanel } from './EditHeaderRightPanel';
+import { ReviewPill } from '../ui/ReviewPill';
 
 interface EditHeaderProps {
   tokenId: string;
@@ -19,6 +20,11 @@ export function EditHeader({ tokenId }: EditHeaderProps) {
       <div className="flex items-center space-x-4">
         <ThemePopover />
         <TypographyControls />
+      </div>
+
+      {/* Center: Review counter pill */}
+      <div className="flex-1 flex justify-center">
+        <ReviewPill />
       </div>
 
       {/* Right Section - Action Controls */}

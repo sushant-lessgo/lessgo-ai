@@ -366,8 +366,8 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
                     className="text-3xl font-bold"
                     placeholder="10,000+"
                     sectionBackground={sectionBackground}
-                    data-section-id={sectionId}
-                    data-element-key="customer_count"
+                    sectionId={sectionId}
+                    elementKey="customer_count"
                   />
                   <EditableAdaptiveText
                     mode={mode}
@@ -379,8 +379,8 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
                     className={`text-sm ${colorTokens.textMuted} mt-1`}
                     placeholder="Happy customers"
                     sectionBackground={sectionBackground}
-                    data-section-id={sectionId}
-                    data-element-key="customer_label"
+                    sectionId={sectionId}
+                    elementKey="customer_label"
                   />
                   
                   {/* Remove button for customer count - V2: delete by setting to empty */}
@@ -427,8 +427,8 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
                     className={`text-sm ${colorTokens.textMuted} ml-2`}
                     placeholder="4.8/5 stars"
                     sectionBackground={sectionBackground}
-                    data-section-id={sectionId}
-                    data-element-key="rating_stat"
+                    sectionId={sectionId}
+                    elementKey="rating_stat"
                   />
                   
                   {/* Remove button for rating - V2: delete by setting to empty */}
@@ -472,8 +472,8 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
                     className="text-3xl font-bold"
                     placeholder="99.9% uptime"
                     sectionBackground={sectionBackground}
-                    data-section-id={sectionId}
-                    data-element-key="uptime_stat"
+                    sectionId={sectionId}
+                    elementKey="uptime_stat"
                   />
                   <EditableAdaptiveText
                     mode={mode}
@@ -485,8 +485,8 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
                     className={`text-sm ${colorTokens.textMuted} mt-1`}
                     placeholder="SOC 2 Compliant"
                     sectionBackground={sectionBackground}
-                    data-section-id={sectionId}
-                    data-element-key="uptime_label"
+                    sectionId={sectionId}
+                    elementKey="uptime_label"
                   />
                   
                   {/* Remove button for uptime - V2: delete by setting to empty */}

@@ -124,8 +124,8 @@ const FAQAccordionItem = React.memo(({
               className={`font-semibold ${cardStyles.textHeading} transition-colors duration-200`}
               placeholder="Enter question..."
               sectionBackground={sectionBackground}
-              data-section-id={sectionId}
-              data-element-key={`faq_items.${item.id}.question`}
+              sectionId={sectionId}
+              elementKey={`faq_items.${item.id}.question`}
             />
           </div>
 
@@ -153,8 +153,8 @@ const FAQAccordionItem = React.memo(({
             className={`${cardStyles.textBody} leading-relaxed`}
             placeholder="Enter answer..."
             sectionBackground={sectionBackground}
-            data-section-id={sectionId}
-            data-element-key={`faq_items.${item.id}.answer`}
+            sectionId={sectionId}
+            elementKey={`faq_items.${item.id}.answer`}
           />
         </div>
       )}

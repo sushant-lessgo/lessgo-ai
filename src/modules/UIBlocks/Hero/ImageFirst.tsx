@@ -335,7 +335,7 @@ export default function ImageFirst(props: LayoutComponentProps) {
               const imageSrc = isValidImagePath && imageValue !== '' ? imageValue : '/hero-placeholder.jpg';
 
               return imageSrc ? (
-                <div className="relative w-full aspect-video overflow-hidden">
+                <div className="relative w-full aspect-video overflow-hidden" data-element-key="center_hero_image">
                   <img
                     src={imageSrc}
                   alt="Hero"
@@ -578,8 +578,8 @@ export default function ImageFirst(props: LayoutComponentProps) {
                       className="text-sm"
                       placeholder="500+ happy customers"
                       sectionBackground={sectionBackground}
-                      data-section-id={sectionId}
-                      data-element-key="customer_count"
+                      sectionId={sectionId}
+                      elementKey="customer_count"
                     />
 
                     {/* Remove button for customer count */}
@@ -614,8 +614,8 @@ export default function ImageFirst(props: LayoutComponentProps) {
                         className="text-sm"
                         placeholder="4.9/5"
                         sectionBackground={sectionBackground}
-                        data-section-id={sectionId}
-                        data-element-key="rating_value"
+                        sectionId={sectionId}
+                        elementKey="rating_value"
                       />
                       <EditableAdaptiveText
                         mode={mode}
@@ -627,8 +627,8 @@ export default function ImageFirst(props: LayoutComponentProps) {
                         className="text-sm"
                         placeholder="from 127 reviews"
                         sectionBackground={sectionBackground}
-                        data-section-id={sectionId}
-                        data-element-key="rating_count"
+                        sectionId={sectionId}
+                        elementKey="rating_count"
                       />
                     </div>
 

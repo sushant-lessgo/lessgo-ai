@@ -535,8 +535,8 @@ export default function CenterStacked(props: LayoutComponentProps) {
                     textStyle={{ textAlign: 'center' }}
                     placeholder="500+ happy customers"
                     sectionBackground={sectionBackground}
-                    data-section-id={sectionId}
-                    data-element-key="customer_count"
+                    sectionId={sectionId}
+                    elementKey="customer_count"
                   />
 
                   {/* Remove button for customer count */}
@@ -572,8 +572,8 @@ export default function CenterStacked(props: LayoutComponentProps) {
                       textStyle={{ textAlign: 'center' }}
                       placeholder="4.9/5"
                       sectionBackground={sectionBackground}
-                      data-section-id={sectionId}
-                      data-element-key="rating_value"
+                      sectionId={sectionId}
+                      elementKey="rating_value"
                     />
                     <EditableAdaptiveText
                       mode={mode}
@@ -586,8 +586,8 @@ export default function CenterStacked(props: LayoutComponentProps) {
                       textStyle={{ textAlign: 'center' }}
                       placeholder="from 127 reviews"
                       sectionBackground={sectionBackground}
-                      data-section-id={sectionId}
-                      data-element-key="rating_count"
+                      sectionId={sectionId}
+                      elementKey="rating_count"
                     />
                   </div>
                   
@@ -629,7 +629,7 @@ export default function CenterStacked(props: LayoutComponentProps) {
               const imageSrc = isValidImagePath && imageValue !== '' ? imageValue : '/hero-placeholder.jpg';
 
               return imageSrc ? (
-                <div className="relative w-[60%] lg:w-[65%] aspect-video mx-auto overflow-hidden">
+                <div className="relative w-[60%] lg:w-[65%] aspect-video mx-auto overflow-hidden" data-element-key="center_hero_image">
                   <img
                     src={imageSrc}
                     alt="Hero"

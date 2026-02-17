@@ -325,7 +325,7 @@ export default function VisualCTAWithMockup(props: LayoutComponentProps) {
           {/* Right Column - Product Mockup */}
           <div className="relative">
             {blockContent.mockup_image && blockContent.mockup_image !== '' ? (
-              <div className="relative aspect-video overflow-hidden">
+              <div className="relative aspect-video overflow-hidden" data-element-key="mockup_image">
                 <img
                   src={blockContent.mockup_image}
                   alt="Product Demo"

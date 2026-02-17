@@ -403,8 +403,8 @@ export default function MetricTiles(props: LayoutComponentProps) {
                 className="mb-4"
                 placeholder="ROI section title..."
                 sectionBackground={sectionBackground}
-                data-section-id={sectionId}
-                data-element-key="roi_summary_title"
+                sectionId={sectionId}
+                elementKey="roi_summary_title"
               />
 
               <div className="grid md:grid-cols-3 gap-8">
@@ -420,8 +420,8 @@ export default function MetricTiles(props: LayoutComponentProps) {
                       className={`text-4xl font-bold ${themeColors.roiMetricColors[index % 3]} mb-2`}
                       placeholder="Metric"
                       sectionBackground={sectionBackground}
-                      data-section-id={sectionId}
-                      data-element-key={`roi_metric_${item.id}`}
+                      sectionId={sectionId}
+                      elementKey={`roi_metric_${item.id}`}
                     />
                     <EditableAdaptiveText
                       mode={mode}
@@ -433,8 +433,8 @@ export default function MetricTiles(props: LayoutComponentProps) {
                       className={`text-sm ${cardStyles.textMuted}`}
                       placeholder="Label"
                       sectionBackground={sectionBackground}
-                      data-section-id={sectionId}
-                      data-element-key={`roi_label_${item.id}`}
+                      sectionId={sectionId}
+                      elementKey={`roi_label_${item.id}`}
                     />
                     {mode === 'edit' && (
                       <button
@@ -466,8 +466,8 @@ export default function MetricTiles(props: LayoutComponentProps) {
                     className={`${cardStyles.textMuted} max-w-2xl mx-auto`}
                     placeholder="ROI description..."
                     sectionBackground={sectionBackground}
-                    data-section-id={sectionId}
-                    data-element-key="roi_description"
+                    sectionId={sectionId}
+                    elementKey="roi_description"
                   />
                 </div>
               )}

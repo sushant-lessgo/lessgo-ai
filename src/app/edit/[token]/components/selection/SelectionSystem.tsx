@@ -1,6 +1,7 @@
 // app/edit/[token]/components/selection/SelectionSystem.tsx
 import React, { useEffect } from 'react';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useReviewState } from '@/hooks/useReviewState';
 // Removed useSelection - functionality now in unified useEditor system
 
 interface SelectionSystemProps {
@@ -65,6 +66,35 @@ export function SelectionSystem({ children }: SelectionSystemProps) {
     });
   }, [mode, selectedSection, selectedElement, multiSelection]);
 
+  // Apply review indicator classes
+  const { reviewItems } = useReviewState();
+
+  useEffect(() => {
+    const allElements = document.querySelectorAll('[data-element-key]');
+
+    if (mode === 'preview') {
+      allElements.forEach((el) => {
+        el.classList.remove('element-needs-review', 'element-manual-preferred');
+      });
+      return;
+    }
+
+    const { getElementReviewStatus } = useReviewState.getState();
+    allElements.forEach((el) => {
+      const sectionId = el.closest('[data-section-id]')?.getAttribute('data-section-id');
+      const elementKey = el.getAttribute('data-element-key');
+      if (!sectionId || !elementKey) return;
+
+      const status = getElementReviewStatus(sectionId, elementKey);
+      el.classList.remove('element-needs-review', 'element-manual-preferred');
+      if (status === 'needs_review') {
+        el.classList.add('element-needs-review');
+      } else if (status === 'manual_preferred') {
+        el.classList.add('element-manual-preferred');
+      }
+    });
+  }, [mode, selectedSection, selectedElement, multiSelection, reviewItems]);
+
   // Handle focus management
   useEffect(() => {
     const focusSelectedElement = () => {
@@ -108,7 +138,7 @@ export function SelectionSystem({ children }: SelectionSystemProps) {
 // CSS styles for selection indicators
 function SelectionStyles() {
   return (
-    <style jsx>{`
+    <style jsx global>{`
       /* Section Selection Styles */
       .selected-section {
         position: relative;
@@ -200,6 +230,8 @@ function SelectionStyles() {
       .element-selection-badge {
         background: #10b981;
       }
+
+      /* Review indicator CSS moved to globals.css for proper global scope */
     `}</style>
   );
 }

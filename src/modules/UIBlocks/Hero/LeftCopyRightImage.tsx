@@ -580,8 +580,8 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
                       className="text-sm"
                       placeholder="500+ happy customers"
                       sectionBackground={sectionBackground}
-                      data-section-id={sectionId}
-                      data-element-key="customer_count"
+                      sectionId={sectionId}
+                      elementKey="customer_count"
                     />
 
                     {/* Remove button for customer count */}
@@ -616,8 +616,8 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
                       className="text-sm ml-2"
                       placeholder="4.9/5"
                       sectionBackground={sectionBackground}
-                      data-section-id={sectionId}
-                      data-element-key="rating_value"
+                      sectionId={sectionId}
+                      elementKey="rating_value"
                     />
                     <EditableAdaptiveText
                       mode={mode}
@@ -629,8 +629,8 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
                       className="text-sm"
                       placeholder="from 127 reviews"
                       sectionBackground={sectionBackground}
-                      data-section-id={sectionId}
-                      data-element-key="rating_count"
+                      sectionId={sectionId}
+                      elementKey="rating_count"
                     />
 
                     {/* Remove button for rating section */}
@@ -673,7 +673,7 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
               const imageSrc = isValidImagePath && imageValue !== '' ? imageValue : '/hero-placeholder.jpg';
 
               return imageSrc ? (
-                <div className="relative w-full h-full overflow-hidden">
+                <div className="relative w-full h-full overflow-hidden" data-element-key="center_hero_image">
                   {/* Decorative gradient blob behind image - uses theme accent color */}
                   <div
                     className="absolute -inset-4 rounded-3xl blur-2xl opacity-30"

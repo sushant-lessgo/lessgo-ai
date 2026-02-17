@@ -234,8 +234,8 @@ const CarouselSlide = React.memo(({
                   className="text-sm font-medium"
                   placeholder="Benefit 1"
                   sectionBackground=""
-                  data-section-id={sectionId}
-                  data-element-key="benefit_1"
+                  sectionId={sectionId}
+                  elementKey="benefit_1"
                 />
               ) : (
                 <span className="text-sm font-medium">{benefit_1}</span>
@@ -280,8 +280,8 @@ const CarouselSlide = React.memo(({
                   className="text-sm font-medium"
                   placeholder="Benefit 2"
                   sectionBackground=""
-                  data-section-id={sectionId}
-                  data-element-key="benefit_2"
+                  sectionId={sectionId}
+                  elementKey="benefit_2"
                 />
               ) : (
                 <span className="text-sm font-medium">{benefit_2}</span>

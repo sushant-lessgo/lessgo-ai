@@ -145,8 +145,8 @@ export default function PropertyComparisonMatrix(props: LayoutComponentProps) {
             className="text-center mb-12 max-w-2xl mx-auto"
             placeholder="Add a subheadline..."
             sectionBackground={sectionBackground}
-            data-section-id={sectionId}
-            data-element-key="subheadline"
+            sectionId={sectionId}
+            elementKey="subheadline"
           />
         )}
 
@@ -164,8 +164,8 @@ export default function PropertyComparisonMatrix(props: LayoutComponentProps) {
                 className="font-bold"
                 placeholder="Feature"
                 sectionBackground={sectionBackground}
-                data-section-id={sectionId}
-                data-element-key="feature_header"
+                sectionId={sectionId}
+                elementKey="feature_header"
               />
             </div>
             <div style={bodyStyle} className={`p-5 font-bold ${themeColors.usHeaderText} ${themeColors.usColumnBg} text-center`}>
@@ -179,8 +179,8 @@ export default function PropertyComparisonMatrix(props: LayoutComponentProps) {
                 className="font-bold text-center"
                 placeholder="Us"
                 sectionBackground={sectionBackground}
-                data-section-id={sectionId}
-                data-element-key="us_header"
+                sectionId={sectionId}
+                elementKey="us_header"
               />
             </div>
             <div style={bodyStyle} className={`p-5 font-bold ${cardStyles.textMuted} text-center`}>
@@ -194,8 +194,8 @@ export default function PropertyComparisonMatrix(props: LayoutComponentProps) {
                 className="font-bold text-center"
                 placeholder="Competitors"
                 sectionBackground={sectionBackground}
-                data-section-id={sectionId}
-                data-element-key="competitors_header"
+                sectionId={sectionId}
+                elementKey="competitors_header"
               />
             </div>
           </div>
@@ -213,8 +213,8 @@ export default function PropertyComparisonMatrix(props: LayoutComponentProps) {
                   className="font-medium"
                   placeholder="Property name"
                   sectionBackground={sectionBackground}
-                  data-section-id={sectionId}
-                  data-element-key={`property_${row.id}`}
+                  sectionId={sectionId}
+                  elementKey={`property_${row.id}`}
                 />
               </div>
               <div style={bodyStyle} className={`p-5 text-center ${themeColors.usColumnText} ${themeColors.usColumnBg} font-semibold`}>
@@ -228,8 +228,8 @@ export default function PropertyComparisonMatrix(props: LayoutComponentProps) {
                   className={`text-center font-semibold ${themeColors.usColumnText}`}
                   placeholder="Our value"
                   sectionBackground={sectionBackground}
-                  data-section-id={sectionId}
-                  data-element-key={`us_value_${row.id}`}
+                  sectionId={sectionId}
+                  elementKey={`us_value_${row.id}`}
                 />
               </div>
               <div style={bodyStyle} className={`p-5 text-center ${cardStyles.textMuted} relative`}>
@@ -243,8 +243,8 @@ export default function PropertyComparisonMatrix(props: LayoutComponentProps) {
                   className={`text-center ${cardStyles.textMuted}`}
                   placeholder="Competitor value"
                   sectionBackground={sectionBackground}
-                  data-section-id={sectionId}
-                  data-element-key={`competitor_value_${row.id}`}
+                  sectionId={sectionId}
+                  elementKey={`competitor_value_${row.id}`}
                 />
 
                 {/* Delete button - only show in edit mode and if more than 1 row */}
@@ -295,8 +295,8 @@ export default function PropertyComparisonMatrix(props: LayoutComponentProps) {
               className="text-center"
               placeholder="Add a conversion nudge..."
               sectionBackground={sectionBackground}
-              data-section-id={sectionId}
-              data-element-key="footer_text"
+              sectionId={sectionId}
+              elementKey="footer_text"
             />
           </div>
         )}

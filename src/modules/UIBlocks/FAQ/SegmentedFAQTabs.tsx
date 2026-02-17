@@ -158,8 +158,8 @@ const FAQTabItem = React.memo(({
           style={getTextStyle('h3')}
           placeholder="Enter question..."
           sectionBackground={sectionBackground}
-          data-section-id={sectionId}
-          data-element-key={`tabs.${tabId}.items.${item.id}.question`}
+          sectionId={sectionId}
+          elementKey={`tabs.${tabId}.items.${item.id}.question`}
         />
       </div>
 
@@ -174,8 +174,8 @@ const FAQTabItem = React.memo(({
           className={`leading-relaxed ${cardStyles.textBody}`}
           placeholder="Enter answer..."
           sectionBackground={sectionBackground}
-          data-section-id={sectionId}
-          data-element-key={`tabs.${tabId}.items.${item.id}.answer`}
+          sectionId={sectionId}
+          elementKey={`tabs.${tabId}.items.${item.id}.answer`}
         />
       )}
 
@@ -392,8 +392,8 @@ export default function SegmentedFAQTabs(props: LayoutComponentProps) {
                     className="font-medium whitespace-nowrap"
                     placeholder={`Tab ${index + 1}`}
                     sectionBackground={activeTab === index ? themeColors.activeBg : sectionBackground}
-                    data-section-id={sectionId}
-                    data-element-key={`tabs.${tab.id}.label`}
+                    sectionId={sectionId}
+                    elementKey={`tabs.${tab.id}.label`}
                   />
                 ) : (
                   tab.label

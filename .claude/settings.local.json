@@ -118,7 +118,11 @@
       "Bash(wc:*)",
       "Bash(git -C \"C:\\\\Users\\\\susha\\\\lessgo-ai\" diff --name-only)",
       "Bash(git diff:*)",
-      "Bash(git log:*)"
+      "Bash(git log:*)",
+      "Bash(test:*)",
+      "WebFetch(domain:landingrabbit.com)",
+      "WebFetch(domain:magicui.design)",
+      "WebFetch(domain:www.alfdesigngroup.com)"
     ],
     "deny": [],
     "ask": [],

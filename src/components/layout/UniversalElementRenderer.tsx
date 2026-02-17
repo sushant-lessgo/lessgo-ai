@@ -2,6 +2,7 @@
 
 import React, { useMemo } from 'react';
 import { EditableContent, EditableHeadline } from './EditableContent';
+import { isStockOrPlaceholder } from '@/hooks/useReviewState';
 import type { UniversalElementType, UniversalElementInstance } from '@/types/universalElements';
 
 interface UniversalElementRendererProps {
@@ -562,15 +563,25 @@ function UniversalImage({
     );
   }
 
+  const effectiveSrc = src || '/placeholder-image.jpg';
+  const imageType = mode !== 'preview' ? isStockOrPlaceholder(effectiveSrc) : null;
+
   return (
-    <img
-      src={src || '/placeholder-image.jpg'}
-      alt={alt}
-      className={imageClasses}
-      style={style}
-      data-section-id={sectionId}
-      data-element-key={elementKey}
-    />
+    <div style={{ position: 'relative', display: 'inline-block' }}>
+      <img
+        src={effectiveSrc}
+        alt={alt}
+        className={imageClasses}
+        style={style}
+        data-section-id={sectionId}
+        data-element-key={elementKey}
+      />
+      {imageType && (
+        <span className="image-source-badge">
+          {imageType === 'placeholder' ? 'Placeholder' : 'Stock photo'}
+        </span>
+      )}
+    </div>
   );
 }
 
