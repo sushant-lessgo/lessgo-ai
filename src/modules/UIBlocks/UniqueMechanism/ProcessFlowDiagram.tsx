@@ -32,36 +32,7 @@ interface ProcessFlowDiagramContent {
   benefits?: Benefit[];
 }
 
-const CONTENT_SCHEMA = {
-  headline: {
-    type: 'string' as const,
-    default: 'How Our Unique Process Works'
-  },
-  subheadline: {
-    type: 'string' as const,
-    default: 'Our proprietary methodology delivers results in simple steps.'
-  },
-  benefits_title: {
-    type: 'string' as const,
-    default: 'Why This Process Works'
-  },
-  steps: {
-    type: 'array' as const,
-    default: [
-      { id: 's1', title: 'Data Ingestion', description: 'Secure data collection from multiple sources.' },
-      { id: 's2', title: 'AI Analysis', description: 'Advanced algorithms analyze patterns and trends.' },
-      { id: 's3', title: 'Results Delivery', description: 'Actionable insights via intuitive dashboards.' },
-    ]
-  },
-  benefits: {
-    type: 'array' as const,
-    default: [
-      { id: 'b1', title: '10x Faster', description: 'Automated processing reduces time.' },
-      { id: 'b2', title: '99% Accurate', description: 'AI-powered validation ensures precision.' },
-      { id: 'b3', title: 'Fully Customizable', description: 'Adapts to your requirements.' },
-    ]
-  }
-};
+// CONTENT_SCHEMA removed — defaults now in layoutElementSchema.ts (ProcessFlowDiagram entry)
 
 export default function ProcessFlowDiagram(props: LayoutComponentProps) {
   const {
@@ -73,14 +44,13 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
     sectionBackground,
     handleContentUpdate
   } = useLayoutComponent<ProcessFlowDiagramContent>({
-    ...props,
-    contentSchema: CONTENT_SCHEMA
+    ...props
   });
 
   const { getTextStyle: getTypographyStyle } = useTypography();
 
   // Ensure steps is always an array
-  const steps: Step[] = Array.isArray(blockContent.steps) ? blockContent.steps : CONTENT_SCHEMA.steps.default;
+  const steps: Step[] = Array.isArray(blockContent.steps) ? blockContent.steps : [];
   const benefits: Benefit[] = Array.isArray(blockContent.benefits) ? blockContent.benefits : [];
 
   // Theme detection: manual override > auto-detection > neutral fallback

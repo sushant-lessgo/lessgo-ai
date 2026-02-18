@@ -27,46 +27,7 @@ interface ValueStackCTAContent {
 }
 
 // Content schema - defines structure and defaults
-const CONTENT_SCHEMA = {
-  headline: {
-    type: 'string' as const,
-    default: 'Everything You Get With Your Account'
-  },
-  subheadline: {
-    type: 'string' as const,
-    default: 'One subscription, unlimited value'
-  },
-  cta_text: {
-    type: 'string' as const,
-    default: 'Start Free Trial'
-  },
-  secondary_cta_text: {
-    type: 'string' as const,
-    default: ''
-  },
-  final_cta_headline: {
-    type: 'string' as const,
-    default: 'Ready to Transform Your Workflow?'
-  },
-  final_cta_description: {
-    type: 'string' as const,
-    default: 'Join 10,000+ teams already saving time every day'
-  },
-  guarantee_text: {
-    type: 'string' as const,
-    default: '30-day money-back guarantee'
-  },
-  value_items: {
-    type: 'array' as const,
-    default: [
-      { id: 'v1', text: 'Save 20+ hours per week on repetitive tasks' },
-      { id: 'v2', text: 'Increase team productivity by 40%' },
-      { id: 'v3', text: 'Real-time analytics and reporting' },
-      { id: 'v4', text: 'Unlimited team members included' },
-      { id: 'v5', text: 'Priority 24/7 customer support' },
-    ]
-  }
-};
+
 
 // Theme-aware color mappings for CTA box
 const getThemeColors = (theme: UIBlockTheme) => {
@@ -104,7 +65,6 @@ export default function ValueStackCTA(props: LayoutComponentProps) {
     handleContentUpdate
   } = useLayoutComponent<ValueStackCTAContent>({
     ...props,
-    contentSchema: CONTENT_SCHEMA
   });
 
   // Typography styles
@@ -117,9 +77,9 @@ export default function ValueStackCTA(props: LayoutComponentProps) {
   const themeColors = getThemeColors(uiBlockTheme);
 
   // Ensure value_items is always an array
-  const valueItems = Array.isArray(blockContent.value_items)
+  const valueItems: Array<{ id: string; text: string }> = Array.isArray(blockContent.value_items)
     ? blockContent.value_items
-    : CONTENT_SCHEMA.value_items.default;
+    : [];
 
   // Add new value item
   const handleAddItem = () => {

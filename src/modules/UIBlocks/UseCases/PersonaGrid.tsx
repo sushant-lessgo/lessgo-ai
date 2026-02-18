@@ -30,30 +30,7 @@ interface PersonaGridContent {
   personas: Persona[];
 }
 
-// Content schema - V2 array format
-const CONTENT_SCHEMA = {
-  headline: {
-    type: 'string' as const,
-    default: 'Built for Every Team Member'
-  },
-  subheadline: {
-    type: 'string' as const,
-    default: ''
-  },
-  footer_text: {
-    type: 'string' as const,
-    default: ''
-  },
-  personas: {
-    type: 'array' as const,
-    default: [
-      { id: 'p1', name: 'Marketing Manager', description: 'Track campaign performance, manage content calendars, and coordinate cross-team marketing initiatives with real-time visibility into ROI and engagement metrics.' },
-      { id: 'p2', name: 'Sales Director', description: 'Monitor sales pipeline, forecast revenue, and optimize team performance while maintaining clear visibility into customer interactions and deal progression.' },
-      { id: 'p3', name: 'Product Manager', description: 'Coordinate product development, manage feature requests, and track user feedback while keeping stakeholders aligned on roadmap priorities.' },
-      { id: 'p4', name: 'Customer Success', description: 'Manage customer relationships, track satisfaction metrics, and proactively address issues while ensuring seamless onboarding and retention.' }
-    ]
-  }
-};
+// CONTENT_SCHEMA removed — defaults now in layoutElementSchema.ts (PersonaGrid entry)
 
 // Generate unique ID
 const generateId = () => `p${Date.now().toString(36)}`;
@@ -243,8 +220,7 @@ export default function PersonaGrid(props: LayoutComponentProps) {
     handleContentUpdate,
     backgroundType
   } = useLayoutComponent<PersonaGridContent>({
-    ...props,
-    contentSchema: CONTENT_SCHEMA
+    ...props
   });
 
   // Theme detection
@@ -291,7 +267,7 @@ export default function PersonaGrid(props: LayoutComponentProps) {
   const themeColors = getThemeColors(uiTheme);
 
   // Get personas array (with fallback)
-  const personas: Persona[] = blockContent.personas || CONTENT_SCHEMA.personas.default;
+  const personas: Persona[] = blockContent.personas || [];
 
   // Handle editing (cast to any for array updates)
   const handleNameEdit = (personaId: string, value: string) => {

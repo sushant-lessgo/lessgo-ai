@@ -30,32 +30,7 @@ interface StackedHighlightsContent {
   highlights: Highlight[];
 }
 
-const CONTENT_SCHEMA = {
-  headline: {
-    type: 'string' as const,
-    default: 'Our Proprietary SmartFlow System™'
-  },
-  subheadline: {
-    type: 'string' as const,
-    default: 'Three unique capabilities that set us apart.'
-  },
-  mechanism_name: {
-    type: 'string' as const,
-    default: ''
-  },
-  footer_text: {
-    type: 'string' as const,
-    default: 'Our proprietary approach that you won\'t find anywhere else'
-  },
-  highlights: {
-    type: 'array' as const,
-    default: [
-      { id: 'h1', title: 'Intelligent Auto-Prioritization', description: 'Our AI analyzes your workflow patterns and automatically prioritizes tasks based on deadlines, dependencies, and business impact.', icon: 'Brain' },
-      { id: 'h2', title: 'Dynamic Context Switching', description: 'The system seamlessly adapts to changing priorities and contexts, maintaining efficiency even when your focus needs to shift.', icon: 'RefreshCw' },
-      { id: 'h3', title: 'Predictive Resource Allocation', description: 'Advanced algorithms predict resource needs and automatically allocate team capacity, preventing bottlenecks before they occur.', icon: 'TrendingUp' },
-    ]
-  }
-};
+// CONTENT_SCHEMA removed — defaults now in layoutElementSchema.ts (StackedHighlights entry)
 
 
 // Individual Highlight Card
@@ -197,14 +172,13 @@ export default function StackedHighlights(props: LayoutComponentProps) {
     backgroundType,
     handleContentUpdate
   } = useLayoutComponent<StackedHighlightsContent>({
-    ...props,
-    contentSchema: CONTENT_SCHEMA
+    ...props
   });
 
   // Ensure highlights is always an array
   const highlights: Highlight[] = Array.isArray(blockContent.highlights)
     ? blockContent.highlights
-    : CONTENT_SCHEMA.highlights.default;
+    : [];
 
   // Theme detection: manual override > auto-detection > neutral fallback
   const uiTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';

@@ -35,54 +35,7 @@ interface BeforeAfterQuoteContent {
   transformations?: Transformation[];
 }
 
-// V2: Content schema with array defaults
-const CONTENT_SCHEMA = {
-  headline: {
-    type: 'string' as const,
-    default: 'Real Customer Transformations'
-  },
-  subheadline: {
-    type: 'string' as const,
-    default: 'See how our solution transformed their operations'
-  },
-  before_icon: {
-    type: 'string' as const,
-    default: 'XCircle'
-  },
-  after_icon: {
-    type: 'string' as const,
-    default: 'CheckCircle'
-  },
-  transformations: {
-    type: 'array' as const,
-    default: [
-      {
-        id: 't-1',
-        before_situation: 'Spending 10+ hours weekly on manual data entry',
-        after_outcome: 'Automated processing with 5 hours saved weekly',
-        testimonial_quote: 'The transformation has been incredible. We went from drowning in manual work to having systems that run themselves.',
-        customer_name: 'Sarah Chen',
-        customer_title: 'Operations Manager',
-        customer_company: 'TechCorp',
-        before_icon: 'Frown',
-        after_icon: 'Smile',
-        avatar_url: ''
-      },
-      {
-        id: 't-2',
-        before_situation: 'Managing inventory across multiple spreadsheets',
-        after_outcome: 'Real-time management with zero stockouts',
-        testimonial_quote: 'This solved our biggest pain point instantly. Our team can now focus on strategy instead of repetitive tasks.',
-        customer_name: 'Michael Rodriguez',
-        customer_title: 'CEO',
-        customer_company: 'GrowthStart Inc',
-        before_icon: 'Clock',
-        after_icon: 'Zap',
-        avatar_url: ''
-      }
-    ]
-  }
-};
+// CONTENT_SCHEMA removed — defaults now in layoutElementSchema.ts (BeforeAfterQuote entry)
 
 export default function BeforeAfterQuote(props: LayoutComponentProps) {
   const { getTextStyle: getTypographyStyle } = useTypography();
@@ -97,8 +50,7 @@ export default function BeforeAfterQuote(props: LayoutComponentProps) {
     backgroundType,
     handleContentUpdate
   } = useLayoutComponent<BeforeAfterQuoteContent>({
-    ...props,
-    contentSchema: CONTENT_SCHEMA as any
+    ...props
   });
 
   // Theme detection: manual override > auto-detection > neutral fallback

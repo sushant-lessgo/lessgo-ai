@@ -16,9 +16,10 @@ import { analyzeBackground } from '@/utils/backgroundAnalysis';
 // ARCHIVED: selectOptionalElements.ts moved to archive/sections/
 // AI now decides optional elements at generation time, stored in aiMetadata.excludedElements
 
+import { getSchemaDefaults } from '@/modules/sections/layoutElementSchema';
 import { logger } from '@/lib/logger';
 export interface UseLayoutComponentProps extends LayoutComponentProps {
-  contentSchema: Record<string, { type: 'string' | 'array' | 'boolean' | 'number'; default: string | boolean | number | any[] }>;
+  contentSchema?: Record<string, { type: 'string' | 'array' | 'boolean' | 'number'; default: string | boolean | number | any[] }>;
 }
 
 export function useLayoutComponent<T = Record<string, any>>({ 
@@ -85,7 +86,14 @@ export function useLayoutComponent<T = Record<string, any>>({
     hasExclusions: excludedElements.length > 0
   });
 
-  const blockContent = extractLayoutContent(elements, contentSchema, layout, excludedElements) as T;
+  // Resolve schema: prop > central schema fallback
+  const resolvedSchema = contentSchema || (layout ? getSchemaDefaults(layout) : null);
+  if (!resolvedSchema) {
+    logger.error(`No schema for section ${sectionId}, layout ${layout}`);
+    return {} as any;
+  }
+
+  const blockContent = extractLayoutContent(elements, resolvedSchema, layout, excludedElements) as T;
   
   //   blockContent,
   //   headlineType: typeof blockContent.headline,

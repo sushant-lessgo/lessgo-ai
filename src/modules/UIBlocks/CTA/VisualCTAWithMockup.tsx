@@ -37,37 +37,7 @@ interface VisualCTAWithMockupContent {
 }
 
 // V2 Content schema - uses clean arrays
-const CONTENT_SCHEMA = {
-  headline: {
-    type: 'string' as const,
-    default: 'See It in Action'
-  },
-  subheadline: {
-    type: 'string' as const,
-    default: 'Experience the power of our platform with a live demo. No installation required.'
-  },
-  cta_text: {
-    type: 'string' as const,
-    default: 'Start Free Trial'
-  },
-  secondary_cta: {
-    type: 'string' as const,
-    default: ''
-  },
-  urgency_text: {
-    type: 'string' as const,
-    default: ''
-  },
-  mockup_image: {
-    type: 'string' as const,
-    default: ''
-  },
-  // V2: Array format - empty by default
-  trust_items: {
-    type: 'array' as const,
-    default: []
-  }
-};
+
 
 // Product Mockup Component
 const ProductMockup = React.memo(({ onClick }: { onClick?: (e: React.MouseEvent) => void }) => (
@@ -167,7 +137,6 @@ export default function VisualCTAWithMockup(props: LayoutComponentProps) {
     handleContentUpdate
   } = useLayoutComponent<VisualCTAWithMockupContent>({
     ...props,
-    contentSchema: CONTENT_SCHEMA
   });
 
   // V2: Theme detection with priority
@@ -195,7 +164,7 @@ export default function VisualCTAWithMockup(props: LayoutComponentProps) {
   const safeBackgroundType = props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'secondary');
 
   // V2: Direct array access
-  const trustItems = blockContent.trust_items || [];
+  const trustItems: TrustItem[] = blockContent.trust_items || [];
 
   return (
     <LayoutSection

@@ -34,49 +34,7 @@ interface TierCardsContent {
 }
 
 // Content schema for TierCards layout
-const CONTENT_SCHEMA = {
-  headline: { type: 'string' as const, default: 'Choose Your Plan' },
-  subheadline: { type: 'string' as const, default: '' },
-  badge_text: { type: 'string' as const, default: '' },
-  billing_note: { type: 'string' as const, default: '' },
-  guarantee_text: { type: 'string' as const, default: '' },
-  highlighted_label: { type: 'string' as const, default: 'Most Popular' },
-  tiers: {
-    type: 'array' as const,
-    default: [
-      {
-        id: 'tier-1',
-        name: 'Starter',
-        price: '$9',
-        period: '/month',
-        description: 'Perfect for individuals getting started',
-        features: ['5 projects', '10GB storage', 'Email support'],
-        cta_text: 'Get Started',
-        highlighted: false,
-      },
-      {
-        id: 'tier-2',
-        name: 'Pro',
-        price: '$29',
-        period: '/month',
-        description: 'For growing teams that need more power',
-        features: ['Unlimited projects', '100GB storage', 'Priority support', 'API access'],
-        cta_text: 'Go Pro',
-        highlighted: true,
-      },
-      {
-        id: 'tier-3',
-        name: 'Enterprise',
-        price: '$99',
-        period: '/month',
-        description: 'Custom solutions for large organizations',
-        features: ['Unlimited everything', 'Custom integrations', 'Dedicated support', 'SLA guarantee', 'White-label'],
-        cta_text: 'Contact Sales',
-        highlighted: false,
-      },
-    ],
-  },
-};
+
 
 // Get theme-specific accent colors for pricing (badge, checkmark)
 const getPricingAccents = (theme: UIBlockTheme) => {
@@ -376,7 +334,6 @@ export default function TierCards(props: TierCardsProps) {
   const { sectionId, mode, blockContent, colorTokens, sectionBackground, backgroundType, handleContentUpdate } =
     useLayoutComponent<TierCardsContent>({
       ...props,
-      contentSchema: CONTENT_SCHEMA,
     });
 
   // Theme detection
@@ -398,7 +355,7 @@ export default function TierCards(props: TierCardsProps) {
   const accentColor = props.theme?.colors?.accentColor || '#3b82f6';
 
   // Get tiers array (ensure it exists)
-  const tiers: Tier[] = blockContent.tiers || CONTENT_SCHEMA.tiers.default;
+  const tiers: Tier[] = blockContent.tiers || [];
 
   // --- Handler Functions ---
 
@@ -695,11 +652,6 @@ export const componentMeta = {
     sectionId: 'string - Required section identifier',
     backgroundType: '"primary" | "secondary" | "neutral" - Controls text color adaptation',
     className: 'string - Additional CSS classes',
-  },
-  contentSchema: {
-    headline: 'Main heading text',
-    subheadline: 'Optional subheading text',
-    tiers: 'Array of tier objects with name, price, period, description, features[], cta_text, highlighted',
   },
   examples: ['SaaS pricing plans', 'Service tier comparison', 'Product package options', 'Subscription levels'],
 };

@@ -35,17 +35,7 @@ interface CarouselContent {
 }
 
 // V2: Content schema for extractLayoutContent
-const CONTENT_SCHEMA = {
-  headline: { type: 'string' as const, default: '' },
-  subheadline: { type: 'string' as const, default: '' },
-  supporting_text: { type: 'string' as const, default: '' },
-  auto_play: { type: 'boolean' as const, default: false },
-  benefit_1: { type: 'string' as const, default: '' },
-  benefit_2: { type: 'string' as const, default: '' },
-  benefit_icon_1: { type: 'string' as const, default: 'CheckCircle' },
-  benefit_icon_2: { type: 'string' as const, default: 'Clock' },
-  features: { type: 'array' as const, default: [] },
-};
+
 
 const CarouselSlide = React.memo(({
   feature,
@@ -385,7 +375,6 @@ export default function Carousel(props: LayoutComponentProps) {
     handleContentUpdate
   } = useLayoutComponent<CarouselContent>({
     ...props,
-    contentSchema: CONTENT_SCHEMA
   });
 
   // Create typography styles

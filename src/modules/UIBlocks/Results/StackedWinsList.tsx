@@ -30,20 +30,7 @@ interface StackedWinsListContent {
 }
 
 // Content schema for StackedWinsList layout (V2 format - no icon defaults)
-const CONTENT_SCHEMA = {
-  headline: { type: 'string' as const, default: 'Your Wins Start Adding Up Fast' },
-  subheadline: { type: 'string' as const, default: '' },
-  footer_text: { type: 'string' as const, default: '' },
-  wins: {
-    type: 'array' as const,
-    default: [
-      { id: 'win-1', win: 'Save 25+ hours per week on manual tasks', description: 'Focus on strategy while automation handles the routine', category: 'Time Savings' },
-      { id: 'win-2', win: 'Increase team productivity by 60%', description: 'Your team works smarter, not harder', category: 'Productivity' },
-      { id: 'win-3', win: 'Reduce operational costs by $50K annually', description: 'Cut expenses while improving quality', category: 'Cost Reduction' },
-      { id: 'win-4', win: 'Eliminate 90% of repetitive work', description: 'Free up time for innovation and growth', category: 'Automation' },
-    ]
-  }
-};
+
 
 // Get category color scheme with theme support
 const getCategoryColor = (category: string | undefined, theme: UIBlockTheme): { bg: string; text: string; border: string } => {
@@ -244,7 +231,6 @@ export default function StackedWinsList(props: StackedWinsListProps) {
     handleContentUpdate
   } = useLayoutComponent<StackedWinsListContent>({
     ...props,
-    contentSchema: CONTENT_SCHEMA
   });
 
   // Theme detection with priority: manual override > auto-detection > neutral
@@ -262,7 +248,7 @@ export default function StackedWinsList(props: StackedWinsListProps) {
   const winIcon = blockContent.win_icon ?? 'CheckCircle';
 
   // Get wins array (ensure it's always an array)
-  const wins: WinItem[] = Array.isArray(blockContent.wins) ? blockContent.wins : CONTENT_SCHEMA.wins.default;
+  const wins: WinItem[] = Array.isArray(blockContent.wins) ? blockContent.wins : [];
 
   // Handle updating a win field
   const handleWinUpdate = (index: number, field: keyof WinItem, value: string) => {
@@ -412,12 +398,6 @@ export const componentMeta = {
     sectionId: 'string - Required section identifier',
     backgroundType: '"primary" | "secondary" | "neutral" - Controls text color adaptation',
     className: 'string - Additional CSS classes'
-  },
-  contentSchema: {
-    headline: 'Main heading text',
-    wins: 'Array of win items with id, win, description, category',
-    subheadline: 'Optional subheading for context',
-    win_count: 'Optional social proof about others achieving these wins'
   },
   examples: [
     'Product benefit achievements',

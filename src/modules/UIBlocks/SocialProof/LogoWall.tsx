@@ -53,45 +53,6 @@ interface LogoWallContent {
 }
 
 // Content schema with defaults
-const CONTENT_SCHEMA = {
-  headline: {
-    type: 'string' as const,
-    default: 'Trusted by Leading Companies Worldwide'
-  },
-  subheadline: {
-    type: 'string' as const,
-    default: 'Join thousands of companies that trust us to power their success.'
-  },
-  show_press: { type: 'boolean' as const, default: true },
-  show_badges: { type: 'boolean' as const, default: true },
-  companies: {
-    type: 'array' as const,
-    default: [
-      { id: 'c1', name: 'Microsoft', logo_url: '' },
-      { id: 'c2', name: 'Google', logo_url: '' },
-      { id: 'c3', name: 'Amazon', logo_url: '' },
-      { id: 'c4', name: 'Stripe', logo_url: '' },
-      { id: 'c5', name: 'Shopify', logo_url: '' },
-      { id: 'c6', name: 'Notion', logo_url: '' },
-    ]
-  },
-  stats: {
-    type: 'array' as const,
-    default: [
-      { id: 's1', value: '10,000+', label: 'companies' },
-      { id: 's2', value: '50+', label: 'countries' },
-    ]
-  },
-  media_mentions: {
-    type: 'array' as const,
-    default: []
-  },
-  certifications: {
-    type: 'array' as const,
-    default: []
-  }
-};
-
 // Constraints
 const CONSTRAINTS = {
   companies: { min: 4, max: 12 },
@@ -110,7 +71,6 @@ export default function LogoWall(props: LayoutComponentProps) {
     handleContentUpdate,
   } = useLayoutComponent<LogoWallContent>({
     ...props,
-    contentSchema: CONTENT_SCHEMA
   });
 
   // Theme detection
@@ -123,10 +83,10 @@ export default function LogoWall(props: LayoutComponentProps) {
   }), [sectionBackground, uiBlockTheme]);
 
   // Collections with fallbacks
-  const companies = blockContent.companies || [];
-  const stats = blockContent.stats || [];
-  const mediaMentions = blockContent.media_mentions || [];
-  const certifications = blockContent.certifications || [];
+  const companies: Company[] = blockContent.companies || [];
+  const stats: Stat[] = blockContent.stats || [];
+  const mediaMentions: MediaMention[] = blockContent.media_mentions || [];
+  const certifications: Certification[] = blockContent.certifications || [];
 
   // Constraint checks
   const canRemoveCompany = companies.length > CONSTRAINTS.companies.min;

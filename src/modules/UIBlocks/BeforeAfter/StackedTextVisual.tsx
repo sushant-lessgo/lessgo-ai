@@ -28,30 +28,7 @@ interface StackedTextVisualContent {
   summary_text?: string;
 }
 
-// Content schema for StackedTextVisual layout
-const CONTENT_SCHEMA = {
-  headline: { type: 'string' as const, default: 'Transform Your Experience' },
-  before_text: { type: 'string' as const, default: 'Struggling with manual processes, disconnected tools, and delayed insights that slow down your progress.' },
-  after_text: { type: 'string' as const, default: 'Enjoy automated workflows, unified data, and instant insights that accelerate your success.' },
-  before_label: { type: 'string' as const, default: 'Before' },
-  after_label: { type: 'string' as const, default: 'After' },
-  transition_text: { type: 'string' as const, default: '' },
-  subheadline: { type: 'string' as const, default: '' },
-  summary_text: { type: 'string' as const, default: '' },
-  before_icon: {
-    type: 'string' as const,
-    default: 'Plus'
-  },
-  after_icon: {
-    type: 'string' as const,
-    default: 'Zap'
-  },
-  transition_icon: {
-    type: 'string' as const,
-    default: 'ArrowDown'
-  }
-};
-
+// CONTENT_SCHEMA removed — defaults now in layoutElementSchema.ts (StackedTextVisual entry)
 
 export default function StackedTextVisual(props: StackedTextVisualProps) {
   // ✅ Use the standard useLayoutComponent hook
@@ -67,8 +44,7 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
     handleContentUpdate,
     theme
   } = useLayoutComponent<StackedTextVisualContent>({
-    ...props,
-    contentSchema: CONTENT_SCHEMA
+    ...props
   });
 
   const { getTextStyle: getTypographyStyle } = useTypography();
@@ -426,13 +402,6 @@ export const componentMeta = {
     sectionId: 'string - Required section identifier',
     backgroundType: '"primary" | "secondary" | "neutral" - Controls text color adaptation',
     className: 'string - Additional CSS classes'
-  },
-  contentSchema: {
-    headline: 'Main heading text',
-    before_text: 'Text describing the "before" state',
-    after_text: 'Text describing the "after" state',
-    transition_text: 'Optional text for the transition connector',
-    subheadline: 'Optional subheading for additional context'
   },
   examples: [
     'Problem to solution comparison',

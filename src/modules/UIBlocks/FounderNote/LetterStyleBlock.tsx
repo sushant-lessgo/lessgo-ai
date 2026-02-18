@@ -31,44 +31,7 @@ interface LetterStyleBlockContent {
 }
 
 // Content schema - defines structure and defaults
-const CONTENT_SCHEMA = {
-  letter_header: {
-    type: 'string' as const,
-    default: 'A Personal Note from Our Founder'
-  },
-  letter_greeting: {
-    type: 'string' as const,
-    default: 'Dear Fellow Builder,'
-  },
-  letter_body: {
-    type: 'string' as const,
-    default: 'Three years ago, I sat exactly where you are now—staring at a landing page that just wouldn\'t convert.\n\nI\'d tried everything. Hired expensive copywriters. A/B tested until my eyes crossed. Read every marketing book I could find.\n\nThen it hit me: the problem wasn\'t my copy. It was the process. Great landing pages need great strategy first.\n\nThat\'s why I built Lessgo. To give founders like us the strategic foundation we need before writing a single word.'
-  },
-  letter_signature: {
-    type: 'string' as const,
-    default: 'Sushant Jain'
-  },
-  founder_title: {
-    type: 'string' as const,
-    default: 'Founder'
-  },
-  company_name: {
-    type: 'string' as const,
-    default: 'Lessgo'
-  },
-  date_text: {
-    type: 'string' as const,
-    default: 'January 2025'
-  },
-  ps_text: {
-    type: 'string' as const,
-    default: 'P.S. Every founder who joins gets a personal strategy review from me. Just reply to your welcome email.'
-  },
-  founder_image: {
-    type: 'string' as const,
-    default: '/images/founder.jpg'
-  }
-};
+
 
 // Theme-based color function for all themeable elements
 const getThemeColors = (theme: UIBlockTheme) => {
@@ -135,7 +98,6 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
     handleContentUpdate
   } = useLayoutComponent<LetterStyleBlockContent>({
     ...props,
-    contentSchema: CONTENT_SCHEMA
   });
 
   // Detect theme: manual override > auto-detection > neutral fallback

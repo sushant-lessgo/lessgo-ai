@@ -10,6 +10,7 @@ import {
 } from '@/modules/Design/ColorSystem/colorTokens';
 // pickFont archived — updateFontsFromTone uses hardcoded defaults
 
+import { layoutElementSchema as lesSchema, isV2Schema as lesIsV2 } from '@/modules/sections/layoutElementSchema';
 import { logger } from '@/lib/logger';
 // AI Generation Status type
 type AIGenerationStatus = {
@@ -389,13 +390,40 @@ export function createGenerationActions(set: any, get: any) {
             });
           }
 
+          // Also exclude manual_preferred + optional elements by default
+          // These are user-added elements — not rendered until user toggles ON
+          const layoutName = elementsMap?.[sectionId]?.layout || section.layout;
+          if (layoutName) {
+            const schemaObj = lesSchema[layoutName];
+            if (schemaObj && lesIsV2(schemaObj)) {
+              for (const [elemKey, elemDef] of Object.entries(schemaObj.elements)) {
+                const def = elemDef as { fillMode: string; requirement?: string };
+                if (def.fillMode === 'manual_preferred' && def.requirement === 'optional') {
+                  if (!excludedElementsFromGeneration.includes(elemKey)) {
+                    excludedElementsFromGeneration.push(elemKey);
+                  }
+                }
+              }
+
+              // Also exclude children whose parent toggleGroup is excluded
+              for (const [elemKey, elemDef] of Object.entries(schemaObj.elements)) {
+                const def = elemDef as { toggleGroup?: string };
+                if (def.toggleGroup && excludedElementsFromGeneration.includes(def.toggleGroup)) {
+                  if (!excludedElementsFromGeneration.includes(elemKey)) {
+                    excludedElementsFromGeneration.push(elemKey);
+                  }
+                }
+              }
+            }
+          }
+
           // Update section metadata
           section.aiMetadata = {
             lastGenerated: Date.now(),
             aiGenerated: true,
             isCustomized: false,
             aiGeneratedElements: generatedElements,
-            excludedElements: excludedElementsFromGeneration  // ✅ ADDED: Store exclusions
+            excludedElements: excludedElementsFromGeneration
           };
 
           // ✅ VALIDATION: Confirm exclusions were actually saved

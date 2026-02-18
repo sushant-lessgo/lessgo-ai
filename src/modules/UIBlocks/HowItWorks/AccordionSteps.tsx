@@ -35,12 +35,7 @@ const DEFAULT_STEPS: StepItem[] = [
   { id: 's4', title: 'Testing & Deployment', description: 'Run comprehensive testing and deploy to production with zero downtime.', details: 'Deployment uses blue-green deployment with automatic rollback on failure. We provide monitoring for all critical metrics.' }
 ];
 
-const CONTENT_SCHEMA = {
-  headline: { type: 'string' as const, default: 'Technical Implementation Process' },
-  subheadline: { type: 'string' as const, default: '' },
-  conclusion_text: { type: 'string' as const, default: '' },
-  steps: { type: 'array' as const, default: DEFAULT_STEPS }
-};
+
 
 // Generate unique ID for new steps
 const generateStepId = (): string => {
@@ -60,7 +55,6 @@ export default function AccordionSteps(props: LayoutComponentProps) {
     handleContentUpdate
   } = useLayoutComponent<AccordionStepsContent>({
     ...props,
-    contentSchema: CONTENT_SCHEMA
   });
   
   const { getTextStyle: getTypographyStyle } = useTypography();
@@ -391,12 +385,6 @@ export const componentMeta = {
   tags: ['how-it-works', 'accordion', 'technical', 'detailed', 'enterprise'],
   defaultBackgroundType: 'neutral' as const,
 
-  contentSchema: {
-    headline: 'Main heading text',
-    subheadline: 'Optional subheadline text',
-    conclusion_text: 'Optional conclusion text to summarize the process',
-    steps: 'Array of step objects with id, title, description, and details'
-  },
 
   features: [
     'Interactive accordion interface',

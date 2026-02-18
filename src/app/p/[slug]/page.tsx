@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
+import { sanitizeContentForPublish } from '@/modules/sections/layoutElementSchema';
 
 // ISR configuration - revalidate every hour
 export const revalidate = 3600;
@@ -106,6 +107,8 @@ export default async function PublishedPage({ params }: PageProps) {
   }
 
   const content = page.content as any;
+  sanitizeContentForPublish(content); // Sanitize for pages published before this feature
+
   const { LandingPagePublishedRenderer } = await import('@/modules/generatedLanding/LandingPagePublishedRenderer');
 
   // Merge section content and forms for renderer

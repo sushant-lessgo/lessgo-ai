@@ -32,20 +32,7 @@ interface SideBySideContent {
   after_points?: PointItem[];
 }
 
-// Content schema
-const CONTENT_SCHEMA = {
-  headline: { type: 'string' as const, default: 'Your Transformation Story' },
-  before_label: { type: 'string' as const, default: 'Before' },
-  after_label: { type: 'string' as const, default: 'After' },
-  before_description: { type: 'string' as const, default: '' },
-  after_description: { type: 'string' as const, default: '' },
-  subheadline: { type: 'string' as const, default: '' },
-  summary_text: { type: 'string' as const, default: '' },
-  before_points: { type: 'array' as const, default: [] },
-  after_points: { type: 'array' as const, default: [] },
-  before_icon: { type: 'string' as const, default: 'XCircle' },
-  after_icon: { type: 'string' as const, default: 'CheckCircle' }
-};
+// CONTENT_SCHEMA removed — defaults now in layoutElementSchema.ts (SideBySideBlocks entry)
 
 export default function SideBySideBlocks(props: LayoutComponentProps) {
   const { getTextStyle: getTypographyStyle } = useTypography();
@@ -61,8 +48,7 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
     backgroundType,
     handleContentUpdate
   } = useLayoutComponent<SideBySideContent>({
-    ...props,
-    contentSchema: CONTENT_SCHEMA
+    ...props
   });
 
   const bodyLgStyle = getTypographyStyle('body-lg');
@@ -133,11 +119,11 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
   const themeColors = getCardColors(uiTheme);
 
   // Parse points from V2 clean arrays
-  const beforePoints = (blockContent.before_points || []).map((item: any) =>
+  const beforePoints: PointItem[] = (blockContent.before_points || []).map((item: any) =>
     typeof item === 'string' ? { id: `bp${Date.now()}`, text: item } : item
   ).filter((item: any) => item.text && item.text.trim() !== '');
 
-  const afterPoints = (blockContent.after_points || []).map((item: any) =>
+  const afterPoints: PointItem[] = (blockContent.after_points || []).map((item: any) =>
     typeof item === 'string' ? { id: `ap${Date.now()}`, text: item } : item
   ).filter((item: any) => item.text && item.text.trim() !== '');
 

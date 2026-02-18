@@ -25,25 +25,7 @@ interface ResultsGalleryContent {
 }
 
 // V2: Content schema - uses clean arrays
-const CONTENT_SCHEMA = {
-  headline: {
-    type: 'string' as const,
-    default: 'See What You Can Create'
-  },
-  subheadline: {
-    type: 'string' as const,
-    default: ''
-  },
-  gallery_items: {
-    type: 'array' as const,
-    default: [
-      { id: 'g1', image_url: '', caption: '' },
-      { id: 'g2', image_url: '', caption: '' },
-      { id: 'g3', image_url: '', caption: '' },
-      { id: 'g4', image_url: '', caption: '' },
-    ]
-  }
-};
+
 
 // Gallery Item Component
 const GalleryItemCard = React.memo(({
@@ -232,7 +214,6 @@ export default function ResultsGallery(props: LayoutComponentProps) {
     backgroundType
   } = useLayoutComponent<ResultsGalleryContent>({
     ...props,
-    contentSchema: CONTENT_SCHEMA
   });
 
   // Safe background type (filter out 'custom')
@@ -245,7 +226,7 @@ export default function ResultsGallery(props: LayoutComponentProps) {
   const handleImageToolbar = useImageToolbar();
 
   // V2: Direct array access
-  const galleryItems = blockContent.gallery_items || [];
+  const galleryItems: GalleryItem[] = blockContent.gallery_items || [];
 
   // V2: Handle caption editing - update array item
   const handleCaptionEdit = (id: string, value: string) => {

@@ -35,29 +35,7 @@ interface VisualObjectionTilesContent {
 // Generate unique ID for new objections
 const generateId = () => `obj_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-// Default objections for new sections
-const DEFAULT_OBJECTIONS: Objection[] = [
-  { id: 'o1', question: '"It\'s too expensive for our budget"', response: 'Plans start at $10/mo with no hidden fees. Most teams see ROI within 30 days.', label: 'Pricing', icon: 'DollarSign' },
-  { id: 'o2', question: '"We don\'t have time for another tool"', response: 'Setup takes under 10 minutes. No IT required. You\'ll save more time than you spend.', label: 'Time', icon: 'Clock' },
-  { id: 'o3', question: '"Our team won\'t adopt it"', response: 'Designed for simplicity—if they can use email, they can use this. 94% adoption rate.', label: 'Adoption', icon: 'Users' },
-  { id: 'o4', question: '"What if it doesn\'t work for us?"', response: '30-day money-back guarantee. No questions asked. Zero risk to try.', label: 'Risk', icon: 'ShieldCheck' },
-];
-
-// Content schema - defines structure and defaults
-const CONTENT_SCHEMA = {
-  headline: {
-    type: 'string' as const,
-    default: 'Common Concerns? We\'ve Got You Covered'
-  },
-  subheadline: {
-    type: 'string' as const,
-    default: 'Here are the questions we hear most often and why they shouldn\'t hold you back.'
-  },
-  objections: {
-    type: 'array' as const,
-    default: DEFAULT_OBJECTIONS
-  }
-};
+// CONTENT_SCHEMA removed — defaults now in layoutElementSchema.ts (VisualObjectionTiles entry)
 
 
 // Theme extras - accent elements (icons, gradients) that stay themed
@@ -87,8 +65,7 @@ export default function VisualObjectionTiles(props: LayoutComponentProps) {
     sectionBackground,
     handleContentUpdate
   } = useLayoutComponent<VisualObjectionTilesContent>({
-    ...props,
-    contentSchema: CONTENT_SCHEMA
+    ...props
   });
 
   // Typography hook
@@ -111,7 +88,7 @@ export default function VisualObjectionTiles(props: LayoutComponentProps) {
   const themeExtras = getThemeExtras(uiTheme);
 
   // Get objections with fallback to defaults
-  const objections = blockContent.objections || DEFAULT_OBJECTIONS;
+  const objections: Objection[] = blockContent.objections || [];
 
   // Helper to get container classes based on count
   const getContainerClasses = (count: number) => {

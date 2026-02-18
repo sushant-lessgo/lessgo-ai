@@ -221,27 +221,27 @@ Option 2 is cleanest — publish is a deliberate action, good place to sanitize.
 
 ## Appendix A: Schema Mismatches (CONTENT_SCHEMA vs layoutElementSchema)
 
-Audit of all UIBlock files. These must be resolved before Phase 1 consolidation.
+Audit of all UIBlock files — re-verified Feb 2026. Original audit had errors.
 
-### Keys in CONTENT_SCHEMA but NOT in layoutElementSchema
+### Confirmed mismatches (resolved)
 
-| UIBlock | Missing keys | Details |
+| UIBlock | Keys | Status |
 |---|---|---|
-| **SplitCard** | `before_placeholder_text`, `after_placeholder_text` | String defaults: 'Current State', 'Premium Result' |
-| **CenteredHeadlineCTA** | `customer_label`, `rating_stat`, `uptime_stat`, `uptime_label` | Social proof stats not in schema at all |
-| **ContactFooter** | `footer_style` | String default: 'dark'. Controls dark/light footer rendering |
+| **SplitCard** | `before_placeholder_text`, `after_placeholder_text` | **Dead code** — in CONTENT_SCHEMA but never used in render. Deleted from CONTENT_SCHEMA and interface. |
 
-### Keys in layoutElementSchema but NOT in CONTENT_SCHEMA
+### False positives from original audit
 
-| UIBlock | Missing keys | Details |
+| UIBlock | Claimed issue | Actual |
 |---|---|---|
-| **MinimalNavHeader** | `nav_items` collection | CONTENT_SCHEMA is empty — nav managed via store directly |
+| **CenteredHeadlineCTA** | `customer_label`, `rating_stat`, `uptime_stat`, `uptime_label` missing from schema | All 4 exist in layoutElementSchema (lines 1658-1661) |
+| **ContactFooter** | `footer_style` missing from schema | Exists in layoutElementSchema (line 1756) |
+| **VisualCTAWithMockup** | `secondary_cta` vs `secondary_cta_text` naming mismatch | Both use `secondary_cta` — no mismatch |
 
-### Key naming inconsistency
+### Intentional gaps (no action needed)
 
-| UIBlock | CONTENT_SCHEMA key | layoutElementSchema key |
+| UIBlock | Gap | Reason |
 |---|---|---|
-| **VisualCTAWithMockup** | `secondary_cta` | `secondary_cta_text` |
+| **MinimalNavHeader** | `nav_items` in layoutElementSchema but CONTENT_SCHEMA is empty | Nav managed via store.navigationConfig, not section-level content |
 
 ### Non-standard but aligned (no action needed)
 
@@ -250,7 +250,7 @@ Audit of all UIBlock files. These must be resolved before Phase 1 consolidation.
 | **IconGrid** | Feature defaults missing `icon` field — correct, icon is manual_preferred |
 | **ValueStackCTA** | 5 hardcoded default items — goes away with collection consolidation (no item-level defaults) |
 
-**Resolution**: Add ~6 missing fields to layoutElementSchema. Pick one name for `secondary_cta` vs `secondary_cta_text`. All small fixes during Phase 1.
+**Result**: After SplitCard cleanup, schemas have 1:1 key parity. No blockers for consolidation.
 
 ---
 
@@ -294,4 +294,4 @@ Re-publish after toggling elements → new snapshot with updated resolved elemen
 
 ### Q4: Non-standard CONTENT_SCHEMA patterns that would break?
 
-**Yes — see Appendix A.** Six fields exist in CONTENT_SCHEMA but not in layoutElementSchema. One naming inconsistency. All small — resolved by adding missing fields to layoutElementSchema during Phase 1.
+**Re-verified — only 1 real mismatch found (SplitCard), now resolved.** Original audit had errors — CenteredHeadlineCTA, ContactFooter, and VisualCTAWithMockup all have correct key parity. See corrected Appendix A. No blockers for consolidation.

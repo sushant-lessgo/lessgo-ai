@@ -4,7 +4,7 @@ export type ArrayElement = string[];
 export type ContentElement = StringElement | ArrayElement;
 
 // Import layout element schema for mandatory/optional checking
-import { layoutElementSchema, getAllElements } from '@/modules/sections/layoutElementSchema';
+import { layoutElementSchema, isV2Schema } from '@/modules/sections/layoutElementSchema';
 import { logger } from '@/lib/logger';
 
 // Store element definitions based on layoutElementSchema
@@ -344,44 +344,13 @@ export interface LayoutComponentProps {
 }
 
 /**
- * Check if an element is mandatory based on layout schema
+ * Check if an element is mandatory based on layout schema (direct V2 access)
  */
 function isElementMandatory(layout: string, elementKey: string): boolean {
   const schema = layoutElementSchema[layout];
-  if (!schema) {
-    logger.dev(`⚠️ isElementMandatory: No schema found for layout "${layout}"`);
-    return false;
-  }
-
-  // Use helper function to get all elements (works with both old and new schema formats)
-  const allElements = getAllElements(schema);
-  const element = allElements.find(el => el.element === elementKey);
-  const isMandatory = element?.mandatory ?? false;
-  
-  // DEBUG: Log mandatory checks for step elements
-  if (elementKey === 'step_titles' || elementKey === 'step_descriptions') {
-    logger.dev(`🔍 isElementMandatory check:`, {
-      layout,
-      elementKey,
-      found: !!element,
-      isMandatory,
-      schemaKeys: Object.keys(layoutElementSchema).filter(k => k.includes('Step')).slice(0, 5)
-    });
-  }
-  
-  return isMandatory;
-}
-
-// Helper to check if an element exists in the schema at all
-function isElementInSchema(layout: string, elementKey: string): boolean {
-  const schema = layoutElementSchema[layout];
-  if (!schema) {
-    return false;
-  }
-
-  // Use helper function to get all elements (works with both old and new schema formats)
-  const allElements = getAllElements(schema);
-  return allElements.some(el => el.element === elementKey);
+  if (!schema || !isV2Schema(schema)) return false;
+  const def = schema.elements[elementKey];
+  return def?.requirement === 'required';
 }
 
 // Generic content extractor for any layout
@@ -401,7 +370,19 @@ export const extractLayoutContent = <T extends Record<string, any>>(
   
   for (const [key, config] of Object.entries(contentSchema)) {
     // PRIORITY 0: Check exclusions FIRST — applies to ALL elements regardless of content
-    const isExcluded = excludedElements?.includes(key) || false;
+    let isExcluded = excludedElements?.includes(key) || false;
+
+    // Also check if element's toggleGroup parent is excluded
+    if (!isExcluded && layout) {
+      const schemaObj = layoutElementSchema[layout];
+      if (schemaObj && isV2Schema(schemaObj)) {
+        const elemDef = schemaObj.elements[key];
+        if (elemDef?.toggleGroup && excludedElements?.includes(elemDef.toggleGroup)) {
+          isExcluded = true;
+        }
+      }
+    }
+
     if (isExcluded) {
       logger.dev(`❌ EXCLUDED: Skipping element "${key}" - toggled off by user`);
       continue;
@@ -411,32 +392,24 @@ export const extractLayoutContent = <T extends Record<string, any>>(
 
     if (elementValue === undefined) {
       const isMandatory = layout ? isElementMandatory(layout, key) : false;
-      const isInSchema = layout ? isElementInSchema(layout, key) : false;
 
       if (isMandatory) {
-        result[key as keyof T] = config.default as T[keyof T];
-      } else if (isInSchema) {
+        // Required elements always render with default
         result[key as keyof T] = config.default as T[keyof T];
       }
+      // Optional elements with no value → skip (don't render)
+      // User must toggle ON via ElementToggleModal to get placeholder content written to store
       continue;
     }
 
     // Element exists and not excluded — include it
-    // DEBUG: Log existing elements for step_titles specifically
-    if (key === 'step_titles' || key === 'step_descriptions') {
-      logger.dev(`🎯 extractLayoutContent: Found existing "${key}":`, {
-        elementValue,
-        layout,
-        valueType: typeof elementValue,
-        isStringEmpty: typeof elementValue === 'string' && elementValue === '',
-        defaultValue: config.default
-      });
-    }
-    
     if (config.type === 'string') {
       result[key as keyof T] = getStringContent(elementValue, config.default) as T[keyof T];
     } else if (config.type === 'array') {
       result[key as keyof T] = getArrayContent(elementValue, config.default) as T[keyof T];
+    } else {
+      // boolean, number — pass through directly
+      result[key as keyof T] = (elementValue ?? config.default) as T[keyof T];
     }
   }
   

@@ -20,6 +20,7 @@ export interface ElementDef {
   requirement?: RequirementType;  // Only applies to ai_generated
   fillMode: GenerationType;
   default?: any;  // Placeholder for manual_preferred
+  toggleGroup?: string;  // Elements with same group are hidden from toggle modal, controlled by group's parent
 }
 
 /** Collection field definition */
@@ -37,6 +38,7 @@ export interface CollectionDef {
   fillMode: GenerationType;
   constraints: { min: number; max: number };
   fields: Record<string, CollectionFieldDef>;
+  toggleGroup?: string;  // Controlled by group's parent toggle
 }
 
 /** New UIBlock schema format (V2) */
@@ -294,19 +296,45 @@ export function applyAllSchemaDefaults(
   return result;
 }
 
+/**
+ * Get schema defaults in the shape useLayoutComponent expects.
+ * Converts V2 central schema → { key: { type, default } } map.
+ * Used as fallback when UIBlock doesn't pass contentSchema prop.
+ */
+export function getSchemaDefaults(layoutName: string): Record<string, { type: 'string' | 'array' | 'boolean' | 'number'; default: any }> | null {
+  const schema = layoutElementSchema[layoutName];
+  if (!schema || !isV2Schema(schema)) return null;
+
+  type SchemaEntry = { type: 'string' | 'array' | 'boolean' | 'number'; default: any };
+  const defaults: Record<string, SchemaEntry> = {};
+
+  for (const [key, def] of Object.entries(schema.elements)) {
+    defaults[key] = { type: def.type as SchemaEntry['type'], default: def.default ?? '' };
+  }
+
+  // Collections get type 'array' with default []
+  if (schema.collections) {
+    for (const collectionName of Object.keys(schema.collections)) {
+      defaults[collectionName] = { type: 'array', default: [] };
+    }
+  }
+
+  return defaults;
+}
+
 export const layoutElementSchema: LayoutSchema = {
   // BeforeAfter Section - V2 Schema
   SideBySideBlocks: {
     sectionType: "SideBySideBlocks",
 
     elements: {
-      headline:           { type: "string", requirement: "required", fillMode: "ai_generated" },
-      before_label:       { type: "string", requirement: "required", fillMode: "ai_generated" },
-      after_label:        { type: "string", requirement: "required", fillMode: "ai_generated" },
-      before_description: { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      after_description:  { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      subheadline:        { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      summary_text:       { type: "string", requirement: "optional", fillMode: "ai_generated" },  // Transition copy below cards
+      headline:           { type: "string", requirement: "required", fillMode: "ai_generated", default: "Your Transformation Story" },
+      before_label:       { type: "string", requirement: "required", fillMode: "ai_generated", default: "Before" },
+      after_label:        { type: "string", requirement: "required", fillMode: "ai_generated", default: "After" },
+      before_description: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      after_description:  { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      subheadline:        { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      summary_text:       { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
       before_icon:        { type: "string", requirement: "optional", fillMode: "manual_preferred", default: "XCircle" },
       after_icon:         { type: "string", requirement: "optional", fillMode: "manual_preferred", default: "CheckCircle" },
     },
@@ -318,7 +346,7 @@ export const layoutElementSchema: LayoutSchema = {
         constraints: { min: 0, max: 5 },
         fields: {
           id:   { type: "string", fillMode: "system" },
-          text: { type: "string", fillMode: "ai_generated" },
+          text: { type: "string", fillMode: "ai_generated", default: "" },
         }
       },
       after_points: {
@@ -327,7 +355,7 @@ export const layoutElementSchema: LayoutSchema = {
         constraints: { min: 0, max: 5 },
         fields: {
           id:   { type: "string", fillMode: "system" },
-          text: { type: "string", fillMode: "ai_generated" },
+          text: { type: "string", fillMode: "ai_generated", default: "" },
         }
       },
     }
@@ -338,17 +366,17 @@ export const layoutElementSchema: LayoutSchema = {
     sectionType: "StackedTextVisual",
 
     elements: {
-      headline:        { type: "string", requirement: "required", fillMode: "ai_generated" },
-      before_text:     { type: "string", requirement: "required", fillMode: "ai_generated" },
-      after_text:      { type: "string", requirement: "required", fillMode: "ai_generated" },
-      before_label:    { type: "string", requirement: "required", fillMode: "ai_generated" },
-      after_label:     { type: "string", requirement: "required", fillMode: "ai_generated" },
-      subheadline:     { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      transition_text: { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      summary_text:    { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      before_icon:     { type: "string", requirement: "optional", fillMode: "manual_preferred" },
-      after_icon:      { type: "string", requirement: "optional", fillMode: "manual_preferred" },
-      transition_icon: { type: "string", requirement: "optional", fillMode: "manual_preferred" },
+      headline:        { type: "string", requirement: "required", fillMode: "ai_generated", default: "Transform Your Experience" },
+      before_text:     { type: "string", requirement: "required", fillMode: "ai_generated", default: "Struggling with manual processes, disconnected tools, and delayed insights that slow down your progress." },
+      after_text:      { type: "string", requirement: "required", fillMode: "ai_generated", default: "Enjoy automated workflows, unified data, and instant insights that accelerate your success." },
+      before_label:    { type: "string", requirement: "required", fillMode: "ai_generated", default: "Before" },
+      after_label:     { type: "string", requirement: "required", fillMode: "ai_generated", default: "After" },
+      subheadline:     { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      transition_text: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      summary_text:    { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      before_icon:     { type: "string", requirement: "optional", fillMode: "manual_preferred", default: "Plus" },
+      after_icon:      { type: "string", requirement: "optional", fillMode: "manual_preferred", default: "Zap" },
+      transition_icon: { type: "string", requirement: "optional", fillMode: "manual_preferred", default: "ArrowDown" },
     },
     // No collections - no trust_items/cta per user decision
   },
@@ -358,19 +386,19 @@ export const layoutElementSchema: LayoutSchema = {
     sectionType: "SplitCard",
 
     elements: {
-      headline:             { type: "string", requirement: "required", fillMode: "ai_generated" },
-      before_label:         { type: "string", requirement: "required", fillMode: "ai_generated" },
-      after_label:          { type: "string", requirement: "required", fillMode: "ai_generated" },
-      before_description:   { type: "string", requirement: "required", fillMode: "ai_generated" },
-      after_description:    { type: "string", requirement: "required", fillMode: "ai_generated" },
-      subheadline:          { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      summary_text:         { type: "string", requirement: "optional", fillMode: "ai_generated" },  // Transition copy below cards
-      upgrade_text:         { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      headline:             { type: "string", requirement: "required", fillMode: "ai_generated", default: "Premium Transformation Experience" },
+      before_label:         { type: "string", requirement: "required", fillMode: "ai_generated", default: "Current Challenge" },
+      after_label:          { type: "string", requirement: "required", fillMode: "ai_generated", default: "Premium Solution" },
+      before_description:   { type: "string", requirement: "required", fillMode: "ai_generated", default: "Complex manual processes requiring expertise, time, and significant resources to execute properly." },
+      after_description:    { type: "string", requirement: "required", fillMode: "ai_generated", default: "Expertly crafted automation that delivers exceptional results with minimal effort and maximum efficiency." },
+      subheadline:          { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      summary_text:         { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      upgrade_text:         { type: "string", requirement: "optional", fillMode: "ai_generated", default: "Upgrade" },
       before_visual:        { type: "string", requirement: "optional", fillMode: "manual_preferred", default: "/Before default.jpg" },
       after_visual:         { type: "string", requirement: "optional", fillMode: "manual_preferred", default: "/After default.jpg" },
-      before_icon:          { type: "string", requirement: "optional", fillMode: "manual_preferred" },
-      after_icon:           { type: "string", requirement: "optional", fillMode: "manual_preferred" },
-      upgrade_icon:         { type: "string", requirement: "optional", fillMode: "manual_preferred" },
+      before_icon:          { type: "string", requirement: "optional", fillMode: "manual_preferred", default: "AlertTriangle" },
+      after_icon:           { type: "string", requirement: "optional", fillMode: "manual_preferred", default: "Star" },
+      upgrade_icon:         { type: "string", requirement: "optional", fillMode: "manual_preferred", default: "ArrowRight" },
     },
     // No collections - no trust_items/cta per user decision
   },
@@ -380,11 +408,11 @@ export const layoutElementSchema: LayoutSchema = {
     sectionType: "AccordionFAQ",
 
     elements: {
-      headline:        { type: "string", requirement: "required", fillMode: "ai_generated" },
-      subheadline:     { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      contact_prompt:  { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      cta_text:        { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      supporting_text: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      headline:        { type: "string", requirement: "required", fillMode: "ai_generated", default: "Frequently Asked Questions" },
+      subheadline:     { type: "string", requirement: "optional", fillMode: "ai_generated", default: "Find answers to common questions about our platform and services." },
+      contact_prompt:  { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      cta_text:        { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      supporting_text: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
     },
 
     collections: {
@@ -394,8 +422,8 @@ export const layoutElementSchema: LayoutSchema = {
         constraints: { min: 3, max: 10 },
         fields: {
           id:       { type: "string", fillMode: "system" },
-          question: { type: "string", fillMode: "ai_generated" },
-          answer:   { type: "string", fillMode: "ai_generated" },
+          question: { type: "string", fillMode: "ai_generated", default: "" },
+          answer:   { type: "string", fillMode: "ai_generated", default: "" },
         }
       }
     }
@@ -406,11 +434,11 @@ export const layoutElementSchema: LayoutSchema = {
     sectionType: "TwoColumnFAQ",
 
     elements: {
-      headline:        { type: "string", requirement: "required", fillMode: "ai_generated" },
-      subheadline:     { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      contact_prompt:  { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      cta_text:        { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      supporting_text: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      headline:        { type: "string", requirement: "required", fillMode: "ai_generated", default: "Frequently Asked Questions" },
+      subheadline:     { type: "string", requirement: "optional", fillMode: "ai_generated", default: "Everything you need to know about our platform" },
+      contact_prompt:  { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      cta_text:        { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      supporting_text: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
     },
 
     collections: {
@@ -420,8 +448,8 @@ export const layoutElementSchema: LayoutSchema = {
         constraints: { min: 4, max: 10 },
         fields: {
           id:       { type: "string", fillMode: "system" },
-          question: { type: "string", fillMode: "ai_generated" },
-          answer:   { type: "string", fillMode: "ai_generated" },
+          question: { type: "string", fillMode: "ai_generated", default: "" },
+          answer:   { type: "string", fillMode: "ai_generated", default: "" },
         }
       }
     }
@@ -432,11 +460,11 @@ export const layoutElementSchema: LayoutSchema = {
     sectionType: "InlineQnAList",
 
     elements: {
-      headline:        { type: "string", requirement: "required", fillMode: "ai_generated" },
-      subheadline:     { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      contact_prompt:  { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      cta_text:        { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      supporting_text: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      headline:        { type: "string", requirement: "required", fillMode: "ai_generated", default: "Quick Questions & Answers" },
+      subheadline:     { type: "string", requirement: "optional", fillMode: "ai_generated", default: "Get instant answers to the most common questions" },
+      contact_prompt:  { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      cta_text:        { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      supporting_text: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
     },
 
     collections: {
@@ -446,8 +474,8 @@ export const layoutElementSchema: LayoutSchema = {
         constraints: { min: 2, max: 8 },
         fields: {
           id:       { type: "string", fillMode: "system" },
-          question: { type: "string", fillMode: "ai_generated" },
-          answer:   { type: "string", fillMode: "ai_generated" },
+          question: { type: "string", fillMode: "ai_generated", default: "" },
+          answer:   { type: "string", fillMode: "ai_generated", default: "" },
         }
       }
     }
@@ -458,11 +486,11 @@ export const layoutElementSchema: LayoutSchema = {
     sectionType: "SegmentedFAQTabs",
 
     elements: {
-      headline:        { type: "string", requirement: "required", fillMode: "ai_generated" },
-      subheadline:     { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      contact_prompt:  { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      cta_text:        { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      supporting_text: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      headline:        { type: "string", requirement: "required", fillMode: "ai_generated", default: "Everything You Need to Know" },
+      subheadline:     { type: "string", requirement: "optional", fillMode: "ai_generated", default: "Find answers organized by topic for easy navigation" },
+      contact_prompt:  { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      cta_text:        { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      supporting_text: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
     },
 
     collections: {
@@ -472,15 +500,15 @@ export const layoutElementSchema: LayoutSchema = {
         constraints: { min: 2, max: 4 },
         fields: {
           id:    { type: "string", fillMode: "system" },
-          label: { type: "string", fillMode: "ai_generated" },
+          label: { type: "string", fillMode: "ai_generated", default: "" },
           items: {
             type: "array",
             fillMode: "ai_generated",
             constraints: { min: 2, max: 5 },
             fields: {
               id:       { type: "string", fillMode: "system" },
-              question: { type: "string", fillMode: "ai_generated" },
-              answer:   { type: "string", fillMode: "ai_generated" },
+              question: { type: "string", fillMode: "ai_generated", default: "" },
+              answer:   { type: "string", fillMode: "ai_generated", default: "" },
             }
           }
         }
@@ -493,10 +521,10 @@ export const layoutElementSchema: LayoutSchema = {
     sectionType: "IconGrid",
 
     elements: {
-      headline:        { type: "string", requirement: "required", fillMode: "ai_generated" },
-      subheadline:     { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      badge_text:      { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      supporting_text: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      headline:        { type: "string", requirement: "required", fillMode: "ai_generated", default: "Core Features" },
+      subheadline:     { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      badge_text:      { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      supporting_text: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
     },
 
     collections: {
@@ -519,9 +547,9 @@ export const layoutElementSchema: LayoutSchema = {
     sectionType: "SplitAlternating",
 
     elements: {
-      headline:        { type: "string", requirement: "required", fillMode: "ai_generated" },
-      subheadline:     { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      supporting_text: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      headline:        { type: "string", requirement: "required", fillMode: "ai_generated", default: "Advanced Features" },
+      subheadline:     { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      supporting_text: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
     },
 
     collections: {
@@ -545,11 +573,11 @@ export const layoutElementSchema: LayoutSchema = {
     sectionType: "MetricTiles",
 
     elements: {
-      headline:          { type: "string", requirement: "required", fillMode: "ai_generated" },
-      subheadline:       { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      headline:          { type: "string", requirement: "required", fillMode: "ai_generated", default: "Quantifiable Results" },
+      subheadline:       { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
       show_roi_summary:  { type: "boolean", fillMode: "manual_preferred", default: true },
-      roi_summary_title: { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      roi_description:   { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      roi_summary_title: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      roi_description:   { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
     },
 
     collections: {
@@ -583,13 +611,13 @@ export const layoutElementSchema: LayoutSchema = {
     sectionType: "Carousel",
 
     elements: {
-      headline:        { type: "string", requirement: "required", fillMode: "ai_generated" },
-      subheadline:     { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      supporting_text: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      headline:        { type: "string", requirement: "required", fillMode: "ai_generated", default: "Feature Showcase" },
+      subheadline:     { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      supporting_text: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
       auto_play:       { type: "boolean", fillMode: "manual_preferred", default: false },
       // Benefits shown per slide (section-level, same on all slides)
-      benefit_1:       { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      benefit_2:       { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      benefit_1:       { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      benefit_2:       { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
       benefit_icon_1:  { type: "string", fillMode: "manual_preferred", default: "Check" },
       benefit_icon_2:  { type: "string", fillMode: "manual_preferred", default: "Clock" },
     },
@@ -616,16 +644,16 @@ export const layoutElementSchema: LayoutSchema = {
 
     elements: {
       // Required AI-generated
-      letter_header:    { type: "string", requirement: "required", fillMode: "ai_generated" },
-      letter_greeting:  { type: "string", requirement: "required", fillMode: "ai_generated" },
-      letter_body:      { type: "string", requirement: "required", fillMode: "ai_generated" },
-      letter_signature: { type: "string", requirement: "required", fillMode: "ai_generated" },
+      letter_header:    { type: "string", requirement: "required", fillMode: "ai_generated", default: "A Personal Note from Our Founder" },
+      letter_greeting:  { type: "string", requirement: "required", fillMode: "ai_generated", default: "Dear Fellow Builder," },
+      letter_body:      { type: "string", requirement: "required", fillMode: "ai_generated", default: "Three years ago, I sat exactly where you are now—staring at a landing page that just wouldn't convert.\n\nI'd tried everything. Hired expensive copywriters. A/B tested until my eyes crossed. Read every marketing book I could find.\n\nThen it hit me: the problem wasn't my copy. It was the process. Great landing pages need great strategy first.\n\nThat's why I built Lessgo. To give founders like us the strategic foundation we need before writing a single word." },
+      letter_signature: { type: "string", requirement: "required", fillMode: "ai_generated", default: "Sushant Jain" },
 
       // Optional AI-generated
-      founder_title:    { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      company_name:     { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      date_text:        { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      ps_text:          { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      founder_title:    { type: "string", requirement: "optional", fillMode: "ai_generated", default: "Founder" },
+      company_name:     { type: "string", requirement: "optional", fillMode: "ai_generated", default: "Lessgo" },
+      date_text:        { type: "string", requirement: "optional", fillMode: "ai_generated", default: "January 2025" },
+      ps_text:          { type: "string", requirement: "optional", fillMode: "ai_generated", default: "P.S. Every founder who joins gets a personal strategy review from me. Just reply to your welcome email." },
 
       // Manual preferred
       founder_image:    { type: "string", requirement: "optional", fillMode: "manual_preferred", default: "/images/founder.jpg" },
@@ -640,26 +668,26 @@ export const layoutElementSchema: LayoutSchema = {
 
     elements: {
       // Required AI-generated
-      headline:           { type: "string", requirement: "required", fillMode: "ai_generated" },
-      subheadline:        { type: "string", requirement: "required", fillMode: "ai_generated" },
-      cta_text:           { type: "string", requirement: "required", fillMode: "ai_generated" },
+      headline:           { type: "string", requirement: "required", fillMode: "ai_generated", default: "Transform Your Business with Smart Automation" },
+      subheadline:        { type: "string", requirement: "required", fillMode: "ai_generated", default: "Streamline workflows, boost productivity, and scale effortlessly with our intelligent automation platform." },
+      cta_text:           { type: "string", requirement: "required", fillMode: "ai_generated", default: "Start Free Trial" },
 
       // Optional AI-generated
-      secondary_cta_text: { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      supporting_text:    { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      badge_text:         { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      secondary_cta_text: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      supporting_text:    { type: "string", requirement: "optional", fillMode: "ai_generated", default: "Save 20+ hours per week with automated workflows that just work." },
+      badge_text:         { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
 
       // Manual preferred - required (show with placeholder)
       hero_image:         { type: "string", requirement: "required", fillMode: "manual_preferred", default: "/hero-placeholder.jpg" },
 
       // Manual preferred - optional (user adds via toolbar)
       show_social_proof:  { type: "boolean", requirement: "optional", fillMode: "manual_preferred", default: true },
-      show_customer_avatars: { type: "boolean", requirement: "optional", fillMode: "manual_preferred", default: true },
+      show_customer_avatars: { type: "boolean", requirement: "optional", fillMode: "manual_preferred", default: true, toggleGroup: "show_social_proof" },
 
-      // AI-generated needs review (user should verify these)
-      customer_count:     { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review" },
-      rating_value:       { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review" },
-      rating_count:       { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review" },
+      // Social proof children (controlled by show_social_proof toggle)
+      customer_count:     { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review", default: "500+ happy customers", toggleGroup: "show_social_proof" },
+      rating_value:       { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review", default: "4.9/5", toggleGroup: "show_social_proof" },
+      rating_count:       { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review", default: "from 127 reviews", toggleGroup: "show_social_proof" },
     },
 
     collections: {
@@ -675,6 +703,7 @@ export const layoutElementSchema: LayoutSchema = {
       customer_avatars: {
         requirement: "optional",
         fillMode: "manual_preferred",
+        toggleGroup: "show_social_proof",
         constraints: { min: 0, max: 6 },
         fields: {
           id:         { type: "string", fillMode: "system" },
@@ -691,26 +720,26 @@ export const layoutElementSchema: LayoutSchema = {
 
     elements: {
       // Required AI-generated
-      headline:           { type: "string", requirement: "required", fillMode: "ai_generated" },
-      subheadline:        { type: "string", requirement: "required", fillMode: "ai_generated" },
-      cta_text:           { type: "string", requirement: "required", fillMode: "ai_generated" },
+      headline:           { type: "string", requirement: "required", fillMode: "ai_generated", default: "Transform Your Business with Smart Automation" },
+      subheadline:        { type: "string", requirement: "required", fillMode: "ai_generated", default: "Streamline workflows, boost productivity, and scale effortlessly with our intelligent automation platform." },
+      cta_text:           { type: "string", requirement: "required", fillMode: "ai_generated", default: "Start Free Trial" },
 
       // Optional AI-generated
-      secondary_cta_text: { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      supporting_text:    { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      badge_text:         { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      secondary_cta_text: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      supporting_text:    { type: "string", requirement: "optional", fillMode: "ai_generated", default: "Save 20+ hours per week with automated workflows that just work." },
+      badge_text:         { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
 
       // Manual preferred - required (show with placeholder)
       center_hero_image:  { type: "string", requirement: "required", fillMode: "manual_preferred", default: "/hero-placeholder.jpg" },
 
       // Manual preferred - optional (user adds via toolbar)
       show_social_proof:  { type: "boolean", requirement: "optional", fillMode: "manual_preferred", default: true },
-      show_customer_avatars: { type: "boolean", requirement: "optional", fillMode: "manual_preferred", default: true },
+      show_customer_avatars: { type: "boolean", requirement: "optional", fillMode: "manual_preferred", default: true, toggleGroup: "show_social_proof" },
 
-      // AI-generated needs review (user should verify these)
-      customer_count:     { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review" },
-      rating_value:       { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review" },
-      rating_count:       { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review" },
+      // Social proof children (controlled by show_social_proof toggle)
+      customer_count:     { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review", default: "500+ happy customers", toggleGroup: "show_social_proof" },
+      rating_value:       { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review", default: "4.9/5", toggleGroup: "show_social_proof" },
+      rating_count:       { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review", default: "from 127 reviews", toggleGroup: "show_social_proof" },
     },
 
     collections: {
@@ -726,6 +755,7 @@ export const layoutElementSchema: LayoutSchema = {
       customer_avatars: {
         requirement: "optional",
         fillMode: "manual_preferred",
+        toggleGroup: "show_social_proof",
         constraints: { min: 0, max: 6 },
         fields: {
           id:         { type: "string", fillMode: "system" },
@@ -742,27 +772,27 @@ export const layoutElementSchema: LayoutSchema = {
 
     elements: {
       // Required AI-generated
-      headline:           { type: "string", requirement: "required", fillMode: "ai_generated" },
-      subheadline:        { type: "string", requirement: "required", fillMode: "ai_generated" },
-      cta_text:           { type: "string", requirement: "required", fillMode: "ai_generated" },
+      headline:           { type: "string", requirement: "required", fillMode: "ai_generated", default: "Transform Your Business with Smart Automation" },
+      subheadline:        { type: "string", requirement: "required", fillMode: "ai_generated", default: "Streamline workflows, boost productivity, and scale effortlessly with our intelligent automation platform." },
+      cta_text:           { type: "string", requirement: "required", fillMode: "ai_generated", default: "Start Free Trial" },
 
       // Optional AI-generated
-      secondary_cta_text: { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      supporting_text:    { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      badge_text:         { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      value_proposition:  { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      secondary_cta_text: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      supporting_text:    { type: "string", requirement: "optional", fillMode: "ai_generated", default: "Save 20+ hours per week with automated workflows that just work." },
+      badge_text:         { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      value_proposition:  { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
 
       // Manual preferred - required (show with placeholder)
       split_hero_image:   { type: "string", requirement: "required", fillMode: "manual_preferred", default: "/hero-placeholder.jpg" },
 
       // Manual preferred - optional (user adds via toolbar)
       show_social_proof:  { type: "boolean", requirement: "optional", fillMode: "manual_preferred", default: true },
-      show_customer_avatars: { type: "boolean", requirement: "optional", fillMode: "manual_preferred", default: true },
+      show_customer_avatars: { type: "boolean", requirement: "optional", fillMode: "manual_preferred", default: true, toggleGroup: "show_social_proof" },
 
-      // AI-generated needs review (user should verify these)
-      customer_count:     { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review" },
-      rating_value:       { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review" },
-      rating_count:       { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review" },
+      // Social proof children (controlled by show_social_proof toggle)
+      customer_count:     { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review", default: "500+ happy customers", toggleGroup: "show_social_proof" },
+      rating_value:       { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review", default: "4.9/5", toggleGroup: "show_social_proof" },
+      rating_count:       { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review", default: "from 127 reviews", toggleGroup: "show_social_proof" },
     },
 
     collections: {
@@ -778,6 +808,7 @@ export const layoutElementSchema: LayoutSchema = {
       customer_avatars: {
         requirement: "optional",
         fillMode: "manual_preferred",
+        toggleGroup: "show_social_proof",
         constraints: { min: 0, max: 6 },
         fields: {
           id:         { type: "string", fillMode: "system" },
@@ -793,26 +824,26 @@ export const layoutElementSchema: LayoutSchema = {
 
     elements: {
       // Required AI-generated
-      headline:           { type: "string", requirement: "required", fillMode: "ai_generated" },
-      subheadline:        { type: "string", requirement: "required", fillMode: "ai_generated" },
-      cta_text:           { type: "string", requirement: "required", fillMode: "ai_generated" },
+      headline:           { type: "string", requirement: "required", fillMode: "ai_generated", default: "Transform Your Business with Smart Automation" },
+      subheadline:        { type: "string", requirement: "required", fillMode: "ai_generated", default: "Streamline workflows, boost productivity, and scale effortlessly with our intelligent automation platform." },
+      cta_text:           { type: "string", requirement: "required", fillMode: "ai_generated", default: "Start Free Trial" },
 
       // Optional AI-generated
-      secondary_cta_text: { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      supporting_text:    { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      badge_text:         { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      secondary_cta_text: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      supporting_text:    { type: "string", requirement: "optional", fillMode: "ai_generated", default: "Save 20+ hours per week with automated workflows that just work." },
+      badge_text:         { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
 
       // Manual preferred - required
       image_first_hero_image: { type: "string", requirement: "required", fillMode: "manual_preferred", default: "/hero-placeholder.jpg" },
 
       // Manual preferred - optional
       show_social_proof:     { type: "boolean", requirement: "optional", fillMode: "manual_preferred", default: true },
-      show_customer_avatars: { type: "boolean", requirement: "optional", fillMode: "manual_preferred", default: true },
+      show_customer_avatars: { type: "boolean", requirement: "optional", fillMode: "manual_preferred", default: true, toggleGroup: "show_social_proof" },
 
-      // AI-generated needs review
-      customer_count:     { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review" },
-      rating_value:       { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review" },
-      rating_count:       { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review" },
+      // Social proof children (controlled by show_social_proof toggle)
+      customer_count:     { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review", default: "500+ happy customers", toggleGroup: "show_social_proof" },
+      rating_value:       { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review", default: "4.9/5", toggleGroup: "show_social_proof" },
+      rating_count:       { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review", default: "from 127 reviews", toggleGroup: "show_social_proof" },
     },
 
     collections: {
@@ -828,6 +859,7 @@ export const layoutElementSchema: LayoutSchema = {
       customer_avatars: {
         requirement: "optional",
         fillMode: "manual_preferred",
+        toggleGroup: "show_social_proof",
         constraints: { min: 0, max: 6 },
         fields: {
           id:         { type: "string", fillMode: "system" },
@@ -844,11 +876,11 @@ export const layoutElementSchema: LayoutSchema = {
 
     elements: {
       // Required AI-generated
-      headline:        { type: "string", requirement: "required", fillMode: "ai_generated" },
+      headline:        { type: "string", requirement: "required", fillMode: "ai_generated", default: "How It Works" },
 
       // Optional AI-generated
-      subheadline:     { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      conclusion_text: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      subheadline:     { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      conclusion_text: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
     },
 
     collections: {
@@ -871,9 +903,9 @@ export const layoutElementSchema: LayoutSchema = {
     sectionType: "VerticalTimeline",
 
     elements: {
-      headline:             { type: "string", requirement: "required", fillMode: "ai_generated" },
-      subheadline:          { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      process_summary_text: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      headline:             { type: "string", requirement: "required", fillMode: "ai_generated", default: "Our Process" },
+      subheadline:          { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      process_summary_text: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
     },
 
     collections: {
@@ -896,9 +928,9 @@ export const layoutElementSchema: LayoutSchema = {
     sectionType: "AccordionSteps",
 
     elements: {
-      headline:        { type: "string", requirement: "required", fillMode: "ai_generated" },
-      subheadline:     { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      conclusion_text: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      headline:        { type: "string", requirement: "required", fillMode: "ai_generated", default: "Implementation Guide" },
+      subheadline:     { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      conclusion_text: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
     },
 
     collections: {
@@ -922,13 +954,13 @@ export const layoutElementSchema: LayoutSchema = {
 
     elements: {
       // Required AI-generated
-      headline:          { type: "string", requirement: "required", fillMode: "ai_generated" },
-      video_title:       { type: "string", requirement: "required", fillMode: "ai_generated" },
-      video_description: { type: "string", requirement: "required", fillMode: "ai_generated" },
+      headline:          { type: "string", requirement: "required", fillMode: "ai_generated", default: "See How It Works" },
+      video_title:       { type: "string", requirement: "required", fillMode: "ai_generated", default: "Product Demo" },
+      video_description: { type: "string", requirement: "required", fillMode: "ai_generated", default: "Watch a quick walkthrough of our platform." },
 
       // Optional AI-generated
-      subheadline:         { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      demo_stats_heading:  { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      subheadline:         { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      demo_stats_heading:  { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
 
       // Manual preferred
       video_url:       { type: "string", fillMode: "manual_preferred", default: "" },
@@ -966,8 +998,8 @@ export const layoutElementSchema: LayoutSchema = {
     sectionType: "MythVsRealityGrid",
 
     elements: {
-      headline:    { type: "string", requirement: "required", fillMode: "ai_generated" },
-      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      headline:    { type: "string", requirement: "required", fillMode: "ai_generated", default: "Separating Myth from Reality" },
+      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "Let's address the common misconceptions and show you what's actually true." },
     },
 
     collections: {
@@ -977,8 +1009,8 @@ export const layoutElementSchema: LayoutSchema = {
         constraints: { min: 3, max: 6 },
         fields: {
           id:      { type: "string", fillMode: "system" },
-          myth:    { type: "string", fillMode: "ai_generated" },
-          reality: { type: "string", fillMode: "ai_generated" },
+          myth:    { type: "string", fillMode: "ai_generated", default: "" },
+          reality: { type: "string", fillMode: "ai_generated", default: "" },
         }
       }
     }
@@ -989,8 +1021,8 @@ export const layoutElementSchema: LayoutSchema = {
     sectionType: "VisualObjectionTiles",
 
     elements: {
-      headline:    { type: "string", requirement: "required", fillMode: "ai_generated" },
-      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      headline:    { type: "string", requirement: "required", fillMode: "ai_generated", default: "Common Concerns? We've Got You Covered" },
+      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "Here are the questions we hear most often and why they shouldn't hold you back." },
     },
 
     collections: {
@@ -1000,9 +1032,9 @@ export const layoutElementSchema: LayoutSchema = {
         constraints: { min: 3, max: 6 },
         fields: {
           id:       { type: "string", fillMode: "system" },
-          question: { type: "string", fillMode: "ai_generated" },
-          response: { type: "string", fillMode: "ai_generated" },
-          label:    { type: "string", fillMode: "ai_generated" },
+          question: { type: "string", fillMode: "ai_generated", default: "" },
+          response: { type: "string", fillMode: "ai_generated", default: "" },
+          label:    { type: "string", fillMode: "ai_generated", default: "" },
           icon:     { type: "string", fillMode: "manual_preferred" },
         }
       }
@@ -1014,11 +1046,11 @@ export const layoutElementSchema: LayoutSchema = {
     sectionType: "TierCards",
 
     elements: {
-      headline:          { type: "string", requirement: "required", fillMode: "ai_generated" },
-      subheadline:       { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      badge_text:        { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      billing_note:      { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      guarantee_text:    { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      headline:          { type: "string", requirement: "required", fillMode: "ai_generated", default: "Simple, Transparent Pricing" },
+      subheadline:       { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      badge_text:        { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      billing_note:      { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      guarantee_text:    { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
       highlighted_label: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "Most Popular" },
     },
 
@@ -1046,10 +1078,10 @@ export const layoutElementSchema: LayoutSchema = {
     sectionType: "ToggleableMonthlyYearly",
 
     elements: {
-      headline:              { type: "string", requirement: "required", fillMode: "ai_generated" },
-      subheadline:           { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      annual_discount_label: { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      billing_note:          { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      headline:              { type: "string", requirement: "required", fillMode: "ai_generated", default: "Choose Your Plan" },
+      subheadline:           { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      annual_discount_label: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      billing_note:          { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
     },
 
     collections: {
@@ -1077,11 +1109,11 @@ export const layoutElementSchema: LayoutSchema = {
     sectionType: "CallToQuotePlan",
 
     elements: {
-      headline:          { type: "string", requirement: "required", fillMode: "ai_generated" },
-      value_proposition: { type: "string", requirement: "required", fillMode: "ai_generated" },
-      subheadline:       { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      supporting_text:   { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      response_time:     { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      headline:          { type: "string", requirement: "required", fillMode: "ai_generated", default: "Let's Talk About Your Needs" },
+      value_proposition: { type: "string", requirement: "required", fillMode: "ai_generated", default: "Custom solutions tailored to your business" },
+      subheadline:       { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      supporting_text:   { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      response_time:     { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
     },
 
     collections: {
@@ -1114,9 +1146,9 @@ export const layoutElementSchema: LayoutSchema = {
     sectionType: "StackedPainBullets",
 
     elements: {
-      headline:        { type: "string", requirement: "required", fillMode: "ai_generated" },
-      subheadline:     { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      conclusion_text: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      headline:        { type: "string", requirement: "required", fillMode: "ai_generated", default: "Are You Struggling With These Daily Frustrations?" },
+      subheadline:     { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      conclusion_text: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "Sound familiar? You're not alone." },
     },
 
     collections: {
@@ -1126,8 +1158,8 @@ export const layoutElementSchema: LayoutSchema = {
         constraints: { min: 2, max: 6 },
         fields: {
           id:          { type: "string", fillMode: "system" },
-          point:       { type: "string", fillMode: "ai_generated" },
-          description: { type: "string", fillMode: "ai_generated" },
+          point:       { type: "string", fillMode: "ai_generated", default: "" },
+          description: { type: "string", fillMode: "ai_generated", default: "" },
           icon:        { type: "string", fillMode: "manual_preferred" },
         }
       }
@@ -1139,9 +1171,9 @@ export const layoutElementSchema: LayoutSchema = {
     sectionType: "StatBlocks",
 
     elements: {
-      headline:           { type: "string", requirement: "required", fillMode: "ai_generated" },
-      subheadline:        { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      achievement_footer: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      headline:           { type: "string", requirement: "required", fillMode: "ai_generated", default: "Our Results Speak for Themselves" },
+      subheadline:        { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      achievement_footer: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
     },
 
     collections: {
@@ -1165,9 +1197,9 @@ export const layoutElementSchema: LayoutSchema = {
     sectionType: "StackedWinsList",
 
     elements: {
-      headline:    { type: "string", requirement: "required", fillMode: "ai_generated" },
-      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      footer_text: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      headline:    { type: "string", requirement: "required", fillMode: "ai_generated", default: "Real Results, Real Impact" },
+      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      footer_text: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
       // Icon: no default - derive at render time per Icon Handling Pattern
       win_icon:    { type: "string", fillMode: "manual_preferred" },
     },
@@ -1192,8 +1224,8 @@ export const layoutElementSchema: LayoutSchema = {
     sectionType: "ResultsGallery",
 
     elements: {
-      headline:    { type: "string", requirement: "required", fillMode: "ai_generated" },
-      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      headline:    { type: "string", requirement: "required", fillMode: "ai_generated", default: "Success Stories" },
+      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
     },
 
     collections: {
@@ -1218,10 +1250,10 @@ export const layoutElementSchema: LayoutSchema = {
 
     elements: {
       // Required AI-generated
-      headline:    { type: "string", requirement: "required", fillMode: "ai_generated" },
+      headline:    { type: "string", requirement: "required", fillMode: "ai_generated", default: "Trusted by Leading Companies Worldwide" },
 
       // Optional AI-generated
-      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "Join thousands of companies that trust us to power their success." },
 
       // Tier toggles
       show_press:  { type: "boolean", fillMode: "manual_preferred", default: true },  // Secondary tier
@@ -1246,8 +1278,8 @@ export const layoutElementSchema: LayoutSchema = {
         constraints: { min: 0, max: 3 },
         fields: {
           id:    { type: "string", fillMode: "system" },
-          value: { type: "string", fillMode: "ai_generated_needs_review" },
-          label: { type: "string", fillMode: "ai_generated" },
+          value: { type: "string", fillMode: "ai_generated_needs_review", default: "" },
+          label: { type: "string", fillMode: "ai_generated", default: "" },
         }
       },
 
@@ -1257,8 +1289,8 @@ export const layoutElementSchema: LayoutSchema = {
         constraints: { min: 0, max: 5 },
         fields: {
           id:    { type: "string", fillMode: "system" },
-          name:  { type: "string", fillMode: "ai_generated" },
-          quote: { type: "string", fillMode: "ai_generated" },
+          name:  { type: "string", fillMode: "ai_generated", default: "" },
+          quote: { type: "string", fillMode: "ai_generated", default: "" },
         }
       },
 
@@ -1268,8 +1300,8 @@ export const layoutElementSchema: LayoutSchema = {
         constraints: { min: 0, max: 5 },
         fields: {
           id:    { type: "string", fillMode: "system" },
-          code:  { type: "string", fillMode: "ai_generated" },
-          label: { type: "string", fillMode: "ai_generated" },
+          code:  { type: "string", fillMode: "ai_generated", default: "" },
+          label: { type: "string", fillMode: "ai_generated", default: "" },
         }
       },
     }
@@ -1280,12 +1312,9 @@ export const layoutElementSchema: LayoutSchema = {
     sectionType: "QuoteGrid",
 
     elements: {
-      // Required AI-generated
-      headline:             { type: "string", requirement: "required", fillMode: "ai_generated" },
-
-      // Optional AI-generated
-      subheadline:          { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      verification_message: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      headline:             { type: "string", requirement: "required", fillMode: "ai_generated", default: "What Our Customers Are Saying" },
+      subheadline:          { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      verification_message: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "All testimonials from verified customers" },
     },
 
     collections: {
@@ -1295,10 +1324,10 @@ export const layoutElementSchema: LayoutSchema = {
         constraints: { min: 2, max: 6 },
         fields: {
           id:               { type: "string", fillMode: "system" },
-          quote:            { type: "string", fillMode: "ai_generated_needs_review" },
-          customer_name:    { type: "string", fillMode: "ai_generated_needs_review" },
-          customer_title:   { type: "string", fillMode: "ai_generated_needs_review" },
-          customer_company: { type: "string", fillMode: "ai_generated_needs_review" },
+          quote:            { type: "string", fillMode: "ai_generated_needs_review", default: "" },
+          customer_name:    { type: "string", fillMode: "ai_generated_needs_review", default: "" },
+          customer_title:   { type: "string", fillMode: "ai_generated_needs_review", default: "" },
+          customer_company: { type: "string", fillMode: "ai_generated_needs_review", default: "" },
           rating_value:     { type: "string", fillMode: "ai_generated_needs_review", default: "5" },
         }
       }
@@ -1310,8 +1339,8 @@ export const layoutElementSchema: LayoutSchema = {
     sectionType: "VideoTestimonials",
 
     elements: {
-      headline:    { type: "string", requirement: "required", fillMode: "ai_generated" },
-      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      headline:    { type: "string", requirement: "required", fillMode: "ai_generated", default: "See What Our Customers Are Saying" },
+      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
     },
 
     collections: {
@@ -1321,11 +1350,11 @@ export const layoutElementSchema: LayoutSchema = {
         constraints: { min: 1, max: 6 },
         fields: {
           id:               { type: "string", fillMode: "system" },
-          title:            { type: "string", fillMode: "ai_generated" },
-          description:      { type: "string", fillMode: "ai_generated" },
-          customer_name:    { type: "string", fillMode: "ai_generated_needs_review" },
-          customer_title:   { type: "string", fillMode: "ai_generated_needs_review" },
-          customer_company: { type: "string", fillMode: "ai_generated_needs_review" },
+          title:            { type: "string", fillMode: "ai_generated", default: "" },
+          description:      { type: "string", fillMode: "ai_generated", default: "" },
+          customer_name:    { type: "string", fillMode: "ai_generated_needs_review", default: "" },
+          customer_title:   { type: "string", fillMode: "ai_generated_needs_review", default: "" },
+          customer_company: { type: "string", fillMode: "ai_generated_needs_review", default: "" },
           video_url:        { type: "string", fillMode: "manual_preferred", default: "" },
           thumbnail:        { type: "string", fillMode: "manual_preferred", default: "" },
         }
@@ -1340,10 +1369,10 @@ export const layoutElementSchema: LayoutSchema = {
     sectionType: "BeforeAfterQuote",
 
     elements: {
-      headline:    { type: "string", requirement: "required", fillMode: "ai_generated" },
-      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      before_icon: { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      after_icon:  { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      headline:    { type: "string", requirement: "required", fillMode: "ai_generated", default: "Real Customer Transformations" },
+      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "See how our solution transformed their operations" },
+      before_icon: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "XCircle" },
+      after_icon:  { type: "string", requirement: "optional", fillMode: "ai_generated", default: "CheckCircle" },
     },
 
     collections: {
@@ -1353,14 +1382,14 @@ export const layoutElementSchema: LayoutSchema = {
         constraints: { min: 1, max: 4 },
         fields: {
           id:                { type: "string", fillMode: "system" },
-          before_situation:  { type: "string", fillMode: "ai_generated" },
-          after_outcome:     { type: "string", fillMode: "ai_generated" },
-          testimonial_quote: { type: "string", fillMode: "ai_generated_needs_review" },
-          customer_name:     { type: "string", fillMode: "ai_generated_needs_review" },
-          customer_title:    { type: "string", fillMode: "ai_generated_needs_review" },
-          customer_company:  { type: "string", fillMode: "ai_generated_needs_review" },
-          before_icon:       { type: "string", fillMode: "ai_generated" },
-          after_icon:        { type: "string", fillMode: "ai_generated" },
+          before_situation:  { type: "string", fillMode: "ai_generated", default: "" },
+          after_outcome:     { type: "string", fillMode: "ai_generated", default: "" },
+          testimonial_quote: { type: "string", fillMode: "ai_generated_needs_review", default: "" },
+          customer_name:     { type: "string", fillMode: "ai_generated_needs_review", default: "" },
+          customer_title:    { type: "string", fillMode: "ai_generated_needs_review", default: "" },
+          customer_company:  { type: "string", fillMode: "ai_generated_needs_review", default: "" },
+          before_icon:       { type: "string", fillMode: "ai_generated", default: "Frown" },
+          after_icon:        { type: "string", fillMode: "ai_generated", default: "Smile" },
           avatar_url:        { type: "string", fillMode: "manual_preferred", default: "" },
         }
       }
@@ -1373,8 +1402,8 @@ export const layoutElementSchema: LayoutSchema = {
     sectionType: "PullQuoteStack",
 
     elements: {
-      headline:    { type: "string", requirement: "required", fillMode: "ai_generated" },
-      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      headline:    { type: "string", requirement: "required", fillMode: "ai_generated", default: "Real People, Real Results" },
+      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
     },
 
     collections: {
@@ -1384,10 +1413,10 @@ export const layoutElementSchema: LayoutSchema = {
         constraints: { min: 2, max: 6 },
         fields: {
           id:               { type: "string", fillMode: "system" },
-          quote:            { type: "string", fillMode: "ai_generated_needs_review" },
-          customer_name:    { type: "string", fillMode: "ai_generated_needs_review" },
-          customer_title:   { type: "string", fillMode: "ai_generated_needs_review" },
-          customer_location: { type: "string", fillMode: "ai_generated_needs_review" },
+          quote:            { type: "string", fillMode: "ai_generated_needs_review", default: "" },
+          customer_name:    { type: "string", fillMode: "ai_generated_needs_review", default: "" },
+          customer_title:   { type: "string", fillMode: "ai_generated_needs_review", default: "" },
+          customer_location: { type: "string", fillMode: "ai_generated_needs_review", default: "" },
           avatar_url:       { type: "string", fillMode: "manual_preferred", default: "" },
         }
       }
@@ -1399,12 +1428,12 @@ export const layoutElementSchema: LayoutSchema = {
     sectionType: "MethodologyBreakdown",
 
     elements: {
-      headline:               { type: "string", requirement: "required", fillMode: "ai_generated" },
-      methodology_name:       { type: "string", requirement: "required", fillMode: "ai_generated" },
-      methodology_description: { type: "string", requirement: "required", fillMode: "ai_generated" },
-      subheadline:            { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      results_title:          { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      methodology_icon:       { type: "string", fillMode: "manual_preferred" },
+      headline:               { type: "string", requirement: "required", fillMode: "ai_generated", default: "The Science Behind Our Success" },
+      methodology_name:       { type: "string", requirement: "required", fillMode: "ai_generated", default: "Adaptive Intelligence Framework™" },
+      methodology_description: { type: "string", requirement: "required", fillMode: "ai_generated", default: "Our proprietary methodology combines machine learning, behavioral psychology, and real-time optimization to deliver unprecedented results." },
+      subheadline:            { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      results_title:          { type: "string", requirement: "optional", fillMode: "ai_generated", default: "Proven Results" },
+      methodology_icon:       { type: "string", fillMode: "manual_preferred", default: "Brain" },
     },
 
     collections: {
@@ -1414,8 +1443,8 @@ export const layoutElementSchema: LayoutSchema = {
         constraints: { min: 3, max: 6 },
         fields: {
           id:          { type: "string", fillMode: "system" },
-          name:        { type: "string", fillMode: "ai_generated" },
-          description: { type: "string", fillMode: "ai_generated" },
+          name:        { type: "string", fillMode: "ai_generated", default: "" },
+          description: { type: "string", fillMode: "ai_generated", default: "" },
           icon:        { type: "string", fillMode: "manual_preferred" },
         }
       },
@@ -1425,8 +1454,8 @@ export const layoutElementSchema: LayoutSchema = {
         constraints: { min: 0, max: 4 },
         fields: {
           id:     { type: "string", fillMode: "system" },
-          metric: { type: "string", fillMode: "ai_generated_needs_review" },
-          label:  { type: "string", fillMode: "ai_generated" },
+          metric: { type: "string", fillMode: "ai_generated_needs_review", default: "" },
+          label:  { type: "string", fillMode: "ai_generated", default: "" },
         }
       }
     }
@@ -1437,9 +1466,9 @@ export const layoutElementSchema: LayoutSchema = {
     sectionType: "ProcessFlowDiagram",
 
     elements: {
-      headline:       { type: "string", requirement: "required", fillMode: "ai_generated" },
-      subheadline:    { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      benefits_title: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      headline:       { type: "string", requirement: "required", fillMode: "ai_generated", default: "How Our Unique Process Works" },
+      subheadline:    { type: "string", requirement: "optional", fillMode: "ai_generated", default: "Our proprietary methodology delivers results in simple steps." },
+      benefits_title: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "Why This Process Works" },
     },
 
     collections: {
@@ -1449,8 +1478,8 @@ export const layoutElementSchema: LayoutSchema = {
         constraints: { min: 2, max: 6 },
         fields: {
           id:          { type: "string", fillMode: "system" },
-          title:       { type: "string", fillMode: "ai_generated" },
-          description: { type: "string", fillMode: "ai_generated" },
+          title:       { type: "string", fillMode: "ai_generated", default: "" },
+          description: { type: "string", fillMode: "ai_generated", default: "" },
         }
       },
       benefits: {
@@ -1459,8 +1488,8 @@ export const layoutElementSchema: LayoutSchema = {
         constraints: { min: 0, max: 3 },
         fields: {
           id:          { type: "string", fillMode: "system" },
-          title:       { type: "string", fillMode: "ai_generated_needs_review" },
-          description: { type: "string", fillMode: "ai_generated" },
+          title:       { type: "string", fillMode: "ai_generated_needs_review", default: "" },
+          description: { type: "string", fillMode: "ai_generated", default: "" },
           icon:        { type: "string", fillMode: "manual_preferred" },
         }
       }
@@ -1471,12 +1500,12 @@ export const layoutElementSchema: LayoutSchema = {
     sectionType: "PropertyComparisonMatrix",
 
     elements: {
-      headline:           { type: "string", requirement: "required", fillMode: "ai_generated" },
-      subheadline:        { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      feature_header:     { type: "string", requirement: "required", fillMode: "ai_generated" },
-      us_header:          { type: "string", requirement: "required", fillMode: "ai_generated" },
-      competitors_header: { type: "string", requirement: "required", fillMode: "ai_generated" },
-      footer_text:        { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      headline:           { type: "string", requirement: "required", fillMode: "ai_generated", default: "How We Compare" },
+      subheadline:        { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      feature_header:     { type: "string", requirement: "required", fillMode: "ai_generated", default: "Feature" },
+      us_header:          { type: "string", requirement: "required", fillMode: "ai_generated", default: "Us" },
+      competitors_header: { type: "string", requirement: "required", fillMode: "ai_generated", default: "Competitors" },
+      footer_text:        { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
     },
 
     collections: {
@@ -1486,9 +1515,9 @@ export const layoutElementSchema: LayoutSchema = {
         constraints: { min: 3, max: 8 },
         fields: {
           id:               { type: "string", fillMode: "system" },
-          property:         { type: "string", fillMode: "ai_generated" },
-          us_value:         { type: "string", fillMode: "ai_generated" },
-          competitor_value: { type: "string", fillMode: "ai_generated" },
+          property:         { type: "string", fillMode: "ai_generated", default: "" },
+          us_value:         { type: "string", fillMode: "ai_generated", default: "" },
+          competitor_value: { type: "string", fillMode: "ai_generated", default: "" },
         }
       }
     }
@@ -1498,8 +1527,8 @@ export const layoutElementSchema: LayoutSchema = {
     sectionType: "SecretSauceReveal",
 
     elements: {
-      headline:    { type: "string", requirement: "required", fillMode: "ai_generated" },
-      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      headline:    { type: "string", requirement: "required", fillMode: "ai_generated", default: "Our Secret Sauce Revealed" },
+      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
     },
 
     collections: {
@@ -1509,8 +1538,8 @@ export const layoutElementSchema: LayoutSchema = {
         constraints: { min: 2, max: 4 },
         fields: {
           id:          { type: "string", fillMode: "system" },
-          title:       { type: "string", fillMode: "ai_generated" },
-          description: { type: "string", fillMode: "ai_generated" },
+          title:       { type: "string", fillMode: "ai_generated", default: "" },
+          description: { type: "string", fillMode: "ai_generated", default: "" },
           icon:        { type: "string", fillMode: "manual_preferred" },
         }
       }
@@ -1522,10 +1551,10 @@ export const layoutElementSchema: LayoutSchema = {
     sectionType: "StackedHighlights",
 
     elements: {
-      headline:       { type: "string", requirement: "required", fillMode: "ai_generated" },
-      subheadline:    { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      mechanism_name: { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      footer_text:    { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      headline:       { type: "string", requirement: "required", fillMode: "ai_generated", default: "Our Proprietary SmartFlow System™" },
+      subheadline:    { type: "string", requirement: "optional", fillMode: "ai_generated", default: "Three unique capabilities that set us apart." },
+      mechanism_name: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      footer_text:    { type: "string", requirement: "optional", fillMode: "ai_generated", default: "Our proprietary approach that you won't find anywhere else" },
     },
 
     collections: {
@@ -1535,8 +1564,8 @@ export const layoutElementSchema: LayoutSchema = {
         constraints: { min: 2, max: 6 },
         fields: {
           id:          { type: "string", fillMode: "system" },
-          title:       { type: "string", fillMode: "ai_generated" },
-          description: { type: "string", fillMode: "ai_generated" },
+          title:       { type: "string", fillMode: "ai_generated", default: "" },
+          description: { type: "string", fillMode: "ai_generated", default: "" },
           icon:        { type: "string", fillMode: "manual_preferred" },
         }
       }
@@ -1548,8 +1577,8 @@ export const layoutElementSchema: LayoutSchema = {
     sectionType: "TechnicalAdvantage",
 
     elements: {
-      headline:    { type: "string", requirement: "required", fillMode: "ai_generated" },
-      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      headline:    { type: "string", requirement: "required", fillMode: "ai_generated", default: "Technical Advantages That Set Us Apart" },
+      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
     },
 
     collections: {
@@ -1559,8 +1588,8 @@ export const layoutElementSchema: LayoutSchema = {
         constraints: { min: 3, max: 6 },
         fields: {
           id:          { type: "string", fillMode: "system" },
-          title:       { type: "string", fillMode: "ai_generated" },
-          description: { type: "string", fillMode: "ai_generated" },
+          title:       { type: "string", fillMode: "ai_generated", default: "" },
+          description: { type: "string", fillMode: "ai_generated", default: "" },
           icon:        { type: "string", fillMode: "manual_preferred" },
         }
       }
@@ -1572,8 +1601,8 @@ export const layoutElementSchema: LayoutSchema = {
     sectionType: "IndustryUseCaseGrid",
 
     elements: {
-      headline:    { type: "string", requirement: "required", fillMode: "ai_generated" },
-      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      headline:    { type: "string", requirement: "required", fillMode: "ai_generated", default: "Trusted Across Industries" },
+      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
     },
 
     collections: {
@@ -1583,9 +1612,9 @@ export const layoutElementSchema: LayoutSchema = {
         constraints: { min: 4, max: 6 },
         fields: {
           id:          { type: "string", fillMode: "system" },
-          name:        { type: "string", fillMode: "ai_generated" },
-          description: { type: "string", fillMode: "ai_generated" },
-          icon:        { type: "string", fillMode: "manual_preferred" },  // No default - computed at render
+          name:        { type: "string", fillMode: "ai_generated", default: "" },
+          description: { type: "string", fillMode: "ai_generated", default: "" },
+          icon:        { type: "string", fillMode: "manual_preferred" },
         }
       }
     }
@@ -1596,9 +1625,9 @@ export const layoutElementSchema: LayoutSchema = {
     sectionType: "PersonaGrid",
 
     elements: {
-      headline:    { type: "string", requirement: "required", fillMode: "ai_generated" },
-      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      footer_text: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      headline:    { type: "string", requirement: "required", fillMode: "ai_generated", default: "Built for Every Team Member" },
+      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      footer_text: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
     },
 
     collections: {
@@ -1608,8 +1637,8 @@ export const layoutElementSchema: LayoutSchema = {
         constraints: { min: 2, max: 6 },
         fields: {
           id:          { type: "string", fillMode: "system" },
-          name:        { type: "string", fillMode: "ai_generated" },
-          description: { type: "string", fillMode: "ai_generated" },
+          name:        { type: "string", fillMode: "ai_generated", default: "" },
+          description: { type: "string", fillMode: "ai_generated", default: "" },
           icon:        { type: "string", fillMode: "manual_preferred" },
         }
       }
@@ -1620,9 +1649,9 @@ export const layoutElementSchema: LayoutSchema = {
     sectionType: "RoleBasedScenarios",
 
     elements: {
-      headline:    { type: "string", requirement: "required", fillMode: "ai_generated" },
-      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      footer_text: { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      headline:    { type: "string", requirement: "required", fillMode: "ai_generated", default: "Perfect for Every Role" },
+      subheadline: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      footer_text: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
     },
 
     collections: {
@@ -1632,8 +1661,8 @@ export const layoutElementSchema: LayoutSchema = {
         constraints: { min: 3, max: 6 },
         fields: {
           id:       { type: "string", fillMode: "system" },
-          role:     { type: "string", fillMode: "ai_generated" },
-          scenario: { type: "string", fillMode: "ai_generated" },
+          role:     { type: "string", fillMode: "ai_generated", default: "" },
+          scenario: { type: "string", fillMode: "ai_generated", default: "" },
         }
       }
     }
@@ -1645,20 +1674,20 @@ export const layoutElementSchema: LayoutSchema = {
 
     elements: {
       // Required AI-generated
-      headline:           { type: "string", requirement: "required", fillMode: "ai_generated" },
-      cta_text:           { type: "string", requirement: "required", fillMode: "ai_generated" },
+      headline:           { type: "string", requirement: "required", fillMode: "ai_generated", default: "Ready to Transform Your Business?" },
+      cta_text:           { type: "string", requirement: "required", fillMode: "ai_generated", default: "Start Your Free Trial Today" },
 
       // Optional AI-generated
-      subheadline:        { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      secondary_cta_text: { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      urgency_text:       { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      subheadline:        { type: "string", requirement: "optional", fillMode: "ai_generated", default: "Join thousands of companies already using our platform to streamline operations and boost productivity." },
+      secondary_cta_text: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      urgency_text:       { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
 
       // AI-generated needs review (user should verify these stats)
-      customer_count:     { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review" },
-      customer_label:     { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review" },
-      rating_stat:        { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review" },
-      uptime_stat:        { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review" },
-      uptime_label:       { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review" },
+      customer_count:     { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review", default: "10,000+" },
+      customer_label:     { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review", default: "Happy customers" },
+      rating_stat:        { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review", default: "4.8/5 stars" },
+      uptime_stat:        { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review", default: "99.9% uptime" },
+      uptime_label:       { type: "string", requirement: "optional", fillMode: "ai_generated_needs_review", default: "SOC 2 Compliant" },
     },
 
     collections: {
@@ -1678,12 +1707,12 @@ export const layoutElementSchema: LayoutSchema = {
     sectionType: "VisualCTAWithMockup",
 
     elements: {
-      headline:      { type: "string", requirement: "required", fillMode: "ai_generated" },
-      subheadline:   { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      cta_text:      { type: "string", requirement: "required", fillMode: "ai_generated" },
-      secondary_cta: { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      urgency_text:  { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      mockup_image:  { type: "string", requirement: "optional", fillMode: "manual_preferred" },
+      headline:      { type: "string", requirement: "required", fillMode: "ai_generated", default: "See It in Action" },
+      subheadline:   { type: "string", requirement: "optional", fillMode: "ai_generated", default: "Experience the power of our platform with a live demo. No installation required." },
+      cta_text:      { type: "string", requirement: "required", fillMode: "ai_generated", default: "Start Free Trial" },
+      secondary_cta: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      urgency_text:  { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      mockup_image:  { type: "string", requirement: "optional", fillMode: "manual_preferred", default: "" },
     },
 
     collections: {
@@ -1703,13 +1732,13 @@ export const layoutElementSchema: LayoutSchema = {
     sectionType: "ValueStackCTA",
 
     elements: {
-      headline:             { type: "string", requirement: "required", fillMode: "ai_generated" },
-      subheadline:          { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      cta_text:             { type: "string", requirement: "required", fillMode: "ai_generated" },
-      secondary_cta_text:   { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      final_cta_headline:   { type: "string", requirement: "required", fillMode: "ai_generated" },
-      final_cta_description:{ type: "string", requirement: "required", fillMode: "ai_generated" },
-      guarantee_text:       { type: "string", requirement: "optional", fillMode: "ai_generated" },
+      headline:             { type: "string", requirement: "required", fillMode: "ai_generated", default: "Everything You Get With Your Account" },
+      subheadline:          { type: "string", requirement: "optional", fillMode: "ai_generated", default: "One subscription, unlimited value" },
+      cta_text:             { type: "string", requirement: "required", fillMode: "ai_generated", default: "Start Free Trial" },
+      secondary_cta_text:   { type: "string", requirement: "optional", fillMode: "ai_generated", default: "" },
+      final_cta_headline:   { type: "string", requirement: "required", fillMode: "ai_generated", default: "Ready to Transform Your Workflow?" },
+      final_cta_description:{ type: "string", requirement: "required", fillMode: "ai_generated", default: "Join 10,000+ teams already saving time every day" },
+      guarantee_text:       { type: "string", requirement: "optional", fillMode: "ai_generated", default: "30-day money-back guarantee" },
     },
 
     collections: {
@@ -1719,7 +1748,7 @@ export const layoutElementSchema: LayoutSchema = {
         constraints: { min: 3, max: 8 },
         fields: {
           id:    { type: "string", fillMode: "system" },
-          text:  { type: "string", fillMode: "ai_generated" }
+          text:  { type: "string", fillMode: "ai_generated", default: "" }
         }
       }
     }
@@ -1753,14 +1782,14 @@ export const layoutElementSchema: LayoutSchema = {
     sectionType: "ContactFooter",
 
     elements: {
-      footer_style:           { type: "string", requirement: "optional", fillMode: "manual_preferred" },
-      copyright:              { type: "string", requirement: "required", fillMode: "manual_preferred" },
-      newsletter_title:       { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      newsletter_description: { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      newsletter_cta:         { type: "string", requirement: "optional", fillMode: "ai_generated" },
-      email:                  { type: "string", requirement: "optional", fillMode: "manual_preferred" },
-      phone:                  { type: "string", requirement: "optional", fillMode: "manual_preferred" },
-      address:                { type: "string", requirement: "optional", fillMode: "manual_preferred" },
+      footer_style:           { type: "string", requirement: "optional", fillMode: "manual_preferred", default: "dark" },
+      copyright:              { type: "string", requirement: "required", fillMode: "manual_preferred", default: "© 2025 Your Company. All rights reserved." },
+      newsletter_title:       { type: "string", requirement: "optional", fillMode: "ai_generated", default: "Stay Updated" },
+      newsletter_description: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "Get the latest updates and news delivered to your inbox." },
+      newsletter_cta:         { type: "string", requirement: "optional", fillMode: "ai_generated", default: "Subscribe" },
+      email:                  { type: "string", requirement: "optional", fillMode: "manual_preferred", default: "contact@company.com" },
+      phone:                  { type: "string", requirement: "optional", fillMode: "manual_preferred", default: "+1 (555) 123-4567" },
+      address:                { type: "string", requirement: "optional", fillMode: "manual_preferred", default: "123 Business St, Suite 100, City, State 12345" },
     },
 
     collections: {
@@ -1777,4 +1806,77 @@ export const layoutElementSchema: LayoutSchema = {
       }
     }
   },
+}
+
+/**
+ * Sanitize content for publish: apply 4-case gating per section.
+ * Strips excluded elements, sets defaults for missing required ones.
+ * Mutates content in place.
+ */
+export function sanitizeContentForPublish(content: Record<string, any>): void {
+  const sections: string[] = content?.layout?.sections;
+  if (!sections || !Array.isArray(sections)) return;
+
+  // Handle nested format (content.content[sectionId]) or flat (content[sectionId])
+  const container = content.content && typeof content.content === 'object'
+    ? content.content
+    : content;
+
+  for (const sectionId of sections) {
+    const section = container[sectionId];
+    if (!section?.elements || !section?.layout) continue;
+
+    const schema = layoutElementSchema[section.layout];
+    if (!schema || !isV2Schema(schema)) continue;
+
+    const excludedArr: string[] = section.aiMetadata?.excludedElements || [];
+    const excludedSet = new Set(excludedArr);
+
+    // Expand toggleGroup children into excluded set
+    for (const [key, def] of Object.entries(schema.elements)) {
+      if (def.toggleGroup && excludedSet.has(def.toggleGroup)) {
+        excludedSet.add(key);
+      }
+    }
+
+    const elements = section.elements;
+    const sanitized: Record<string, any> = {};
+
+    // Gate elements
+    for (const [key, def] of Object.entries(schema.elements)) {
+      if (excludedSet.has(key)) continue;
+      if (elements[key] !== undefined && elements[key] !== null) {
+        sanitized[key] = elements[key];
+      } else if (def.requirement === 'required') {
+        sanitized[key] = def.default ?? '';
+      }
+    }
+
+    // Gate collections
+    if (schema.collections) {
+      for (const [colName, colDef] of Object.entries(schema.collections)) {
+        if (excludedSet.has(colName)) continue;
+        if (colDef.toggleGroup && excludedSet.has(colDef.toggleGroup)) continue;
+
+        if (elements[colName] !== undefined && elements[colName] !== null) {
+          sanitized[colName] = elements[colName];
+        } else if (colDef.requirement === 'required') {
+          sanitized[colName] = [];
+        }
+      }
+    }
+
+    // Preserve non-schema keys
+    const schemaKeys = new Set([
+      ...Object.keys(schema.elements),
+      ...Object.keys(schema.collections || {})
+    ]);
+    for (const [key, val] of Object.entries(elements)) {
+      if (!schemaKeys.has(key)) {
+        sanitized[key] = val;
+      }
+    }
+
+    section.elements = sanitized;
+  }
 }

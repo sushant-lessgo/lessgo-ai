@@ -54,65 +54,7 @@ interface LeftCopyRightImageContent {
 }
 
 // V2 Content schema - uses clean arrays
-const CONTENT_SCHEMA = {
-  headline: {
-    type: 'string' as const,
-    default: 'Transform Your Business with Smart Automation'
-  },
-  cta_text: {
-    type: 'string' as const,
-    default: 'Start Free Trial'
-  },
-  secondary_cta_text: {
-    type: 'string' as const,
-    default: ''
-  },
-  subheadline: {
-    type: 'string' as const,
-    default: 'Streamline workflows, boost productivity, and scale effortlessly with our intelligent automation platform.'
-  },
-  supporting_text: {
-    type: 'string' as const,
-    default: 'Save 20+ hours per week with automated workflows that just work.'
-  },
-  badge_text: {
-    type: 'string' as const,
-    default: ''
-  },
-  hero_image: {
-    type: 'string' as const,
-    default: '/hero-placeholder.jpg'
-  },
-  customer_count: {
-    type: 'string' as const,
-    default: '500+ happy customers'
-  },
-  rating_value: {
-    type: 'string' as const,
-    default: '4.9/5'
-  },
-  rating_count: {
-    type: 'string' as const,
-    default: 'from 127 reviews'
-  },
-  show_social_proof: {
-    type: 'boolean' as const,
-    default: true
-  },
-  show_customer_avatars: {
-    type: 'boolean' as const,
-    default: true
-  },
-  // V2: Optional arrays - empty by default (only exist if AI generated or user added)
-  trust_items: {
-    type: 'array' as const,
-    default: []
-  },
-  customer_avatars: {
-    type: 'array' as const,
-    default: []
-  }
-};
+// CONTENT_SCHEMA removed — defaults now in layoutElementSchema.ts (leftCopyRightImage entry)
 
 // Enhanced Hero Image Component (unchanged from original)
 const HeroImagePlaceholder = React.memo(() => (
@@ -279,7 +221,7 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
     handleContentUpdate
   } = useLayoutComponent<LeftCopyRightImageContent>({
     ...props,
-    contentSchema: CONTENT_SCHEMA as any  // V2: Schema now includes arrays
+    // contentSchema resolved from central layoutElementSchema
   });
   
   // Create typography styles
@@ -287,8 +229,8 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
 
 
   // V2: Direct array access - no legacy parsing needed
-  const trustItems = blockContent.trust_items || [];
-  const customerAvatars = blockContent.customer_avatars || [];
+  const trustItems: TrustItem[] = blockContent.trust_items || [];
+  const customerAvatars: CustomerAvatar[] = blockContent.customer_avatars || [];
 
   // Muted text color for trust indicators
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
@@ -551,23 +493,31 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
             })()}
 
             {/* V2: Social Proof Section */}
-            {(blockContent.show_social_proof !== false) && (
+            {('show_social_proof' in blockContent) && (
               <div className="flex items-center space-x-6 pt-4">
                 {blockContent.customer_count && (
-                  <div className="relative group/customer-count flex items-center space-x-2">
-                    {blockContent.show_customer_avatars !== false && customerAvatars.length > 0 && (
+                  <div className="relative flex items-center space-x-2">
+                    {'show_customer_avatars' in blockContent && (
                       <div className="flex -space-x-2">
-                        {customerAvatars.map((customer) => (
-                          <AvatarEditableComponent
-                            key={customer.id}
-                            mode={mode}
-                            avatarUrl={customer.avatar_url || ''}
-                            onAvatarChange={(url) => handleAvatarChange(customer.id, url)}
-                            customerName={customer.name}
-                            size="sm"
-                            className="cursor-default"
-                          />
-                        ))}
+                        {customerAvatars.length > 0 ? (
+                          customerAvatars.map((customer) => (
+                            <AvatarEditableComponent
+                              key={customer.id}
+                              mode={mode}
+                              avatarUrl={customer.avatar_url || ''}
+                              onAvatarChange={(url) => handleAvatarChange(customer.id, url)}
+                              customerName={customer.name}
+                              size="sm"
+                              className="cursor-default"
+                            />
+                          ))
+                        ) : (
+                          Array.from({ length: 4 }, (_, i) => (
+                            <div key={i} className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 border-2 border-white flex items-center justify-center text-white text-xs font-bold">
+                              {String.fromCharCode(65 + i)}
+                            </div>
+                          ))
+                        )}
                       </div>
                     )}
                     <EditableAdaptiveText
@@ -584,27 +534,12 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
                       elementKey="customer_count"
                     />
 
-                    {/* Remove button for customer count */}
-                    {mode !== 'preview' && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleContentUpdate('customer_count', '');
-                        }}
-                        className="opacity-0 group-hover/customer-count:opacity-100 ml-2 text-red-500 hover:text-red-700 transition-opacity duration-200"
-                        title="Remove customer count"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    )}
                   </div>
                 )}
                 
                 {/* V2: Rating section - no ___REMOVED___ markers */}
                 {blockContent.rating_value && (
-                  <div className="relative group/rating-section flex items-center space-x-1">
+                  <div className="flex items-center space-x-1">
                     {renderStars(blockContent.rating_value)}
                     <EditableAdaptiveText
                       mode={mode}
@@ -633,22 +568,6 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
                       elementKey="rating_count"
                     />
 
-                    {/* Remove button for rating section */}
-                    {mode !== 'preview' && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleContentUpdate('rating_value', '');
-                          handleContentUpdate('rating_count', '');
-                        }}
-                        className="opacity-0 group-hover/rating-section:opacity-100 ml-2 text-red-500 hover:text-red-700 transition-opacity duration-200"
-                        title="Remove rating section"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    )}
                   </div>
                 )}
               </div>

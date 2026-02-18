@@ -27,18 +27,7 @@ interface SecretSauceRevealContent {
   secrets: SecretItem[];
 }
 
-const CONTENT_SCHEMA = {
-  headline: { type: 'string' as const, default: 'Our Secret Sauce Revealed' },
-  subheadline: { type: 'string' as const, default: '' },
-  secrets: {
-    type: 'array' as const,
-    default: [
-      { id: 's1', title: 'Quantum-Enhanced Machine Learning', description: 'We combine quantum computing principles with traditional machine learning to achieve processing speeds and accuracy levels impossible with conventional approaches.', icon: 'Cpu' },
-      { id: 's2', title: 'Adaptive Intelligence Framework', description: 'Our system learns and adapts in real-time, continuously improving its performance based on new data and user interactions.', icon: 'Brain' },
-      { id: 's3', title: 'Predictive Optimization Engine', description: 'Advanced algorithms predict future trends and automatically optimize operations before issues arise.', icon: 'TrendingUp' }
-    ]
-  }
-};
+// CONTENT_SCHEMA removed — defaults now in layoutElementSchema.ts (SecretSauceReveal entry)
 
 const SecretCard = ({
   secret,
@@ -162,8 +151,7 @@ export default function SecretSauceReveal(props: LayoutComponentProps) {
     sectionBackground,
     handleContentUpdate
   } = useLayoutComponent<SecretSauceRevealContent>({
-    ...props,
-    contentSchema: CONTENT_SCHEMA
+    ...props
   });
 
   const { getTextStyle: getTypographyStyle } = useTypography();
@@ -204,7 +192,7 @@ export default function SecretSauceReveal(props: LayoutComponentProps) {
   }[uiTheme];
 
   // V2: Get secrets array directly
-  const secrets = blockContent.secrets || [];
+  const secrets: SecretItem[] = blockContent.secrets || [];
 
   // V2: Array-based edit handlers
   const handleTitleEdit = (id: string, newTitle: string) => {

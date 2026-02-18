@@ -39,60 +39,6 @@ interface CallToQuotePlanContent {
   contact_cards: ContactCard[];
   trust_items?: TrustItem[];
 }
-
-const CONTENT_SCHEMA = {
-  headline: {
-    type: 'string' as const,
-    default: 'Get a Custom Quote for Your Business'
-  },
-  value_proposition: {
-    type: 'string' as const,
-    default: 'Ready to take the next step? Get personalized pricing and see how our solution can work specifically for your needs.'
-  },
-  subheadline: {
-    type: 'string' as const,
-    default: ''
-  },
-  supporting_text: {
-    type: 'string' as const,
-    default: ''
-  },
-  response_time: {
-    type: 'string' as const,
-    default: ''
-  },
-  contact_cards: {
-    type: 'array' as const,
-    default: [
-      {
-        id: 'cc-1',
-        title: 'Schedule a Demo',
-        description: 'See the platform in action with a personalized walkthrough',
-        cta: 'Book Demo',
-        icon: 'calendar'
-      },
-      {
-        id: 'cc-2',
-        title: 'Request a Quote',
-        description: 'Get pricing tailored to your team size and needs',
-        cta: 'Get Quote',
-        icon: 'dollar-sign'
-      },
-      {
-        id: 'cc-3',
-        title: 'Talk to Sales',
-        description: 'Discuss your specific requirements with our enterprise team',
-        cta: 'Contact Sales',
-        icon: 'phone'
-      }
-    ]
-  },
-  trust_items: {
-    type: 'array' as const,
-    default: []
-  }
-};
-
 export default function CallToQuotePlan(props: LayoutComponentProps) {
 
   const {
@@ -107,7 +53,6 @@ export default function CallToQuotePlan(props: LayoutComponentProps) {
     handleContentUpdate
   } = useLayoutComponent<CallToQuotePlanContent>({
     ...props,
-    contentSchema: CONTENT_SCHEMA
   });
 
   const { getTextStyle: getTypographyStyle } = useTypography();
@@ -135,7 +80,7 @@ export default function CallToQuotePlan(props: LayoutComponentProps) {
   // Ensure contact_cards is always an array
   const contactCards: ContactCard[] = Array.isArray(blockContent.contact_cards)
     ? blockContent.contact_cards
-    : CONTENT_SCHEMA.contact_cards.default;
+    : [];
 
   // Ensure trust_items is always an array
   const trustItems: TrustItem[] = Array.isArray(blockContent.trust_items)

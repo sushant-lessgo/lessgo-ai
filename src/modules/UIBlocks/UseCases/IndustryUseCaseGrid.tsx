@@ -26,26 +26,7 @@ interface IndustryUseCaseGridContent {
   industries: Industry[];
 }
 
-// V2: Content schema - uses clean arrays
-const CONTENT_SCHEMA = {
-  headline: {
-    type: 'string' as const,
-    default: 'Trusted Across Industries'
-  },
-  subheadline: {
-    type: 'string' as const,
-    default: ''
-  },
-  industries: {
-    type: 'array' as const,
-    default: [
-      { id: 'ind1', name: 'Healthcare', description: 'Patient data management and treatment optimization' },
-      { id: 'ind2', name: 'Finance', description: 'Risk assessment and fraud detection' },
-      { id: 'ind3', name: 'Manufacturing', description: 'Quality control and supply chain optimization' },
-      { id: 'ind4', name: 'Retail', description: 'Customer analytics and inventory management' }
-    ]
-  }
-};
+// CONTENT_SCHEMA removed — defaults now in layoutElementSchema.ts (IndustryUseCaseGrid entry)
 
 // Industry Card component
 const IndustryCard = React.memo(({
@@ -183,8 +164,7 @@ export default function IndustryUseCaseGrid(props: LayoutComponentProps) {
     backgroundType,
     handleContentUpdate
   } = useLayoutComponent<IndustryUseCaseGridContent>({
-    ...props,
-    contentSchema: CONTENT_SCHEMA
+    ...props
   });
 
   // Detect theme: manual override > auto-detection > neutral fallback
@@ -199,7 +179,7 @@ export default function IndustryUseCaseGrid(props: LayoutComponentProps) {
   }, [sectionBackground, theme]);
 
   // V2: Direct array access
-  const industries = blockContent.industries || [];
+  const industries: Industry[] = blockContent.industries || [];
 
   // V2: Handle name editing - update array item
   const handleNameEdit = (id: string, value: string) => {

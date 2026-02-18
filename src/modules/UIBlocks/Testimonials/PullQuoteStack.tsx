@@ -32,25 +32,7 @@ interface PullQuoteStackContent {
   testimonials: Testimonial[];
 }
 
-// V2: Content schema - uses clean arrays
-const CONTENT_SCHEMA = {
-  headline: {
-    type: 'string' as const,
-    default: 'Real People, Real Results'
-  },
-  subheadline: {
-    type: 'string' as const,
-    default: ''
-  },
-  testimonials: {
-    type: 'array' as const,
-    default: [
-      { id: 't1', quote: 'I used to spend my entire Sunday meal prepping. Now I have that time back with my kids. This changed everything for our family.', customer_name: 'Sarah M.', customer_title: 'Busy Mom of 3', customer_location: 'Austin, TX', avatar_url: '' },
-      { id: 't2', quote: 'Finally something that actually fits into my crazy schedule. No complicated setup, no learning curve. Just results.', customer_name: 'Mike R.', customer_title: 'Night Shift Nurse', customer_location: 'Chicago, IL', avatar_url: '' },
-      { id: 't3', quote: 'I was skeptical at first but gave it a shot. Three months later and I genuinely look forward to using this every day.', customer_name: 'Jennifer L.', customer_title: 'Working Professional', customer_location: 'Seattle, WA', avatar_url: '' }
-    ]
-  }
-};
+// CONTENT_SCHEMA removed — defaults now in layoutElementSchema.ts (PullQuoteStack entry)
 
 // Theme color mapping for gradient cards
 const getEmotionalColor = (index: number, theme: UIBlockTheme) => {
@@ -94,8 +76,7 @@ export default function PullQuoteStack(props: LayoutComponentProps) {
     sectionBackground,
     handleContentUpdate
   } = useLayoutComponent<PullQuoteStackContent>({
-    ...props,
-    contentSchema: CONTENT_SCHEMA
+    ...props
   });
 
   // Theme detection with priority: manual override > auto-detection > neutral fallback

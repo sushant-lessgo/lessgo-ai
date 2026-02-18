@@ -48,53 +48,7 @@ interface CenteredHeadlineCTAContent {
 }
 
 // V2 Content schema - uses clean arrays
-const CONTENT_SCHEMA = {
-  headline: {
-    type: 'string' as const,
-    default: 'Ready to Transform Your Business?'
-  },
-  subheadline: {
-    type: 'string' as const,
-    default: 'Join thousands of companies already using our platform to streamline operations and boost productivity.'
-  },
-  cta_text: {
-    type: 'string' as const,
-    default: 'Start Your Free Trial Today'
-  },
-  secondary_cta_text: {
-    type: 'string' as const,
-    default: ''
-  },
-  urgency_text: {
-    type: 'string' as const,
-    default: ''
-  },
-  // V2: Array format - empty by default (only exists if AI generated or user added)
-  trust_items: {
-    type: 'array' as const,
-    default: []
-  },
-  customer_count: {
-    type: 'string' as const,
-    default: '10,000+'
-  },
-  customer_label: {
-    type: 'string' as const,
-    default: 'Happy customers'
-  },
-  rating_stat: {
-    type: 'string' as const,
-    default: '4.8/5 stars'
-  },
-  uptime_stat: {
-    type: 'string' as const,
-    default: '99.9% uptime'
-  },
-  uptime_label: {
-    type: 'string' as const,
-    default: 'SOC 2 Compliant'
-  }
-};
+
 
 export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
   const { content } = useEditStore();
@@ -112,7 +66,6 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
     handleContentUpdate
   } = useLayoutComponent<CenteredHeadlineCTAContent>({
     ...props,
-    contentSchema: CONTENT_SCHEMA
   });
 
   const { getTextStyle: getTypographyStyle } = useTypography();
@@ -145,7 +98,7 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
   const themeColors = getThemeColors(uiBlockTheme);
 
   // V2: Direct array access - no legacy parsing needed
-  const trustItems = blockContent.trust_items || [];
+  const trustItems: TrustItem[] = blockContent.trust_items || [];
 
   return (
     <LayoutSection

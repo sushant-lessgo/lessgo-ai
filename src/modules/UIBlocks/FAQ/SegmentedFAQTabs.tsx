@@ -36,52 +36,7 @@ interface SegmentedFAQTabsContent {
   tabs: Tab[];
 }
 
-// Content schema - defines structure and defaults
-const CONTENT_SCHEMA = {
-  headline: {
-    type: 'string' as const,
-    default: 'Everything You Need to Know'
-  },
-  subheadline: {
-    type: 'string' as const,
-    default: 'Find answers organized by topic for easy navigation'
-  },
-  contact_prompt: { type: 'string' as const, default: '' },
-  cta_text: { type: 'string' as const, default: '' },
-  supporting_text: { type: 'string' as const, default: '' },
-  tabs: {
-    type: 'array' as const,
-    default: [
-      {
-        id: 'tab-1',
-        label: 'Getting Started',
-        items: [
-          { id: 'tab-1-faq-1', question: 'How do I sign up?', answer: 'Simply click "Start Free Trial" and follow the guided setup process. It takes less than 2 minutes.' },
-          { id: 'tab-1-faq-2', question: 'What\'s included in the free trial?', answer: 'Full access to all features, unlimited users, and priority support for 14 days.' },
-          { id: 'tab-1-faq-3', question: 'How long does setup take?', answer: 'Most teams are up and running in under 10 minutes. We provide templates to get you started quickly.' },
-        ]
-      },
-      {
-        id: 'tab-2',
-        label: 'Technical Details',
-        items: [
-          { id: 'tab-2-faq-1', question: 'What\'s your uptime guarantee?', answer: 'We guarantee 99.9% uptime with redundant infrastructure across multiple regions.' },
-          { id: 'tab-2-faq-2', question: 'How is data encrypted?', answer: 'All data is encrypted using AES-256 at rest and TLS 1.3 in transit. We\'re SOC 2 Type II certified.' },
-          { id: 'tab-2-faq-3', question: 'Can I export my data?', answer: 'Yes, you can export all your data anytime in JSON, CSV, or SQL format. We believe in data portability.' },
-        ]
-      },
-      {
-        id: 'tab-3',
-        label: 'Billing & Support',
-        items: [
-          { id: 'tab-3-faq-1', question: 'What payment methods do you accept?', answer: 'We accept all major credit cards, ACH transfers, and wire transfers for enterprise customers.' },
-          { id: 'tab-3-faq-2', question: 'Can I change plans anytime?', answer: 'Yes, upgrade or downgrade anytime. Changes are prorated to your billing cycle.' },
-          { id: 'tab-3-faq-3', question: 'How do I contact support?', answer: '24/7 support via live chat, email at support@company.com, or schedule a call with our team.' },
-        ]
-      }
-    ]
-  }
-};
+// CONTENT_SCHEMA removed — defaults now in layoutElementSchema.ts (SegmentedFAQTabs entry)
 
 // Theme-based tab accent colors (decorative only, not structural bg/text)
 const getTabColors = (theme: UIBlockTheme) => ({
@@ -211,8 +166,7 @@ export default function SegmentedFAQTabs(props: LayoutComponentProps) {
     backgroundType,
     handleContentUpdate
   } = useLayoutComponent<SegmentedFAQTabsContent>({
-    ...props,
-    contentSchema: CONTENT_SCHEMA
+    ...props
   });
 
   // Theme detection: manual override > auto-detection > neutral fallback
@@ -228,7 +182,7 @@ export default function SegmentedFAQTabs(props: LayoutComponentProps) {
   const [activeTab, setActiveTab] = useState(0);
 
   // Get tabs from content (direct array access)
-  const tabs: Tab[] = blockContent.tabs || CONTENT_SCHEMA.tabs.default;
+  const tabs: Tab[] = blockContent.tabs || [];
 
   // Handler: Edit tab label
   const handleTabLabelEdit = (tabId: string, value: string) => {

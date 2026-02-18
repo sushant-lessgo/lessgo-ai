@@ -21,8 +21,6 @@ interface SplitCardContent {
   before_visual?: string;
   after_visual?: string;
   upgrade_text: string;
-  before_placeholder_text: string;
-  after_placeholder_text: string;
   before_icon?: string;
   after_icon?: string;
   upgrade_icon?: string;
@@ -30,23 +28,7 @@ interface SplitCardContent {
   summary_text?: string;
 }
 
-const CONTENT_SCHEMA = {
-  headline: { type: 'string' as const, default: 'Premium Transformation Experience' },
-  before_label: { type: 'string' as const, default: 'Current Challenge' },
-  after_label: { type: 'string' as const, default: 'Premium Solution' },
-  before_description: { type: 'string' as const, default: 'Complex manual processes requiring expertise, time, and significant resources to execute properly.' },
-  after_description: { type: 'string' as const, default: 'Expertly crafted automation that delivers exceptional results with minimal effort and maximum efficiency.' },
-  before_visual: { type: 'string' as const, default: '/Before default.jpg' },
-  after_visual: { type: 'string' as const, default: '/After default.jpg' },
-  subheadline: { type: 'string' as const, default: '' },
-  summary_text: { type: 'string' as const, default: '' },
-  upgrade_text: { type: 'string' as const, default: 'Upgrade' },
-  before_placeholder_text: { type: 'string' as const, default: 'Current State' },
-  after_placeholder_text: { type: 'string' as const, default: 'Premium Result' },
-  before_icon: { type: 'string' as const, default: 'AlertTriangle' },
-  after_icon: { type: 'string' as const, default: 'Star' },
-  upgrade_icon: { type: 'string' as const, default: 'ArrowRight' }
-};
+// CONTENT_SCHEMA removed — defaults now in layoutElementSchema.ts (SplitCard entry)
 
 const PremiumCard = React.memo(({
   type,
@@ -214,8 +196,7 @@ export default function SplitCard(props: LayoutComponentProps) {
     backgroundType,
     handleContentUpdate
   } = useLayoutComponent<SplitCardContent>({
-    ...props,
-    contentSchema: CONTENT_SCHEMA
+    ...props
   });
 
   const bodyLgStyle = getTypographyStyle('body-lg');

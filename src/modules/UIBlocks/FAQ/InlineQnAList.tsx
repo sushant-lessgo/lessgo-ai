@@ -29,28 +29,7 @@ interface InlineQnAListContent {
   supporting_text?: string;
 }
 
-// Content schema - defines structure and defaults
-const CONTENT_SCHEMA = {
-  headline: {
-    type: 'string' as const,
-    default: 'Quick Questions & Answers'
-  },
-  subheadline: {
-    type: 'string' as const,
-    default: 'Get instant answers to the most common questions'
-  },
-  faq_items: {
-    type: 'array' as const,
-    default: [
-      { id: 'faq-1', question: 'What is your product?', answer: 'We\'re a no-code automation platform that helps you streamline your business processes without writing a single line of code.' },
-      { id: 'faq-2', question: 'How much does it cost?', answer: 'We offer flexible pricing starting at $29/month. See our pricing page for detailed plans.' },
-      { id: 'faq-3', question: 'Do I need technical knowledge?', answer: 'Not at all! Our platform is designed for non-technical users. If you can use email, you can use our product.' },
-    ]
-  },
-  contact_prompt: { type: 'string' as const, default: '' },
-  cta_text: { type: 'string' as const, default: '' },
-  supporting_text: { type: 'string' as const, default: '' }
-};
+// CONTENT_SCHEMA removed — defaults now in layoutElementSchema.ts (InlineQnAList entry)
 
 export default function InlineQnAList(props: LayoutComponentProps) {
   const {
@@ -64,8 +43,7 @@ export default function InlineQnAList(props: LayoutComponentProps) {
     backgroundType,
     handleContentUpdate
   } = useLayoutComponent<InlineQnAListContent>({
-    ...props,
-    contentSchema: CONTENT_SCHEMA
+    ...props
   });
 
   // Theme detection: manual override > auto-detection > neutral fallback
@@ -77,7 +55,7 @@ export default function InlineQnAList(props: LayoutComponentProps) {
   }), [sectionBackground, uiBlockTheme]);
 
   // Get FAQ items from content (direct array access)
-  const faqItems: FAQItem[] = blockContent.faq_items || CONTENT_SCHEMA.faq_items.default;
+  const faqItems: FAQItem[] = blockContent.faq_items || [];
 
   // Handle question edit
   const handleQuestionEdit = (id: string, value: string) => {

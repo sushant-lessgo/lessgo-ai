@@ -40,51 +40,7 @@ interface VideoWalkthroughContent {
   video_info: VideoInfoItem[];
 }
 
-const CONTENT_SCHEMA = {
-  headline: {
-    type: 'string' as const,
-    default: 'See How It Works in Action'
-  },
-  video_title: {
-    type: 'string' as const,
-    default: 'Complete Product Walkthrough'
-  },
-  video_description: {
-    type: 'string' as const,
-    default: 'Watch our comprehensive demo showing exactly how our platform integrates with your existing workflow, processes your data, and delivers measurable results for your enterprise.'
-  },
-  video_url: {
-    type: 'string' as const,
-    default: ''
-  },
-  video_duration: {
-    type: 'string' as const,
-    default: '4:32'
-  },
-  subheadline: {
-    type: 'string' as const,
-    default: ''
-  },
-  demo_stats_heading: {
-    type: 'string' as const,
-    default: 'Enterprise Demo Highlights'
-  },
-  demo_stats: {
-    type: 'array' as const,
-    default: [
-      { id: 'ds-1', label: 'Real Data', description: 'Actual customer implementation', icon: '' },
-      { id: 'ds-2', label: 'Live Demo', description: 'Interactive walkthrough', icon: '' },
-      { id: 'ds-3', label: 'Q&A', description: 'Expert consultation included', icon: '' }
-    ]
-  },
-  video_info: {
-    type: 'array' as const,
-    default: [
-      { id: 'vi-1', text: 'Live demonstration', icon: '' },
-      { id: 'vi-2', text: '5 min watch', icon: '' }
-    ]
-  }
-};
+
 
 // Theme-based styling
 const getThemeStyles = (theme: UIBlockTheme) => ({
@@ -126,7 +82,6 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
     handleContentUpdate
   } = useLayoutComponent<VideoWalkthroughContent>({
     ...props,
-    contentSchema: CONTENT_SCHEMA
   });
 
   // Typography styles
@@ -145,8 +100,8 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
   }), [sectionBackground, uiBlockTheme]);
 
   // Ensure arrays exist
-  const demoStats = Array.isArray(blockContent.demo_stats) ? blockContent.demo_stats : [];
-  const videoInfo = Array.isArray(blockContent.video_info) ? blockContent.video_info : [];
+  const demoStats: DemoStatItem[] = Array.isArray(blockContent.demo_stats) ? blockContent.demo_stats : [];
+  const videoInfo: VideoInfoItem[] = Array.isArray(blockContent.video_info) ? blockContent.video_info : [];
 
   // Array handlers - cast to any for array values
   const handleDemoStatUpdate = (id: string, field: keyof DemoStatItem, value: string) => {

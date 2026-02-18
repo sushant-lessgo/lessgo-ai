@@ -20,26 +20,13 @@ interface RoleBasedScenariosContent {
   scenarios: Scenario[];
 }
 
-const CONTENT_SCHEMA = {
-  headline: { type: 'string' as const, default: 'Perfect for Every Role' },
-  subheadline: { type: 'string' as const, default: '' },
-  footer_text: { type: 'string' as const, default: '' },
-  scenarios: {
-    type: 'array' as const,
-    default: [
-      { id: 'sc1', role: 'CEO', scenario: 'Get executive dashboards and strategic insights' },
-      { id: 'sc2', role: 'CTO', scenario: 'Monitor system performance and technical metrics' },
-      { id: 'sc3', role: 'Marketing Manager', scenario: 'Track campaign performance and lead generation' },
-      { id: 'sc4', role: 'Sales Director', scenario: 'Manage pipeline and forecast revenue' }
-    ]
-  }
-};
+// CONTENT_SCHEMA removed — defaults now in layoutElementSchema.ts (RoleBasedScenarios entry)
 
 export default function RoleBasedScenarios(props: LayoutComponentProps) {
-  const { sectionId, mode, blockContent, colorTokens, sectionBackground, handleContentUpdate } = useLayoutComponent<RoleBasedScenariosContent>({ ...props, contentSchema: CONTENT_SCHEMA });
+  const { sectionId, mode, blockContent, colorTokens, sectionBackground, handleContentUpdate } = useLayoutComponent<RoleBasedScenariosContent>({ ...props });
 
   // Ensure scenarios is always an array
-  const scenarios: Scenario[] = Array.isArray(blockContent.scenarios) ? blockContent.scenarios : CONTENT_SCHEMA.scenarios.default;
+  const scenarios: Scenario[] = Array.isArray(blockContent.scenarios) ? blockContent.scenarios : [];
 
   // Theme detection with priority: manual > auto > neutral
   const uiTheme: UIBlockTheme = props.manualThemeOverride || 'neutral';

@@ -35,12 +35,7 @@ const DEFAULT_STEPS: StepItem[] = [
 ];
 
 // Content schema for ThreeStepHorizontal layout
-const CONTENT_SCHEMA = {
-  headline: { type: 'string' as const, default: 'How It Works' },
-  subheadline: { type: 'string' as const, default: '' },
-  conclusion_text: { type: 'string' as const, default: '' },
-  steps: { type: 'array' as const, default: DEFAULT_STEPS }
-};
+
 
 // Generate unique ID for new steps
 const generateStepId = (): string => {
@@ -213,7 +208,6 @@ export default function ThreeStepHorizontal(props: ThreeStepHorizontalProps) {
     handleContentUpdate
   } = useLayoutComponent<ThreeStepHorizontalContent>({
     ...props,
-    contentSchema: CONTENT_SCHEMA
   });
 
   // Detect theme: manual override > auto-detection > neutral fallback
@@ -375,12 +369,6 @@ export const componentMeta = {
     sectionId: 'string - Required section identifier',
     backgroundType: '"primary" | "secondary" | "neutral" - Controls text color adaptation',
     className: 'string - Additional CSS classes'
-  },
-  contentSchema: {
-    headline: 'Main heading text',
-    subheadline: 'Optional subheadline text',
-    conclusion_text: 'Optional conclusion text to summarize the process',
-    steps: 'Array of step objects with id, title, description, and optional icon'
   },
   examples: [
     'How it works process',

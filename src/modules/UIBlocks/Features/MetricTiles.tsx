@@ -38,45 +38,7 @@ interface MetricTilesContent {
   roi_metrics?: RoiMetricItem[];
 }
 
-const CONTENT_SCHEMA = {
-  headline: {
-    type: 'string' as const,
-    default: 'Quantifiable Results That Drive ROI'
-  },
-  subheadline: {
-    type: 'string' as const,
-    default: ''
-  },
-  show_roi_summary: {
-    type: 'boolean' as const,
-    default: true
-  },
-  roi_summary_title: {
-    type: 'string' as const,
-    default: 'Proven Return on Investment'
-  },
-  roi_description: {
-    type: 'string' as const,
-    default: 'Based on independent analysis of 500+ enterprise implementations'
-  },
-  metrics: {
-    type: 'array' as const,
-    default: [
-      { id: 'm1', title: 'Efficiency Boost', metric: '300%', label: 'faster processing', description: 'Automate manual processes and reduce task completion time by 300% with our intelligent workflow engine.' },
-      { id: 'm2', title: 'Cost Reduction', metric: '$2.4M', label: 'annual savings', description: 'Save an average of $2.4M annually through reduced operational costs and improved resource allocation.' },
-      { id: 'm3', title: 'Error Prevention', metric: '99.9%', label: 'accuracy rate', description: 'Achieve 99.9% accuracy with our AI-powered error detection and automatic correction systems.' },
-      { id: 'm4', title: 'Revenue Growth', metric: '47%', label: 'revenue increase', description: 'Drive 47% revenue growth through optimized processes and improved customer satisfaction.' }
-    ]
-  },
-  roi_metrics: {
-    type: 'array' as const,
-    default: [
-      { id: 'r1', metric: '6 Months', label: 'Average Payback Period' },
-      { id: 'r2', metric: '400%', label: 'Average ROI in Year 1' },
-      { id: 'r3', metric: '$5.2M', label: 'Average 3-Year Value' }
-    ]
-  }
-};
+
 
 // Theme-based metric text color
 const getMetricTextColor = (theme: UIBlockTheme) => ({
@@ -238,7 +200,6 @@ export default function MetricTiles(props: LayoutComponentProps) {
     handleContentUpdate
   } = useLayoutComponent<MetricTilesContent>({
     ...props,
-    contentSchema: CONTENT_SCHEMA
   });
 
   const h3Style = getTypographyStyle('h3');

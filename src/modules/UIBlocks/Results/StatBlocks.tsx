@@ -33,20 +33,7 @@ interface StatBlocksContent {
 }
 
 // Content schema for StatBlocks layout (V2)
-const CONTENT_SCHEMA = {
-  headline: { type: 'string' as const, default: 'Real Results That Speak for Themselves' },
-  subheadline: { type: 'string' as const, default: '' },
-  achievement_footer: { type: 'string' as const, default: 'Results measured across thousands of customers' },
-  stats: {
-    type: 'array' as const,
-    default: [
-      { id: 's1', value: '10,000+', label: 'Happy Customers', description: 'And growing daily' },
-      { id: 's2', value: '98%', label: 'Customer Satisfaction', description: 'Based on NPS surveys' },
-      { id: 's3', value: '2.5x', label: 'Revenue Growth', description: 'Average increase' },
-      { id: 's4', value: '24/7', label: 'Support Available', description: 'Always here to help' }
-    ]
-  }
-};
+
 
 // Generate unique ID for new stats
 const generateStatId = (): string => `s${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -193,7 +180,6 @@ export default function StatBlocks(props: StatBlocksProps) {
     handleContentUpdate
   } = useLayoutComponent<StatBlocksContent>({
     ...props,
-    contentSchema: CONTENT_SCHEMA
   });
 
   // Theme detection: manual override > auto-detection > neutral fallback
@@ -262,7 +248,7 @@ export default function StatBlocks(props: StatBlocksProps) {
   const footerColors = getFooterColors(theme);
 
   // Get stats array (with fallback to default)
-  const stats = blockContent.stats || CONTENT_SCHEMA.stats.default;
+  const stats: StatItem[] = blockContent.stats || [];
 
   // Handle stat field updates
   const handleStatUpdate = (id: string, field: keyof StatItem, value: string) => {
@@ -456,12 +442,6 @@ export const componentMeta = {
     sectionId: 'string - Required section identifier',
     backgroundType: '"primary" | "secondary" | "neutral" - Controls text color adaptation',
     className: 'string - Additional CSS classes'
-  },
-  contentSchema: {
-    headline: 'Main heading text',
-    stats: 'Array of stat objects with id, value, label, description, icon',
-    subheadline: 'Optional subheading for context',
-    achievement_footer: 'Optional credibility text'
   },
   examples: [
     'Company achievements',

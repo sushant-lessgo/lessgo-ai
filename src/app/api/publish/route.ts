@@ -10,6 +10,7 @@ import { createSecureResponse, validateSlug, sanitizeHtmlContent, verifyProjectA
 import { withPublishRateLimit } from '@/lib/rateLimit';
 import { getUserPlan, checkLimit } from '@/lib/planManager';
 import { stripHTMLTags } from '@/utils/smartTitleGenerator';
+import { sanitizeContentForPublish } from '@/modules/sections/layoutElementSchema';
 
 // Force Node.js runtime for ReactDOMServer support
 export const runtime = 'nodejs';
@@ -39,6 +40,11 @@ async function publishHandler(req: NextRequest) {
     }
     
     const { slug, title, content, themeValues, tokenId, inputText, previewImage, analyticsEnabled } = validationResult.data;
+
+    // Sanitize: strip excluded elements, set required defaults
+    if (content && typeof content === 'object') {
+      sanitizeContentForPublish(content as Record<string, any>);
+    }
 
     // Sanitize title - strip HTML tags for meta/OG image safety
     const cleanTitle = stripHTMLTags(title || '').trim().slice(0, 100) || 'Untitled Page';

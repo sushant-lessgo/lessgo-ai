@@ -38,32 +38,7 @@ interface MethodologyBreakdownContent {
   results?: Result[];
 }
 
-// V2: Content schema
-const CONTENT_SCHEMA = {
-  headline: { type: 'string' as const, default: 'The Science Behind Our Success' },
-  methodology_name: { type: 'string' as const, default: 'Adaptive Intelligence Framework™' },
-  methodology_description: { type: 'string' as const, default: 'Our proprietary methodology combines machine learning, behavioral psychology, and real-time optimization to deliver unprecedented results.' },
-  subheadline: { type: 'string' as const, default: '' },
-  results_title: { type: 'string' as const, default: 'Proven Results' },
-  methodology_icon: { type: 'string' as const, default: 'Brain' },
-  principles: {
-    type: 'array' as const,
-    default: [
-      { id: 'p1', name: 'Continuous Learning', description: 'System continuously learns from new data and user interactions' },
-      { id: 'p2', name: 'Adaptive Optimization', description: 'Algorithms automatically adjust strategies based on performance' },
-      { id: 'p3', name: 'Data-Driven Decisions', description: 'Every decision backed by comprehensive data analysis' }
-    ]
-  },
-  results: {
-    type: 'array' as const,
-    default: [
-      { id: 'r1', metric: '300%', label: 'Performance Increase' },
-      { id: 'r2', metric: '85%', label: 'Time Saved' },
-      { id: 'r3', metric: '99.7%', label: 'Accuracy Rate' },
-      { id: 'r4', metric: '24/7', label: 'Autonomous Operation' }
-    ]
-  }
-};
+// CONTENT_SCHEMA removed — defaults now in layoutElementSchema.ts (MethodologyBreakdown entry)
 
 // Theme-based extras (non-card elements: headers, results, buttons)
 const getThemeExtras = (theme: UIBlockTheme) => ({
@@ -215,8 +190,7 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
     sectionBackground,
     handleContentUpdate
   } = useLayoutComponent<MethodologyBreakdownContent>({
-    ...props,
-    contentSchema: CONTENT_SCHEMA
+    ...props
   });
 
   // Detect theme: manual override > auto-detection > neutral fallback
@@ -233,8 +207,8 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
   }, [sectionBackground, uiTheme]);
 
   // Ensure principles is always an array
-  const principles = Array.isArray(blockContent.principles) ? blockContent.principles : [];
-  const results = Array.isArray(blockContent.results) ? blockContent.results : [];
+  const principles: Principle[] = Array.isArray(blockContent.principles) ? blockContent.principles : [];
+  const results: Result[] = Array.isArray(blockContent.results) ? blockContent.results : [];
 
   // Get methodology icon
   const methodologyIcon = blockContent.methodology_icon || inferIconFromText(blockContent.methodology_name, blockContent.methodology_description);

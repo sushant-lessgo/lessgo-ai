@@ -26,17 +26,7 @@ interface ContactFooterContent {
   social_links?: SocialLink[];
 }
 
-const CONTENT_SCHEMA = {
-  footer_style: { type: 'string' as const, default: 'dark' },
-  copyright: { type: 'string' as const, default: `© ${new Date().getFullYear()} Your Company. All rights reserved.` },
-  newsletter_title: { type: 'string' as const, default: 'Stay Updated' },
-  newsletter_description: { type: 'string' as const, default: 'Get the latest updates and news delivered to your inbox.' },
-  newsletter_cta: { type: 'string' as const, default: 'Subscribe' },
-  email: { type: 'string' as const, default: 'contact@company.com' },
-  phone: { type: 'string' as const, default: '+1 (555) 123-4567' },
-  address: { type: 'string' as const, default: '123 Business St, Suite 100, City, State 12345' },
-  social_links: { type: 'array' as const, default: [] },
-};
+
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   FaTwitter,
@@ -77,7 +67,6 @@ const ContactFooter: React.FC<LayoutComponentProps> = (props) => {
     handleContentUpdate
   } = useLayoutComponent<ContactFooterContent>({
     ...props,
-    contentSchema: CONTENT_SCHEMA
   });
 
   const [showSocialEditor, setShowSocialEditor] = useState(false);

@@ -36,12 +36,7 @@ const DEFAULT_STEPS: StepItem[] = [
   { id: 's4', title: 'Go Live', description: 'Launch your optimized workflows and start seeing results.', duration: 'Instant' },
 ];
 
-const CONTENT_SCHEMA = {
-  headline: { type: 'string' as const, default: 'How It Works' },
-  subheadline: { type: 'string' as const, default: '' },
-  process_summary_text: { type: 'string' as const, default: '' },
-  steps: { type: 'array' as const, default: DEFAULT_STEPS }
-};
+
 
 // Generate unique ID for new steps
 const generateStepId = (): string => `s${Date.now().toString(36)}`;
@@ -235,7 +230,6 @@ export default function VerticalTimeline(props: LayoutComponentProps) {
     handleContentUpdate
   } = useLayoutComponent<VerticalTimelineContent>({
     ...props,
-    contentSchema: CONTENT_SCHEMA
   });
 
   // Detect theme: manual override > auto-detection > neutral fallback

@@ -32,29 +32,7 @@ interface QuoteGridContent {
   testimonials: Testimonial[];
 }
 
-// V2: Content schema - uses clean arrays
-const CONTENT_SCHEMA = {
-  headline: {
-    type: 'string' as const,
-    default: 'What Our Customers Are Saying'
-  },
-  subheadline: {
-    type: 'string' as const,
-    default: ''
-  },
-  verification_message: {
-    type: 'string' as const,
-    default: 'All testimonials from verified customers'
-  },
-  testimonials: {
-    type: 'array' as const,
-    default: [
-      { id: 't1', quote: 'This platform completely transformed how we handle our daily operations. What used to take hours now takes minutes.', customer_name: 'Sarah Johnson', customer_title: 'Operations Director', customer_company: 'TechFlow Inc', rating_value: '5' },
-      { id: 't2', quote: 'The ROI was immediate and significant. Within the first month, we had already saved more than the annual subscription cost.', customer_name: 'Michael Chen', customer_title: 'CTO', customer_company: 'DataWorks', rating_value: '5' },
-      { id: 't3', quote: 'Outstanding customer support and a product that actually delivers on its promises. Rare to find both in one solution.', customer_name: 'Emma Rodriguez', customer_title: 'Marketing Manager', customer_company: 'GrowthLab', rating_value: '5' }
-    ]
-  }
-};
+// CONTENT_SCHEMA removed — defaults now in layoutElementSchema.ts (QuoteGrid entry)
 
 // Parse rating for star rendering
 const parseRating = (rating: string | number | undefined): number => {
@@ -306,8 +284,7 @@ export default function QuoteGrid(props: LayoutComponentProps) {
     sectionBackground,
     handleContentUpdate
   } = useLayoutComponent<QuoteGridContent>({
-    ...props,
-    contentSchema: CONTENT_SCHEMA
+    ...props
   });
 
   // Detect theme: manual override > auto-detection > neutral fallback

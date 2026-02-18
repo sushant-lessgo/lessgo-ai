@@ -25,26 +25,10 @@ interface PropertyComparisonMatrixContent {
   comparison_rows: ComparisonRow[];
 }
 
-const DEFAULT_ROWS: ComparisonRow[] = [
-  { id: 'r1', property: 'Speed', us_value: 'Ultra-Fast', competitor_value: 'Slow' },
-  { id: 'r2', property: 'Accuracy', us_value: '99.9%', competitor_value: '95%' },
-  { id: 'r3', property: 'Security', us_value: 'Enterprise', competitor_value: 'Basic' },
-  { id: 'r4', property: 'Scalability', us_value: 'Unlimited', competitor_value: 'Limited' },
-  { id: 'r5', property: 'Support', us_value: '24/7', competitor_value: 'Business Hours' },
-];
-
-const CONTENT_SCHEMA = {
-  headline: { type: 'string' as const, default: 'How We Compare' },
-  subheadline: { type: 'string' as const, default: '' },
-  feature_header: { type: 'string' as const, default: 'Feature' },
-  us_header: { type: 'string' as const, default: 'Us' },
-  competitors_header: { type: 'string' as const, default: 'Competitors' },
-  footer_text: { type: 'string' as const, default: '' },
-  comparison_rows: { type: 'array' as const, default: DEFAULT_ROWS }
-};
+// CONTENT_SCHEMA removed — defaults now in layoutElementSchema.ts (PropertyComparisonMatrix entry)
 
 export default function PropertyComparisonMatrix(props: LayoutComponentProps) {
-  const { sectionId, mode, blockContent, colorTokens, sectionBackground, handleContentUpdate } = useLayoutComponent<PropertyComparisonMatrixContent>({ ...props, contentSchema: CONTENT_SCHEMA });
+  const { sectionId, mode, blockContent, colorTokens, sectionBackground, handleContentUpdate } = useLayoutComponent<PropertyComparisonMatrixContent>({ ...props });
   const { getTextStyle: getTypographyStyle } = useTypography();
 
   // Detect theme: manual override > auto-detection > neutral fallback
@@ -98,7 +82,7 @@ export default function PropertyComparisonMatrix(props: LayoutComponentProps) {
   }), [sectionBackground, uiTheme]);
 
   // Get comparison rows from content
-  const comparisonRows = blockContent.comparison_rows || DEFAULT_ROWS;
+  const comparisonRows: ComparisonRow[] = blockContent.comparison_rows || [];
 
   // Handle row field update
   const handleRowUpdate = (rowId: string, field: keyof ComparisonRow, value: string) => {

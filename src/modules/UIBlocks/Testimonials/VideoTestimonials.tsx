@@ -29,61 +29,7 @@ interface VideoTestimonialsContent {
   video_testimonials: VideoTestimonialItem[];
 }
 
-const CONTENT_SCHEMA = {
-  headline: {
-    type: 'string' as const,
-    default: 'See What Our Customers Are Saying'
-  },
-  subheadline: {
-    type: 'string' as const,
-    default: ''
-  },
-  video_testimonials: {
-    type: 'array' as const,
-    default: [
-      {
-        id: 'vt-1',
-        title: 'How We Transformed Our Operations',
-        description: 'Learn how our platform helped streamline their entire workflow and reduce operational costs by 60%.',
-        customer_name: 'Sarah Mitchell',
-        customer_title: 'VP of Operations',
-        customer_company: 'TechCorp Industries',
-        video_url: '',
-        thumbnail: ''
-      },
-      {
-        id: 'vt-2',
-        title: '500% ROI in First Quarter',
-        description: 'Discover the strategies and implementation process that delivered immediate results for this growing enterprise.',
-        customer_name: 'James Rodriguez',
-        customer_title: 'Chief Technology Officer',
-        customer_company: 'Global Dynamics',
-        video_url: '',
-        thumbnail: ''
-      },
-      {
-        id: 'vt-3',
-        title: 'Seamless Enterprise Integration',
-        description: 'See the technical integration process and how our API seamlessly connected with their existing systems.',
-        customer_name: 'Anna Chen',
-        customer_title: 'Director of IT',
-        customer_company: 'InnovateSoft',
-        video_url: '',
-        thumbnail: ''
-      },
-      {
-        id: 'vt-4',
-        title: 'From Manual to Automated in 30 Days',
-        description: 'Watch the complete transformation journey from manual processes to full automation with measurable outcomes.',
-        customer_name: 'Michael Thompson',
-        customer_title: 'Head of Digital Transformation',
-        customer_company: 'Enterprise Solutions Inc',
-        video_url: '',
-        thumbnail: ''
-      }
-    ]
-  }
-};
+// CONTENT_SCHEMA removed — defaults now in layoutElementSchema.ts (VideoTestimonials entry)
 
 // Theme-based card styling (per uiBlockTheme.md)
 const getCardStyles = (theme: UIBlockTheme) => ({
@@ -331,8 +277,7 @@ export default function VideoTestimonials(props: LayoutComponentProps) {
     backgroundType,
     handleContentUpdate
   } = useLayoutComponent<VideoTestimonialsContent>({
-    ...props,
-    contentSchema: CONTENT_SCHEMA
+    ...props
   });
 
   // Create typography styles

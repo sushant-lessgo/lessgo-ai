@@ -27,20 +27,7 @@ interface StackedPainBulletsContent {
   pain_items: PainItem[];
 }
 
-// Default pain items for new sections
-const DEFAULT_PAIN_ITEMS: PainItem[] = [
-  { id: 'p1', point: 'Spending hours on manual data entry that could be automated', description: '' },
-  { id: 'p2', point: 'Juggling multiple tools that don\'t talk to each other', description: '' },
-  { id: 'p3', point: 'Missing important deadlines because nothing is centralized', description: '' },
-];
-
-// Content schema for StackedPainBullets layout (V2)
-const CONTENT_SCHEMA = {
-  headline: { type: 'string' as const, default: 'Are You Struggling With These Daily Frustrations?' },
-  subheadline: { type: 'string' as const, default: '' },
-  conclusion_text: { type: 'string' as const, default: 'Sound familiar? You\'re not alone.' },
-  pain_items: { type: 'array' as const, default: DEFAULT_PAIN_ITEMS },
-};
+// CONTENT_SCHEMA removed — defaults now in layoutElementSchema.ts (StackedPainBullets entry)
 
 
 // Individual Pain Point Item
@@ -169,8 +156,7 @@ export default function StackedPainBullets(props: LayoutComponentProps) {
     backgroundType,
     handleContentUpdate
   } = useLayoutComponent<StackedPainBulletsContent>({
-    ...props,
-    contentSchema: CONTENT_SCHEMA
+    ...props
   });
 
   // Detect theme: manual override > auto-detection > neutral fallback
@@ -216,7 +202,7 @@ export default function StackedPainBullets(props: LayoutComponentProps) {
   // Get pain items from content (array-based)
   const painItems: PainItem[] = Array.isArray(blockContent.pain_items)
     ? blockContent.pain_items
-    : DEFAULT_PAIN_ITEMS;
+    : [];
 
   // Handle item field update - V2: cast as any for array updates
   const handleItemUpdate = (index: number, field: keyof PainItem, value: string) => {

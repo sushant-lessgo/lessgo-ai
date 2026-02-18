@@ -29,28 +29,7 @@ interface AccordionFAQContent {
   supporting_text?: string;
 }
 
-// Content schema - defines structure and defaults
-const CONTENT_SCHEMA = {
-  headline: {
-    type: 'string' as const,
-    default: 'Frequently Asked Questions'
-  },
-  subheadline: {
-    type: 'string' as const,
-    default: 'Find answers to common questions about our platform and services.'
-  },
-  faq_items: {
-    type: 'array' as const,
-    default: [
-      { id: 'faq-1', question: 'How does the free trial work?', answer: 'Our free trial gives you full access to all features for 14 days. No credit card required to start.' },
-      { id: 'faq-2', question: 'What payment methods do you accept?', answer: 'We accept all major credit cards, PayPal, and bank transfers for annual plans. All payments are processed securely.' },
-      { id: 'faq-3', question: 'Can I cancel anytime?', answer: 'Yes, you can cancel your subscription at any time. No long-term contracts or cancellation fees.' },
-    ]
-  },
-  contact_prompt: { type: 'string' as const, default: '' },
-  cta_text: { type: 'string' as const, default: '' },
-  supporting_text: { type: 'string' as const, default: '' }
-};
+// CONTENT_SCHEMA removed — defaults now in layoutElementSchema.ts (AccordionFAQ entry)
 
 // Theme-based accordion accent colors (decorative borders only)
 const getAccordionAccents = (theme: UIBlockTheme) => ({
@@ -192,8 +171,7 @@ export default function AccordionFAQ(props: LayoutComponentProps) {
     backgroundType,
     handleContentUpdate
   } = useLayoutComponent<AccordionFAQContent>({
-    ...props,
-    contentSchema: CONTENT_SCHEMA
+    ...props
   });
 
   // Theme detection: manual override > auto-detection > neutral fallback
@@ -210,7 +188,7 @@ export default function AccordionFAQ(props: LayoutComponentProps) {
   const [openItems, setOpenItems] = useState<Set<string>>(new Set(['faq-1']));
 
   // Get FAQ items from content (direct array access)
-  const faqItems: FAQItem[] = blockContent.faq_items || CONTENT_SCHEMA.faq_items.default;
+  const faqItems: FAQItem[] = blockContent.faq_items || [];
 
   // Handle question edit
   const handleQuestionEdit = (id: string, value: string) => {

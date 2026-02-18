@@ -31,29 +31,7 @@ interface MythVsRealityGridContent {
 // Generate unique ID for new pairs
 const generateId = () => `pair_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-// Default pairs for new sections
-const DEFAULT_PAIRS: MythRealityPair[] = [
-  { id: 'p1', myth: 'This is too complex for small teams', reality: 'Our platform is designed for teams of any size, with setup taking less than 5 minutes' },
-  { id: 'p2', myth: 'AI tools replace human creativity', reality: 'Our AI enhances your creativity by handling repetitive tasks so you can focus on strategy' },
-  { id: 'p3', myth: 'Implementation takes months', reality: 'Most customers see results within the first week' },
-  { id: 'p4', myth: 'It won\'t integrate with existing tools', reality: 'We connect seamlessly with 500+ popular business tools and platforms' },
-];
-
-// Content schema - defines structure and defaults
-const CONTENT_SCHEMA = {
-  headline: {
-    type: 'string' as const,
-    default: 'Separating Myth from Reality'
-  },
-  subheadline: {
-    type: 'string' as const,
-    default: 'Let\'s address the common misconceptions and show you what\'s actually true.'
-  },
-  pairs: {
-    type: 'array' as const,
-    default: DEFAULT_PAIRS
-  }
-};
+// CONTENT_SCHEMA removed — defaults now in layoutElementSchema.ts (MythVsRealityGrid entry)
 
 // Theme-based colors for Myth cards
 const getMythColors = (theme: UIBlockTheme) => ({
@@ -100,8 +78,7 @@ export default function MythVsRealityGrid(props: LayoutComponentProps) {
     sectionBackground,
     handleContentUpdate
   } = useLayoutComponent<MythVsRealityGridContent>({
-    ...props,
-    contentSchema: CONTENT_SCHEMA
+    ...props
   });
 
   // Typography hook
@@ -125,7 +102,7 @@ export default function MythVsRealityGrid(props: LayoutComponentProps) {
   const mythColors = getMythColors(theme);
 
   // Get pairs with fallback to defaults
-  const pairs = blockContent.pairs || DEFAULT_PAIRS;
+  const pairs: MythRealityPair[] = blockContent.pairs || [];
 
   // Add a new pair
   const addPair = () => {

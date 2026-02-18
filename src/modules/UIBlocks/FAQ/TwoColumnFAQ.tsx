@@ -29,40 +29,7 @@ interface TwoColumnFAQContent {
   supporting_text?: string;
 }
 
-// Content schema - defines structure and defaults
-const CONTENT_SCHEMA = {
-  headline: {
-    type: 'string' as const,
-    default: 'Frequently Asked Questions'
-  },
-  subheadline: {
-    type: 'string' as const,
-    default: 'Everything you need to know about our platform'
-  },
-  faq_items: {
-    type: 'array' as const,
-    default: [
-      { id: 'faq-1', question: 'How does the pricing work?', answer: 'Our pricing is simple and transparent. Choose from monthly or annual plans, with discounts for annual billing. All plans include core features with no hidden fees.' },
-      { id: 'faq-2', question: 'Is there a free trial available?', answer: 'Yes! We offer a 14-day free trial with full access to all features. No credit card required to start your trial.' },
-      { id: 'faq-3', question: 'Can I cancel my subscription anytime?', answer: 'Absolutely. You can cancel your subscription at any time from your account settings. There are no cancellation fees or long-term commitments.' },
-      { id: 'faq-4', question: 'What kind of support do you offer?', answer: 'We provide 24/7 customer support via live chat and email. Premium plans also include priority support and dedicated account managers.' },
-      { id: 'faq-5', question: 'Do you integrate with other tools?', answer: 'Yes, we integrate with 50+ popular tools including Slack, Google Workspace, Microsoft Teams, and more. Custom integrations are available for enterprise plans.' },
-      { id: 'faq-6', question: 'Is my data secure?', answer: 'Security is our top priority. We use bank-level encryption, regular security audits, and are SOC 2 compliant. Your data is always encrypted in transit and at rest.' },
-    ]
-  },
-  contact_prompt: {
-    type: 'string' as const,
-    default: ''
-  },
-  cta_text: {
-    type: 'string' as const,
-    default: ''
-  },
-  supporting_text: {
-    type: 'string' as const,
-    default: ''
-  }
-};
+// CONTENT_SCHEMA removed — defaults now in layoutElementSchema.ts (TwoColumnFAQ entry)
 
 export default function TwoColumnFAQ(props: LayoutComponentProps) {
   const {
@@ -76,8 +43,7 @@ export default function TwoColumnFAQ(props: LayoutComponentProps) {
     backgroundType,
     handleContentUpdate
   } = useLayoutComponent<TwoColumnFAQContent>({
-    ...props,
-    contentSchema: CONTENT_SCHEMA
+    ...props
   });
 
   // Theme detection: manual override > auto-detection > neutral fallback
@@ -89,7 +55,7 @@ export default function TwoColumnFAQ(props: LayoutComponentProps) {
   }), [sectionBackground, uiBlockTheme]);
 
   // Get FAQ items from content (direct array access)
-  const faqItems: FAQItem[] = blockContent.faq_items || CONTENT_SCHEMA.faq_items.default;
+  const faqItems: FAQItem[] = blockContent.faq_items || [];
 
   // Split items into two columns (first half = left, second half = right)
   const midpoint = Math.ceil(faqItems.length / 2);

@@ -27,26 +27,7 @@ interface TechnicalAdvantageContent {
   advantages: Advantage[];
 }
 
-// V2: Content schema - uses clean arrays
-const CONTENT_SCHEMA = {
-  headline: {
-    type: 'string' as const,
-    default: 'Technical Advantages That Set Us Apart'
-  },
-  subheadline: {
-    type: 'string' as const,
-    default: ''
-  },
-  advantages: {
-    type: 'array' as const,
-    default: [
-      { id: 'a1', title: '10x Processing Speed', description: 'Our parallel processing engine handles millions of transactions per second with sub-millisecond latency.' },
-      { id: 'a2', title: 'Quantum-Resistant Security', description: 'Military-grade encryption with post-quantum cryptography ensures future-proof security.' },
-      { id: 'a3', title: 'Zero-Knowledge Architecture', description: 'Complete data privacy with zero-knowledge proofs - we never see your sensitive information.' },
-      { id: 'a4', title: 'Self-Healing Infrastructure', description: 'Intelligent monitoring and automated recovery systems ensure 99.999% uptime.' }
-    ]
-  }
-};
+// CONTENT_SCHEMA removed — defaults now in layoutElementSchema.ts (TechnicalAdvantage entry)
 
 // Theme-based gradient icon backgrounds (component-specific brand element)
 const themeIconGradients = {
@@ -178,8 +159,7 @@ export default function TechnicalAdvantage(props: LayoutComponentProps) {
     sectionBackground,
     handleContentUpdate
   } = useLayoutComponent<TechnicalAdvantageContent>({
-    ...props,
-    contentSchema: CONTENT_SCHEMA
+    ...props
   });
 
   // Detect theme: manual override > auto-detection > neutral fallback
@@ -196,7 +176,7 @@ export default function TechnicalAdvantage(props: LayoutComponentProps) {
   const iconGradient = themeIconGradients[uiTheme];
 
   // V2: Direct array access
-  const advantages = blockContent.advantages || [];
+  const advantages: Advantage[] = blockContent.advantages || [];
 
   // V2: Direct array update handlers - use (handleContentUpdate as any) for array types
   const handleTitleEdit = (id: string, newTitle: string) => {

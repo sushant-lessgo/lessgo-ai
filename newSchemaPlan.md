@@ -236,3 +236,86 @@ Recommend lazy migration — small, safe, prevents confusion.
 | 3 | Final QA + cleanup + legacy migration | 1 | Phase 1.5 + 2 done | 1-2 days |
 
 **Total: ~2 weeks. Max 2 devs concurrent. Phase 1.5 and Phase 2 run in parallel.**
+
+---
+
+## Appendix: Pilot Learnings (Phase 1 → Phase 1.5 Carry-Forward)
+
+### 1. Implicit `any` Explosions
+
+~20 UIBlock files have `const items = blockContent.something || []` without type annotations. The `.map()` callbacks lose types → `Parameter implicitly has an 'any' type` build errors. **During Phase 1.5, every UIBlock needs explicit types on array destructures:**
+
+```ts
+// BAD — triggers implicit any on .map()
+const features = blockContent.features || [];
+
+// GOOD
+const features: Feature[] = blockContent.features || [];
+```
+
+Files already fixed in pilot: SideBySideBlock, CenteredHeadlineCTA, ValueStackCTA, IndustryUseCaseGrid, LogoWall, ResultsGallery, IconGrid, VisualCTAWithMockup, SplitAlternating, SecretSauceReveal, TechnicalAdvantage, MinimalNavHeader, VideoWalkthrough, MythVsRealityGrid, VisualObjectionTiles, PropertyComparisonMatrix, MethodologyBreakdown, StatBlocks. Remaining UIBlocks likely have the same issue.
+
+### 2. `toggleGroup` Pattern for Grouped Elements
+
+Pilot introduced `toggleGroup` on `ElementDef` and `CollectionDef`. When scaling to Phase 1.5:
+
+- **SplitScreen** and **ImageFirst** have the exact same social proof pattern (customer_count, rating_value, rating_count, show_customer_avatars, customer_avatars). Tag them with `toggleGroup: "show_social_proof"`.
+- Any other UIBlock with parent-child element relationships should use the same pattern.
+- After tagging, also **remove the per-element X buttons** on hover for grouped children (same as done in pilot for LeftCopyRightImage + CenterStacked). These files still have the X buttons: `SplitScreen.tsx`, `ImageFirst.tsx`.
+
+### 3. Cascade Locations Are Already Wired
+
+The pilot wired toggleGroup cascade in 3 places. Phase 1.5 UIBlocks get this for free — no per-block work needed:
+
+| Location | File | What it does |
+|---|---|---|
+| Toggle modal | `ElementToggleModal.tsx` | Hides children from list, cascades ON/OFF to children |
+| Generation | `generationActions.ts` | Excludes children when parent excluded |
+| Render | `storeTypes.ts` (`extractLayoutContent`) | Skips children if parent in excludedElements |
+
+### 4. Boolean Elements Need `type: "boolean"` + Correct Default
+
+Pilot found `handleToggle` was writing string labels (`"Show Social Proof"`) instead of `true` for boolean elements. Fixed globally in `ElementToggleModal.tsx` — the `writeDefault` helper now checks `def?.type === 'boolean'`. This works automatically for all new schemas, but **ensure new schema entries use `type: "boolean"` with `default: true/false`**, not `type: "string"`.
+
+### 5. Collection Seeding is Generic
+
+`handleToggle` seeds collections from schema field templates — no per-collection hardcoding. When adding new collections with `toggleGroup`, just ensure:
+- `constraints.min` is set (used as seed count; falls back to 4 if 0)
+- `fields` have sensible `default` values
+- `fillMode: 'system'` fields are skipped during seeding (e.g. `id`)
+
+### 6. Avatar Placeholder Pattern
+
+When `avatar_url` is empty, UIBlocks render letter placeholders (A, B, C, D). This is handled in the UIBlock JSX, not in seeded data. **SplitScreen and ImageFirst need the same fallback** — currently they still require `customerAvatars.length > 0` to render anything.
+
+### 7. Build-First Strategy Works
+
+After any type/interface change, run `npm run build` immediately. TS strict mode catches every downstream reference. Fix iteratively — each error reveals the next. Don't try to grep-find all usages manually.
+
+### 8. Per-UIBlock Checklist (Updated from Pilot)
+
+For each UIBlock during Phase 1.5:
+
+```
+[ ] Add `default` values to central schema entry
+[ ] Add `toggleGroup` to any parent-child element groups
+[ ] Remove `contentSchema: CONTENT_SCHEMA as any` from useLayoutComponent call
+[ ] Delete CONTENT_SCHEMA const
+[ ] Add explicit types to array destructures from blockContent
+[ ] Remove per-element X buttons for toggleGroup children.. NOT FROM THE COLLECTIONS
+[ ] Remove scoped group/* hover classes that only served deleted X buttons
+[ ] Remove redundant rendering guards ({x && x.trim() !== '' && ...})
+[ ] npm run build passes
+```
+
+### 9. Files Modified in Pilot (Reference)
+
+| File | Change |
+|---|---|
+| `layoutElementSchema.ts` | `toggleGroup` on ElementDef + CollectionDef interfaces. Tagged social proof children in leftCopyRightImage + centerStacked |
+| `ElementToggleModal.tsx` | Hide grouped elements, cascade toggle ON/OFF, boolean fix, generic collection seeding |
+| `LeftCopyRightImage.tsx` | Avatar fallback, removed social proof X buttons + scoped hover classes |
+| `CenterStacked.tsx` | Same as above |
+| `generationActions.ts` | toggleGroup child exclusion cascade |
+| `storeTypes.ts` | toggleGroup parent exclusion cascade in extractLayoutContent |
+| 18 other UIBlock files | Explicit type annotations for implicit `any` fixes |

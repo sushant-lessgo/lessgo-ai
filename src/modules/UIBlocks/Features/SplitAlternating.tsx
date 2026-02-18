@@ -31,29 +31,7 @@ interface SplitAlternatingContent {
 }
 
 // V2: Content schema - uses clean arrays
-const CONTENT_SCHEMA = {
-  headline: {
-    type: 'string' as const,
-    default: 'Advanced Features for Power Users'
-  },
-  subheadline: {
-    type: 'string' as const,
-    default: ''
-  },
-  supporting_text: {
-    type: 'string' as const,
-    default: ''
-  },
-  features: {
-    type: 'array' as const,
-    default: [
-      { id: 'f1', title: 'Intelligent Automation', description: 'Our AI-powered automation engine learns from your workflows and optimizes processes automatically, reducing manual work by up to 80%.', visual: '', icon: 'Target' },
-      { id: 'f2', title: 'Real-Time Analytics', description: 'Monitor performance metrics in real-time with customizable dashboards that give you instant insights into what matters most.', visual: '', icon: 'Zap' },
-      { id: 'f3', title: 'Advanced Security', description: 'Enterprise-grade security with end-to-end encryption, SOC 2 compliance, and advanced threat detection to keep your data safe.', visual: '', icon: 'TrendingUp' },
-      { id: 'f4', title: 'Seamless Integration', description: 'Connect with over 1000+ tools through our robust API and pre-built integrations, creating a seamless workflow ecosystem.', visual: '', icon: 'Wrench' }
-    ]
-  }
-};
+
 
 // Feature Row Component
 const FeatureRow = React.memo(({
@@ -275,7 +253,6 @@ export default function SplitAlternating(props: LayoutComponentProps) {
     handleContentUpdate
   } = useLayoutComponent<SplitAlternatingContent>({
     ...props,
-    contentSchema: CONTENT_SCHEMA
   });
 
   // Detect theme: manual override > auto-detection > neutral fallback
@@ -294,7 +271,7 @@ export default function SplitAlternating(props: LayoutComponentProps) {
   const handleImageToolbar = useImageToolbar();
 
   // V2: Direct array access
-  const features = blockContent.features || [];
+  const features: Feature[] = blockContent.features || [];
 
   // V2: Handle title editing - update array item
   const handleTitleEdit = (id: string, value: string) => {

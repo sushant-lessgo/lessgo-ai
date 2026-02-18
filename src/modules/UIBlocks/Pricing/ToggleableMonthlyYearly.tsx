@@ -32,47 +32,7 @@ interface ToggleableMonthlyYearlyContent {
 }
 
 // Content schema
-const CONTENT_SCHEMA = {
-  headline: { type: 'string' as const, default: 'Choose the Perfect Plan for Your Business' },
-  subheadline: { type: 'string' as const, default: '' },
-  annual_discount_label: { type: 'string' as const, default: 'Save 17% with annual billing' },
-  billing_note: { type: 'string' as const, default: 'All plans include 14-day free trial. No credit card required.' },
-  tiers: {
-    type: 'array' as const,
-    default: [
-      {
-        id: 'tier-1',
-        name: 'Starter',
-        monthly_price: '$29',
-        yearly_price: '$290',
-        description: 'Perfect for small teams getting started',
-        features: ['Up to 5 team members', '10GB storage', 'Basic integrations', 'Email support'],
-        cta_text: 'Start Free Trial',
-        is_popular: false,
-      },
-      {
-        id: 'tier-2',
-        name: 'Professional',
-        monthly_price: '$79',
-        yearly_price: '$790',
-        description: 'For growing businesses that need more power',
-        features: ['Up to 25 team members', '100GB storage', 'Advanced integrations', 'Priority support', 'Custom branding'],
-        cta_text: 'Start Free Trial',
-        is_popular: true,
-      },
-      {
-        id: 'tier-3',
-        name: 'Enterprise',
-        monthly_price: '$199',
-        yearly_price: '$1990',
-        description: 'Custom solutions for large organizations',
-        features: ['Unlimited team members', 'Unlimited storage', 'Enterprise integrations', 'Dedicated support', 'Advanced security'],
-        cta_text: 'Contact Sales',
-        is_popular: false,
-      },
-    ],
-  },
-};
+
 
 // Get theme-specific accent colors for pricing (badge, checkmark - not card styling)
 const getPricingAccents = (theme: UIBlockTheme) => {
@@ -394,7 +354,6 @@ export default function ToggleableMonthlyYearly(props: ToggleableMonthlyYearlyPr
   const { sectionId, mode, blockContent, colorTokens, sectionBackground, backgroundType, handleContentUpdate } =
     useLayoutComponent<ToggleableMonthlyYearlyContent>({
       ...props,
-      contentSchema: CONTENT_SCHEMA,
     });
 
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
@@ -421,7 +380,7 @@ export default function ToggleableMonthlyYearly(props: ToggleableMonthlyYearlyPr
   const pricingAccents = getPricingAccents(uiBlockTheme);
 
   // Get tiers
-  const tiers: Tier[] = blockContent.tiers || CONTENT_SCHEMA.tiers.default;
+  const tiers: Tier[] = blockContent.tiers || [];
 
   // --- Tier Handlers ---
   const handleTierUpdate = (tierId: string, field: keyof Tier, value: any) => {
@@ -680,11 +639,4 @@ export const componentMeta = {
     'Feature comparison lists',
     'Responsive pricing cards (2-4 tiers)',
   ],
-  contentSchema: {
-    headline: 'Main heading text',
-    subheadline: 'Optional subheading text',
-    annual_discount_label: 'Label showing annual discount',
-    billing_note: 'Note about billing/trials',
-    tiers: 'Array of tier objects with name, monthly_price, yearly_price, description, features[], cta_text, is_popular',
-  },
 };

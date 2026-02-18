@@ -20,9 +20,7 @@ interface MinimalNavHeaderContent {
 }
 
 // Content schema - V2 format with nav_items collection
-const CONTENT_SCHEMA = {
-  // Navigation managed via store.navigationConfig, no section-level defaults needed
-};
+
 
 const MinimalNavHeader: React.FC<LayoutComponentProps> = (props) => {
   const {
@@ -36,7 +34,6 @@ const MinimalNavHeader: React.FC<LayoutComponentProps> = (props) => {
     handleContentUpdate
   } = useLayoutComponent<MinimalNavHeaderContent>({
     ...props,
-    contentSchema: CONTENT_SCHEMA
   });
   const store = useEditStore();
   const [showNavigationEditor, setShowNavigationEditor] = useState(false);
@@ -57,7 +54,7 @@ const MinimalNavHeader: React.FC<LayoutComponentProps> = (props) => {
 
     // Fallback: V2 nav_items array from content
     if (blockContent.nav_items && blockContent.nav_items.length > 0) {
-      return blockContent.nav_items.slice(0, 4).map((item, index) => ({
+      return blockContent.nav_items.slice(0, 4).map((item: NavItem, index: number) => ({
         id: item.id || `nav-${index + 1}`,
         label: item.label,
         link: item.link || '#',

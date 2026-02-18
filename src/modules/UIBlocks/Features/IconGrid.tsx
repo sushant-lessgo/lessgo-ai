@@ -35,35 +35,7 @@ interface IconGridContent {
 }
 
 // V2: Content schema - uses clean arrays
-const CONTENT_SCHEMA = {
-  headline: {
-    type: 'string' as const,
-    default: 'Powerful Features Built for You'
-  },
-  subheadline: {
-    type: 'string' as const,
-    default: 'Everything you need to streamline your workflow and boost productivity.'
-  },
-  badge_text: {
-    type: 'string' as const,
-    default: ''
-  },
-  supporting_text: {
-    type: 'string' as const,
-    default: ''
-  },
-  features: {
-    type: 'array' as const,
-    default: [
-      { id: 'f1', title: 'Real-time Collaboration', description: 'Work together seamlessly with your team in real-time, no matter where you are.' },
-      { id: 'f2', title: 'Advanced Analytics', description: 'Get deep insights into your data with powerful analytics and reporting tools.' },
-      { id: 'f3', title: 'Smart Automation', description: 'Automate repetitive tasks and workflows to save time and reduce errors.' },
-      { id: 'f4', title: 'Secure Data Protection', description: 'Enterprise-grade security keeps your data safe with encryption and compliance.' },
-      { id: 'f5', title: 'Custom Integrations', description: 'Connect with your favorite tools through our extensive integration library.' },
-      { id: 'f6', title: '24/7 Support', description: 'Round-the-clock support from our expert team whenever you need help.' }
-    ]
-  }
-};
+
 
 // Enhanced Individual Feature Card with Adaptive Colors
 const FeatureCard = React.memo(({
@@ -197,7 +169,6 @@ export default function IconGrid(props: LayoutComponentProps) {
     handleContentUpdate
   } = useLayoutComponent<IconGridContent>({
     ...props,
-    contentSchema: CONTENT_SCHEMA
   });
 
   // Detect theme: manual override > auto-detection > neutral fallback
@@ -212,7 +183,7 @@ export default function IconGrid(props: LayoutComponentProps) {
   }, [sectionBackground, theme]);
 
   // V2: Direct array access
-  const features = blockContent.features || [];
+  const features: Feature[] = blockContent.features || [];
 
   // V2: Handle title editing - update array item
   const handleTitleEdit = (id: string, value: string) => {
