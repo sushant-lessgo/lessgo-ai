@@ -201,16 +201,38 @@ h1, h2, h3, h4, h5 {
 
 /* ===== Review Indicator System ===== */
 
-/* Amber "Verify" badge — AI-generated elements needing user review */
+/* Red "Verify" badge — fabricated AI data (metrics, testimonials, pricing) */
 .element-needs-review {
-  border-left: 3px solid #f59e0b !important;
-  background: rgba(245, 158, 11, 0.04);
+  border-left: 3px solid #ef4444 !important;
+  background: rgba(239, 68, 68, 0.04);
   position: relative;
 }
 .element-needs-review::after {
   content: 'Verify';
   position: absolute;
   top: -8px;
+  right: 4px;
+  font-size: 9px;
+  font-weight: 600;
+  color: #dc2626;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  padding: 1px 5px;
+  border-radius: 3px;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* Amber "Add yours" badge — placeholders & stock images */
+.element-manual-preferred {
+  border: 2px dashed #f59e0b !important;
+  border-radius: 6px;
+  position: relative;
+}
+.element-manual-preferred::after {
+  content: 'Add yours';
+  position: absolute;
+  bottom: 4px;
   right: 4px;
   font-size: 9px;
   font-weight: 600;
@@ -223,22 +245,22 @@ h1, h2, h3, h4, h5 {
   z-index: 5;
 }
 
-/* Dashed "Add yours" badge — manual_preferred placeholders */
-.element-manual-preferred {
-  border: 2px dashed #d1d5db !important;
-  border-radius: 6px;
+/* Blue "Set up" badge — config items (CTA links, nav, etc.) */
+.element-unconfigured {
+  border-left: 3px solid #3b82f6 !important;
+  background: rgba(59, 130, 246, 0.04);
   position: relative;
 }
-.element-manual-preferred::after {
-  content: 'Add yours';
+.element-unconfigured::after {
+  content: 'Set up';
   position: absolute;
-  bottom: 4px;
+  top: -8px;
   right: 4px;
   font-size: 9px;
   font-weight: 600;
-  color: #6b7280;
-  background: white;
-  border: 1px solid #e5e7eb;
+  color: #2563eb;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
   padding: 1px 5px;
   border-radius: 3px;
   pointer-events: none;
@@ -264,7 +286,8 @@ h1, h2, h3, h4, h5 {
 
 /* Hide review badges when element is actively being edited */
 [data-element-key][contenteditable="true"][data-editing="true"].element-needs-review::after,
-[data-element-key][contenteditable="true"][data-editing="true"].element-manual-preferred::after {
+[data-element-key][contenteditable="true"][data-editing="true"].element-manual-preferred::after,
+[data-element-key][contenteditable="true"][data-editing="true"].element-unconfigured::after {
   display: none;
 }
 

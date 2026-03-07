@@ -199,42 +199,6 @@ export function EditProvider({ children, tokenId, options = {} }: EditProviderPr
     }
   }, [store, isInitialized, isHydrating, tokenId]);
 
-  // Subscribe to content changes for review state auto-clearing
-  useEffect(() => {
-    if (!store) return;
-    let prevContent: Record<string, any> = store.getState().content || {};
-
-    const unsub = store.subscribe((state) => {
-      const newContent = state.content;
-      if (newContent === prevContent) return;
-
-      const { markReviewed } = useReviewState.getState();
-      for (const sectionId of Object.keys(newContent)) {
-        const newEls = newContent[sectionId]?.elements || {};
-        const oldEls = prevContent[sectionId]?.elements || {};
-        for (const key of Object.keys(newEls)) {
-          if (Array.isArray(newEls[key]) && Array.isArray(oldEls[key])) {
-            // Deep-diff collection items by id
-            for (const newItem of newEls[key]) {
-              const oldItem = (oldEls[key] as any[]).find((o: any) => o.id === newItem.id);
-              if (!oldItem) continue;
-              for (const field of Object.keys(newItem)) {
-                if (field === 'id') continue;
-                if (newItem[field] !== oldItem[field]) {
-                  markReviewed(sectionId, `${key}.${newItem.id}.${field}`);
-                }
-              }
-            }
-          } else if (newEls[key] !== oldEls[key]) {
-            markReviewed(sectionId, key);
-          }
-        }
-      }
-      prevContent = newContent;
-    });
-
-    return unsub;
-  }, [store]);
 
   // Create context value - get fresh data from store if available
   const storeState = store?.getState();

@@ -90,7 +90,7 @@ export interface FlattenedEditState {
     leftPanel: {
       width: number;
       collapsed: boolean;
-      activeTab: 'pageStructure' | 'styles' | 'settings';
+      activeTab: 'pageStructure' | 'styles' | 'settings' | 'review';
     };
   };
   

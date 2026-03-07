@@ -202,7 +202,7 @@ export interface UISlice {
     width: number;
     collapsed: boolean;
     manuallyToggled: boolean;
-    activeTab: 'addSections' | 'pageStructure' | 'inputVariables' | 'aiControls' | 'guidance' | 'insights';
+    activeTab: 'addSections' | 'pageStructure' | 'inputVariables' | 'aiControls' | 'guidance' | 'insights' | 'review';
   };
   
   // Simplified single toolbar state

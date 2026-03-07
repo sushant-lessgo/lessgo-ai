@@ -1,45 +1,41 @@
 'use client';
 
 import { useReviewState } from '@/hooks/useReviewState';
+import { useEditStoreContext, useStoreState } from '@/components/EditProvider';
 
 export function ReviewPill() {
-  const { remainingCount, getNextUnreviewed, resetCycleIndex } = useReviewState();
-  const isDone = remainingCount === 0;
+  const { totalCount, confirmedCount } = useReviewState();
+  const { store } = useEditStoreContext();
+  const leftPanel = useStoreState(state => state.leftPanel);
+
+  if (totalCount === 0) return null;
+
+  const allDone = confirmedCount === totalCount;
+  const isActive = leftPanel.activeTab === 'review';
 
   const handleClick = () => {
-    if (isDone) return;
+    const s = store?.getState();
+    if (!s) return;
 
-    const next = getNextUnreviewed();
-    if (!next) {
-      resetCycleIndex();
-      return;
+    if (isActive) {
+      s.setLeftPanelTab('pageStructure');
+    } else {
+      s.setLeftPanelTab('review');
+      if (leftPanel.collapsed) s.toggleLeftPanel();
     }
-
-    // Scroll section into view
-    const sectionEl = document.querySelector(`[data-section-id="${next.sectionId}"]`);
-    sectionEl?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-    // Try to focus the specific element after scroll
-    setTimeout(() => {
-      const elementEl = sectionEl?.querySelector(`[data-element-key="${next.elementKey}"]`);
-      if (elementEl instanceof HTMLElement) {
-        elementEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    }, 300);
   };
 
   return (
     <button
       onClick={handleClick}
-      className={isDone ? 'review-pill-done' : 'review-pill-pending'}
       title={
-        isDone
+        allDone
           ? 'All elements reviewed'
-          : `${remainingCount} elements need review — click to cycle`
+          : `${totalCount - confirmedCount} elements need review — click to open checklist`
       }
-      style={isDone ? pillDoneStyle : pillPendingStyle}
+      style={allDone ? pillDoneStyle : isActive ? pillActiveStyle : pillPendingStyle}
     >
-      {isDone ? '\u2713 Ready to publish' : `${remainingCount} to review`}
+      {allDone ? '\u2713 All reviewed' : `${confirmedCount}/${totalCount} reviewed`}
     </button>
   );
 }
@@ -59,6 +55,13 @@ const pillPendingStyle: React.CSSProperties = {
   ...pillBase,
   background: '#fffbeb',
   borderColor: '#fde68a',
+  color: '#92400e',
+};
+
+const pillActiveStyle: React.CSSProperties = {
+  ...pillBase,
+  background: '#fef3c7',
+  borderColor: '#f59e0b',
   color: '#92400e',
 };
 

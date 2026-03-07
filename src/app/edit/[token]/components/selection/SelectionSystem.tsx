@@ -74,7 +74,7 @@ export function SelectionSystem({ children }: SelectionSystemProps) {
 
     if (mode === 'preview') {
       allElements.forEach((el) => {
-        el.classList.remove('element-needs-review', 'element-manual-preferred');
+        el.classList.remove('element-needs-review', 'element-manual-preferred', 'element-unconfigured');
       });
       return;
     }
@@ -86,11 +86,13 @@ export function SelectionSystem({ children }: SelectionSystemProps) {
       if (!sectionId || !elementKey) return;
 
       const status = getElementReviewStatus(sectionId, elementKey);
-      el.classList.remove('element-needs-review', 'element-manual-preferred');
+      el.classList.remove('element-needs-review', 'element-manual-preferred', 'element-unconfigured');
       if (status === 'needs_review') {
         el.classList.add('element-needs-review');
-      } else if (status === 'manual_preferred') {
+      } else if (status === 'manual_preferred' || status === 'stock_image') {
         el.classList.add('element-manual-preferred');
+      } else if (status === 'unconfigured') {
+        el.classList.add('element-unconfigured');
       }
     });
   }, [mode, selectedSection, selectedElement, multiSelection, reviewItems]);

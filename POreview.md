@@ -1,38 +1,78 @@
-# PO Review — Social Proof Variants (snug-booping-reef.md)
+  PO Review: ticklish-swinging-clock.md                                                                                                                                                                           
+  Verdict: Mostly sound, 4 issues to resolve before execution.                                                                                                                                                    
+  ---                                                                                                    
+  Issue 1: activeTab union mismatch (BLOCKER)
 
-**Status**: Approved with 4 recommendations
+  The plan says add 'review' to leftPanel.activeTab in state.ts and flattenedState.ts. But these files   
+  have different unions:
 
-## What's correct
-- All 4 heroes confirmed identical social proof rendering (CenterStacked, ImageFirst, LeftCopyRightImage, SplitScreen)
-- All fields match exactly (`customer_avatars`, `customer_count`, `rating_value`, `rating_count`, `show_customer_avatars`, `show_social_proof`)
-- `show_social_proof !== false` gate confirmed in all 4 blocks
-- Schema, AvatarEditableComponent, ElementToggleModal — all verified against actual code
-- `handleAvatarChange` defined per-hero (identical x4) — correct to consolidate
+  - state.ts:205: 'addSections' | 'pageStructure' | 'inputVariables' | 'aiControls' | 'guidance' |       
+  'insights'
+  - flattenedState.ts:93: 'pageStructure' | 'styles' | 'settings'
 
-## Recommendation 1: Add generation-time variant selection (Step 0)
+  Plan treats them as "same union update" — they're not. Dev needs to know which union is authoritative, 
+  and whether flattenedState.ts even governs the left panel activeTab that LeftPanel.tsx reads. The      
+  setLeftPanelTab action in uiActions.ts:272 uses UISlice['leftPanel']['activeTab'] from state.ts, so    
+  that's the real one. The flattenedState.ts union looks stale/divergent — adding 'review' there without 
+  reconciling could cause type errors elsewhere.
 
-Plan only covers editor switching. Without generation-time selection, every page defaults to `avatar_stack` — defeating the purpose. The CORE value is variety across generated pages; editor switching is secondary.
+  Question: Is flattenedState.ts:93 actually consumed anywhere, or is it dead?
 
-Dev should add plumbing to write `social_proof_variant` to hero section elements during generation. Selection logic based on asset availability + strategy — PO to provide exact rules separately. But the write path must be in this plan.
+  ---
+  Issue 2: stock_image status not mapped in SelectionSystem (plan claim is wrong)
 
-## Recommendation 2: Separate published component
+  Plan step 5 says: "Map stock_image status → .element-manual-preferred class"
 
-Plan says published versions pass `mode="preview"` to the same SocialProofBlock. But published components use `TextPublished`/`AvatarPublished` (server-safe), not `EditableAdaptiveText`/`AvatarEditableComponent` (client). Create `SocialProofBlock.published.tsx` separately — matches codebase pattern and avoids client/server boundary issues.
+  But looking at SelectionSystem.tsx:88-94, the current code only maps needs_review and manual_preferred.
+   stock_image is already silently dropped — no class gets added for it. The plan correctly identifies   
+  this gap but the fix description is vague. The dev needs to know: add an else if (status ===
+  'stock_image') branch mapping to which class? The plan says .element-manual-preferred but should       
+  confirm this is intentional (same amber styling for both medium severities).
 
-## Recommendation 3: ElementToggleModal is harder than described
+  ---
+  Issue 3: getElementReviewStatus behavior change is underspecified
 
-Modal currently renders flat list of Switch toggles (binary on/off via excludedElements). No precedent for:
-- Non-switch UI (radio group / card selector)
-- Conditional visibility (variant selector only visible when `show_social_proof` is ON)
-- String-value elements (everything is currently binary on/off)
+  Plan says: "getElementReviewStatus() stays — returns status regardless of confirmed state (badges      
+  always visible)"
 
-This is the hardest part of the plan and gets the least detail. Dev should expect to add branching logic in the render loop to detect `social_proof_variant` and render different UI.
+  But current implementation at useReviewState.ts:237-243 searches reviewItems — and markReviewed filters
+   items out of reviewItems (line 225-227). So currently, once reviewed, getElementReviewStatus returns  
+  null.
 
-## Recommendation 4: Consolidate handleAvatarChange
+  The plan wants badges to persist after confirmation, but the rewrite must store ALL items (not just    
+  unconfirmed) and have getElementReviewStatus search the full list. The plan doesn't explicitly say this
+   — a dev could miss it and break badge persistence.
 
-Move into SocialProofBlock instead of passing as prop. It's identical across all 4 heroes — just calls `handleContentUpdate('customer_avatars', updatedArray)`. Eliminates 4 duplicate definitions.
+  Needs explicit instruction: "Store all items in a separate allItems array (or don't filter
+  reviewItems). getElementReviewStatus searches all items regardless of confirmed state."
 
-## Verified non-issues
-- `extractLayoutContent` handles `social_proof_variant` as string element — fallback `|| 'avatar_stack'` covers excluded case
-- `renderStars()` duplicated 4x — extraction into shared component is correct
-- Step ordering (interfaces should be Step 1-2 not Step 6) — minor, type errors will catch it
+  ---
+  Issue 4: No setLeftPanelTab call exists on LeftPanel — plan assumes it does
+
+  LeftPanel.tsx currently reads leftPanel state but never calls setLeftPanelTab. The plan says ReviewPill
+   will call setLeftPanelTab('review'), which is fine — that action exists in uiActions.ts:272. But      
+  LeftPanel itself doesn't import or use this action. The plan's step 7 needs to also import
+  setLeftPanelTab (or access it via store) to implement the back arrow that sets tab to 'pageStructure'. 
+
+  ---
+  What's correct
+
+  - Auto-clear deletion in EditProvider.tsx — lines 202-237 confirmed, safe to remove
+  - initFromContent call at lines 177-186 — confirmed, keep it
+  - ReviewPill rewrite approach — current pill is simple cycling, rewrite to progress fraction makes     
+  sense
+  - LeftPanel conditional rendering approach — clean, no structural issues
+  - Severity classification (high=ai_generated_needs_review, medium=manual_preferred+stock_image) —      
+  sensible
+  - Execution order — correct dependency chain
+  - CSS badge changes — straightforward
+
+  ---
+  Unresolved questions from plan + my additions
+
+  1. Is flattenedState.ts:93 activeTab union actually consumed, or dead?
+  2. Should stock_image get .element-manual-preferred class (same amber) or its own class?
+  3. Should getElementReviewStatus search a separate allItems array, or should reviewItems stop being    
+  filtered on confirm?
+  4. Persist confirmed state across reloads — do we want this for v1?
+  5. Reset on regen — should confirming be blocked during regen, or just silently reset after?
