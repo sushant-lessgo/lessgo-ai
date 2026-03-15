@@ -120,7 +120,7 @@ export default function LeftCopyRightImagePublished(props: LayoutComponentProps)
   const supporting_text = props.supporting_text || 'Save 20+ hours per week with automated workflows that just work.';
   const badge_text = props.badge_text || '';
   const cta_text = props.cta_text || 'Start Free Trial';
-  const secondary_cta_text = props.secondary_cta_text || 'Watch Demo';
+  const secondary_cta_text = props.secondary_cta_text || '';
   const hero_image = props.hero_image || '/hero-placeholder.jpg';
   const customer_count = props.customer_count || '500+ happy customers';
   const rating_value = props.rating_value || '4.9/5';

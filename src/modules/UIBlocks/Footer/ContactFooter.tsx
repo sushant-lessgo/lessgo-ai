@@ -78,6 +78,12 @@ const ContactFooter: React.FC<LayoutComponentProps> = (props) => {
 
   const socialLinks: SocialLink[] = blockContent.social_links || [];
 
+  // Defaults matching ContactFooter.published.tsx for when AI doesn't generate these
+  const newsletterTitle = blockContent.newsletter_title || 'Stay Updated';
+  const newsletterDescription = blockContent.newsletter_description || 'Get the latest updates and news delivered to your inbox.';
+  const newsletterCta = blockContent.newsletter_cta || 'Subscribe';
+  const copyrightText = blockContent.copyright || `© ${new Date().getFullYear()} Your Company. All rights reserved.`;
+
   const contactInfo = [
     { icon: FaEnvelope, text: blockContent.email, id: 'email' },
     { icon: FaPhone, text: blockContent.phone, id: 'phone' },
@@ -230,7 +236,7 @@ const ContactFooter: React.FC<LayoutComponentProps> = (props) => {
               <h3 style={{ color: colors.text }} className="font-semibold mb-2">
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.newsletter_title || ''}
+                  value={newsletterTitle}
                   onEdit={(value) => handleContentUpdate('newsletter_title', value)}
                   backgroundType={backgroundType}
                   colorTokens={colorTokens}
@@ -246,7 +252,7 @@ const ContactFooter: React.FC<LayoutComponentProps> = (props) => {
               <div style={{ color: colors.textBody }} className="text-sm mb-4">
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.newsletter_description || ''}
+                  value={newsletterDescription}
                   onEdit={(value) => handleContentUpdate('newsletter_description', value)}
                   backgroundType={backgroundType}
                   colorTokens={colorTokens}
@@ -277,7 +283,7 @@ const ContactFooter: React.FC<LayoutComponentProps> = (props) => {
                   }}
                   className="px-4 py-2 text-sm font-medium rounded-lg hover:opacity-90 transition-opacity"
                 >
-                  {blockContent.newsletter_cta || 'Subscribe'}
+                  {newsletterCta}
                 </button>
               </div>
             </div>
@@ -287,7 +293,7 @@ const ContactFooter: React.FC<LayoutComponentProps> = (props) => {
             <div style={{ color: colors.textMuted }} className="text-sm">
               <EditableAdaptiveText
                 mode={mode}
-                value={blockContent.copyright || ''}
+                value={copyrightText}
                 onEdit={(value) => handleContentUpdate('copyright', value)}
                 backgroundType={backgroundType}
                 colorTokens={colorTokens}
