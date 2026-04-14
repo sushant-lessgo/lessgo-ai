@@ -55,6 +55,40 @@ export const RATE_LIMIT_PRESETS = {
     maxRequests: 100,
     windowMs: 60 * 1000, // 1 minute
   } as RateLimitConfig,
+
+  // Domain verification (per-domain, used by /api/domains/verify-*)
+  DOMAIN_VERIFY: {
+    maxRequests: 1,
+    windowMs: 10 * 1000, // 10 seconds
+  } as RateLimitConfig,
+};
+
+/**
+ * Per-domain rate limit check. Uses the same in-memory store with a
+ * `domain:{name}` key — separate from per-user/IP limits.
+ * Returns allowed + retryAfter (seconds) for the caller to surface in 429.
+ */
+export const checkDomainRateLimit = (
+  domain: string,
+  config: RateLimitConfig = RATE_LIMIT_PRESETS.DOMAIN_VERIFY
+): { allowed: boolean; retryAfter: number; resetTime: number } => {
+  const key = `domain:${domain.toLowerCase()}`;
+  const now = Date.now();
+  let entry = rateLimitStore.get(key);
+  if (!entry || now > entry.resetTime) {
+    entry = { requests: 0, resetTime: now + config.windowMs };
+    rateLimitStore.set(key, entry);
+  }
+  if (entry.requests >= config.maxRequests) {
+    return {
+      allowed: false,
+      retryAfter: Math.ceil((entry.resetTime - now) / 1000),
+      resetTime: entry.resetTime,
+    };
+  }
+  entry.requests++;
+  rateLimitStore.set(key, entry);
+  return { allowed: true, retryAfter: 0, resetTime: entry.resetTime };
 };
 
 // Tier-based rate limit multipliers

@@ -65,6 +65,18 @@ model PublishedPage {
   publishError     String?
   analyticsEnabled Boolean  @default(false)
 
+  // Custom domain fields (Phase 5)
+  customDomain                    String?   @unique
+  customDomainStatus              String?   // pending_ownership | pending_dns | issuing_ssl | live | failed
+  customDomainKind                String?   // apex | subdomain
+  customDomainVercelId            String?
+  customDomainOwnershipToken      String?
+  customDomainOwnershipVerifiedAt DateTime?
+  customDomainAddedAt             DateTime?
+  customDomainLiveAt              DateTime?
+  customDomainFailedAt            DateTime?
+  customDomainError               String?
+
   // Relations
   currentVersion PublishedPageVersion? @relation("CurrentVersion", fields: [currentVersionId], references: [id])
   versions       PublishedPageVersion[] @relation("PageVersions")
@@ -199,7 +211,7 @@ model UserPlan {
   // Feature limits
   publishedPagesLimit  Int @default(1)
   draftProjectsLimit   Int @default(3)
-  customDomainsLimit   Int @default(0)
+  customDomainsLimit   Int @default(1)
   formSubmissionsLimit Int @default(100)
   teamMembersLimit     Int @default(1)
 

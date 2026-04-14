@@ -1,5 +1,5 @@
 import { kv } from '@vercel/kv';
-import type { RouteConfig } from './types';
+import type { RouteConfig, RedirectConfig } from './types';
 
 /**
  * Get route config by route key (Edge-compatible)
@@ -261,4 +261,65 @@ export async function atomicPublishWithRetry(
   });
 
   throw new Error(errorMessage);
+}
+
+/**
+ * Get redirect config for host + path (Edge-compatible)
+ * v1: only root path ('/') redirects supported; returns null for non-root
+ */
+export async function getRedirectEdge(
+  host: string,
+  path: string = '/'
+): Promise<RedirectConfig | null> {
+  if (path !== '/') return null;
+  const key = `redirect:${host}:${path}`;
+  try {
+    const url = `${process.env.KV_REST_API_URL}/get/${encodeURIComponent(key)}`;
+    const response = await fetch(url, {
+      headers: { Authorization: `Bearer ${process.env.KV_REST_API_TOKEN}` },
+    });
+    if (!response.ok) return null;
+    const data = await response.json();
+    if (!data.result) return null;
+    const cfg = typeof data.result === 'string' ? JSON.parse(data.result) : data.result;
+    return cfg as RedirectConfig;
+  } catch (error) {
+    console.error('[KV Edge] getRedirectEdge error:', error);
+    return null;
+  }
+}
+
+/**
+ * Write a redirect entry (e.g. subdomain -> custom domain)
+ * TTL: 365 days (matches route entries)
+ */
+export async function writeRedirect(
+  fromHost: string,
+  toUrl: string,
+  status: 301 | 302 = 301
+): Promise<void> {
+  const key = `redirect:${fromHost}:/`;
+  const cfg: RedirectConfig = { to: toUrl, status, createdAt: Date.now() };
+  await kv.set(key, cfg, { ex: 365 * 24 * 60 * 60 });
+}
+
+/**
+ * Remove redirect entry
+ */
+export async function removeRedirect(fromHost: string): Promise<void> {
+  await kv.del(`redirect:${fromHost}:/`);
+}
+
+/**
+ * Cleanup all KV routing entries for given hosts (root path only in v1)
+ * Deletes both `route:{host}:/` and `redirect:{host}:/`
+ */
+export async function removeRoutes(hosts: string[]): Promise<void> {
+  if (!hosts.length) return;
+  const pipeline = kv.pipeline();
+  for (const host of hosts) {
+    pipeline.del(`route:${host}:/`);
+    pipeline.del(`redirect:${host}:/`);
+  }
+  await pipeline.exec();
 }

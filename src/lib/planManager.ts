@@ -63,13 +63,13 @@ export const PLAN_CONFIGS: Record<PlanTier, PlanConfig> = {
     limits: {
       publishedPages: 20,
       draftProjects: 3,
-      customDomains: 0,
+      customDomains: 1,
       formSubmissions: 100,
       teamMembers: 1,
     },
     features: {
       removeBranding: false,
-      customDomains: false,
+      customDomains: true,
       formIntegrations: false,
       exportHTML: false,
       whiteLabel: false,

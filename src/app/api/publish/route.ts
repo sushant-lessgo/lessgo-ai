@@ -269,11 +269,17 @@ async function publishHandler(req: NextRequest) {
       // === PHASE 3: UPDATE KV ROUTING WITH RETRY & VERIFICATION ===
       // Add after successful DB update
       try {
-        const { atomicPublishWithRetry } = await import('@/lib/routing/kvRoutes');
+        const { atomicPublishWithRetry, writeRedirect } = await import('@/lib/routing/kvRoutes');
 
-        // Build domain list (currently only {slug}.lessgo.ai)
-        // Phase 5 will add custom domains from DB
+        // Build domain list — includes custom domain when live
+        const pageDomains = await prisma.publishedPage.findUnique({
+          where: { id: pageId },
+          select: { customDomain: true, customDomainStatus: true },
+        });
         const domains = [`${slug}.lessgo.ai`];
+        const hasLiveCustom =
+          pageDomains?.customDomain && pageDomains.customDomainStatus === 'live';
+        if (hasLiveCustom) domains.push(pageDomains!.customDomain!);
 
         // CRITICAL: Pass blobUrl (not blobKey) to KV
         // This allows proxy to fetch directly without head() API call
@@ -299,6 +305,15 @@ async function publishHandler(req: NextRequest) {
           attempts: kvResult.attempts,
           verified: kvResult.verified,
         });
+
+        // Re-assert subdomain → custom domain 301 on every republish
+        if (hasLiveCustom) {
+          try {
+            await writeRedirect(`${slug}.lessgo.ai`, `https://${pageDomains!.customDomain!}`, 301);
+          } catch (e) {
+            console.error('[Phase 3] writeRedirect failed (non-fatal)', e);
+          }
+        }
 
       } catch (kvError) {
         // CRITICAL: KV update failed after retries - this is a fatal error

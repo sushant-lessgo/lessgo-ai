@@ -1,6 +1,7 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
-import { getRouteEdge } from '@/lib/routing/kvRoutes'
+import { getRouteEdge, getRedirectEdge } from '@/lib/routing/kvRoutes'
+import { isLessgoAppHost } from '@/lib/domains/hosts'
 
 const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
@@ -47,47 +48,61 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.json({ error: 'Dev routes disabled in production' }, { status: 404 })
   }
   
-  // Handle subdomain routing for published pages
-  if (host && host.includes('.lessgo.ai')) {
-    const subdomain = host.split('.')[0]
+  // API + _next always fall through to Clerk (for ALL hosts, including custom domains)
+  const isApiOrNext = url.pathname.startsWith('/api/') || url.pathname.startsWith('/_next/')
 
-    // Skip www and main domain
-    if (subdomain && subdomain !== 'www' && subdomain !== 'lessgo') {
-      // Don't rewrite API routes - they need to go through normally
-      if (!url.pathname.startsWith('/api/')) {
-        // === PHASE 3: KV ROUTING ===
-        // Try KV routing first (edge-optimized static serving)
-        const originalPath = url.pathname; // Preserve for logging
-
+  if (!isApiOrNext) {
+    // Branch A: Lessgo subdomain (e.g. mypage.lessgo.ai)
+    if (host && host.includes('.lessgo.ai')) {
+      const subdomain = host.split('.')[0]
+      if (subdomain && subdomain !== 'www' && subdomain !== 'lessgo') {
+        // Check for redirect to custom domain first (301)
         try {
-          console.error('[Middleware] Checking KV:', { host, path: originalPath });
-          const routeKey = await getRouteEdge(host, originalPath || '/');
-          console.error('[Middleware] KV result:', { routeKey, found: !!routeKey });
-
-          if (routeKey) {
-            // Found in KV - rewrite to blob proxy with ROUTE KEY (not blob key)
-            // Proxy will do KV lookup to prevent user-supplied key spoofing
-            url.pathname = '/api/blob-proxy';
-            url.searchParams.set('rk', routeKey); // rk = route key
-
-            console.error('[Middleware] Rewriting to blob proxy:', routeKey);
-            return NextResponse.rewrite(url);
-          } else {
-            console.error('[Middleware] KV not found, falling back to SSR');
+          const redirect = await getRedirectEdge(host, url.pathname || '/')
+          if (redirect) {
+            return NextResponse.redirect(redirect.to, redirect.status === 302 ? 302 : 301)
           }
         } catch (error) {
-          // KV error - log and fall through to legacy SSR
-          console.error('[Middleware] KV lookup error:', error);
+          console.error('[Middleware] getRedirectEdge error:', error)
         }
 
-        // === FALLBACK: LEGACY SSR ===
-        // Not in KV or KV error - use existing SSR route
-        url.pathname = `/p/${subdomain}`;
-        return NextResponse.rewrite(url);
+        // KV route lookup → blob proxy
+        try {
+          const routeKey = await getRouteEdge(host, url.pathname || '/')
+          if (routeKey) {
+            url.pathname = '/api/blob-proxy'
+            url.searchParams.set('rk', routeKey)
+            return NextResponse.rewrite(url)
+          }
+        } catch (error) {
+          console.error('[Middleware] KV lookup error:', error)
+        }
+
+        // Fallback: legacy SSR
+        url.pathname = `/p/${subdomain}`
+        return NextResponse.rewrite(url)
       }
     }
+    // Branch B: Custom domain (host not owned by Lessgo)
+    else if (host && !isLessgoAppHost(host)) {
+      // v1: root path only
+      if (url.pathname !== '/') {
+        return new NextResponse('Not Found', { status: 404 })
+      }
+      try {
+        const routeKey = await getRouteEdge(host, '/')
+        if (routeKey) {
+          url.pathname = '/api/blob-proxy'
+          url.searchParams.set('rk', routeKey)
+          return NextResponse.rewrite(url)
+        }
+      } catch (error) {
+        console.error('[Middleware] custom-domain KV error:', error)
+      }
+      return new NextResponse('Not Found', { status: 404 })
+    }
   }
-  
+
   if (!isPublicRoute(req)) {
     await auth.protect()
   }

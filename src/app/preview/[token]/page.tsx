@@ -7,6 +7,7 @@ import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import LandingPageRenderer from '@/modules/generatedLanding/LandingPageRenderer';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { SlugModal } from '@/components/SlugModal';
+import CustomDomainModal from '@/components/CustomDomainModal';
 import posthog from "posthog-js";
 import { getTabManager, cleanupTabManager } from '@/utils/tabManager';
 import { logger } from '@/lib/logger';
@@ -77,6 +78,7 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
   const [publishedUrl, setPublishedUrl] = useState("");
   const [publishError, setPublishError] = useState("");
   const [showSlugModal, setShowSlugModal] = useState(false);
+  const [showDomainModal, setShowDomainModal] = useState(false);
   const [customSlug, setCustomSlug] = useState('');
   const [publishTitle, setPublishTitle] = useState('');
   const [analyticsEnabled, setAnalyticsEnabled] = useState(false);
@@ -465,6 +467,32 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
               <span>Back to Edit</span>
             </button>
 
+            {/* Custom Domain Button */}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div>
+                    <button
+                      onClick={() => setShowDomainModal(true)}
+                      disabled={!existingPublished?.slug}
+                      className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 border ${
+                        !existingPublished?.slug
+                          ? 'border-gray-200 text-gray-400 cursor-not-allowed'
+                          : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      Custom Domain
+                    </button>
+                  </div>
+                </TooltipTrigger>
+                {!existingPublished?.slug && (
+                  <TooltipContent side="top">
+                    <p>Publish first to attach a custom domain</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </TooltipProvider>
+
             {/* Publish Button */}
             <TooltipProvider>
               <Tooltip>
@@ -515,6 +543,15 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
           existingPublished={existingPublished}
           analyticsEnabled={analyticsEnabled}
           onAnalyticsChange={setAnalyticsEnabled}
+        />
+      )}
+
+      {/* Custom Domain Modal */}
+      {showDomainModal && existingPublished?.slug && (
+        <CustomDomainModal
+          slug={existingPublished.slug}
+          open={showDomainModal}
+          onClose={() => setShowDomainModal(false)}
         />
       )}
 
