@@ -84,9 +84,9 @@ export async function addDomain(name: string): Promise<{ name: string; verified:
 }
 
 export async function getDomainConfig(name: string): Promise<VercelDomainConfig> {
-  const { projectId, teamId } = env();
+  const { teamId } = env();
   return await vercelFetch(
-    `/v9/projects/${encodeURIComponent(projectId)}/domains/${encodeURIComponent(name)}/config${teamQuery(teamId)}`,
+    `/v6/domains/${encodeURIComponent(name)}/config${teamQuery(teamId)}`,
     { method: 'GET' }
   );
 }
