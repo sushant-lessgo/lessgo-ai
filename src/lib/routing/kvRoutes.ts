@@ -312,7 +312,7 @@ export async function removeRedirect(fromHost: string): Promise<void> {
 
 /**
  * Cleanup all KV routing entries for given hosts (root path only in v1)
- * Deletes both `route:{host}:/` and `redirect:{host}:/`
+ * Deletes route, redirect, and slug-for keys for each host
  */
 export async function removeRoutes(hosts: string[]): Promise<void> {
   if (!hosts.length) return;
@@ -320,6 +320,42 @@ export async function removeRoutes(hosts: string[]): Promise<void> {
   for (const host of hosts) {
     pipeline.del(`route:${host}:/`);
     pipeline.del(`redirect:${host}:/`);
+    pipeline.del(`slug-for:${host}`);
   }
   await pipeline.exec();
+}
+
+/**
+ * Map custom host → slug for SSR fallback when static blob is missing.
+ * Middleware Branch B reads this to rewrite to /p/{slug}, mirroring Branch A fallback.
+ */
+export async function writeSlugForHost(host: string, slug: string): Promise<void> {
+  await kv.set(`slug-for:${host}`, slug, { ex: 365 * 24 * 60 * 60 });
+}
+
+export async function removeSlugForHost(host: string): Promise<void> {
+  await kv.del(`slug-for:${host}`);
+}
+
+/**
+ * Edge-compatible slug lookup for a custom host
+ */
+export async function getSlugForHostEdge(host: string): Promise<string | null> {
+  const key = `slug-for:${host}`;
+  try {
+    const url = `${process.env.KV_REST_API_URL}/get/${encodeURIComponent(key)}`;
+    const response = await fetch(url, {
+      headers: { Authorization: `Bearer ${process.env.KV_REST_API_TOKEN}` },
+    });
+    if (!response.ok) return null;
+    const data = await response.json();
+    if (!data.result) return null;
+    const slug = typeof data.result === 'string'
+      ? (data.result.startsWith('"') ? JSON.parse(data.result) : data.result)
+      : data.result;
+    return typeof slug === 'string' ? slug : null;
+  } catch (error) {
+    console.error('[KV Edge] getSlugForHostEdge error:', error);
+    return null;
+  }
 }

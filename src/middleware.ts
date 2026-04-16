@@ -1,6 +1,6 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
-import { getRouteEdge, getRedirectEdge } from '@/lib/routing/kvRoutes'
+import { getRouteEdge, getRedirectEdge, getSlugForHostEdge } from '@/lib/routing/kvRoutes'
 import { isLessgoAppHost } from '@/lib/domains/hosts'
 
 const isPublicRoute = createRouteMatcher([
@@ -90,10 +90,17 @@ export default clerkMiddleware(async (auth, req) => {
         return new NextResponse('Not Found', { status: 404 })
       }
       try {
+        // 1. Fast path: KV route → blob proxy
         const routeKey = await getRouteEdge(host, '/')
         if (routeKey) {
           url.pathname = '/api/blob-proxy'
           url.searchParams.set('rk', routeKey)
+          return NextResponse.rewrite(url)
+        }
+        // 2. SSR fallback: look up slug → /p/{slug} dynamic render
+        const slug = await getSlugForHostEdge(host)
+        if (slug) {
+          url.pathname = `/p/${slug}`
           return NextResponse.rewrite(url)
         }
       } catch (error) {

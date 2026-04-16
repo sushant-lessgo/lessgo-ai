@@ -8,7 +8,7 @@ import { prisma } from '@/lib/prisma';
 import { createSecureResponse } from '@/lib/security';
 import { getDomainConfig, VercelApiError } from '@/lib/vercel/domains';
 import { checkDomainRateLimit } from '@/lib/rateLimit';
-import { writeRedirect, atomicPublishWithRetry } from '@/lib/routing/kvRoutes';
+import { writeRedirect, atomicPublishWithRetry, writeSlugForHost } from '@/lib/routing/kvRoutes';
 
 const BodySchema = z.object({ slug: z.string().min(1).max(100) });
 
@@ -83,8 +83,12 @@ export async function POST(req: NextRequest) {
     },
   });
 
-  // Write KV route for custom domain (point to current blob) + redirect from subdomain
+  // Wire KV: slug-for (SSR fallback, always) + route (static blob, if published) + redirect (subdomain → custom)
   try {
+    // 1. slug-for — FIRST + unconditional. Enables SSR fallback even if static export failed.
+    await writeSlugForHost(customHost, page.slug);
+
+    // 2. static blob route — only if currentVersion exists
     if (page.currentVersion?.blobUrl && page.currentVersion?.version) {
       await atomicPublishWithRetry(
         page.id,
@@ -94,6 +98,8 @@ export async function POST(req: NextRequest) {
         { maxRetries: 3, baseDelay: 500 }
       );
     }
+
+    // 3. 301 from subdomain → custom domain
     await writeRedirect(subdomainHost, `https://${customHost}`, 301);
   } catch (e) {
     console.error('[verify-dns] KV wiring failed', e);

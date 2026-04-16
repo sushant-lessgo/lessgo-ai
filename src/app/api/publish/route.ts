@@ -269,7 +269,7 @@ async function publishHandler(req: NextRequest) {
       // === PHASE 3: UPDATE KV ROUTING WITH RETRY & VERIFICATION ===
       // Add after successful DB update
       try {
-        const { atomicPublishWithRetry, writeRedirect } = await import('@/lib/routing/kvRoutes');
+        const { atomicPublishWithRetry, writeRedirect, writeSlugForHost } = await import('@/lib/routing/kvRoutes');
 
         // Build domain list — includes custom domain when live
         const pageDomains = await prisma.publishedPage.findUnique({
@@ -306,12 +306,13 @@ async function publishHandler(req: NextRequest) {
           verified: kvResult.verified,
         });
 
-        // Re-assert subdomain → custom domain 301 on every republish
+        // Re-assert subdomain → custom domain 301 + slug-for fallback on every republish
         if (hasLiveCustom) {
           try {
             await writeRedirect(`${slug}.lessgo.ai`, `https://${pageDomains!.customDomain!}`, 301);
+            await writeSlugForHost(pageDomains!.customDomain!, slug);
           } catch (e) {
-            console.error('[Phase 3] writeRedirect failed (non-fatal)', e);
+            console.error('[Phase 3] writeRedirect/writeSlugForHost failed (non-fatal)', e);
           }
         }
 
