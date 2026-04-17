@@ -148,6 +148,17 @@ export default function ContactFooterPublished(props: LayoutComponentProps) {
               />
             </p>
           )}
+          <p className="mt-3">
+            <a
+              href="https://lessgo.ai"
+              target="_blank"
+              rel="noopener"
+              style={{ color: colors.textMuted }}
+              className="text-xs opacity-70 hover:opacity-100"
+            >
+              Powered by Lessgo.ai
+            </a>
+          </p>
         </div>
       </div>
     </footer>
