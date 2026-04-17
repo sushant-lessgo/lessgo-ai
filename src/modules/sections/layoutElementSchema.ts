@@ -1784,9 +1784,6 @@ export const layoutElementSchema: LayoutSchema = {
     elements: {
       footer_style:           { type: "string", requirement: "optional", fillMode: "manual_preferred", default: "dark" },
       copyright:              { type: "string", requirement: "required", fillMode: "manual_preferred", default: "© 2025 Your Company. All rights reserved." },
-      newsletter_title:       { type: "string", requirement: "optional", fillMode: "ai_generated", default: "Stay Updated" },
-      newsletter_description: { type: "string", requirement: "optional", fillMode: "ai_generated", default: "Get the latest updates and news delivered to your inbox." },
-      newsletter_cta:         { type: "string", requirement: "optional", fillMode: "ai_generated", default: "Subscribe" },
       email:                  { type: "string", requirement: "optional", fillMode: "manual_preferred", default: "contact@company.com" },
       phone:                  { type: "string", requirement: "optional", fillMode: "manual_preferred", default: "+1 (555) 123-4567" },
       address:                { type: "string", requirement: "optional", fillMode: "manual_preferred", default: "123 Business St, Suite 100, City, State 12345" },

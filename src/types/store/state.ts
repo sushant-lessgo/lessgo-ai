@@ -138,6 +138,22 @@ export interface SocialMediaConfig {
   lastUpdated: number;
 }
 
+export interface LegalPageEntry {
+  content: string; // markdown
+  updatedAt: string; // ISO timestamp
+  metadata?: {
+    jurisdiction?: string;
+    dataCollected?: string[];
+    cookiesUsed?: boolean;
+    analyticsUsed?: boolean;
+    contactEmail?: string;
+  };
+}
+
+export interface LegalPages {
+  privacy?: LegalPageEntry;
+}
+
 /**
  * ===== LAYOUT SLICE INTERFACE =====
  */
@@ -150,7 +166,10 @@ export interface LayoutSlice {
   // Navigation Configuration
   navigationConfig?: NavigationConfig;
   socialMediaConfig?: SocialMediaConfig;
-  
+
+  // Legal Pages (page-level, per project)
+  legalPages?: LegalPages;
+
   // Theme System
   theme: Theme;
   typography: TypographyState;

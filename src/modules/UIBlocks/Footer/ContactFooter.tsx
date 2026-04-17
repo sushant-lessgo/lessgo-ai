@@ -6,6 +6,9 @@ import { LayoutComponentProps } from '@/types/storeTypes';
 import { FaEnvelope, FaPhone, FaMapMarkerAlt, FaTwitter, FaLinkedin, FaGithub, FaFacebook, FaInstagram, FaYoutube, FaTiktok, FaDiscord, FaMedium, FaDribbble, FaGlobe } from 'react-icons/fa';
 import HeaderLogo from '@/components/ui/HeaderLogo';
 import { normalizeUrl, isValidUrl } from '@/utils/urlHelpers';
+import { useEditStoreLegacy } from '@/hooks/useEditStoreLegacy';
+import { PrivacyPolicyEditor } from '@/components/editor/PrivacyPolicyEditor';
+import { PrivacyPolicyLink } from '@/components/editor/PrivacyPolicyLink';
 
 interface SocialLink {
   id: string;
@@ -17,9 +20,6 @@ interface SocialLink {
 interface ContactFooterContent {
   footer_style?: 'dark' | 'light';
   copyright?: string;
-  newsletter_title?: string;
-  newsletter_description?: string;
-  newsletter_cta?: string;
   email?: string;
   phone?: string;
   address?: string;
@@ -72,16 +72,17 @@ const ContactFooter: React.FC<LayoutComponentProps> = (props) => {
   const [showSocialEditor, setShowSocialEditor] = useState(false);
   const [editingLink, setEditingLink] = useState<SocialLink | null>(null);
   const [newLink, setNewLink] = useState({ platform: '', url: '', icon: '' });
+  const [showPrivacyEditor, setShowPrivacyEditor] = useState(false);
+
+  // Page-level legal pages (always read — ContactFooter.tsx is rendered inside EditProvider)
+  const editStore = useEditStoreLegacy();
+  const hasPrivacy = !!editStore.legalPages?.privacy?.content;
 
   const footerStyle = blockContent.footer_style || 'dark';
   const isDark = footerStyle === 'dark';
 
   const socialLinks: SocialLink[] = blockContent.social_links || [];
 
-  // Defaults matching ContactFooter.published.tsx for when AI doesn't generate these
-  const newsletterTitle = blockContent.newsletter_title || 'Stay Updated';
-  const newsletterDescription = blockContent.newsletter_description || 'Get the latest updates and news delivered to your inbox.';
-  const newsletterCta = blockContent.newsletter_cta || 'Subscribe';
   const copyrightText = blockContent.copyright || `© ${new Date().getFullYear()} Your Company. All rights reserved.`;
 
   const contactInfo = [
@@ -134,10 +135,6 @@ const ContactFooter: React.FC<LayoutComponentProps> = (props) => {
     textMuted: isDark ? '#9CA3AF' : '#6B7280',
     textBody: isDark ? '#D1D5DB' : '#4B5563',
     border: isDark ? '#374151' : '#E5E7EB',
-    inputBg: isDark ? '#1F2937' : '#FFFFFF',
-    inputBorder: isDark ? '#374151' : '#D1D5DB',
-    buttonBg: isDark ? '#374151' : '#374151',
-    buttonText: '#FFFFFF',
   };
 
   return (
@@ -151,14 +148,13 @@ const ContactFooter: React.FC<LayoutComponentProps> = (props) => {
     >
       <div style={{ backgroundColor: colors.bg, color: colors.text }} className="py-12 md:py-16 lg:py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-12 mb-12">
-            <div>
-              <div className="mb-6">
-                <HeaderLogo
-                  mode={mode}
-                  className={`h-8 w-auto object-contain ${isDark ? 'brightness-0 invert' : ''}`}
-                />
-              </div>
+          <div className="mb-12">
+            <div className="mb-6">
+              <HeaderLogo
+                mode={mode}
+                className={`h-8 w-auto object-contain ${isDark ? 'brightness-0 invert' : ''}`}
+              />
+            </div>
               <div className="space-y-3">
                 {contactInfo.map((info, index) => {
                   const Icon = info.icon;
@@ -230,63 +226,18 @@ const ContactFooter: React.FC<LayoutComponentProps> = (props) => {
                   </div>
                 </div>
               )}
-            </div>
 
-            <div>
-              <h3 style={{ color: colors.text }} className="font-semibold mb-2">
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={newsletterTitle}
-                  onEdit={(value) => handleContentUpdate('newsletter_title', value)}
-                  backgroundType={backgroundType}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="font-semibold"
-                  textStyle={{ color: colors.text }}
-                  placeholder="Newsletter title"
-                  sectionId={sectionId}
-                  elementKey="newsletter_title"
-                  sectionBackground={sectionBackground}
-                />
-              </h3>
-              <div style={{ color: colors.textBody }} className="text-sm mb-4">
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={newsletterDescription}
-                  onEdit={(value) => handleContentUpdate('newsletter_description', value)}
-                  backgroundType={backgroundType}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="text-sm"
-                  textStyle={{ color: colors.textBody }}
-                  placeholder="Newsletter description"
-                  sectionId={sectionId}
-                  elementKey="newsletter_description"
-                  sectionBackground={sectionBackground}
-                />
-              </div>
-              <div className="flex gap-2">
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  style={{
-                    backgroundColor: colors.inputBg,
-                    borderColor: colors.inputBorder,
-                    color: colors.text
-                  }}
-                  className="flex-1 px-3 py-2 text-sm border rounded-lg focus:outline-none"
-                />
-                <button
-                  style={{
-                    backgroundColor: colors.buttonBg,
-                    color: colors.buttonText,
-                  }}
-                  className="px-4 py-2 text-sm font-medium rounded-lg hover:opacity-90 transition-opacity"
-                >
-                  {newsletterCta}
-                </button>
-              </div>
-            </div>
+              {mode === 'edit' && (
+                <div className="mt-4">
+                  <button
+                    onClick={() => setShowPrivacyEditor(true)}
+                    className="px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 transition-colors"
+                    title={hasPrivacy ? 'Edit privacy policy' : 'Add privacy policy'}
+                  >
+                    {hasPrivacy ? 'Edit Privacy Policy' : '+ Add Privacy Policy'}
+                  </button>
+                </div>
+              )}
           </div>
 
           <div style={{ borderColor: colors.border }} className="pt-8 border-t text-center">
@@ -305,6 +256,16 @@ const ContactFooter: React.FC<LayoutComponentProps> = (props) => {
                 elementKey="copyright"
                 sectionBackground={sectionBackground}
               />
+              {hasPrivacy && (
+                <div className="mt-2">
+                  <PrivacyPolicyLink
+                    editMode={mode === 'edit'}
+                    onEditClick={() => setShowPrivacyEditor(true)}
+                    style={{ color: colors.textMuted }}
+                    className="text-sm hover:opacity-80 underline"
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -368,6 +329,11 @@ const ContactFooter: React.FC<LayoutComponentProps> = (props) => {
           </div>
         </div>
       )}
+
+      <PrivacyPolicyEditor
+        isOpen={showPrivacyEditor && mode === 'edit'}
+        onClose={() => setShowPrivacyEditor(false)}
+      />
     </LayoutSection>
   );
 };

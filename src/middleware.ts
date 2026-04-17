@@ -32,7 +32,7 @@ const isPublicRoute = createRouteMatcher([
   '/api/v2/generate-copy',
   '/api/v3/strategy',
   '/api/v3/generate-copy',
-  '/p/:slug',
+  '/p/(.*)',
   '/thanks',
   '/privacy',
   '/terms',
@@ -78,29 +78,27 @@ export default clerkMiddleware(async (auth, req) => {
           console.error('[Middleware] KV lookup error:', error)
         }
 
-        // Fallback: legacy SSR
-        url.pathname = `/p/${subdomain}`
+        // Fallback: legacy SSR (preserve subpath, e.g. /privacy)
+        const originalPath = url.pathname || '/'
+        url.pathname = originalPath === '/' ? `/p/${subdomain}` : `/p/${subdomain}${originalPath}`
         return NextResponse.rewrite(url)
       }
     }
     // Branch B: Custom domain (host not owned by Lessgo)
     else if (host && !isLessgoAppHost(host)) {
-      // v1: root path only
-      if (url.pathname !== '/') {
-        return new NextResponse('Not Found', { status: 404 })
-      }
+      const originalPath = url.pathname || '/'
       try {
-        // 1. Fast path: KV route → blob proxy
-        const routeKey = await getRouteEdge(host, '/')
+        // 1. Fast path: KV route → blob proxy (only root has static blob today; subpaths fall through)
+        const routeKey = await getRouteEdge(host, originalPath)
         if (routeKey) {
           url.pathname = '/api/blob-proxy'
           url.searchParams.set('rk', routeKey)
           return NextResponse.rewrite(url)
         }
-        // 2. SSR fallback: look up slug → /p/{slug} dynamic render
+        // 2. SSR fallback: look up slug → /p/{slug}{path} dynamic render
         const slug = await getSlugForHostEdge(host)
         if (slug) {
-          url.pathname = `/p/${slug}`
+          url.pathname = originalPath === '/' ? `/p/${slug}` : `/p/${slug}${originalPath}`
           return NextResponse.rewrite(url)
         }
       } catch (error) {

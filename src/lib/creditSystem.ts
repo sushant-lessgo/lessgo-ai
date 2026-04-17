@@ -16,6 +16,8 @@ export const CREDIT_COSTS = {
   STRATEGY_GENERATION: 2,
   UIBLOCK_SELECT: 1,
   GENERATE_COPY: 3,
+  // Legal pages
+  PRIVACY_POLICY_GENERATION: 2,
 } as const;
 
 // Event types for usage tracking
@@ -30,6 +32,8 @@ export enum UsageEventType {
   STRATEGY_GENERATION = 'strategy_generation',
   UIBLOCK_SELECT = 'uiblock_select',
   GENERATE_COPY = 'generate_copy',
+  // Legal pages
+  PRIVACY_POLICY_GENERATION = 'privacy_policy_generation',
 }
 
 // Usage event interface

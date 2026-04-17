@@ -118,6 +118,7 @@ function createInitialState(tokenId: string): EditStore {
     theme: defaultTheme,
     navigationConfig: undefined,
     socialMediaConfig: undefined,
+    legalPages: undefined,
     globalSettings: {
       maxWidth: '1200px',
       containerPadding: '32px',

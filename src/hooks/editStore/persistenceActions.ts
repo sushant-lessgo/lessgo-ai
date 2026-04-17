@@ -158,6 +158,10 @@ export function createPersistenceActions(set: any, get: any) {
             logger.debug('🔗 [SOCIAL-DEBUG] Restored social media config:', state.socialMediaConfig);
           }
 
+          if (contentToLoad && contentToLoad.legalPages) {
+            state.legalPages = contentToLoad.legalPages;
+          }
+
           // Restore forms data if available
           if (contentToLoad && contentToLoad.forms) {
             const restoredForms: Record<string, any> = {};
@@ -267,6 +271,7 @@ export function createPersistenceActions(set: any, get: any) {
         globalSettings: state.globalSettings,
         navigationConfig: state.navigationConfig,
         socialMediaConfig: state.socialMediaConfig,
+        legalPages: state.legalPages,
         onboardingData: state.onboardingData,
         forms: state.forms || {}, // Include forms in export
         lastUpdated: state.lastUpdated,
@@ -276,6 +281,25 @@ export function createPersistenceActions(set: any, get: any) {
 
       return exportData;
     },
+
+    /**
+     * ===== LEGAL PAGES =====
+     */
+    setLegalPage: (kind: 'privacy', entry: { content: string; metadata?: any } | undefined) =>
+      set((state: EditStore) => {
+        if (!state.legalPages) state.legalPages = {};
+        if (entry === undefined) {
+          delete state.legalPages[kind];
+        } else {
+          state.legalPages[kind] = {
+            content: entry.content,
+            updatedAt: new Date().toISOString(),
+            metadata: entry.metadata,
+          };
+        }
+        state.persistence.isDirty = true;
+        state.lastUpdated = Date.now();
+      }),
 
     /**
      * ===== FORMS MANAGEMENT =====

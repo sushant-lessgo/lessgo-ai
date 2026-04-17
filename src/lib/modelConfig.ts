@@ -2,7 +2,7 @@
 // cheap = testing/development, production = quality
 
 export type ModelTier = 'cheap' | 'production';
-export type Endpoint = 'understand' | 'strategy' | 'uiblock' | 'copy';
+export type Endpoint = 'understand' | 'strategy' | 'uiblock' | 'copy' | 'privacy';
 
 interface ModelConfig {
   primary: string;
@@ -22,6 +22,7 @@ const MODELS: Record<ModelTier, Record<Endpoint, ModelConfig>> = {
     strategy: { primary: GPT_4O_MINI, backup: CLAUDE_HAIKU },
     uiblock: { primary: GPT_4O_MINI, backup: CLAUDE_HAIKU },
     copy: { primary: GPT_4O_MINI, backup: CLAUDE_HAIKU },
+    privacy: { primary: GPT_4O_MINI, backup: CLAUDE_HAIKU },
   },
   production: {
     understand: { primary: GPT_4O_MINI, backup: CLAUDE_HAIKU },
@@ -29,6 +30,7 @@ const MODELS: Record<ModelTier, Record<Endpoint, ModelConfig>> = {
     strategy: { primary: CLAUDE_SONNET, backup: GPT_4O },
     uiblock: { primary: CLAUDE_SONNET, backup: GPT_4O },
     copy: { primary: CLAUDE_SONNET, backup: GPT_4O },
+    privacy: { primary: CLAUDE_SONNET, backup: GPT_4O },
   },
 };
 

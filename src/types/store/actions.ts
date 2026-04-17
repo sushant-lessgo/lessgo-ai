@@ -407,6 +407,9 @@ export interface MetaActions {
   export: () => object;
   loadFromDraft: (apiResponse: any, urlTokenId?: string) => Promise<void>;
   save: () => Promise<void>;
+
+  // Legal Pages
+  setLegalPage: (kind: 'privacy', entry: { content: string; metadata?: any } | undefined) => void;
 }
 
 /**

@@ -588,7 +588,7 @@ function getSectionLayoutGuidance(sectionType: string, layout: string): string {
 
     Footer: {
       // Archived layouts moved to archive/prompt/buildPrompt.guidance.archived.ts
-      ContactFooter: "Contact-focused footer with newsletter. Newsletter copy should offer value. Include multiple contact methods. Make contact info scannable."
+      ContactFooter: "Contact-focused footer. Include multiple contact methods. Make contact info scannable."
     }
   };
 

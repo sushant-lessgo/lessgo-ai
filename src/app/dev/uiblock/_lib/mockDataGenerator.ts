@@ -1372,9 +1372,6 @@ const realisticMockData: Record<string, Record<string, any>> = {
   ContactFooter: {
     footer_style: 'dark',
     copyright: `© ${new Date().getFullYear()} FlowTrack Inc. All rights reserved.`,
-    newsletter_title: 'Stay in the Loop',
-    newsletter_description: 'Get product updates, tips, and exclusive offers delivered straight to your inbox.',
-    newsletter_cta: 'Subscribe',
     email: 'hello@flowtrack.io',
     phone: '+1 (555) 234-5678',
     address: '123 Innovation Way, San Francisco, CA 94105',

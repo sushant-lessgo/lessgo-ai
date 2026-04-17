@@ -114,7 +114,8 @@ export default async function PublishedPage({ params }: PageProps) {
   // Merge section content and forms for renderer
   const mergedContent = {
     ...(content.content || {}),  // Section data
-    forms: content.forms || {}    // Forms data
+    forms: content.forms || {},   // Forms data
+    legalPages: content.legalPages || undefined,  // Page-level legal pages (privacy etc.)
   };
 
   return (
