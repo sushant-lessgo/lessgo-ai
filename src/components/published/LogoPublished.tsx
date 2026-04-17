@@ -36,6 +36,10 @@ export function LogoPublished({ logoUrl, companyName, size = 'md', className }: 
 
   // Use inline styles only if className not provided
   const inlineSizeStyles = className ? {} : sizeStyles[size];
+  // Fallback (gradient+initials) block always needs explicit square dims,
+  // otherwise a className like "h-8" without a width stretches the flex
+  // container to full parent width ("big white box" when dark-inverted).
+  const fallbackSizeStyles = className ? sizeStyles[size] : inlineSizeStyles;
 
   // Gradient colors matching LogoEditableComponent (lines 50-55)
   const gradients = [
@@ -59,9 +63,9 @@ export function LogoPublished({ logoUrl, companyName, size = 'md', className }: 
     return (
       <div
         style={{
-          ...inlineSizeStyles,
+          ...fallbackSizeStyles,
           background: gradient,
-          display: 'flex',
+          display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
           borderRadius: '12px',

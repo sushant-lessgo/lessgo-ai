@@ -53,6 +53,7 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
     theme,
     title,
     onboardingData,
+    legalPages,
     setMode
   } = useEditStore();
 
@@ -364,7 +365,8 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
           content: {
             layout: { sections, theme },
             content,
-            forms: safeForms
+            forms: safeForms,
+            legalPages: legalPages || undefined,
           },
           themeValues: {
             primary: colorTokens.accent,
