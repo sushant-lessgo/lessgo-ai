@@ -1,44 +1,11 @@
-{status: 'live', domain: 'kundiusphotography.com', kind: 'apex', error: null, dnsInstructions: {…}, …}
-dnsInstructions
-: 
-host
-: 
-"@"
-type
-: 
-"A"
-value
-: 
-"64.29.17.65"
-[[Prototype]]
-: 
-Object
-domain
-: 
-"kundiusphotography.com"
-error
-: 
-null
-kind
-: 
-"apex"
-ownership
-: 
-txtHost
-: 
-"_lessgo-verify.kundiusphotography.com"
-txtValue
-: 
-"lessgo-verify=Z-Hg2xF_GsaYAXxJPVnHGoBEXtj-6ydp"
-[[Prototype]]
-: 
-Object
-ownershipVerified
-: 
-true
-status
-: 
-"live"
-[[Prototype]]
-: 
-Object
+ ✓ Compiled /admin in 4s (1010 modules)
+[isAdmin] {
+  clerkId: 'user_2xd9rxqOOyXmfy1JhrFtKOmD1yw',
+  ADMIN_IDS: [ 'user_2xd8uk6gNi74SHZ296Ylm5GECw5' ],
+  envRaw: 'user_2xd8uk6gNi74SHZ296Ylm5GECw5',
+  result: false
+}
+ GET /admin 404 in 5216ms
+ ✓ Compiled in 1199ms (399 modules)
+ ✓ Compiled /favicon.ico in 339ms (642 modules)
+ GET /favicon.ico 200 in 421ms

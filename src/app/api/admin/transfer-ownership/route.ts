@@ -2,30 +2,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { TransferOwnershipSchema } from '@/lib/adminValidation';
 import { logger } from '@/lib/logger';
+import { requireAdmin } from '@/lib/admin';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60; // 1 min max
 
 export async function POST(req: NextRequest) {
   try {
-    // 1. AUTH: Verify CRON_SECRET
-    const authHeader = req.headers.get('authorization');
-    const cronSecret = process.env.CRON_SECRET;
-
-    if (!cronSecret) {
-      logger.error('CRON_SECRET not configured');
-      return NextResponse.json(
-        { error: 'Server configuration error' },
-        { status: 500 }
-      );
-    }
-
-    if (authHeader !== `Bearer ${cronSecret}`) {
+    const denied = await requireAdmin(req);
+    if (denied) {
       logger.warn('Unauthorized admin transfer attempt');
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return denied;
     }
 
-    // 2. VALIDATE INPUT
+    // VALIDATE INPUT
     const body = await req.json();
     const validationResult = TransferOwnershipSchema.safeParse(body);
 
