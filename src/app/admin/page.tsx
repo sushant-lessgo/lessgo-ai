@@ -113,6 +113,7 @@ export default async function AdminPage() {
 
   const planByClerk = new Map(plans.map((p) => [p.userId, p]));
   const usageByClerk = new Map(usage.map((u) => [u.userId, u]));
+  const emailByClerk = new Map(users.map((u) => [u.clerkId, u.email]));
   const subsByPageId = new Map(
     subsByPage.map((s) => [s.publishedPageId ?? '', s._count._all])
   );
@@ -219,22 +220,17 @@ export default async function AdminPage() {
                     <td className="px-3 py-2 text-xs text-slate-600" title={p.inputText ?? ''}>
                       {truncate(p.inputText, 80)}
                     </td>
-                    <td className="px-3 py-2 text-xs text-slate-500">{p.user?.email ?? '—'}</td>
+                    <td className="px-3 py-2 text-xs text-slate-500" title={p.user?.clerkId ?? 'orphan'}>
+                      {p.user?.email ?? (p.user?.clerkId ? shortId(p.user.clerkId, 14) : 'orphan')}
+                    </td>
                     <td className="px-3 py-2 text-xs text-slate-500">{fmtDate(p.updatedAt)}</td>
-                    <td className="px-3 py-2 text-xs space-x-2">
+                    <td className="px-3 py-2 text-xs">
                       <Link
                         href={`/preview/${p.token.value}`}
                         target="_blank"
                         className="text-blue-600 hover:underline"
                       >
                         preview
-                      </Link>
-                      <Link
-                        href={`/edit/${p.token.value}`}
-                        target="_blank"
-                        className="text-blue-600 hover:underline"
-                      >
-                        edit
                       </Link>
                     </td>
                   </tr>
@@ -258,7 +254,7 @@ export default async function AdminPage() {
                   <th className="px-3 py-2">State</th>
                   <th className="px-3 py-2 text-right">Views</th>
                   <th className="px-3 py-2 text-right">Submissions</th>
-                  <th className="px-3 py-2">Owner (Clerk)</th>
+                  <th className="px-3 py-2">Owner</th>
                   <th className="px-3 py-2">Last Publish</th>
                   <th className="px-3 py-2">Links</th>
                 </tr>
@@ -291,8 +287,8 @@ export default async function AdminPage() {
                           <span className="text-slate-400">0</span>
                         )}
                       </td>
-                      <td className="px-3 py-2 font-mono text-xs text-slate-500" title={p.userId}>
-                        {shortId(p.userId, 16)}
+                      <td className="px-3 py-2 text-xs text-slate-500" title={p.userId}>
+                        {emailByClerk.get(p.userId) ?? shortId(p.userId, 14)}
                       </td>
                       <td className="px-3 py-2 text-xs text-slate-500">
                         {fmtDate(p.lastPublishAt ?? p.updatedAt)}

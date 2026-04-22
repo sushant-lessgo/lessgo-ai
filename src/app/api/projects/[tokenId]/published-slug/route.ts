@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@clerk/nextjs/server';
 import type { NextRequest } from 'next/server';
+import { isAdmin } from '@/lib/admin';
 
 export async function GET(
   req: NextRequest,
@@ -23,12 +24,12 @@ export async function GET(
       );
     }
 
-    // Get project by tokenId AND verify ownership via User.clerkId
+    // Get project by tokenId AND verify ownership via User.clerkId (admins bypass read-only)
+    const admin = isAdmin(userId);
     const project = await prisma.project.findFirst({
-      where: {
-        tokenId,
-        user: { clerkId: userId }  // Filter by Clerk ID
-      },
+      where: admin
+        ? { tokenId }
+        : { tokenId, user: { clerkId: userId } },
       select: { id: true },
     });
 
@@ -39,10 +40,9 @@ export async function GET(
 
     // Query PublishedPage by projectId
     const publishedPage = await prisma.publishedPage.findFirst({
-      where: {
-        projectId: project.id,
-        userId: userId // Additional safety check
-      },
+      where: admin
+        ? { projectId: project.id }
+        : { projectId: project.id, userId },
       select: {
         slug: true,
         updatedAt: true,

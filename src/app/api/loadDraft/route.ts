@@ -4,6 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { createSecureResponse, verifyProjectAccess, validateToken } from '@/lib/security';
+import { isAdmin } from '@/lib/admin';
 
 const DEMO_TOKEN = 'lessgodemomockdata';
 
@@ -76,10 +77,10 @@ export async function GET(req: Request) {
       return createSecureResponse({ error: "Project not found" }, 404);
     }
 
-    // A01: Broken Access Control - Ensure user owns the project (skip for demo)
-    if (!isDemo) {
+    // A01: Broken Access Control - Ensure user owns the project (skip for demo, admins bypass read-only)
+    if (!isDemo && !isAdmin(clerkId)) {
       const userRecord = await prisma.user.findUnique({ where: { clerkId } });
-      
+
       if (!userRecord) {
         return createSecureResponse({ error: 'User not found' }, 404);
       }
