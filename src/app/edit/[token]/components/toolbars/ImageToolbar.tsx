@@ -9,6 +9,7 @@ import type { StockPhoto } from '@/services/pexelsApi';
 import { TextInputModal } from '../modals/TextInputModal';
 import { SimpleImageEditor } from '@/components/ui/SimpleImageEditor';
 import { logger } from '@/lib/logger';
+import { getServiceImageQuery } from '@/modules/service/design/imageKeywords';
 
 interface ImageToolbarProps {
   targetId: string;
@@ -41,6 +42,7 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
     uploadImage,
     hideElementToolbar,
     tokenId,
+    projectType,
   } = useEditStore();
 
   // Stub executeAction (removed in V2 refactor)
@@ -562,14 +564,17 @@ function StockPhotosPanel({ position, onClose, onSelectImage }: {
     setSearchQuery(query);
     setIsSearching(true);
     setError(null);
-    
+
+    const effectiveQuery =
+      projectType === 'service' ? getServiceImageQuery(query.trim()) : query.trim();
+
     try {
       const response = await fetch('/api/images/search', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           searchType: 'search',
-          query: query.trim(),
+          query: effectiveQuery,
           per_page: 12,
           orientation: 'landscape'
         })
@@ -605,9 +610,11 @@ function StockPhotosPanel({ position, onClose, onSelectImage }: {
       if (category === 'featured') {
         requestBody = { searchType: 'curated', per_page: 12 };
       } else {
+        const categoryQuery =
+          projectType === 'service' ? getServiceImageQuery(category) : category;
         requestBody = {
           searchType: category,
-          query: category,
+          query: categoryQuery,
           per_page: 12
         };
       }

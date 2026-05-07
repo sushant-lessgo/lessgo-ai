@@ -61,6 +61,11 @@ export function MainContent({ tokenId }: MainContentProps) {
   const selectedSection = useStoreState(state => state.selectedSection);
   const selectedElement = useStoreState(state => state.selectedElement);
   const multiSelection = useStoreState(state => state.multiSelection);
+  const projectType = useStoreState(state => state.projectType);
+
+  // Service projects use the Hearth UIBlock library; the layout-swap UI
+  // (add-section / change-layout) is product-only at pilot. Hide accordingly.
+  const showLayoutSwapUI = projectType !== 'service';
   
   // Get actions from store
   const storeState = store?.getState();
@@ -578,11 +583,13 @@ const handleAddSection = (afterSectionId?: string) => {
                   Add sections from the left panel or start with a pre-built template.
                 </p>
                 <div className="text-center">
-                  <EnhancedAddSection
-                    position="end"
-                    existingSections={sections}
-                    onAddSection={handleEnhancedAddSection}
-                  />
+                  {showLayoutSwapUI && (
+                    <EnhancedAddSection
+                      position="end"
+                      existingSections={sections}
+                      onAddSection={handleEnhancedAddSection}
+                    />
+                  )}
                 </div>
               </div>
             </div>
@@ -604,7 +611,7 @@ const handleAddSection = (afterSectionId?: string) => {
                   ]
                 )}>
                   {/* Add Section Button (Between Sections) */}
-                  {index > 0 && (
+                  {index > 0 && showLayoutSwapUI && (
                     <EnhancedAddSection
                       position="between"
                       afterSectionId={sections[index - 1]}
@@ -699,12 +706,14 @@ const handleAddSection = (afterSectionId?: string) => {
               ))}
 
               {/* Add Section Button (End) */}
-              <EnhancedAddSection
-                position="end"
-                afterSectionId={sections[sections.length - 1]}
-                existingSections={sections}
-                onAddSection={handleEnhancedAddSection}
-              />
+              {showLayoutSwapUI && (
+                <EnhancedAddSection
+                  position="end"
+                  afterSectionId={sections[sections.length - 1]}
+                  existingSections={sections}
+                  onAddSection={handleEnhancedAddSection}
+                />
+              )}
             </div>
           )}
 

@@ -80,6 +80,8 @@ export default async function PublishedPage({ params }: PageProps) {
       userId: true,
       content: true,
       analyticsEnabled: true,
+      projectType: true,
+      paletteId: true,
     },
   });
 
@@ -127,6 +129,8 @@ export default async function PublishedPage({ params }: PageProps) {
       pageOwnerId={page.userId}
       slug={page.slug}
       analyticsEnabled={page.analyticsEnabled || false}
+      projectType={page.projectType === 'service' ? 'service' : 'product'}
+      paletteId={page.paletteId}
     />
   );
 }

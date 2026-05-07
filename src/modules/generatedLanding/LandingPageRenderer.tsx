@@ -3,7 +3,7 @@ import { useParams } from 'next/navigation';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useOnboardingStore } from '@/hooks/useOnboardingStore';
 import { sectionList } from '@/modules/sections/sectionList';
-import { getComponent } from '@/modules/generatedLanding/componentRegistry';
+import { getComponent, extractSectionType as extractSectionTypeRaw } from '@/modules/generatedLanding/componentRegistry';
 import {
   generateCompleteBackgroundSystem,
   getSectionBackgroundTypeWithContext,
@@ -11,6 +11,10 @@ import {
 } from '@/modules/Design/background/backgroundIntegration';
 import { SmartTextSection } from '@/components/layout/SmartTextSection';
 import { VariableThemeInjector } from '@/modules/Design/ColorSystem/VariableThemeInjector';
+import { HearthThemeInjector } from '@/modules/service/design/HearthThemeInjector';
+import { getSurfaceForSection } from '@/modules/service/design/sectionRules';
+import { defaultHearthPalette } from '@/modules/service/design/palettes';
+import type { HearthPalette } from '@/types/service';
 // import { VariableBackgroundRenderer } from '@/modules/Design/ColorSystem/VariableBackgroundRenderer'; // Disabled
 import { CSSVariableErrorBoundary } from '@/components/CSSVariableErrorBoundary';
 import { useFeatureFlags } from '@/utils/featureFlags';
@@ -127,8 +131,13 @@ export default function LandingPageRenderer({ className = '', tokenId, published
     errors,
     updateFontsFromTone,
     getColorTokens,
-    updateFromBackgroundSystem
+    updateFromBackgroundSystem,
+    projectType,
+    paletteId,
   } = storeState;
+
+  const isService = projectType === 'service';
+  const effectivePalette: HearthPalette = (paletteId as HearthPalette) || defaultHearthPalette;
 
   // Get feature flags for CSS variable system
   const featureFlags = useFeatureFlags(effectiveTokenId);
@@ -310,7 +319,7 @@ const finalSections: OrderedSection[] = processedSections
     const { id: sectionId, background, layout, data, alternatingInfo } = section;
     
     // Get the appropriate component from registry
-    const LayoutComponent = getComponent(sectionId, layout);
+    const LayoutComponent = getComponent(sectionId, layout, projectType);
 
     // Use fallback if component not found
     if (!LayoutComponent) {
@@ -432,6 +441,40 @@ const finalSections: OrderedSection[] = processedSections
       // Choose rendering method based on feature flags
       // Detect header sections for sticky positioning
       const isHeaderSection = sectionId.includes('header') || layout?.includes('Header');
+
+      // Service projects: skip product theme wrapper. Surface comes from
+      // sectionRules (data-hearth-surface), Hearth tokens come from the
+      // outer HearthThemeInjector wrap on the page.
+      if (isService) {
+        const sectionTypeKey = extractSectionTypeRaw(sectionId);
+        const surface = getSurfaceForSection(sectionTypeKey);
+        return (
+          <SectionTracker
+            key={sectionId}
+            sectionId={sectionId}
+            sectionType={layout}
+          >
+            <div
+              data-hearth-surface={surface}
+              className={`relative ${isHeaderSection ? 'sticky top-0 z-50' : ''}`}
+            >
+              <LayoutComponent
+                sectionId={sectionId}
+                className=""
+                isEditable={mode !== 'preview'}
+                publishedPageId={publishedPageId}
+                pageOwnerId={pageOwnerId}
+                {...(data || {})}
+              />
+              <FormPlacementRenderer
+                sectionId={sectionId}
+                userId={pageOwnerId}
+                publishedPageId={publishedPageId}
+              />
+            </div>
+          </SectionTracker>
+        );
+      }
 
       if (shouldUseVariableSystem) {
         return (
@@ -800,6 +843,16 @@ const finalSections: OrderedSection[] = processedSections
       )}
       </main>
   );
+
+  // Service projects: wrap output in HearthThemeInjector. Skip product theme
+  // injectors entirely — Hearth tokens come from CSS vars on :root.
+  if (isService) {
+    return (
+      <HearthThemeInjector paletteId={effectivePalette}>
+        {renderContent()}
+      </HearthThemeInjector>
+    );
+  }
 
   // Conditionally wrap with VariableThemeInjector based on feature flags
   return shouldUseVariableSystem ? (

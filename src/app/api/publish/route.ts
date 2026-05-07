@@ -55,11 +55,15 @@ async function publishHandler(req: NextRequest) {
       return createSecureResponse({ error: slugValidation.error }, 400);
     }
 
-    // 🔍 Get the project to link to published page
+    // 🔍 Get the project to link to published page (also pull projectType +
+    // paletteId so service projects ship with the right Hearth tokens).
     const project = await prisma.project.findUnique({
       where: { tokenId },
-      select: { id: true }
+      select: { id: true, projectType: true, paletteId: true }
     });
+
+    const projectType: 'product' | 'service' = project?.projectType === 'service' ? 'service' : 'product';
+    const paletteId: string | null = project?.paletteId ?? null;
 
     // Phase 2: No longer generating htmlContent - using dynamic rendering
     // Published pages now render on-demand via React Server Components
@@ -80,6 +84,8 @@ async function publishHandler(req: NextRequest) {
           content: content as any,
           themeValues: themeValues as any,
           projectId: project?.id || null,
+          projectType,
+          paletteId,
           ...(previewImage !== undefined && { previewImage }),
           analyticsEnabled: analyticsEnabled || false, // Phase 4
           updatedAt: new Date()
@@ -110,6 +116,8 @@ async function publishHandler(req: NextRequest) {
           content: content as any,
           themeValues: themeValues as any,
           projectId: project?.id || null,
+          projectType,
+          paletteId,
           previewImage: previewImage || null,
           analyticsEnabled: analyticsEnabled || false, // Phase 4
         }
@@ -217,6 +225,8 @@ async function publishHandler(req: NextRequest) {
         previewImage,
         analyticsOptIn: analyticsEnabled || false, // Phase 4
         baseURL: baseUrl,
+        projectType,
+        paletteId,
       });
 
       // Upload to blob with timeout protection

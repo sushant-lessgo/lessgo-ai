@@ -81,7 +81,10 @@ export default function RootLayout({
 
 
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      signUpForceRedirectUrl="/onboarding/persona?next=/dashboard"
+      signInForceRedirectUrl="/dashboard"
+    >
       <html lang="en">
         <head />
         <body className="antialiased">

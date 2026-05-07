@@ -18,6 +18,12 @@ export interface InlineTextEditorV2Props {
   colorTokens?: any;
   sectionBackground?: string;
   multiline?: boolean;
+  /**
+   * When true, always persist `innerHTML` so inline tags (e.g. `<em>`) survive
+   * a save round-trip. Default false preserves existing product-block behavior
+   * (textContent fallback unless span[style] formatting is present).
+   */
+  preserveHtml?: boolean;
 }
 
 export function InlineTextEditorV2({
@@ -33,7 +39,8 @@ export function InlineTextEditorV2({
   backgroundType,
   colorTokens,
   sectionBackground,
-  multiline = false
+  multiline = false,
+  preserveHtml = false
 }: InlineTextEditorV2Props) {
   const [isEditing, setIsEditing] = useState(false);
   const editorRef = useRef<HTMLElement>(null);
@@ -76,7 +83,9 @@ export function InlineTextEditorV2({
 
       let finalContent: string;
 
-      if (hasFormatting) {
+      if (preserveHtml) {
+        finalContent = html;
+      } else if (hasFormatting) {
         finalContent = html;
       } else if (shouldPreserveStructure &&
                  (html.includes('<br') || html.includes('<div') || html.includes('<p'))) {

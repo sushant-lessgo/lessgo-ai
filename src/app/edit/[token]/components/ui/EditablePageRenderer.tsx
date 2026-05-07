@@ -105,10 +105,11 @@ export function EditablePageRenderer({
   colorTokens,
   globalSettings
 }: EditablePageRendererProps) {
-  
+
   const backgroundType = getBackgroundTypeFromSection(sectionId);
-  
-  const LayoutComponent = getComponent(sectionId, layout);
+  const { projectType } = useEditStore();
+
+  const LayoutComponent = getComponent(sectionId, layout, projectType);
 
   // Enhanced element click handler
   const handleElementClick = React.useCallback((elementKey: string) => {

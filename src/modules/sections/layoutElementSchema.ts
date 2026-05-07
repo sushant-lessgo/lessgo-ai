@@ -1,3 +1,5 @@
+import { serviceElementSchema } from '@/modules/service/sections/serviceElementSchema';
+
 /**
  * Generation types for elements:
  * - ai_generated: AI generates content, ready to use
@@ -323,6 +325,10 @@ export function getSchemaDefaults(layoutName: string): Record<string, { type: 's
 }
 
 export const layoutElementSchema: LayoutSchema = {
+  // ===== Service-route pilot blocks (Phase 2) =====
+  // Layout names distinct from product (PetalFramedHero, IconServiceCards, etc.) — no collision risk.
+  ...serviceElementSchema,
+
   // BeforeAfter Section - V2 Schema
   SideBySideBlocks: {
     sectionType: "SideBySideBlocks",

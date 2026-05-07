@@ -11,6 +11,7 @@ import { layoutElementSchema, getAllElements } from '@/modules/sections/layoutEl
 import { logger } from '@/lib/logger';
 import { sectionList } from '@/modules/sections/sectionList';
 import type { EditableElement } from '@/types/core/content';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 
 interface EnhancedAddSectionProps {
   position: 'between' | 'end';
@@ -32,9 +33,12 @@ export function EnhancedAddSection({
   onAddSection,
   className
 }: EnhancedAddSectionProps) {
+  const { projectType } = useEditStore();
   const [showSectionSelector, setShowSectionSelector] = useState(false);
   const [showLayoutSelector, setShowLayoutSelector] = useState(false);
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
+
+  if (projectType === 'service') return null;
 
   // Validate props on mount
   React.useEffect(() => {

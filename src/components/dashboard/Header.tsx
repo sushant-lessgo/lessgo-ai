@@ -1,6 +1,7 @@
 'use client'
 
 import { UserButton, useUser, SignOutButton } from '@clerk/nextjs'
+import Link from 'next/link'
 import Logo from '@/components/shared/Logo'
 import posthog from 'posthog-js'
 
@@ -23,6 +24,13 @@ export default function Header() {
         {/* Right: User info */}
         {isSignedIn && (
           <div className="flex items-center gap-4">
+            <Link
+              href="/dashboard/settings"
+              className="hidden sm:inline text-sm text-brand-text hover:text-brand-accentPrimary transition"
+            >
+              Settings
+            </Link>
+
             <div className="hidden sm:block text-sm text-brand-mutedText font-medium">
               {user.firstName}
             </div>

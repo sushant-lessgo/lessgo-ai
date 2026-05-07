@@ -122,7 +122,10 @@
       "Bash(test:*)",
       "WebFetch(domain:landingrabbit.com)",
       "WebFetch(domain:magicui.design)",
-      "WebFetch(domain:www.alfdesigngroup.com)"
+      "WebFetch(domain:www.alfdesigngroup.com)",
+      "Bash(npx tsc *)",
+      "Read(//tmp/**)",
+      "Bash(NEXT_PUBLIC_USE_MOCK_GPT=true npx tsx scripts/dogfoodServicePipeline.ts)"
     ],
     "deny": [],
     "ask": [],

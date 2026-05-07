@@ -1,5 +1,6 @@
 // lib/validation.ts - OWASP Input Validation
 import { z } from 'zod';
+import { hearthPalettes } from '@/types/service';
 
 // A03: Injection Prevention - Input validation schemas
 export const FormSubmissionSchema = z.object({
@@ -30,6 +31,7 @@ export const DraftSaveSchema = z.object({
   title: z.string().max(200).optional(),
   themeValues: z.record(z.string(), z.unknown()).optional(),
   finalContent: z.unknown().optional(),
+  paletteId: z.enum(hearthPalettes as unknown as [string, ...string[]]).optional(),
 });
 
 export const PublishSchema = z.object({

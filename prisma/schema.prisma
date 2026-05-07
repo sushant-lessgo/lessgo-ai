@@ -11,20 +11,23 @@ model User {
   id        String    @id @default(cuid())
   clerkId   String    @unique
   email     String?
+  persona   String?
   projects  Project[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }
 
 model Project {
-  id      String  @id @default(cuid())
-  userId  String?
-  user    User?   @relation(fields: [userId], references: [id])
-  tokenId String  @unique
-  token   Token   @relation(fields: [tokenId], references: [value])
-  title   String  @default("Untitled Project")
-  status  String  @default("draft")
-  content Json?
+  id          String  @id @default(cuid())
+  userId      String?
+  user        User?   @relation(fields: [userId], references: [id])
+  tokenId     String  @unique
+  token       Token   @relation(fields: [tokenId], references: [value])
+  title       String  @default("Untitled Project")
+  status      String  @default("draft")
+  projectType String  @default("product")
+  paletteId   String?
+  content     Json?
 
   themeValues    Json?
   computedDesign Json?
@@ -50,6 +53,8 @@ model PublishedPage {
   themeValues    Json?
   computedDesign Json?
   projectId      String?
+  projectType    String   @default("product")
+  paletteId      String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   isPublished    Boolean  @default(true)
@@ -59,16 +64,16 @@ model PublishedPage {
   views        Int     @default(0)
 
   // Static export fields (Phase 2)
-  publishState     String   @default("draft") // draft, publishing, published, failed
-  currentVersionId String?  @unique            // FK to PublishedPageVersion.id
+  publishState     String    @default("draft") // draft, publishing, published, failed
+  currentVersionId String?   @unique // FK to PublishedPageVersion.id
   lastPublishAt    DateTime?
   publishError     String?
-  analyticsEnabled Boolean  @default(false)
+  analyticsEnabled Boolean   @default(false)
 
   // Custom domain fields (Phase 5)
   customDomain                    String?   @unique
-  customDomainStatus              String?   // pending_ownership | pending_dns | issuing_ssl | live | failed
-  customDomainKind                String?   // apex | subdomain
+  customDomainStatus              String? // pending_ownership | pending_dns | issuing_ssl | live | failed
+  customDomainKind                String? // apex | subdomain
   customDomainVercelId            String?
   customDomainOwnershipToken      String?
   customDomainOwnershipVerifiedAt DateTime?
@@ -78,7 +83,7 @@ model PublishedPage {
   customDomainError               String?
 
   // Relations
-  currentVersion PublishedPageVersion? @relation("CurrentVersion", fields: [currentVersionId], references: [id])
+  currentVersion PublishedPageVersion?  @relation("CurrentVersion", fields: [currentVersionId], references: [id])
   versions       PublishedPageVersion[] @relation("PageVersions")
 
   @@index([userId])

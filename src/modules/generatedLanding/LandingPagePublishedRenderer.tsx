@@ -14,6 +14,10 @@
 import React from 'react';
 import Script from 'next/script';
 import { getComponent, extractSectionType } from './componentRegistry.published';
+import type { ProjectType, HearthPalette } from '@/types/service';
+import { HearthSSRTokens } from '@/modules/service/components/HearthSSRTokens';
+import { getSurfaceForSection } from '@/modules/service/design/sectionRules';
+import { defaultHearthPalette } from '@/modules/service/design/palettes';
 
 /**
  * Extract content fields from elements structure
@@ -36,6 +40,8 @@ interface LandingPagePublishedRendererProps {
   pageOwnerId?: string;         // For analytics (optional)
   slug?: string;                // For analytics tracking
   analyticsEnabled?: boolean;   // Enable analytics beacon
+  projectType?: ProjectType;    // Routes to service block library when 'service'
+  paletteId?: string | null;    // Hearth palette for service projects
 }
 
 export function LandingPagePublishedRenderer({
@@ -46,8 +52,13 @@ export function LandingPagePublishedRenderer({
   publishedPageId,
   pageOwnerId,
   slug,
-  analyticsEnabled
+  analyticsEnabled,
+  projectType = 'product',
+  paletteId = null,
 }: LandingPagePublishedRendererProps) {
+  const isService = projectType === 'service';
+  const effectivePalette: HearthPalette =
+    (paletteId as HearthPalette) || defaultHearthPalette;
   // 1. Extract sectionLayouts from content
   const sectionLayouts: Record<string, string> = {};
   for (const sectionId of sections) {
@@ -74,19 +85,41 @@ export function LandingPagePublishedRenderer({
     .filter(Boolean);
 
   // 3. Render sections with mode="published"
-  return (
-    <>
+  const sectionsTree = (
     <div className={`landing-page-published ${className}`}>
       {processedSections.map((section) => {
         if (!section) return null;
         const { id: sectionId, layout, data } = section;
         const sectionType = extractSectionType(sectionId);
-        const LayoutComponent = getComponent(sectionType, layout);
+        const LayoutComponent = getComponent(sectionType, layout, projectType);
 
         // Silent fallback if component not found
         if (!LayoutComponent) {
           console.warn(`Published: Missing component for ${sectionType}:${layout}`);
           return null;
+        }
+
+        // Extract content fields from elements structure
+        const flattenedData = extractContentFields(data, content);
+
+        // Service projects: skip product theme background. Wrap in a Hearth
+        // surface div (cream / cream-1 / cream-2) per sectionRules.
+        if (isService) {
+          const surface = getSurfaceForSection(sectionType);
+          return (
+            <div key={sectionId} data-hearth-surface={surface}>
+              <LayoutComponent
+                sectionId={sectionId}
+                mode="published"
+                theme={theme}
+                publishedPageId={publishedPageId}
+                pageOwnerId={pageOwnerId}
+                content={content}
+                sections={sections}
+                {...flattenedData}
+              />
+            </div>
+          );
         }
 
         // Get section background
@@ -116,9 +149,6 @@ export function LandingPagePublishedRenderer({
           }
         }
 
-        // Extract content fields from elements structure
-        const flattenedData = extractContentFields(data, content);
-
         return (
           <LayoutComponent
             key={sectionId}
@@ -136,6 +166,17 @@ export function LandingPagePublishedRenderer({
         );
       })}
     </div>
+  );
+
+  return (
+    <>
+    {isService ? (
+      <HearthSSRTokens paletteId={effectivePalette}>
+        {sectionsTree}
+      </HearthSSRTokens>
+    ) : (
+      sectionsTree
+    )}
 
     {/* Smooth scroll enhancement for anchor links */}
     <script

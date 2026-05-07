@@ -5,12 +5,13 @@ import Footer from '@/components/shared/Footer'
 import DashboardHeader from '@/components/dashboard/DashboardHeader'
 import ProjectCard from '@/components/dashboard/ProjectCard'
 import EmptyState from '@/components/dashboard/EmptyState'
+import PersonaPrompt from '@/components/onboarding/PersonaPrompt'
 
 export default async function DashboardPage() {
   const { userId } = await auth()
   if (!userId) return null
 
-  // Unified query: Projects with published info
+  // Unified query: Projects with published info + persona for blocking gate
   const user = await prisma.user.findUnique({
     where: { clerkId: userId },
     include: {
@@ -27,6 +28,12 @@ export default async function DashboardPage() {
       },
     },
   })
+
+  // Block dashboard until persona is captured. Existing users with persona=null
+  // (pre-Phase-0) hit this gate on first dashboard load post-deploy.
+  if (user && !user.persona) {
+    return <PersonaPrompt next="/dashboard" />
+  }
 
   const projects = user?.projects ?? []
 

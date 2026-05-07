@@ -39,13 +39,21 @@ const [stepIndex, setStepIndex] = useState(0);
   });
 
   const res = await fetch('/api/start');
-  const { url } = await res.json(); // Your API should return JSON with the new URL
-  window.open(url, '_blank');
+  const { url } = await res.json();
+
+  // /api/start may redirect to the persona prompt for authed-no-persona users.
+  // Navigate same tab in that case so the prompt replaces the dashboard;
+  // otherwise open the project create flow in a new tab as before.
+  if (typeof url === 'string' && url.includes('/onboarding/persona')) {
+    router.push(url.replace(process.env.NEXT_PUBLIC_SITE_URL || '', ''));
+  } else {
+    window.open(url, '_blank');
+  }
 
   setUserInput("");
   setConfirmedFields({});
   setStepIndex(0);
- 
+
 };
 
 

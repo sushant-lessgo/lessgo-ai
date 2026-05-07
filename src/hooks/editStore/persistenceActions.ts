@@ -220,6 +220,8 @@ export function createPersistenceActions(set: any, get: any) {
           state.id = apiResponse.tokenId || urlTokenId || '';
           state.title = apiResponse.title || 'Untitled Project';
           state.tokenId = apiResponse.tokenId || urlTokenId || '';
+          state.projectType = apiResponse.projectType === 'service' ? 'service' : 'product';
+          state.paletteId = apiResponse.paletteId ?? null;
           
           // Restore onboarding data — check API top-level first, then contentToLoad fallback
           const onboardingFromContent = contentToLoad?.onboardingData;

@@ -70,6 +70,8 @@ export async function GET(req: Request) {
         title: true,
         userId: true,
         updatedAt: true,
+        projectType: true,
+        paletteId: true,
       },
     });
 
@@ -114,6 +116,8 @@ export async function GET(req: Request) {
       inputText: project.inputText || "",
       title: project.title || "Untitled Project",
       themeValues: project.themeValues || null,
+      projectType: project.projectType || 'product',
+      paletteId: project.paletteId || null,
 
       // Onboarding state for resume
       stepIndex: onboarding.stepIndex || 0,

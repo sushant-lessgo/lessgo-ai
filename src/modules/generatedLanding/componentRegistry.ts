@@ -166,6 +166,8 @@ import VisualObjectionTiles from '@/modules/UIBlocks/ObjectionHandle/VisualObjec
 
 
 import { logger } from '@/lib/logger';
+import { resolveServiceBlock } from '@/modules/service/resolveServiceBlock';
+import type { ProjectType } from '@/types/service';
 // Component registry type definition
 export type ComponentRegistry = Record<string, Record<string, React.ComponentType<any>>>;
 
@@ -426,22 +428,31 @@ export function extractSectionType(sectionId: string): string {
 }
 
 // Helper function to get a component by section and layout
-export function getComponent(sectionIdOrType: string, layoutName: string): React.ComponentType<any> | null {
+export function getComponent(
+  sectionIdOrType: string,
+  layoutName: string,
+  projectType: ProjectType = 'product'
+): React.ComponentType<any> | null {
   // Extract section type from section ID if needed
   const sectionType = extractSectionType(sectionIdOrType);
-  
+
+  // Service projects dispatch to the Hearth UIBlock library (Phase 3).
+  if (projectType === 'service') {
+    return resolveServiceBlock(sectionType, layoutName, 'edit');
+  }
+
   const sectionComponents = componentRegistry[sectionType];
   if (!sectionComponents) {
     logger.warn(`No components found for section type: ${sectionType} (from: ${sectionIdOrType})`);
     return null;
   }
-  
+
   const component = sectionComponents[layoutName];
   if (!component) {
     logger.warn(`No component found for layout: ${sectionType}.${layoutName}`);
     return null;
   }
-  
+
   return component;
 }
 

@@ -1,0 +1,1773 @@
+<!doctype html>
+<html lang="en" data-palette="terracotta" data-variant="classic">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hearth — Warm Service · Lessgo design system</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   HEARTH — Warm Service
+   Light-native. Photo-led. Organic-soft. Serif display.
+   One configurable token: --accent.
+   ============================================================ */
+
+:root {
+  /* ————— Accent (user-configurable — the one knob) ————— */
+  --accent:       oklch(0.62 0.15 40);            /* terracotta */
+  --accent-deep:  oklch(0.48 0.15 40);            /* hover / text on cream */
+  --accent-ink:   oklch(0.99 0.01 80);            /* on accent fill */
+  --accent-wash:  oklch(0.62 0.15 40 / 0.10);     /* hairline tint */
+
+  /* ————— Neutrals (warm-cream, not white) ————— */
+  --cream:        oklch(0.97 0.015 80);           /* base surface */
+  --cream-1:      oklch(0.95 0.02  75);           /* raised / cards */
+  --cream-2:      oklch(0.92 0.025 72);           /* secondary section */
+  --sand:         oklch(0.84 0.03  70);           /* divider / border */
+  --ink:          oklch(0.22 0.02  40);           /* fg-1 — warm near-black */
+  --ink-2:        oklch(0.42 0.015 40);           /* fg-2 */
+  --ink-3:        oklch(0.58 0.012 40);           /* fg-3 */
+
+  /* accent neighbors (baked, not user-tuned) */
+  --sage:         oklch(0.72 0.045 135);          /* calm green — pricing checks, tags */
+  --clay:         oklch(0.78 0.08  55);           /* peach — gradient stop */
+
+  /* ————— Lines + shadow ————— */
+  --line:         oklch(0.22 0.02 40 / 0.10);
+  --line-soft:    oklch(0.22 0.02 40 / 0.06);
+  --shadow-card:  0 20px 40px -24px oklch(0.30 0.04 40 / 0.18),
+                  0 2px 4px -1px oklch(0.30 0.04 40 / 0.06);
+  --shadow-lift:  0 40px 70px -30px oklch(0.30 0.04 40 / 0.22),
+                  0 6px 14px -4px oklch(0.30 0.04 40 / 0.10);
+
+  /* ————— Type ————— */
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-body:    "DM Sans", ui-sans-serif, system-ui, sans-serif;
+
+  /* ————— Space (8px base, spacious character) ————— */
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px;
+  --s-5: 24px; --s-6: 32px; --s-7: 48px; --s-8: 72px;
+  --s-9: 96px; --s-10: 140px;
+
+  /* ————— Radius (organic-soft) ————— */
+  --r-sm: 10px;    /* inputs, small badges */
+  --r-md: 14px;    /* buttons */
+  --r-lg: 20px;    /* cards */
+  --r-xl: 28px;    /* media, hero frame */
+  --r-petal: 120px 120px 24px 120px;  /* soft asymmetric hero image */
+
+  /* ————— Section rhythm ————— */
+  --sec-pad-y: 140px;
+  --sec-pad-x: clamp(24px, 5vw, 80px);
+  --max-w: 1240px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+/* ============================================================
+   SPEC DOC
+   ============================================================ */
+
+.doc {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 120px 32px 72px;
+}
+.doc-header { border-bottom: 1px solid var(--line); padding-bottom: 56px; margin-bottom: 64px; }
+.doc-eyebrow {
+  font-family: var(--font-body);
+  font-size: 12px; font-weight: 500;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--accent-deep);
+  display: flex; align-items: center; gap: 12px;
+}
+.doc-eyebrow::before { content: ""; width: 18px; height: 1px; background: var(--accent); }
+.doc-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 96px;
+  line-height: 0.95;
+  letter-spacing: -0.015em;
+  margin: 20px 0 16px;
+  font-variation-settings: "opsz" 144, "SOFT" 50;
+}
+.doc-title em { font-style: italic; font-weight: 500; color: var(--accent-deep); }
+.doc-sub {
+  font-family: var(--font-display);
+  font-weight: 400; font-style: italic;
+  font-size: 22px; line-height: 1.45;
+  color: var(--ink-2);
+  max-width: 58ch;
+  margin: 0;
+}
+.doc-meta {
+  margin-top: 48px;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
+  background: var(--sand);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  border: 1px solid var(--sand);
+}
+.doc-meta > div { background: var(--cream); padding: 22px 22px; }
+.doc-meta dt {
+  font-size: 11px; letter-spacing: 0.16em; font-weight: 500;
+  text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px;
+}
+.doc-meta dd { margin: 0; font-family: var(--font-display); font-size: 18px; color: var(--ink); }
+
+.doc h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 36px;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  margin: 80px 0 6px;
+  font-variation-settings: "opsz" 72;
+}
+.doc h2 .n {
+  font-family: var(--font-body); font-size: 12px; font-weight: 500;
+  letter-spacing: 0.2em; color: var(--accent-deep); text-transform: uppercase;
+  display: block; margin-bottom: 10px;
+}
+.doc h2 + .dek { font-family: var(--font-display); font-style: italic; font-size: 19px; color: var(--ink-2); margin: 4px 0 32px; max-width: 60ch; }
+.doc h3 { font-family: var(--font-display); font-weight: 500; font-size: 22px; letter-spacing: -0.01em; margin: 36px 0 12px; color: var(--ink); }
+.doc p { color: var(--ink-2); max-width: 66ch; margin: 0 0 14px; }
+.doc ul { color: var(--ink-2); padding-left: 22px; margin: 0 0 14px; }
+.doc ul li { margin-bottom: 6px; }
+.doc ul li::marker { color: var(--accent); }
+.doc code, .doc .mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12.5px; background: var(--cream-1); border: 1px solid var(--line);
+  padding: 1px 6px; border-radius: 4px; color: var(--ink);
+}
+.doc .callout {
+  border-left: 2px solid var(--accent);
+  padding: 6px 0 6px 20px;
+  font-family: var(--font-display); font-style: italic;
+  font-size: 18px; color: var(--ink);
+  margin: 22px 0;
+}
+
+/* Spec tables */
+.spec-table {
+  border: 1px solid var(--sand);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  margin: 20px 0 8px;
+  background: var(--cream-1);
+  font-size: 13px;
+}
+.spec-table .row {
+  display: grid;
+  grid-template-columns: 80px 1fr 100px 100px 100px;
+  border-bottom: 1px solid var(--sand);
+}
+.spec-table .row:last-child { border-bottom: 0; }
+.spec-table .row > * { padding: 14px 16px; color: var(--ink-2); border-right: 1px solid var(--sand); }
+.spec-table .row > *:last-child { border-right: 0; }
+.spec-table .row.head > * { color: var(--ink-3); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 500; background: var(--cream-2); }
+.spec-table .sample { font-family: var(--font-display); color: var(--ink); font-size: 18px; font-weight: 400; }
+
+/* Swatches */
+.swatch-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin: 16px 0 8px; }
+.swatch { border-radius: var(--r-md); overflow: hidden; box-shadow: var(--shadow-card); }
+.swatch .chip { height: 96px; }
+.swatch .lbl { padding: 12px 14px; font-size: 11px; background: var(--cream-1); color: var(--ink-2); letter-spacing: 0.04em; display: flex; justify-content: space-between; }
+.swatch .lbl b { color: var(--ink); font-weight: 500; }
+
+.sample-display {
+  border: 1px solid var(--sand); border-radius: var(--r-xl);
+  padding: 48px 44px; margin: 18px 0 0; background: var(--cream-1);
+}
+.sample-display .s-label {
+  font-size: 11px; letter-spacing: 0.16em; font-weight: 500;
+  color: var(--ink-3); text-transform: uppercase; margin-bottom: 20px;
+}
+.s-d1 { font-family: var(--font-display); font-weight: 400; font-size: 84px; line-height: 0.98; letter-spacing: -0.015em; font-variation-settings: "opsz" 144; }
+.s-d1 em { font-style: italic; color: var(--accent-deep); font-weight: 500; }
+.s-d2 { font-family: var(--font-display); font-weight: 400; font-size: 56px; line-height: 1.05; letter-spacing: -0.012em; font-variation-settings: "opsz" 96; }
+.s-d3 { font-family: var(--font-display); font-weight: 500; font-size: 38px; line-height: 1.1; letter-spacing: -0.01em; }
+.s-d4 { font-family: var(--font-display); font-weight: 500; font-size: 26px; line-height: 1.25; letter-spacing: -0.008em; }
+
+/* ============================================================
+   STAGE
+   ============================================================ */
+
+.stage {
+  border-top: 1px solid var(--sand);
+  padding: 56px 24px 0;
+  max-width: 1360px;
+  margin: 80px auto 0;
+}
+.stage-header {
+  display: flex; align-items: baseline; gap: 16px;
+  margin-bottom: 24px; padding: 0 8px;
+}
+.stage-n { font-size: 12px; font-weight: 500; color: var(--accent-deep); letter-spacing: 0.2em; text-transform: uppercase; }
+.stage-title { font-family: var(--font-display); font-weight: 500; font-size: 26px; letter-spacing: -0.01em; color: var(--ink); }
+.stage-note { font-size: 12px; color: var(--ink-3); margin-left: auto; font-style: italic; font-family: var(--font-display); }
+
+.frame {
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  background: var(--cream);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--sand);
+}
+
+/* Shared section scaffold */
+.section {
+  padding: var(--sec-pad-y) var(--sec-pad-x);
+  max-width: 1360px;
+  margin: 0 auto;
+  position: relative;
+}
+.section.on-cream-2 { background: var(--cream-2); }
+.section .eyebrow {
+  font-family: var(--font-body); font-weight: 500;
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent-deep);
+  display: inline-flex; align-items: center; gap: 14px;
+}
+.section .eyebrow::before { content: ""; width: 28px; height: 1px; background: var(--accent); }
+.section .eyebrow::after { content: ""; width: 28px; height: 1px; background: var(--accent); }
+
+.section-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 60px;
+  line-height: 1.02;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  max-width: 22ch;
+  margin: 28px 0 0;
+  font-variation-settings: "opsz" 96;
+}
+.section-title em { font-style: italic; font-weight: 500; color: var(--accent-deep); }
+.section-lede {
+  font-family: var(--font-display);
+  font-style: italic; font-weight: 400;
+  font-size: 22px; line-height: 1.5;
+  color: var(--ink-2);
+  max-width: 56ch;
+  margin: 20px 0 0;
+}
+
+/* ============================================================
+   NAV
+   ============================================================ */
+.nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 26px var(--sec-pad-x);
+  background: color-mix(in oklch, var(--cream) 84%, transparent);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line-soft);
+}
+.brand { display: flex; align-items: center; gap: 12px; font-family: var(--font-display); font-weight: 500; font-size: 22px; letter-spacing: -0.01em; }
+.brand-mark {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--accent);
+  position: relative;
+  display: grid; place-items: center;
+  color: var(--accent-ink);
+  font-family: var(--font-display); font-style: italic; font-weight: 500; font-size: 18px;
+}
+.nav-links { display: flex; gap: 32px; font-size: 15px; color: var(--ink-2); }
+.nav-links a { position: relative; padding: 4px 0; }
+.nav-links a:hover { color: var(--ink); }
+.nav-links a.active { color: var(--ink); }
+.nav-links a.active::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -2px;
+  height: 6px; background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 6'><path d='M1 4 C 15 1, 30 6, 45 2, 55 5' fill='none' stroke='%23b6451e' stroke-width='1.5' stroke-linecap='round'/></svg>") no-repeat center / 100% 100%;
+}
+.nav-right { display: flex; align-items: center; gap: 12px; }
+
+/* ————— Buttons ————— */
+.btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: var(--font-body); font-weight: 500;
+  font-size: 15px;
+  border-radius: var(--r-md);
+  padding: 14px 22px;
+  transition: all 220ms cubic-bezier(.2,.8,.2,1);
+  border: 1px solid transparent;
+}
+.btn-sm { padding: 10px 16px; font-size: 13.5px; border-radius: var(--r-sm); }
+.btn-lg { padding: 18px 28px; font-size: 16.5px; }
+.btn-primary {
+  background: var(--accent); color: var(--accent-ink);
+  box-shadow: 0 10px 24px -12px var(--accent);
+}
+.btn-primary:hover { background: var(--accent-deep); transform: translateY(-1px); box-shadow: 0 14px 28px -12px var(--accent-deep); }
+.btn-ghost {
+  color: var(--ink); border-color: var(--sand); background: var(--cream);
+}
+.btn-ghost:hover { border-color: var(--ink-3); background: var(--cream-1); }
+.btn-quiet { color: var(--ink-2); padding-left: 2px; padding-right: 2px; }
+.btn-quiet:hover { color: var(--ink); }
+.btn .arrow { font-family: var(--font-display); font-style: italic; }
+
+/* ============================================================
+   HERO
+   ============================================================ */
+
+.hero {
+  position: relative;
+  padding: 80px var(--sec-pad-x) 120px;
+  max-width: 1360px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 64px;
+  align-items: center;
+}
+.hero-copy { position: relative; z-index: 1; }
+.hero-top {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-size: 13px; font-weight: 500;
+  padding: 8px 14px; border-radius: 999px;
+  background: var(--cream-1); border: 1px solid var(--sand);
+  color: var(--ink-2);
+  margin-bottom: 28px;
+}
+.hero-top .pip { width: 8px; height: 8px; border-radius: 50%; background: var(--sage); }
+.hero-top em { color: var(--ink); font-style: normal; font-weight: 500; }
+
+.hero h1 {
+  font-family: var(--font-display); font-weight: 400;
+  font-size: clamp(52px, 7vw, 92px);
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: var(--ink);
+  font-variation-settings: "opsz" 144, "SOFT" 50;
+}
+.hero h1 .swoop {
+  font-style: italic; font-weight: 500;
+  color: var(--accent-deep);
+  position: relative;
+  padding: 0 4px 14px;
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 22' preserveAspectRatio='none'><path d='M4 16 C 60 4, 150 22, 230 8, 280 18, 316 6' fill='none' stroke='%23b6451e' stroke-width='3' stroke-linecap='round'/></svg>")
+    no-repeat left bottom / 100% 14px;
+}
+
+.hero .lede {
+  font-family: var(--font-display);
+  font-style: italic; font-weight: 400;
+  font-size: 22px; line-height: 1.5;
+  color: var(--ink-2);
+  max-width: 46ch;
+  margin: 36px 0 0;
+}
+
+.hero-actions { display: flex; gap: 14px; margin-top: 44px; align-items: center; flex-wrap: wrap; }
+.hero-actions .caption {
+  font-family: var(--font-display); font-style: italic; font-size: 14px;
+  color: var(--ink-3); margin-left: 4px;
+}
+
+.hero-trust {
+  margin-top: 56px;
+  display: flex; align-items: center; gap: 24px;
+  padding-top: 28px;
+  border-top: 1px solid var(--line);
+}
+.avatars { display: flex; }
+.avatars .a { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--cream); margin-left: -8px; background-size: cover; background-position: center; }
+.avatars .a:first-child { margin-left: 0; }
+.hero-trust .r {
+  font-family: var(--font-display); font-weight: 500; font-size: 16px; color: var(--ink);
+}
+.hero-trust .r em { font-style: italic; color: var(--accent-deep); font-weight: 500; }
+.hero-trust .stars {
+  display: inline-flex; gap: 2px; color: var(--accent); font-size: 15px; margin-right: 4px;
+}
+
+/* Hero collage */
+.hero-art { position: relative; aspect-ratio: 4/5; }
+.photo {
+  position: absolute;
+  overflow: hidden;
+  background-color: var(--cream-2);
+  background-size: cover; background-position: center;
+  box-shadow: var(--shadow-lift);
+}
+.photo-main {
+  inset: 0 0 14% 12%;
+  border-radius: var(--r-petal);
+  background-image:
+    linear-gradient(150deg, oklch(0.72 0.07 135) 0%, oklch(0.55 0.08 135) 40%, oklch(0.40 0.06 135) 100%);
+}
+.photo-main::after {
+  /* suggestion of foliage silhouettes */
+  content: "";
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 30% 80%, oklch(0.35 0.06 130 / 0.5), transparent 60%),
+    radial-gradient(ellipse 50% 35% at 75% 30%, oklch(0.8 0.09 135 / 0.35), transparent 70%),
+    radial-gradient(circle at 60% 60%, oklch(0.9 0.1 55 / 0.3), transparent 50%);
+}
+.photo-tl {
+  top: 0; left: 0; width: 38%; height: 32%;
+  border-radius: 80px 20px 80px 20px;
+  background-image: linear-gradient(135deg, oklch(0.78 0.08 55), oklch(0.62 0.12 40));
+}
+.photo-br {
+  bottom: 0; right: -4%; width: 44%; height: 38%;
+  border-radius: 24px 100px 24px 100px;
+  background-image: linear-gradient(135deg, oklch(0.90 0.04 80), oklch(0.75 0.06 55));
+}
+.photo-caption {
+  position: absolute; top: 2%; right: -2%;
+  background: var(--cream);
+  padding: 12px 18px 12px 16px;
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-lift);
+  display: flex; gap: 12px; align-items: center;
+  border: 1px solid var(--sand);
+}
+.photo-caption .dot { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--clay)); }
+.photo-caption .t { font-family: var(--font-display); font-weight: 500; font-size: 14px; color: var(--ink); }
+.photo-caption .s { font-family: var(--font-display); font-style: italic; font-size: 13px; color: var(--ink-2); }
+
+/* Tiny laurel divider used across sections */
+.laurel {
+  display: block; margin: 0 auto;
+  width: 110px; height: 24px;
+  color: var(--accent);
+  opacity: 0.9;
+}
+
+/* ============================================================
+   FEATURES (as "Our approach")
+   ============================================================ */
+
+.features {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+  margin-top: 72px;
+}
+.feature {
+  background: var(--cream-1);
+  border-radius: var(--r-lg);
+  padding: 36px 32px 32px;
+  border: 1px solid var(--sand);
+  position: relative;
+}
+.feature .n {
+  font-family: var(--font-display); font-style: italic;
+  font-size: 48px; font-weight: 400;
+  color: var(--accent);
+  line-height: 1; margin-bottom: 22px;
+  font-variation-settings: "opsz" 144;
+}
+.feature h3 {
+  font-family: var(--font-display); font-weight: 500;
+  font-size: 26px; letter-spacing: -0.01em; line-height: 1.15;
+  margin: 0 0 14px; color: var(--ink);
+}
+.feature p { font-size: 15px; color: var(--ink-2); line-height: 1.6; margin: 0; }
+.feature .tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  margin-top: 20px;
+  font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500;
+  color: var(--accent-deep);
+}
+
+/* ============================================================
+   TESTIMONIALS
+   ============================================================ */
+
+.testi {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 24px;
+  margin-top: 72px;
+}
+.testi-card {
+  background: var(--cream-1);
+  border-radius: var(--r-lg);
+  padding: 36px 36px 32px;
+  border: 1px solid var(--sand);
+  display: flex; flex-direction: column;
+  position: relative;
+}
+.testi-card.lg {
+  grid-column: span 7;
+  padding: 56px 56px 44px;
+  background:
+    linear-gradient(160deg, oklch(0.93 0.03 60) 0%, var(--cream-1) 60%);
+}
+.testi-card.sm { grid-column: span 5; }
+.testi-card.full { grid-column: span 12; }
+.testi-card .mark {
+  font-family: var(--font-display); font-style: italic;
+  font-weight: 400; font-size: 80px; line-height: 0.6;
+  color: var(--accent); margin: 0 0 -6px -4px;
+  font-variation-settings: "opsz" 144;
+}
+.testi-card blockquote {
+  margin: 0; flex: 1;
+  font-family: var(--font-display);
+  font-weight: 400; font-size: 22px; line-height: 1.45;
+  letter-spacing: -0.005em;
+  color: var(--ink);
+}
+.testi-card.lg blockquote { font-size: 30px; line-height: 1.35; }
+.testi-card .who {
+  display: flex; align-items: center; gap: 14px;
+  padding-top: 28px; margin-top: 28px;
+  border-top: 1px solid var(--line);
+}
+.avatar-photo {
+  width: 44px; height: 44px; border-radius: 50%;
+  background-size: cover; background-position: center;
+  background-image: linear-gradient(135deg, oklch(0.82 0.06 50), oklch(0.65 0.08 40));
+}
+.who .name { font-family: var(--font-display); font-weight: 500; font-size: 15px; color: var(--ink); }
+.who .role { font-family: var(--font-display); font-style: italic; font-size: 13.5px; color: var(--ink-2); margin-top: 2px; }
+
+.logo-rail {
+  margin-top: 72px;
+  padding: 36px 0;
+  border-top: 1px solid var(--sand);
+  border-bottom: 1px solid var(--sand);
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.logo-rail .lbl {
+  font-family: var(--font-display); font-style: italic;
+  font-size: 14px; color: var(--ink-3);
+  flex-basis: 100%; text-align: center; margin-bottom: 8px;
+}
+.logo-rail .logos {
+  display: flex; justify-content: space-between; align-items: center; width: 100%;
+  gap: 24px; flex-wrap: wrap;
+}
+.logo-rail .logos > div {
+  font-family: var(--font-display); font-weight: 500; font-size: 22px;
+  letter-spacing: -0.01em; color: var(--ink-2);
+}
+.logo-rail .logos > div em { font-style: italic; font-weight: 400; color: var(--ink-3); }
+
+/* ============================================================
+   PRICING
+   ============================================================ */
+
+.price-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 24px; margin-top: 72px;
+}
+.price-card {
+  border-radius: var(--r-xl);
+  padding: 44px 40px 36px;
+  background: var(--cream-1);
+  border: 1px solid var(--sand);
+  position: relative;
+}
+.price-card.mid {
+  background: var(--ink);
+  color: oklch(0.96 0.015 70);
+  border-color: var(--ink);
+  box-shadow: var(--shadow-lift);
+  transform: translateY(-12px);
+}
+.price-card.mid .pitch { color: oklch(0.82 0.02 60); }
+.price-card.mid ul li { color: oklch(0.88 0.01 60); }
+.price-card.mid .amount { color: oklch(0.97 0.01 70); }
+.price-card.mid .per { color: oklch(0.72 0.01 60); }
+.price-card.mid .plan { color: var(--clay); }
+.price-card.mid::before {
+  content: "Most booked"; position: absolute; top: -1px; right: 32px;
+  transform: translateY(-50%);
+  font-family: var(--font-display); font-style: italic; font-size: 13px;
+  color: var(--accent-ink); background: var(--accent);
+  padding: 6px 16px; border-radius: 999px;
+}
+.price-card .plan {
+  font-family: var(--font-body); font-weight: 500;
+  font-size: 12px; letter-spacing: 0.22em;
+  color: var(--accent-deep); text-transform: uppercase;
+}
+.price-card .amount {
+  font-family: var(--font-display); font-weight: 400;
+  font-size: 64px; letter-spacing: -0.02em; line-height: 1;
+  margin: 24px 0 8px; color: var(--ink);
+  font-variation-settings: "opsz" 96;
+}
+.price-card .amount sup { font-size: 22px; vertical-align: super; color: var(--ink-2); font-weight: 400; margin-right: 2px; }
+.price-card .per { font-family: var(--font-display); font-style: italic; font-size: 14px; color: var(--ink-2); }
+.price-card p.pitch {
+  font-family: var(--font-display); font-style: italic;
+  font-size: 17px; color: var(--ink-2); margin: 22px 0 28px; max-width: 26ch;
+  line-height: 1.4;
+}
+.price-card ul { list-style: none; padding: 0; margin: 0 0 32px; }
+.price-card ul li {
+  display: flex; align-items: flex-start; gap: 12px;
+  font-size: 14.5px; color: var(--ink-2); padding: 10px 0;
+  border-top: 1px solid var(--line-soft);
+}
+.price-card.mid ul li { border-top-color: oklch(1 0 0 / 0.08); }
+.price-card ul li:first-child { border-top: 0; }
+.price-card ul li::before {
+  content: "";
+  width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18' fill='none'><path d='M3 9.5 L7 13.5 L15 5' stroke='%23739c5a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>") no-repeat center / contain;
+}
+.price-card.mid ul li::before {
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18' fill='none'><path d='M3 9.5 L7 13.5 L15 5' stroke='%23d9b48f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>") no-repeat center / contain;
+}
+.price-card .cta-row .btn { width: 100%; justify-content: space-between; }
+.price-card.mid .btn-ghost { background: transparent; color: oklch(0.96 0.015 70); border-color: oklch(1 0 0 / 0.18); }
+.price-card.mid .btn-ghost:hover { border-color: oklch(1 0 0 / 0.35); background: oklch(1 0 0 / 0.06); }
+
+/* ============================================================
+   CTA
+   ============================================================ */
+
+.cta {
+  position: relative;
+  border-radius: var(--r-xl);
+  padding: 120px 80px;
+  margin: 120px var(--sec-pad-x);
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 60% 80% at 88% 50%, oklch(0.82 0.10 55 / 0.5), transparent 65%),
+    radial-gradient(ellipse 50% 70% at 12% 90%, oklch(0.74 0.09 40 / 0.35), transparent 70%),
+    linear-gradient(160deg, var(--cream-2) 0%, var(--cream-1) 60%);
+  border: 1px solid var(--sand);
+}
+.cta-inner { position: relative; z-index: 1; max-width: 640px; }
+.cta-laurel { position: absolute; top: 48px; right: 56px; width: 120px; color: var(--accent); opacity: 0.8; }
+.cta .eyebrow { color: var(--accent-deep); }
+.cta h2 {
+  font-family: var(--font-display); font-weight: 400;
+  font-size: 76px; line-height: 0.98; letter-spacing: -0.02em;
+  margin: 20px 0 0; color: var(--ink);
+  font-variation-settings: "opsz" 144;
+}
+.cta h2 em { font-style: italic; font-weight: 500; color: var(--accent-deep); }
+.cta p {
+  font-family: var(--font-display); font-style: italic;
+  font-size: 21px; color: var(--ink-2);
+  margin: 28px 0 44px; max-width: 48ch;
+}
+.cta .actions { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.cta .actions .caption { font-family: var(--font-display); font-style: italic; font-size: 14px; color: var(--ink-3); }
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+
+.footer {
+  padding: 96px var(--sec-pad-x) 40px;
+  max-width: 1360px; margin: 0 auto;
+  background: var(--cream-2);
+}
+.footer-top {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1.2fr;
+  gap: 48px;
+  padding-bottom: 64px;
+  border-bottom: 1px solid var(--sand);
+}
+.footer .wordmark {
+  font-family: var(--font-display); font-weight: 500;
+  font-size: 36px; letter-spacing: -0.02em; color: var(--ink);
+  font-variation-settings: "opsz" 96;
+}
+.footer .wordmark em { font-style: italic; color: var(--accent-deep); }
+.footer .tag {
+  font-family: var(--font-display); font-style: italic;
+  font-size: 17px; color: var(--ink-2);
+  margin: 14px 0 24px; max-width: 32ch; line-height: 1.5;
+}
+.footer .hours {
+  font-size: 13px; color: var(--ink-2);
+}
+.footer .hours .line { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed var(--sand); }
+.footer .hours .line:last-child { border-bottom: 0; }
+.footer .hours .line b { font-family: var(--font-display); font-weight: 500; color: var(--ink); }
+
+.footer-col h4 {
+  font-size: 12px; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.2em;
+  color: var(--accent-deep); margin: 0 0 22px;
+}
+.footer-col ul { list-style: none; padding: 0; margin: 0; }
+.footer-col ul li {
+  font-family: var(--font-display);
+  font-size: 16px; color: var(--ink-2); padding: 6px 0;
+}
+.footer-col ul li:hover { color: var(--accent-deep); }
+
+.footer-news p {
+  font-family: var(--font-display); font-style: italic;
+  font-size: 15px; color: var(--ink-2);
+  margin: 0 0 14px;
+}
+.footer-news .news {
+  display: flex; border: 1px solid var(--sand);
+  border-radius: 999px; overflow: hidden; background: var(--cream);
+}
+.footer-news .news input {
+  flex: 1; border: 0; background: transparent;
+  padding: 12px 18px; font: inherit; font-size: 14px; outline: none; color: var(--ink);
+}
+.footer-news .news input::placeholder { color: var(--ink-3); }
+.footer-news .news button {
+  background: var(--ink); color: var(--cream);
+  padding: 0 22px; font-size: 14px;
+}
+
+.footer-bottom {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding-top: 36px;
+  font-family: var(--font-display);
+  font-style: italic; font-size: 14px; color: var(--ink-3);
+}
+
+/* ============================================================
+   TOKENS
+   ============================================================ */
+
+.tokens {
+  max-width: 980px;
+  margin: 120px auto 120px;
+  padding: 0 24px;
+}
+.tokens h2 {
+  font-family: var(--font-display); font-weight: 400;
+  font-size: 40px; letter-spacing: -0.015em; margin: 0 0 14px;
+  font-variation-settings: "opsz" 96;
+}
+.tokens h2 em { font-style: italic; color: var(--accent-deep); }
+.tokens p { color: var(--ink-2); max-width: 66ch; margin: 0 0 24px; }
+.tokens h3 {
+  font-size: 12px; font-weight: 500; letter-spacing: 0.2em;
+  color: var(--accent-deep); text-transform: uppercase;
+  margin: 40px 0 12px;
+}
+.tokens pre {
+  background: var(--cream-1);
+  border: 1px solid var(--sand);
+  border-radius: var(--r-lg);
+  padding: 28px 30px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12.5px; line-height: 1.75;
+  color: var(--ink-2);
+  overflow-x: auto;
+  white-space: pre;
+}
+.tokens .c { color: var(--ink-3); font-style: italic; }
+.tokens .k { color: var(--ink); font-weight: 500; }
+.tokens .v { color: var(--accent-deep); }
+
+/* ============================================================
+   PALETTES — user picks hue. Chroma + lightness are held.
+   Applied via [data-palette] on <html>.
+   ============================================================ */
+
+/* terracotta (default) — baked above; duplicated here for completeness */
+html[data-palette="terracotta"] {
+  --accent:      oklch(0.62 0.15 40);
+  --accent-deep: oklch(0.48 0.15 40);
+}
+html[data-palette="ochre"] {
+  --accent:      oklch(0.68 0.14 75);
+  --accent-deep: oklch(0.50 0.14 75);
+}
+html[data-palette="rose"] {
+  --accent:      oklch(0.64 0.14 10);
+  --accent-deep: oklch(0.48 0.14 10);
+}
+html[data-palette="moss"] {
+  --accent:      oklch(0.52 0.09 145);
+  --accent-deep: oklch(0.38 0.09 145);
+}
+html[data-palette="sage"] {
+  --accent:      oklch(0.60 0.06 155);
+  --accent-deep: oklch(0.42 0.07 155);
+}
+html[data-palette="plum"] {
+  --accent:      oklch(0.50 0.12 330);
+  --accent-deep: oklch(0.36 0.12 330);
+}
+html[data-palette="indigo"] {
+  --accent:      oklch(0.52 0.13 260);
+  --accent-deep: oklch(0.38 0.13 260);
+}
+html[data-palette="teal"] {
+  --accent:      oklch(0.56 0.08 195);
+  --accent-deep: oklch(0.40 0.09 195);
+}
+html[data-palette="charcoal"] {
+  --accent:      oklch(0.32 0.02 40);
+  --accent-deep: oklch(0.22 0.02 40);
+}
+
+/* The SVG swoop + sage check are hardcoded colors in data-URIs.
+   Recolor them with CSS filters keyed off palette so they track accent. */
+html[data-palette="moss"]    .hero h1 .swoop,
+html[data-palette="sage"]    .hero h1 .swoop,
+html[data-palette="indigo"]  .hero h1 .swoop,
+html[data-palette="teal"]    .hero h1 .swoop,
+html[data-palette="plum"]    .hero h1 .swoop,
+html[data-palette="charcoal"].hero h1 .swoop { filter: hue-rotate(0deg); } /* noop; swoop color overridden via mask below if needed */
+/* Swoop uses <currentColor>-independent data URI; regenerate via CSS mask to stay on-accent */
+.hero h1 .swoop {
+  background: none !important;
+  position: relative;
+}
+.hero h1 .swoop::after {
+  content: "";
+  position: absolute; left: -4px; right: -4px; bottom: -6px; height: 14px;
+  background: var(--accent-deep);
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 22' preserveAspectRatio='none'><path d='M4 16 C 60 4, 150 22, 230 8, 280 18, 316 6' fill='none' stroke='black' stroke-width='3' stroke-linecap='round'/></svg>") no-repeat center / 100% 100%;
+          mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 22' preserveAspectRatio='none'><path d='M4 16 C 60 4, 150 22, 230 8, 280 18, 316 6' fill='none' stroke='black' stroke-width='3' stroke-linecap='round'/></svg>") no-repeat center / 100% 100%;
+}
+/* Nav active underline — same treatment */
+.nav-links a.active::after {
+  background: var(--accent-deep) !important;
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 6' preserveAspectRatio='none'><path d='M1 4 C 15 1, 30 6, 45 2, 55 5' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round'/></svg>") no-repeat center / 100% 100%;
+          mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 6' preserveAspectRatio='none'><path d='M1 4 C 15 1, 30 6, 45 2, 55 5' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round'/></svg>") no-repeat center / 100% 100%;
+}
+
+/* ============================================================
+   VARIANTS — mood swap, same DNA.
+   Applied via [data-variant] on <html>.
+   ============================================================ */
+
+/* CLASSIC (default) — spacious, 84px hero, photo collage. Baked above. */
+
+/* CONDENSED — tighter rhythm, smaller hero, 3-photo grid. Same type, same colors. */
+html[data-variant="condensed"] {
+  --sec-pad-y: 96px;
+}
+html[data-variant="condensed"] .hero { padding-top: 56px; padding-bottom: 80px; gap: 48px; }
+html[data-variant="condensed"] .hero h1 { font-size: clamp(44px, 5.4vw, 68px); line-height: 1.02; }
+html[data-variant="condensed"] .hero .lede { font-size: 19px; margin-top: 24px; max-width: 44ch; }
+html[data-variant="condensed"] .hero-actions { margin-top: 28px; }
+html[data-variant="condensed"] .hero-trust { margin-top: 36px; padding-top: 20px; }
+html[data-variant="condensed"] .section-title { font-size: 44px; }
+html[data-variant="condensed"] .section-lede { font-size: 18px; }
+html[data-variant="condensed"] .features { margin-top: 48px; gap: 20px; }
+html[data-variant="condensed"] .feature { padding: 28px 26px 26px; }
+html[data-variant="condensed"] .feature .n { font-size: 36px; margin-bottom: 14px; }
+html[data-variant="condensed"] .feature h3 { font-size: 22px; margin-bottom: 10px; }
+html[data-variant="condensed"] .feature p { font-size: 14.5px; }
+html[data-variant="condensed"] .testi { margin-top: 48px; gap: 18px; }
+html[data-variant="condensed"] .testi-card { padding: 28px 28px 24px; }
+html[data-variant="condensed"] .testi-card.lg { padding: 36px 36px 30px; }
+html[data-variant="condensed"] .testi-card blockquote { font-size: 18px; }
+html[data-variant="condensed"] .testi-card.lg blockquote { font-size: 22px; }
+html[data-variant="condensed"] .price-card { padding: 32px 28px 28px; }
+html[data-variant="condensed"] .price-card .amount { font-size: 52px; }
+html[data-variant="condensed"] .cta { padding: 80px 64px; margin-top: 64px; margin-bottom: 64px; }
+html[data-variant="condensed"] .cta h2 { font-size: 56px; }
+/* Condensed hero: collapse the collage to a simpler 2-photo arrangement */
+html[data-variant="condensed"] .hero-art { aspect-ratio: 5/4; }
+html[data-variant="condensed"] .photo-main { inset: 0 0 0 18%; border-radius: 28px; }
+html[data-variant="condensed"] .photo-tl { top: 0; left: 0; width: 34%; height: 100%; border-radius: 28px; }
+html[data-variant="condensed"] .photo-br { display: none; }
+html[data-variant="condensed"] .photo-caption { top: auto; bottom: 6%; right: 4%; }
+
+/* EDITORIAL — asymmetric hero, bigger italic display, drop-caps, rule lines.
+   Fraunces even more theatrical. */
+html[data-variant="editorial"] {
+  --r-lg: 4px;
+  --r-xl: 6px;
+  --r-md: 4px;
+  --r-sm: 2px;
+  --sec-pad-y: 160px;
+}
+/* Hero: stack copy wide, photo smaller and offset */
+html[data-variant="editorial"] .hero {
+  grid-template-columns: 1.6fr 1fr;
+  gap: 80px;
+  padding-bottom: 160px;
+}
+html[data-variant="editorial"] .hero h1 {
+  font-size: clamp(64px, 9vw, 128px);
+  line-height: 0.92;
+  letter-spacing: -0.035em;
+  font-style: italic;
+  font-weight: 400;
+}
+html[data-variant="editorial"] .hero h1 .swoop { font-style: italic; color: var(--ink); }
+html[data-variant="editorial"] .hero h1 .swoop::after { display: none; }
+html[data-variant="editorial"] .hero .lede {
+  font-style: normal; font-family: var(--font-body); font-size: 17px;
+  border-top: 1px solid var(--ink); padding-top: 20px; max-width: 52ch;
+  column-count: 2; column-gap: 28px;
+}
+html[data-variant="editorial"] .hero-top {
+  background: transparent; border: 0; padding: 0;
+  border-bottom: 1px solid var(--ink); border-radius: 0;
+  padding-bottom: 12px; margin-bottom: 40px; width: fit-content;
+}
+html[data-variant="editorial"] .hero-art { aspect-ratio: 3/4; }
+html[data-variant="editorial"] .photo-main { border-radius: 4px; inset: 0; }
+html[data-variant="editorial"] .photo-tl,
+html[data-variant="editorial"] .photo-br { display: none; }
+html[data-variant="editorial"] .photo-caption {
+  border-radius: 0; border: 0; border-left: 2px solid var(--accent);
+  background: var(--cream); bottom: 6%; top: auto; right: auto; left: -40px;
+}
+/* Section headings — editorial uses drop-rule above, huge italic serif */
+html[data-variant="editorial"] .section-title {
+  font-size: clamp(48px, 6vw, 88px);
+  font-style: italic; font-weight: 400; letter-spacing: -0.03em;
+  max-width: 24ch;
+  border-top: 1px solid var(--ink);
+  padding-top: 28px;
+}
+html[data-variant="editorial"] .section-lede {
+  font-family: var(--font-body); font-style: normal; font-size: 17px;
+  max-width: 64ch;
+}
+html[data-variant="editorial"] .eyebrow::before,
+html[data-variant="editorial"] .eyebrow::after { display: none; }
+html[data-variant="editorial"] .eyebrow {
+  font-family: var(--font-display); font-style: italic; font-weight: 400;
+  font-size: 16px; text-transform: none; letter-spacing: 0;
+  color: var(--accent-deep);
+}
+html[data-variant="editorial"] .feature {
+  background: transparent; border: 0; border-top: 1px solid var(--ink);
+  border-radius: 0; padding: 32px 0 0 0;
+}
+html[data-variant="editorial"] .feature .n {
+  font-size: 22px; font-style: normal; font-weight: 500;
+  font-family: var(--font-body); color: var(--ink-3);
+  letter-spacing: 0.04em;
+}
+html[data-variant="editorial"] .feature h3 {
+  font-size: 34px; font-weight: 400; font-style: italic;
+  line-height: 1.1; letter-spacing: -0.02em;
+}
+html[data-variant="editorial"] .feature p:first-letter {
+  font-family: var(--font-display); font-size: 3.2em;
+  float: left; line-height: 0.95; padding: 4px 10px 0 0;
+  color: var(--accent-deep); font-weight: 500;
+}
+html[data-variant="editorial"] .testi-card {
+  background: transparent; border: 0;
+  border-top: 1px solid var(--ink);
+  border-radius: 0; padding: 32px 0 28px 0;
+}
+html[data-variant="editorial"] .testi-card.lg { background: transparent; padding: 40px 0 36px 0; }
+html[data-variant="editorial"] .testi-card blockquote { font-style: italic; }
+html[data-variant="editorial"] .price-card {
+  background: transparent; border: 0;
+  border-top: 1px solid var(--ink);
+  border-radius: 0; padding: 32px 24px 32px 0;
+}
+html[data-variant="editorial"] .price-card.mid {
+  background: var(--ink); border-radius: 4px; padding: 32px;
+  border-top: 0;
+}
+html[data-variant="editorial"] .price-card .amount { font-style: italic; }
+html[data-variant="editorial"] .cta { border-radius: 6px; }
+html[data-variant="editorial"] .cta h2 { font-style: italic; font-size: 88px; }
+html[data-variant="editorial"] .btn { border-radius: 4px; }
+html[data-variant="editorial"] .hero-top span:last-child { font-family: var(--font-display); font-style: italic; }
+
+/* ————— Responsive ————— */
+@media (max-width: 1060px) {
+  .hero { grid-template-columns: 1fr; gap: 48px; padding-top: 48px; padding-bottom: 72px; }
+  .hero-art { aspect-ratio: 5/4; max-width: 640px; }
+  .features { grid-template-columns: 1fr; }
+  .testi-card.lg, .testi-card.sm { grid-column: span 12; }
+  .price-grid { grid-template-columns: 1fr; }
+  .price-card.mid { transform: none; }
+  .footer-top { grid-template-columns: 1fr 1fr; }
+  .logo-rail .logos { justify-content: center; }
+}
+@media (max-width: 720px) {
+  :root { --sec-pad-y: 88px; }
+  .doc { padding: 72px 24px; }
+  .doc-title { font-size: 56px; }
+  .section-title { font-size: 40px; }
+  .cta { padding: 72px 36px; margin: 80px 24px; }
+  .cta h2 { font-size: 48px; }
+  .cta-laurel { width: 80px; top: 32px; right: 32px; }
+  .doc-meta { grid-template-columns: repeat(2, 1fr); }
+  .swatch-grid { grid-template-columns: repeat(3, 1fr); }
+  .spec-table .row { grid-template-columns: 60px 1fr 80px; }
+  .spec-table .row > *:nth-child(4),
+  .spec-table .row > *:nth-child(5) { display: none; }
+}
+
+/* ============================================================
+   SWITCHER — floating control for palette + variant.
+   ============================================================ */
+.switcher {
+  position: fixed; top: 20px; right: 20px; z-index: 100;
+  background: var(--cream);
+  border: 1px solid var(--sand);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lift);
+  padding: 14px 16px 16px;
+  width: 280px;
+  font-family: var(--font-body);
+}
+.switcher-title {
+  font-size: 10px; font-weight: 500;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--accent-deep);
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 10px;
+}
+.switcher-title::before { content: ""; width: 14px; height: 1px; background: var(--accent); }
+.switcher-title::after  { content: ""; flex: 1; height: 1px; background: var(--sand); }
+.switcher-label {
+  font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--ink-3); font-weight: 500;
+  margin: 10px 0 8px;
+}
+.switcher-palettes {
+  display: grid; grid-template-columns: repeat(9, 1fr); gap: 6px;
+}
+.switcher-palettes button {
+  aspect-ratio: 1; border-radius: 50%;
+  border: 2px solid transparent;
+  padding: 0;
+  cursor: pointer;
+  transition: transform 160ms ease, border-color 160ms ease;
+}
+.switcher-palettes button:hover { transform: scale(1.12); }
+.switcher-palettes button[aria-pressed="true"] {
+  border-color: var(--ink);
+  transform: scale(1.08);
+}
+.switcher-variants { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+.switcher-variants button {
+  font-family: var(--font-body); font-size: 12px; font-weight: 500;
+  padding: 9px 8px;
+  border: 1px solid var(--sand);
+  background: transparent;
+  color: var(--ink-2);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 160ms ease;
+}
+.switcher-variants button:hover { color: var(--ink); border-color: var(--ink-3); }
+.switcher-variants button[aria-pressed="true"] {
+  background: var(--ink); color: var(--cream); border-color: var(--ink);
+}
+.switcher-caption {
+  font-family: var(--font-display); font-style: italic;
+  font-size: 12px; color: var(--ink-3);
+  margin-top: 12px; padding-top: 10px;
+  border-top: 1px dashed var(--sand);
+  line-height: 1.4;
+}
+.switcher-caption b { font-family: var(--font-body); font-style: normal; font-weight: 500; color: var(--ink-2); }
+@media (max-width: 720px) {
+  .switcher { top: auto; bottom: 12px; right: 12px; left: 12px; width: auto; }
+  .switcher-palettes { grid-template-columns: repeat(9, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     SWITCHER — palette + variant
+     ============================================================ -->
+<aside class="switcher" aria-label="Hearth design system controls">
+  <div class="switcher-title">Hearth · controls</div>
+
+  <div class="switcher-label">Palette</div>
+  <div class="switcher-palettes" role="radiogroup" aria-label="Accent palette">
+    <button data-set-palette="terracotta" style="background: oklch(0.62 0.15 40)"  title="Terracotta" aria-label="Terracotta"></button>
+    <button data-set-palette="ochre"      style="background: oklch(0.68 0.14 75)"  title="Ochre"      aria-label="Ochre"></button>
+    <button data-set-palette="rose"       style="background: oklch(0.64 0.14 10)"  title="Rose"       aria-label="Rose"></button>
+    <button data-set-palette="moss"       style="background: oklch(0.52 0.09 145)" title="Moss"       aria-label="Moss"></button>
+    <button data-set-palette="sage"       style="background: oklch(0.60 0.06 155)" title="Sage"       aria-label="Sage"></button>
+    <button data-set-palette="plum"       style="background: oklch(0.50 0.12 330)" title="Plum"       aria-label="Plum"></button>
+    <button data-set-palette="indigo"     style="background: oklch(0.52 0.13 260)" title="Indigo"     aria-label="Indigo"></button>
+    <button data-set-palette="teal"       style="background: oklch(0.56 0.08 195)" title="Teal"       aria-label="Teal"></button>
+    <button data-set-palette="charcoal"   style="background: oklch(0.32 0.02 40)"  title="Charcoal"   aria-label="Charcoal"></button>
+  </div>
+
+  <div class="switcher-label">Variant</div>
+  <div class="switcher-variants" role="radiogroup" aria-label="Style variant">
+    <button data-set-variant="classic"    title="Spacious · serif hero · photo collage">Classic</button>
+    <button data-set-variant="condensed"  title="Tighter rhythm · smaller hero · simpler imagery">Condensed</button>
+    <button data-set-variant="editorial"  title="Asymmetric · italic display · magazine lines">Editorial</button>
+  </div>
+
+  <div class="switcher-caption" id="switcherCaption">
+    <b>Classic</b> · the house default — spacious, photo-led, italic serif doing the emotional work.
+  </div>
+</aside>
+
+<script>
+(() => {
+  const root = document.documentElement;
+  const KEY_P = "hearth.palette";
+  const KEY_V = "hearth.variant";
+
+  const VARIANT_DESC = {
+    classic:   "<b>Classic</b> · the house default — spacious, photo-led, italic serif doing the emotional work.",
+    condensed: "<b>Condensed</b> · tighter rhythm for info-dense service pages. Same voice, less breath.",
+    editorial: "<b>Editorial</b> · asymmetric hero, huge italic display, magazine rule-lines. For studios selling taste.",
+  };
+
+  // hydrate from storage
+  try {
+    const p = localStorage.getItem(KEY_P);
+    const v = localStorage.getItem(KEY_V);
+    if (p) root.setAttribute("data-palette", p);
+    if (v) root.setAttribute("data-variant", v);
+  } catch {}
+
+  const syncPressed = () => {
+    const p = root.getAttribute("data-palette") || "terracotta";
+    const v = root.getAttribute("data-variant") || "classic";
+    document.querySelectorAll("[data-set-palette]").forEach(b =>
+      b.setAttribute("aria-pressed", b.dataset.setPalette === p)
+    );
+    document.querySelectorAll("[data-set-variant]").forEach(b =>
+      b.setAttribute("aria-pressed", b.dataset.setVariant === v)
+    );
+    const cap = document.getElementById("switcherCaption");
+    if (cap) cap.innerHTML = VARIANT_DESC[v] || VARIANT_DESC.classic;
+  };
+
+  document.querySelectorAll("[data-set-palette]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      root.setAttribute("data-palette", btn.dataset.setPalette);
+      try { localStorage.setItem(KEY_P, btn.dataset.setPalette); } catch {}
+      syncPressed();
+    });
+  });
+  document.querySelectorAll("[data-set-variant]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      root.setAttribute("data-variant", btn.dataset.setVariant);
+      try { localStorage.setItem(KEY_V, btn.dataset.setVariant); } catch {}
+      syncPressed();
+    });
+  });
+
+  syncPressed();
+})();
+</script>
+
+<!-- ============================================================
+     SPEC DOC
+     ============================================================ -->
+<div class="doc">
+  <header class="doc-header">
+    <div class="doc-eyebrow">02 — Lessgo Design Library · Warm Service</div>
+    <h1 class="doc-title">Hearth<em>,</em></h1>
+    <p class="doc-sub">A light-native, photo-led system for agencies, coaches, course creators, and local service. Serif display doing the emotional work. Warm cream surfaces, organic radii, one terracotta accent used with care.</p>
+    <dl class="doc-meta">
+      <div><dt>ICP</dt><dd>Agencies · coaches · service</dd></div>
+      <div><dt>Mode</dt><dd>Light-native</dd></div>
+      <div><dt>Density</dt><dd>Spacious</dd></div>
+      <div><dt>References</dt><dd>Ueno, Fable, Craft&Thought</dd></div>
+    </dl>
+  </header>
+
+  <!-- 1 Identity -->
+  <section>
+    <h2><span class="n">01 — Identity</span>Who this is for &amp; how it should feel.</h2>
+    <p class="dek">Warm, unhurried, human. Designed to make a small studio read as considered, not thin.</p>
+    <p>Hearth is for people who sell work they made with their hands — boutique agencies, one-human design studios, coaches, florists, garden designers, interior photographers, yoga teachers. The page should feel like stepping into a well-lit room, not a landing page. Where Meridian decorates with structure, Hearth decorates with <em>breath</em>: generous margins, italic serif for feeling, one hand-drawn mark, real photography framed with soft asymmetric radii.</p>
+    <p class="callout">It's a letter, not a brochure. The type does the tone, the photography carries the proof, the accent shows up only where it earns its place.</p>
+  </section>
+
+  <!-- 2 Typography -->
+  <section>
+    <h2><span class="n">02 — Typography</span>Typography carries the warmth.</h2>
+
+    <h3>Pairing</h3>
+    <ul>
+      <li><span class="mono">Fraunces</span> — display, variable. Optical size 144 at hero, 96 at section titles. <em>SOFT</em> axis 50. Italic is a deliberate rhetorical move, not an afterthought.</li>
+      <li><span class="mono">DM Sans</span> — body. Modern, warm-neutral humanist. Keeps paragraphs readable without competing with the serif.</li>
+      <li><em>No mono.</em> This system is not about machines.</li>
+    </ul>
+
+    <h3>Display scale (desktop / mobile)</h3>
+    <div class="spec-table">
+      <div class="row head"><div>role</div><div>sample</div><div>desktop</div><div>mobile</div><div>tracking</div></div>
+      <div class="row"><div>D1</div><div class="sample" style="font-size: 32px; font-variation-settings: 'opsz' 144;">Bring your garden <em style="color:var(--accent-deep);font-weight:500">to life.</em></div><div>84 / 0.98</div><div>52 / 1.02</div><div>-1.5%</div></div>
+      <div class="row"><div>D2</div><div class="sample" style="font-size: 26px; font-variation-settings: 'opsz' 96;">Section headline</div><div>56 / 1.05</div><div>38 / 1.1</div><div>-1.2%</div></div>
+      <div class="row"><div>D3</div><div class="sample" style="font-size: 20px; font-weight: 500;">Card title treatment</div><div>38 / 1.1</div><div>26 / 1.2</div><div>-1%</div></div>
+      <div class="row"><div>D4</div><div class="sample" style="font-size: 17px; font-weight: 500;">Feature subhead</div><div>26 / 1.25</div><div>20 / 1.3</div><div>-0.8%</div></div>
+    </div>
+
+    <h3>Body scale</h3>
+    <div class="spec-table">
+      <div class="row head"><div>role</div><div>sample</div><div>size</div><div>lh</div><div>weight</div></div>
+      <div class="row"><div>XL</div><div class="sample" style="font-size: 21px; font-style: italic; font-weight: 400;">Lede — italic serif under D2</div><div>21</div><div>1.5</div><div>400i</div></div>
+      <div class="row"><div>L</div><div class="sample" style="font-family: 'DM Sans'; font-size: 17px;">Primary body, DM Sans</div><div>17</div><div>1.6</div><div>400</div></div>
+      <div class="row"><div>M</div><div class="sample" style="font-family: 'DM Sans'; font-size: 15px;">Card body</div><div>15</div><div>1.6</div><div>400</div></div>
+      <div class="row"><div>SM</div><div class="sample" style="font-family: 'DM Sans'; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase;">Eyebrow · meta · caption</div><div>13</div><div>1.4</div><div>500</div></div>
+    </div>
+
+    <h3>Semantic roles</h3>
+    <ul>
+      <li><span class="mono">eyebrow</span> — 12px DM Sans 500, tracking +0.22em, uppercase, <span class="mono">accent-deep</span>. Bookended with tiny horizontal rules in accent.</li>
+      <li><span class="mono">lede</span> — 21–22px Fraunces <em>italic</em> 400. Always italic. Max 56ch.</li>
+      <li><span class="mono">body</span> — 15–17px DM Sans 400, <span class="mono">ink-2</span>.</li>
+      <li><span class="mono">quote</span> — 22–30px Fraunces 400. Preceded by a large italic quotation mark in <span class="mono">accent</span>.</li>
+      <li><span class="mono">meta</span> — 13–14px Fraunces italic, <span class="mono">ink-3</span>. Roles, hours, credits.</li>
+    </ul>
+
+    <div class="sample-display">
+      <div class="s-label">D1 · hero at real scale</div>
+      <div class="s-d1">Bring your garden <em>to life.</em></div>
+    </div>
+    <div class="sample-display">
+      <div class="s-label">D2 · D3 · D4</div>
+      <div class="s-d2">Designed for the way you <em style="font-style:italic;color:var(--accent-deep);font-weight:500">actually</em> live outside.</div>
+      <div class="s-d3" style="margin-top: 20px; color: var(--ink-2);">From first visit to last bloom.</div>
+      <div class="s-d4" style="margin-top: 14px; color: var(--ink-2);">A considered process for a considered garden.</div>
+    </div>
+  </section>
+
+  <!-- 3 Color -->
+  <section>
+    <h2><span class="n">03 — Color</span>Cream carries the page. Accent is the salt.</h2>
+
+    <h3>Warm neutral palette</h3>
+    <div class="swatch-grid">
+      <div class="swatch"><div class="chip" style="background: oklch(0.97 0.015 80)"></div><div class="lbl"><b>cream</b><span>0.97</span></div></div>
+      <div class="swatch"><div class="chip" style="background: oklch(0.95 0.02 75)"></div><div class="lbl"><b>cream-1</b><span>0.95</span></div></div>
+      <div class="swatch"><div class="chip" style="background: oklch(0.92 0.025 72)"></div><div class="lbl"><b>cream-2</b><span>0.92</span></div></div>
+      <div class="swatch"><div class="chip" style="background: oklch(0.84 0.03 70)"></div><div class="lbl"><b>sand</b><span>0.84</span></div></div>
+      <div class="swatch"><div class="chip" style="background: oklch(0.22 0.02 40)"></div><div class="lbl" style="background: var(--ink-2)"><b style="color: var(--cream)">ink</b><span style="color: var(--cream-2)">0.22</span></div></div>
+    </div>
+
+    <h3>Accent</h3>
+    <p>A single warm accent. The user picks hue; we hold chroma (0.15) and lightness (0.62) so the accent always harmonizes with cream. Default: terracotta <span class="mono">oklch(0.62 0.15 40)</span>.</p>
+    <div class="swatch-grid" style="grid-template-columns: repeat(4, 1fr);">
+      <div class="swatch"><div class="chip" style="background: oklch(0.62 0.15 40)"></div><div class="lbl"><b>terracotta</b><span>40°</span></div></div>
+      <div class="swatch"><div class="chip" style="background: oklch(0.62 0.15 70)"></div><div class="lbl"><b>ochre</b><span>70°</span></div></div>
+      <div class="swatch"><div class="chip" style="background: oklch(0.62 0.15 350)"></div><div class="lbl"><b>rose</b><span>350°</span></div></div>
+      <div class="swatch"><div class="chip" style="background: oklch(0.52 0.09 150)"></div><div class="lbl"><b>moss</b><span>150°</span></div></div>
+    </div>
+
+    <h3>Accent usage rules</h3>
+    <ul>
+      <li><b>Allowed:</b> primary button fill, hand-drawn underline swoop under one hero word, quotation marks, numeric "01" in features, active nav underline, footer em-word, pricing "most booked" badge, link hover.</li>
+      <li><b>Forbidden:</b> body text color, card fills, section backgrounds (use cream variants), accent icons sprinkled across a grid.</li>
+      <li><b>Budget:</b> ≤ 8% of the visual weight of any viewport.</li>
+    </ul>
+
+    <h3>Text tone ladder</h3>
+    <div class="spec-table">
+      <div class="row head"><div>role</div><div>use</div><div>hex / L</div><div>on cream</div><div>on ink</div></div>
+      <div class="row"><div>fg-1</div><div>headlines, primary body</div><div>L 0.22</div><div>AAA</div><div>n/a</div></div>
+      <div class="row"><div>fg-2</div><div>ledes, secondary body</div><div>L 0.42</div><div>AA+</div><div>—</div></div>
+      <div class="row"><div>fg-3</div><div>meta, caption</div><div>L 0.58</div><div>AA (14px+)</div><div>—</div></div>
+    </div>
+  </section>
+
+  <!-- 4 Spacing -->
+  <section>
+    <h2><span class="n">04 — Spacing &amp; density</span>Spacious. Breath is the luxury.</h2>
+    <div class="spec-table">
+      <div class="row head"><div>token</div><div>use</div><div>value</div><div>—</div><div>—</div></div>
+      <div class="row"><div>s-2</div><div>icon ↔ label</div><div>8px</div><div></div><div></div></div>
+      <div class="row"><div>s-4</div><div>inline group</div><div>16px</div><div></div><div></div></div>
+      <div class="row"><div>s-6</div><div>stacked</div><div>32px</div><div></div><div></div></div>
+      <div class="row"><div>s-7</div><div>card gap</div><div>48px</div><div></div><div></div></div>
+      <div class="row"><div>s-8</div><div>card padding</div><div>36–44px</div><div></div><div></div></div>
+      <div class="row"><div>s-10</div><div>section y · desktop</div><div>140px</div><div></div><div></div></div>
+      <div class="row"><div>s-10·m</div><div>section y · mobile</div><div>88px</div><div></div><div></div></div>
+    </div>
+  </section>
+
+  <!-- 5 Radius + elevation -->
+  <section>
+    <h2><span class="n">05 — Radius &amp; elevation</span>Organic-soft. Warm shadows, not hairlines.</h2>
+    <div class="spec-table">
+      <div class="row head"><div>token</div><div>element</div><div>value</div><div>—</div><div>—</div></div>
+      <div class="row"><div>r-sm</div><div>inputs, badges</div><div>10px</div><div></div><div></div></div>
+      <div class="row"><div>r-md</div><div>buttons</div><div>14px</div><div></div><div></div></div>
+      <div class="row"><div>r-lg</div><div>cards</div><div>20px</div><div></div><div></div></div>
+      <div class="row"><div>r-xl</div><div>media, pricing, CTA</div><div>28px</div><div></div><div></div></div>
+      <div class="row"><div>r-petal</div><div>hero hero photo only</div><div>120 / 120 / 24 / 120</div><div></div><div></div></div>
+    </div>
+    <h3>Elevation</h3>
+    <p>Shadows are warm-tinted (hue 40) and always soft. Never cool-gray, never 2xl-stacked. Two levels only:</p>
+    <p class="mono" style="background: var(--cream-1); padding: 10px 14px; border-radius: 6px; display: block; max-width: 100%; overflow-x: auto;">--shadow-card: 0 20px 40px -24px oklch(0.30 0.04 40 / 0.18), 0 2px 4px -1px oklch(0.30 0.04 40 / 0.06);</p>
+    <p class="mono" style="background: var(--cream-1); padding: 10px 14px; border-radius: 6px; display: block; max-width: 100%; overflow-x: auto;">--shadow-lift: 0 40px 70px -30px oklch(0.30 0.04 40 / 0.22), 0 6px 14px -4px oklch(0.30 0.04 40 / 0.10);</p>
+  </section>
+
+  <!-- 6 Decorative -->
+  <section>
+    <h2><span class="n">06 — Decorative layer</span>Hand-drawn, used once.</h2>
+    <ul>
+      <li><b>The swoop.</b> A hand-drawn SVG underline beneath exactly one italic word in the hero. Never reused as a divider or decoration elsewhere.</li>
+      <li><b>Eyebrow rules.</b> Two 28px hairlines flanking every eyebrow in accent. Replaces plain uppercase labels.</li>
+      <li><b>Photo collage.</b> Hero is a 3-photo arrangement with one large petal-radius anchor and two smaller asymmetric crops. Every other section uses rectangular <span class="mono">r-lg</span> photos.</li>
+      <li><b>Laurel sprig.</b> A thin-stroke SVG botanical sits in the CTA, top-right, and nowhere else.</li>
+      <li><b>Warm gradient.</b> The closing CTA uses a subtle peach radial glow — the only gradient in the system. Sections are solid cream variants.</li>
+    </ul>
+    <p class="callout">When in doubt, leave it plain. A well-set italic word is more decoration than a dozen ornaments.</p>
+  </section>
+
+  <!-- 7 Components -->
+  <section>
+    <h2><span class="n">07 — Components</span>Button, form, card, badge, iconography.</h2>
+
+    <h3>Buttons</h3>
+    <ul>
+      <li><b>Primary</b> — accent fill, cream text, 14px 22px, 14px radius, warm accent shadow. Hover: <span class="mono">accent-deep</span>, lift 1px.</li>
+      <li><b>Ghost</b> — cream fill, 1px sand border. Hover: border <span class="mono">ink-3</span>, bg <span class="mono">cream-1</span>.</li>
+      <li><b>Quiet</b> — text only. For secondary nav, footer.</li>
+      <li><b>Small</b> — 10px 16px, 10px radius.</li>
+    </ul>
+
+    <h3>Form input</h3>
+    <p>Filled cream, 1px sand border, 10px radius. Focus: border pulls to <span class="mono">accent</span>, no glow. Labels above, not floating.</p>
+
+    <h3>Cards</h3>
+    <ul>
+      <li><b>Flat</b> — cream-1 bg, 1px sand border, 20px radius. Default.</li>
+      <li><b>Inverted</b> — ink bg, cream text. Used for <em>exactly one</em> pricing tier (the middle).</li>
+      <li><b>Photo card</b> — image at r-lg, caption in Fraunces italic below.</li>
+    </ul>
+
+    <h3>Badges</h3>
+    <p>Pill. Italic Fraunces 13px. Accent fill + cream ink for status. Sand bg + ink-2 for neutral.</p>
+
+    <h3>Iconography</h3>
+    <p>Lucide is too uniform here. Preferred: <b>number glyphs</b> (italic Fraunces "01", "02", etc.) at card scale; <b>hand-drawn marks</b> (the swoop, the laurel) where a figurative icon would be; <b>sage checkmarks</b> in pricing. No icon grids. No 48px Lucide illustrations.</p>
+  </section>
+</div>
+
+<!-- ============================================================
+     SECTION 8 — RENDERED MOCKUPS
+     ============================================================ -->
+
+<!-- HEADER + HERO -->
+<div class="stage">
+  <div class="stage-header">
+    <div class="stage-n">08 / a</div>
+    <div class="stage-title">Header + Hero</div>
+    <div class="stage-note">photo collage · swoop under one italic word</div>
+  </div>
+  <div class="frame">
+    <nav class="nav">
+      <div style="display: flex; align-items: center; gap: 40px;">
+        <div class="brand"><div class="brand-mark">h</div>hearth <em style="font-style: italic; color: var(--accent-deep);">&amp; fern</em></div>
+        <div class="nav-links">
+          <a class="active">Work</a><a>Services</a><a>Process</a><a>Journal</a><a>About</a>
+        </div>
+      </div>
+      <div class="nav-right">
+        <a class="btn btn-quiet btn-sm">(415) 555‑0142</a>
+        <a class="btn btn-primary btn-sm">Book a visit</a>
+      </div>
+    </nav>
+
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="hero-top">
+          <span class="pip"></span>
+          <span>Booking summer installs — <em>3 spots left</em></span>
+        </div>
+
+        <h1>Bring your garden <span class="swoop">to life</span>.</h1>
+
+        <p class="lede">Hearth &amp; Fern is a three-person studio in the Bay Area designing gardens that feel lived-in from the first season. We visit, we sketch, we plant, we stay.</p>
+
+        <div class="hero-actions">
+          <a class="btn btn-primary btn-lg">Book a garden visit <span class="arrow">→</span></a>
+          <a class="btn btn-ghost btn-lg">See recent gardens</a>
+          <span class="caption">Free 45-minute consult</span>
+        </div>
+
+        <div class="hero-trust">
+          <div class="avatars">
+            <div class="a" style="background: linear-gradient(135deg, oklch(0.78 0.08 55), oklch(0.62 0.12 40));"></div>
+            <div class="a" style="background: linear-gradient(135deg, oklch(0.82 0.06 90), oklch(0.55 0.08 135));"></div>
+            <div class="a" style="background: linear-gradient(135deg, oklch(0.85 0.04 350), oklch(0.62 0.12 40));"></div>
+            <div class="a" style="background: linear-gradient(135deg, oklch(0.80 0.07 60), oklch(0.50 0.06 130));"></div>
+          </div>
+          <div class="r">
+            <span class="stars">★★★★★</span>
+            <em>4.9</em> from 180 clients · <em>est. 2017</em>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-art" aria-hidden="true">
+        <div class="photo photo-tl"></div>
+        <div class="photo photo-br"></div>
+        <div class="photo photo-main"></div>
+        <div class="photo-caption">
+          <div class="dot"></div>
+          <div>
+            <div class="t">Mission District</div>
+            <div class="s">May 2025 · backyard rebuild</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<div class="stage">
+  <div class="stage-header">
+    <div class="stage-n">08 / b</div>
+    <div class="stage-title">Features — "How we work"</div>
+    <div class="stage-note">numeric italic glyphs · no icon grid</div>
+  </div>
+  <div class="frame">
+    <section class="section on-cream-2">
+      <div class="eyebrow">Our approach</div>
+      <h2 class="section-title">A process built for <em>stays</em>, not just installs.</h2>
+      <p class="section-lede">Every garden we design is visited four times over the first year. The best gardens are the ones we stay close to.</p>
+
+      <div class="features">
+        <article class="feature">
+          <div class="n">01.</div>
+          <h3>We visit first.</h3>
+          <p>Before we sketch, we walk your site through three seasons of photos and one real afternoon. The garden already has opinions — we listen.</p>
+          <div class="tag">—  visit + brief</div>
+        </article>
+        <article class="feature">
+          <div class="n">02.</div>
+          <h3>We sketch by hand.</h3>
+          <p>Plans live on paper before pixels. You get three routes through the same site, each grown from a different idea about how you'd use it.</p>
+          <div class="tag">—  concept + plan</div>
+        </article>
+        <article class="feature">
+          <div class="n">03.</div>
+          <h3>We plant it, and we stay.</h3>
+          <p>Our crew installs, then returns in month 3, 6, and 12. Plants move. We move them back. You get a garden, not a photograph of one.</p>
+          <div class="tag">—  install + tend</div>
+        </article>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- TESTIMONIALS -->
+<div class="stage">
+  <div class="stage-header">
+    <div class="stage-n">08 / c</div>
+    <div class="stage-title">Testimonials + logo rail</div>
+    <div class="stage-note">12-col mixed sizes · large hero quote</div>
+  </div>
+  <div class="frame">
+    <section class="section">
+      <div class="eyebrow">Kind words</div>
+      <h2 class="section-title">From the clients whose gardens we still visit.</h2>
+
+      <div class="testi">
+        <article class="testi-card lg">
+          <div class="mark">"</div>
+          <blockquote>They treated our small yard like it was the only project on the books. A year in, the roses are exactly where they should be — and so are we, on the patio most evenings.</blockquote>
+          <div class="who">
+            <div class="avatar-photo" style="background-image: linear-gradient(135deg, oklch(0.82 0.06 50), oklch(0.55 0.1 40));"></div>
+            <div><div class="name">Ava &amp; Miles Okafor</div><div class="role">Noe Valley · client since 2023</div></div>
+          </div>
+        </article>
+        <article class="testi-card sm">
+          <div class="mark">"</div>
+          <blockquote>I asked for "a little wild." They heard me exactly right.</blockquote>
+          <div class="who">
+            <div class="avatar-photo" style="background-image: linear-gradient(135deg, oklch(0.8 0.05 90), oklch(0.55 0.08 135));"></div>
+            <div><div class="name">Leah Harmon</div><div class="role">Marin · cottage garden</div></div>
+          </div>
+        </article>
+        <article class="testi-card sm">
+          <div class="mark">"</div>
+          <blockquote>The 6-month visit is the part nobody else offers, and the part that made everything work.</blockquote>
+          <div class="who">
+            <div class="avatar-photo" style="background-image: linear-gradient(135deg, oklch(0.85 0.04 350), oklch(0.62 0.1 40));"></div>
+            <div><div class="name">Ben Dreiser</div><div class="role">Berkeley · front &amp; side</div></div>
+          </div>
+        </article>
+      </div>
+
+      <div class="logo-rail">
+        <div class="lbl">— Featured in —</div>
+        <div class="logos">
+          <div>Garden<em>Design</em></div>
+          <div>Dwell</div>
+          <div>Sunset</div>
+          <div>Remodelista</div>
+          <div>The <em>Cut</em></div>
+          <div>Apartment Therapy</div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- PRICING -->
+<div class="stage">
+  <div class="stage-header">
+    <div class="stage-n">08 / d</div>
+    <div class="stage-title">Pricing — "Services"</div>
+    <div class="stage-note">middle tier inverts to ink · sage checks</div>
+  </div>
+  <div class="frame">
+    <section class="section on-cream-2">
+      <div class="eyebrow">Services</div>
+      <h2 class="section-title">Three ways to <em>begin</em>.</h2>
+      <p class="section-lede">Whether you want a single bed reworked or a whole yard re-imagined — we have a shape for it.</p>
+
+      <div class="price-grid">
+        <article class="price-card">
+          <div class="plan">Consult</div>
+          <div class="amount"><sup>$</sup>295</div>
+          <div class="per">one-time · two hours</div>
+          <p class="pitch">A walkable diagnosis of your current garden, with a written follow-up.</p>
+          <ul>
+            <li>Two-hour on-site walk</li>
+            <li>Written recommendations</li>
+            <li>Plant palette suggestions</li>
+            <li>Three vetted contractor refs</li>
+          </ul>
+          <div class="cta-row"><a class="btn btn-ghost">Book a consult <span class="arrow">→</span></a></div>
+        </article>
+        <article class="price-card mid">
+          <div class="plan">Full design</div>
+          <div class="amount"><sup>$</sup>4,800</div>
+          <div class="per">starting · 6–10 weeks</div>
+          <p class="pitch">The full studio treatment — three concepts, one plan, a plant list, and year-one visits.</p>
+          <ul>
+            <li>Everything in Consult</li>
+            <li>3 hand-drawn concepts</li>
+            <li>Detailed planting plan</li>
+            <li>Material + cost estimate</li>
+            <li>Four year-one visits included</li>
+          </ul>
+          <div class="cta-row"><a class="btn btn-primary">Start a design <span class="arrow">→</span></a></div>
+        </article>
+        <article class="price-card">
+          <div class="plan">Tend</div>
+          <div class="amount" style="font-size: 48px;">By season</div>
+          <div class="per">existing clients · quarterly</div>
+          <p class="pitch">For the gardens we've designed — we come back, and we stay close.</p>
+          <ul>
+            <li>Seasonal visit + report</li>
+            <li>On-call plant swaps</li>
+            <li>Priority scheduling</li>
+            <li>Year-end garden letter</li>
+          </ul>
+          <div class="cta-row"><a class="btn btn-ghost">Learn about Tend <span class="arrow">→</span></a></div>
+        </article>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="stage">
+  <div class="stage-header">
+    <div class="stage-n">08 / e</div>
+    <div class="stage-title">Closing CTA</div>
+    <div class="stage-note">warm radial glow · laurel sprig · the only gradient</div>
+  </div>
+  <div class="frame">
+    <section class="cta">
+      <svg class="cta-laurel" viewBox="0 0 120 40" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round">
+        <path d="M60 34 C 60 22, 50 14, 38 12 M60 32 C 58 28, 52 24, 44 22 M60 28 C 58 24, 52 21, 46 19 M60 24 C 58 20, 54 18, 48 16"/>
+        <path d="M60 34 C 60 22, 70 14, 82 12 M60 32 C 62 28, 68 24, 76 22 M60 28 C 62 24, 68 21, 74 19 M60 24 C 62 20, 66 18, 72 16"/>
+        <circle cx="60" cy="36" r="1.5" fill="currentColor"/>
+      </svg>
+      <div class="cta-inner">
+        <div class="eyebrow">Let's begin</div>
+        <h2>Your garden is <em>waiting</em>.<br>Tell us what it wants.</h2>
+        <p>A 45-minute phone call, a few pictures of your yard, and we'll tell you whether we're the right studio for it. No pitch deck, promise.</p>
+        <div class="actions">
+          <a class="btn btn-primary btn-lg">Book a free visit <span class="arrow">→</span></a>
+          <a class="btn btn-ghost btn-lg">Read our process</a>
+          <span class="caption">We answer within a day.</span>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="stage">
+  <div class="stage-header">
+    <div class="stage-n">08 / f</div>
+    <div class="stage-title">Footer</div>
+    <div class="stage-note">studio hours · italic sitemap · rounded newsletter</div>
+  </div>
+  <div class="frame">
+    <footer class="footer">
+      <div class="footer-top">
+        <div>
+          <div class="wordmark">hearth <em>&amp; fern</em></div>
+          <p class="tag">A small studio making gardens in the Bay Area since 2017.</p>
+          <div class="hours">
+            <div class="line"><span>Studio</span><b>Tue – Fri · 10–4</b></div>
+            <div class="line"><span>Site visits</span><b>Sat · by appt.</b></div>
+            <div class="line"><span>Closed</span><b>Jan — late Feb</b></div>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Studio</h4>
+          <ul><li>Work</li><li>Services</li><li>Process</li><li>Journal</li><li>About</li></ul>
+        </div>
+        <div class="footer-col">
+          <h4>Visit</h4>
+          <ul><li>Book a consult</li><li>Book a visit</li><li>Enquiries</li><li>Referrals</li></ul>
+        </div>
+        <div class="footer-col">
+          <h4>Elsewhere</h4>
+          <ul><li>Instagram</li><li>Substack</li><li>Pinterest</li><li>Are.na</li></ul>
+        </div>
+        <div class="footer-news">
+          <h4 style="font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.2em; color: var(--accent-deep); margin: 0 0 22px;">Garden letter</h4>
+          <p>One short note each season — what we're planting, what's blooming, one good book.</p>
+          <form class="news" onsubmit="event.preventDefault();">
+            <input placeholder="your@email" />
+            <button type="submit">Join →</button>
+          </form>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div>© 2026 Hearth &amp; Fern, LLC</div>
+        <div>Made with care in Oakland.</div>
+      </div>
+    </footer>
+  </div>
+</div>
+
+<!-- ============================================================
+     COPY VOICE
+     ============================================================ -->
+<div class="doc" style="padding-top: 96px;">
+  <section>
+    <h2><span class="n">09 — Copy voice</span>How the words should sound.</h2>
+    <p class="dek">Warm, unhurried, first-person plural. Specific over clever.</p>
+    <p>We say "we visit," not "our consultation process." Concrete nouns over adjectives: "roses" not "stunning florals." Short sentences, occasional fragments for cadence. Permission to be a little literary — one italicized word per headline is allowed, even encouraged. Never "elevated," "curated," "bespoke," "transformative." Never exclamation marks. Numbers are specific: "three-person studio," not "small team."</p>
+    <p>Cadence: a long sentence, a short one. Set the scene, then land. Ledes are italic. The word "you" is earned.</p>
+    <div class="callout">
+      <div style="font-size: 11px; letter-spacing: 0.2em; font-weight: 500; color: var(--accent-deep); margin-bottom: 12px; text-transform: uppercase; font-style: normal; font-family: var(--font-body);">Example hero</div>
+      <div style="font-family: var(--font-display); font-size: 48px; line-height: 1; letter-spacing: -0.015em; color: var(--ink); margin-bottom: 22px; font-style: normal; font-weight: 400;">Bring your garden <span style="font-style: italic; font-weight: 500; color: var(--accent-deep);">to life.</span></div>
+      <div style="font-family: var(--font-display); font-style: italic; font-size: 19px; color: var(--ink-2); max-width: 52ch;">Hearth &amp; Fern is a three-person studio in the Bay Area designing gardens that feel lived-in from the first season. We visit, we sketch, we plant, we stay.</div>
+    </div>
+  </section>
+</div>
+
+<!-- ============================================================
+     TOKENS
+     ============================================================ -->
+
+<section class="tokens">
+  <h2>Tokens — <em>copyable</em></h2>
+  <p>Drop-in for <span class="mono">colorTokens.ts</span> + Tailwind <span class="mono">theme.extend</span>. Only <span class="mono">--accent</span> varies per tenant. Replaces the <span class="mono">Warm Friendly</span> + <span class="mono">Calm Minimal</span> vibes and the warm palette group (<span class="mono">coral</span>, <span class="mono">warm-sand</span>, <span class="mono">sunset</span>, <span class="mono">golden-hour</span>).</p>
+
+  <h3>CSS variables</h3>
+<pre><span class="c">/* hearth.css — light-native · one knob: --accent */</span>
+<span class="k">:root</span> {
+  <span class="c">/* accent (user-configurable — hue only) */</span>
+  --accent:       <span class="v">oklch(0.62 0.15 40)</span>;
+  --accent-deep:  <span class="v">oklch(0.48 0.15 40)</span>;
+  --accent-ink:   <span class="v">oklch(0.99 0.01 80)</span>;
+  --accent-wash:  <span class="v">oklch(0.62 0.15 40 / 0.10)</span>;
+
+  <span class="c">/* warm neutrals */</span>
+  --cream:        <span class="v">oklch(0.97 0.015 80)</span>;
+  --cream-1:      <span class="v">oklch(0.95 0.020 75)</span>;
+  --cream-2:      <span class="v">oklch(0.92 0.025 72)</span>;
+  --sand:         <span class="v">oklch(0.84 0.030 70)</span>;
+  --ink:          <span class="v">oklch(0.22 0.020 40)</span>;
+  --ink-2:        <span class="v">oklch(0.42 0.015 40)</span>;
+  --ink-3:        <span class="v">oklch(0.58 0.012 40)</span>;
+
+  <span class="c">/* accent neighbors (baked) */</span>
+  --sage:         <span class="v">oklch(0.72 0.045 135)</span>;
+  --clay:         <span class="v">oklch(0.78 0.080 55)</span>;
+
+  <span class="c">/* lines + warm shadows */</span>
+  --line:         <span class="v">oklch(0.22 0.02 40 / 0.10)</span>;
+  --line-soft:    <span class="v">oklch(0.22 0.02 40 / 0.06)</span>;
+  --shadow-card:  <span class="v">0 20px 40px -24px oklch(0.30 0.04 40 / .18),
+                                   0 2px 4px -1px  oklch(0.30 0.04 40 / .06)</span>;
+  --shadow-lift:  <span class="v">0 40px 70px -30px oklch(0.30 0.04 40 / .22),
+                                   0 6px 14px -4px oklch(0.30 0.04 40 / .10)</span>;
+
+  <span class="c">/* type */</span>
+  --font-display: <span class="v">"Fraunces", Georgia, serif</span>;
+  --font-body:    <span class="v">"DM Sans", ui-sans-serif, system-ui</span>;
+
+  <span class="c">/* space (8px base, spacious) */</span>
+  --s-1: <span class="v">4</span>; --s-2: <span class="v">8</span>; --s-3: <span class="v">12</span>; --s-4: <span class="v">16</span>;
+  --s-5: <span class="v">24</span>; --s-6: <span class="v">32</span>; --s-7: <span class="v">48</span>; --s-8: <span class="v">72</span>;
+  --s-9: <span class="v">96</span>; --s-10: <span class="v">140</span>;
+
+  <span class="c">/* radius — organic-soft */</span>
+  --r-sm: <span class="v">10px</span>;  --r-md: <span class="v">14px</span>;  --r-lg: <span class="v">20px</span>;
+  --r-xl: <span class="v">28px</span>;  --r-petal: <span class="v">120px 120px 24px 120px</span>;
+
+  <span class="c">/* section rhythm */</span>
+  --sec-pad-y:    <span class="v">140px</span>;  <span class="c">/* 88px mobile */</span>
+  --sec-pad-x:    <span class="v">clamp(24px, 5vw, 80px)</span>;
+  --max-w:        <span class="v">1240px</span>;
+}</pre>
+
+  <h3>Tailwind config</h3>
+<pre><span class="c">// tailwind.config.ts — Hearth · Warm Service</span>
+<span class="k">export const</span> hearth = {
+  <span class="k">colors</span>: {
+    <span class="k">accent</span>:       <span class="v">"var(--accent)"</span>,
+    <span class="k">"accent-deep"</span>: <span class="v">"var(--accent-deep)"</span>,
+    <span class="k">"accent-ink"</span>:  <span class="v">"var(--accent-ink)"</span>,
+    <span class="k">cream</span>:        <span class="v">"var(--cream)"</span>,
+    <span class="k">"cream-1"</span>:     <span class="v">"var(--cream-1)"</span>,
+    <span class="k">"cream-2"</span>:     <span class="v">"var(--cream-2)"</span>,
+    <span class="k">sand</span>:         <span class="v">"var(--sand)"</span>,
+    <span class="k">ink</span>:          <span class="v">"var(--ink)"</span>,
+    <span class="k">"ink-2"</span>:       <span class="v">"var(--ink-2)"</span>,
+    <span class="k">"ink-3"</span>:       <span class="v">"var(--ink-3)"</span>,
+    <span class="k">sage</span>:         <span class="v">"var(--sage)"</span>,
+    <span class="k">clay</span>:         <span class="v">"var(--clay)"</span>,
+  },
+  <span class="k">fontFamily</span>: {
+    <span class="k">display</span>: [<span class="v">"Fraunces"</span>, <span class="v">"Georgia"</span>, <span class="v">"serif"</span>],
+    <span class="k">body</span>:    [<span class="v">"DM Sans"</span>, <span class="v">"system-ui"</span>],
+  },
+  <span class="k">fontSize</span>: {
+    <span class="k">"d-1"</span>: [<span class="v">"84px"</span>, { <span class="k">lineHeight</span>: <span class="v">"0.98"</span>, <span class="k">letterSpacing</span>: <span class="v">"-0.015em"</span>, <span class="k">fontWeight</span>: <span class="v">"400"</span> }],
+    <span class="k">"d-2"</span>: [<span class="v">"56px"</span>, { <span class="k">lineHeight</span>: <span class="v">"1.05"</span>, <span class="k">letterSpacing</span>: <span class="v">"-0.012em"</span>, <span class="k">fontWeight</span>: <span class="v">"400"</span> }],
+    <span class="k">"d-3"</span>: [<span class="v">"38px"</span>, { <span class="k">lineHeight</span>: <span class="v">"1.1"</span>,  <span class="k">letterSpacing</span>: <span class="v">"-0.01em"</span>,  <span class="k">fontWeight</span>: <span class="v">"500"</span> }],
+    <span class="k">"d-4"</span>: [<span class="v">"26px"</span>, { <span class="k">lineHeight</span>: <span class="v">"1.25"</span>, <span class="k">letterSpacing</span>: <span class="v">"-0.008em"</span>, <span class="k">fontWeight</span>: <span class="v">"500"</span> }],
+  },
+  <span class="k">borderRadius</span>: { <span class="k">sm</span>: <span class="v">"10px"</span>, <span class="k">md</span>: <span class="v">"14px"</span>, <span class="k">lg</span>: <span class="v">"20px"</span>, <span class="k">xl</span>: <span class="v">"28px"</span> },
+  <span class="k">spacing</span>: { <span class="k">"1"</span>:<span class="v">"4px"</span>, <span class="k">"2"</span>:<span class="v">"8px"</span>, <span class="k">"3"</span>:<span class="v">"12px"</span>, <span class="k">"4"</span>:<span class="v">"16px"</span>, <span class="k">"5"</span>:<span class="v">"24px"</span>, <span class="k">"6"</span>:<span class="v">"32px"</span>, <span class="k">"7"</span>:<span class="v">"48px"</span>, <span class="k">"8"</span>:<span class="v">"72px"</span>, <span class="k">"9"</span>:<span class="v">"96px"</span>, <span class="k">"10"</span>:<span class="v">"140px"</span> },
+  <span class="k">boxShadow</span>: {
+    <span class="k">card</span>: <span class="v">"0 20px 40px -24px oklch(.3 .04 40/.18), 0 2px 4px -1px oklch(.3 .04 40/.06)"</span>,
+    <span class="k">lift</span>: <span class="v">"0 40px 70px -30px oklch(.3 .04 40/.22), 0 6px 14px -4px oklch(.3 .04 40/.10)"</span>,
+  },
+};</pre>
+</section>
+
+</body>
+</html>

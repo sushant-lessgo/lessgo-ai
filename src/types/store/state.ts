@@ -339,7 +339,10 @@ export interface MetaSlice {
   lastUpdated: number;
   version: number;
   tokenId: string;
-  
+  projectType: 'product' | 'service';
+  paletteId: string | null;
+
+
   // Onboarding Data
   onboardingData: {
     oneLiner: string;

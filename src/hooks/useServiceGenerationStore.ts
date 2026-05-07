@@ -1,0 +1,228 @@
+// src/hooks/useServiceGenerationStore.ts
+// Service-route generation flow state - Phase 0 skeleton.
+// Mirrors useGenerationStore but with service-specific shape (oneClient,
+// ourPosition, servicePresentation — no oneReader/oneIdea/vibe).
+// Phase 4 wires this into the service onboarding UI.
+
+import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
+import { immer } from 'zustand/middleware/immer';
+import type {
+  ServiceType,
+  ServiceGoal,
+  HearthPalette,
+  ServiceStrategyOutput,
+} from '@/types/service';
+
+/**
+ * Service generation flow steps
+ */
+export const SERVICE_GENERATION_STEPS = [
+  'oneLiner', // 0: User describes the service
+  'understanding', // 1: AI extracts service type, categories, industries
+  'goal', // 2: Primary CTA
+  'offer', // 3: What does the visitor get
+  'assets', // 4: Testimonials/logos/outcomes/case-studies/photos
+  'style', // 5: Hearth palette picker
+  'generating', // 6: Strategy + copy generation
+  'complete', // 7: Page ready
+] as const;
+
+export type ServiceGenerationStep = (typeof SERVICE_GENERATION_STEPS)[number];
+
+export interface ServiceUnderstanding {
+  serviceType: ServiceType;
+  serviceCategories: string[];
+  industries: string[];
+  targetClients: string;
+  services: string[];
+  deliveryModel: 'remote' | 'in-person' | 'hybrid';
+}
+
+export interface ServiceAssetAvailability {
+  hasTestimonials: boolean;
+  hasClientLogos: boolean;
+  hasOutcomes: boolean;
+  hasCaseStudies: boolean;
+  hasTeamPhotos: boolean;
+  hasFounderPhoto: boolean;
+  testimonialType: 'text' | 'photos' | 'video' | 'transformation' | null;
+}
+
+interface ServiceGenerationState {
+  // Progress
+  currentStep: ServiceGenerationStep;
+  stepIndex: number;
+
+  // Step 0
+  oneLiner: string;
+
+  // Step 1
+  understanding: ServiceUnderstanding | null;
+  understandingLoading: boolean;
+  understandingError: string | null;
+
+  // Step 2
+  goal: ServiceGoal | null;
+
+  // Step 3
+  offer: string;
+
+  // Step 4
+  assets: ServiceAssetAvailability | null;
+
+  // Step 5
+  paletteId: HearthPalette | null;
+
+  // Step 6: Strategy
+  strategy: ServiceStrategyOutput | null;
+  strategyLoading: boolean;
+  strategyError: string | null;
+
+  // Step 6: Copy generation
+  generationProgress: number;
+  generationError: string | null;
+}
+
+interface ServiceGenerationActions {
+  goToStep: (step: ServiceGenerationStep) => void;
+  nextStep: () => void;
+  prevStep: () => void;
+
+  setOneLiner: (value: string) => void;
+
+  setUnderstanding: (data: ServiceUnderstanding) => void;
+  setUnderstandingLoading: (loading: boolean) => void;
+  setUnderstandingError: (error: string | null) => void;
+
+  setGoal: (goal: ServiceGoal) => void;
+  setOffer: (offer: string) => void;
+  setAssets: (assets: ServiceAssetAvailability) => void;
+  setPaletteId: (palette: HearthPalette) => void;
+
+  setStrategy: (strategy: ServiceStrategyOutput) => void;
+  setStrategyLoading: (loading: boolean) => void;
+  setStrategyError: (error: string | null) => void;
+
+  setGenerationProgress: (progress: number) => void;
+  setGenerationError: (error: string | null) => void;
+
+  reset: () => void;
+}
+
+type ServiceGenerationStore = ServiceGenerationState & ServiceGenerationActions;
+
+const initialState: ServiceGenerationState = {
+  currentStep: 'oneLiner',
+  stepIndex: 0,
+  oneLiner: '',
+  understanding: null,
+  understandingLoading: false,
+  understandingError: null,
+  goal: null,
+  offer: '',
+  assets: null,
+  paletteId: null,
+  strategy: null,
+  strategyLoading: false,
+  strategyError: null,
+  generationProgress: 0,
+  generationError: null,
+};
+
+export const useServiceGenerationStore = create<ServiceGenerationStore>()(
+  devtools(
+    immer((set) => ({
+      ...initialState,
+
+      goToStep: (step) =>
+        set((state) => {
+          state.currentStep = step;
+          state.stepIndex = SERVICE_GENERATION_STEPS.indexOf(step);
+        }),
+
+      nextStep: () =>
+        set((state) => {
+          const next = Math.min(
+            state.stepIndex + 1,
+            SERVICE_GENERATION_STEPS.length - 1
+          );
+          state.stepIndex = next;
+          state.currentStep = SERVICE_GENERATION_STEPS[next];
+        }),
+
+      prevStep: () =>
+        set((state) => {
+          const prev = Math.max(state.stepIndex - 1, 0);
+          state.stepIndex = prev;
+          state.currentStep = SERVICE_GENERATION_STEPS[prev];
+        }),
+
+      setOneLiner: (value) =>
+        set((state) => {
+          state.oneLiner = value;
+        }),
+
+      setUnderstanding: (data) =>
+        set((state) => {
+          state.understanding = data;
+          state.understandingLoading = false;
+          state.understandingError = null;
+        }),
+      setUnderstandingLoading: (loading) =>
+        set((state) => {
+          state.understandingLoading = loading;
+        }),
+      setUnderstandingError: (error) =>
+        set((state) => {
+          state.understandingError = error;
+          state.understandingLoading = false;
+        }),
+
+      setGoal: (goal) =>
+        set((state) => {
+          state.goal = goal;
+        }),
+      setOffer: (offer) =>
+        set((state) => {
+          state.offer = offer;
+        }),
+      setAssets: (assets) =>
+        set((state) => {
+          state.assets = assets;
+        }),
+      setPaletteId: (palette) =>
+        set((state) => {
+          state.paletteId = palette;
+        }),
+
+      setStrategy: (strategy) =>
+        set((state) => {
+          state.strategy = strategy;
+          state.strategyLoading = false;
+          state.strategyError = null;
+        }),
+      setStrategyLoading: (loading) =>
+        set((state) => {
+          state.strategyLoading = loading;
+        }),
+      setStrategyError: (error) =>
+        set((state) => {
+          state.strategyError = error;
+          state.strategyLoading = false;
+        }),
+
+      setGenerationProgress: (progress) =>
+        set((state) => {
+          state.generationProgress = progress;
+        }),
+      setGenerationError: (error) =>
+        set((state) => {
+          state.generationError = error;
+        }),
+
+      reset: () => set(initialState),
+    })),
+    { name: 'ServiceGenerationStore' }
+  )
+);

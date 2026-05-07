@@ -4,6 +4,7 @@
 import { usePathname, useSearchParams } from "next/navigation"
 import { useEffect, Suspense } from "react"
 import { usePostHog } from 'posthog-js/react'
+import { useUser } from '@clerk/nextjs'
 
 import posthog from 'posthog-js'
 import { PostHogProvider as PHProvider } from 'posthog-js/react'
@@ -35,10 +36,45 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <PHProvider client={posthog}>
+      <ClerkUserIdentify />
       <SuspendedPostHogPageView />
       {children}
     </PHProvider>
   )
+}
+
+/**
+ * Identify authed Clerk users in PostHog and attach persona as a person
+ * property. Persona is read once per session via /api/user/persona. Must
+ * live below ClerkProvider; PostHogProvider is mounted inside it.
+ */
+function ClerkUserIdentify() {
+  const { user, isLoaded, isSignedIn } = useUser()
+
+  useEffect(() => {
+    if (!isLoaded || !isSignedIn || !user?.id) return
+
+    // Identify with Clerk user id; superseded the previous internal-only path.
+    posthog.identify(user.id, {
+      email: user.primaryEmailAddress?.emailAddress,
+      name: user.fullName,
+      first_name: user.firstName,
+    })
+
+    // Fetch persona and attach as a person property (super-property scope).
+    fetch('/api/user/persona')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.persona) {
+          posthog.setPersonProperties({ persona: data.persona })
+        }
+      })
+      .catch(() => {
+        /* non-fatal */
+      })
+  }, [isLoaded, isSignedIn, user?.id])
+
+  return null
 }
 
 function PostHogPageView() {
