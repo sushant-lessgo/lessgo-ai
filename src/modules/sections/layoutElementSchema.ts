@@ -1,4 +1,4 @@
-import { serviceElementSchema } from '@/modules/service/sections/serviceElementSchema';
+import { serviceElementSchema } from '@/modules/templates/hearth/elementSchema';
 
 /**
  * Generation types for elements:

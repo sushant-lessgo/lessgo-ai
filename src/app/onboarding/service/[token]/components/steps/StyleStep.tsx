@@ -6,8 +6,8 @@ import { useServiceGenerationStore } from '@/hooks/useServiceGenerationStore';
 import { Button } from '@/components/ui/button';
 import { usePostHog } from 'posthog-js/react';
 import { hearthPalettes, type HearthPalette } from '@/types/service';
-import { pilotEnabledPalettes } from '@/modules/service/design/palettes';
-import { inferDefaultPalette } from '@/modules/service/design/paletteSelection';
+import { pilotEnabledPalettes } from '@/modules/templates/hearth/palettes';
+import { inferDefaultPalette } from '@/modules/templates/hearth/paletteSelection';
 import PaletteSwatch from '../fields/PaletteSwatch';
 
 export default function StyleStep() {

@@ -9,7 +9,7 @@ import {
   HearthThemeInjector,
   hearthPaletteConfigs,
   defaultHearthPalette,
-} from '@/modules/service/design';
+} from '@/modules/templates/hearth';
 import { hearthPalettes, type HearthPalette } from '@/types/service';
 
 export function HearthDemoClient() {

@@ -12,8 +12,8 @@ import type {
   ServiceGoal,
 } from '@/types/service';
 import type { SectionCopy } from '@/types/generation';
-import { selectServiceSections } from '@/modules/service/strategy/sectionSelectionService';
-import { selectServiceUIBlocks } from '@/modules/service/uiblock/selectUIBlocksService';
+import { selectServiceSections } from '@/modules/audience/service/sectionSelection';
+import { selectServiceUIBlocks } from '@/modules/audience/service/selectUIBlocks';
 
 export interface MockServiceStrategyInput {
   oneLiner: string;

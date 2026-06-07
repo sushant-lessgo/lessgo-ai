@@ -10,8 +10,8 @@
 
 import React from 'react';
 import type { HearthPalette } from '@/types/service';
-import { serializeBaseTokens } from '../design/tokens';
-import { serializePaletteOverrides } from '../design/palettes';
+import { serializeBaseTokens } from '../tokens';
+import { serializePaletteOverrides } from '../palettes';
 
 const FRAUNCES_HREF =
   'https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&display=swap';

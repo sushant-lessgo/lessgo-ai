@@ -23,18 +23,18 @@ import { join } from 'path';
 dotenvConfig({ path: join(process.cwd(), '.env.local') });
 dotenvConfig({ path: join(process.cwd(), '.env') });
 
-import { buildServiceStrategyPrompt } from '../src/modules/service/strategy/promptsService';
-import { assembleServiceStrategy } from '../src/modules/service/strategy/parseStrategyService';
-import { buildServiceCopyPrompt } from '../src/modules/service/copy/copyPromptService';
+import { buildServiceStrategyPrompt } from '../src/modules/audience/service/strategy/promptsService';
+import { assembleServiceStrategy } from '../src/modules/audience/service/strategy/parseStrategyService';
+import { buildServiceCopyPrompt } from '../src/modules/audience/service/copyPrompt';
 import {
   processServiceCopy,
   validateServiceCopyCompleteness,
-} from '../src/modules/service/copy/parseCopyService';
+} from '../src/modules/audience/service/parseCopy';
 import {
   generateMockServiceStrategy,
   generateMockServiceCopy,
 } from '../src/modules/prompt/mockResponseGeneratorService';
-import { HEARTH_VOICE } from '../src/modules/service/copy/voiceHearth';
+import { SERVICE_VOICE } from '../src/modules/audience/service/voice';
 import type {
   ServiceUnderstandingInput,
   ServiceAssetInput,
@@ -234,7 +234,7 @@ function detectForbiddenWords(
   copy: Record<string, SectionCopy>
 ): { word: string; sectionType: string; field: string; value: string }[] {
   const hits: { word: string; sectionType: string; field: string; value: string }[] = [];
-  const forbidden = HEARTH_VOICE.lexicon.forbidden;
+  const forbidden = SERVICE_VOICE.lexicon.forbidden;
 
   for (const [sectionType, section] of Object.entries(copy)) {
     const elements = section.elements ?? {};

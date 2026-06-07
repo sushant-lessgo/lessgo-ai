@@ -1,9 +1,10 @@
-// src/modules/service/copy/voiceHearth.ts
-// Hearth voice spec — verbatim from newServiceOnboarding.md §6.
-// Baked into copyPromptService prompt. No per-vibe branching for service route;
-// Hearth is the only family at v1.
+// src/modules/audience/service/voice.ts
+// Service-type voice spec — verbatim from newServiceOnboarding.md §6.
+// Type-level (shared by ALL service templates), not Hearth-specific: the
+// italic-<em> emphasis convention is a service-copy rule. Baked into the
+// service copy prompt. Phase 7.5b extracted this from voiceHearth.ts unchanged.
 
-export const HEARTH_VOICE = {
+export const SERVICE_VOICE = {
   toneProfile: 'warm, unhurried, founder-to-founder, editorial confidence',
 
   cadenceRules: [
@@ -57,39 +58,39 @@ export const HEARTH_VOICE = {
  * Render the voice spec as a prompt-ready Markdown block.
  * Used inside copyPromptService to inject the full spec into the LLM prompt.
  */
-export function formatHearthVoiceForPrompt(): string {
+export function formatServiceVoiceForPrompt(): string {
   return `## VOICE — HEARTH
 
-**Tone profile:** ${HEARTH_VOICE.toneProfile}
+**Tone profile:** ${SERVICE_VOICE.toneProfile}
 
 **Cadence rules:**
-${HEARTH_VOICE.cadenceRules.map((r) => `- ${r}`).join('\n')}
+${SERVICE_VOICE.cadenceRules.map((r) => `- ${r}`).join('\n')}
 
-**Preferred words:** ${HEARTH_VOICE.lexicon.preferred.join(', ')}
-**Forbidden words (do NOT use):** ${HEARTH_VOICE.lexicon.forbidden.join(', ')}
+**Preferred words:** ${SERVICE_VOICE.lexicon.preferred.join(', ')}
+**Forbidden words (do NOT use):** ${SERVICE_VOICE.lexicon.forbidden.join(', ')}
 
 **Italic-accent convention (CRITICAL — applies to EVERY section, not just hero):**
 Wrap 1-2 emphasized words in <em>...</em> within EVERY "headline" field AND EVERY "lede" field across ALL sections. The renderer styles those as accent-deep italic Fraunces. This is the visual signature of Hearth — without it, the page reads flat.
 
 Hero headline examples:
-${HEARTH_VOICE.examples.hero.map((e) => `  - "${e}"`).join('\n')}
+${SERVICE_VOICE.examples.hero.map((e) => `  - "${e}"`).join('\n')}
 
 Services-section headline examples:
-${HEARTH_VOICE.examples.services.map((e) => `  - "${e}"`).join('\n')}
+${SERVICE_VOICE.examples.services.map((e) => `  - "${e}"`).join('\n')}
 
 Packages-section headline examples:
-${HEARTH_VOICE.examples.packages.map((e) => `  - "${e}"`).join('\n')}
+${SERVICE_VOICE.examples.packages.map((e) => `  - "${e}"`).join('\n')}
 
 CTA-section headline examples:
-${HEARTH_VOICE.examples.cta.map((e) => `  - "${e}"`).join('\n')}
+${SERVICE_VOICE.examples.cta.map((e) => `  - "${e}"`).join('\n')}
 
 Lede examples (lede ALSO gets <em>):
-${HEARTH_VOICE.examples.lede.map((e) => `  - "${e}"`).join('\n')}
+${SERVICE_VOICE.examples.lede.map((e) => `  - "${e}"`).join('\n')}
 
-**Eyebrow style:** ${HEARTH_VOICE.roleNotes.eyebrow}
-Examples: ${HEARTH_VOICE.examples.eyebrow.map((e) => `"${e}"`).join(', ')}
+**Eyebrow style:** ${SERVICE_VOICE.roleNotes.eyebrow}
+Examples: ${SERVICE_VOICE.examples.eyebrow.map((e) => `"${e}"`).join(', ')}
 
 **Lede style:** Mid-length sentence (~20-30 words), introduces the engagement on the hero's terms. Wraps 1 emphasized word in <em>.
 
-**Quote style:** ${HEARTH_VOICE.roleNotes.quote}`;
+**Quote style:** ${SERVICE_VOICE.roleNotes.quote}`;
 }

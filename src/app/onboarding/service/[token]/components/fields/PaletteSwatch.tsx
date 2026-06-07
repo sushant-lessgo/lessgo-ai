@@ -2,7 +2,7 @@
 
 import { Check, Lock } from 'lucide-react';
 import type { HearthPalette } from '@/types/service';
-import { hearthPaletteConfigs } from '@/modules/service/design/palettes';
+import { hearthPaletteConfigs } from '@/modules/templates/hearth/palettes';
 
 interface PaletteSwatchProps {
   paletteId: HearthPalette;

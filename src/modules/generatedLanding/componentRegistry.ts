@@ -166,7 +166,7 @@ import VisualObjectionTiles from '@/modules/UIBlocks/ObjectionHandle/VisualObjec
 
 
 import { logger } from '@/lib/logger';
-import { resolveServiceBlock } from '@/modules/service/resolveServiceBlock';
+import { resolveServiceBlock } from '@/modules/templates/hearth/resolveServiceBlock';
 import type { AudienceType } from '@/types/service';
 // Component registry type definition
 export type ComponentRegistry = Record<string, Record<string, React.ComponentType<any>>>;

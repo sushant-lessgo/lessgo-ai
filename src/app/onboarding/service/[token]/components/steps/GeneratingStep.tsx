@@ -8,7 +8,7 @@ import { usePostHog } from 'posthog-js/react';
 import ErrorRetry from '@/app/create/[token]/components/shared/ErrorRetry';
 import type { SectionCopy } from '@/types/generation';
 import type { ServiceStrategyOutputAssembled } from '@/types/service';
-import { defaultHearthPalette } from '@/modules/service/design/palettes';
+import { defaultHearthPalette } from '@/modules/templates/hearth/palettes';
 
 type Stage = 'strategy' | 'copy' | 'saving' | 'done';
 

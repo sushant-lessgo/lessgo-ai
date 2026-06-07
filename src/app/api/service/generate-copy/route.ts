@@ -22,11 +22,11 @@ import { CopyResponseSchema } from '@/lib/schemas';
 import {
   buildServiceCopyPrompt,
   buildServiceCopyRetryPrompt,
-} from '@/modules/service/copy/copyPromptService';
+} from '@/modules/audience/service/copyPrompt';
 import {
   processServiceCopy,
   validateServiceCopyCompleteness,
-} from '@/modules/service/copy/parseCopyService';
+} from '@/modules/audience/service/parseCopy';
 import { generateMockServiceCopy } from '@/modules/prompt/mockResponseGeneratorService';
 import {
   serviceTypes,

@@ -15,9 +15,9 @@ import React from 'react';
 import Script from 'next/script';
 import { getComponent, extractSectionType } from './componentRegistry.published';
 import type { AudienceType, HearthPalette } from '@/types/service';
-import { HearthSSRTokens } from '@/modules/service/components/HearthSSRTokens';
-import { getSurfaceForSection } from '@/modules/service/design/sectionRules';
-import { defaultHearthPalette } from '@/modules/service/design/palettes';
+import { HearthSSRTokens } from '@/modules/templates/hearth/components/HearthSSRTokens';
+import { getSurfaceForSection } from '@/modules/templates/hearth/sectionRules';
+import { defaultHearthPalette } from '@/modules/templates/hearth/palettes';
 
 /**
  * Extract content fields from elements structure

@@ -6,7 +6,7 @@
 // newServiceOnboarding.md §3 Step 9 (asset signals + LLM uiblockDecisions
 // hints + service-type / awareness rhythm).
 
-import { PILOT_LAYOUT_NAMES } from '@/modules/service/sections/serviceElementSchema';
+import { PILOT_LAYOUT_NAMES } from '@/modules/templates/hearth/elementSchema';
 
 export interface SelectServiceUIBlocksInput {
   sections: string[];

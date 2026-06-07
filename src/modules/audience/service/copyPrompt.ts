@@ -15,7 +15,7 @@ import {
   type LayoutElement,
   type CardRequirements,
 } from '@/modules/sections/layoutElementSchema';
-import { formatHearthVoiceForPrompt } from './voiceHearth';
+import { formatServiceVoiceForPrompt } from './voice';
 import { serviceGoalLabels } from '@/types/service';
 
 export interface ServiceCopyPromptInput {
@@ -142,7 +142,7 @@ Format: ${strategy.servicePresentation.format}
 Show process: ${strategy.servicePresentation.showProcess}
 Show case studies: ${strategy.servicePresentation.showCaseStudies}
 
-${formatHearthVoiceForPrompt()}
+${formatServiceVoiceForPrompt()}
 
 ## SECTIONS TO GENERATE
 

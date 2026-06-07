@@ -9,7 +9,7 @@ import type { StockPhoto } from '@/services/pexelsApi';
 import { TextInputModal } from '../modals/TextInputModal';
 import { SimpleImageEditor } from '@/components/ui/SimpleImageEditor';
 import { logger } from '@/lib/logger';
-import { getServiceImageQuery } from '@/modules/service/design/imageKeywords';
+import { getHearthImageQuery } from '@/modules/templates/hearth/imageKeywords';
 import type { HearthPalette } from '@/types/service';
 
 interface ImageToolbarProps {
@@ -569,7 +569,7 @@ function StockPhotosPanel({ position, onClose, onSelectImage }: {
 
     const effectiveQuery =
       audienceType === 'service'
-        ? getServiceImageQuery(query.trim(), undefined, (paletteId as HearthPalette | null) ?? undefined)
+        ? getHearthImageQuery(query.trim(), undefined, (paletteId as HearthPalette | null) ?? undefined)
         : query.trim();
 
     try {
@@ -616,7 +616,7 @@ function StockPhotosPanel({ position, onClose, onSelectImage }: {
       } else {
         const categoryQuery =
           audienceType === 'service'
-            ? getServiceImageQuery(category, undefined, (paletteId as HearthPalette | null) ?? undefined)
+            ? getHearthImageQuery(category, undefined, (paletteId as HearthPalette | null) ?? undefined)
             : category;
         requestBody = {
           searchType: category,

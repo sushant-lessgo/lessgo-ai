@@ -8,8 +8,8 @@ import type {
   ServiceGoal,
 } from '@/types/service';
 import type { ServiceStrategyResponse } from '@/lib/schemas/strategyService.schema';
-import { selectServiceSections } from './sectionSelectionService';
-import { selectServiceUIBlocks } from '@/modules/service/uiblock/selectUIBlocksService';
+import { selectServiceSections } from '../sectionSelection';
+import { selectServiceUIBlocks } from '@/modules/audience/service/selectUIBlocks';
 
 export interface AssembleServiceStrategyInput {
   llmResponse: ServiceStrategyResponse;

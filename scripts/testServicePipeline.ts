@@ -19,10 +19,10 @@
 // It is dev-only and not wired into any UI flow.
 
 import 'dotenv/config';
-import { buildServiceStrategyPrompt } from '../src/modules/service/strategy/promptsService';
-import { assembleServiceStrategy } from '../src/modules/service/strategy/parseStrategyService';
-import { buildServiceCopyPrompt } from '../src/modules/service/copy/copyPromptService';
-import { processServiceCopy, validateServiceCopyCompleteness } from '../src/modules/service/copy/parseCopyService';
+import { buildServiceStrategyPrompt } from '../src/modules/audience/service/strategy/promptsService';
+import { assembleServiceStrategy } from '../src/modules/audience/service/strategy/parseStrategyService';
+import { buildServiceCopyPrompt } from '../src/modules/audience/service/copyPrompt';
+import { processServiceCopy, validateServiceCopyCompleteness } from '../src/modules/audience/service/parseCopy';
 import { generateMockServiceStrategy, generateMockServiceCopy } from '../src/modules/prompt/mockResponseGeneratorService';
 import type {
   ServiceUnderstandingInput,

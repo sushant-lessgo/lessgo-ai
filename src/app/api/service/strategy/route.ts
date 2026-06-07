@@ -18,8 +18,8 @@ import { requireAuth } from '@/lib/middleware/planCheck';
 import { consumeCredits, CREDIT_COSTS, UsageEventType } from '@/lib/creditSystem';
 import { generateWithSchema } from '@/lib/aiClient';
 import { ServiceStrategyResponseSchema } from '@/lib/schemas/strategyService.schema';
-import { buildServiceStrategyPrompt } from '@/modules/service/strategy/promptsService';
-import { assembleServiceStrategy } from '@/modules/service/strategy/parseStrategyService';
+import { buildServiceStrategyPrompt } from '@/modules/audience/service/strategy/promptsService';
+import { assembleServiceStrategy } from '@/modules/audience/service/strategy/parseStrategyService';
 import { generateMockServiceStrategy } from '@/modules/prompt/mockResponseGeneratorService';
 import {
   serviceTypes,

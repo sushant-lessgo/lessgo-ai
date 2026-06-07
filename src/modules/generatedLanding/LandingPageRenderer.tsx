@@ -11,9 +11,9 @@ import {
 } from '@/modules/Design/background/backgroundIntegration';
 import { SmartTextSection } from '@/components/layout/SmartTextSection';
 import { VariableThemeInjector } from '@/modules/Design/ColorSystem/VariableThemeInjector';
-import { HearthThemeInjector } from '@/modules/service/design/HearthThemeInjector';
-import { getSurfaceForSection } from '@/modules/service/design/sectionRules';
-import { defaultHearthPalette } from '@/modules/service/design/palettes';
+import { HearthThemeInjector } from '@/modules/templates/hearth/ThemeInjector';
+import { getSurfaceForSection } from '@/modules/templates/hearth/sectionRules';
+import { defaultHearthPalette } from '@/modules/templates/hearth/palettes';
 import type { HearthPalette } from '@/types/service';
 // import { VariableBackgroundRenderer } from '@/modules/Design/ColorSystem/VariableBackgroundRenderer'; // Disabled
 import { CSSVariableErrorBoundary } from '@/components/CSSVariableErrorBoundary';

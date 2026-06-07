@@ -313,7 +313,7 @@ export function extractSectionType(sectionId: string): string {
   return sectionId.split('-')[0].toLowerCase();
 }
 
-import { resolveServiceBlock } from '@/modules/service/resolveServiceBlock';
+import { resolveServiceBlock } from '@/modules/templates/hearth/resolveServiceBlock';
 import type { AudienceType } from '@/types/service';
 
 /**
