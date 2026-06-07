@@ -103,30 +103,36 @@ Source: `newServiceOnboarding.md`. Philosophy: **pilot first with minimum UIBloc
 
 **Exit:** end-to-end agency persona ships a live published page. Pilot complete.
 
-### Phase 6 — Pilot Hardening (~3 days)
+### Phase 6 — Pilot Hardening (~3 days) ✅ DONE 2026-05-07
 - Internal dogfooding (3–5 personas): different service types, different industries.
 - Tune prompts based on observed LLM output.
 - Fix italic-`<em>` reliability.
 - Decide: is pilot output good enough to expand, or does prompt strategy need rework?
 
-**Exit:** signed-off pilot. Decision gate before expansion.
+**Exit:** signed-off pilot. Decision gate before expansion. See `servicePilotReview.md` — both gates passed, ship verdict.
 
 ---
 
 ## Expansion Phases (post-pilot)
 
-### Phase 7 — Palettes (~2 days)
-- Enable remaining 8 palettes in picker.
-- Industry-signal default selection (Step 6 spec logic).
-- Per-palette image keyword tuning.
+### Phase 7 — Palettes (~2 days) 🔄 WIP — code done, uncommitted as of 2026-06-07
+- Enable remaining 8 palettes in picker. ✅ `palettes.ts` `pilotEnabledPalettes` spans all 9.
+- Industry-signal default selection (Step 6 spec logic). ✅ `paletteSelection.ts` — keyword scoring → serviceType fallback → terracotta.
+- Per-palette image keyword tuning. ✅ `imageKeywords.ts` `PALETTE_IMAGE_KEYWORDS` layered on serviceType hint; `ImageToolbar` passes `paletteId` through.
+
+**Exit:** commit + build verify. Phase 6 backlog items (credibility hallucination, restaurant-marketing lede outlier) deferred to Phase 8 or later.
 
 ### Phase 8 — Section Templates (~3 days)
 - Implement 3 remaining awareness templates (cold / referral / relationship).
 - Optional section gating logic (Problem, Transformation, IndustriesServed).
 - TeamAndFounder placement modes.
 
-### Phase 9 — Block Library Batches (~4 weeks total)
-Order chosen by frequency of need × authoring difficulty.
+### Phase 9 — Block Library Batches (~4 weeks total) ⏸ ON HOLD 2026-06-07
+**Reason:** designer only delivered HTML for the 6 pilot blocks. The 20+ blocks below have no visual reference. Authoring them from spec alone is highest-risk chunk of plan. Un-hold trigger TBD (designer mockups arrive, or real pilot users demand specific block types).
+
+Soft launch (Phase 12) ships with **6 blocks × 9 palettes × 3 variants = 162 distinct visuals** — judged sufficient for early agency cohort.
+
+Order chosen by frequency of need × authoring difficulty (preserved for un-hold reference):
 
 **Batch A (proof, ~1 week):** Outcomes (StatHighlights, OutcomeStories), CaseStudies (FeaturedCaseStudy, CaseStudyGrid), ClientLogos (WarmLogoWall), TeamAndFounder (FounderLetter, TeamGrid).
 
@@ -142,15 +148,20 @@ After each batch: extend `selectUIBlocksService.ts` rules + `serviceElementSchem
 - Promote `uiblockDecisions` from strategy output from advisory to active.
 - Replace hardcoded pilot mapping with LLM hint + deterministic fallback (per spec §3 Step 9).
 
-### Phase 11 — Edit Surface Adjustments (~3 days)
+### Phase 11 — Edit Surface Adjustments (~4.5 days)
 - Theme panel: palette picker (service projects only).
+- **Variant picker (Classic / Condensed / Editorial)** — header surface. Sets `data-variant` on `:root`; pure token rescale (font-size, line-height, spacing). Default Classic. Must NOT affect copy length or voice — purely visual, no LLM prompt impact.
 - Section toolbar: cream / cream-1 / cream-2 surfaces for service.
 - Text toolbar: role-based color swatches; italic = Fraunces accent-deep.
 - Form builder: "Book a call" default template.
+- PostHog: `service_variant_changed` + super-property `variant`.
+
+**Variant token sourcing:** port from `Hearth - Warm Service.html` switcher CSS as-is for v1. Designer extraction request only if uplift needed post-launch.
 
 ### Phase 12 — QA + Soft Launch (~3 days)
 - Visual QA against Hearth reference HTML.
 - All 4 awareness × all goal × all palette spot-checks.
+- **Variant QA matrix:** Classic × all 9 palettes (full) + Condensed/Editorial × terracotta (spot). Full 9×3 cartesian deferred unless visual breakage observed.
 - Bundle-size check; code-split if material.
 - PostHog event property `projectType`.
 - Feature flag rollout: internal → beta cohort → public.
@@ -175,9 +186,15 @@ After each batch: extend `selectUIBlocksService.ts` rules + `serviceElementSchem
 ## Estimated Timeline
 
 Sum of phase budgets in working days:
-- Phase 0: 7d, Phase 1: 3d, Phase 2: 5d, Phase 3: 5d, Phase 4: 4d, Phase 5: 3d, Phase 6: 3d → **Pilot = 30 working days ≈ 6 working weeks** to live end-to-end agency persona.
-- Expansion phases 7–12: ~30 working days ≈ 6 working weeks.
-- **Total: ~12 working weeks** (vs spec's 7-week estimate — pilot phasing trades raw speed for risk reduction at decision gate after Phase 6).
+- Phases 0–6: 30d ≈ 6 weeks. ✅ DONE 2026-05-07.
+- **Post-break revision (2026-06-07): Phase 9 on hold, variant picker added to Phase 11.**
+  - Phase 7: 2d 🔄 WIP
+  - Phase 8: 3d
+  - ~~Phase 9: 20d~~ ⏸ on hold
+  - Phase 10: 2d
+  - Phase 11: 4.5d (was 3d, +1.5d for variant picker)
+  - Phase 12: 3d
+- **Remaining to soft launch ≈ 14.5 working days ≈ 3 working weeks** (vs 6 weeks pre-revision).
 
 ---
 
@@ -197,6 +214,14 @@ Sum of phase budgets in working days:
 12. **Feature flag** = none. Pilot ships live to all (no live users yet, no gating risk).
 13. **Per-project gateway fallback for cross-pivot projects** = defer post-launch. Pilot handles via manual DB edit.
 
+## Resolved (post-pilot, 2026-06-07)
+
+14. **Phase 9 block library** = on hold. Designer only mocked the 6 pilot blocks; authoring 20+ from spec alone too risky. Soft launch with 6 blocks × 9 palettes × 3 variants = 162 visuals deemed sufficient for early agency cohort. Un-hold trigger: designer mockups arrive OR real pilot users repeatedly request specific block types.
+15. **Variant switcher (Classic/Condensed/Editorial)** = in scope, lands in Phase 11 next to palette picker. Built in header. Pure visual rescale (`data-variant` on `:root`), zero copy-prompt impact. Default Classic; others opt-in. Visual QA in Phase 12 uses spot-check matrix not full 9×3 cartesian.
+16. **Phase 6 backlog items** (credibility number hallucination, restaurant-marketing lede outlier) = defer to Phase 8 prompt-tuning pass or later. Not blocking Phase 7 commit.
+
 ## Unresolved Questions
 
-(none currently — all pre-kickoff questions resolved. New questions land here as they surface during Phase 0.)
+- Variant tokens: port from `Hearth - Warm Service.html` switcher CSS, or have designer extract clean numbers? (Default: port as-is.)
+- Phase 9 un-hold trigger: which signal counts? Block-type request count threshold, or qualitative pilot feedback?
+- Phase 8 awareness templates (cold / referral / relationship) — no designer mockups. Build from spec or pause like Phase 9?

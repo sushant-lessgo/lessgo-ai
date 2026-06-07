@@ -1,15 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import { useServiceGenerationStore } from '@/hooks/useServiceGenerationStore';
 import { Button } from '@/components/ui/button';
 import { usePostHog } from 'posthog-js/react';
 import { hearthPalettes, type HearthPalette } from '@/types/service';
-import {
-  pilotEnabledPalettes,
-  defaultHearthPalette,
-} from '@/modules/service/design/palettes';
+import { pilotEnabledPalettes } from '@/modules/service/design/palettes';
+import { inferDefaultPalette } from '@/modules/service/design/paletteSelection';
 import PaletteSwatch from '../fields/PaletteSwatch';
 
 export default function StyleStep() {
@@ -18,24 +16,30 @@ export default function StyleStep() {
   const tokenId = params?.token as string;
 
   const paletteId = useServiceGenerationStore((s) => s.paletteId);
+  const understanding = useServiceGenerationStore((s) => s.understanding);
   const setPaletteId = useServiceGenerationStore((s) => s.setPaletteId);
   const nextStep = useServiceGenerationStore((s) => s.nextStep);
 
+  const inferredPalette = useMemo(
+    () => inferDefaultPalette(understanding),
+    [understanding]
+  );
+
   const [selected, setSelected] = useState<HearthPalette>(
-    paletteId ?? defaultHearthPalette
+    paletteId ?? inferredPalette
   );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Pre-select default + write to store on mount.
-    if (!paletteId) setPaletteId(defaultHearthPalette);
+    if (!paletteId) setPaletteId(inferredPalette);
     posthog?.capture('service_onboarding_step_view', {
       step: 'style',
       stepIndex: 5,
       projectType: 'service',
+      inferredPalette,
     });
-  }, [paletteId, setPaletteId, posthog]);
+  }, [paletteId, setPaletteId, inferredPalette, posthog]);
 
   const enabled = (id: HearthPalette) => pilotEnabledPalettes.includes(id);
 
@@ -63,6 +67,8 @@ export default function StyleStep() {
         step: 'style',
         projectType: 'service',
         paletteId: selected,
+        inferredPalette,
+        userChanged: inferredPalette !== selected,
       });
       nextStep();
     } catch (e: any) {
@@ -76,8 +82,8 @@ export default function StyleStep() {
       <div>
         <h1 className="text-2xl font-semibold text-gray-900">Pick a palette</h1>
         <p className="mt-2 text-gray-600">
-          One color story for the whole page. Terracotta is the pilot
-          default — more palettes open up soon.
+          One color story for the whole page. We&rsquo;ve suggested one based
+          on your work — tap any swatch to change it.
         </p>
       </div>
 

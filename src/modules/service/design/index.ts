@@ -26,5 +26,8 @@ export { HearthThemeInjector } from './HearthThemeInjector';
 
 export {
   SERVICE_IMAGE_KEYWORDS,
+  PALETTE_IMAGE_KEYWORDS,
   getServiceImageQuery,
 } from './imageKeywords';
+
+export { inferDefaultPalette } from './paletteSelection';

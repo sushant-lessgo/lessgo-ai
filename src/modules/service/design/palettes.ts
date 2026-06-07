@@ -70,11 +70,11 @@ export const hearthPaletteConfigs: Record<HearthPalette, PaletteConfig> = {
 };
 
 /**
- * Pilot whitelist — only terracotta is selectable in the Phase 4 picker.
- * Other palettes ship in code (so the design system is complete) but the
- * picker UI greys them out with a "coming soon" tooltip.
+ * Picker enablement list. Phase 7 unlocked all 9 palettes; kept as a list
+ * (not a boolean) so future restrictions / experiments can re-gate without
+ * re-plumbing.
  */
-export const pilotEnabledPalettes: HearthPalette[] = ['terracotta'];
+export const pilotEnabledPalettes: HearthPalette[] = [...hearthPalettes];
 
 /**
  * Default palette when one is not yet picked or persisted.

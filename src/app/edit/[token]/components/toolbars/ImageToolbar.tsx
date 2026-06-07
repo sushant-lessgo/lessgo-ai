@@ -10,6 +10,7 @@ import { TextInputModal } from '../modals/TextInputModal';
 import { SimpleImageEditor } from '@/components/ui/SimpleImageEditor';
 import { logger } from '@/lib/logger';
 import { getServiceImageQuery } from '@/modules/service/design/imageKeywords';
+import type { HearthPalette } from '@/types/service';
 
 interface ImageToolbarProps {
   targetId: string;
@@ -514,7 +515,8 @@ function StockPhotosPanel({ position, onClose, onSelectImage }: {
   onClose: () => void;
   onSelectImage: (stockPhoto: StockPhoto) => void;
 }) {
-  
+  const { projectType, paletteId } = useEditStore();
+
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<StockPhoto[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -566,7 +568,9 @@ function StockPhotosPanel({ position, onClose, onSelectImage }: {
     setError(null);
 
     const effectiveQuery =
-      projectType === 'service' ? getServiceImageQuery(query.trim()) : query.trim();
+      projectType === 'service'
+        ? getServiceImageQuery(query.trim(), undefined, (paletteId as HearthPalette | null) ?? undefined)
+        : query.trim();
 
     try {
       const response = await fetch('/api/images/search', {
@@ -611,7 +615,9 @@ function StockPhotosPanel({ position, onClose, onSelectImage }: {
         requestBody = { searchType: 'curated', per_page: 12 };
       } else {
         const categoryQuery =
-          projectType === 'service' ? getServiceImageQuery(category) : category;
+          projectType === 'service'
+            ? getServiceImageQuery(category, undefined, (paletteId as HearthPalette | null) ?? undefined)
+            : category;
         requestBody = {
           searchType: category,
           query: categoryQuery,
