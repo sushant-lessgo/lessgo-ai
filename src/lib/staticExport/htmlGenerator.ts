@@ -28,6 +28,7 @@ export interface StaticHTMLOptions {
   description?: string;
   previewImage?: string;
   audienceType?: 'product' | 'service';
+  templateId?: string | null;
   paletteId?: string | null;
 
   // Configuration
@@ -53,6 +54,12 @@ export async function generateStaticHTML(
   // Dynamic import - avoids Next.js static analysis
   const ReactDOMServer = await import('react-dom/server');
 
+  // Preload the service template module so the sync renderer resolves blocks.
+  if (options.audienceType === 'service') {
+    const { preloadTemplate } = await import('@/modules/templates/registry');
+    await preloadTemplate((options.templateId || 'hearth') as any);
+  }
+
   // 1. Extract fonts from theme
   const fonts = extractFontsFromTheme(options.theme);
 
@@ -68,6 +75,7 @@ export async function generateStaticHTML(
       publishedPageId: options.publishedPageId,
       pageOwnerId: options.pageOwnerId,
       audienceType: options.audienceType ?? 'product',
+      templateId: options.templateId ?? 'hearth',
       paletteId: options.paletteId ?? null,
     })
   );

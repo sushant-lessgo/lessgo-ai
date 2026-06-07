@@ -27,6 +27,10 @@ export {
 export { HearthThemeInjector } from './ThemeInjector';
 export { HearthSSRTokens } from './components/HearthSSRTokens';
 
+// TemplateModule contract surface (consumed via the dynamic registry).
+export { HearthThemeInjector as ThemeInjector } from './ThemeInjector';
+export { HearthSSRTokens as SSRTokens } from './components/HearthSSRTokens';
+
 export {
   PALETTE_IMAGE_KEYWORDS,
   getHearthImageQuery,
@@ -35,5 +39,14 @@ export {
 export { inferDefaultPalette } from './paletteSelection';
 
 export { resolveServiceBlock } from './resolveServiceBlock';
-export { useServiceBlock } from './hooks/useServiceBlock';
-export { HearthEditable } from './components/HearthEditable';
+// NOTE: useServiceBlock / HearthEditable are client-only and consumed by blocks
+// via relative imports — intentionally NOT re-exported here, so the barrel stays
+// importable from server components (registry preload path) without dragging a
+// bare client module across the RSC boundary.
+
+// TemplateModule.resolveBlock: (blockType, mode). Hearth's resolver ignores
+// sectionType, so adapt the (sectionType, layoutName, mode) signature.
+import { resolveServiceBlock as _resolveServiceBlock } from './resolveServiceBlock';
+export function resolveBlock(blockType: string, mode: 'edit' | 'published') {
+  return _resolveServiceBlock('', blockType, mode);
+}

@@ -232,6 +232,7 @@ async function publishHandler(req: NextRequest) {
         analyticsOptIn: analyticsEnabled || false, // Phase 4
         baseURL: baseUrl,
         audienceType,
+        templateId,
         paletteId,
       });
 

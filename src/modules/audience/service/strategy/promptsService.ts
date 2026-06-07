@@ -9,6 +9,7 @@ import type {
   ServiceGoal,
 } from '@/types/service';
 import { serviceGoalLabels } from '@/types/service';
+import { assertNoTemplateLeak } from '../promptFirewall';
 
 export interface ServiceStrategyPromptInput {
   oneLiner: string;
@@ -19,6 +20,7 @@ export interface ServiceStrategyPromptInput {
 }
 
 export function buildServiceStrategyPrompt(input: ServiceStrategyPromptInput): string {
+  assertNoTemplateLeak(input, 'buildServiceStrategyPrompt');
   const { oneLiner, understanding, goal, offer, assets } = input;
 
   const assetSummary = [

@@ -11,9 +11,9 @@ import {
 } from '@/modules/Design/background/backgroundIntegration';
 import { SmartTextSection } from '@/components/layout/SmartTextSection';
 import { VariableThemeInjector } from '@/modules/Design/ColorSystem/VariableThemeInjector';
-import { HearthThemeInjector } from '@/modules/templates/hearth/ThemeInjector';
-import { getSurfaceForSection } from '@/modules/templates/hearth/sectionRules';
-import { defaultHearthPalette } from '@/modules/templates/hearth/palettes';
+// Template visuals load via the dynamic registry (no static template import →
+// Hearth stays out of the product bundle).
+import { useTemplateModule } from '@/modules/templates/useTemplateReady';
 import type { HearthPalette } from '@/types/service';
 // import { VariableBackgroundRenderer } from '@/modules/Design/ColorSystem/VariableBackgroundRenderer'; // Disabled
 import { CSSVariableErrorBoundary } from '@/components/CSSVariableErrorBoundary';
@@ -133,11 +133,14 @@ export default function LandingPageRenderer({ className = '', tokenId, published
     getColorTokens,
     updateFromBackgroundSystem,
     audienceType,
+    templateId,
     paletteId,
   } = storeState;
 
   const isService = audienceType === 'service';
-  const effectivePalette: HearthPalette = (paletteId as HearthPalette) || defaultHearthPalette;
+  const { ready: templateReady, tmpl } = useTemplateModule(audienceType, templateId);
+  const effectivePalette: HearthPalette =
+    (paletteId as HearthPalette) || ((tmpl?.defaultPaletteId as HearthPalette) ?? 'terracotta');
 
   // Get feature flags for CSS variable system
   const featureFlags = useFeatureFlags(effectiveTokenId);
@@ -319,7 +322,7 @@ const finalSections: OrderedSection[] = processedSections
     const { id: sectionId, background, layout, data, alternatingInfo } = section;
     
     // Get the appropriate component from registry
-    const LayoutComponent = getComponent(sectionId, layout, audienceType);
+    const LayoutComponent = getComponent(sectionId, layout, audienceType, templateId);
 
     // Use fallback if component not found
     if (!LayoutComponent) {
@@ -447,7 +450,7 @@ const finalSections: OrderedSection[] = processedSections
       // outer HearthThemeInjector wrap on the page.
       if (isService) {
         const sectionTypeKey = extractSectionTypeRaw(sectionId);
-        const surface = getSurfaceForSection(sectionTypeKey);
+        const surface = tmpl?.getSurfaceForSection(sectionTypeKey) ?? 'cream';
         return (
           <SectionTracker
             key={sectionId}
@@ -844,13 +847,16 @@ const finalSections: OrderedSection[] = processedSections
       </main>
   );
 
-  // Service projects: wrap output in HearthThemeInjector. Skip product theme
-  // injectors entirely — Hearth tokens come from CSS vars on :root.
+  // Service projects: wrap output in the template's ThemeInjector. Skip product
+  // theme injectors entirely — template tokens come from CSS vars on :root.
+  // Gate render until the dynamically-loaded template module is ready.
   if (isService) {
+    if (!templateReady || !tmpl) return null;
+    const ThemeInjector = tmpl.ThemeInjector;
     return (
-      <HearthThemeInjector paletteId={effectivePalette}>
+      <ThemeInjector paletteId={effectivePalette}>
         {renderContent()}
-      </HearthThemeInjector>
+      </ThemeInjector>
     );
   }
 

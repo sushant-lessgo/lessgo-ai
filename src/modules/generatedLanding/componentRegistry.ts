@@ -166,8 +166,11 @@ import VisualObjectionTiles from '@/modules/UIBlocks/ObjectionHandle/VisualObjec
 
 
 import { logger } from '@/lib/logger';
-import { resolveServiceBlock } from '@/modules/templates/hearth/resolveServiceBlock';
-import type { AudienceType } from '@/types/service';
+// NOTE: do NOT statically import any template module here — that would pull
+// Hearth into the product/main bundle. Service dispatch goes through the
+// dynamic template registry's preloaded cache (firewall, Phase 7.5c).
+import { getLoadedTemplate } from '@/modules/templates/registry';
+import type { AudienceType, TemplateId } from '@/types/service';
 // Component registry type definition
 export type ComponentRegistry = Record<string, Record<string, React.ComponentType<any>>>;
 
@@ -431,14 +434,18 @@ export function extractSectionType(sectionId: string): string {
 export function getComponent(
   sectionIdOrType: string,
   layoutName: string,
-  audienceType: AudienceType = 'product'
+  audienceType: AudienceType = 'product',
+  templateId: string | null = 'hearth'
 ): React.ComponentType<any> | null {
   // Extract section type from section ID if needed
   const sectionType = extractSectionType(sectionIdOrType);
 
-  // Service projects dispatch to the Hearth UIBlock library (Phase 3).
+  // Service projects dispatch to the selected template module. The module is
+  // dynamically imported + cached via preloadTemplate() before render; here we
+  // read it synchronously (null until loaded — renderers gate on readiness).
   if (audienceType === 'service') {
-    return resolveServiceBlock(sectionType, layoutName, 'edit');
+    const tmpl = getLoadedTemplate((templateId || 'hearth') as TemplateId);
+    return tmpl ? tmpl.resolveBlock(layoutName, 'edit') : null;
   }
 
   const sectionComponents = componentRegistry[sectionType];

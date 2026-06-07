@@ -313,7 +313,10 @@ export function extractSectionType(sectionId: string): string {
   return sectionId.split('-')[0].toLowerCase();
 }
 
-import { resolveServiceBlock } from '@/modules/templates/hearth/resolveServiceBlock';
+// NOTE: no static template-module import (firewall). Service dispatch reads
+// the dynamically-preloaded template module from the registry cache.
+import { getLoadedTemplate } from '@/modules/templates/registry';
+import type { TemplateId } from '@/types/service';
 import type { AudienceType } from '@/types/service';
 
 /**
@@ -323,14 +326,17 @@ import type { AudienceType } from '@/types/service';
 export function getComponent(
   type: string,
   layout: string,
-  audienceType: AudienceType = 'product'
+  audienceType: AudienceType = 'product',
+  templateId: string | null = 'hearth'
 ): React.ComponentType<any> | null {
   const normalizedType = type.toLowerCase();
   const normalizedLayout = layout.toLowerCase();
 
-  // Service projects dispatch to the Hearth UIBlock library (Phase 3).
+  // Service projects dispatch to the selected template module (preloaded +
+  // cached via the dynamic registry; read synchronously here).
   if (audienceType === 'service') {
-    return resolveServiceBlock(normalizedType, normalizedLayout, 'published');
+    const tmpl = getLoadedTemplate((templateId || 'hearth') as TemplateId);
+    return tmpl ? tmpl.resolveBlock(normalizedLayout, 'published') : null;
   }
 
   return publishedComponentRegistry[normalizedType]?.[normalizedLayout] ?? null;

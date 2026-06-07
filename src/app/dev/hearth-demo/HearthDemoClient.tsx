@@ -5,11 +5,11 @@
 // Verifies HearthThemeInjector resolves all CSS vars correctly.
 
 import { useState } from 'react';
+import { HearthThemeInjector } from '@/modules/templates/hearth/ThemeInjector';
 import {
-  HearthThemeInjector,
   hearthPaletteConfigs,
   defaultHearthPalette,
-} from '@/modules/templates/hearth';
+} from '@/modules/templates/hearth/palettes';
 import { hearthPalettes, type HearthPalette } from '@/types/service';
 
 export function HearthDemoClient() {

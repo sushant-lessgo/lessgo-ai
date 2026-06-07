@@ -1,6 +1,7 @@
 // app/edit/[token]/components/ui/EditablePageRenderer.tsx - Enhanced with selection attributes
 import React from 'react';
 import { getComponent } from '@/modules/generatedLanding/componentRegistry';
+import { useTemplateModule } from '@/modules/templates/useTemplateReady';
 import { sectionList } from '@/modules/sections/sectionList';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { InlineTextEditorV2 } from '@/app/edit/[token]/components/editor/InlineTextEditorV2';
@@ -107,9 +108,10 @@ export function EditablePageRenderer({
 }: EditablePageRendererProps) {
 
   const backgroundType = getBackgroundTypeFromSection(sectionId);
-  const { audienceType } = useEditStore();
+  const { audienceType, templateId } = useEditStore();
+  const { ready: templateReady } = useTemplateModule(audienceType, templateId);
 
-  const LayoutComponent = getComponent(sectionId, layout, audienceType);
+  const LayoutComponent = getComponent(sectionId, layout, audienceType, templateId);
 
   // Enhanced element click handler
   const handleElementClick = React.useCallback((elementKey: string) => {
@@ -126,10 +128,16 @@ export function EditablePageRenderer({
     };
   }, [sectionId, onContentUpdate]);
 
+  // Service template module still loading — avoid flashing the missing-layout
+  // fallback before the dynamically-imported blocks are available.
+  if (audienceType === 'service' && !templateReady) {
+    return null;
+  }
+
   if (!LayoutComponent) {
     return (
-      <MissingLayoutComponent 
-        sectionId={sectionId} 
+      <MissingLayoutComponent
+        sectionId={sectionId}
         layout={layout}
       />
     );

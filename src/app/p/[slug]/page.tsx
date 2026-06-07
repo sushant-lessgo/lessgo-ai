@@ -81,6 +81,7 @@ export default async function PublishedPage({ params }: PageProps) {
       content: true,
       analyticsEnabled: true,
       audienceType: true,
+      templateId: true,
       paletteId: true,
     },
   });
@@ -113,6 +114,14 @@ export default async function PublishedPage({ params }: PageProps) {
 
   const { LandingPagePublishedRenderer } = await import('@/modules/generatedLanding/LandingPagePublishedRenderer');
 
+  // Preload the service template module so the sync renderer can resolve blocks.
+  const audienceType = page.audienceType === 'service' ? 'service' : 'product';
+  const templateId = page.templateId || 'hearth';
+  if (audienceType === 'service') {
+    const { preloadTemplate } = await import('@/modules/templates/registry');
+    await preloadTemplate(templateId as any);
+  }
+
   // Merge section content and forms for renderer
   const mergedContent = {
     ...(content.content || {}),  // Section data
@@ -129,7 +138,8 @@ export default async function PublishedPage({ params }: PageProps) {
       pageOwnerId={page.userId}
       slug={page.slug}
       analyticsEnabled={page.analyticsEnabled || false}
-      audienceType={page.audienceType === 'service' ? 'service' : 'product'}
+      audienceType={audienceType}
+      templateId={templateId}
       paletteId={page.paletteId}
     />
   );

@@ -1,3 +1,5 @@
+'use client';
+
 // src/modules/service/hooks/useServiceBlock.ts
 // Thin Hearth-side parallel to useLayoutComponent. Skips product theming
 // (color tokens, dynamic text colors, background CSS) — Hearth blocks

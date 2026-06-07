@@ -14,10 +14,10 @@
 import React from 'react';
 import Script from 'next/script';
 import { getComponent, extractSectionType } from './componentRegistry.published';
-import type { AudienceType, HearthPalette } from '@/types/service';
-import { HearthSSRTokens } from '@/modules/templates/hearth/components/HearthSSRTokens';
-import { getSurfaceForSection } from '@/modules/templates/hearth/sectionRules';
-import { defaultHearthPalette } from '@/modules/templates/hearth/palettes';
+import type { AudienceType, HearthPalette, TemplateId } from '@/types/service';
+// No static template import (firewall). Service template module is preloaded by
+// the caller (p/[slug] page / static export) and read from the registry cache.
+import { getLoadedTemplate } from '@/modules/templates/registry';
 
 /**
  * Extract content fields from elements structure
@@ -40,8 +40,9 @@ interface LandingPagePublishedRendererProps {
   pageOwnerId?: string;         // For analytics (optional)
   slug?: string;                // For analytics tracking
   analyticsEnabled?: boolean;   // Enable analytics beacon
-  audienceType?: AudienceType;  // Routes to service block library when 'service'
-  paletteId?: string | null;    // Hearth palette for service projects
+  audienceType?: AudienceType;  // Routes to service template when 'service'
+  templateId?: string | null;   // Which template module to dispatch to
+  paletteId?: string | null;    // Template palette for service projects
 }
 
 export function LandingPagePublishedRenderer({
@@ -54,11 +55,16 @@ export function LandingPagePublishedRenderer({
   slug,
   analyticsEnabled,
   audienceType = 'product',
+  templateId = 'hearth',
   paletteId = null,
 }: LandingPagePublishedRendererProps) {
   const isService = audienceType === 'service';
+  // Module was preloaded by the caller; read it synchronously from the cache.
+  const tmpl = isService
+    ? getLoadedTemplate((templateId || 'hearth') as TemplateId) ?? null
+    : null;
   const effectivePalette: HearthPalette =
-    (paletteId as HearthPalette) || defaultHearthPalette;
+    (paletteId as HearthPalette) || ((tmpl?.defaultPaletteId as HearthPalette) ?? 'terracotta');
   // 1. Extract sectionLayouts from content
   const sectionLayouts: Record<string, string> = {};
   for (const sectionId of sections) {
@@ -91,7 +97,7 @@ export function LandingPagePublishedRenderer({
         if (!section) return null;
         const { id: sectionId, layout, data } = section;
         const sectionType = extractSectionType(sectionId);
-        const LayoutComponent = getComponent(sectionType, layout, audienceType);
+        const LayoutComponent = getComponent(sectionType, layout, audienceType, templateId);
 
         // Silent fallback if component not found
         if (!LayoutComponent) {
@@ -105,7 +111,7 @@ export function LandingPagePublishedRenderer({
         // Service projects: skip product theme background. Wrap in a Hearth
         // surface div (cream / cream-1 / cream-2) per sectionRules.
         if (isService) {
-          const surface = getSurfaceForSection(sectionType);
+          const surface = tmpl?.getSurfaceForSection(sectionType) ?? 'cream';
           return (
             <div key={sectionId} data-hearth-surface={surface}>
               <LayoutComponent
@@ -170,10 +176,10 @@ export function LandingPagePublishedRenderer({
 
   return (
     <>
-    {isService ? (
-      <HearthSSRTokens paletteId={effectivePalette}>
+    {isService && tmpl ? (
+      <tmpl.SSRTokens paletteId={effectivePalette}>
         {sectionsTree}
-      </HearthSSRTokens>
+      </tmpl.SSRTokens>
     ) : (
       sectionsTree
     )}

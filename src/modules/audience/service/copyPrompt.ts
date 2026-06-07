@@ -16,6 +16,7 @@ import {
   type CardRequirements,
 } from '@/modules/sections/layoutElementSchema';
 import { formatServiceVoiceForPrompt } from './voice';
+import { assertNoTemplateLeak } from './promptFirewall';
 import { serviceGoalLabels } from '@/types/service';
 
 export interface ServiceCopyPromptInput {
@@ -90,6 +91,7 @@ Notes:
 }
 
 export function buildServiceCopyPrompt(input: ServiceCopyPromptInput): string {
+  assertNoTemplateLeak(input, 'buildServiceCopyPrompt');
   const { strategy, uiblocks, oneLiner, offer, goal, understanding } = input;
 
   const sectionSpecs = strategy.sections
