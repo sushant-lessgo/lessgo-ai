@@ -8,7 +8,7 @@ import { prisma } from '@/lib/prisma'
 import { nanoid } from 'nanoid'
 import { createDefaultPlan } from '@/lib/planManager'
 import { logger } from '@/lib/logger'
-import { personaToProjectType, type UserPersona } from '@/types/service'
+import { personaToAudienceType, type UserPersona } from '@/types/service'
 
 // Pilot lockdown: only `agency` persona reaches the service onboarding flow.
 // Other service personas waitlist (resolution #6 in nsoPlan.md).
@@ -56,13 +56,13 @@ export async function GET() {
     }
   }
 
-  // Derive projectType: from persona for authed users, default 'product' for anon.
+  // Derive audienceType: from persona for authed users, default 'product' for anon.
   const persona = dbUser?.persona as UserPersona | null | undefined
-  const projectType = persona ? personaToProjectType(persona) : 'product'
+  const audienceType = persona ? personaToAudienceType(persona) : 'product'
 
   // Pilot waitlist gate: non-agency service personas short-circuit BEFORE any
   // Token/Project creation, so we don't leak orphan rows for waitlisted users.
-  if (projectType === 'service' && persona && !PILOT_SERVICE_PERSONAS.has(persona)) {
+  if (audienceType === 'service' && persona && !PILOT_SERVICE_PERSONAS.has(persona)) {
     return NextResponse.json({
       url: `${process.env.NEXT_PUBLIC_SITE_URL}/onboarding/waitlist`,
     })
@@ -81,13 +81,13 @@ export async function GET() {
     data: {
       tokenId: token.value,
       userId: dbUser?.id,
-      projectType,
+      audienceType,
     },
   })
 
-  // Branch redirect by projectType. Service (agency-only at pilot) → service
+  // Branch redirect by audienceType. Service (agency-only at pilot) → service
   // wizard. Product / anon → existing v3 onboarding.
-  const wizardPath = projectType === 'service'
+  const wizardPath = audienceType === 'service'
     ? `/onboarding/service/${tokenValue}`
     : `/create/${tokenValue}`
 

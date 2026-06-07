@@ -1,6 +1,6 @@
 // Phase 0 placeholder rendered for any service section until Phase 3 ships
 // the real Hearth UIBlock library. Visible label + section-type tag let dev
-// verify the projectType branch is reaching this code path.
+// verify the audienceType branch is reaching this code path.
 
 import React from 'react';
 

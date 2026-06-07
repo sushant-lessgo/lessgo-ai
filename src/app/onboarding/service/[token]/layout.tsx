@@ -2,7 +2,7 @@ import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { logger } from '@/lib/logger';
-import { personaToProjectType, type UserPersona } from '@/types/service';
+import { personaToAudienceType, type UserPersona } from '@/types/service';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -35,10 +35,10 @@ export default async function ServiceOnboardingLayout({
   }
 
   const persona = dbUser.persona as UserPersona;
-  const projectType = personaToProjectType(persona);
+  const audienceType = personaToAudienceType(persona);
 
-  // Wrong projectType (saas-founder / indie-maker) → product flow.
-  if (projectType !== 'service') {
+  // Wrong audienceType (saas-founder / indie-maker) → product flow.
+  if (audienceType !== 'service') {
     redirect(`/create/${params.token}`);
   }
 

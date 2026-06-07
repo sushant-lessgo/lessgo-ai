@@ -207,7 +207,9 @@ function createInitialState(tokenId: string): EditStore {
     lastUpdated: Date.now(),
     version: 1,
     tokenId: tokenId,
-    projectType: 'product',
+    audienceType: 'product',
+    templateId: null,
+    variantId: null,
     paletteId: null,
     onboardingData: {
       oneLiner: '',

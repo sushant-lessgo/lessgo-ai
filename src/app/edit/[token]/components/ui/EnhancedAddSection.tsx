@@ -33,12 +33,12 @@ export function EnhancedAddSection({
   onAddSection,
   className
 }: EnhancedAddSectionProps) {
-  const { projectType } = useEditStore();
+  const { audienceType } = useEditStore();
   const [showSectionSelector, setShowSectionSelector] = useState(false);
   const [showLayoutSelector, setShowLayoutSelector] = useState(false);
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
 
-  if (projectType === 'service') return null;
+  if (audienceType === 'service') return null;
 
   // Validate props on mount
   React.useEffect(() => {

@@ -3,15 +3,31 @@
 // Reference: newServiceOnboarding.md, nsoPlan.md
 
 /**
- * ===== PROJECT TYPE =====
- * Single bifurcation between product and service routes.
+ * ===== AUDIENCE TYPE =====
+ * Top tier of the 3-tier model: audienceType → templateId → variantId + paletteId.
+ * `ecommerce` reserved for the Phase 13 wave (no persona maps to it yet).
  */
-export const projectTypes = ['product', 'service'] as const;
-export type ProjectType = (typeof projectTypes)[number];
+export const audienceTypes = ['product', 'service', 'ecommerce'] as const;
+export type AudienceType = (typeof audienceTypes)[number];
+
+/**
+ * ===== TEMPLATE + VARIANT =====
+ * templateId selects the visual template module (Phase 7.5 only ships Hearth).
+ * variantId is a per-template token rescale (surfaced in Phase 11; default now).
+ */
+export const templateIds = ['hearth'] as const;
+export type TemplateId = (typeof templateIds)[number];
+
+export type VariantId = string;
+
+/** First (default) variant per template. Persisted on save until Phase 11 UI. */
+export const defaultVariantForTemplate: Record<TemplateId, VariantId> = {
+  hearth: 'classic',
+};
 
 /**
  * ===== USER PERSONA =====
- * Captured once at user level. Drives ProjectType derivation.
+ * Captured once at user level. Drives AudienceType derivation.
  */
 export const userPersonas = [
   'saas-founder',
@@ -49,10 +65,11 @@ export const userPersonaDescriptions: Record<UserPersona, string> = {
 };
 
 /**
- * Derive ProjectType from UserPersona.
+ * Derive AudienceType from UserPersona.
  * SaaS founder + indie maker → product. All other personas → service.
+ * (ecommerce has no persona yet — added in the Phase 13 ecom wave.)
  */
-export function personaToProjectType(persona: UserPersona): ProjectType {
+export function personaToAudienceType(persona: UserPersona): AudienceType {
   if (persona === 'saas-founder' || persona === 'indie-maker') {
     return 'product';
   }

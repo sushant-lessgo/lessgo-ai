@@ -122,10 +122,74 @@ Source: `newServiceOnboarding.md`. Philosophy: **pilot first with minimum UIBloc
 
 **Exit:** commit + build verify. Phase 6 backlog items (credibility hallucination, restaurant-marketing lede outlier) deferred to Phase 8 or later.
 
+### Phase 7.5 — Multi-Template Architecture Refactor (~5 days) 🆕 2026-06-07
+**Trigger:** designer delivered 8 more templates (Folio, Riot, Lex, Mill, Atlas, Pulse, Vital, Stockroom). Locks in 3-tier model: **audienceType → templateId → variantId + paletteId**.
+
+**Sequenced as 4 tickets (PO call):** 7.5a rename+schema, 7.5b restructure+voice, 7.5c dispatch+picker, 7.5d route rename (post-merge).
+- **7.5a status (2026-06-07):** code done — `projectType→audienceType` across 33 files, `templateId`/`variantId` columns + migration `20260607120000_rename_audiencetype_add_template_fields`, PostHog props renamed, save/load/publish plumbing. Build clean. Migration NOT yet applied (dev DB unreachable at edit time) — run `npx prisma migrate deploy` when DB is up.
+- **Deferred cleanup (intentional):** `useServiceGenerationStore` and the `/onboarding/service/[token]` route path keep their names — renaming would 3× the surface for no pre-launch value. Revisit post-launch.
+
+**Rename:** `projectType` → `audienceType`. Values: `product | service | ecommerce` (nothing in prod = zero migration risk). Touch Prisma schema, all `/api/*` routes, edit store, renderer dispatcher, image keywords, prompts.
+
+**Schema additions** (Project + PublishedPage):
+- `audienceType: enum` (renamed from `projectType`)
+- `templateId: string?` — hearth | folio | riot | lex | mill | atlas | pulse | vital (meridian post-launch)
+- `variantId: string?` — template-specific (Classic/Condensed/Editorial for Hearth, Serif/Mixed/Grotesque for Folio, etc.)
+- `paletteId: string?` — kept, but now template-scoped (terracotta belongs to Hearth; bone belongs to Folio; etc.)
+
+**Directory restructure:**
+```
+src/modules/templates/
+  hearth/        (move existing src/modules/service/* here)
+    tokens.ts, palettes.ts, sectionRules.ts, blocks/, ThemeInjector.tsx, index.ts
+  folio/
+  riot/
+  ...
+  registry.ts    — id → template module
+src/modules/audience/
+  service/
+    voice.ts     (rename from voiceHearth.ts — type-level voice, shared across all service templates)
+    copyPrompt.ts, strategy/, sectionSelection.ts, italicAccentFallback.ts
+  product/       (existing v3 logic moves here, or stays where it is and gets aliased)
+  ecommerce/     (stub for now)
+```
+
+**Voice extraction:** `voiceHearth.ts` → `src/modules/audience/service/voice.ts`. Italic-`<em>` rules become **service-type convention**, not Hearth-specific. All 8 service templates share. No prompt regression — rules unchanged.
+
+**Renderer dispatch:** `resolveServiceBlock` → `resolveTemplateBlock(audienceType, templateId, blockType)`. Two-level lookup: type → template → block renderer.
+
+**Onboarding type-gate (persona-step refinement):**
+- Keep `User.persona` capture (8 options stay).
+- Persona → `audienceType` derivation map. SaaS founder / indie maker → `product`. All other 6 → `service`. (E-commerce not in pilot persona list; added in ecom wave.)
+- No new global step. Refinement = persona prompt copy updated to clarify "this drives what kind of page we build."
+
+**Template + variant + palette picker:**
+- Lives in onboarding **after section selection + copy gen**, runs **parallel** to copy generation (Stage 3b in unified model).
+- For pilot Hearth users, picker filtered to Hearth templates only (gallery shows 1 template, 3 variants, 9 palettes).
+- Post Phase 7.5, gallery expands to all 8 service templates.
+- Persisted as `templateId` + `variantId` + `paletteId` on Project.
+
+**Backend audit:**
+- `/api/service/strategy` + `/api/service/generate-copy` rename to `/api/audience/service/*` (clean URL hierarchy).
+- Prompt service receives `audienceType` + persona only. **Does not receive `templateId`** — that's the firewall guaranteeing parallel copy/template.
+- `Project.content` JSON shape: audit `saveDraft`/`loadDraft` round-trip new fields.
+
+**Existing pilot data:**
+- Pilot dev/test projects: backfill `audienceType='service'`, `templateId='hearth'`, `variantId='classic'` (variants ship later via Phase 11), `paletteId=<current>`. Code-side: one-time migration script during refactor merge.
+
+**Phase 7.5 exit:**
+1. All Hearth-specific names refactored to template-scoped paths.
+2. Renderer dispatches via `(audienceType, templateId)` lookup.
+3. Voice extracted to type-level, copy quality unchanged on dogfood re-run.
+4. Schema rename + 3 new fields + backfill done.
+5. Picker UI exists (even if filtered to 1 template). Renders parallel to copy gen.
+6. `npm run build` clean. Existing pilot publishes still render correctly.
+
 ### Phase 8 — Section Templates (~3 days)
 - Implement 3 remaining awareness templates (cold / referral / relationship).
 - Optional section gating logic (Problem, Transformation, IndustriesServed).
 - TeamAndFounder placement modes.
+- Lives in `src/modules/audience/service/sectionSelection.ts` (renamed from `sectionSelectionService.ts`).
 
 ### Phase 9 — Block Library Batches (~4 weeks total) ⏸ ON HOLD 2026-06-07
 **Reason:** designer only delivered HTML for the 6 pilot blocks. The 20+ blocks below have no visual reference. Authoring them from spec alone is highest-risk chunk of plan. Un-hold trigger TBD (designer mockups arrive, or real pilot users demand specific block types).
@@ -148,23 +212,30 @@ After each batch: extend `selectUIBlocksService.ts` rules + `serviceElementSchem
 - Promote `uiblockDecisions` from strategy output from advisory to active.
 - Replace hardcoded pilot mapping with LLM hint + deterministic fallback (per spec §3 Step 9).
 
-### Phase 11 — Edit Surface Adjustments (~4.5 days)
-- Theme panel: palette picker (service projects only).
-- **Variant picker (Classic / Condensed / Editorial)** — header surface. Sets `data-variant` on `:root`; pure token rescale (font-size, line-height, spacing). Default Classic. Must NOT affect copy length or voice — purely visual, no LLM prompt impact.
-- Section toolbar: cream / cream-1 / cream-2 surfaces for service.
-- Text toolbar: role-based color swatches; italic = Fraunces accent-deep.
-- Form builder: "Book a call" default template.
-- PostHog: `service_variant_changed` + super-property `variant`.
+### Phase 11 — Edit Surface Adjustments (~5 days)
+- Theme panel: **template + variant + palette picker** (service projects only). Gallery scoped by `audienceType`.
+- Variant picker — pure token rescale (`data-variant` on `:root`). Must NOT affect copy length or voice. Default = template's first variant.
+- Template picker — full re-render on switch (copy stays, blocks re-resolve via new `templateId`). Confirm-before-switch UX to prevent accidental clobber.
+- Section toolbar: surface color options per template.
+- Text toolbar: role-based color swatches; italic emphasis matches template voice.
+- Form builder: "Book a call" default template (service-type universal).
+- PostHog: `template_changed`, `variant_changed`, super-properties `templateId`, `variantId`.
 
-**Variant token sourcing:** port from `Hearth - Warm Service.html` switcher CSS as-is for v1. Designer extraction request only if uplift needed post-launch.
+**Variant token sourcing:** port from each template HTML's switcher CSS as-is. 8 templates × 3 variants = 24 token sets. Mostly font-size + spacing rescales.
 
-### Phase 12 — QA + Soft Launch (~3 days)
-- Visual QA against Hearth reference HTML.
-- All 4 awareness × all goal × all palette spot-checks.
-- **Variant QA matrix:** Classic × all 9 palettes (full) + Condensed/Editorial × terracotta (spot). Full 9×3 cartesian deferred unless visual breakage observed.
-- Bundle-size check; code-split if material.
-- PostHog event property `projectType`.
+### Phase 12 — QA + Soft Launch (~4 days)
+- Visual QA against each template's reference HTML.
+- All 4 awareness × all goal spot-checks per template.
+- **Visual QA matrix (8 service templates):** each template's default variant × all 9 of its palettes (full); other 2 variants × default palette (spot). Total: 8 × (9 + 2) = 88 spot checks. Full 27-per-template cartesian deferred unless breakage observed.
+- Bundle-size check; code-split per-template if material (8 templates × 6 blocks × 2 renderers shipping to all users is a concern).
+- PostHog event property `audienceType`, `templateId`, `variantId`.
 - Feature flag rollout: internal → beta cohort → public.
+
+### Phase 13 — E-commerce Wave (~TBD)
+**Deferred to dedicated wave after service GTM.** Stockroom template + ecommerce `audienceType` + product-grid block (new schema with price / SKU / image / "add to bag"). Onboarding question flow for ecom audience. Not blocking service launch.
+
+### Phase 14 — Product Redesign (~TBD)
+**Deferred, user-driven sequencing.** Meridian + additional product templates. Migrates current 48 UIBlocks to template-scoped architecture. Highest-revenue surface so risk profile justifies delay until service flow proves the model.
 
 ---
 
@@ -187,14 +258,17 @@ After each batch: extend `selectUIBlocksService.ts` rules + `serviceElementSchem
 
 Sum of phase budgets in working days:
 - Phases 0–6: 30d ≈ 6 weeks. ✅ DONE 2026-05-07.
-- **Post-break revision (2026-06-07): Phase 9 on hold, variant picker added to Phase 11.**
-  - Phase 7: 2d 🔄 WIP
-  - Phase 8: 3d
+- Phase 7: 2d ✅ DONE 2026-06-07 (commit `3e47ca6`).
+- **Post-break revision (2026-06-07): 8 templates landed → multi-template refactor needed; Phase 9 on hold; ecom + product deferred.**
+  - Phase 7.5: 5d 🆕 multi-template + voice + rename refactor
+  - Phase 8: 3d (service section rules expansion)
   - ~~Phase 9: 20d~~ ⏸ on hold
-  - Phase 10: 2d
-  - Phase 11: 4.5d (was 3d, +1.5d for variant picker)
-  - Phase 12: 3d
-- **Remaining to soft launch ≈ 14.5 working days ≈ 3 working weeks** (vs 6 weeks pre-revision).
+  - Phase 10: 2d (skip — section rules deterministic per type; may collapse into Phase 8)
+  - Phase 11: 5d (template + variant + palette picker, was 4.5d)
+  - Phase 12: 4d (QA × 8 templates, was 3d)
+  - Phase 13: TBD (e-commerce wave, deferred)
+  - Phase 14: TBD (product redesign / Meridian, deferred)
+- **Remaining to soft launch (8 service templates) ≈ 17–19 working days ≈ 3.5–4 working weeks.**
 
 ---
 
@@ -216,12 +290,20 @@ Sum of phase budgets in working days:
 
 ## Resolved (post-pilot, 2026-06-07)
 
-14. **Phase 9 block library** = on hold. Designer only mocked the 6 pilot blocks; authoring 20+ from spec alone too risky. Soft launch with 6 blocks × 9 palettes × 3 variants = 162 visuals deemed sufficient for early agency cohort. Un-hold trigger: designer mockups arrive OR real pilot users repeatedly request specific block types.
-15. **Variant switcher (Classic/Condensed/Editorial)** = in scope, lands in Phase 11 next to palette picker. Built in header. Pure visual rescale (`data-variant` on `:root`), zero copy-prompt impact. Default Classic; others opt-in. Visual QA in Phase 12 uses spot-check matrix not full 9×3 cartesian.
-16. **Phase 6 backlog items** (credibility number hallucination, restaurant-marketing lede outlier) = defer to Phase 8 prompt-tuning pass or later. Not blocking Phase 7 commit.
+14. **Phase 9 block library** = on hold. Designer only mocked the 6 pilot blocks; authoring 20+ from spec alone too risky. Soft launch with 6 blocks × N templates × 27 (palette × variant) per template = 1296 visuals across 8 service templates. Sufficient for GTM. Un-hold trigger: designer mockups arrive OR real users repeatedly request specific block types.
+15. **Variant switcher** = in scope per template, lands in Phase 11 next to template + palette picker. Pure visual rescale (`data-variant` on `:root`), zero copy-prompt impact. Default = template's first variant.
+16. **Phase 6 backlog items** (credibility hallucination, restaurant-marketing lede outlier) = defer to Phase 8 or later. Not blocking.
+17. **3-tier model: audienceType → templateId → variantId+paletteId.** 9 templates total (Hearth shipped, 7 more service queued, Stockroom for ecom wave, Meridian + product redesign deferred).
+18. **Voice = type-level, not template-level.** `voiceHearth.ts` → `voiceService.ts` during 7.5 refactor. Italic-`<em>` rules shared across all 8 service templates. Enables copy + template parallel generation.
+19. **Stockroom (e-commerce)** = dedicated wave (Phase 13), not bundled with service launch. Needs new product-grid block schema (price/SKU/cart), different from service blocks.
+20. **Type-gate UI** = persona-step refinement, not new global step. Persona derives `audienceType` automatically.
+21. **Existing data migration** = no concern. Nothing in production. Test/dev projects backfilled in 7.5 migration script.
+22. **Rename `projectType` → `audienceType`.** Disambiguates from `templateId`. Zero migration risk (no prod data). Touch Prisma + all consumers once during 7.5.
 
 ## Unresolved Questions
 
-- Variant tokens: port from `Hearth - Warm Service.html` switcher CSS, or have designer extract clean numbers? (Default: port as-is.)
-- Phase 9 un-hold trigger: which signal counts? Block-type request count threshold, or qualitative pilot feedback?
-- Phase 8 awareness templates (cold / referral / relationship) — no designer mockups. Build from spec or pause like Phase 9?
+- Stockroom (ecom Phase 13) — single template at launch (Stockroom only) or build 2–3 ecom templates in parallel to match service-wave pattern?
+- Phase 8 awareness templates (cold / referral / relationship) — no designer mockups. Build deterministic-rules from spec or pause like Phase 9?
+- Bundle size: 8 templates × 6 blocks × 2 renderers = 96 service block files ship to ALL users incl. product. Code-split per-`templateId` becomes important earlier than expected. Phase 11 or push to Phase 12?
+- `User.persona` (8 values) currently lacks any ecom option. Add `dtc-founder` / `online-retailer` etc. now in 7.5, or wait for Phase 13?
+- Template gallery UX: full preview thumbnails (need 24 mockup screenshots) or descriptive cards (faster to ship, less wow)?

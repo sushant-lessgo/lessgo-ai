@@ -36,7 +36,7 @@ export default function UnderstandingStep() {
     posthog?.capture('service_onboarding_step_view', {
       step: 'understanding',
       stepIndex: 1,
-      projectType: 'service',
+      audienceType: 'service',
     });
   }, [posthog]);
 
@@ -61,7 +61,7 @@ export default function UnderstandingStep() {
     });
     posthog?.capture('service_onboarding_step_submit', {
       step: 'understanding',
-      projectType: 'service',
+      audienceType: 'service',
       categoryCount: serviceCategories.length,
       industryCount: industries.length,
       serviceCount: services.length,

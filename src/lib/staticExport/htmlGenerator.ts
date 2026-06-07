@@ -27,7 +27,7 @@ export interface StaticHTMLOptions {
   title: string;
   description?: string;
   previewImage?: string;
-  projectType?: 'product' | 'service';
+  audienceType?: 'product' | 'service';
   paletteId?: string | null;
 
   // Configuration
@@ -67,7 +67,7 @@ export async function generateStaticHTML(
       theme: options.theme,
       publishedPageId: options.publishedPageId,
       pageOwnerId: options.pageOwnerId,
-      projectType: options.projectType ?? 'product',
+      audienceType: options.audienceType ?? 'product',
       paletteId: options.paletteId ?? null,
     })
   );

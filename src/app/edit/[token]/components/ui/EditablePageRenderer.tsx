@@ -107,9 +107,9 @@ export function EditablePageRenderer({
 }: EditablePageRendererProps) {
 
   const backgroundType = getBackgroundTypeFromSection(sectionId);
-  const { projectType } = useEditStore();
+  const { audienceType } = useEditStore();
 
-  const LayoutComponent = getComponent(sectionId, layout, projectType);
+  const LayoutComponent = getComponent(sectionId, layout, audienceType);
 
   // Enhanced element click handler
   const handleElementClick = React.useCallback((elementKey: string) => {

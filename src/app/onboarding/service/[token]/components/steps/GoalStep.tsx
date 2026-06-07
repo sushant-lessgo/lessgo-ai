@@ -19,7 +19,7 @@ export default function GoalStep() {
     posthog?.capture('service_onboarding_step_view', {
       step: 'goal',
       stepIndex: 2,
-      projectType: 'service',
+      audienceType: 'service',
       goal: 'book-call',
     });
   }, [setGoal, posthog]);
@@ -27,7 +27,7 @@ export default function GoalStep() {
   const handleContinue = () => {
     posthog?.capture('service_onboarding_step_submit', {
       step: 'goal',
-      projectType: 'service',
+      audienceType: 'service',
       goal: 'book-call',
     });
     nextStep();

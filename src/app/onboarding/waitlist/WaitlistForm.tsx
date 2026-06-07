@@ -37,7 +37,7 @@ export default function WaitlistForm({ persona }: WaitlistFormProps) {
         persona,
         email,
         emailDomain: domain,
-        projectType: 'service',
+        audienceType: 'service',
       });
       setSubmitted(true);
       setTimeout(() => router.push('/dashboard'), 1500);

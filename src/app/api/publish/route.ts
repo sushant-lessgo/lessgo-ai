@@ -55,14 +55,16 @@ async function publishHandler(req: NextRequest) {
       return createSecureResponse({ error: slugValidation.error }, 400);
     }
 
-    // 🔍 Get the project to link to published page (also pull projectType +
-    // paletteId so service projects ship with the right Hearth tokens).
+    // 🔍 Get the project to link to published page (also pull audienceType +
+    // template/variant/palette so service projects ship with the right tokens).
     const project = await prisma.project.findUnique({
       where: { tokenId },
-      select: { id: true, projectType: true, paletteId: true }
+      select: { id: true, audienceType: true, templateId: true, variantId: true, paletteId: true }
     });
 
-    const projectType: 'product' | 'service' = project?.projectType === 'service' ? 'service' : 'product';
+    const audienceType: 'product' | 'service' = project?.audienceType === 'service' ? 'service' : 'product';
+    const templateId: string | null = project?.templateId ?? null;
+    const variantId: string | null = project?.variantId ?? null;
     const paletteId: string | null = project?.paletteId ?? null;
 
     // Phase 2: No longer generating htmlContent - using dynamic rendering
@@ -84,7 +86,9 @@ async function publishHandler(req: NextRequest) {
           content: content as any,
           themeValues: themeValues as any,
           projectId: project?.id || null,
-          projectType,
+          audienceType,
+          templateId,
+          variantId,
           paletteId,
           ...(previewImage !== undefined && { previewImage }),
           analyticsEnabled: analyticsEnabled || false, // Phase 4
@@ -116,7 +120,9 @@ async function publishHandler(req: NextRequest) {
           content: content as any,
           themeValues: themeValues as any,
           projectId: project?.id || null,
-          projectType,
+          audienceType,
+          templateId,
+          variantId,
           paletteId,
           previewImage: previewImage || null,
           analyticsEnabled: analyticsEnabled || false, // Phase 4
@@ -225,7 +231,7 @@ async function publishHandler(req: NextRequest) {
         previewImage,
         analyticsOptIn: analyticsEnabled || false, // Phase 4
         baseURL: baseUrl,
-        projectType,
+        audienceType,
         paletteId,
       });
 

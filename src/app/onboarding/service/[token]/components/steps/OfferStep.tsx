@@ -27,7 +27,7 @@ export default function OfferStep() {
     posthog?.capture('service_onboarding_step_view', {
       step: 'offer',
       stepIndex: 3,
-      projectType: 'service',
+      audienceType: 'service',
     });
   }, [posthog]);
 
@@ -37,7 +37,7 @@ export default function OfferStep() {
     setOffer(trimmed);
     posthog?.capture('service_onboarding_step_submit', {
       step: 'offer',
-      projectType: 'service',
+      audienceType: 'service',
     });
     nextStep();
   };

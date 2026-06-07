@@ -61,11 +61,11 @@ export function MainContent({ tokenId }: MainContentProps) {
   const selectedSection = useStoreState(state => state.selectedSection);
   const selectedElement = useStoreState(state => state.selectedElement);
   const multiSelection = useStoreState(state => state.multiSelection);
-  const projectType = useStoreState(state => state.projectType);
+  const audienceType = useStoreState(state => state.audienceType);
 
   // Service projects use the Hearth UIBlock library; the layout-swap UI
   // (add-section / change-layout) is product-only at pilot. Hide accordingly.
-  const showLayoutSwapUI = projectType !== 'service';
+  const showLayoutSwapUI = audienceType !== 'service';
   
   // Get actions from store
   const storeState = store?.getState();

@@ -19,7 +19,7 @@ export default async function CreateLayout({ children, params }: LayoutProps) {
   // and the current authed user has a User row, claim ownership atomically.
   // updateMany is race-safe: a second tab racing this call returns count=0
   // because the WHERE clause requires userId IS NULL. We do NOT auto-rebuild
-  // on projectType mismatch — cross-pivot conversion is deferred post-launch
+  // on audienceType mismatch — cross-pivot conversion is deferred post-launch
   // (resolution #13). Note: PublishedPage.userId is a Clerk-ID string, not an
   // FK, so claiming Project does not auto-claim publishes.
   try {

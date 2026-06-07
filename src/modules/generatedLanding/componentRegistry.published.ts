@@ -314,7 +314,7 @@ export function extractSectionType(sectionId: string): string {
 }
 
 import { resolveServiceBlock } from '@/modules/service/resolveServiceBlock';
-import type { ProjectType } from '@/types/service';
+import type { AudienceType } from '@/types/service';
 
 /**
  * Get component from registry by section type and layout name
@@ -323,13 +323,13 @@ import type { ProjectType } from '@/types/service';
 export function getComponent(
   type: string,
   layout: string,
-  projectType: ProjectType = 'product'
+  audienceType: AudienceType = 'product'
 ): React.ComponentType<any> | null {
   const normalizedType = type.toLowerCase();
   const normalizedLayout = layout.toLowerCase();
 
   // Service projects dispatch to the Hearth UIBlock library (Phase 3).
-  if (projectType === 'service') {
+  if (audienceType === 'service') {
     return resolveServiceBlock(normalizedType, normalizedLayout, 'published');
   }
 

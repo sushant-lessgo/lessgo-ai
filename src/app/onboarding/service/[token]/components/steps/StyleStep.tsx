@@ -36,7 +36,7 @@ export default function StyleStep() {
     posthog?.capture('service_onboarding_step_view', {
       step: 'style',
       stepIndex: 5,
-      projectType: 'service',
+      audienceType: 'service',
       inferredPalette,
     });
   }, [paletteId, setPaletteId, inferredPalette, posthog]);
@@ -65,7 +65,7 @@ export default function StyleStep() {
       }
       posthog?.capture('service_onboarding_step_submit', {
         step: 'style',
-        projectType: 'service',
+        audienceType: 'service',
         paletteId: selected,
         inferredPalette,
         userChanged: inferredPalette !== selected,

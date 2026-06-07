@@ -1,7 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
-import { personaToProjectType, userPersonaLabels, type UserPersona } from '@/types/service';
+import { personaToAudienceType, userPersonaLabels, type UserPersona } from '@/types/service';
 import Logo from '@/components/shared/Logo';
 import WaitlistForm from './WaitlistForm';
 
@@ -23,11 +23,11 @@ export default async function WaitlistPage() {
   }
 
   const persona = user.persona as UserPersona;
-  const projectType = personaToProjectType(persona);
+  const audienceType = personaToAudienceType(persona);
 
   // Defensive: if user is product or pilot-eligible (agency), they shouldn't
   // be here. Bounce to dashboard.
-  if (projectType !== 'service' || persona === 'agency') {
+  if (audienceType !== 'service' || persona === 'agency') {
     redirect('/dashboard');
   }
 

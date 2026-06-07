@@ -167,7 +167,7 @@ import VisualObjectionTiles from '@/modules/UIBlocks/ObjectionHandle/VisualObjec
 
 import { logger } from '@/lib/logger';
 import { resolveServiceBlock } from '@/modules/service/resolveServiceBlock';
-import type { ProjectType } from '@/types/service';
+import type { AudienceType } from '@/types/service';
 // Component registry type definition
 export type ComponentRegistry = Record<string, Record<string, React.ComponentType<any>>>;
 
@@ -431,13 +431,13 @@ export function extractSectionType(sectionId: string): string {
 export function getComponent(
   sectionIdOrType: string,
   layoutName: string,
-  projectType: ProjectType = 'product'
+  audienceType: AudienceType = 'product'
 ): React.ComponentType<any> | null {
   // Extract section type from section ID if needed
   const sectionType = extractSectionType(sectionIdOrType);
 
   // Service projects dispatch to the Hearth UIBlock library (Phase 3).
-  if (projectType === 'service') {
+  if (audienceType === 'service') {
     return resolveServiceBlock(sectionType, layoutName, 'edit');
   }
 

@@ -7,7 +7,7 @@
 //  3. <link id="hearth-fraunces"> for Fraunces Google Fonts (DM Sans is
 //     self-hosted; do NOT load it from Google here to avoid double-loading)
 //
-// Phase 1 only — Phase 3 mounts this from the renderer when projectType==='service'.
+// Phase 1 only — Phase 3 mounts this from the renderer when audienceType==='service'.
 
 import { useEffect, type ReactNode } from 'react';
 import type { HearthPalette } from '@/types/service';

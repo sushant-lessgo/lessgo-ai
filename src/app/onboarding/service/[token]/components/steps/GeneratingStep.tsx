@@ -147,7 +147,7 @@ export default function GeneratingStep() {
         creditsUsed: json?.creditsUsed,
         creditsRemaining: json?.creditsRemaining,
         durationMs: Date.now() - strategyStart,
-        projectType: 'service',
+        audienceType: 'service',
       });
       if (!res.ok || !json?.success) {
         if (res.status === 402 || /credit/i.test(json?.error ?? '')) {
@@ -187,7 +187,7 @@ export default function GeneratingStep() {
         creditsRemaining: json?.creditsRemaining,
         durationMs: Date.now() - copyStart,
         attempts: json?.meta?.attempts,
-        projectType: 'service',
+        audienceType: 'service',
       });
       if (!res.ok || !json?.success) {
         if (res.status === 402 || /credit/i.test(json?.error ?? '')) {
@@ -229,7 +229,7 @@ export default function GeneratingStep() {
       totalDurationMs: Date.now() - startedAt.current,
       sectionCount: strategy.sections.length,
       paletteId: effectivePalette,
-      projectType: 'service',
+      audienceType: 'service',
     });
 
     // Brief delay so the user sees the final check before the editor loads.

@@ -14,7 +14,7 @@ export function LayoutChangeModal() {
   const updateSectionLayout = useStoreState(state => state.updateSectionLayout);
   const setSection = useStoreState(state => state.setSection);
   const hideLayoutChangeModal = useStoreState(state => state.hideLayoutChangeModal);
-  const projectType = useStoreState(state => state.projectType);
+  const audienceType = useStoreState(state => state.audienceType);
 
   const handleLayoutChange = (layoutId: string, migratedData: Record<string, EditableElement>) => {
     if (!layoutChangeModal.sectionId) return;
@@ -42,7 +42,7 @@ export function LayoutChangeModal() {
 
   // Service projects use a fixed Hearth UIBlock library at pilot — no
   // layout-swap UI. Hide unconditionally; opening the modal is a no-op.
-  if (projectType === 'service') {
+  if (audienceType === 'service') {
     return null;
   }
 

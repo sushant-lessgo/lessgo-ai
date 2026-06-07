@@ -43,7 +43,7 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
     uploadImage,
     hideElementToolbar,
     tokenId,
-    projectType,
+    audienceType,
   } = useEditStore();
 
   // Stub executeAction (removed in V2 refactor)
@@ -515,7 +515,7 @@ function StockPhotosPanel({ position, onClose, onSelectImage }: {
   onClose: () => void;
   onSelectImage: (stockPhoto: StockPhoto) => void;
 }) {
-  const { projectType, paletteId } = useEditStore();
+  const { audienceType, paletteId } = useEditStore();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<StockPhoto[]>([]);
@@ -568,7 +568,7 @@ function StockPhotosPanel({ position, onClose, onSelectImage }: {
     setError(null);
 
     const effectiveQuery =
-      projectType === 'service'
+      audienceType === 'service'
         ? getServiceImageQuery(query.trim(), undefined, (paletteId as HearthPalette | null) ?? undefined)
         : query.trim();
 
@@ -615,7 +615,7 @@ function StockPhotosPanel({ position, onClose, onSelectImage }: {
         requestBody = { searchType: 'curated', per_page: 12 };
       } else {
         const categoryQuery =
-          projectType === 'service'
+          audienceType === 'service'
             ? getServiceImageQuery(category, undefined, (paletteId as HearthPalette | null) ?? undefined)
             : category;
         requestBody = {

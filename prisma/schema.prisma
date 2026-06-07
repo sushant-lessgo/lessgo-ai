@@ -23,11 +23,13 @@ model Project {
   user        User?   @relation(fields: [userId], references: [id])
   tokenId     String  @unique
   token       Token   @relation(fields: [tokenId], references: [value])
-  title       String  @default("Untitled Project")
-  status      String  @default("draft")
-  projectType String  @default("product")
-  paletteId   String?
-  content     Json?
+  title        String  @default("Untitled Project")
+  status       String  @default("draft")
+  audienceType String  @default("product")
+  templateId   String?
+  variantId    String?
+  paletteId    String?
+  content      Json?
 
   themeValues    Json?
   computedDesign Json?
@@ -53,7 +55,9 @@ model PublishedPage {
   themeValues    Json?
   computedDesign Json?
   projectId      String?
-  projectType    String   @default("product")
+  audienceType   String   @default("product")
+  templateId     String?
+  variantId      String?
   paletteId      String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt

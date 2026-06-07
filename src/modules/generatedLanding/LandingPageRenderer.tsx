@@ -132,11 +132,11 @@ export default function LandingPageRenderer({ className = '', tokenId, published
     updateFontsFromTone,
     getColorTokens,
     updateFromBackgroundSystem,
-    projectType,
+    audienceType,
     paletteId,
   } = storeState;
 
-  const isService = projectType === 'service';
+  const isService = audienceType === 'service';
   const effectivePalette: HearthPalette = (paletteId as HearthPalette) || defaultHearthPalette;
 
   // Get feature flags for CSS variable system
@@ -319,7 +319,7 @@ const finalSections: OrderedSection[] = processedSections
     const { id: sectionId, background, layout, data, alternatingInfo } = section;
     
     // Get the appropriate component from registry
-    const LayoutComponent = getComponent(sectionId, layout, projectType);
+    const LayoutComponent = getComponent(sectionId, layout, audienceType);
 
     // Use fallback if component not found
     if (!LayoutComponent) {

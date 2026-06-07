@@ -58,7 +58,7 @@ export default function OneLinerStep() {
     posthog?.capture('service_onboarding_step_view', {
       step: 'oneLiner',
       stepIndex: 0,
-      projectType: 'service',
+      audienceType: 'service',
     });
   }, [posthog]);
 
@@ -68,7 +68,7 @@ export default function OneLinerStep() {
     setOneLiner(local.trim());
     posthog?.capture('service_onboarding_step_submit', {
       step: 'oneLiner',
-      projectType: 'service',
+      audienceType: 'service',
     });
     nextStep();
   };

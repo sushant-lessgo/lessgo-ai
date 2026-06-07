@@ -75,7 +75,9 @@ async function saveDraftHandler(req: NextRequest) {
       title,
       themeValues,
       finalContent,
-      paletteId
+      paletteId,
+      templateId,
+      variantId
     } = validationResult.data;
 
     const isDemo = tokenId === DEMO_TOKEN;
@@ -154,6 +156,8 @@ async function saveDraftHandler(req: NextRequest) {
         inputText: inputText || null,
         themeValues: (themeValues || existingProject?.themeValues || null) as any,
         paletteId: paletteId ?? null,
+        templateId: templateId ?? null,
+        variantId: variantId ?? null,
         status: 'draft',
       },
       update: {
@@ -162,6 +166,8 @@ async function saveDraftHandler(req: NextRequest) {
         inputText: inputText !== undefined ? inputText : undefined,
         themeValues: themeValues !== undefined ? (themeValues as any) : undefined,
         paletteId: paletteId !== undefined ? paletteId : undefined,
+        templateId: templateId !== undefined ? templateId : undefined,
+        variantId: variantId !== undefined ? variantId : undefined,
         updatedAt: new Date(),
       },
     });

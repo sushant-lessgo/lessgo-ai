@@ -54,7 +54,7 @@ export default function AssetsStep() {
     posthog?.capture('service_onboarding_step_view', {
       step: 'assets',
       stepIndex: 4,
-      projectType: 'service',
+      audienceType: 'service',
     });
   }, [posthog]);
 
@@ -83,7 +83,7 @@ export default function AssetsStep() {
     });
     posthog?.capture('service_onboarding_step_submit', {
       step: 'assets',
-      projectType: 'service',
+      audienceType: 'service',
       hasTestimonials,
       hasClientLogos,
       hasOutcomes,

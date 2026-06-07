@@ -14,7 +14,7 @@
 import React from 'react';
 import Script from 'next/script';
 import { getComponent, extractSectionType } from './componentRegistry.published';
-import type { ProjectType, HearthPalette } from '@/types/service';
+import type { AudienceType, HearthPalette } from '@/types/service';
 import { HearthSSRTokens } from '@/modules/service/components/HearthSSRTokens';
 import { getSurfaceForSection } from '@/modules/service/design/sectionRules';
 import { defaultHearthPalette } from '@/modules/service/design/palettes';
@@ -40,7 +40,7 @@ interface LandingPagePublishedRendererProps {
   pageOwnerId?: string;         // For analytics (optional)
   slug?: string;                // For analytics tracking
   analyticsEnabled?: boolean;   // Enable analytics beacon
-  projectType?: ProjectType;    // Routes to service block library when 'service'
+  audienceType?: AudienceType;  // Routes to service block library when 'service'
   paletteId?: string | null;    // Hearth palette for service projects
 }
 
@@ -53,10 +53,10 @@ export function LandingPagePublishedRenderer({
   pageOwnerId,
   slug,
   analyticsEnabled,
-  projectType = 'product',
+  audienceType = 'product',
   paletteId = null,
 }: LandingPagePublishedRendererProps) {
-  const isService = projectType === 'service';
+  const isService = audienceType === 'service';
   const effectivePalette: HearthPalette =
     (paletteId as HearthPalette) || defaultHearthPalette;
   // 1. Extract sectionLayouts from content
@@ -91,7 +91,7 @@ export function LandingPagePublishedRenderer({
         if (!section) return null;
         const { id: sectionId, layout, data } = section;
         const sectionType = extractSectionType(sectionId);
-        const LayoutComponent = getComponent(sectionType, layout, projectType);
+        const LayoutComponent = getComponent(sectionType, layout, audienceType);
 
         // Silent fallback if component not found
         if (!LayoutComponent) {
