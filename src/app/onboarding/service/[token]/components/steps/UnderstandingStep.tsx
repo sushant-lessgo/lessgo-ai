@@ -7,14 +7,48 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { usePostHog } from 'posthog-js/react';
 import ChipInput from '../fields/ChipInput';
+import { personaToServiceType, type ServiceType, type UserPersona } from '@/types/service';
 
 type DeliveryModel = 'remote' | 'in-person' | 'hybrid';
+
+// Friendly labels for the seeded business-type badge.
+const SERVICE_TYPE_LABELS: Record<ServiceType, string> = {
+  'agency': 'Agency',
+  'consultancy': 'Consultancy',
+  'coaching': 'Coaching',
+  'freelance': 'Freelance',
+  'productized-service': 'Productized service',
+  'local-service': 'Local service',
+};
 
 export default function UnderstandingStep() {
   const posthog = usePostHog();
   const understanding = useServiceGenerationStore((s) => s.understanding);
   const setUnderstanding = useServiceGenerationStore((s) => s.setUnderstanding);
   const nextStep = useServiceGenerationStore((s) => s.nextStep);
+
+  // Seed serviceType from the user's persona (consultant → consultancy,
+  // coach → coaching, agency → agency). Falls back to 'agency'. The field is
+  // not user-editable here (single locked badge), but it's persona-correct now.
+  const [serviceType, setServiceType] = useState<ServiceType>(
+    (understanding?.serviceType as ServiceType) ?? 'agency'
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/user/persona')
+      .then((r) => r.json())
+      .then((data) => {
+        if (cancelled) return;
+        const persona = data?.persona as UserPersona | null;
+        const seeded = persona ? personaToServiceType(persona) : null;
+        if (seeded) setServiceType(seeded);
+      })
+      .catch(() => {/* keep default 'agency' */});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const [serviceCategories, setServiceCategories] = useState<string[]>(
     understanding?.serviceCategories ?? []
@@ -52,7 +86,7 @@ export default function UnderstandingStep() {
     e.preventDefault();
     if (!isValid) return;
     setUnderstanding({
-      serviceType: 'agency',
+      serviceType,
       serviceCategories,
       industries,
       services,
@@ -73,19 +107,18 @@ export default function UnderstandingStep() {
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold text-gray-900">
-          Tell us about your studio
+          Tell us about your business
         </h1>
         <p className="mt-2 text-gray-600">
           A few details so the page can speak directly to your kind of client.
         </p>
       </div>
 
-      {/* Service type — locked badge */}
+      {/* Service type — seeded from persona, shown as a locked badge */}
       <div className="space-y-2">
-        <Label className="text-gray-700">Studio type</Label>
+        <Label className="text-gray-700">Business type</Label>
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-50 border border-orange-200 text-sm text-brand-accentPrimary">
-          <span className="font-medium">Agency</span>
-          <span className="text-xs text-gray-500">(pilot)</span>
+          <span className="font-medium">{SERVICE_TYPE_LABELS[serviceType]}</span>
         </div>
       </div>
 

@@ -10,6 +10,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, X, GripVertical, Settings } from 'lucide-react';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import type { MVPForm, MVPFormField, MVPFormFieldType, MVPFormIntegration } from '@/types/core/forms';
+import {
+  getServiceFormTemplate,
+  SERVICE_FORM_TEMPLATE_GOALS,
+} from '@/modules/audience/service/formTemplates';
+import { serviceGoalLabels } from '@/types/service';
 import { logger } from '@/lib/logger';
 
 interface FormBuilderProps {
@@ -117,6 +122,21 @@ export function FormBuilder({ isOpen, onClose, editingFormId }: FormBuilderProps
     } finally {
       setIsSaving(false);
     }
+  };
+
+  // Phase 8: seed the in-progress form from a goal template. Only offered for a
+  // new (not-yet-saved) form so it never clobbers an existing one.
+  const handleLoadTemplate = (goal: (typeof SERVICE_FORM_TEMPLATE_GOALS)[number]) => {
+    const tpl = getServiceFormTemplate(goal);
+    setFormData({
+      name: tpl.name,
+      // Clone fields so edits don't mutate the shared template constant.
+      fields: tpl.fields.map((f) => ({ ...f })),
+      submitButtonText: tpl.submitButtonText,
+      successMessage: tpl.successMessage,
+      integrations: [],
+    });
+    setErrors({});
   };
 
   const handleAddField = () => {
@@ -234,6 +254,24 @@ export function FormBuilder({ isOpen, onClose, editingFormId }: FormBuilderProps
               rows={2}
             />
           </div>
+
+          {/* Start-from-template picker — only for a new form */}
+          {!editingFormId && (
+            <div className="flex flex-wrap items-center gap-2 rounded-lg border border-dashed border-gray-200 bg-gray-50 p-3">
+              <span className="text-sm text-gray-600">Start from a template:</span>
+              {SERVICE_FORM_TEMPLATE_GOALS.map((goal) => (
+                <Button
+                  key={goal}
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleLoadTemplate(goal)}
+                >
+                  {serviceGoalLabels[goal]}
+                </Button>
+              ))}
+            </div>
+          )}
 
           {/* Form Fields */}
           <div>

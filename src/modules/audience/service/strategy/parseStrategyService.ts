@@ -20,9 +20,8 @@ export interface AssembleServiceStrategyInput {
 /**
  * Combine LLM strategy + deterministic sections + deterministic uiblocks.
  *
- * Pilot detail: section selection ignores LLM `awareness` and forces the
- * search-aware-comparing template. The LLM's awareness value is preserved in
- * the output for analytics + Phase 7+ activation.
+ * Phase 8: section order is routed by the LLM-inferred `awareness` state, and
+ * `servicePresentation.format === 'quote-only'` drops the packages section.
  */
 export function assembleServiceStrategy(
   input: AssembleServiceStrategyInput
@@ -33,6 +32,7 @@ export function assembleServiceStrategy(
     awareness: llmResponse.awareness,
     goal,
     assets,
+    format: llmResponse.servicePresentation.format,
   });
 
   const { uiblocks } = selectServiceUIBlocks({ sections });

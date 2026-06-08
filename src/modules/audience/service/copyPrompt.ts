@@ -63,6 +63,24 @@ function buildSectionSpec(sectionType: string, layoutName: string): string {
   return lines.join('\n');
 }
 
+/**
+ * Goal-specific CTA guidance — steers the verbs/commitment level of every
+ * CTA-bearing field (header.cta_text, hero.cta_text, packages[].cta_text,
+ * cta.cta_text). CTA variation is copy-level on the shared BookCallCTA block —
+ * there is no per-goal CTA block (Phase 9 hold).
+ */
+function getGoalCtaGuidance(goal: ServiceGoal): string {
+  const map: Partial<Record<ServiceGoal, string>> = {
+    'book-call':
+      'Goal = book a call. CTA copy should invite a low-pressure conversation: "Book a call", "Book a discovery call", "Start a conversation". Warm, no hard sell.',
+    'request-quote':
+      'Goal = request a quote. CTA copy should invite a scoped, custom estimate: "Request a quote", "Get a quote", "Scope your project". Signal bespoke pricing, not a fixed price tag.',
+    'lead-magnet':
+      'Goal = lead magnet. CTA copy should offer the free resource with minimal commitment: "Get the guide", "Download the resource", "Send it to me". Make the value of the resource obvious; do NOT imply a sales call.',
+  };
+  return map[goal] ?? map['book-call']!;
+}
+
 function getEmotionalContext(awareness: string): string {
   const map: Record<string, string> = {
     'search-aware-cold':      'Visitor Googled the service category. Has a need but no preferred provider yet — they need to feel "this provider gets it" within 3 seconds.',
@@ -115,6 +133,7 @@ Target clients: ${understanding.targetClients}
 Delivery: ${understanding.deliveryModel}
 Offer: ${offer}
 Landing goal: ${serviceGoalLabels[goal]} (${goal})
+${getGoalCtaGuidance(goal)}
 
 ## ONE CLIENT (Ideal Reader)
 ${strategy.oneClient.who}
@@ -154,14 +173,21 @@ ${getElementSchemas()}
 
 ## RULES (MUST FOLLOW)
 1. **Italic-accent convention — applies to EVERY section, not just hero.** Every "headline" field AND every "lede" field across ALL sections (hero, services, packages, testimonials, cta — every one) must wrap 1-2 emphasized words in <em>...</em>. The renderer styles them as italic Fraunces. Without <em>, the page reads flat — this is the visual signature of Hearth. Do not skip it on services/packages/cta headlines or on any lede.
+   - ⚠️ **LEDES ARE THE #1 MISSED FIELD.** A lede is a full descriptive sentence, so it is easy to forget the accent — but it needs exactly one <em>...</em> just like a headline. Pick the single most meaningful word in each lede and wrap it. Re-read every lede before you output.
 2. Respect character limits and array min/max strictly.
 3. NO placeholder text — every field must be real, usable copy.
 4. NO invented exact numbers, client names, or dollar figures. Use ranges or "experienced in X" framing.
 5. NEEDS_REVIEW elements (price_display, quote, author_*): write realistic copy but use general framing — founder will verify.
 6. For arrays: return the actual array, respecting min/max.
 7. Return ONLY valid JSON. No markdown, no commentary.
-8. Every section listed must have output.
-9. Use Hearth voice — concrete nouns, craftsperson tone. Avoid forbidden words.
+8. **Output EVERY section listed above — no omissions.** Include each section key (header, hero, services, testimonials, packages, cta, footer — whichever are listed) with a complete "elements" object. Do not drop trailing sections like testimonials or footer.
+9. Use Hearth voice — concrete nouns, craftsperson tone. **Avoid the forbidden words ANYWHERE** — including invented brand names (logo_text), company names (author_company), copyright lines, and testimonial quotes. E.g. do NOT name the business "Leverage ..." or "... Solutions" and do NOT let a quote say "game-changing".
+
+## FINAL SELF-CHECK (do this before returning)
+Scan your JSON once more and fix any miss:
+(a) Every section listed in "SECTIONS TO GENERATE" has an entry.
+(b) Every "headline" contains an <em>...</em>.
+(c) Every "lede" contains an <em>...</em> — this is the field most often missed.
 
 ## OUTPUT FORMAT
 

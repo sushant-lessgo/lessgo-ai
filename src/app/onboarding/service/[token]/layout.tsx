@@ -9,10 +9,15 @@ interface LayoutProps {
   params: { token: string };
 }
 
-// Pilot lockdown: only `agency` reaches the service wizard. Other service
-// personas hit the waitlist gate via /api/start. This guard catches direct-URL
-// access (someone bookmarking a wizard URL after persona change, etc).
-const PILOT_SERVICE_PERSONAS: ReadonlySet<UserPersona> = new Set(['agency']);
+// Phase 8: agency + consultant + coach reach the service wizard. The remaining
+// service personas (freelancer, local-service, productized-service) still hit the
+// waitlist gate via /api/start. This guard also catches direct-URL access
+// (someone bookmarking a wizard URL after a persona change, etc).
+const PILOT_SERVICE_PERSONAS: ReadonlySet<UserPersona> = new Set([
+  'agency',
+  'consultant',
+  'coach',
+]);
 
 export default async function ServiceOnboardingLayout({
   children,

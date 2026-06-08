@@ -134,6 +134,7 @@ export type ServiceAwareness = (typeof serviceAwarenessStates)[number];
 export const serviceGoals = [
   'book-call',
   'request-quote',
+  'lead-magnet',
   'apply',
   'download-portfolio',
   'subscribe-newsletter',
@@ -144,6 +145,7 @@ export type ServiceGoal = (typeof serviceGoals)[number];
 export const serviceGoalLabels: Record<ServiceGoal, string> = {
   'book-call': 'Book a discovery call',
   'request-quote': 'Request a quote',
+  'lead-magnet': 'Get the free resource',
   'apply': 'Apply to work with us',
   'download-portfolio': 'Download portfolio',
   'subscribe-newsletter': 'Get free resource',

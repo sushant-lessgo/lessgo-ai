@@ -10,9 +10,14 @@ import { createDefaultPlan } from '@/lib/planManager'
 import { logger } from '@/lib/logger'
 import { personaToAudienceType, type UserPersona } from '@/types/service'
 
-// Pilot lockdown: only `agency` persona reaches the service onboarding flow.
-// Other service personas waitlist (resolution #6 in nsoPlan.md).
-const PILOT_SERVICE_PERSONAS: ReadonlySet<UserPersona> = new Set(['agency'])
+// Phase 8: agency + consultant + coach reach the service onboarding flow.
+// Remaining service personas (freelancer, local-service, productized-service)
+// waitlist (nsoPlan.md resolution #25).
+const PILOT_SERVICE_PERSONAS: ReadonlySet<UserPersona> = new Set([
+  'agency',
+  'consultant',
+  'coach',
+])
 
 export async function GET() {
   const { userId } = await auth()

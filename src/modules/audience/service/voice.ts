@@ -45,6 +45,9 @@ export const SERVICE_VOICE = {
     lede: [
       'A six-week studio engagement for founders who want their brand to feel as <em>deliberate</em> as their product.',
       'A small team that takes <em>fewer</em> projects, on purpose.',
+      // Short/punchy ledes still take an accent — terse copy is the easiest place to forget <em>.
+      'Fill your midweek seats with <em>local</em> regulars.',
+      'Websites that actually <em>convert</em> browsers to bookings.',
     ],
   },
 
@@ -84,7 +87,7 @@ ${SERVICE_VOICE.examples.packages.map((e) => `  - "${e}"`).join('\n')}
 CTA-section headline examples:
 ${SERVICE_VOICE.examples.cta.map((e) => `  - "${e}"`).join('\n')}
 
-Lede examples (lede ALSO gets <em>):
+Lede examples (lede ALSO gets <em> — including SHORT, punchy one-line ledes; never skip the accent just because the lede is brief):
 ${SERVICE_VOICE.examples.lede.map((e) => `  - "${e}"`).join('\n')}
 
 **Eyebrow style:** ${SERVICE_VOICE.roleNotes.eyebrow}

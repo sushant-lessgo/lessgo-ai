@@ -10,8 +10,16 @@
 //
 // Usage:
 //   NEXT_PUBLIC_USE_MOCK_GPT=true npx tsx scripts/dogfoodServicePipeline.ts
-//   npx tsx scripts/dogfoodServicePipeline.ts                 # real LLM, all 5
+//   npx tsx scripts/dogfoodServicePipeline.ts                 # real LLM, all personas once
 //   npx tsx scripts/dogfoodServicePipeline.ts --persona=skincare   # single persona
+//   npx tsx scripts/dogfoodServicePipeline.ts --persona=skincare --awareness=referral-driven --goal=request-quote
+//
+// Phase 8 case matrices (--matrix takes precedence; forceAwareness drives section
+// routing + copy emotional context deterministically):
+//   --matrix=awareness           # 3 personas × 4 awareness × book-call   = 12
+//   --matrix=goal                # 2 personas × 3 goals × inferred aware   = 6
+//   --matrix=smell               # 2 personas × {cold, relationship}       = 4  (prints copy diff)
+//   --matrix=comparing-baseline  # 3 personas × forced comparing × book    = 3  (regression gate)
 
 import { config as dotenvConfig } from 'dotenv';
 import { writeFileSync, mkdirSync, existsSync } from 'fs';
@@ -26,6 +34,8 @@ dotenvConfig({ path: join(process.cwd(), '.env') });
 import { buildServiceStrategyPrompt } from '../src/modules/audience/service/strategy/promptsService';
 import { assembleServiceStrategy } from '../src/modules/audience/service/strategy/parseStrategyService';
 import { buildServiceCopyPrompt } from '../src/modules/audience/service/copyPrompt';
+import { selectServiceSections } from '../src/modules/audience/service/sectionSelection';
+import { selectServiceUIBlocks } from '../src/modules/audience/service/selectUIBlocks';
 import {
   processServiceCopy,
   validateServiceCopyCompleteness,
@@ -35,13 +45,18 @@ import {
   generateMockServiceCopy,
 } from '../src/modules/prompt/mockResponseGeneratorService';
 import { SERVICE_VOICE } from '../src/modules/audience/service/voice';
+import { serviceAwarenessStates } from '../src/types/service';
 import type {
   ServiceUnderstandingInput,
   ServiceAssetInput,
   ServiceGoal,
+  ServiceAwareness,
   ServiceStrategyOutputAssembled,
 } from '../src/types/service';
 import type { SectionCopy } from '../src/types/generation';
+
+// Pilot-validated baseline order for search-aware-comparing (regression gate).
+const COMPARING_BASELINE_ORDER = ['header', 'hero', 'services', 'testimonials', 'packages', 'cta', 'footer'];
 
 // ---------- Sample inputs ----------
 
@@ -176,7 +191,61 @@ const PERSONAS: DogfoodPersona[] = [
       testimonialType: null,
     },
   },
+  // Phase 8: consultant + coach personas (newly unlocked) for the case matrix.
+  {
+    slug: 'ops-consultant',
+    label: 'Operations consultant for scaling startups',
+    oneLiner: 'Independent operations consultant helping seed-to-Series-B startups fix their internal chaos.',
+    understanding: {
+      serviceType: 'consultancy',
+      serviceCategories: ['Operations', 'Process Design'],
+      industries: ['Startups', 'Tech', 'SaaS'],
+      targetClients: 'Founders and COOs of 10–80 person startups feeling operational drag',
+      services: ['Ops diagnostic', 'Process redesign', 'Tooling & systems setup'],
+      deliveryModel: 'remote',
+    },
+    goal: 'book-call',
+    offer: 'Free 45-min operations diagnostic call',
+    assets: {
+      hasTestimonials: true,
+      hasClientLogos: false,
+      hasOutcomes: false,
+      hasCaseStudies: true,
+      hasTeamPhotos: false,
+      hasFounderPhoto: true,
+      testimonialType: 'text',
+    },
+  },
+  {
+    slug: 'exec-coach',
+    label: 'Executive leadership coach',
+    oneLiner: 'Leadership coach for newly-promoted engineering managers stepping into their first director role.',
+    understanding: {
+      serviceType: 'coaching',
+      serviceCategories: ['Leadership Coaching', 'Career Strategy'],
+      industries: ['Tech', 'Engineering Leadership'],
+      targetClients: 'First-time directors and senior managers at growth-stage tech companies',
+      services: ['1:1 coaching engagements', 'Leadership intensives', '360 feedback debriefs'],
+      deliveryModel: 'remote',
+    },
+    goal: 'book-call',
+    offer: 'Free 30-min leadership clarity session',
+    assets: {
+      hasTestimonials: true,
+      hasClientLogos: false,
+      hasOutcomes: false,
+      hasCaseStudies: false,
+      hasTeamPhotos: false,
+      hasFounderPhoto: true,
+      testimonialType: 'text',
+    },
+  },
 ];
+
+// Representative persona per active persona-type, for the case matrices.
+const MATRIX_AGENCY = 'skincare';
+const MATRIX_CONSULTANT = 'ops-consultant';
+const MATRIX_COACH = 'exec-coach';
 
 // ---------- Metrics ----------
 
@@ -193,15 +262,45 @@ interface PerSectionAccentMetric {
 interface PersonaMetrics {
   slug: string;
   label: string;
+  caseLabel: string;
+  awareness: string;
+  goal: string;
+  sectionOrder: string[];
   schemaValid: boolean;
   copyComplete: boolean;
   missingSections: string[];
   accentFields: PerSectionAccentMetric[];
   forbiddenWordHits: { word: string; sectionType: string; field: string; value: string }[];
+  credibilityFlag: string | null;
 }
 
 function hasEm(value: unknown): boolean {
   return typeof value === 'string' && /<em\b/i.test(value);
+}
+
+/**
+ * Phase 8 (Phase 6 backlog): flag credibility numbers the LLM invented — any
+ * digit-run in ourPosition.credibility that doesn't appear in the provider input.
+ */
+function detectCredibilityHallucination(
+  strategy: ServiceStrategyOutputAssembled,
+  persona: DogfoodPersona
+): string | null {
+  const cred = strategy.ourPosition?.credibility ?? '';
+  const nums = cred.match(/\d+/g);
+  if (!nums) return null;
+  const corpus = [
+    persona.oneLiner,
+    persona.offer,
+    persona.understanding.targetClients,
+    ...persona.understanding.serviceCategories,
+    ...persona.understanding.industries,
+    ...persona.understanding.services,
+  ]
+    .join(' ')
+    .toLowerCase();
+  const invented = nums.filter((n) => !corpus.includes(n));
+  return invented.length ? `"${cred}" (invented numbers: ${invented.join(', ')})` : null;
 }
 
 /**
@@ -254,12 +353,26 @@ function detectForbiddenWords(
 
 // ---------- Pipeline ----------
 
+interface RunOpts {
+  forceAwareness?: ServiceAwareness;
+  goalOverride?: ServiceGoal;
+  caseLabel?: string;
+}
+
 async function runPersona(
   persona: DogfoodPersona,
-  useMocks: boolean
+  useMocks: boolean,
+  opts: RunOpts = {}
 ): Promise<{ metrics: PersonaMetrics; assembled: ServiceStrategyOutputAssembled; copy: Record<string, SectionCopy> } | null> {
+  const goal = opts.goalOverride ?? persona.goal;
+  const caseLabel =
+    opts.caseLabel ??
+    `${persona.slug}${opts.forceAwareness ? ` · ${opts.forceAwareness}` : ''}${
+      opts.goalOverride ? ` · ${goal}` : ''
+    }`;
+
   console.log(`\n${'─'.repeat(60)}`);
-  console.log(`Running: ${persona.slug} — ${persona.label}`);
+  console.log(`Running: ${caseLabel} — ${persona.label}`);
   console.log('─'.repeat(60));
 
   // ----- Strategy -----
@@ -270,17 +383,30 @@ async function runPersona(
       assembledStrategy = generateMockServiceStrategy({
         oneLiner: persona.oneLiner,
         understanding: persona.understanding,
-        goal: persona.goal,
+        goal,
         offer: persona.offer,
         assets: persona.assets,
       });
+      // Mocks ignore awareness routing — apply the override deterministically.
+      if (opts.forceAwareness) {
+        assembledStrategy.awareness = opts.forceAwareness;
+        assembledStrategy.sections = selectServiceSections({
+          awareness: opts.forceAwareness,
+          goal,
+          assets: persona.assets,
+          format: assembledStrategy.servicePresentation.format,
+        });
+        assembledStrategy.uiblocks = selectServiceUIBlocks({
+          sections: assembledStrategy.sections,
+        }).uiblocks;
+      }
     } else {
       const { generateWithSchema } = await import('../src/lib/aiClient');
       const { ServiceStrategyResponseSchema } = await import('../src/lib/schemas/strategyService.schema');
       const prompt = buildServiceStrategyPrompt({
         oneLiner: persona.oneLiner,
         understanding: persona.understanding,
-        goal: persona.goal,
+        goal,
         offer: persona.offer,
         assets: persona.assets,
       });
@@ -290,9 +416,12 @@ async function runPersona(
         ServiceStrategyResponseSchema,
         'serviceStrategy'
       );
+      // Override the inferred awareness so section routing + copy emotional
+      // context exercise the forced state deterministically.
+      if (opts.forceAwareness) llmResponse.awareness = opts.forceAwareness;
       assembledStrategy = assembleServiceStrategy({
         llmResponse,
-        goal: persona.goal,
+        goal,
         assets: persona.assets,
       });
     }
@@ -301,7 +430,7 @@ async function runPersona(
     return null;
   }
 
-  console.log(`  Strategy ok. Sections: ${assembledStrategy.sections.length}`);
+  console.log(`  Strategy ok. Awareness: ${assembledStrategy.awareness}. Sections: ${assembledStrategy.sections.join(' → ')}`);
 
   // ----- Copy (capture raw before fallback for em-emit measurement) -----
   let rawCopy: Record<string, SectionCopy>;
@@ -321,7 +450,7 @@ async function runPersona(
         uiblocks: assembledStrategy.uiblocks,
         oneLiner: persona.oneLiner,
         offer: persona.offer,
-        goal: persona.goal,
+        goal,
         understanding: persona.understanding,
       });
       rawCopy = (await generateRawJson('copy', copyPrompt, CopyResponseSchema)) as Record<string, SectionCopy>;
@@ -333,11 +462,16 @@ async function runPersona(
       metrics: {
         slug: persona.slug,
         label: persona.label,
+        caseLabel,
+        awareness: assembledStrategy.awareness,
+        goal,
+        sectionOrder: assembledStrategy.sections,
         schemaValid: false,
         copyComplete: false,
         missingSections: [],
         accentFields: [],
         forbiddenWordHits: [],
+        credibilityFlag: detectCredibilityHallucination(assembledStrategy, persona),
       },
       assembled: assembledStrategy,
       copy: {},
@@ -349,20 +483,26 @@ async function runPersona(
   const processedCopy = processServiceCopy(rawCopy, assembledStrategy.uiblocks);
   const { complete, missingSections } = validateServiceCopyCompleteness(processedCopy, assembledStrategy.uiblocks);
   const forbiddenWordHits = detectForbiddenWords(processedCopy);
+  const credibilityFlag = detectCredibilityHallucination(assembledStrategy, persona);
 
   const emitted = accentFields.filter((a) => a.llmEmitted).length;
   console.log(`  Copy ok. Sections: ${Object.keys(processedCopy).length}`);
-  console.log(`  Accent emit: ${emitted}/${accentFields.length}, complete: ${complete}, forbidden: ${forbiddenWordHits.length}`);
+  console.log(`  Accent emit: ${emitted}/${accentFields.length}, complete: ${complete}, forbidden: ${forbiddenWordHits.length}, credibility: ${credibilityFlag ? 'FLAG' : 'ok'}`);
 
   return {
     metrics: {
       slug: persona.slug,
       label: persona.label,
+      caseLabel,
+      awareness: assembledStrategy.awareness,
+      goal,
+      sectionOrder: assembledStrategy.sections,
       schemaValid,
       copyComplete: complete,
       missingSections,
       accentFields,
       forbiddenWordHits,
+      credibilityFlag,
     },
     assembled: assembledStrategy,
     copy: processedCopy,
@@ -422,59 +562,210 @@ function printAggregate(metricsList: PersonaMetrics[]) {
     }
   }
 
+  // Credibility hallucination flags (Phase 6 backlog)
+  const credFlags = metricsList.filter((m) => m.credibilityFlag);
+  console.log(`\nCredibility hallucination flags: ${credFlags.length}`);
+  for (const m of credFlags) {
+    console.log(`  [${m.caseLabel}] ${m.credibilityFlag}`);
+  }
+
+  // Comparing-state regression gate: order must match the pilot baseline's
+  // relative order (services → testimonials → packages, for present sections).
+  const comparingCases = metricsList.filter((m) => m.awareness === 'search-aware-comparing');
+  if (comparingCases.length) {
+    console.log('\nComparing-baseline order check (services < testimonials < packages):');
+    for (const m of comparingCases) {
+      const idx = (s: string) => m.sectionOrder.indexOf(s);
+      const present = ['services', 'testimonials', 'packages'].filter((s) => idx(s) >= 0);
+      const ordered = present.every((s, i) => i === 0 || idx(present[i - 1]) < idx(s));
+      console.log(`  ${ordered ? '✓' : '✗'} ${m.caseLabel.padEnd(34)} ${m.sectionOrder.join(' → ')}`);
+    }
+  }
+
   // Schema / completeness failures
-  console.log('\nPer-persona status:');
+  console.log('\nPer-case status:');
   for (const m of metricsList) {
     const status = m.schemaValid && m.copyComplete ? '✓' : '✗';
-    console.log(`  ${status} ${m.slug.padEnd(22)} schema:${m.schemaValid ? 'ok' : 'FAIL'} complete:${m.copyComplete ? 'ok' : 'FAIL'}${
-      m.missingSections.length ? ' missing:' + m.missingSections.join(',') : ''
-    }`);
+    console.log(
+      `  ${status} ${m.caseLabel.padEnd(34)} aware:${m.awareness.padEnd(24)} goal:${m.goal.padEnd(14)} schema:${m.schemaValid ? 'ok' : 'FAIL'} complete:${m.copyComplete ? 'ok' : 'FAIL'}${
+        m.missingSections.length ? ' missing:' + m.missingSections.join(',') : ''
+      }`
+    );
   }
 
   console.log('\nDone.');
 }
 
+// ---------- Case matrix ----------
+
+interface DogfoodCase {
+  persona: DogfoodPersona;
+  forceAwareness?: ServiceAwareness;
+  goalOverride?: ServiceGoal;
+  caseLabel: string;
+}
+
+function personaBySlug(slug: string): DogfoodPersona {
+  const p = PERSONAS.find((x) => x.slug === slug);
+  if (!p) throw new Error(`Unknown persona slug: ${slug}`);
+  return p;
+}
+
+const GOAL_MATRIX: ServiceGoal[] = ['book-call', 'request-quote', 'lead-magnet'];
+
+function buildMatrix(matrix: string): DogfoodCase[] {
+  const cases: DogfoodCase[] = [];
+  if (matrix === 'awareness') {
+    // 3 personas × 4 awareness × book-call = 12
+    for (const slug of [MATRIX_AGENCY, MATRIX_CONSULTANT, MATRIX_COACH]) {
+      for (const aw of serviceAwarenessStates) {
+        cases.push({
+          persona: personaBySlug(slug),
+          forceAwareness: aw,
+          caseLabel: `${slug} · ${aw}`,
+        });
+      }
+    }
+  } else if (matrix === 'goal') {
+    // 2 personas × 3 goals × default(inferred) awareness = 6
+    for (const slug of [MATRIX_AGENCY, MATRIX_CONSULTANT]) {
+      for (const g of GOAL_MATRIX) {
+        cases.push({
+          persona: personaBySlug(slug),
+          goalOverride: g,
+          caseLabel: `${slug} · ${g}`,
+        });
+      }
+    }
+  } else if (matrix === 'smell') {
+    // 2 personas × {cold, relationship} = 4 (side-by-side copy diff)
+    for (const slug of [MATRIX_AGENCY, MATRIX_CONSULTANT]) {
+      for (const aw of ['search-aware-cold', 'relationship-warming'] as ServiceAwareness[]) {
+        cases.push({
+          persona: personaBySlug(slug),
+          forceAwareness: aw,
+          caseLabel: `${slug} · ${aw}`,
+        });
+      }
+    }
+  } else if (matrix === 'comparing-baseline') {
+    // 3 personas × forced comparing × book-call = 3 (regression gate)
+    for (const slug of [MATRIX_AGENCY, MATRIX_CONSULTANT, MATRIX_COACH]) {
+      cases.push({
+        persona: personaBySlug(slug),
+        forceAwareness: 'search-aware-comparing',
+        caseLabel: `${slug} · comparing-baseline`,
+      });
+    }
+  } else {
+    throw new Error(`Unknown --matrix=${matrix}. Use: awareness | goal | smell | comparing-baseline`);
+  }
+  return cases;
+}
+
+/** For the smell test, dump headline/lede per section side-by-side per persona. */
+function printSmellDiff(
+  results: { metrics: PersonaMetrics; copy: Record<string, SectionCopy> }[]
+) {
+  console.log(`\n${'='.repeat(60)}`);
+  console.log('SMELL TEST — cold vs relationship copy (manual diff)');
+  console.log('='.repeat(60));
+  const bySlug: Record<string, typeof results> = {};
+  for (const r of results) (bySlug[r.metrics.slug] ??= []).push(r);
+  for (const [slug, rs] of Object.entries(bySlug)) {
+    console.log(`\n● ${slug}`);
+    for (const r of rs) {
+      console.log(`\n  [${r.metrics.awareness}]`);
+      for (const sectionType of Object.keys(r.copy)) {
+        const el = (r.copy[sectionType]?.elements ?? {}) as Record<string, unknown>;
+        const h = typeof el.headline === 'string' ? el.headline : '';
+        const l = typeof el.lede === 'string' ? el.lede : '';
+        if (h || l) console.log(`    ${sectionType.padEnd(13)} ${h}${l ? `  /  ${l}` : ''}`);
+      }
+    }
+  }
+}
+
 // ---------- Main ----------
 
-function parseArgs(): { personaFilter: string | null } {
-  const arg = process.argv.find((a) => a.startsWith('--persona='));
-  return { personaFilter: arg ? arg.split('=')[1] : null };
+function parseArgs(): {
+  personaFilter: string | null;
+  matrix: string | null;
+  awareness: ServiceAwareness | null;
+  goal: ServiceGoal | null;
+} {
+  const get = (k: string) => {
+    const a = process.argv.find((x) => x.startsWith(`--${k}=`));
+    return a ? a.split('=')[1] : null;
+  };
+  return {
+    personaFilter: get('persona'),
+    matrix: get('matrix'),
+    awareness: (get('awareness') as ServiceAwareness | null) ?? null,
+    goal: (get('goal') as ServiceGoal | null) ?? null,
+  };
+}
+
+function sanitize(label: string): string {
+  return label.replace(/[^a-z0-9]+/gi, '-').toLowerCase();
 }
 
 async function main() {
-  const { personaFilter } = parseArgs();
+  const { personaFilter, matrix, awareness, goal } = parseArgs();
   const useMocks = process.env.NEXT_PUBLIC_USE_MOCK_GPT === 'true';
-  const targets = personaFilter ? PERSONAS.filter((p) => p.slug === personaFilter) : PERSONAS;
-  if (targets.length === 0) {
-    console.error(`No persona matches --persona=${personaFilter}. Available: ${PERSONAS.map((p) => p.slug).join(', ')}`);
-    process.exit(1);
+
+  // Build the run list. --matrix takes precedence; else --persona (+ optional
+  // --awareness / --goal overrides); else all personas once (legacy behavior).
+  let cases: DogfoodCase[];
+  if (matrix) {
+    cases = buildMatrix(matrix);
+  } else {
+    const targets = personaFilter ? PERSONAS.filter((p) => p.slug === personaFilter) : PERSONAS;
+    if (targets.length === 0) {
+      console.error(`No persona matches --persona=${personaFilter}. Available: ${PERSONAS.map((p) => p.slug).join(', ')}`);
+      process.exit(1);
+    }
+    cases = targets.map((persona) => ({
+      persona,
+      forceAwareness: awareness ?? undefined,
+      goalOverride: goal ?? undefined,
+      caseLabel: `${persona.slug}${awareness ? ` · ${awareness}` : ''}${goal ? ` · ${goal}` : ''}`,
+    }));
   }
 
   const outDir = join(process.cwd(), 'dogfoodOutput');
   if (!existsSync(outDir)) mkdirSync(outDir);
 
   console.log(`\n${'='.repeat(60)}`);
-  console.log(`Service dogfood batch  |  mocks: ${useMocks}  |  personas: ${targets.length}`);
+  console.log(`Service dogfood batch  |  mocks: ${useMocks}  |  matrix: ${matrix ?? 'none'}  |  cases: ${cases.length}`);
   console.log('='.repeat(60));
 
   const metricsList: PersonaMetrics[] = [];
-  for (const persona of targets) {
-    const result = await runPersona(persona, useMocks);
+  const collected: { metrics: PersonaMetrics; copy: Record<string, SectionCopy> }[] = [];
+  for (const c of cases) {
+    const result = await runPersona(c.persona, useMocks, {
+      forceAwareness: c.forceAwareness,
+      goalOverride: c.goalOverride,
+      caseLabel: c.caseLabel,
+    });
     if (!result) continue;
 
     metricsList.push(result.metrics);
+    collected.push({ metrics: result.metrics, copy: result.copy });
     const dump = {
-      persona: { slug: persona.slug, label: persona.label, oneLiner: persona.oneLiner, goal: persona.goal },
+      case: { caseLabel: c.caseLabel, awareness: result.metrics.awareness, goal: result.metrics.goal },
+      persona: { slug: c.persona.slug, label: c.persona.label, oneLiner: c.persona.oneLiner },
       metrics: result.metrics,
       strategy: result.assembled,
       copy: result.copy,
     };
-    const outPath = join(outDir, `${persona.slug}.json`);
+    const outPath = join(outDir, `${sanitize(c.caseLabel)}.json`);
     writeFileSync(outPath, JSON.stringify(dump, null, 2), 'utf8');
     console.log(`  → ${outPath}`);
   }
 
   printAggregate(metricsList);
+  if (matrix === 'smell') printSmellDiff(collected);
 }
 
 main().catch((err) => {

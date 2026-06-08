@@ -63,12 +63,14 @@ Generate a JSON response with the following structure. Speak about the *provider
 
 ### Step 1: awareness
 
-Choose ONE awareness level — the visitor's relationship to the service at landing time:
+Choose ONE awareness level — the visitor's relationship to the service at landing time. Infer it from the signals above: the service type, the one-liner's framing, the offer, and which assets exist (e.g. heavy referral/testimonial language → referral-driven; broad category one-liner with a free audit → search-aware-cold).
 
 - "search-aware-cold": Googled the service category, has a need but no preferred provider yet.
 - "search-aware-comparing": Shopping multiple providers, has multiple tabs open.
 - "referral-driven": Came from a recommendation, name-pre-trusted but unconvinced of fit.
 - "relationship-warming": Knew the founder personally, deciding whether to engage commercially.
+
+This choice drives page structure downstream — pick the single best fit, do not hedge.
 
 ### Step 2: oneClient
 
@@ -87,7 +89,7 @@ How the *provider* shows up — services sell trust in a person/team, not a feat
 
 - promise: One clear sentence on what the provider commits to deliver. Concrete, not aspirational.
 - approach: How they work — methodology, philosophy, or process style. One sentence.
-- credibility: The single most relevant proof point. (E.g., "40+ DTC brands launched", "12 years in family law", etc.) Avoid invented specifics — say "experienced in X" if no concrete number is implied by input.
+- credibility: The single most relevant proof point. **Do NOT invent numbers.** Use a specific figure ONLY if one is literally present in the provider input above; otherwise use non-numeric proof framing (e.g. "specialized exclusively in family law", "trusted by independent DTC founders", "years inside the SaaS go-to-market trenches"). Never fabricate counts of clients, years, or results.
 
 ### Step 4: servicePresentation
 
