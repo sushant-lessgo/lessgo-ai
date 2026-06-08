@@ -1,5 +1,5 @@
 /**
- * /api/service/generate-copy — Service-route copy generation endpoint
+ * /api/audience/service/generate-copy — Service-route copy generation endpoint
  *
  * Mirrors /api/v3/generate-copy:
  *  1. Validate request (assembled strategy + uiblocks + understanding)
@@ -200,7 +200,7 @@ async function serviceCopyHandler(req: NextRequest): Promise<Response> {
       UsageEventType.GENERATE_COPY,
       CREDIT_COSTS.GENERATE_COPY,
       {
-        endpoint: '/api/service/generate-copy',
+        endpoint: '/api/audience/service/generate-copy',
         duration: Date.now() - startTime,
         metadata: {
           version: 'service',

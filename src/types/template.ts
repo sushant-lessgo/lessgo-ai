@@ -20,6 +20,9 @@ export interface TemplateModule {
   getSurfaceForSection(sectionType: string): string;
   /** Template's default palette id (used when none persisted). */
   defaultPaletteId: string;
+  /** Per-palette image mood phrases (paletteId → keyword phrase). Optional —
+   *  consumed by the editor image search; absent templates just omit the mood. */
+  paletteImageKeywords?: Record<string, string>;
 }
 
 export type TemplateModuleLoader = () => Promise<TemplateModule>;

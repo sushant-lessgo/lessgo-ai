@@ -20,6 +20,7 @@ export const templateRegistry: Record<TemplateId, TemplateModuleLoader> = {
       SSRTokens: m.SSRTokens,
       getSurfaceForSection: m.getSurfaceForSection,
       defaultPaletteId: m.defaultHearthPalette,
+      paletteImageKeywords: m.PALETTE_IMAGE_KEYWORDS,
     };
   },
 };

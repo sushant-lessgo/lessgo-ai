@@ -217,7 +217,7 @@ export interface ServiceStrategyOutput {
 
 /**
  * ===== STRATEGY OUTPUT — ASSEMBLED =====
- * What /api/service/strategy returns to the caller: LLM strategy plus the
+ * What /api/audience/service/strategy returns to the caller: LLM strategy plus the
  * deterministic section list and uiblock map computed server-side.
  */
 export interface ServiceStrategyOutputAssembled extends ServiceStrategyOutput {
@@ -229,7 +229,7 @@ export interface ServiceStrategyOutputAssembled extends ServiceStrategyOutput {
 
 /**
  * ===== STRATEGY INPUT =====
- * Shape /api/service/strategy expects in request body. Mirrors fields that
+ * Shape /api/audience/service/strategy expects in request body. Mirrors fields that
  * useServiceGenerationStore collects across onboarding pages.
  */
 export interface ServiceUnderstandingInput {

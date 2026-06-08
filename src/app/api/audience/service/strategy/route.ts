@@ -1,5 +1,5 @@
 /**
- * /api/service/strategy — Service-route strategy generation endpoint
+ * /api/audience/service/strategy — Service-route strategy generation endpoint
  *
  * Mirrors /api/v3/strategy:
  *  1. Validate request (service shape: oneLiner + understanding + goal + offer + assets + paletteId)
@@ -152,7 +152,7 @@ async function serviceStrategyHandler(req: NextRequest): Promise<Response> {
       UsageEventType.STRATEGY_GENERATION,
       CREDIT_COSTS.STRATEGY_GENERATION,
       {
-        endpoint: '/api/service/strategy',
+        endpoint: '/api/audience/service/strategy',
         duration: Date.now() - startTime,
         metadata: {
           version: 'service',

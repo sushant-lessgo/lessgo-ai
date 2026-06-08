@@ -2,4 +2,4 @@
 // Pilot block layout names. Re-export of PILOT_LAYOUT_NAMES from
 // serviceElementSchema for ergonomic imports from uiblock + test code.
 
-export { PILOT_LAYOUT_NAMES, type PilotSectionType } from '@/modules/templates/hearth/elementSchema';
+export { PILOT_LAYOUT_NAMES, type PilotSectionType } from './elementSchema';

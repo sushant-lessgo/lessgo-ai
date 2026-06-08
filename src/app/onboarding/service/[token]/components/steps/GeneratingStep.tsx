@@ -129,7 +129,7 @@ export default function GeneratingStep() {
     const strategyStart = Date.now();
     let strategy: ServiceStrategyOutputAssembled;
     try {
-      const res = await fetch('/api/service/strategy', {
+      const res = await fetch('/api/audience/service/strategy', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -168,7 +168,7 @@ export default function GeneratingStep() {
     const copyStart = Date.now();
     let copySections: Record<string, SectionCopy>;
     try {
-      const res = await fetch('/api/service/generate-copy', {
+      const res = await fetch('/api/audience/service/generate-copy', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

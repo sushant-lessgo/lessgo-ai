@@ -9,8 +9,12 @@ import type { StockPhoto } from '@/services/pexelsApi';
 import { TextInputModal } from '../modals/TextInputModal';
 import { SimpleImageEditor } from '@/components/ui/SimpleImageEditor';
 import { logger } from '@/lib/logger';
-import { getHearthImageQuery } from '@/modules/templates/hearth/imageKeywords';
-import type { HearthPalette } from '@/types/service';
+// Palette mood phrase comes from the preloaded template module (no static
+// template import in the shared editor bundle — firewall, 7.5d). The query
+// composition helper itself is audience-level.
+import { getServiceImageQuery } from '@/modules/audience/service/imageKeywords';
+import { getLoadedTemplate } from '@/modules/templates/registry';
+import type { TemplateId } from '@/types/service';
 
 interface ImageToolbarProps {
   targetId: string;
@@ -515,7 +519,16 @@ function StockPhotosPanel({ position, onClose, onSelectImage }: {
   onClose: () => void;
   onSelectImage: (stockPhoto: StockPhoto) => void;
 }) {
-  const { audienceType, paletteId } = useEditStore();
+  const { audienceType, templateId, paletteId } = useEditStore();
+
+  // Resolve the active template's palette mood phrase from the preloaded module
+  // (loaded by EditablePageRenderer before the toolbar opens). Undefined → the
+  // audience helper simply omits the mood suffix.
+  const palettePhrase =
+    audienceType === 'service'
+      ? getLoadedTemplate((templateId || 'hearth') as TemplateId)
+          ?.paletteImageKeywords?.[(paletteId as string) ?? '']
+      : undefined;
 
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<StockPhoto[]>([]);
@@ -569,7 +582,7 @@ function StockPhotosPanel({ position, onClose, onSelectImage }: {
 
     const effectiveQuery =
       audienceType === 'service'
-        ? getHearthImageQuery(query.trim(), undefined, (paletteId as HearthPalette | null) ?? undefined)
+        ? getServiceImageQuery(query.trim(), undefined, palettePhrase)
         : query.trim();
 
     try {
@@ -616,7 +629,7 @@ function StockPhotosPanel({ position, onClose, onSelectImage }: {
       } else {
         const categoryQuery =
           audienceType === 'service'
-            ? getHearthImageQuery(category, undefined, (paletteId as HearthPalette | null) ?? undefined)
+            ? getServiceImageQuery(category, undefined, palettePhrase)
             : category;
         requestBody = {
           searchType: category,

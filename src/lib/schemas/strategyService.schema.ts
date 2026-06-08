@@ -1,5 +1,5 @@
 // src/lib/schemas/strategyService.schema.ts
-// Zod schema for /api/service/strategy response. Mirror of strategyV3.schema.ts
+// Zod schema for /api/audience/service/strategy response. Mirror of strategyV3.schema.ts
 // pattern but with service-specific shape (oneClient / ourPosition /
 // servicePresentation). All enum values inlined to avoid $ref issues with
 // Anthropic structured outputs.
