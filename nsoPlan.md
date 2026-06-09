@@ -240,6 +240,8 @@ src/modules/audience/
 
 **Dependency:** 7.5d audience/template boundary fix must be merged first. ✅ Confirmed done (commit `7adc240`, 2026-06-08).
 
+**✅ PHASE 8 DONE (2026-06-09, commit `a4d4a0f` + defect-fix follow-up).** Dogfood gates passed (headline 100%, lede ≥83%, 0 forbidden, 0 credibility hallucination, schema 5/5, comparing-baseline order held). Manual E2E Pass 1 surfaced 4 runtime defects (collection-id backfill missing → duplicate React keys; CTA Button-Settings entry blocked by contenteditable; empty-image affordance; persona-save dead-end) — all fixed + re-verified (`POreview.md` / `devMessage.md`). Branch `phase-7.5-multi-template` carries 7.5a–e + Phase 8 + fixes; merge to main is housekeeping (no deploy — see Phase 11 for launch sequencing).
+
 ### Phase 9 — Block Library Batches (~4 weeks total) ⏸ ON HOLD 2026-06-07
 **Reason:** designer only delivered HTML for the 6 pilot blocks. The 20+ blocks below have no visual reference. Authoring them from spec alone is highest-risk chunk of plan. Un-hold trigger TBD (designer mockups arrive, or real pilot users demand specific block types).
 
@@ -261,24 +263,44 @@ After each batch: extend `selectUIBlocksService.ts` rules + `serviceElementSchem
 - Promote `uiblockDecisions` from strategy output from advisory to active.
 - Replace hardcoded pilot mapping with LLM hint + deterministic fallback (per spec §3 Step 9).
 
-### Phase 11 — Edit Surface Adjustments (~5 days)
-- Theme panel: **template + variant + palette picker** (service projects only). Gallery scoped by `audienceType`.
-- Variant picker — pure token rescale (`data-variant` on `:root`). Must NOT affect copy length or voice. Default = template's first variant.
+### Phase 11 — Second Template + Picker (LAUNCH-WITH-2) 🟢 NEXT after branch merge
+**Decision locked 2026-06-09 (PO + founder):** do NOT build all 7 remaining templates before launch. Port **one** contrasting template (Lex), build the picker, launch with **Hearth + Lex = 2 templates**. Remaining 6 (Folio, Riot, Mill, Atlas, Pulse, Vital) added **post-launch, one at a time, demand-driven** — same philosophy as the Phase 9 block hold. "Do the 2nd first, then decide" — revisit launch-gallery size after Lex proves the architecture.
+
+**Why Lex as template #2:** maximum visual contrast from Hearth (trust/professional — formal serifs, navy/gold palette logic, cool surfaces vs Hearth's warm cream). If the architecture handles Hearth + Lex cleanly, the middle-ground templates (Folio/Mill/Pulse) are easy drop-ins. Find architecture gaps now on template #2, not on template #5.
+
+#### Phase 11a — Port Lex as template #2 (~4–5 days)
+- New `src/modules/templates/lex/` matching the Hearth module shape: `tokens.ts`, `palettes.ts` (Lex's 9: counsel/heritage/forest/slate/vellum/burgundy/pacific/court/trust), `sectionRules.ts`, `ThemeInjector.tsx`, `SSRTokens`, `index.ts` satisfying `TemplateModule`.
+- 6 blocks × 2 renderers (edit + published) for Lex's section set, authored against the same `data-element-key` / `data-section-id` contract → editor tooling free.
+- Register in `templateRegistry` (dynamic import → own chunk).
+- **Voice unchanged:** Lex shares `audience/service/voice.ts` (type-level). If Lex needs a tonal shift (more formal, less warm-italic), add a `tone` param to the service voice — do NOT fork a `voiceLex.ts` (firewall: voice is audience-level, not template-level).
+- **Reuse 2b backfill, image-overlay, button-affordance patterns** from Hearth — they're template-agnostic where possible; Lex blocks must replicate the `isButton` + `HearthAddImageOverlay`-equivalent affordances.
+- **Architecture-gap log:** capture anything Hearth-specific that leaked into shared code and forces a Lex workaround — that's the real output of this phase (proves/improves the multi-template contract).
+
+**11a exit:** a Lex service page generates + renders + edits + publishes, identical pipeline to Hearth, with zero changes to `audience/service/*` copy logic.
+
+#### Phase 11b — Template + Variant + Palette Picker (~4 days)
+- Theme panel: **template + variant + palette picker** (service projects only). Gallery scoped by `audienceType`, shows the 2 live templates.
 - Template picker — full re-render on switch (copy stays, blocks re-resolve via new `templateId`). Confirm-before-switch UX to prevent accidental clobber.
+- Variant picker — pure token rescale (`data-variant` on `:root`). Must NOT affect copy length or voice. Default = template's first variant.
+- Onboarding: template+palette pick at Style step runs **parallel** to copy gen (Stage 3b firewall preserved).
 - Section toolbar: surface color options per template.
 - Text toolbar: role-based color swatches; italic emphasis matches template voice.
-- Form builder: "Book a call" default template (service-type universal).
 - PostHog: `template_changed`, `variant_changed`, super-properties `templateId`, `variantId`.
 
-**Variant token sourcing:** port from each template HTML's switcher CSS as-is. 8 templates × 3 variants = 24 token sets. Mostly font-size + spacing rescales.
+**Variant token sourcing:** port from each template HTML's switcher CSS as-is. 2 templates × 3 variants = 6 token sets at launch. Mostly font-size + spacing rescales.
 
-### Phase 12 — QA + Soft Launch (~4 days)
-- Visual QA against each template's reference HTML.
+**11b exit:** user can pick between Hearth and Lex (each with variants + palettes) in onboarding AND switch in the editor; choice persists + renders correctly.
+
+### Phase 12 — QA + Soft Launch (2 templates) (~4 days)
+- Visual QA against Hearth + Lex reference HTML.
 - All 4 awareness × all goal spot-checks per template.
-- **Visual QA matrix (8 service templates):** each template's default variant × all 9 of its palettes (full); other 2 variants × default palette (spot). Total: 8 × (9 + 2) = 88 spot checks. Full 27-per-template cartesian deferred unless breakage observed.
-- Bundle-size check; code-split per-template if material (8 templates × 6 blocks × 2 renderers shipping to all users is a concern).
+- **Visual QA matrix (2 launch templates):** each template's default variant × all 9 of its palettes (full); other 2 variants × default palette (spot). Total: 2 × (9 + 2) = 22 spot checks.
+- Bundle-size check; per-template dynamic chunking already in place (registry) — confirm Lex lands in its own chunk, product bundle still clean.
 - PostHog event property `audienceType`, `templateId`, `variantId`.
-- Feature flag rollout: internal → beta cohort → public.
+- **Deploy / soft-launch with 2 templates.** Feature flag rollout: internal → beta cohort → public.
+
+### Phase 11c (POST-LAUNCH) — Remaining 6 templates, demand-driven
+Add Folio / Riot / Mill / Atlas / Pulse / Vital **one at a time**, ordered by real user signal (signups by persona, explicit requests). Each is a ~3–4 day drop-in once the architecture is proven (11a) and the picker exists (11b): new `templates/<id>/` module + register + variant tokens + QA. No big-bang batch.
 
 ### Phase 13 — E-commerce Wave (~TBD)
 **Deferred to dedicated wave after service GTM.** Stockroom template + ecommerce `audienceType` + product-grid block (new schema with price / SKU / image / "add to bag"). Onboarding question flow for ecom audience. Not blocking service launch.
@@ -308,16 +330,19 @@ After each batch: extend `selectUIBlocksService.ts` rules + `serviceElementSchem
 Sum of phase budgets in working days:
 - Phases 0–6: 30d ≈ 6 weeks. ✅ DONE 2026-05-07.
 - Phase 7: 2d ✅ DONE 2026-06-07 (commit `3e47ca6`).
-- Phase 7.5: 5d ✅ DONE 2026-06-08 (commits `1a4707f` → `7adc240`, branch `phase-7.5-multi-template`, awaiting merge to main).
-- **Post-break revision (2026-06-07/08): 8 templates landed → multi-template refactor done; Phase 9 on hold; ecom + product deferred.**
-  - Phase 8: 4d 🟢 NEXT (was 3d, +1d for goal expansion + Phase 6 backlog fold-in)
+- Phase 7.5: 5d ✅ DONE 2026-06-08 (commits `1a4707f` → `7adc240`, branch `phase-7.5-multi-template`).
+- Phase 8: 4d ✅ DONE 2026-06-09 (commit `a4d4a0f` + defect fixes). Branch awaiting merge to main.
+- **Revision 2026-06-09: LAUNCH-WITH-2. Don't build all 7 templates pre-launch — port 1 (Lex), launch with Hearth+Lex, add rest post-launch on demand.**
+  - Merge branch → main: housekeeping, no deploy.
+  - Phase 11a: 4–5d (port Lex as template #2) 🟢 NEXT
+  - Phase 11b: 4d (template + variant + palette picker, 2 templates)
+  - Phase 12: 4d (QA × 2 templates → deploy/soft-launch)
+  - Phase 11c: post-launch, ~3–4d per template, demand-driven (6 remaining)
   - ~~Phase 9: 20d~~ ⏸ on hold
-  - Phase 10: 2d (skip — section rules deterministic per type; collapsing into Phase 8 strategy work)
-  - Phase 11: 5d (template + variant + palette picker)
-  - Phase 12: 4d (QA × 8 templates)
+  - Phase 10: collapsed into Phase 8 (deterministic section rules)
   - Phase 13: TBD (e-commerce wave, deferred)
   - Phase 14: TBD (product redesign / Meridian, deferred)
-- **Remaining to soft launch (8 service templates) ≈ 13–15 working days ≈ 3 working weeks.**
+- **Remaining to soft launch (2 service templates) ≈ 12–13 working days ≈ 2.5 working weeks.**
 
 ---
 
@@ -357,6 +382,13 @@ Sum of phase budgets in working days:
 26. **Goal expansion in Phase 8** = **book-call + quote-request + lead-magnet** (3 total). Web-researched top service-page conversion goals. Other goals (contact-form, waitlist) deprioritized.
 27. **Phase 6 backlog items** = folded into Phase 8 prompt-tune pass (credibility hallucination + restaurant-marketing lede outlier). Not held to a separate ticket.
 28. **Phase 8 dogfood signal** = Phase 6 gates (em ≥80%, 0 forbidden, schema 5/5) + awareness-fit smell test (manual diff cold-vs-relationship copy on 2 personas).
+
+## Resolved (Phase 11 sequencing, 2026-06-09)
+
+29. **LAUNCH-WITH-2, not all-8.** Port one contrasting template (Lex) → build picker → launch with Hearth + Lex. Remaining 6 templates added post-launch one-at-a-time, demand-driven. Founder: "do the 2nd first, then decide" — launch-gallery size revisited after Lex proves the architecture.
+30. **Template #2 = Lex** (trust/professional). Chosen for maximum contrast from Hearth — stresses the token/palette/voice-sharing contract hardest. If Hearth+Lex works, mid-ground templates are easy.
+31. **Merge ≠ deploy.** `phase-7.5-multi-template` → main is housekeeping (consolidate 7.5+8 before Phase 11). Public launch waits for 2 templates + picker (end of Phase 12). No live service users yet, so no deploy pressure.
+32. **Voice stays audience-level for Lex.** If Lex needs a more formal tone, add a `tone` param to `audience/service/voice.ts` — do NOT fork `voiceLex.ts`. Firewall: voice is type-level, templates restyle at CSS only.
 
 ## Unresolved Questions
 
