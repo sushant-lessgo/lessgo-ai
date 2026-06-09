@@ -12,14 +12,19 @@ export interface TemplateModule {
     blockType: string,
     mode: 'edit' | 'published',
   ): React.ComponentType<any> | null;
-  /** Client-side theme injector (CSS vars + fonts + data-palette). */
-  ThemeInjector: React.ComponentType<{ paletteId: any; children?: React.ReactNode }>;
+  /** Client-side theme injector (CSS vars + fonts + data-palette [+ data-variant]).
+   *  `variantId` is optional: palette-only templates (Hearth) ignore it; templates
+   *  with a variant axis (Meridian: developer/marketing/light) consume it. */
+  ThemeInjector: React.ComponentType<{ paletteId: any; variantId?: any; children?: React.ReactNode }>;
   /** Server-safe token emitter for published / static export. */
-  SSRTokens: React.ComponentType<{ paletteId: any; children?: React.ReactNode }>;
+  SSRTokens: React.ComponentType<{ paletteId: any; variantId?: any; children?: React.ReactNode }>;
   /** Section-type → surface token for this template's alternation rules. */
   getSurfaceForSection(sectionType: string): string;
   /** Template's default palette id (used when none persisted). */
   defaultPaletteId: string;
+  /** Template's default variant id (used when none persisted). Optional —
+   *  palette-only templates omit it. */
+  defaultVariantId?: string;
   /** Per-palette image mood phrases (paletteId → keyword phrase). Optional —
    *  consumed by the editor image search; absent templates just omit the mood. */
   paletteImageKeywords?: Record<string, string>;

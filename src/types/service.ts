@@ -12,10 +12,12 @@ export type AudienceType = (typeof audienceTypes)[number];
 
 /**
  * ===== TEMPLATE + VARIANT =====
- * templateId selects the visual template module (Phase 7.5 only ships Hearth).
- * variantId is a per-template token rescale (surfaced in Phase 11; default now).
+ * templateId selects the visual template module. Hearth = service line;
+ * Meridian = first product template (Meridian migration P0).
+ * variantId is a per-template token rescale (Hearth: 'classic' default;
+ * Meridian: developer/marketing/light — see types/product.ts).
  */
-export const templateIds = ['hearth'] as const;
+export const templateIds = ['hearth', 'meridian'] as const;
 export type TemplateId = (typeof templateIds)[number];
 
 export type VariantId = string;
@@ -23,6 +25,19 @@ export type VariantId = string;
 /** First (default) variant per template. Persisted on save until Phase 11 UI. */
 export const defaultVariantForTemplate: Record<TemplateId, VariantId> = {
   hearth: 'classic',
+  meridian: 'developer',
+};
+
+/**
+ * Default template per audienceType — the cutover target for each line.
+ * DEFINED ONLY: the render gate still keys on `audienceType === 'service'`, so
+ * product keeps rendering the legacy 47 UIBlocks until the Meridian cutover
+ * (P4) flips dispatch. Not yet imported by any getComponent path.
+ */
+export const defaultTemplateForAudience: Record<AudienceType, TemplateId | null> = {
+  product: 'meridian',
+  service: 'hearth',
+  ecommerce: null,
 };
 
 /**
