@@ -84,6 +84,7 @@ export default function WarmNavHeader({ sectionId }: WarmNavHeaderProps) {
             value={blockContent.cta_text}
             onSave={(v) => handleContentUpdate('cta_text', v)}
             enterBehavior="save"
+            isButton
             className="hearth-btn hearth-btn--primary hearth-btn--sm"
             placeholder="Book a call"
           />

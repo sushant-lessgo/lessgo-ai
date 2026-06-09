@@ -1,0 +1,1823 @@
+<!doctype html>
+<html lang="en" data-palette="acid" data-variant="brutalist">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Riot — Bold Expressive · Lessgo design system</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   RIOT — Bold Expressive
+   Saturated. Loud. Two accents that fight each other.
+   Display-as-object. Marquees. Crops with bleed.
+   Two configurable axes: --a1/--a2 (palette) + variant (style system).
+   ============================================================ */
+
+:root {
+  /* ————— Dual accents (the whole point of this system) ————— */
+  --a1:        oklch(0.85 0.21 130);             /* acid lime */
+  --a1-deep:   oklch(0.62 0.21 130);
+  --a1-ink:    oklch(0.10 0.02 130);             /* text on a1 */
+  --a2:        oklch(0.62 0.27 0);               /* hot magenta */
+  --a2-deep:   oklch(0.46 0.27 0);
+  --a2-ink:    oklch(0.99 0.01 0);               /* text on a2 */
+
+  /* ————— Surface ————— */
+  --bg:        oklch(0.99 0.005 90);             /* off-white paper */
+  --bg-1:      oklch(0.96 0.008 90);             /* second surface */
+  --bg-deep:   oklch(0.10 0.015 240);            /* deep ink for inverted blocks */
+  --ink:       oklch(0.12 0.015 240);            /* near-black, slight cool */
+  --ink-2:     oklch(0.32 0.012 240);
+  --ink-3:     oklch(0.55 0.010 240);
+
+  /* ————— Lines + shadow ————— */
+  --line:      oklch(0.12 0.015 240);            /* full-strength always */
+  --line-w:    2px;                              /* every box border */
+  --line-thick: 4px;
+  --shadow-stamp: 8px 8px 0 var(--ink);          /* hard offset shadow */
+  --shadow-stamp-a2: 8px 8px 0 var(--a2);
+
+  /* ————— Type ————— */
+  --font-display: "Bricolage Grotesque", "Space Grotesk", system-ui, sans-serif;
+  --font-sans:    "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-serif:   "Instrument Serif", "Times New Roman", serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, monospace;
+  --font-body:    var(--font-sans);
+
+  /* ————— Space ————— */
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px;
+  --s-5: 24px; --s-6: 32px; --s-7: 48px; --s-8: 72px;
+  --s-9: 96px; --s-10: 120px;
+
+  /* ————— Radius — almost nothing. Riot is square. ————— */
+  --r-sm: 0;
+  --r-md: 0;
+  --r-lg: 0;
+  --r-xl: 0;
+  --r-pill: 999px;                               /* only for pill stickers */
+
+  /* ————— Section rhythm ————— */
+  --sec-pad-y: 120px;
+  --sec-pad-x: clamp(20px, 4vw, 64px);
+  --max-w: 1480px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+/* ============================================================
+   SPEC DOC
+   ============================================================ */
+
+.doc {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 96px 32px 72px;
+}
+.doc-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end; gap: 48px;
+  border-bottom: var(--line-thick) solid var(--line);
+  padding-bottom: 40px;
+  margin-bottom: 64px;
+}
+.doc-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 12px; font-weight: 500;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--ink-2);
+  display: inline-flex; align-items: center; gap: 12px;
+  padding: 8px 12px;
+  background: var(--a1);
+  color: var(--a1-ink);
+  border: var(--line-w) solid var(--ink);
+  margin-bottom: 24px;
+}
+.doc-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 192px;
+  line-height: 0.84;
+  letter-spacing: -0.04em;
+  margin: 0;
+  font-variation-settings: "opsz" 96;
+  text-transform: uppercase;
+}
+.doc-title .pop {
+  display: inline-block;
+  background: var(--a2); color: var(--a2-ink);
+  padding: 0 12px;
+  font-style: italic;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  text-transform: none;
+  transform: rotate(-2deg);
+}
+.doc-sub {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 21px;
+  line-height: 1.4;
+  color: var(--ink-2);
+  max-width: 56ch;
+  margin: 0;
+  padding-right: 80px;
+}
+.doc-stamp {
+  font-family: var(--font-mono);
+  font-size: 11px; letter-spacing: 0.16em;
+  text-transform: uppercase;
+  background: var(--ink); color: var(--bg);
+  padding: 12px 16px;
+  text-align: right;
+  align-self: end;
+  min-width: 200px;
+  line-height: 1.4;
+}
+.doc-stamp .big { font-family: var(--font-display); font-size: 28px; font-weight: 700; letter-spacing: -0.02em; text-transform: none; color: var(--a1); display: block; margin-top: 4px; }
+
+.doc-meta {
+  margin-top: 32px;
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  border: var(--line-w) solid var(--line);
+  background: var(--ink);
+  gap: var(--line-w);
+}
+.doc-meta > div { background: var(--bg); padding: 18px 18px; }
+.doc-meta dt {
+  font-family: var(--font-mono);
+  font-size: 10.5px; letter-spacing: 0.16em; font-weight: 500;
+  text-transform: uppercase; color: var(--ink-2); margin-bottom: 8px;
+}
+.doc-meta dd { margin: 0; font-family: var(--font-display); font-weight: 600; font-size: 18px; color: var(--ink); letter-spacing: -0.01em; }
+
+.doc h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 56px;
+  line-height: 0.95;
+  letter-spacing: -0.025em;
+  margin: 96px 0 8px;
+  text-transform: uppercase;
+  display: flex; align-items: baseline; gap: 18px;
+  flex-wrap: wrap;
+}
+.doc h2 .n {
+  font-family: var(--font-mono); font-size: 13px; font-weight: 500;
+  letter-spacing: 0.16em; color: var(--bg); text-transform: uppercase;
+  background: var(--ink);
+  padding: 8px 12px;
+  align-self: center;
+  flex-shrink: 0;
+}
+.doc h2 + .dek { font-family: var(--font-sans); font-size: 19px; color: var(--ink-2); margin: 6px 0 28px; max-width: 60ch; }
+.doc h3 { font-family: var(--font-display); font-weight: 700; font-size: 22px; letter-spacing: -0.01em; margin: 36px 0 12px; color: var(--ink); text-transform: uppercase; }
+.doc p { color: var(--ink-2); max-width: 66ch; margin: 0 0 14px; font-size: 16px; }
+.doc ul { color: var(--ink-2); padding-left: 22px; margin: 0 0 14px; }
+.doc ul li { margin-bottom: 8px; }
+.doc ul li::marker { color: var(--ink); content: "▶  "; font-size: 0.7em; }
+.doc code, .doc .mono {
+  font-family: var(--font-mono);
+  font-size: 12.5px; background: var(--ink); color: var(--a1);
+  padding: 2px 6px;
+}
+.doc .callout {
+  border-left: var(--line-thick) solid var(--a2);
+  background: var(--a1);
+  color: var(--a1-ink);
+  padding: 18px 22px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 18px; line-height: 1.35;
+  margin: 22px 0;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+}
+
+.spec-table {
+  border: var(--line-w) solid var(--line);
+  margin: 20px 0 8px;
+  background: var(--bg-1);
+  font-size: 13px;
+}
+.spec-table .row {
+  display: grid;
+  grid-template-columns: 80px 1fr 100px 100px 100px;
+  border-bottom: var(--line-w) solid var(--line);
+}
+.spec-table .row:last-child { border-bottom: 0; }
+.spec-table .row > * { padding: 14px 16px; color: var(--ink-2); border-right: var(--line-w) solid var(--line); font-family: var(--font-mono); font-size: 12px; }
+.spec-table .row > *:last-child { border-right: 0; }
+.spec-table .row.head > * { color: var(--bg); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 500; background: var(--ink); }
+.spec-table .sample { font-family: var(--font-display); color: var(--ink); font-size: 18px; font-weight: 500; text-transform: uppercase; }
+
+.swatch-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; margin: 16px 0 8px; border: var(--line-w) solid var(--line); }
+.swatch { border-right: var(--line-w) solid var(--line); }
+.swatch:last-child { border-right: 0; }
+.swatch .chip { height: 124px; }
+.swatch .lbl { padding: 10px 12px; font-family: var(--font-mono); font-size: 11px; background: var(--bg); color: var(--ink-2); letter-spacing: 0.04em; display: flex; justify-content: space-between; border-top: var(--line-w) solid var(--line); }
+.swatch .lbl b { color: var(--ink); font-weight: 600; font-family: var(--font-display); text-transform: uppercase; letter-spacing: 0; }
+
+.sample-display {
+  border: var(--line-w) solid var(--line);
+  padding: 56px 44px;
+  margin: 18px 0 0;
+  background: var(--bg-1);
+}
+.sample-display .s-label {
+  font-family: var(--font-mono);
+  font-size: 11px; letter-spacing: 0.18em; font-weight: 500;
+  color: var(--ink-2); text-transform: uppercase;
+  margin-bottom: 20px;
+  display: inline-block;
+  padding: 6px 10px;
+  background: var(--ink); color: var(--bg);
+}
+.s-d1 { font-family: var(--font-display); font-weight: 800; font-size: 144px; line-height: 0.84; letter-spacing: -0.04em; color: var(--ink); text-transform: uppercase; }
+.s-d2 { font-family: var(--font-display); font-weight: 700; font-size: 80px; line-height: 0.92; letter-spacing: -0.03em; color: var(--ink); text-transform: uppercase; }
+.s-d3 { font-family: var(--font-display); font-weight: 600; font-size: 48px; line-height: 1; letter-spacing: -0.02em; color: var(--ink); }
+.s-d4 { font-family: var(--font-sans); font-weight: 500; font-size: 28px; line-height: 1.2; color: var(--ink); }
+.s-d1 em, .s-d2 em { font-family: var(--font-serif); font-style: italic; font-weight: 400; color: var(--a2); text-transform: none; }
+
+/* ============================================================
+   STAGE
+   ============================================================ */
+.stage {
+  max-width: 1480px; margin: 64px auto 0;
+  padding: 64px 24px 0;
+  border-top: var(--line-thick) solid var(--line);
+}
+.stage-header {
+  display: flex; align-items: baseline; gap: 16px;
+  margin-bottom: 20px; padding: 0 8px;
+  font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-2);
+}
+.stage-n { background: var(--a2); color: var(--a2-ink); padding: 4px 8px; }
+.stage-title { color: var(--ink); letter-spacing: 0.18em; font-weight: 500; }
+.stage-note { margin-left: auto; color: var(--ink-3); }
+
+.frame {
+  background: var(--bg);
+  border: var(--line-thick) solid var(--line);
+  position: relative;
+  overflow: hidden;
+}
+
+/* ============================================================
+   MARQUEE — the system's signature ornament
+   ============================================================ */
+.marquee {
+  background: var(--ink); color: var(--bg);
+  border-top: var(--line-thick) solid var(--line);
+  border-bottom: var(--line-thick) solid var(--line);
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 28px;
+  letter-spacing: -0.015em;
+  text-transform: uppercase;
+  padding: 14px 0;
+  position: relative;
+}
+.marquee-track {
+  display: flex; gap: 48px; white-space: nowrap;
+  animation: marquee 40s linear infinite;
+  width: max-content;
+}
+.marquee span { display: inline-flex; align-items: center; gap: 48px; }
+.marquee em {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--a1);
+  text-transform: none;
+}
+.marquee .star { color: var(--a2); font-family: var(--font-display); font-style: normal; }
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* ============================================================
+   NAV
+   ============================================================ */
+.nav {
+  display: flex; align-items: stretch; justify-content: space-between;
+  border-bottom: var(--line-thick) solid var(--line);
+  background: var(--bg);
+}
+.nav-brand {
+  display: flex; align-items: center; gap: 12px;
+  padding: 18px 28px;
+  border-right: var(--line-thick) solid var(--line);
+  background: var(--a1); color: var(--a1-ink);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 28px;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+}
+.nav-brand .star {
+  display: inline-block;
+  width: 24px; height: 24px;
+  background: var(--ink);
+  clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+}
+.nav-mid {
+  display: flex; align-items: center; gap: 0;
+  padding: 0 16px;
+  flex: 1;
+}
+.nav-mid a {
+  font-family: var(--font-sans);
+  font-size: 14px; font-weight: 500;
+  letter-spacing: -0.005em;
+  padding: 0 18px;
+  height: 100%;
+  display: inline-flex; align-items: center;
+  border-right: var(--line-w) solid var(--line);
+  border-left: var(--line-w) solid var(--line);
+  margin-left: -2px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 12px;
+  color: var(--ink-2);
+}
+.nav-mid a:hover { background: var(--a2); color: var(--a2-ink); }
+.nav-mid a.active { background: var(--ink); color: var(--bg); }
+.nav-right {
+  display: flex; align-items: stretch;
+}
+.nav-right a {
+  display: inline-flex; align-items: center;
+  padding: 0 22px;
+  font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--ink-2);
+  border-left: var(--line-w) solid var(--line);
+}
+.nav-right a:hover { background: var(--a1); color: var(--a1-ink); }
+.nav-right .cta {
+  background: var(--ink); color: var(--bg);
+  font-family: var(--font-display); font-weight: 700;
+  font-size: 14px; letter-spacing: 0;
+  padding: 0 28px;
+  text-transform: uppercase;
+}
+.nav-right .cta:hover { background: var(--a2); color: var(--a2-ink); }
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: -0.005em;
+  border-radius: 0;
+  padding: 16px 24px;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+  border: var(--line-w) solid var(--ink);
+  text-transform: uppercase;
+  position: relative;
+}
+.btn-sm { padding: 10px 16px; font-size: 13px; }
+.btn-lg { padding: 22px 32px; font-size: 19px; }
+.btn-primary {
+  background: var(--a2); color: var(--a2-ink);
+  box-shadow: var(--shadow-stamp);
+}
+.btn-primary:hover { transform: translate(-2px, -2px); box-shadow: 10px 10px 0 var(--ink); }
+.btn-primary:active { transform: translate(4px, 4px); box-shadow: 4px 4px 0 var(--ink); }
+.btn-ghost {
+  background: var(--bg); color: var(--ink);
+  box-shadow: var(--shadow-stamp);
+}
+.btn-ghost:hover { transform: translate(-2px, -2px); box-shadow: 10px 10px 0 var(--ink); background: var(--a1); }
+.btn-ghost:active { transform: translate(4px, 4px); box-shadow: 4px 4px 0 var(--ink); }
+.btn-quiet {
+  border: 0; padding: 16px 0;
+  text-decoration: underline; text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+  color: var(--ink);
+}
+.btn-quiet:hover { color: var(--a2-deep); }
+.btn .arrow { font-family: var(--font-display); font-size: 1.1em; }
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero {
+  position: relative;
+  padding: 56px var(--sec-pad-x) 0;
+  background: var(--bg);
+}
+.hero-tag-row {
+  display: flex; align-items: center; gap: 14px;
+  font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--ink-2);
+  margin-bottom: 32px;
+}
+.hero-tag-row .pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--a1); color: var(--a1-ink);
+  padding: 6px 12px;
+  border: var(--line-w) solid var(--ink);
+  font-weight: 500;
+}
+.hero-tag-row .pill .dot { width: 8px; height: 8px; background: var(--a2); }
+.hero-tag-row .stamp {
+  background: var(--ink); color: var(--bg);
+  padding: 6px 12px;
+  font-weight: 500;
+}
+
+.hero-display {
+  position: relative;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(72px, 14.5vw, 232px);
+  line-height: 0.84;
+  letter-spacing: -0.045em;
+  text-transform: uppercase;
+  margin: 0;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.hero-display .pop {
+  display: inline-block;
+  background: var(--a2); color: var(--a2-ink);
+  padding: 0 0.08em;
+  transform: rotate(-2deg) translateY(-0.04em);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  text-transform: none;
+  margin: 0 0.04em;
+}
+.hero-display .strike {
+  text-decoration: line-through;
+  text-decoration-color: var(--a1-deep);
+  text-decoration-thickness: 0.08em;
+  color: var(--ink-3);
+}
+
+.hero-row {
+  margin-top: 32px;
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 56px;
+  align-items: end;
+  padding-bottom: 56px;
+  border-bottom: var(--line-thick) solid var(--ink);
+}
+.hero-lede {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 21px;
+  line-height: 1.45;
+  color: var(--ink);
+  max-width: 36ch;
+  margin: 0;
+}
+.hero-actions {
+  display: flex; flex-direction: column; gap: 18px;
+  align-items: flex-start;
+}
+.hero-actions-row { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.hero-meta {
+  font-family: var(--font-mono);
+  font-size: 11px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--ink-2);
+  display: flex; gap: 18px;
+}
+.hero-meta b { color: var(--ink); font-weight: 500; }
+
+/* corner stickers */
+.sticker {
+  position: absolute;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
+  border: var(--line-w) solid var(--ink);
+  z-index: 2;
+}
+.sticker-circle {
+  width: 140px; height: 140px;
+  border-radius: 50%;
+  background: var(--a1); color: var(--a1-ink);
+  font-size: 14px;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  padding: 14px;
+  box-shadow: 6px 6px 0 var(--ink);
+}
+.sticker-circle .big {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 28px; font-weight: 800;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.sticker-rotate { transform: rotate(-8deg); }
+
+/* ============================================================
+   FEATURES — three brutalist tiles
+   ============================================================ */
+.features {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  border-top: var(--line-thick) solid var(--ink);
+  border-bottom: var(--line-thick) solid var(--ink);
+  background: var(--ink);
+  margin-top: 64px;
+}
+.feature {
+  background: var(--bg);
+  padding: 40px 32px 36px;
+  border-right: var(--line-w) solid var(--ink);
+  position: relative;
+  display: flex; flex-direction: column;
+  min-height: 360px;
+}
+.feature:last-child { border-right: 0; }
+.feature.f-2 { background: var(--a1); color: var(--a1-ink); }
+.feature.f-3 { background: var(--a2); color: var(--a2-ink); }
+.feature .num {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 88px;
+  line-height: 0.85;
+  letter-spacing: -0.05em;
+  margin-bottom: 24px;
+}
+.feature h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 32px; line-height: 1.0;
+  letter-spacing: -0.025em;
+  margin: 0 0 16px;
+  text-transform: uppercase;
+}
+.feature h3 em {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  text-transform: none;
+}
+.feature p {
+  font-family: var(--font-sans);
+  font-size: 15px; line-height: 1.45;
+  margin: 0 0 24px;
+  font-weight: 500;
+  flex: 1;
+}
+.feature .more {
+  font-family: var(--font-mono);
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  display: inline-flex; gap: 8px; align-items: center;
+  border-bottom: var(--line-w) solid currentColor; padding-bottom: 4px;
+  align-self: flex-start;
+}
+
+/* ============================================================
+   SECTION SCAFFOLD
+   ============================================================ */
+.section {
+  padding: var(--sec-pad-y) var(--sec-pad-x);
+  max-width: var(--max-w); margin: 0 auto;
+  position: relative;
+}
+.section .eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--ink);
+  display: inline-flex; align-items: center; gap: 0;
+  border: var(--line-w) solid var(--ink);
+}
+.section .eyebrow .num { background: var(--a1); color: var(--a1-ink); padding: 8px 12px; border-right: var(--line-w) solid var(--ink); font-weight: 600; }
+.section .eyebrow .lbl { padding: 8px 12px; }
+.section-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(48px, 7vw, 112px);
+  line-height: 0.88;
+  letter-spacing: -0.035em;
+  color: var(--ink);
+  text-transform: uppercase;
+  max-width: 14ch;
+  margin: 24px 0 0;
+}
+.section-title em {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  text-transform: none;
+  color: var(--a2);
+}
+.section-lede {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 19px; line-height: 1.45;
+  color: var(--ink-2);
+  max-width: 48ch;
+  margin: 22px 0 0;
+}
+
+/* ============================================================
+   TESTIMONIALS — overlapping speech-bubble bricks
+   ============================================================ */
+.testi-section { padding: 56px 0 var(--sec-pad-y); }
+.testi-head {
+  padding: 0 var(--sec-pad-x);
+  display: grid; grid-template-columns: 1fr 1fr;
+  align-items: end; gap: 48px;
+  margin-bottom: 56px;
+}
+.testi-grid {
+  padding: 0 var(--sec-pad-x);
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 24px;
+}
+.testi-card {
+  border: var(--line-w) solid var(--ink);
+  padding: 28px;
+  display: flex; flex-direction: column; gap: 18px;
+  background: var(--bg);
+  box-shadow: var(--shadow-stamp);
+}
+.testi-card.lg { grid-column: span 7; padding: 40px 36px; background: var(--a1); color: var(--a1-ink); }
+.testi-card.sm { grid-column: span 5; }
+.testi-card.f1 { grid-column: span 5; background: var(--a2); color: var(--a2-ink); }
+.testi-card.f2 { grid-column: span 7; }
+.testi-card blockquote {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 22px; line-height: 1.2;
+  letter-spacing: -0.015em;
+}
+.testi-card.lg blockquote { font-size: 30px; }
+.testi-card blockquote em {
+  font-family: var(--font-serif);
+  font-style: italic; font-weight: 400;
+  font-size: 1.1em;
+}
+.testi-card .quoter {
+  display: flex; align-items: center; gap: 12px;
+  font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  border-top: var(--line-w) solid currentColor;
+  padding-top: 16px;
+}
+.testi-card .quoter .av {
+  width: 36px; height: 36px;
+  background: currentColor; border-radius: 50%;
+  position: relative; opacity: 0.18;
+}
+.testi-card .quoter b { font-family: var(--font-display); font-weight: 700; font-size: 14px; letter-spacing: -0.005em; text-transform: uppercase; }
+
+/* ============================================================
+   LOGO BAR — chunky stamp grid
+   ============================================================ */
+.logo-bar {
+  border-top: var(--line-thick) solid var(--ink);
+  border-bottom: var(--line-thick) solid var(--ink);
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0;
+  background: var(--ink);
+}
+.logo-bar div {
+  background: var(--bg);
+  height: 96px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 22px; letter-spacing: -0.03em;
+  text-transform: uppercase;
+  border-right: var(--line-w) solid var(--ink);
+  color: var(--ink);
+}
+.logo-bar div:nth-child(2) { background: var(--a1); color: var(--a1-ink); }
+.logo-bar div:nth-child(5) { background: var(--a2); color: var(--a2-ink); }
+.logo-bar div:last-child { border-right: 0; }
+.logo-bar em { font-family: var(--font-serif); font-style: italic; font-weight: 400; text-transform: none; margin: 0 4px; }
+
+/* ============================================================
+   PRICING
+   ============================================================ */
+.pricing { padding: var(--sec-pad-y) var(--sec-pad-x); max-width: var(--max-w); margin: 0 auto; }
+.pricing-head { display: grid; grid-template-columns: 1fr 1fr; align-items: end; gap: 48px; margin-bottom: 56px; }
+.price-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+.price-card {
+  border: var(--line-thick) solid var(--ink);
+  padding: 32px 28px 32px;
+  background: var(--bg);
+  position: relative;
+}
+.price-card.featured {
+  background: var(--ink); color: var(--bg);
+  transform: translateY(-12px);
+  box-shadow: var(--shadow-stamp-a2);
+}
+.price-card .marker {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  background: var(--a1); color: var(--a1-ink);
+  padding: 6px 10px;
+  border: var(--line-w) solid var(--ink);
+  margin-bottom: 28px;
+}
+.price-card.featured .marker {
+  background: var(--a2); color: var(--a2-ink); border-color: var(--bg);
+}
+.price-card h3 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 36px; line-height: 1; letter-spacing: -0.025em;
+  margin: 0 0 0;
+  text-transform: uppercase;
+}
+.price-card h3 em { font-family: var(--font-serif); font-style: italic; font-weight: 400; text-transform: none; color: var(--a2); }
+.price-card.featured h3 em { color: var(--a1); }
+.price-card .amt {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 88px; line-height: 1;
+  letter-spacing: -0.05em;
+  margin: 28px 0 8px;
+  display: flex; align-items: baseline; gap: 6px;
+}
+.price-card .amt .cur { font-size: 36px; font-weight: 600; }
+.price-card .amt .per { font-family: var(--font-sans); font-size: 13px; font-weight: 500; align-self: flex-end; padding-bottom: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
+.price-card .amt-sub {
+  font-family: var(--font-sans);
+  font-size: 14px; font-weight: 500; line-height: 1.4;
+  margin: 0 0 28px;
+  padding-bottom: 24px;
+  border-bottom: var(--line-w) solid currentColor;
+}
+.price-card.featured .amt-sub { color: var(--bg); opacity: 0.7; }
+.price-card ul { list-style: none; margin: 0 0 32px; padding: 0; display: flex; flex-direction: column; gap: 12px; font-size: 14.5px; }
+.price-card ul li { display: grid; grid-template-columns: 18px 1fr; gap: 12px; align-items: baseline; line-height: 1.4; }
+.price-card ul li::before { content: "→"; font-family: var(--font-display); font-weight: 700; color: var(--a2); font-size: 16px; }
+.price-card.featured ul li::before { color: var(--a1); }
+.price-card ul li b { font-family: var(--font-display); font-weight: 700; }
+
+/* ============================================================
+   CTA — full-bleed brutalist tile
+   ============================================================ */
+.cta {
+  margin: 0;
+  padding: 120px var(--sec-pad-x) 120px;
+  background: var(--ink);
+  color: var(--bg);
+  border-top: var(--line-thick) solid var(--ink);
+  border-bottom: var(--line-thick) solid var(--ink);
+  position: relative;
+  overflow: hidden;
+}
+.cta::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at 80% 20%, var(--a2) 0, transparent 40%),
+              radial-gradient(circle at 10% 90%, var(--a1) 0, transparent 35%);
+  opacity: 0.45;
+  pointer-events: none;
+}
+.cta-inner {
+  position: relative; z-index: 1;
+  max-width: var(--max-w); margin: 0 auto;
+  display: grid; grid-template-columns: 1.2fr 1fr; gap: 48px; align-items: end;
+}
+.cta-tag {
+  font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--a1); font-weight: 500;
+  display: inline-flex; gap: 12px; align-items: center;
+  margin-bottom: 28px;
+}
+.cta-tag::before { content: ""; width: 24px; height: 1px; background: var(--a1); }
+.cta h2 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(64px, 10vw, 168px);
+  line-height: 0.85;
+  letter-spacing: -0.04em;
+  margin: 0 0 32px;
+  text-transform: uppercase;
+}
+.cta h2 em {
+  font-family: var(--font-serif); font-style: italic; font-weight: 400;
+  color: var(--a2); text-transform: none;
+}
+.cta-actions { display: flex; gap: 18px; flex-wrap: wrap; }
+.cta-actions .btn-primary { background: var(--a1); color: var(--a1-ink); border-color: var(--bg); box-shadow: 8px 8px 0 var(--a2); }
+.cta-actions .btn-primary:hover { box-shadow: 10px 10px 0 var(--a2); }
+.cta-actions .btn-ghost { background: transparent; color: var(--bg); border-color: var(--bg); box-shadow: 8px 8px 0 var(--a1); }
+.cta-aside {
+  font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.04em;
+  color: var(--bg); opacity: 0.7;
+  border-top: var(--line-w) solid var(--bg); padding-top: 18px;
+  line-height: 1.6;
+}
+.cta-aside b { font-family: var(--font-display); font-weight: 700; font-size: 18px; color: var(--a1); display: block; letter-spacing: -0.005em; margin-bottom: 4px; }
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.footer {
+  background: var(--bg);
+  border-bottom: var(--line-thick) solid var(--ink);
+}
+.footer-bigword {
+  font-family: var(--font-display); font-weight: 800;
+  font-size: clamp(96px, 17vw, 280px);
+  line-height: 0.82;
+  letter-spacing: -0.05em;
+  text-transform: uppercase;
+  text-align: center;
+  margin: 64px 0 0;
+  padding: 0 var(--sec-pad-x);
+  color: var(--ink);
+  word-break: keep-all;
+  overflow: hidden;
+}
+.footer-bigword em {
+  font-family: var(--font-serif);
+  font-style: italic; font-weight: 400;
+  color: var(--a2);
+  text-transform: none;
+}
+.footer-cols {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr;
+  gap: 0;
+  border-top: var(--line-thick) solid var(--ink);
+  background: var(--ink);
+  margin-top: 48px;
+  gap: var(--line-w);
+}
+.footer-col {
+  padding: 32px;
+  background: var(--bg);
+}
+.footer-col h4 {
+  font-family: var(--font-mono);
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  margin: 0 0 18px;
+  color: var(--ink-2);
+}
+.footer-col ul { list-style: none; margin: 0; padding: 0; }
+.footer-col ul li {
+  font-family: var(--font-display); font-weight: 600;
+  font-size: 17px; padding: 6px 0;
+  text-transform: uppercase;
+  letter-spacing: -0.005em;
+}
+.footer-col ul li:hover { color: var(--a2-deep); }
+.footer-col p {
+  font-family: var(--font-sans); font-weight: 500;
+  font-size: 14.5px; line-height: 1.5;
+  color: var(--ink-2);
+  margin: 0 0 18px;
+}
+.footer-news .news {
+  display: flex; border: var(--line-w) solid var(--ink);
+  background: var(--bg);
+}
+.footer-news .news input {
+  flex: 1; border: 0; background: transparent;
+  padding: 12px 14px; font: inherit; font-family: var(--font-mono); font-size: 13px;
+  outline: none;
+}
+.footer-news .news button {
+  background: var(--ink); color: var(--bg);
+  font-family: var(--font-display); font-weight: 700;
+  padding: 0 18px; font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.footer-news .news button:hover { background: var(--a2); color: var(--a2-ink); }
+.footer-bottom {
+  background: var(--ink); color: var(--bg);
+  padding: 18px 32px;
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 0.18em; text-transform: uppercase;
+}
+.footer-bottom em { color: var(--a1); font-family: var(--font-display); font-style: normal; font-weight: 700; letter-spacing: -0.005em; text-transform: none; font-size: 13px; }
+
+/* ============================================================
+   TOKENS
+   ============================================================ */
+.tokens { max-width: 1080px; margin: 96px auto 96px; padding: 0 32px; }
+.tokens h2 {
+  font-family: var(--font-display); font-weight: 800;
+  font-size: 64px; line-height: 0.95; letter-spacing: -0.03em;
+  text-transform: uppercase;
+  margin: 0 0 14px;
+}
+.tokens h2 em { font-family: var(--font-serif); font-style: italic; font-weight: 400; color: var(--a2); text-transform: none; }
+.tokens p { color: var(--ink-2); max-width: 66ch; margin: 0 0 24px; }
+.tokens h3 {
+  font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  margin: 40px 0 12px;
+  background: var(--ink); color: var(--bg);
+  display: inline-block; padding: 6px 12px;
+}
+.tokens pre {
+  background: var(--ink); color: var(--bg);
+  border: var(--line-w) solid var(--ink);
+  padding: 28px 30px;
+  font-family: var(--font-mono);
+  font-size: 12.5px; line-height: 1.75;
+  overflow-x: auto;
+  white-space: pre;
+}
+.tokens .c { color: var(--ink-3); font-style: italic; }
+.tokens .k { color: var(--a1); }
+.tokens .v { color: var(--a2); }
+
+/* ============================================================
+   PALETTES — dual accent. Each palette is a fight, not a hue.
+   ============================================================ */
+
+/* acid — lime + magenta (default) */
+html[data-palette="acid"] {
+  --a1: oklch(0.85 0.21 130); --a1-deep: oklch(0.62 0.21 130); --a1-ink: oklch(0.10 0.02 130);
+  --a2: oklch(0.62 0.27 0);   --a2-deep: oklch(0.46 0.27 0);   --a2-ink: oklch(0.99 0.01 0);
+}
+/* punch — cherry red + sun yellow */
+html[data-palette="punch"] {
+  --a1: oklch(0.92 0.20 100); --a1-deep: oklch(0.78 0.20 100); --a1-ink: oklch(0.10 0.02 100);
+  --a2: oklch(0.58 0.24 25);  --a2-deep: oklch(0.42 0.24 25);  --a2-ink: oklch(0.99 0.01 25);
+}
+/* volt — electric blue + tangerine */
+html[data-palette="volt"] {
+  --a1: oklch(0.74 0.18 230); --a1-deep: oklch(0.54 0.18 230); --a1-ink: oklch(0.10 0.02 230);
+  --a2: oklch(0.72 0.20 50);  --a2-deep: oklch(0.55 0.20 50);  --a2-ink: oklch(0.10 0.02 50);
+}
+/* toxic — lime + violet */
+html[data-palette="toxic"] {
+  --a1: oklch(0.88 0.22 125); --a1-deep: oklch(0.65 0.22 125); --a1-ink: oklch(0.10 0.02 125);
+  --a2: oklch(0.50 0.22 290); --a2-deep: oklch(0.36 0.22 290); --a2-ink: oklch(0.99 0.01 290);
+}
+/* ember — orange + cobalt */
+html[data-palette="ember"] {
+  --a1: oklch(0.74 0.20 60);  --a1-deep: oklch(0.56 0.20 60);  --a1-ink: oklch(0.10 0.02 60);
+  --a2: oklch(0.42 0.22 260); --a2-deep: oklch(0.30 0.22 260); --a2-ink: oklch(0.99 0.01 260);
+}
+/* bubblegum — hot pink + teal */
+html[data-palette="bubblegum"] {
+  --a1: oklch(0.74 0.20 350); --a1-deep: oklch(0.56 0.20 350); --a1-ink: oklch(0.10 0.02 350);
+  --a2: oklch(0.62 0.14 195); --a2-deep: oklch(0.46 0.14 195); --a2-ink: oklch(0.99 0.01 195);
+}
+/* mono — black + sun yellow (one accent only) */
+html[data-palette="mono"] {
+  --a1: oklch(0.92 0.20 100); --a1-deep: oklch(0.78 0.20 100); --a1-ink: oklch(0.10 0.02 100);
+  --a2: oklch(0.12 0.015 240);--a2-deep: oklch(0.05 0.015 240);--a2-ink: oklch(0.99 0.01 240);
+}
+/* highlighter — neon yellow on black */
+html[data-palette="highlighter"] {
+  --a1: oklch(0.96 0.22 110); --a1-deep: oklch(0.80 0.22 110); --a1-ink: oklch(0.10 0.02 110);
+  --a2: oklch(0.62 0.27 0);   --a2-deep: oklch(0.46 0.27 0);   --a2-ink: oklch(0.99 0.01 0);
+}
+/* riso — cornflower riso + fluo pink */
+html[data-palette="risograph"] {
+  --a1: oklch(0.62 0.16 250); --a1-deep: oklch(0.46 0.16 250); --a1-ink: oklch(0.99 0.01 250);
+  --a2: oklch(0.70 0.22 350); --a2-deep: oklch(0.54 0.22 350); --a2-ink: oklch(0.10 0.02 350);
+}
+
+/* ============================================================
+   VARIANTS
+   BRUTALIST (default) — black + one acid color, geometric, hard.
+   MAXIMALIST — full color, mixed display fonts, oversized stickers.
+   RISO — limited 2-3 color, screenprint feel, grain texture, halftones.
+   ============================================================ */
+
+/* MAXIMALIST — louder, more decoration, more color */
+html[data-variant="maximalist"] {
+  --bg: oklch(0.99 0.005 90);
+}
+html[data-variant="maximalist"] body { background:
+  radial-gradient(circle at 95% 8%, var(--a1) 0, transparent 14%),
+  radial-gradient(circle at 4% 50%, var(--a2) 0, transparent 12%),
+  var(--bg);
+  background-attachment: fixed;
+}
+html[data-variant="maximalist"] .hero-display .pop { transform: rotate(-4deg) translateY(-0.06em); }
+html[data-variant="maximalist"] .hero { background: transparent; }
+html[data-variant="maximalist"] .feature.f-1 { background: var(--a2); color: var(--a2-ink); }
+html[data-variant="maximalist"] .feature.f-2 { background: var(--ink); color: var(--bg); }
+html[data-variant="maximalist"] .feature.f-3 { background: var(--a1); color: var(--a1-ink); }
+html[data-variant="maximalist"] .feature h3 em { color: currentColor; opacity: 0.95; }
+html[data-variant="maximalist"] .testi-card.lg { background: var(--a2); color: var(--a2-ink); }
+html[data-variant="maximalist"] .testi-card.f1 { background: var(--ink); color: var(--bg); }
+html[data-variant="maximalist"] .testi-card.f2 { background: var(--a1); color: var(--a1-ink); }
+html[data-variant="maximalist"] .testi-card.sm { background: var(--bg); }
+html[data-variant="maximalist"] .price-card { background: var(--a1); color: var(--a1-ink); }
+html[data-variant="maximalist"] .price-card.featured { background: var(--ink); color: var(--bg); }
+html[data-variant="maximalist"] .price-card.t-3 { background: var(--a2); color: var(--a2-ink); }
+html[data-variant="maximalist"] .price-card .marker { background: var(--bg); color: var(--ink); }
+html[data-variant="maximalist"] .nav { background: var(--a2); color: var(--a2-ink); }
+html[data-variant="maximalist"] .nav-mid a { color: var(--a2-ink); }
+html[data-variant="maximalist"] .nav-mid a:hover { background: var(--a1); color: var(--a1-ink); }
+html[data-variant="maximalist"] .nav-mid a.active { background: var(--ink); color: var(--bg); }
+html[data-variant="maximalist"] .nav-right a { color: var(--a2-ink); }
+html[data-variant="maximalist"] .nav-right .cta { background: var(--a1); color: var(--a1-ink); }
+html[data-variant="maximalist"] .marquee { background: var(--a1); color: var(--a1-ink); }
+html[data-variant="maximalist"] .marquee em { color: var(--a2); }
+html[data-variant="maximalist"] .marquee .star { color: var(--ink); }
+html[data-variant="maximalist"] .footer-bigword em { color: var(--a1); }
+html[data-variant="maximalist"] .doc-title { font-family: var(--font-serif); font-weight: 400; font-style: italic; text-transform: none; letter-spacing: -0.03em; }
+html[data-variant="maximalist"] .doc-title .pop { font-family: var(--font-display); font-style: normal; font-weight: 800; text-transform: uppercase; }
+
+/* RISO — limited palette, grain, halftone backgrounds */
+html[data-variant="riso"] {
+  --bg: oklch(0.97 0.012 90);
+  --bg-1: oklch(0.94 0.015 90);
+}
+html[data-variant="riso"] body {
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(circle at 1px 1px, oklch(0.20 0.02 240 / 0.15) 1px, transparent 1.4px);
+  background-size: 4px 4px;
+}
+html[data-variant="riso"] .frame {
+  background:
+    radial-gradient(circle at 1px 1px, oklch(0.20 0.02 240 / 0.10) 1px, transparent 1.4px) 0 0/4px 4px,
+    var(--bg);
+}
+/* Halftone fills for solid color blocks */
+html[data-variant="riso"] .feature.f-2,
+html[data-variant="riso"] .testi-card.lg,
+html[data-variant="riso"] .price-card .marker {
+  background-image: radial-gradient(circle at 2px 2px, var(--a1-deep) 1.4px, transparent 1.6px), linear-gradient(var(--a1), var(--a1));
+  background-size: 5px 5px, 100% 100%;
+}
+html[data-variant="riso"] .feature.f-3,
+html[data-variant="riso"] .testi-card.f1 {
+  background-image: radial-gradient(circle at 2px 2px, var(--a2-deep) 1.4px, transparent 1.6px), linear-gradient(var(--a2), var(--a2));
+  background-size: 5px 5px, 100% 100%;
+}
+html[data-variant="riso"] .marquee { background-image: radial-gradient(circle at 1px 1px, var(--a1) 0.8px, transparent 1.2px), linear-gradient(var(--ink), var(--ink)); background-size: 6px 6px, 100% 100%; }
+html[data-variant="riso"] .nav-brand { background-image: radial-gradient(circle at 2px 2px, var(--a1-deep) 1.4px, transparent 1.6px), linear-gradient(var(--a1), var(--a1)); background-size: 5px 5px, 100% 100%; }
+html[data-variant="riso"] .doc-eyebrow { background-image: radial-gradient(circle at 2px 2px, var(--a1-deep) 1.4px, transparent 1.6px), linear-gradient(var(--a1), var(--a1)); background-size: 5px 5px, 100% 100%; }
+html[data-variant="riso"] .hero-display .pop { background-image: radial-gradient(circle at 2px 2px, var(--a2-deep) 1.4px, transparent 1.6px), linear-gradient(var(--a2), var(--a2)); background-size: 5px 5px, 100% 100%; }
+/* riso prefers softer line weight */
+html[data-variant="riso"] { --line-w: 1.5px; --line-thick: 3px; }
+html[data-variant="riso"] .btn { font-family: var(--font-serif); font-weight: 400; font-style: italic; font-size: 19px; text-transform: none; letter-spacing: 0; }
+html[data-variant="riso"] .btn-lg { font-size: 22px; }
+html[data-variant="riso"] .footer-bigword { font-family: var(--font-serif); font-style: italic; font-weight: 400; text-transform: none; }
+html[data-variant="riso"] .doc-title { font-family: var(--font-serif); font-weight: 400; font-style: italic; text-transform: none; }
+html[data-variant="riso"] .section-title { font-family: var(--font-serif); font-weight: 400; font-style: italic; text-transform: none; letter-spacing: -0.02em; }
+html[data-variant="riso"] .hero-display { font-family: var(--font-display); font-weight: 800; }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 1100px) {
+  .hero-row { grid-template-columns: 1fr; gap: 32px; }
+  .features { grid-template-columns: 1fr; border-top: var(--line-thick) solid var(--ink); }
+  .feature { border-right: 0; border-bottom: var(--line-w) solid var(--ink); }
+  .feature:last-child { border-bottom: 0; }
+  .testi-grid { grid-template-columns: 1fr; }
+  .testi-card.lg, .testi-card.sm, .testi-card.f1, .testi-card.f2 { grid-column: span 12; }
+  .price-grid { grid-template-columns: 1fr; }
+  .price-card.featured { transform: none; }
+  .footer-cols { grid-template-columns: 1fr 1fr; }
+  .testi-head, .pricing-head, .cta-inner { grid-template-columns: 1fr; }
+  .logo-bar { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 720px) {
+  :root { --sec-pad-y: 80px; }
+  .doc { padding: 64px 24px 56px; }
+  .doc-header { grid-template-columns: 1fr; }
+  .doc-stamp { min-width: 0; align-self: stretch; text-align: left; }
+  .doc-title { font-size: 96px; }
+  .doc-meta { grid-template-columns: 1fr 1fr; }
+  .footer-cols { grid-template-columns: 1fr; }
+  .footer-bigword { font-size: 88px; }
+  .nav { flex-direction: column; }
+  .nav-brand { padding: 16px 24px; border-right: 0; border-bottom: var(--line-thick) solid var(--ink); }
+  .nav-mid { display: none; }
+  .nav-right .cta { flex: 1; justify-content: center; padding: 18px; }
+  .swatch-grid { grid-template-columns: repeat(2, 1fr); }
+  .spec-table .row { grid-template-columns: 60px 1fr 80px; }
+  .spec-table .row > *:nth-child(4),
+  .spec-table .row > *:nth-child(5) { display: none; }
+}
+
+/* ============================================================
+   SWITCHER
+   ============================================================ */
+.switcher {
+  position: fixed; top: 20px; right: 20px; z-index: 100;
+  background: var(--bg);
+  border: var(--line-w) solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink);
+  padding: 14px 16px 16px;
+  width: 290px;
+  font-family: var(--font-sans);
+}
+.switcher-title {
+  font-family: var(--font-mono);
+  font-size: 10px; font-weight: 500;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--ink-2);
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 4px; padding-bottom: 10px;
+  border-bottom: var(--line-w) solid var(--ink);
+}
+.switcher-title em {
+  font-family: var(--font-display); font-style: normal; font-weight: 800;
+  font-size: 14px; letter-spacing: -0.005em; color: var(--ink);
+  text-transform: uppercase;
+  background: var(--a1); color: var(--a1-ink);
+  padding: 2px 6px;
+}
+.switcher-label {
+  font-family: var(--font-mono);
+  font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--ink-2); font-weight: 500;
+  margin: 14px 0 8px;
+}
+.switcher-palettes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.switcher-palettes button {
+  height: 38px;
+  border: var(--line-w) solid var(--ink);
+  border-radius: 0;
+  padding: 0; cursor: pointer;
+  display: flex;
+  position: relative;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  transition: outline-color 140ms ease, transform 140ms ease;
+}
+.switcher-palettes button:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--ink); }
+.switcher .switcher-palettes button[aria-pressed="true"] {
+  outline-color: var(--ink) !important;
+  outline-offset: 3px;
+  transform: translate(-2px, -2px);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+.switcher-palettes button .a1,
+.switcher-palettes button .a2 { flex: 1; height: 100%; }
+.switcher-palettes button .name {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-weight: 700;
+  font-size: 10px; letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--ink); mix-blend-mode: difference;
+  text-shadow: 0 0 0 currentColor;
+  pointer-events: none;
+}
+.switcher-variants { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: var(--line-w) solid var(--ink); }
+.switcher-variants button {
+  font-family: var(--font-display); font-weight: 700; font-size: 12px;
+  text-transform: uppercase; letter-spacing: 0.02em;
+  padding: 10px 6px;
+  background: transparent;
+  color: var(--ink);
+  border: 0;
+  border-right: var(--line-w) solid var(--ink);
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease;
+}
+.switcher-variants button:last-child { border-right: 0; }
+.switcher-variants button:hover { background: var(--a1); color: var(--a1-ink); }
+.switcher .switcher-variants button[aria-pressed="true"] {
+  background-color: var(--ink) !important;
+  color: var(--bg) !important;
+}
+.switcher-caption {
+  font-family: var(--font-sans); font-weight: 500;
+  font-size: 12px; line-height: 1.4;
+  color: var(--ink-2);
+  margin-top: 12px; padding-top: 10px;
+  border-top: var(--line-w) dashed var(--ink);
+}
+.switcher-caption b { color: var(--ink); font-weight: 700; }
+@media (max-width: 720px) {
+  .switcher { top: auto; bottom: 12px; right: 12px; left: 12px; width: auto; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     SWITCHER
+     ============================================================ -->
+<aside class="switcher" aria-label="Riot design system controls">
+  <div class="switcher-title"><em>Riot</em> · controls</div>
+
+  <div class="switcher-label">Palette · dual accent</div>
+  <div class="switcher-palettes" role="radiogroup" aria-label="Accent palette">
+    <button data-set-palette="acid"        title="Acid · lime + magenta (default)" aria-label="Acid">
+      <span class="a1" style="background: oklch(0.85 0.21 130)"></span>
+      <span class="a2" style="background: oklch(0.62 0.27 0)"></span>
+      <span class="name">Acid</span>
+    </button>
+    <button data-set-palette="punch"       title="Punch · cherry + sun" aria-label="Punch">
+      <span class="a1" style="background: oklch(0.92 0.20 100)"></span>
+      <span class="a2" style="background: oklch(0.58 0.24 25)"></span>
+      <span class="name">Punch</span>
+    </button>
+    <button data-set-palette="volt"        title="Volt · electric blue + tangerine" aria-label="Volt">
+      <span class="a1" style="background: oklch(0.74 0.18 230)"></span>
+      <span class="a2" style="background: oklch(0.72 0.20 50)"></span>
+      <span class="name">Volt</span>
+    </button>
+    <button data-set-palette="toxic"       title="Toxic · lime + violet" aria-label="Toxic">
+      <span class="a1" style="background: oklch(0.88 0.22 125)"></span>
+      <span class="a2" style="background: oklch(0.50 0.22 290)"></span>
+      <span class="name">Toxic</span>
+    </button>
+    <button data-set-palette="ember"       title="Ember · orange + cobalt" aria-label="Ember">
+      <span class="a1" style="background: oklch(0.74 0.20 60)"></span>
+      <span class="a2" style="background: oklch(0.42 0.22 260)"></span>
+      <span class="name">Ember</span>
+    </button>
+    <button data-set-palette="bubblegum"   title="Bubblegum · pink + teal" aria-label="Bubblegum">
+      <span class="a1" style="background: oklch(0.74 0.20 350)"></span>
+      <span class="a2" style="background: oklch(0.62 0.14 195)"></span>
+      <span class="name">Gum</span>
+    </button>
+    <button data-set-palette="mono"        title="Mono · black + sun (single accent)" aria-label="Mono">
+      <span class="a1" style="background: oklch(0.92 0.20 100)"></span>
+      <span class="a2" style="background: oklch(0.12 0.015 240)"></span>
+      <span class="name">Mono</span>
+    </button>
+    <button data-set-palette="highlighter" title="Highlighter · neon + magenta" aria-label="Highlighter">
+      <span class="a1" style="background: oklch(0.96 0.22 110)"></span>
+      <span class="a2" style="background: oklch(0.62 0.27 0)"></span>
+      <span class="name">Hilite</span>
+    </button>
+    <button data-set-palette="risograph"   title="Risograph · cornflower + fluo pink" aria-label="Risograph">
+      <span class="a1" style="background: oklch(0.62 0.16 250)"></span>
+      <span class="a2" style="background: oklch(0.70 0.22 350)"></span>
+      <span class="name">Riso</span>
+    </button>
+  </div>
+
+  <div class="switcher-label">Variant</div>
+  <div class="switcher-variants" role="radiogroup" aria-label="Style variant">
+    <button data-set-variant="brutalist"   title="Black + acid · hard, geometric, the default">Brutalist</button>
+    <button data-set-variant="maximalist"  title="Full color riot, mixed display fonts">Maximal</button>
+    <button data-set-variant="riso"        title="Limited palette, halftone, screenprint feel">Riso</button>
+  </div>
+
+  <div class="switcher-caption" id="switcherCaption">
+    <b>Brutalist</b> · the house default — hard borders, hard shadows, two accents fighting in a flat plane.
+  </div>
+</aside>
+
+<script>
+(() => {
+  const root = document.documentElement;
+  const KEY_P = "riot.palette";
+  const KEY_V = "riot.variant";
+
+  const VARIANT_DESC = {
+    brutalist:  "<b>Brutalist</b> · the house default — hard borders, hard shadows, two accents fighting in a flat plane.",
+    maximalist: "<b>Maximal</b> · full color, three-tone tiles, mixed display fonts. The agency-portfolio energy.",
+    riso:       "<b>Riso</b> · halftone fills, paper grain, italic serif display. A zine that scrolls.",
+  };
+
+  try {
+    const p = localStorage.getItem(KEY_P);
+    const v = localStorage.getItem(KEY_V);
+    if (p) root.setAttribute("data-palette", p);
+    if (v) root.setAttribute("data-variant", v);
+  } catch {}
+
+  const syncPressed = () => {
+    const p = root.getAttribute("data-palette") || "acid";
+    const v = root.getAttribute("data-variant") || "brutalist";
+    document.querySelectorAll("[data-set-palette]").forEach(b =>
+      b.setAttribute("aria-pressed", b.dataset.setPalette === p)
+    );
+    document.querySelectorAll("[data-set-variant]").forEach(b =>
+      b.setAttribute("aria-pressed", b.dataset.setVariant === v)
+    );
+    const cap = document.getElementById("switcherCaption");
+    if (cap) cap.innerHTML = VARIANT_DESC[v] || VARIANT_DESC.brutalist;
+  };
+
+  document.querySelectorAll("[data-set-palette]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      root.setAttribute("data-palette", btn.dataset.setPalette);
+      try { localStorage.setItem(KEY_P, btn.dataset.setPalette); } catch {}
+      syncPressed();
+    });
+  });
+  document.querySelectorAll("[data-set-variant]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      root.setAttribute("data-variant", btn.dataset.setVariant);
+      try { localStorage.setItem(KEY_V, btn.dataset.setVariant); } catch {}
+      syncPressed();
+    });
+  });
+
+  syncPressed();
+})();
+</script>
+
+<!-- ============================================================
+     SPEC DOC
+     ============================================================ -->
+<div class="doc">
+  <header class="doc-header">
+    <div>
+      <span class="doc-eyebrow">№ 04 — Bold Expressive</span>
+      <h1 class="doc-title">RIOT<span class="pop">,</span></h1>
+      <p class="doc-sub">A loud, two-accent system for agencies, fashion, music, festivals, and challenger SaaS that wants to read like a poster instead of a landing page.</p>
+    </div>
+    <div class="doc-stamp">
+      Lessgo<br>Library<br><span class="big">Vol. IV</span>April<br>MMXXVI
+    </div>
+  </header>
+
+  <dl class="doc-meta">
+    <div><dt>For</dt><dd>Agencies · DTC · music · festivals</dd></div>
+    <div><dt>Mode</dt><dd>Light, high-contrast</dd></div>
+    <div><dt>Density</dt><dd>Crowded · loud</dd></div>
+    <div><dt>References</dt><dd>Pentagram · Wieden · Working&nbsp;Not&nbsp;Working</dd></div>
+  </dl>
+
+  <!-- 01 Identity -->
+  <section>
+    <h2><span class="n">№ 01</span>Identity</h2>
+    <p class="dek">Two accents. They fight. The fight is the design.</p>
+    <p>Riot is the system that disrespects whitespace on purpose. Where Folio holds 160px of section padding sacred, Riot pushes the type to the edge of the viewport and lets letters touch. Where Hearth uses a single warm accent at 8% of the viewport, Riot uses <em>two</em> high-chroma accents at ~25% combined and lets them argue.</p>
+    <p>This is the system for buyers who want the page to feel like a poster pinned to a wall. Agencies whose hero is their own work. Fashion brands that don't care if you can read it on first glance. SaaS that wants to sound less like a product and more like a manifesto.</p>
+    <p class="callout">If your buyer asks "is this too much?" — they are not your buyer.</p>
+    <p>The accent budget is inverted: ~3% in Folio, ~25% in Riot. The rule is no longer "hold accent at minimum" — it's "two accents must always appear in the same viewport, and never be the same hue." If a viewport has only one accent, the design has failed.</p>
+  </section>
+
+  <!-- 02 Typography -->
+  <section>
+    <h2><span class="n">№ 02</span>Type</h2>
+    <p class="dek">Display fills the page. Body holds back. Italics in Instrument Serif provide the only softness.</p>
+
+    <h3>Variants</h3>
+    <ul>
+      <li><b>Brutalist</b> (default) — Bricolage Grotesque 800 for display, all-caps. Geometric, hard, technical. Body in Space Grotesk.</li>
+      <li><b>Maximal</b> — same display family but italic Instrument Serif used at title sizes too. Mixed-font tension is the whole point.</li>
+      <li><b>Riso</b> — Instrument Serif italic at display sizes. Buttons go serif italic. The zine variant.</li>
+    </ul>
+
+    <h3>Display scale</h3>
+    <div class="spec-table">
+      <div class="row head"><div>role</div><div>sample</div><div>desktop</div><div>mobile</div><div>weight</div></div>
+      <div class="row"><div>D1</div><div class="sample" style="font-size: 36px;">RIOT</div><div>232 / 0.84</div><div>72 / 0.88</div><div>800</div></div>
+      <div class="row"><div>D2</div><div class="sample" style="font-size: 28px;">SECTION TITLE</div><div>112 / 0.88</div><div>56 / 0.92</div><div>800</div></div>
+      <div class="row"><div>D3</div><div class="sample" style="font-size: 22px;">FEATURE</div><div>32 / 1.0</div><div>26 / 1.1</div><div>700</div></div>
+      <div class="row"><div>D4</div><div class="sample" style="font-size: 18px; text-transform:none;">Quote / lede</div><div>22 / 1.2</div><div>19 / 1.3</div><div>600</div></div>
+    </div>
+
+    <h3>Body scale</h3>
+    <div class="spec-table">
+      <div class="row head"><div>role</div><div>sample</div><div>size</div><div>lh</div><div>weight</div></div>
+      <div class="row"><div>XL</div><div class="sample" style="font-size: 21px; text-transform: none;">Lede — Space Grotesk 500</div><div>21</div><div>1.45</div><div>500</div></div>
+      <div class="row"><div>L</div><div class="sample" style="font-family: 'Space Grotesk'; font-size: 16px; text-transform: none;">Primary body, Space Grotesk 400</div><div>16</div><div>1.5</div><div>400</div></div>
+      <div class="row"><div>M</div><div class="sample" style="font-family: 'Space Grotesk'; font-size: 15px; text-transform: none; font-weight: 500;">Card body</div><div>15</div><div>1.45</div><div>500</div></div>
+      <div class="row"><div>SM</div><div class="sample" style="font-family: 'JetBrains Mono'; font-size: 11px; letter-spacing: 0.18em;">EYEBROW · META · STAMP</div><div>11</div><div>1.4</div><div>500</div></div>
+    </div>
+
+    <div class="sample-display">
+      <div class="s-label">D1 · the poster moment</div>
+      <div class="s-d1">YELL,<em> softly.</em></div>
+    </div>
+    <div class="sample-display">
+      <div class="s-label">D2 · D3 · D4</div>
+      <div class="s-d2">PUT THE WORD<em> here.</em></div>
+      <div class="s-d3" style="margin-top: 24px; color: var(--ink-2);">Two accents, no compromise.</div>
+      <div class="s-d4" style="margin-top: 18px; color: var(--ink-2);">If a viewport has one accent, the design failed.</div>
+    </div>
+  </section>
+
+  <!-- 03 Color -->
+  <section>
+    <h2><span class="n">№ 03</span>Color</h2>
+    <p class="dek">Nine dual-accent palettes. Each is a fight between two highly-saturated hues.</p>
+
+    <h3>Surface (held)</h3>
+    <div class="swatch-grid">
+      <div class="swatch"><div class="chip" style="background: oklch(0.99 0.005 90)"></div><div class="lbl"><b>bg</b><span>0.99</span></div></div>
+      <div class="swatch"><div class="chip" style="background: oklch(0.96 0.008 90)"></div><div class="lbl"><b>bg-1</b><span>0.96</span></div></div>
+      <div class="swatch"><div class="chip" style="background: oklch(0.55 0.010 240)"></div><div class="lbl"><b>ink-3</b><span>0.55</span></div></div>
+      <div class="swatch"><div class="chip" style="background: oklch(0.32 0.012 240)"></div><div class="lbl" style="color:#fff"><b style="color:#fff">ink-2</b><span style="color: #ddd">0.32</span></div></div>
+      <div class="swatch"><div class="chip" style="background: oklch(0.12 0.015 240)"></div><div class="lbl" style="color:#fff"><b style="color:#fff">ink</b><span style="color: #ddd">0.12</span></div></div>
+    </div>
+
+    <h3>Dual-accent palettes (the user's only color knob)</h3>
+    <p>The user picks a palette; the system always exposes <span class="mono">--a1</span> and <span class="mono">--a2</span>. Variants and components are written to demand both — no component uses only one accent. This forces every page to carry the fight.</p>
+    <div class="swatch-grid" style="grid-template-columns: repeat(9, 1fr);">
+      <div class="swatch"><div class="chip" style="background: linear-gradient(90deg, oklch(0.85 0.21 130) 50%, oklch(0.62 0.27 0) 50%)"></div><div class="lbl"><b>acid</b></div></div>
+      <div class="swatch"><div class="chip" style="background: linear-gradient(90deg, oklch(0.92 0.20 100) 50%, oklch(0.58 0.24 25) 50%)"></div><div class="lbl"><b>punch</b></div></div>
+      <div class="swatch"><div class="chip" style="background: linear-gradient(90deg, oklch(0.74 0.18 230) 50%, oklch(0.72 0.20 50) 50%)"></div><div class="lbl"><b>volt</b></div></div>
+      <div class="swatch"><div class="chip" style="background: linear-gradient(90deg, oklch(0.88 0.22 125) 50%, oklch(0.50 0.22 290) 50%)"></div><div class="lbl"><b>toxic</b></div></div>
+      <div class="swatch"><div class="chip" style="background: linear-gradient(90deg, oklch(0.74 0.20 60) 50%, oklch(0.42 0.22 260) 50%)"></div><div class="lbl"><b>ember</b></div></div>
+      <div class="swatch"><div class="chip" style="background: linear-gradient(90deg, oklch(0.74 0.20 350) 50%, oklch(0.62 0.14 195) 50%)"></div><div class="lbl"><b>gum</b></div></div>
+      <div class="swatch"><div class="chip" style="background: linear-gradient(90deg, oklch(0.92 0.20 100) 50%, oklch(0.12 0.015 240) 50%)"></div><div class="lbl"><b>mono</b></div></div>
+      <div class="swatch"><div class="chip" style="background: linear-gradient(90deg, oklch(0.96 0.22 110) 50%, oklch(0.62 0.27 0) 50%)"></div><div class="lbl"><b>hilite</b></div></div>
+      <div class="swatch"><div class="chip" style="background: linear-gradient(90deg, oklch(0.62 0.16 250) 50%, oklch(0.70 0.22 350) 50%)"></div><div class="lbl"><b>riso</b></div></div>
+    </div>
+  </section>
+
+  <!-- 04 Decoration -->
+  <section>
+    <h2><span class="n">№ 04</span>Decoration</h2>
+    <p class="dek">Six permitted motifs. Use as many as you like.</p>
+    <ul>
+      <li><b>Marquees.</b> Black ticker band running across full bleed, oversized, with serif italics breaking the all-caps.</li>
+      <li><b>Stickers.</b> Round, rotated badges with hard stamp shadows. Always at the corner of a hero image or section.</li>
+      <li><b>Stamp shadows.</b> Hard offset shadows in <span class="mono">--ink</span> (8 8 0). Buttons and cards have them. Hover lifts to 10 10.</li>
+      <li><b>Marker eyebrows.</b> Two-tone bordered pills. Number on the left in accent, label on the right.</li>
+      <li><b>Italic serif pops.</b> One italic word per heading, in <span class="mono">Instrument Serif</span>, contrasting tone block. The shape contrast carries the brand.</li>
+      <li><b>Big-word footers.</b> The brand name set at 280px in the footer, full-bleed. Always.</li>
+    </ul>
+    <p class="callout">No drop shadows below 8px. No gradients (except in Maximal variant body wash). No rounded corners except round stickers and pill stamps.</p>
+  </section>
+
+  <!-- 05 Components -->
+  <section>
+    <h2><span class="n">№ 05</span>Components</h2>
+    <p class="dek">All components carry the line-weight system. Borders are 2px on small, 4px on full-bleed dividers. Always full-strength <span class="mono">--ink</span>, never softened.</p>
+
+    <h3>Buttons</h3>
+    <ul>
+      <li><b>Primary</b> — <span class="mono">--a2</span> fill, ink border, 8px stamp shadow. Hover translates -2px (shadow grows). Active translates +4px (shadow shrinks).</li>
+      <li><b>Ghost</b> — bg fill, ink border, stamp shadow. Hover fills with <span class="mono">--a1</span>.</li>
+      <li><b>Quiet</b> — text only, 2px underline. The only un-stamped action.</li>
+    </ul>
+
+    <h3>Cards</h3>
+    <p>Every card is a stamped tile — hard borders, hard shadows. Featured cards rotate slightly (-2deg) or translate up. Three-card sections use three different fills (bg / a1 / a2) — never one fill for all three.</p>
+
+    <h3>Forms</h3>
+    <p>Inputs have hard 2px borders, no rounding, no inner shadow. Focus thickens border to 4px. Submit button is always a stamped Primary.</p>
+  </section>
+</div>
+
+<!-- ============================================================
+     RENDERED MOCKUP
+     ============================================================ -->
+<div class="stage">
+  <div class="stage-header">
+    <span class="stage-n">№ 06</span>
+    <span class="stage-title">Composed page</span>
+    <span class="stage-note">Mocked at 1480 max-width</span>
+  </div>
+  <div class="frame">
+
+    <!-- NAV -->
+    <nav class="nav">
+      <div class="nav-brand"><span class="star"></span>RIOT/CO</div>
+      <div class="nav-mid">
+        <a class="active">WORK</a>
+        <a>STUDIO</a>
+        <a>PRESS</a>
+        <a>WRITING</a>
+        <a>NOW</a>
+      </div>
+      <div class="nav-right">
+        <a>EN/JP</a>
+        <a class="cta">START A PROJECT →</a>
+      </div>
+    </nav>
+
+    <!-- MARQUEE -->
+    <div class="marquee">
+      <div class="marquee-track">
+        <span>SHIPPING NEW WORK <span class="star">✶</span> <em>Spring</em> MMXXVI <span class="star">✶</span> NOW BOOKING Q3 <span class="star">✶</span> RIOT × CO <span class="star">✶</span> SHIPPING NEW WORK <span class="star">✶</span> <em>Spring</em> MMXXVI <span class="star">✶</span> NOW BOOKING Q3 <span class="star">✶</span> RIOT × CO <span class="star">✶</span></span>
+        <span aria-hidden="true">SHIPPING NEW WORK <span class="star">✶</span> <em>Spring</em> MMXXVI <span class="star">✶</span> NOW BOOKING Q3 <span class="star">✶</span> RIOT × CO <span class="star">✶</span> SHIPPING NEW WORK <span class="star">✶</span> <em>Spring</em> MMXXVI <span class="star">✶</span> NOW BOOKING Q3 <span class="star">✶</span> RIOT × CO <span class="star">✶</span></span>
+      </div>
+    </div>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-tag-row">
+        <span class="pill"><span class="dot"></span>Available · Q3 / MMXXVI</span>
+        <span class="stamp">№ 47 — A studio for big ideas</span>
+        <span style="margin-left:auto; font-family: var(--font-mono); color: var(--ink-3);">Brooklyn · Tokyo</span>
+      </div>
+
+      <h1 class="hero-display">
+        DESIGN<br>
+        THAT <span class="pop">refuses</span><br>
+        <span class="strike">to&nbsp;sit&nbsp;quietly.</span>
+      </h1>
+
+      <div class="hero-row">
+        <p class="hero-lede">A studio for brands tired of looking like every other Tailwind landing page. Identity, motion, and the occasional poster — for people who'd rather be remembered than approved of.</p>
+        <div class="hero-actions">
+          <div class="hero-actions-row">
+            <a class="btn btn-primary btn-lg">START A PROJECT <span class="arrow">→</span></a>
+            <a class="btn btn-ghost btn-lg">SEE THE WORK</a>
+          </div>
+          <div class="hero-meta">
+            <span><b>112</b> · projects shipped</span>
+            <span><b>14</b> · in residence</span>
+            <span><b>1</b> · cat</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="features">
+      <div class="feature f-1">
+        <span class="num">01</span>
+        <h3>BRAND, <em>built loud</em></h3>
+        <p>Identity systems for brands that want to be heard. We don't do "minimal but warm." We do present-tense, full-volume, no-asterisk.</p>
+        <a class="more">SELECTED →</a>
+      </div>
+      <div class="feature f-2">
+        <span class="num">02</span>
+        <h3>MOTION &amp; <em>noise</em></h3>
+        <p>Brand films, type animations, OOH for buyers who actually want their billboard to do something. We work with directors who know the second comma in a script matters.</p>
+        <a class="more">REEL →</a>
+      </div>
+      <div class="feature f-3">
+        <span class="num">03</span>
+        <h3>PRINT, <em>still</em></h3>
+        <p>Posters, books, a zine when the brief allows. We have a riso machine and we know how to use it. Editions of 40 to 4,000.</p>
+        <a class="more">CATALOGUE →</a>
+      </div>
+    </section>
+
+    <!-- TESTIMONIALS -->
+    <section class="testi-section">
+      <div class="testi-head">
+        <div>
+          <span class="eyebrow"><span class="num">№ 02</span><span class="lbl">Receipts</span></span>
+          <h2 class="section-title">PEOPLE WHO <em>asked&nbsp;us&nbsp;back.</em></h2>
+        </div>
+        <p class="section-lede">Some of these are public. Some of them aren't. The pattern is the same: a long brief, a short list of specifics, and a willingness to let the work be a little uncomfortable for two days before deciding.</p>
+      </div>
+      <div class="testi-grid">
+        <div class="testi-card lg">
+          <blockquote>"Riot redrew our whole identity in nine weeks and I haven't <em>thought&nbsp;about&nbsp;it since.</em> That's the highest compliment I have for a studio."</blockquote>
+          <div class="quoter">
+            <span class="av"></span>
+            <span><b>Anouk Devereux</b> · Founder, Maison Lacq</span>
+          </div>
+        </div>
+        <div class="testi-card sm">
+          <blockquote>The wordmark felt obvious five minutes after we saw it, which is the part that actually takes nine weeks.</blockquote>
+          <div class="quoter">
+            <span class="av"></span>
+            <span><b>Yuki Tanaka</b> · ECD, Hôtel Souvient</span>
+          </div>
+        </div>
+        <div class="testi-card f1">
+          <blockquote>They argued with us about the headline for an entire afternoon. The headline was <em>better</em> at the end of the&nbsp;afternoon.</blockquote>
+          <div class="quoter">
+            <span class="av"></span>
+            <span><b>Marcus West</b> · Brand Lead, Volt&nbsp;DTC</span>
+          </div>
+        </div>
+        <div class="testi-card f2">
+          <blockquote>The presentation deck had a marquee in it. The marquee made it into the brand. The brand made it onto a building.</blockquote>
+          <div class="quoter">
+            <span class="av"></span>
+            <span><b>Sela Okafor</b> · Director, Verba Volant&nbsp;Press</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LOGOS -->
+    <div class="logo-bar">
+      <div>MAISON<em>·</em>LACQ</div>
+      <div>VOLT/DTC</div>
+      <div>HÔTEL<em>·</em>SOUVIENT</div>
+      <div>TLÖN<em>·</em>PRESS</div>
+      <div>SALT<em>&amp;</em>STONE</div>
+      <div>ÉTUDES<em>·</em>SOIR</div>
+    </div>
+
+    <!-- PRICING -->
+    <section class="pricing">
+      <div class="pricing-head">
+        <div>
+          <span class="eyebrow"><span class="num">№ 03</span><span class="lbl">Engagement</span></span>
+          <h2 class="section-title">THREE WAYS <em>in.</em></h2>
+        </div>
+        <p class="section-lede">Fixed-fee engagements, written before the kickoff. Discovery is free. Everything below the discovery is not.</p>
+      </div>
+      <div class="price-grid">
+        <div class="price-card t-1">
+          <span class="marker">№ 01 · Sprint</span>
+          <h3>THE SPARK<em>.</em></h3>
+          <div class="amt"><span class="cur">$</span>12K<span class="per">/ 3 wks</span></div>
+          <p class="amt-sub">An identity audit, three directions, one decision.</p>
+          <ul>
+            <li>Two-week <b>brief sprint</b></li>
+            <li>Three identity routes</li>
+            <li>One full presentation</li>
+            <li>Working files for the chosen route</li>
+          </ul>
+          <a class="btn btn-ghost">START SMALL →</a>
+        </div>
+        <div class="price-card featured">
+          <span class="marker">№ 02 · Most chosen</span>
+          <h3>THE WORKS<em>.</em></h3>
+          <div class="amt"><span class="cur">$</span>68K<span class="per">/ 8 wks</span></div>
+          <p class="amt-sub">Full identity system. Wordmark, type, motion, the marquee.</p>
+          <ul>
+            <li>Eight-week <b>engagement</b></li>
+            <li>Wordmark, marks, system</li>
+            <li>Custom display + body pairing</li>
+            <li>Motion package, 6 motifs</li>
+            <li>Brand book, riso-printed</li>
+          </ul>
+          <a class="btn btn-primary">START A PROJECT →</a>
+        </div>
+        <div class="price-card t-3">
+          <span class="marker">№ 03 · Annual</span>
+          <h3>THE LONG ONE<em>.</em></h3>
+          <div class="amt"><span class="cur">$</span>240K<span class="per">/ year</span></div>
+          <p class="amt-sub">Full studio retainer. Three milestones, two campaigns, one studio visit.</p>
+          <ul>
+            <li>Twelve months</li>
+            <li>Identity refresh + season</li>
+            <li>Two ad campaigns</li>
+            <li>Quarterly print drop</li>
+            <li>Custom type at cost</li>
+          </ul>
+          <a class="btn btn-ghost">INQUIRE →</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta">
+      <div class="cta-inner">
+        <div>
+          <span class="cta-tag">A NOTE BEFORE YOU WRITE</span>
+          <h2>WE READ EVERY EMAIL <em>by hand.</em></h2>
+          <div class="cta-actions">
+            <a class="btn btn-primary btn-lg"><span class="__cf_email__" data-cfemail="b7c4c3c2d3ded8f7c5ded8c399d4d8">[email&#160;protected]</span> <span class="arrow">→</span></a>
+            <a class="btn btn-ghost btn-lg">BOOK A CALL</a>
+          </div>
+        </div>
+        <div class="cta-aside">
+          <b>RIOT/CO STUDIO</b>
+          221 GRAND ST, BROOKLYN<br>
+          12-3 SHIBUYA-CHŌ, TOKYO<br><br>
+          OFFICE HOURS<br>
+          MON–FRI · 10–18<br>
+          REPLY WITHIN 48H
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="footer-bigword">RIOT<em>/co.</em></div>
+      <div class="footer-cols">
+        <div class="footer-col footer-news">
+          <h4>NEWSLETTER</h4>
+          <p>Once a month. New work, links we sent each other, a recipe that has nothing to do with design.</p>
+          <div class="news">
+            <input type="email" placeholder="email@studio.com" />
+            <button>JOIN →</button>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>STUDIO</h4>
+          <ul><li>About</li><li>Team</li><li>Press</li><li>Hire us</li></ul>
+        </div>
+        <div class="footer-col">
+          <h4>WORK</h4>
+          <ul><li>Identity</li><li>Motion</li><li>Print</li><li>Type</li></ul>
+        </div>
+        <div class="footer-col">
+          <h4>FOLLOW</h4>
+          <ul><li>Instagram</li><li>Are.na</li><li>Vimeo</li><li>RSS</li></ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© RIOT/CO MMXVII–MMXXVI</span>
+        <span><em>Set in</em> BRICOLAGE × INSTRUMENT</span>
+        <span>↑ TO TOP</span>
+      </div>
+    </footer>
+  </div>
+</div>
+
+<!-- ============================================================
+     TOKENS
+     ============================================================ -->
+<section class="tokens">
+  <h2>TOKENS, <em>copy &amp; paste.</em></h2>
+  <p>The full token surface for the renderer. The user-configurable axes are <span class="mono">--a1 + --a2</span> (palette, 9 dual-accent options) and <span class="mono">[data-variant]</span> (Brutalist · Maximal · Riso). Every component reads from both accents — never one in isolation.</p>
+
+  <h3>:root tokens</h3>
+  <pre><span class="c">/* Dual accent — both required, never use one alone */</span>
+<span class="k">--a1</span>:        <span class="v">oklch(0.85 0.21 130)</span>;   <span class="c">/* primary — usually lighter */</span>
+<span class="k">--a1-deep</span>:   <span class="v">oklch(0.62 0.21 130)</span>;
+<span class="k">--a1-ink</span>:    <span class="v">oklch(0.10 0.02 130)</span>;
+<span class="k">--a2</span>:        <span class="v">oklch(0.62 0.27 0)</span>;     <span class="c">/* secondary — usually saturated */</span>
+<span class="k">--a2-deep</span>:   <span class="v">oklch(0.46 0.27 0)</span>;
+<span class="k">--a2-ink</span>:    <span class="v">oklch(0.99 0.01 0)</span>;
+
+<span class="c">/* Surface */</span>
+<span class="k">--bg</span>:        <span class="v">oklch(0.99 0.005 90)</span>;
+<span class="k">--bg-deep</span>:   <span class="v">oklch(0.10 0.015 240)</span>;
+<span class="k">--ink</span>:       <span class="v">oklch(0.12 0.015 240)</span>;
+
+<span class="c">/* Lines + shadow — full strength always */</span>
+<span class="k">--line</span>:           <span class="v">var(--ink)</span>;
+<span class="k">--line-w</span>:         <span class="v">2px</span>;
+<span class="k">--line-thick</span>:     <span class="v">4px</span>;
+<span class="k">--shadow-stamp</span>:    <span class="v">8px 8px 0 var(--ink)</span>;
+
+<span class="c">/* Type */</span>
+<span class="k">--font-display</span>: <span class="v">"Bricolage Grotesque", "Space Grotesk", sans-serif</span>;
+<span class="k">--font-sans</span>:    <span class="v">"Space Grotesk", system-ui, sans-serif</span>;
+<span class="k">--font-serif</span>:   <span class="v">"Instrument Serif", serif</span>;       <span class="c">/* italic accents only */</span>
+<span class="k">--font-mono</span>:    <span class="v">"JetBrains Mono", monospace</span>;
+
+<span class="c">/* Radius — Riot is square */</span>
+<span class="k">--r-sm</span>: <span class="v">0</span>; <span class="k">--r-md</span>: <span class="v">0</span>; <span class="k">--r-lg</span>: <span class="v">0</span>; <span class="k">--r-xl</span>: <span class="v">0</span>;
+<span class="k">--r-pill</span>: <span class="v">999px</span>;   <span class="c">/* only for round stickers */</span>
+
+<span class="c">/* Section rhythm */</span>
+<span class="k">--sec-pad-y</span>:  <span class="v">120px</span>;
+<span class="k">--sec-pad-x</span>:  <span class="v">clamp(20px, 4vw, 64px)</span>;</pre>
+
+  <h3>palette overrides ([data-palette])</h3>
+  <pre><span class="k">html[data-palette="acid"]</span>        { <span class="k">--a1</span>: <span class="v">oklch(0.85 0.21 130)</span>; <span class="k">--a2</span>: <span class="v">oklch(0.62 0.27 0)</span>; }   <span class="c">/* lime + magenta (default) */</span>
+<span class="k">html[data-palette="punch"]</span>       { <span class="k">--a1</span>: <span class="v">oklch(0.92 0.20 100)</span>; <span class="k">--a2</span>: <span class="v">oklch(0.58 0.24 25)</span>; }  <span class="c">/* sun + cherry */</span>
+<span class="k">html[data-palette="volt"]</span>        { <span class="k">--a1</span>: <span class="v">oklch(0.74 0.18 230)</span>; <span class="k">--a2</span>: <span class="v">oklch(0.72 0.20 50)</span>; }  <span class="c">/* electric + tangerine */</span>
+<span class="k">html[data-palette="toxic"]</span>       { <span class="k">--a1</span>: <span class="v">oklch(0.88 0.22 125)</span>; <span class="k">--a2</span>: <span class="v">oklch(0.50 0.22 290)</span>; } <span class="c">/* lime + violet */</span>
+<span class="k">html[data-palette="ember"]</span>       { <span class="k">--a1</span>: <span class="v">oklch(0.74 0.20 60)</span>;  <span class="k">--a2</span>: <span class="v">oklch(0.42 0.22 260)</span>; } <span class="c">/* orange + cobalt */</span>
+<span class="k">html[data-palette="bubblegum"]</span>   { <span class="k">--a1</span>: <span class="v">oklch(0.74 0.20 350)</span>; <span class="k">--a2</span>: <span class="v">oklch(0.62 0.14 195)</span>; } <span class="c">/* pink + teal */</span>
+<span class="k">html[data-palette="mono"]</span>        { <span class="k">--a1</span>: <span class="v">oklch(0.92 0.20 100)</span>; <span class="k">--a2</span>: <span class="v">oklch(0.12 0.015 240)</span>; } <span class="c">/* sun + black */</span>
+<span class="k">html[data-palette="highlighter"]</span> { <span class="k">--a1</span>: <span class="v">oklch(0.96 0.22 110)</span>; <span class="k">--a2</span>: <span class="v">oklch(0.62 0.27 0)</span>; }   <span class="c">/* neon yellow + magenta */</span>
+<span class="k">html[data-palette="risograph"]</span>   { <span class="k">--a1</span>: <span class="v">oklch(0.62 0.16 250)</span>; <span class="k">--a2</span>: <span class="v">oklch(0.70 0.22 350)</span>; } <span class="c">/* cornflower + fluo pink */</span></pre>
+
+  <h3>variant overrides ([data-variant])</h3>
+  <pre><span class="c">/* Brutalist (default) — black + accents, geometric, hard. */</span>
+
+<span class="c">/* Maximal — full color tiles + radial body wash */</span>
+<span class="k">html[data-variant="maximalist"] body</span> {
+  background: <span class="v">radial-gradient(circle at 95% 8%, var(--a1) 0, transparent 14%),
+              radial-gradient(circle at 4% 50%, var(--a2) 0, transparent 12%),
+              var(--bg)</span>;
+}
+
+<span class="c">/* Riso — halftone fills + serif italic display */</span>
+<span class="k">html[data-variant="riso"] body</span> {
+  background-image: <span class="v">radial-gradient(circle at 1px 1px,
+    oklch(0.20 0.02 240 / 0.15) 1px, transparent 1.4px)</span>;
+  background-size: <span class="v">4px 4px</span>;
+}
+<span class="k">html[data-variant="riso"] .section-title,
+html[data-variant="riso"] .doc-title,
+html[data-variant="riso"] .footer-bigword</span> {
+  font-family: <span class="v">var(--font-serif)</span>;
+  font-style: <span class="v">italic</span>;
+  text-transform: <span class="v">none</span>;
+}</pre>
+</section>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script></body>
+</html>

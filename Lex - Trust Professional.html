@@ -1,0 +1,2058 @@
+<!doctype html>
+<html lang="en" data-palette="counsel" data-variant="statesman">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lex — Trust Professional · Lessgo design system</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   LEX — Trust Professional
+   Stillness, not silence. Annual-report typography.
+   One trust hue at 8–12%; one accent at <2%.
+   ============================================================ */
+
+:root {
+  /* ————— Trust hue + accent ————— */
+  --trust:        oklch(0.27 0.06 250);          /* deep counsel navy */
+  --trust-deep:   oklch(0.18 0.06 250);
+  --trust-soft:   oklch(0.92 0.025 250);
+  --trust-ink:    oklch(0.98 0.005 250);
+
+  --accent:       oklch(0.74 0.10 80);           /* old gold */
+  --accent-deep:  oklch(0.58 0.11 80);
+  --accent-ink:   oklch(0.18 0.04 80);
+
+  /* ————— Surface — never pure white ————— */
+  --paper:        oklch(0.985 0.006 80);         /* warm paper */
+  --paper-1:      oklch(0.965 0.008 80);
+  --paper-2:      oklch(0.94 0.010 80);
+
+  --ink:          oklch(0.18 0.015 250);         /* document ink */
+  --ink-2:        oklch(0.36 0.012 250);
+  --ink-3:        oklch(0.55 0.010 250);
+  --ink-4:        oklch(0.72 0.008 250);
+
+  /* ————— Hairlines — financial document weight ————— */
+  --rule:         oklch(0.78 0.010 250);         /* hairline */
+  --rule-strong:  oklch(0.45 0.014 250);
+  --rule-w:       1px;
+
+  /* ————— Type ————— */
+  --font-display: "Source Serif 4", "Lora", "Times New Roman", serif;
+  --font-body:    "Inter Tight", -apple-system, system-ui, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, monospace;
+  --font-figure:  "Source Serif 4", "Lora", serif;
+
+  /* ————— Space ————— */
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px;
+  --s-5: 24px; --s-6: 32px; --s-7: 48px; --s-8: 64px;
+  --s-9: 96px; --s-10: 128px;
+
+  /* ————— Radius — almost none. Lex is square. ————— */
+  --r-sm: 0;
+  --r-md: 2px;
+  --r-lg: 2px;
+  --r-xl: 2px;
+  --r-pill: 999px;
+
+  /* ————— Elevation — almost none. ————— */
+  --shadow-1: 0 1px 0 oklch(0.18 0.015 250 / 0.06);
+  --shadow-2: 0 1px 2px oklch(0.18 0.015 250 / 0.06), 0 1px 0 oklch(0.18 0.015 250 / 0.04);
+
+  /* ————— Section rhythm ————— */
+  --sec-pad-y: 128px;
+  --sec-pad-x: clamp(24px, 5vw, 64px);
+  --max-w: 1320px;
+  --col-gap: 32px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.55;
+  font-feature-settings: "ss01", "cv11", "lnum";
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+/* small-caps utility */
+.sc {
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.08em;
+  font-weight: 500;
+}
+.osf { font-feature-settings: "onum"; }
+.lnum { font-feature-settings: "lnum"; }
+
+/* ============================================================
+   SPEC DOC
+   ============================================================ */
+.doc {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 96px 32px 64px;
+}
+.doc-header {
+  display: grid;
+  grid-template-columns: 1fr 220px;
+  align-items: end;
+  gap: 64px;
+  border-bottom: 2px solid var(--ink);
+  padding-bottom: 48px;
+  margin-bottom: 56px;
+  position: relative;
+}
+.doc-header::after {
+  content: "";
+  position: absolute;
+  bottom: -7px; left: 0; right: 0;
+  height: 1px; background: var(--ink);
+}
+.doc-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--ink-2);
+  margin-bottom: 28px;
+  display: flex; align-items: center; gap: 14px;
+}
+.doc-eyebrow .seal {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px;
+  border: 1px solid currentColor; border-radius: 50%;
+  font-family: var(--font-display);
+  font-size: 12px; font-weight: 600;
+  letter-spacing: 0;
+  color: var(--trust);
+}
+.doc-title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(72px, 11vw, 168px);
+  line-height: 0.95;
+  letter-spacing: -0.025em;
+  margin: 0;
+  color: var(--ink);
+}
+.doc-title em {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--trust);
+}
+.doc-sub {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 1.45;
+  color: var(--ink-2);
+  max-width: 56ch;
+  margin: 24px 0 0;
+  font-style: italic;
+}
+.doc-stamp {
+  font-family: var(--font-mono);
+  font-size: 10.5px; letter-spacing: 0.14em;
+  color: var(--ink-2);
+  align-self: end;
+  text-align: right;
+  border-left: 1px solid var(--rule);
+  padding-left: 24px;
+  line-height: 1.7;
+  text-transform: uppercase;
+}
+.doc-stamp b { font-family: var(--font-display); color: var(--ink); font-weight: 500; font-size: 14px; letter-spacing: 0; text-transform: none; display: block; margin-bottom: 6px; }
+.doc-stamp .seal-big {
+  width: 56px; height: 56px;
+  border: 1.5px solid var(--trust);
+  border-radius: 50%;
+  margin: 12px 0 12px auto;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-style: italic; font-size: 24px;
+  font-weight: 500; color: var(--trust);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* meta strip */
+.doc-meta {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 28px;
+  margin-bottom: 56px;
+}
+.doc-meta dt {
+  font-family: var(--font-mono);
+  font-size: 10px; letter-spacing: 0.18em; font-weight: 500;
+  text-transform: uppercase; color: var(--ink-3);
+  margin-bottom: 6px;
+}
+.doc-meta dd {
+  margin: 0;
+  font-family: var(--font-display); font-weight: 500; font-size: 17px;
+  color: var(--ink);
+  line-height: 1.35;
+}
+.doc-meta dd em { font-style: italic; font-weight: 400; color: var(--ink-2); }
+
+.doc h2 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 44px;
+  line-height: 1.05;
+  letter-spacing: -0.018em;
+  margin: 96px 0 6px;
+  color: var(--ink);
+  display: flex; align-items: baseline; gap: 18px;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 14px;
+}
+.doc h2 .n {
+  font-family: var(--font-mono);
+  font-size: 12px; font-weight: 500;
+  letter-spacing: 0.16em; color: var(--ink-3);
+  text-transform: uppercase;
+  margin-right: 6px;
+  align-self: center;
+}
+.doc h2 + .dek {
+  font-family: var(--font-display);
+  font-style: italic; font-weight: 400;
+  font-size: 21px; line-height: 1.45;
+  color: var(--ink-2);
+  margin: 18px 0 24px;
+  max-width: 60ch;
+}
+.doc h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 19px; letter-spacing: -0.005em;
+  margin: 36px 0 10px;
+  color: var(--ink);
+}
+.doc p { color: var(--ink-2); max-width: 66ch; margin: 0 0 16px; line-height: 1.65; }
+.doc p strong { color: var(--ink); font-weight: 600; }
+.doc ul { color: var(--ink-2); padding-left: 24px; margin: 0 0 16px; line-height: 1.65; }
+.doc ul li { margin-bottom: 10px; }
+.doc ul li::marker { color: var(--trust); content: "§ "; font-family: var(--font-display); }
+.doc code, .doc .mono {
+  font-family: var(--font-mono);
+  font-size: 12.5px; background: var(--paper-2);
+  padding: 1px 6px; border-radius: 2px;
+  color: var(--ink);
+  border: 1px solid var(--rule);
+}
+
+.doc .pull {
+  border-left: 2px solid var(--trust);
+  padding: 4px 0 4px 28px;
+  margin: 28px 0;
+  font-family: var(--font-display);
+  font-style: italic; font-weight: 400;
+  font-size: 22px; line-height: 1.45;
+  color: var(--ink);
+  max-width: 56ch;
+}
+
+/* spec table — TOC-style with dotted leaders */
+.spec {
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+  margin: 24px 0 8px;
+}
+.spec .row {
+  display: grid;
+  grid-template-columns: 50px 1fr auto auto auto;
+  gap: 32px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--rule);
+  align-items: baseline;
+  font-size: 13px;
+  font-family: var(--font-mono);
+  color: var(--ink-2);
+}
+.spec .row:last-child { border-bottom: 0; }
+.spec .row.head {
+  border-bottom: 1px solid var(--ink);
+  font-size: 10px; letter-spacing: 0.2em;
+  text-transform: uppercase; font-weight: 500;
+  color: var(--ink); padding: 8px 0;
+}
+.spec .sample {
+  font-family: var(--font-display);
+  color: var(--ink); font-size: 18px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+}
+.spec .leader {
+  position: relative;
+  overflow: hidden;
+  height: 1em;
+  flex: 1;
+}
+.spec .leader::before {
+  content: "...........................................................................................................................";
+  color: var(--ink-4);
+  letter-spacing: 4px;
+}
+
+/* swatches — annual-report style */
+.swatch-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0;
+  margin: 18px 0 8px;
+  border: 1px solid var(--rule);
+}
+.swatch {
+  border-right: 1px solid var(--rule);
+  padding: 0;
+}
+.swatch:last-child { border-right: 0; }
+.swatch .chip { height: 132px; }
+.swatch .lbl {
+  padding: 12px 14px;
+  display: flex; flex-direction: column; gap: 4px;
+  background: var(--paper);
+  border-top: 1px solid var(--rule);
+}
+.swatch .lbl b { font-family: var(--font-display); font-weight: 500; font-size: 14px; color: var(--ink); }
+.swatch .lbl span { font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-3); letter-spacing: 0.04em; }
+
+/* type specimen plates */
+.plate {
+  border: 1px solid var(--rule);
+  padding: 56px 48px;
+  margin: 18px 0 0;
+  background: var(--paper-1);
+  position: relative;
+}
+.plate-label {
+  position: absolute; top: 14px; left: 16px;
+  font-family: var(--font-mono);
+  font-size: 10px; letter-spacing: 0.18em;
+  color: var(--ink-3); text-transform: uppercase;
+  font-weight: 500;
+}
+.plate-num {
+  position: absolute; top: 14px; right: 16px;
+  font-family: var(--font-mono);
+  font-size: 10px; letter-spacing: 0.18em;
+  color: var(--ink-3); text-transform: uppercase;
+  font-weight: 500;
+}
+.s-d1 { font-family: var(--font-display); font-weight: 500; font-size: 112px; line-height: 0.95; letter-spacing: -0.025em; color: var(--ink); }
+.s-d1 em { font-style: italic; font-weight: 400; color: var(--trust); }
+.s-d2 { font-family: var(--font-display); font-weight: 500; font-size: 56px; line-height: 1.05; letter-spacing: -0.018em; color: var(--ink); }
+.s-d2 em { font-style: italic; font-weight: 400; color: var(--trust); }
+.s-d3 { font-family: var(--font-display); font-weight: 500; font-size: 28px; line-height: 1.25; letter-spacing: -0.005em; color: var(--ink); }
+.s-d4 { font-family: var(--font-display); font-style: italic; font-weight: 400; font-size: 21px; line-height: 1.45; color: var(--ink-2); }
+
+/* ============================================================
+   STAGE
+   ============================================================ */
+.stage {
+  max-width: 1320px; margin: 64px auto 0;
+  padding: 56px 24px 0;
+  border-top: 2px solid var(--ink);
+  position: relative;
+}
+.stage::before {
+  content: ""; position: absolute; top: -7px; left: 24px; right: 24px;
+  height: 1px; background: var(--ink);
+}
+.stage-header {
+  display: flex; align-items: baseline; gap: 16px;
+  margin-bottom: 28px; padding: 0 4px;
+  font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-2);
+}
+.stage-n {
+  font-family: var(--font-display); font-style: italic; font-weight: 400;
+  font-size: 18px; color: var(--trust);
+  letter-spacing: 0; text-transform: none;
+}
+.stage-title { color: var(--ink); letter-spacing: 0.18em; }
+.stage-note { margin-left: auto; color: var(--ink-3); font-style: italic; text-transform: none; letter-spacing: 0; font-family: var(--font-display); font-size: 14px; }
+
+.frame {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-2);
+}
+
+/* ============================================================
+   NAV — letterhead-style
+   ============================================================ */
+.nav {
+  display: grid;
+  grid-template-columns: 220px 1fr auto;
+  align-items: stretch;
+  border-bottom: 1px solid var(--rule);
+  background: var(--paper);
+}
+.nav-brand {
+  display: flex; align-items: center; gap: 12px;
+  padding: 24px 32px;
+  border-right: 1px solid var(--rule);
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 24px;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+}
+.nav-brand .mark {
+  width: 32px; height: 32px;
+  border: 1.5px solid var(--trust); border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-style: italic; font-weight: 500;
+  font-size: 18px; color: var(--trust);
+  flex-shrink: 0;
+}
+.nav-brand em { font-style: italic; font-weight: 400; color: var(--trust); }
+.nav-mid {
+  display: flex; align-items: center; gap: 0;
+  padding: 0;
+}
+.nav-mid a {
+  font-family: var(--font-body);
+  font-size: 13px; font-weight: 500;
+  padding: 0 22px;
+  height: 100%;
+  display: inline-flex; align-items: center;
+  color: var(--ink-2);
+  letter-spacing: 0.04em;
+  position: relative;
+}
+.nav-mid a:hover { color: var(--ink); }
+.nav-mid a.active { color: var(--ink); }
+.nav-mid a.active::after {
+  content: "";
+  position: absolute; bottom: 0; left: 22px; right: 22px;
+  height: 2px; background: var(--trust);
+}
+.nav-right {
+  display: flex; align-items: center; gap: 16px;
+  padding: 0 24px;
+  border-left: 1px solid var(--rule);
+}
+.nav-right .meta {
+  font-family: var(--font-mono);
+  font-size: 10px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--ink-3);
+}
+.nav-right .quiet { font-family: var(--font-body); font-size: 13px; font-weight: 500; color: var(--ink-2); padding: 8px 0; }
+.nav-right .quiet:hover { color: var(--ink); }
+.nav-right .cta {
+  background: var(--trust); color: var(--trust-ink);
+  font-family: var(--font-body); font-weight: 500;
+  font-size: 13px;
+  padding: 12px 22px;
+  border-radius: 2px;
+  letter-spacing: 0.02em;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.nav-right .cta:hover { background: var(--trust-deep); }
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  border-radius: 2px;
+  padding: 14px 22px;
+  transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+  border: 1px solid transparent;
+}
+.btn-sm { padding: 9px 14px; font-size: 12.5px; }
+.btn-lg { padding: 17px 28px; font-size: 15px; }
+.btn-primary {
+  background: var(--trust); color: var(--trust-ink);
+  border-color: var(--trust);
+}
+.btn-primary:hover { background: var(--trust-deep); border-color: var(--trust-deep); }
+.btn-ghost {
+  background: transparent; color: var(--ink);
+  border-color: var(--rule-strong);
+}
+.btn-ghost:hover { background: var(--paper-1); border-color: var(--ink); }
+.btn-quiet {
+  border: 0; padding: 14px 0;
+  color: var(--trust);
+  border-bottom: 1px solid var(--trust);
+  border-radius: 0;
+  padding-bottom: 4px;
+  font-style: italic;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 16px;
+}
+.btn-quiet:hover { color: var(--trust-deep); }
+.btn .arrow { font-family: var(--font-display); font-style: italic; font-weight: 400; font-size: 1.05em; line-height: 1; }
+
+/* ============================================================
+   HERO — annual-report cover
+   ============================================================ */
+.hero {
+  padding: 88px var(--sec-pad-x) 96px;
+  position: relative;
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
+}
+.hero-eyebrow {
+  display: flex; align-items: center; gap: 18px;
+  margin-bottom: 56px;
+  font-family: var(--font-mono);
+  font-size: 11px; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--ink-2);
+}
+.hero-eyebrow .num {
+  font-family: var(--font-display); font-weight: 500;
+  font-size: 16px; letter-spacing: 0; text-transform: none;
+  color: var(--trust);
+  border-right: 1px solid var(--rule); padding-right: 18px;
+}
+.hero-eyebrow .since { margin-left: auto; color: var(--ink-3); }
+.hero-eyebrow .since em { color: var(--ink); font-family: var(--font-display); font-style: italic; font-weight: 400; font-size: 14px; letter-spacing: 0; text-transform: none; }
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: 7fr 5fr;
+  gap: 80px;
+  align-items: end;
+}
+.hero-display {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(56px, 8.5vw, 128px);
+  line-height: 0.96;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+  margin: 0;
+  text-wrap: balance;
+}
+.hero-display em {
+  font-family: var(--font-display);
+  font-style: italic; font-weight: 400;
+  color: var(--trust);
+}
+.hero-aside {
+  border-left: 1px solid var(--rule);
+  padding-left: 32px;
+  display: flex; flex-direction: column; gap: 24px;
+  padding-bottom: 8px;
+}
+.hero-lede {
+  font-family: var(--font-display);
+  font-style: italic; font-weight: 400;
+  font-size: 21px; line-height: 1.5;
+  color: var(--ink);
+  max-width: 38ch;
+  margin: 0;
+}
+.hero-actions { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-top: 4px; }
+
+/* ledger row */
+.hero-ledger {
+  margin-top: 96px;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--rule);
+  padding: 28px 0 24px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px;
+}
+.hero-ledger .item {
+  display: flex; flex-direction: column; gap: 6px;
+  padding-right: 32px;
+  border-right: 1px solid var(--rule);
+}
+.hero-ledger .item:last-child { border-right: 0; }
+.hero-ledger .lbl {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--ink-3); font-weight: 500;
+}
+.hero-ledger .val {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 44px; line-height: 1;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+  font-feature-settings: "lnum";
+}
+.hero-ledger .val em {
+  font-style: italic; font-weight: 400;
+  color: var(--trust); font-size: 0.7em;
+  margin-left: 6px;
+}
+.hero-ledger .note {
+  font-family: var(--font-display);
+  font-style: italic; font-weight: 400;
+  font-size: 13px; color: var(--ink-2);
+  margin-top: 4px;
+}
+
+/* logo strip — partner / accreditation */
+.accreditation {
+  background: var(--paper-1);
+  border-bottom: 1px solid var(--rule);
+  padding: 32px var(--sec-pad-x);
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 48px;
+  align-items: center;
+}
+.accreditation .lbl {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--ink-3); font-weight: 500;
+  border-right: 1px solid var(--rule);
+  padding-right: 24px;
+  line-height: 1.7;
+}
+.accreditation .lbl em { font-family: var(--font-display); font-style: italic; font-weight: 400; font-size: 14px; color: var(--ink); letter-spacing: 0; text-transform: none; display: block; margin-top: 4px; }
+.accreditation .seals {
+  display: flex; gap: 56px; align-items: center;
+  font-family: var(--font-display); font-weight: 500;
+  font-size: 18px; letter-spacing: -0.005em;
+  color: var(--ink-2);
+  flex-wrap: wrap;
+}
+.accreditation .seals em { font-style: italic; font-weight: 400; color: var(--trust); margin: 0 6px; }
+.accreditation .seals .seal-emb {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 8px 14px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+.accreditation .seals .seal-emb .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-deep); }
+
+/* ============================================================
+   FEATURES — practice areas grid
+   ============================================================ */
+.section {
+  padding: var(--sec-pad-y) var(--sec-pad-x);
+  max-width: var(--max-w);
+  margin: 0 auto;
+  position: relative;
+}
+.sec-head {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px; align-items: end;
+  margin-bottom: 64px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--ink);
+  position: relative;
+}
+.sec-head::after {
+  content: "";
+  position: absolute; bottom: -5px; left: 0; right: 0;
+  height: 1px; background: var(--ink);
+}
+.sec-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--ink-3);
+  font-weight: 500;
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 22px;
+}
+.sec-eyebrow .n {
+  font-family: var(--font-display); font-style: italic; font-weight: 400;
+  font-size: 18px; letter-spacing: 0; text-transform: none;
+  color: var(--trust);
+}
+.sec-title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(40px, 5.6vw, 72px);
+  line-height: 1.0;
+  letter-spacing: -0.022em;
+  color: var(--ink);
+  margin: 0;
+  max-width: 16ch;
+}
+.sec-title em {
+  font-family: var(--font-display);
+  font-style: italic; font-weight: 400;
+  color: var(--trust);
+}
+.sec-lede {
+  font-family: var(--font-display);
+  font-style: italic; font-weight: 400;
+  font-size: 19px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  max-width: 48ch;
+  margin: 0;
+}
+
+.practice {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid var(--rule);
+  border-left: 1px solid var(--rule);
+}
+.practice .item {
+  border-right: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  padding: 36px 32px 32px;
+  background: var(--paper);
+  position: relative;
+  display: flex; flex-direction: column;
+  min-height: 320px;
+}
+.practice .item .ix {
+  font-family: var(--font-mono);
+  font-size: 11px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--ink-3);
+  font-weight: 500;
+  margin-bottom: 28px;
+  display: flex; align-items: center; gap: 10px;
+}
+.practice .item .ix::before {
+  content: "";
+  width: 6px; height: 6px;
+  background: var(--trust);
+  border-radius: 50%;
+}
+.practice .item h3 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 28px;
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  margin: 0 0 14px;
+  color: var(--ink);
+}
+.practice .item h3 em {
+  font-style: italic; font-weight: 400; color: var(--trust);
+}
+.practice .item p {
+  font-family: var(--font-body);
+  font-size: 15px; line-height: 1.55;
+  color: var(--ink-2);
+  margin: 0 0 24px;
+  flex: 1;
+}
+.practice .item .more {
+  font-family: var(--font-display);
+  font-style: italic; font-weight: 400;
+  font-size: 15px;
+  color: var(--trust);
+  border-bottom: 1px solid var(--trust);
+  padding-bottom: 4px;
+  align-self: flex-start;
+  display: inline-flex; gap: 6px; align-items: center;
+}
+
+/* ============================================================
+   TESTIMONIALS — letters-of-reference
+   ============================================================ */
+.testi { padding: var(--sec-pad-y) var(--sec-pad-x); max-width: var(--max-w); margin: 0 auto; }
+.testi-grid {
+  display: grid;
+  grid-template-columns: 5fr 7fr;
+  gap: 64px;
+  align-items: start;
+}
+.testi-aside {
+  position: sticky; top: 32px;
+  border-top: 1px solid var(--ink);
+  padding-top: 32px;
+}
+.testi-aside .sec-eyebrow { margin-bottom: 16px; }
+.testi-aside .sec-title { font-size: 56px; max-width: 12ch; }
+.testi-aside .sec-lede { margin-top: 24px; }
+
+.letters { display: flex; flex-direction: column; }
+.letter {
+  border-top: 1px solid var(--rule);
+  padding: 36px 0 36px;
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 28px;
+}
+.letter:first-child { border-top: 1px solid var(--ink); }
+.letter:last-child { border-bottom: 1px solid var(--rule); }
+.letter .ix {
+  font-family: var(--font-display);
+  font-style: italic; font-weight: 400;
+  font-size: 24px; color: var(--trust);
+  line-height: 1;
+  padding-top: 4px;
+}
+.letter blockquote {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 1.4;
+  letter-spacing: -0.005em;
+  color: var(--ink);
+  text-wrap: pretty;
+}
+.letter blockquote em { font-style: italic; color: var(--trust); }
+.letter .signed {
+  margin-top: 22px;
+  display: grid; grid-template-columns: 1fr auto; gap: 24px;
+  align-items: end;
+  border-top: 1px solid var(--rule);
+  padding-top: 18px;
+}
+.letter .who {
+  display: flex; flex-direction: column; gap: 4px;
+}
+.letter .who b { font-family: var(--font-display); font-weight: 500; font-size: 16px; color: var(--ink); }
+.letter .who span { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-3); }
+.letter .auth {
+  font-family: var(--font-display);
+  font-style: italic; font-weight: 400;
+  font-size: 32px;
+  color: var(--ink-2);
+  line-height: 1;
+}
+
+/* ============================================================
+   PRICING — fee schedule
+   ============================================================ */
+.fees {
+  padding: var(--sec-pad-y) var(--sec-pad-x);
+  max-width: var(--max-w); margin: 0 auto;
+}
+.fees-table {
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+  background: var(--paper);
+}
+.fees-row {
+  display: grid;
+  grid-template-columns: 60px 1.6fr 2.2fr 1fr 130px;
+  gap: 32px;
+  padding: 28px 0;
+  border-bottom: 1px solid var(--rule);
+  align-items: center;
+}
+.fees-row:last-child { border-bottom: 0; }
+.fees-row.head {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--ink-3); font-weight: 500;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--ink);
+  align-items: baseline;
+}
+.fees-row.featured { background: var(--paper-1); }
+.fees-row.featured .price-amt { color: var(--trust); }
+.fees-row .ix {
+  font-family: var(--font-display); font-style: italic; font-weight: 400;
+  color: var(--trust);
+  font-size: 22px; line-height: 1;
+  padding-left: 12px;
+}
+.fees-row.head .ix { font-family: var(--font-mono); font-style: normal; color: var(--ink-3); font-size: 10px; }
+.fees-row .name {
+  font-family: var(--font-display); font-weight: 500;
+  font-size: 22px; letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.fees-row .name em { font-style: italic; font-weight: 400; color: var(--trust); }
+.fees-row .name span {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 11px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--ink-3);
+  margin-top: 6px;
+  font-weight: 500;
+}
+.fees-row .desc {
+  font-family: var(--font-body);
+  font-size: 14px; line-height: 1.55;
+  color: var(--ink-2);
+}
+.fees-row .desc b { color: var(--ink); font-weight: 500; }
+.fees-row .audience {
+  font-family: var(--font-display);
+  font-style: italic; font-weight: 400;
+  font-size: 14px; color: var(--ink-2);
+  line-height: 1.4;
+}
+.fees-row .price {
+  text-align: right;
+  display: flex; flex-direction: column; gap: 2px;
+  align-items: flex-end;
+  padding-right: 12px;
+}
+.price-amt {
+  font-family: var(--font-display); font-weight: 500;
+  font-size: 28px; line-height: 1;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  font-feature-settings: "lnum";
+}
+.price-per {
+  font-family: var(--font-mono); font-size: 10.5px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink-3); font-weight: 500;
+}
+.fees-foot {
+  margin-top: 24px;
+  display: grid; grid-template-columns: 1fr auto; gap: 24px;
+  align-items: end;
+  font-family: var(--font-display);
+  font-style: italic; font-weight: 400;
+  font-size: 14px; color: var(--ink-3);
+  line-height: 1.5;
+}
+.fees-foot sup { font-size: 0.85em; color: var(--trust); padding-right: 4px; }
+
+/* ============================================================
+   CTA — engraved invitation
+   ============================================================ */
+.cta {
+  padding: 144px var(--sec-pad-x);
+  background: var(--trust);
+  color: var(--trust-ink);
+  position: relative;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+}
+.cta-inner {
+  max-width: var(--max-w); margin: 0 auto;
+  display: grid; grid-template-columns: 7fr 5fr;
+  gap: 80px; align-items: end;
+}
+.cta-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px; letter-spacing: 0.24em;
+  text-transform: uppercase; color: var(--accent);
+  font-weight: 500;
+  display: inline-flex; align-items: center; gap: 14px;
+  margin-bottom: 32px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid oklch(1 0 0 / 0.18);
+}
+.cta-eyebrow::before { content: ""; width: 32px; height: 1px; background: var(--accent); }
+.cta h2 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(48px, 6.4vw, 96px);
+  line-height: 1.0;
+  letter-spacing: -0.022em;
+  margin: 0 0 36px;
+  color: var(--trust-ink);
+  text-wrap: balance;
+}
+.cta h2 em {
+  font-style: italic; font-weight: 400; color: var(--accent);
+}
+.cta-actions { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.cta-actions .btn-primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.cta-actions .btn-primary:hover { background: var(--accent-deep); border-color: var(--accent-deep); color: var(--trust-ink); }
+.cta-actions .btn-ghost {
+  background: transparent; color: var(--trust-ink);
+  border-color: oklch(1 0 0 / 0.32);
+}
+.cta-actions .btn-ghost:hover { background: oklch(1 0 0 / 0.08); border-color: var(--trust-ink); }
+
+.cta-aside {
+  border-left: 1px solid oklch(1 0 0 / 0.20);
+  padding-left: 32px;
+  display: flex; flex-direction: column; gap: 18px;
+  padding-bottom: 4px;
+}
+.cta-aside .row {
+  display: grid; grid-template-columns: 90px 1fr;
+  gap: 18px;
+  align-items: baseline;
+  font-size: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid oklch(1 0 0 / 0.12);
+}
+.cta-aside .row:last-child { border-bottom: 0; }
+.cta-aside .row dt {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--accent); font-weight: 500;
+  margin: 0;
+}
+.cta-aside .row dd {
+  font-family: var(--font-display); font-weight: 400; font-size: 16px;
+  color: var(--trust-ink);
+  margin: 0;
+  line-height: 1.4;
+}
+.cta-aside .row dd em { font-style: italic; color: var(--accent); }
+
+/* ============================================================
+   FOOTER — colophon / masthead
+   ============================================================ */
+.footer {
+  background: var(--paper);
+  border-top: 1px solid var(--ink);
+}
+.footer-top {
+  padding: 64px var(--sec-pad-x) 56px;
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr;
+  gap: 48px;
+  border-bottom: 1px solid var(--rule);
+}
+.footer-brand {
+  display: flex; flex-direction: column; gap: 16px;
+}
+.footer-brand .word {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 36px; line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.footer-brand .word em { font-style: italic; font-weight: 400; color: var(--trust); }
+.footer-brand p {
+  font-family: var(--font-display);
+  font-style: italic; font-weight: 400;
+  font-size: 16px; line-height: 1.5;
+  color: var(--ink-2);
+  max-width: 32ch;
+  margin: 0;
+}
+.footer-brand .addr {
+  font-family: var(--font-mono);
+  font-size: 11px; letter-spacing: 0.06em;
+  color: var(--ink-3);
+  line-height: 1.7;
+  margin-top: 16px;
+}
+.footer-col h4 {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--ink-3); font-weight: 500;
+  margin: 0 0 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--rule);
+}
+.footer-col ul { list-style: none; margin: 0; padding: 0; }
+.footer-col ul li {
+  font-family: var(--font-display); font-weight: 400;
+  font-size: 16px;
+  padding: 6px 0;
+  color: var(--ink-2);
+}
+.footer-col ul li:hover { color: var(--trust); }
+.footer-bottom {
+  padding: 24px var(--sec-pad-x);
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-family: var(--font-mono);
+  font-size: 10.5px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--ink-3);
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.footer-bottom em {
+  font-family: var(--font-display); font-style: italic; font-weight: 400;
+  font-size: 13px; letter-spacing: 0; text-transform: none;
+  color: var(--ink-2);
+}
+
+.footer-colophon {
+  border-top: 1px solid var(--ink);
+  padding: 56px var(--sec-pad-x) 80px;
+  text-align: center;
+  background: var(--paper-1);
+}
+.footer-colophon .word {
+  font-family: var(--font-display); font-weight: 500;
+  font-size: clamp(96px, 16vw, 240px);
+  line-height: 0.9; letter-spacing: -0.04em;
+  color: var(--ink);
+}
+.footer-colophon .word em { font-style: italic; font-weight: 400; color: var(--trust); }
+.footer-colophon .note {
+  font-family: var(--font-display); font-style: italic; font-weight: 400;
+  font-size: 16px; color: var(--ink-2);
+  margin-top: 16px;
+  letter-spacing: 0;
+}
+
+/* ============================================================
+   TOKENS
+   ============================================================ */
+.tokens { max-width: 1080px; margin: 96px auto 96px; padding: 0 32px; }
+.tokens h2 {
+  font-family: var(--font-display); font-weight: 500;
+  font-size: 44px; line-height: 1.05; letter-spacing: -0.018em;
+  margin: 0 0 12px;
+  border-bottom: 1px solid var(--rule); padding-bottom: 14px;
+}
+.tokens h2 em { font-style: italic; font-weight: 400; color: var(--trust); }
+.tokens p { color: var(--ink-2); max-width: 66ch; margin: 18px 0 24px; }
+.tokens h3 {
+  font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  margin: 40px 0 12px;
+  color: var(--ink-2);
+}
+.tokens pre {
+  background: var(--paper-1);
+  border: 1px solid var(--rule);
+  padding: 28px 32px;
+  font-family: var(--font-mono);
+  font-size: 12.5px; line-height: 1.8;
+  overflow-x: auto;
+  white-space: pre;
+  color: var(--ink);
+  border-radius: 2px;
+}
+.tokens .c { color: var(--ink-3); font-style: italic; }
+.tokens .k { color: var(--trust); }
+.tokens .v { color: var(--accent-deep); }
+
+/* ============================================================
+   PALETTES — one trust-hue + one restrained accent
+   ============================================================ */
+
+/* counsel — deep navy + old gold (default) */
+html[data-palette="counsel"] {
+  --trust: oklch(0.27 0.06 250); --trust-deep: oklch(0.18 0.06 250);
+  --trust-soft: oklch(0.92 0.025 250); --trust-ink: oklch(0.98 0.005 250);
+  --accent: oklch(0.74 0.10 80); --accent-deep: oklch(0.58 0.11 80);
+  --accent-ink: oklch(0.18 0.04 80);
+  --paper: oklch(0.985 0.006 80); --paper-1: oklch(0.965 0.008 80); --paper-2: oklch(0.94 0.010 80);
+}
+/* heritage — oxblood + cream */
+html[data-palette="heritage"] {
+  --trust: oklch(0.32 0.13 25); --trust-deep: oklch(0.22 0.13 25);
+  --trust-soft: oklch(0.93 0.03 25); --trust-ink: oklch(0.98 0.005 25);
+  --accent: oklch(0.82 0.07 80); --accent-deep: oklch(0.62 0.10 80);
+  --accent-ink: oklch(0.18 0.04 80);
+  --paper: oklch(0.98 0.012 80); --paper-1: oklch(0.96 0.015 80); --paper-2: oklch(0.93 0.018 80);
+}
+/* forest — deep green + bronze */
+html[data-palette="forest"] {
+  --trust: oklch(0.32 0.07 155); --trust-deep: oklch(0.22 0.07 155);
+  --trust-soft: oklch(0.92 0.025 155); --trust-ink: oklch(0.98 0.005 155);
+  --accent: oklch(0.66 0.10 60); --accent-deep: oklch(0.50 0.11 60);
+  --accent-ink: oklch(0.98 0.005 60);
+  --paper: oklch(0.98 0.008 100); --paper-1: oklch(0.96 0.010 100); --paper-2: oklch(0.93 0.012 100);
+}
+/* slate — charcoal + steel */
+html[data-palette="slate"] {
+  --trust: oklch(0.28 0.015 250); --trust-deep: oklch(0.18 0.015 250);
+  --trust-soft: oklch(0.92 0.008 250); --trust-ink: oklch(0.98 0.003 250);
+  --accent: oklch(0.62 0.07 230); --accent-deep: oklch(0.48 0.08 230);
+  --accent-ink: oklch(0.98 0.003 230);
+  --paper: oklch(0.98 0.003 250); --paper-1: oklch(0.96 0.004 250); --paper-2: oklch(0.93 0.005 250);
+}
+/* vellum — ink + sage on warm paper */
+html[data-palette="vellum"] {
+  --trust: oklch(0.22 0.02 200); --trust-deep: oklch(0.14 0.02 200);
+  --trust-soft: oklch(0.92 0.012 200); --trust-ink: oklch(0.98 0.005 200);
+  --accent: oklch(0.70 0.06 145); --accent-deep: oklch(0.54 0.07 145);
+  --accent-ink: oklch(0.16 0.03 145);
+  --paper: oklch(0.97 0.014 85); --paper-1: oklch(0.95 0.016 85); --paper-2: oklch(0.92 0.018 85);
+}
+/* burgundy — wine + gold */
+html[data-palette="burgundy"] {
+  --trust: oklch(0.28 0.10 15); --trust-deep: oklch(0.18 0.10 15);
+  --trust-soft: oklch(0.92 0.025 15); --trust-ink: oklch(0.98 0.005 15);
+  --accent: oklch(0.78 0.10 85); --accent-deep: oklch(0.58 0.11 85);
+  --accent-ink: oklch(0.18 0.04 85);
+  --paper: oklch(0.98 0.010 80); --paper-1: oklch(0.96 0.012 80); --paper-2: oklch(0.93 0.014 80);
+}
+/* pacific — deep teal + sand */
+html[data-palette="pacific"] {
+  --trust: oklch(0.30 0.07 215); --trust-deep: oklch(0.20 0.07 215);
+  --trust-soft: oklch(0.92 0.020 215); --trust-ink: oklch(0.98 0.005 215);
+  --accent: oklch(0.78 0.07 75); --accent-deep: oklch(0.60 0.09 75);
+  --accent-ink: oklch(0.18 0.04 75);
+  --paper: oklch(0.98 0.008 90); --paper-1: oklch(0.96 0.010 90); --paper-2: oklch(0.93 0.012 90);
+}
+/* court — black + brick */
+html[data-palette="court"] {
+  --trust: oklch(0.16 0.005 250); --trust-deep: oklch(0.08 0.005 250);
+  --trust-soft: oklch(0.92 0.006 250); --trust-ink: oklch(0.98 0.003 250);
+  --accent: oklch(0.55 0.13 32); --accent-deep: oklch(0.42 0.14 32);
+  --accent-ink: oklch(0.98 0.005 32);
+  --paper: oklch(0.97 0.005 80); --paper-1: oklch(0.95 0.007 80); --paper-2: oklch(0.92 0.008 80);
+}
+/* trust — midnight + champagne */
+html[data-palette="trust"] {
+  --trust: oklch(0.22 0.05 265); --trust-deep: oklch(0.12 0.05 265);
+  --trust-soft: oklch(0.92 0.020 265); --trust-ink: oklch(0.98 0.005 265);
+  --accent: oklch(0.84 0.07 90); --accent-deep: oklch(0.66 0.09 90);
+  --accent-ink: oklch(0.18 0.04 90);
+  --paper: oklch(0.985 0.006 90); --paper-1: oklch(0.965 0.008 90); --paper-2: oklch(0.94 0.010 90);
+}
+
+/* ============================================================
+   VARIANTS
+   ============================================================ */
+
+/* CLINICAL — healthcare. Cool fog paper, more whitespace, more rounding, Lora display. */
+html[data-variant="clinical"] {
+  --font-display: "Lora", "Source Serif 4", serif;
+  --paper: oklch(0.985 0.004 220);
+  --paper-1: oklch(0.965 0.005 220);
+  --paper-2: oklch(0.94 0.006 220);
+  --r-md: 4px; --r-lg: 6px; --r-xl: 8px;
+  --sec-pad-y: 144px;
+}
+html[data-variant="clinical"] .nav-right .cta { border-radius: 6px; }
+html[data-variant="clinical"] .btn { border-radius: 6px; }
+html[data-variant="clinical"] .btn-primary { border-radius: 6px; }
+html[data-variant="clinical"] .btn-quiet { border-radius: 0; }
+html[data-variant="clinical"] .practice .item { background: var(--paper); }
+html[data-variant="clinical"] .practice .item:hover { background: var(--paper-1); }
+html[data-variant="clinical"] .nav-brand .mark { border-radius: 50%; }
+html[data-variant="clinical"] .frame { border-radius: 6px; }
+html[data-variant="clinical"] .accreditation .seals .seal-emb { border-radius: 6px; }
+html[data-variant="clinical"] .doc-title em { color: var(--accent-deep); }
+html[data-variant="clinical"] .hero-display em { color: var(--accent-deep); }
+html[data-variant="clinical"] .sec-title em { color: var(--accent-deep); }
+
+/* CIVIC — government / fiduciary / academic. Slab-serif heads, more rule-density, EB Garamond display. */
+html[data-variant="civic"] {
+  --font-display: "EB Garamond", "Source Serif 4", serif;
+  --paper: oklch(0.97 0.008 85);
+  --paper-1: oklch(0.95 0.010 85);
+  --paper-2: oklch(0.92 0.012 85);
+  --rule: oklch(0.65 0.012 250);
+  --rule-w: 1px;
+}
+html[data-variant="civic"] body { background-image: linear-gradient(var(--paper), var(--paper)); }
+html[data-variant="civic"] .doc-title { font-weight: 500; letter-spacing: -0.015em; }
+html[data-variant="civic"] .hero-display { font-weight: 500; letter-spacing: -0.015em; }
+html[data-variant="civic"] .sec-title { font-weight: 500; letter-spacing: -0.015em; }
+html[data-variant="civic"] .practice {
+  border-top: 2px solid var(--ink);
+  border-left: 2px solid var(--ink);
+}
+html[data-variant="civic"] .practice .item {
+  border-right: 2px solid var(--ink);
+  border-bottom: 2px solid var(--ink);
+}
+html[data-variant="civic"] .doc h2,
+html[data-variant="civic"] .sec-head { border-bottom-width: 2px; }
+html[data-variant="civic"] .doc-header { border-bottom-width: 3px; }
+html[data-variant="civic"] .doc-header::after { background: transparent; }
+html[data-variant="civic"] .nav { border-bottom-width: 2px; }
+html[data-variant="civic"] .frame { border: 2px solid var(--ink); }
+/* watermark */
+html[data-variant="civic"] .frame::before {
+  content: "";
+  position: absolute; inset: 0;
+  background-image: repeating-linear-gradient(45deg,
+    transparent 0, transparent 28px,
+    oklch(0.18 0.015 250 / 0.025) 28px, oklch(0.18 0.015 250 / 0.025) 29px);
+  pointer-events: none; z-index: 0;
+}
+html[data-variant="civic"] .frame > * { position: relative; z-index: 1; }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 1100px) {
+  .nav { grid-template-columns: auto 1fr auto; }
+  .nav-mid { display: none; }
+  .hero-grid { grid-template-columns: 1fr; gap: 40px; }
+  .hero-aside { border-left: 0; padding-left: 0; border-top: 1px solid var(--rule); padding-top: 32px; }
+  .hero-ledger { grid-template-columns: 1fr 1fr; }
+  .hero-ledger .item { border-right: 0; border-bottom: 1px solid var(--rule); padding-bottom: 16px; padding-right: 0; }
+  .practice { grid-template-columns: 1fr 1fr; }
+  .testi-grid { grid-template-columns: 1fr; }
+  .testi-aside { position: static; }
+  .footer-top { grid-template-columns: 1fr 1fr; }
+  .sec-head, .cta-inner { grid-template-columns: 1fr; gap: 32px; }
+  .accreditation { grid-template-columns: 1fr; gap: 24px; }
+  .accreditation .lbl { border-right: 0; padding-right: 0; padding-bottom: 16px; border-bottom: 1px solid var(--rule); }
+  .fees-row { grid-template-columns: 40px 1fr 100px; gap: 16px; }
+  .fees-row .desc, .fees-row .audience { grid-column: 2 / 4; }
+  .fees-row.head .desc, .fees-row.head .audience { display: none; }
+}
+@media (max-width: 720px) {
+  :root { --sec-pad-y: 88px; }
+  .doc { padding: 64px 24px 56px; }
+  .doc-header { grid-template-columns: 1fr; gap: 32px; }
+  .doc-stamp { border-left: 0; border-top: 1px solid var(--rule); padding-left: 0; padding-top: 24px; text-align: left; }
+  .doc-meta { grid-template-columns: 1fr 1fr; gap: 24px; }
+  .nav { grid-template-columns: 1fr; }
+  .nav-brand { border-right: 0; border-bottom: 1px solid var(--rule); }
+  .nav-mid { display: none; }
+  .nav-right { padding: 12px 24px; justify-content: space-between; }
+  .practice { grid-template-columns: 1fr; }
+  .footer-top { grid-template-columns: 1fr; gap: 32px; }
+  .swatch-grid { grid-template-columns: 1fr 1fr; }
+  .spec .row { grid-template-columns: 40px 1fr; gap: 16px; }
+  .spec .row > *:nth-child(3),
+  .spec .row > *:nth-child(4),
+  .spec .row > *:nth-child(5) { display: none; }
+}
+
+/* ============================================================
+   SWITCHER
+   ============================================================ */
+.switcher {
+  position: fixed; top: 20px; right: 20px; z-index: 100;
+  background: var(--paper);
+  border: 1px solid var(--rule-strong);
+  box-shadow: 0 8px 28px oklch(0.18 0.015 250 / 0.10);
+  padding: 16px 18px 18px;
+  width: 280px;
+  font-family: var(--font-body);
+  border-radius: 2px;
+}
+.switcher-title {
+  font-family: var(--font-mono);
+  font-size: 10px; font-weight: 500;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--ink-2);
+  display: flex; align-items: center; gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--rule);
+}
+.switcher-title em {
+  font-family: var(--font-display); font-weight: 500;
+  font-style: italic;
+  font-size: 18px; letter-spacing: -0.005em; color: var(--trust);
+  text-transform: none;
+  letter-spacing: 0;
+}
+.switcher-label {
+  font-family: var(--font-mono);
+  font-size: 9.5px; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--ink-3); font-weight: 500;
+  margin: 16px 0 10px;
+}
+.switcher-palettes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.switcher-palettes button {
+  height: 36px;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  padding: 0; cursor: pointer;
+  display: flex; overflow: hidden;
+  position: relative;
+  outline: 2px solid transparent;
+  outline-offset: 1px;
+  transition: outline-color 140ms ease, transform 140ms ease;
+}
+.switcher-palettes button:hover { transform: translateY(-1px); }
+.switcher .switcher-palettes button[aria-pressed="true"] {
+  outline-color: var(--ink) !important;
+}
+.switcher-palettes button .trust,
+.switcher-palettes button .accent { flex: 1; height: 100%; }
+.switcher-palettes button .trust { flex: 3; }
+.switcher-palettes button .accent { flex: 1; }
+.switcher-palettes button .name {
+  position: absolute;
+  bottom: 2px; left: 4px;
+  font-family: var(--font-display); font-style: italic; font-weight: 400;
+  font-size: 10.5px; letter-spacing: 0;
+  color: var(--paper); text-transform: none;
+  pointer-events: none;
+  text-shadow: 0 0 4px oklch(0.18 0.015 250 / 0.4);
+}
+.switcher-variants { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: 1px solid var(--rule); border-radius: 2px; overflow: hidden; }
+.switcher-variants button {
+  font-family: var(--font-display); font-weight: 500; font-size: 13px;
+  letter-spacing: -0.005em;
+  padding: 9px 6px;
+  background: transparent;
+  color: var(--ink);
+  border: 0;
+  border-right: 1px solid var(--rule);
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease;
+}
+.switcher-variants button:last-child { border-right: 0; }
+.switcher-variants button:hover { color: var(--trust); background: var(--paper-1); }
+.switcher .switcher-variants button[aria-pressed="true"] {
+  background-color: var(--trust) !important;
+  color: var(--trust-ink) !important;
+}
+.switcher-caption {
+  font-family: var(--font-display); font-weight: 400; font-style: italic;
+  font-size: 13.5px; line-height: 1.5;
+  color: var(--ink-2);
+  margin-top: 12px; padding-top: 10px;
+  border-top: 1px solid var(--rule);
+}
+.switcher-caption b { color: var(--ink); font-weight: 500; font-style: normal; }
+@media (max-width: 720px) {
+  .switcher { top: auto; bottom: 12px; right: 12px; left: 12px; width: auto; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     SWITCHER
+     ============================================================ -->
+<aside class="switcher" aria-label="Lex design system controls">
+  <div class="switcher-title">№ 04 · <em>Lex</em> · controls</div>
+
+  <div class="switcher-label">Palette</div>
+  <div class="switcher-palettes" role="radiogroup" aria-label="Palette">
+    <button data-set-palette="counsel"   title="Counsel · navy + gold (default)" aria-label="Counsel">
+      <span class="trust" style="background: oklch(0.27 0.06 250)"></span>
+      <span class="accent" style="background: oklch(0.74 0.10 80)"></span>
+      <span class="name">Counsel</span>
+    </button>
+    <button data-set-palette="heritage"  title="Heritage · oxblood + cream" aria-label="Heritage">
+      <span class="trust" style="background: oklch(0.32 0.13 25)"></span>
+      <span class="accent" style="background: oklch(0.82 0.07 80)"></span>
+      <span class="name">Heritage</span>
+    </button>
+    <button data-set-palette="forest"    title="Forest · deep green + bronze" aria-label="Forest">
+      <span class="trust" style="background: oklch(0.32 0.07 155)"></span>
+      <span class="accent" style="background: oklch(0.66 0.10 60)"></span>
+      <span class="name">Forest</span>
+    </button>
+    <button data-set-palette="slate"     title="Slate · charcoal + steel" aria-label="Slate">
+      <span class="trust" style="background: oklch(0.28 0.015 250)"></span>
+      <span class="accent" style="background: oklch(0.62 0.07 230)"></span>
+      <span class="name">Slate</span>
+    </button>
+    <button data-set-palette="vellum"    title="Vellum · ink + sage on warm paper" aria-label="Vellum">
+      <span class="trust" style="background: oklch(0.22 0.02 200)"></span>
+      <span class="accent" style="background: oklch(0.70 0.06 145)"></span>
+      <span class="name">Vellum</span>
+    </button>
+    <button data-set-palette="burgundy"  title="Burgundy · wine + gold" aria-label="Burgundy">
+      <span class="trust" style="background: oklch(0.28 0.10 15)"></span>
+      <span class="accent" style="background: oklch(0.78 0.10 85)"></span>
+      <span class="name">Burgundy</span>
+    </button>
+    <button data-set-palette="pacific"   title="Pacific · deep teal + sand" aria-label="Pacific">
+      <span class="trust" style="background: oklch(0.30 0.07 215)"></span>
+      <span class="accent" style="background: oklch(0.78 0.07 75)"></span>
+      <span class="name">Pacific</span>
+    </button>
+    <button data-set-palette="court"     title="Court · black + brick" aria-label="Court">
+      <span class="trust" style="background: oklch(0.16 0.005 250)"></span>
+      <span class="accent" style="background: oklch(0.55 0.13 32)"></span>
+      <span class="name">Court</span>
+    </button>
+    <button data-set-palette="trust"     title="Trust · midnight + champagne" aria-label="Trust">
+      <span class="trust" style="background: oklch(0.22 0.05 265)"></span>
+      <span class="accent" style="background: oklch(0.84 0.07 90)"></span>
+      <span class="name">Trust</span>
+    </button>
+  </div>
+
+  <div class="switcher-label">Variant</div>
+  <div class="switcher-variants" role="radiogroup" aria-label="Variant">
+    <button data-set-variant="statesman" title="Statesman · default. Banks, law, fiduciary. Source Serif 4.">Statesman</button>
+    <button data-set-variant="clinical"  title="Clinical · healthcare. Lora, cool fog paper, softer rounding.">Clinical</button>
+    <button data-set-variant="civic"     title="Civic · government, academic. EB Garamond, watermark, heavier rules.">Civic</button>
+  </div>
+
+  <div class="switcher-caption" id="switcherCaption">
+    <b>Statesman.</b> The default — financial / legal. Annual-report grids, hairline rules, ledger numerals.
+  </div>
+</aside>
+
+<script>
+(() => {
+  const root = document.documentElement;
+  const KEY_P = "lex.palette";
+  const KEY_V = "lex.variant";
+
+  const VARIANT_DESC = {
+    statesman: "<b>Statesman.</b> The default — financial / legal. Annual-report grids, hairline rules, ledger numerals.",
+    clinical:  "<b>Clinical.</b> Healthcare. Cool-fog paper, gentle rounding, Lora display. Calmer voice.",
+    civic:     "<b>Civic.</b> Government / academic. EB Garamond display, watermark, heavier rules.",
+  };
+
+  try {
+    const p = localStorage.getItem(KEY_P);
+    const v = localStorage.getItem(KEY_V);
+    if (p) root.setAttribute("data-palette", p);
+    if (v) root.setAttribute("data-variant", v);
+  } catch {}
+
+  const syncPressed = () => {
+    const p = root.getAttribute("data-palette") || "counsel";
+    const v = root.getAttribute("data-variant") || "statesman";
+    document.querySelectorAll("[data-set-palette]").forEach(b =>
+      b.setAttribute("aria-pressed", b.dataset.setPalette === p)
+    );
+    document.querySelectorAll("[data-set-variant]").forEach(b =>
+      b.setAttribute("aria-pressed", b.dataset.setVariant === v)
+    );
+    const cap = document.getElementById("switcherCaption");
+    if (cap) cap.innerHTML = VARIANT_DESC[v] || VARIANT_DESC.statesman;
+  };
+
+  document.querySelectorAll("[data-set-palette]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      root.setAttribute("data-palette", btn.dataset.setPalette);
+      try { localStorage.setItem(KEY_P, btn.dataset.setPalette); } catch {}
+      syncPressed();
+    });
+  });
+  document.querySelectorAll("[data-set-variant]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      root.setAttribute("data-variant", btn.dataset.setVariant);
+      try { localStorage.setItem(KEY_V, btn.dataset.setVariant); } catch {}
+      syncPressed();
+    });
+  });
+
+  syncPressed();
+})();
+</script>
+
+<!-- ============================================================
+     SPEC DOC
+     ============================================================ -->
+<div class="doc">
+  <header class="doc-header">
+    <div>
+      <div class="doc-eyebrow">
+        <span class="seal">L</span>
+        № 05 — Trust Professional · Lessgo design library
+      </div>
+      <h1 class="doc-title">Lex<em>,</em> &amp; Sound.</h1>
+      <p class="doc-sub">A composed system for buyers whose customers must feel safe before they feel anything else — banks, fiduciaries, law firms, hospitals, insurers, government.</p>
+    </div>
+    <div class="doc-stamp">
+      Lessgo Library<br>
+      <b>Volume V</b>
+      April · MMXXVI
+      <div class="seal-big">L</div>
+      Reviewed · 04/MMXXVI
+    </div>
+  </header>
+
+  <dl class="doc-meta">
+    <div><dt>For</dt><dd>Banks · law · health · fiduciary</dd></div>
+    <div><dt>Mode</dt><dd>Light · warm paper</dd></div>
+    <div><dt>Voice</dt><dd>Composed · <em>not silent</em></dd></div>
+    <div><dt>References</dt><dd>Annual reports · prospectus · journals</dd></div>
+  </dl>
+
+  <!-- 01 Identity -->
+  <section>
+    <h2><span class="n">№ 01</span> Identity</h2>
+    <p class="dek">Stillness, not silence. Composed, not minimal.</p>
+    <p>Lex is the system for buyers whose customers must feel safe before they feel anything else. It does not whisper — that's Folio's job. It does not yell — that's Riot's job. Lex <strong>composes</strong>: every element earns its place by sitting on the same baseline as something else, and the page reads like an annual report set by someone who has set a thousand of them.</p>
+    <p class="pull">If your buyer has a compliance department and a seal, this is their system.</p>
+    <p>The accent budget is the inverse of Riot. Lex spends ~10% of the viewport on its <strong>trust hue</strong> — usually a deep ink-navy, forest, or oxblood — and less than 2% on its <strong>accent</strong> (gold, sage, brick, steel-blue). The trust hue carries the page; the accent confirms a single thing per viewport. Never two accents. Never a gradient.</p>
+    <h3>Borrowed vocabulary</h3>
+    <ul>
+      <li>The annual-report cover: outsized serif title, ledger row across the bottom, hairline rule above and below.</li>
+      <li>The prospectus TOC: dotted leaders, page numbers in the right column, hairline rules between rows.</li>
+      <li>The journal masthead: italic editorial subhead, all-caps small-caps section labels, Vol./No. metadata.</li>
+      <li>The certificate: embossed seal, italic signature, paper that is not white.</li>
+    </ul>
+  </section>
+
+  <!-- 02 Type -->
+  <section>
+    <h2><span class="n">№ 02</span> Type</h2>
+    <p class="dek">A sober transitional serif for headlines. A neutral humanist sans for body. Italics for emphasis where editorial.</p>
+
+    <h3>Variants</h3>
+    <ul>
+      <li><strong>Statesman</strong> — Source Serif 4 display + Inter Tight body. The financial-legal default.</li>
+      <li><strong>Clinical</strong> — Lora display + Inter Tight body. Slightly softer terminals; reads calmer.</li>
+      <li><strong>Civic</strong> — EB Garamond display + Inter Tight body. Old-style figures throughout.</li>
+    </ul>
+    <p>No weight above 600. No display italic that isn't editorial. Body text uses old-style figures inline (<span class="osf">1234567890</span>); ledger rows and tabular data use lining figures (<span class="lnum">$1,234,567</span>). Never mix.</p>
+
+    <h3>Display scale</h3>
+    <div class="spec">
+      <div class="row head"><div>Role</div><div>Sample</div><div>Desktop</div><div>Mobile</div><div>Weight</div></div>
+      <div class="row"><div>D1</div><div class="sample">Trust, Composed</div><div>128 / .96</div><div>56 / 1.0</div><div>500</div></div>
+      <div class="row"><div>D2</div><div class="sample">Section heading</div><div>72 / 1.0</div><div>40 / 1.05</div><div>500</div></div>
+      <div class="row"><div>D3</div><div class="sample">Letterhead</div><div>44 / 1.05</div><div>32 / 1.1</div><div>500</div></div>
+      <div class="row"><div>D4</div><div class="sample" style="font-style: italic; font-weight: 400;">Editorial italic lede</div><div>22 / 1.45</div><div>19 / 1.5</div><div>400</div></div>
+    </div>
+
+    <h3>Body scale</h3>
+    <div class="spec">
+      <div class="row head"><div>Role</div><div>Sample</div><div>Size</div><div>LH</div><div>Weight</div></div>
+      <div class="row"><div>XL</div><div class="sample" style="font-family: var(--font-body); font-size: 19px;">Lead paragraph, Inter Tight 500</div><div>19</div><div>1.5</div><div>500</div></div>
+      <div class="row"><div>L</div><div class="sample" style="font-family: var(--font-body); font-size: 16px;">Primary body, Inter Tight 400</div><div>16</div><div>1.65</div><div>400</div></div>
+      <div class="row"><div>M</div><div class="sample" style="font-family: var(--font-body); font-size: 15px;">Card body</div><div>15</div><div>1.55</div><div>400</div></div>
+      <div class="row"><div>SM</div><div class="sample" style="font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;">META · LABEL · STAMP</div><div>11</div><div>1.4</div><div>500</div></div>
+    </div>
+
+    <div class="plate">
+      <span class="plate-label">Plate № 01 — Display sample</span>
+      <span class="plate-num">D1 · 128 / .96 / 500</span>
+      <div class="s-d1">A century of <em>discretion,</em> on paper.</div>
+    </div>
+    <div class="plate">
+      <span class="plate-label">Plate № 02 — Specimens</span>
+      <span class="plate-num">D2 · D3 · D4</span>
+      <div class="s-d2">Counsel before <em>commitment.</em></div>
+      <div class="s-d3" style="margin-top: 24px;">Section heading at twenty-eight points</div>
+      <div class="s-d4" style="margin-top: 14px;">Editorial italic at twenty-one points — for a single phrase, never a whole paragraph.</div>
+    </div>
+  </section>
+
+  <!-- 03 Color -->
+  <section>
+    <h2><span class="n">№ 03</span> Color</h2>
+    <p class="dek">One trust hue at 8–12% coverage. One accent at under 2%. Backgrounds are warm paper or cool fog — never pure white.</p>
+
+    <h3>Surface — held constant</h3>
+    <div class="swatch-grid">
+      <div class="swatch"><div class="chip" style="background: oklch(0.985 0.006 80)"></div><div class="lbl"><b>paper</b><span>L 0.985 · warm</span></div></div>
+      <div class="swatch"><div class="chip" style="background: oklch(0.965 0.008 80)"></div><div class="lbl"><b>paper-1</b><span>L 0.965 · second surface</span></div></div>
+      <div class="swatch"><div class="chip" style="background: oklch(0.78 0.010 250)"></div><div class="lbl"><b>rule</b><span>L 0.78 · hairline</span></div></div>
+      <div class="swatch"><div class="chip" style="background: oklch(0.36 0.012 250)"></div><div class="lbl" style="background: oklch(0.36 0.012 250); color: oklch(0.98 0 0)"><b style="color:#fff">ink-2</b><span style="color: #ddd">L 0.36 · body</span></div></div>
+      <div class="swatch"><div class="chip" style="background: oklch(0.18 0.015 250)"></div><div class="lbl" style="background: oklch(0.18 0.015 250); color: oklch(0.98 0 0)"><b style="color:#fff">ink</b><span style="color: #ddd">L 0.18 · headline</span></div></div>
+    </div>
+
+    <h3>Trust palettes — single hue + one restrained accent</h3>
+    <p>The user picks a palette; the system exposes <span class="mono">--trust</span> (the hue carrying the page) and <span class="mono">--accent</span> (the confirmation hue, used at &lt; 2%). No palette uses two accents. The accent never appears as a button background outside the CTA section.</p>
+    <div class="swatch-grid" style="grid-template-columns: repeat(9, 1fr);">
+      <div class="swatch"><div class="chip" style="background: linear-gradient(to right, oklch(0.27 0.06 250) 75%, oklch(0.74 0.10 80) 75%)"></div><div class="lbl"><b>counsel</b><span>navy · gold</span></div></div>
+      <div class="swatch"><div class="chip" style="background: linear-gradient(to right, oklch(0.32 0.13 25) 75%, oklch(0.82 0.07 80) 75%)"></div><div class="lbl"><b>heritage</b><span>oxblood · cream</span></div></div>
+      <div class="swatch"><div class="chip" style="background: linear-gradient(to right, oklch(0.32 0.07 155) 75%, oklch(0.66 0.10 60) 75%)"></div><div class="lbl"><b>forest</b><span>green · bronze</span></div></div>
+      <div class="swatch"><div class="chip" style="background: linear-gradient(to right, oklch(0.28 0.015 250) 75%, oklch(0.62 0.07 230) 75%)"></div><div class="lbl"><b>slate</b><span>charcoal · steel</span></div></div>
+      <div class="swatch"><div class="chip" style="background: linear-gradient(to right, oklch(0.22 0.02 200) 75%, oklch(0.70 0.06 145) 75%)"></div><div class="lbl"><b>vellum</b><span>ink · sage</span></div></div>
+      <div class="swatch"><div class="chip" style="background: linear-gradient(to right, oklch(0.28 0.10 15) 75%, oklch(0.78 0.10 85) 75%)"></div><div class="lbl"><b>burgundy</b><span>wine · gold</span></div></div>
+      <div class="swatch"><div class="chip" style="background: linear-gradient(to right, oklch(0.30 0.07 215) 75%, oklch(0.78 0.07 75) 75%)"></div><div class="lbl"><b>pacific</b><span>teal · sand</span></div></div>
+      <div class="swatch"><div class="chip" style="background: linear-gradient(to right, oklch(0.16 0.005 250) 75%, oklch(0.55 0.13 32) 75%)"></div><div class="lbl"><b>court</b><span>black · brick</span></div></div>
+      <div class="swatch"><div class="chip" style="background: linear-gradient(to right, oklch(0.22 0.05 265) 75%, oklch(0.84 0.07 90) 75%)"></div><div class="lbl"><b>trust</b><span>midnight · champagne</span></div></div>
+    </div>
+  </section>
+
+  <!-- 04 Decoration -->
+  <section>
+    <h2><span class="n">№ 04</span> Decoration</h2>
+    <p class="dek">Five permitted motifs. Use sparingly; one per section is plenty.</p>
+    <ul>
+      <li><strong>Hairline rules</strong> at <span class="mono">1px</span> in <span class="mono">--rule</span>, full-width <span class="mono">2px</span> in <span class="mono">--ink</span> at section breaks. The <span class="mono">2px</span> rule is always doubled with a <span class="mono">1px</span> rule 6px below — the annual-report double-rule.</li>
+      <li><strong>Small-caps section labels</strong> in JetBrains Mono, 10–11px, 0.18em tracking. Always uppercase. Always with a Vol./No. or §-numeral.</li>
+      <li><strong>Embossed seals.</strong> Outline circle, italic monogram inside. Used once on the page — the masthead.</li>
+      <li><strong>Italic editorial pops.</strong> One italic phrase per heading, in the trust hue. Never decorative.</li>
+      <li><strong>Dotted leaders</strong> on TOC-style rows (specimen tables, fee schedules). Always 4-letter-spaced periods, never solid lines.</li>
+    </ul>
+    <p>What's <em>banned</em>: stamp shadows, drop shadows above 2px, gradients (any), marquees, two-accent compositions, full-bleed color sections that aren't the CTA, all-caps display.</p>
+  </section>
+</div>
+
+<!-- ============================================================
+     RENDERED MOCKUP
+     ============================================================ -->
+<div class="stage">
+  <div class="stage-header">
+    <span class="stage-n">Plate № 06</span>
+    <span class="stage-title">Composed page</span>
+    <span class="stage-note">An invitation to a private bank.</span>
+  </div>
+  <div class="frame">
+
+    <!-- NAV -->
+    <nav class="nav">
+      <div class="nav-brand">
+        <span class="mark">L</span>
+        Lex <em>&amp; Sound</em>
+      </div>
+      <div class="nav-mid">
+        <a class="active">Practice</a>
+        <a>Counsel</a>
+        <a>Insights</a>
+        <a>Firm</a>
+        <a>Careers</a>
+      </div>
+      <div class="nav-right">
+        <span class="meta">EST · MCMXIV</span>
+        <a class="quiet">Sign in</a>
+        <a class="cta">Schedule a consultation <span class="arrow">→</span></a>
+      </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-eyebrow">
+        <span class="num">№ 47</span>
+        <span>Quarterly letter · Q1 MMXXVI</span>
+        <span class="since">In practice <em>since 1914</em></span>
+      </div>
+
+      <div class="hero-grid">
+        <h1 class="hero-display">
+          A century of <em>discretion,</em><br>
+          and what we&rsquo;ve done with&nbsp;it.
+        </h1>
+        <aside class="hero-aside">
+          <p class="hero-lede">Lex &amp; Sound is a fiduciary, advisory, and trust office serving 312 families across four generations. We accept new client relationships by introduction.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary btn-lg">Request an introduction <span class="arrow">→</span></a>
+            <a class="btn btn-quiet">Read the letter</a>
+          </div>
+        </aside>
+      </div>
+
+      <dl class="hero-ledger">
+        <div class="item">
+          <span class="lbl">Assets under stewardship</span>
+          <span class="val lnum">$48.2<em>B</em></span>
+          <span class="note">As of 31 Mar MMXXVI · audited</span>
+        </div>
+        <div class="item">
+          <span class="lbl">Family relationships</span>
+          <span class="val lnum">312</span>
+          <span class="note">Across <em>four generations</em></span>
+        </div>
+        <div class="item">
+          <span class="lbl">Average tenure</span>
+          <span class="val lnum">38<em>yr</em></span>
+          <span class="note">First introduction to present day</span>
+        </div>
+        <div class="item">
+          <span class="lbl">Partner-to-client</span>
+          <span class="val lnum">1 : 12</span>
+          <span class="note">Industry average <em>1 : 84</em></span>
+        </div>
+      </dl>
+    </section>
+
+    <!-- ACCREDITATION STRIP -->
+    <div class="accreditation">
+      <div class="lbl">Memberships &amp; <em>oversight</em></div>
+      <div class="seals">
+        <span class="seal-emb"><span class="dot"></span>SEC · Registered Adviser</span>
+        <span class="seal-emb"><span class="dot"></span>FINRA Member</span>
+        <span class="seal-emb"><span class="dot"></span>SIPC · Insured</span>
+        <span class="seal-emb"><span class="dot"></span>NYSBA · Trust Section</span>
+        <span class="seal-emb"><span class="dot"></span>ABA · Banking</span>
+      </div>
+    </div>
+
+    <!-- PRACTICE AREAS -->
+    <section class="section">
+      <header class="sec-head">
+        <div>
+          <div class="sec-eyebrow"><span class="n">§ 02</span><span>The practice</span></div>
+          <h2 class="sec-title">Six lines of <em>counsel,</em> one office.</h2>
+        </div>
+        <p class="sec-lede">Each practice is partner-led and case-staffed. We do not assemble pitch teams. The partner who answers your first letter is the partner who attends your last meeting.</p>
+      </header>
+
+      <div class="practice">
+        <div class="item">
+          <span class="ix">§ 02 · I — Wealth</span>
+          <h3>Wealth, <em>preserved.</em></h3>
+          <p>Discretionary investment management for taxable, exempt, and trust accounts. Conservative-by-default, opportunistic on rare occasion.</p>
+          <a class="more">Memorandum on philosophy <span class="arrow">→</span></a>
+        </div>
+        <div class="item">
+          <span class="ix">§ 02 · II — Trust</span>
+          <h3>Trust &amp; <em>estate.</em></h3>
+          <p>Drafting, administration, and dispute counsel for revocable trusts, charitable trusts, dynasty trusts, and the long unwinding of family complexity.</p>
+          <a class="more">A primer for first-time settlors <span class="arrow">→</span></a>
+        </div>
+        <div class="item">
+          <span class="ix">§ 02 · III — Tax</span>
+          <h3>Tax, <em>quietly.</em></h3>
+          <p>Federal, state, and international tax structure for closely-held businesses, founders pre-liquidity, and families with cross-border holdings.</p>
+          <a class="more">Selected matters <span class="arrow">→</span></a>
+        </div>
+        <div class="item">
+          <span class="ix">§ 02 · IV — Philanthropy</span>
+          <h3>Giving, <em>well.</em></h3>
+          <p>Foundation establishment and stewardship, donor-advised structuring, and the difficult conversations about what your money is actually for.</p>
+          <a class="more">Letter to a new foundation <span class="arrow">→</span></a>
+        </div>
+        <div class="item">
+          <span class="ix">§ 02 · V — Family</span>
+          <h3>Family <em>office.</em></h3>
+          <p>Bookkeeping, household payroll, residence administration, art and collection registry, and travel logistics for principals.</p>
+          <a class="more">Service inventory <span class="arrow">→</span></a>
+        </div>
+        <div class="item">
+          <span class="ix">§ 02 · VI — Counsel</span>
+          <h3>Counsel <em>at large.</em></h3>
+          <p>The matters that don't have a department: a board seat, a difficult sale, a sibling, a will to be read aloud, the call at 11pm.</p>
+          <a class="more">By introduction only <span class="arrow">→</span></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- TESTIMONIALS / LETTERS -->
+    <section class="testi">
+      <div class="testi-grid">
+        <aside class="testi-aside">
+          <div class="sec-eyebrow"><span class="n">§ 03</span><span>Letters of reference</span></div>
+          <h2 class="sec-title">In their <em>own words.</em></h2>
+          <p class="sec-lede">Reproduced with permission from clients of varying tenure. Names and identifying detail held in our files; available to qualified prospects on request.</p>
+          <div style="margin-top: 32px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.16em; color: var(--ink-3); text-transform: uppercase; border-top: 1px solid var(--rule); padding-top: 18px;">312 active relationships · 38 yr avg tenure</div>
+        </aside>
+
+        <div class="letters">
+          <article class="letter">
+            <span class="ix">§ I</span>
+            <div>
+              <blockquote>"My grandfather was their client. My father was their client. I am their client. There is, in matters of trust, <em>some advantage to time</em> — and an enormous one to consistency."</blockquote>
+              <div class="signed">
+                <div class="who">
+                  <b>A. Whitcombe-Hayes</b>
+                  <span>Third generation · since MCMLXXVIII</span>
+                </div>
+                <span class="auth">A.W.H.</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="letter">
+            <span class="ix">§ II</span>
+            <div>
+              <blockquote>"They returned my call at 11:14 on a Thursday evening, listened for forty minutes, and only then suggested we speak again in the morning. <em>That was the engagement letter.</em>"</blockquote>
+              <div class="signed">
+                <div class="who">
+                  <b>Dr. M. Okonkwo, MD</b>
+                  <span>Trustee · Estate of A.K. Okonkwo</span>
+                </div>
+                <span class="auth">M.O.</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="letter">
+            <span class="ix">§ III</span>
+            <div>
+              <blockquote>"Our previous firm had eleven people on our account. Lex has three, the same three for nineteen years, and they remember <em>which child needs the trust at twenty-five</em> and which can wait until thirty-five."</blockquote>
+              <div class="signed">
+                <div class="who">
+                  <b>F. Aaltonen</b>
+                  <span>Settlor · the Aaltonen 1996 Trust</span>
+                </div>
+                <span class="auth">F.A.</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="letter">
+            <span class="ix">§ IV</span>
+            <div>
+              <blockquote>"My partner died on a Saturday. Their associate met me at the house on Sunday afternoon, with the will, the keys to the safe-deposit, and <em>two hours of patience</em> — none of which I had asked for."</blockquote>
+              <div class="signed">
+                <div class="who">
+                  <b>Hon. C. Rutherford (Ret.)</b>
+                  <span>Beneficiary · since MMVII</span>
+                </div>
+                <span class="auth">C.R.</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEE SCHEDULE -->
+    <section class="fees">
+      <header class="sec-head">
+        <div>
+          <div class="sec-eyebrow"><span class="n">§ 04</span><span>Schedule of fees</span></div>
+          <h2 class="sec-title">Three terms <em>of engagement.</em></h2>
+        </div>
+        <p class="sec-lede">All fees are quoted in advance, in writing, and reviewed annually. Hourly billing is reserved for litigation matters; ongoing relationships are quoted as flat or basis-point retainers.</p>
+      </header>
+
+      <div class="fees-table">
+        <div class="fees-row head">
+          <div class="ix">§</div>
+          <div class="name">Engagement</div>
+          <div class="desc">Scope</div>
+          <div class="audience">Suitable for</div>
+          <div class="price">Annual fee</div>
+        </div>
+        <div class="fees-row">
+          <span class="ix">I</span>
+          <div class="name">Counsel<em> · </em>Standard<span>For new relationships</span></div>
+          <div class="desc">Discretionary management of one investment account, plus quarterly letter and annual review. <b>Includes</b> 12 partner hours.</div>
+          <div class="audience">Households &gt; $5M; first introduction.</div>
+          <div class="price">
+            <span class="price-amt lnum">$32,000</span>
+            <span class="price-per">per yr · or 75 bps</span>
+          </div>
+        </div>
+        <div class="fees-row featured">
+          <span class="ix">II</span>
+          <div class="name">Counsel<em> · </em>Comprehensive<span>Most chosen</span></div>
+          <div class="desc">Full investment, trust, tax, and family-office staffing. Two-partner team, dedicated associate, named trust officer. <b>Includes</b> unlimited partner correspondence.</div>
+          <div class="audience">Multi-generational families; $25M – $250M.</div>
+          <div class="price">
+            <span class="price-amt lnum">$140,000</span>
+            <span class="price-per">per yr · or 55 bps</span>
+          </div>
+        </div>
+        <div class="fees-row">
+          <span class="ix">III</span>
+          <div class="name">Counsel<em> · </em>Office<span>For principals at scale</span></div>
+          <div class="desc">A dedicated single-family or multi-family office, integrated within the firm. Bookkeeping, payroll, residence, philanthropy, and at-large counsel.</div>
+          <div class="audience">$250M+; legacy holdings; family staff.</div>
+          <div class="price">
+            <span class="price-amt lnum">$900K+</span>
+            <span class="price-per">per yr · or 25 bps</span>
+          </div>
+        </div>
+      </div>
+      <div class="fees-foot">
+        <p><sup>1</sup> All schedules subject to engagement letter. Fee minimums waived in certain charitable and pro-bono matters at the firm's discretion.</p>
+        <a class="btn btn-quiet">Request the long-form schedule <span class="arrow">→</span></a>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta">
+      <div class="cta-inner">
+        <div>
+          <div class="cta-eyebrow">An invitation to correspond</div>
+          <h2>We accept new relationships <em>by introduction.</em></h2>
+          <p style="font-family: var(--font-display); font-style: italic; font-weight: 400; font-size: 19px; line-height: 1.5; color: oklch(1 0 0 / 0.78); max-width: 50ch; margin: 0 0 36px;">If you have been referred by a partner, trustee, or longstanding client of the firm, the simplest first step is a written letter — by post or by mail — and a brief telephone call at your convenience.</p>
+          <div class="cta-actions">
+            <a class="btn btn-primary btn-lg">Begin a correspondence <span class="arrow">→</span></a>
+            <a class="btn btn-ghost btn-lg">Speak with the desk</a>
+          </div>
+        </div>
+        <dl class="cta-aside">
+          <div class="row"><dt>By post</dt><dd>1 Whitehall Mews<br>London &nbsp;SW1A 1AA</dd></div>
+          <div class="row"><dt>New York</dt><dd>14 Wall St, 28th Floor<br>New York, NY 10005</dd></div>
+          <div class="row"><dt>Telephone</dt><dd class="lnum">+44 20 7930 0900<br>+1 212 482 1212</dd></div>
+          <div class="row"><dt>Hours</dt><dd>Mon – Fri · <em>9:00 to 17:30</em><br>By appointment after.</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <div class="word">Lex <em>&amp; Sound</em></div>
+          <p>A fiduciary, trust, and advisory office. By introduction, since MCMXIV.</p>
+          <div class="addr">
+            1 WHITEHALL MEWS · LONDON SW1A 1AA<br>
+            14 WALL ST, 28TH FL · NEW YORK NY 10005<br>
+            +44 20 7930 0900 · +1 212 482 1212
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Practice</h4>
+          <ul><li>Wealth</li><li>Trust &amp; estate</li><li>Tax</li><li>Philanthropy</li><li>Family office</li><li>At-large</li></ul>
+        </div>
+        <div class="footer-col">
+          <h4>Firm</h4>
+          <ul><li>Partners</li><li>Associates</li><li>Trustees</li><li>History</li><li>Memberships</li></ul>
+        </div>
+        <div class="footer-col">
+          <h4>Counsel</h4>
+          <ul><li>Quarterly letter</li><li>Memoranda</li><li>The reading list</li><li>Annual report</li><li>Press</li></ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© Lex &amp; Sound LLP · MCMXIV — MMXXVI</span>
+        <span><em>Set in</em> Source Serif 4 &amp; Inter Tight</span>
+        <span>Sitemap · Privacy · Disclosures</span>
+      </div>
+      <div class="footer-colophon">
+        <div class="word">Lex<em>&amp;</em>Sound</div>
+        <div class="note">Composed by hand · printed on warm paper.</div>
+      </div>
+    </footer>
+  </div>
+</div>
+
+<!-- ============================================================
+     TOKENS
+     ============================================================ -->
+<section class="tokens">
+  <h2>Tokens, <em>copy &amp; paste.</em></h2>
+  <p>The full token surface for the renderer. The user-configurable axes are <span class="mono">--trust + --accent</span> (palette, 9 options) and <span class="mono">[data-variant]</span> (Statesman · Clinical · Civic). Body always Inter Tight; display family swaps with variant.</p>
+
+  <h3>:root tokens</h3>
+  <pre><span class="c">/* Trust hue + accent — the only color knob */</span>
+<span class="k">--trust</span>:        <span class="v">oklch(0.27 0.06 250)</span>;     <span class="c">/* deep navy */</span>
+<span class="k">--trust-deep</span>:   <span class="v">oklch(0.18 0.06 250)</span>;     <span class="c">/* hover / press */</span>
+<span class="k">--trust-soft</span>:   <span class="v">oklch(0.92 0.025 250)</span>;
+<span class="k">--trust-ink</span>:    <span class="v">oklch(0.98 0.005 250)</span>;    <span class="c">/* text on trust */</span>
+<span class="k">--accent</span>:       <span class="v">oklch(0.74 0.10 80)</span>;      <span class="c">/* gold — &lt; 2% of viewport */</span>
+<span class="k">--accent-deep</span>:  <span class="v">oklch(0.58 0.11 80)</span>;
+<span class="k">--accent-ink</span>:   <span class="v">oklch(0.18 0.04 80)</span>;
+
+<span class="c">/* Surface — never pure white */</span>
+<span class="k">--paper</span>:        <span class="v">oklch(0.985 0.006 80)</span>;
+<span class="k">--paper-1</span>:      <span class="v">oklch(0.965 0.008 80)</span>;
+<span class="k">--ink</span>:          <span class="v">oklch(0.18 0.015 250)</span>;
+<span class="k">--ink-2</span>:        <span class="v">oklch(0.36 0.012 250)</span>;
+<span class="k">--rule</span>:         <span class="v">oklch(0.78 0.010 250)</span>;     <span class="c">/* hairline */</span>
+<span class="k">--rule-w</span>:       <span class="v">1px</span>;
+
+<span class="c">/* Type */</span>
+<span class="k">--font-display</span>: <span class="v">"Source Serif 4", "Lora", serif</span>;
+<span class="k">--font-body</span>:    <span class="v">"Inter Tight", system-ui, sans-serif</span>;
+<span class="k">--font-mono</span>:    <span class="v">"JetBrains Mono", monospace</span>;
+
+<span class="c">/* Radius — almost none */</span>
+<span class="k">--r-sm</span>: <span class="v">0</span>;
+<span class="k">--r-md</span>: <span class="v">2px</span>;
+<span class="k">--r-lg</span>: <span class="v">2px</span>;
+<span class="k">--r-pill</span>: <span class="v">999px</span>;</pre>
+
+  <h3>palette overrides ([data-palette])</h3>
+  <pre><span class="k">html[data-palette="counsel"]</span>  { <span class="k">--trust</span>: <span class="v">oklch(0.27 0.06 250)</span>;  <span class="k">--accent</span>: <span class="v">oklch(0.74 0.10 80)</span>; }   <span class="c">/* navy + gold (default) */</span>
+<span class="k">html[data-palette="heritage"]</span> { <span class="k">--trust</span>: <span class="v">oklch(0.32 0.13 25)</span>;   <span class="k">--accent</span>: <span class="v">oklch(0.82 0.07 80)</span>; }   <span class="c">/* oxblood + cream */</span>
+<span class="k">html[data-palette="forest"]</span>   { <span class="k">--trust</span>: <span class="v">oklch(0.32 0.07 155)</span>;  <span class="k">--accent</span>: <span class="v">oklch(0.66 0.10 60)</span>; }   <span class="c">/* deep green + bronze */</span>
+<span class="k">html[data-palette="slate"]</span>    { <span class="k">--trust</span>: <span class="v">oklch(0.28 0.015 250)</span>; <span class="k">--accent</span>: <span class="v">oklch(0.62 0.07 230)</span>; }  <span class="c">/* charcoal + steel */</span>
+<span class="k">html[data-palette="vellum"]</span>   { <span class="k">--trust</span>: <span class="v">oklch(0.22 0.02 200)</span>;  <span class="k">--accent</span>: <span class="v">oklch(0.70 0.06 145)</span>; }  <span class="c">/* ink + sage */</span>
+<span class="k">html[data-palette="burgundy"]</span> { <span class="k">--trust</span>: <span class="v">oklch(0.28 0.10 15)</span>;   <span class="k">--accent</span>: <span class="v">oklch(0.78 0.10 85)</span>; }   <span class="c">/* wine + gold */</span>
+<span class="k">html[data-palette="pacific"]</span>  { <span class="k">--trust</span>: <span class="v">oklch(0.30 0.07 215)</span>;  <span class="k">--accent</span>: <span class="v">oklch(0.78 0.07 75)</span>; }   <span class="c">/* deep teal + sand */</span>
+<span class="k">html[data-palette="court"]</span>    { <span class="k">--trust</span>: <span class="v">oklch(0.16 0.005 250)</span>; <span class="k">--accent</span>: <span class="v">oklch(0.55 0.13 32)</span>; }   <span class="c">/* black + brick */</span>
+<span class="k">html[data-palette="trust"]</span>    { <span class="k">--trust</span>: <span class="v">oklch(0.22 0.05 265)</span>;  <span class="k">--accent</span>: <span class="v">oklch(0.84 0.07 90)</span>; }   <span class="c">/* midnight + champagne */</span></pre>
+
+  <h3>variant overrides ([data-variant])</h3>
+  <pre><span class="c">/* Statesman (default) — Source Serif 4 + Inter Tight, warm paper, sharp corners. */</span>
+
+<span class="c">/* Clinical — healthcare. Lora display, cool fog paper, gentle rounding. */</span>
+<span class="k">html[data-variant="clinical"]</span> {
+  <span class="k">--font-display</span>: <span class="v">"Lora", "Source Serif 4", serif</span>;
+  <span class="k">--paper</span>:    <span class="v">oklch(0.985 0.004 220)</span>;   <span class="c">/* cool fog */</span>
+  <span class="k">--r-md</span>:     <span class="v">4px</span>;
+  <span class="k">--r-lg</span>:     <span class="v">6px</span>;
+  <span class="k">--sec-pad-y</span>: <span class="v">144px</span>;
+}
+
+<span class="c">/* Civic — government / academic. EB Garamond, watermark, heavier rules. */</span>
+<span class="k">html[data-variant="civic"]</span> {
+  <span class="k">--font-display</span>: <span class="v">"EB Garamond", "Source Serif 4", serif</span>;
+  <span class="k">--paper</span>:        <span class="v">oklch(0.97 0.008 85)</span>;
+  <span class="k">--rule</span>:         <span class="v">oklch(0.65 0.012 250)</span>;
+}
+<span class="k">html[data-variant="civic"] .frame::before</span> {
+  background-image: <span class="v">repeating-linear-gradient(45deg,
+    transparent 0, transparent 28px,
+    oklch(0.18 0.015 250 / 0.025) 28px,
+    oklch(0.18 0.015 250 / 0.025) 29px)</span>;     <span class="c">/* hatched watermark */</span>
+}</pre>
+</section>
+
+</body>
+</html>

@@ -7,6 +7,7 @@
 import React from 'react';
 import { useServiceBlock } from '../../hooks/useServiceBlock';
 import { HearthEditable } from '../../components/HearthEditable';
+import { HearthAddImageOverlay } from '../../components/HearthAddImageOverlay';
 import { useImageToolbar } from '@/hooks/useImageToolbar';
 
 interface PullQuoteWithMarkContent {
@@ -69,6 +70,7 @@ export default function PullQuoteWithMark({ sectionId }: PullQuoteWithMarkProps)
               data-image-id={`${sectionId}-author-photo`}
               data-element-key="author_photo"
               style={{
+                position: 'relative',
                 backgroundImage: blockContent.author_photo
                   ? `url(${blockContent.author_photo})`
                   : 'linear-gradient(135deg, var(--clay), var(--accent))',
@@ -82,7 +84,11 @@ export default function PullQuoteWithMark({ sectionId }: PullQuoteWithMarkProps)
                   });
                 }
               }}
-            />
+            >
+              {mode === 'edit' && !blockContent.author_photo && (
+                <HearthAddImageOverlay compact />
+              )}
+            </div>
             <div className="hearth-testi__who-text">
               <HearthEditable
                 as="div"

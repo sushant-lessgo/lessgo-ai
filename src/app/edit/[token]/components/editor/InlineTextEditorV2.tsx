@@ -4,6 +4,16 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 
+// Place the caret at the end of a contenteditable element.
+function placeCaretAtEnd(el: HTMLElement) {
+  const range = document.createRange();
+  range.selectNodeContents(el);
+  range.collapse(false);
+  const sel = window.getSelection();
+  sel?.removeAllRanges();
+  sel?.addRange(range);
+}
+
 export interface InlineTextEditorV2Props {
   content: string;
   onContentChange: (content: string) => void;
@@ -24,6 +34,14 @@ export interface InlineTextEditorV2Props {
    * (textContent fallback unless span[style] formatting is present).
    */
   preserveHtml?: boolean;
+  /**
+   * Focus + enter editing on mount. Used by callers that gate editing behind a
+   * separate gesture (e.g. Hearth button elements that select on single-click
+   * and edit on double-click). Default false — zero change for existing callers.
+   */
+  autoFocus?: boolean;
+  /** Notified when editing starts/ends (focus/blur). Optional. */
+  onEditingChange?: (editing: boolean) => void;
 }
 
 export function InlineTextEditorV2({
@@ -40,13 +58,23 @@ export function InlineTextEditorV2({
   colorTokens,
   sectionBackground,
   multiline = false,
-  preserveHtml = false
+  preserveHtml = false,
+  autoFocus = false,
+  onEditingChange
 }: InlineTextEditorV2Props) {
   const [isEditing, setIsEditing] = useState(false);
   const editorRef = useRef<HTMLElement>(null);
   const originalContentRef = useRef<string>(content);
 
   const { setTextEditingMode, showToolbar, hideToolbar } = useEditStore();
+
+  // Auto-enter editing on mount when requested (double-click → edit gesture).
+  useEffect(() => {
+    if (autoFocus && editorRef.current) {
+      editorRef.current.focus();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Sync content from props to DOM when NOT editing
   // This prevents cursor jumping by avoiding updates during typing
@@ -109,6 +137,16 @@ export function InlineTextEditorV2({
   const handleFocus = () => {
     setIsEditing(true);
     setTextEditingMode(true, { sectionId, elementKey });
+    onEditingChange?.(true);
+
+    // When editing was entered programmatically (autoFocus), the element wasn't
+    // contenteditable at focus time, so the browser places no caret. Drop one at
+    // the end. Only for autoFocus — normal clicks should keep the clicked caret.
+    if (autoFocus && editorRef.current) {
+      requestAnimationFrame(() => {
+        if (editorRef.current) placeCaretAtEnd(editorRef.current);
+      });
+    }
 
     // Show toolbar
     if (editorRef.current) {
@@ -132,6 +170,7 @@ export function InlineTextEditorV2({
     saveContent();
     setIsEditing(false);
     setTextEditingMode(false);
+    onEditingChange?.(false);
     hideToolbar();
   };
 

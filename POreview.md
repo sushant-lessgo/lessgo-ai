@@ -1,61 +1,60 @@
-Verified accurate
-                                                                                                                      
-  - HearthEditable.tsx exists ✓
-  - InlineTextEditorV2.tsx:216-217 data-element-key + data-section-id binding ✓
-  - publish/route.ts:60-88 writes projectType + paletteId to PublishedPage ✓
-  - /p/[slug]/page.tsx:124-134 passes both props to renderer ✓
-  - LandingPageRenderer.tsx:849-854 wraps service in HearthThemeInjector ✓
-  - LandingPagePublishedRenderer.tsx:107-122 wraps each section in data-hearth-surface div ✓
-  - LandingPagePublishedRenderer.tsx:173-176 wraps in HearthSSRTokens ✓
-  - CenteredHeadlineCTA.published.tsx:94 buttonConfig extraction + form modal pattern at 148-207 ✓ — clean pattern to
-  copy
-  - BookCallCTA.tsx:110-125 calendly_url field + edit UI confirmed ✓
-  - BookCallCTA.published.tsx exists ✓
-  - /api/images/search/route.ts:188 getSpecializedQuery only, no projectType awareness ✓
-  - imageKeywords.ts does NOT exist ✓ — Step 2 creates it
-  - ImageToolbar.tsx exists ✓
-  - Published renderer already flattens content, sections, publishedPageId, pageOwnerId to LayoutComponent props (line
-   107-122) — Step 1d's prop-extension is supported by upstream wiring ✓
+Verified against code. Plan is approved — proceed — with 2 corrections and answers to the dev's 2 open questions. Diagnoses are mostly accurate; one citation is wrong
+  in a way that could send the dev down the wrong path.
 
-  Real flags
+  What I confirmed in code
 
-  1. serviceType availability in edit store. Step 2 plan §76 says "read projectType + serviceType from edit store."
-  serviceType is NOT in useEditStoreLegacy today — it lives in useServiceGenerationStore (in-memory, reset after
-  onboarding) and gets persisted into Project.content.onboardingData. ImageToolbar would need to read from
-  content.onboardingData.understanding.serviceType (loaded from saveDraft response), not the edit store directly. For
-  pilot (agency-only), this is moot — getServiceImageQuery can default to generic "warm" keywords without serviceType.
-   But plan should clarify either: (a) thread serviceType through editStore meta slice in Phase 4 saveDraft response,
-  or (b) fall back to default keywords. Lean: (b) for pilot.
+  ┌─────────────────────────────────────────────────────────────────────────┬─────────────────────────────────────────────────────────────────────────────────────────┐
+  │                                  Claim                                  │                                         Status                                          │
+  ├─────────────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────┤
+  │ 2b: processServiceCopy has no ID backfill                               │ ✅ Confirmed (parseCopy.ts:21-27)                                                       │
+  ├─────────────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────┤
+  │ 2b: schema at audience/service/elementSchema.ts (not templates/hearth)  │ ✅ Confirmed — dev's "Files touched" path is right; moved in 7.5d                       │
+  ├─────────────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────┤
+  │ 2b: collections declare id: { fillMode: 'system' }                      │ ✅ Confirmed (elementSchema.ts:33,71,...) — schema-driven walk will work                │
+  ├─────────────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────┤
+  │ 2b: no v3 pattern to mirror (product uses pipe-delimited strings)       │ ✅ Correct — separate backfill is the right call, not touching frozen                   │
+  │                                                                         │ applyAllSchemaDefaults                                                                  │
+  ├─────────────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────┤
+  │ 3: canConvertToForm already lights up "Button Settings" for cta/button  │ ✅ Confirmed (ElementToolbar.tsx:156-175)                                               │
+  │ keys                                                                    │                                                                                         │
+  └─────────────────────────────────────────────────────────────────────────┴─────────────────────────────────────────────────────────────────────────────────────────┘
 
-  2. Image-search call sites beyond ImageToolbar. Plan mutates the query client-side in ImageToolbar.tsx. Other
-  callers (initial hero image fetch during generation pipeline, regenerate-image API, etc.) won't get warm keywords.
-  For pilot this is acceptable since onboarding generation is mostly text and the user manually sets hero image
-  post-generation via toolbar. Worth noting in the plan exit summary so Phase 6 catches any image-quality regressions
-  on initial AI-generated images.
+  Correction 1 — Defect 3 diagnosis cites the wrong lines
 
-  Step 1c blocker contingency — sound
+  Dev says the element toolbar is suppressed by "ElementToolbar early-returns when a text toolbar is active (ElementToolbar.tsx:87-89)." That's inaccurate. Lines 87-89
+  return null only on image or form toolbar types — not text. A text toolbar does not trigger that early return.
 
-  Pre-flight check before deleting calendly_url: open service project, click cta_text, verify buttonConfig UI renders.
-   If toolbar binds via data-element-key (which we verified at InlineTextEditorV2:216-217 — generic), it should work.
-  If it doesn't, plan halts — correct discipline.
+  The real mechanism is upstream: single-clicking the contenteditable HearthEditable routes the click to text-edit selection, so the element is never selected as an
+  'element' type — the ElementToolbar's element branch never activates. The fix direction (button affordance → single-click selects, double-click edits) is still correct,
+  but the dev must validate the actual selection routing (determineElementType / useEditor) before coding, not the 87-89 early-return. Otherwise they may "fix" the
+  early-return and the toolbar still won't show.
 
-  Open question stances
+  Action: re-validate the selection path; keep the fix, correct the diagnosis.
 
-  All resolved per plan §172. Agree:
-  - Drop calendly_url, use buttonConfig ✓
-  - Client-side keyword merge ✓
-  - Project-level by serviceType ✓ (with my flag #1 caveat)
-  - Punt missing toolbar UI to Phase 11 ✓
+  Correction 2 — Scope the button affordance narrowly
 
-  Verdict
+  The button-select-on-single-click affordance must apply only to actual button/cta elements, NOT all HearthEditable. Every other Hearth text element single-clicks to
+  edit; if the CTA suddenly single-clicks to select, that's fine (matches product's button-vs-text model) — but only if it's scoped to the button. A blanket change would
+  make all Hearth text require double-click to edit = regression. Dev's plan implies this but doesn't state the guard explicitly. Make it explicit.
 
-  GO. Plan is tight, blocker contingency well-flagged, scope appropriately small for a verification phase. Two flags
-  above are implementation hints, not blockers.
+  Answers to dev's 2 open questions
 
-  ---
-  Unresolved questions
+  Q1 — heal-on-load backfill for already-saved drafts?
+  Skip it. Don't touch the frozen loadDraft surface. No live users; dev/test drafts with broken collection IDs just get regenerated. Fresh-generation backfill is
+  sufficient. (Matches the plan's own fallback.)
 
-  1. serviceType source for getServiceImageQuery in ImageToolbar: thread through editStore meta slice (~30min Phase 4
-  patch), or fall back to default warm keywords for pilot?
-  2. Initial hero-image fetch during onboarding generation — accept generic Pexels keywords for pilot, or extend
-  keyword override into the server-side image-fetch path too?
+  Q2 — double-click-to-edit on the CTA acceptable, or keep single-click + separate Button-Settings entry?
+  Double-click-to-edit is acceptable — it matches how product buttons already behave (select vs edit split). Lower-risk than inventing a parallel entry point. Proceed
+  with it, scoped per Correction 2.
+
+  Everything else — approved as written
+
+  - 2a (empty image): reuse ResultsGallery's ImagePlaceholder pattern, apply to both Hearth image slots (hero_image, author_photo). Good.
+  - 1 (persona stranding): ?personaUpdated=1 banner on dashboard + back link, mirror billing ?success= convention. Good — minimal blast radius, leaves /api/start
+  PersonaPrompt untouched.
+  - Priority order (2b → 3 → 2a → 1), idempotent backfill, UUID-per-item over Date.now(), re-run both passes, re-check copy gates after 2b. All correct.
+
+  One addition to the re-test gate
+
+  After 2b, also confirm: publish a service page → /p/[slug] renders the collections (not just edit mode). The backfill runs at copy-gen; verify the IDs persist through
+  save → publish → published render, since that's a different renderer path.

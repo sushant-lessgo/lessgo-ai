@@ -8,6 +8,7 @@
 import React from 'react';
 import { useServiceBlock } from '../../hooks/useServiceBlock';
 import { HearthEditable } from '../../components/HearthEditable';
+import { HearthAddImageOverlay } from '../../components/HearthAddImageOverlay';
 import { useImageToolbar } from '@/hooks/useImageToolbar';
 
 interface PetalFramedHeroContent {
@@ -84,6 +85,7 @@ export default function PetalFramedHero({ sectionId }: PetalFramedHeroProps) {
               value={blockContent.cta_text}
               onSave={(v) => handleContentUpdate('cta_text', v)}
               enterBehavior="save"
+              isButton
               className="hearth-btn hearth-btn--primary hearth-btn--lg"
               placeholder="Book a call"
             />
@@ -96,6 +98,7 @@ export default function PetalFramedHero({ sectionId }: PetalFramedHeroProps) {
                 value={blockContent.secondary_cta_text}
                 onSave={(v) => handleContentUpdate('secondary_cta_text', v)}
                 enterBehavior="save"
+                isButton
                 className="hearth-btn hearth-btn--ghost hearth-btn--lg"
                 placeholder="See work"
               />
@@ -116,7 +119,7 @@ export default function PetalFramedHero({ sectionId }: PetalFramedHeroProps) {
           </div>
         </div>
 
-        <div className="hearth-hero__art" aria-hidden="true">
+        <div className="hearth-hero__art">
           <div
             className="hearth-hero__photo hearth-hero__photo--main"
             data-image-id={`${sectionId}-hero-image`}
@@ -135,7 +138,9 @@ export default function PetalFramedHero({ sectionId }: PetalFramedHeroProps) {
                 });
               }
             }}
-          />
+          >
+            {mode === 'edit' && !blockContent.hero_image && <HearthAddImageOverlay />}
+          </div>
         </div>
       </section>
     </>

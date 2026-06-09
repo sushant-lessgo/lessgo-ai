@@ -6,8 +6,13 @@ import DashboardHeader from '@/components/dashboard/DashboardHeader'
 import ProjectCard from '@/components/dashboard/ProjectCard'
 import EmptyState from '@/components/dashboard/EmptyState'
 import PersonaPrompt from '@/components/onboarding/PersonaPrompt'
+import PersonaUpdatedBanner from '@/components/dashboard/PersonaUpdatedBanner'
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams?: { personaUpdated?: string }
+}) {
   const { userId } = await auth()
   if (!userId) return null
 
@@ -113,6 +118,7 @@ export default async function DashboardPage() {
     <div className="flex flex-col min-h-screen bg-white text-brand-text font-body">
       <Header />
       <main className="flex-grow w-full max-w-5xl mx-auto px-4 py-8">
+        {searchParams?.personaUpdated === '1' && <PersonaUpdatedBanner />}
         <DashboardHeader />
 
         {allItems.length > 0 ? (

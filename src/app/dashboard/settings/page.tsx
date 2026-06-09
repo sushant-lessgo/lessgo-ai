@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
@@ -21,6 +22,12 @@ export default async function SettingsPage() {
     <div className="flex flex-col min-h-screen bg-white text-brand-text font-body">
       <Header />
       <main className="flex-grow w-full max-w-3xl mx-auto px-4 py-8">
+        <Link
+          href="/dashboard"
+          className="inline-block text-sm text-brand-mutedText hover:text-brand-text mb-6"
+        >
+          ← Back to dashboard
+        </Link>
         <h1 className="text-heading2 font-heading text-landing-textPrimary mb-2">
           Account settings
         </h1>
@@ -31,7 +38,7 @@ export default async function SettingsPage() {
         <PersonaPrompt
           embedded
           initialPersona={(user?.persona as UserPersona) ?? null}
-          next="/dashboard/settings"
+          next="/dashboard?personaUpdated=1"
           heading="What do you do?"
           subheading="Pick the option that fits best. You can change this later."
         />

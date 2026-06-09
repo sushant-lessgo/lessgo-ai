@@ -76,6 +76,7 @@ export default function BookCallCTA({ sectionId }: BookCallCTAProps) {
                 value={blockContent.cta_text}
                 onSave={(v) => handleContentUpdate('cta_text', v)}
                 enterBehavior="save"
+                isButton
                 className="hearth-btn hearth-btn--primary hearth-btn--lg"
                 placeholder="Book a call"
               />
@@ -88,6 +89,7 @@ export default function BookCallCTA({ sectionId }: BookCallCTAProps) {
                   value={blockContent.secondary_cta_text}
                   onSave={(v) => handleContentUpdate('secondary_cta_text', v)}
                   enterBehavior="save"
+                  isButton
                   className="hearth-btn hearth-btn--ghost hearth-btn--lg"
                   placeholder="See work"
                 />

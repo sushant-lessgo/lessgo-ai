@@ -1,0 +1,1600 @@
+<!doctype html>
+<html lang="en" data-palette="clay" data-variant="letterpress">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mill — Local Craft · Lessgo design system</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=Oswald:wght@400;500;600;700&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   MILL — Local Craft
+   Hand-set, not hand-drawn. One ink, one paper.
+   Wood-type display, serif body, letterpress vocabulary.
+   ============================================================ */
+
+:root {
+  /* ————— Single ink + paper ————— */
+  --ink:        oklch(0.34 0.10 40);             /* clay terracotta */
+  --ink-deep:   oklch(0.22 0.10 40);
+  --ink-soft:   oklch(0.50 0.09 40);
+  --ink-pale:   oklch(0.78 0.05 40);
+  --paper:      oklch(0.96 0.018 85);            /* cream */
+  --paper-1:    oklch(0.93 0.022 85);
+  --paper-2:    oklch(0.89 0.026 85);
+  --paper-deep: oklch(0.84 0.030 85);
+
+  --rule:       oklch(0.62 0.06 40);
+  --rule-w:     1px;
+
+  /* ————— Type ————— */
+  --font-display:  "Fraunces", "Times New Roman", serif;
+  --font-wood:     "Oswald", "Trade Gothic", "Inter Tight", sans-serif; /* condensed wood-type */
+  --font-body:     "Source Serif 4", "Georgia", serif;
+  --font-ui:       "Inter Tight", system-ui, sans-serif;
+  --font-mono:     "JetBrains Mono", ui-monospace, monospace;
+
+  /* ————— Space ————— */
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px;
+  --s-5: 24px; --s-6: 32px; --s-7: 48px; --s-8: 64px;
+  --s-9: 96px; --s-10: 128px;
+
+  /* ————— Radius — none. Mill is square stock. ————— */
+  --r-sm: 0; --r-md: 0; --r-lg: 0;
+
+  /* ————— Section ————— */
+  --sec-pad-y: 112px;
+  --sec-pad-x: clamp(24px, 5vw, 64px);
+  --max-w: 1280px;
+
+  --shadow-1: 0 1px 0 oklch(0.22 0.10 40 / 0.08);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "onum";
+  /* paper grain */
+  background-image:
+    radial-gradient(circle at 25% 30%, oklch(0.30 0.06 40 / 0.025) 1px, transparent 1.5px),
+    radial-gradient(circle at 75% 70%, oklch(0.30 0.06 40 / 0.020) 1px, transparent 1.5px);
+  background-size: 6px 6px, 9px 9px;
+}
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+.sc { font-variant-caps: all-small-caps; letter-spacing: 0.10em; font-weight: 500; }
+.lnum { font-feature-settings: "lnum"; }
+
+/* ============================================================
+   SPEC DOC
+   ============================================================ */
+.doc { max-width: 1080px; margin: 0 auto; padding: 88px 32px 64px; }
+.doc-header {
+  display: grid; grid-template-columns: 1fr 200px;
+  gap: 56px; align-items: end;
+  border-bottom: 3px double var(--ink);
+  padding-bottom: 40px; margin-bottom: 56px;
+}
+.doc-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--ink-soft); font-weight: 500;
+  margin-bottom: 22px;
+  display: flex; align-items: center; gap: 14px;
+}
+.doc-eyebrow::before { content: "✶"; font-family: var(--font-display); color: var(--ink); font-size: 14px; }
+.doc-title {
+  font-family: var(--font-wood);
+  font-weight: 700;
+  font-size: clamp(80px, 13vw, 200px);
+  line-height: 0.85;
+  letter-spacing: -0.015em;
+  margin: 0;
+  color: var(--ink);
+  text-transform: uppercase;
+  font-stretch: condensed;
+}
+.doc-title em {
+  font-family: var(--font-display);
+  font-style: italic; font-weight: 400;
+  text-transform: none;
+  color: var(--ink-soft);
+  font-size: 0.55em;
+  letter-spacing: -0.02em;
+  vertical-align: 0.4em;
+}
+.doc-sub {
+  font-family: var(--font-display);
+  font-style: italic; font-weight: 400;
+  font-size: 22px; line-height: 1.45;
+  color: var(--ink); opacity: 0.82;
+  max-width: 56ch;
+  margin: 22px 0 0;
+}
+.doc-stamp {
+  font-family: var(--font-mono); font-size: 10.5px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink); line-height: 1.7;
+  border: 1.5px solid var(--ink);
+  padding: 16px 18px;
+  text-align: center;
+  align-self: end;
+  position: relative;
+  background: var(--paper-1);
+}
+.doc-stamp .seal {
+  width: 56px; height: 56px;
+  border: 1.5px solid var(--ink); border-radius: 50%;
+  margin: 6px auto 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-style: italic; font-weight: 500;
+  font-size: 26px; color: var(--ink);
+  text-transform: none; letter-spacing: 0;
+}
+.doc-stamp b { display: block; font-family: var(--font-wood); font-weight: 600; font-size: 14px; letter-spacing: 0.06em; margin-bottom: 4px; }
+
+.doc-meta {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  border-bottom: 1px solid var(--ink-pale);
+  padding-bottom: 24px; margin-bottom: 56px;
+}
+.doc-meta dt {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--ink-soft); font-weight: 500;
+  margin-bottom: 6px;
+}
+.doc-meta dd {
+  margin: 0; font-family: var(--font-display); font-weight: 500;
+  font-size: 17px; line-height: 1.35; color: var(--ink);
+}
+.doc-meta dd em { font-style: italic; font-weight: 400; color: var(--ink-soft); }
+
+.doc h2 {
+  font-family: var(--font-wood);
+  font-weight: 700;
+  font-size: 52px; line-height: 0.9;
+  letter-spacing: 0.005em;
+  margin: 96px 0 4px;
+  color: var(--ink); text-transform: uppercase;
+  display: flex; align-items: baseline; gap: 16px;
+  border-bottom: 1px solid var(--ink-pale);
+  padding-bottom: 14px;
+}
+.doc h2 .n {
+  font-family: var(--font-display); font-style: italic; font-weight: 400;
+  font-size: 22px; color: var(--ink-soft);
+  letter-spacing: 0; text-transform: none;
+  margin-right: 4px; align-self: center;
+}
+.doc h2 + .dek {
+  font-family: var(--font-display); font-style: italic; font-weight: 400;
+  font-size: 21px; line-height: 1.45;
+  color: var(--ink); opacity: 0.82;
+  margin: 18px 0 24px;
+  max-width: 60ch;
+}
+.doc h3 {
+  font-family: var(--font-wood); font-weight: 600;
+  font-size: 18px; letter-spacing: 0.08em; text-transform: uppercase;
+  margin: 36px 0 10px;
+  color: var(--ink);
+}
+.doc p { color: var(--ink); opacity: 0.85; max-width: 66ch; margin: 0 0 16px; line-height: 1.65; }
+.doc p strong { color: var(--ink); opacity: 1; font-weight: 600; }
+.doc ul { color: var(--ink); padding-left: 22px; margin: 0 0 16px; line-height: 1.65; }
+.doc ul li { margin-bottom: 10px; opacity: 0.85; }
+.doc ul li::marker { color: var(--ink); content: "✶ "; font-size: 0.85em; opacity: 0.7; }
+.doc code, .doc .mono {
+  font-family: var(--font-mono); font-size: 12.5px;
+  background: var(--paper-2); padding: 1px 6px;
+  color: var(--ink); border: 1px solid var(--ink-pale);
+}
+.doc .pull {
+  border-left: 3px solid var(--ink);
+  padding: 2px 0 2px 24px; margin: 28px 0;
+  font-family: var(--font-display); font-style: italic; font-weight: 400;
+  font-size: 22px; line-height: 1.45;
+  color: var(--ink); max-width: 56ch;
+}
+
+/* spec table */
+.spec { border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); margin: 24px 0 8px; }
+.spec .row {
+  display: grid; grid-template-columns: 50px 1fr auto auto auto;
+  gap: 32px; padding: 12px 0;
+  border-bottom: 1px solid var(--ink-pale);
+  align-items: baseline;
+  font-size: 13px; font-family: var(--font-mono);
+  color: var(--ink); opacity: 0.85;
+}
+.spec .row:last-child { border-bottom: 0; }
+.spec .row.head {
+  border-bottom: 1px solid var(--ink);
+  font-size: 10px; letter-spacing: 0.2em;
+  text-transform: uppercase; font-weight: 500;
+  opacity: 1; color: var(--ink); padding: 8px 0;
+}
+.spec .sample { font-family: var(--font-wood); color: var(--ink); font-size: 20px; font-weight: 700; text-transform: uppercase; letter-spacing: 0; opacity: 1; }
+
+.swatch-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; margin: 18px 0 8px; border: 1px solid var(--ink-pale); }
+.swatch { border-right: 1px solid var(--ink-pale); padding: 0; }
+.swatch:last-child { border-right: 0; }
+.swatch .chip { height: 124px; }
+.swatch .lbl { padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; background: var(--paper); border-top: 1px solid var(--ink-pale); }
+.swatch .lbl b { font-family: var(--font-wood); font-weight: 600; font-size: 14px; color: var(--ink); letter-spacing: 0.04em; text-transform: uppercase; }
+.swatch .lbl span { font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-soft); letter-spacing: 0.04em; }
+
+.plate {
+  border: 1px solid var(--ink-pale);
+  padding: 56px 48px;
+  margin: 18px 0 0;
+  background: var(--paper-1); position: relative;
+}
+.plate-label, .plate-num {
+  position: absolute; top: 14px;
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--ink-soft); font-weight: 500;
+}
+.plate-label { left: 16px; }
+.plate-num { right: 16px; }
+.s-d1 { font-family: var(--font-wood); font-weight: 700; font-size: 144px; line-height: 0.85; letter-spacing: -0.005em; color: var(--ink); text-transform: uppercase; }
+.s-d1 em { font-family: var(--font-display); font-style: italic; font-weight: 400; color: var(--ink-soft); text-transform: none; font-size: 0.5em; vertical-align: 0.5em; letter-spacing: -0.02em; }
+.s-d2 { font-family: var(--font-wood); font-weight: 700; font-size: 72px; line-height: 0.92; letter-spacing: 0.005em; color: var(--ink); text-transform: uppercase; }
+.s-d3 { font-family: var(--font-display); font-style: italic; font-weight: 400; font-size: 32px; line-height: 1.2; color: var(--ink); }
+.s-d4 { font-family: var(--font-body); font-size: 19px; line-height: 1.5; color: var(--ink); opacity: 0.85; }
+
+/* ============================================================
+   STAGE
+   ============================================================ */
+.stage { max-width: 1280px; margin: 64px auto 0; padding: 56px 24px 0; border-top: 3px double var(--ink); }
+.stage-header {
+  display: flex; align-items: baseline; gap: 16px;
+  margin-bottom: 20px; padding: 0 4px;
+  font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-soft);
+}
+.stage-n { font-family: var(--font-display); font-style: italic; color: var(--ink); font-size: 18px; letter-spacing: 0; text-transform: none; }
+.stage-title { color: var(--ink); }
+.stage-note { margin-left: auto; font-family: var(--font-display); font-style: italic; font-size: 14px; letter-spacing: 0; text-transform: none; color: var(--ink-soft); }
+
+.frame {
+  background: var(--paper);
+  border: 1px solid var(--ink-pale); position: relative;
+  overflow: hidden;
+  background-image:
+    radial-gradient(circle at 25% 30%, oklch(0.30 0.06 40 / 0.025) 1px, transparent 1.5px),
+    radial-gradient(circle at 75% 70%, oklch(0.30 0.06 40 / 0.020) 1px, transparent 1.5px);
+  background-size: 6px 6px, 9px 9px;
+}
+
+/* ============================================================
+   NAV — chalkboard / signboard
+   ============================================================ */
+.nav {
+  display: grid; grid-template-columns: auto 1fr auto;
+  align-items: stretch;
+  border-bottom: 3px double var(--ink);
+  background: var(--paper);
+}
+.nav-brand {
+  display: flex; align-items: center; gap: 14px;
+  padding: 22px 32px;
+  border-right: 1px solid var(--ink-pale);
+}
+.nav-brand .mark {
+  width: 44px; height: 44px;
+  border: 1.5px solid var(--ink); border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-style: italic; font-weight: 500;
+  font-size: 24px; color: var(--ink);
+  flex-shrink: 0;
+  background: var(--paper);
+}
+.nav-brand .name {
+  font-family: var(--font-wood); font-weight: 700;
+  font-size: 26px; letter-spacing: 0.02em;
+  color: var(--ink); text-transform: uppercase;
+  line-height: 1;
+}
+.nav-brand .name + .est {
+  font-family: var(--font-mono); font-size: 9.5px;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--ink-soft); margin-top: 4px;
+  display: block;
+}
+.nav-mid { display: flex; align-items: center; padding: 0 8px; }
+.nav-mid a {
+  font-family: var(--font-wood); font-weight: 500;
+  font-size: 14px; letter-spacing: 0.10em;
+  text-transform: uppercase;
+  padding: 0 18px; height: 100%;
+  display: inline-flex; align-items: center;
+  color: var(--ink); opacity: 0.7;
+  position: relative;
+}
+.nav-mid a:hover { opacity: 1; }
+.nav-mid a.active { opacity: 1; }
+.nav-mid a.active::before { content: "✶"; position: absolute; top: 12px; left: 50%; transform: translateX(-50%); font-family: var(--font-display); font-size: 9px; color: var(--ink); }
+.nav-right {
+  display: flex; align-items: center; gap: 12px;
+  padding: 0 24px;
+  border-left: 1px solid var(--ink-pale);
+}
+.nav-right .meta {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-soft);
+}
+.nav-right .cta {
+  font-family: var(--font-wood); font-weight: 600;
+  font-size: 13px; letter-spacing: 0.10em;
+  text-transform: uppercase;
+  background: var(--ink); color: var(--paper);
+  padding: 12px 20px;
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 1.5px solid var(--ink);
+}
+.nav-right .cta:hover { background: var(--ink-deep); border-color: var(--ink-deep); }
+.nav-right .cta .arrow { font-family: var(--font-display); font-style: italic; font-weight: 400; }
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: var(--font-wood); font-weight: 600;
+  font-size: 14px; letter-spacing: 0.10em;
+  text-transform: uppercase;
+  padding: 14px 24px;
+  border: 1.5px solid var(--ink);
+  transition: background 140ms ease, color 140ms ease;
+}
+.btn-lg { padding: 18px 30px; font-size: 15px; }
+.btn-primary { background: var(--ink); color: var(--paper); }
+.btn-primary:hover { background: var(--ink-deep); border-color: var(--ink-deep); }
+.btn-ghost { background: transparent; color: var(--ink); }
+.btn-ghost:hover { background: var(--paper-2); }
+.btn-quiet {
+  border: 0; padding: 14px 0;
+  font-family: var(--font-display); font-style: italic; font-weight: 400;
+  font-size: 17px; letter-spacing: 0; text-transform: none;
+  color: var(--ink);
+  border-bottom: 1px solid var(--ink); padding-bottom: 4px;
+}
+.btn-quiet:hover { color: var(--ink-deep); }
+.btn .arrow { font-family: var(--font-display); font-style: italic; font-weight: 400; text-transform: none; letter-spacing: 0; font-size: 1.05em; }
+
+/* ============================================================
+   HERO — chalkboard / shopfront
+   ============================================================ */
+.hero { padding: 64px var(--sec-pad-x) 56px; position: relative; }
+.hero-rule {
+  display: flex; align-items: center; gap: 16px;
+  font-family: var(--font-mono); font-size: 10.5px;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--ink-soft); font-weight: 500;
+  margin-bottom: 32px;
+}
+.hero-rule .line { flex: 1; height: 1px; background: var(--ink-pale); }
+.hero-rule .star { font-family: var(--font-display); color: var(--ink); font-size: 14px; opacity: 0.85; }
+
+.hero-display {
+  font-family: var(--font-wood); font-weight: 700;
+  font-size: clamp(72px, 14vw, 220px);
+  line-height: 0.82;
+  letter-spacing: -0.005em;
+  color: var(--ink);
+  margin: 0;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+.hero-display em {
+  font-family: var(--font-display);
+  font-style: italic; font-weight: 400;
+  text-transform: none;
+  font-size: 0.42em;
+  letter-spacing: -0.015em;
+  vertical-align: 0.7em;
+  color: var(--ink-soft);
+  display: inline-block;
+  padding: 0 0.04em;
+}
+.hero-display .row2 { display: block; }
+
+.hero-mid {
+  margin-top: 32px;
+  display: grid; grid-template-columns: 1.3fr 1fr;
+  gap: 64px; align-items: end;
+  padding-bottom: 40px;
+  border-bottom: 3px double var(--ink);
+}
+.hero-lede {
+  font-family: var(--font-display); font-style: italic; font-weight: 400;
+  font-size: 22px; line-height: 1.45;
+  color: var(--ink); opacity: 0.88;
+  max-width: 36ch;
+  margin: 0;
+}
+.hero-actions { display: flex; flex-direction: column; gap: 18px; align-items: flex-start; }
+.hero-actions-row { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+
+/* ticket strip */
+.tickets {
+  margin: 56px calc(-1 * var(--sec-pad-x)) 0;
+  padding: 0 var(--sec-pad-x);
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
+  border-top: 1px solid var(--ink-pale);
+  border-bottom: 1px solid var(--ink-pale);
+}
+.ticket {
+  padding: 28px 28px 28px 0;
+  border-right: 1px dashed var(--ink-pale);
+  display: flex; flex-direction: column; gap: 6px;
+}
+.ticket:first-child { padding-left: 0; }
+.ticket:last-child { border-right: 0; padding-right: 0; }
+.ticket .tag {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--ink-soft); font-weight: 500;
+}
+.ticket .name {
+  font-family: var(--font-wood); font-weight: 700;
+  font-size: 32px; line-height: 1; letter-spacing: 0;
+  color: var(--ink); text-transform: uppercase;
+  margin-top: 4px;
+}
+.ticket .name em { font-family: var(--font-display); font-style: italic; font-weight: 400; text-transform: none; color: var(--ink-soft); font-size: 0.55em; vertical-align: 0.4em; letter-spacing: -0.02em; }
+.ticket .where {
+  font-family: var(--font-display); font-style: italic; font-weight: 400;
+  font-size: 14px; color: var(--ink); opacity: 0.78;
+  margin-top: 2px;
+}
+.ticket .price {
+  font-family: var(--font-wood); font-weight: 600;
+  font-size: 16px; letter-spacing: 0.08em;
+  color: var(--ink);
+  margin-top: 8px;
+}
+
+/* ============================================================
+   SECTIONS
+   ============================================================ */
+.section { padding: var(--sec-pad-y) var(--sec-pad-x); max-width: var(--max-w); margin: 0 auto; position: relative; }
+.sec-head {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: end;
+  margin-bottom: 56px; padding-bottom: 24px;
+  border-bottom: 3px double var(--ink);
+}
+.sec-eyebrow {
+  font-family: var(--font-mono); font-size: 10.5px;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--ink-soft); font-weight: 500;
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 22px;
+}
+.sec-eyebrow .n {
+  font-family: var(--font-display); font-style: italic; font-weight: 400;
+  font-size: 18px; letter-spacing: 0; text-transform: none;
+  color: var(--ink);
+}
+.sec-eyebrow::before { content: "✶"; font-family: var(--font-display); font-size: 11px; color: var(--ink); }
+.sec-title {
+  font-family: var(--font-wood); font-weight: 700;
+  font-size: clamp(48px, 7vw, 96px);
+  line-height: 0.9; letter-spacing: -0.005em;
+  color: var(--ink); margin: 0;
+  text-transform: uppercase;
+  max-width: 14ch;
+}
+.sec-title em {
+  font-family: var(--font-display); font-style: italic; font-weight: 400;
+  text-transform: none;
+  color: var(--ink-soft);
+  font-size: 0.5em;
+  letter-spacing: -0.02em;
+  vertical-align: 0.5em;
+}
+.sec-lede {
+  font-family: var(--font-display); font-style: italic; font-weight: 400;
+  font-size: 19px; line-height: 1.5;
+  color: var(--ink); opacity: 0.85;
+  max-width: 48ch; margin: 0;
+}
+
+/* PRACTICE / OFFERINGS */
+.menu {
+  display: grid; grid-template-columns: 1fr;
+  border-top: 1px solid var(--ink);
+}
+.menu-row {
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  gap: 32px; padding: 32px 0;
+  border-bottom: 1px solid var(--ink-pale);
+  align-items: baseline;
+}
+.menu-row:last-child { border-bottom: 1px solid var(--ink); }
+.menu-row .ix {
+  font-family: var(--font-display); font-style: italic; font-weight: 400;
+  font-size: 28px; color: var(--ink-soft); line-height: 1;
+}
+.menu-row .body { display: flex; flex-direction: column; gap: 8px; }
+.menu-row h3 {
+  font-family: var(--font-wood); font-weight: 700;
+  font-size: 32px; letter-spacing: 0.005em;
+  text-transform: uppercase; color: var(--ink); line-height: 1;
+  margin: 0;
+}
+.menu-row h3 em { font-family: var(--font-display); font-style: italic; font-weight: 400; text-transform: none; color: var(--ink-soft); font-size: 0.55em; vertical-align: 0.4em; letter-spacing: -0.02em; }
+.menu-row p { font-family: var(--font-body); font-size: 16px; line-height: 1.5; color: var(--ink); opacity: 0.85; margin: 0; max-width: 60ch; }
+.menu-row .source {
+  font-family: var(--font-display); font-style: italic; font-weight: 400;
+  font-size: 14px; color: var(--ink-soft); margin-top: 4px;
+}
+.menu-row .price {
+  font-family: var(--font-wood); font-weight: 700;
+  font-size: 28px; line-height: 1; letter-spacing: 0;
+  color: var(--ink);
+  text-align: right;
+  display: flex; flex-direction: column; gap: 4px;
+  align-items: flex-end;
+}
+.menu-row .price small {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--ink-soft); font-weight: 500;
+}
+
+/* TESTIMONIALS — letterpress press notes */
+.notes {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 32px;
+}
+.note-card {
+  border: 1px solid var(--ink-pale);
+  padding: 32px 30px;
+  background: var(--paper);
+  display: flex; flex-direction: column; gap: 18px;
+  position: relative;
+}
+.note-card.lg { grid-column: span 7; padding: 40px 36px; background: var(--paper-1); }
+.note-card.sm { grid-column: span 5; }
+.note-card.f1 { grid-column: span 5; }
+.note-card.f2 { grid-column: span 7; background: var(--paper-1); }
+.note-card .badge {
+  position: absolute; top: -1px; right: -1px;
+  background: var(--ink); color: var(--paper);
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  padding: 6px 10px; font-weight: 500;
+}
+.note-card blockquote {
+  margin: 0;
+  font-family: var(--font-display); font-weight: 400;
+  font-size: 21px; line-height: 1.42;
+  color: var(--ink); text-wrap: pretty;
+  letter-spacing: -0.005em;
+}
+.note-card.lg blockquote { font-size: 26px; }
+.note-card blockquote em { font-style: italic; color: var(--ink-soft); }
+.note-card cite {
+  display: grid; grid-template-columns: 1fr auto;
+  gap: 16px; align-items: end;
+  font-style: normal;
+  border-top: 1px solid var(--ink-pale);
+  padding-top: 14px;
+}
+.note-card cite .who {
+  font-family: var(--font-wood); font-weight: 600;
+  font-size: 14px; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--ink); line-height: 1.3;
+}
+.note-card cite .who span {
+  display: block; font-family: var(--font-display); font-style: italic; font-weight: 400;
+  font-size: 13px; letter-spacing: 0; text-transform: none; color: var(--ink-soft);
+  margin-top: 2px;
+}
+.note-card cite .stars {
+  font-family: var(--font-display); color: var(--ink);
+  font-size: 16px; letter-spacing: 0.04em;
+}
+
+/* PRICE / CSA TIERS */
+.tiers {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+}
+.tier {
+  background: var(--paper);
+  padding: 36px 30px;
+  border-right: 1px solid var(--ink-pale);
+  display: flex; flex-direction: column;
+  position: relative;
+}
+.tier:last-child { border-right: 0; }
+.tier.featured {
+  background: var(--ink); color: var(--paper);
+  position: relative;
+}
+.tier.featured::before {
+  content: "Most chosen";
+  position: absolute; top: 16px; right: 16px;
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--paper); font-weight: 500;
+  border: 1px solid var(--paper-2); padding: 4px 8px;
+}
+.tier .num {
+  font-family: var(--font-display); font-style: italic; font-weight: 400;
+  font-size: 22px; line-height: 1;
+  color: var(--ink-soft); margin-bottom: 16px;
+}
+.tier.featured .num { color: var(--paper-deep); }
+.tier h3 {
+  font-family: var(--font-wood); font-weight: 700;
+  font-size: 38px; line-height: 0.95; letter-spacing: 0;
+  text-transform: uppercase; margin: 0 0 20px;
+}
+.tier h3 em { font-family: var(--font-display); font-style: italic; font-weight: 400; text-transform: none; font-size: 0.6em; vertical-align: 0.3em; color: var(--ink-soft); }
+.tier.featured h3 em { color: var(--paper-deep); }
+.tier .amt {
+  font-family: var(--font-wood); font-weight: 700;
+  font-size: 64px; line-height: 1; letter-spacing: -0.01em;
+  display: flex; align-items: baseline; gap: 4px;
+  margin-bottom: 6px;
+}
+.tier .amt .cur { font-size: 28px; font-weight: 600; }
+.tier .amt .per { font-family: var(--font-mono); font-size: 11px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; align-self: flex-end; padding-bottom: 14px; color: var(--ink-soft); }
+.tier.featured .amt .per { color: var(--paper-deep); }
+.tier .sub {
+  font-family: var(--font-display); font-style: italic; font-weight: 400;
+  font-size: 15px; line-height: 1.4;
+  color: var(--ink); opacity: 0.85;
+  margin: 0 0 22px;
+  padding-bottom: 22px;
+  border-bottom: 1px dashed var(--ink-pale);
+}
+.tier.featured .sub { color: var(--paper); opacity: 0.85; border-color: oklch(1 0 0 / 0.18); }
+.tier ul { list-style: none; margin: 0 0 28px; padding: 0; display: flex; flex-direction: column; gap: 10px; font-size: 14.5px; flex: 1; }
+.tier ul li { display: grid; grid-template-columns: 18px 1fr; gap: 10px; align-items: baseline; line-height: 1.4; font-family: var(--font-body); }
+.tier ul li::before { content: "✶"; font-family: var(--font-display); color: var(--ink); font-size: 12px; }
+.tier.featured ul li::before { color: var(--paper-deep); }
+.tier ul li b { font-family: var(--font-wood); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; font-size: 13px; }
+
+/* CTA */
+.cta {
+  padding: 128px var(--sec-pad-x);
+  background: var(--ink); color: var(--paper);
+  border-top: 3px double var(--ink);
+  border-bottom: 3px double var(--ink);
+  position: relative;
+}
+.cta::before {
+  content: "";
+  position: absolute; inset: 0;
+  background-image:
+    radial-gradient(circle at 25% 30%, oklch(1 0 0 / 0.04) 1px, transparent 1.5px),
+    radial-gradient(circle at 75% 70%, oklch(1 0 0 / 0.03) 1px, transparent 1.5px);
+  background-size: 6px 6px, 9px 9px;
+  pointer-events: none;
+}
+.cta-inner { max-width: var(--max-w); margin: 0 auto; display: grid; grid-template-columns: 1.4fr 1fr; gap: 64px; align-items: end; position: relative; }
+.cta-eyebrow {
+  font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 0.24em; text-transform: uppercase;
+  color: var(--paper-deep); font-weight: 500;
+  display: inline-flex; align-items: center; gap: 14px;
+  margin-bottom: 30px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid oklch(1 0 0 / 0.20);
+}
+.cta-eyebrow::before { content: "✶"; font-family: var(--font-display); }
+.cta h2 {
+  font-family: var(--font-wood); font-weight: 700;
+  font-size: clamp(56px, 9vw, 144px);
+  line-height: 0.85; letter-spacing: -0.005em;
+  margin: 0 0 36px;
+  text-transform: uppercase;
+}
+.cta h2 em {
+  font-family: var(--font-display); font-style: italic; font-weight: 400;
+  text-transform: none;
+  font-size: 0.45em; vertical-align: 0.55em;
+  letter-spacing: -0.015em;
+  color: var(--paper-deep);
+}
+.cta-actions { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.cta-actions .btn-primary { background: var(--paper); color: var(--ink); border-color: var(--paper); }
+.cta-actions .btn-primary:hover { background: var(--paper-1); border-color: var(--paper-1); }
+.cta-actions .btn-ghost { color: var(--paper); border-color: var(--paper-deep); }
+.cta-actions .btn-ghost:hover { background: oklch(1 0 0 / 0.08); border-color: var(--paper); }
+.cta-aside { border-left: 1px solid oklch(1 0 0 / 0.20); padding-left: 32px; display: flex; flex-direction: column; gap: 0; }
+.cta-aside .row {
+  display: grid; grid-template-columns: 90px 1fr; gap: 18px; align-items: baseline;
+  padding: 14px 0; border-bottom: 1px solid oklch(1 0 0 / 0.12);
+}
+.cta-aside .row:last-child { border-bottom: 0; }
+.cta-aside dt { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.20em; text-transform: uppercase; color: var(--paper-deep); margin: 0; font-weight: 500; }
+.cta-aside dd { font-family: var(--font-display); font-weight: 400; font-size: 16px; line-height: 1.4; color: var(--paper); margin: 0; }
+.cta-aside dd em { font-style: italic; color: var(--paper-deep); }
+
+/* FOOTER */
+.footer { background: var(--paper); border-top: 3px double var(--ink); }
+.footer-top {
+  padding: 64px var(--sec-pad-x) 56px;
+  display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr;
+  gap: 48px;
+  border-bottom: 1px solid var(--ink-pale);
+}
+.footer-brand { display: flex; flex-direction: column; gap: 14px; }
+.footer-brand .word {
+  font-family: var(--font-wood); font-weight: 700;
+  font-size: 36px; line-height: 1;
+  letter-spacing: 0.02em; text-transform: uppercase;
+  color: var(--ink);
+}
+.footer-brand p { font-family: var(--font-display); font-style: italic; font-weight: 400; font-size: 16px; line-height: 1.5; color: var(--ink); opacity: 0.85; max-width: 32ch; margin: 0; }
+.footer-brand .addr { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; color: var(--ink-soft); line-height: 1.7; margin-top: 16px; }
+.footer-col h4 {
+  font-family: var(--font-wood); font-size: 13px;
+  letter-spacing: 0.10em; text-transform: uppercase;
+  color: var(--ink); font-weight: 600; margin: 0 0 14px;
+  padding-bottom: 8px; border-bottom: 1px solid var(--ink-pale);
+}
+.footer-col ul { list-style: none; margin: 0; padding: 0; }
+.footer-col ul li { font-family: var(--font-display); font-weight: 400; font-size: 16px; padding: 5px 0; color: var(--ink); opacity: 0.82; }
+.footer-col ul li:hover { opacity: 1; }
+.footer-bottom {
+  padding: 24px var(--sec-pad-x);
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-family: var(--font-mono);
+  font-size: 10.5px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--ink-soft);
+  flex-wrap: wrap; gap: 16px;
+}
+.footer-bottom em { font-family: var(--font-display); font-style: italic; font-weight: 400; font-size: 13px; letter-spacing: 0; text-transform: none; color: var(--ink); opacity: 0.85; }
+
+.footer-colophon {
+  border-top: 1px solid var(--ink-pale);
+  padding: 56px var(--sec-pad-x) 80px;
+  text-align: center; background: var(--paper-1);
+}
+.footer-colophon .word {
+  font-family: var(--font-wood); font-weight: 700;
+  font-size: clamp(96px, 17vw, 280px);
+  line-height: 0.85; letter-spacing: -0.005em;
+  color: var(--ink); text-transform: uppercase;
+}
+.footer-colophon .word em {
+  font-family: var(--font-display); font-style: italic; font-weight: 400;
+  text-transform: none; color: var(--ink-soft);
+  font-size: 0.4em; vertical-align: 0.55em; letter-spacing: -0.02em;
+}
+.footer-colophon .note {
+  font-family: var(--font-display); font-style: italic; font-weight: 400;
+  font-size: 16px; color: var(--ink); opacity: 0.85; margin-top: 16px;
+}
+
+/* ============================================================
+   TOKENS
+   ============================================================ */
+.tokens { max-width: 1080px; margin: 96px auto 96px; padding: 0 32px; }
+.tokens h2 {
+  font-family: var(--font-wood); font-weight: 700;
+  font-size: 52px; line-height: 0.9; letter-spacing: 0;
+  text-transform: uppercase;
+  margin: 0 0 12px; padding-bottom: 14px;
+  border-bottom: 1px solid var(--ink-pale);
+}
+.tokens h2 em { font-family: var(--font-display); font-style: italic; font-weight: 400; text-transform: none; color: var(--ink-soft); font-size: 0.5em; vertical-align: 0.4em; }
+.tokens p { color: var(--ink); opacity: 0.85; max-width: 66ch; margin: 18px 0 24px; }
+.tokens h3 {
+  font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  margin: 40px 0 12px; color: var(--ink-soft);
+}
+.tokens pre {
+  background: var(--paper-1); border: 1px solid var(--ink-pale);
+  padding: 28px 32px; font-family: var(--font-mono);
+  font-size: 12.5px; line-height: 1.8; overflow-x: auto;
+  white-space: pre; color: var(--ink);
+}
+.tokens .c { color: var(--ink-soft); font-style: italic; }
+.tokens .k { color: var(--ink); font-weight: 500; }
+.tokens .v { color: var(--ink-deep); }
+
+/* ============================================================
+   PALETTES — one ink + one paper
+   ============================================================ */
+html[data-palette="clay"]  { --ink: oklch(0.34 0.10 40); --ink-deep: oklch(0.22 0.10 40); --ink-soft: oklch(0.50 0.09 40); --ink-pale: oklch(0.78 0.05 40); --paper: oklch(0.96 0.018 85); --paper-1: oklch(0.93 0.022 85); --paper-2: oklch(0.89 0.026 85); --paper-deep: oklch(0.84 0.030 85); }
+html[data-palette="olive"] { --ink: oklch(0.36 0.07 110); --ink-deep: oklch(0.24 0.07 110); --ink-soft: oklch(0.52 0.06 110); --ink-pale: oklch(0.78 0.04 110); --paper: oklch(0.96 0.014 90); --paper-1: oklch(0.93 0.018 90); --paper-2: oklch(0.89 0.022 90); --paper-deep: oklch(0.84 0.026 90); }
+html[data-palette="ochre"] { --ink: oklch(0.42 0.10 70); --ink-deep: oklch(0.28 0.10 70); --ink-soft: oklch(0.56 0.09 70); --ink-pale: oklch(0.80 0.05 70); --paper: oklch(0.96 0.020 85); --paper-1: oklch(0.93 0.024 85); --paper-2: oklch(0.89 0.028 85); --paper-deep: oklch(0.84 0.032 85); }
+html[data-palette="rust"]  { --ink: oklch(0.30 0.12 30); --ink-deep: oklch(0.20 0.12 30); --ink-soft: oklch(0.48 0.10 30); --ink-pale: oklch(0.76 0.06 30); --paper: oklch(0.93 0.022 70); --paper-1: oklch(0.90 0.026 70); --paper-2: oklch(0.86 0.030 70); --paper-deep: oklch(0.82 0.034 70); }
+html[data-palette="indigo"]{ --ink: oklch(0.28 0.08 250); --ink-deep: oklch(0.18 0.08 250); --ink-soft: oklch(0.46 0.06 250); --ink-pale: oklch(0.76 0.04 250); --paper: oklch(0.96 0.012 90); --paper-1: oklch(0.93 0.014 90); --paper-2: oklch(0.89 0.016 90); --paper-deep: oklch(0.84 0.018 90); }
+html[data-palette="mill"]  { --ink: oklch(0.22 0.012 60); --ink-deep: oklch(0.12 0.012 60); --ink-soft: oklch(0.42 0.010 60); --ink-pale: oklch(0.74 0.008 60); --paper: oklch(0.96 0.010 90); --paper-1: oklch(0.93 0.012 90); --paper-2: oklch(0.89 0.014 90); --paper-deep: oklch(0.84 0.016 90); }
+html[data-palette="cellar"]{ --ink: oklch(0.28 0.11 20); --ink-deep: oklch(0.18 0.11 20); --ink-soft: oklch(0.46 0.09 20); --ink-pale: oklch(0.76 0.05 20); --paper: oklch(0.95 0.018 85); --paper-1: oklch(0.92 0.022 85); --paper-2: oklch(0.88 0.026 85); --paper-deep: oklch(0.84 0.030 85); }
+html[data-palette="linen"] { --ink: oklch(0.36 0.07 145); --ink-deep: oklch(0.24 0.07 145); --ink-soft: oklch(0.52 0.06 145); --ink-pale: oklch(0.78 0.04 145); --paper: oklch(0.95 0.014 90); --paper-1: oklch(0.92 0.018 90); --paper-2: oklch(0.88 0.022 90); --paper-deep: oklch(0.84 0.026 90); }
+html[data-palette="brick"] { --ink: oklch(0.36 0.13 28); --ink-deep: oklch(0.24 0.13 28); --ink-soft: oklch(0.52 0.10 28); --ink-pale: oklch(0.78 0.06 28); --paper: oklch(0.93 0.024 80); --paper-1: oklch(0.90 0.028 80); --paper-2: oklch(0.86 0.032 80); --paper-deep: oklch(0.82 0.036 80); }
+
+/* ============================================================
+   VARIANTS
+   ============================================================ */
+
+/* MARKET — chalkboard. Darker paper, two-color tickets, hand-pricing. */
+html[data-variant="market"] {
+  --paper:    oklch(0.18 0.012 60);
+  --paper-1:  oklch(0.22 0.014 60);
+  --paper-2:  oklch(0.26 0.016 60);
+  --paper-deep: oklch(0.30 0.018 60);
+  --ink:      oklch(0.96 0.018 85);
+  --ink-deep: oklch(0.90 0.022 85);
+  --ink-soft: oklch(0.74 0.020 85);
+  --ink-pale: oklch(0.42 0.014 60);
+}
+html[data-variant="market"] body {
+  background-image:
+    radial-gradient(circle at 25% 30%, oklch(1 0 0 / 0.025) 1px, transparent 1.5px),
+    radial-gradient(circle at 75% 70%, oklch(1 0 0 / 0.020) 1px, transparent 1.5px);
+}
+html[data-variant="market"] .frame {
+  background-image:
+    radial-gradient(circle at 25% 30%, oklch(1 0 0 / 0.025) 1px, transparent 1.5px),
+    radial-gradient(circle at 75% 70%, oklch(1 0 0 / 0.020) 1px, transparent 1.5px);
+}
+html[data-variant="market"] .cta { background: var(--paper-2); }
+html[data-variant="market"] .cta-actions .btn-primary { background: var(--ink); color: var(--paper); }
+html[data-variant="market"] .tier.featured { background: var(--paper-2); }
+html[data-variant="market"] .tier { background: var(--paper-1); }
+html[data-variant="market"] .nav-right .cta { background: var(--ink); color: var(--paper); }
+
+/* WORKSHOP — blueprint. Cool paper, more mono, ruler-tick rules. */
+html[data-variant="workshop"] {
+  --paper:   oklch(0.95 0.012 220);
+  --paper-1: oklch(0.92 0.014 220);
+  --paper-2: oklch(0.88 0.016 220);
+  --paper-deep: oklch(0.84 0.018 220);
+  --ink:     oklch(0.30 0.08 240);
+  --ink-deep:oklch(0.20 0.08 240);
+  --ink-soft:oklch(0.48 0.06 240);
+  --ink-pale:oklch(0.74 0.04 240);
+  --font-display: "Source Serif 4", "Times New Roman", serif;
+}
+html[data-variant="workshop"] body {
+  background-image:
+    linear-gradient(to right, oklch(0.30 0.08 240 / 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(0.30 0.08 240 / 0.04) 1px, transparent 1px);
+  background-size: 32px 32px, 32px 32px;
+}
+html[data-variant="workshop"] .frame {
+  background-image:
+    linear-gradient(to right, oklch(0.30 0.08 240 / 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(0.30 0.08 240 / 0.04) 1px, transparent 1px);
+  background-size: 32px 32px, 32px 32px;
+}
+html[data-variant="workshop"] .hero-display { font-family: var(--font-wood); letter-spacing: 0.005em; }
+html[data-variant="workshop"] .doc-title { letter-spacing: 0.005em; }
+html[data-variant="workshop"] .menu-row .source { font-family: var(--font-mono); font-style: normal; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; }
+html[data-variant="workshop"] .ticket .where { font-family: var(--font-mono); font-style: normal; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 1100px) {
+  .nav { grid-template-columns: auto 1fr auto; }
+  .nav-mid { display: none; }
+  .hero-mid { grid-template-columns: 1fr; gap: 32px; }
+  .tickets { grid-template-columns: 1fr 1fr; }
+  .ticket:nth-child(2) { border-right: 0; padding-right: 0; }
+  .ticket:nth-child(3) { padding-left: 0; }
+  .menu-row { grid-template-columns: 50px 1fr auto; gap: 20px; }
+  .notes { grid-template-columns: 1fr; }
+  .note-card.lg, .note-card.sm, .note-card.f1, .note-card.f2 { grid-column: span 12; }
+  .tiers { grid-template-columns: 1fr; }
+  .tier { border-right: 0; border-bottom: 1px solid var(--ink-pale); }
+  .footer-top { grid-template-columns: 1fr 1fr; }
+  .sec-head, .cta-inner { grid-template-columns: 1fr; gap: 32px; }
+}
+@media (max-width: 720px) {
+  :root { --sec-pad-y: 80px; }
+  .doc { padding: 64px 24px 56px; }
+  .doc-header { grid-template-columns: 1fr; gap: 32px; }
+  .doc-stamp { align-self: stretch; }
+  .doc-meta { grid-template-columns: 1fr 1fr; gap: 20px; }
+  .nav { grid-template-columns: 1fr; }
+  .nav-brand { border-right: 0; border-bottom: 1px solid var(--ink-pale); }
+  .nav-right { padding: 12px 24px; justify-content: space-between; }
+  .tickets { grid-template-columns: 1fr; }
+  .ticket { border-right: 0; border-bottom: 1px dashed var(--ink-pale); padding: 20px 0; }
+  .ticket:last-child { border-bottom: 0; }
+  .menu-row { grid-template-columns: 30px 1fr; gap: 16px; }
+  .menu-row .price { grid-column: 1 / 3; text-align: left; align-items: flex-start; flex-direction: row; gap: 16px; padding-top: 6px; }
+  .footer-top { grid-template-columns: 1fr; gap: 32px; }
+  .swatch-grid { grid-template-columns: 1fr 1fr; }
+  .spec .row { grid-template-columns: 30px 1fr; gap: 12px; }
+  .spec .row > *:nth-child(3),
+  .spec .row > *:nth-child(4),
+  .spec .row > *:nth-child(5) { display: none; }
+}
+
+/* ============================================================
+   SWITCHER
+   ============================================================ */
+.switcher {
+  position: fixed; top: 20px; right: 20px; z-index: 100;
+  background: var(--paper);
+  border: 1.5px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink-pale);
+  padding: 14px 16px 16px;
+  width: 280px;
+  font-family: var(--font-ui);
+}
+.switcher-title {
+  font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--ink-soft);
+  display: flex; align-items: center; gap: 10px;
+  padding-bottom: 12px; border-bottom: 1px solid var(--ink-pale);
+}
+.switcher-title em {
+  font-family: var(--font-wood); font-weight: 700; font-style: normal;
+  font-size: 14px; color: var(--ink); letter-spacing: 0.04em; text-transform: uppercase;
+}
+.switcher-label {
+  font-family: var(--font-mono); font-size: 9.5px;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--ink-soft); font-weight: 500;
+  margin: 14px 0 8px;
+}
+.switcher-palettes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.switcher-palettes button {
+  height: 36px;
+  border: 1px solid var(--ink); padding: 0; cursor: pointer;
+  display: flex; overflow: hidden;
+  position: relative;
+  outline: 2px solid transparent; outline-offset: 1px;
+  transition: outline-color 140ms ease, transform 140ms ease;
+}
+.switcher-palettes button:hover { transform: translateY(-1px); }
+.switcher .switcher-palettes button[aria-pressed="true"] {
+  outline-color: var(--ink) !important;
+}
+.switcher-palettes button .ink, .switcher-palettes button .paper { flex: 1; height: 100%; }
+.switcher-palettes button .name {
+  position: absolute; bottom: 1px; left: 4px;
+  font-family: var(--font-wood); font-weight: 600;
+  font-size: 10.5px; letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--paper); pointer-events: none;
+  text-shadow: 0 0 3px oklch(0.20 0 0 / 0.5);
+}
+.switcher-variants { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: 1px solid var(--ink); }
+.switcher-variants button {
+  font-family: var(--font-wood); font-weight: 600; font-size: 12px;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 9px 6px;
+  background: transparent; color: var(--ink);
+  border: 0; border-right: 1px solid var(--ink-pale);
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease;
+}
+.switcher-variants button:last-child { border-right: 0; }
+.switcher-variants button:hover { background: var(--paper-2); }
+.switcher .switcher-variants button[aria-pressed="true"] {
+  background-color: var(--ink) !important;
+  color: var(--paper) !important;
+}
+.switcher-caption {
+  font-family: var(--font-display); font-style: italic; font-weight: 400;
+  font-size: 13.5px; line-height: 1.5;
+  color: var(--ink); opacity: 0.85;
+  margin-top: 12px; padding-top: 10px;
+  border-top: 1px dashed var(--ink-pale);
+}
+.switcher-caption b { font-style: normal; font-family: var(--font-wood); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; opacity: 1; font-size: 12px; }
+@media (max-width: 720px) {
+  .switcher { top: auto; bottom: 12px; right: 12px; left: 12px; width: auto; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     SWITCHER
+     ============================================================ -->
+<aside class="switcher" aria-label="Mill design system controls">
+  <div class="switcher-title">№ 06 · <em>Mill</em> · controls</div>
+
+  <div class="switcher-label">Ink &amp; paper</div>
+  <div class="switcher-palettes" role="radiogroup" aria-label="Palette">
+    <button data-set-palette="clay" aria-label="Clay" title="Clay · terracotta on cream (default)">
+      <span class="ink" style="background: oklch(0.34 0.10 40); flex: 3;"></span>
+      <span class="paper" style="background: oklch(0.96 0.018 85);"></span>
+      <span class="name">Clay</span>
+    </button>
+    <button data-set-palette="olive" aria-label="Olive" title="Olive on cream">
+      <span class="ink" style="background: oklch(0.36 0.07 110); flex: 3;"></span>
+      <span class="paper" style="background: oklch(0.96 0.014 90);"></span>
+      <span class="name">Olive</span>
+    </button>
+    <button data-set-palette="ochre" aria-label="Ochre" title="Ochre on cream">
+      <span class="ink" style="background: oklch(0.42 0.10 70); flex: 3;"></span>
+      <span class="paper" style="background: oklch(0.96 0.020 85);"></span>
+      <span class="name">Ochre</span>
+    </button>
+    <button data-set-palette="rust" aria-label="Rust" title="Rust on kraft">
+      <span class="ink" style="background: oklch(0.30 0.12 30); flex: 3;"></span>
+      <span class="paper" style="background: oklch(0.93 0.022 70);"></span>
+      <span class="name">Rust</span>
+    </button>
+    <button data-set-palette="indigo" aria-label="Indigo" title="Vat-blue on natural">
+      <span class="ink" style="background: oklch(0.28 0.08 250); flex: 3;"></span>
+      <span class="paper" style="background: oklch(0.96 0.012 90);"></span>
+      <span class="name">Indigo</span>
+    </button>
+    <button data-set-palette="mill" aria-label="Mill" title="Charcoal on bone">
+      <span class="ink" style="background: oklch(0.22 0.012 60); flex: 3;"></span>
+      <span class="paper" style="background: oklch(0.96 0.010 90);"></span>
+      <span class="name">Mill</span>
+    </button>
+    <button data-set-palette="cellar" aria-label="Cellar" title="Oxblood on parchment">
+      <span class="ink" style="background: oklch(0.28 0.11 20); flex: 3;"></span>
+      <span class="paper" style="background: oklch(0.95 0.018 85);"></span>
+      <span class="name">Cellar</span>
+    </button>
+    <button data-set-palette="linen" aria-label="Linen" title="Sage on linen">
+      <span class="ink" style="background: oklch(0.36 0.07 145); flex: 3;"></span>
+      <span class="paper" style="background: oklch(0.95 0.014 90);"></span>
+      <span class="name">Linen</span>
+    </button>
+    <button data-set-palette="brick" aria-label="Brick" title="Warm red on butcher paper">
+      <span class="ink" style="background: oklch(0.36 0.13 28); flex: 3;"></span>
+      <span class="paper" style="background: oklch(0.93 0.024 80);"></span>
+      <span class="name">Brick</span>
+    </button>
+  </div>
+
+  <div class="switcher-label">Variant</div>
+  <div class="switcher-variants" role="radiogroup" aria-label="Variant">
+    <button data-set-variant="letterpress" title="Letterpress · the default. Restaurants, hotels, wineries.">Letterpr.</button>
+    <button data-set-variant="market" title="Market · chalkboard. Bakeries, butchers, markets.">Market</button>
+    <button data-set-variant="workshop" title="Workshop · blueprint. Ceramic, leather, wood studios.">Workshop</button>
+  </div>
+
+  <div class="switcher-caption" id="switcherCaption">
+    <b>Letterpress.</b> The default — wood-type display, single ink, cream paper. Restaurants, small hotels, wineries.
+  </div>
+</aside>
+
+<script>
+(() => {
+  const root = document.documentElement;
+  const KEY_P = "mill.palette";
+  const KEY_V = "mill.variant";
+  const VARIANT_DESC = {
+    letterpress: "<b>Letterpress.</b> The default — wood-type display, single ink, cream paper. Restaurants, small hotels, wineries.",
+    market:      "<b>Market.</b> Chalkboard energy — chalk-on-slate paper, hand-set tickets. Bakeries, butchers, market stalls.",
+    workshop:    "<b>Workshop.</b> Blueprint background, mono metadata, ruler ticks. Ceramic, leather, wood studios."
+  };
+  try { const p = localStorage.getItem(KEY_P); const v = localStorage.getItem(KEY_V);
+    if (p) root.setAttribute("data-palette", p); if (v) root.setAttribute("data-variant", v); } catch {}
+  const sync = () => {
+    const p = root.getAttribute("data-palette") || "clay";
+    const v = root.getAttribute("data-variant") || "letterpress";
+    document.querySelectorAll("[data-set-palette]").forEach(b => b.setAttribute("aria-pressed", b.dataset.setPalette === p));
+    document.querySelectorAll("[data-set-variant]").forEach(b => b.setAttribute("aria-pressed", b.dataset.setVariant === v));
+    const cap = document.getElementById("switcherCaption");
+    if (cap) cap.innerHTML = VARIANT_DESC[v] || VARIANT_DESC.letterpress;
+  };
+  document.querySelectorAll("[data-set-palette]").forEach(btn => btn.addEventListener("click", () => {
+    root.setAttribute("data-palette", btn.dataset.setPalette);
+    try { localStorage.setItem(KEY_P, btn.dataset.setPalette); } catch {} sync();
+  }));
+  document.querySelectorAll("[data-set-variant]").forEach(btn => btn.addEventListener("click", () => {
+    root.setAttribute("data-variant", btn.dataset.setVariant);
+    try { localStorage.setItem(KEY_V, btn.dataset.setVariant); } catch {} sync();
+  }));
+  sync();
+})();
+</script>
+
+<!-- ============================================================
+     SPEC DOC
+     ============================================================ -->
+<div class="doc">
+  <header class="doc-header">
+    <div>
+      <div class="doc-eyebrow">№ 06 — Local Craft · Lessgo design library</div>
+      <h1 class="doc-title">Mill <em>&amp; Co.</em></h1>
+      <p class="doc-sub">A hand-set system for makers, bakers, neighbourhood restaurants, ceramic studios, butchers, coffee roasters, and small farms — for buyers whose customers walk in by name.</p>
+    </div>
+    <div class="doc-stamp">
+      Lessgo Library
+      <div class="seal">M</div>
+      <b>Volume VI</b>
+      April · MMXXVI
+    </div>
+  </header>
+
+  <dl class="doc-meta">
+    <div><dt>For</dt><dd>Restaurants · markets · makers · hotels</dd></div>
+    <div><dt>Mode</dt><dd>Single ink on warm paper</dd></div>
+    <div><dt>Voice</dt><dd>Specific · <em>not folksy</em></dd></div>
+    <div><dt>References</dt><dd>Letterpress · chalkboards · price tags</dd></div>
+  </dl>
+
+  <!-- 01 Identity -->
+  <section>
+    <h2><span class="n">№ 01</span> Identity</h2>
+    <p class="dek">Hand-set, not hand-drawn. Letterpress vocabulary. One ink, one paper.</p>
+    <p>Mill is the system for the place you walk past every Tuesday. The neighbourhood bakery, the tiny restaurant with eight tables, the studio where someone is still throwing pots at 7pm. It looks made — by a person, on equipment that has a serial number — but it is never twee. There is no chalk-script. There are no rope-borders. There are no badges that say "EST. 2024" in a fake-vintage typeface.</p>
+    <p>Instead Mill borrows from the things actual makers actually use. Wood-type posters. Letterpress menus. Chalkboards (real ones). Butcher-paper price tags. Ledger-bound order books. Stamped boxes. The vocabulary is concrete and the typography is correct.</p>
+    <p class="pull">"Apricots. From Helen, in Sebastopol. Tuesday only." — not "premium artisanal stone-fruit."</p>
+    <p>The system enforces specificity in the copy slots. Every product has a person, a place, a day. Every price is a real number. Every "About" page is shorter than its menu.</p>
+  </section>
+
+  <!-- 02 Type -->
+  <section>
+    <h2><span class="n">№ 02</span> Type</h2>
+    <p class="dek">Wood-type display. Italic serif for the editorial moment. Mono for tickets and stamps.</p>
+    <h3>Variants</h3>
+    <ul>
+      <li><strong>Letterpress</strong> — Oswald (wood-type stand-in) for display, Source Serif 4 for body, Fraunces italic for editorial. The default — small hotels, restaurants, wineries.</li>
+      <li><strong>Market</strong> — same families, inverted to chalk-on-slate paper. Adds two-color tickets and hand-pricing.</li>
+      <li><strong>Workshop</strong> — blueprint background, more JetBrains Mono for source-tags and dimensional callouts. Ceramic, leather, wood studios.</li>
+    </ul>
+
+    <h3>Display scale</h3>
+    <div class="spec">
+      <div class="row head"><div>Role</div><div>Sample</div><div>Desktop</div><div>Mobile</div><div>Weight</div></div>
+      <div class="row"><div>D1</div><div class="sample">MILL &amp; CO.</div><div>220 / .82</div><div>72 / .85</div><div>700</div></div>
+      <div class="row"><div>D2</div><div class="sample">SECTION</div><div>96 / .9</div><div>48 / .95</div><div>700</div></div>
+      <div class="row"><div>D3</div><div class="sample">TICKET</div><div>32 / 1.0</div><div>26 / 1.05</div><div>700</div></div>
+      <div class="row"><div>D4</div><div class="sample" style="font-family: var(--font-display); font-style: italic; font-weight: 400; text-transform: none; letter-spacing: 0;">Editorial italic</div><div>22 / 1.45</div><div>19 / 1.5</div><div>400</div></div>
+    </div>
+
+    <div class="plate">
+      <span class="plate-label">Plate № 01 — Display</span>
+      <span class="plate-num">D1 · 144 / 700</span>
+      <div class="s-d1">MILL <em>&amp; Co.</em></div>
+    </div>
+    <div class="plate">
+      <span class="plate-label">Plate № 02 — Specimens</span>
+      <span class="plate-num">D2 · D3 · D4</span>
+      <div class="s-d2">FRESH BREAD,<br>BAKED <em style="font-family: var(--font-display); font-style: italic; font-weight: 400; text-transform: none; font-size: 0.55em; vertical-align: 0.35em; color: var(--ink-soft);">Tuesday.</em></div>
+      <div class="s-d3" style="margin-top: 24px;">A hand-set system for buyers whose customers walk in by name.</div>
+    </div>
+  </section>
+
+  <!-- 03 Color -->
+  <section>
+    <h2><span class="n">№ 03</span> Color</h2>
+    <p class="dek">Nine inks, nine papers. The whole brand is set in one ink color on one paper.</p>
+
+    <h3>Surface</h3>
+    <div class="swatch-grid">
+      <div class="swatch"><div class="chip" style="background: oklch(0.96 0.018 85)"></div><div class="lbl"><b>paper</b><span>L 0.96 · cream</span></div></div>
+      <div class="swatch"><div class="chip" style="background: oklch(0.93 0.022 85)"></div><div class="lbl"><b>paper-1</b><span>L 0.93</span></div></div>
+      <div class="swatch"><div class="chip" style="background: oklch(0.78 0.05 40)"></div><div class="lbl"><b>ink-pale</b><span>L 0.78 · rule</span></div></div>
+      <div class="swatch"><div class="chip" style="background: oklch(0.50 0.09 40)"></div><div class="lbl" style="background: oklch(0.50 0.09 40); color: oklch(0.96 0.018 85)"><b style="color: oklch(0.96 0.018 85)">ink-soft</b><span style="color: oklch(0.92 0.018 85)">L 0.50 · captions</span></div></div>
+      <div class="swatch"><div class="chip" style="background: oklch(0.34 0.10 40)"></div><div class="lbl" style="background: oklch(0.34 0.10 40); color: oklch(0.96 0.018 85)"><b style="color: oklch(0.96 0.018 85)">ink</b><span style="color: oklch(0.92 0.018 85)">L 0.34 · everything</span></div></div>
+    </div>
+
+    <h3>Ink palettes</h3>
+    <p>The user picks a palette; <span class="mono">--ink</span> and <span class="mono">--paper</span> co-vary. The ink does almost everything; the paper is warmer or cooler than Lex's. Two-color is reserved for Market variant only.</p>
+    <div class="swatch-grid" style="grid-template-columns: repeat(9, 1fr);">
+      <div class="swatch"><div class="chip" style="background: linear-gradient(to right, oklch(0.34 0.10 40) 75%, oklch(0.96 0.018 85) 75%)"></div><div class="lbl"><b>clay</b><span>terracotta</span></div></div>
+      <div class="swatch"><div class="chip" style="background: linear-gradient(to right, oklch(0.36 0.07 110) 75%, oklch(0.96 0.014 90) 75%)"></div><div class="lbl"><b>olive</b><span>L 0.36</span></div></div>
+      <div class="swatch"><div class="chip" style="background: linear-gradient(to right, oklch(0.42 0.10 70) 75%, oklch(0.96 0.020 85) 75%)"></div><div class="lbl"><b>ochre</b><span>L 0.42</span></div></div>
+      <div class="swatch"><div class="chip" style="background: linear-gradient(to right, oklch(0.30 0.12 30) 75%, oklch(0.93 0.022 70) 75%)"></div><div class="lbl"><b>rust</b><span>on kraft</span></div></div>
+      <div class="swatch"><div class="chip" style="background: linear-gradient(to right, oklch(0.28 0.08 250) 75%, oklch(0.96 0.012 90) 75%)"></div><div class="lbl"><b>indigo</b><span>vat-blue</span></div></div>
+      <div class="swatch"><div class="chip" style="background: linear-gradient(to right, oklch(0.22 0.012 60) 75%, oklch(0.96 0.010 90) 75%)"></div><div class="lbl"><b>mill</b><span>charcoal</span></div></div>
+      <div class="swatch"><div class="chip" style="background: linear-gradient(to right, oklch(0.28 0.11 20) 75%, oklch(0.95 0.018 85) 75%)"></div><div class="lbl"><b>cellar</b><span>oxblood</span></div></div>
+      <div class="swatch"><div class="chip" style="background: linear-gradient(to right, oklch(0.36 0.07 145) 75%, oklch(0.95 0.014 90) 75%)"></div><div class="lbl"><b>linen</b><span>sage</span></div></div>
+      <div class="swatch"><div class="chip" style="background: linear-gradient(to right, oklch(0.36 0.13 28) 75%, oklch(0.93 0.024 80) 75%)"></div><div class="lbl"><b>brick</b><span>warm red</span></div></div>
+    </div>
+  </section>
+
+  <!-- 04 Decoration -->
+  <section>
+    <h2><span class="n">№ 04</span> Decoration</h2>
+    <p class="dek">Six permitted motifs. They were used because they were useful, then they became style.</p>
+    <ul>
+      <li><strong>Stars and asterisks</strong> (✶ ⁂) — section breaks, nav indicators, list markers. Always Fraunces italic, always at one weight below the body.</li>
+      <li><strong>Double rules</strong> — 3px double-line at section breaks and chapter heads, the printer's way of saying "this is important."</li>
+      <li><strong>Stamps and seals</strong> — outline circle with a hand-set monogram. One per page, in the masthead.</li>
+      <li><strong>Tickets &amp; price tags</strong> — dashed-edged cards with a tag, a name, a where, a price. The composing-stick of the system.</li>
+      <li><strong>Hand-numbered editions</strong> — "№ 14 of 200" in the corner of any limited thing. Builds inventory honesty.</li>
+      <li><strong>Paper grain</strong> — radial-noise overlay at low opacity. The page should feel printed, never sterile.</li>
+    </ul>
+    <p>What's <em>banned</em>: chalk-script fonts, rope borders, burlap textures, photo filters that fake age, "EST." badges, leaf flourishes, anything painted on a wooden sign.</p>
+  </section>
+</div>
+
+<!-- ============================================================
+     RENDERED MOCKUP
+     ============================================================ -->
+<div class="stage">
+  <div class="stage-header">
+    <span class="stage-n">Plate № 06</span>
+    <span class="stage-title">Composed page</span>
+    <span class="stage-note">A neighbourhood restaurant.</span>
+  </div>
+  <div class="frame">
+
+    <!-- NAV -->
+    <nav class="nav">
+      <div class="nav-brand">
+        <span class="mark">M</span>
+        <div>
+          <div class="name">Mill &amp; Wheat</div>
+          <span class="est">Restaurant · Bakery · est. MMXVII</span>
+        </div>
+      </div>
+      <div class="nav-mid">
+        <a class="active">Menu</a>
+        <a>Bakery</a>
+        <a>Larder</a>
+        <a>Kitchen</a>
+        <a>Visit</a>
+      </div>
+      <div class="nav-right">
+        <span class="meta">Open Wed–Sun · 8–14</span>
+        <a class="cta">Reserve a table <span class="arrow">→</span></a>
+      </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-rule">
+        <span>№ 47 · Spring</span>
+        <span class="line"></span>
+        <span class="star">✶</span>
+        <span class="line"></span>
+        <span>Open Wednesday</span>
+      </div>
+
+      <h1 class="hero-display">
+        BREAD,<br>
+        <span class="row2">BUTTER, <em>&amp; the rest</em></span><br>
+        <span class="row2">FROM THE FIELD.</span>
+      </h1>
+
+      <div class="hero-mid">
+        <p class="hero-lede">A 26-seat restaurant, a four-table bakery, and a larder of things we couldn't help ourselves from making — flour milled on Tuesday, butter churned Friday, sourdough on the bench by half past five.</p>
+        <div class="hero-actions">
+          <div class="hero-actions-row">
+            <a class="btn btn-primary btn-lg">Reserve a table <span class="arrow">→</span></a>
+            <a class="btn btn-quiet">See this week&rsquo;s menu</a>
+          </div>
+          <div style="font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-soft); display: flex; gap: 18px; flex-wrap: wrap;">
+            <span>Wed–Sun · 8 to 14</span>
+            <span>Bakery from 7</span>
+            <span>14 Mill Lane · SE15</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- TICKETS -->
+      <div class="tickets">
+        <div class="ticket">
+          <span class="tag">№ 01 · Today</span>
+          <span class="name">Sourdough <em>(loaf)</em></span>
+          <span class="where">From the bench since 5:30 — by Mary &amp; Jules</span>
+          <span class="price">£6.20</span>
+        </div>
+        <div class="ticket">
+          <span class="tag">№ 02 · Today</span>
+          <span class="name">Butter <em>(½ lb)</em></span>
+          <span class="where">Churned Friday — Helen at the dairy</span>
+          <span class="price">£5.80</span>
+        </div>
+        <div class="ticket">
+          <span class="tag">№ 03 · Tuesday</span>
+          <span class="name">Apricots <em>(kilo)</em></span>
+          <span class="where">From Helen, in Sebastopol — until they go</span>
+          <span class="price">£12.00</span>
+        </div>
+        <div class="ticket">
+          <span class="tag">№ 04 · Sunday</span>
+          <span class="name">Roast <em>(whole)</em></span>
+          <span class="where">Lamb from the Frith brothers, Welsh hills</span>
+          <span class="price">£44.00</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- MENU / OFFERINGS -->
+    <section class="section">
+      <header class="sec-head">
+        <div>
+          <div class="sec-eyebrow"><span class="n">№ 02</span><span>This week</span></div>
+          <h2 class="sec-title">SIX THINGS, <em>that's it.</em></h2>
+        </div>
+        <p class="sec-lede">The menu is short on purpose. We change five of these every Wednesday. The bread doesn&rsquo;t change.</p>
+      </header>
+
+      <div class="menu">
+        <div class="menu-row">
+          <span class="ix">i.</span>
+          <div class="body">
+            <h3>SEEDED RYE LOAF <em>by Mary</em></h3>
+            <p>Slow-fermented dark rye with caraway and fennel. From a starter Mary has kept alive since 2014.</p>
+            <span class="source">Flour: stoneground at Foxes Mill, Kent · 36-hour ferment</span>
+          </div>
+          <div class="price">£6.20<small>per loaf</small></div>
+        </div>
+        <div class="menu-row">
+          <span class="ix">ii.</span>
+          <div class="body">
+            <h3>BUTTERED RADISHES <em>&amp; sea salt</em></h3>
+            <p>Breakfast radishes from Roger in Hayes, our cultured butter, Maldon. A plate that takes ninety seconds to make and has been on every menu since we opened.</p>
+            <span class="source">Radishes: Hayes Farm · Butter: churned Friday</span>
+          </div>
+          <div class="price">£8.50<small>plate</small></div>
+        </div>
+        <div class="menu-row">
+          <span class="ix">iii.</span>
+          <div class="body">
+            <h3>CHICKEN, BROWN BUTTER <em>&amp; lemon</em></h3>
+            <p>A whole-boned thigh from the Brick Lane butcher, cooked in a pan that has been on this stove since 2019. Served with whatever herb is on the windowsill.</p>
+            <span class="source">Chicken: Coles &amp; Sons, E1 · Lemons: from Carmelo, Sicily</span>
+          </div>
+          <div class="price">£18.00<small>main</small></div>
+        </div>
+        <div class="menu-row">
+          <span class="ix">iv.</span>
+          <div class="body">
+            <h3>HAKE, BROTH <em>&amp; cabbage</em></h3>
+            <p>Day-boat hake from Newlyn. Broth from yesterday&rsquo;s bones. Hispi cabbage, charred. The kind of fish dish you eat with a spoon.</p>
+            <span class="source">Hake: Newlyn day-boats · Cabbage: Roger in Hayes</span>
+          </div>
+          <div class="price">£22.00<small>main</small></div>
+        </div>
+        <div class="menu-row">
+          <span class="ix">v.</span>
+          <div class="body">
+            <h3>APRICOT TART <em>&amp; cream</em></h3>
+            <p>Helen&rsquo;s Sebastopol apricots, almond frangipane, a buttery short crust. Available Tuesday until the apricots run out — usually that&rsquo;s Saturday.</p>
+            <span class="source">Apricots: Helen, Sebastopol CA · Cream: same dairy as the butter</span>
+          </div>
+          <div class="price">£8.00<small>slice</small></div>
+        </div>
+        <div class="menu-row">
+          <span class="ix">vi.</span>
+          <div class="body">
+            <h3>THE THING <em>(off-menu)</em></h3>
+            <p>One thing we made that morning that we can&rsquo;t put on a menu because we don&rsquo;t know what we&rsquo;ll have. Ask the host.</p>
+            <span class="source">Variable. Always one. Frequently the best plate.</span>
+          </div>
+          <div class="price">mkt<small>price</small></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- NOTES / TESTIMONIALS -->
+    <section class="section">
+      <header class="sec-head">
+        <div>
+          <div class="sec-eyebrow"><span class="n">№ 03</span><span>Press &amp; people</span></div>
+          <h2 class="sec-title">WHAT THEY <em>said about it.</em></h2>
+        </div>
+        <p class="sec-lede">A wall of notes by the door, reproduced. The actual wall has more. Names below as printed.</p>
+      </header>
+
+      <div class="notes">
+        <article class="note-card lg">
+          <span class="badge">★ Time Out</span>
+          <blockquote>"The kind of <em>twenty-six-seat restaurant</em> a city builds itself around — quietly, without anyone announcing it, and on a side street you&rsquo;ve walked past for years."</blockquote>
+          <cite>
+            <span class="who">Time Out London<span>By J. Patel — March MMXXVI</span></span>
+            <span class="stars">★★★★★</span>
+          </cite>
+        </article>
+        <article class="note-card sm">
+          <blockquote>"I came for the bread. I came back for everything else, in that order."</blockquote>
+          <cite>
+            <span class="who">A Reader<span>via the suggestions box</span></span>
+            <span class="stars">✶</span>
+          </cite>
+        </article>
+        <article class="note-card f1">
+          <span class="badge">FT Weekend</span>
+          <blockquote>"The hake-and-cabbage at Mill &amp; Wheat is the <em>best £22 I have spent</em> on lunch this calendar year."</blockquote>
+          <cite>
+            <span class="who">FT Weekend<span>Tim Hayward — Feb MMXXVI</span></span>
+            <span class="stars">★★★★</span>
+          </cite>
+        </article>
+        <article class="note-card f2">
+          <blockquote>"Helen drives the apricots up from the airport on Tuesdays. The tart is on the menu by lunch. By Saturday it&rsquo;s gone. It is <em>this kind of restaurant.</em>"</blockquote>
+          <cite>
+            <span class="who">Vittles Newsletter<span>April MMXXVI · No. 412</span></span>
+            <span class="stars">✶</span>
+          </cite>
+        </article>
+      </div>
+    </section>
+
+    <!-- TIERS — bread club / CSA -->
+    <section class="section">
+      <header class="sec-head">
+        <div>
+          <div class="sec-eyebrow"><span class="n">№ 04</span><span>Bread club</span></div>
+          <h2 class="sec-title">A LOAF <em>every week.</em></h2>
+        </div>
+        <p class="sec-lede">A subscription to the bench. We bake your loaf with the rest of Wednesday&rsquo;s and you collect, or we deliver three streets in any direction.</p>
+      </header>
+
+      <div class="tiers">
+        <div class="tier">
+          <span class="num">i.</span>
+          <h3>The Loaf <em>club</em></h3>
+          <div class="amt"><span class="cur">£</span>24<span class="per">per month</span></div>
+          <p class="sub">A loaf a week, your choice — sourdough, rye, or seeded.</p>
+          <ul>
+            <li><b>One loaf</b> a week, Wednesday</li>
+            <li>Collected by 11am</li>
+            <li>Skip a week, no question</li>
+            <li>Bring a tote, save 50p</li>
+          </ul>
+          <a class="btn btn-ghost">Sign up <span class="arrow">→</span></a>
+        </div>
+        <div class="tier featured">
+          <span class="num">ii.</span>
+          <h3>The Larder <em>box</em></h3>
+          <div class="amt"><span class="cur">£</span>62<span class="per">per month</span></div>
+          <p class="sub">A loaf, butter, jam, and one thing we couldn&rsquo;t resist this week.</p>
+          <ul>
+            <li><b>One loaf</b> a week</li>
+            <li><b>½ lb butter</b>, churned Friday</li>
+            <li><b>One jar</b> of seasonal jam</li>
+            <li><b>The thing</b> · variable, always one</li>
+            <li>Free local delivery</li>
+          </ul>
+          <a class="btn" style="background: var(--paper); color: var(--ink); border-color: var(--paper);">Most chosen <span class="arrow">→</span></a>
+        </div>
+        <div class="tier">
+          <span class="num">iii.</span>
+          <h3>The Kitchen <em>shelf</em></h3>
+          <div class="amt"><span class="cur">£</span>118<span class="per">per month</span></div>
+          <p class="sub">Everything in the Larder box, plus a bottle and a recipe card.</p>
+          <ul>
+            <li>Everything in <b>Larder box</b></li>
+            <li><b>One bottle</b> · wine or oil, our pick</li>
+            <li><b>Recipe card</b>, hand-set</li>
+            <li>One reserved seat / month</li>
+            <li>Standing invitation to Sunday lunch</li>
+          </ul>
+          <a class="btn btn-ghost">Sign up <span class="arrow">→</span></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta">
+      <div class="cta-inner">
+        <div>
+          <span class="cta-eyebrow">Visit the shop</span>
+          <h2>14 MILL LANE,<br>SE15 <em>· just past the laundrette.</em></h2>
+          <div class="cta-actions">
+            <a class="btn btn-primary btn-lg">Reserve a table <span class="arrow">→</span></a>
+            <a class="btn btn-ghost btn-lg">Find us on the map</a>
+          </div>
+        </div>
+        <dl class="cta-aside">
+          <div class="row"><dt>Bakery</dt><dd>Wed–Sun · <em>7 to 14</em></dd></div>
+          <div class="row"><dt>Restaurant</dt><dd>Wed–Sat · <em>12 to 14, 18 to 22</em></dd></div>
+          <div class="row"><dt>Sunday lunch</dt><dd>One seating · <em>13:00 sharp</em></dd></div>
+          <div class="row"><dt>Telephone</dt><dd class="lnum">020 7635 4220</dd></div>
+          <div class="row"><dt>By foot</dt><dd>Two minutes from Peckham&nbsp;Rye</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <div class="word">Mill &amp; Wheat</div>
+          <p>A small restaurant, a smaller bakery, and a larder. Open Wednesday to Sunday since MMXVII.</p>
+          <div class="addr">14 MILL LANE · LONDON SE15 1AA<br>020 7635 4220 · <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="7f171a1313103f121613131e111b08171a1e0b511c10">[email&#160;protected]</a></div>
+        </div>
+        <div class="footer-col">
+          <h4>The shop</h4>
+          <ul><li>Menu</li><li>Bakery</li><li>Larder</li><li>Bread club</li><li>Reserve</li></ul>
+        </div>
+        <div class="footer-col">
+          <h4>Kitchen</h4>
+          <ul><li>This week</li><li>Suppliers</li><li>The cooks</li><li>Notes</li></ul>
+        </div>
+        <div class="footer-col">
+          <h4>Visit</h4>
+          <ul><li>Find us</li><li>Hours</li><li>Sunday lunch</li><li>Private dining</li><li>Hire</li></ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© Mill &amp; Wheat · MMXVII — MMXXVI</span>
+        <span><em>Set in</em> Oswald, Source Serif 4 &amp; Fraunces</span>
+        <span>Privacy · Allergies · Hire</span>
+      </div>
+      <div class="footer-colophon">
+        <div class="word">MILL <em>&amp; Wheat.</em></div>
+        <div class="note">Hand-set, baked Tuesday, eaten Wednesday.</div>
+      </div>
+    </footer>
+  </div>
+</div>
+
+<!-- ============================================================
+     TOKENS
+     ============================================================ -->
+<section class="tokens">
+  <h2>Tokens, <em>copy &amp; paste.</em></h2>
+  <p>Mill is a single-ink-on-single-paper system. The two configurable axes are <span class="mono">--ink + --paper</span> (palette, 9 options) and <span class="mono">[data-variant]</span> (Letterpress · Market · Workshop). Display family swaps with variant; body stays Source Serif 4.</p>
+
+  <h3>:root tokens</h3>
+  <pre><span class="c">/* Single-ink palette — the only color knob */</span>
+<span class="k">--ink</span>:        <span class="v">oklch(0.34 0.10 40)</span>;     <span class="c">/* terracotta */</span>
+<span class="k">--ink-deep</span>:   <span class="v">oklch(0.22 0.10 40)</span>;     <span class="c">/* hover / press */</span>
+<span class="k">--ink-soft</span>:   <span class="v">oklch(0.50 0.09 40)</span>;     <span class="c">/* captions */</span>
+<span class="k">--ink-pale</span>:   <span class="v">oklch(0.78 0.05 40)</span>;     <span class="c">/* hairlines */</span>
+<span class="k">--paper</span>:      <span class="v">oklch(0.96 0.018 85)</span>;    <span class="c">/* cream */</span>
+<span class="k">--paper-1</span>:    <span class="v">oklch(0.93 0.022 85)</span>;
+<span class="k">--paper-2</span>:    <span class="v">oklch(0.89 0.026 85)</span>;
+
+<span class="c">/* Type */</span>
+<span class="k">--font-display</span>: <span class="v">"Fraunces", serif</span>;          <span class="c">/* italic editorial moments */</span>
+<span class="k">--font-wood</span>:    <span class="v">"Oswald", sans-serif</span>;       <span class="c">/* condensed wood-type for headlines */</span>
+<span class="k">--font-body</span>:    <span class="v">"Source Serif 4", serif</span>;
+<span class="k">--font-mono</span>:    <span class="v">"JetBrains Mono", monospace</span>;
+
+<span class="c">/* Radius — none. Mill is square stock. */</span>
+<span class="k">--r-sm</span>: <span class="v">0</span>; <span class="k">--r-md</span>: <span class="v">0</span>; <span class="k">--r-lg</span>: <span class="v">0</span>;</pre>
+
+  <h3>palette overrides ([data-palette])</h3>
+  <pre><span class="k">html[data-palette="clay"]</span>   { <span class="k">--ink</span>: <span class="v">oklch(0.34 0.10 40)</span>;  <span class="k">--paper</span>: <span class="v">oklch(0.96 0.018 85)</span>; } <span class="c">/* default */</span>
+<span class="k">html[data-palette="olive"]</span>  { <span class="k">--ink</span>: <span class="v">oklch(0.36 0.07 110)</span>; <span class="k">--paper</span>: <span class="v">oklch(0.96 0.014 90)</span>; }
+<span class="k">html[data-palette="ochre"]</span>  { <span class="k">--ink</span>: <span class="v">oklch(0.42 0.10 70)</span>;  <span class="k">--paper</span>: <span class="v">oklch(0.96 0.020 85)</span>; }
+<span class="k">html[data-palette="rust"]</span>   { <span class="k">--ink</span>: <span class="v">oklch(0.30 0.12 30)</span>;  <span class="k">--paper</span>: <span class="v">oklch(0.93 0.022 70)</span>; } <span class="c">/* on kraft */</span>
+<span class="k">html[data-palette="indigo"]</span> { <span class="k">--ink</span>: <span class="v">oklch(0.28 0.08 250)</span>; <span class="k">--paper</span>: <span class="v">oklch(0.96 0.012 90)</span>; }
+<span class="k">html[data-palette="mill"]</span>   { <span class="k">--ink</span>: <span class="v">oklch(0.22 0.012 60)</span>; <span class="k">--paper</span>: <span class="v">oklch(0.96 0.010 90)</span>; }
+<span class="k">html[data-palette="cellar"]</span> { <span class="k">--ink</span>: <span class="v">oklch(0.28 0.11 20)</span>;  <span class="k">--paper</span>: <span class="v">oklch(0.95 0.018 85)</span>; }
+<span class="k">html[data-palette="linen"]</span>  { <span class="k">--ink</span>: <span class="v">oklch(0.36 0.07 145)</span>; <span class="k">--paper</span>: <span class="v">oklch(0.95 0.014 90)</span>; }
+<span class="k">html[data-palette="brick"]</span>  { <span class="k">--ink</span>: <span class="v">oklch(0.36 0.13 28)</span>;  <span class="k">--paper</span>: <span class="v">oklch(0.93 0.024 80)</span>; }</pre>
+
+  <h3>variant overrides ([data-variant])</h3>
+  <pre><span class="c">/* Letterpress (default) — wood-type headlines, single ink, cream paper. */</span>
+
+<span class="c">/* Market — chalkboard. Inverted: ink becomes paper, paper becomes slate. */</span>
+<span class="k">html[data-variant="market"]</span> {
+  <span class="k">--paper</span>: <span class="v">oklch(0.18 0.012 60)</span>;     <span class="c">/* slate */</span>
+  <span class="k">--ink</span>:   <span class="v">oklch(0.96 0.018 85)</span>;     <span class="c">/* chalk */</span>
+}
+
+<span class="c">/* Workshop — blueprint. Cool paper, faint grid background. */</span>
+<span class="k">html[data-variant="workshop"]</span> {
+  <span class="k">--paper</span>: <span class="v">oklch(0.95 0.012 220)</span>;
+  <span class="k">--ink</span>:   <span class="v">oklch(0.30 0.08 240)</span>;
+}
+<span class="k">html[data-variant="workshop"] body</span> {
+  background-image: <span class="v">linear-gradient(to right, oklch(0.30 0.08 240 / 0.04) 1px, transparent 1px),
+                     linear-gradient(to bottom, oklch(0.30 0.08 240 / 0.04) 1px, transparent 1px)</span>;
+  background-size: <span class="v">32px 32px</span>;
+}</pre>
+</section>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script></body>
+</html>

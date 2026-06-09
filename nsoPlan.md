@@ -132,7 +132,7 @@ Source: `newServiceOnboarding.md`. Philosophy: **pilot first with minimum UIBloc
 - **7.5d DONE (2026-06-08, PO 2nd-review blockers):** firewall leaks fixed. `elementSchema.ts` moved `templates/hearth/` → `audience/service/` (audience-level; shared by all service templates); 3 importers updated. ImageToolbar no longer static-imports Hearth — `paletteImageKeywords` added to `TemplateModule`, palette phrase sourced via `getLoadedTemplate(...)`, query composed by audience `getServiceImageQuery`. Grep gate: **zero** `@/modules/templates/hearth/*` static imports under `sections/`, `copy/`, `prompt/`, `api/v3/`, `p/`, `hooks/`, `utils/`, `edit/`.
 - **7.5e DONE:** `/api/service/*` → `/api/audience/service/*` (routes moved; `GeneratingStep` callers + endpoint strings updated).
 - **Bundle finding (7.5d):** `/p/[slug]` stays 17.5 kB — NOT reduced by the move. Root cause is pre-existing: `p/[slug]/page.tsx` imports `sanitizeContentForPublish` from `sections/layoutElementSchema`, pulling the full schema registry. Not a template leak. → separate follow-up "decouple published render from `layoutElementSchema`" (flag to PO).
-- **Migration NOT yet applied** (dev DB unreachable at edit time) — run `npx prisma migrate deploy` when DB is up. Runtime gates (dogfood copy-diff, edit/publish E2E) deferred to when DB is reachable; all tickets pass `npm run build`.
+- **Migration applied** (verified 2026-06-08 via `npx prisma migrate status` against Neon dev DB): `20260607120000_rename_audiencetype_add_template_fields` recorded as applied alongside the other 11 migrations. Runtime gates unblocked.
 - **Deferred cleanup (intentional):** `useServiceGenerationStore` and the `/onboarding/service/[token]` route path keep their names — renaming would 3× the surface for no pre-launch value. Revisit post-launch.
 
 **Rename:** `projectType` → `audienceType`. Values: `product | service | ecommerce` (nothing in prod = zero migration risk). Touch Prisma schema, all `/api/*` routes, edit store, renderer dispatcher, image keywords, prompts.
@@ -191,11 +191,54 @@ src/modules/audience/
 5. Picker UI exists (even if filtered to 1 template). Renders parallel to copy gen.
 6. `npm run build` clean. Existing pilot publishes still render correctly.
 
-### Phase 8 — Section Templates (~3 days)
-- Implement 3 remaining awareness templates (cold / referral / relationship).
-- Optional section gating logic (Problem, Transformation, IndustriesServed).
-- TeamAndFounder placement modes.
-- Lives in `src/modules/audience/service/sectionSelection.ts` (renamed from `sectionSelectionService.ts`).
+### Phase 8 — Section Templates + Awareness + Persona/Goal Expansion (~4 days) 🟢 NEXT after 7.5d/e merged
+**Decisions locked 2026-06-08 (PO).** Reorders existing 6 blocks across 4 awareness states; no new section types (keeps Phase 9 hold consistent).
+
+**In scope:**
+- **Section sequence rules** for 4 service awareness states × existing 6 blocks (Header, Hero, Services, Testimonials, Packages, CTA, Footer). Lives in `src/modules/audience/service/sectionSelection.ts`. Deterministic, no LLM in the routing step itself.
+  - Awareness states (service-specific labels, NOT product's): `cold`, `search-aware-comparing`, `referral`, `relationship`.
+  - Per-awareness sequence emphasis: e.g. cold → hero-first + heavy testimonials early; relationship → lighter trust + lead-with-packages; etc. Exact orderings authored in this ticket.
+- **LLM-inferred awareness** (mirror product v3 — no UI step). Strategy LLM picks awareness from the 4 service states based on persona + one-liner + offer signals. Add `awareness` field to `/api/audience/service/strategy` Zod schema + strategy prompt instructions. `sectionSelection` reads inferred value.
+- **Persona unlock:** add `consultant` + `coach` (3 total active: agency + consultant + coach). Waitlist remains for: `freelancer`, `local-service`, `productized-service`. Update waitlist gate copy.
+- **Goal expansion** (3 total): `book-call` (pilot), `quote-request` (NEW), `lead-magnet` (NEW). Per web research the most common service-page conversion goals after book-a-call.
+  - Each goal needs: CTA block copy variant, form-builder default template, prompt hint in copy-gen.
+  - `quote-request` form: budget / timeline / project scope fields. `lead-magnet` form: name + email; asset URL persisted on Project.
+- **Phase 6 backlog tightening** (folded into Phase 8 prompt-tune pass):
+  - Credibility-field number hallucination — rephrase rule + drop numbered example, OR flag `ai_generated_needs_review` like `price_display`.
+  - Restaurant-marketing-style lede `<em>` outlier — investigate one-liner length / em-dash correlation; tighten prompt.
+
+**Out of scope (explicit, to prevent drift):**
+- New section types (Problem, Transformation, IndustriesServed, TeamAndFounder) — Phase 9 hold continues.
+- New blocks of any kind.
+- Onboarding awareness step UI — LLM-inferred only.
+- Personas 4–6 (freelancer, local-service, productized-service).
+- Goals beyond the 3 above (contact-form too generic; waitlist too niche).
+
+**Dogfood pass (gate on exit):**
+- Awareness coverage: 3 personas × 4 awareness × default goal (book-call) = **12 cases**.
+- Goal coverage: 2 personas (agency, consultant) × 3 goals × default awareness = **6 cases**.
+- Awareness-fit smell test: 2 personas × {cold, relationship} side-by-side manual diff — does copy actually read materially different? = **4 manual diffs**.
+- Phase 6 gates re-apply: em-emit ≥80%, 0 forbidden words, schema/completeness 5/5.
+- Phase 6 backlog re-check baked into the 18 generation cases above.
+
+**Files touched (anticipated):**
+- `src/modules/audience/service/sectionSelection.ts` — main routing logic.
+- `src/lib/schemas/strategyService.schema.ts` — add `awareness` field.
+- `src/modules/audience/service/strategy/promptsService.ts` — extend strategy prompt for awareness inference + persona-aware emphasis.
+- `src/modules/audience/service/copyPrompt.ts` — goal-aware emphasis tuning (CTA copy + credibility fix).
+- `src/app/onboarding/service/[token]/components/steps/GoalStep.tsx` — unlock quote-request + lead-magnet options.
+- `src/app/onboarding/service/[token]/layout.tsx` — persona gate: unlock consultant + coach.
+- `src/modules/audience/service/voice.ts` — credibility prompt tightening.
+- `src/components/forms/*` — quote-request + lead-magnet form templates.
+- `scripts/dogfoodServicePipeline.ts` — extend for awareness × goal coverage.
+
+**Exit:**
+- All 4 awareness states render valid pages across 3 active personas.
+- 3 goals each produce a coherent CTA + form pairing.
+- Dogfood gates pass.
+- `npm run build` clean.
+
+**Dependency:** 7.5d audience/template boundary fix must be merged first. ✅ Confirmed done (commit `7adc240`, 2026-06-08).
 
 ### Phase 9 — Block Library Batches (~4 weeks total) ⏸ ON HOLD 2026-06-07
 **Reason:** designer only delivered HTML for the 6 pilot blocks. The 20+ blocks below have no visual reference. Authoring them from spec alone is highest-risk chunk of plan. Un-hold trigger TBD (designer mockups arrive, or real pilot users demand specific block types).
@@ -265,16 +308,16 @@ After each batch: extend `selectUIBlocksService.ts` rules + `serviceElementSchem
 Sum of phase budgets in working days:
 - Phases 0–6: 30d ≈ 6 weeks. ✅ DONE 2026-05-07.
 - Phase 7: 2d ✅ DONE 2026-06-07 (commit `3e47ca6`).
-- **Post-break revision (2026-06-07): 8 templates landed → multi-template refactor needed; Phase 9 on hold; ecom + product deferred.**
-  - Phase 7.5: 5d 🆕 multi-template + voice + rename refactor
-  - Phase 8: 3d (service section rules expansion)
+- Phase 7.5: 5d ✅ DONE 2026-06-08 (commits `1a4707f` → `7adc240`, branch `phase-7.5-multi-template`, awaiting merge to main).
+- **Post-break revision (2026-06-07/08): 8 templates landed → multi-template refactor done; Phase 9 on hold; ecom + product deferred.**
+  - Phase 8: 4d 🟢 NEXT (was 3d, +1d for goal expansion + Phase 6 backlog fold-in)
   - ~~Phase 9: 20d~~ ⏸ on hold
-  - Phase 10: 2d (skip — section rules deterministic per type; may collapse into Phase 8)
-  - Phase 11: 5d (template + variant + palette picker, was 4.5d)
-  - Phase 12: 4d (QA × 8 templates, was 3d)
+  - Phase 10: 2d (skip — section rules deterministic per type; collapsing into Phase 8 strategy work)
+  - Phase 11: 5d (template + variant + palette picker)
+  - Phase 12: 4d (QA × 8 templates)
   - Phase 13: TBD (e-commerce wave, deferred)
   - Phase 14: TBD (product redesign / Meridian, deferred)
-- **Remaining to soft launch (8 service templates) ≈ 17–19 working days ≈ 3.5–4 working weeks.**
+- **Remaining to soft launch (8 service templates) ≈ 13–15 working days ≈ 3 working weeks.**
 
 ---
 
@@ -306,10 +349,19 @@ Sum of phase budgets in working days:
 21. **Existing data migration** = no concern. Nothing in production. Test/dev projects backfilled in 7.5 migration script.
 22. **Rename `projectType` → `audienceType`.** Disambiguates from `templateId`. Zero migration risk (no prod data). Touch Prisma + all consumers once during 7.5.
 
+## Resolved (Phase 8 kickoff, 2026-06-08)
+
+23. **Phase 8 optional section types** (Problem, Transformation, IndustriesServed, TeamAndFounder) = **punted.** Phase 8 reorders existing 6 blocks only — no new section types. Keeps Phase 9 hold consistent (no block authoring without designer mockup).
+24. **Awareness capture** = **LLM-inferred via `/api/audience/service/strategy`** (mirrors product v3). No new onboarding step. Service-specific labels stay: `cold`, `search-aware-comparing`, `referral`, `relationship` (NOT product's problem/solution-aware labels — service buying journey is different).
+25. **Persona expansion in Phase 8** = unlock **consultant + coach** (3 total active: agency + consultant + coach). Waitlist remains: freelancer, local-service, productized-service.
+26. **Goal expansion in Phase 8** = **book-call + quote-request + lead-magnet** (3 total). Web-researched top service-page conversion goals. Other goals (contact-form, waitlist) deprioritized.
+27. **Phase 6 backlog items** = folded into Phase 8 prompt-tune pass (credibility hallucination + restaurant-marketing lede outlier). Not held to a separate ticket.
+28. **Phase 8 dogfood signal** = Phase 6 gates (em ≥80%, 0 forbidden, schema 5/5) + awareness-fit smell test (manual diff cold-vs-relationship copy on 2 personas).
+
 ## Unresolved Questions
 
 - Stockroom (ecom Phase 13) — single template at launch (Stockroom only) or build 2–3 ecom templates in parallel to match service-wave pattern?
-- Phase 8 awareness templates (cold / referral / relationship) — no designer mockups. Build deterministic-rules from spec or pause like Phase 9?
 - Bundle size: 8 templates × 6 blocks × 2 renderers = 96 service block files ship to ALL users incl. product. Code-split per-`templateId` becomes important earlier than expected. Phase 11 or push to Phase 12?
-- `User.persona` (8 values) currently lacks any ecom option. Add `dtc-founder` / `online-retailer` etc. now in 7.5, or wait for Phase 13?
+- `User.persona` (8 values) currently lacks any ecom option. Add `dtc-founder` / `online-retailer` etc. now or wait for Phase 13?
 - Template gallery UX: full preview thumbnails (need 24 mockup screenshots) or descriptive cards (faster to ship, less wow)?
+- Pre-existing leak (7.5d bundle finding): `/p/[slug]/page.tsx` imports `sanitizeContentForPublish` from `sections/layoutElementSchema`, pulling the full schema registry → 17.5 kB. Decouple in Phase 11 or before launch?

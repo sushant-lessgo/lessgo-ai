@@ -1,0 +1,1784 @@
+<!doctype html>
+<html lang="en" data-palette="sage" data-variant="practice">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Vital — Healthcare & Wellness · Lessgo design system</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   VITAL — Healthcare & Wellness
+   Clinical warmth. Bookable, not browsable.
+   ============================================================ */
+
+:root {
+  /* SAGE palette — default */
+  --bone:         oklch(0.985 0.010 105);
+  --bone-1:       oklch(0.965 0.014 105);
+  --bone-2:       oklch(0.93 0.018 105);
+
+  --ink:          oklch(0.22 0.02 165);
+  --ink-2:        oklch(0.38 0.018 165);
+  --ink-3:        oklch(0.55 0.014 165);
+  --ink-4:        oklch(0.75 0.010 165);
+
+  --rule:         oklch(0.86 0.014 145);
+  --rule-strong:  oklch(0.62 0.020 145);
+
+  --sage:         oklch(0.62 0.06 155);   /* primary brand hue */
+  --sage-deep:    oklch(0.42 0.06 160);
+  --sage-soft:    oklch(0.92 0.030 145);
+
+  --accent:       oklch(0.60 0.13 38);    /* warm clay — for CTA only */
+  --accent-deep:  oklch(0.46 0.13 32);
+  --accent-soft:  oklch(0.94 0.04 50);
+  --accent-ink:   oklch(0.985 0.005 50);
+
+  --font-display: "Newsreader", "Iowan Old Style", Georgia, serif;
+  --font-body:    "Inter Tight", -apple-system, system-ui, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, monospace;
+
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px;
+  --s-5: 24px; --s-6: 32px; --s-7: 48px; --s-8: 64px;
+  --s-9: 96px;
+
+  --r-sm: 8px; --r-md: 14px; --r-lg: 20px; --r-xl: 28px; --r-pill: 999px;
+
+  --shadow-1: 0 1px 0 oklch(0.22 0.02 165 / 0.04);
+  --shadow-2: 0 6px 16px oklch(0.22 0.02 165 / 0.06), 0 1px 0 oklch(0.22 0.02 165 / 0.04);
+  --shadow-3: 0 24px 64px oklch(0.22 0.02 165 / 0.10), 0 2px 0 oklch(0.22 0.02 165 / 0.04);
+
+  --sec-pad-y: 120px;
+  --sec-pad-x: clamp(24px, 5vw, 64px);
+  --max-w: 1320px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bone);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+.lnum { font-feature-settings: "lnum", "tnum"; }
+
+/* ============================================================
+   SPEC DOC
+   ============================================================ */
+.doc { max-width: 1080px; margin: 0 auto; padding: 96px 32px 64px; }
+.doc-header {
+  display: grid; grid-template-columns: 1fr 220px;
+  gap: 64px; align-items: end;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 36px; margin-bottom: 56px;
+}
+.doc-eyebrow {
+  font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+  letter-spacing: 0.20em; text-transform: uppercase;
+  color: var(--sage-deep); margin-bottom: 28px;
+  display: flex; align-items: center; gap: 12px;
+}
+.doc-eyebrow .cross {
+  width: 14px; height: 14px;
+  background:
+    linear-gradient(var(--sage) 0 0) center/100% 3px no-repeat,
+    linear-gradient(var(--sage) 0 0) center/3px 100% no-repeat;
+  display: inline-block;
+}
+.doc-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(64px, 9vw, 144px);
+  line-height: 1.0; letter-spacing: -0.025em;
+  margin: 0; color: var(--ink);
+  font-variation-settings: "opsz" 72;
+}
+.doc-title em { font-style: italic; font-weight: 400; color: var(--sage-deep); }
+.doc-sub {
+  font-family: var(--font-display);
+  font-weight: 400; font-style: italic;
+  font-size: 22px; line-height: 1.4;
+  color: var(--ink-2); max-width: 56ch;
+  margin: 24px 0 0;
+}
+.doc-stamp {
+  font-family: var(--font-mono); font-size: 10.5px;
+  letter-spacing: 0.14em; color: var(--ink-2);
+  align-self: end; text-align: right;
+  border-left: 1px solid var(--rule);
+  padding-left: 24px; line-height: 1.7;
+  text-transform: uppercase;
+}
+.doc-stamp b {
+  font-family: var(--font-display); font-style: italic; font-weight: 500;
+  color: var(--ink); font-size: 16px; letter-spacing: 0; text-transform: none;
+  display: block; margin-bottom: 6px;
+}
+.doc-stamp .seal {
+  width: 64px; height: 64px;
+  margin: 14px 0 14px auto;
+  border-radius: 50%;
+  border: 1.5px solid var(--sage);
+  display: grid; place-items: center;
+  position: relative;
+}
+.doc-stamp .seal::before {
+  content: "";
+  width: 18px; height: 18px;
+  background:
+    linear-gradient(var(--sage) 0 0) center/100% 4px no-repeat,
+    linear-gradient(var(--sage) 0 0) center/4px 100% no-repeat;
+}
+.doc-meta {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 28px; margin-bottom: 56px;
+}
+.doc-meta dt {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--ink-3); font-weight: 500; margin-bottom: 6px;
+}
+.doc-meta dd {
+  margin: 0;
+  font-family: var(--font-display); font-weight: 500; font-style: italic;
+  font-size: 18px; color: var(--ink); line-height: 1.3;
+}
+.doc-meta dd b { font-style: normal; font-weight: 600; color: var(--sage-deep); }
+
+.doc h2 {
+  font-family: var(--font-display); font-weight: 400;
+  font-size: 48px; line-height: 1.05; letter-spacing: -0.022em;
+  margin: 80px 0 6px; color: var(--ink);
+  display: flex; align-items: baseline; gap: 18px;
+  border-bottom: 1px solid var(--rule); padding-bottom: 14px;
+}
+.doc h2 em { font-style: italic; color: var(--sage-deep); }
+.doc h2 .n {
+  font-family: var(--font-mono); font-size: 12px; font-weight: 500;
+  letter-spacing: 0.16em; color: var(--ink-3); text-transform: uppercase;
+  align-self: center; font-style: normal;
+}
+.doc h2 + .dek {
+  font-family: var(--font-display); font-style: italic; font-weight: 400;
+  font-size: 21px; line-height: 1.45;
+  color: var(--ink-2); margin: 18px 0 24px; max-width: 60ch;
+}
+.doc h3 {
+  font-family: var(--font-display); font-weight: 600; font-style: normal;
+  font-size: 20px; margin: 36px 0 10px; color: var(--ink);
+}
+.doc p { color: var(--ink-2); max-width: 66ch; margin: 0 0 16px; line-height: 1.65; }
+.doc p strong { color: var(--ink); font-weight: 600; }
+.doc ul { color: var(--ink-2); padding-left: 0; list-style: none; margin: 0 0 16px; line-height: 1.65; }
+.doc ul li { margin-bottom: 10px; padding-left: 28px; position: relative; }
+.doc ul li::before { content: "+"; position: absolute; left: 0; top: 0; color: var(--sage); font-family: var(--font-mono); font-weight: 500; }
+.doc code, .doc .mono {
+  font-family: var(--font-mono); font-size: 12.5px; background: var(--bone-1);
+  padding: 1px 6px; border-radius: 3px; color: var(--ink);
+  border: 1px solid var(--rule);
+}
+.doc .pull {
+  border-left: 3px solid var(--sage); padding: 4px 0 4px 28px; margin: 28px 0;
+  font-family: var(--font-display); font-style: italic; font-weight: 400;
+  font-size: 24px; line-height: 1.4; color: var(--ink); max-width: 56ch;
+}
+
+.spec { border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); margin: 24px 0 8px; }
+.spec .row {
+  display: grid; grid-template-columns: 50px 1fr auto auto auto;
+  gap: 32px; padding: 12px 0;
+  border-bottom: 1px solid var(--rule);
+  align-items: baseline;
+  font-size: 13px; font-family: var(--font-mono); color: var(--ink-2);
+}
+.spec .row:last-child { border-bottom: 0; }
+.spec .row.head {
+  border-bottom: 1px solid var(--ink); font-size: 10px;
+  letter-spacing: 0.2em; text-transform: uppercase; font-weight: 500;
+  color: var(--ink); padding: 8px 0;
+}
+.spec .sample {
+  font-family: var(--font-display); color: var(--ink); font-size: 18px;
+  font-weight: 400; font-style: italic;
+}
+
+.swatch-grid {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 0;
+  margin: 18px 0 8px; border: 1px solid var(--rule); border-radius: var(--r-sm); overflow: hidden;
+}
+.swatch { border-right: 1px solid var(--rule); }
+.swatch:last-child { border-right: 0; }
+.swatch .chip { height: 132px; }
+.swatch .lbl { padding: 12px 14px; background: var(--bone); border-top: 1px solid var(--rule); }
+.swatch .lbl b { display: block; font-family: var(--font-display); font-style: italic; font-weight: 500; font-size: 14px; color: var(--ink); }
+.swatch .lbl span { font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-3); letter-spacing: 0.04em; }
+
+.plate {
+  border: 1px solid var(--rule); padding: 56px 48px;
+  margin: 18px 0 0; background: var(--bone-1);
+  position: relative; border-radius: var(--r-md);
+}
+.plate-label, .plate-num {
+  position: absolute; top: 14px;
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.18em; color: var(--ink-3);
+  text-transform: uppercase; font-weight: 500;
+}
+.plate-label { left: 16px; }
+.plate-num { right: 16px; }
+
+.s-d1 {
+  font-family: var(--font-display); font-weight: 400;
+  font-size: 96px; line-height: 0.98; letter-spacing: -0.028em;
+  color: var(--ink); font-variation-settings: "opsz" 72;
+}
+.s-d1 em { font-style: italic; color: var(--sage-deep); }
+.s-d2 {
+  font-family: var(--font-display); font-weight: 400;
+  font-size: 48px; line-height: 1.05; letter-spacing: -0.018em; color: var(--ink);
+}
+.s-d3 {
+  font-family: var(--font-display); font-weight: 600;
+  font-size: 24px; line-height: 1.2; color: var(--ink);
+}
+.s-d4 {
+  font-family: var(--font-display); font-weight: 400; font-style: italic;
+  font-size: 21px; line-height: 1.45; color: var(--ink-2);
+}
+
+/* ============================================================
+   STAGE
+   ============================================================ */
+.stage {
+  max-width: 1320px; margin: 64px auto 0;
+  padding: 56px 24px 0;
+  border-top: 1px solid var(--rule); position: relative;
+}
+.stage-header {
+  display: flex; align-items: baseline; gap: 16px;
+  margin-bottom: 28px; padding: 0 4px;
+  font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-2);
+}
+.stage-n {
+  font-family: var(--font-display); font-style: italic; font-weight: 500;
+  font-size: 18px; color: var(--sage-deep);
+  letter-spacing: 0; text-transform: none;
+}
+.stage-title { color: var(--ink); letter-spacing: 0.18em; }
+.stage-note {
+  margin-left: auto; color: var(--ink-3); font-style: italic;
+  text-transform: none; letter-spacing: 0; font-family: var(--font-display);
+  font-size: 14px;
+}
+
+.frame {
+  background: var(--bone);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-lg);
+  position: relative; overflow: hidden;
+  box-shadow: var(--shadow-2);
+}
+
+/* ============================================================
+   NAV
+   ============================================================ */
+.nav {
+  display: grid; grid-template-columns: auto 1fr auto;
+  align-items: center; padding: 18px 32px;
+  border-bottom: 1px solid var(--rule);
+  background: var(--bone); gap: 32px;
+}
+.nav-brand {
+  display: flex; align-items: center; gap: 12px;
+  font-family: var(--font-display); font-weight: 500;
+  font-size: 22px; letter-spacing: -0.015em; color: var(--ink);
+  white-space: nowrap; flex-shrink: 0;
+}
+.nav-brand em { font-style: italic; color: var(--sage-deep); }
+.nav-brand .mark {
+  width: 32px; height: 32px;
+  border-radius: 50%; background: var(--sage-soft);
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  position: relative;
+}
+.nav-brand .mark::before {
+  content: ""; width: 12px; height: 12px;
+  background:
+    linear-gradient(var(--sage-deep) 0 0) center/100% 2.5px no-repeat,
+    linear-gradient(var(--sage-deep) 0 0) center/2.5px 100% no-repeat;
+}
+.nav-mid {
+  display: flex; align-items: center; gap: 4px;
+  justify-self: center;
+}
+.nav-mid a {
+  font-family: var(--font-body); font-size: 14px; font-weight: 500;
+  padding: 8px 14px; color: var(--ink-2);
+  border-radius: var(--r-sm);
+}
+.nav-mid a:hover { color: var(--ink); background: var(--bone-1); }
+.nav-mid a.active { color: var(--sage-deep); }
+.nav-right {
+  display: flex; align-items: center; gap: 16px;
+}
+.nav-right .quiet {
+  font-family: var(--font-body); font-size: 14px; font-weight: 500; color: var(--ink-2);
+}
+.nav-right .quiet:hover { color: var(--ink); }
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: var(--font-body); font-weight: 600; font-size: 14px;
+  letter-spacing: 0.005em; border-radius: var(--r-pill);
+  padding: 12px 22px;
+  white-space: nowrap;
+  transition: background 140ms ease, border-color 140ms ease, color 140ms ease, transform 140ms ease;
+  border: 1.5px solid transparent;
+}
+.btn-sm { padding: 9px 16px; font-size: 13px; }
+.btn-lg { padding: 16px 28px; font-size: 15px; }
+.btn-primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn-primary:hover { background: var(--accent-deep); border-color: var(--accent-deep); }
+.btn-sage { background: var(--sage); color: var(--bone); border-color: var(--sage); }
+.btn-sage:hover { background: var(--sage-deep); border-color: var(--sage-deep); }
+.btn-ghost { background: transparent; color: var(--ink); border-color: var(--rule-strong); }
+.btn-ghost:hover { background: var(--bone-1); border-color: var(--ink); }
+.btn .arrow { font-family: var(--font-display); font-style: italic; font-weight: 500; font-size: 1.1em; line-height: 1; }
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero {
+  padding: 64px var(--sec-pad-x) 88px;
+  background: var(--bone);
+  border-bottom: 1px solid var(--rule);
+  position: relative; overflow: hidden;
+}
+.hero::before {
+  content: ""; position: absolute;
+  top: -120px; right: -120px;
+  width: 480px; height: 480px;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, var(--sage-soft) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-eyebrow {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 40px;
+  font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 0.20em; text-transform: uppercase; color: var(--ink-2);
+  position: relative;
+}
+.hero-eyebrow .accepting {
+  display: inline-flex; align-items: center; gap: 8px;
+  color: var(--sage-deep); font-weight: 500;
+}
+.hero-eyebrow .accepting::before {
+  content: ""; width: 8px; height: 8px; border-radius: 50%;
+  background: var(--sage); flex-shrink: 0;
+  animation: pulse 2.4s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 oklch(from var(--sage) l c h / 0.4); }
+  50% { box-shadow: 0 0 0 8px oklch(from var(--sage) l c h / 0); }
+}
+.hero-eyebrow .insurance { margin-left: auto; color: var(--ink-3); }
+.hero-eyebrow .insurance b { color: var(--ink); font-family: var(--font-display); font-style: italic; font-weight: 500; font-size: 14px; letter-spacing: 0; text-transform: none; }
+
+.hero-grid {
+  display: grid; grid-template-columns: 7fr 5fr;
+  gap: 64px; align-items: center;
+  position: relative;
+}
+
+.hero-content { display: flex; flex-direction: column; gap: 24px; }
+.hero-display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(48px, 7.5vw, 112px);
+  line-height: 0.98; letter-spacing: -0.03em;
+  color: var(--ink); margin: 0;
+  text-wrap: balance;
+}
+.hero-display em { font-style: italic; color: var(--sage-deep); font-weight: 400; }
+.hero-lede {
+  font-family: var(--font-display);
+  font-weight: 400; font-style: italic;
+  font-size: 22px; line-height: 1.45;
+  color: var(--ink-2); max-width: 50ch; margin: 0;
+}
+.hero-cta {
+  display: flex; flex-wrap: wrap; gap: 14px; align-items: center;
+  margin-top: 8px;
+}
+.hero-cta .quiet {
+  font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--ink-3); font-weight: 500;
+  margin-left: 8px;
+}
+.hero-cta .quiet em {
+  color: var(--ink); font-family: var(--font-display); font-style: italic; font-weight: 500;
+  font-size: 14px; letter-spacing: 0; text-transform: none;
+}
+
+/* hero booking card */
+.hero-book {
+  background: var(--bone);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-3);
+  position: relative;
+}
+.hero-book::before {
+  content: ""; position: absolute;
+  top: -10px; left: 24px;
+  background: var(--sage);
+  color: var(--bone);
+  padding: 4px 12px;
+  border-radius: var(--r-pill);
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.18em; text-transform: uppercase; font-weight: 500;
+  content: "Next available";
+}
+.book-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 12px 0 14px;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 14px;
+}
+.book-header b {
+  font-family: var(--font-display); font-style: italic; font-weight: 500;
+  font-size: 18px; color: var(--ink);
+}
+.book-header span {
+  font-family: var(--font-mono); font-size: 10.5px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink-3); font-weight: 500;
+}
+.book-days {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  gap: 4px; margin-bottom: 14px;
+}
+.book-days .dow {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--ink-3); font-weight: 500;
+  text-align: center; padding: 4px 0;
+}
+.book-days .day {
+  aspect-ratio: 1; display: grid; place-items: center;
+  font-family: var(--font-display); font-weight: 500;
+  font-size: 14px; color: var(--ink);
+  border-radius: 50%;
+  font-feature-settings: "lnum";
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease;
+}
+.book-days .day:hover { background: var(--bone-1); }
+.book-days .day.dim { color: var(--ink-4); cursor: default; }
+.book-days .day.dim:hover { background: transparent; }
+.book-days .day.has-slot { background: var(--sage-soft); color: var(--sage-deep); }
+.book-days .day.selected {
+  background: var(--sage-deep); color: var(--bone);
+}
+.book-times {
+  border-top: 1px solid var(--rule);
+  padding-top: 14px;
+  margin-top: 4px;
+}
+.book-times .lbl {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--ink-3); font-weight: 500;
+  margin-bottom: 10px;
+}
+.book-slots {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
+}
+.book-slots button {
+  padding: 9px 4px;
+  font-family: var(--font-display); font-weight: 500;
+  font-size: 13.5px; color: var(--ink);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-sm);
+  background: var(--bone);
+  cursor: pointer;
+  transition: border-color 140ms ease, color 140ms ease, background 140ms ease;
+  font-feature-settings: "lnum";
+}
+.book-slots button:hover { border-color: var(--sage); color: var(--sage-deep); }
+.book-slots button.taken { color: var(--ink-4); cursor: default; }
+.book-slots button.taken:hover { border-color: var(--rule); color: var(--ink-4); }
+.book-foot {
+  margin-top: 16px; padding-top: 14px;
+  border-top: 1px solid var(--rule);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.book-foot .visit {
+  font-family: var(--font-display); font-style: italic; font-weight: 500;
+  font-size: 14px; color: var(--ink-2);
+}
+.book-foot .visit b { font-style: normal; font-weight: 600; color: var(--ink); }
+
+/* ============================================================
+   CONDITIONS — what we treat
+   ============================================================ */
+.section {
+  padding: var(--sec-pad-y) var(--sec-pad-x);
+  max-width: var(--max-w); margin: 0 auto; position: relative;
+}
+.sec-head {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 64px; align-items: end;
+  margin-bottom: 56px; padding-bottom: 24px;
+  border-bottom: 1px solid var(--rule);
+}
+.sec-eyebrow {
+  font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-3);
+  font-weight: 500;
+  display: flex; align-items: center; gap: 12px; margin-bottom: 22px;
+}
+.sec-eyebrow .n {
+  font-family: var(--font-display); font-style: italic; font-weight: 500;
+  font-size: 18px; letter-spacing: 0; text-transform: none; color: var(--sage-deep);
+}
+.sec-title {
+  font-family: var(--font-display); font-weight: 400;
+  font-size: clamp(44px, 5.6vw, 72px);
+  line-height: 1.0; letter-spacing: -0.025em;
+  color: var(--ink); margin: 0; max-width: 16ch;
+}
+.sec-title em { font-style: italic; color: var(--sage-deep); font-weight: 400; }
+.sec-lede {
+  font-family: var(--font-display); font-style: italic; font-weight: 400;
+  font-size: 19px; line-height: 1.5;
+  color: var(--ink-2); max-width: 48ch; margin: 0;
+}
+
+.conditions {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: var(--bone-1);
+}
+.cond {
+  padding: 28px 26px;
+  border-right: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  display: flex; flex-direction: column; gap: 8px;
+  background: var(--bone);
+  transition: background 140ms ease;
+  cursor: pointer;
+  position: relative;
+}
+.cond:hover { background: var(--bone-1); }
+.cond:nth-child(4n) { border-right: 0; }
+.cond:nth-last-child(-n+4) { border-bottom: 0; }
+.cond .num {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.14em; color: var(--ink-3);
+  font-weight: 500;
+  font-feature-settings: "lnum";
+}
+.cond h3 {
+  font-family: var(--font-display); font-weight: 500;
+  font-size: 22px; line-height: 1.15;
+  letter-spacing: -0.015em;
+  margin: 0; color: var(--ink);
+}
+.cond h3 em { font-style: italic; color: var(--sage-deep); }
+.cond p {
+  font-family: var(--font-body); font-size: 13.5px; line-height: 1.55;
+  color: var(--ink-2); margin: 0;
+}
+.cond .arrow {
+  position: absolute; top: 24px; right: 26px;
+  font-family: var(--font-display); font-style: italic;
+  font-size: 16px; color: var(--ink-3);
+  transition: color 140ms ease, transform 140ms ease;
+}
+.cond:hover .arrow { color: var(--sage-deep); transform: translateX(2px); }
+
+/* ============================================================
+   TEAM — clinicians
+   ============================================================ */
+.team-section {
+  padding: var(--sec-pad-y) var(--sec-pad-x);
+  background: var(--bone-1);
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+.team-inner { max-width: var(--max-w); margin: 0 auto; }
+.team-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+}
+.clinician {
+  background: var(--bone);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-lg);
+  padding: 28px;
+  display: flex; flex-direction: column; gap: 16px;
+  transition: border-color 140ms ease, transform 140ms ease;
+}
+.clinician:hover { border-color: var(--sage); transform: translateY(-2px); }
+.clinician .portrait {
+  aspect-ratio: 4 / 5;
+  border-radius: var(--r-md);
+  background: var(--sage-soft);
+  position: relative;
+  overflow: hidden;
+}
+.clinician .portrait .head {
+  position: absolute; top: 22%; left: 50%; transform: translateX(-50%);
+  width: 38%; aspect-ratio: 4 / 5;
+  border-radius: 45% 45% 42% 42%;
+  background: oklch(0.78 0.06 50);
+}
+.clinician .portrait .body {
+  position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 95%; height: 36%;
+  background: var(--bone);
+  border-radius: 50% 50% 0 0 / 70% 70% 0 0;
+  border-top: 8px solid var(--sage);
+}
+.clinician .portrait .body::before {
+  content: "";
+  position: absolute; top: -28px; left: 50%; transform: translateX(-50%);
+  width: 48%; height: 36px;
+  background: var(--bone);
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+}
+.clinician .credentials {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--sage-deep); font-weight: 500;
+}
+.clinician h3 {
+  font-family: var(--font-display); font-weight: 500;
+  font-size: 26px; line-height: 1.05;
+  letter-spacing: -0.018em;
+  margin: 0; color: var(--ink);
+}
+.clinician h3 em { font-style: italic; color: var(--sage-deep); }
+.clinician .role {
+  font-family: var(--font-display); font-style: italic; font-weight: 400;
+  font-size: 15px; color: var(--ink-2);
+  margin-top: -8px;
+}
+.clinician p {
+  font-family: var(--font-body); font-size: 14px; line-height: 1.55;
+  color: var(--ink-2); margin: 0;
+}
+.clinician .vibe {
+  margin-top: auto; padding-top: 14px;
+  border-top: 1px solid var(--rule);
+  font-family: var(--font-display); font-style: italic; font-weight: 400;
+  font-size: 14.5px; line-height: 1.4;
+  color: var(--ink);
+}
+.clinician .vibe b {
+  display: block;
+  font-family: var(--font-mono); font-size: 9.5px;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--ink-3); font-weight: 500;
+  margin-bottom: 6px;
+  font-style: normal;
+}
+
+/* ============================================================
+   COSTS / INSURANCE
+   ============================================================ */
+.cost-strip {
+  padding: 80px var(--sec-pad-x);
+  background: var(--ink);
+  color: var(--bone);
+}
+.cost-inner {
+  max-width: var(--max-w); margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 0;
+  border: 1px solid oklch(from var(--bone) l c h / 0.16);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+.cost-inner .col {
+  padding: 32px 28px;
+  border-right: 1px solid oklch(from var(--bone) l c h / 0.14);
+  display: flex; flex-direction: column; gap: 8px;
+}
+.cost-inner .col:last-child { border-right: 0; }
+.cost-inner .col .lbl {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.20em; text-transform: uppercase;
+  color: oklch(from var(--bone) l c h / 0.55); font-weight: 500;
+}
+.cost-inner .col .val {
+  font-family: var(--font-display); font-weight: 400;
+  font-size: 32px; line-height: 1.05;
+  letter-spacing: -0.018em; color: var(--bone);
+  font-feature-settings: "lnum";
+}
+.cost-inner .col .val em { font-style: italic; color: oklch(from var(--sage) l c h * 1.3); font-weight: 400; }
+.cost-inner .col .val small {
+  font-family: var(--font-display); font-style: italic; font-weight: 400;
+  font-size: 16px; color: oklch(from var(--bone) l c h / 0.7);
+  display: block; margin-top: 4px;
+}
+.cost-inner .col p {
+  font-family: var(--font-body); font-size: 13px; line-height: 1.55;
+  color: oklch(from var(--bone) l c h / 0.72); margin: 6px 0 0;
+}
+
+/* ============================================================
+   TESTIMONIAL — patient story
+   ============================================================ */
+.story {
+  padding: var(--sec-pad-y) var(--sec-pad-x);
+  max-width: 980px; margin: 0 auto;
+}
+.story-quote {
+  font-family: var(--font-display); font-weight: 400; font-style: italic;
+  font-size: clamp(32px, 4vw, 52px);
+  line-height: 1.15; letter-spacing: -0.015em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.story-quote::before {
+  content: "“"; font-size: 1.4em; line-height: 0;
+  color: var(--sage); margin-right: 4px; vertical-align: -0.15em;
+}
+.story-by {
+  margin-top: 36px;
+  display: grid; grid-template-columns: 56px 1fr;
+  gap: 18px; align-items: center;
+  padding-top: 24px; border-top: 1px solid var(--rule);
+}
+.story-by .who-portrait {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: var(--sage-soft);
+  position: relative; overflow: hidden;
+}
+.story-by .who-portrait::before {
+  content: ""; position: absolute;
+  top: 18%; left: 50%; transform: translateX(-50%);
+  width: 42%; aspect-ratio: 1;
+  border-radius: 50%;
+  background: oklch(0.78 0.06 50);
+}
+.story-by .who-portrait::after {
+  content: ""; position: absolute;
+  bottom: -10%; left: 50%; transform: translateX(-50%);
+  width: 110%; height: 60%;
+  background: var(--ink);
+  border-radius: 50% 50% 0 0;
+}
+.story-by .meta {
+  font-family: var(--font-display); font-style: italic; font-weight: 500;
+  font-size: 17px; color: var(--ink); line-height: 1.3;
+}
+.story-by .meta span {
+  display: block; font-style: normal; font-weight: 400;
+  font-family: var(--font-mono); font-size: 10.5px;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--ink-3); margin-top: 4px;
+}
+
+/* ============================================================
+   CTA — book a visit
+   ============================================================ */
+.cta {
+  padding: 96px var(--sec-pad-x);
+  background: var(--sage-soft);
+  border-top: 1px solid var(--rule);
+  position: relative;
+  overflow: hidden;
+}
+.cta::before {
+  content: "";
+  position: absolute; top: 50%; left: -120px; transform: translateY(-50%);
+  width: 320px; height: 320px;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, oklch(from var(--sage) l c h / 0.18) 0, transparent 70%);
+  pointer-events: none;
+}
+.cta::after {
+  content: "";
+  position: absolute; top: 50%; right: -160px; transform: translateY(-50%);
+  width: 400px; height: 400px;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, oklch(from var(--sage) l c h / 0.14) 0, transparent 70%);
+  pointer-events: none;
+}
+.cta-inner {
+  max-width: 800px; margin: 0 auto;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  gap: 24px; position: relative;
+}
+.cta .eyebrow {
+  font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 0.22em; text-transform: uppercase; color: var(--sage-deep);
+  font-weight: 500;
+  display: inline-flex; align-items: center; gap: 14px;
+}
+.cta .eyebrow::before, .cta .eyebrow::after {
+  content: ""; width: 24px; height: 1px; background: var(--sage-deep);
+}
+.cta h2 {
+  font-family: var(--font-display); font-weight: 400;
+  font-size: clamp(44px, 6vw, 80px);
+  line-height: 1.0; letter-spacing: -0.025em;
+  margin: 0; color: var(--ink);
+  text-wrap: balance;
+}
+.cta h2 em { font-style: italic; color: var(--sage-deep); font-weight: 400; }
+.cta-sub {
+  font-family: var(--font-display); font-weight: 400; font-style: italic;
+  font-size: 21px; line-height: 1.5;
+  color: var(--ink-2); max-width: 50ch; margin: 0;
+}
+.cta-actions { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
+.cta-meta {
+  display: flex; gap: 24px; flex-wrap: wrap;
+  justify-content: center;
+  font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--ink-3); font-weight: 500;
+  margin-top: 16px;
+}
+.cta-meta span { display: inline-flex; align-items: center; gap: 8px; }
+.cta-meta span::before { content: ""; width: 4px; height: 4px; border-radius: 50%; background: var(--sage); }
+.cta-meta span:first-child::before { display: none; }
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.footer {
+  background: var(--bone);
+  border-top: 1px solid var(--rule);
+}
+.footer-top {
+  padding: 56px var(--sec-pad-x) 48px;
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr 1fr;
+  gap: 48px;
+  border-bottom: 1px solid var(--rule);
+}
+.footer-brand { display: flex; flex-direction: column; gap: 14px; }
+.footer-brand .word {
+  font-family: var(--font-display); font-weight: 500;
+  font-size: 32px; line-height: 1; letter-spacing: -0.02em; color: var(--ink);
+}
+.footer-brand .word em { font-style: italic; color: var(--sage-deep); }
+.footer-brand p {
+  font-family: var(--font-display); font-style: italic; font-weight: 400;
+  font-size: 16px; line-height: 1.5; color: var(--ink-2);
+  max-width: 32ch; margin: 0;
+}
+.footer-brand .hours {
+  margin-top: 12px; padding-top: 14px;
+  border-top: 1px solid var(--rule);
+  font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 0.10em;
+  color: var(--ink-2); line-height: 1.8;
+}
+.footer-brand .hours em {
+  font-family: var(--font-display); font-style: italic; font-weight: 500;
+  color: var(--ink); font-size: 13.5px; letter-spacing: 0;
+  display: block; margin-bottom: 4px;
+}
+.footer-col h4 {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.20em; text-transform: uppercase;
+  color: var(--ink-3); font-weight: 500;
+  margin: 0 0 14px; padding-bottom: 8px;
+  border-bottom: 1px solid var(--rule);
+}
+.footer-col ul { list-style: none; margin: 0; padding: 0; }
+.footer-col ul li {
+  font-family: var(--font-display); font-style: italic; font-weight: 400;
+  font-size: 16px; padding: 5px 0; color: var(--ink-2);
+}
+.footer-col ul li:hover { color: var(--sage-deep); }
+.footer-bottom {
+  padding: 22px var(--sec-pad-x);
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-family: var(--font-mono); font-size: 10.5px;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3);
+  flex-wrap: wrap; gap: 16px;
+}
+.footer-bottom em {
+  font-family: var(--font-display); font-style: italic; font-weight: 400;
+  font-size: 13px; letter-spacing: 0; text-transform: none; color: var(--ink-2);
+}
+
+/* ============================================================
+   TOKENS
+   ============================================================ */
+.tokens { max-width: 1080px; margin: 96px auto 96px; padding: 0 32px; }
+.tokens h2 {
+  font-family: var(--font-display); font-weight: 400;
+  font-size: 48px; line-height: 1.05; letter-spacing: -0.022em;
+  margin: 0 0 12px;
+  border-bottom: 1px solid var(--rule); padding-bottom: 14px;
+}
+.tokens h2 em { font-style: italic; color: var(--sage-deep); font-weight: 400; }
+.tokens p { color: var(--ink-2); max-width: 66ch; margin: 18px 0 24px; }
+.tokens h3 {
+  font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  margin: 40px 0 12px; color: var(--ink-2);
+}
+.tokens pre {
+  background: var(--bone-1);
+  border: 1px solid var(--rule);
+  padding: 26px 30px;
+  font-family: var(--font-mono);
+  font-size: 12.5px; line-height: 1.8;
+  overflow-x: auto; white-space: pre;
+  color: var(--ink); border-radius: var(--r-sm);
+}
+.tokens .c { color: var(--ink-3); font-style: italic; }
+.tokens .k { color: var(--sage-deep); }
+.tokens .v { color: oklch(0.46 0.14 30); }
+
+/* ============================================================
+   PALETTES
+   ============================================================ */
+html[data-palette="sage"] {
+  --bone: oklch(0.985 0.010 105); --bone-1: oklch(0.965 0.014 105); --bone-2: oklch(0.93 0.018 105);
+  --ink: oklch(0.22 0.02 165);
+  --sage: oklch(0.62 0.06 155); --sage-deep: oklch(0.42 0.06 160); --sage-soft: oklch(0.92 0.030 145);
+  --accent: oklch(0.60 0.13 38); --accent-deep: oklch(0.46 0.13 32);
+}
+html[data-palette="bone"] {
+  --bone: oklch(0.99 0.006 80); --bone-1: oklch(0.97 0.008 80); --bone-2: oklch(0.94 0.010 80);
+  --ink: oklch(0.22 0.012 60);
+  --sage: oklch(0.55 0.04 80); --sage-deep: oklch(0.36 0.04 80); --sage-soft: oklch(0.93 0.020 75);
+  --accent: oklch(0.60 0.13 38); --accent-deep: oklch(0.46 0.13 32);
+}
+html[data-palette="clay"] {
+  --bone: oklch(0.985 0.012 60); --bone-1: oklch(0.96 0.014 60); --bone-2: oklch(0.92 0.016 60);
+  --ink: oklch(0.22 0.025 30);
+  --sage: oklch(0.60 0.10 40); --sage-deep: oklch(0.42 0.11 35); --sage-soft: oklch(0.94 0.030 40);
+  --accent: oklch(0.55 0.14 25); --accent-deep: oklch(0.40 0.16 22);
+}
+html[data-palette="sky"] {
+  --bone: oklch(0.985 0.010 220); --bone-1: oklch(0.96 0.012 220); --bone-2: oklch(0.92 0.014 220);
+  --ink: oklch(0.22 0.022 235);
+  --sage: oklch(0.60 0.08 225); --sage-deep: oklch(0.42 0.10 232); --sage-soft: oklch(0.92 0.030 220);
+  --accent: oklch(0.62 0.13 30); --accent-deep: oklch(0.48 0.14 25);
+}
+html[data-palette="lavender"] {
+  --bone: oklch(0.985 0.010 290); --bone-1: oklch(0.96 0.012 290); --bone-2: oklch(0.92 0.014 290);
+  --ink: oklch(0.22 0.025 290);
+  --sage: oklch(0.60 0.10 290); --sage-deep: oklch(0.42 0.12 290); --sage-soft: oklch(0.93 0.030 290);
+  --accent: oklch(0.62 0.14 35); --accent-deep: oklch(0.48 0.15 30);
+}
+html[data-palette="stone"] {
+  --bone: oklch(0.98 0.006 240); --bone-1: oklch(0.955 0.008 240); --bone-2: oklch(0.91 0.010 240);
+  --ink: oklch(0.24 0.012 240);
+  --sage: oklch(0.55 0.04 240); --sage-deep: oklch(0.36 0.04 240); --sage-soft: oklch(0.92 0.020 240);
+  --accent: oklch(0.60 0.13 38); --accent-deep: oklch(0.46 0.13 32);
+}
+html[data-palette="linen"] {
+  --bone: oklch(0.97 0.018 80); --bone-1: oklch(0.945 0.020 80); --bone-2: oklch(0.91 0.022 80);
+  --ink: oklch(0.22 0.020 50);
+  --sage: oklch(0.58 0.08 95); --sage-deep: oklch(0.40 0.08 95); --sage-soft: oklch(0.93 0.040 80);
+  --accent: oklch(0.55 0.16 30); --accent-deep: oklch(0.40 0.18 25);
+}
+html[data-palette="olive"] {
+  --bone: oklch(0.97 0.018 105); --bone-1: oklch(0.945 0.020 105); --bone-2: oklch(0.91 0.022 105);
+  --ink: oklch(0.22 0.025 110);
+  --sage: oklch(0.55 0.10 115); --sage-deep: oklch(0.38 0.10 115); --sage-soft: oklch(0.93 0.040 110);
+  --accent: oklch(0.58 0.14 30); --accent-deep: oklch(0.42 0.16 25);
+}
+html[data-palette="ash"] {
+  --bone: oklch(0.985 0.004 250); --bone-1: oklch(0.96 0.006 250); --bone-2: oklch(0.92 0.008 250);
+  --ink: oklch(0.20 0.008 250);
+  --sage: oklch(0.50 0.02 250); --sage-deep: oklch(0.32 0.02 250); --sage-soft: oklch(0.92 0.012 250);
+  --accent: oklch(0.60 0.13 38); --accent-deep: oklch(0.46 0.13 32);
+}
+
+/* ============================================================
+   VARIANTS
+   ============================================================ */
+
+/* PRACTICE (default) — solo or small clinic. Already wired. */
+
+/* MODERN CLINIC — telehealth / new-wave concierge. App-like, cooler, sharper. */
+html[data-variant="modern"] {
+  --r-sm: 6px; --r-md: 10px; --r-lg: 14px; --r-xl: 20px; --r-pill: 999px;
+  --sec-pad-y: 96px;
+}
+html[data-variant="modern"] .hero-display {
+  font-family: var(--font-body);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+}
+html[data-variant="modern"] .hero-display em { font-family: var(--font-display); font-weight: 400; }
+html[data-variant="modern"] .sec-title {
+  font-family: var(--font-body);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+html[data-variant="modern"] .sec-title em { font-family: var(--font-display); font-weight: 400; }
+html[data-variant="modern"] .clinician h3,
+html[data-variant="modern"] .cond h3 {
+  font-family: var(--font-body); font-weight: 600;
+  letter-spacing: -0.015em;
+}
+html[data-variant="modern"] .clinician h3 em,
+html[data-variant="modern"] .cond h3 em { font-family: var(--font-display); font-weight: 400; }
+
+/* SPECIALTY — single-specialty (fertility / derm / ortho). Editorial energy. */
+html[data-variant="specialty"] {
+  --r-sm: 0px; --r-md: 0px; --r-lg: 0px; --r-pill: 999px;
+  --sec-pad-y: 144px;
+}
+html[data-variant="specialty"] .frame { border-radius: 0; }
+html[data-variant="specialty"] .hero-book { border-radius: 0; }
+html[data-variant="specialty"] .conditions { border-radius: 0; }
+html[data-variant="specialty"] .clinician { border-radius: 0; }
+html[data-variant="specialty"] .cost-inner { border-radius: 0; }
+html[data-variant="specialty"] .hero-display {
+  font-size: clamp(56px, 9vw, 144px);
+  letter-spacing: -0.04em;
+  line-height: 0.92;
+}
+html[data-variant="specialty"] .hero-display em { font-style: italic; }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 1180px) {
+  .nav-mid { display: none; }
+  .nav { grid-template-columns: auto 1fr auto; }
+  .hero-grid { grid-template-columns: 1fr; gap: 40px; }
+  .hero-book { max-width: 480px; margin: 0 auto; width: 100%; }
+  .conditions { grid-template-columns: repeat(2, 1fr); }
+  .cond:nth-child(4n) { border-right: 1px solid var(--rule); }
+  .cond:nth-child(2n) { border-right: 0; }
+  .cond:nth-last-child(-n+4) { border-bottom: 1px solid var(--rule); }
+  .cond:nth-last-child(-n+2) { border-bottom: 0; }
+  .team-grid { grid-template-columns: repeat(2, 1fr); }
+  .cost-inner { grid-template-columns: 1fr 1fr; }
+  .cost-inner .col:nth-child(2) { border-right: 0; }
+  .cost-inner .col { border-bottom: 1px solid oklch(from var(--bone) l c h / 0.14); }
+  .cost-inner .col:nth-child(3), .cost-inner .col:nth-child(4) { border-bottom: 0; }
+  .footer-top { grid-template-columns: 1fr 1fr; }
+  .sec-head { grid-template-columns: 1fr; gap: 32px; }
+}
+@media (max-width: 720px) {
+  :root { --sec-pad-y: 80px; }
+  .doc { padding: 64px 24px 48px; }
+  .doc-header { grid-template-columns: 1fr; gap: 32px; }
+  .doc-stamp { border-left: 0; border-top: 1px solid var(--rule); padding-left: 0; padding-top: 24px; text-align: left; }
+  .doc-meta { grid-template-columns: 1fr 1fr; gap: 24px; }
+  .conditions { grid-template-columns: 1fr; }
+  .cond { border-right: 0 !important; }
+  .team-grid { grid-template-columns: 1fr; }
+  .cost-inner { grid-template-columns: 1fr; }
+  .cost-inner .col { border-right: 0; border-bottom: 1px solid oklch(from var(--bone) l c h / 0.14) !important; }
+  .cost-inner .col:last-child { border-bottom: 0 !important; }
+  .footer-top { grid-template-columns: 1fr; gap: 32px; }
+  .swatch-grid { grid-template-columns: 1fr 1fr; }
+  .spec .row { grid-template-columns: 40px 1fr; gap: 16px; }
+  .spec .row > *:nth-child(3),
+  .spec .row > *:nth-child(4),
+  .spec .row > *:nth-child(5) { display: none; }
+}
+
+/* ============================================================
+   SWITCHER
+   ============================================================ */
+.switcher {
+  position: fixed; top: 20px; right: 20px; z-index: 100;
+  background: var(--bone);
+  border: 1px solid var(--rule-strong);
+  box-shadow: 0 12px 32px oklch(0.22 0.02 165 / 0.14);
+  padding: 16px 18px 18px;
+  width: 280px;
+  font-family: var(--font-body);
+  border-radius: var(--r-md);
+}
+.switcher-title {
+  font-family: var(--font-mono);
+  font-size: 10px; font-weight: 500;
+  letter-spacing: 0.20em; text-transform: uppercase;
+  color: var(--ink-2);
+  display: flex; align-items: center; gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--rule);
+}
+.switcher-title em {
+  font-family: var(--font-display); font-weight: 500; font-style: italic;
+  font-size: 18px; letter-spacing: -0.005em; color: var(--sage-deep);
+  text-transform: none;
+}
+.switcher-label {
+  font-family: var(--font-mono);
+  font-size: 9.5px; letter-spacing: 0.20em; text-transform: uppercase;
+  color: var(--ink-3); font-weight: 500;
+  margin: 16px 0 10px;
+}
+.switcher-palettes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.switcher-palettes button {
+  height: 36px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-sm);
+  padding: 0; cursor: pointer;
+  display: flex; overflow: hidden;
+  position: relative;
+  outline: 2px solid transparent; outline-offset: 1px;
+  transition: outline-color 140ms ease, transform 140ms ease;
+}
+.switcher-palettes button:hover { transform: translateY(-1px); }
+.switcher .switcher-palettes button[aria-pressed="true"] {
+  outline-color: var(--ink) !important;
+}
+.switcher-palettes button .ink,
+.switcher-palettes button .accent { flex: 1; height: 100%; }
+.switcher-palettes button .ink { flex: 2; }
+.switcher-palettes button .accent { flex: 1; }
+.switcher-palettes button .name {
+  position: absolute;
+  bottom: 2px; left: 4px;
+  font-family: var(--font-display); font-style: italic; font-weight: 500;
+  font-size: 10.5px; letter-spacing: 0;
+  color: var(--bone); text-transform: none;
+  pointer-events: none;
+  text-shadow: 0 0 4px oklch(0.22 0.02 165 / 0.6);
+}
+.switcher-variants {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 0;
+  border: 1px solid var(--rule); border-radius: var(--r-sm); overflow: hidden;
+}
+.switcher-variants button {
+  font-family: var(--font-display); font-weight: 500; font-style: italic;
+  font-size: 13px; letter-spacing: -0.005em;
+  padding: 9px 6px;
+  background: transparent; color: var(--ink);
+  border: 0; border-right: 1px solid var(--rule);
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease;
+}
+.switcher-variants button:last-child { border-right: 0; }
+.switcher-variants button:hover { color: var(--sage-deep); background: var(--bone-1); }
+.switcher .switcher-variants button[aria-pressed="true"] {
+  background-color: var(--ink) !important;
+  color: var(--bone) !important;
+}
+.switcher-caption {
+  font-family: var(--font-display); font-weight: 400; font-style: italic;
+  font-size: 13.5px; line-height: 1.5;
+  color: var(--ink-2);
+  margin-top: 12px; padding-top: 10px;
+  border-top: 1px solid var(--rule);
+}
+.switcher-caption b { color: var(--ink); font-weight: 500; font-style: normal; }
+@media (max-width: 720px) {
+  .switcher { top: auto; bottom: 12px; right: 12px; left: 12px; width: auto; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     SWITCHER
+     ============================================================ -->
+<aside class="switcher" aria-label="Vital design system controls">
+  <div class="switcher-title">№ 09 · <em>Vital</em> · controls</div>
+
+  <div class="switcher-label">Palette</div>
+  <div class="switcher-palettes" role="radiogroup" aria-label="Palette">
+    <button data-set-palette="sage"     title="Sage · default" aria-label="Sage">
+      <span class="ink" style="background: oklch(0.22 0.02 165)"></span>
+      <span class="accent" style="background: oklch(0.62 0.06 155)"></span>
+      <span class="name">Sage</span>
+    </button>
+    <button data-set-palette="bone"     title="Bone · neutral warm" aria-label="Bone">
+      <span class="ink" style="background: oklch(0.22 0.012 60)"></span>
+      <span class="accent" style="background: oklch(0.55 0.04 80)"></span>
+      <span class="name">Bone</span>
+    </button>
+    <button data-set-palette="clay"     title="Clay · warm earth" aria-label="Clay">
+      <span class="ink" style="background: oklch(0.22 0.025 30)"></span>
+      <span class="accent" style="background: oklch(0.60 0.10 40)"></span>
+      <span class="name">Clay</span>
+    </button>
+    <button data-set-palette="sky"      title="Sky · cool blue" aria-label="Sky">
+      <span class="ink" style="background: oklch(0.22 0.022 235)"></span>
+      <span class="accent" style="background: oklch(0.60 0.08 225)"></span>
+      <span class="name">Sky</span>
+    </button>
+    <button data-set-palette="lavender" title="Lavender · soft violet" aria-label="Lavender">
+      <span class="ink" style="background: oklch(0.22 0.025 290)"></span>
+      <span class="accent" style="background: oklch(0.60 0.10 290)"></span>
+      <span class="name">Lavender</span>
+    </button>
+    <button data-set-palette="stone"    title="Stone · cool neutral" aria-label="Stone">
+      <span class="ink" style="background: oklch(0.24 0.012 240)"></span>
+      <span class="accent" style="background: oklch(0.55 0.04 240)"></span>
+      <span class="name">Stone</span>
+    </button>
+    <button data-set-palette="linen"    title="Linen · warm cream" aria-label="Linen">
+      <span class="ink" style="background: oklch(0.22 0.020 50)"></span>
+      <span class="accent" style="background: oklch(0.58 0.08 95)"></span>
+      <span class="name">Linen</span>
+    </button>
+    <button data-set-palette="olive"    title="Olive · earthy green" aria-label="Olive">
+      <span class="ink" style="background: oklch(0.22 0.025 110)"></span>
+      <span class="accent" style="background: oklch(0.55 0.10 115)"></span>
+      <span class="name">Olive</span>
+    </button>
+    <button data-set-palette="ash"      title="Ash · cool gray" aria-label="Ash">
+      <span class="ink" style="background: oklch(0.20 0.008 250)"></span>
+      <span class="accent" style="background: oklch(0.50 0.02 250)"></span>
+      <span class="name">Ash</span>
+    </button>
+  </div>
+
+  <div class="switcher-label">Variant</div>
+  <div class="switcher-variants" role="radiogroup" aria-label="Variant">
+    <button data-set-variant="practice"  title="Practice · default. Solo or small clinic.">Practice</button>
+    <button data-set-variant="modern"    title="Modern Clinic · telehealth / concierge. Sans display, sharper.">Modern</button>
+    <button data-set-variant="specialty" title="Specialty · single-specialty editorial. Squared, hard.">Specialty</button>
+  </div>
+
+  <div class="switcher-caption" id="switcherCaption">
+    <b>Practice.</b> The default — solo or small clinic. Warm bone bg, sage accent, large team grid, conditions list, hours block.
+  </div>
+</aside>
+
+<script>
+(() => {
+  const root = document.documentElement;
+  const KEY_P = "vital.palette";
+  const KEY_V = "vital.variant";
+  const VARIANT_DESC = {
+    "practice":  "<b>Practice.</b> The default — solo or small clinic. Warm bone bg, sage accent, large team grid, conditions list, hours block.",
+    "modern":    "<b>Modern Clinic.</b> Telehealth or new-wave concierge. App-like sans display, sharper rounding, prominent booking flow.",
+    "specialty": "<b>Specialty.</b> Single-specialty (fertility / derm / ortho). Squared corners, larger display type, editorial photography energy."
+  };
+  try {
+    const p = localStorage.getItem(KEY_P);
+    const v = localStorage.getItem(KEY_V);
+    if (p) root.setAttribute("data-palette", p);
+    if (v) root.setAttribute("data-variant", v);
+  } catch {}
+  const syncPressed = () => {
+    const p = root.getAttribute("data-palette") || "sage";
+    const v = root.getAttribute("data-variant") || "practice";
+    document.querySelectorAll("[data-set-palette]").forEach(b =>
+      b.setAttribute("aria-pressed", b.dataset.setPalette === p)
+    );
+    document.querySelectorAll("[data-set-variant]").forEach(b =>
+      b.setAttribute("aria-pressed", b.dataset.setVariant === v)
+    );
+    const cap = document.getElementById("switcherCaption");
+    if (cap) cap.innerHTML = VARIANT_DESC[v] || VARIANT_DESC.practice;
+  };
+  document.querySelectorAll("[data-set-palette]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      root.setAttribute("data-palette", btn.dataset.setPalette);
+      try { localStorage.setItem(KEY_P, btn.dataset.setPalette); } catch {}
+      syncPressed();
+    });
+  });
+  document.querySelectorAll("[data-set-variant]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      root.setAttribute("data-variant", btn.dataset.setVariant);
+      try { localStorage.setItem(KEY_V, btn.dataset.setVariant); } catch {}
+      syncPressed();
+    });
+  });
+  syncPressed();
+})();
+</script>
+
+<!-- ============================================================
+     SPEC DOC
+     ============================================================ -->
+<div class="doc">
+  <header class="doc-header">
+    <div>
+      <div class="doc-eyebrow">
+        <span class="cross"></span>
+        № 09 — Healthcare &amp; Wellness · Lessgo design library
+      </div>
+      <h1 class="doc-title">Vital,<br><em>without the chill.</em></h1>
+      <p class="doc-sub">A clinically warm system for clinics, therapists, dentists, dermatologists, fertility, telehealth — anywhere a patient has to feel safe before they'll book.</p>
+    </div>
+    <div class="doc-stamp">
+      Lessgo Library<br>
+      <b>Volume IX</b>
+      May · MMXXVI
+      <div class="seal"></div>
+      Reviewed · 05/MMXXVI
+    </div>
+  </header>
+
+  <dl class="doc-meta">
+    <div><dt>For</dt><dd>Clinics · therapists · <b>specialty</b></dd></div>
+    <div><dt>Mode</dt><dd>Light · warm bone</dd></div>
+    <div><dt>Voice</dt><dd>Calm · plain-language</dd></div>
+    <div><dt>References</dt><dd>One Medical; Tia; Parsley Health</dd></div>
+  </dl>
+
+  <section>
+    <h2><span class="n">№ 01</span> Identity</h2>
+    <p class="dek">A center of gravity none of the other eight systems will reach: clinical warmth — competent, calm, plainly bookable.</p>
+    <p>Vital exists because medicine has its own physics. <strong>Lex</strong> is too cold (you don't want a fiduciary energy from your dermatologist). <strong>Atlas</strong> is too cartographic (a visit isn't a journey). <strong>Hearth</strong> is too casual (you can't put "Hey friend" on an OB-GYN site). The buyer has to feel safe with their body or their kid's body before they'll feel anything else.</p>
+    <p class="pull">Browsable is a feature; bookable is a verb. Vital is built around the verb.</p>
+    <p>The visual grammar borrows from health-record interfaces — generous whitespace, calm sage, plain-language labels, real availability mockups — without inheriting the ugliness. Single warm clay accent for CTAs only. Never decoration.</p>
+    <h3>Five commitments</h3>
+    <ul>
+      <li><strong>Bookable, not browsable.</strong> Primary CTA everywhere is "Book a visit," with a real calendar mockup hero-side.</li>
+      <li><strong>Conditions, not features.</strong> List what you actually treat, plain-language.</li>
+      <li><strong>A face per clinician.</strong> Real bios, real credentials, a one-line "what they're like to work with."</li>
+      <li><strong>Insurance + price clarity.</strong> A real "what it costs" strip — not buried in a footer link.</li>
+      <li><strong>One calm color, one warm accent.</strong> Sage for surface; clay for CTA only. No decorative use of either.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="n">№ 02</span> Type</h2>
+    <p class="dek">Newsreader (variable serif) for display in Practice and Specialty; Inter Tight steps in for display in Modern Clinic. Inter Tight body throughout.</p>
+    <ul>
+      <li><strong>Practice</strong> — Newsreader 400 display, italic for emphasis. Reads warm and humane.</li>
+      <li><strong>Modern Clinic</strong> — Inter Tight 600 display, Newsreader italic for emphasized phrase only. Reads app-like and decisive.</li>
+      <li><strong>Specialty</strong> — Newsreader 400, larger, tighter tracking. Reads editorial.</li>
+    </ul>
+    <div class="spec">
+      <div class="row head"><div>Role</div><div>Sample</div><div>Desktop</div><div>Mobile</div><div>Family</div></div>
+      <div class="row"><div>D1</div><div class="sample">Without the chill</div><div>112 / 0.98</div><div>48 / 1.0</div><div>Newsreader 400</div></div>
+      <div class="row"><div>D2</div><div class="sample">Section heading</div><div>72 / 1.0</div><div>44 / 1.05</div><div>Newsreader 400</div></div>
+      <div class="row"><div>D3</div><div class="sample">Clinician name</div><div>26 / 1.05</div><div>22 / 1.1</div><div>Newsreader 500</div></div>
+      <div class="row"><div>D4</div><div class="sample">Editorial italic lede</div><div>22 / 1.45</div><div>19 / 1.5</div><div>Newsreader italic</div></div>
+    </div>
+    <div class="plate">
+      <span class="plate-label">Plate № 01 — Display</span>
+      <span class="plate-num">D1 · 96 / 0.98</span>
+      <div class="s-d1">Care that doesn't<br><em>treat you like a&nbsp;chart.</em></div>
+    </div>
+    <div class="plate">
+      <span class="plate-label">Plate № 02 — Specimens</span>
+      <span class="plate-num">D2 · D3 · D4</span>
+      <div class="s-d2">Conditions <em>we&nbsp;treat.</em></div>
+      <div class="s-d3" style="margin-top: 24px;">Dr. Lina Park, MD · primary care</div>
+      <div class="s-d4" style="margin-top: 14px;">Soft, italic editorial leads — never used to set body text.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">№ 03</span> Color</h2>
+    <p class="dek">Two surfaces, one calm primary, one warm accent. Sage carries identity; clay carries action.</p>
+    <h3>Surface — held constant</h3>
+    <div class="swatch-grid">
+      <div class="swatch"><div class="chip" style="background: oklch(0.985 0.010 105)"></div><div class="lbl"><b>bone</b><span>L 0.985 · paper</span></div></div>
+      <div class="swatch"><div class="chip" style="background: oklch(0.965 0.014 105)"></div><div class="lbl"><b>bone-1</b><span>L 0.965 · second</span></div></div>
+      <div class="swatch"><div class="chip" style="background: oklch(0.86 0.014 145)"></div><div class="lbl"><b>rule</b><span>L 0.86 · hairline</span></div></div>
+      <div class="swatch"><div class="chip" style="background: oklch(0.38 0.018 165)"></div><div class="lbl" style="background: oklch(0.38 0.018 165); color:#fff"><b style="color:#fff">ink-2</b><span style="color:#ddd">L 0.38 · body</span></div></div>
+      <div class="swatch"><div class="chip" style="background: oklch(0.22 0.02 165)"></div><div class="lbl" style="background: oklch(0.22 0.02 165); color:#fff"><b style="color:#fff">ink</b><span style="color:#ddd">L 0.22 · headline</span></div></div>
+    </div>
+    <h3>Palette pairs (sage / accent)</h3>
+    <p>Each palette ships a calm primary (sage-equivalent — used on identity, hero halo, CTA chips) and a warm clay accent (used on primary CTA buttons only, never decoration). The two never compete: ≤4% combined viewport coverage.</p>
+    <div class="swatch-grid" style="grid-template-columns: repeat(9, 1fr);">
+      <div class="swatch"><div class="chip" style="background: linear-gradient(to right, oklch(0.62 0.06 155) 60%, oklch(0.60 0.13 38) 60%)"></div><div class="lbl"><b>sage</b><span>green · clay</span></div></div>
+      <div class="swatch"><div class="chip" style="background: linear-gradient(to right, oklch(0.55 0.04 80) 60%, oklch(0.60 0.13 38) 60%)"></div><div class="lbl"><b>bone</b><span>warm · clay</span></div></div>
+      <div class="swatch"><div class="chip" style="background: linear-gradient(to right, oklch(0.60 0.10 40) 60%, oklch(0.55 0.14 25) 60%)"></div><div class="lbl"><b>clay</b><span>earth · red</span></div></div>
+      <div class="swatch"><div class="chip" style="background: linear-gradient(to right, oklch(0.60 0.08 225) 60%, oklch(0.62 0.13 30) 60%)"></div><div class="lbl"><b>sky</b><span>blue · clay</span></div></div>
+      <div class="swatch"><div class="chip" style="background: linear-gradient(to right, oklch(0.60 0.10 290) 60%, oklch(0.62 0.14 35) 60%)"></div><div class="lbl"><b>lavender</b><span>violet · clay</span></div></div>
+      <div class="swatch"><div class="chip" style="background: linear-gradient(to right, oklch(0.55 0.04 240) 60%, oklch(0.60 0.13 38) 60%)"></div><div class="lbl"><b>stone</b><span>cool · clay</span></div></div>
+      <div class="swatch"><div class="chip" style="background: linear-gradient(to right, oklch(0.58 0.08 95) 60%, oklch(0.55 0.16 30) 60%)"></div><div class="lbl"><b>linen</b><span>cream · clay</span></div></div>
+      <div class="swatch"><div class="chip" style="background: linear-gradient(to right, oklch(0.55 0.10 115) 60%, oklch(0.58 0.14 30) 60%)"></div><div class="lbl"><b>olive</b><span>green · clay</span></div></div>
+      <div class="swatch"><div class="chip" style="background: linear-gradient(to right, oklch(0.50 0.02 250) 60%, oklch(0.60 0.13 38) 60%)"></div><div class="lbl"><b>ash</b><span>gray · clay</span></div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">№ 04</span> Decoration</h2>
+    <p class="dek">Five permitted motifs. All borrowed from medical interfaces, intentionally calm.</p>
+    <ul>
+      <li><strong>Cross / plus.</strong> A single small + glyph for brand mark and item bullets. Never decorative on cards.</li>
+      <li><strong>Sage halo.</strong> Soft radial gradient behind hero. The only allowed gradient in Vital.</li>
+      <li><strong>Calendar booking card.</strong> Real-feeling availability mockup with date pill and three time slots — system signature.</li>
+      <li><strong>Conditions grid.</strong> Plain-language list of what's treated, four columns, generous whitespace, hover arrow.</li>
+      <li><strong>Italic lead, roman body.</strong> Editorial italic for one phrase per heading; never for paragraphs.</li>
+    </ul>
+    <p>What's <em>banned</em>: stock photos of doctor-with-stethoscope, "modern healthcare experience" copy, gradient buttons, pulse-line ECG dividers as decoration, "AI-powered care," tablet-on-desk imagery, Lex's award-bar pattern, two-accent palettes (Riot territory).</p>
+  </section>
+</div>
+
+<!-- ============================================================
+     RENDERED MOCKUP
+     ============================================================ -->
+<div class="stage">
+  <div class="stage-header">
+    <span class="stage-n">Plate № 09</span>
+    <span class="stage-title">Composed page</span>
+    <span class="stage-note">A primary-care practice, four clinicians, accepting new patients.</span>
+  </div>
+  <div class="frame">
+
+    <!-- NAV -->
+    <nav class="nav">
+      <div class="nav-brand">
+        <span class="mark"></span>
+        Linden <em>Family Medicine</em>
+      </div>
+      <div class="nav-mid">
+        <a class="active">Care we offer</a>
+        <a>Our team</a>
+        <a>Insurance &amp; cost</a>
+        <a>About</a>
+        <a>Patient portal</a>
+      </div>
+      <div class="nav-right">
+        <a class="quiet">Call (415) 555-0182</a>
+        <a class="btn btn-primary btn-sm">Book a visit <span class="arrow">→</span></a>
+      </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-eyebrow">
+        <span class="accepting">Accepting new patients · 3 clinicians</span>
+        <span class="insurance">In-network with <b>Aetna · Blue Shield · Kaiser · United</b></span>
+      </div>
+
+      <div class="hero-grid">
+        <div class="hero-content">
+          <h1 class="hero-display">
+            Care that doesn't <em>treat you like a&nbsp;chart.</em>
+          </h1>
+          <p class="hero-lede">A small primary-care practice in Hayes Valley. Four physicians, longer visits, plain-language plans, same-week appointments.</p>
+          <div class="hero-cta">
+            <a class="btn btn-primary btn-lg">Book a visit <span class="arrow">→</span></a>
+            <a class="btn btn-ghost btn-lg">Meet the team</a>
+            <span class="quiet">Or call <em>(415) 555-0182</em></span>
+          </div>
+        </div>
+        <div class="hero-book">
+          <div class="book-header">
+            <b>May · 2026</b>
+            <span>Next 7 days</span>
+          </div>
+          <div class="book-days">
+            <span class="dow">M</span><span class="dow">T</span><span class="dow">W</span><span class="dow">T</span><span class="dow">F</span><span class="dow">S</span><span class="dow">S</span>
+            <span class="day dim">5</span>
+            <span class="day has-slot">6</span>
+            <span class="day selected">7</span>
+            <span class="day has-slot">8</span>
+            <span class="day has-slot">9</span>
+            <span class="day dim">10</span>
+            <span class="day dim">11</span>
+          </div>
+          <div class="book-times">
+            <div class="lbl">Thursday, May 7 — available with Dr. Park</div>
+            <div class="book-slots">
+              <button class="taken">8:30 am</button>
+              <button>9:15 am</button>
+              <button>10:00 am</button>
+              <button class="taken">11:30 am</button>
+              <button>2:15 pm</button>
+              <button>3:30 pm</button>
+            </div>
+          </div>
+          <div class="book-foot">
+            <span class="visit">First visit · <b>60 min</b></span>
+            <a class="btn btn-sage btn-sm">See more <span class="arrow">→</span></a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONDITIONS -->
+    <section class="section">
+      <header class="sec-head">
+        <div>
+          <div class="sec-eyebrow"><span class="n">stage 02</span><span>Care we offer</span></div>
+          <h2 class="sec-title">Conditions <em>we&nbsp;treat.</em></h2>
+        </div>
+        <p class="sec-lede">Plain-language list of what we actually do. If you don't see your concern, call us — we'll tell you honestly whether we're the right fit.</p>
+      </header>
+
+      <div class="conditions">
+        <article class="cond">
+          <span class="num">01</span>
+          <h3>Annual <em>physicals</em></h3>
+          <p>Comprehensive yearly exam. Bloodwork, screening review, plain plan written on real paper.</p>
+          <span class="arrow">→</span>
+        </article>
+        <article class="cond">
+          <span class="num">02</span>
+          <h3>Same-week <em>sick visits</em></h3>
+          <p>Sore throat, UTI, rash, mystery headache. Most appointments within 48 hours.</p>
+          <span class="arrow">→</span>
+        </article>
+        <article class="cond">
+          <span class="num">03</span>
+          <h3>Women's <em>health</em></h3>
+          <p>Pap, breast exam, contraception, perimenopause. Longer visits, full conversation.</p>
+          <span class="arrow">→</span>
+        </article>
+        <article class="cond">
+          <span class="num">04</span>
+          <h3>Mental <em>health</em></h3>
+          <p>Depression, anxiety, ADHD. Co-management with therapy referrals. We'll find the right person.</p>
+          <span class="arrow">→</span>
+        </article>
+        <article class="cond">
+          <span class="num">05</span>
+          <h3>Chronic <em>conditions</em></h3>
+          <p>Diabetes, hypertension, thyroid, asthma. Quarterly check-ins, real coordination, no panicking.</p>
+          <span class="arrow">→</span>
+        </article>
+        <article class="cond">
+          <span class="num">06</span>
+          <h3>Travel <em>medicine</em></h3>
+          <p>Vaccines, prescriptions, what to bring. Same-week if you booked a flight tomorrow.</p>
+          <span class="arrow">→</span>
+        </article>
+        <article class="cond">
+          <span class="num">07</span>
+          <h3>Skin <em>concerns</em></h3>
+          <p>Acne, eczema, mole checks, in-office biopsies. Specialist referral when we're not the right call.</p>
+          <span class="arrow">→</span>
+        </article>
+        <article class="cond">
+          <span class="num">08</span>
+          <h3>Pediatric <em>well-child</em></h3>
+          <p>Birth through 18. Same-day sick care. Parents stay in the room as long as the kid wants.</p>
+          <span class="arrow">→</span>
+        </article>
+      </div>
+    </section>
+
+    <!-- TEAM -->
+    <section class="team-section">
+      <div class="team-inner">
+        <header class="sec-head">
+          <div>
+            <div class="sec-eyebrow"><span class="n">stage 03</span><span>Our team</span></div>
+            <h2 class="sec-title">Three <em>physicians,</em><br>one practice.</h2>
+          </div>
+          <p class="sec-lede">Each of us takes about 850 patients — about a third of what a typical primary-care doc carries. That's why visits run long and why we know your name.</p>
+        </header>
+
+        <div class="team-grid">
+          <article class="clinician">
+            <div class="portrait"><div class="head"></div><div class="body"></div></div>
+            <span class="credentials">MD · Stanford '06</span>
+            <h3>Dr. Lina <em>Park</em></h3>
+            <span class="role">Primary care · women's health</span>
+            <p>Twelve years in academic medicine before opening Linden in 2018. Special interest in perimenopause and migraine.</p>
+            <div class="vibe">
+              <b>What it's like</b>
+              "Asks me three follow-up questions before she writes anything down."
+            </div>
+          </article>
+
+          <article class="clinician">
+            <div class="portrait"><div class="head"></div><div class="body"></div></div>
+            <span class="credentials">MD, MPH · UCSF '09</span>
+            <h3>Dr. Marcus <em>Hale</em></h3>
+            <span class="role">Primary care · pediatrics</span>
+            <p>Treats kids and parents — often the whole family in one practice. Trained in pediatrics; certified in addiction medicine.</p>
+            <div class="vibe">
+              <b>What it's like</b>
+              "He explained the meds to my eleven-year-old like she was a serious person."
+            </div>
+          </article>
+
+          <article class="clinician">
+            <div class="portrait"><div class="head"></div><div class="body"></div></div>
+            <span class="credentials">DO · Touro '12</span>
+            <h3>Dr. Priya <em>Iyer</em></h3>
+            <span class="role">Primary care · mental health</span>
+            <p>Co-manages depression, anxiety, ADHD, and complex med regimens. Slow, thorough, and good with skeptics.</p>
+            <div class="vibe">
+              <b>What it's like</b>
+              "First doctor who treated my anxiety like a thing she could actually fix."
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- COSTS -->
+    <section class="cost-strip">
+      <div class="cost-inner">
+        <div class="col">
+          <span class="lbl">Insurance</span>
+          <span class="val"><em>In-network</em><small>Aetna · Blue Shield · Kaiser · United · Cigna</small></span>
+          <p>We bill insurance directly. Co-pays apply per your plan. Out-of-network superbill on request.</p>
+        </div>
+        <div class="col">
+          <span class="lbl">Cash visit</span>
+          <span class="val">$<span class="lnum">240</span><small>60-minute first visit</small></span>
+          <p>Flat cash rate for uninsured or out-of-network patients. $180 for 30-min follow-ups.</p>
+        </div>
+        <div class="col">
+          <span class="lbl">Membership</span>
+          <span class="val">$<span class="lnum">59</span> <em>/ mo</em><small>optional · waives co-pays + same-week priority</small></span>
+          <p>Pay monthly to skip co-pays, get same-week appointments, and message us directly. Most patients don't need it.</p>
+        </div>
+        <div class="col">
+          <span class="lbl">Sliding scale</span>
+          <span class="val"><em>Yes</em><small>income-based · ask honestly, we mean it</small></span>
+          <p>Income-based pricing for anyone in financial hardship. No paperwork dance — just tell us when you book.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- STORY -->
+    <section class="story">
+      <p class="story-quote">After fifteen years of being a number at a big practice, I cried a little when Dr.&nbsp;Park called me back the same afternoon to talk through my labs. I didn't know that was&nbsp;allowed.</p>
+      <div class="story-by">
+        <div class="who-portrait"></div>
+        <div class="meta">
+          Maya Levine, 41 · patient since 2022
+          <span>Primary care · Linden FM</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta">
+      <div class="cta-inner">
+        <span class="eyebrow">Book a visit</span>
+        <h2>The first one's <em>sixty minutes.</em><br>That's where we start.</h2>
+        <p class="cta-sub">A real first visit — long enough for an actual conversation, plain-language plan, no rush. Most new patients see us within the week.</p>
+        <div class="cta-actions">
+          <a class="btn btn-primary btn-lg">Book online <span class="arrow">→</span></a>
+          <a class="btn btn-ghost btn-lg">Or call (415) 555-0182</a>
+        </div>
+        <div class="cta-meta">
+          <span>In-network with most plans</span>
+          <span>Sliding scale available</span>
+          <span>Same-week sick visits</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <div class="word">Linden <em>Family Medicine</em></div>
+          <p>A primary-care practice in Hayes Valley, San Francisco. Four physicians, longer visits, real conversations.</p>
+          <div class="hours">
+            <em>Hours</em>
+            Mon–Thu  8:00 am – 6:00 pm<br>
+            Friday   8:00 am – 4:00 pm<br>
+            Saturday 9:00 am – 1:00 pm<br>
+            Sunday   on-call only
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Care</h4>
+          <ul><li>Conditions we treat</li><li>Same-week sick visits</li><li>Women's health</li><li>Mental health</li><li>Pediatric care</li></ul>
+        </div>
+        <div class="footer-col">
+          <h4>Practice</h4>
+          <ul><li>Our team</li><li>Insurance &amp; cost</li><li>New patients</li><li>Patient portal</li><li>Forms</li></ul>
+        </div>
+        <div class="footer-col">
+          <h4>Visit</h4>
+          <ul><li>Hayes Valley · SF</li><li>Hours &amp; directions</li><li>Parking</li><li>Contact</li><li>Careers</li></ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© Linden Family Medicine · MMXVIII — MMXXVI</span>
+        <span><em>Set in</em> Newsreader &amp; Inter Tight</span>
+        <span>Privacy · HIPAA · Accessibility</span>
+      </div>
+    </footer>
+  </div>
+</div>
+
+<!-- ============================================================
+     TOKENS
+     ============================================================ -->
+<section class="tokens">
+  <h2>Tokens, <em>copy &amp; paste.</em></h2>
+  <p>The full token surface for the renderer. User-configurable axes are <span class="mono">[data-palette]</span> (9 options) and <span class="mono">[data-variant]</span> (Practice · Modern Clinic · Specialty). Display family swaps from Newsreader to Inter Tight on the Modern variant; corner radius collapses to 0 on Specialty.</p>
+
+  <h3>:root tokens</h3>
+  <pre><span class="c">/* Surface */</span>
+<span class="k">--bone</span>:        <span class="v">oklch(0.985 0.010 105)</span>;     <span class="c">/* paper */</span>
+<span class="k">--bone-1</span>:      <span class="v">oklch(0.965 0.014 105)</span>;
+<span class="k">--ink</span>:         <span class="v">oklch(0.22 0.02 165)</span>;       <span class="c">/* near-black, slightly green */</span>
+<span class="k">--ink-2</span>:       <span class="v">oklch(0.38 0.018 165)</span>;      <span class="c">/* body */</span>
+<span class="k">--rule</span>:        <span class="v">oklch(0.86 0.014 145)</span>;      <span class="c">/* hairline */</span>
+
+<span class="c">/* Sage — calm primary, &lt;= 8% of viewport */</span>
+<span class="k">--sage</span>:        <span class="v">oklch(0.62 0.06 155)</span>;       <span class="c">/* identity */</span>
+<span class="k">--sage-deep</span>:   <span class="v">oklch(0.42 0.06 160)</span>;       <span class="c">/* on light */</span>
+<span class="k">--sage-soft</span>:   <span class="v">oklch(0.92 0.030 145)</span>;      <span class="c">/* halos, chips */</span>
+
+<span class="c">/* Clay — single warm CTA accent. CTA only, never decoration. */</span>
+<span class="k">--accent</span>:      <span class="v">oklch(0.60 0.13 38)</span>;
+<span class="k">--accent-deep</span>: <span class="v">oklch(0.46 0.13 32)</span>;
+
+<span class="c">/* Type */</span>
+<span class="k">--font-display</span>: <span class="v">"Newsreader", "Iowan Old Style", serif</span>;
+<span class="k">--font-body</span>:    <span class="v">"Inter Tight", system-ui, sans-serif</span>;
+<span class="k">--font-mono</span>:    <span class="v">"JetBrains Mono", monospace</span>;
+
+<span class="c">/* Radius — soft, generous */</span>
+<span class="k">--r-sm</span>: <span class="v">8px</span>;  <span class="k">--r-md</span>: <span class="v">14px</span>;
+<span class="k">--r-lg</span>: <span class="v">20px</span>; <span class="k">--r-pill</span>: <span class="v">999px</span>;</pre>
+
+  <h3>palette overrides ([data-palette])</h3>
+  <pre><span class="k">html[data-palette="sage"]</span>     { <span class="k">--sage</span>: <span class="v">oklch(0.62 0.06 155)</span>;   <span class="k">--accent</span>: <span class="v">oklch(0.60 0.13 38)</span>; }   <span class="c">/* default */</span>
+<span class="k">html[data-palette="bone"]</span>     { <span class="k">--sage</span>: <span class="v">oklch(0.55 0.04 80)</span>;    <span class="k">--accent</span>: <span class="v">oklch(0.60 0.13 38)</span>; }   <span class="c">/* warm neutral */</span>
+<span class="k">html[data-palette="clay"]</span>     { <span class="k">--sage</span>: <span class="v">oklch(0.60 0.10 40)</span>;    <span class="k">--accent</span>: <span class="v">oklch(0.55 0.14 25)</span>; }   <span class="c">/* warm earth */</span>
+<span class="k">html[data-palette="sky"]</span>      { <span class="k">--sage</span>: <span class="v">oklch(0.60 0.08 225)</span>;   <span class="k">--accent</span>: <span class="v">oklch(0.62 0.13 30)</span>; }   <span class="c">/* cool blue */</span>
+<span class="k">html[data-palette="lavender"]</span> { <span class="k">--sage</span>: <span class="v">oklch(0.60 0.10 290)</span>;   <span class="k">--accent</span>: <span class="v">oklch(0.62 0.14 35)</span>; }   <span class="c">/* therapy / mental health */</span>
+<span class="k">html[data-palette="stone"]</span>    { <span class="k">--sage</span>: <span class="v">oklch(0.55 0.04 240)</span>;   <span class="k">--accent</span>: <span class="v">oklch(0.60 0.13 38)</span>; }   <span class="c">/* cool neutral */</span>
+<span class="k">html[data-palette="linen"]</span>    { <span class="k">--sage</span>: <span class="v">oklch(0.58 0.08 95)</span>;    <span class="k">--accent</span>: <span class="v">oklch(0.55 0.16 30)</span>; }   <span class="c">/* warm cream */</span>
+<span class="k">html[data-palette="olive"]</span>    { <span class="k">--sage</span>: <span class="v">oklch(0.55 0.10 115)</span>;   <span class="k">--accent</span>: <span class="v">oklch(0.58 0.14 30)</span>; }   <span class="c">/* earthy green */</span>
+<span class="k">html[data-palette="ash"]</span>      { <span class="k">--sage</span>: <span class="v">oklch(0.50 0.02 250)</span>;   <span class="k">--accent</span>: <span class="v">oklch(0.60 0.13 38)</span>; }   <span class="c">/* cool gray */</span></pre>
+
+  <h3>variant overrides ([data-variant])</h3>
+  <pre><span class="c">/* Practice (default) — Newsreader display, soft 14–20px radii. */</span>
+
+<span class="c">/* Modern Clinic — Inter Tight 600 display, sharper rounding. */</span>
+<span class="k">html[data-variant="modern"]</span> {
+  <span class="k">--r-sm</span>: <span class="v">6px</span>; <span class="k">--r-md</span>: <span class="v">10px</span>; <span class="k">--r-lg</span>: <span class="v">14px</span>;
+  <span class="k">--sec-pad-y</span>: <span class="v">96px</span>;
+}
+<span class="k">html[data-variant="modern"] .hero-display</span> {
+  <span class="k">font-family</span>: <span class="v">var(--font-body)</span>;
+  <span class="k">font-weight</span>: <span class="v">600</span>;
+  <span class="k">letter-spacing</span>: <span class="v">-0.035em</span>;
+}
+
+<span class="c">/* Specialty — squared corners, larger display. */</span>
+<span class="k">html[data-variant="specialty"]</span> {
+  <span class="k">--r-sm</span>: <span class="v">0</span>; <span class="k">--r-md</span>: <span class="v">0</span>; <span class="k">--r-lg</span>: <span class="v">0</span>;
+  <span class="k">--sec-pad-y</span>: <span class="v">144px</span>;
+}</pre>
+</section>
+
+</body>
+</html>
