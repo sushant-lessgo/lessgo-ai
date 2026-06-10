@@ -9,6 +9,7 @@
 import { useEffect, useState } from 'react';
 import { preloadTemplate, getLoadedTemplate } from './registry';
 import type { TemplateId } from '@/types/service';
+import { usesTemplateModule } from '@/types/service';
 import type { TemplateModule } from '@/types/template';
 
 export interface TemplateModuleState {
@@ -22,15 +23,15 @@ export function useTemplateModule(
   audienceType: string | undefined,
   templateId: string | null | undefined,
 ): TemplateModuleState {
-  const isService = audienceType === 'service';
+  const usesTemplate = usesTemplateModule(audienceType, templateId);
   const id = (templateId || 'hearth') as TemplateId;
 
   const [tmpl, setTmpl] = useState<TemplateModule | null>(
-    () => (isService ? getLoadedTemplate(id) ?? null : null),
+    () => (usesTemplate ? getLoadedTemplate(id) ?? null : null),
   );
 
   useEffect(() => {
-    if (!isService) {
+    if (!usesTemplate) {
       setTmpl(null);
       return;
     }
@@ -46,7 +47,7 @@ export function useTemplateModule(
     return () => {
       alive = false;
     };
-  }, [isService, id]);
+  }, [usesTemplate, id]);
 
-  return { ready: !isService || !!tmpl, tmpl };
+  return { ready: !usesTemplate || !!tmpl, tmpl };
 }

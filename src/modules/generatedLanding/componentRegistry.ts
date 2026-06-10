@@ -171,6 +171,7 @@ import { logger } from '@/lib/logger';
 // dynamic template registry's preloaded cache (firewall, Phase 7.5c).
 import { getLoadedTemplate } from '@/modules/templates/registry';
 import type { AudienceType, TemplateId } from '@/types/service';
+import { usesTemplateModule } from '@/types/service';
 // Component registry type definition
 export type ComponentRegistry = Record<string, Record<string, React.ComponentType<any>>>;
 
@@ -440,10 +441,11 @@ export function getComponent(
   // Extract section type from section ID if needed
   const sectionType = extractSectionType(sectionIdOrType);
 
-  // Service projects dispatch to the selected template module. The module is
-  // dynamically imported + cached via preloadTemplate() before render; here we
-  // read it synchronously (null until loaded — renderers gate on readiness).
-  if (audienceType === 'service') {
+  // Template-backed projects (service = Hearth; product+meridian = Meridian)
+  // dispatch to the selected template module. The module is dynamically imported
+  // + cached via preloadTemplate() before render; here we read it synchronously
+  // (null until loaded — renderers gate on readiness).
+  if (usesTemplateModule(audienceType, templateId)) {
     const tmpl = getLoadedTemplate((templateId || 'hearth') as TemplateId);
     return tmpl ? tmpl.resolveBlock(layoutName, 'edit') : null;
   }

@@ -4,6 +4,8 @@
 // 3-tier model: audienceType='product' → templateId='meridian' → variantId + paletteId.
 // Source of truth: "Meridian - Modern Tech.html" (<head> palettes/variants).
 
+import type { ProductStrategyResponse } from '@/lib/schemas/productStrategy.schema';
+
 /**
  * ===== MERIDIAN PALETTE =====
  * 9 accent hues. User picks the hue; chroma/lightness held per variant.
@@ -39,3 +41,16 @@ export const defaultMeridianPalette: MeridianPalette = 'mint';
 
 /** Default variant when none is picked or persisted. */
 export const defaultMeridianVariant: MeridianVariant = 'developer';
+
+/**
+ * ===== MERIDIAN STRATEGY (P3 — generation wiring) =====
+ * The assembled strategy passed from /api/audience/product/strategy into
+ * /api/audience/product/generate-copy. = raw LLM output (ProductStrategyResponse:
+ * awareness / oneReader / oneIdea / featureAnalysis) + the deterministic fixed
+ * section list and block map. No vibe / section-decisions / uiblock-decisions —
+ * the pilot makes no layout choices (see productStrategy.schema.ts).
+ */
+export interface ProductStrategyOutput extends ProductStrategyResponse {
+  sections: string[]; // fixed 7: header, hero, features, testimonials, pricing, cta, footer
+  uiblocks: Record<string, string>; // section type → Meridian layout name (PascalCase)
+}

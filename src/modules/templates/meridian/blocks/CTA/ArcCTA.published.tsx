@@ -3,6 +3,16 @@
 
 import React from 'react';
 
+// Primary CTA destination resolved via buttonConfig on cta_text element-metadata
+// (single source of truth — mirrors Hearth's BookCallCTA.published). A form
+// connection set in the editor resolves to the shared "#form-section" anchor.
+interface ButtonConfig {
+  type?: 'link' | 'form' | 'link-with-input';
+  formId?: string;
+  behavior?: 'scrollTo' | 'openModal';
+  url?: string;
+}
+
 interface ArcCTAPublishedProps {
   sectionId: string;
   eyebrow?: string;
@@ -10,15 +20,41 @@ interface ArcCTAPublishedProps {
   body?: string;
   cta_text?: string;
   secondary_cta_text?: string;
+  // Standard published-renderer props for form-builder integration.
+  content?: any;
+  elementMetadata?: any;
+}
+
+function resolvePrimaryHref(
+  buttonConfig: ButtonConfig | undefined,
+  forms: Record<string, any> | undefined,
+): string {
+  if (!buttonConfig) return '#cta';
+  if (buttonConfig.type === 'link' || buttonConfig.type === 'link-with-input') {
+    return buttonConfig.url || '#cta';
+  }
+  if (buttonConfig.type === 'form') {
+    if (!buttonConfig.formId) return '#cta';
+    const form = forms?.[buttonConfig.formId];
+    if (!form) return '#cta';
+    return '#form-section';
+  }
+  return '#cta';
 }
 
 export default function ArcCTAPublished(props: ArcCTAPublishedProps) {
   const headline = props.headline || '';
 
+  const sectionData = props.content?.[props.sectionId];
+  const buttonConfig: ButtonConfig | undefined =
+    sectionData?.elementMetadata?.cta_text?.buttonConfig ||
+    props.elementMetadata?.cta_text?.buttonConfig;
+  const ctaHref = resolvePrimaryHref(buttonConfig, props.content?.forms);
+
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
-      <section className="mrd-cta-wrap">
+      <section className="mrd-cta-wrap" id="cta">
         <div className="mrd-cta">
           <div className="mrd-cta__grid" aria-hidden="true" />
           <div className="mrd-cta__arc" aria-hidden="true" />
@@ -28,7 +64,7 @@ export default function ArcCTAPublished(props: ArcCTAPublishedProps) {
             {props.body && <p className="mrd-cta__body">{props.body}</p>}
             <div className="mrd-cta__actions">
               {props.cta_text && (
-                <a className="mrd-btn mrd-btn--primary mrd-btn--lg mrd-btn--arrow" href="#cta">{props.cta_text}</a>
+                <a className="mrd-btn mrd-btn--primary mrd-btn--lg mrd-btn--arrow" href={ctaHref}>{props.cta_text}</a>
               )}
               {props.secondary_cta_text && (
                 <a className="mrd-btn mrd-btn--ghost mrd-btn--lg" href="#cta">{props.secondary_cta_text}</a>

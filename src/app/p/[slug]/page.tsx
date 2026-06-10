@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { sanitizeContentForPublish } from '@/modules/sections/layoutElementSchema';
+import { usesTemplateModule } from '@/types/service';
 
 // ISR configuration - revalidate every hour
 export const revalidate = 3600;
@@ -83,6 +84,7 @@ export default async function PublishedPage({ params }: PageProps) {
       audienceType: true,
       templateId: true,
       paletteId: true,
+      variantId: true,
     },
   });
 
@@ -114,10 +116,13 @@ export default async function PublishedPage({ params }: PageProps) {
 
   const { LandingPagePublishedRenderer } = await import('@/modules/generatedLanding/LandingPagePublishedRenderer');
 
-  // Preload the service template module so the sync renderer can resolve blocks.
+  // Preload the template module so the sync renderer can resolve blocks.
+  // STRICT: keep templateId as stored (no default-synthesis) — a legacy
+  // product page (templateId=null + 47-block content) must stay on the legacy
+  // path. Only default to 'hearth' for service (its null-templateId legacy).
   const audienceType = page.audienceType === 'service' ? 'service' : 'product';
-  const templateId = page.templateId || 'hearth';
-  if (audienceType === 'service') {
+  const templateId = page.templateId || (audienceType === 'service' ? 'hearth' : null);
+  if (usesTemplateModule(audienceType, templateId)) {
     const { preloadTemplate } = await import('@/modules/templates/registry');
     await preloadTemplate(templateId as any);
   }
@@ -141,6 +146,7 @@ export default async function PublishedPage({ params }: PageProps) {
       audienceType={audienceType}
       templateId={templateId}
       paletteId={page.paletteId}
+      variantId={page.variantId}
     />
   );
 }

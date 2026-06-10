@@ -15,6 +15,7 @@ import { logger } from '@/lib/logger';
 import { getServiceImageQuery } from '@/modules/audience/service/imageKeywords';
 import { getLoadedTemplate } from '@/modules/templates/registry';
 import type { TemplateId } from '@/types/service';
+import { usesTemplateModule } from '@/types/service';
 
 interface ImageToolbarProps {
   targetId: string;
@@ -520,12 +521,13 @@ function StockPhotosPanel({ position, onClose, onSelectImage }: {
   onSelectImage: (stockPhoto: StockPhoto) => void;
 }) {
   const { audienceType, templateId, paletteId } = useEditStore();
+  const usesTemplate = usesTemplateModule(audienceType, templateId);
 
   // Resolve the active template's palette mood phrase from the preloaded module
   // (loaded by EditablePageRenderer before the toolbar opens). Undefined → the
   // audience helper simply omits the mood suffix.
   const palettePhrase =
-    audienceType === 'service'
+    usesTemplate
       ? getLoadedTemplate((templateId || 'hearth') as TemplateId)
           ?.paletteImageKeywords?.[(paletteId as string) ?? '']
       : undefined;
@@ -581,7 +583,7 @@ function StockPhotosPanel({ position, onClose, onSelectImage }: {
     setError(null);
 
     const effectiveQuery =
-      audienceType === 'service'
+      usesTemplate
         ? getServiceImageQuery(query.trim(), undefined, palettePhrase)
         : query.trim();
 
@@ -628,7 +630,7 @@ function StockPhotosPanel({ position, onClose, onSelectImage }: {
         requestBody = { searchType: 'curated', per_page: 12 };
       } else {
         const categoryQuery =
-          audienceType === 'service'
+          usesTemplate
             ? getServiceImageQuery(category, undefined, palettePhrase)
             : category;
         requestBody = {

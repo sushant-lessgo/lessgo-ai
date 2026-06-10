@@ -318,6 +318,7 @@ export function extractSectionType(sectionId: string): string {
 import { getLoadedTemplate } from '@/modules/templates/registry';
 import type { TemplateId } from '@/types/service';
 import type { AudienceType } from '@/types/service';
+import { usesTemplateModule } from '@/types/service';
 
 /**
  * Get component from registry by section type and layout name
@@ -332,9 +333,10 @@ export function getComponent(
   const normalizedType = type.toLowerCase();
   const normalizedLayout = layout.toLowerCase();
 
-  // Service projects dispatch to the selected template module (preloaded +
-  // cached via the dynamic registry; read synchronously here).
-  if (audienceType === 'service') {
+  // Template-backed projects (service = Hearth; product+meridian = Meridian)
+  // dispatch to the selected template module (preloaded + cached via the dynamic
+  // registry; read synchronously here).
+  if (usesTemplateModule(audienceType, templateId)) {
     const tmpl = getLoadedTemplate((templateId || 'hearth') as TemplateId);
     return tmpl ? tmpl.resolveBlock(normalizedLayout, 'published') : null;
   }

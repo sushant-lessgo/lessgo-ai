@@ -32,6 +32,8 @@ const isPublicRoute = createRouteMatcher([
   '/api/v2/generate-copy',
   '/api/v3/strategy',
   '/api/v3/generate-copy',
+  '/api/audience/product/strategy',
+  '/api/audience/product/generate-copy',
   '/p/(.*)',
   '/thanks',
   '/privacy',

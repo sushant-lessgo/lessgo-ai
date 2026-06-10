@@ -41,6 +41,26 @@ export const defaultTemplateForAudience: Record<AudienceType, TemplateId | null>
 };
 
 /**
+ * Single source of truth for the render gate: does this (audienceType, templateId)
+ * pair render through a template module (templates/<id>/*) rather than the legacy
+ * 47-UIBlock path? Service always does (Hearth). Product does ONLY when its
+ * templateId is explicitly 'meridian' (the Meridian cutover, P4).
+ *
+ * STRICT on purpose: legacy `/create` product drafts carry templateId=null + 47-block
+ * content and must keep rendering via legacy until /create is archived (P5). Never
+ * synthesize a default templateId at a gate site — gate on the stored value only.
+ */
+export function usesTemplateModule(
+  audienceType: AudienceType | string | null | undefined,
+  templateId: string | null | undefined
+): boolean {
+  return (
+    audienceType === 'service' ||
+    (audienceType === 'product' && templateId === 'meridian')
+  );
+}
+
+/**
  * ===== USER PERSONA =====
  * Captured once at user level. Drives AudienceType derivation.
  */

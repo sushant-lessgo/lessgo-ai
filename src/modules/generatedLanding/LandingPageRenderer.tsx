@@ -15,6 +15,8 @@ import { VariableThemeInjector } from '@/modules/Design/ColorSystem/VariableThem
 // Hearth stays out of the product bundle).
 import { useTemplateModule } from '@/modules/templates/useTemplateReady';
 import type { HearthPalette } from '@/types/service';
+import { usesTemplateModule } from '@/types/service';
+import type { MeridianPalette, MeridianVariant } from '@/types/product';
 // import { VariableBackgroundRenderer } from '@/modules/Design/ColorSystem/VariableBackgroundRenderer'; // Disabled
 import { CSSVariableErrorBoundary } from '@/components/CSSVariableErrorBoundary';
 import { useFeatureFlags } from '@/utils/featureFlags';
@@ -135,12 +137,18 @@ export default function LandingPageRenderer({ className = '', tokenId, published
     audienceType,
     templateId,
     paletteId,
+    variantId,
   } = storeState;
 
-  const isService = audienceType === 'service';
+  const usesTemplate = usesTemplateModule(audienceType, templateId);
   const { ready: templateReady, tmpl } = useTemplateModule(audienceType, templateId);
-  const effectivePalette: HearthPalette =
-    (paletteId as HearthPalette) || ((tmpl?.defaultPaletteId as HearthPalette) ?? 'terracotta');
+  // Palette is a loose string in the store; the concrete union depends on the
+  // template (Hearth vs Meridian). Widen the type and let the template's
+  // ThemeInjector validate at its own boundary.
+  const effectivePalette: HearthPalette | MeridianPalette =
+    (paletteId as HearthPalette | MeridianPalette) ||
+    ((tmpl?.defaultPaletteId as HearthPalette | MeridianPalette) ?? 'terracotta');
+  const effectiveVariant = (variantId as MeridianVariant | null) ?? undefined;
 
   // Get feature flags for CSS variable system
   const featureFlags = useFeatureFlags(effectiveTokenId);
@@ -445,10 +453,10 @@ const finalSections: OrderedSection[] = processedSections
       // Detect header sections for sticky positioning
       const isHeaderSection = sectionId.includes('header') || layout?.includes('Header');
 
-      // Service projects: skip product theme wrapper. Surface comes from
-      // sectionRules (data-hearth-surface), Hearth tokens come from the
-      // outer HearthThemeInjector wrap on the page.
-      if (isService) {
+      // Template-backed projects: skip product theme wrapper. Surface comes from
+      // sectionRules (data-hearth-surface), template tokens come from the
+      // outer ThemeInjector wrap on the page.
+      if (usesTemplate) {
         const sectionTypeKey = extractSectionTypeRaw(sectionId);
         const surface = tmpl?.getSurfaceForSection(sectionTypeKey) ?? 'cream';
         return (
@@ -847,14 +855,14 @@ const finalSections: OrderedSection[] = processedSections
       </main>
   );
 
-  // Service projects: wrap output in the template's ThemeInjector. Skip product
-  // theme injectors entirely — template tokens come from CSS vars on :root.
-  // Gate render until the dynamically-loaded template module is ready.
-  if (isService) {
+  // Template-backed projects: wrap output in the template's ThemeInjector. Skip
+  // product theme injectors entirely — template tokens come from CSS vars on
+  // :root. Gate render until the dynamically-loaded template module is ready.
+  if (usesTemplate) {
     if (!templateReady || !tmpl) return null;
     const ThemeInjector = tmpl.ThemeInjector;
     return (
-      <ThemeInjector paletteId={effectivePalette}>
+      <ThemeInjector paletteId={effectivePalette} variantId={effectiveVariant}>
         {renderContent()}
       </ThemeInjector>
     );
