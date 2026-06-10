@@ -1,4 +1,5 @@
 import { serviceElementSchema } from '@/modules/audience/service/elementSchema';
+import { meridianElementSchema } from '@/modules/audience/product/elementSchema';
 
 /**
  * Generation types for elements:
@@ -328,6 +329,10 @@ export const layoutElementSchema: LayoutSchema = {
   // ===== Service-route pilot blocks (Phase 2) =====
   // Layout names distinct from product (PetalFramedHero, IconServiceCards, etc.) — no collision risk.
   ...serviceElementSchema,
+
+  // ===== Meridian product-template pilot blocks (P2) =====
+  // Layout names distinct from service + v3 product — no collision risk.
+  ...meridianElementSchema,
 
   // BeforeAfter Section - V2 Schema
   SideBySideBlocks: {
