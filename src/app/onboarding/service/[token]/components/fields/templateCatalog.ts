@@ -44,7 +44,10 @@ export interface TemplateCatalogEntry {
   inferDefaultPalette: (understanding: any) => string;
 }
 
-export const TEMPLATE_CATALOG: Record<TemplateId, TemplateCatalogEntry> = {
+// Service-only: Meridian is a product template (not offered in service
+// onboarding), so the catalog is partial over TemplateId — only service
+// templates have an entry. Consumers fall back to hearth for any non-service id.
+export const TEMPLATE_CATALOG: Partial<Record<TemplateId, TemplateCatalogEntry>> = {
   hearth: {
     id: 'hearth',
     label: templateLabels.hearth,

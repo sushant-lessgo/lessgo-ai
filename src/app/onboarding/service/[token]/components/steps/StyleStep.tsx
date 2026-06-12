@@ -24,7 +24,9 @@ export default function StyleStep() {
   const setPaletteId = useServiceGenerationStore((s) => s.setPaletteId);
   const nextStep = useServiceGenerationStore((s) => s.nextStep);
 
-  const catalog = TEMPLATE_CATALOG[templateId];
+  // Service onboarding only ever holds a service template (hearth/lex); fall
+  // back to hearth for any non-service id so the picker never crashes.
+  const catalog = TEMPLATE_CATALOG[templateId] ?? TEMPLATE_CATALOG.hearth!;
 
   // Default palette inferred from the understanding, scoped to the active template.
   const inferredPalette = useMemo(
@@ -55,7 +57,7 @@ export default function StyleStep() {
     // Store resets variant + palette to the new template's defaults.
     setTemplateId(id);
     const next = TEMPLATE_CATALOG[id];
-    setPaletteId(next.inferDefaultPalette(understanding));
+    if (next) setPaletteId(next.inferDefaultPalette(understanding));
   };
 
   const handlePalette = (id: string) => {
@@ -107,7 +109,7 @@ export default function StyleStep() {
         <h2 className="text-sm font-medium text-gray-700 mb-2">Template</h2>
         <div className="grid grid-cols-1 gap-3">
           {TEMPLATE_ORDER.map((id) => {
-            const t = TEMPLATE_CATALOG[id];
+            const t = TEMPLATE_CATALOG[id]!;
             const isActive = templateId === id;
             return (
               <button

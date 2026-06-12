@@ -14,7 +14,9 @@
 import React from 'react';
 import Script from 'next/script';
 import { getComponent, extractSectionType } from './componentRegistry.published';
-import type { AudienceType, TemplateId } from '@/types/service';
+import type { AudienceType, HearthPalette, TemplateId } from '@/types/service';
+import { usesTemplateModule } from '@/types/service';
+import type { MeridianPalette } from '@/types/product';
 // No static template import (firewall). Service template module is preloaded by
 // the caller (p/[slug] page / static export) and read from the registry cache.
 import { getLoadedTemplate } from '@/modules/templates/registry';
@@ -40,10 +42,10 @@ interface LandingPagePublishedRendererProps {
   pageOwnerId?: string;         // For analytics (optional)
   slug?: string;                // For analytics tracking
   analyticsEnabled?: boolean;   // Enable analytics beacon
-  audienceType?: AudienceType;  // Routes to service template when 'service'
+  audienceType?: AudienceType;  // Routes to template module (service, or product+meridian)
   templateId?: string | null;   // Which template module to dispatch to
-  variantId?: string | null;    // Template variant (token rescale) for service
-  paletteId?: string | null;    // Template palette for service projects
+  paletteId?: string | null;    // Template palette for template-backed projects
+  variantId?: string | null;    // Template variant (Lex/Meridian token rescale)
 }
 
 export function LandingPagePublishedRenderer({
@@ -57,18 +59,20 @@ export function LandingPagePublishedRenderer({
   analyticsEnabled,
   audienceType = 'product',
   templateId = 'hearth',
-  variantId = null,
   paletteId = null,
+  variantId = null,
 }: LandingPagePublishedRendererProps) {
-  const isService = audienceType === 'service';
+  const usesTemplate = usesTemplateModule(audienceType, templateId);
   // Module was preloaded by the caller; read it synchronously from the cache.
-  const tmpl = isService
+  const tmpl = usesTemplate
     ? getLoadedTemplate((templateId || 'hearth') as TemplateId) ?? null
     : null;
-  // Template-agnostic: fall back to the template's own default palette (Hearth
-  // → terracotta, Lex → counsel, …). No hardcoded Hearth literal.
-  const effectivePalette: string = paletteId || tmpl?.defaultPaletteId || 'terracotta';
-  const effectiveVariant: string = variantId || tmpl?.defaultVariantId || 'classic';
+  // Template-agnostic: fall back to the template's own default palette (Hearth →
+  // terracotta, Lex → counsel, Meridian → mint). No hardcoded Hearth literal.
+  const effectivePalette: HearthPalette | MeridianPalette =
+    (paletteId as HearthPalette | MeridianPalette) ||
+    ((tmpl?.defaultPaletteId as HearthPalette | MeridianPalette) ?? 'terracotta');
+  const effectiveVariant: string | undefined = variantId || tmpl?.defaultVariantId || undefined;
   // 1. Extract sectionLayouts from content
   const sectionLayouts: Record<string, string> = {};
   for (const sectionId of sections) {
@@ -112,12 +116,13 @@ export function LandingPagePublishedRenderer({
         // Extract content fields from elements structure
         const flattenedData = extractContentFields(data, content);
 
-        // Service projects: skip product theme background. Wrap in a Hearth
-        // surface div (cream / cream-1 / cream-2) per sectionRules.
-        if (isService) {
+        // Template-backed projects: skip product theme background. Wrap in a
+        // template surface div per the template's sectionRules.
+        if (usesTemplate) {
           const surface = tmpl?.getSurfaceForSection(sectionType) ?? 'cream';
           return (
             <div key={sectionId} data-surface={surface}>
+
               <LayoutComponent
                 sectionId={sectionId}
                 mode="published"
@@ -180,7 +185,7 @@ export function LandingPagePublishedRenderer({
 
   return (
     <>
-    {isService && tmpl ? (
+    {usesTemplate && tmpl ? (
       <tmpl.SSRTokens paletteId={effectivePalette} variantId={effectiveVariant}>
         {sectionsTree}
       </tmpl.SSRTokens>

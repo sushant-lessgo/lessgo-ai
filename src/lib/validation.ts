@@ -31,10 +31,11 @@ export const DraftSaveSchema = z.object({
   title: z.string().max(200).optional(),
   themeValues: z.record(z.string(), z.unknown()).optional(),
   finalContent: z.unknown().optional(),
-  // paletteId is template-scoped (Hearth: terracotta…; Lex: counsel…; each
-  // template adds 9). Validate as a bounded slug rather than a per-template enum
-  // so the save path stays template-agnostic (Phase 11a / A1 firewall).
-  paletteId: z.string().max(50).regex(/^[a-z0-9-]+$/, 'Invalid palette id').optional(),
+  // paletteId is a template-scoped token (Hearth, Lex, Meridian, …) validated at
+  // the template's own ThemeInjector boundary and set by our own code (onboarding
+  // / P6 picker) — not user free-text. Keep it a bounded string (like variantId)
+  // rather than a per-template enum, so new templates don't edit this schema.
+  paletteId: z.string().max(50).optional(),
   templateId: z.enum(templateIds as unknown as [string, ...string[]]).optional(),
   variantId: z.string().max(50).optional(),
 });

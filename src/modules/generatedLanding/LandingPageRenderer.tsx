@@ -15,6 +15,8 @@ import { VariableThemeInjector } from '@/modules/Design/ColorSystem/VariableThem
 // Hearth stays out of the product bundle).
 import { useTemplateModule } from '@/modules/templates/useTemplateReady';
 import type { HearthPalette } from '@/types/service';
+import { usesTemplateModule } from '@/types/service';
+import type { MeridianPalette } from '@/types/product';
 // import { VariableBackgroundRenderer } from '@/modules/Design/ColorSystem/VariableBackgroundRenderer'; // Disabled
 import { CSSVariableErrorBoundary } from '@/components/CSSVariableErrorBoundary';
 import { useFeatureFlags } from '@/utils/featureFlags';
@@ -138,12 +140,18 @@ export default function LandingPageRenderer({ className = '', tokenId, published
     paletteId,
   } = storeState;
 
-  const isService = audienceType === 'service';
+  const usesTemplate = usesTemplateModule(audienceType, templateId);
   const { ready: templateReady, tmpl } = useTemplateModule(audienceType, templateId);
-  const effectivePalette: HearthPalette =
-    (paletteId as HearthPalette) || ((tmpl?.defaultPaletteId as HearthPalette) ?? 'terracotta');
-  const effectiveVariant: string =
-    (variantId as string) || tmpl?.defaultVariantId || 'classic';
+  // Palette is a loose string in the store; the concrete union depends on the
+  // template (Hearth / Lex / Meridian). Widen the type and let the template's
+  // ThemeInjector validate at its own boundary.
+  const effectivePalette: HearthPalette | MeridianPalette =
+    (paletteId as HearthPalette | MeridianPalette) ||
+    ((tmpl?.defaultPaletteId as HearthPalette | MeridianPalette) ?? 'terracotta');
+  // Fall back to the loaded template's own default variant (Hearth 'classic',
+  // Lex 'statesman', Meridian 'developer'); undefined until the module loads.
+  const effectiveVariant: string | undefined =
+    (variantId as string) || tmpl?.defaultVariantId;
 
   // Get feature flags for CSS variable system
   const featureFlags = useFeatureFlags(effectiveTokenId);
@@ -448,10 +456,11 @@ const finalSections: OrderedSection[] = processedSections
       // Detect header sections for sticky positioning
       const isHeaderSection = sectionId.includes('header') || layout?.includes('Header');
 
-      // Service projects: skip product theme wrapper. Surface comes from
-      // sectionRules (data-surface), template tokens come from the outer
-      // ThemeInjector wrap on the page.
-      if (isService) {
+      // Template-backed projects (service Hearth/Lex, product Meridian): skip the
+      // product theme wrapper. Surface comes from sectionRules via the neutral
+      // data-surface attribute; template tokens come from the outer ThemeInjector
+      // wrap on the page.
+      if (usesTemplate) {
         const sectionTypeKey = extractSectionTypeRaw(sectionId);
         const surface = tmpl?.getSurfaceForSection(sectionTypeKey) ?? 'cream';
         return (
@@ -580,45 +589,12 @@ const finalSections: OrderedSection[] = processedSections
     }
   };
 
-  // Handle empty state
-  if (!sections || sections.length === 0) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="w-16 h-16 mx-auto mb-4 bg-gray-200 rounded-full flex items-center justify-center">
-            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2-8v14a2 2 0 002 2h-5" />
-            </svg>
-          </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No Sections to Display</h3>
-          <p className="text-gray-500">
-            {mode !== 'preview' 
-              ? 'Add sections to start building your landing page.' 
-              : 'This landing page is empty.'
-            }
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // Handle global errors
-  const globalError = errors['global'];
-  if (globalError) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-red-50">
-        <div className="text-center">
-          <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
-            <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-1.964-.833-2.732 0L5.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-            </svg>
-          </div>
-          <h3 className="text-lg font-medium text-red-900 mb-2">Unable to Render Landing Page</h3>
-          <p className="text-red-700">{globalError}</p>
-        </div>
-      </div>
-    );
-  }
+  // NOTE: empty-state + global-error guards are intentionally placed AFTER all
+  // hooks below (see end of this block). React requires every hook to run on
+  // every render; an early return here would skip the useMemo/useEffect hooks
+  // that follow and crash with "Rendered fewer hooks than expected" the moment
+  // `sections`/`globalError` toggles across renders (e.g. async draft + template
+  // load on the Meridian editor path).
 
   // Prepare background system for VariableThemeInjector
   const variableBackgroundSystem = useMemo(() => {
@@ -675,6 +651,48 @@ const finalSections: OrderedSection[] = processedSections
     validatedFields,
     hiddenInferredFields,
   }), [validatedFields, hiddenInferredFields]);
+
+  // ── Early returns (AFTER all hooks — see note above) ──
+
+  // Handle empty state
+  if (!sections || sections.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="w-16 h-16 mx-auto mb-4 bg-gray-200 rounded-full flex items-center justify-center">
+            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2-8v14a2 2 0 002 2h-5" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No Sections to Display</h3>
+          <p className="text-gray-500">
+            {mode !== 'preview'
+              ? 'Add sections to start building your landing page.'
+              : 'This landing page is empty.'
+            }
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Handle global errors
+  const globalError = errors['global'];
+  if (globalError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-red-50">
+        <div className="text-center">
+          <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+            <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-1.964-.833-2.732 0L5.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-medium text-red-900 mb-2">Unable to Render Landing Page</h3>
+          <p className="text-red-700">{globalError}</p>
+        </div>
+      </div>
+    );
+  }
 
   // Main renderer with conditional variable system wrapper
   const renderContent = () => (
@@ -850,10 +868,10 @@ const finalSections: OrderedSection[] = processedSections
       </main>
   );
 
-  // Service projects: wrap output in the template's ThemeInjector. Skip product
-  // theme injectors entirely — template tokens come from CSS vars on :root.
-  // Gate render until the dynamically-loaded template module is ready.
-  if (isService) {
+  // Template-backed projects: wrap output in the template's ThemeInjector. Skip
+  // product theme injectors entirely — template tokens come from CSS vars on
+  // :root. Gate render until the dynamically-loaded template module is ready.
+  if (usesTemplate) {
     if (!templateReady || !tmpl) return null;
     const ThemeInjector = tmpl.ThemeInjector;
     return (

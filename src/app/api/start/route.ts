@@ -91,10 +91,11 @@ export async function GET() {
   })
 
   // Branch redirect by audienceType. Service (agency-only at pilot) → service
-  // wizard. Product / anon → existing v3 onboarding.
+  // wizard. Product / anon → Meridian product onboarding (P4 cutover; legacy
+  // /create archived in P5).
   const wizardPath = audienceType === 'service'
     ? `/onboarding/service/${tokenValue}`
-    : `/create/${tokenValue}`
+    : `/onboarding/product/${tokenValue}`
 
   return NextResponse.json({
     url: `${process.env.NEXT_PUBLIC_SITE_URL}${wizardPath}`,

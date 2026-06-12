@@ -31,11 +31,15 @@ export interface TemplateModule {
     blockType: string,
     mode: 'edit' | 'published',
   ): React.ComponentType<any> | null;
-  /** Client-side theme injector (CSS vars + fonts + data-palette + data-variant). */
-  ThemeInjector: React.ComponentType<{ paletteId: any; variantId?: string; children?: React.ReactNode }>;
+  /** Client-side theme injector (CSS vars + fonts + data-palette [+ data-variant]).
+   *  `variantId` is optional: palette-only templates ignore it; templates with a
+   *  variant axis (Meridian: developer/marketing/light) consume it. */
+  ThemeInjector: React.ComponentType<{ paletteId: any; variantId?: any; children?: React.ReactNode }>;
   /** Server-safe token emitter for published / static export. */
-  SSRTokens: React.ComponentType<{ paletteId: any; variantId?: string; children?: React.ReactNode }>;
-  /** Section-type → surface token for this template's alternation rules. */
+  SSRTokens: React.ComponentType<{ paletteId: any; variantId?: any; children?: React.ReactNode }>;
+  /** Section-type → surface token for this template's alternation rules. The
+   *  renderer writes this under the neutral `data-surface` attribute (shared by
+   *  all templates; surface *values* differ per template, so no collision). */
   getSurfaceForSection(sectionType: string): string;
   /** Template's default palette id (used when none persisted). */
   defaultPaletteId: string;

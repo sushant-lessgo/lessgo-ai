@@ -38,6 +38,19 @@ export const templateRegistry: Record<TemplateId, TemplateModuleLoader> = {
       paletteImageKeywords: m.PALETTE_IMAGE_KEYWORDS,
     };
   },
+  meridian: async () => {
+    const m = await import('@/modules/templates/meridian');
+    return {
+      resolveBlock: m.resolveBlock,
+      ThemeInjector: m.ThemeInjector,
+      SSRTokens: m.SSRTokens,
+      getSurfaceForSection: m.getSurfaceForSection,
+      defaultPaletteId: m.defaultMeridianPalette,
+      variants: m.meridianVariants,
+      defaultVariantId: m.defaultMeridianVariant,
+      paletteImageKeywords: m.PALETTE_IMAGE_KEYWORDS,
+    };
+  },
 };
 
 const cache: Partial<Record<TemplateId, TemplateModule>> = {};

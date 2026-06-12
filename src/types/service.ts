@@ -2,6 +2,8 @@
 // Service-route types - Phase 0 foundation
 // Reference: newServiceOnboarding.md, nsoPlan.md
 
+import { meridianPalettes } from '@/types/product';
+
 /**
  * ===== AUDIENCE TYPE =====
  * Top tier of the 3-tier model: audienceType → templateId → variantId + paletteId.
@@ -12,10 +14,12 @@ export type AudienceType = (typeof audienceTypes)[number];
 
 /**
  * ===== TEMPLATE + VARIANT =====
- * templateId selects the visual template module (Phase 7.5 only ships Hearth).
- * variantId is a per-template token rescale (surfaced in Phase 11; default now).
+ * templateId selects the visual template module. Hearth = service line;
+ * Meridian = first product template (Meridian migration P0).
+ * variantId is a per-template token rescale (Hearth: 'classic' default;
+ * Meridian: developer/marketing/light — see types/product.ts).
  */
-export const templateIds = ['hearth', 'lex'] as const;
+export const templateIds = ['hearth', 'lex', 'meridian'] as const;
 export type TemplateId = (typeof templateIds)[number];
 
 export type VariantId = string;
@@ -24,7 +28,40 @@ export type VariantId = string;
 export const defaultVariantForTemplate: Record<TemplateId, VariantId> = {
   hearth: 'classic',
   lex: 'statesman',
+  meridian: 'developer',
 };
+
+/**
+ * Default template per audienceType — the cutover target for each line.
+ * DEFINED ONLY: the render gate still keys on `audienceType === 'service'`, so
+ * product keeps rendering the legacy 47 UIBlocks until the Meridian cutover
+ * (P4) flips dispatch. Not yet imported by any getComponent path.
+ */
+export const defaultTemplateForAudience: Record<AudienceType, TemplateId | null> = {
+  product: 'meridian',
+  service: 'hearth',
+  ecommerce: null,
+};
+
+/**
+ * Single source of truth for the render gate: does this (audienceType, templateId)
+ * pair render through a template module (templates/<id>/*) rather than the legacy
+ * 47-UIBlock path? Service always does (Hearth). Product does ONLY when its
+ * templateId is explicitly 'meridian' (the Meridian cutover, P4).
+ *
+ * STRICT on purpose: legacy `/create` product drafts carry templateId=null + 47-block
+ * content and must keep rendering via legacy until /create is archived (P5). Never
+ * synthesize a default templateId at a gate site — gate on the stored value only.
+ */
+export function usesTemplateModule(
+  audienceType: AudienceType | string | null | undefined,
+  templateId: string | null | undefined
+): boolean {
+  return (
+    audienceType === 'service' ||
+    (audienceType === 'product' && templateId === 'meridian')
+  );
+}
 
 /**
  * ===== USER PERSONA =====
@@ -200,16 +237,20 @@ export type LexPalette = (typeof lexPalettes)[number];
 export const templateLabels: Record<TemplateId, string> = {
   hearth: 'Hearth',
   lex: 'Lex',
+  meridian: 'Meridian',
 };
 
 export const templateBlurbs: Record<TemplateId, string> = {
   hearth: 'Warm, editorial — cream surfaces, serif accents.',
   lex: 'Trust & professional — serif authority, cool document surfaces.',
+  meridian: 'Modern tech — dark surfaces, hairline rules, mono accents.',
 };
 
-/** Palette id list for a template (Hearth → 9 warm, Lex → 9 trust). */
+/** Palette id list for a template (Hearth → 9 warm, Lex → 9 trust, Meridian → 9 accent). */
 export function palettesForTemplate(templateId: TemplateId): readonly string[] {
-  return templateId === 'lex' ? lexPalettes : hearthPalettes;
+  if (templateId === 'lex') return lexPalettes;
+  if (templateId === 'meridian') return meridianPalettes;
+  return hearthPalettes;
 }
 
 /**

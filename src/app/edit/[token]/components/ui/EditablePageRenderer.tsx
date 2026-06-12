@@ -6,6 +6,7 @@ import { sectionList } from '@/modules/sections/sectionList';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { InlineTextEditorV2 } from '@/app/edit/[token]/components/editor/InlineTextEditorV2';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { usesTemplateModule } from '@/types/service';
 import type { TextFormatState } from '@/utils/textFormatting';
 
 // Simple TextSelection type (was from old InlineTextEditor)
@@ -128,9 +129,9 @@ export function EditablePageRenderer({
     };
   }, [sectionId, onContentUpdate]);
 
-  // Service template module still loading — avoid flashing the missing-layout
+  // Template module still loading — avoid flashing the missing-layout
   // fallback before the dynamically-imported blocks are available.
-  if (audienceType === 'service' && !templateReady) {
+  if (usesTemplateModule(audienceType, templateId) && !templateReady) {
     return null;
   }
 

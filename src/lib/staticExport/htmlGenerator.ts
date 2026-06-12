@@ -10,6 +10,7 @@ import 'server-only';
 import React from 'react';
 import { LandingPagePublishedRenderer } from '@/modules/generatedLanding/LandingPagePublishedRenderer';
 import { validateAndResolveAssetURLs } from './assetResolver';
+import { usesTemplateModule } from '@/types/service';
 
 // Self-hosted core fonts (don't load from Google Fonts)
 const CORE_FONTS = new Set(['Inter', 'Sora', 'DM Sans', 'Playfair Display']);
@@ -30,6 +31,7 @@ export interface StaticHTMLOptions {
   audienceType?: 'product' | 'service';
   templateId?: string | null;
   paletteId?: string | null;
+  variantId?: string | null;
 
   // Configuration
   analyticsOptIn?: boolean;
@@ -54,8 +56,9 @@ export async function generateStaticHTML(
   // Dynamic import - avoids Next.js static analysis
   const ReactDOMServer = await import('react-dom/server');
 
-  // Preload the service template module so the sync renderer resolves blocks.
-  if (options.audienceType === 'service') {
+  // Preload the template module (service = Hearth; product+meridian = Meridian)
+  // so the sync renderer resolves blocks.
+  if (usesTemplateModule(options.audienceType, options.templateId)) {
     const { preloadTemplate } = await import('@/modules/templates/registry');
     await preloadTemplate((options.templateId || 'hearth') as any);
   }
@@ -75,8 +78,9 @@ export async function generateStaticHTML(
       publishedPageId: options.publishedPageId,
       pageOwnerId: options.pageOwnerId,
       audienceType: options.audienceType ?? 'product',
-      templateId: options.templateId ?? 'hearth',
+      templateId: options.templateId ?? null,
       paletteId: options.paletteId ?? null,
+      variantId: options.variantId ?? null,
     })
   );
 

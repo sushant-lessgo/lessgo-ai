@@ -7,7 +7,6 @@ import { GeistSans, GeistMono } from 'geist/font';
 import "./globals.css";
 // import GoogleAnalytics from '@/components/GoogleAnalytics';
 import { Suspense } from 'react';
-import { InjectLandingTheme } from '@/components/theme/InjectLandingTheme';
 import {
   ClerkProvider,
   SignInButton,
@@ -88,7 +87,6 @@ export default function RootLayout({
       <html lang="en">
         <head />
         <body className="antialiased">
-          <InjectLandingTheme />
           <TooltipProvider>
           <PostHogProvider>
             {children}

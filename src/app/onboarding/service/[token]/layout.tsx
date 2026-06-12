@@ -44,7 +44,7 @@ export default async function ServiceOnboardingLayout({
 
   // Wrong audienceType (saas-founder / indie-maker) → product flow.
   if (audienceType !== 'service') {
-    redirect(`/create/${params.token}`);
+    redirect(`/onboarding/product/${params.token}`);
   }
 
   // Service persona, but not pilot-eligible → waitlist gate.

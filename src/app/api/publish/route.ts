@@ -234,6 +234,7 @@ async function publishHandler(req: NextRequest) {
         audienceType,
         templateId,
         paletteId,
+        variantId,
       });
 
       // Upload to blob with timeout protection

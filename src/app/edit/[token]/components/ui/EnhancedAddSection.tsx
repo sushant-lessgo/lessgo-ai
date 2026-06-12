@@ -12,6 +12,7 @@ import { logger } from '@/lib/logger';
 import { sectionList } from '@/modules/sections/sectionList';
 import type { EditableElement } from '@/types/core/content';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { usesTemplateModule } from '@/types/service';
 
 interface EnhancedAddSectionProps {
   position: 'between' | 'end';
@@ -33,12 +34,12 @@ export function EnhancedAddSection({
   onAddSection,
   className
 }: EnhancedAddSectionProps) {
-  const { audienceType } = useEditStore();
+  const { audienceType, templateId } = useEditStore();
   const [showSectionSelector, setShowSectionSelector] = useState(false);
   const [showLayoutSelector, setShowLayoutSelector] = useState(false);
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
 
-  if (audienceType === 'service') return null;
+  if (usesTemplateModule(audienceType, templateId)) return null;
 
   // Validate props on mount
   React.useEffect(() => {

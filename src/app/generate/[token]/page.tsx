@@ -106,7 +106,7 @@ function GeneratePageContent({ tokenId }: { tokenId: string }) {
           if (err instanceof Error && err.message.includes('regeneration required')) {
             setError('Page needs to be regenerated. Redirecting to setup...');
             setTimeout(() => {
-              router.push(`/create/${tokenId}`);
+              router.push(`/onboarding/product/${tokenId}`);
             }, 2000);
           } else {
             setError('Failed to load page data. Please return to setup and try again.');
@@ -257,7 +257,7 @@ logger.debug('🎯 Theme after setMode:', afterModeSet.theme);
           <p className="text-gray-600 mb-6">{error}</p>
           <div className="space-y-3">
             <button
-              onClick={() => router.push(`/create/${tokenId}`)}
+              onClick={() => router.push(`/onboarding/product/${tokenId}`)}
               className="w-full bg-brand-accentPrimary hover:bg-orange-500 text-white px-4 py-2 rounded-lg transition-colors"
             >
               Return to Setup
