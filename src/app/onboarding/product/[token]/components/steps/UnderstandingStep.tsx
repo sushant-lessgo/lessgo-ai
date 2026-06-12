@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { X, Plus } from 'lucide-react';
 // Cross-import shared editors from the legacy /create flow (same precedent as
 // the service GeneratingStep). P5 relocates these to a shared module.
-import FeatureListEditor from '@/app/create/[token]/components/shared/FeatureListEditor';
+import FeatureListEditor from '@/components/onboarding/shared/FeatureListEditor';
 import type { UnderstandingData } from '@/types/generation';
 
 const loadingMessages = [

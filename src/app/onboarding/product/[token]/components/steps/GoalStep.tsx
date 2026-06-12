@@ -2,7 +2,7 @@
 
 import { useProductGenerationStore } from '@/hooks/useProductGenerationStore';
 import { landingGoals, landingGoalLabels, type LandingGoal } from '@/types/generation';
-import OptionCard from '@/app/create/[token]/components/shared/OptionCard';
+import OptionCard from '@/components/onboarding/shared/OptionCard';
 import {
   ClipboardList,
   UserPlus,

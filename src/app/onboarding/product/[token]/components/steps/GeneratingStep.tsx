@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { Check, Loader2 } from 'lucide-react';
 import { useProductGenerationStore } from '@/hooks/useProductGenerationStore';
 import { usePostHog } from 'posthog-js/react';
-import ErrorRetry from '@/app/create/[token]/components/shared/ErrorRetry';
+import ErrorRetry from '@/components/onboarding/shared/ErrorRetry';
 import type { SectionCopy } from '@/types/generation';
 import type { ProductStrategyOutput } from '@/types/product';
 import { defaultMeridianPalette, defaultMeridianVariant } from '@/types/product';

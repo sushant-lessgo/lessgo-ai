@@ -197,11 +197,35 @@ good enough to archive + expand?
   published SSR HTML, needs-review badges on all 7, form-modal open on published CTA click,
   legacy product regression (templateId-null → 47).
 
-### P5 — Archive the 47 (~1d)
+### P5 — Archive the 47 (~1d) — ✅ BUILD-GREEN (2026-06-11), runtime E2E pending
 - Move `UIBlocks/*` + v3 selection logic to `archive/`. Strip product entries from
   `layoutElementSchema` (keep engine). Decouple `/p/[slug]` if needed.
 - `npm run build` clean; product renders only via Meridian.
 **Exit:** old architecture archived; single product render path.
+
+**Done (decisions: hard cut / archive everything legacy — both PO-confirmed):**
+- **Archived → `archive/`** (tsconfig already excludes `archive`, so out of build; `git mv` preserves
+  history): modules `UIBlocks/`, `uiblock/`, `strategy/`, `copy/`, `prompt/mockResponseGeneratorV3.ts`;
+  schemas `strategyV3/strategy/uiblock.schema.ts`; routes/pages `api/v3/*`, `api/v2/{strategy,
+  uiblock-select,research}`, `app/create/*`, `app/dev/uiblock/*`. **Kept** `api/v2/understand` +
+  `understand.schema.ts` (new product onboarding depends on it).
+- **Render path collapsed to template modules**: rewrote `componentRegistry.ts` + `.published.ts` —
+  deleted ~45 static UIBlock imports + the registry maps + dead `getAvailableLayouts`/`hasLayout`;
+  `getComponent` now dispatches solely via `usesTemplateModule` (legacy fall-through → warn + null).
+- **`layoutElementSchema.ts` 1891 → 409 lines**: stripped the 47 inline product block entries; kept
+  type defs, the engine (`applyAllSchemaDefaults`/`getSchemaDefaults`/…), the `...serviceElementSchema`
+  + `...meridianElementSchema` spreads, and `sanitizeContentForPublish`. `/p/[slug]` needed no further
+  decouple (built at 26.5 kB; only pulls `sanitizeContentForPublish`).
+- **Cleanups**: `middleware.ts` dropped dead v2/v3 public routes (kept `understand` + audience/product);
+  `lib/schemas/index.ts` barrel drops `strategy`/`uiblock` re-exports; `/create` fallbacks in
+  `ProjectCard.tsx` + `generate/[token]/page.tsx` repointed → `/onboarding/product`. New onboarding's
+  shared comps (`ErrorRetry`/`FeatureListEditor`/`OptionCard`/`LoadingOverlay`) relocated out of the
+  archived `/create` to `src/components/onboarding/shared/` + 4 importers repointed.
+- **Verified**: `tsc --noEmit` clean; `next build` green (no `/api/v3`, `/create`, `/dev/uiblock`,
+  v2 strategy/uiblock-select/research in route list; `/api/v2/understand` + both onboarding flows
+  emitted). grep: zero live imports of archived modules (only doc-comment mentions remain). **Pending
+  manual E2E** (no headless browser in env): product onboarding → edit → publish → `/p/[slug]` Meridian
+  render; service/Hearth regression.
 
 ### P6 — Variants + palettes (~2d, expansion)
 - Enable 3 variants + 9 palettes in picker / theme panel. Per-palette image keywords.

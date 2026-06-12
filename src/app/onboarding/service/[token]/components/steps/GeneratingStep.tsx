@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { Check, Loader2 } from 'lucide-react';
 import { useServiceGenerationStore } from '@/hooks/useServiceGenerationStore';
 import { usePostHog } from 'posthog-js/react';
-import ErrorRetry from '@/app/create/[token]/components/shared/ErrorRetry';
+import ErrorRetry from '@/components/onboarding/shared/ErrorRetry';
 import type { SectionCopy } from '@/types/generation';
 import type { ServiceStrategyOutputAssembled } from '@/types/service';
 import { defaultHearthPalette } from '@/modules/templates/hearth/palettes';

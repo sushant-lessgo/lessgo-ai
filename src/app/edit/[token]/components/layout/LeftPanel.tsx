@@ -367,7 +367,7 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
 
                     {/* Change inputs & regenerate */}
                     <button
-                      onClick={() => router.push(`/create/${tokenId}`)}
+                      onClick={() => router.push(`/onboarding/product/${tokenId}`)}
                       className="w-full mt-4 px-3 py-2.5 text-sm text-white bg-brand-accentPrimary hover:bg-orange-500 rounded-lg transition-colors text-center font-medium shadow-sm"
                     >
                       Change inputs & regenerate

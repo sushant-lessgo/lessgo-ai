@@ -54,16 +54,16 @@ export default function ProjectCard({ project, onEdit, onPreview }: Props) {
           } else {
             // Still in onboarding flow
             logger.debug('Project in onboarding, routing to create flow')
-            router.push(`/create/${project.tokenId}`)
+            router.push(`/onboarding/product/${project.tokenId}`)
           }
         } else {
           // Fallback to create for any errors
-          router.push(`/create/${project.tokenId}`)
+          router.push(`/onboarding/product/${project.tokenId}`)
         }
       } catch (error) {
         // Fallback to create for any errors
         logger.warn('Failed to check project status, defaulting to create:', error)
-        router.push(`/create/${project.tokenId}`)
+        router.push(`/onboarding/product/${project.tokenId}`)
       }
     }
 

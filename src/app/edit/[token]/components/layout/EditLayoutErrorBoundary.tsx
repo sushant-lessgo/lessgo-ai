@@ -93,7 +93,7 @@ function ErrorFallback({ error, errorInfo, tokenId, onRetry }: ErrorFallbackProp
   };
 
   const handleGoToCreate = () => {
-    router.push(`/create/${tokenId}`);
+    router.push(`/onboarding/product/${tokenId}`);
   };
 
   return (
