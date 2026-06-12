@@ -86,7 +86,7 @@ export const hearthBaseTokens: HearthBaseTokens = {
 /**
  * Serialize palette-invariant tokens into a `:root { ... }` CSS block,
  * followed by:
- *   - `[data-hearth-surface=...]` rules → parent renderer wraps each section in
+ *   - `[data-surface=...]` rules → parent renderer wraps each section in
  *     a div with this attribute (single source of truth: sectionRules.ts).
  *   - `[data-palette] em` rule → the italic-`<em>` accent convention. Any
  *     `<em>` inside Hearth-rendered text inherits italic + accent-deep color.
@@ -124,8 +124,43 @@ export function serializeBaseTokens(t: HearthBaseTokens = hearthBaseTokens): str
   --sec-pad-x:${t.secPadX};
   --max-w:${t.maxW};
 }
-[data-hearth-surface="cream"]{background:var(--cream);}
-[data-hearth-surface="cream-1"]{background:var(--cream-1);}
-[data-hearth-surface="cream-2"]{background:var(--cream-2);}
+[data-surface="cream"]{background:var(--cream);}
+[data-surface="cream-1"]{background:var(--cream-1);}
+[data-surface="cream-2"]{background:var(--cream-2);}
 [data-palette] em{font-style:italic;color:var(--accent-deep);}`;
+}
+
+/**
+ * ===== VARIANTS — token rescale, same DNA =====
+ * Source: Hearth - Warm Service.html (lines 855-993). `classic` is the baked
+ * default (no override block). Phase 11b ships variant switching.
+ *
+ * SCOPE NOTE: the HTML reference also retunes per-block layout via class
+ * selectors (`.hero h1`, `.feature`, …). Those classes don't exist in our React
+ * DOM, so only the **CSS-variable** overrides port (spacing/radii). This is the
+ * "pure token rescale" scope (nsoPlan Phase 11b) — variants must NOT touch copy.
+ * Emitted under `[data-variant="x"]` (NOT `html[...]`) so they apply on the SSR
+ * wrapper div at depth (gap #8).
+ */
+import type { TemplateVariant } from '@/types/template';
+
+export const hearthVariants: TemplateVariant[] = [
+  { id: 'classic', label: 'Classic', blurb: 'Spacious, generous rhythm.' },
+  { id: 'condensed', label: 'Condensed', blurb: 'Tighter rhythm, denser layout.' },
+  { id: 'editorial', label: 'Editorial', blurb: 'Square corners, magazine spacing.' },
+];
+
+export const defaultHearthVariant = 'classic';
+
+export function serializeVariantOverrides(): string {
+  return `[data-variant="condensed"]{
+  --sec-pad-y:96px;
+}
+[data-variant="editorial"]{
+  --r-sm:2px;
+  --r-md:4px;
+  --r-lg:4px;
+  --r-xl:6px;
+  --sec-pad-y:160px;
+}`;
 }

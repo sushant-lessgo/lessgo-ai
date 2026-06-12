@@ -1,60 +1,54 @@
-Verified against code. Plan is approved — proceed — with 2 corrections and answers to the dev's 2 open questions. Diagnoses are mostly accurate; one citation is wrong
-  in a way that could send the dev down the wrong path.
+ Two big findings — one good, one is a real break the plan undersells:
 
-  What I confirmed in code
+  ✅ Finding A (good): The plan's commit-state is fine. P5 is committed (f2176e1 "Meridian P5: archive… + fix /create refs") — product-meridian is 4 clean commits + 6
+  uncommitted source files, which Step 1 captures. And that commit claims it fixed the /create refs (contradicting the plan's "known-open" note — likely stale).
 
-  ┌─────────────────────────────────────────────────────────────────────────┬─────────────────────────────────────────────────────────────────────────────────────────┐
-  │                                  Claim                                  │                                         Status                                          │
-  ├─────────────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────┤
-  │ 2b: processServiceCopy has no ID backfill                               │ ✅ Confirmed (parseCopy.ts:21-27)                                                       │
-  ├─────────────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────┤
-  │ 2b: schema at audience/service/elementSchema.ts (not templates/hearth)  │ ✅ Confirmed — dev's "Files touched" path is right; moved in 7.5d                       │
-  ├─────────────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────┤
-  │ 2b: collections declare id: { fillMode: 'system' }                      │ ✅ Confirmed (elementSchema.ts:33,71,...) — schema-driven walk will work                │
-  ├─────────────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────┤
-  │ 2b: no v3 pattern to mirror (product uses pipe-delimited strings)       │ ✅ Correct — separate backfill is the right call, not touching frozen                   │
-  │                                                                         │ applyAllSchemaDefaults                                                                  │
-  ├─────────────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────┤
-  │ 3: canConvertToForm already lights up "Button Settings" for cta/button  │ ✅ Confirmed (ElementToolbar.tsx:156-175)                                               │
-  │ keys                                                                    │                                                                                         │
-  └─────────────────────────────────────────────────────────────────────────┴─────────────────────────────────────────────────────────────────────────────────────────┘
+  🔴 Finding B (real break, not "verify"): Meridian's resolveMeridianBlock is keyed by layout name ('terminalhero', lowercased), and index.ts passes blockType into the
+  layoutName slot. But phase-11 dispatches resolveBlock(**sectionType**, mode). After the merge takes phase-11's section-type dispatch, the registry will hand Meridian
+  'hero' → no match in a layout-name-keyed map → placeholder → Meridian renders nothing. The plan says "verify" — it actually needs a fix. Let me confirm exactly how main
+  calls it and whether the /create refs really got fixed.
 
-  Correction 1 — Defect 3 diagnosis cites the wrong lines
+● Bash(echo "=== MAIN: how does componentRegistry call tmpl.resolveBlock? (first arg) ==="; grep -nE "resolveBlock\(" "C:/Users/susha/lessgo-ai/src/modules/generatedLa…)
+  ⎿  === MAIN: how does componentRegistry call tmpl.resolveBlock? (first arg) ===
+     C:/Users/susha/lessgo-ai/src/modules/generatedLanding/componentRegistry.ts:452:    return tmpl ? tmpl.resolveBlock(sectionType, 'edit') : null;
+     C:/Users/susha/lessgo-ai/src/modules/generatedLanding/componentRegistry.published.ts:340:    return tmpl ? tmpl.resolveBlock(normalizedType, 'published') : null
+     … +7 lines (ctrl+o to expand)
+  ⎿  Shell cwd was reset to C:\Users\susha\lessgo-ai
 
-  Dev says the element toolbar is suppressed by "ElementToolbar early-returns when a text toolbar is active (ElementToolbar.tsx:87-89)." That's inaccurate. Lines 87-89
-  return null only on image or form toolbar types — not text. A text toolbar does not trigger that early return.
+● Both findings confirmed against the actual code:
 
-  The real mechanism is upstream: single-clicking the contenteditable HearthEditable routes the click to text-edit selection, so the element is never selected as an
-  'element' type — the ElementToolbar's element branch never activates. The fix direction (button affordance → single-click selects, double-click edits) is still correct,
-  but the dev must validate the actual selection routing (determineElementType / useEditor) before coding, not the 87-89 early-return. Otherwise they may "fix" the
-  early-return and the toolbar still won't show.
+  🔴 The one that will break Meridian — must be a FIX, not "verify"
 
-  Action: re-validate the selection path; keep the fix, correct the diagnosis.
+  - main dispatches by section type: componentRegistry.ts:452 → tmpl.resolveBlock(sectionType, 'edit'); .published.ts:340 → resolveBlock(normalizedType, …). And main's
+  Hearth resolver is now section-type-keyed (resolveServiceBlock.ts:53 key = sectionType.toLowerCase()).
+  - Meridian is layout-name-keyed: MERIDIAN_BLOCK_REGISTRY keys are 'terminalhero', 'hairlinefeaturegrid', …; index.ts passes blockType into the layoutName slot.
 
-  Correction 2 — Scope the button affordance narrowly
+  So post-merge the registry hands Meridian 'hero' → no match → MeridianPlaceholderBlock. Every Meridian section renders as a placeholder. Step 4's "verify Meridian's
+  resolveBlock is keyed by section type" is wrong — it isn't. The plan must include the fix: re-key MERIDIAN_BLOCK_REGISTRY to section types and fix the index.ts adapter:
 
-  The button-select-on-single-click affordance must apply only to actual button/cta elements, NOT all HearthEditable. Every other Hearth text element single-clicks to
-  edit; if the CTA suddenly single-clicks to select, that's fine (matches product's button-vs-text model) — but only if it's scoped to the button. A blanket change would
-  make all Hearth text require double-click to edit = regression. Dev's plan implies this but doesn't state the guard explicitly. Make it explicit.
+  header→MeridianNavHeader · hero→TerminalHero · features→HairlineFeatureGrid ·
+  testimonials→ProofWithLogoRail · pricing→ThreeTierPricing · cta→ArcCTA · footer→HairlineFooter
 
-  Answers to dev's 2 open questions
+  (Meridian is 1-block-per-section, so it's a clean re-key — mirror exactly what main's Hearth resolver did.) This is the make-or-break item.
 
-  Q1 — heal-on-load backfill for already-saved drafts?
-  Skip it. Don't touch the frozen loadDraft surface. No live users; dev/test drafts with broken collection IDs just get regenerated. Fresh-generation backfill is
-  sufficient. (Matches the plan's own fallback.)
+  ✅ Otherwise the plan is sound
 
-  Q2 — double-click-to-edit on the CTA acceptable, or keep single-click + separate Button-Settings entry?
-  Double-click-to-edit is acceptable — it matches how product buttons already behave (select vs edit split). Lower-risk than inventing a parallel entry point. Proceed
-  with it, scoped per Correction 2.
+  - Commit state is correct. P5 is committed (f2176e1), product-meridian = 4 clean commits + 6 uncommitted source files that Step 1 captures. No archive loss.
+  - Reconciliation (Step 4) matches my POreview — drop surfaceAttr, templateIds=['hearth','lex','meridian'], all-three defaultVariantForTemplate, keep usesTemplateModule
+  (covers Lex via the service arm), generic data-surface, loosened validation.ts, hooks-fix carried into the merged renderer. Good.
+  - Sequencing (commit both → FF service → hand-merge product) is right, and the verification gate (render Hearth + Lex + Meridian) is the correct backstop — note that
+  the Meridian render in that gate is exactly what catches the dispatch break if the fix above is skipped.
 
-  Everything else — approved as written
+  Two corrections to the plan's notes
 
-  - 2a (empty image): reuse ResultsGallery's ImagePlaceholder pattern, apply to both Hearth image slots (hero_image, author_photo). Good.
-  - 1 (persona stranding): ?personaUpdated=1 banner on dashboard + back link, mirror billing ?success= convention. Good — minimal blast radius, leaves /api/start
-  PersonaPrompt untouched.
-  - Priority order (2b → 3 → 2a → 1), idempotent backfill, UUID-per-item over Date.now(), re-run both passes, re-check copy gates after 2b. All correct.
+  1. Stale: the "4 live /create refs known-open" is out of date — f2176e1 fixed them (I confirmed the three editor/onboarding refs are gone; InjectLandingTheme.tsx was
+  relocated). Drop it from "known-open," but still run the service regression to confirm onboarding/service/layout.tsx:47 no longer 404s under the now-archived /create.
+  2. Contract variants/defaultVariantId: Step 4 rightly says reconcile required-vs-optional so all three loaders compile — concretely, Meridian's loader must expose
+  whatever phase-11 made required (e.g. a variants: TemplateVariant[] array for the theme picker). Meridian has meridianVariants in types/product.ts but may not export it
+  in the contract shape Lex established. Check this at merge or the registry won't type-check.
 
-  One addition to the re-test gate
+  Verdict
 
-  After 2b, also confirm: publish a service page → /p/[slug] renders the collections (not just edit mode). The backfill runs at copy-gen; verify the IDs persist through
-  save → publish → published render, since that's a different renderer path.
+  Approve the merge sequence + reconciliation — with one required addition: elevate the componentRegistry item to a concrete fix (re-key Meridian's resolver to section
+  type). Without it, the build passes but Meridian renders all-placeholders. Everything else (drop surfaceAttr, loosened validation, hooks-fix, generic data-surface) is
+  correct, and the 3-template render gate must be run green before calling the merge done.

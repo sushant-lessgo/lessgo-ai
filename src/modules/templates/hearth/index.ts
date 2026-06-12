@@ -6,6 +6,9 @@
 export {
   hearthBaseTokens,
   serializeBaseTokens,
+  serializeVariantOverrides,
+  hearthVariants,
+  defaultHearthVariant,
   type HearthBaseTokens,
 } from './tokens';
 
@@ -44,9 +47,9 @@ export { resolveServiceBlock } from './resolveServiceBlock';
 // importable from server components (registry preload path) without dragging a
 // bare client module across the RSC boundary.
 
-// TemplateModule.resolveBlock: (blockType, mode). Hearth's resolver ignores
-// sectionType, so adapt the (sectionType, layoutName, mode) signature.
+// TemplateModule.resolveBlock(blockType, mode): blockType is the SECTION TYPE
+// (A1 — section-type dispatch). Forwards straight to the resolver.
 import { resolveServiceBlock as _resolveServiceBlock } from './resolveServiceBlock';
 export function resolveBlock(blockType: string, mode: 'edit' | 'published') {
-  return _resolveServiceBlock('', blockType, mode);
+  return _resolveServiceBlock(blockType, mode);
 }

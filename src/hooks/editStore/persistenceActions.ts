@@ -35,6 +35,11 @@ export function createPersistenceActions(set: any, get: any) {
             tokenId: state.tokenId,
             finalContent: exportedData,  // Changed from 'content' to 'finalContent' to match API
             title: state.title,
+            // Service template selection (Phase 11b) — persist editor switches.
+            // Null for product; saveDraft writes only when provided.
+            templateId: state.templateId ?? undefined,
+            variantId: state.variantId ?? undefined,
+            paletteId: state.paletteId ?? undefined,
           }),
         });
 
@@ -224,6 +229,22 @@ export function createPersistenceActions(set: any, get: any) {
           state.templateId = apiResponse.templateId ?? null;
           state.variantId = apiResponse.variantId ?? null;
           state.paletteId = apiResponse.paletteId ?? null;
+
+          // Dev-only override (Phase 11a): `?templateId=lex` (optionally
+          // `&paletteId=counsel`) lets us exercise a template in edit/preview
+          // without a DB edit, before the picker ships (11b). Forces the service
+          // branch so the template module resolves. INERT in production.
+          if (process.env.NODE_ENV !== 'production' && typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            const devTemplateId = params.get('templateId');
+            if (devTemplateId) {
+              state.audienceType = 'service';
+              state.templateId = devTemplateId;
+              const devPaletteId = params.get('paletteId');
+              if (devPaletteId) state.paletteId = devPaletteId;
+              logger.warn(`[dev] templateId override → ${devTemplateId}${params.get('paletteId') ? ` / ${params.get('paletteId')}` : ''}`);
+            }
+          }
           
           // Restore onboarding data — check API top-level first, then contentToLoad fallback
           const onboardingFromContent = contentToLoad?.onboardingData;

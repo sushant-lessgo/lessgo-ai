@@ -334,9 +334,10 @@ export function getComponent(
 
   // Service projects dispatch to the selected template module (preloaded +
   // cached via the dynamic registry; read synchronously here).
+  // A1: dispatch by SECTION TYPE (normalizedType), not the stored layout name.
   if (audienceType === 'service') {
     const tmpl = getLoadedTemplate((templateId || 'hearth') as TemplateId);
-    return tmpl ? tmpl.resolveBlock(normalizedLayout, 'published') : null;
+    return tmpl ? tmpl.resolveBlock(normalizedType, 'published') : null;
   }
 
   return publishedComponentRegistry[normalizedType]?.[normalizedLayout] ?? null;

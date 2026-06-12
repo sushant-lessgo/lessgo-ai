@@ -134,6 +134,7 @@ export default function LandingPageRenderer({ className = '', tokenId, published
     updateFromBackgroundSystem,
     audienceType,
     templateId,
+    variantId,
     paletteId,
   } = storeState;
 
@@ -141,6 +142,8 @@ export default function LandingPageRenderer({ className = '', tokenId, published
   const { ready: templateReady, tmpl } = useTemplateModule(audienceType, templateId);
   const effectivePalette: HearthPalette =
     (paletteId as HearthPalette) || ((tmpl?.defaultPaletteId as HearthPalette) ?? 'terracotta');
+  const effectiveVariant: string =
+    (variantId as string) || tmpl?.defaultVariantId || 'classic';
 
   // Get feature flags for CSS variable system
   const featureFlags = useFeatureFlags(effectiveTokenId);
@@ -446,8 +449,8 @@ const finalSections: OrderedSection[] = processedSections
       const isHeaderSection = sectionId.includes('header') || layout?.includes('Header');
 
       // Service projects: skip product theme wrapper. Surface comes from
-      // sectionRules (data-hearth-surface), Hearth tokens come from the
-      // outer HearthThemeInjector wrap on the page.
+      // sectionRules (data-surface), template tokens come from the outer
+      // ThemeInjector wrap on the page.
       if (isService) {
         const sectionTypeKey = extractSectionTypeRaw(sectionId);
         const surface = tmpl?.getSurfaceForSection(sectionTypeKey) ?? 'cream';
@@ -458,7 +461,7 @@ const finalSections: OrderedSection[] = processedSections
             sectionType={layout}
           >
             <div
-              data-hearth-surface={surface}
+              data-surface={surface}
               className={`relative ${isHeaderSection ? 'sticky top-0 z-50' : ''}`}
             >
               <LayoutComponent
@@ -854,7 +857,7 @@ const finalSections: OrderedSection[] = processedSections
     if (!templateReady || !tmpl) return null;
     const ThemeInjector = tmpl.ThemeInjector;
     return (
-      <ThemeInjector paletteId={effectivePalette}>
+      <ThemeInjector paletteId={effectivePalette} variantId={effectiveVariant}>
         {renderContent()}
       </ThemeInjector>
     );

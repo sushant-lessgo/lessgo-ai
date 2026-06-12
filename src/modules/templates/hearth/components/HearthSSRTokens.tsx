@@ -10,7 +10,7 @@
 
 import React from 'react';
 import type { HearthPalette } from '@/types/service';
-import { serializeBaseTokens } from '../tokens';
+import { serializeBaseTokens, serializeVariantOverrides, defaultHearthVariant } from '../tokens';
 import { serializePaletteOverrides } from '../palettes';
 
 const FRAUNCES_HREF =
@@ -18,18 +18,19 @@ const FRAUNCES_HREF =
 
 interface HearthSSRTokensProps {
   paletteId: HearthPalette;
+  variantId?: string;
   children?: React.ReactNode;
   className?: string;
 }
 
-export function HearthSSRTokens({ paletteId, children, className = '' }: HearthSSRTokensProps) {
-  const stylesheet = `${serializeBaseTokens()}\n${serializePaletteOverrides()}`;
+export function HearthSSRTokens({ paletteId, variantId, children, className = '' }: HearthSSRTokensProps) {
+  const stylesheet = `${serializeBaseTokens()}\n${serializePaletteOverrides()}\n${serializeVariantOverrides()}`;
 
   return (
     <>
       <link rel="stylesheet" href={FRAUNCES_HREF} id="hearth-fraunces" />
       <style id="hearth-theme" dangerouslySetInnerHTML={{ __html: stylesheet }} />
-      <div data-palette={paletteId} className={className}>
+      <div data-palette={paletteId} data-variant={variantId || defaultHearthVariant} className={className}>
         {children}
       </div>
     </>

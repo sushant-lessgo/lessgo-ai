@@ -1,10 +1,11 @@
-// src/modules/service/resolveServiceBlock.ts
-// Service-block dispatch — Phase 3 real implementation.
-// Maps (sectionType, layoutName, mode) → React component for the 7 pilot blocks.
+// src/modules/templates/hearth/resolveServiceBlock.ts
+// Hearth block dispatch.
 //
-// Casing-mismatch notice: edit registry passes PascalCase (`WarmNavHeader`);
-// published registry pre-lowercases (`warmnavheader`). Inputs are normalized
-// internally so a single map keyed by lowercased layoutName handles both.
+// A1 (Phase 11a): keyed by SECTION TYPE, not layout name. Hearth owns exactly
+// one block per section type, so section-type dispatch lets the editor switch
+// templates without rewriting stored layout names. The stored layout name is
+// kept in saved content (unused here) — restore name-keyed dispatch if Phase 9
+// multi-block (`uiblockDecisions`) ever lands.
 
 import React from 'react';
 import { ServicePlaceholderBlock } from './ServicePlaceholderBlock';
@@ -32,27 +33,27 @@ interface BlockEntry {
   published: React.ComponentType<any>;
 }
 
+// Keyed by section type (A1).
 const SERVICE_BLOCK_REGISTRY: Record<string, BlockEntry> = {
-  warmnavheader:     { edit: WarmNavHeader,     published: WarmNavHeaderPublished },
-  petalframedhero:   { edit: PetalFramedHero,   published: PetalFramedHeroPublished },
-  iconservicecards:  { edit: IconServiceCards,  published: IconServiceCardsPublished },
-  pullquotewithmark: { edit: PullQuoteWithMark, published: PullQuoteWithMarkPublished },
-  tieredpackages:    { edit: TieredPackages,    published: TieredPackagesPublished },
-  bookcallcta:       { edit: BookCallCTA,       published: BookCallCTAPublished },
-  contactfooterrich: { edit: ContactFooterRich, published: ContactFooterRichPublished },
+  header:       { edit: WarmNavHeader,     published: WarmNavHeaderPublished },
+  hero:         { edit: PetalFramedHero,   published: PetalFramedHeroPublished },
+  services:     { edit: IconServiceCards,  published: IconServiceCardsPublished },
+  testimonials: { edit: PullQuoteWithMark, published: PullQuoteWithMarkPublished },
+  packages:     { edit: TieredPackages,    published: TieredPackagesPublished },
+  cta:          { edit: BookCallCTA,       published: BookCallCTAPublished },
+  footer:       { edit: ContactFooterRich, published: ContactFooterRichPublished },
 };
 
 export type ServiceBlockMode = 'edit' | 'published';
 
 export function resolveServiceBlock(
-  _sectionType: string,
-  layoutName: string,
+  sectionType: string,
   mode: ServiceBlockMode = 'edit'
 ): React.ComponentType<any> | null {
-  const key = (layoutName || '').toLowerCase();
+  const key = (sectionType || '').toLowerCase();
   const entry = SERVICE_BLOCK_REGISTRY[key];
   if (!entry) {
-    // Unknown layout: keep the placeholder so the renderer doesn't crash.
+    // Unknown section type: keep the placeholder so the renderer doesn't crash.
     return ServicePlaceholderBlock;
   }
   return mode === 'published' ? entry.published : entry.edit;

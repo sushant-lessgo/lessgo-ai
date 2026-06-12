@@ -10,9 +10,10 @@ import { immer } from 'zustand/middleware/immer';
 import type {
   ServiceType,
   ServiceGoal,
-  HearthPalette,
+  TemplateId,
   ServiceStrategyOutput,
 } from '@/types/service';
+import { defaultVariantForTemplate } from '@/types/service';
 
 /**
  * Service generation flow steps
@@ -71,8 +72,11 @@ interface ServiceGenerationState {
   // Step 4
   assets: ServiceAssetAvailability | null;
 
-  // Step 5
-  paletteId: HearthPalette | null;
+  // Step 5 — template + variant + palette (Phase 11b picker).
+  // Palette is a template-agnostic slug (Hearth + Lex have disjoint palette ids).
+  templateId: TemplateId;
+  variantId: string;
+  paletteId: string | null;
 
   // Step 6: Strategy
   strategy: ServiceStrategyOutput | null;
@@ -98,7 +102,11 @@ interface ServiceGenerationActions {
   setGoal: (goal: ServiceGoal) => void;
   setOffer: (offer: string) => void;
   setAssets: (assets: ServiceAssetAvailability) => void;
-  setPaletteId: (palette: HearthPalette) => void;
+  /** Switch template — resets variant + palette to the new template's defaults
+   *  (Hearth/Lex ids don't overlap, so stale ids would break render). */
+  setTemplateId: (templateId: TemplateId) => void;
+  setVariantId: (variantId: string) => void;
+  setPaletteId: (palette: string) => void;
 
   setStrategy: (strategy: ServiceStrategyOutput) => void;
   setStrategyLoading: (loading: boolean) => void;
@@ -122,6 +130,8 @@ const initialState: ServiceGenerationState = {
   goal: null,
   offer: '',
   assets: null,
+  templateId: 'hearth',
+  variantId: defaultVariantForTemplate['hearth'],
   paletteId: null,
   strategy: null,
   strategyLoading: false,
@@ -190,6 +200,18 @@ export const useServiceGenerationStore = create<ServiceGenerationStore>()(
       setAssets: (assets) =>
         set((state) => {
           state.assets = assets;
+        }),
+      setTemplateId: (templateId) =>
+        set((state) => {
+          if (state.templateId === templateId) return;
+          state.templateId = templateId;
+          // Reset variant + palette — cross-template ids don't overlap.
+          state.variantId = defaultVariantForTemplate[templateId];
+          state.paletteId = null;
+        }),
+      setVariantId: (variantId) =>
+        set((state) => {
+          state.variantId = variantId;
         }),
       setPaletteId: (palette) =>
         set((state) => {

@@ -1,15 +1,18 @@
 'use client';
 
 import { Check, Lock } from 'lucide-react';
-import type { HearthPalette } from '@/types/service';
-import { hearthPaletteConfigs } from '@/modules/templates/hearth/palettes';
 
 interface PaletteSwatchProps {
-  paletteId: HearthPalette;
+  paletteId: string;
   label: string;
   selected: boolean;
   enabled: boolean;
-  onSelect: (id: HearthPalette) => void;
+  /** Swatch colors — passed in so the swatch is template-agnostic (Hearth + Lex). */
+  accent: string;
+  accentDeep: string;
+  /** Optional soft wash behind the swatch (Hearth has one; Lex falls back). */
+  wash?: string;
+  onSelect: (id: string) => void;
 }
 
 export default function PaletteSwatch({
@@ -17,10 +20,11 @@ export default function PaletteSwatch({
   label,
   selected,
   enabled,
+  accent,
+  accentDeep,
+  wash,
   onSelect,
 }: PaletteSwatchProps) {
-  const cfg = hearthPaletteConfigs[paletteId];
-
   const handleClick = () => {
     if (!enabled) return;
     onSelect(paletteId);
@@ -40,15 +44,12 @@ export default function PaletteSwatch({
             ? 'border-gray-200 hover:border-gray-400'
             : 'border-gray-200 cursor-not-allowed opacity-50'
       }`}
-      style={{ background: cfg.accentWash }}
+      style={{ background: wash ?? '#f8f8f8' }}
     >
-      <div
-        className="absolute inset-3 rounded-lg"
-        style={{ background: cfg.accent }}
-      />
+      <div className="absolute inset-3 rounded-lg" style={{ background: accent }} />
       <div
         className="absolute bottom-0 left-0 right-0 h-1/3"
-        style={{ background: cfg.accentDeep }}
+        style={{ background: accentDeep }}
       />
 
       {selected && enabled && (
@@ -64,9 +65,7 @@ export default function PaletteSwatch({
       )}
 
       <div className="absolute bottom-0 left-0 right-0 px-2 py-1 bg-white/90 backdrop-blur-sm">
-        <span className="text-xs font-medium text-gray-700 capitalize">
-          {label}
-        </span>
+        <span className="text-xs font-medium text-gray-700 capitalize">{label}</span>
       </div>
     </button>
   );

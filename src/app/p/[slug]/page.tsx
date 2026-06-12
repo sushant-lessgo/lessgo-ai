@@ -82,6 +82,7 @@ export default async function PublishedPage({ params }: PageProps) {
       analyticsEnabled: true,
       audienceType: true,
       templateId: true,
+      variantId: true,
       paletteId: true,
     },
   });
@@ -140,6 +141,7 @@ export default async function PublishedPage({ params }: PageProps) {
       analyticsEnabled={page.analyticsEnabled || false}
       audienceType={audienceType}
       templateId={templateId}
+      variantId={page.variantId}
       paletteId={page.paletteId}
     />
   );

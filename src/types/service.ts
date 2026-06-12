@@ -15,7 +15,7 @@ export type AudienceType = (typeof audienceTypes)[number];
  * templateId selects the visual template module (Phase 7.5 only ships Hearth).
  * variantId is a per-template token rescale (surfaced in Phase 11; default now).
  */
-export const templateIds = ['hearth'] as const;
+export const templateIds = ['hearth', 'lex'] as const;
 export type TemplateId = (typeof templateIds)[number];
 
 export type VariantId = string;
@@ -23,6 +23,7 @@ export type VariantId = string;
 /** First (default) variant per template. Persisted on save until Phase 11 UI. */
 export const defaultVariantForTemplate: Record<TemplateId, VariantId> = {
   hearth: 'classic',
+  lex: 'statesman',
 };
 
 /**
@@ -168,6 +169,48 @@ export const hearthPalettes = [
 ] as const;
 
 export type HearthPalette = (typeof hearthPalettes)[number];
+
+/**
+ * ===== LEX PALETTE =====
+ * Lex (template #2, trust/professional) ships its own 9-palette family.
+ * Each palette is a (trust hue + accent) pair; default is `counsel` (navy + gold).
+ */
+export const lexPalettes = [
+  'counsel',
+  'heritage',
+  'forest',
+  'slate',
+  'vellum',
+  'burgundy',
+  'pacific',
+  'court',
+  'trust',
+] as const;
+
+export type LexPalette = (typeof lexPalettes)[number];
+
+/**
+ * ===== TEMPLATE PICKER METADATA =====
+ * Leaf-level display data + palette scoping for the Phase 11b picker. Kept here
+ * (NOT importing the template modules) so onboarding/editor pickers can scope by
+ * template without pulling a template's block chunk. Swatch colors + variant
+ * labels come from the loaded TemplateModule (firewall: editor reads via
+ * getLoadedTemplate, never a static template import).
+ */
+export const templateLabels: Record<TemplateId, string> = {
+  hearth: 'Hearth',
+  lex: 'Lex',
+};
+
+export const templateBlurbs: Record<TemplateId, string> = {
+  hearth: 'Warm, editorial — cream surfaces, serif accents.',
+  lex: 'Trust & professional — serif authority, cool document surfaces.',
+};
+
+/** Palette id list for a template (Hearth → 9 warm, Lex → 9 trust). */
+export function palettesForTemplate(templateId: TemplateId): readonly string[] {
+  return templateId === 'lex' ? lexPalettes : hearthPalettes;
+}
 
 /**
  * ===== STRATEGY OUTPUT =====

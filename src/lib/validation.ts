@@ -1,6 +1,6 @@
 // lib/validation.ts - OWASP Input Validation
 import { z } from 'zod';
-import { hearthPalettes, templateIds } from '@/types/service';
+import { templateIds } from '@/types/service';
 
 // A03: Injection Prevention - Input validation schemas
 export const FormSubmissionSchema = z.object({
@@ -31,7 +31,10 @@ export const DraftSaveSchema = z.object({
   title: z.string().max(200).optional(),
   themeValues: z.record(z.string(), z.unknown()).optional(),
   finalContent: z.unknown().optional(),
-  paletteId: z.enum(hearthPalettes as unknown as [string, ...string[]]).optional(),
+  // paletteId is template-scoped (Hearth: terracotta…; Lex: counsel…; each
+  // template adds 9). Validate as a bounded slug rather than a per-template enum
+  // so the save path stays template-agnostic (Phase 11a / A1 firewall).
+  paletteId: z.string().max(50).regex(/^[a-z0-9-]+$/, 'Invalid palette id').optional(),
   templateId: z.enum(templateIds as unknown as [string, ...string[]]).optional(),
   variantId: z.string().max(50).optional(),
 });

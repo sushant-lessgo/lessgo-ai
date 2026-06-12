@@ -24,7 +24,6 @@ import { generateMockServiceStrategy } from '@/modules/prompt/mockResponseGenera
 import {
   serviceTypes,
   serviceGoals,
-  hearthPalettes,
 } from '@/types/service';
 
 export const dynamic = 'force-dynamic';
@@ -55,7 +54,11 @@ const ServiceStrategyRequestSchema = z.object({
       .nullable()
       .default(null),
   }),
-  paletteId: z.enum(hearthPalettes as unknown as [string, ...string[]]),
+  // Template-agnostic slug (palettes are template-scoped and grow per template).
+  // The route never receives templateId (firewall — must not reach prompts), so
+  // template↔palette validity is enforced at the picker + saveDraft, not here.
+  // Mirrors the DraftSaveSchema.paletteId widening (11a gap #9).
+  paletteId: z.string().max(50).regex(/^[a-z0-9-]+$/, 'Invalid palette id'),
 });
 
 async function serviceStrategyHandler(req: NextRequest): Promise<Response> {

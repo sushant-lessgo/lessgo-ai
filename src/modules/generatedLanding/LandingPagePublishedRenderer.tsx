@@ -14,7 +14,7 @@
 import React from 'react';
 import Script from 'next/script';
 import { getComponent, extractSectionType } from './componentRegistry.published';
-import type { AudienceType, HearthPalette, TemplateId } from '@/types/service';
+import type { AudienceType, TemplateId } from '@/types/service';
 // No static template import (firewall). Service template module is preloaded by
 // the caller (p/[slug] page / static export) and read from the registry cache.
 import { getLoadedTemplate } from '@/modules/templates/registry';
@@ -42,6 +42,7 @@ interface LandingPagePublishedRendererProps {
   analyticsEnabled?: boolean;   // Enable analytics beacon
   audienceType?: AudienceType;  // Routes to service template when 'service'
   templateId?: string | null;   // Which template module to dispatch to
+  variantId?: string | null;    // Template variant (token rescale) for service
   paletteId?: string | null;    // Template palette for service projects
 }
 
@@ -56,6 +57,7 @@ export function LandingPagePublishedRenderer({
   analyticsEnabled,
   audienceType = 'product',
   templateId = 'hearth',
+  variantId = null,
   paletteId = null,
 }: LandingPagePublishedRendererProps) {
   const isService = audienceType === 'service';
@@ -63,8 +65,10 @@ export function LandingPagePublishedRenderer({
   const tmpl = isService
     ? getLoadedTemplate((templateId || 'hearth') as TemplateId) ?? null
     : null;
-  const effectivePalette: HearthPalette =
-    (paletteId as HearthPalette) || ((tmpl?.defaultPaletteId as HearthPalette) ?? 'terracotta');
+  // Template-agnostic: fall back to the template's own default palette (Hearth
+  // → terracotta, Lex → counsel, …). No hardcoded Hearth literal.
+  const effectivePalette: string = paletteId || tmpl?.defaultPaletteId || 'terracotta';
+  const effectiveVariant: string = variantId || tmpl?.defaultVariantId || 'classic';
   // 1. Extract sectionLayouts from content
   const sectionLayouts: Record<string, string> = {};
   for (const sectionId of sections) {
@@ -113,7 +117,7 @@ export function LandingPagePublishedRenderer({
         if (isService) {
           const surface = tmpl?.getSurfaceForSection(sectionType) ?? 'cream';
           return (
-            <div key={sectionId} data-hearth-surface={surface}>
+            <div key={sectionId} data-surface={surface}>
               <LayoutComponent
                 sectionId={sectionId}
                 mode="published"
@@ -177,7 +181,7 @@ export function LandingPagePublishedRenderer({
   return (
     <>
     {isService && tmpl ? (
-      <tmpl.SSRTokens paletteId={effectivePalette}>
+      <tmpl.SSRTokens paletteId={effectivePalette} variantId={effectiveVariant}>
         {sectionsTree}
       </tmpl.SSRTokens>
     ) : (

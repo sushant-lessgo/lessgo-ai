@@ -20,6 +20,21 @@ export const templateRegistry: Record<TemplateId, TemplateModuleLoader> = {
       SSRTokens: m.SSRTokens,
       getSurfaceForSection: m.getSurfaceForSection,
       defaultPaletteId: m.defaultHearthPalette,
+      variants: m.hearthVariants,
+      defaultVariantId: m.defaultHearthVariant,
+      paletteImageKeywords: m.PALETTE_IMAGE_KEYWORDS,
+    };
+  },
+  lex: async () => {
+    const m = await import('@/modules/templates/lex');
+    return {
+      resolveBlock: m.resolveBlock,
+      ThemeInjector: m.ThemeInjector,
+      SSRTokens: m.SSRTokens,
+      getSurfaceForSection: m.getSurfaceForSection,
+      defaultPaletteId: m.defaultLexPalette,
+      variants: m.lexVariants,
+      defaultVariantId: m.defaultLexVariant,
       paletteImageKeywords: m.PALETTE_IMAGE_KEYWORDS,
     };
   },

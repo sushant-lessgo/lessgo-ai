@@ -291,6 +291,22 @@ After each batch: extend `selectUIBlocksService.ts` rules + `serviceElementSchem
 
 **11b exit:** user can pick between Hearth and Lex (each with variants + palettes) in onboarding AND switch in the editor; choice persists + renders correctly.
 
+**✅ 11b CODE-COMPLETE (2026-06-09).** Build clean, firewall intact (audience untouched, no static template imports in gated dirs), W3 store gap fixed (`setPaletteId` widened to string + `setTemplateId`/`setVariantId` added), editor `confirmTemplate` resets BOTH ids to new-template defaults after `preloadTemplate`. Uncommitted on `phase-7.5-multi-template`.
+
+**🟡 RUNTIME VERIFICATION IN PROGRESS (dev-driven `/verify`).** Gate before commit/merge/Phase 12. Dev to run app + capture screenshots, report pass/fail per item:
+1. Onboarding E2E — Lex path (pick Lex + `counsel` + `civic` → generate → renders Lex w/ EB Garamond). Screenshot.
+2. Onboarding E2E — Hearth path (`editorial` variant) regression. Screenshot.
+3. Editor switch: Hearth→Lex, confirm prompt, copy identical, both ids reset, live re-render; switch back. Before/after screenshots.
+4. ⭐ **Variant eyeball (key deliverable, founder decides from this):** 6 framed shots — Hearth classic/condensed/editorial + Lex statesman/clinical/civic. Annotate obvious / subtle / near-imperceptible.
+5. Variant = zero copy: diff `Project.content` text before/after toggle → byte-identical.
+6. Palette scoping: Lex shows Lex palettes, Hearth shows Hearth palettes, no cross-bleed.
+7. Publish round-trip: `/p/[slug]` renders Lex server-side (`data-variant` at div depth not `html`). Screenshot.
+8. Save round-trip: Lex `paletteId='counsel'` saves without rejection (gap #9 regression).
+
+**⚠️ PENDING FOUNDER DECISION — variant subtlety (gap #11):** designer HTML variants got punch from class-targeted CSS (drop-caps, watermark, asymmetric hero) absent in our React DOM; only CSS-variable overrides (font/paper/spacing/radii) port → variants read subtler than the demo. After seeing item-4 screenshots, founder rules: **ship as-is / enhance 1–2 block-level knobs / cut variants from launch.** Decision blocks Phase 12 scope.
+
+**Next after verification + variant call:** commit 11b → merge `phase-7.5-multi-template` → main (housekeeping, no deploy) → Phase 12.
+
 ### Phase 12 — QA + Soft Launch (2 templates) (~4 days)
 - Visual QA against Hearth + Lex reference HTML.
 - All 4 awareness × all goal spot-checks per template.

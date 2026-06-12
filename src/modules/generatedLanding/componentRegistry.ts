@@ -445,7 +445,11 @@ export function getComponent(
   // read it synchronously (null until loaded — renderers gate on readiness).
   if (audienceType === 'service') {
     const tmpl = getLoadedTemplate((templateId || 'hearth') as TemplateId);
-    return tmpl ? tmpl.resolveBlock(layoutName, 'edit') : null;
+    // A1: dispatch by SECTION TYPE, not the stored layout name. One block per
+    // section per template, so the template re-resolves its own block regardless
+    // of which template generated the stored layout string (kept in data, unused
+    // here). Lets the editor switch templates with zero layout-name rewrites.
+    return tmpl ? tmpl.resolveBlock(sectionType, 'edit') : null;
   }
 
   const sectionComponents = componentRegistry[sectionType];

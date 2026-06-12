@@ -11,7 +11,7 @@
 
 import { useEffect, type ReactNode } from 'react';
 import type { HearthPalette } from '@/types/service';
-import { serializeBaseTokens } from './tokens';
+import { serializeBaseTokens, serializeVariantOverrides, defaultHearthVariant } from './tokens';
 import { serializePaletteOverrides } from './palettes';
 
 const STYLE_ID = 'hearth-theme';
@@ -27,11 +27,12 @@ const FRAUNCES_HREF =
 
 interface HearthThemeInjectorProps {
   paletteId: HearthPalette;
+  variantId?: string;
   children?: ReactNode;
 }
 
 function buildStylesheet(): string {
-  return `${serializeBaseTokens()}\n${serializePaletteOverrides()}`;
+  return `${serializeBaseTokens()}\n${serializePaletteOverrides()}\n${serializeVariantOverrides()}`;
 }
 
 function ensureStyleTag(): HTMLStyleElement {
@@ -59,19 +60,22 @@ function ensureFontLink(): HTMLLinkElement {
   return el;
 }
 
-export function HearthThemeInjector({ paletteId, children }: HearthThemeInjectorProps) {
+export function HearthThemeInjector({ paletteId, variantId, children }: HearthThemeInjectorProps) {
+  const variant = variantId || defaultHearthVariant;
   useEffect(() => {
     ensureStyleTag();
     ensureFontLink();
     document.documentElement.dataset.palette = paletteId;
+    document.documentElement.dataset.variant = variant;
 
     return () => {
-      // Clean up only the data attribute on unmount; keep <style> + <link>
+      // Clean up only the data attributes on unmount; keep <style> + <link>
       // around in case another HearthThemeInjector re-mounts (avoids FOUC).
       // Full cleanup happens implicitly when the page navigates away.
       delete document.documentElement.dataset.palette;
+      delete document.documentElement.dataset.variant;
     };
-  }, [paletteId]);
+  }, [paletteId, variant]);
 
   return <>{children}</>;
 }
