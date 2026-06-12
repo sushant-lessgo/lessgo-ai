@@ -1,6 +1,6 @@
 // lib/validation.ts - OWASP Input Validation
 import { z } from 'zod';
-import { hearthPalettes, templateIds } from '@/types/service';
+import { templateIds } from '@/types/service';
 
 // A03: Injection Prevention - Input validation schemas
 export const FormSubmissionSchema = z.object({
@@ -31,7 +31,11 @@ export const DraftSaveSchema = z.object({
   title: z.string().max(200).optional(),
   themeValues: z.record(z.string(), z.unknown()).optional(),
   finalContent: z.unknown().optional(),
-  paletteId: z.enum(hearthPalettes as unknown as [string, ...string[]]).optional(),
+  // paletteId is a template-scoped token (Hearth, Meridian, …) validated at the
+  // template's own ThemeInjector boundary and set by our own code (onboarding /
+  // P6 picker) — not user free-text. Keep it a bounded string (like variantId)
+  // rather than an enum, so new templates don't have to edit this schema.
+  paletteId: z.string().max(50).optional(),
   templateId: z.enum(templateIds as unknown as [string, ...string[]]).optional(),
   variantId: z.string().max(50).optional(),
 });

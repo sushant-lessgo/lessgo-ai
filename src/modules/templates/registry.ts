@@ -19,6 +19,7 @@ export const templateRegistry: Record<TemplateId, TemplateModuleLoader> = {
       ThemeInjector: m.ThemeInjector,
       SSRTokens: m.SSRTokens,
       getSurfaceForSection: m.getSurfaceForSection,
+      surfaceAttr: 'data-hearth-surface',
       defaultPaletteId: m.defaultHearthPalette,
       paletteImageKeywords: m.PALETTE_IMAGE_KEYWORDS,
     };
@@ -30,6 +31,7 @@ export const templateRegistry: Record<TemplateId, TemplateModuleLoader> = {
       ThemeInjector: m.ThemeInjector,
       SSRTokens: m.SSRTokens,
       getSurfaceForSection: m.getSurfaceForSection,
+      surfaceAttr: 'data-meridian-surface',
       defaultPaletteId: m.defaultMeridianPalette,
       defaultVariantId: m.defaultMeridianVariant,
       paletteImageKeywords: m.PALETTE_IMAGE_KEYWORDS,

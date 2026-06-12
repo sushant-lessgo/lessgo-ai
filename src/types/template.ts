@@ -20,6 +20,10 @@ export interface TemplateModule {
   SSRTokens: React.ComponentType<{ paletteId: any; variantId?: any; children?: React.ReactNode }>;
   /** Section-type → surface token for this template's alternation rules. */
   getSurfaceForSection(sectionType: string): string;
+  /** The data-attribute name the renderer puts the surface token on, so the
+   *  template's `[data-…-surface=…]` background rules match. Template-specific:
+   *  Hearth = 'data-hearth-surface', Meridian = 'data-meridian-surface'. */
+  surfaceAttr: string;
   /** Template's default palette id (used when none persisted). */
   defaultPaletteId: string;
   /** Template's default variant id (used when none persisted). Optional —

@@ -119,7 +119,7 @@ export function LandingPagePublishedRenderer({
         if (usesTemplate) {
           const surface = tmpl?.getSurfaceForSection(sectionType) ?? 'cream';
           return (
-            <div key={sectionId} data-hearth-surface={surface}>
+            <div key={sectionId} {...{ [tmpl?.surfaceAttr ?? 'data-hearth-surface']: surface }}>
               <LayoutComponent
                 sectionId={sectionId}
                 mode="published"
