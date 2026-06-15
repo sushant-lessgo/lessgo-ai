@@ -233,6 +233,12 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
       return;
     }
 
+    // Data arrived. EditProvider loads the draft asynchronously, so `sections`
+    // is empty on the first render (which set the error above) and populates a
+    // tick later. Clear the stale error so the preview recovers instead of
+    // sticking on "Preview Not Available" for a fresh (cold-store) load.
+    setError(null);
+
     logger.debug(() => '🎨 [PREVIEW-DEBUG] Preview ready with theme data:', () => ({
       backgroundsAvailable: {
         primary: theme?.colors?.sectionBackgrounds?.primary,

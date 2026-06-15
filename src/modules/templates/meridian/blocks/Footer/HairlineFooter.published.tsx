@@ -40,10 +40,14 @@ export default function HairlineFooterPublished(props: HairlineFooterPublishedPr
               <span className="mrd-footer__dot" aria-hidden="true">.</span>
             </div>
             {props.tag && <p className="mrd-footer__tag">{props.tag}</p>}
-            <form className="mrd-news" onSubmit={(e) => e.preventDefault()}>
-              <input className="mrd-news__input" placeholder={props.newsletter_placeholder || 'you@company.com'} />
-              <button type="submit" className="mrd-news__btn">{props.newsletter_cta || 'subscribe'}</button>
-            </form>
+            {/* Decorative newsletter UI. Rendered as a div (not a form) because
+                the published page is a Server Component — event handlers like
+                onSubmit can't cross the RSC boundary. The original handler only
+                preventDefault'd, so a non-submitting div is behavior-equivalent. */}
+            <div className="mrd-news">
+              <input className="mrd-news__input" placeholder={props.newsletter_placeholder || 'you@company.com'} readOnly />
+              <button type="button" className="mrd-news__btn">{props.newsletter_cta || 'subscribe'}</button>
+            </div>
           </div>
 
           {columns.map((col, idx) => (

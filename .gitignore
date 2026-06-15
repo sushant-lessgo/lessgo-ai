@@ -44,6 +44,11 @@ _Archived
 # clerk configuration (can include secrets)
 /.clerk/
 
+# e2e Clerk session state + Playwright artifacts
+e2e/.clerk/
+/test-results/
+/playwright-report/
+
 # test background
 src/app/TestBackground/
 
