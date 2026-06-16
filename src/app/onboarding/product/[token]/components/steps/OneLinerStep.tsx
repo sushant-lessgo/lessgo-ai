@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { Globe, Loader2 } from 'lucide-react';
 import { useProductGenerationStore } from '@/hooks/useProductGenerationStore';
+import type { LandingGoal } from '@/types/generation';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -12,6 +14,21 @@ const examples = [
   'Invoice generator for freelancers',
   'Workout planner for busy parents',
 ];
+
+/** Normalize user input to an http(s) URL; returns null if not URL-like. */
+function normalizeUrl(raw: string): string | null {
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  const withProto = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+  try {
+    const u = new URL(withProto);
+    // Require a dot in the host so "foo" isn't treated as a site.
+    if (!u.hostname.includes('.')) return null;
+    return u.href;
+  } catch {
+    return null;
+  }
+}
 
 function validateOneLiner(text: string): { valid: boolean; error?: string } {
   const trimmed = text.trim();
@@ -48,14 +65,65 @@ export default function OneLinerStep() {
   const productName = useProductGenerationStore((s) => s.productName);
   const setOneLiner = useProductGenerationStore((s) => s.setOneLiner);
   const setProductName = useProductGenerationStore((s) => s.setProductName);
+  const setUnderstanding = useProductGenerationStore((s) => s.setUnderstanding);
   const setUnderstandingLoading = useProductGenerationStore((s) => s.setUnderstandingLoading);
+  const setOffer = useProductGenerationStore((s) => s.setOffer);
+  const setLandingGoal = useProductGenerationStore((s) => s.setLandingGoal);
+  const setImportSourceUrl = useProductGenerationStore((s) => s.setImportSourceUrl);
+  const setImportedTestimonials = useProductGenerationStore((s) => s.setImportedTestimonials);
   const nextStep = useProductGenerationStore((s) => s.nextStep);
 
   const [localOneLiner, setLocalOneLiner] = useState(oneLiner);
   const [localProductName, setLocalProductName] = useState(productName);
 
+  const [url, setUrl] = useState('');
+  const [importing, setImporting] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
+
   const validation = validateOneLiner(localOneLiner);
   const isValid = validation.valid;
+  const normalizedUrl = normalizeUrl(url);
+
+  const handleImport = async () => {
+    if (!normalizedUrl || importing) return;
+    setImporting(true);
+    setImportError(null);
+    try {
+      const res = await fetch('/api/v2/scrape-website', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: normalizedUrl }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json?.success) {
+        setImportError(
+          json?.message || "Couldn't read that site. Fill it in manually below."
+        );
+        return;
+      }
+      const d = json.data;
+      // Hydrate the store directly. We set `understanding` (not
+      // understandingLoading) so UnderstandingStep renders its confirm view
+      // without firing a second /understand call — no double charge.
+      setOneLiner(d.oneLiner || '');
+      if (d.productName) setProductName(d.productName);
+      setUnderstanding({
+        categories: d.categories ?? [],
+        audiences: d.audiences ?? [],
+        whatItDoes: d.whatItDoes ?? '',
+        features: d.features ?? [],
+      });
+      if (d.offer) setOffer(d.offer);
+      if (d.landingGoal) setLandingGoal(d.landingGoal as LandingGoal);
+      setImportedTestimonials(Array.isArray(d.testimonials) ? d.testimonials : []);
+      setImportSourceUrl(normalizedUrl);
+      nextStep();
+    } catch {
+      setImportError("Couldn't reach that site. Fill it in manually below.");
+    } finally {
+      setImporting(false);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,6 +150,64 @@ export default function OneLinerStep() {
         <p className="mt-2 text-gray-600">
           Mention who it&apos;s for + the big benefit
         </p>
+      </div>
+
+      {/* Import from existing website (optional shortcut) */}
+      <div className="rounded-lg border border-orange-200 bg-orange-50/60 p-4 space-y-2">
+        <div className="flex items-center gap-2">
+          <Globe className="w-4 h-4 text-brand-accentPrimary" />
+          <p className="text-sm font-medium text-gray-800">
+            Already have a website? Import it to skip the typing.
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Input
+            type="url"
+            inputMode="url"
+            placeholder="yourcompany.com"
+            value={url}
+            onChange={(e) => {
+              setUrl(e.target.value);
+              if (importError) setImportError(null);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && normalizedUrl && !importing) {
+                e.preventDefault();
+                handleImport();
+              }
+            }}
+            disabled={importing}
+            className="bg-white"
+          />
+          <Button
+            type="button"
+            onClick={handleImport}
+            disabled={!normalizedUrl || importing}
+            className="bg-brand-accentPrimary hover:bg-orange-500 shrink-0"
+          >
+            {importing ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin mr-1.5" />
+                Reading…
+              </>
+            ) : (
+              'Import'
+            )}
+          </Button>
+        </div>
+        {importError ? (
+          <p className="text-xs text-red-500">{importError}</p>
+        ) : (
+          <p className="text-xs text-gray-500">
+            We&apos;ll pull your copy + testimonials. You can review everything next.
+          </p>
+        )}
+      </div>
+
+      <div className="flex items-center gap-3">
+        <div className="h-px flex-1 bg-gray-200" />
+        <span className="text-xs text-gray-400">or describe it manually</span>
+        <div className="h-px flex-1 bg-gray-200" />
       </div>
 
       {/* One-liner (required) */}

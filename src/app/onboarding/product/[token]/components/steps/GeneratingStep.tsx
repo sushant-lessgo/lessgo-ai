@@ -39,6 +39,7 @@ export default function GeneratingStep() {
   const understanding = useProductGenerationStore((s) => s.understanding);
   const landingGoal = useProductGenerationStore((s) => s.landingGoal);
   const offer = useProductGenerationStore((s) => s.offer);
+  const importedTestimonials = useProductGenerationStore((s) => s.importedTestimonials);
   const setGenerationError = useProductGenerationStore((s) => s.setGenerationError);
 
   const [stage, setStage] = useState<Stage>('strategy');
@@ -185,6 +186,7 @@ export default function GeneratingStep() {
           offer,
           landingGoal,
           features,
+          realTestimonials: importedTestimonials,
         }),
       });
       const json = await res.json();
@@ -249,6 +251,7 @@ export default function GeneratingStep() {
     productName,
     oneLiner,
     offer,
+    importedTestimonials,
     tokenId,
     posthog,
     router,

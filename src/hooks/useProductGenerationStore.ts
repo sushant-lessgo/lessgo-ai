@@ -10,6 +10,13 @@ import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import type { LandingGoal, UnderstandingData } from '@/types/generation';
 
+/** Real testimonial imported from a user's existing website (verbatim). */
+export interface ImportedTestimonial {
+  quote: string;
+  author_name: string;
+  author_role: string;
+}
+
 /**
  * Product generation flow steps. Lean vs the legacy /create flow: no vibe /
  * research / 47-block selection / design-questions — strategy is lean and the
@@ -44,6 +51,10 @@ interface ProductGenerationState {
   // Step 3
   offer: string;
 
+  // Website import (optional) — carried forward verbatim into generation.
+  importSourceUrl: string | null;
+  importedTestimonials: ImportedTestimonial[];
+
   // Step 4
   generationProgress: number;
   generationError: string | null;
@@ -65,6 +76,9 @@ interface ProductGenerationActions {
   setLandingGoal: (goal: LandingGoal) => void;
   setOffer: (offer: string) => void;
 
+  setImportSourceUrl: (url: string | null) => void;
+  setImportedTestimonials: (testimonials: ImportedTestimonial[]) => void;
+
   setGenerationProgress: (progress: number) => void;
   setGenerationError: (error: string | null) => void;
 
@@ -83,6 +97,8 @@ const initialState: ProductGenerationState = {
   understandingError: null,
   landingGoal: null,
   offer: '',
+  importSourceUrl: null,
+  importedTestimonials: [],
   generationProgress: 0,
   generationError: null,
 };
@@ -153,6 +169,15 @@ export const useProductGenerationStore = create<ProductGenerationStore>()(
       setOffer: (offer) =>
         set((state) => {
           state.offer = offer;
+        }),
+
+      setImportSourceUrl: (url) =>
+        set((state) => {
+          state.importSourceUrl = url;
+        }),
+      setImportedTestimonials: (testimonials) =>
+        set((state) => {
+          state.importedTestimonials = testimonials;
         }),
 
       setGenerationProgress: (progress) =>

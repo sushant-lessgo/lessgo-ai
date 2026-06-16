@@ -26,6 +26,7 @@ import {
 import {
   processProductCopy,
   validateProductCopyCompleteness,
+  injectRealTestimonials,
 } from '@/modules/audience/product/parseCopy';
 import { generateMockMeridianCopy } from '@/modules/prompt/mockResponseGeneratorProduct';
 import { landingGoals } from '@/types/generation';
@@ -73,6 +74,17 @@ const GenerateProductCopyRequestSchema = z.object({
   offer: z.string().min(1),
   landingGoal: z.enum(landingGoals as unknown as [string, ...string[]]),
   features: z.array(z.string()),
+  // Real testimonials imported from the user's website — injected verbatim,
+  // overriding AI-invented quotes. Optional; omitted on the manual path.
+  realTestimonials: z
+    .array(
+      z.object({
+        quote: z.string(),
+        author_name: z.string(),
+        author_role: z.string(),
+      })
+    )
+    .optional(),
 });
 
 async function productCopyHandler(req: NextRequest): Promise<Response> {
@@ -89,8 +101,16 @@ async function productCopyHandler(req: NextRequest): Promise<Response> {
         400
       );
     }
-    const { strategy, uiblocks, productName, oneLiner, offer, landingGoal, features } =
-      validation.data;
+    const {
+      strategy,
+      uiblocks,
+      productName,
+      oneLiner,
+      offer,
+      landingGoal,
+      features,
+      realTestimonials,
+    } = validation.data;
 
     // 2. Auth
     const authCheck = await requireAuth(req);
@@ -114,7 +134,10 @@ async function productCopyHandler(req: NextRequest): Promise<Response> {
         oneLiner,
         offer,
       });
-      const processed = processProductCopy(mockSections, uiblocks);
+      const withReal = realTestimonials?.length
+        ? injectRealTestimonials(mockSections, realTestimonials)
+        : mockSections;
+      const processed = processProductCopy(withReal, uiblocks);
       return createSecureResponse({
         success: true,
         sections: processed,
@@ -169,7 +192,11 @@ async function productCopyHandler(req: NextRequest): Promise<Response> {
       );
     }
 
-    // 5. Process — schema defaults + recursive id backfill + accent-<em> fallback
+    // 5. Inject verbatim website testimonials (before processing so backfill
+    //    assigns collection ids), then schema defaults + id backfill + accent-<em>.
+    if (realTestimonials?.length) {
+      sections = injectRealTestimonials(sections, realTestimonials);
+    }
     const processed = processProductCopy(sections, uiblocks);
 
     const { complete, missingSections } = validateProductCopyCompleteness(processed, uiblocks);

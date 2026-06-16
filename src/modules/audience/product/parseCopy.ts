@@ -11,6 +11,7 @@
 // (duplicate React keys, collapsed inline-edit identity).
 
 import type { SectionCopy } from '@/types/generation';
+import { logger } from '@/lib/logger';
 import { applyAllSchemaDefaults } from '@/modules/sections/layoutElementSchema';
 import { meridianElementSchema } from './elementSchema';
 import { applyAccentEmFallback } from './accentFallback';
@@ -78,6 +79,46 @@ export function backfillCollectionIds(
       backfillItems(items, collection.fields as Record<string, FieldDefLike>, collectionKey);
     }
   }
+
+  return sections;
+}
+
+/** A real testimonial lifted verbatim from a user's existing website. */
+export interface RealTestimonial {
+  quote: string;
+  author_name: string;
+  author_role: string;
+}
+
+/**
+ * Overwrite the generated `testimonials` section's testimonials collection with
+ * REAL (verbatim) testimonials imported from the user's website. Done AFTER the
+ * LLM (and before processProductCopy, so backfillCollectionIds assigns the
+ * `system` ids) — guarantees exact wording with zero rewrite risk.
+ *
+ * - Keeps the AI-generated eyebrow/headline and `logos` untouched.
+ * - Caps at the collection max (3).
+ * - No-ops (with a warn) if no testimonials section was produced — the Meridian
+ *   pilot set always includes one, so this is a defensive guard, not a path we
+ *   expect to hit.
+ */
+export function injectRealTestimonials(
+  sections: Record<string, SectionCopy>,
+  real: RealTestimonial[]
+): Record<string, SectionCopy> {
+  if (!real?.length) return sections;
+
+  const section = sections['testimonials'];
+  if (!section || !section.elements) {
+    logger.warn('[injectRealTestimonials] no testimonials section in copy; skipping injection');
+    return sections;
+  }
+
+  (section.elements as Record<string, unknown>).testimonials = real.slice(0, 3).map((t) => ({
+    quote: t.quote,
+    author_name: t.author_name,
+    author_role: t.author_role,
+  }));
 
   return sections;
 }

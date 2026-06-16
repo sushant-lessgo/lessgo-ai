@@ -16,6 +16,9 @@ export const CREDIT_COSTS = {
   STRATEGY_GENERATION: 2,
   UIBLOCK_SELECT: 1,
   GENERATE_COPY: 3,
+  // Onboarding website import (fetch + one extraction call). Net-neutral vs
+  // typing manually since it replaces the UNDERSTAND charge on the import path.
+  SCRAPE_WEBSITE: 1,
   // Legal pages
   PRIVACY_POLICY_GENERATION: 2,
 } as const;
@@ -32,6 +35,8 @@ export enum UsageEventType {
   STRATEGY_GENERATION = 'strategy_generation',
   UIBLOCK_SELECT = 'uiblock_select',
   GENERATE_COPY = 'generate_copy',
+  // Onboarding website import
+  SCRAPE_WEBSITE = 'scrape_website',
   // Legal pages
   PRIVACY_POLICY_GENERATION = 'privacy_policy_generation',
 }
