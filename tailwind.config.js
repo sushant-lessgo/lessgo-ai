@@ -635,11 +635,11 @@ module.exports = {
   		},
   		fontFamily: {
   			heading: [
-  				'Sora',
+  				'Inter',
   				'sans-serif'
   			],
   			body: [
-  				'Sora',
+  				'Inter',
   				'sans-serif'
   			]
   		},

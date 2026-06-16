@@ -8,7 +8,7 @@ import {
   generateColorTokensFromBackgroundSystem, 
   type BackgroundSystem
 } from '@/modules/Design/ColorSystem/colorTokens';
-// pickFont archived — updateFontsFromTone uses hardcoded defaults
+// pickFont removed — updateFontsFromTone uses hardcoded Inter default
 
 import { layoutElementSchema as lesSchema, isV2Schema as lesIsV2 } from '@/modules/sections/layoutElementSchema';
 import { logger } from '@/lib/logger';
@@ -637,7 +637,7 @@ export function createGenerationActions(set: any, get: any) {
     if (state.theme.typography.headingFont) return;
 
     set((state: EditStore) => {
-      state.theme.typography.headingFont = "'Sora', sans-serif";
+      state.theme.typography.headingFont = "'Inter', sans-serif";
       state.theme.typography.bodyFont = "'Inter', sans-serif";
       state.persistence.isDirty = true;
     });

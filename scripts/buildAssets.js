@@ -30,6 +30,13 @@ const files = [
   { src: 'analyticsGenerator.js', out: 'a.v1.js' },
 ];
 
+// Static CSS copied verbatim (no minify) into public/assets for published pages.
+// Published HTML loads https://lessgo.ai/assets/fonts-self-hosted.css — keep this
+// in lockstep with the source of truth so the two never drift.
+const cssCopies = [
+  { src: '../../styles/fonts-self-hosted.css', out: 'fonts-self-hosted.css' },
+];
+
 // Ensure output directory exists
 if (!fs.existsSync(outDir)) {
   fs.mkdirSync(outDir, { recursive: true });
@@ -93,6 +100,16 @@ async function build() {
     console.log(`✅ ${file.out}`);
     console.log(`   Original: ${(originalSize / 1024).toFixed(2)} KB`);
     console.log(`   Output:   ${(outputSize / 1024).toFixed(2)} KB${minified ? ` (-${reduction}%)` : ' (not minified)'}`);
+    console.log(`   Path:     ${outPath}\n`);
+  }
+
+  // Copy static CSS verbatim
+  for (const css of cssCopies) {
+    const srcPath = path.join(srcDir, css.src);
+    const outPath = path.join(outDir, css.out);
+    const code = fs.readFileSync(srcPath, 'utf8');
+    fs.writeFileSync(outPath, code, 'utf8');
+    console.log(`✅ ${css.out} (copied verbatim)`);
     console.log(`   Path:     ${outPath}\n`);
   }
 

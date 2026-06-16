@@ -5,7 +5,7 @@ import type { Theme, ColorTokens } from '@/types/core/index';
 // ✅ CORRECT
 import type { EditStore, EditHistoryEntry } from '@/types/store';
 import type { LayoutActions } from '@/types/store';
-// pickFont archived — vibe not persisted, reset uses hardcoded Sora+Inter
+// pickFont removed — vibe not persisted, reset uses hardcoded Inter default
 import type { FontTheme, TypographyState } from '@/types/core/index';
 
 import { logger } from '@/lib/logger';
@@ -559,7 +559,7 @@ resetTypographyToGenerated: () =>
     const oldTypography = { ...state.theme.typography };
 
     // Vibe not persisted on theme, so reset to most neutral default
-    state.theme.typography.headingFont = "'Sora', sans-serif";
+    state.theme.typography.headingFont = "'Inter', sans-serif";
     state.theme.typography.bodyFont = "'Inter', sans-serif";
 
     state.persistence.isDirty = true;

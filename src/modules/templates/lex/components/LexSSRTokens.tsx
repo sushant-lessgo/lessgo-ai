@@ -1,16 +1,17 @@
 // src/modules/templates/lex/components/LexSSRTokens.tsx
 // Server-safe Lex token emitter for the published renderer + static export.
 // Counterpart to LexThemeInjector (client-only). Emits the same payload:
-//   1. <link rel="stylesheet"> for the statesman font set
-//   2. <style id="lex-theme"> with base tokens + per-palette overrides
-//   3. wrapping <div data-palette="..." data-variant="statesman"> so
+//   1. <style id="lex-theme"> with base tokens + per-palette overrides
+//   2. wrapping <div data-palette="..." data-variant="statesman"> so
 //      [data-palette="x"] selectors match at any depth.
+// Fonts (Source Serif 4 / Inter Tight / JetBrains Mono, + Lora/EB Garamond for
+// the clinical/civic variants) are self-hosted globally via
+// src/styles/fonts-self-hosted.css — no per-variant Google <link> needed.
 
 import React from 'react';
 import type { LexPalette } from '@/types/service';
 import { serializeBaseTokens, serializeVariantOverrides, defaultLexVariant } from '../tokens';
 import { serializePaletteOverrides } from '../palettes';
-import { lexFontsHref } from '../fonts';
 
 interface LexSSRTokensProps {
   paletteId: LexPalette;
@@ -25,7 +26,6 @@ export function LexSSRTokens({ paletteId, variantId, children, className = '' }:
 
   return (
     <>
-      <link rel="stylesheet" href={lexFontsHref(variant)} id="lex-fonts" />
       <style id="lex-theme" dangerouslySetInnerHTML={{ __html: stylesheet }} />
       <div data-palette={paletteId} data-variant={variant} className={className}>
         {children}

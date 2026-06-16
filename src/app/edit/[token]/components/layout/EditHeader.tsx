@@ -4,7 +4,6 @@
 import React from 'react';
 import { ThemePopover } from '../ui/ThemePopover';
 import { ServiceThemePopover } from '../ui/ServiceThemePopover';
-import { TypographyControls } from '../ui/TypographyControls';
 import { EditHeaderRightPanel } from './EditHeaderRightPanel';
 import { ReviewPill } from '../ui/ReviewPill';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
@@ -26,8 +25,8 @@ export function EditHeader({ tokenId }: EditHeaderProps) {
   //  - Service templates get the template/variant/palette picker.
   //  - Product+Meridian is a template project with the picker LOCKED for the
   //    pilot — show a static, read-only label instead of the stale legacy theme
-  //    + typography controls (which target the old product color system).
-  //  - Legacy (non-template) product keeps the old theme + typography panel.
+  //    controls (which target the old product color system).
+  //  - Legacy (non-template) product keeps the old theme panel.
   let designControls: React.ReactNode;
   if (isService) {
     designControls = <ServiceThemePopover />;
@@ -44,12 +43,7 @@ export function EditHeader({ tokenId }: EditHeaderProps) {
       </div>
     );
   } else {
-    designControls = (
-      <>
-        <ThemePopover />
-        <TypographyControls />
-      </>
-    );
+    designControls = <ThemePopover />;
   }
 
   return (

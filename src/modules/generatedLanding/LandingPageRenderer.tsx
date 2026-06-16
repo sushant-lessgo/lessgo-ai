@@ -24,35 +24,6 @@ import { SectionTracker } from '@/app/p/[slug]/components/SectionTracker';
 import { FormPlacementRenderer } from '@/components/forms/FormPlacementRenderer';
 
 import { logger } from '@/lib/logger';
-// ... (font loading utility remains the same)
-const loadGoogleFonts = () => {
-  if (document.querySelector('#google-fonts-preload')) {
-    return;
-  }
-
-  const link = document.createElement('link');
-  link.id = 'google-fonts-preload';
-  link.rel = 'stylesheet';
-  link.href = 'https://fonts.googleapis.com/css2?' +
-    'family=Inter:wght@400;500;600;700&' +
-    'family=Bricolage+Grotesque:wght@400;500;600;700&' +
-    'family=Poppins:wght@400;500;600;700&' +
-    'family=Rubik:wght@400;500;600;700&' +
-    'family=Manrope:wght@400;500;600;700&' +
-    'family=Sora:wght@400;500;600;700&' +
-    'family=Space+Grotesk:wght@400;500;600;700&' +
-    'family=Plus+Jakarta+Sans:wght@400;500;600;700&' +
-    'family=Outfit:wght@400;500;600;700&' +
-    'family=DM+Sans:wght@400;500;600;700&' +
-    'family=Open+Sans:wght@400;500;600;700&' +
-    'family=Nunito:wght@400;500;600;700&' +
-    'family=Playfair+Display:wght@400;500;600;700&' +
-    'family=DM+Serif+Display:wght@400;500;600;700&' +
-    'family=Raleway:wght@400;500;600;700&' +
-    'display=swap';
-  
-  document.head.appendChild(link);
-};
 
 // ... (types remain the same)
 type SectionBackground = 'neutral' | 'primary-highlight' | 'secondary-highlight';
@@ -131,7 +102,6 @@ export default function LandingPageRenderer({ className = '', tokenId, published
     content,
     mode,
     errors,
-    updateFontsFromTone,
     getColorTokens,
     updateFromBackgroundSystem,
     audienceType,
@@ -224,12 +194,6 @@ export default function LandingPageRenderer({ className = '', tokenId, published
     });
     return tokens;
   }, [getColorTokens]);
-
-  // Initialize fonts and load Google Fonts on mount
-  useEffect(() => {
-    loadGoogleFonts();
-    updateFontsFromTone();
-  }, [updateFontsFromTone]);
 
   // ✅ ENHANCED: Get ordered sections with ALTERNATING background assignment
   
@@ -696,14 +660,10 @@ const finalSections: OrderedSection[] = processedSections
 
   // Main renderer with conditional variable system wrapper
   const renderContent = () => (
-    <main 
+    <main
       className={`landing-page-renderer ${className}`}
       data-mode={mode}
       data-variable-system={shouldUseVariableSystem ? 'enabled' : 'legacy'}
-      style={{
-        '--font-heading': `${theme.typography.headingFont}, 'Inter', sans-serif`,
-        '--font-body': `${theme.typography.bodyFont}, 'Inter', sans-serif`,
-      } as React.CSSProperties}
     >
       {/* Enhanced Global CSS Variables for Color Tokens - Only when using variable system */}
       {shouldUseVariableSystem && (

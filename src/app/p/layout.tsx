@@ -1,13 +1,15 @@
 /**
  * Published Pages Layout
  *
- * Statically preloads most common core fonts (Inter, Sora) for optimal LCP.
- * These 4 preloads (~60-80KB) load on all pages - acceptable tradeoff for SSR performance.
+ * Statically preloads the broadly-shared near-body faces for optimal LCP.
+ * `p/layout` is shared across all template pages, so we preload only the faces
+ * used by the most templates (not template-specific display/variable fonts).
  *
  * Strategy:
- * - Preload Inter 400/700 (default font, most pages)
- * - Preload Sora 400/700 (startup/AI tone, second most common)
- * - Covers 80-90% of actual usage
+ * - Preload Inter 400 (Meridian body)
+ * - Preload Inter Tight 400 (Meridian display + Lex body)
+ * - Other faces (Fraunces, Source Serif 4, Lora, EB Garamond, JetBrains Mono,
+ *   DM Sans) load on demand via font-display:swap from fonts-self-hosted.css
  * - Static preloads in server HTML = zero JS dependency
  */
 
@@ -22,7 +24,7 @@ export default function PublishedLayout({
   return (
     <html lang="en">
       <head>
-        {/* Preload Inter - default font (most pages) */}
+        {/* Preload Inter - Meridian body */}
         <link
           rel="preload"
           as="font"
@@ -30,26 +32,12 @@ export default function PublishedLayout({
           type="font/woff2"
           crossOrigin="anonymous"
         />
-        <link
-          rel="preload"
-          as="font"
-          href="/fonts/inter/inter-v20-latin-700.woff2"
-          type="font/woff2"
-          crossOrigin="anonymous"
-        />
 
-        {/* Preload Sora - startup/AI tone (second most common) */}
+        {/* Preload Inter Tight - Meridian display + Lex body */}
         <link
           rel="preload"
           as="font"
-          href="/fonts/sora/sora-v17-latin-regular.woff2"
-          type="font/woff2"
-          crossOrigin="anonymous"
-        />
-        <link
-          rel="preload"
-          as="font"
-          href="/fonts/sora/sora-v17-latin-700.woff2"
+          href="/fonts/inter-tight/inter-tight-latin-400-normal.woff2"
           type="font/woff2"
           crossOrigin="anonymous"
         />

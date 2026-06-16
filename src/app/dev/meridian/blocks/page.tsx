@@ -3,6 +3,7 @@
 // from schema-default / design-reference mock content, across palettes + variants.
 // Internal-only (/dev/* convention; blocked in production by middleware).
 
+import '@/styles/fonts-self-hosted.css';
 import { MeridianBlocksClient } from './MeridianBlocksClient';
 
 export const metadata = {

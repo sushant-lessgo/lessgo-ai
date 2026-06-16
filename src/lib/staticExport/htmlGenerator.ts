@@ -12,9 +12,6 @@ import { LandingPagePublishedRenderer } from '@/modules/generatedLanding/Landing
 import { validateAndResolveAssetURLs } from './assetResolver';
 import { usesTemplateModule } from '@/types/service';
 
-// Self-hosted core fonts (don't load from Google Fonts)
-const CORE_FONTS = new Set(['Inter', 'Sora', 'DM Sans', 'Playfair Display']);
-
 export interface StaticHTMLOptions {
   // Content
   sections: string[];
@@ -42,7 +39,6 @@ export interface StaticHTMLResult {
   html: string;
   metadata: {
     size: number;
-    fonts: string[];
     cssVariableCount: number;
   };
 }
@@ -63,10 +59,7 @@ export async function generateStaticHTML(
     await preloadTemplate((options.templateId || 'hearth') as any);
   }
 
-  // 1. Extract fonts from theme
-  const fonts = extractFontsFromTheme(options.theme);
-
-  // 2. Generate CSS variables from theme
+  // 1. Generate CSS variables from theme
   const cssVariables = generateThemeVariables(options.theme);
 
   // 3. Render React components to HTML string
@@ -91,7 +84,6 @@ export async function generateStaticHTML(
   const html = buildHTMLDocument({
     bodyHTML,
     cssVariables,
-    fonts,
     metadata: {
       title: options.title,
       description: options.description || '',
@@ -114,36 +106,9 @@ export async function generateStaticHTML(
     html: validatedHTML,
     metadata: {
       size: Buffer.byteLength(validatedHTML, 'utf8'),
-      fonts,
       cssVariableCount: Object.keys(cssVariables).length,
     },
   };
-}
-
-/**
- * Extract unique font families from theme.typography
- */
-function extractFontsFromTheme(theme: any): string[] {
-  const fonts = new Set<string>();
-
-  // Extract base font names (remove CSS quotes and fallbacks)
-  const headingFont = theme?.typography?.headingFont
-    ?.replace(/['"]/g, '')
-    .split(',')[0]
-    .trim();
-  const bodyFont = theme?.typography?.bodyFont
-    ?.replace(/['"]/g, '')
-    .split(',')[0]
-    .trim();
-
-  // Add fonts if they exist and aren't default
-  if (headingFont && headingFont !== 'Inter') fonts.add(headingFont);
-  if (bodyFont && bodyFont !== 'Inter') fonts.add(bodyFont);
-
-  // Always include Inter as fallback (already loaded in /p/layout.tsx)
-  fonts.add('Inter');
-
-  return Array.from(fonts);
 }
 
 /**
@@ -192,7 +157,6 @@ function generateThemeVariables(theme: any): Record<string, string> {
 function buildHTMLDocument(params: {
   bodyHTML: string;
   cssVariables: Record<string, string>;
-  fonts: string[];
   metadata: {
     title: string;
     description: string;
@@ -204,10 +168,7 @@ function buildHTMLDocument(params: {
   analyticsOptIn: boolean;
   hasForms: boolean;
 }): string {
-  const { bodyHTML, cssVariables, fonts, metadata, analyticsOptIn, hasForms } = params;
-
-  // Generate Google Fonts URL
-  const fontsURL = generateGoogleFontsURL(fonts);
+  const { bodyHTML, cssVariables, metadata, analyticsOptIn, hasForms } = params;
 
   // Generate CSS variables style tag
   const cssVariablesStyle = generateCSSVariablesStyle(cssVariables);
@@ -246,10 +207,8 @@ function buildHTMLDocument(params: {
   <meta name="twitter:description" content="${escapeHTML(metadata.description)}">
   <meta name="twitter:image" content="${ogImage}">
 
-  <!-- Google Fonts (for non-core fonts only) -->
-  ${fontsURL ? `<link href="${fontsURL}" rel="stylesheet">` : ''}
-
-  <!-- Self-hosted core fonts (Inter, Sora, DM Sans, Playfair Display) -->
+  <!-- Self-hosted template fonts (Inter, Inter Tight, JetBrains Mono, DM Sans,
+       Fraunces, Source Serif 4, Lora, EB Garamond) -->
   <link rel="stylesheet" href="https://lessgo.ai/assets/fonts-self-hosted.css">
 
   <!-- Shared CSS -->
@@ -272,34 +231,6 @@ function buildHTMLDocument(params: {
   }
 </body>
 </html>`;
-}
-
-/**
- * Generate Google Fonts CDN URL with display=swap
- * Filters out self-hosted core fonts (Inter, Sora, DM Sans, Playfair Display)
- */
-function generateGoogleFontsURL(fonts: string[]): string {
-  if (!fonts || fonts.length === 0) return '';
-
-  // Filter: Only load non-core fonts from Google
-  const fontsToLoad = fonts.filter((f) => {
-    const fontName = f.replace(/['"]/g, '').split(',')[0].trim();
-    // Skip core self-hosted fonts
-    if (CORE_FONTS.has(fontName)) return false;
-    // Skip Inter and Bricolage Grotesque (backward compat)
-    if (fontName === 'Inter' || fontName === 'Bricolage Grotesque') return false;
-    return true;
-  });
-
-  // If all fonts are self-hosted, return empty string
-  if (fontsToLoad.length === 0) return '';
-
-  // Format: https://fonts.googleapis.com/css2?family=Poppins&family=Open+Sans&display=swap
-  const families = fontsToLoad
-    .map((f) => `family=${f.replace(/\s/g, '+')}`)
-    .join('&');
-
-  return `https://fonts.googleapis.com/css2?${families}&display=swap`;
 }
 
 /**

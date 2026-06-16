@@ -209,8 +209,8 @@ async function buildPublishedCSS() {
       theme: {
         extend: {
           fontFamily: {
-            heading: ['Sora', 'sans-serif'],
-            body: ['Sora', 'sans-serif']
+            heading: ['Inter', 'sans-serif'],
+            body: ['Inter', 'sans-serif']
           },
           colors: {
             landing: {

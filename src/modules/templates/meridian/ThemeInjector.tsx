@@ -6,7 +6,9 @@
 //     overrides AND per-variant token rescales (incl. the light inversion).
 //  2. <style id="meridian-theme"> in <head> with :root tokens + palette + variant
 //     blocks.
-//  3. <link id="meridian-fonts"> for Inter Tight / Inter / JetBrains Mono.
+//
+// Fonts (Inter Tight / Inter / JetBrains Mono) are self-hosted globally via
+// src/styles/fonts-self-hosted.css — no per-template Google <link> needed.
 //
 // Counterpart to MeridianSSRTokens (server). Mirrors HearthThemeInjector, plus
 // the data-variant axis.
@@ -19,11 +21,6 @@ import { serializePaletteOverrides } from './palettes';
 import { serializeVariantOverrides } from './variants';
 
 const STYLE_ID = 'meridian-theme';
-const FONT_LINK_ID = 'meridian-fonts';
-
-/** Combined Google Fonts href — pinned from "Meridian - Modern Tech.html" line 9. */
-const FONTS_HREF =
-  'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap';
 
 interface MeridianThemeInjectorProps {
   paletteId: MeridianPalette;
@@ -48,18 +45,6 @@ function ensureStyleTag(): HTMLStyleElement {
   return el;
 }
 
-function ensureFontLink(): HTMLLinkElement {
-  let el = document.getElementById(FONT_LINK_ID) as HTMLLinkElement | null;
-  if (!el) {
-    el = document.createElement('link');
-    el.id = FONT_LINK_ID;
-    el.rel = 'stylesheet';
-    el.href = FONTS_HREF;
-    document.head.appendChild(el);
-  }
-  return el;
-}
-
 export function MeridianThemeInjector({
   paletteId,
   variantId = defaultMeridianVariant,
@@ -67,14 +52,13 @@ export function MeridianThemeInjector({
 }: MeridianThemeInjectorProps) {
   useEffect(() => {
     ensureStyleTag();
-    ensureFontLink();
     document.documentElement.dataset.palette = paletteId;
     document.documentElement.dataset.variant = variantId;
 
     return () => {
-      // Clean up only the data attributes on unmount; keep <style> + <link>
-      // around in case another injector re-mounts (avoids FOUC). Full cleanup
-      // happens implicitly when the page navigates away.
+      // Clean up only the data attributes on unmount; keep the <style> around
+      // in case another injector re-mounts (avoids FOUC). Full cleanup happens
+      // implicitly when the page navigates away.
       delete document.documentElement.dataset.palette;
       delete document.documentElement.dataset.variant;
     };

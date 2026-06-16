@@ -268,12 +268,9 @@ interface MVPFormatState {
 - Accessibility validation
 
 #### Typography
-**Location**: `components/ui/typography/`
-**Features**:
-- Font theme selection
-- Size controls
-- Line height adjustment
-- Letter spacing
+Per-page font selection was removed when the template-based model landed — each
+template (Meridian/Hearth/Lex) defines its own typography via its `tokens.ts`,
+and all template fonts are self-hosted in `src/styles/fonts-self-hosted.css`.
 
 ## Design System Integration
 
