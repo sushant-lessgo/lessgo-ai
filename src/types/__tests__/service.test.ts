@@ -57,9 +57,10 @@ describe('palettesForTemplate (picker scoping)', () => {
 });
 
 describe('persona derivation', () => {
-  it('only saas-founder + indie-maker map to product; all others to service', () => {
+  it('only saas-founder + indie-maker + hardware-founder map to product; all others to service', () => {
+    const productPersonas = new Set(['saas-founder', 'indie-maker', 'hardware-founder']);
     for (const p of userPersonas) {
-      const expected = (p === 'saas-founder' || p === 'indie-maker') ? 'product' : 'service';
+      const expected = productPersonas.has(p) ? 'product' : 'service';
       expect(personaToAudienceType(p)).toBe(expected);
     }
   });
@@ -71,6 +72,7 @@ describe('persona derivation', () => {
     expect(personaToServiceType('freelancer')).toBe('freelance');
     expect(personaToServiceType('saas-founder')).toBeNull();
     expect(personaToServiceType('indie-maker')).toBeNull();
+    expect(personaToServiceType('hardware-founder')).toBeNull();
   });
 });
 

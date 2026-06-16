@@ -70,6 +70,7 @@ export function usesTemplateModule(
 export const userPersonas = [
   'saas-founder',
   'indie-maker',
+  'hardware-founder',
   'agency',
   'consultant',
   'coach',
@@ -83,6 +84,7 @@ export type UserPersona = (typeof userPersonas)[number];
 export const userPersonaLabels: Record<UserPersona, string> = {
   'saas-founder': 'SaaS / app founder',
   'indie-maker': 'Indie maker',
+  'hardware-founder': 'Hardware / connected-product founder',
   'agency': 'Agency owner',
   'consultant': 'Consultant / advisor',
   'coach': 'Coach',
@@ -94,6 +96,7 @@ export const userPersonaLabels: Record<UserPersona, string> = {
 export const userPersonaDescriptions: Record<UserPersona, string> = {
   'saas-founder': 'Building a SaaS, app, or web tool',
   'indie-maker': 'Shipping plugins, indie products, or side projects',
+  'hardware-founder': 'Building a physical, IoT, or connected hardware product',
   'agency': 'Marketing, dev, or creative agency',
   'consultant': 'Strategic advisory or expert consulting',
   'coach': '1:1 or group coaching',
@@ -104,11 +107,15 @@ export const userPersonaDescriptions: Record<UserPersona, string> = {
 
 /**
  * Derive AudienceType from UserPersona.
- * SaaS founder + indie maker → product. All other personas → service.
+ * SaaS founder + indie maker + hardware founder → product. All others → service.
  * (ecommerce has no persona yet — added in the Phase 13 ecom wave.)
  */
 export function personaToAudienceType(persona: UserPersona): AudienceType {
-  if (persona === 'saas-founder' || persona === 'indie-maker') {
+  if (
+    persona === 'saas-founder' ||
+    persona === 'indie-maker' ||
+    persona === 'hardware-founder'
+  ) {
     return 'product';
   }
   return 'service';
