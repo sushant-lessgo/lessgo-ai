@@ -244,7 +244,8 @@ export default function GeneratingStep() {
       audienceType: 'product',
     });
 
-    setTimeout(() => router.push(`/edit/${tokenId}`), 600);
+    // Reveal the generated page (wow moment) before the editor.
+    setTimeout(() => router.push(`/generate/${tokenId}`), 600);
   }, [
     understanding,
     landingGoal,

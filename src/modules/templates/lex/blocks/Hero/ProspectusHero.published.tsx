@@ -2,6 +2,7 @@
 // Server-safe published variant of ProspectusHero.
 
 import React from 'react';
+import { resolveCtaHref } from '@/utils/resolveCtaHref';
 
 interface ProspectusHeroPublishedProps {
   sectionId: string;
@@ -12,11 +13,17 @@ interface ProspectusHeroPublishedProps {
   secondary_cta_text?: string;
   hero_image?: string;
   meta?: string;
+  content?: any;
 }
 
 export default function ProspectusHeroPublished(props: ProspectusHeroPublishedProps) {
   const headline = props.headline || '';
   const lede = props.lede || '';
+
+  const md = props.content?.[props.sectionId]?.elementMetadata;
+  const forms = props.content?.forms;
+  const ctaHref = resolveCtaHref(md?.cta_text?.buttonConfig, forms, '#cta');
+  const secondaryHref = resolveCtaHref(md?.secondary_cta_text?.buttonConfig, forms, '#cta');
 
   return (
     <>
@@ -33,10 +40,10 @@ export default function ProspectusHeroPublished(props: ProspectusHeroPublishedPr
             <p className="lex-hero__lede" dangerouslySetInnerHTML={{ __html: lede }} />
             <div className="lex-hero__actions">
               {props.cta_text && (
-                <a className="lex-btn lex-btn--primary lex-btn--lg" href="#cta">{props.cta_text}</a>
+                <a className="lex-btn lex-btn--primary lex-btn--lg" href={ctaHref}>{props.cta_text}</a>
               )}
               {props.secondary_cta_text && (
-                <a className="lex-btn lex-btn--quiet" href="#cta">{props.secondary_cta_text}</a>
+                <a className="lex-btn lex-btn--quiet" href={secondaryHref}>{props.secondary_cta_text}</a>
               )}
             </div>
           </aside>

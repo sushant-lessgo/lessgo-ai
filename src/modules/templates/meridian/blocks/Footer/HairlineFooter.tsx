@@ -11,6 +11,7 @@
 import React from 'react';
 import { useMeridianBlock } from '../../hooks/useMeridianBlock';
 import { MeridianEditable } from '../../components/MeridianEditable';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 
 interface FooterLink {
   id: string;
@@ -41,6 +42,38 @@ interface HairlineFooterProps {
 export default function HairlineFooter({ sectionId }: HairlineFooterProps) {
   const { mode, blockContent, handleContentUpdate, handleCollectionUpdate } =
     useMeridianBlock<HairlineFooterContent>({ sectionId });
+
+  // Newsletter capture: one-click auto-provisions a dashboard-backed form and
+  // connects it to newsletter_cta (buttonConfig.formId). Once connected, the
+  // published footer renders a live email-capture widget.
+  const { content, addForm, deleteForm, getFormById, setSection } = useEditStore();
+  const newsletterFormId: string | undefined =
+    content?.[sectionId]?.elementMetadata?.newsletter_cta?.buttonConfig?.formId;
+  const isNewsletterConnected = !!(newsletterFormId && getFormById?.(newsletterFormId));
+
+  const setupNewsletter = () => {
+    const formId = addForm({
+      name: 'Newsletter',
+      fields: [{
+        id: 'email',
+        type: 'email',
+        label: 'Email',
+        placeholder: blockContent.newsletter_placeholder || 'you@company.com',
+        required: true,
+      }],
+      submitButtonText: blockContent.newsletter_cta || 'Subscribe',
+      successMessage: 'Thanks for subscribing!',
+      integrations: [{ id: `int-${Date.now()}`, type: 'dashboard', name: 'Dashboard', enabled: true }],
+    } as any);
+    const prevMeta = content?.[sectionId]?.elementMetadata || {};
+    setSection(sectionId, {
+      elementMetadata: { ...prevMeta, newsletter_cta: { buttonConfig: { type: 'form', formId } } },
+    });
+  };
+
+  const removeNewsletter = () => {
+    if (newsletterFormId) deleteForm(newsletterFormId); // also clears the buttonConfig link
+  };
 
   const columns = blockContent.footer_columns || [];
 
@@ -115,30 +148,48 @@ export default function HairlineFooter({ sectionId }: HairlineFooterProps) {
                 placeholder="A short line about what you do."
               />
             )}
-            <div className="mrd-news">
-              <MeridianEditable
-                as="span"
-                mode={mode}
-                sectionId={sectionId}
-                elementKey="newsletter_placeholder"
-                value={blockContent.newsletter_placeholder}
-                onSave={(v) => handleContentUpdate('newsletter_placeholder', v)}
-                enterBehavior="save"
-                className="mrd-news__field"
-                placeholder="you@company.com"
-              />
-              <MeridianEditable
-                as="span"
-                mode={mode}
-                sectionId={sectionId}
-                elementKey="newsletter_cta"
-                value={blockContent.newsletter_cta}
-                onSave={(v) => handleContentUpdate('newsletter_cta', v)}
-                enterBehavior="save"
-                className="mrd-news__btn"
-                placeholder="subscribe"
-              />
-            </div>
+            {isNewsletterConnected ? (
+              <>
+                <div className="mrd-news">
+                  <MeridianEditable
+                    as="span"
+                    mode={mode}
+                    sectionId={sectionId}
+                    elementKey="newsletter_placeholder"
+                    value={blockContent.newsletter_placeholder}
+                    onSave={(v) => handleContentUpdate('newsletter_placeholder', v)}
+                    enterBehavior="save"
+                    className="mrd-news__field"
+                    placeholder="you@company.com"
+                  />
+                  <MeridianEditable
+                    as="span"
+                    mode={mode}
+                    sectionId={sectionId}
+                    elementKey="newsletter_cta"
+                    value={blockContent.newsletter_cta}
+                    onSave={(v) => handleContentUpdate('newsletter_cta', v)}
+                    enterBehavior="save"
+                    className="mrd-news__btn"
+                    placeholder="subscribe"
+                  />
+                </div>
+                {mode === 'edit' && (
+                  <div className="mrd-news-status">
+                    <span>✓ Saving signups to dashboard</span>
+                    <button type="button" className="mrd-news-status__remove" onClick={removeNewsletter}>
+                      Remove
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
+              mode === 'edit' && (
+                <button type="button" className="mrd-news-setup" onClick={setupNewsletter}>
+                  ⊕ Set up newsletter signup
+                </button>
+              )
+            )}
           </div>
 
           {columns.map((col) => (
@@ -251,6 +302,18 @@ const STYLES = `
 .mrd-news__field { flex: 1; padding: 10px 12px; font-size: 13px; color: var(--bone-3); cursor: text; }
 .mrd-news__btn { background: var(--ink-1); color: var(--bone); padding: 10px 14px; border-left: 1px solid var(--line); font-family: var(--font-mono); font-size: 12px; cursor: pointer; }
 .mrd-news__btn:hover { background: var(--ink-2); }
+.mrd-news-setup {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: transparent; border: 1px dashed var(--line-strong); color: var(--bone-2);
+  font-family: var(--font-mono); font-size: 12px; padding: 9px 14px; border-radius: var(--r-md); cursor: pointer;
+}
+.mrd-news-setup:hover { color: var(--bone); border-color: var(--bone-3); }
+.mrd-news-status {
+  display: flex; align-items: center; gap: 10px; margin-top: 8px;
+  font-family: var(--font-mono); font-size: 11px; color: var(--bone-3);
+}
+.mrd-news-status__remove { background: transparent; border: none; color: var(--accent); font: inherit; cursor: pointer; padding: 0; }
+.mrd-news-status__remove:hover { text-decoration: underline; }
 .mrd-footer__col-head { display: flex; align-items: center; gap: 6px; margin-bottom: 18px; }
 .mrd-footer__col h4 { font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--bone-3); margin: 0; font-weight: 400; }
 .mrd-footer__col-remove, .mrd-footer__link-remove {

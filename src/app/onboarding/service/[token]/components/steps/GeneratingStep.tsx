@@ -232,8 +232,9 @@ export default function GeneratingStep() {
       audienceType: 'service',
     });
 
-    // Brief delay so the user sees the final check before the editor loads.
-    setTimeout(() => router.push(`/edit/${tokenId}`), 600);
+    // Brief delay so the user sees the final check, then reveal the generated
+    // page (wow moment) before the editor.
+    setTimeout(() => router.push(`/generate/${tokenId}`), 600);
   }, [
     understanding,
     goal,

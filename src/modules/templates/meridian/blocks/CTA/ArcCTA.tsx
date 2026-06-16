@@ -105,10 +105,10 @@ export default function ArcCTA({ sectionId }: ArcCTAProps) {
 }
 
 const STYLES = `
-.mrd-cta-wrap { max-width: 1340px; margin: 0 auto; padding: 0 var(--sec-pad-x); }
+.mrd-cta-wrap { max-width: 1340px; margin: 0 auto; padding: 120px var(--sec-pad-x); }
 .mrd-cta {
   position: relative; border: 1px solid var(--line); border-radius: var(--r-xl);
-  padding: 96px 72px; overflow: hidden; background: var(--ink); margin: 120px 0;
+  padding: 96px 72px; overflow: hidden; background: var(--ink);
 }
 @media (max-width: 760px) { .mrd-cta { padding: 56px 28px; } }
 .mrd-cta__arc {

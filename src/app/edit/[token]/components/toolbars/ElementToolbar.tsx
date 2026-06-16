@@ -152,9 +152,12 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
            elementKey.includes('button') || elementKey.includes('description');
   };
 
-  // Check if element can be converted to form
+  // Check if element can be converted to form / configured as a button.
+  // Covers cta_text, *_button, and the Meridian header sign-in button (signin_text)
+  // which is a real CTA but whose key contains neither 'cta' nor 'button'.
   const canConvertToForm = () => {
-    return elementSelection.elementKey.includes('cta') || elementSelection.elementKey.includes('button');
+    const key = elementSelection.elementKey;
+    return key.includes('cta') || key.includes('button') || key.includes('signin');
   };
 
   // Primary Actions

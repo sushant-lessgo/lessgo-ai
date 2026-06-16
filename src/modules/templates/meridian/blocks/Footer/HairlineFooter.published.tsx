@@ -2,6 +2,7 @@
 // Server-safe published variant of HairlineFooter. Nested link columns.
 
 import React from 'react';
+import MeridianNewsletterCapture from './MeridianNewsletterCapture';
 
 interface FooterLink {
   id?: string;
@@ -24,10 +25,20 @@ interface HairlineFooterPublishedProps {
   copyright?: string;
   location?: string;
   footer_columns?: FooterColumn[];
+  // Standard published-renderer props for form-submission integration.
+  content?: any;
+  publishedPageId?: string;
+  pageOwnerId?: string;
 }
 
 export default function HairlineFooterPublished(props: HairlineFooterPublishedProps) {
   const columns = Array.isArray(props.footer_columns) ? props.footer_columns : [];
+
+  // Newsletter capture is live only when a form was provisioned + connected in the
+  // editor (buttonConfig.formId on newsletter_cta). Otherwise the block is omitted.
+  const newsletterFormId: string | undefined =
+    props.content?.[props.sectionId]?.elementMetadata?.newsletter_cta?.buttonConfig?.formId;
+  const newsletterForm = newsletterFormId ? props.content?.forms?.[newsletterFormId] : undefined;
 
   return (
     <>
@@ -40,14 +51,18 @@ export default function HairlineFooterPublished(props: HairlineFooterPublishedPr
               <span className="mrd-footer__dot" aria-hidden="true">.</span>
             </div>
             {props.tag && <p className="mrd-footer__tag">{props.tag}</p>}
-            {/* Decorative newsletter UI. Rendered as a div (not a form) because
-                the published page is a Server Component — event handlers like
-                onSubmit can't cross the RSC boundary. The original handler only
-                preventDefault'd, so a non-submitting div is behavior-equivalent. */}
-            <div className="mrd-news">
-              <input className="mrd-news__input" placeholder={props.newsletter_placeholder || 'you@company.com'} readOnly />
-              <button type="button" className="mrd-news__btn">{props.newsletter_cta || 'subscribe'}</button>
-            </div>
+            {/* Live newsletter capture (client component) — only when a form was
+                provisioned + connected in the editor. Submits to /api/forms/submit. */}
+            {newsletterForm && (
+              <MeridianNewsletterCapture
+                form={newsletterForm}
+                formId={newsletterFormId as string}
+                placeholder={props.newsletter_placeholder}
+                cta={props.newsletter_cta}
+                publishedPageId={props.publishedPageId}
+                pageOwnerId={props.pageOwnerId}
+              />
+            )}
           </div>
 
           {columns.map((col, idx) => (
@@ -86,6 +101,8 @@ const STYLES = `
 .mrd-news__input::placeholder { color: var(--bone-3); }
 .mrd-news__btn { background: var(--ink-1); color: var(--bone); padding: 0 14px; border: 0; border-left: 1px solid var(--line); font-family: var(--font-mono); font-size: 12px; cursor: pointer; }
 .mrd-news__btn:hover { background: var(--ink-2); }
+.mrd-news__btn:disabled { opacity: 0.6; cursor: default; }
+.mrd-news-done { font-family: var(--font-mono); font-size: 12px; color: var(--accent); max-width: 320px; padding: 6px 0; }
 .mrd-footer__col h4 { font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--bone-3); margin: 0 0 18px; font-weight: 400; }
 .mrd-footer__col ul { list-style: none; padding: 0; margin: 0; }
 .mrd-footer__col ul li { font-size: 13.5px; color: var(--bone-2); padding: 4px 0; }

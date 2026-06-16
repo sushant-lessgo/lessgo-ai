@@ -3,16 +3,10 @@
 // no image slot — PO ruling); copy neutralized (abstract mono key/value), aria-hidden.
 
 import React from 'react';
+import { resolveCtaHref } from '@/utils/resolveCtaHref';
 
-// Primary CTA destination resolved via buttonConfig on cta_text element-metadata
-// (mirrors Hearth's BookCallCTA.published). Form connection → "#form-section".
-interface ButtonConfig {
-  type?: 'link' | 'form' | 'link-with-input';
-  formId?: string;
-  behavior?: 'scrollTo' | 'openModal';
-  url?: string;
-}
-
+// CTA destinations resolved via buttonConfig on each element's metadata (shared
+// resolveCtaHref util). Form connection → "#form-section".
 interface HeroStat {
   id?: string;
   value?: string;
@@ -34,33 +28,15 @@ interface TerminalHeroPublishedProps {
   elementMetadata?: any;
 }
 
-function resolvePrimaryHref(
-  buttonConfig: ButtonConfig | undefined,
-  forms: Record<string, any> | undefined,
-): string {
-  if (!buttonConfig) return '#cta';
-  if (buttonConfig.type === 'link' || buttonConfig.type === 'link-with-input') {
-    return buttonConfig.url || '#cta';
-  }
-  if (buttonConfig.type === 'form') {
-    if (!buttonConfig.formId) return '#cta';
-    const form = forms?.[buttonConfig.formId];
-    if (!form) return '#cta';
-    return '#form-section';
-  }
-  return '#cta';
-}
-
 export default function TerminalHeroPublished(props: TerminalHeroPublishedProps) {
   const headline = props.headline || '';
   const lede = props.lede || '';
   const stats = Array.isArray(props.stats) ? props.stats : [];
 
-  const sectionData = props.content?.[props.sectionId];
-  const buttonConfig: ButtonConfig | undefined =
-    sectionData?.elementMetadata?.cta_text?.buttonConfig ||
-    props.elementMetadata?.cta_text?.buttonConfig;
-  const ctaHref = resolvePrimaryHref(buttonConfig, props.content?.forms);
+  const md = props.content?.[props.sectionId]?.elementMetadata || props.elementMetadata;
+  const forms = props.content?.forms;
+  const ctaHref = resolveCtaHref(md?.cta_text?.buttonConfig, forms, '#cta');
+  const secondaryHref = resolveCtaHref(md?.secondary_cta_text?.buttonConfig, forms, '#cta');
 
   return (
     <>
@@ -85,7 +61,7 @@ export default function TerminalHeroPublished(props: TerminalHeroPublishedProps)
               <a className="mrd-btn mrd-btn--primary mrd-btn--lg mrd-btn--arrow" href={ctaHref}>{props.cta_text}</a>
             )}
             {props.secondary_cta_text && (
-              <a className="mrd-btn mrd-btn--ghost mrd-btn--lg" href="#cta">{props.secondary_cta_text}</a>
+              <a className="mrd-btn mrd-btn--ghost mrd-btn--lg" href={secondaryHref}>{props.secondary_cta_text}</a>
             )}
             {props.caption && <span className="mrd-hero__caption">{props.caption}</span>}
           </div>

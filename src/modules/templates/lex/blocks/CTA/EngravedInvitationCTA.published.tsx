@@ -2,6 +2,7 @@
 // Server-safe published variant of EngravedInvitationCTA.
 
 import React from 'react';
+import { resolveCtaHref } from '@/utils/resolveCtaHref';
 
 interface EngravedInvitationCTAPublishedProps {
   sectionId: string;
@@ -11,9 +12,15 @@ interface EngravedInvitationCTAPublishedProps {
   cta_text?: string;
   secondary_cta_text?: string;
   meta?: string;
+  content?: any;
 }
 
 export default function EngravedInvitationCTAPublished(props: EngravedInvitationCTAPublishedProps) {
+  const md = props.content?.[props.sectionId]?.elementMetadata;
+  const forms = props.content?.forms;
+  const ctaHref = resolveCtaHref(md?.cta_text?.buttonConfig, forms, '#cta');
+  const secondaryHref = resolveCtaHref(md?.secondary_cta_text?.buttonConfig, forms, '#cta');
+
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
@@ -28,10 +35,10 @@ export default function EngravedInvitationCTAPublished(props: EngravedInvitation
           )}
           <div className="lex-cta__actions">
             {props.cta_text && (
-              <a className="lex-btn lex-btn--accent lex-btn--lg" href="#cta">{props.cta_text}</a>
+              <a className="lex-btn lex-btn--accent lex-btn--lg" href={ctaHref}>{props.cta_text}</a>
             )}
             {props.secondary_cta_text && (
-              <a className="lex-btn lex-btn--ghost-light lex-btn--lg" href="#cta">{props.secondary_cta_text}</a>
+              <a className="lex-btn lex-btn--ghost-light lex-btn--lg" href={secondaryHref}>{props.secondary_cta_text}</a>
             )}
           </div>
           {props.meta && (

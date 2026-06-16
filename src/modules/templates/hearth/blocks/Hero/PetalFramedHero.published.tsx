@@ -2,6 +2,7 @@
 // Server-safe published variant of PetalFramedHero.
 
 import React from 'react';
+import { resolveCtaHref } from '@/utils/resolveCtaHref';
 
 interface PetalFramedHeroPublishedProps {
   sectionId: string;
@@ -12,11 +13,17 @@ interface PetalFramedHeroPublishedProps {
   secondary_cta_text?: string;
   hero_image?: string;
   meta?: string;
+  content?: any;
 }
 
 export default function PetalFramedHeroPublished(props: PetalFramedHeroPublishedProps) {
   const headline = props.headline || '';
   const lede = props.lede || '';
+
+  const md = props.content?.[props.sectionId]?.elementMetadata;
+  const forms = props.content?.forms;
+  const ctaHref = resolveCtaHref(md?.cta_text?.buttonConfig, forms, '#cta');
+  const secondaryHref = resolveCtaHref(md?.secondary_cta_text?.buttonConfig, forms, '#cta');
 
   return (
     <>
@@ -39,12 +46,12 @@ export default function PetalFramedHeroPublished(props: PetalFramedHeroPublished
           />
           <div className="hearth-hero__actions">
             {props.cta_text && (
-              <a className="hearth-btn hearth-btn--primary hearth-btn--lg" href="#cta">
+              <a className="hearth-btn hearth-btn--primary hearth-btn--lg" href={ctaHref}>
                 {props.cta_text}
               </a>
             )}
             {props.secondary_cta_text && (
-              <a className="hearth-btn hearth-btn--ghost hearth-btn--lg" href="#cta">
+              <a className="hearth-btn hearth-btn--ghost hearth-btn--lg" href={secondaryHref}>
                 {props.secondary_cta_text}
               </a>
             )}

@@ -2,6 +2,7 @@
 // Server-safe published variant of ThreeTierPricing.
 
 import React from 'react';
+import { resolveCtaHref } from '@/utils/resolveCtaHref';
 
 interface Tier {
   id?: string;
@@ -20,10 +21,13 @@ interface ThreeTierPricingPublishedProps {
   headline?: string;
   lede?: string;
   tiers?: Tier[];
+  content?: any;
 }
 
 export default function ThreeTierPricingPublished(props: ThreeTierPricingPublishedProps) {
   const tiers = Array.isArray(props.tiers) ? props.tiers : [];
+  const md = props.content?.[props.sectionId]?.elementMetadata;
+  const forms = props.content?.forms;
 
   return (
     <>
@@ -55,7 +59,7 @@ export default function ThreeTierPricingPublished(props: ThreeTierPricingPublish
                 )}
                 {t.cta_text && (
                   <div className="mrd-price-card__cta-row">
-                    <a href="#cta" className={`mrd-btn ${t.featured ? 'mrd-btn--primary' : 'mrd-btn--ghost'} mrd-btn--arrow mrd-price-card__cta`}>
+                    <a href={resolveCtaHref(md?.[`tiers_cta_${t.id}`]?.buttonConfig, forms, '#cta')} className={`mrd-btn ${t.featured ? 'mrd-btn--primary' : 'mrd-btn--ghost'} mrd-btn--arrow mrd-price-card__cta`}>
                       {t.cta_text}
                     </a>
                   </div>

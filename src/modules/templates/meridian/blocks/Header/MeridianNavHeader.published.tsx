@@ -2,6 +2,7 @@
 // Server-safe published variant of MeridianNavHeader. No hooks, no edit affordances.
 
 import React from 'react';
+import { resolveCtaHref } from '@/utils/resolveCtaHref';
 
 interface NavItem {
   id?: string;
@@ -16,6 +17,7 @@ interface MeridianNavHeaderPublishedProps {
   signin_text?: string;
   logo_image?: string;
   nav_items?: NavItem[];
+  content?: any;
 }
 
 export default function MeridianNavHeaderPublished(props: MeridianNavHeaderPublishedProps) {
@@ -23,6 +25,11 @@ export default function MeridianNavHeaderPublished(props: MeridianNavHeaderPubli
   const ctaText = props.cta_text || 'Start free';
   const signinText = props.signin_text || 'Sign in';
   const navItems = Array.isArray(props.nav_items) ? props.nav_items : [];
+
+  const md = props.content?.[props.sectionId]?.elementMetadata;
+  const forms = props.content?.forms;
+  const ctaHref = resolveCtaHref(md?.cta_text?.buttonConfig, forms, '#cta');
+  const signinHref = resolveCtaHref(md?.signin_text?.buttonConfig, forms, '#signin');
 
   return (
     <>
@@ -48,8 +55,8 @@ export default function MeridianNavHeaderPublished(props: MeridianNavHeaderPubli
           )}
         </div>
         <div className="mrd-nav-right">
-          <a className="mrd-btn mrd-btn--quiet mrd-btn--sm" href="#signin">{signinText}</a>
-          <a className="mrd-btn mrd-btn--primary mrd-btn--sm mrd-btn--arrow" href="#cta">{ctaText}</a>
+          <a className="mrd-btn mrd-btn--quiet mrd-btn--sm" href={signinHref}>{signinText}</a>
+          <a className="mrd-btn mrd-btn--primary mrd-btn--sm mrd-btn--arrow" href={ctaHref}>{ctaText}</a>
         </div>
       </nav>
     </>

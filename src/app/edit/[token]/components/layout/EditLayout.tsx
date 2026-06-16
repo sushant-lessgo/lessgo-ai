@@ -15,6 +15,8 @@ import { LayoutChangeModal } from '../ui/LayoutChangeModal';
 import { modalEmergencyReset } from '@/utils/modalEmergencyReset';
 import { ModalDebugPanel } from '@/components/debug/ModalDebugPanel';
 import { VariableThemeInjector } from '@/modules/Design/ColorSystem/VariableThemeInjector';
+import { usesTemplateModule } from '@/types/service';
+import { useTemplateModule } from '@/modules/templates/useTemplateReady';
 
 interface EditLayoutProps {
   tokenId: string;
@@ -40,6 +42,18 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
   // Get theme and background system for variable integration
   const theme = useStoreState(state => state.theme);
   const onboardingData = useStoreState(state => state.onboardingData);
+
+  // Template-backed projects (Meridian/Hearth/Lex) theme via CSS vars on :root,
+  // injected by the template's own ThemeInjector — NOT the legacy product
+  // VariableThemeInjector. Mirror LandingPageRenderer so edit == preview/published.
+  const audienceType = useStoreState(state => state.audienceType);
+  const templateId = useStoreState(state => state.templateId);
+  const variantId = useStoreState(state => state.variantId);
+  const paletteId = useStoreState(state => state.paletteId);
+  const usesTemplate = usesTemplateModule(audienceType, templateId);
+  const { tmpl } = useTemplateModule(audienceType, templateId);
+  const effectivePalette = (paletteId as any) || tmpl?.defaultPaletteId;
+  const effectiveVariant = (variantId as any) || tmpl?.defaultVariantId;
 
   // Initialize unified editor system
   const editor = useEditor();
@@ -107,13 +121,8 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
     }
   }, [mode]);
 
-  return (
-    <VariableThemeInjector
-      tokenId={tokenId}
-      backgroundSystem={backgroundSystem}
-      businessContext={onboardingData}
-    >
-      <div 
+  const shell = (
+      <div
         className="h-screen flex flex-col bg-gray-50 font-inter"
         onContextMenu={handleContextMenu}
         style={{
@@ -183,6 +192,30 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
       {/* Modal Debug Panel - Only in development */}
       {process.env.NODE_ENV === 'development' && <ModalDebugPanel />}
       </div>
+  );
+
+  // Template-backed projects: theme via the template's own ThemeInjector (CSS
+  // vars on :root) so the editor matches preview/published. Until the module
+  // loads, render the shell un-themed (blocks fall back briefly) rather than
+  // blanking the whole editor chrome.
+  if (usesTemplate) {
+    if (!tmpl) return shell;
+    const ThemeInjector = tmpl.ThemeInjector;
+    return (
+      <ThemeInjector paletteId={effectivePalette} variantId={effectiveVariant}>
+        {shell}
+      </ThemeInjector>
+    );
+  }
+
+  // Legacy product projects: keep the variable-based product theme injector.
+  return (
+    <VariableThemeInjector
+      tokenId={tokenId}
+      backgroundSystem={backgroundSystem}
+      businessContext={onboardingData}
+    >
+      {shell}
     </VariableThemeInjector>
   );
 }

@@ -179,6 +179,7 @@ export default function TieredPackages({ sectionId }: TieredPackagesProps) {
                   value={p.cta_text}
                   onSave={(v) => updateField(p.id, 'cta_text', v)}
                   enterBehavior="save"
+                  isButton
                   className={`hearth-btn ${p.is_featured ? 'hearth-btn--primary-inverse' : 'hearth-btn--ghost'} hearth-pkg__cta`}
                   placeholder="Book a call"
                 />

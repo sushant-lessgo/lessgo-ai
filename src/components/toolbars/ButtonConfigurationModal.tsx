@@ -17,6 +17,26 @@ import * as LucideIcons from 'lucide-react';
 import { getDisabledBehaviorOptions } from '@/utils/formPlacement';
 import { hasPrimaryCTASection } from '@/utils/sectionHelpers';
 
+// Some button elements are items inside a collection (pricing/package tiers):
+// their elementKey is `<collection>_cta_<id>` and the visible text lives nested at
+// elements[<collection>][n].cta_text, NOT at a flat elements[key]. Resolve that
+// here so the modal can seed + write the right place. Guarded by Array.isArray so
+// single keys (e.g. secondary_cta_text → elements.secondary is not an array) stay
+// on the normal flat path.
+function getCollectionCtaRef(
+  sectionData: any,
+  elementKey: string,
+): { field: string; id: string; item: any } | null {
+  const m = elementKey.match(/^(.+)_cta_(.+)$/);
+  if (!m) return null;
+  const field = m[1];
+  const id = m[2];
+  const arr = sectionData?.elements?.[field];
+  if (!Array.isArray(arr)) return null;
+  const item = arr.find((it: any) => it?.id === id);
+  return item ? { field, id, item } : null;
+}
+
 interface ButtonConfig {
   type: 'link' | 'form' | 'link-with-input';
   text: string;
@@ -72,13 +92,27 @@ export function ButtonConfigurationModal({
   // Initialize with current element content and saved configuration
   useEffect(() => {
     if (elementSelection && content[elementSelection.sectionId]) {
-      const element = content[elementSelection.sectionId].elements[elementSelection.elementKey];
-      if (element) {
-        const buttonText = typeof element.content === 'string' ? element.content : 'Button Text';
-        
-        // Check if there's saved button configuration in metadata
-        const savedConfig = element.metadata?.buttonConfig;
-        
+      const sectionData = content[elementSelection.sectionId];
+      const element = sectionData.elements[elementSelection.elementKey];
+      const collRef = getCollectionCtaRef(sectionData, elementSelection.elementKey);
+      if (element !== undefined || collRef) {
+        // V2 stores element content as a plain string; tolerate a legacy
+        // { content } object too. Reading element.content on the string shape
+        // always yielded undefined → modal showed "Button Text" and clobbered
+        // the real copy on save (#8/#9). Tier CTAs (collRef) read their nested
+        // cta_text instead of the (absent) flat key.
+        const buttonText = collRef
+          ? (typeof collRef.item.cta_text === 'string' ? collRef.item.cta_text : 'Button Text')
+          : (typeof element === 'string'
+              ? element
+              : (typeof element?.content === 'string' ? element.content : 'Button Text'));
+
+        // Saved config lives in elementMetadata[key].buttonConfig (NOT on the
+        // element). Reading element.metadata always returned undefined, so a set
+        // URL/form never rehydrated on reopen (#9).
+        const savedConfig =
+          sectionData.elementMetadata?.[elementSelection.elementKey]?.buttonConfig;
+
         if (savedConfig) {
           // Load saved configuration
           setConfig({
@@ -145,7 +179,8 @@ export function ButtonConfigurationModal({
     try {
       // V2: Store button text directly, metadata in elementMetadata
       const currentSection = content[elementSelection.sectionId];
-      if (currentSection?.elements[elementSelection.elementKey] !== undefined) {
+      const collRef = getCollectionCtaRef(currentSection, elementSelection.elementKey);
+      if (currentSection?.elements[elementSelection.elementKey] !== undefined || collRef) {
         // Build buttonConfig object
         const buttonConfig = {
           type: config.type,
@@ -174,11 +209,20 @@ export function ButtonConfigurationModal({
           inputConfig: config.type === 'link-with-input' ? config.inputConfig : undefined,
         };
 
-        // V2: Elements stored directly (no wrapper)
-        const updatedElements = {
-          ...currentSection.elements,
-          [elementSelection.elementKey]: config.text  // Direct string, no spread
-        };
+        // V2: Elements stored directly (no wrapper). Tier CTAs (collRef) write
+        // their text back into the nested collection item's cta_text instead of a
+        // junk flat key the block never reads.
+        const updatedElements = collRef
+          ? {
+              ...currentSection.elements,
+              [collRef.field]: currentSection.elements[collRef.field].map((it: any) =>
+                it?.id === collRef.id ? { ...it, cta_text: config.text } : it
+              ),
+            }
+          : {
+              ...currentSection.elements,
+              [elementSelection.elementKey]: config.text  // Direct string, no spread
+            };
 
         // V2: Store cta_url/cta_embed as direct strings
         if (config.type === 'link' && config.url) {

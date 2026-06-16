@@ -2,6 +2,7 @@
 // Server-safe published variant.
 
 import React from 'react';
+import { resolveCtaHref } from '@/utils/resolveCtaHref';
 
 interface PackageTier {
   id?: string;
@@ -19,10 +20,13 @@ interface TieredPackagesPublishedProps {
   headline?: string;
   lede?: string;
   packages?: PackageTier[];
+  content?: any;
 }
 
 export default function TieredPackagesPublished(props: TieredPackagesPublishedProps) {
   const packages = Array.isArray(props.packages) ? props.packages : [];
+  const md = props.content?.[props.sectionId]?.elementMetadata;
+  const forms = props.content?.forms;
 
   return (
     <>
@@ -63,7 +67,7 @@ export default function TieredPackagesPublished(props: TieredPackagesPublishedPr
                 )}
                 {p.cta_text && (
                   <a
-                    href="#cta"
+                    href={resolveCtaHref(md?.[`packages_cta_${p.id}`]?.buttonConfig, forms, '#cta')}
                     className={`hearth-btn ${p.is_featured ? 'hearth-btn--primary-inverse' : 'hearth-btn--ghost'} hearth-pkg__cta`}
                   >
                     {p.cta_text}

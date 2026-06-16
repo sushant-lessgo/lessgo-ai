@@ -60,6 +60,14 @@ function GeneratePageContent({ tokenId }: { tokenId: string }) {
   const [error, setError] = useState<string | null>(null);
   const [dataLoaded, setDataLoaded] = useState(false);
 
+  // Track-aware "return to setup" path (product vs service onboarding).
+  const onboardingPath = () => {
+    const audienceType = store?.getState()?.audienceType;
+    return audienceType === 'service'
+      ? `/onboarding/service/${tokenId}`
+      : `/onboarding/product/${tokenId}`;
+  };
+
   // Initialize preview mode and validate data
   useEffect(() => {
     if (!store || !isInitialized || isHydrating) return;
@@ -106,7 +114,7 @@ function GeneratePageContent({ tokenId }: { tokenId: string }) {
           if (err instanceof Error && err.message.includes('regeneration required')) {
             setError('Page needs to be regenerated. Redirecting to setup...');
             setTimeout(() => {
-              router.push(`/onboarding/product/${tokenId}`);
+              router.push(onboardingPath());
             }, 2000);
           } else {
             setError('Failed to load page data. Please return to setup and try again.');
@@ -257,7 +265,7 @@ logger.debug('🎯 Theme after setMode:', afterModeSet.theme);
           <p className="text-gray-600 mb-6">{error}</p>
           <div className="space-y-3">
             <button
-              onClick={() => router.push(`/onboarding/product/${tokenId}`)}
+              onClick={() => router.push(onboardingPath())}
               className="w-full bg-brand-accentPrimary hover:bg-orange-500 text-white px-4 py-2 rounded-lg transition-colors"
             >
               Return to Setup
@@ -288,7 +296,7 @@ logger.debug('🎯 Theme after setMode:', afterModeSet.theme);
         <div className="max-w-screen-xl mx-auto flex justify-between items-center">
           {/* Context Info */}
           <div className="text-sm text-gray-500">
-            Generated page ready for editing
+            Your page is ready — preview it, then customize
           </div>
 
           {/* Action Buttons */}
