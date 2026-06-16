@@ -61,3 +61,6 @@ tmpclaude-*
 
 # service pilot dogfood outputs
 /dogfoodOutput/
+
+# Prod data backups (never commit)
+backups/
