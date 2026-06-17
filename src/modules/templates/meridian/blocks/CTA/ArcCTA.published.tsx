@@ -30,7 +30,8 @@ export default function ArcCTAPublished(props: ArcCTAPublishedProps) {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
-      <section className="mrd-cta-wrap" id="cta">
+      {/* anchor id="cta" now owned by the section wrapper in the renderer */}
+      <section className="mrd-cta-wrap">
         <div className="mrd-cta">
           <div className="mrd-cta__grid" aria-hidden="true" />
           <div className="mrd-cta__arc" aria-hidden="true" />

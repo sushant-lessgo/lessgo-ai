@@ -7,6 +7,9 @@
 import React from 'react';
 import { useMeridianBlock } from '../../hooks/useMeridianBlock';
 import { MeridianEditable } from '../../components/MeridianEditable';
+import { LinkTargetPopover } from '../../components/LinkTargetPopover';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { buildSectionLinkOptions } from '@/utils/sectionAnchors';
 
 interface NavItem {
   id: string;
@@ -32,10 +35,23 @@ export default function MeridianNavHeader({ sectionId }: MeridianNavHeaderProps)
 
   const navItems = blockContent.nav_items || [];
 
+  const { sections } = useEditStore();
+  const sectionOptions = React.useMemo(
+    () => buildSectionLinkOptions(sections || []),
+    [sections]
+  );
+
   const updateNavLabel = (id: string, label: string) => {
     handleCollectionUpdate(
       'nav_items',
       navItems.map((n) => (n.id === id ? { ...n, label } : n))
+    );
+  };
+
+  const updateNavHref = (id: string, href: string) => {
+    handleCollectionUpdate(
+      'nav_items',
+      navItems.map((n) => (n.id === id ? { ...n, href } : n))
     );
   };
 
@@ -75,31 +91,43 @@ export default function MeridianNavHeader({ sectionId }: MeridianNavHeaderProps)
             />
           </div>
           <div className="mrd-nav-links">
-            {navItems.map((item) => (
-              <span key={item.id} className="mrd-nav-link-wrap">
-                <MeridianEditable
-                  as="span"
-                  mode={mode}
-                  sectionId={sectionId}
-                  elementKey={`nav_items_label_${item.id}`}
-                  value={item.label}
-                  onSave={(v) => updateNavLabel(item.id, v)}
-                  enterBehavior="save"
-                  className="mrd-nav-link"
-                  placeholder="Link"
-                />
-                {mode === 'edit' && navItems.length > 2 && (
-                  <button
-                    type="button"
-                    className="mrd-nav-link-remove"
-                    onClick={() => removeNavItem(item.id)}
-                    aria-label="Remove link"
-                  >
-                    ×
-                  </button>
-                )}
-              </span>
-            ))}
+            {navItems.map((item) =>
+              mode === 'edit' ? (
+                <span key={item.id} className="mrd-nav-link-wrap">
+                  <MeridianEditable
+                    as="span"
+                    mode={mode}
+                    sectionId={sectionId}
+                    elementKey={`nav_items_label_${item.id}`}
+                    value={item.label}
+                    onSave={(v) => updateNavLabel(item.id, v)}
+                    enterBehavior="save"
+                    className="mrd-nav-link"
+                    placeholder="Link"
+                  />
+                  <LinkTargetPopover
+                    href={item.href}
+                    sectionOptions={sectionOptions}
+                    onChange={(href) => updateNavHref(item.id, href)}
+                    triggerClassName="mrd-nav-link-cfg"
+                  />
+                  {navItems.length > 2 && (
+                    <button
+                      type="button"
+                      className="mrd-nav-link-remove"
+                      onClick={() => removeNavItem(item.id)}
+                      aria-label="Remove link"
+                    >
+                      ×
+                    </button>
+                  )}
+                </span>
+              ) : (
+                <a key={item.id} className="mrd-nav-link" href={item.href || '#'}>
+                  {item.label}
+                </a>
+              )
+            )}
             {mode === 'edit' && navItems.length < 5 && (
               <button type="button" className="mrd-nav-link-add" onClick={addNavItem}>
                 + link
@@ -164,12 +192,18 @@ const STYLES = `
 .mrd-brand-img { width: 22px; height: 22px; border-radius: 5px; object-fit: cover; }
 .mrd-nav-links { display: flex; align-items: center; gap: 28px; font-size: 13.5px; }
 .mrd-nav-link-wrap { display: inline-flex; align-items: center; gap: 4px; }
-.mrd-nav-link { color: var(--bone-2); cursor: pointer; }
+.mrd-nav-link { color: var(--bone-2); cursor: pointer; text-decoration: none; }
 .mrd-nav-link:hover { color: var(--bone); }
 .mrd-nav-link-remove {
   background: transparent; border: none; color: var(--bone-3);
   font-size: 13px; line-height: 1; cursor: pointer;
 }
+.mrd-nav-link-cfg {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: transparent; border: none; color: var(--bone-2);
+  cursor: pointer; padding: 0; line-height: 1; opacity: 1;
+}
+.mrd-nav-link-cfg:hover { color: var(--accent); }
 .mrd-nav-link-add {
   background: transparent; border: 1px dashed var(--line-strong);
   color: var(--bone-3); padding: 3px 8px; border-radius: var(--r-sm);

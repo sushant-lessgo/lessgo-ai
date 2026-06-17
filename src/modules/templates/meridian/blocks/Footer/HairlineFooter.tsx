@@ -11,7 +11,9 @@
 import React from 'react';
 import { useMeridianBlock } from '../../hooks/useMeridianBlock';
 import { MeridianEditable } from '../../components/MeridianEditable';
+import { LinkTargetPopover } from '../../components/LinkTargetPopover';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { buildSectionLinkOptions } from '@/utils/sectionAnchors';
 
 interface FooterLink {
   id: string;
@@ -46,7 +48,11 @@ export default function HairlineFooter({ sectionId }: HairlineFooterProps) {
   // Newsletter capture: one-click auto-provisions a dashboard-backed form and
   // connects it to newsletter_cta (buttonConfig.formId). Once connected, the
   // published footer renders a live email-capture widget.
-  const { content, addForm, deleteForm, getFormById, setSection } = useEditStore();
+  const { content, addForm, deleteForm, getFormById, setSection, sections } = useEditStore();
+  const sectionOptions = React.useMemo(
+    () => buildSectionLinkOptions(sections || []),
+    [sections]
+  );
   const newsletterFormId: string | undefined =
     content?.[sectionId]?.elementMetadata?.newsletter_cta?.buttonConfig?.formId;
   const isNewsletterConnected = !!(newsletterFormId && getFormById?.(newsletterFormId));
@@ -87,6 +93,14 @@ export default function HairlineFooter({ sectionId }: HairlineFooterProps) {
       if (c.id !== colId) return c;
       const links = [...(c.links || [])];
       links[linkIdx] = { ...links[linkIdx], label };
+      return { ...c, links };
+    }));
+  };
+  const updateLinkHref = (colId: string, linkIdx: number, href: string) => {
+    setColumns(columns.map((c) => {
+      if (c.id !== colId) return c;
+      const links = [...(c.links || [])];
+      links[linkIdx] = { ...links[linkIdx], href };
       return { ...c, links };
     }));
   };
@@ -217,30 +231,44 @@ export default function HairlineFooter({ sectionId }: HairlineFooterProps) {
                 )}
               </div>
               <ul>
-                {(col.links || []).map((link, linkIdx) => (
-                  <li key={link.id || linkIdx}>
-                    <MeridianEditable
-                      as="span"
-                      mode={mode}
-                      sectionId={sectionId}
-                      elementKey={`footer_columns_link_${col.id}_${linkIdx}`}
-                      value={link.label}
-                      onSave={(v) => updateLinkLabel(col.id, linkIdx, v)}
-                      enterBehavior="save"
-                      placeholder="Link"
-                    />
-                    {mode === 'edit' && (col.links || []).length > 1 && (
-                      <button
-                        type="button"
-                        className="mrd-footer__link-remove"
-                        onClick={() => removeLink(col.id, linkIdx)}
-                        aria-label="Remove link"
-                      >
-                        ×
-                      </button>
-                    )}
-                  </li>
-                ))}
+                {(col.links || []).map((link, linkIdx) =>
+                  mode === 'edit' ? (
+                    <li key={link.id || linkIdx}>
+                      <MeridianEditable
+                        as="span"
+                        mode={mode}
+                        sectionId={sectionId}
+                        elementKey={`footer_columns_link_${col.id}_${linkIdx}`}
+                        value={link.label}
+                        onSave={(v) => updateLinkLabel(col.id, linkIdx, v)}
+                        enterBehavior="save"
+                        placeholder="Link"
+                      />
+                      <LinkTargetPopover
+                        href={link.href}
+                        sectionOptions={sectionOptions}
+                        onChange={(href) => updateLinkHref(col.id, linkIdx, href)}
+                        triggerClassName="mrd-footer__link-cfg"
+                      />
+                      {(col.links || []).length > 1 && (
+                        <button
+                          type="button"
+                          className="mrd-footer__link-remove"
+                          onClick={() => removeLink(col.id, linkIdx)}
+                          aria-label="Remove link"
+                        >
+                          ×
+                        </button>
+                      )}
+                    </li>
+                  ) : (
+                    <li key={link.id || linkIdx}>
+                      <a className="mrd-footer__link" href={link.href || '#'}>
+                        {link.label}
+                      </a>
+                    </li>
+                  )
+                )}
                 {mode === 'edit' && (col.links || []).length < 6 && (
                   <li>
                     <button type="button" className="mrd-footer__link-add" onClick={() => addLink(col.id)}>
@@ -319,9 +347,16 @@ const STYLES = `
 .mrd-footer__col-remove, .mrd-footer__link-remove {
   background: transparent; border: none; color: var(--bone-3); font-size: 12px; line-height: 1; cursor: pointer;
 }
+.mrd-footer__link-cfg {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: transparent; border: none; color: var(--bone-2);
+  cursor: pointer; padding: 0; line-height: 1; opacity: 1;
+}
+.mrd-footer__link-cfg:hover { color: var(--accent); }
 .mrd-footer__col ul { list-style: none; padding: 0; margin: 0; }
 .mrd-footer__col ul li { font-size: 13.5px; color: var(--bone-2); padding: 4px 0; display: flex; align-items: center; gap: 6px; }
 .mrd-footer__col ul li:hover { color: var(--bone); }
+.mrd-footer__link { color: inherit; text-decoration: none; }
 .mrd-footer__link-add, .mrd-footer__col-add {
   background: transparent; border: 1px dashed var(--line-strong); color: var(--bone-3);
   font-family: var(--font-mono); font-size: 11px; padding: 3px 8px; border-radius: var(--r-sm); cursor: pointer;

@@ -1,3 +1,5 @@
+#Round 1 - complete
+
 1. Login sussessful... Persona selected SaaS app founder
 2. Create new page 
 3. ISSUE/GAP: It did not ask me what assets I have + Didnt get any option to select the design (since it is only meridian, i SHOULD get option to select pallette and variation)
@@ -68,3 +70,74 @@ Credit/error fallbacks still skip straight to `/edit` (nothing to reveal).
 
 ## Deferred (not bugs)
 - #3 palette/variation picker + assets step — post-pilot (P6). Pilot stays mint/developer.
+
+
+
+#Round 2 - in progress
+
+1. On published page https://ceradistest.lessgo.ai/ hero headline is getting overlapped with right side image.. same for edit.. on preview it is correct though
+2. The mock up image should be editable using existing replace image functionality in hero
+3. in edit, the background color is light.. hero headline is not visible (light on light).. working correctly in preview and published
+4. In header links are not clickable.. need away to configure them or auto configure
+5. Footer links are also not working... how to solve it?
+
+---
+
+# Round 2 — Fix Plan (Phases)
+
+Decisions locked: #2 deferred (terminal stays as-is, make lines editable later if demanded);
+links = section-anchor + custom URL, auto-mapped by label at generation, user-editable.
+
+## Phase 1 — Editor paints section surfaces  *(launch blocker; fixes #3)*  ✅ DONE
+Root cause: preview/published wrap each template section in `<div data-surface=...>` so the
+globally-injected `[data-surface="ink"]{background:var(--ink)}` rule paints. The edit renderer
+(`EditablePageRenderer.tsx`) sets only `data-section-id/layout/background-type` — no
+`data-surface` → transparent sections over the light editor canvas → light bg + invisible
+`--bone` headline.
+- [ ] 1a. `EditablePageRenderer.tsx`: when `usesTemplateModule`, add `data-surface={surface}` to
+      the wrapper. Pull `tmpl` from `useTemplateModule`; `surface = tmpl?.getSurfaceForSection(
+      extractSectionType(sectionId)) ?? 'cream'` (same default as published, no drift). Reuse
+      `extractSectionType` from `componentRegistry.ts`.
+- [ ] 1b. Verify in dev: edit hero dark + headline visible, matching preview.
+(Genuine completion of Round-1 Phase 1: that defined `var(--ink)`; this paints it.)
+
+## Phase 2 — Hero right gutter so headline can't overlap terminal  *(#1)*  ✅ DONE
+Root cause: `.mrd-hero__vis` is `position:absolute; right; width:440px`; `.mrd-hero__inner` has
+no reserved right column, so a long wrapped headline runs under the terminal. Length-dependent
+(NOT the Round-1 both-from-left bug).
+- [ ] 2a. In BOTH `TerminalHero.tsx` + `.published.tsx` STYLES: above the 1100px breakpoint,
+      reserve the terminal lane on `.mrd-hero__inner` (`padding-right`/`max-width: calc(100% - 480px)`).
+      Keep the `<=1100px` stack-to-static rule.
+- [ ] 2b. Verify with a deliberately long headline (edit + published); mobile unchanged.
+
+## Phase 3 — Header + footer link targets  *(#4, #5)*  ✅ DONE
+Links already have an `href` field; published renders it directly; smooth-scroll JS already
+exists. Gaps: (a) sections have no scroll `id`, (b) no edit UI, (c) no auto-map.
+New shared util `src/utils/sectionAnchors.ts` (`buildSectionAnchorMap` dedup-aware +
+`buildSectionLinkOptions` + `prettySectionLabel`) used by both renderers and the picker.
+- [x] 3a. Section anchors: `id={anchorMap[sectionId]}` on the wrapper in
+      `LandingPagePublishedRenderer.tsx` + `LandingPageRenderer.tsx` (dedup so duplicate section
+      types get `-2/-3`). Dropped inner `id="cta"` in `ArcCTA.published.tsx` + Hearth
+      `BookCallCTA.published.tsx` (only 2 hardcoded ids in all `*.published.tsx`). Anchors fire on
+      published only.
+- [x] 3b. New shared `LinkTargetPopover.tsx` (Radix popover + native select/radio + Input) wired
+      into `MeridianNavHeader.tsx` (`updateNavHref`) + `HairlineFooter.tsx` (`updateLinkHref`),
+      writing `href` via `handleCollectionUpdate`. Section dropdown from store `sections`.
+- [x] 3c. `autoMapLinkHrefs()` in `parseCopy.ts`, called in `generate-copy/route.ts` (live + mock
+      paths) after `processProductCopy` with `Set(Object.keys(uiblocks))`. Map:
+      pricing/features/faq/testimonials(reviews)/contact/about; only when the section exists and
+      href is unset.
+- `npm run build` ✅ passes. Pending: manual verify on dev + published page.
+
+### Phase 3 follow-up (retest fixes)  ✅ DONE
+- Bug A (#1): header/footer link gear was near-invisible (`--bone-3` @0.6) — bumped to `--bone-2`,
+  opacity 1, accent on hover, icon 14px. (Auto-link is generation-time only; existing pages = manual.)
+- Bug B (#2): preview rendered links as `MeridianEditable` spans (dead). Now `mode !== 'edit'`
+  renders real `<a href>` in `MeridianNavHeader` + `HairlineFooter` (mirrors published) → section
+  anchors + external URLs navigate in preview. Added `scroll-margin-top:80px` to section wrappers
+  (both renderers) so jumps clear the sticky header. `npm run build` ✅.
+
+## Deferred / follow-up
+- #2 editable hero terminal — defer.
+- Service parity: Hearth/Lex (WarmNavHeader, ContactFooterRich) share the dead-link problem; 3a
+  fixes anchors for free, 3b/3c are Meridian-only this round — service follow-up later.

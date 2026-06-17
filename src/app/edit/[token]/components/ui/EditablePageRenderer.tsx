@@ -1,6 +1,6 @@
 // app/edit/[token]/components/ui/EditablePageRenderer.tsx - Enhanced with selection attributes
 import React from 'react';
-import { getComponent } from '@/modules/generatedLanding/componentRegistry';
+import { getComponent, extractSectionType } from '@/modules/generatedLanding/componentRegistry';
 import { useTemplateModule } from '@/modules/templates/useTemplateReady';
 import { sectionList } from '@/modules/sections/sectionList';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
@@ -110,7 +110,17 @@ export function EditablePageRenderer({
 
   const backgroundType = getBackgroundTypeFromSection(sectionId);
   const { audienceType, templateId } = useEditStore();
-  const { ready: templateReady } = useTemplateModule(audienceType, templateId);
+  const { ready: templateReady, tmpl } = useTemplateModule(audienceType, templateId);
+
+  // Template-backed projects: paint the section's surface in edit so it matches
+  // preview/published. The surface→bg CSS ([data-surface="ink"]{background:var(--ink)})
+  // is injected globally by the template's ThemeInjector but only applies where the
+  // wrapper carries data-surface — preview/published add it, edit didn't (→ light bg,
+  // invisible headline). Mirror LandingPageRenderer; same 'cream' fallback to avoid drift.
+  const usesTemplate = usesTemplateModule(audienceType, templateId);
+  const surface = usesTemplate
+    ? (tmpl?.getSurfaceForSection(extractSectionType(sectionId)) ?? 'cream')
+    : undefined;
 
   const LayoutComponent = getComponent(sectionId, layout, audienceType, templateId);
 
@@ -172,6 +182,7 @@ export function EditablePageRenderer({
         data-section-id={sectionId}
         data-layout={layout}
         data-background-type={backgroundType}
+        {...(surface ? { 'data-surface': surface } : {})}
       >
         {/* Enhanced Layout Component with Selection Wrappers */}
         <EnhancedLayoutWrapper

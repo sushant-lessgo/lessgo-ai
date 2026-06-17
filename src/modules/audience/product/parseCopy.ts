@@ -124,6 +124,61 @@ export function injectRealTestimonials(
 }
 
 /**
+ * Auto-map nav/footer link targets to on-page section anchors by label, so generated
+ * links work out of the box (the user can override any in the editor — see
+ * LinkTargetPopover). Only touches links whose href is still the unset default
+ * (empty or '#'), and only sets a `#<type>` anchor when that section type actually
+ * exists on the page (`presentTypes`). Anchors are bare types here (no timestamp) —
+ * they match the wrapper id the renderer emits for the first occurrence of a type.
+ * See src/utils/sectionAnchors.ts (the matching render side).
+ */
+const LABEL_ANCHOR_RULES: { type: string; keywords: string[] }[] = [
+  { type: 'pricing', keywords: ['pricing', 'plans', 'price'] },
+  { type: 'features', keywords: ['features', 'feature'] },
+  { type: 'faq', keywords: ['faq', 'faqs', 'questions'] },
+  { type: 'testimonials', keywords: ['testimonials', 'testimonial', 'reviews', 'review', 'customers'] },
+  { type: 'contact', keywords: ['contact'] },
+  { type: 'about', keywords: ['about'] },
+];
+
+function matchAnchorType(label: unknown): string | undefined {
+  if (typeof label !== 'string') return undefined;
+  const norm = label.replace(/<[^>]*>/g, '').toLowerCase().trim();
+  if (!norm) return undefined;
+  return LABEL_ANCHOR_RULES.find((r) => r.keywords.some((k) => norm === k || norm.includes(k)))?.type;
+}
+
+export function autoMapLinkHrefs(
+  sections: Record<string, SectionCopy>,
+  presentTypes: Set<string>
+): Record<string, SectionCopy> {
+  const mapLink = (link: Record<string, any>) => {
+    if (!link || typeof link !== 'object') return;
+    if (link.href && link.href !== '#') return; // user/LLM already set a real target
+    const type = matchAnchorType(link.label);
+    if (type && presentTypes.has(type)) link.href = `#${type}`;
+  };
+
+  for (const sectionCopy of Object.values(sections)) {
+    const elements = sectionCopy?.elements as Record<string, unknown> | undefined;
+    if (!elements) continue;
+
+    const navItems = elements.nav_items;
+    if (Array.isArray(navItems)) navItems.forEach((it) => mapLink(it as Record<string, any>));
+
+    const footerColumns = elements.footer_columns;
+    if (Array.isArray(footerColumns)) {
+      for (const col of footerColumns) {
+        const links = (col as Record<string, any>)?.links;
+        if (Array.isArray(links)) links.forEach((l) => mapLink(l as Record<string, any>));
+      }
+    }
+  }
+
+  return sections;
+}
+
+/**
  * Apply schema defaults → backfill system ids (recursive) → accent-<em> fallback.
  * Order matters: defaults first so we don't wrap default placeholders; id
  * backfill before render/persist so collection identity is stable.

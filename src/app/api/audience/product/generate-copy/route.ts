@@ -25,6 +25,7 @@ import {
 } from '@/modules/audience/product/copyPrompt';
 import {
   processProductCopy,
+  autoMapLinkHrefs,
   validateProductCopyCompleteness,
   injectRealTestimonials,
 } from '@/modules/audience/product/parseCopy';
@@ -137,7 +138,10 @@ async function productCopyHandler(req: NextRequest): Promise<Response> {
       const withReal = realTestimonials?.length
         ? injectRealTestimonials(mockSections, realTestimonials)
         : mockSections;
-      const processed = processProductCopy(withReal, uiblocks);
+      const processed = autoMapLinkHrefs(
+        processProductCopy(withReal, uiblocks),
+        new Set(Object.keys(uiblocks))
+      );
       return createSecureResponse({
         success: true,
         sections: processed,
@@ -197,7 +201,10 @@ async function productCopyHandler(req: NextRequest): Promise<Response> {
     if (realTestimonials?.length) {
       sections = injectRealTestimonials(sections, realTestimonials);
     }
-    const processed = processProductCopy(sections, uiblocks);
+    let processed = processProductCopy(sections, uiblocks);
+    // Auto-map nav/footer link targets to on-page section anchors by label
+    // (user-overridable in the editor). presentTypes = section types on this page.
+    processed = autoMapLinkHrefs(processed, new Set(Object.keys(uiblocks)));
 
     const { complete, missingSections } = validateProductCopyCompleteness(processed, uiblocks);
     if (!complete) {

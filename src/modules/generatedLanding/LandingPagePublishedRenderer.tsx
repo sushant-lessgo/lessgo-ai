@@ -14,6 +14,7 @@
 import React from 'react';
 import Script from 'next/script';
 import { getComponent, extractSectionType } from './componentRegistry.published';
+import { buildSectionAnchorMap } from '@/utils/sectionAnchors';
 import type { AudienceType, HearthPalette, TemplateId } from '@/types/service';
 import { usesTemplateModule } from '@/types/service';
 import type { MeridianPalette } from '@/types/product';
@@ -99,6 +100,10 @@ export function LandingPagePublishedRenderer({
     .filter(Boolean);
 
   // 3. Render sections with mode="published"
+  // Stable in-page anchor ids (dedup-aware) so nav/footer "#<type>" links scroll here.
+  const anchorMap = buildSectionAnchorMap(
+    processedSections.filter(Boolean).map((s) => s!.id)
+  );
   const sectionsTree = (
     <div className={`landing-page-published ${className}`}>
       {processedSections.map((section) => {
@@ -121,7 +126,7 @@ export function LandingPagePublishedRenderer({
         if (usesTemplate) {
           const surface = tmpl?.getSurfaceForSection(sectionType) ?? 'cream';
           return (
-            <div key={sectionId} data-surface={surface}>
+            <div key={sectionId} id={anchorMap[sectionId]} data-surface={surface} style={{ scrollMarginTop: 80 }}>
 
               <LayoutComponent
                 sectionId={sectionId}

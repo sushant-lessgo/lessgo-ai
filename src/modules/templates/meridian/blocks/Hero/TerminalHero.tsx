@@ -242,7 +242,7 @@ const STYLES = `
   mask-image: radial-gradient(ellipse at 50% 30%, black 30%, transparent 75%);
   pointer-events: none;
 }
-.mrd-hero__inner { position: relative; z-index: 1; }
+.mrd-hero__inner { position: relative; z-index: 1; padding-right: 480px; }
 .mrd-hero__top {
   display: flex; align-items: center; gap: 14px;
   font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.1em;
@@ -316,6 +316,7 @@ const STYLES = `
 .mrd-btn--arrow::after { content: "→"; font-family: var(--font-mono); font-size: 13px; }
 @media (max-width: 1100px) {
   .mrd-hero { padding-top: 96px; }
+  .mrd-hero__inner { padding-right: 0; }
   .mrd-hero__vis { position: static; width: 100%; margin-top: 48px; }
 }
 [data-variant="marketing"] .mrd-hero { padding-top: 112px; padding-bottom: 128px; }

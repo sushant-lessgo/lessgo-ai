@@ -4,6 +4,7 @@ import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useOnboardingStore } from '@/hooks/useOnboardingStore';
 import { sectionList } from '@/modules/sections/sectionList';
 import { getComponent, extractSectionType as extractSectionTypeRaw } from '@/modules/generatedLanding/componentRegistry';
+import { buildSectionAnchorMap } from '@/utils/sectionAnchors';
 import {
   generateCompleteBackgroundSystem,
   getSectionBackgroundTypeWithContext,
@@ -292,6 +293,13 @@ const finalSections: OrderedSection[] = processedSections
     return finalSections;
   }, [sections, sectionLayouts, content, dynamicBackgroundSystem, theme.colors.sectionBackgrounds.secondary, validatedFields, hiddenInferredFields]);
 
+  // Stable in-page anchor ids (dedup-aware) so nav/footer "#<type>" links resolve in
+  // preview too (smooth-scroll itself runs only on the published page).
+  const anchorMap = useMemo(
+    () => buildSectionAnchorMap(orderedSections.map((s) => s.id)),
+    [orderedSections]
+  );
+
   // ✅ Enhanced render section with alternating debug info
   const renderSection = (section: OrderedSection) => {
     const { id: sectionId, background, layout, data, alternatingInfo } = section;
@@ -434,8 +442,10 @@ const finalSections: OrderedSection[] = processedSections
             sectionType={layout}
           >
             <div
+              id={anchorMap[sectionId]}
               data-surface={surface}
               className={`relative ${isHeaderSection ? 'sticky top-0 z-50' : ''}`}
+              style={{ scrollMarginTop: 80 }}
             >
               <LayoutComponent
                 sectionId={sectionId}

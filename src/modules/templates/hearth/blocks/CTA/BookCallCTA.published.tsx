@@ -31,7 +31,8 @@ export default function BookCallCTAPublished(props: BookCallCTAPublishedProps) {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
-      <section className="hearth-cta-wrap" id="cta">
+      {/* anchor id="cta" now owned by the section wrapper in the renderer */}
+      <section className="hearth-cta-wrap">
         <div className="hearth-cta">
           <div className="hearth-cta__inner">
             {props.eyebrow && (
