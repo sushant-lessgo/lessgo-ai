@@ -51,6 +51,19 @@ export const templateRegistry: Record<TemplateId, TemplateModuleLoader> = {
       paletteImageKeywords: m.PALETTE_IMAGE_KEYWORDS,
     };
   },
+  techpremium: async () => {
+    const m = await import('@/modules/templates/techpremium');
+    return {
+      resolveBlock: m.resolveBlock,
+      ThemeInjector: m.ThemeInjector,
+      SSRTokens: m.SSRTokens,
+      getSurfaceForSection: m.getSurfaceForSection,
+      defaultPaletteId: m.defaultTechPremiumPalette,
+      variants: m.techPremiumVariants,
+      defaultVariantId: m.defaultTechPremiumVariant,
+      paletteImageKeywords: m.PALETTE_IMAGE_KEYWORDS,
+    };
+  },
 };
 
 const cache: Partial<Record<TemplateId, TemplateModule>> = {};

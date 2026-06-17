@@ -2,7 +2,7 @@
 // Service-route types - Phase 0 foundation
 // Reference: newServiceOnboarding.md, nsoPlan.md
 
-import { meridianPalettes } from '@/types/product';
+import { meridianPalettes, techPremiumPalettes } from '@/types/product';
 
 /**
  * ===== AUDIENCE TYPE =====
@@ -19,7 +19,7 @@ export type AudienceType = (typeof audienceTypes)[number];
  * variantId is a per-template token rescale (Hearth: 'classic' default;
  * Meridian: developer/marketing/light — see types/product.ts).
  */
-export const templateIds = ['hearth', 'lex', 'meridian'] as const;
+export const templateIds = ['hearth', 'lex', 'meridian', 'techpremium'] as const;
 export type TemplateId = (typeof templateIds)[number];
 
 export type VariantId = string;
@@ -29,6 +29,7 @@ export const defaultVariantForTemplate: Record<TemplateId, VariantId> = {
   hearth: 'classic',
   lex: 'statesman',
   meridian: 'developer',
+  techpremium: 'default',
 };
 
 /**
@@ -59,7 +60,7 @@ export function usesTemplateModule(
 ): boolean {
   return (
     audienceType === 'service' ||
-    (audienceType === 'product' && templateId === 'meridian')
+    (audienceType === 'product' && (templateId === 'meridian' || templateId === 'techpremium'))
   );
 }
 
@@ -245,18 +246,21 @@ export const templateLabels: Record<TemplateId, string> = {
   hearth: 'Hearth',
   lex: 'Lex',
   meridian: 'Meridian',
+  techpremium: 'TechPremium',
 };
 
 export const templateBlurbs: Record<TemplateId, string> = {
   hearth: 'Warm, editorial — cream surfaces, serif accents.',
   lex: 'Trust & professional — serif authority, cool document surfaces.',
   meridian: 'Modern tech — dark surfaces, hairline rules, mono accents.',
+  techpremium: 'Industrial IoT — warm paper, forest + signal-lime, control-room readouts.',
 };
 
-/** Palette id list for a template (Hearth → 9 warm, Lex → 9 trust, Meridian → 9 accent). */
+/** Palette id list for a template (Hearth → 9 warm, Lex → 9 trust, Meridian → 9 accent, TechPremium → forest). */
 export function palettesForTemplate(templateId: TemplateId): readonly string[] {
   if (templateId === 'lex') return lexPalettes;
   if (templateId === 'meridian') return meridianPalettes;
+  if (templateId === 'techpremium') return techPremiumPalettes;
   return hearthPalettes;
 }
 

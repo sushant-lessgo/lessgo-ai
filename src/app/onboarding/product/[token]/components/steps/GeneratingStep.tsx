@@ -8,7 +8,12 @@ import { usePostHog } from 'posthog-js/react';
 import ErrorRetry from '@/components/onboarding/shared/ErrorRetry';
 import type { SectionCopy } from '@/types/generation';
 import type { ProductStrategyOutput } from '@/types/product';
-import { defaultMeridianPalette, defaultMeridianVariant } from '@/types/product';
+import {
+  defaultMeridianPalette,
+  defaultMeridianVariant,
+  defaultTechPremiumPalette,
+  defaultTechPremiumVariant,
+} from '@/types/product';
 
 type Stage = 'strategy' | 'copy' | 'saving' | 'done';
 
@@ -130,6 +135,14 @@ export default function GeneratingStep() {
     setError(null);
     setCreditsError(false);
 
+    // ─── Persona → template (fired in parallel with generation; no serial cost) ───
+    // The hardware-founder persona gets the TechPremium product template; every other
+    // product persona keeps Meridian. On fetch error / null persona → Meridian (safe).
+    const personaPromise: Promise<string | null> = fetch('/api/user/persona')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => (j?.persona ?? null) as string | null)
+      .catch(() => null);
+
     // ─── Strategy ───
     setStage('strategy');
     const strategyStart = Date.now();
@@ -213,6 +226,12 @@ export default function GeneratingStep() {
 
     // ─── Save ───
     setStage('saving');
+    // Persona-gated template selection (resolved by now; awaiting adds no latency).
+    const persona = await personaPromise;
+    const isHardwareFounder = persona === 'hardware-founder';
+    const templateId = isHardwareFounder ? 'techpremium' : PILOT_TEMPLATE;
+    const paletteId = isHardwareFounder ? defaultTechPremiumPalette : PILOT_PALETTE;
+    const variantId = isHardwareFounder ? defaultTechPremiumVariant : PILOT_VARIANT;
     try {
       const { finalContent } = buildFinalContent(strategy, copySections, title);
       const res = await fetch('/api/saveDraft', {
@@ -221,9 +240,9 @@ export default function GeneratingStep() {
         body: JSON.stringify({
           tokenId,
           title,
-          paletteId: PILOT_PALETTE,
-          templateId: PILOT_TEMPLATE,
-          variantId: PILOT_VARIANT,
+          paletteId,
+          templateId,
+          variantId,
           finalContent,
         }),
       });
@@ -239,8 +258,9 @@ export default function GeneratingStep() {
     posthog?.capture('product_onboarding_complete', {
       totalDurationMs: Date.now() - startedAt.current,
       sectionCount: strategy.sections.length,
-      paletteId: PILOT_PALETTE,
-      variantId: PILOT_VARIANT,
+      templateId,
+      paletteId,
+      variantId,
       audienceType: 'product',
     });
 

@@ -43,6 +43,25 @@ export const defaultMeridianPalette: MeridianPalette = 'mint';
 export const defaultMeridianVariant: MeridianVariant = 'developer';
 
 /**
+ * ===== TECHPREMIUM PALETTE / VARIANT =====
+ * Product template for the hardware-founder persona. Light, warm-paper
+ * "control-room" system (forest + signal-lime). Pilot-locked: a single palette
+ * + single variant (no picker). Applied via `[data-palette]` / `[data-variant]`.
+ * Source of truth: TechPremium.html (<head> :root).
+ */
+export const techPremiumPalettes = ['forest'] as const;
+export type TechPremiumPalette = (typeof techPremiumPalettes)[number];
+
+export const techPremiumVariants = ['default'] as const;
+export type TechPremiumVariant = (typeof techPremiumVariants)[number];
+
+/** Default palette when none is picked or persisted. */
+export const defaultTechPremiumPalette: TechPremiumPalette = 'forest';
+
+/** Default variant when none is picked or persisted. */
+export const defaultTechPremiumVariant: TechPremiumVariant = 'default';
+
+/**
  * ===== MERIDIAN STRATEGY (P3 — generation wiring) =====
  * The assembled strategy passed from /api/audience/product/strategy into
  * /api/audience/product/generate-copy. = raw LLM output (ProductStrategyResponse:
