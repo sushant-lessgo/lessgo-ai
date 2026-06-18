@@ -2,7 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { sanitizeContentForPublish } from '@/modules/sections/layoutElementSchema';
-import { usesTemplateModule } from '@/types/service';
+import { usesTemplateModule, type TemplateId } from '@/types/service';
 
 // ISR configuration - revalidate every hour
 export const revalidate = 3600;
@@ -115,6 +115,7 @@ export default async function PublishedPage({ params }: PageProps) {
   sanitizeContentForPublish(content); // Sanitize for pages published before this feature
 
   const { LandingPagePublishedRenderer } = await import('@/modules/generatedLanding/LandingPagePublishedRenderer');
+  const { CriticalFontPreload } = await import('@/modules/templates/CriticalFontPreload');
 
   // Preload the template module so the sync renderer can resolve blocks.
   // STRICT: keep templateId as stored (no default-synthesis) — a legacy
@@ -135,18 +136,23 @@ export default async function PublishedPage({ params }: PageProps) {
   };
 
   return (
-    <LandingPagePublishedRenderer
-      sections={content.layout?.sections || []}
-      content={mergedContent}
-      theme={content.layout?.theme || {}}
-      publishedPageId={page.id}
-      pageOwnerId={page.userId}
-      slug={page.slug}
-      analyticsEnabled={page.analyticsEnabled || false}
-      audienceType={audienceType}
-      templateId={templateId}
-      variantId={page.variantId}
-      paletteId={page.paletteId}
-    />
+    <>
+      {/* Preload the hero-headline (LCP) display face for this template/variant —
+          p/layout only preloads the shared near-body faces. */}
+      <CriticalFontPreload templateId={templateId as TemplateId | null} variantId={page.variantId} />
+      <LandingPagePublishedRenderer
+        sections={content.layout?.sections || []}
+        content={mergedContent}
+        theme={content.layout?.theme || {}}
+        publishedPageId={page.id}
+        pageOwnerId={page.userId}
+        slug={page.slug}
+        analyticsEnabled={page.analyticsEnabled || false}
+        audienceType={audienceType}
+        templateId={templateId}
+        variantId={page.variantId}
+        paletteId={page.paletteId}
+      />
+    </>
   );
 }
