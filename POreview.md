@@ -1,54 +1,108 @@
- Two big findings — one good, one is a real break the plan undersells:
+# PO review — Service onboarding up-to-speed (re: devMessage.md)
 
-  ✅ Finding A (good): The plan's commit-state is fine. P5 is committed (f2176e1 "Meridian P5: archive… + fix /create refs") — product-meridian is 4 clean commits + 6
-  uncommitted source files, which Step 1 captures. And that commit claims it fixed the /create refs (contradicting the plan's "known-open" note — likely stale).
+**Verdict:** analysis is accurate (spot-verified: `/api/v2/scrape-website` + `/api/v2/understand`
+exist; product OneLinerStep calls scrape; service Understanding is manual + has step PostHog).
+Endorse closing the P0 gaps, but **not as one big port** — sequence as thin vertical slices with a
+gate after each. Core insight: #1+#2+#3 all hinge on **one new thing — a service-shaped
+extraction/inference schema**. Build that once; the three features layer on it.
 
-  🔴 Finding B (real break, not "verify"): Meridian's resolveMeridianBlock is keyed by layout name ('terminalhero', lowercased), and index.ts passes blockType into the
-  layoutName slot. But phase-11 dispatches resolveBlock(**sectionType**, mode). After the merge takes phase-11's section-type dispatch, the registry will hand Meridian
-  'hero' → no match in a layout-name-keyed map → placeholder → Meridian renders nothing. The plan says "verify" — it actually needs a fix. Let me confirm exactly how main
-  calls it and whether the /create refs really got fixed.
+## What this really is
+The gap is not "5 features." It's: product has an **AI-inferred, import-able Understanding**;
+service is hand-typed. The route plumbing (scrape fetch/crawl/SSRF, credits, auth, rate-limit,
+demo) is audience-agnostic and already built. The only genuinely new asset = a **service Zod
+schema + prompt** (serviceCategories / industries / services / targetClients [+ testimonials])
+to sit beside the product one.
 
-● Bash(echo "=== MAIN: how does componentRegistry call tmpl.resolveBlock? (first arg) ==="; grep -nE "resolveBlock\(" "C:/Users/susha/lessgo-ai/src/modules/generatedLa…)
-  ⎿  === MAIN: how does componentRegistry call tmpl.resolveBlock? (first arg) ===
-     C:/Users/susha/lessgo-ai/src/modules/generatedLanding/componentRegistry.ts:452:    return tmpl ? tmpl.resolveBlock(sectionType, 'edit') : null;
-     C:/Users/susha/lessgo-ai/src/modules/generatedLanding/componentRegistry.published.ts:340:    return tmpl ? tmpl.resolveBlock(normalizedType, 'published') : null
-     … +7 lines (ctrl+o to expand)
-  ⎿  Shell cwd was reset to C:\Users\susha\lessgo-ai
+## Priority / sequencing (pilot-first, gate after each)
+1. **Slice 1 — Service AI Understanding (#2).** Biggest UX win + the foundation. Add service schema
+   + prompt to `/api/v2/understand` (branch by `audienceType`, see decisions). Reuse product
+   UnderstandingStep UX wholesale: LoadingView, error/retry, editable chips/textarea, "edit
+   one-liner" recovery. **Gate:** real inference quality on 2–3 live service sites before moving on.
+2. **Slice 2 — Website import (#1).** Builds directly on Slice 1's schema (import hydrates the same
+   Understanding shape). Same orange box + graceful manual fallback. High ROI — agencies/consultants
+   almost always have a site (answers the dev's open Q: yes, worth it; arguably more than product).
+3. **Slice 3 — Imported testimonials → copy (#3).** Depends on Slice 2. Mirror product's verbatim
+   path: `realTestimonials` through service `generate-copy` + an `injectRealTestimonials` in service
+   `parseCopy`. Verify the service testimonials block (`PullQuoteWithMark`) element keys match the
+   extraction shape. High trust value for service.
+4. **P1 polish (#4/#5) + business-name field** — fold in opportunistically; shared components, near-zero
+   cost. Collect studio/business name like product (better title + copy input): yes.
+5. **PostHog funnel parity (reverse gap)** — port product → service-style step events INTO product.
+   Standalone small PR, decouple from the above. Do it; cheap, real funnel value.
 
-● Both findings confirmed against the actual code:
+## Decisions on the dev's open questions
+- **Branch existing v2 routes, do NOT fork new service routes.** Add an `audienceType` param; select
+  schema+prompt; reuse SSRF/credits/auth/rate-limit/demo untouched. One route per concern, one place
+  to maintain. (Scrape's crawl/fetch is identical; only the final LLM schema differs.)
+- **Import for studios/agencies: yes** (Slice 2).
+- **Goal step (#6): keep service's explainer cards, but adopt product's auto-advance + shared
+  `OptionCard`.** Consistency of interaction + DRY without losing the service explainers (service's 3
+  goals benefit from a description slot). Low priority — not a P0.
+- **PostHog into product: yes**, as its own PR.
+- **Business name: yes**, mirror product.
 
-  🔴 The one that will break Meridian — must be a FIX, not "verify"
+## Risks / must-not-miss (carry into the build plan)
+- **Double-charge guard.** Product import skips the 2nd `/understand` via the
+  `understandingLoading && !understanding` mount guard. Service UnderstandingStep MUST replicate it
+  when hydrated by import, or imports get charged twice.
+- **Service copy pipeline doesn't accept `realTestimonials` yet** — Slice 3 must add it (schema +
+  parse inject) exactly as product did; don't assume parity.
+- **AssetsStep × import collision.** Service's AssetsStep asks "do you have testimonials/logos?"
+  If import pulls REAL testimonials, that flag is redundant/confusing. Decide: import pre-fills
+  AssetsStep (availability + verbatim quotes) → AssetsStep becomes a confirm, not a question.
+- **Extraction framing.** Service sites describe services/testimonials differently than product
+  sites — the prompt needs service framing; budget real-site test runs (product's naayom equivalent).
+- **SSRF hardening** rides along when service reuses scrape — confirm the route's SSRF/DNS-rebinding
+  guard is solid before driving more traffic to it.
 
-  - main dispatches by section type: componentRegistry.ts:452 → tmpl.resolveBlock(sectionType, 'edit'); .published.ts:340 → resolveBlock(normalizedType, …). And main's
-  Hearth resolver is now section-type-keyed (resolveServiceBlock.ts:53 key = sectionType.toLowerCase()).
-  - Meridian is layout-name-keyed: MERIDIAN_BLOCK_REGISTRY keys are 'terminalhero', 'hairlinefeaturegrid', …; index.ts passes blockType into the layoutName slot.
+## Keep as-is (don't over-symmetrize)
+Goal = service at product's UX *quality*, not identical flows. Service legitimately keeps
+**AssetsStep** + **StyleStep** (palette picker) — product is pilot-locked there. Not gaps.
 
-  So post-merge the registry hands Meridian 'hero' → no match → MeridianPlaceholderBlock. Every Meridian section renders as a placeholder. Step 4's "verify Meridian's
-  resolveBlock is keyed by section type" is wrong — it isn't. The plan must include the fix: re-key MERIDIAN_BLOCK_REGISTRY to section types and fix the index.ts adapter:
+## Cross-check vs your Round 1 service testing (testResultsService.md)
 
-  header→MeridianNavHeader · hero→TerminalHero · features→HairlineFeatureGrid ·
-  testimonials→ProofWithLogoRail · pricing→ThreeTierPricing · cta→ArcCTA · footer→HairlineFooter
+**Already covered by this plan / already shipped:**
+- #1 "should take agency name" → P1 business-name field (yes). In scope.
+- #2 "business page empty, should pre-fill like product" → **this IS Slice 1** (AI Understanding).
+  The headline fix.
+- #5 "went straight to edit, no generate phase" → **already fixed** (Phase 4 wired service
+  GeneratingStep → `/generate/[token]`). Re-test a fresh build.
+- #6 template switch, #8 publish → working, no action.
 
-  (Meridian is 1-block-per-section, so it's a clean re-key — mirror exactly what main's Hearth resolver did.) This is the make-or-break item.
+**NEW issues to ADD to scope (not in devMessage):**
+- **#3 + #4 — service field model is bloated/overlapping** ("industries" ∩ "target clients";
+  "service categories" ∩ "specific services"; *"only take what's necessary from a copywriting
+  POV"*). This **reshapes Slice 1**: don't AI-fill the existing 4 overlapping fields — first
+  **redesign the service Understanding to a lean, non-overlapping set** (likely ~2: *what you do*
+  / *who you serve*), THEN make it inferred + importable. Cheapest input, best copy. Note: trimming
+  fields lightly touches the service understanding→strategy input mapping (`modules/audience/service`),
+  so it's not purely onboarding-UI — scope accordingly. **Treat this as a prerequisite refinement to
+  Slice 1, not a separate item.**
+- **#7 — StyleStep palette swatches all look the same.** Standalone service-UX bug, independent of
+  the parity port. Diagnose: `StyleStep.tsx:136` paints only `t.swatch(p).accent` as one dot — check
+  it isn't resolving to `transparent` (config/id mismatch); regardless, Hearth's muted earth tones
+  read as "same" in a tiny dot. Fix = multi-tone swatch chip (accent + accentDeep + wash) so palettes
+  are visually distinct. Small, do opportunistically.
 
-  ✅ Otherwise the plan is sound
+## Decisions (approved — build to these)
+- **Sequencing:** Slice 1 (service AI Understanding) FIRST, then **gate** on real-site inference
+  quality before Slices 2 (import) + 3 (testimonials→copy).
+- **Field model (#3/#4):** mirror product's 4 lean groups, service-flavored + de-overlapped —
+  **whatYouDo (one-liner) + services[] + targetClients[] + outcomes/differentiator**. Drop the
+  industries/categories duplicate fields. AI-prefilled → low burden. This is Slice 1's core schema
+  (and the contract import + copy lock onto).
+- **Credit model:** mirror product — `/understand` = 1 credit; website-import scrape **replaces**
+  that charge (no double-charge). Not free.
+- **AssetsStep:** **confirm-after-import** — import/AI pre-fills assets + verbatim testimonials;
+  AssetsStep becomes a quick confirm/edit; still functions without import; keeps the availability
+  signal service strategy uses for section selection.
+- **Polish:** fix the **palette-swatch bug (#7) this round** (real bug, cheap); **defer goal-step**
+  → product OptionCard + auto-advance to a later parity-polish pass.
 
-  - Commit state is correct. P5 is committed (f2176e1), product-meridian = 4 clean commits + 6 uncommitted source files that Step 1 captures. No archive loss.
-  - Reconciliation (Step 4) matches my POreview — drop surfaceAttr, templateIds=['hearth','lex','meridian'], all-three defaultVariantForTemplate, keep usesTemplateModule
-  (covers Lex via the service arm), generic data-surface, loosened validation.ts, hooks-fix carried into the merged renderer. Good.
-  - Sequencing (commit both → FF service → hand-merge product) is right, and the verification gate (render Hearth + Lex + Meridian) is the correct backstop — note that
-  the Meridian render in that gate is exactly what catches the dispatch break if the fix above is skipped.
-
-  Two corrections to the plan's notes
-
-  1. Stale: the "4 live /create refs known-open" is out of date — f2176e1 fixed them (I confirmed the three editor/onboarding refs are gone; InjectLandingTheme.tsx was
-  relocated). Drop it from "known-open," but still run the service regression to confirm onboarding/service/layout.tsx:47 no longer 404s under the now-archived /create.
-  2. Contract variants/defaultVariantId: Step 4 rightly says reconcile required-vs-optional so all three loaders compile — concretely, Meridian's loader must expose
-  whatever phase-11 made required (e.g. a variants: TemplateVariant[] array for the theme picker). Meridian has meridianVariants in types/product.ts but may not export it
-  in the contract shape Lex established. Check this at merge or the registry won't type-check.
-
-  Verdict
-
-  Approve the merge sequence + reconciliation — with one required addition: elevate the componentRegistry item to a concrete fix (re-key Meridian's resolver to section
-  type). Without it, the build passes but Meridian renders all-placeholders. Everything else (drop surfaceAttr, loosened validation, hooks-fix, generic data-surface) is
-  correct, and the 3-template render gate must be run green before calling the merge done.
+## Round 1 service test items — disposition
+- #1 agency name → in Slice 1 OneLiner polish (business-name field).
+- #2 empty understanding / pre-fill → **Slice 1** (the headline fix).
+- #3/#4 overlapping fields → folded into Slice 1 field-model decision above.
+- #5 no generate phase → **already shipped** (Phase 4); re-test fresh build.
+- #7 palette swatches same → **fix this round** (multi-tone swatch chip; check accent≠transparent).
+- #6 template switch, #8 publish → working, no action.
