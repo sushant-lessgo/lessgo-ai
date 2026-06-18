@@ -23,6 +23,7 @@ export interface ServiceCopyPromptInput {
   strategy: ServiceStrategyOutputAssembled;
   uiblocks: Record<string, string>;
   oneLiner: string;
+  businessName?: string;
   offer: string;
   goal: ServiceGoal;
   understanding: ServiceUnderstandingInput;
@@ -110,7 +111,7 @@ Notes:
 
 export function buildServiceCopyPrompt(input: ServiceCopyPromptInput): string {
   assertNoTemplateLeak(input, 'buildServiceCopyPrompt');
-  const { strategy, uiblocks, oneLiner, offer, goal, understanding } = input;
+  const { strategy, uiblocks, oneLiner, businessName, offer, goal, understanding } = input;
 
   const sectionSpecs = strategy.sections
     .map((sectionType) => {
@@ -126,10 +127,12 @@ You are a conversion copywriter for a service business landing page. The page us
 
 ## PROVIDER
 One-liner: ${oneLiner}
+Business name: ${businessName || '—'}
 Service type: ${understanding.serviceType}
-Industries: ${understanding.industries.join(', ') || '—'}
+What they do: ${understanding.whatYouDo}
 Services offered: ${understanding.services.join(', ') || '—'}
-Target clients: ${understanding.targetClients}
+Target clients: ${understanding.targetClients.join(', ') || '—'}
+Outcomes / differentiators: ${understanding.outcomes.join(', ') || '—'}
 Delivery: ${understanding.deliveryModel}
 Offer: ${offer}
 Landing goal: ${serviceGoalLabels[goal]} (${goal})

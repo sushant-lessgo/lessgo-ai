@@ -16,15 +16,20 @@ import { withAIRateLimit } from '@/lib/rateLimit';
 import { requireAuth } from '@/lib/middleware/planCheck';
 import { consumeCredits, CREDIT_COSTS, UsageEventType } from '@/lib/creditSystem';
 import { generateWithSchema } from '@/lib/aiClient';
-import { UnderstandingResponseSchema } from '@/lib/schemas';
+import {
+  UnderstandingResponseSchema,
+  ServiceUnderstandingResponseSchema,
+} from '@/lib/schemas';
+import { buildServiceUnderstandPrompt } from '@/modules/audience/service/promptUnderstand';
 import { isDemoMode } from '@/lib/mockMode';
-import type { UnderstandingData } from '@/types/generation';
 
 export const dynamic = 'force-dynamic';
 
-// Request schema
+// Request schema. audienceType selects the extraction schema + prompt; the
+// shared plumbing (auth, credits, rate-limit, demo) is audience-agnostic.
 const UnderstandRequestSchema = z.object({
   oneLiner: z.string().min(10, 'One-liner must be at least 10 characters'),
+  audienceType: z.enum(['product', 'service']).optional().default('product'),
 });
 
 function buildUnderstandPrompt(oneLiner: string): string {
@@ -60,7 +65,8 @@ async function understandHandler(req: NextRequest): Promise<Response> {
       );
     }
 
-    const { oneLiner } = validation.data;
+    const { oneLiner, audienceType } = validation.data;
+    const isService = audienceType === 'service';
 
     // 2. Auth check
     const authCheck = await requireAuth(req);
@@ -79,39 +85,57 @@ async function understandHandler(req: NextRequest): Promise<Response> {
 
     // 2b. Check for demo/mock mode - return mock data without AI call
     if (isDemoMode(req)) {
-      logger.info('[understand] Using mock response');
+      logger.info(`[understand] Using mock response (${audienceType})`);
       return createSecureResponse({
         success: true,
-        data: {
-          categories: ['SaaS', 'Productivity', 'Automation'],
-          audiences: ['Small Business Owners', 'Entrepreneurs', 'Teams'],
-          whatItDoes: 'Helps users streamline their workflow and boost productivity',
-          features: [
-            'Easy setup in minutes',
-            'Automated workflows',
-            'Real-time analytics',
-            'Team collaboration',
-            'Custom integrations',
-          ],
-        },
+        data: isService
+          ? {
+              whatYouDo:
+                'We help brands launch conversion-focused marketing sites that turn visitors into booked calls',
+              services: ['Brand identity', 'Marketing site', 'Conversion copy'],
+              targetClients: ['DTC founders', 'Early-stage SaaS teams'],
+              outcomes: [
+                'Launch-ready in 4 weeks',
+                'Senior-only team',
+                'Conversion-focused copy',
+              ],
+              deliveryModel: 'remote',
+            }
+          : {
+              categories: ['SaaS', 'Productivity', 'Automation'],
+              audiences: ['Small Business Owners', 'Entrepreneurs', 'Teams'],
+              whatItDoes:
+                'Helps users streamline their workflow and boost productivity',
+              features: [
+                'Easy setup in minutes',
+                'Automated workflows',
+                'Real-time analytics',
+                'Team collaboration',
+                'Custom integrations',
+              ],
+            },
         creditsUsed: 0,
         creditsRemaining: 999,
       });
     }
 
-    // 3. Build prompt
-    const prompt = buildUnderstandPrompt(oneLiner);
+    // 3. Build prompt (audience-specific)
+    const prompt = isService
+      ? buildServiceUnderstandPrompt(oneLiner)
+      : buildUnderstandPrompt(oneLiner);
 
     // 4. Call AI with structured outputs
     logger.dev('[understand] PROMPT:', prompt);
 
-    let understandingData: UnderstandingData;
+    let understandingData: any;
     try {
       understandingData = await generateWithSchema(
         'understand',
         [{ role: 'user', content: prompt }],
-        UnderstandingResponseSchema,
-        'understanding'
+        isService
+          ? ServiceUnderstandingResponseSchema
+          : UnderstandingResponseSchema,
+        isService ? 'service_understanding' : 'understanding'
       );
       logger.dev('[understand] RESPONSE:', understandingData);
     } catch (error: any) {
@@ -135,12 +159,21 @@ async function understandHandler(req: NextRequest): Promise<Response> {
       {
         endpoint: '/api/v2/understand',
         duration: Date.now() - startTime,
-        metadata: {
-          oneLinerLength: oneLiner.length,
-          categoriesCount: understandingData.categories.length,
-          audiencesCount: understandingData.audiences.length,
-          featuresCount: understandingData.features.length,
-        },
+        metadata: isService
+          ? {
+              audienceType,
+              oneLinerLength: oneLiner.length,
+              servicesCount: understandingData.services.length,
+              targetClientsCount: understandingData.targetClients.length,
+              outcomesCount: understandingData.outcomes.length,
+            }
+          : {
+              audienceType,
+              oneLinerLength: oneLiner.length,
+              categoriesCount: understandingData.categories.length,
+              audiencesCount: understandingData.audiences.length,
+              featuresCount: understandingData.features.length,
+            },
       }
     );
 

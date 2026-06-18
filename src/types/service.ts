@@ -331,10 +331,10 @@ export interface ServiceStrategyOutputAssembled extends ServiceStrategyOutput {
  */
 export interface ServiceUnderstandingInput {
   serviceType: ServiceType;
-  serviceCategories: string[];
-  industries: string[];
-  targetClients: string;
+  whatYouDo: string;
   services: string[];
+  targetClients: string[];
+  outcomes: string[];
   deliveryModel: 'remote' | 'in-person' | 'hybrid';
 }
 

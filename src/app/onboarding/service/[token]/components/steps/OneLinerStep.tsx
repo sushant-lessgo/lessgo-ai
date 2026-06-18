@@ -1,17 +1,40 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { Globe, Loader2 } from 'lucide-react';
 import { useServiceGenerationStore } from '@/hooks/useServiceGenerationStore';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { usePostHog } from 'posthog-js/react';
+import {
+  personaToServiceType,
+  type ServiceType,
+  type ServiceGoal,
+  type UserPersona,
+} from '@/types/service';
 
 const examples = [
   'Boutique branding studio for DTC skincare brands',
   'Performance marketing agency for B2B SaaS startups',
   'Web design studio for indie founders launching their first product',
 ];
+
+/** Normalize user input to an http(s) URL; returns null if not URL-like.
+ *  Copied from product OneLinerStep. */
+function normalizeUrl(raw: string): string | null {
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  const withProto = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+  try {
+    const u = new URL(withProto);
+    if (!u.hostname.includes('.')) return null;
+    return u.href;
+  } catch {
+    return null;
+  }
+}
 
 // Validator copied from product OneLinerStep:16-53.
 function validateOneLiner(text: string): { valid: boolean; error?: string } {
@@ -47,12 +70,26 @@ function validateOneLiner(text: string): { valid: boolean; error?: string } {
 export default function OneLinerStep() {
   const posthog = usePostHog();
   const oneLiner = useServiceGenerationStore((s) => s.oneLiner);
+  const businessName = useServiceGenerationStore((s) => s.businessName);
   const setOneLiner = useServiceGenerationStore((s) => s.setOneLiner);
+  const setBusinessName = useServiceGenerationStore((s) => s.setBusinessName);
+  const setUnderstanding = useServiceGenerationStore((s) => s.setUnderstanding);
+  const setUnderstandingLoading = useServiceGenerationStore((s) => s.setUnderstandingLoading);
+  const setOffer = useServiceGenerationStore((s) => s.setOffer);
+  const setGoal = useServiceGenerationStore((s) => s.setGoal);
+  const setImportSourceUrl = useServiceGenerationStore((s) => s.setImportSourceUrl);
+  const setImportedTestimonials = useServiceGenerationStore((s) => s.setImportedTestimonials);
   const nextStep = useServiceGenerationStore((s) => s.nextStep);
 
   const [local, setLocal] = useState(oneLiner);
+  const [localBusinessName, setLocalBusinessName] = useState(businessName);
   const validation = validateOneLiner(local);
   const isValid = validation.valid;
+
+  const [url, setUrl] = useState('');
+  const [importing, setImporting] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
+  const normalizedUrl = normalizeUrl(url);
 
   useEffect(() => {
     posthog?.capture('service_onboarding_step_view', {
@@ -62,10 +99,76 @@ export default function OneLinerStep() {
     });
   }, [posthog]);
 
+  const handleImport = async () => {
+    if (!normalizedUrl || importing) return;
+    setImporting(true);
+    setImportError(null);
+
+    // Fetch persona in PARALLEL with the scrape (the scrape dominates latency, so
+    // this is effectively free) and derive the real serviceType. Doing it here —
+    // not via UnderstandingStep's async effect — closes the import + instant-confirm
+    // race that would otherwise ship a mislabeled serviceType for non-agency personas.
+    const personaP = fetch('/api/user/persona')
+      .then((r) => r.json())
+      .then((d) => (d?.persona ?? null) as UserPersona | null)
+      .catch(() => null);
+
+    try {
+      const res = await fetch('/api/v2/scrape-website', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: normalizedUrl, audienceType: 'service' }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json?.success) {
+        setImportError(
+          json?.message || "Couldn't read that site. Fill it in manually below."
+        );
+        return;
+      }
+      const d = json.data;
+      const persona = await personaP;
+      const serviceType: ServiceType =
+        (persona ? personaToServiceType(persona) : null) ?? 'agency';
+
+      // Hydrate the store directly. We set `understanding` (not understandingLoading)
+      // so UnderstandingStep renders its confirm view without firing a second
+      // /understand call — no double charge.
+      setOneLiner(d.oneLiner || '');
+      if (d.businessName) setBusinessName(d.businessName);
+      setUnderstanding({
+        whatYouDo: d.whatYouDo ?? '',
+        services: d.services ?? [],
+        targetClients: d.targetClients ?? [],
+        outcomes: d.outcomes ?? [],
+        deliveryModel: d.deliveryModel ?? 'remote',
+        serviceType,
+      });
+      if (d.offer) setOffer(d.offer);
+      if (d.goal) setGoal(d.goal as ServiceGoal);
+      setImportedTestimonials(Array.isArray(d.testimonials) ? d.testimonials : []);
+      setImportSourceUrl(normalizedUrl);
+      posthog?.capture('service_onboarding_import', {
+        audienceType: 'service',
+        testimonialsFound: Array.isArray(d.testimonials) ? d.testimonials.length : 0,
+      });
+      nextStep();
+    } catch {
+      setImportError("Couldn't reach that site. Fill it in manually below.");
+    } finally {
+      setImporting(false);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!isValid) return;
     setOneLiner(local.trim());
+    setBusinessName(localBusinessName.trim());
+    // Flag loading so UnderstandingStep auto-fires the inference call on mount
+    // (mirror product OneLinerStep). Import path sets understanding directly and
+    // does NOT set this, so it won't double-charge.
+    setUnderstandingLoading(true);
     posthog?.capture('service_onboarding_step_submit', {
       step: 'oneLiner',
       audienceType: 'service',
@@ -82,6 +185,64 @@ export default function OneLinerStep() {
         <p className="mt-2 text-gray-600">
           One sentence — what you do, who you do it for.
         </p>
+      </div>
+
+      {/* Import from existing website (optional shortcut) */}
+      <div className="rounded-lg border border-orange-200 bg-orange-50/60 p-4 space-y-2">
+        <div className="flex items-center gap-2">
+          <Globe className="w-4 h-4 text-brand-accentPrimary" />
+          <p className="text-sm font-medium text-gray-800">
+            Already have a website? Import it to skip the typing.
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Input
+            type="url"
+            inputMode="url"
+            placeholder="yourstudio.com"
+            value={url}
+            onChange={(e) => {
+              setUrl(e.target.value);
+              if (importError) setImportError(null);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && normalizedUrl && !importing) {
+                e.preventDefault();
+                handleImport();
+              }
+            }}
+            disabled={importing}
+            className="bg-white"
+          />
+          <Button
+            type="button"
+            onClick={handleImport}
+            disabled={!normalizedUrl || importing}
+            className="bg-brand-accentPrimary hover:bg-orange-500 shrink-0"
+          >
+            {importing ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin mr-1.5" />
+                Reading…
+              </>
+            ) : (
+              'Import'
+            )}
+          </Button>
+        </div>
+        {importError ? (
+          <p className="text-xs text-red-500">{importError}</p>
+        ) : (
+          <p className="text-xs text-gray-500">
+            We&apos;ll pull your services + testimonials. You can review everything next.
+          </p>
+        )}
+      </div>
+
+      <div className="flex items-center gap-3">
+        <div className="h-px flex-1 bg-gray-200" />
+        <span className="text-xs text-gray-400">or describe it manually</span>
+        <div className="h-px flex-1 bg-gray-200" />
       </div>
 
       <div className="space-y-2">
@@ -122,6 +283,25 @@ export default function OneLinerStep() {
             </button>
           ))}
         </div>
+      </div>
+
+      {/* Business name (optional) */}
+      <div className="space-y-2">
+        <Label htmlFor="businessName" className="text-gray-700">
+          Studio / business name <span className="text-gray-400">(optional)</span>
+        </Label>
+        <Input
+          id="businessName"
+          placeholder="Studio Hearth"
+          value={localBusinessName}
+          onChange={(e) => setLocalBusinessName(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && isValid) {
+              e.preventDefault();
+              handleSubmit(e as unknown as React.FormEvent);
+            }
+          }}
+        />
       </div>
 
       <div>

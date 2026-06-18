@@ -413,3 +413,38 @@ Sum of phase budgets in working days:
 - `User.persona` (8 values) currently lacks any ecom option. Add `dtc-founder` / `online-retailer` etc. now or wait for Phase 13?
 - Template gallery UX: full preview thumbnails (need 24 mockup screenshots) or descriptive cards (faster to ship, less wow)?
 - Pre-existing leak (7.5d bundle finding): `/p/[slug]/page.tsx` imports `sanitizeContentForPublish` from `sections/layoutElementSchema`, pulling the full schema registry → 17.5 kB. Decouple in Phase 11 or before launch?
+
+---
+
+## Phase 14 — Product-parity port (AI Understanding + import + testimonials)
+
+Brings service onboarding to product's UX *quality* (not identical flow). PO-approved, gated slices; all hinge on one new asset: a service-shaped extraction schema. Full plan: `.claude/plans/fluttering-roaming-cray.md`. Round-1 service test issues folded in (#2 empty understanding, #3/#4 overlapping fields, #7 palette swatches).
+
+**Lean service Understanding (replaces 6 overlapping fields):** `whatYouDo` + `services[]` + `targetClients[]` (was string) + `outcomes[]` + `deliveryModel`; `serviceType` persona-derived (no badge). Drops `serviceCategories` + `industries`. Maps 1:1 onto product's UnderstandingStep UX.
+
+### Slice 1 — Service AI Understanding ✅ DONE (2026-06-18)
+- Store reshaped (`ServiceUnderstanding`); `resetUnderstanding` added.
+- New `lib/schemas/understandService.schema.ts` + `modules/audience/service/promptUnderstand.ts`.
+- `/api/v2/understand` branches on `audienceType` (client param, enum-validated, default `product`); shared auth/credits/rate-limit/demo untouched; 1 credit.
+- Service `UnderstandingStep` rewritten to mirror product (auto-infer on mount, LoadingView, error/retry, edit-one-liner recovery, editable chips + textarea + `FeatureListEditor` + delivery toggle). Double-charge mount guard replicated. `OneLinerStep` flags `understandingLoading` on submit.
+- **Field-drop cascade fixed (17 readers, not 15 — +2 dogfood scripts).** Re-pointed `inferDefaultPalette` (hearth + lex) haystack → `services/outcomes/whatYouDo` (semantic regression PO flagged; verified discriminates via `paletteSelection.regression.test.ts`). Updated prompts, route Zods, `types/service.ts`, golden/contract fixtures.
+- `npm run build` green; contract/golden + palette-regression tests pass.
+- **GATE 1 (pending human):** run real-site inference on 2–3 live agency/consultant/coach pages; confirm copy quality + non-overlap before Slices 2/3.
+
+### Slice 2 — Website import ✅ DONE (2026-06-18)
+- Branched `/api/v2/scrape-website` by `audienceType` (default product) — new `scrapeWebsiteService.schema.ts` + `promptScrape.ts` (verbatim/no-fabricate rules copied exactly); fetch/crawl/SSRF/credits unchanged; service `MOCK_DATA_SERVICE` for demo.
+- Store gained `businessName` + `importSourceUrl` + `importedTestimonials` (+ setters).
+- Service `OneLinerStep`: orange import box + optional business-name input. `handleImport` fetches persona **in parallel** with scrape and derives `serviceType` (`?? 'agency'`) → closes the import + instant-confirm race; hydrates store; lands on Understanding confirm; manual fallback on failure. Import sets understanding directly (not loading) → no double-charge.
+- `AssetsStep`: confirm-after-import — pre-checks `hasTestimonials`+`type='text'`, renders imported quotes w/ remove, **recomputes `hasTestimonials` on full removal** (unless user manually toggled).
+- `businessName` threaded into title + strategy + copy prompts (parity with product `productName`); optional Zod on both routes.
+- Build green; contract/golden + palette-regression tests pass.
+- **Runtime check pending (human):** live import as consultant/coach → confirm serviceType not agency; 1 credit not 2 (no `/understand` call).
+
+### Slice 3 — Imported testimonials → copy ✅ DONE (2026-06-18)
+- `injectRealTestimonials` added to service `parseCopy.ts`: overwrites the FLAT single `PullQuoteWithMark` block (quote/author_name/author_role) with the **best** imported quote (attributed + length heuristic, `pickBestTestimonial`); **clears `author_company`** so a real quote isn't paired with a fabricated company. No-op+warn if no testimonials section.
+- `generate-copy/route.ts`: optional `realTestimonials` Zod; injected before `processServiceCopy` in **both** mock + production branches.
+- `GeneratingStep` threads `importedTestimonials` → `realTestimonials` in the copy body.
+- Build green; new `injectRealTestimonials.test.ts` (4 cases: overwrite+clear-company, pick-best, no-section no-op, empty) + full suite pass.
+
+### Standalone (decoupled) — not started
+Palette-swatch multi-tone fix (#7, coordinate w/ Slice-1 palette work); optional business-name field; PostHog step events → product (own PR).

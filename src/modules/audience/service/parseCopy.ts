@@ -8,6 +8,8 @@ import type { SectionCopy } from '@/types/generation';
 import { applyAllSchemaDefaults } from '@/modules/sections/layoutElementSchema';
 import { serviceElementSchema } from './elementSchema';
 import { applyItalicEmFallback } from './italicAccentFallback';
+import { logger } from '@/lib/logger';
+import type { ScrapedTestimonial } from '@/lib/schemas';
 
 export interface ServiceCopyValidationResult {
   complete: boolean;
@@ -53,6 +55,52 @@ export function backfillCollectionIds(
       }
     }
   }
+
+  return sections;
+}
+
+/**
+ * Replace the generated testimonial with a REAL (verbatim) one imported from the
+ * user's website. Done AFTER the LLM and BEFORE processServiceCopy (so schema
+ * defaults still apply) — guarantees exact wording with zero rewrite risk.
+ *
+ * UNLIKE product (a `testimonials` collection array), the service Hearth/Lex
+ * testimonials block `PullQuoteWithMark` is a FLAT single block, so we overwrite
+ * its `quote`/`author_name`/`author_role` directly with the single best import.
+ * `author_company` is cleared — the scrape shape carries no company and the AI's
+ * guess would falsely attribute a real quote.
+ *
+ * No-op (with a warn) if no testimonials section was produced — defensive guard;
+ * import pre-checks `hasTestimonials` so the section is normally present.
+ */
+function pickBestTestimonial(real: ScrapedTestimonial[]): ScrapedTestimonial {
+  // Prefer an attributed, substantial quote over an anonymous/thin one.
+  const score = (t: ScrapedTestimonial) =>
+    (t.author_name?.trim() ? 2 : 0) + Math.min(t.quote?.length ?? 0, 280) / 280;
+  return [...real].sort((a, b) => score(b) - score(a))[0];
+}
+
+export function injectRealTestimonials(
+  sections: Record<string, SectionCopy>,
+  real: ScrapedTestimonial[]
+): Record<string, SectionCopy> {
+  if (!real?.length) return sections;
+
+  const section = sections['testimonials'];
+  if (!section || !section.elements) {
+    logger.warn(
+      '[injectRealTestimonials/service] no testimonials section in copy; skipping injection'
+    );
+    return sections;
+  }
+
+  const best = pickBestTestimonial(real);
+  const el = section.elements as Record<string, unknown>;
+  el.quote = best.quote;
+  el.author_name = best.author_name;
+  el.author_role = best.author_role;
+  // Clear AI-guessed company so a real quote isn't paired with a fabricated one.
+  el.author_company = '';
 
   return sections;
 }

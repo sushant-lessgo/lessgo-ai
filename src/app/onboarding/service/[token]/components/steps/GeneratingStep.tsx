@@ -30,10 +30,12 @@ export default function GeneratingStep() {
   const posthog = usePostHog();
 
   const oneLiner = useServiceGenerationStore((s) => s.oneLiner);
+  const businessName = useServiceGenerationStore((s) => s.businessName);
   const understanding = useServiceGenerationStore((s) => s.understanding);
   const goal = useServiceGenerationStore((s) => s.goal);
   const offer = useServiceGenerationStore((s) => s.offer);
   const assets = useServiceGenerationStore((s) => s.assets);
+  const importedTestimonials = useServiceGenerationStore((s) => s.importedTestimonials);
   const paletteId = useServiceGenerationStore((s) => s.paletteId);
   const setStrategy = useServiceGenerationStore((s) => s.setStrategy);
   const setGenerationError = useServiceGenerationStore((s) => s.setGenerationError);
@@ -80,7 +82,7 @@ export default function GeneratingStep() {
       };
     });
 
-    const title = (oneLiner || 'Untitled Studio').slice(0, 50);
+    const title = (businessName.trim() || oneLiner || 'Untitled Studio').slice(0, 50);
 
     return {
       finalContent: {
@@ -103,6 +105,7 @@ export default function GeneratingStep() {
         },
         onboardingData: {
           oneLiner,
+          businessName,
           understanding,
           goal,
           offer,
@@ -134,6 +137,7 @@ export default function GeneratingStep() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           oneLiner,
+          businessName,
           understanding,
           goal,
           offer,
@@ -175,9 +179,11 @@ export default function GeneratingStep() {
           strategy,
           uiblocks: strategy.uiblocks,
           oneLiner,
+          businessName,
           offer,
           goal,
           understanding,
+          realTestimonials: importedTestimonials,
         }),
       });
       const json = await res.json();
@@ -240,7 +246,9 @@ export default function GeneratingStep() {
     goal,
     assets,
     oneLiner,
+    businessName,
     offer,
+    importedTestimonials,
     paletteId,
     tokenId,
     posthog,

@@ -43,10 +43,10 @@ const SCHEMAS = {
 
 const understanding: ServiceUnderstandingInput = {
   serviceType: 'agency',
-  serviceCategories: ['branding'],
-  industries: ['dtc'],
-  targetClients: 'DTC founders at $300k-$2M ARR',
+  whatYouDo: 'Brand and web studio for DTC skincare founders',
   services: ['Brand identity', 'Packaging', 'Website refresh'],
+  targetClients: ['DTC founders at $300k-$2M ARR'],
+  outcomes: ['Launch-ready in 4 weeks', 'Conversion-focused copy'],
   deliveryModel: 'remote',
 };
 

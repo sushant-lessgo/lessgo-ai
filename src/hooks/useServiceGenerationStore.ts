@@ -14,13 +14,14 @@ import type {
   ServiceStrategyOutput,
 } from '@/types/service';
 import { defaultVariantForTemplate } from '@/types/service';
+import type { ScrapedTestimonial } from '@/lib/schemas';
 
 /**
  * Service generation flow steps
  */
 export const SERVICE_GENERATION_STEPS = [
   'oneLiner', // 0: User describes the service
-  'understanding', // 1: AI extracts service type, categories, industries
+  'understanding', // 1: AI extracts whatYouDo, services, targetClients, outcomes
   'goal', // 2: Primary CTA
   'offer', // 3: What does the visitor get
   'assets', // 4: Testimonials/logos/outcomes/case-studies/photos
@@ -31,12 +32,26 @@ export const SERVICE_GENERATION_STEPS = [
 
 export type ServiceGenerationStep = (typeof SERVICE_GENERATION_STEPS)[number];
 
+// Lean, de-overlapped service understanding (mirrors product's 4-field UX 1:1).
+// serviceType is persona-seeded (no UI badge) and kept for strategy / section
+// selection / palette fallback. The other five map onto the product shape:
+//   whatYouDo ≈ whatItDoes, services ≈ categories, targetClients ≈ audiences,
+//   outcomes ≈ features. deliveryModel is service-specific.
 export interface ServiceUnderstanding {
   serviceType: ServiceType;
-  serviceCategories: string[];
-  industries: string[];
-  targetClients: string;
+  whatYouDo: string;
   services: string[];
+  targetClients: string[];
+  outcomes: string[];
+  deliveryModel: 'remote' | 'in-person' | 'hybrid';
+}
+
+/** Service-shaped AI extraction (no serviceType — that's persona-derived). */
+export interface ServiceUnderstandingExtract {
+  whatYouDo: string;
+  services: string[];
+  targetClients: string[];
+  outcomes: string[];
   deliveryModel: 'remote' | 'in-person' | 'hybrid';
 }
 
@@ -57,11 +72,18 @@ interface ServiceGenerationState {
 
   // Step 0
   oneLiner: string;
+  // Optional studio/business name (manual or import-prefilled). Used for the
+  // draft title and threaded into strategy/copy for brand-aware wording.
+  businessName: string;
 
   // Step 1
   understanding: ServiceUnderstanding | null;
   understandingLoading: boolean;
   understandingError: string | null;
+
+  // Website import (optional) — carried forward into AssetsStep + copy.
+  importSourceUrl: string | null;
+  importedTestimonials: ScrapedTestimonial[];
 
   // Step 2
   goal: ServiceGoal | null;
@@ -94,10 +116,14 @@ interface ServiceGenerationActions {
   prevStep: () => void;
 
   setOneLiner: (value: string) => void;
+  setBusinessName: (value: string) => void;
+  setImportSourceUrl: (url: string | null) => void;
+  setImportedTestimonials: (testimonials: ScrapedTestimonial[]) => void;
 
   setUnderstanding: (data: ServiceUnderstanding) => void;
   setUnderstandingLoading: (loading: boolean) => void;
   setUnderstandingError: (error: string | null) => void;
+  resetUnderstanding: () => void;
 
   setGoal: (goal: ServiceGoal) => void;
   setOffer: (offer: string) => void;
@@ -124,9 +150,12 @@ const initialState: ServiceGenerationState = {
   currentStep: 'oneLiner',
   stepIndex: 0,
   oneLiner: '',
+  businessName: '',
   understanding: null,
   understandingLoading: false,
   understandingError: null,
+  importSourceUrl: null,
+  importedTestimonials: [],
   goal: null,
   offer: '',
   assets: null,
@@ -172,6 +201,18 @@ export const useServiceGenerationStore = create<ServiceGenerationStore>()(
         set((state) => {
           state.oneLiner = value;
         }),
+      setBusinessName: (value) =>
+        set((state) => {
+          state.businessName = value;
+        }),
+      setImportSourceUrl: (url) =>
+        set((state) => {
+          state.importSourceUrl = url;
+        }),
+      setImportedTestimonials: (testimonials) =>
+        set((state) => {
+          state.importedTestimonials = testimonials;
+        }),
 
       setUnderstanding: (data) =>
         set((state) => {
@@ -187,6 +228,12 @@ export const useServiceGenerationStore = create<ServiceGenerationStore>()(
         set((state) => {
           state.understandingError = error;
           state.understandingLoading = false;
+        }),
+      resetUnderstanding: () =>
+        set((state) => {
+          state.understanding = null;
+          state.understandingLoading = false;
+          state.understandingError = null;
         }),
 
       setGoal: (goal) =>

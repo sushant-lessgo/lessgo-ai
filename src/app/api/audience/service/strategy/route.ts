@@ -32,12 +32,13 @@ const DEMO_TOKEN = 'lessgodemomockdata';
 
 const ServiceStrategyRequestSchema = z.object({
   oneLiner: z.string().min(10, 'One-liner must be at least 10 characters'),
+  businessName: z.string().optional(),
   understanding: z.object({
     serviceType: z.enum(serviceTypes as unknown as [string, ...string[]]),
-    serviceCategories: z.array(z.string()).default([]),
-    industries: z.array(z.string()).default([]),
-    targetClients: z.string().min(1, 'Target clients required'),
+    whatYouDo: z.string().min(1, 'What you do is required'),
     services: z.array(z.string()).min(1, 'At least one service required'),
+    targetClients: z.array(z.string()).min(1, 'At least one target client required'),
+    outcomes: z.array(z.string()).default([]),
     deliveryModel: z.enum(['remote', 'in-person', 'hybrid']),
   }),
   goal: z.enum(serviceGoals as unknown as [string, ...string[]]),
@@ -109,6 +110,7 @@ async function serviceStrategyHandler(req: NextRequest): Promise<Response> {
     // 3. Build prompt
     const prompt = buildServiceStrategyPrompt({
       oneLiner: data.oneLiner,
+      businessName: data.businessName,
       understanding: data.understanding as any,
       goal: data.goal as any,
       offer: data.offer,

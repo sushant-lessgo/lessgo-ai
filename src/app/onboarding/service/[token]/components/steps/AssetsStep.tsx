@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { Quote, X } from 'lucide-react';
 import { useServiceGenerationStore } from '@/hooks/useServiceGenerationStore';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -38,17 +39,38 @@ export default function AssetsStep() {
   const posthog = usePostHog();
   const assets = useServiceGenerationStore((s) => s.assets);
   const setAssets = useServiceGenerationStore((s) => s.setAssets);
+  const importedTestimonials = useServiceGenerationStore((s) => s.importedTestimonials);
+  const setImportedTestimonials = useServiceGenerationStore((s) => s.setImportedTestimonials);
   const nextStep = useServiceGenerationStore((s) => s.nextStep);
 
-  const [hasTestimonials, setHasTestimonials] = useState(assets?.hasTestimonials ?? false);
+  const hasImported = importedTestimonials.length > 0;
+
+  // Import pre-fills testimonial availability → this step becomes a confirm.
+  const [hasTestimonials, setHasTestimonials] = useState(
+    assets?.hasTestimonials ?? hasImported
+  );
   const [hasClientLogos, setHasClientLogos] = useState(assets?.hasClientLogos ?? false);
   const [hasOutcomes, setHasOutcomes] = useState(assets?.hasOutcomes ?? false);
   const [hasCaseStudies, setHasCaseStudies] = useState(assets?.hasCaseStudies ?? false);
   const [hasTeamPhotos, setHasTeamPhotos] = useState(assets?.hasTeamPhotos ?? false);
   const [hasFounderPhoto, setHasFounderPhoto] = useState(assets?.hasFounderPhoto ?? false);
   const [testimonialType, setTestimonialType] = useState<TestimonialType | null>(
-    (assets?.testimonialType as TestimonialType | null) ?? null
+    (assets?.testimonialType as TestimonialType | null) ?? (hasImported ? 'text' : null)
   );
+  // Track whether the user manually toggled testimonials, so removing the last
+  // imported quote can safely flip the auto-set flag back off (but never override
+  // a deliberate user choice).
+  const [testimonialsTouched, setTestimonialsTouched] = useState(false);
+
+  const removeImportedTestimonial = (index: number) => {
+    const next = importedTestimonials.filter((_, i) => i !== index);
+    setImportedTestimonials(next);
+    // Full removal + user hasn't manually toggled → drop the auto-set availability
+    // so sectionSelection doesn't force an empty testimonials section.
+    if (next.length === 0 && !testimonialsTouched) {
+      setHasTestimonials(false);
+    }
+  };
 
   useEffect(() => {
     posthog?.capture('service_onboarding_step_view', {
@@ -102,10 +124,47 @@ export default function AssetsStep() {
           What do you have to work with?
         </h1>
         <p className="mt-2 text-gray-600">
-          Toggle on what you already have. We&apos;ll only build sections you
-          can actually fill in. You can flip any of these later.
+          {hasImported
+            ? 'We pulled these from your site. Confirm what you have — toggle anything off you can’t actually use. You can flip these later.'
+            : 'Toggle on what you already have. We’ll only build sections you can actually fill in. You can flip any of these later.'}
         </p>
       </div>
+
+      {importedTestimonials.length > 0 && (
+        <div className="space-y-3">
+          <div>
+            <Label className="text-gray-700">Testimonials from your website</Label>
+            <p className="text-xs text-gray-500 mt-1">
+              We&apos;ll add these to your page word-for-word. Remove any you don&apos;t want.
+            </p>
+          </div>
+          <div className="space-y-2">
+            {importedTestimonials.map((t, i) => (
+              <div
+                key={i}
+                className="relative rounded-lg border border-gray-200 bg-gray-50 p-3 pr-9"
+              >
+                <Quote className="w-3.5 h-3.5 text-brand-accentPrimary mb-1" />
+                <p className="text-sm text-gray-800">&ldquo;{t.quote}&rdquo;</p>
+                {(t.author_name || t.author_role) && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    {[t.author_name, t.author_role].filter(Boolean).join(' · ')}
+                  </p>
+                )}
+                <button
+                  type="button"
+                  onClick={() => removeImportedTestimonial(i)}
+                  title="Remove"
+                  className="absolute top-2 right-2 p-1 rounded-full text-gray-400
+                             hover:bg-red-50 hover:text-red-600 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="space-y-2">
         {ASSET_FIELDS.map(({ key, label, hint }) => {
@@ -114,7 +173,10 @@ export default function AssetsStep() {
             <button
               type="button"
               key={key}
-              onClick={() => setter(!val)}
+              onClick={() => {
+                setter(!val);
+                if (key === 'hasTestimonials') setTestimonialsTouched(true);
+              }}
               className={`w-full text-left p-4 rounded-lg border transition-all flex items-start justify-between ${
                 val
                   ? 'border-brand-accentPrimary bg-brand-accentPrimary/5'

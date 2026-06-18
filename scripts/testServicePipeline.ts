@@ -42,9 +42,9 @@ const SAMPLE_INPUT: SampleInput = {
   oneLiner: 'Boutique branding studio for direct-to-consumer skincare brands.',
   understanding: {
     serviceType: 'agency',
-    serviceCategories: ['Branding', 'Packaging Design'],
-    industries: ['Skincare', 'Beauty', 'DTC'],
-    targetClients: 'Founders launching DTC skincare brands at $300k–$2M ARR',
+    whatYouDo: 'Boutique branding studio for DTC skincare brands',
+    targetClients: ['Founders launching DTC skincare brands at $300k–$2M ARR'],
+    outcomes: ['Launch-ready brand in 4 weeks', 'Shelf-ready packaging system', 'Senior designers only'],
     services: ['Brand identity', 'Packaging design', 'Web design'],
     deliveryModel: 'remote',
   },

@@ -19,15 +19,19 @@ import { withAIRateLimit } from '@/lib/rateLimit';
 import { requireAuth } from '@/lib/middleware/planCheck';
 import { consumeCredits, CREDIT_COSTS, UsageEventType } from '@/lib/creditSystem';
 import { generateWithSchema } from '@/lib/aiClient';
-import { ScrapeWebsiteSchema } from '@/lib/schemas';
-import type { ScrapeWebsiteData } from '@/lib/schemas';
+import { ScrapeWebsiteSchema, ScrapeWebsiteServiceSchema } from '@/lib/schemas';
+import type { ScrapeWebsiteData, ScrapeWebsiteServiceData } from '@/lib/schemas';
+import { buildServiceScrapePrompt } from '@/modules/audience/service/promptScrape';
 import { isDemoMode } from '@/lib/mockMode';
 import { scrapeSite, ScrapeError } from '@/lib/scrape/fetchSite';
 
 export const dynamic = 'force-dynamic';
 
+// audienceType selects the extraction schema + prompt + mock; the fetch/crawl/
+// SSRF/credit/auth plumbing is audience-agnostic.
 const ScrapeRequestSchema = z.object({
   url: z.string().url('Enter a valid website URL'),
+  audienceType: z.enum(['product', 'service']).optional().default('product'),
 });
 
 function buildScrapePrompt(combinedText: string): string {
@@ -79,6 +83,26 @@ const MOCK_DATA: ScrapeWebsiteData = {
   ],
 };
 
+const MOCK_DATA_SERVICE: ScrapeWebsiteServiceData = {
+  oneLiner: 'Boutique branding studio for direct-to-consumer skincare brands',
+  businessName: 'Studio Hearth',
+  whatYouDo:
+    'We build conversion-focused brand identities and marketing sites that turn skincare browsers into buyers.',
+  services: ['Brand identity', 'Packaging design', 'Marketing site'],
+  targetClients: ['DTC skincare founders', 'Early-stage beauty brands'],
+  outcomes: ['Launch-ready in 4 weeks', 'Senior designers only', 'Conversion-focused copy'],
+  deliveryModel: 'remote',
+  offer: 'Free 30-min brand audit, no obligation',
+  goal: 'book-call',
+  testimonials: [
+    {
+      quote: 'Studio Hearth rebranded us and our launch sold out in 48 hours.',
+      author_name: 'Priya Shah',
+      author_role: 'Founder, Lumen Skin',
+    },
+  ],
+};
+
 async function scrapeHandler(req: NextRequest): Promise<Response> {
   const startTime = Date.now();
 
@@ -92,7 +116,8 @@ async function scrapeHandler(req: NextRequest): Promise<Response> {
         400
       );
     }
-    const { url } = validation.data;
+    const { url, audienceType } = validation.data;
+    const isService = audienceType === 'service';
 
     // 2. Auth
     const authCheck = await requireAuth(req);
@@ -106,10 +131,10 @@ async function scrapeHandler(req: NextRequest): Promise<Response> {
 
     // 2b. Demo/mock mode — no network, no AI call.
     if (isDemoMode(req)) {
-      logger.info('[scrape-website] Using mock response');
+      logger.info(`[scrape-website] Using mock response (${audienceType})`);
       return createSecureResponse({
         success: true,
-        data: MOCK_DATA,
+        data: isService ? MOCK_DATA_SERVICE : MOCK_DATA,
         creditsUsed: 0,
         creditsRemaining: 999,
       });
@@ -145,15 +170,22 @@ async function scrapeHandler(req: NextRequest): Promise<Response> {
       );
     }
 
-    // 4. ONE AI call with structured outputs
-    let data: ScrapeWebsiteData;
+    // 4. ONE AI call with structured outputs (audience-specific schema + prompt)
+    let data: ScrapeWebsiteData | ScrapeWebsiteServiceData;
     try {
-      data = await generateWithSchema(
-        'understand', // reuse the cheap-tier model config
-        [{ role: 'user', content: buildScrapePrompt(combinedText) }],
-        ScrapeWebsiteSchema,
-        'scrape_website'
-      );
+      data = isService
+        ? await generateWithSchema(
+            'understand', // reuse the cheap-tier model config
+            [{ role: 'user', content: buildServiceScrapePrompt(combinedText) }],
+            ScrapeWebsiteServiceSchema,
+            'scrape_website_service'
+          )
+        : await generateWithSchema(
+            'understand',
+            [{ role: 'user', content: buildScrapePrompt(combinedText) }],
+            ScrapeWebsiteSchema,
+            'scrape_website'
+          );
     } catch (error: any) {
       logger.error('[scrape-website] AI extraction failed:', error);
       return createSecureResponse(
@@ -176,6 +208,7 @@ async function scrapeHandler(req: NextRequest): Promise<Response> {
         endpoint: '/api/v2/scrape-website',
         duration: Date.now() - startTime,
         metadata: {
+          audienceType,
           pageCount,
           textLength: combinedText.length,
           testimonialsFound: data.testimonials.length,

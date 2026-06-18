@@ -13,6 +13,7 @@ import { assertNoTemplateLeak } from '../promptFirewall';
 
 export interface ServiceStrategyPromptInput {
   oneLiner: string;
+  businessName?: string;
   understanding: ServiceUnderstandingInput;
   goal: ServiceGoal;
   offer: string;
@@ -21,7 +22,7 @@ export interface ServiceStrategyPromptInput {
 
 export function buildServiceStrategyPrompt(input: ServiceStrategyPromptInput): string {
   assertNoTemplateLeak(input, 'buildServiceStrategyPrompt');
-  const { oneLiner, understanding, goal, offer, assets } = input;
+  const { oneLiner, businessName, understanding, goal, offer, assets } = input;
 
   const assetSummary = [
     assets.hasTestimonials && `client testimonials (${assets.testimonialType ?? 'text'})`,
@@ -39,11 +40,12 @@ export function buildServiceStrategyPrompt(input: ServiceStrategyPromptInput): s
 ## Provider
 
 **One-liner:** ${oneLiner}
+**Business name:** ${businessName || '—'}
 **Service type:** ${understanding.serviceType}
-**Service categories:** ${understanding.serviceCategories.join(', ') || '—'}
-**Industries served:** ${understanding.industries.join(', ') || '—'}
-**Target clients:** ${understanding.targetClients}
+**What they do:** ${understanding.whatYouDo}
+**Target clients:** ${understanding.targetClients.join(', ') || '—'}
 **Services offered:** ${understanding.services.join(', ') || '—'}
+**Outcomes / differentiators:** ${understanding.outcomes.join(', ') || '—'}
 **Delivery model:** ${understanding.deliveryModel}
 
 ## Landing Goal

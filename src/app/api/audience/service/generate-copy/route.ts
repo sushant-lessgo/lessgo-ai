@@ -26,6 +26,7 @@ import {
 import {
   processServiceCopy,
   validateServiceCopyCompleteness,
+  injectRealTestimonials,
 } from '@/modules/audience/service/parseCopy';
 import { generateMockServiceCopy } from '@/modules/prompt/mockResponseGeneratorService';
 import {
@@ -83,16 +84,27 @@ const GenerateServiceCopyRequestSchema = z.object({
   strategy: AssembledStrategySchema,
   uiblocks: z.record(z.string()),
   oneLiner: z.string().min(10),
+  businessName: z.string().optional(),
   offer: z.string().min(1),
   goal: z.enum(serviceGoals as unknown as [string, ...string[]]),
   understanding: z.object({
     serviceType: z.enum(serviceTypes as unknown as [string, ...string[]]),
-    serviceCategories: z.array(z.string()).default([]),
-    industries: z.array(z.string()).default([]),
-    targetClients: z.string(),
+    whatYouDo: z.string().min(1),
     services: z.array(z.string()).min(1),
+    targetClients: z.array(z.string()).min(1),
+    outcomes: z.array(z.string()).default([]),
     deliveryModel: z.enum(['remote', 'in-person', 'hybrid']),
   }),
+  // Verbatim testimonials imported from the user's site (optional).
+  realTestimonials: z
+    .array(
+      z.object({
+        quote: z.string(),
+        author_name: z.string(),
+        author_role: z.string(),
+      })
+    )
+    .optional(),
 });
 
 async function serviceCopyHandler(req: NextRequest): Promise<Response> {
@@ -109,7 +121,7 @@ async function serviceCopyHandler(req: NextRequest): Promise<Response> {
         400
       );
     }
-    const { strategy, uiblocks, oneLiner, offer, goal, understanding } = validation.data;
+    const { strategy, uiblocks, oneLiner, businessName, offer, goal, understanding, realTestimonials } = validation.data;
 
     // 2. Auth
     const authCheck = await requireAuth(req);
@@ -126,12 +138,15 @@ async function serviceCopyHandler(req: NextRequest): Promise<Response> {
     const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
     if (process.env.NEXT_PUBLIC_USE_MOCK_GPT === 'true' || token === DEMO_TOKEN) {
       logger.info('[Service Copy] Using mock response');
-      const mockSections = generateMockServiceCopy({
+      let mockSections = generateMockServiceCopy({
         strategy: strategy as any,
         uiblocks,
         oneLiner,
         offer,
       });
+      if (realTestimonials?.length) {
+        mockSections = injectRealTestimonials(mockSections, realTestimonials);
+      }
       const processed = processServiceCopy(mockSections, uiblocks);
       return createSecureResponse({
         success: true,
@@ -147,6 +162,7 @@ async function serviceCopyHandler(req: NextRequest): Promise<Response> {
       strategy: strategy as any,
       uiblocks,
       oneLiner,
+      businessName,
       offer,
       goal: goal as any,
       understanding: understanding as any,
@@ -186,7 +202,11 @@ async function serviceCopyHandler(req: NextRequest): Promise<Response> {
       );
     }
 
-    // 5. Process — schema defaults + italic-em fallback
+    // 5. Inject verbatim imported testimonials (before processing so defaults
+    // still apply), then process — schema defaults + italic-em fallback.
+    if (realTestimonials?.length) {
+      sections = injectRealTestimonials(sections, realTestimonials);
+    }
     const processed = processServiceCopy(sections, uiblocks);
 
     const { complete, missingSections } = validateServiceCopyCompleteness(processed, uiblocks);

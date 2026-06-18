@@ -3,7 +3,7 @@
 // Reference: newServiceOnboarding.md §6 (Step 6 default pre-selection).
 //
 // Strategy: score each palette by # of substring hits across the user's
-// industries[] + serviceCategories[]. Highest score wins. Ties / zero hits
+// services[] + outcomes[] + whatYouDo. Highest score wins. Ties / zero hits
 // fall back to a serviceType→palette map. Final fallback: terracotta.
 // Deterministic, no LLM, runs synchronously on Style step mount.
 
@@ -42,9 +42,12 @@ export function inferDefaultPalette(
 ): HearthPalette {
   if (!understanding) return defaultHearthPalette;
 
+  // Score across the lean understanding's free-text signal (services +
+  // outcomes + whatYouDo) — industries/serviceCategories were removed.
   const haystack = [
-    ...(understanding.industries ?? []),
-    ...(understanding.serviceCategories ?? []),
+    understanding.whatYouDo ?? '',
+    ...(understanding.services ?? []),
+    ...(understanding.outcomes ?? []),
   ]
     .join(' ')
     .toLowerCase();

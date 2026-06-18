@@ -38,9 +38,12 @@ export function inferDefaultPalette(
 ): LexPalette {
   if (!understanding) return defaultLexPalette;
 
+  // Score across the lean understanding's free-text signal (services +
+  // outcomes + whatYouDo) — industries/serviceCategories were removed.
   const haystack = [
-    ...(understanding.industries ?? []),
-    ...(understanding.serviceCategories ?? []),
+    understanding.whatYouDo ?? '',
+    ...(understanding.services ?? []),
+    ...(understanding.outcomes ?? []),
   ]
     .join(' ')
     .toLowerCase();
