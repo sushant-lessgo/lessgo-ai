@@ -14,6 +14,7 @@ import { MeridianEditable } from '../../components/MeridianEditable';
 import { LinkTargetPopover } from '../../components/LinkTargetPopover';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { buildSectionLinkOptions } from '@/utils/sectionAnchors';
+import { buildPageLinkOptions } from '@/utils/pageLinks';
 
 interface FooterLink {
   id: string;
@@ -48,11 +49,12 @@ export default function HairlineFooter({ sectionId }: HairlineFooterProps) {
   // Newsletter capture: one-click auto-provisions a dashboard-backed form and
   // connects it to newsletter_cta (buttonConfig.formId). Once connected, the
   // published footer renders a live email-capture widget.
-  const { content, addForm, deleteForm, getFormById, setSection, sections } = useEditStore();
+  const { content, addForm, deleteForm, getFormById, setSection, sections, pages } = useEditStore();
   const sectionOptions = React.useMemo(
     () => buildSectionLinkOptions(sections || []),
     [sections]
   );
+  const pageOptions = React.useMemo(() => buildPageLinkOptions(pages), [pages]);
   const newsletterFormId: string | undefined =
     content?.[sectionId]?.elementMetadata?.newsletter_cta?.buttonConfig?.formId;
   const isNewsletterConnected = !!(newsletterFormId && getFormById?.(newsletterFormId));
@@ -247,6 +249,7 @@ export default function HairlineFooter({ sectionId }: HairlineFooterProps) {
                       <LinkTargetPopover
                         href={link.href}
                         sectionOptions={sectionOptions}
+                        pageOptions={pageOptions}
                         onChange={(href) => updateLinkHref(col.id, linkIdx, href)}
                         triggerClassName="mrd-footer__link-cfg"
                       />

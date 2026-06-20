@@ -193,6 +193,8 @@ export type {
   PageAxisState,
   PageActions,
   SectionSpacing,
+  ChromeEntry,
+  ChromeState,
 } from './pages';
 
 // Complete EditStore interface combining all slices and actions

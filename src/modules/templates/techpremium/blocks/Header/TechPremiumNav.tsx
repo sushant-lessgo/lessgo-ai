@@ -11,6 +11,7 @@ import { TechPremiumEditable } from '../../components/TechPremiumEditable';
 import { LinkTargetPopover } from '../../components/LinkTargetPopover';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { buildSectionLinkOptions } from '@/utils/sectionAnchors';
+import { buildPageLinkOptions } from '@/utils/pageLinks';
 
 interface NavItem {
   id: string;
@@ -43,11 +44,12 @@ export default function TechPremiumNav({ sectionId }: TechPremiumNavProps) {
 
   const navItems = blockContent.nav_items || [];
 
-  const { sections } = useEditStore();
+  const { sections, pages } = useEditStore();
   const sectionOptions = React.useMemo(
     () => buildSectionLinkOptions(sections || []),
     [sections]
   );
+  const pageOptions = React.useMemo(() => buildPageLinkOptions(pages), [pages]);
 
   const updateNavLabel = (id: string, label: string) => {
     handleCollectionUpdate('nav_items', navItems.map((n) => (n.id === id ? { ...n, label } : n)));
@@ -105,6 +107,7 @@ export default function TechPremiumNav({ sectionId }: TechPremiumNavProps) {
                   <LinkTargetPopover
                     href={item.href}
                     sectionOptions={sectionOptions}
+                    pageOptions={pageOptions}
                     onChange={(href) => updateNavHref(item.id, href)}
                     triggerClassName="tp-nav-link-cfg"
                   />

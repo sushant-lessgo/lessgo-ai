@@ -12,6 +12,10 @@ import type { SectionType } from '@/types/core/content';
 import { logger } from '@/lib/logger';
 import { getSectionTypeFromLayout } from '@/utils/layoutSectionTypeMapping';
 import { ElementToggleModal } from '../ui/ElementToggleModal';
+import { isChromeId } from '@/hooks/editStore/pageHelpers';
+
+// Shared chrome (header/footer) is site-wide: hide per-page structural actions.
+const CHROME_HIDDEN_ACTIONS = ['move-up', 'move-down', 'duplicate', 'delete'];
 
 interface SectionToolbarProps {
   sectionId: string;
@@ -208,7 +212,7 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
         }
       },
     },
-  ];
+  ].filter((action) => !isChromeId(sectionId) || !CHROME_HIDDEN_ACTIONS.includes(action.id));
 
   // Check if this specific section is being regenerated
   const isRegenerating = aiGeneration.isGenerating && 
@@ -342,9 +346,15 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
             <span className="text-xs font-medium text-gray-700">
               {sectionId.charAt(0).toUpperCase() + sectionId.slice(1)}
             </span>
-            <span className="text-xs text-gray-500">
-              {validation?.completionPercentage || 0}%
-            </span>
+            {isChromeId(sectionId) ? (
+              <span className="text-[10px] font-medium text-white bg-gray-900/80 rounded px-1.5 py-0.5 whitespace-nowrap">
+                Shared · all pages
+              </span>
+            ) : (
+              <span className="text-xs text-gray-500">
+                {validation?.completionPercentage || 0}%
+              </span>
+            )}
           </div>
           
           {/* Primary Actions */}

@@ -29,9 +29,26 @@ export interface ProjectPageEntry extends PageSlice {
   order: number;
 }
 
+/** A shared chrome entry (header or footer) — one per project, rendered on every page. */
+export interface ChromeEntry {
+  id: string;
+  layout: string;
+  spacing?: SectionSpacing;
+  data: SectionData;
+}
+
+export interface ChromeState {
+  header: ChromeEntry | null;
+  footer: ChromeEntry | null;
+}
+
 export interface PageAxisState {
   pages: Record<string, ProjectPageEntry>;
   currentPageId: string;
+  // Shared site chrome (Phase 2). Canonical source of truth; injected into the
+  // active page's working copy for editing, extracted on commit, and injected
+  // per-page at publish. Stored pages are body-only (no header/footer).
+  chrome: ChromeState;
 }
 
 export interface PageActions {

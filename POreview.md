@@ -1,19 +1,44 @@
-Verdict: Approve Phase 1 — strong plan, fix the scoping before you commit effort.
+Verdict: Solid, well-architected, low-risk — approve with 2 must-fix defects.
 
-  The architecture read is unusually good. I verified every load-bearing seam against code: privacy-subpage precedent, middleware path-preservation (L79/L97), path-aware
-  KV reads, blob key scheme, single store identity, and a genuinely path-agnostic published renderer all check out. The instinct — de-risk the store axis + publish loop 
-  first, defer collections/blocks/chrome — is the right sequencing. Most of the "is this even possible cheaply" risk is retired.
+  The approach is right and high-leverage: instrumentation hook + funneling the 98 logger.error sites through one captureException + targeted captures on the
+  raw-console.error paths (publish/middleware/domains). Additive and DSN-gated, so it can't regress existing behavior. Most claims check out. But two real defects would
+  make it silently capture nothing or send garbage if shipped as written.
 
-  Corrections to fold in (verified inaccuracies)
+  Must-fix
 
-  1. Store mutation surface is ~10× the estimate. Plan says "wrap the ~15 direct mutations." Reality: ~213 state.sections|content|sectionLayouts references across the 5
-  named action files (sectionCRUD 52, layout 57, content 51, core 37, persistence 16) — not all writes, but the surface is an order of magnitude bigger. This is the
-  single biggest under-scope, and it's the heart of Phase 1. The "mirror top-level → active page" trick is what keeps you from editing all 213 sites — but mirror-sync is
-  exactly the shallow-merge/stale-state trap PO-Handover.md flags repeatedly. Budget for it and make the mirror invariant a tested contract, not a footnote.
-  2. The publish route has no loop today — it's a single generateStaticHTML + single uploadStaticSite (L222/L241). Plan's "loop root + ProjectPage rows" reads as if a
-  loop exists to extend; it must be built. Minor, but don't budget it as an edit.
-  3. uploadStaticSite has no pageName param (key hardcoded to index.html) and KV writers hardcode :/ (atomicPublish L142, retry L204). Plan acknowledges both — just
-  confirming they're net-new, not tweaks.
-  4. Static serving of subpages isn't free. Middleware preserves subpaths only on the SSR fallback; the fast blob-proxy path is root-only today (comment: "subpaths fall
-  through"). Your subpage KV writes should light up the fast path — but verify it actually serves subpages from blob, or you ship multi-page that silently SSRs every hit.
-  Add that to the Phase-1 gate explicitly (plan currently only verifies "/contact reaches the catch-all" = the SSR path).
+  1. Server + edge capture will silently never fire. You're on Next 14.2.28, and next.config.js:64 has the experimental block commented out. On Next 14,
+  instrumentation.ts's register() only runs with experimental: { instrumentationHook: true } (it didn't become default until Next 15). The plan's next.config.js section
+  never enables it → server/edge errors captured by nothing, while the build still passes green. Fix: uncomment + add the flag (or confirm the installed @sentry/nextjs
+  version injects it — on 14.2, set it explicitly). This is the headline risk; verification step #2 would eventually catch it, but it should be in the plan.
+  2. The logger.error forwarding snippet is broken pseudocode. Actual signature (logger.ts:64): error(message: LogValue, meta?: MetaValue) where both can be lazy thunks
+  (() => string / () => any), gated by if (shouldLog(LOG_LEVELS.ERROR)). The plan's snippet:
+    - references evalMsg — no such variable; the real param is message, often a function;
+    - passes raw meta to extra and tests meta instanceof Error — but a thunk is never an Error and would serialize as a function.
+
+  Fix: evaluate message/meta first (reuse the file's existing safeEvaluate, currently private in formatMessage), and decide placement vs the shouldLog gate — put
+  captureException outside it so log-suppressed environments still report (or accept prod-only, since ERROR always logs).
+
+  Minor / adjust wording
+
+  - verify-ownership/route.ts has no existing console.error (only verify-dns does, L105) — so "keep the existing console.error" is wrong there; the capture belongs in the
+  VercelApiError catch (there's a VercelApiError type at lib/vercel/domains to branch on).
+  - Cited publish line numbers drifted post-Phase-1 (fatal is L521/522, KV L451, blob L486/495) — match by context, not line.
+  - Quota/noise: forwarding all logger.error includes AI-provider fallbacks that "always fall back" (expected, non-actionable) — these could dominate the 5k/mo free tier
+  and bury real errors. Better than the plan's "tune later": add a beforeSend or a tag/fingerprint to down-rank the known AI-timeout category from day one.
+
+  Confirmed-good (de-risks the plan)
+
+  - removeConsole is { exclude: ['error'] } (next.config.js:41) → console.error survives in prod, so the "Vercel logs as backup" rationale actually holds. ✓
+  - Middleware has exactly 3 console.error sites (L62/74/101), as claimed. ✓
+  - Both domains routes exist with addDomain/getDomainConfig + a VercelApiError to tag on. ✓
+  - .env.example exists (plan's conditional resolves), no pre-existing instrumentation.ts. ✓
+  - Published static pages are genuinely unaffected — they're renderToStaticMarkup output with no Next client bundle, so Sentry client/replay never ships to Naayom's
+  end-visitors (matches the plan's stated scope). ✓
+
+  Unresolved questions
+
+  1. tunnelRoute: '/monitoring' — confirm middleware doesn't rewrite /monitoring on the main app host (it only rewrites custom-domain/subdomain hosts → should pass, but
+  verify no collision).
+  2. instrumentationHook — enable explicitly, or confirm the SDK version auto-injects on Next 14.2?
+  3. AI-fallback errors — filter/down-rank via beforeSend from the start, or accept the noise for v1?
+  4. Tracing sample rate — keep 0.2, or start at 0 (errors-only) to protect free-tier quota until you see volume?

@@ -13,6 +13,7 @@ import { TechPremiumEditable } from '../../components/TechPremiumEditable';
 import { LinkTargetPopover } from '../../components/LinkTargetPopover';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { buildSectionLinkOptions } from '@/utils/sectionAnchors';
+import { buildPageLinkOptions } from '@/utils/pageLinks';
 
 interface FooterLink {
   id: string;
@@ -44,11 +45,12 @@ export default function TechPremiumFooter({ sectionId }: TechPremiumFooterProps)
   const { mode, blockContent, handleContentUpdate, handleCollectionUpdate } =
     useTechPremiumBlock<TechPremiumFooterContent>({ sectionId });
 
-  const { content, addForm, deleteForm, getFormById, setSection, sections } = useEditStore();
+  const { content, addForm, deleteForm, getFormById, setSection, sections, pages } = useEditStore();
   const sectionOptions = React.useMemo(
     () => buildSectionLinkOptions(sections || []),
     [sections]
   );
+  const pageOptions = React.useMemo(() => buildPageLinkOptions(pages), [pages]);
   const newsletterFormId: string | undefined =
     content?.[sectionId]?.elementMetadata?.newsletter_cta?.buttonConfig?.formId;
   const isNewsletterConnected = !!(newsletterFormId && getFormById?.(newsletterFormId));
@@ -229,6 +231,7 @@ export default function TechPremiumFooter({ sectionId }: TechPremiumFooterProps)
                         <LinkTargetPopover
                           href={link.href}
                           sectionOptions={sectionOptions}
+                          pageOptions={pageOptions}
                           onChange={(href) => updateLinkHref(col.id, linkIdx, href)}
                           triggerClassName="tp-footer__link-cfg"
                         />

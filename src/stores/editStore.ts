@@ -135,6 +135,7 @@ function createInitialState(tokenId: string): EditStore {
     // layout/content fields above are the live working copy of `currentPageId`.
     pages: {} as Record<string, import('@/types/store').ProjectPageEntry>,
     currentPageId: '' as string,
+    chrome: { header: null, footer: null } as import('@/types/store').ChromeState,
 
     // UI Slice
     mode: 'edit' as const,
@@ -385,6 +386,7 @@ export function createEditStore(tokenId: string) {
               content: state.content,
               pages: state.pages,
               currentPageId: state.currentPageId,
+              chrome: state.chrome,
               theme: state.theme,
               navigationConfig: state.navigationConfig,
               socialMediaConfig: state.socialMediaConfig,

@@ -15,6 +15,33 @@ import { sanitizeContentForPublish } from '@/modules/sections/layoutElementSchem
 // Force Node.js runtime for ReactDOMServer support
 export const runtime = 'nodejs';
 
+// Multi-page shared chrome (Phase 2): inject the project's shared header/footer
+// into a page's { layout:{sections}, content } so every frozen/generated page is
+// self-contained. Header prepended, footer appended; idempotent.
+function injectChromeIntoPage(layout: any, contentMap: any, chrome: any) {
+  if (!chrome || !layout || !contentMap) return;
+  const sections: string[] = Array.isArray(layout.sections) ? layout.sections : [];
+  const without = sections.filter(
+    (id) => !(chrome.header && id === chrome.header.id) && !(chrome.footer && id === chrome.footer.id),
+  );
+  const next: string[] = [];
+  if (chrome.header?.id) {
+    next.push(chrome.header.id);
+    contentMap[chrome.header.id] = chrome.header.data;
+  }
+  next.push(...without);
+  if (chrome.footer?.id) {
+    next.push(chrome.footer.id);
+    contentMap[chrome.footer.id] = chrome.footer.data;
+  }
+  layout.sections = next;
+}
+
+// First body (non-header/footer) hero section id, for meta description.
+function findHeroId(sections: string[] = []): string | undefined {
+  return sections.find((id) => /^hero/i.test(id)) || sections.find((id) => !/^(header|footer)/i.test(id));
+}
+
 async function publishHandler(req: NextRequest) {
   const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
   const host = req.headers.get("host") || "localhost:3000";
@@ -44,6 +71,21 @@ async function publishHandler(req: NextRequest) {
     // Sanitize: strip excluded elements, set required defaults
     if (content && typeof content === 'object') {
       sanitizeContentForPublish(content as Record<string, any>);
+    }
+
+    // Multi-page (Phase 2): inject shared chrome into the root + every subpage so
+    // each frozen/generated page contains the same header/footer. Done BEFORE the
+    // DB write + static export so published routes need no chrome logic.
+    {
+      const c = content as any;
+      const chrome = c?.chrome;
+      if (chrome && (chrome.header || chrome.footer)) {
+        if (c.layout && c.content) injectChromeIntoPage(c.layout, c.content, chrome);
+        const subs = c.subpages && typeof c.subpages === 'object' ? c.subpages : {};
+        for (const sub of Object.values(subs) as any[]) {
+          if (sub?.layout && sub?.content) injectChromeIntoPage(sub.layout, sub.content, chrome);
+        }
+      }
     }
 
     // Sanitize title - strip HTML tags for meta/OG image safety
@@ -212,8 +254,8 @@ async function publishHandler(req: NextRequest) {
         contentData.forms = {};
       }
 
-      const heroSection = contentData.layout?.sections?.[0];
-      const heroContent = contentData[heroSection];
+      const heroSection = findHeroId(contentData.layout?.sections);
+      const heroContent = heroSection ? contentData[heroSection] : undefined;
       const description =
         heroContent?.elements?.subheadline?.content ||
         heroContent?.elements?.headline?.content ||
@@ -283,7 +325,7 @@ async function publishHandler(req: NextRequest) {
             forms: contentData.forms || {},
             legalPages: contentData.legalPages,
           };
-          const subHero = subFlat[subSections?.[0]];
+          const subHero = subFlat[findHeroId(subSections) || ''];
           const subDesc =
             subHero?.elements?.subheadline?.content ||
             subHero?.elements?.headline?.content ||

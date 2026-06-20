@@ -21,6 +21,7 @@ export interface SectionOption {
 interface LinkTargetPopoverProps {
   href: string;
   sectionOptions: SectionOption[];
+  pageOptions?: SectionOption[]; // cross-page targets (value = pathSlug)
   onChange: (href: string) => void;
   triggerClassName?: string;
 }
@@ -28,16 +29,23 @@ interface LinkTargetPopoverProps {
 export function LinkTargetPopover({
   href,
   sectionOptions,
+  pageOptions = [],
   onChange,
   triggerClassName,
 }: LinkTargetPopoverProps) {
   const isSectionHref = !!href && href.startsWith('#');
-  const [mode, setMode] = useState<'section' | 'url'>(
-    isSectionHref || !href || href === '#' ? 'section' : 'url'
+  const isPageHref = !!href && href.startsWith('/');
+  const [mode, setMode] = useState<'section' | 'url' | 'page'>(
+    isSectionHref || !href || href === '#'
+      ? 'section'
+      : isPageHref && pageOptions.length
+      ? 'page'
+      : 'url'
   );
-  const [urlDraft, setUrlDraft] = useState(isSectionHref ? '' : href === '#' ? '' : href);
+  const [urlDraft, setUrlDraft] = useState(isSectionHref || isPageHref ? '' : href === '#' ? '' : href);
 
   const selectedSection = isSectionHref ? href : '';
+  const selectedPage = isPageHref ? href : '';
 
   return (
     <Popover>
@@ -67,6 +75,17 @@ export function LinkTargetPopover({
               />
               Scroll to section
             </label>
+            {pageOptions.length > 0 && (
+              <label className="flex items-center gap-1.5 cursor-pointer">
+                <input
+                  type="radio"
+                  name="link-target-mode"
+                  checked={mode === 'page'}
+                  onChange={() => setMode('page')}
+                />
+                Link to page
+              </label>
+            )}
             <label className="flex items-center gap-1.5 cursor-pointer">
               <input
                 type="radio"
@@ -88,6 +107,21 @@ export function LinkTargetPopover({
                 Choose section…
               </option>
               {sectionOptions.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          ) : mode === 'page' ? (
+            <select
+              className="w-full rounded-md border border-input bg-transparent px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+              value={pageOptions.some((o) => o.value === selectedPage) ? selectedPage : ''}
+              onChange={(e) => onChange(e.target.value)}
+            >
+              <option value="" disabled>
+                Choose page…
+              </option>
+              {pageOptions.map((o) => (
                 <option key={o.value} value={o.value}>
                   {o.label}
                 </option>

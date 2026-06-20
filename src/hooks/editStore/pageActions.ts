@@ -4,8 +4,8 @@
 // is immediately valid and renderable (no blank-canvas problem, no drag-drop).
 // Real template archetypes replace the clone in Phase 4.
 
-import type { EditStore, ProjectPageEntry } from '@/types/store';
-import { commitActivePage, loadPageIntoActive, findHomeId, HOME_PAGE_ID } from './pageHelpers';
+import type { EditStore, ProjectPageEntry, PageSlice } from '@/types/store';
+import { commitActivePage, loadPageIntoActive, findHomeId, splitChrome, HOME_PAGE_ID } from './pageHelpers';
 import { logger } from '@/lib/logger';
 
 const clone = <T>(v: T): T => JSON.parse(JSON.stringify(v ?? null));
@@ -39,12 +39,16 @@ export function createPageActions(set: any, get: any) {
         // Clone the home slice as the starting point (Phase 1 throwaway archetype).
         const homeId = findHomeId(state.pages);
         const source = (homeId && state.pages[homeId]) || null;
-        const slice = clone({
-          sections: source ? source.sections : state.sections,
-          sectionLayouts: source ? source.sectionLayouts : state.sectionLayouts,
-          sectionSpacing: (source ? source.sectionSpacing : state.sectionSpacing) || {},
-          content: source ? source.content : state.content,
-        });
+        // Body-only clone. splitChrome() guarantees no header/footer leak even if
+        // the source is the (chrome-injected) working copy (PO must-fix #1, site 4).
+        const slice = splitChrome(
+          clone({
+            sections: source ? source.sections : state.sections,
+            sectionLayouts: source ? source.sectionLayouts : state.sectionLayouts,
+            sectionSpacing: (source ? source.sectionSpacing : state.sectionSpacing) || {},
+            content: source ? source.content : state.content,
+          }) as PageSlice,
+        ).body;
         const order = Object.keys(state.pages).length;
         const entry: ProjectPageEntry = {
           id: newId,

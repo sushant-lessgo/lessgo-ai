@@ -5,6 +5,7 @@ import type { Theme, ColorTokens } from '@/types/core/index';
 // ✅ CORRECT
 import type { EditStore, EditHistoryEntry } from '@/types/store';
 import type { LayoutActions } from '@/types/store';
+import { isChromeId } from './pageHelpers';
 // pickFont removed — vibe not persisted, reset uses hardcoded Inter default
 import type { FontTheme, TypographyState } from '@/types/core/index';
 
@@ -132,6 +133,8 @@ export function createLayoutActions(set: any, get: any): LayoutActions {
     
     removeSection: (sectionId: string) =>
       set((state: EditStore) => {
+        // Shared chrome (header/footer) is site-wide; can't be removed per-page.
+        if (isChromeId(sectionId)) return;
         const sectionIndex = state.sections.indexOf(sectionId);
         if (sectionIndex === -1) return;
         
@@ -183,6 +186,7 @@ export function createLayoutActions(set: any, get: any): LayoutActions {
       }),
     
     duplicateSection: (sectionId: string) => {
+      if (isChromeId(sectionId)) return sectionId; // shared chrome isn't per-page duplicable
       const newId = `${sectionId}-copy-${Date.now()}`;
       set((state: EditStore) => {
         const originalSection = state.content[sectionId];
@@ -315,11 +319,15 @@ updateSectionLayout: (sectionId: string, newLayout: string) =>
 // Enhanced moveSection for toolbar integration
 moveSection: (sectionId: string, direction: 'up' | 'down') =>
   set((state: EditStore) => {
+    if (isChromeId(sectionId)) return; // chrome stays pinned (header first, footer last)
     const currentIndex = state.sections.indexOf(sectionId);
     if (currentIndex === -1) return;
-    
+
     const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-    
+
+    // Don't let a body section swap into a chrome slot.
+    if (isChromeId(state.sections[newIndex])) return;
+
     if (newIndex >= 0 && newIndex < state.sections.length) {
       const newSections = [...state.sections];
       [newSections[currentIndex], newSections[newIndex]] = [newSections[newIndex], newSections[currentIndex]];

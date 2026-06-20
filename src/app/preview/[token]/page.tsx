@@ -378,6 +378,8 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
         };
       }
       const safeSubpages = JSON.parse(JSON.stringify(subpages));
+      // Shared chrome (Phase 2) — body pages are chrome-free; publish injects it per page.
+      const safeChrome = exported?.chrome ? JSON.parse(JSON.stringify(exported.chrome)) : undefined;
 
       // Publish the page
       const response = await fetch('/api/publish', {
@@ -393,6 +395,7 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
             forms: safeForms,
             legalPages: legalPages || undefined,
             subpages: safeSubpages,
+            chrome: safeChrome,
           },
           themeValues: {
             primary: colorTokens.accent,

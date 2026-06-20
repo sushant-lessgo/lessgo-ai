@@ -81,9 +81,61 @@ High-fidelity, token-based HTML/CSS/JS references to **port** (not ship verbatim
 
 ---
 
-## Later phases (detail after Phase 1 gate)
+## Phase 1 — STATUS: ✅ DONE (committed `feat/multipage-phase1`, gate verified: subpage served from blob fast path).
 
-- **Phase 2 — Shared chrome + cross-page linking.** Hoist header/footer (+ WhatsApp FAB) to a site-level `sharedChrome` slot rendered once per page; port the designer's dropdown nav + mobile menu. Add an "internal page" link mode to `LinkTargetPopover`, `ButtonConfigurationModal`, `resolveCtaHref`.
+---
+
+## Phase 2 — Shared chrome + cross-page linking (THE FOCUS)
+
+**Goal:** header & footer become **shared site chrome** — edited once, identical on every page (and on every published page) — and nav items / CTA buttons can **link to another page** in the project. Scope = **mechanism only**: reuse existing `TechPremiumNav`/`TechPremiumFooter` blocks. Designer's dropdown nav / mobile menu / WhatsApp FAB **visuals deferred to Phase 4**.
+
+### A. Shared chrome (the architectural piece)
+
+Reuse the Phase-1 **mirror strategy**: a canonical `chrome` slice is the source of truth; it is **injected into the active page's working copy** so the existing edit renderer + block components edit it with zero changes, and **extracted on commit** so stored pages stay body-only. Renderers and published routes need **no change** because chrome is injected per-page at publish.
+
+- **Store** (`src/types/store/pages.ts`, `editStore.ts`): add `chrome: { header: {id,layout,data}|null, footer: {id,layout,data}|null }`. Persist in `partialize` + `finalContent`.
+- **Two centralized helpers do ALL the work** (`src/hooks/editStore/pageHelpers.ts`) — every slice-construction site MUST route through these (this is the fix for PO must-fix #1):
+  - `splitChrome(slice) → { body, chrome }`: removes header/footer **by `extractSectionType(id) === 'header'|'footer'`** (NEVER exact-id — `objectionFlowEngine.ts:1114` emits bare-literal `'header'`/`'footer'` ids that exact-match would miss; PO must-fix #3) and returns their `{id,layout,data}`.
+  - `withChrome(bodySlice, chrome) → workingSlice`: prepends `chrome.header`, appends `chrome.footer`.
+
+- **PO MUST-FIX #1 — all 6 slice-construction sites honor the contract** (stored pages are body-only; working copy = header+body+footer). Route each through the helpers:
+  1. `loadPageIntoActive` (pageHelpers) → `withChrome(pages[id], chrome)`.
+  2. `commitActivePage` (pageHelpers) → `splitChrome(working)`; write `body` to `pages[id]`, sync `chrome` data.
+  3. `buildPagesForExport` (pageHelpers) → body-only pages + top-level `chrome`.
+  4. `addPage` clone (`pageActions.ts:34`) → clones `pages[home]` (already body-only); no special-casing, but assert post-clone is body-only.
+  5. `loadFromDraft` legacy-wrap (`persistenceActions.ts:277`) → `splitChrome(loaded)` → `pages[home]=body`, `state.chrome=chrome` (the one-time migration when `contentToLoad.chrome` absent; extract by-type from home, strip from **all** pages).
+  6. `export()` top-level `sections/content` spread (`persistenceActions.ts:330`) → emit **body-only** (strip chrome) so finalContent's top-level matches `pages[home]`.
+- **Publish injection** (`src/app/api/publish/route.ts`): one helper injects `content.chrome` into the **root** (`content.layout.sections`+`content.content`) **and each subpage** (`sub.layout.sections`+`sub.content`) before HTML generation + before the frozen DB write → published renderer + `/p/[slug]` + `/p/[slug]/[...subpath]` **unchanged**.
+- **Preview payload** (`src/app/preview/[token]/page.tsx`): include `content.chrome` from `store.export()`; pages stay body-only.
+- **Chrome delete/reorder blocked** (PO smaller-flag): the injected header/footer are `required:true`; guard delete/move actions by `extractSectionType==='header'|'footer'` so a per-page structural change can't remove shared chrome. Content edits ARE global (the point).
+- **"Shared" affordance** (discoverability — resolves the user's concern): render a **"Shared · applies to all pages"** badge on the header/footer section in the edit canvas (keyed by `extractSectionType`).
+- **Tests (PO MUST-FIX #2 — combinatorial invariant)**: `pageActions.test.ts` must assert *all three together across every one of the 6 sites*: (a) working copy === `chrome.header + pages[current].body + chrome.footer`, (b) every `pages[id]` is body-only (no header/footer type), (c) editing chrome on page A shows on page B, and round-trips. Drive each site (load, switch, addPage, legacy-wrap migration, export, publish-inject) and re-assert.
+
+### B. Cross-page linking (small, high-value)
+
+Plain `href="/contact"` works natively (middleware routes it; no publish rewriting). **Encoding (PO Q1):** nav stores the **raw `pathSlug` in the existing flat `href`** (parity with `#anchor`/url modes); CTA stores a structured `{ type:'page', pageId, pathSlug }` (pageId kept for future slug-rename resilience; v1 resolves to `pathSlug`).
+- **New util** `src/utils/pageLinks.ts`: `buildPageLinkOptions(pages, currentPageId)` → `[{ value: pathSlug, label: title }]` (excludes current page).
+- **Nav picker** `LinkTargetPopover.tsx` — **byte-identical in techpremium + meridian** (PO duplication flag): add the **"Link to page"** mode to **both**; read pages via `useEditStore().getPagesList()`; store `href = pathSlug`. (Note duplication; a shared-component refactor is a reasonable follow-up, out of Phase-2 scope.)
+- **CTA picker** `src/components/toolbars/ButtonConfigurationModal.tsx`: add a `'page'` button type → `{ type:'page', pageId, pathSlug }`.
+- **Resolver** `src/utils/resolveCtaHref.ts`: add `type==='page'` → return `pathSlug`. Extend **both** `ButtonConfig` (modal) and `CtaButtonConfig` (resolver) with `pageId?`/`pathSlug?` (PO flag: two separate types).
+
+### Resolved (PO review)
+
+- **One chrome per project** (Q2) — naayom is TechPremium-only; per-template chrome deferred.
+- **Chrome delete/reorder blocked** per page (Q3); content edits apply globally.
+- **Per-page SEO (Q4):** basic per-page title/desc **already works** — the publish loop passes `sub.title` and the catch-all `generateMetadata` derives title/desc from each subpage's hero. **Rich** per-page SEO editing (custom description/OG/editable path-slug UI) is **deferred to Phase 3** (honest scope — Phase 2 does not add a SEO editor).
+
+### Phase 2 gate
+
+1. Edit the header on a subpage → change shows on Home and all pages; "Shared · applies to all pages" badge visible; can't delete/move chrome per-page.
+2. Add a nav item + a CTA that "Link to page" → `/contact`; publish → clicking them navigates across published pages (blob fast path intact).
+3. Header/footer identical on every published page (root + subpages); single-page projects unaffected.
+4. **Combinatorial chrome invariant test** green across all 6 slice sites; `npm run test:run` + `npm run build` green.
+
+---
+
+## Later phases (detail after each gate)
+
 - **Phase 3 — Collection system.** Extend `ProjectPage` with `kind ('singleton'|'collectionItem')` + `collectionKey`; the **Product entry record** as rows; auto-listing catalog block; `/products` + `/products/{slug}` routing; "manage entries" UI; empty-state handling per Block Specs.
 - **Phase 4 — Port TechPremium archetype blocks (designer package).** Recreate each section from `design_handoff_naayom/` as dual-render block pairs against `Naayom - Block Specs.html`: hero+live-readout, trust strip, problem, how-it-works, explainer rows, capabilities, collection-list/product cards, product-detail (gallery+specs+related), results, gallery grid+lightbox, compatibility, FAQ, contact form, contact-sales band. Reuse `naayom.css`/`naayom.blocks.css` tokens; reimplement `naayom.js` behaviors published-safe; lead form → existing forms system; icons → lucide; preserve `data-surface` + `<em>` theming.
 - **Phase 5 — naayom go-live.** Load real content + the ~36 photos, wire custom domain, publish.
