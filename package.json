@@ -32,6 +32,7 @@
     "@radix-ui/react-slot": "^1.2.2",
     "@radix-ui/react-switch": "^1.2.4",
     "@radix-ui/react-tooltip": "^1.2.7",
+    "@sentry/nextjs": "^10.59.0",
     "@stripe/stripe-js": "^8.1.0",
     "@types/canvas-confetti": "^1.9.0",
     "@types/dompurify": "^3.0.5",

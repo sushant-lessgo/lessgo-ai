@@ -9,6 +9,7 @@ import { createSecureResponse } from '@/lib/security';
 import { verifyOwnershipTxt, ownershipTxtHost, ownershipTxtValue } from '@/lib/domains/verify';
 import { addDomain, VercelApiError } from '@/lib/vercel/domains';
 import { checkDomainRateLimit } from '@/lib/rateLimit';
+import * as Sentry from '@sentry/nextjs';
 
 const BodySchema = z.object({ slug: z.string().min(1).max(100) });
 
@@ -79,6 +80,11 @@ export async function POST(req: NextRequest) {
     const err = e as VercelApiError;
     const msg = err?.message || 'vercel_api_error';
     const code = err?.code || 'unknown';
+    Sentry.captureException(e, {
+      tags: { area: 'custom-domain', op: 'addDomain', code },
+      extra: { domain: page.customDomain },
+      user: { id: userId },
+    });
     if (code === 'conflict') {
       await prisma.publishedPage.update({
         where: { id: page.id },

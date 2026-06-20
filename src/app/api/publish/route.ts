@@ -11,6 +11,7 @@ import { withPublishRateLimit } from '@/lib/rateLimit';
 import { getUserPlan, checkLimit } from '@/lib/planManager';
 import { stripHTMLTags } from '@/utils/smartTitleGenerator';
 import { sanitizeContentForPublish } from '@/modules/sections/layoutElementSchema';
+import * as Sentry from '@sentry/nextjs';
 
 // Force Node.js runtime for ReactDOMServer support
 export const runtime = 'nodejs';
@@ -54,6 +55,7 @@ async function publishHandler(req: NextRequest) {
     if (!userId) {
       return createSecureResponse({ error: 'Unauthorized' }, 401);
     }
+    Sentry.setUser({ id: userId });
 
     const body = await req.json();
     
@@ -455,6 +457,13 @@ async function publishHandler(req: NextRequest) {
           blobUrl,
         });
 
+        Sentry.captureException(kvError, {
+          level: 'fatal',
+          tags: { area: 'publish-kv' },
+          extra: { pageId, slug, blobUrl },
+          user: { id: userId },
+        });
+
         // Set failed state in DB
         await prisma.publishedPage.update({
           where: { id: pageId },
@@ -485,6 +494,11 @@ async function publishHandler(req: NextRequest) {
 
     } catch (error) {
       console.error('[Phase 2] Static export failed:', error);
+      Sentry.captureException(error, {
+        tags: { area: 'publish', phase: 'static-export' },
+        extra: { slug },
+        user: { id: userId },
+      });
 
       // Rollback: delete uploaded blob if DB update failed
       if (uploadedBlobKey) {
@@ -520,6 +534,7 @@ async function publishHandler(req: NextRequest) {
 
   } catch (err) {
   console.error('[publish] fatal error:', err);
+  Sentry.captureException(err, { tags: { area: 'publish', phase: 'fatal' } });
   return createSecureResponse({ error: 'Internal Server Error' }, 500);
 }
 }

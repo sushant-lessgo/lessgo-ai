@@ -2,6 +2,7 @@ import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import { getRouteEdge, getRedirectEdge, getSlugForHostEdge } from '@/lib/routing/kvRoutes'
 import { isLessgoAppHost } from '@/lib/domains/hosts'
+import * as Sentry from '@sentry/nextjs'
 
 const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
@@ -60,6 +61,7 @@ export default clerkMiddleware(async (auth, req) => {
           }
         } catch (error) {
           console.error('[Middleware] getRedirectEdge error:', error)
+          Sentry.captureException(error, { level: 'warning', tags: { area: 'middleware', op: 'getRedirect' }, extra: { host } })
         }
 
         // KV route lookup → blob proxy
@@ -72,6 +74,7 @@ export default clerkMiddleware(async (auth, req) => {
           }
         } catch (error) {
           console.error('[Middleware] KV lookup error:', error)
+          Sentry.captureException(error, { level: 'warning', tags: { area: 'middleware', op: 'kvLookup' }, extra: { host } })
         }
 
         // Fallback: legacy SSR (preserve subpath, e.g. /privacy)
@@ -99,6 +102,7 @@ export default clerkMiddleware(async (auth, req) => {
         }
       } catch (error) {
         console.error('[Middleware] custom-domain KV error:', error)
+        Sentry.captureException(error, { level: 'warning', tags: { area: 'middleware', op: 'customDomainKv' }, extra: { host } })
       }
       return new NextResponse('Not Found', { status: 404 })
     }
