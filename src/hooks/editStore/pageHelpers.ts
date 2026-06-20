@@ -12,6 +12,7 @@
 
 import type { EditStore, PageSlice, ProjectPageEntry, ChromeEntry, ChromeState } from '@/types/store';
 import { extractSectionType } from '@/modules/generatedLanding/componentRegistry';
+import { syncCollection, materializeIntoPages, collectionKeysInPages } from './collectionHelpers';
 
 export const HOME_PAGE_ID = 'home';
 
@@ -111,6 +112,12 @@ export function commitActivePage(state: any): void {
   if (!state.chrome) state.chrome = { header: null, footer: null };
   if (chrome.header) state.chrome.header = clone(chrome.header);
   if (chrome.footer) state.chrome.footer = clone(chrome.footer);
+
+  // Phase 3: the page we just flushed is now final in `pages` — re-materialize
+  // its collection (catalog items + sibling related) so a record edit on this
+  // page propagates to the catalog card. Only when this page belongs to one.
+  const collectionKey = state.pages[id].collectionKey;
+  if (collectionKey) syncCollection(state, collectionKey);
 }
 
 /** Immer-draft helper: load a body-only page entry + inject chrome into the working copy. */
@@ -158,6 +165,11 @@ export function buildPagesForExport(state: any): {
 
   const currentPageId = state.currentPageId && pages[state.currentPageId] ? state.currentPageId : homeId;
   pages[currentPageId] = { ...pages[currentPageId], ...clone(activeBody) };
+
+  // Phase 3: export-boundary materialize — idempotent safety net so the frozen
+  // publish/save always ships a fresh catalog even if a live trigger was missed.
+  // Operates on the plain clone (no active mirror here).
+  for (const key of collectionKeysInPages(pages)) materializeIntoPages(pages, key);
 
   // The active working copy carries the latest chrome edits; fall back to state.chrome.
   const chrome: ChromeState =

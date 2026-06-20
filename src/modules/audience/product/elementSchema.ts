@@ -204,6 +204,126 @@ export const meridianElementSchema: Record<string, UIBlockSchemaV2> = {
       },
     },
   },
+
+  // ===== Collection system (Phase 3) — EDITOR-ONLY blocks =====
+  // These two layouts are inserted by the Products panel + archetype builders,
+  // NEVER by the generation pipeline (MERIDIAN_PILOT_SECTIONS is untouched).
+  // The `items` (catalog) and `related` (detail) collections are fillMode:'system'
+  // — they are MATERIALIZED from the product records (see collectionHelpers.ts),
+  // never AI-generated, never hand-edited in the block. The Product entry record
+  // = ProductDetailRecord's elements + user-edited collections.
+
+  // ----- Catalog (auto-listing collection-list) -----
+  ProductCatalogList: {
+    sectionType: 'catalog',
+    elements: {
+      eyebrow:  { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      headline: { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'The product <em>catalog.</em>' },
+      lede:     { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+    },
+    collections: {
+      // User-edited: the category groupings (controllers / control / monitors).
+      categories: {
+        requirement: 'required',
+        fillMode: 'manual_preferred',
+        constraints: { min: 1, max: 12 },
+        fields: {
+          id:    { type: 'string', fillMode: 'system' },
+          title: { type: 'string', fillMode: 'manual_preferred', default: '' },
+          label: { type: 'string', fillMode: 'manual_preferred', default: '' },
+        },
+      },
+      // MATERIALIZED: one card per product page, grouped by categoryId.
+      items: {
+        requirement: 'optional',
+        fillMode: 'system',
+        constraints: { min: 0, max: 50 },
+        fields: {
+          id:         { type: 'string', fillMode: 'system' },
+          model:      { type: 'string', fillMode: 'system', default: '' },
+          name:       { type: 'string', fillMode: 'system', default: '' },
+          oneLiner:   { type: 'string', fillMode: 'system', default: '' },
+          image:      { type: 'string', fillMode: 'system', default: '' },
+          cardSpec:   { type: 'string', fillMode: 'system', default: '' },
+          categoryId: { type: 'string', fillMode: 'system', default: '' },
+          href:       { type: 'string', fillMode: 'system', default: '#' },
+        },
+      },
+    },
+  },
+
+  // ----- Product detail (the Product entry record, rendered in full) -----
+  ProductDetailRecord: {
+    sectionType: 'productdetail',
+    elements: {
+      model:        { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'NWC 2000' },
+      name:         { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Product name' },
+      category:     { type: 'string', requirement: 'required', fillMode: 'manual_preferred', default: '' }, // → catalog category id
+      oneLiner:     { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: '' },
+      lede:         { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      cardSpec:     { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      enquireText:  { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: 'Enquire about this product' },
+      whatsappText: { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: 'Ask on WhatsApp' },
+      note:         { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: 'Sales-led — we spec the unit to your rooms. No online pricing.' },
+    },
+    collections: {
+      images: {
+        requirement: 'required',
+        fillMode: 'manual_preferred',
+        constraints: { min: 1, max: 12 },
+        fields: {
+          id:  { type: 'string', fillMode: 'system' },
+          src: { type: 'string', fillMode: 'manual_preferred', default: '' },
+          tag: { type: 'string', fillMode: 'ai_generated', default: '' },
+        },
+      },
+      badges: {
+        requirement: 'optional',
+        fillMode: 'ai_generated',
+        constraints: { min: 0, max: 2 },
+        fields: {
+          id:    { type: 'string', fillMode: 'system' },
+          label: { type: 'string', fillMode: 'ai_generated', default: '' },
+          tone:  { type: 'string', fillMode: 'ai_generated', default: '' }, // '' | 'teal'
+        },
+      },
+      features: {
+        requirement: 'optional',
+        fillMode: 'ai_generated',
+        constraints: { min: 0, max: 8 },
+        fields: {
+          id:   { type: 'string', fillMode: 'system' },
+          text: { type: 'string', fillMode: 'ai_generated', default: '' },
+        },
+      },
+      specs: {
+        requirement: 'optional',
+        fillMode: 'ai_generated',
+        constraints: { min: 0, max: 16 },
+        fields: {
+          id:    { type: 'string', fillMode: 'system' },
+          key:   { type: 'string', fillMode: 'ai_generated', default: '' },
+          value: { type: 'string', fillMode: 'ai_generated', default: '' },
+        },
+      },
+      // MATERIALIZED: same-category sibling cards.
+      related: {
+        requirement: 'optional',
+        fillMode: 'system',
+        constraints: { min: 0, max: 50 },
+        fields: {
+          id:         { type: 'string', fillMode: 'system' },
+          model:      { type: 'string', fillMode: 'system', default: '' },
+          name:       { type: 'string', fillMode: 'system', default: '' },
+          oneLiner:   { type: 'string', fillMode: 'system', default: '' },
+          image:      { type: 'string', fillMode: 'system', default: '' },
+          cardSpec:   { type: 'string', fillMode: 'system', default: '' },
+          categoryId: { type: 'string', fillMode: 'system', default: '' },
+          href:       { type: 'string', fillMode: 'system', default: '#' },
+        },
+      },
+    },
+  },
 };
 
 /**

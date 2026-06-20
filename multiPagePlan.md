@@ -134,9 +134,26 @@ Plain `href="/contact"` works natively (middleware routes it; no publish rewriti
 
 ---
 
+## Phase 3 — Collection system (Product Catalog + Product Detail)
+
+**Goal (delivered):** a product **catalog** page that auto-lists products, and one **product-detail** page per product, routed at `/products` and `/products/{slug}`. Driven by the designer's **Product entry record** (`Lessgo.zip` → `design_handoff_naayom/`): *define once; Catalog auto-lists it, Detail renders it full*. Per the customer direction, Phase 3 ports the designed catalog + product-detail blocks at high fidelity (Home/Gallery/Contact pages + dropdown-nav/WhatsApp-FAB chrome visuals remain Phase 4).
+
+**Reused unchanged (Phase 1/2):** nested-subpath publish loop, KV routing, blob upload, `/p/[slug]/[...subpath]` serve, shared chrome injection, native cross-page `href` linking. Collection-item pages are just subpages — **no publish/KV/blob/middleware changes.**
+
+- **Data model** (`src/types/store/pages.ts`): `ProjectPageEntry` gains `kind ('singleton'|'collectionItem')` + `collectionKey` (optional → legacy drafts are inert singletons). Lives in `finalContent.pages` JSON (no DB migration; `ProjectPage` table stays vestigial). Collection topology in `src/modules/collections/registry.ts` (`COLLECTIONS.products`).
+- **Product entry record** = the `productdetail` section's content (`ProductDetailRecord` schema in `audience/product/elementSchema.ts`): model, name, category, oneLiner, lede, images[1–12], cardSpec, badges[0–2], features[0–8], specs[0–16] + materialized `related[]`.
+- **Materialize** (`src/hooks/editStore/collectionHelpers.ts`): `syncCollection` derives catalog `items[]` (grouped by category) + each product's `related[]` from the product records → writes into block content. Runs after `commitActivePage` (records fresh) + at the export boundary (`buildPagesForExport`, idempotent net). Mirror rule: writes active page → top-level mirror + stored in lockstep; section located by **type**, never index 0.
+- **Blocks** (dual-render pairs, ported, `tp-`-scoped CSS; tokens/em/surfaces from SSRTokens): `techpremium/blocks/Catalog/TechPremiumCatalog{.tsx,.published.tsx}` (page-head, jump-nav, category groups, product cards, empty states) + `…/ProductDetail/TechPremiumProductDetail{.tsx,.published.tsx}` + `styles.ts` (breadcrumb, gallery + thumbs + **per-block inline lightbox script**, info + Enquire/WhatsApp actions — **no price**, features, specs, related). Registered in `resolveTechPremiumBlock.ts` + `sectionRules.ts`. **Editor-only insertion** — `MERIDIAN_PILOT_SECTIONS` (generation path) intentionally untouched.
+- **Page actions** (`pageActions.ts` + `archetypes.ts`): `ensureCatalogPage`, `addCollectionItem` (unique `/products/{slug}`), `reorderCollection`, `setCollectionItemCategory`, `getCollectionItems`; `deletePage`/`renamePage` re-materialize.
+- **Manage UI:** `ProductsModal` (GlobalModals `modalEvents` pattern) — add/edit/delete/reorder/assign-category; **Products** entry in `PageSwitcher` (product pages are managed there, not shown as tabs).
+- **Per-page SEO:** `/p/[slug]/[...subpath]` `generateMetadata` gains a `productdetail`-record branch (title `model+name`, desc `oneLiner/lede`, OG `images[0]`).
+
+### Phase 3 — STATUS: ✅ DONE. `npm run test:run` (12 new collection tests incl. cross-page materialize G8b + mirror invariant) + `npm run build` green. Manual dev/publish gate pending.
+
+---
+
 ## Later phases (detail after each gate)
 
-- **Phase 3 — Collection system.** Extend `ProjectPage` with `kind ('singleton'|'collectionItem')` + `collectionKey`; the **Product entry record** as rows; auto-listing catalog block; `/products` + `/products/{slug}` routing; "manage entries" UI; empty-state handling per Block Specs.
 - **Phase 4 — Port TechPremium archetype blocks (designer package).** Recreate each section from `design_handoff_naayom/` as dual-render block pairs against `Naayom - Block Specs.html`: hero+live-readout, trust strip, problem, how-it-works, explainer rows, capabilities, collection-list/product cards, product-detail (gallery+specs+related), results, gallery grid+lightbox, compatibility, FAQ, contact form, contact-sales band. Reuse `naayom.css`/`naayom.blocks.css` tokens; reimplement `naayom.js` behaviors published-safe; lead form → existing forms system; icons → lucide; preserve `data-surface` + `<em>` theming.
 - **Phase 5 — naayom go-live.** Load real content + the ~36 photos, wire custom domain, publish.
 

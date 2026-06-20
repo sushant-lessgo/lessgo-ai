@@ -39,16 +39,34 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const sections: string[] = sub?.layout?.sections || [];
   const heroId = sections.find((id: string) => id.includes('hero'));
-  const heroElements = heroId ? sub?.content?.[heroId]?.elements || {} : {};
-  const headline = heroElements.headline?.content || sub?.title || page.title || 'Page';
-  const subheadline = heroElements.subheadline?.content || '';
-  const description = subheadline
-    ? subheadline.length > 160
-      ? subheadline.slice(0, 157) + '...'
-      : subheadline
-    : `Check out ${headline}`;
+
+  // Product-detail pages have no hero — derive SEO from the Product entry record.
+  const pdId = sections.find((id: string) => /^productdetail/i.test(id));
+  const pdEl = pdId ? sub?.content?.[pdId]?.elements || {} : null;
+
+  let headline: string;
+  let description: string;
+  let ogImageUrl = page.previewImage || `/api/og/${params.slug}`;
+
+  if (pdEl) {
+    const model = typeof pdEl.model === 'string' ? pdEl.model : '';
+    const name = typeof pdEl.name === 'string' ? pdEl.name : '';
+    headline = [model, name].filter(Boolean).join(' ') || sub?.title || page.title || 'Product';
+    const intro = (typeof pdEl.oneLiner === 'string' && pdEl.oneLiner) || (typeof pdEl.lede === 'string' && pdEl.lede) || '';
+    description = intro ? (intro.length > 160 ? intro.slice(0, 157) + '...' : intro) : `Learn more about the ${headline}.`;
+    const firstImg = Array.isArray(pdEl.images) ? pdEl.images.find((im: any) => im?.src)?.src : undefined;
+    if (firstImg) ogImageUrl = firstImg;
+  } else {
+    const heroElements = heroId ? sub?.content?.[heroId]?.elements || {} : {};
+    headline = heroElements.headline?.content || sub?.title || page.title || 'Page';
+    const subheadline = heroElements.subheadline?.content || '';
+    description = subheadline
+      ? subheadline.length > 160
+        ? subheadline.slice(0, 157) + '...'
+        : subheadline
+      : `Check out ${headline}`;
+  }
   const pageTitle = sub?.title ? `${sub.title} — ${page.title}` : page.title || headline;
-  const ogImageUrl = page.previewImage || `/api/og/${params.slug}`;
 
   return {
     title: pageTitle,

@@ -241,3 +241,163 @@ describe('shared chrome', () => {
     expectWorkingComposed(fresh);
   });
 });
+
+// ---- Phase 3: collection system (catalog + product-detail materialize) ----
+
+const pdSidOf = (entry: any): string | undefined => (entry?.sections ?? []).find((id: string) => /^productdetail/.test(id));
+const recOf = (entry: any): any => { const sid = pdSidOf(entry); return sid ? entry.content[sid].elements : {}; };
+const catalogOf = (s: Store) => {
+  const cp: any = Object.values(s.getState().pages).find((p: any) => p.collectionKey === 'products' && p.kind === 'singleton');
+  if (!cp) return null;
+  const sid = (cp.sections ?? []).find((id: string) => /^catalog/.test(id));
+  const el = cp.content[sid].elements;
+  return { page: cp, sid, items: (el.items || []) as any[], categories: (el.categories || []) as any[] };
+};
+const activePdSid = (s: Store): string => (s.getState().sections.find((id) => /^productdetail/.test(id)) as string);
+
+describe('collection system', () => {
+  let store: Store;
+  beforeEach(() => {
+    store = createEditStore('tok-col');
+    seedHome(store);
+  });
+
+  it('first addCollectionItem creates the catalog singleton at /products', () => {
+    expect(catalogOf(store)).toBeNull();
+    store.getState().addCollectionItem('products', { title: 'NWC 2000' });
+    const cat = catalogOf(store)!;
+    expect(cat.page.pathSlug).toBe('/products');
+    expect(cat.page.kind).toBe('singleton');
+    // exactly one catalog page
+    const catalogs = Object.values(store.getState().pages).filter((p: any) => p.collectionKey === 'products' && p.kind === 'singleton');
+    expect(catalogs.length).toBe(1);
+    expectMirror(store);
+  });
+
+  it('materializes one card per product, href === pathSlug, ordered, grouped by category', () => {
+    const a = store.getState().addCollectionItem('products', { title: 'Alpha' });
+    const b = store.getState().addCollectionItem('products', { title: 'Beta' });
+    // put Beta in 'control'
+    store.getState().setCollectionItemCategory('products', b, 'control');
+    const cat = catalogOf(store)!;
+    expect(cat.items.length).toBe(2);
+    const itemA = cat.items.find((i) => i.id === a)!;
+    const itemB = cat.items.find((i) => i.id === b)!;
+    expect(itemA.href).toBe(store.getState().pages[a].pathSlug);
+    expect(itemA.categoryId).toBe('controllers'); // default first category
+    expect(itemB.categoryId).toBe('control');
+    // ordered by page order (Alpha before Beta)
+    expect(cat.items.map((i) => i.id)).toEqual([a, b]);
+  });
+
+  it('add / delete update the catalog items; catalog survives delete', () => {
+    const a = store.getState().addCollectionItem('products', { title: 'Alpha' });
+    store.getState().addCollectionItem('products', { title: 'Beta' });
+    expect(catalogOf(store)!.items.length).toBe(2);
+    store.getState().deletePage(a);
+    const cat = catalogOf(store)!;
+    expect(cat.items.length).toBe(1);
+    expect(cat.items[0].name).toBe('Beta');
+  });
+
+  it('reorderCollection reorders the catalog items', () => {
+    const a = store.getState().addCollectionItem('products', { title: 'Alpha' });
+    const b = store.getState().addCollectionItem('products', { title: 'Beta' });
+    store.getState().reorderCollection('products', [b, a]);
+    expect(catalogOf(store)!.items.map((i) => i.id)).toEqual([b, a]);
+  });
+
+  it('rename (slug change) updates the catalog card href', () => {
+    const a = store.getState().addCollectionItem('products', { title: 'Alpha' });
+    store.getState().renamePage(a, 'Alpha', '/products/alpha-x');
+    const cat = catalogOf(store)!;
+    expect(store.getState().pages[a].pathSlug).toBe('/products/alpha-x');
+    expect(cat.items.find((i) => i.id === a)!.href).toBe('/products/alpha-x');
+  });
+
+  it('related = same-category siblings (excl. self)', () => {
+    const a = store.getState().addCollectionItem('products', { title: 'Alpha' }); // controllers
+    const b = store.getState().addCollectionItem('products', { title: 'Beta' }); // controllers
+    const c = store.getState().addCollectionItem('products', { title: 'Gamma' });
+    store.getState().setCollectionItemCategory('products', c, 'monitors');
+    const relA = recOf(store.getState().pages[a]).related as any[];
+    expect(relA.map((r) => r.id)).toEqual([b]); // same category, not self, not Gamma
+  });
+
+  it('cross-page materialize: editing a product updates the catalog while catalog is NOT active', () => {
+    const a = store.getState().addCollectionItem('products', { title: 'Alpha' });
+    // product A is active — edit its record
+    store.getState().updateElementContent(activePdSid(store), 'model', 'NWC-9000');
+    // switch to home (commits A → re-materializes catalog stored page; catalog never active)
+    store.getState().setCurrentPage('home');
+    const cat = catalogOf(store)!;
+    expect(cat.items.find((i) => i.id === a)!.model).toBe('NWC-9000');
+    expectMirror(store); // home is active, invariant holds
+  });
+
+  it('empty-state: a catalog with no items has items:[]', () => {
+    const a = store.getState().addCollectionItem('products', { title: 'Solo' });
+    store.getState().deletePage(a);
+    const cat = catalogOf(store)!;
+    expect(Array.isArray(cat.items)).toBe(true);
+    expect(cat.items.length).toBe(0);
+  });
+
+  it('export freezes materialized items, body-only, and is idempotent', () => {
+    store.getState().addCollectionItem('products', { title: 'Alpha' });
+    const ex1: any = store.getState().export();
+    const catPage: any = Object.values(ex1.pages).find((p: any) => p.collectionKey === 'products' && p.kind === 'singleton');
+    const sid = catPage.sections.find((id: string) => /^catalog/.test(id));
+    expect(catPage.content[sid].elements.items.length).toBe(1);
+    expect(hasChromeType(catPage.sections)).toBe(false); // body-only
+    const ex2: any = store.getState().export();
+    const catPage2: any = Object.values(ex2.pages).find((p: any) => p.collectionKey === 'products' && p.kind === 'singleton');
+    expect(catPage2.content[sid].elements.items).toEqual(catPage.content[sid].elements.items);
+  });
+
+  it('mirror invariant holds across collection mutations', () => {
+    store.getState().addCollectionItem('products', { title: 'Alpha' });
+    expectMirror(store); // active = new product
+    const b = store.getState().addCollectionItem('products', { title: 'Beta' });
+    expectMirror(store);
+    store.getState().setCurrentPage('home');
+    expectMirror(store);
+    store.getState().reorderCollection('products', [b]);
+    store.getState().setCurrentPage(b);
+    expectMirror(store);
+  });
+
+  it('back-compat: legacy pages (no kind) are inert singletons', () => {
+    // seedHome made a home page with no `kind`. No catalog, no items.
+    expect(catalogOf(store)).toBeNull();
+    expect(store.getState().getCollectionItems('products')).toEqual([]);
+  });
+
+  it('an image edit on a product survives export() into pages[] (Bug 2 persistence)', () => {
+    const a = store.getState().addCollectionItem('products', { title: 'Alpha' });
+    const pdSid = activePdSid(store); // product A is active
+    const imgId = recOf(store.getState().pages[a]).images[0].id;
+    store.getState().updateElementContent(pdSid, `images.${imgId}.src`, 'https://blob/x.webp');
+    const ex: any = store.getState().export();
+    const img = ex.pages[a].content[pdSid].elements.images[0];
+    expect(img.src).toBe('https://blob/x.webp'); // full export carries the image into pages
+  });
+
+  it('setCollectionCategories rehomes orphans to the first remaining category (Bug 6)', () => {
+    const a = store.getState().addCollectionItem('products', { title: 'Alpha' }); // controllers
+    const b = store.getState().addCollectionItem('products', { title: 'Beta' });
+    store.getState().setCollectionItemCategory('products', b, 'monitors');
+    // Delete 'monitors' → Beta should rehome to the first remaining category.
+    store.getState().setCollectionCategories('products', [
+      { id: 'controllers', title: 'Controllers' },
+      { id: 'control', title: 'Control' },
+    ]);
+    const recB = recOf(store.getState().pages[b]);
+    expect(recB.category).toBe('controllers');
+    const cat = catalogOf(store)!;
+    expect(cat.categories.map((c) => c.id)).toEqual(['controllers', 'control']);
+    // Beta's card now groups under a valid category (controllers).
+    expect(cat.items.find((i) => i.id === b)!.categoryId).toBe('controllers');
+    expectMirror(store);
+  });
+});

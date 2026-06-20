@@ -19,6 +19,9 @@ export const techPremiumSectionSurfaces: Record<string, TechPremiumSurface> = {
   pricing:      'paper-2',
   cta:          'forest',
   footer:       'forest-d',
+  // Collection system (Phase 3) — both sit on warm paper.
+  catalog:       'paper',
+  productdetail: 'paper',
 };
 
 const surfaceVarMap: Record<TechPremiumSurface, string> = {

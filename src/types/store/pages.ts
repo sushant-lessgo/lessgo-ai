@@ -20,6 +20,9 @@ export interface PageSlice {
   content: Record<string, SectionData>;
 }
 
+/** A page's role in the multi-page model (Phase 3 collection system). */
+export type PageKind = 'singleton' | 'collectionItem';
+
 /** A page entry = its slice plus identity/route metadata. Maps to a ProjectPage row. */
 export interface ProjectPageEntry extends PageSlice {
   id: string;
@@ -27,6 +30,9 @@ export interface ProjectPageEntry extends PageSlice {
   pathSlug: string; // '/', '/contact', '/products/nwc-2000'
   title: string;
   order: number;
+  // Collection system (Phase 3). Optional → Phase-1/2 drafts default to 'singleton'.
+  kind?: PageKind; // default 'singleton'
+  collectionKey?: string; // e.g. 'products' — set on the catalog page AND each item
 }
 
 /** A shared chrome entry (header or footer) — one per project, rendered on every page. */
@@ -61,4 +67,18 @@ export interface PageActions {
   renamePage: (pageId: string, title: string, pathSlug?: string) => void;
   /** All pages, order-sorted (home first). */
   getPagesList: () => ProjectPageEntry[];
+
+  // ===== Collection system (Phase 3) =====
+  /** Idempotently create the catalog singleton page for a collection if absent. Returns its id. */
+  ensureCatalogPage: (collectionKey: string) => string;
+  /** Create a new collection item (product) page + re-materialize the catalog. Returns its id. */
+  addCollectionItem: (collectionKey: string, opts?: { title?: string }) => string;
+  /** Reorder the items of a collection by id, then re-materialize. */
+  reorderCollection: (collectionKey: string, orderedIds: string[]) => void;
+  /** Assign a collection item's category (updates its record + re-materializes). */
+  setCollectionItemCategory: (collectionKey: string, pageId: string, categoryId: string) => void;
+  /** Replace a collection's category list; rehomes orphaned items to the first remaining category. */
+  setCollectionCategories: (collectionKey: string, categories: Array<{ id: string; title: string; label?: string }>) => void;
+  /** All item pages of a collection, order-sorted. */
+  getCollectionItems: (collectionKey: string) => ProjectPageEntry[];
 }

@@ -185,21 +185,23 @@ async function publishHandler(req: NextRequest) {
     }
 
 
-    // ✅ 🔁 Always upsert into Project as well
+    // ✅ 🔁 Mark the Project published — but DO NOT overwrite Project.content.
+    // Project.content is the editor DRAFT (onboarding + finalContent.pages). The
+    // published snapshot lives in PublishedPage.content. Clobbering the draft with
+    // the (pages-less) publish payload destroyed multi-page structure on next edit
+    // (the catalog/products vanished). The editor autosaves the draft separately
+    // (and preview now force-saves before publish), so we only flip status/title.
     await prisma.project.upsert({
       where: { tokenId },
       create: {
         tokenId,
         userId,
         title: cleanTitle,
-        content: content as any,
         inputText,
         status: 'published',
       },
       update: {
         title: cleanTitle,
-        content: content as any,
-        inputText,
         status: 'published',
         updatedAt: new Date(),
       },

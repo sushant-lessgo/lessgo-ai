@@ -56,6 +56,7 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
     legalPages,
     setMode,
     export: exportState,
+    save,
   } = useEditStore();
 
   // Validate preview data loaded correctly
@@ -343,6 +344,15 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
     setPublishError('');
 
     try {
+      // Persist the full draft (finalContent.pages + chrome) to the DB BEFORE
+      // publishing. Publish no longer writes Project.content, so the draft must be
+      // current here or a dashboard→Edit after publish would load a stale draft.
+      try {
+        if (typeof save === 'function') await save();
+      } catch (e) {
+        logger.warn('Pre-publish save failed (continuing):', e);
+      }
+
       // Get HTML content from rendered page
       const previewElement = document.getElementById('landing-preview');
       if (!previewElement) {

@@ -15,6 +15,8 @@ import TechPremiumResults from './blocks/Testimonials/TechPremiumResults';
 import TechPremiumPricing from './blocks/Pricing/TechPremiumPricing';
 import TechPremiumCTA from './blocks/CTA/TechPremiumCTA';
 import TechPremiumFooter from './blocks/Footer/TechPremiumFooter';
+import TechPremiumCatalog from './blocks/Catalog/TechPremiumCatalog';
+import TechPremiumProductDetail from './blocks/ProductDetail/TechPremiumProductDetail';
 
 // Published-mode blocks
 import TechPremiumNavPublished from './blocks/Header/TechPremiumNav.published';
@@ -24,6 +26,8 @@ import TechPremiumResultsPublished from './blocks/Testimonials/TechPremiumResult
 import TechPremiumPricingPublished from './blocks/Pricing/TechPremiumPricing.published';
 import TechPremiumCTAPublished from './blocks/CTA/TechPremiumCTA.published';
 import TechPremiumFooterPublished from './blocks/Footer/TechPremiumFooter.published';
+import TechPremiumCatalogPublished from './blocks/Catalog/TechPremiumCatalog.published';
+import TechPremiumProductDetailPublished from './blocks/ProductDetail/TechPremiumProductDetail.published';
 
 interface BlockEntry {
   edit: React.ComponentType<any>;
@@ -38,6 +42,9 @@ const TECHPREMIUM_BLOCK_REGISTRY: Record<string, BlockEntry> = {
   pricing:      { edit: TechPremiumPricing,      published: TechPremiumPricingPublished },
   cta:          { edit: TechPremiumCTA,          published: TechPremiumCTAPublished },
   footer:       { edit: TechPremiumFooter,       published: TechPremiumFooterPublished },
+  // Collection system (Phase 3) — editor-only insertion, never generated.
+  catalog:       { edit: TechPremiumCatalog,       published: TechPremiumCatalogPublished },
+  productdetail: { edit: TechPremiumProductDetail, published: TechPremiumProductDetailPublished },
 };
 
 export type TechPremiumBlockMode = 'edit' | 'published';
