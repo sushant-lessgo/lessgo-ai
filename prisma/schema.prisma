@@ -36,6 +36,8 @@ model Project {
   inputText      String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+
+  testimonials Testimonial[]
 }
 
 model Token {
@@ -341,4 +343,38 @@ model IVOCCache {
   @@unique([categoryKey, audienceKey])
   @@index([categoryKey])
   @@index([audienceKey])
+}
+
+// Testimonial collection system. Owner-scoped (Clerk userId, external — not a FK,
+// matching PublishedPage/FormSubmission). Superset of fields; templates consume only
+// what they render. See testimonialSystem.md for the full track plan.
+model Testimonial {
+  id        String   @id @default(cuid())
+  userId    String // Clerk User ID (owner / tenant)
+  projectId String? // optional — which project/page this belongs to
+  // SetNull (NOT Cascade): testimonials are durable tenant assets — deleting a project
+  // must not destroy real customer testimonials; they survive as account-level.
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  // Author / content (superset; templates consume only what they render)
+  authorName     String
+  authorRole     String?
+  authorCompany  String?
+  authorPhotoUrl String? // Vercel Blob URL (collection wired in Phase 3)
+  quote          String
+  rating         Int? // 1–5, optional
+  videoUrl       String? // schema-ready; video collection deferred (Phase 5)
+
+  // Lifecycle
+  status       String  @default("pending") // pending | approved | rejected
+  source       String  @default("manual") // manual | collect-form | imported
+  collectToken String? // denormalized ref to the public collect link that produced it.
+  // Phase 3 may add a CollectLink entity owning the token lifecycle — keep this a ref, don't double-model.
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([projectId])
+  @@index([status])
 }
