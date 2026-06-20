@@ -33,8 +33,18 @@ export async function cleanupOldVersions(
     let deleted = 0;
     for (const version of oldVersions) {
       try {
-        // Delete blob first
-        await del(version.blobKey);
+        // Delete every blob in this version (root + subpages). Multi-page
+        // publishes record all blob keys in metadata.blobs[]; fall back to the
+        // primary blobKey for legacy single-page versions.
+        const meta = version.metadata as { blobs?: Array<{ blobKey?: string }> } | null;
+        const blobKeys = Array.isArray(meta?.blobs)
+          ? meta!.blobs.map((b) => b.blobKey).filter((k): k is string => !!k)
+          : [];
+        if (!blobKeys.includes(version.blobKey)) blobKeys.unshift(version.blobKey);
+
+        for (const key of blobKeys) {
+          await del(key);
+        }
 
         // Then delete DB record (only if blob deletion succeeded)
         await prisma.publishedPageVersion.delete({

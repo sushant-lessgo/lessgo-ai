@@ -260,15 +260,82 @@ async function publishHandler(req: NextRequest) {
         throw new Error('Invalid blob upload response');
       }
 
-      // Create version record
+      // === MULTI-PAGE: render + upload each subpage under the SAME version ===
+      // Subpages live in content.subpages[pathSlug] = { layout:{sections,theme}, content }.
+      // Shared forms/legalPages/theme come from the root content.
+      const allBlobs: Array<{ path: string; blobKey: string; blobUrl: string; sizeBytes: number }> = [
+        { path: '/', blobKey, blobUrl, sizeBytes },
+      ];
+      const extraRoutes: Record<string, string> = {};
+      const subpages =
+        contentData.subpages && typeof contentData.subpages === 'object' ? contentData.subpages : {};
+
+      for (const [rawPath, sub] of Object.entries(subpages) as Array<[string, any]>) {
+        try {
+          const path = rawPath.startsWith('/') ? rawPath : `/${rawPath}`;
+          if (path === '/') continue; // root already published above
+          const pageName = path.replace(/^\//, '').replace(/\/$/, '') || 'index';
+
+          const subSections: string[] = sub?.layout?.sections || [];
+          const subTheme = sub?.layout?.theme || contentData.layout.theme;
+          const subFlat = {
+            ...(sub?.content || {}),
+            forms: contentData.forms || {},
+            legalPages: contentData.legalPages,
+          };
+          const subHero = subFlat[subSections?.[0]];
+          const subDesc =
+            subHero?.elements?.subheadline?.content ||
+            subHero?.elements?.headline?.content ||
+            sub?.title ||
+            cleanTitle;
+
+          const subHtml = await generateStaticHTML({
+            sections: subSections,
+            content: subFlat,
+            theme: subTheme,
+            publishedPageId: pageId,
+            pageOwnerId: userId,
+            slug,
+            title: sub?.title || cleanTitle,
+            description: typeof subDesc === 'string' ? subDesc.slice(0, 160) : cleanTitle.slice(0, 160),
+            previewImage,
+            analyticsOptIn: analyticsEnabled || false,
+            baseURL: baseUrl,
+            audienceType,
+            templateId,
+            paletteId,
+            variantId,
+          });
+
+          const subUpload = await uploadStaticSite({
+            pageId,
+            html: subHtml.html,
+            assetBundleVersion: 'v1',
+            version, // share the root's version
+            pageName,
+          });
+
+          allBlobs.push({ path, blobKey: subUpload.blobKey, blobUrl: subUpload.blobUrl, sizeBytes: subUpload.sizeBytes });
+          extraRoutes[path] = subUpload.blobUrl;
+        } catch (subErr) {
+          // A failed subpage must not block the rest of the publish.
+          console.error('[Phase 2] Subpage render/upload failed:', rawPath, subErr);
+        }
+      }
+
+      const totalSizeBytes = allBlobs.reduce((sum, b) => sum + b.sizeBytes, 0);
+
+      // Create version record — ONE version covers all pages; per-page blobs in metadata.
       const newVersion = await prisma.publishedPageVersion.create({
         data: {
           publishedPageId: pageId,
           version,
           blobKey,
           blobUrl,
-          sizeBytes,
+          sizeBytes: totalSizeBytes,
           status: 'active',
+          metadata: { blobs: allBlobs } as any,
         }
       });
 
@@ -313,7 +380,7 @@ async function publishHandler(req: NextRequest) {
           domains,
           version,
           blobUrl,  // Use blobUrl from upload result, not blobKey
-          { maxRetries: 3, baseDelay: 1000 }
+          { maxRetries: 3, baseDelay: 1000, extraRoutes }  // extraRoutes = subpage paths → blobUrls
         );
 
         console.log('[Phase 3] ✓ KV routing updated successfully:', {

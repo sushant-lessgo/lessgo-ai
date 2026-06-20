@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { UserButton, useUser } from '@clerk/nextjs';
 import Logo from '@/components/shared/Logo';
+import { PageSwitcher } from './PageSwitcher';
 
 interface GlobalAppHeaderProps {
   tokenId: string;
@@ -44,11 +45,10 @@ export function GlobalAppHeader({ tokenId }: GlobalAppHeaderProps) {
           <div className="hidden sm:flex items-center space-x-2 text-sm text-gray-500">
             <span>/</span>
             <span>Editor</span>
-            <span>/</span>
-            <span className="text-gray-900 font-medium">
-              {tokenId.slice(0, 8)}...
-            </span>
           </div>
+
+          {/* Multi-page switcher */}
+          <PageSwitcher />
         </div>
 
         {/* Right: User info and actions */}

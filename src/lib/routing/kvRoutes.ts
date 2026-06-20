@@ -122,25 +122,25 @@ export async function atomicPublish(
   pageId: string,
   domains: string[],
   version: string,
-  blobUrl: string
+  blobUrl: string,
+  extraRoutes: Record<string, string> = {}
 ): Promise<void> {
   const publishedAt = Date.now();
 
   try {
-    const routeConfig: RouteConfig = {
-      pageId,
-      version,
-      blobUrl,       // Store CDN URL, not key
-      publishedAt,
-    };
+    // Root ('/') + any subpaths. Each path gets its own blobUrl, same version.
+    const pathBlobs: Record<string, string> = { '/': blobUrl, ...extraRoutes };
 
     // Use pipeline for atomicity
     const pipeline = kv.pipeline();
 
-    // Update all domain routes (only root path for Phase 3)
+    // Update all domain routes for every path (root + subpages)
     for (const domain of domains) {
-      const routeKey = `route:${domain}:/`;
-      pipeline.set(routeKey, routeConfig, { ex: 365 * 24 * 60 * 60 });
+      for (const [path, url] of Object.entries(pathBlobs)) {
+        const routeKey = `route:${domain}:${path}`;
+        const routeConfig: RouteConfig = { pageId, version, blobUrl: url, publishedAt };
+        pipeline.set(routeKey, routeConfig, { ex: 365 * 24 * 60 * 60 });
+      }
     }
 
     // Execute pipeline
@@ -178,9 +178,11 @@ export async function atomicPublishWithRetry(
   domains: string[],
   version: string,
   blobUrl: string,
-  options: { maxRetries?: number; baseDelay?: number } = {}
+  options: { maxRetries?: number; baseDelay?: number; extraRoutes?: Record<string, string> } = {}
 ): Promise<{ attempts: number; verified: boolean }> {
-  const { maxRetries = 3, baseDelay = 1000 } = options;
+  const { maxRetries = 3, baseDelay = 1000, extraRoutes = {} } = options;
+  // Root + subpaths; verification checks every path's blobUrl.
+  const pathBlobs: Record<string, string> = { '/': blobUrl, ...extraRoutes };
   let lastError: Error | null = null;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -192,36 +194,36 @@ export async function atomicPublishWithRetry(
         version,
       });
 
-      // Attempt publish
-      await atomicPublish(pageId, domains, version, blobUrl);
+      // Attempt publish (root + subpaths)
+      await atomicPublish(pageId, domains, version, blobUrl, extraRoutes);
 
-      // Verify the write succeeded
+      // Verify the write succeeded (every domain × every path)
       console.log('[KV] Verifying write...');
       let allVerified = true;
       const verificationErrors: string[] = [];
 
       for (const domain of domains) {
-        const routeKey = `route:${domain}:/`;
-        const stored = await kv.get<RouteConfig>(routeKey);
+        for (const [path, url] of Object.entries(pathBlobs)) {
+          const routeKey = `route:${domain}:${path}`;
+          const stored = await kv.get<RouteConfig>(routeKey);
 
-        if (!stored) {
-          allVerified = false;
-          verificationErrors.push(`${routeKey}: entry not found`);
-        } else if (stored.pageId !== pageId) {
-          allVerified = false;
-          verificationErrors.push(
-            `${routeKey}: pageId mismatch (expected ${pageId}, got ${stored.pageId})`
-          );
-        } else if (stored.version !== version) {
-          allVerified = false;
-          verificationErrors.push(
-            `${routeKey}: version mismatch (expected ${version}, got ${stored.version})`
-          );
-        } else if (stored.blobUrl !== blobUrl) {
-          allVerified = false;
-          verificationErrors.push(
-            `${routeKey}: blobUrl mismatch`
-          );
+          if (!stored) {
+            allVerified = false;
+            verificationErrors.push(`${routeKey}: entry not found`);
+          } else if (stored.pageId !== pageId) {
+            allVerified = false;
+            verificationErrors.push(
+              `${routeKey}: pageId mismatch (expected ${pageId}, got ${stored.pageId})`
+            );
+          } else if (stored.version !== version) {
+            allVerified = false;
+            verificationErrors.push(
+              `${routeKey}: version mismatch (expected ${version}, got ${stored.version})`
+            );
+          } else if (stored.blobUrl !== url) {
+            allVerified = false;
+            verificationErrors.push(`${routeKey}: blobUrl mismatch`);
+          }
         }
       }
 

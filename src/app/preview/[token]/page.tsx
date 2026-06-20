@@ -54,7 +54,8 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
     title,
     onboardingData,
     legalPages,
-    setMode
+    setMode,
+    export: exportState,
   } = useEditStore();
 
   // Validate preview data loaded correctly
@@ -360,6 +361,24 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
       // Serialize forms to strip non-serializable Zustand properties
       const safeForms = forms ? JSON.parse(JSON.stringify(forms)) : {};
 
+      // Multi-page: commit the active page + collect every page. Root is always
+      // the home page; the rest become content.subpages keyed by pathSlug.
+      const exported: any = exportState ? exportState() : null;
+      const allPages: Record<string, any> = exported?.pages || {};
+      const homeEntry = Object.values(allPages).find((p: any) => p?.pathSlug === '/') as any;
+      const rootSections = homeEntry?.sections || sections;
+      const rootContent = homeEntry?.content || content;
+      const subpages: Record<string, any> = {};
+      for (const p of Object.values(allPages) as any[]) {
+        if (!p || p.pathSlug === '/') continue;
+        subpages[p.pathSlug] = {
+          layout: { sections: p.sections, theme },
+          content: p.content,
+          title: p.title,
+        };
+      }
+      const safeSubpages = JSON.parse(JSON.stringify(subpages));
+
       // Publish the page
       const response = await fetch('/api/publish', {
         method: 'POST',
@@ -369,10 +388,11 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
           htmlContent,
           title: stripHTMLTags(publishTitle || title || 'Untitled Page'),
           content: {
-            layout: { sections, theme },
-            content,
+            layout: { sections: rootSections, theme },
+            content: rootContent,
             forms: safeForms,
             legalPages: legalPages || undefined,
+            subpages: safeSubpages,
           },
           themeValues: {
             primary: colorTokens.accent,

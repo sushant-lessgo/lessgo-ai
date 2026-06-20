@@ -36,6 +36,27 @@ model Project {
   inputText      String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+
+  pages ProjectPage[]
+}
+
+// Multi-page support. Uniform model: every page of a project is a row, including
+// the home page (archetypeKey 'home', pathSlug '/'). content holds this page's
+// own { sections, sectionLayouts, content } slice. See multiPagePlan.md.
+model ProjectPage {
+  id           String   @id @default(cuid())
+  projectId    String
+  project      Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  archetypeKey String   @default("basic") // home | basic | contact | gallery | product-catalog | product-detail
+  pathSlug     String // '/', '/contact', '/products/nwc-2000'
+  title        String   @default("Untitled Page")
+  order        Int      @default(0)
+  content      Json? // { sections: string[], sectionLayouts: {}, content: {} }
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([projectId, pathSlug])
+  @@index([projectId])
 }
 
 model Token {
@@ -97,10 +118,11 @@ model PublishedPageVersion {
   id              String   @id @default(cuid())
   publishedPageId String
   version         String // timestamp-nanoid: 20260107T123045789-a3k9xz
-  blobKey         String // pages/{pageId}/{version}/index.html
+  blobKey         String // pages/{pageId}/{version}/index.html (primary; root page)
   blobUrl         String
   sizeBytes       Int
   status          String   @default("active") // active, deleted
+  metadata        Json? // multi-page: { blobs: [{ path, blobKey, blobUrl, sizeBytes }] }
   createdAt       DateTime @default(now())
 
   publishedPage PublishedPage  @relation("PageVersions", fields: [publishedPageId], references: [id], onDelete: Cascade)

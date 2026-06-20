@@ -1,7 +1,10 @@
 // hooks/editStore/persistenceActions.ts - Simplified persistence and forms/images actions
 import type { EditStore, FormField, ImageAsset } from '@/types/store';
+import { buildPagesForExport, loadPageIntoActive, findHomeId, HOME_PAGE_ID } from './pageHelpers';
 
 import { logger } from '@/lib/logger';
+
+const deepClone = <T>(v: T): T => JSON.parse(JSON.stringify(v ?? null));
 /**
  * Consolidated persistence actions for save/load operations plus forms and images
  */
@@ -256,10 +259,44 @@ export function createPersistenceActions(set: any, get: any) {
             confirmedFields: onboardingFromContent?.confirmedFields || apiResponse.confirmedFields || {},
           };
           
+          // ===== Multi-page hydration =====
+          // If the draft carries a `pages` map, load it and make the persisted
+          // current page active. Otherwise wrap the just-restored single-page
+          // slice into a home page (legacy / first multi-page load).
+          const pagesFromDraft = contentToLoad?.pages;
+          if (pagesFromDraft && typeof pagesFromDraft === 'object' && Object.keys(pagesFromDraft).length > 0) {
+            state.pages = deepClone(pagesFromDraft);
+            const homeId = findHomeId(state.pages);
+            const desired =
+              contentToLoad.currentPageId && state.pages[contentToLoad.currentPageId]
+                ? contentToLoad.currentPageId
+                : homeId || Object.keys(state.pages)[0];
+            const active = state.pages[desired];
+            if (active) loadPageIntoActive(state, active);
+          } else {
+            const slice = deepClone({
+              sections: state.sections,
+              sectionLayouts: state.sectionLayouts,
+              sectionSpacing: state.sectionSpacing || {},
+              content: state.content,
+            });
+            state.pages = {
+              [HOME_PAGE_ID]: {
+                id: HOME_PAGE_ID,
+                archetypeKey: 'home',
+                pathSlug: '/',
+                title: state.title || 'Home',
+                order: 0,
+                ...slice,
+              },
+            };
+            state.currentPageId = HOME_PAGE_ID;
+          }
+
           state.lastUpdated = Date.now();
           state.persistence.isLoading = false;
           state.persistence.isDirty = false;
-          
+
           // Ensure performance object is initialized
           if (!state.performance) {
             state.performance = {
@@ -284,6 +321,9 @@ export function createPersistenceActions(set: any, get: any) {
 
     export: () => {
       const state = get();
+      // Multi-page: commit the active page + guarantee a home entry. Top-level
+      // sections/content stay in the payload for back-compat (== active page).
+      const { pages, currentPageId } = buildPagesForExport(state);
       const exportData = {
         id: state.id,
         title: state.title,
@@ -292,6 +332,8 @@ export function createPersistenceActions(set: any, get: any) {
         sectionLayouts: state.sectionLayouts,
         sectionSpacing: state.sectionSpacing,
         content: state.content,
+        pages,
+        currentPageId,
         theme: state.theme,
         globalSettings: state.globalSettings,
         navigationConfig: state.navigationConfig,

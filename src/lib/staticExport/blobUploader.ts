@@ -7,6 +7,10 @@ interface UploadStaticSiteOptions {
   pageId: string;
   html: string;
   assetBundleVersion: string; // "v1" for CSS/JS references
+  // Multi-page: share ONE version across every page of a publish, and name the
+  // blob per page. Root page → pageName 'index'; subpages → their path name.
+  version?: string;
+  pageName?: string; // 'index' | 'contact' | 'products/nwc-2000' (no extension)
 }
 
 interface UploadStaticSiteResult {
@@ -54,12 +58,13 @@ export async function uploadStaticSite(
     );
   }
 
-  // 2. Generate version ID with collision protection
+  // 2. Version ID with collision protection (shared across pages when provided)
   const timestamp = new Date().toISOString().replace(/[:.]/g, '').replace('Z', '');
-  const version = `${timestamp}-${nanoid(6)}`;
+  const version = options.version || `${timestamp}-${nanoid(6)}`;
 
-  // 3. Build blob key
-  const blobKey = `pages/${pageId}/${version}/index.html`;
+  // 3. Build blob key (per-page within the shared version folder)
+  const pageName = options.pageName || 'index';
+  const blobKey = `pages/${pageId}/${version}/${pageName}.html`;
 
   // 4. Upload with retry logic
   const result = await uploadWithRetry(() =>
