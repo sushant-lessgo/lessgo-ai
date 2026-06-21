@@ -21,6 +21,8 @@ interface HeroStat {
   id: string;
   value: string;
   label: string;
+  unit?: string;
+  live?: string;
 }
 
 interface TechPremiumHeroContent {
@@ -193,17 +195,31 @@ export default function TechPremiumHero({ sectionId }: TechPremiumHeroProps) {
                         className="tp-metric__k"
                         placeholder="metric"
                       />
-                      <TechPremiumEditable
-                        as="div"
-                        mode={mode}
-                        sectionId={sectionId}
-                        elementKey={`stats_value_${s.id}`}
-                        value={s.value}
-                        onSave={(v) => updateStat(s.id, 'value', v)}
-                        enterBehavior="save"
-                        className="tp-metric__v"
-                        placeholder="00"
-                      />
+                      <div className="tp-metric__v" data-live={s.live || undefined}>
+                        <TechPremiumEditable
+                          as="span"
+                          mode={mode}
+                          sectionId={sectionId}
+                          elementKey={`stats_value_${s.id}`}
+                          value={s.value}
+                          onSave={(v) => updateStat(s.id, 'value', v)}
+                          enterBehavior="save"
+                          placeholder="00"
+                        />
+                        {(s.unit || mode === 'edit') && (
+                          <TechPremiumEditable
+                            as="span"
+                            mode={mode}
+                            sectionId={sectionId}
+                            elementKey={`stats_unit_${s.id}`}
+                            value={s.unit || ''}
+                            onSave={(v) => updateStat(s.id, 'unit', v)}
+                            enterBehavior="save"
+                            className="tp-metric__u"
+                            placeholder="unit"
+                          />
+                        )}
+                      </div>
                       {mode === 'edit' && (
                         <button type="button" className="tp-metric__remove" onClick={() => removeStat(s.id)} aria-label="Remove metric">×</button>
                       )}
@@ -258,7 +274,8 @@ const STYLES = `
 .tp-metric { padding:16px 16px 14px; border-right:1px solid var(--line); position:relative; }
 .tp-metric:last-child { border-right:0; }
 .tp-metric__k { font-family:var(--font-mono); font-size:10px; font-weight:500; letter-spacing:0.16em; text-transform:uppercase; color:var(--ink-3); }
-.tp-metric__v { font-family:var(--font-mono); font-weight:600; font-size:22px; letter-spacing:-0.02em; color:var(--ink); margin-top:4px; line-height:1; }
+.tp-metric__v { font-family:var(--font-mono); font-weight:600; font-size:22px; letter-spacing:-0.02em; color:var(--ink); margin-top:4px; line-height:1; display:flex; align-items:baseline; gap:3px; }
+.tp-metric__u { font-size:11px; font-weight:500; color:var(--ink-3); letter-spacing:0; }
 .tp-metric__remove { position:absolute; top:4px; right:4px; background:transparent; border:none; color:var(--ink-3); font-size:12px; line-height:1; cursor:pointer; }
 .tp-readout__foot { padding:10px 16px 14px; border-top:1px solid var(--line); display:flex; align-items:center; gap:12px; }
 .tp-readout__spark { flex:1; height:34px; }

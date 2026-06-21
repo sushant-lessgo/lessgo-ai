@@ -11,6 +11,8 @@ interface TechPremiumCTAPublishedProps {
   body?: string;
   cta_text?: string;
   secondary_cta_text?: string;
+  tertiary_cta_text?: string;
+  phone_line?: string;
   content?: any;
   elementMetadata?: any;
 }
@@ -22,6 +24,7 @@ export default function TechPremiumCTAPublished(props: TechPremiumCTAPublishedPr
   const forms = props.content?.forms;
   const ctaHref = resolveCtaHref(md?.cta_text?.buttonConfig, forms, '#cta');
   const secondaryHref = resolveCtaHref(md?.secondary_cta_text?.buttonConfig, forms, '#cta');
+  const tertiaryHref = resolveCtaHref(md?.tertiary_cta_text?.buttonConfig, forms, '#cta');
 
   return (
     <>
@@ -36,9 +39,13 @@ export default function TechPremiumCTAPublished(props: TechPremiumCTAPublishedPr
               <a className="tp-btn tp-btn--lime tp-btn--lg" href={ctaHref}>{props.cta_text}</a>
             )}
             {props.secondary_cta_text && (
-              <a className="tp-btn tp-btn--ghost-d tp-btn--lg" href={secondaryHref}>{props.secondary_cta_text}</a>
+              <a className="tp-btn tp-btn--wa tp-btn--lg" href={secondaryHref}>{props.secondary_cta_text}</a>
+            )}
+            {props.tertiary_cta_text && (
+              <a className="tp-btn tp-btn--ghost-d tp-btn--lg" href={tertiaryHref}>{props.tertiary_cta_text}</a>
             )}
           </div>
+          {props.phone_line && <p className="tp-cta__phone" dangerouslySetInnerHTML={{ __html: props.phone_line }} />}
         </div>
       </section>
     </>
@@ -60,4 +67,8 @@ const STYLES = `
 .tp-btn--lime:hover { background:oklch(0.815 0.185 128); transform:translateY(-1px); }
 .tp-btn--ghost-d { border:1px solid var(--line-dk); color:var(--paper); background:transparent; }
 .tp-btn--ghost-d:hover { border-color:var(--lime); color:var(--lime); }
+.tp-btn--wa { background:var(--wa); color:#fff; }
+.tp-btn--wa:hover { background:oklch(0.55 0.16 150); transform:translateY(-1px); }
+.tp-cta__phone { font-family:var(--font-mono); font-size:12.5px; letter-spacing:0.04em; color:oklch(0.82 0.03 140 / 0.78); margin:14px 0 0; }
+.tp-cta__phone b { color:var(--lime); font-weight:600; }
 `;

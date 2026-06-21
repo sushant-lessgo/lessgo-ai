@@ -62,6 +62,12 @@ export interface PageActions {
   setCurrentPage: (pageId: string) => void;
   /** Create a new page (Phase 1: clones the home slice). Returns its id. */
   addPage: (opts?: { archetypeKey?: string; title?: string; pathSlug?: string }) => string;
+  /**
+   * Replace the active (home/basic, non-collection) page's BODY with a template
+   * archetype (Phase 4b — 'home' = the full naayom layout). Chrome-safe: commits,
+   * swaps body-only fields, re-injects chrome. Refuses collection pages.
+   */
+  applyArchetype: (archetypeKey?: string) => void;
   /** Delete a page. The home page cannot be deleted. */
   deletePage: (pageId: string) => void;
   renamePage: (pageId: string, title: string, pathSlug?: string) => void;

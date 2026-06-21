@@ -80,6 +80,9 @@ export const meridianElementSchema: Record<string, UIBlockSchemaV2> = {
           id:    { type: 'string', fillMode: 'system' },
           value: { type: 'string', fillMode: 'ai_generated_needs_review', default: '' },
           label: { type: 'string', fillMode: 'ai_generated', default: '' },
+          // Phase 4b: optional units + live-tick hook (co2|temp|rh) for the readout card.
+          unit:  { type: 'string', fillMode: 'ai_generated', default: '' },
+          live:  { type: 'string', fillMode: 'manual_preferred', default: '' },
         },
       },
     },
@@ -118,6 +121,17 @@ export const meridianElementSchema: Record<string, UIBlockSchemaV2> = {
       headline: { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Loved by fast teams' },
     },
     collections: {
+      // Phase 4b: optional stat cards above the quote grid (naayom results).
+      stats: {
+        requirement: 'optional',
+        fillMode: 'ai_generated',
+        constraints: { min: 0, max: 3 },
+        fields: {
+          id:    { type: 'string', fillMode: 'system' },
+          value: { type: 'string', fillMode: 'ai_generated_needs_review', default: '' },
+          label: { type: 'string', fillMode: 'ai_generated', default: '' },
+        },
+      },
       testimonials: {
         requirement: 'required',
         fillMode: 'ai_generated',
@@ -180,6 +194,10 @@ export const meridianElementSchema: Record<string, UIBlockSchemaV2> = {
       body:               { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: '' },
       cta_text:           { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Start free' },
       secondary_cta_text: { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      // Phase 4b contact-sales: 3rd action (call/ghost) + a mono phone note.
+      // Existing pages ignore these (optional). cta=demo, secondary=WhatsApp, call=tel.
+      tertiary_cta_text:  { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      phone_line:         { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
     },
   },
 
@@ -366,6 +384,149 @@ export const meridianElementSchema: Record<string, UIBlockSchemaV2> = {
           categoryId: { type: 'string', fillMode: 'system', default: '' },
           href:       { type: 'string', fillMode: 'system', default: '#' },
         },
+      },
+    },
+  },
+
+  // ===== Phase 4b — naayom Home blocks (editor-only; archetype-seeded) =====
+
+  TrustStrip: {
+    sectionType: 'trust',
+    elements: {},
+    collections: {
+      metrics: {
+        requirement: 'optional', fillMode: 'ai_generated', constraints: { min: 0, max: 3 },
+        fields: { id: { type: 'string', fillMode: 'system' }, value: { type: 'string', fillMode: 'ai_generated_needs_review', default: '' }, label: { type: 'string', fillMode: 'ai_generated', default: '' } },
+      },
+      logos: {
+        requirement: 'optional', fillMode: 'manual_preferred', constraints: { min: 0, max: 8 },
+        fields: { id: { type: 'string', fillMode: 'system' }, name: { type: 'string', fillMode: 'manual_preferred', default: '' }, image: { type: 'string', fillMode: 'manual_preferred', default: '' } },
+      },
+    },
+  },
+
+  ProblemPains: {
+    sectionType: 'problem',
+    elements: {
+      eyebrow:  { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      headline: { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'The problem with the status quo' },
+      lede:     { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+    },
+    collections: {
+      pains: {
+        requirement: 'required', fillMode: 'ai_generated', constraints: { min: 2, max: 5 },
+        fields: { id: { type: 'string', fillMode: 'system' }, title: { type: 'string', fillMode: 'ai_generated', default: '' }, body: { type: 'string', fillMode: 'ai_generated', default: '' } },
+      },
+    },
+  },
+
+  ProcessSteps: {
+    sectionType: 'process',
+    elements: {
+      eyebrow:  { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      headline: { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'How it works' },
+      lede:     { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+    },
+    collections: {
+      steps: {
+        requirement: 'required', fillMode: 'ai_generated', constraints: { min: 3, max: 4 },
+        fields: { id: { type: 'string', fillMode: 'system' }, icon: { type: 'string', fillMode: 'manual_preferred', default: 'Radar' }, title: { type: 'string', fillMode: 'ai_generated', default: '' }, body: { type: 'string', fillMode: 'ai_generated', default: '' } },
+      },
+    },
+  },
+
+  ExplainerRows: {
+    sectionType: 'explainer',
+    elements: {},
+    collections: {
+      rows: {
+        requirement: 'required', fillMode: 'ai_generated', constraints: { min: 1, max: 4 },
+        fields: {
+          id:      { type: 'string', fillMode: 'system' },
+          eyebrow: { type: 'string', fillMode: 'ai_generated', default: '' },
+          title:   { type: 'string', fillMode: 'ai_generated', default: '' },
+          body:    { type: 'string', fillMode: 'ai_generated', default: '' },
+          image:   { type: 'string', fillMode: 'manual_preferred', default: '' },
+          flip:    { type: 'boolean', fillMode: 'ai_generated', default: false },
+          cta_text:{ type: 'string', fillMode: 'ai_generated', default: '' },
+          cta_href:{ type: 'string', fillMode: 'ai_generated', default: '#' },
+          bullets: { type: 'array', fillMode: 'ai_generated', constraints: { min: 0, max: 5 }, fields: { id: { type: 'string', fillMode: 'system' }, text: { type: 'string', fillMode: 'ai_generated', default: '' } } },
+        },
+      },
+    },
+  },
+
+  ProductLineup: {
+    sectionType: 'lineup',
+    elements: {
+      eyebrow:  { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      headline: { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'The product lineup' },
+      lede:     { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+    },
+    collections: {
+      items: {
+        requirement: 'required', fillMode: 'manual_preferred', constraints: { min: 1, max: 6 },
+        fields: {
+          id:       { type: 'string', fillMode: 'system' },
+          model:    { type: 'string', fillMode: 'ai_generated', default: '' },
+          name:     { type: 'string', fillMode: 'ai_generated', default: '' },
+          oneLiner: { type: 'string', fillMode: 'ai_generated', default: '' },
+          image:    { type: 'string', fillMode: 'manual_preferred', default: '' },
+          cardSpec: { type: 'string', fillMode: 'ai_generated', default: '' },
+          href:     { type: 'string', fillMode: 'manual_preferred', default: '/products' },
+        },
+      },
+    },
+  },
+
+  GalleryMasonry: {
+    sectionType: 'gallerypreview',
+    elements: {
+      eyebrow:  { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      headline: { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'From the field' },
+      lede:     { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+    },
+    collections: {
+      images: {
+        requirement: 'required', fillMode: 'manual_preferred', constraints: { min: 1, max: 12 },
+        fields: { id: { type: 'string', fillMode: 'system' }, src: { type: 'string', fillMode: 'manual_preferred', default: '' }, tag: { type: 'string', fillMode: 'ai_generated', default: '' }, category: { type: 'string', fillMode: 'ai_generated', default: '' } },
+      },
+    },
+  },
+
+  CompatibilityChips: {
+    sectionType: 'compatibility',
+    elements: {
+      eyebrow:        { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      headline:       { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Works with what you have' },
+      lede:           { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      readout_status: { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      readout_tone:   { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      readout_stage:  { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      readout_caption:{ type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+    },
+    collections: {
+      chips: {
+        requirement: 'required', fillMode: 'ai_generated', constraints: { min: 2, max: 8 },
+        fields: { id: { type: 'string', fillMode: 'system' }, text: { type: 'string', fillMode: 'ai_generated', default: '' } },
+      },
+      readout_metrics: {
+        requirement: 'optional', fillMode: 'ai_generated', constraints: { min: 0, max: 3 },
+        fields: { id: { type: 'string', fillMode: 'system' }, key: { type: 'string', fillMode: 'ai_generated', default: '' }, value: { type: 'string', fillMode: 'ai_generated_needs_review', default: '' }, unit: { type: 'string', fillMode: 'ai_generated', default: '' }, live: { type: 'string', fillMode: 'manual_preferred', default: '' } },
+      },
+    },
+  },
+
+  FaqDisclosures: {
+    sectionType: 'faq',
+    elements: {
+      eyebrow:  { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      headline: { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Questions, answered' },
+    },
+    collections: {
+      items: {
+        requirement: 'required', fillMode: 'ai_generated', constraints: { min: 2, max: 10 },
+        fields: { id: { type: 'string', fillMode: 'system' }, question: { type: 'string', fillMode: 'ai_generated', default: '' }, answer: { type: 'string', fillMode: 'ai_generated', default: '' } },
       },
     },
   },

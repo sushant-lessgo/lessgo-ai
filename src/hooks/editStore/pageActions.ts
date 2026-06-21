@@ -7,12 +7,17 @@
 import type { EditStore, ProjectPageEntry, PageSlice } from '@/types/store';
 import { commitActivePage, loadPageIntoActive, findHomeId, splitChrome, HOME_PAGE_ID } from './pageHelpers';
 import { getCollectionDef } from '@/modules/collections/registry';
-import { buildCatalogSlice, buildProductDetailSlice } from './archetypes';
+import { buildCatalogSlice, buildProductDetailSlice, buildHomeSlice } from './archetypes';
 import { syncCollection, findCatalogPage, collectionItems } from './collectionHelpers';
 import { extractSectionType } from '@/modules/generatedLanding/componentRegistry';
 import { logger } from '@/lib/logger';
 
 const clone = <T>(v: T): T => JSON.parse(JSON.stringify(v ?? null));
+
+/** Body-slice builders keyed by archetype (Phase 4b). Home = the full naayom layout. */
+const ARCHETYPE_BUILDERS: Record<string, () => PageSlice> = {
+  home: buildHomeSlice,
+};
 
 function genPageId(): string {
   return `page-${Math.random().toString(36).slice(2, 10)}`;
@@ -139,6 +144,41 @@ export function createPageActions(set: any, get: any) {
       });
       return newId;
     },
+
+    applyArchetype: (archetypeKey: string = 'home') =>
+      set((state: EditStore) => {
+        const builder = ARCHETYPE_BUILDERS[archetypeKey];
+        if (!builder) {
+          logger.warn(`applyArchetype: unknown archetype ${archetypeKey}`);
+          return;
+        }
+        const id = state.currentPageId;
+        const entry = id ? state.pages?.[id] : undefined;
+        if (!entry) {
+          logger.warn('applyArchetype: no active page');
+          return;
+        }
+        // Gate: only home/basic (non-collection) pages. Replacing a collection
+        // page's body is incoherent — committing it triggers syncCollection.
+        if (entry.collectionKey) {
+          logger.warn('applyArchetype: refusing to apply onto a collection page');
+          return;
+        }
+        commitActivePage(state); // flush outgoing edits before replacing the body
+        // Defensive: builder emits body-only, but splitChrome guarantees no chrome leak.
+        const slice = splitChrome(builder()).body;
+        // Replace body-only fields (mirror-safe — chrome stays in state.chrome).
+        entry.sections = slice.sections;
+        entry.sectionLayouts = slice.sectionLayouts;
+        entry.sectionSpacing = slice.sectionSpacing;
+        entry.content = slice.content as any;
+        entry.archetypeKey = archetypeKey;
+        loadPageIntoActive(state, clone(entry)); // re-inject chrome into the working copy
+        state.selectedSection = undefined;
+        state.selectedElement = undefined;
+        state.persistence.isDirty = true;
+        state.lastUpdated = Date.now();
+      }),
 
     deletePage: (pageId: string) =>
       set((state: EditStore) => {

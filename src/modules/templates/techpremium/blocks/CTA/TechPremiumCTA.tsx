@@ -16,6 +16,8 @@ interface TechPremiumCTAContent {
   body: string;
   cta_text: string;
   secondary_cta_text: string;
+  tertiary_cta_text: string;
+  phone_line: string;
 }
 
 interface TechPremiumCTAProps {
@@ -88,11 +90,38 @@ export default function TechPremiumCTA({ sectionId }: TechPremiumCTAProps) {
                 onSave={(v) => handleContentUpdate('secondary_cta_text', v)}
                 enterBehavior="save"
                 isButton
+                className="tp-btn tp-btn--wa tp-btn--lg"
+                placeholder="WhatsApp"
+              />
+            )}
+            {(blockContent.tertiary_cta_text || mode === 'edit') && (
+              <TechPremiumEditable
+                as="span"
+                mode={mode}
+                sectionId={sectionId}
+                elementKey="tertiary_cta_text"
+                value={blockContent.tertiary_cta_text}
+                onSave={(v) => handleContentUpdate('tertiary_cta_text', v)}
+                enterBehavior="save"
+                isButton
                 className="tp-btn tp-btn--ghost-d tp-btn--lg"
-                placeholder="Talk to us"
+                placeholder="Call sales"
               />
             )}
           </div>
+          {(blockContent.phone_line || mode === 'edit') && (
+            <TechPremiumEditable
+              as="p"
+              mode={mode}
+              sectionId={sectionId}
+              elementKey="phone_line"
+              value={blockContent.phone_line}
+              onSave={(v) => handleContentUpdate('phone_line', v)}
+              enterBehavior="save"
+              className="tp-cta__phone"
+              placeholder="Or call +00 000 000 000 · Mon–Fri"
+            />
+          )}
         </div>
       </section>
     </>
@@ -114,4 +143,8 @@ const STYLES = `
 .tp-btn--lime:hover { background:oklch(0.815 0.185 128); transform:translateY(-1px); }
 .tp-btn--ghost-d { border:1px solid var(--line-dk); color:var(--paper); background:transparent; }
 .tp-btn--ghost-d:hover { border-color:var(--lime); color:var(--lime); }
+.tp-btn--wa { background:var(--wa); color:#fff; }
+.tp-btn--wa:hover { background:oklch(0.55 0.16 150); transform:translateY(-1px); }
+.tp-cta__phone { font-family:var(--font-mono); font-size:12.5px; letter-spacing:0.04em; color:oklch(0.82 0.03 140 / 0.78); margin:14px 0 0; }
+.tp-cta__phone b { color:var(--lime); font-weight:600; }
 `;

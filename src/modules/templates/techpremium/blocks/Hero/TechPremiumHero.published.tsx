@@ -9,6 +9,8 @@ interface HeroStat {
   id?: string;
   value?: string;
   label?: string;
+  unit?: string;
+  live?: string;
 }
 
 interface TechPremiumHeroPublishedProps {
@@ -76,7 +78,10 @@ export default function TechPremiumHeroPublished(props: TechPremiumHeroPublished
                   {stats.map((s, idx) => (
                     <div key={s.id || idx} className="tp-metric">
                       <div className="tp-metric__k">{s.label || ''}</div>
-                      <div className="tp-metric__v">{s.value || ''}</div>
+                      <div className="tp-metric__v" data-live={s.live || undefined}>
+                        <span>{s.value || ''}</span>
+                        {s.unit ? <span className="tp-metric__u">{s.unit}</span> : null}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -126,7 +131,8 @@ const STYLES = `
 .tp-metric { padding:16px 16px 14px; border-right:1px solid var(--line); position:relative; }
 .tp-metric:last-child { border-right:0; }
 .tp-metric__k { font-family:var(--font-mono); font-size:10px; font-weight:500; letter-spacing:0.16em; text-transform:uppercase; color:var(--ink-3); }
-.tp-metric__v { font-family:var(--font-mono); font-weight:600; font-size:22px; letter-spacing:-0.02em; color:var(--ink); margin-top:4px; line-height:1; }
+.tp-metric__v { font-family:var(--font-mono); font-weight:600; font-size:22px; letter-spacing:-0.02em; color:var(--ink); margin-top:4px; line-height:1; display:flex; align-items:baseline; gap:3px; }
+.tp-metric__u { font-size:11px; font-weight:500; color:var(--ink-3); letter-spacing:0; }
 .tp-readout__foot { padding:10px 16px 14px; border-top:1px solid var(--line); display:flex; align-items:center; gap:12px; }
 .tp-readout__spark { flex:1; height:34px; }
 .tp-readout__spark polyline { fill:none; stroke:var(--lime-d); stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }

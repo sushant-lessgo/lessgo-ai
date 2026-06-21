@@ -50,6 +50,21 @@ export function PageSwitcher() {
     if (title) store.renamePage(id, title.trim());
   };
 
+  // Apply naayom Home layout — TechPremium only, on the active home/basic
+  // (non-collection) page. Replaces the page body with the full designed layout.
+  const activePage: any = currentPageId ? (pages as any)[currentPageId] : undefined;
+  const canApplyHome =
+    isTechPremium &&
+    !!activePage &&
+    !activePage.collectionKey &&
+    (activePage.pathSlug === '/' || activePage.archetypeKey === 'home' || activePage.archetypeKey === 'basic');
+
+  const handleApplyHome = () => {
+    if (window.confirm('Replace this page with the naayom Home layout? Current section content on this page will be replaced.')) {
+      store.applyArchetype('home');
+    }
+  };
+
   return (
     <div className="hidden md:flex items-center gap-1" role="tablist" aria-label="Pages">
       {tabs.map((p: any) => {
@@ -83,6 +98,16 @@ export function PageSwitcher() {
           </div>
         );
       })}
+      {canApplyHome && (
+        <button
+          onClick={handleApplyHome}
+          className="px-3 py-1 rounded-md text-sm text-emerald-700 hover:bg-emerald-50"
+          aria-label="Apply naayom Home layout"
+          title="Replace this page with the full naayom Home layout"
+        >
+          ✦ Home layout
+        </button>
+      )}
       {isTechPremium && !hasCatalog && (
         <button
           onClick={() => showProductsModal()}
