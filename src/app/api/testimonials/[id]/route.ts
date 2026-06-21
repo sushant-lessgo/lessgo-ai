@@ -4,6 +4,7 @@ export const runtime = 'nodejs';
 import type { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@clerk/nextjs/server';
+import { prisma } from '@/lib/prisma';
 import { createSecureResponse } from '@/lib/security';
 import { isTestimonialsEnabled } from '@/lib/testimonials/flag';
 import {
@@ -14,7 +15,8 @@ import {
   isTestimonialStatus,
 } from '@/lib/testimonials/repo';
 
-// Edit fields and/or change status. Nullable optionals let the form clear a field.
+// Edit fields and/or change status. Nullable optionals let the form clear a field
+// (projectId null = unassign / account-level).
 const PatchBody = z.object({
   authorName: z.string().min(1).max(120).optional(),
   quote: z.string().min(1).max(2000).optional(),
@@ -23,6 +25,7 @@ const PatchBody = z.object({
   authorPhotoUrl: z.string().url().max(2000).nullable().optional(),
   rating: z.number().int().min(1).max(5).nullable().optional(),
   status: z.string().refine(isTestimonialStatus, 'Invalid status').optional(),
+  projectId: z.string().min(1).nullable().optional(),
 });
 
 // Ownership is enforced here (repo mutators take no userId): fetch then compare.
@@ -44,6 +47,15 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
   const owned = await requireOwned(params.id, userId);
   if (owned.fail) return owned.fail;
+
+  // Reassigning to a project? It must belong to the caller (null = unassign, allowed).
+  if (typeof parse.data.projectId === 'string') {
+    const ownedProject = await prisma.project.findFirst({
+      where: { id: parse.data.projectId, user: { clerkId: userId } },
+      select: { id: true },
+    });
+    if (!ownedProject) return createSecureResponse({ error: 'Invalid project' }, 400);
+  }
 
   const { status, ...fields } = parse.data;
 

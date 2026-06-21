@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { ArrowLeft, MessageSquare, Clock, CheckCircle2, XCircle } from 'lucide-react'
 import Header from '@/components/dashboard/Header'
 import Footer from '@/components/shared/Footer'
+import { prisma } from '@/lib/prisma'
 import { isTestimonialsEnabled } from '@/lib/testimonials/flag'
 import { listTestimonialsByOwner } from '@/lib/testimonials/repo'
 import TestimonialModerationList from '@/components/dashboard/testimonials/TestimonialModerationList'
@@ -16,7 +17,14 @@ export default async function TestimonialsPage() {
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
 
-  const testimonials = await listTestimonialsByOwner(userId)
+  const [testimonials, user] = await Promise.all([
+    listTestimonialsByOwner(userId),
+    prisma.user.findUnique({
+      where: { clerkId: userId },
+      include: { projects: { select: { id: true, title: true }, orderBy: { updatedAt: 'desc' } } },
+    }),
+  ])
+  const projects = user?.projects ?? []
 
   const counts = {
     total: testimonials.length,
@@ -66,7 +74,7 @@ export default async function TestimonialsPage() {
           ))}
         </div>
 
-        <TestimonialModerationList initial={testimonials} />
+        <TestimonialModerationList initial={testimonials} projects={projects} />
       </main>
       <Footer />
     </div>

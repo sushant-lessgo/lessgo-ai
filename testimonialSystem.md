@@ -226,9 +226,29 @@ override); **account-level** (`projectId` null — Phase 4 ties to a page); Reje
 **Two flags now (both default false):** `TESTIMONIALS_ENABLED` (server: page + API),
 `NEXT_PUBLIC_TESTIMONIALS_ENABLED` (client: nav link). Set both in `.env.local` to enable.
 
-**Not yet runtime-smoked:** needs the `Testimonial` table in a DB (migration still unapplied).
-Choose a **Neon dev branch** (preferred) or non-destructive `db execute` on shared dev first.
+**Runtime-smoked** on a dedicated Neon dev branch `testimonials-dev` (migration applied via
+`migrate deploy` over the direct URL); user confirmed the moderation flow works.
+
+## Phase 2.5 — As Built (2026-06-20): project scoping
+
+Makes testimonials **project-aware** (a Lessgo project = one business/site; separate projects =
+separate businesses that must stay isolated). UI + API only — `Testimonial.projectId` and repo
+support already existed, so **no schema/migration/repo change**. Build clean, tests 9/9.
+
+- `src/app/dashboard/testimonials/page.tsx` — also loads the owner's projects
+  (`prisma.user.findUnique({ where:{clerkId}, include:{projects} })`) → passes to the list.
+- `TestimonialModerationList.tsx` — project **filter** (All / per-project / Unassigned) +
+  per-card project label. Both **hidden when ≤1 project** (`showProjects`).
+- `TestimonialFormDialog.tsx` — project **picker** (`<select>`); hidden when ≤1 project
+  (auto-assigns the single project); add defaults to most-recent project, edit pre-selects current.
+- `api/testimonials/route.ts` (POST) + `[id]/route.ts` (PATCH) — accept `projectId`; when set,
+  **verify ownership** via `prisma.project.findFirst({ where:{ id, user:{ clerkId } } })` → 400
+  `Invalid project` otherwise (the isolation guarantee). PATCH `projectId:null` = unassign.
+
+**UX:** invisible for the common single-project user; the project dimension only appears with
+multiple projects. Legacy Phase-2 null-project testimonials show under **"Unassigned"**, reassignable.
 
 ### Next: Phase 3 — Collection
-Public `/t/[collectToken]` branded form + collect-token entity (per project) + photo **file upload**
-(Blob, the deferred piece) → creates `pending` testimonials into the same moderation queue.
+Public `/t/[collectToken]` branded form + collect-token entity (**per project** — projectId auto-set
+at collection) + photo **file upload** (Blob, the deferred piece) → `pending` testimonials into the
+same moderation queue.

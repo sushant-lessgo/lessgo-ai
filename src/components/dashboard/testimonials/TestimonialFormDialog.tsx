@@ -20,6 +20,7 @@ interface Props {
   onOpenChange: (open: boolean) => void
   onSuccess: () => void
   testimonial?: Testimonial | null
+  projects: { id: string; title: string }[]
 }
 
 const emptyForm = {
@@ -30,18 +31,21 @@ const emptyForm = {
   authorPhotoUrl: '',
   rating: '',
   status: 'approved',
+  projectId: '',
 }
 
 const selectClass =
   'flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring'
 
-export default function TestimonialFormDialog({ open, onOpenChange, onSuccess, testimonial }: Props) {
+export default function TestimonialFormDialog({ open, onOpenChange, onSuccess, testimonial, projects }: Props) {
   const isEdit = !!testimonial
   const [form, setForm] = useState(emptyForm)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   // Sync form state whenever the dialog opens (for add) or the target changes (for edit).
+  // Reads `projects` at open time for the add-default; intentionally not a dep (avoids
+  // resetting the form mid-edit if the parent re-renders with a new array reference).
   useEffect(() => {
     if (!open) return
     if (testimonial) {
@@ -53,11 +57,14 @@ export default function TestimonialFormDialog({ open, onOpenChange, onSuccess, t
         authorPhotoUrl: testimonial.authorPhotoUrl ?? '',
         rating: testimonial.rating ? String(testimonial.rating) : '',
         status: testimonial.status ?? 'approved',
+        projectId: testimonial.projectId ?? '',
       })
     } else {
-      setForm(emptyForm)
+      // Add: default to the most-recent project (first, ordered updatedAt desc); '' if none.
+      setForm({ ...emptyForm, projectId: projects[0]?.id ?? '' })
     }
     setError(null)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, testimonial])
 
   const set =
@@ -88,6 +95,7 @@ export default function TestimonialFormDialog({ open, onOpenChange, onSuccess, t
             authorPhotoUrl: form.authorPhotoUrl.trim() || null,
             rating: rating ?? null,
             status: form.status,
+            projectId: form.projectId || null,
           }),
         })
       } else {
@@ -101,6 +109,7 @@ export default function TestimonialFormDialog({ open, onOpenChange, onSuccess, t
         if (form.authorCompany.trim()) body.authorCompany = form.authorCompany.trim()
         if (form.authorPhotoUrl.trim()) body.authorPhotoUrl = form.authorPhotoUrl.trim()
         if (rating) body.rating = rating
+        if (form.projectId) body.projectId = form.projectId
         res = await fetch('/api/testimonials', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -161,6 +170,20 @@ export default function TestimonialFormDialog({ open, onOpenChange, onSuccess, t
               </select>
             </div>
           </div>
+
+          {projects.length > 1 && (
+            <div className="space-y-1.5">
+              <Label htmlFor="projectId">Project</Label>
+              <select id="projectId" value={form.projectId} onChange={set('projectId')} className={selectClass}>
+                {projects.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.title || 'Untitled project'}
+                  </option>
+                ))}
+                <option value="">No project (account-level)</option>
+              </select>
+            </div>
+          )}
 
           <div className="space-y-1.5">
             <Label htmlFor="quote">Quote *</Label>

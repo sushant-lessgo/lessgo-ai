@@ -26,16 +26,33 @@ const STATUS_BADGE: Record<string, { label: string; variant: BadgeVariant }> = {
   rejected: { label: 'Rejected', variant: 'destructive' },
 }
 
-export default function TestimonialModerationList({ initial }: { initial: Testimonial[] }) {
+export default function TestimonialModerationList({
+  initial,
+  projects,
+}: {
+  initial: Testimonial[]
+  projects: { id: string; title: string }[]
+}) {
   const router = useRouter()
   const [filter, setFilter] = useState<Filter>('all')
+  const [projectFilter, setProjectFilter] = useState<string>('all')
   const [busyId, setBusyId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<Testimonial | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Testimonial | null>(null)
 
-  const visible = filter === 'all' ? initial : initial.filter((t) => t.status === filter)
+  const projectMap = new Map(projects.map((p) => [p.id, p.title || 'Untitled project']))
+  const hasUnassigned = initial.some((t) => !t.projectId)
+  // Project dimension is hidden entirely for the common single-project user (zero friction).
+  const showProjects = projects.length > 1 || hasUnassigned
+
+  const visible = initial.filter((t) => {
+    if (filter !== 'all' && t.status !== filter) return false
+    if (projectFilter === 'all') return true
+    if (projectFilter === 'unassigned') return !t.projectId
+    return t.projectId === projectFilter
+  })
   const refresh = () => router.refresh()
 
   const act = async (id: string, fn: () => Promise<Response>) => {
@@ -74,19 +91,37 @@ export default function TestimonialModerationList({ initial }: { initial: Testim
   return (
     <div>
       {/* Toolbar */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex gap-1">
-          {FILTERS.map((f) => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`px-3 py-1.5 text-sm rounded-lg capitalize transition ${
-                filter === f ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100'
-              }`}
+      <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex gap-1">
+            {FILTERS.map((f) => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={`px-3 py-1.5 text-sm rounded-lg capitalize transition ${
+                  filter === f ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
+          {showProjects && (
+            <select
+              value={projectFilter}
+              onChange={(e) => setProjectFilter(e.target.value)}
+              className="h-9 rounded-md border border-gray-200 bg-white px-3 text-sm text-gray-700"
+              aria-label="Filter by project"
             >
-              {f}
-            </button>
-          ))}
+              <option value="all">All projects</option>
+              {projects.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.title || 'Untitled project'}
+                </option>
+              ))}
+              {hasUnassigned && <option value="unassigned">Unassigned</option>}
+            </select>
+          )}
         </div>
         <Button
           onClick={() => {
@@ -159,7 +194,14 @@ export default function TestimonialModerationList({ initial }: { initial: Testim
                       )}
                     </div>
                   </div>
-                  <Badge variant={badge.variant}>{badge.label}</Badge>
+                  <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                    <Badge variant={badge.variant}>{badge.label}</Badge>
+                    {showProjects && (
+                      <span className="text-xs text-gray-400 whitespace-nowrap">
+                        {t.projectId ? projectMap.get(t.projectId) ?? 'Unknown project' : 'Unassigned'}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <div className="mt-4 flex items-center gap-2">
@@ -200,7 +242,13 @@ export default function TestimonialModerationList({ initial }: { initial: Testim
         </div>
       )}
 
-      <TestimonialFormDialog open={formOpen} onOpenChange={setFormOpen} onSuccess={refresh} testimonial={editing} />
+      <TestimonialFormDialog
+        open={formOpen}
+        onOpenChange={setFormOpen}
+        onSuccess={refresh}
+        testimonial={editing}
+        projects={projects}
+      />
 
       <Dialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
         <DialogContent>
