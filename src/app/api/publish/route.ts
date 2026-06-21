@@ -400,7 +400,7 @@ async function publishHandler(req: NextRequest) {
       // === PHASE 3: UPDATE KV ROUTING WITH RETRY & VERIFICATION ===
       // Add after successful DB update
       try {
-        const { atomicPublishWithRetry, writeRedirect, writeSlugForHost } = await import('@/lib/routing/kvRoutes');
+        const { atomicPublishWithRetry, writeRedirect, writeSlugForHost, removeRedirect } = await import('@/lib/routing/kvRoutes');
 
         // Build domain list — includes custom domain when live
         const pageDomains = await prisma.publishedPage.findUnique({
@@ -444,6 +444,16 @@ async function publishHandler(req: NextRequest) {
             await writeSlugForHost(pageDomains!.customDomain!, slug);
           } catch (e) {
             console.error('[Phase 3] writeRedirect/writeSlugForHost failed (non-fatal)', e);
+          }
+        } else {
+          // Self-heal: no live custom domain → clear any STALE subdomain→custom-domain
+          // redirect so {slug}.lessgo.ai serves its own page. Without this, a redirect:
+          // KV entry left over from a removed custom domain or a DB wipe survives and the
+          // middleware 301s the subdomain to a dead/wrong target (e.g. test1 → kundius...).
+          try {
+            await removeRedirect(`${slug}.lessgo.ai`);
+          } catch (e) {
+            console.error('[publish] removeRedirect (stale) failed (non-fatal)', e);
           }
         }
 

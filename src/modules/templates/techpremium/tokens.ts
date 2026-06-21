@@ -33,6 +33,7 @@ export interface TechPremiumBaseTokens {
   okBg: string;
   warn: string;
   warnBg: string;
+  wa: string; // WhatsApp green (FAB + "Ask on WhatsApp" buttons)
 
   // Type
   fontDisplay: string;
@@ -77,6 +78,7 @@ export const techPremiumBaseTokens: TechPremiumBaseTokens = {
   okBg:  'oklch(0.660 0.150 150 / 0.14)',
   warn:  'oklch(0.730 0.150 75)',
   warnBg:'oklch(0.730 0.150 75 / 0.14)',
+  wa:    'oklch(0.62 0.16 150)',
 
   fontDisplay: '"Inter Tight", system-ui, -apple-system, sans-serif',
   fontBody:    '"Inter", system-ui, -apple-system, sans-serif',
@@ -128,6 +130,7 @@ export function serializeBaseTokens(t: TechPremiumBaseTokens = techPremiumBaseTo
   --ok-bg:${t.okBg};
   --warn:${t.warn};
   --warn-bg:${t.warnBg};
+  --wa:${t.wa};
   --font-display:${t.fontDisplay};
   --font-body:${t.fontBody};
   --font-mono:${t.fontMono};
