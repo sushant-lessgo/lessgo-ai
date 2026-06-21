@@ -123,56 +123,9 @@ export default function TechPremiumProductDetailPublished(props: Props) {
           )}
         </div>
       </section>
-      <script dangerouslySetInnerHTML={{ __html: GALLERY_JS }} />
+      {/* Gallery + lightbox behavior is now wired by the shared naayom.v1.js asset
+          (injected by htmlGenerator on TechPremium pages) — markup contract is the
+          [data-tp-pd] / .tp-lightbox classes below, unchanged from Phase 3. */}
     </>
   );
 }
-
-// Vanilla, dependency-free, idempotent. Wires every [data-tp-pd] gallery + a shared
-// lightbox. No-ops when markup is absent. Mirrors naayom.js gallery + lightbox.
-const GALLERY_JS = `
-(function(){
-  if (window.__tpPdGalleryInit) return; window.__tpPdGalleryInit = true;
-  function ready(fn){ if(document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded',fn); }
-  ready(function(){
-    var lb=null, lbItems=[], lbIndex=0;
-    function buildLb(){
-      if(lb) return lb;
-      lb=document.createElement('div'); lb.className='tp-lightbox';
-      lb.innerHTML='<div class="tp-lb-stage"><button class="tp-lb-close" aria-label="Close">\\u2715</button><button class="tp-lb-nav prev" aria-label="Previous">\\u2039</button><button class="tp-lb-nav next" aria-label="Next">\\u203A</button><div class="tp-lb-img"></div><div class="tp-lb-cap"></div></div>';
-      document.body.appendChild(lb);
-      lb.querySelector('.tp-lb-close').addEventListener('click',closeLb);
-      lb.querySelector('.tp-lb-nav.prev').addEventListener('click',function(){showLb(lbIndex-1);});
-      lb.querySelector('.tp-lb-nav.next').addEventListener('click',function(){showLb(lbIndex+1);});
-      lb.addEventListener('click',function(e){ if(e.target===lb) closeLb(); });
-      document.addEventListener('keydown',function(e){ if(!lb.classList.contains('is-open'))return; if(e.key==='Escape')closeLb(); if(e.key==='ArrowLeft')showLb(lbIndex-1); if(e.key==='ArrowRight')showLb(lbIndex+1); });
-      return lb;
-    }
-    function openLb(items,start){ buildLb(); lbItems=items; showLb(start); lb.classList.add('is-open'); document.body.style.overflow='hidden'; }
-    function closeLb(){ if(lb){ lb.classList.remove('is-open'); document.body.style.overflow=''; } }
-    function showLb(n){ if(!lbItems.length)return; lbIndex=(n+lbItems.length)%lbItems.length; var it=lbItems[lbIndex];
-      lb.querySelector('.tp-lb-img').innerHTML = it.src ? '<img src="'+it.src+'" alt="">' : '<span class="tp-pd-ph">'+(it.cap||'')+'</span>';
-      lb.querySelector('.tp-lb-cap').textContent = (it.cap||'') + '  ' + (lbIndex+1) + ' / ' + lbItems.length;
-    }
-    var gals = document.querySelectorAll('[data-tp-pd]');
-    Array.prototype.forEach.call(gals,function(gal){
-      var slides = gal.querySelectorAll('.tp-pd-slide');
-      var thumbs = gal.querySelectorAll('.tp-pd-thumb');
-      var cur = gal.querySelector('.tp-cur');
-      var i=0;
-      function items(){ return Array.prototype.map.call(slides,function(s){ var img=s.querySelector('img'); return { src: img?img.getAttribute('src'):'', cap: s.getAttribute('data-cap')||'' }; }); }
-      function show(n){ i=(n+slides.length)%slides.length;
-        Array.prototype.forEach.call(slides,function(s,k){ s.classList.toggle('is-active',k===i); });
-        Array.prototype.forEach.call(thumbs,function(t,k){ t.classList.toggle('is-active',k===i); });
-        if(cur) cur.textContent=String(i+1);
-      }
-      var prev=gal.querySelector('[data-prev]'), next=gal.querySelector('[data-next]'), zoom=gal.querySelector('[data-zoom]');
-      if(prev) prev.addEventListener('click',function(){ show(i-1); });
-      if(next) next.addEventListener('click',function(){ show(i+1); });
-      Array.prototype.forEach.call(thumbs,function(t,k){ t.addEventListener('click',function(){ show(k); }); });
-      if(zoom) zoom.addEventListener('click',function(){ openLb(items(),i); });
-      Array.prototype.forEach.call(slides,function(s,k){ s.addEventListener('click',function(){ openLb(items(),k); }); });
-    });
-  });
-})();
-`;

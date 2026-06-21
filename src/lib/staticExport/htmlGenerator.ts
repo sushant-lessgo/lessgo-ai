@@ -80,6 +80,10 @@ export async function generateStaticHTML(
   // 4. Detect if page has forms
   const hasForms = Boolean(options.content?.forms && Object.keys(options.content.forms).length > 0);
 
+  // Phase 4: TechPremium pages load the shared naayom.v1.js behaviors asset
+  // (dropdown nav, mobile menu, lightbox, gallery filter, live readout tick).
+  const usesNaayom = options.templateId === 'techpremium';
+
   // 5. Build complete HTML document
   const html = buildHTMLDocument({
     bodyHTML,
@@ -94,6 +98,7 @@ export async function generateStaticHTML(
     },
     analyticsOptIn: options.analyticsOptIn || false,
     hasForms,
+    usesNaayom,
   });
 
   // 5. Validate and resolve asset URLs
@@ -167,8 +172,9 @@ function buildHTMLDocument(params: {
   };
   analyticsOptIn: boolean;
   hasForms: boolean;
+  usesNaayom: boolean;
 }): string {
-  const { bodyHTML, cssVariables, metadata, analyticsOptIn, hasForms } = params;
+  const { bodyHTML, cssVariables, metadata, analyticsOptIn, hasForms, usesNaayom } = params;
 
   // Generate CSS variables style tag
   const cssVariablesStyle = generateCSSVariablesStyle(cssVariables);
@@ -222,6 +228,9 @@ function buildHTMLDocument(params: {
 
   <!-- Phase 4: Form handler (loaded if page has forms) -->
   ${hasForms ? `<script src="https://lessgo.ai/assets/form.v1.js" defer></script>` : ''}
+
+  <!-- Phase 4: TechPremium behaviors (dropdown nav, lightbox, gallery filter, readout tick) -->
+  ${usesNaayom ? `<script src="https://lessgo.ai/assets/naayom.v1.js" defer></script>` : ''}
 
   <!-- Phase 4: Analytics beacon (opt-in) -->
   ${

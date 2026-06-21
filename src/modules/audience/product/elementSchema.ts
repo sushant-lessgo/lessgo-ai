@@ -25,7 +25,9 @@ export const meridianElementSchema: Record<string, UIBlockSchemaV2> = {
     elements: {
       logo_text:   { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'meridian' },
       cta_text:    { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Start free' },
+      cta_href:    { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '/contact' }, // Phase 4: Book-a-demo target
       signin_text: { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Sign in' },
+      signin_url:  { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' }, // Phase 4: Platform login (external)
       logo_image:  { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
     },
     collections: {
@@ -37,6 +39,19 @@ export const meridianElementSchema: Record<string, UIBlockSchemaV2> = {
           id:    { type: 'string', fillMode: 'system' },
           label: { type: 'string', fillMode: 'ai_generated', default: '' },
           href:  { type: 'string', fillMode: 'ai_generated', default: '#' },
+          // Phase 4: optional dropdown (Products mega-item). When present, this
+          // nav item renders as a dropdown instead of a plain link.
+          children: {
+            type: 'array',
+            fillMode: 'ai_generated',
+            constraints: { min: 0, max: 8 },
+            fields: {
+              id:    { type: 'string', fillMode: 'system' },
+              label: { type: 'string', fillMode: 'ai_generated', default: '' },
+              desc:  { type: 'string', fillMode: 'ai_generated', default: '' },
+              href:  { type: 'string', fillMode: 'ai_generated', default: '#' },
+            },
+          },
         },
       },
     },
@@ -177,10 +192,19 @@ export const meridianElementSchema: Record<string, UIBlockSchemaV2> = {
     elements: {
       wordmark:              { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'meridian' },
       tag:                   { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      // Phase 4: multi-column footer — brand blurb + click-to-action contact.
+      blurb:                 { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      contact_address:       { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      contact_tel:           { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      contact_email:         { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
       newsletter_placeholder:{ type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: 'you@company.com' },
       newsletter_cta:        { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: 'subscribe' },
       copyright:             { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: '© Meridian' },
       location:              { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      // Phase 4: floating WhatsApp widget (rendered by the footer → every page).
+      whatsapp_number:       { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      whatsapp_prefill:      { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      whatsapp_label:        { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: 'Chat with us' },
     },
     collections: {
       footer_columns: {
@@ -200,6 +224,27 @@ export const meridianElementSchema: Record<string, UIBlockSchemaV2> = {
               href:  { type: 'string', fillMode: 'ai_generated', default: '#' },
             },
           },
+        },
+      },
+      // Phase 4: social icon links (lucide names).
+      socials: {
+        requirement: 'optional',
+        fillMode: 'manual_preferred',
+        constraints: { min: 0, max: 6 },
+        fields: {
+          id:   { type: 'string', fillMode: 'system' },
+          icon: { type: 'string', fillMode: 'manual_preferred', default: 'MessageCircle' }, // Facebook|Linkedin|Youtube|MessageCircle
+          url:  { type: 'string', fillMode: 'manual_preferred', default: '#' },
+        },
+      },
+      legal_links: {
+        requirement: 'optional',
+        fillMode: 'ai_generated',
+        constraints: { min: 0, max: 4 },
+        fields: {
+          id:    { type: 'string', fillMode: 'system' },
+          label: { type: 'string', fillMode: 'ai_generated', default: '' },
+          href:  { type: 'string', fillMode: 'ai_generated', default: '#' },
         },
       },
     },
