@@ -143,8 +143,9 @@ Each phase is independently valuable and safe to merge (dark) before the next ex
 - **Phase 1 — Foundation. ✅ DONE (2026-06-20).** Worktree + `Testimonial` model (superset,
   additive migration, DB-free) + data-access layer + `TESTIMONIALS_ENABLED` flag + mocked test.
   No UI. _(as-built detail below)_
-- **Phase 2 — Admin / Moderation.** `/dashboard/testimonials`: list, approve/reject/edit,
-  **manual add** (lets us seed our own immediately). Owner-scoped API + Clerk auth.
+- **Phase 2 — Admin / Moderation. ✅ DONE (2026-06-20).** `/dashboard/testimonials`: list,
+  filter, approve/reject/edit/delete, **manual add**. Owner-scoped API + Clerk auth, flag-gated.
+  _(as-built detail below)_
 - **Phase 3 — Collection.** Public `/t/[collectToken]` branded form; collect-token
   generation (per project); submit API → pending Testimonial; photo upload via Blob.
 - **Phase 4 — Feed to page.** "Add to page" picker → inject approved testimonials into the
@@ -158,7 +159,8 @@ Each phase is independently valuable and safe to merge (dark) before the next ex
 
 - Collect token scope: **per-project** (recommended — testimonials belong to a page) vs
   per-owner (one wall)? — leaning per-project.
-- Where does the moderation UI live in the existing dashboard IA?
+- ~~Where does the moderation UI live in the existing dashboard IA?~~ → RESOLVED: `/dashboard/testimonials`,
+  reached via a flag-gated `Header` nav link (Phase 2).
 - Photo storage path/policy in Blob (reuse existing upload util?).
 - Do we want a public "Wall of Love" page per project, or only section-injection, in early phases?
 
@@ -190,9 +192,43 @@ deletion); mocked test (no shared-dev pollution); repo-layer status/source valid
 **Verification:** `npx vitest run src/lib/testimonials/repo.test.ts` → 9 passed.
 `prisma generate` → client includes `Testimonial`. `npm run build` → (see commit/CI).
 
-**NOT committed yet** — working tree only. Commit when ready (nothing is on main; fully dark).
+**Committed** as `8ffd3b1` on `feature/testimonials` (still dark; nothing on main).
 
-### Next: Phase 2 — Admin / Moderation
-`/dashboard/testimonials` (owner-scoped list + approve/reject/edit + **manual add** to seed our
-own), API routes using `auth()` + `verifyProjectAccess` (`src/lib/security.ts`), all gated by
-`isTestimonialsEnabled()`. Resolve open Q: where it slots in the dashboard IA / Header nav.
+## Phase 2 — As Built (2026-06-20)
+
+Owner-scoped moderation surface. No public collection form (Phase 3), no page-injection (Phase 4).
+Verified by `npm run build` (clean; routes present in build) + repo tests still 9/9 green.
+
+**Files (worktree `../lessgo-testimonials`, branch `feature/testimonials`):**
+- `src/app/dashboard/testimonials/page.tsx` — server component: flag-gate (`notFound()` if off) →
+  `auth()` → `listTestimonialsByOwner(userId)` → Header/Footer shell + status stat cards +
+  `<TestimonialModerationList>`. Mirrors `dashboard/forms/[slug]/page.tsx`.
+- `src/app/api/testimonials/route.ts` — `POST` manual add (zod; defaults `source:'manual'`,
+  `status:'approved'`).
+- `src/app/api/testimonials/[id]/route.ts` — `PATCH` (edit/status) + `DELETE`. Ownership enforced
+  **in-route** (`getTestimonial` → `userId` check → 403). Enum validated via `isTestimonialStatus`.
+  All routes flag-gated (404 if off). Pattern from `api/domains/remove/route.ts`.
+- `src/components/dashboard/testimonials/TestimonialModerationList.tsx` — client: filter tabs
+  (all/pending/approved/rejected), cards w/ photo/quote/author/rating/`Badge`, Approve/Reject
+  (`PATCH {status}`), Edit, Delete (confirm `Dialog`). `fetch` → `router.refresh()`, inline errors.
+- `src/components/dashboard/testimonials/TestimonialFormDialog.tsx` — client: shared Add/Edit form
+  in `Dialog` (name/role/company/quote/rating/photo-URL/status). Photo is a **pasted URL**
+  (file upload deferred to Phase 3). Idiom from `domain/AddDomainForm.tsx`.
+- `src/lib/testimonials/flag.ts` — added `isTestimonialsEnabledPublic()` (reads
+  `NEXT_PUBLIC_TESTIMONIALS_ENABLED`) for the client nav link; server `isTestimonialsEnabled()`
+  still gates page + routes (authoritative).
+- `src/components/dashboard/Header.tsx` — flag-gated `Testimonials` nav link beside Settings.
+
+**Decisions baked in (PO review):** manual-add defaults **approved** (owner-trusted; form can
+override); **account-level** (`projectId` null — Phase 4 ties to a page); Reject = status `rejected`
+(reversible), separate Delete = hard remove; route-layer enum validation via exported guards.
+
+**Two flags now (both default false):** `TESTIMONIALS_ENABLED` (server: page + API),
+`NEXT_PUBLIC_TESTIMONIALS_ENABLED` (client: nav link). Set both in `.env.local` to enable.
+
+**Not yet runtime-smoked:** needs the `Testimonial` table in a DB (migration still unapplied).
+Choose a **Neon dev branch** (preferred) or non-destructive `db execute` on shared dev first.
+
+### Next: Phase 3 — Collection
+Public `/t/[collectToken]` branded form + collect-token entity (per project) + photo **file upload**
+(Blob, the deferred piece) → creates `pending` testimonials into the same moderation queue.

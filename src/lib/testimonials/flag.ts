@@ -1,6 +1,17 @@
-// Dark-launch gate for the testimonial system (Phase 1+). Server-side only for now;
-// a NEXT_PUBLIC_TESTIMONIALS_ENABLED twin is added in Phase 2 only if a client
-// component (e.g. a dashboard nav link) needs to read it. See testimonialSystem.md.
+// Dark-launch gate for the testimonial system. See testimonialSystem.md.
+//
+// Two flags, kept in sync:
+// - TESTIMONIALS_ENABLED (server-only) gates the dashboard page + API routes — the real
+//   security boundary.
+// - NEXT_PUBLIC_TESTIMONIALS_ENABLED gates client components (e.g. the Header nav link),
+//   since server-only env vars aren't available in the client bundle. Cosmetic only.
+
+// Server-side gate (page + API routes). Authoritative.
 export function isTestimonialsEnabled(): boolean {
   return process.env.TESTIMONIALS_ENABLED === 'true';
+}
+
+// Client-readable gate (nav link visibility). Cosmetic — never the security boundary.
+export function isTestimonialsEnabledPublic(): boolean {
+  return process.env.NEXT_PUBLIC_TESTIMONIALS_ENABLED === 'true';
 }
