@@ -94,26 +94,28 @@ export function buildHomeSlice(): PageSlice {
 
   return slice([
     { id: h, data: section(h, 'hero', 'TerminalHero', {
-      status_text: 'Climate automation · controlled-environment ag',
-      audience_tag: 'Built for commercial growers & research farms',
-      headline: 'Grow rooms that <em>run themselves.</em>',
-      lede: 'Sensors, controllers and one dashboard — so CO₂, temperature and humidity hold their setpoints while you sleep.',
-      cta_text: 'Book a demo',
+      status_text: 'Climate automation · controlled-environment agriculture',
+      audience_tag: 'Built for commercial mushroom growers & research farms',
+      headline: 'Where climate control meets <em>precision</em> for mushroom farmers.',
+      lede: 'Experience seamless management of temperature, CO₂, humidity and air circulation — from anywhere. Naayom holds every chamber at setpoint so your crop doesn’t pay for a missed reading.',
+      cta_text: 'Contact Sales',
       secondary_cta_text: 'See the systems',
-      caption: '99.98% uptime across 140+ rooms in the field.',
+      caption: '50% Cordyceps yield uplift — Mycoforest, Gwalior.',
       stats: [
         { id: rid('st'), value: '820', label: 'CO₂', unit: 'ppm', live: 'co2' },
         { id: rid('st'), value: '24.4', label: 'Air temp', unit: '°C', live: 'temp' },
-        { id: rid('st'), value: '61', label: 'RH', unit: '%', live: 'rh' },
+        { id: rid('st'), value: '91', label: 'RH', unit: '%', live: 'rh' },
       ],
     }) },
     { id: t, data: section(t, 'trust', 'TrustStrip', {
       metrics: [
-        { id: rid('m'), value: '140+', label: 'rooms automated' },
-        { id: rid('m'), value: '99.98%', label: 'controller uptime' },
-        { id: rid('m'), value: '6 yrs', label: 'in the field' },
+        { id: rid('m'), value: '+50%', label: 'Cordyceps yield uplift' },
+        { id: rid('m'), value: '24/7', label: 'real-time monitoring' },
+        { id: rid('m'), value: 'Remote', label: 'control from anywhere' },
       ],
       logos: [
+        { id: rid('lg'), name: 'Partner', image: '' },
+        { id: rid('lg'), name: 'Partner', image: '' },
         { id: rid('lg'), name: 'Partner', image: '' },
         { id: rid('lg'), name: 'Partner', image: '' },
         { id: rid('lg'), name: 'Partner', image: '' },
@@ -123,131 +125,136 @@ export function buildHomeSlice(): PageSlice {
     { id: pr, data: section(pr, 'problem', 'ProblemPains', {
       eyebrow: 'The status quo',
       headline: 'Manual climate control quietly costs you yield.',
-      lede: 'Every room drifts the moment no one is watching. The damage shows up weeks later, in the harvest.',
+      lede: 'Every chamber drifts the moment no one is watching. The damage shows up weeks later, in the flush.',
       pains: [
-        { id: rid('p'), title: 'Setpoints drift overnight', body: 'A thermostat and a timer can’t react to a heat spike at 3am. By morning the room has already swung twice.' },
-        { id: rid('p'), title: 'Equipment runs blind', body: 'Foggers, fans and CO₂ fire on schedules, not on what the room actually needs — wasting power and stressing plants.' },
-        { id: rid('p'), title: 'No record when it matters', body: 'When a batch underperforms there’s no log to point to. You’re guessing at what went wrong.' },
+        { id: rid('p'), title: 'Setpoints drift overnight', body: 'A thermostat and a timer can’t react to a CO₂ or humidity swing at 3am. By morning the chamber has already drifted twice.' },
+        { id: rid('p'), title: 'Equipment runs blind', body: 'Foggers, blowers and dampers fire on schedules, not on what the room actually needs — wasting power and stressing the crop.' },
+        { id: rid('p'), title: 'No record when it matters', body: 'When a batch underperforms there’s no log to point to. You’re left guessing at what went wrong.' },
       ],
     }) },
     { id: pc, data: section(pc, 'process', 'ProcessSteps', {
-      eyebrow: 'How it works',
-      headline: 'Sense, decide, act — every few seconds.',
-      lede: 'A closed loop that holds your climate steady without anyone in the room.',
+      eyebrow: 'How Naayom works',
+      headline: 'Sense, control, optimise — <em>automatically</em>.',
+      lede: 'A closed loop that holds your climate steady and turns every reading into an insight.',
       steps: [
-        { id: rid('s'), icon: 'Radar', title: 'Sense', body: 'Calibrated probes read CO₂, temperature and humidity across the canopy in real time.' },
-        { id: rid('s'), icon: 'SlidersHorizontal', title: 'Decide', body: 'The controller compares every reading to your setpoints and computes the next move.' },
-        { id: rid('s'), icon: 'TrendingUp', title: 'Act', body: 'It drives foggers, fans, heaters and CO₂ directly — then logs every action for you.' },
+        { id: rid('s'), icon: 'Radar', title: 'Sensing', body: 'IoT devices and sensors monitor CO₂, temperature and humidity levels in real time, helping growers make informed decisions.' },
+        { id: rid('s'), icon: 'SlidersHorizontal', title: 'Control', body: 'Control any type of equipment installed at your farm — compressors, blowers, valves, dampers, VFDs, and more.' },
+        { id: rid('s'), icon: 'TrendingUp', title: 'Data Analytics', body: 'We process collected data to provide actionable insights, enhancing farming efficiency and productivity.' },
       ],
     }) },
     { id: ex, data: section(ex, 'explainer', 'ExplainerRows', {
       rows: [
-        { id: rid('r'), eyebrow: 'Control', title: 'One controller, every actuator.', body: 'Wire your foggers, exhaust, heating and CO₂ into a single unit. It switches them on what the room needs, not a clock.', image: '', flip: false, cta_text: 'See controllers', cta_href: '/products', bullets: [
-          { id: rid('b'), text: 'Drives up to 8 channels per unit' },
-          { id: rid('b'), text: 'Hard setpoint + deadband per channel' },
-          { id: rid('b'), text: 'Fails safe on sensor loss' },
+        { id: rid('r'), eyebrow: 'Precision', title: 'Stage-based precision control.', body: 'Optimise mushroom cultivation with an advanced controller, ensuring ideal conditions at every stage for consistent, high-quality yields — seamlessly.', image: '', flip: false, cta_text: 'See controllers', cta_href: '/products', bullets: [
+          { id: rid('b'), text: 'Stage-wise parameter settings' },
+          { id: rid('b'), text: 'Integrated control algorithms' },
+          { id: rid('b'), text: 'Customizable climate parameters' },
         ] },
-        { id: rid('r'), eyebrow: 'Visibility', title: 'The whole farm on one dashboard.', body: 'Every room reports to the same screen. See live values, history and alerts from anywhere — phone or desk.', image: '', flip: true, cta_text: 'See monitors', cta_href: '/products', bullets: [
-          { id: rid('b'), text: 'Live + 12-month history per room' },
-          { id: rid('b'), text: 'SMS / push alerts on breach' },
-          { id: rid('b'), text: 'Export logs for any batch' },
+        { id: rid('r'), eyebrow: 'Visibility', title: 'Get the full picture at a glance.', body: 'Monitor and control all growing chambers, Phase II tunnels and Phase I bunkers in real time — via mobile or laptop.', image: '', flip: true, cta_text: 'See monitors', cta_href: '/products', bullets: [
+          { id: rid('b'), text: 'Every chamber on one dashboard' },
+          { id: rid('b'), text: 'Live values + historical trends' },
+          { id: rid('b'), text: 'Alarms that signal faults' },
+        ] },
+        { id: rid('r'), eyebrow: 'Insight', title: 'Data-driven farming.', body: 'Leverage data to get insights for precise parameter adjustments, proactive issue resolution, and to optimise farm productivity.', image: '', flip: false, cta_text: '', cta_href: '#', bullets: [
+          { id: rid('b'), text: 'Detailed trend graphs per parameter' },
+          { id: rid('b'), text: 'Spot issues before they cost a batch' },
+          { id: rid('b'), text: 'Benchmark room against room' },
         ] },
       ],
     }) },
     { id: fe, data: section(fe, 'features', 'HairlineFeatureGrid', {
-      eyebrow: 'Capabilities',
-      headline: 'Everything the room needs, built in.',
-      lede: 'Hardware and software designed together — no integrators required.',
+      eyebrow: 'Why Naayom',
+      headline: 'Why top growers choose <em>Naayom</em>.',
+      lede: 'Our climate control system empowers growers for sustainable growth.',
       features: [
-        { id: rid('f'), title: 'Multi-channel drive', description: 'Switch and ramp foggers, fans, heaters and CO₂ from one controller.', icon: 'SlidersHorizontal', link_text: '' },
-        { id: rid('f'), title: 'Real-time sensing', description: 'Calibrated CO₂, temp and RH probes report every few seconds.', icon: 'Radar', link_text: '' },
-        { id: rid('f'), title: 'Alerts that reach you', description: 'Breach a setpoint and the right person gets an SMS in seconds.', icon: 'Bell', link_text: '' },
-        { id: rid('f'), title: 'Full audit log', description: 'Every reading and action stored — replay any batch.', icon: 'FileText', link_text: '' },
-        { id: rid('f'), title: 'Offline-safe', description: 'Controllers hold setpoints even if the network drops.', icon: 'ShieldCheck', link_text: '' },
-        { id: rid('f'), title: 'Open dashboard', description: 'One screen for every room, on any device.', icon: 'LayoutDashboard', link_text: '' },
+        { id: rid('f'), title: 'Optimize Yield', description: 'We understand mushroom growers’ challenges through in-depth research to identify improvement opportunities.', icon: 'TrendingUp', link_text: '' },
+        { id: rid('f'), title: 'Reduces Error', description: 'Minimizes errors typically caused by human limitations in mushroom farming.', icon: 'ShieldCheck', link_text: '' },
+        { id: rid('f'), title: 'Consistency', description: 'Enhance farm consistency with Naayom’s reliable climate control solutions.', icon: 'Repeat', link_text: '' },
+        { id: rid('f'), title: 'Trend Graphs', description: 'Every parameter at your farm is displayed in a detailed graph to help analyze trends.', icon: 'LineChart', link_text: '' },
+        { id: rid('f'), title: 'Enhance Visibility', description: 'Monitor climate parameters, control signals and historical data for comprehensive farming management.', icon: 'Eye', link_text: '' },
+        { id: rid('f'), title: 'Stay Connected', description: 'Stay connected to your farm from anywhere in the world with Naayom’s advanced IoT platform.', icon: 'Wifi', link_text: '' },
+        { id: rid('f'), title: 'Energy Savings', description: 'Reduce energy usage while maintaining perfect growing conditions.', icon: 'Zap', link_text: '' },
+        { id: rid('f'), title: 'Support', description: 'We are available at every step to support our mushroom growers.', icon: 'LifeBuoy', link_text: '' },
       ],
     }) },
     { id: li, data: section(li, 'lineup', 'ProductLineup', {
-      eyebrow: 'Products',
-      headline: 'Pick the unit for the room.',
-      lede: 'Three lines, one platform — every unit talks to the same dashboard.',
+      eyebrow: 'Our Products',
+      headline: 'Pick the system for your <em>farm</em>.',
+      lede: 'We assist the world’s leading mushroom growers in optimizing their production through advanced connectivity and automation.',
       items: [
-        { id: rid('it'), model: 'RC-1', name: 'Room Controller', oneLiner: 'Full-room climate automation in one unit.', image: '', cardSpec: '8 channels · 3 probes', href: '/products' },
-        { id: rid('it'), model: 'CS-1', name: 'Control System', oneLiner: 'Equipment drive & switching for existing rigs.', image: '', cardSpec: '4 channels · relay out', href: '/products' },
-        { id: rid('it'), model: 'MN-1', name: 'Monitor', oneLiner: 'Sense & alert where you don’t need control.', image: '', cardSpec: '3 probes · SMS alerts', href: '/products' },
+        { id: rid('it'), model: 'NWC 1000', name: 'Mushroom Growing Room Controller', oneLiner: 'Advanced mushroom climate controller for grow rooms — remote connectivity and automated climate management.', image: '', cardSpec: 'Multi-channel · 3 probes', href: '/products' },
+        { id: rid('it'), model: 'NWC 2000', name: 'Phase II Tunnel Control System', oneLiner: 'Full tunnel climate automation for Phase II — built for tunnel-scale rooms.', image: '', cardSpec: 'Tunnel-scale · VFD-ready', href: '/products' },
+        { id: rid('it'), model: 'NWC 101', name: 'CO₂, Temperature & Humidity Control', oneLiner: 'Three-parameter control for a single room, with stage-wise settings.', image: '', cardSpec: '3 parameters · relay out', href: '/products' },
       ],
     }) },
     { id: te, data: section(te, 'testimonials', 'ProofWithLogoRail', {
-      eyebrow: 'Results in the field',
-      headline: 'The numbers customers came back with.',
+      eyebrow: 'Success stories',
+      headline: 'What our clients say about Naayom.',
       stats: [
-        { id: rid('rs'), value: '+18%', label: 'yield per cycle' },
-        { id: rid('rs'), value: '−31%', label: 'energy per kg' },
-        { id: rid('rs'), value: '0', label: 'manual night checks' },
+        { id: rid('rs'), value: '+50%', label: 'Cordyceps yield' },
+        { id: rid('rs'), value: '24/7', label: 'real-time monitoring' },
+        { id: rid('rs'), value: 'Remote', label: 'from anywhere' },
       ],
       testimonials: [
-        { id: rid('t'), quote: 'We stopped doing 3am walk-throughs the week it went in. The rooms just hold.', author_name: 'Operations lead', author_role: 'Commercial grower' },
-        { id: rid('t'), quote: 'First season with the controllers our energy bill dropped and the canopy was the most even we’ve had.', author_name: 'Head grower', author_role: 'Research farm' },
+        { id: rid('t'), quote: 'Naayom has significantly boosted my Cordyceps crop yield by 50%. Its precise environmental control and efficient power management are game-changers for mushroom farming.', author_name: 'Mycoforest', author_role: 'Gwalior' },
+        { id: rid('t'), quote: 'Thank you, Naayom! Today, I got my first flush, and it was the best one yet!', author_name: 'Green Caps Musluv', author_role: 'Mushroom grower' },
       ],
-      logos: [
-        { id: rid('lg'), name: 'Brand' },
-        { id: rid('lg'), name: 'Brand' },
-        { id: rid('lg'), name: 'Brand' },
-      ],
+      logos: [],
     }) },
     { id: ga, data: section(ga, 'gallerypreview', 'GalleryMasonry', {
-      eyebrow: 'From the field',
-      headline: 'Real rooms, running on it.',
-      lede: 'Installs across commercial and research farms.',
+      eyebrow: 'Gallery',
+      headline: 'Climate controllers <em>in the field</em>.',
+      lede: 'Real Naayom installations across mushroom farms.',
       images: [
         { id: rid('g'), src: '', tag: 'Controller install', category: 'install' },
+        { id: rid('g'), src: '', tag: 'Growing room', category: 'room' },
+        { id: rid('g'), src: '', tag: 'Phase II tunnel', category: 'room' },
         { id: rid('g'), src: '', tag: 'Sensor array', category: 'hardware' },
-        { id: rid('g'), src: '', tag: 'Grow room', category: 'room' },
         { id: rid('g'), src: '', tag: 'Dashboard', category: 'software' },
-        { id: rid('g'), src: '', tag: 'Fogger line', category: 'hardware' },
-        { id: rid('g'), src: '', tag: 'Canopy', category: 'room' },
+        { id: rid('g'), src: '', tag: 'Mushroom flush', category: 'crop' },
       ],
     }) },
     { id: co, data: section(co, 'compatibility', 'CompatibilityChips', {
       eyebrow: 'Compatibility',
-      headline: 'Works with what you already run.',
-      lede: 'Wire it into your existing foggers, fans and CO₂ — no rip-and-replace.',
+      headline: 'Control any equipment on your farm.',
+      lede: 'Wire Naayom into your existing rig — no rip-and-replace. It drives whatever your rooms already run.',
       readout_status: 'Holding setpoint',
       readout_tone: 'ok',
-      readout_stage: 'Veg · day',
-      readout_caption: 'Live from a connected room',
+      readout_stage: 'Growing · day',
+      readout_caption: 'Live from a connected chamber',
       chips: [
-        { id: rid('c'), text: 'Ultrasonic foggers' },
-        { id: rid('c'), text: 'Exhaust & circulation fans' },
+        { id: rid('c'), text: 'Compressors' },
+        { id: rid('c'), text: 'Blowers' },
+        { id: rid('c'), text: 'Valves' },
+        { id: rid('c'), text: 'Dampers' },
+        { id: rid('c'), text: 'VFDs' },
+        { id: rid('c'), text: 'Foggers' },
+        { id: rid('c'), text: 'Exhaust fans' },
         { id: rid('c'), text: 'CO₂ regulators' },
-        { id: rid('c'), text: 'Resistive heaters' },
-        { id: rid('c'), text: 'Dehumidifiers' },
-        { id: rid('c'), text: 'Dimmable LED drivers' },
       ],
       readout_metrics: [
         { id: rid('rm'), key: 'CO₂', value: '820', unit: 'ppm', live: 'co2b' },
         { id: rid('rm'), key: 'Temp', value: '24.4', unit: '°C', live: 'tempb' },
-        { id: rid('rm'), key: 'RH', value: '61', unit: '%', live: 'rhb' },
+        { id: rid('rm'), key: 'RH', value: '91', unit: '%', live: 'rhb' },
       ],
     }) },
     { id: fa, data: section(fa, 'faq', 'FaqDisclosures', {
       eyebrow: 'FAQ',
       headline: 'Questions, answered.',
       items: [
-        { id: rid('q'), question: 'Do I need to replace my equipment?', answer: 'No. The controller drives the foggers, fans and CO₂ you already own. We confirm wiring during the spec call.' },
-        { id: rid('q'), question: 'What happens if the internet drops?', answer: 'Controllers run fully offline and keep holding your setpoints. They sync history back to the dashboard once the connection returns.' },
-        { id: rid('q'), question: 'How many rooms can one dashboard handle?', answer: 'There’s no practical limit — every controller reports to the same screen, whether you run one room or fifty.' },
-        { id: rid('q'), question: 'Do you commission on site?', answer: 'Yes. We spec the units to your rooms, install, and walk your team through the dashboard before handover.' },
+        { id: rid('q'), question: 'Do I need to replace my equipment?', answer: 'No. Naayom drives the compressors, blowers, valves, dampers, VFDs, foggers and CO₂ you already own. We confirm wiring during the spec call.' },
+        { id: rid('q'), question: 'Can I monitor my farm remotely?', answer: 'Yes. Monitor and control every growing chamber, Phase II tunnel and Phase I bunker in real time from your mobile or laptop, anywhere in the world.' },
+        { id: rid('q'), question: 'What happens if the internet drops?', answer: 'Controllers keep holding your setpoints locally and sync history back to the dashboard once the connection returns.' },
+        { id: rid('q'), question: 'Do you support installation?', answer: 'We are available at every step — we spec the units to your rooms, help with installation, and walk your team through the dashboard.' },
       ],
     }) },
     { id: ct, data: section(ct, 'cta', 'ArcCTA', {
-      eyebrow: 'Talk to us',
-      headline: 'Spec it for your <em>farm.</em>',
-      body: 'Tell us your setup — we’ll confirm the wiring, commission on site, and walk through the numbers. No pricing pressure, just a plan.',
-      cta_text: 'Book a demo',
+      eyebrow: 'Contact Sales',
+      headline: 'Have any <em>questions?</em>',
+      body: 'Talk to our team — we’ll spec the right system for your farm and walk you through the numbers. No pricing pressure, just a plan.',
+      cta_text: 'Contact Sales',
       secondary_cta_text: 'Chat on WhatsApp',
       tertiary_cta_text: 'Call sales',
-      phone_line: 'Or call <b>+00 000 000 000</b> · Mon–Fri, 9–6',
+      phone_line: 'Or call <b>+91 9310119271</b> · Mon–Sat, 9am–7pm IST',
     }) },
   ]);
 }
@@ -275,42 +282,80 @@ export function buildTechPremiumHomeFinalContent(opts: {
   offer?: string;
 }): any {
   const body = buildHomeSlice(); // 12 body sections (no chrome)
-  const brand = (opts.productName || '').trim();
+  const brand = (opts.productName || '').trim() || 'Naayom';
   const headerId = sectionId('header');
   const footerId = sectionId('footer');
+
+  // Resolve in-page nav/footer anchors to the actual seeded body section ids.
+  const idByType = (ty: string) => body.sections.find((id) => (body.content as any)[id]?.type === ty) || '';
+  const anchor = (ty: string) => { const id = idByType(ty); return id ? `#${id}` : '/'; };
+  const whyHref = anchor('features');
+  const howHref = anchor('process');
+  const successHref = anchor('testimonials');
 
   const header = section(headerId, 'header', 'MeridianNavHeader', {
     logo_text: brand,
     logo_image: '',
-    cta_text: 'Book a demo',
+    cta_text: 'Contact Sales',
     cta_href: '/contact',
-    signin_text: '',
+    signin_text: 'Login',
     signin_url: '',
     nav_items: [
-      { id: rid('nav'), label: 'Home', href: '/' },
-      { id: rid('nav'), label: 'Contact', href: '/contact' },
+      { id: rid('nav'), label: 'Why Naayom', href: whyHref, children: [
+        { id: rid('c'), label: 'Why Choose Naayom', desc: 'The case for Naayom', href: whyHref },
+        { id: rid('c'), label: 'How Naayom Works', desc: 'Sense · control · analytics', href: howHref },
+      ] },
+      { id: rid('nav'), label: 'Success Story', href: successHref },
+      { id: rid('nav'), label: 'Products', href: '/products', children: [
+        { id: rid('c'), label: 'Mushroom Growing Control Systems', desc: 'NWC 1000 · 2000 · 3000', href: '/products' },
+        { id: rid('c'), label: 'Control systems', desc: 'NWC 101 · 301 · 201', href: '/products' },
+        { id: rid('c'), label: 'Monitoring systems', desc: 'NWM 100 · 300 · 200', href: '/products' },
+      ] },
+      { id: rid('nav'), label: 'Gallery', href: '/gallery' },
     ],
   });
   const footer = section(footerId, 'footer', 'HairlineFooter', {
     wordmark: brand,
     logo_image: '',
     tag: '',
-    blurb: (opts.oneLiner || '').trim(),
-    contact_address: '',
-    contact_tel: '',
-    contact_email: '',
+    blurb: 'We are passionate about transforming the agricultural landscape through cutting-edge technology. Our Agritech startup is dedicated to solving pressing challenges faced by farmers.',
+    contact_address: '7th Floor, Software Technology Park of India, Electronic City Phase IV, Sector 18, Gurugram, Haryana 122015',
+    contact_tel: '+91 9310119271',
+    contact_email: 'info@naayom.com',
     newsletter_placeholder: 'you@company.com',
     newsletter_cta: 'Subscribe',
-    copyright: `© ${brand || 'Your Company'}`,
-    location: '',
-    whatsapp_number: '',
-    whatsapp_prefill: '',
+    copyright: `© 2024 ${brand}. All Rights Reserved.`,
+    location: 'Gurugram, India',
+    whatsapp_number: '919310119271',
+    whatsapp_prefill: 'Hi Naayom, I’d like to know more about your climate controllers.',
     whatsapp_label: 'Chat with us',
     footer_columns: [
-      { id: rid('col'), heading: 'Company', links: [{ id: rid('ln'), label: 'Home', href: '/' }, { id: rid('ln'), label: 'Contact', href: '/contact' }] },
+      { id: rid('col'), heading: 'Quick Links', links: [
+        { id: rid('ln'), label: 'Why Choose Naayom', href: whyHref },
+        { id: rid('ln'), label: 'How Naayom Works', href: howHref },
+        { id: rid('ln'), label: 'Products', href: '/products' },
+        { id: rid('ln'), label: 'Success Story', href: successHref },
+        { id: rid('ln'), label: 'Gallery', href: '/gallery' },
+        { id: rid('ln'), label: 'Contact Us', href: '/contact' },
+      ] },
+      { id: rid('col'), heading: 'Products', links: [
+        { id: rid('ln'), label: 'NWC 1000', href: '/products' },
+        { id: rid('ln'), label: 'NWC 2000', href: '/products' },
+        { id: rid('ln'), label: 'NWB 3000', href: '/products' },
+        { id: rid('ln'), label: 'NWM 100', href: '/products' },
+        { id: rid('ln'), label: 'NWM 200', href: '/products' },
+        { id: rid('ln'), label: 'NWM 300', href: '/products' },
+      ] },
     ],
-    socials: [],
-    legal_links: [],
+    socials: [
+      { id: rid('soc'), icon: 'Facebook', url: 'https://www.facebook.com/Naayomtech' },
+      { id: rid('soc'), icon: 'Linkedin', url: '#' },
+      { id: rid('soc'), icon: 'Youtube', url: '#' },
+    ],
+    legal_links: [
+      { id: rid('lg'), label: 'Refunds & Cancellation', href: '#' },
+      { id: rid('lg'), label: 'Terms & Conditions', href: '#' },
+    ],
   });
 
   const sections = [headerId, ...body.sections, footerId];
