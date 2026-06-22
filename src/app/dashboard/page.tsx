@@ -1,5 +1,6 @@
 import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
+import { isAdmin } from '@/lib/admin'
 import Header from '@/components/dashboard/Header'
 import Footer from '@/components/shared/Footer'
 import DashboardHeader from '@/components/dashboard/DashboardHeader'
@@ -34,24 +35,64 @@ export default async function DashboardPage({
     },
   })
 
-  // Block dashboard until persona is captured. Existing users with persona=null
-  // (pre-Phase-0) hit this gate on first dashboard load post-deploy.
-  if (user && !user.persona) {
+  const viewerIsAdmin = isAdmin(userId)
+
+  // Block dashboard until persona is captured (non-admins only). Existing users with
+  // persona=null (pre-Phase-0) hit this gate on first dashboard load post-deploy.
+  // Admins skip the gate so a persona-null admin account isn't locked out of the
+  // admin-all view.
+  if (!viewerIsAdmin && user && !user.persona) {
     return <PersonaPrompt next="/dashboard" />
   }
 
-  const projects = user?.projects ?? []
+  type SourceProject = {
+    id: string
+    title: string
+    content: unknown
+    inputText: string | null
+    updatedAt: Date
+    token: { value: string }
+    ownerEmail?: string | null
+  }
 
-  // Get all published pages for this user
-  const publishedPages = await prisma.publishedPage.findMany({
-    where: { userId },
-    select: {
-      slug: true,
-      title: true,
-      updatedAt: true,
-      projectId: true,
-    },
-  })
+  let sourceProjects: SourceProject[]
+  let publishedPages: { slug: string; title: string | null; updatedAt: Date; projectId: string | null }[]
+
+  if (viewerIsAdmin) {
+    // Admin god-view: every project, regardless of owner, with the owner's email for labelling.
+    const all = await prisma.project.findMany({
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        inputText: true,
+        updatedAt: true,
+        token: { select: { value: true } },
+        user: { select: { email: true } },
+      },
+      orderBy: { updatedAt: 'desc' },
+      take: 200,
+    })
+    sourceProjects = all.map((p) => ({
+      id: p.id,
+      title: p.title,
+      content: p.content,
+      inputText: p.inputText,
+      updatedAt: p.updatedAt,
+      token: p.token,
+      ownerEmail: p.user?.email ?? null,
+    }))
+    publishedPages = await prisma.publishedPage.findMany({
+      where: { projectId: { in: all.map((p) => p.id) } },
+      select: { slug: true, title: true, updatedAt: true, projectId: true },
+    })
+  } else {
+    sourceProjects = (user?.projects ?? []).map((p) => ({ ...p, ownerEmail: undefined }))
+    publishedPages = await prisma.publishedPage.findMany({
+      where: { userId },
+      select: { slug: true, title: true, updatedAt: true, projectId: true },
+    })
+  }
 
   // Create lookup map: projectId → publishedPage
   const publishedByProjectId = new Map(
@@ -61,7 +102,7 @@ export default async function DashboardPage({
   )
 
   // Transform projects into unified items
-  const allItems = projects.map((project) => {
+  const allItems = sourceProjects.map((project) => {
     const publishedPage = publishedByProjectId.get(project.id)
 
     // Generate smart project name from available data
@@ -111,6 +152,7 @@ export default async function DashboardPage({
       slug: publishedPage?.slug || null,
       type: 'unified' as const,
       publishedAt: publishedPage?.updatedAt.toISOString(),
+      owner: viewerIsAdmin ? (project.ownerEmail ?? '(orphan)') : undefined,
     }
   })
 
@@ -126,6 +168,9 @@ export default async function DashboardPage({
             <h2 className="text-sm uppercase text-brand-mutedText tracking-wide">
               Recent Projects
             </h2>
+            {viewerIsAdmin && sourceProjects.length === 200 && (
+              <p className="text-xs text-brand-mutedText">Showing first 200 projects</p>
+            )}
             {allItems.map((item) => (
               <ProjectCard
                 key={`${item.type}-${item.id}`}

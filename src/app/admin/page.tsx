@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { isAdmin } from '@/lib/admin';
+import TransferOwnershipControl from '@/components/admin/TransferOwnershipControl';
 
 export const dynamic = 'force-dynamic';
 
@@ -121,6 +122,8 @@ export default async function AdminPage() {
   const payingCount = plans.filter((p) => p.tier !== 'FREE' && p.status === 'active').length;
   const activeThisMonth = usage.length;
 
+  const userOptions = users.map((u) => ({ clerkId: u.clerkId, email: u.email }));
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <div className="max-w-[1400px] mx-auto px-6 py-8">
@@ -211,6 +214,7 @@ export default async function AdminPage() {
                   <th className="px-3 py-2">Owner</th>
                   <th className="px-3 py-2">Updated</th>
                   <th className="px-3 py-2">Links</th>
+                  <th className="px-3 py-2">Transfer</th>
                 </tr>
               </thead>
               <tbody>
@@ -232,6 +236,13 @@ export default async function AdminPage() {
                       >
                         preview
                       </Link>
+                    </td>
+                    <td className="px-3 py-2">
+                      <TransferOwnershipControl
+                        token={p.token.value}
+                        currentOwnerClerkId={p.user?.clerkId ?? null}
+                        users={userOptions}
+                      />
                     </td>
                   </tr>
                 ))}
