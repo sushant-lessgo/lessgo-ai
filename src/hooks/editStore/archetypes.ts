@@ -81,7 +81,6 @@ export function buildCatalogSlice(): PageSlice {
 export function buildHomeSlice(): PageSlice {
   const h = sectionId('hero');
   const t = sectionId('trust');
-  const pr = sectionId('problem');
   const pc = sectionId('process');
   const ex = sectionId('explainer');
   const fe = sectionId('features');
@@ -122,14 +121,19 @@ export function buildHomeSlice(): PageSlice {
         { id: rid('lg'), name: 'Partner', image: '' },
       ],
     }) },
-    { id: pr, data: section(pr, 'problem', 'ProblemPains', {
-      eyebrow: 'The status quo',
-      headline: 'Manual climate control quietly costs you yield.',
-      lede: 'Every chamber drifts the moment no one is watching. The damage shows up weeks later, in the flush.',
-      pains: [
-        { id: rid('p'), title: 'Setpoints drift overnight', body: 'A thermostat and a timer can’t react to a CO₂ or humidity swing at 3am. By morning the chamber has already drifted twice.' },
-        { id: rid('p'), title: 'Equipment runs blind', body: 'Foggers, blowers and dampers fire on schedules, not on what the room actually needs — wasting power and stressing the crop.' },
-        { id: rid('p'), title: 'No record when it matters', body: 'When a batch underperforms there’s no log to point to. You’re left guessing at what went wrong.' },
+    { id: fe, data: section(fe, 'features', 'HairlineFeatureGrid', {
+      eyebrow: 'Why Naayom',
+      headline: 'Why top growers choose <em>Naayom</em>.',
+      lede: 'Our climate control system empowers growers for sustainable growth.',
+      features: [
+        { id: rid('f'), title: 'Optimize Yield', description: 'We understand mushroom growers’ challenges through in-depth research to identify improvement opportunities.', icon: 'TrendingUp', link_text: '' },
+        { id: rid('f'), title: 'Reduces Error', description: 'Minimizes errors typically caused by human limitations in mushroom farming.', icon: 'ShieldCheck', link_text: '' },
+        { id: rid('f'), title: 'Consistency', description: 'Enhance farm consistency with Naayom’s reliable climate control solutions.', icon: 'Repeat', link_text: '' },
+        { id: rid('f'), title: 'Trend Graphs', description: 'Every parameter at your farm is displayed in a detailed graph to help analyze trends.', icon: 'LineChart', link_text: '' },
+        { id: rid('f'), title: 'Enhance Visibility', description: 'Monitor climate parameters, control signals and historical data for comprehensive farming management.', icon: 'Eye', link_text: '' },
+        { id: rid('f'), title: 'Stay Connected', description: 'Stay connected to your farm from anywhere in the world with Naayom’s advanced IoT platform.', icon: 'Wifi', link_text: '' },
+        { id: rid('f'), title: 'Energy Savings', description: 'Reduce energy usage while maintaining perfect growing conditions.', icon: 'Zap', link_text: '' },
+        { id: rid('f'), title: 'Support', description: 'We are available at every step to support our mushroom growers.', icon: 'LifeBuoy', link_text: '' },
       ],
     }) },
     { id: pc, data: section(pc, 'process', 'ProcessSteps', {
@@ -159,21 +163,6 @@ export function buildHomeSlice(): PageSlice {
           { id: rid('b'), text: 'Spot issues before they cost a batch' },
           { id: rid('b'), text: 'Benchmark room against room' },
         ] },
-      ],
-    }) },
-    { id: fe, data: section(fe, 'features', 'HairlineFeatureGrid', {
-      eyebrow: 'Why Naayom',
-      headline: 'Why top growers choose <em>Naayom</em>.',
-      lede: 'Our climate control system empowers growers for sustainable growth.',
-      features: [
-        { id: rid('f'), title: 'Optimize Yield', description: 'We understand mushroom growers’ challenges through in-depth research to identify improvement opportunities.', icon: 'TrendingUp', link_text: '' },
-        { id: rid('f'), title: 'Reduces Error', description: 'Minimizes errors typically caused by human limitations in mushroom farming.', icon: 'ShieldCheck', link_text: '' },
-        { id: rid('f'), title: 'Consistency', description: 'Enhance farm consistency with Naayom’s reliable climate control solutions.', icon: 'Repeat', link_text: '' },
-        { id: rid('f'), title: 'Trend Graphs', description: 'Every parameter at your farm is displayed in a detailed graph to help analyze trends.', icon: 'LineChart', link_text: '' },
-        { id: rid('f'), title: 'Enhance Visibility', description: 'Monitor climate parameters, control signals and historical data for comprehensive farming management.', icon: 'Eye', link_text: '' },
-        { id: rid('f'), title: 'Stay Connected', description: 'Stay connected to your farm from anywhere in the world with Naayom’s advanced IoT platform.', icon: 'Wifi', link_text: '' },
-        { id: rid('f'), title: 'Energy Savings', description: 'Reduce energy usage while maintaining perfect growing conditions.', icon: 'Zap', link_text: '' },
-        { id: rid('f'), title: 'Support', description: 'We are available at every step to support our mushroom growers.', icon: 'LifeBuoy', link_text: '' },
       ],
     }) },
     { id: li, data: section(li, 'lineup', 'ProductLineup', {
