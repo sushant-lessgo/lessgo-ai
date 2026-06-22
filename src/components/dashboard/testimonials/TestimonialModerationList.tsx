@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Testimonial } from '@prisma/client'
-import { Plus, Star, MessageSquare, Link as LinkIcon } from 'lucide-react'
+import { Plus, Star, MessageSquare, Link as LinkIcon, Megaphone } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dialog'
 import TestimonialFormDialog from './TestimonialFormDialog'
 import CollectLinksDialog from './CollectLinksDialog'
+import FeatureOnPageDialog from './FeatureOnPageDialog'
 
 type Filter = 'all' | 'pending' | 'approved' | 'rejected'
 const FILTERS: Filter[] = ['all', 'pending', 'approved', 'rejected']
@@ -32,7 +33,7 @@ export default function TestimonialModerationList({
   projects,
 }: {
   initial: Testimonial[]
-  projects: { id: string; title: string }[]
+  projects: { id: string; title: string; audienceType: string; token: string | null }[]
 }) {
   const router = useRouter()
   const [filter, setFilter] = useState<Filter>('all')
@@ -43,6 +44,7 @@ export default function TestimonialModerationList({
   const [editing, setEditing] = useState<Testimonial | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Testimonial | null>(null)
   const [collectOpen, setCollectOpen] = useState(false)
+  const [featureOpen, setFeatureOpen] = useState(false)
 
   const projectMap = new Map(projects.map((p) => [p.id, p.title || 'Untitled project']))
   const hasUnassigned = initial.some((t) => !t.projectId)
@@ -126,6 +128,10 @@ export default function TestimonialModerationList({
           )}
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => setFeatureOpen(true)}>
+            <Megaphone className="w-4 h-4 mr-1.5" />
+            Feature on page
+          </Button>
           <Button variant="outline" onClick={() => setCollectOpen(true)}>
             <LinkIcon className="w-4 h-4 mr-1.5" />
             Collect link
@@ -259,6 +265,8 @@ export default function TestimonialModerationList({
       />
 
       <CollectLinksDialog open={collectOpen} onOpenChange={setCollectOpen} projects={projects} />
+
+      <FeatureOnPageDialog open={featureOpen} onOpenChange={setFeatureOpen} projects={projects} testimonials={initial} />
 
       <Dialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
         <DialogContent>

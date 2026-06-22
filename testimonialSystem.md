@@ -281,6 +281,28 @@ unlike `forms/submit`).
 
 **Spam defense (v1):** honeypot + 10/min/IP rate limit. (hCaptcha later if needed.)
 
-### Next: Phase 4 — Feed approved testimonials onto pages
-"Add to page" picker → inject approved (project-scoped) testimonials into the page's testimonial
-section via the existing `injectRealTestimonials` seam (field-mapped per template) → re-publish.
+## Phase 4 — As Built (2026-06-22): feed approved testimonials onto the page
+
+Closes the loop: owner features approved, project-scoped testimonials on the project's page.
+**Single-page** (this branch is off main — no `ProjectPage`). Build clean, tests 14/14 (5 new).
+
+- `src/lib/testimonials/applyToPage.ts` — pure `applyTestimonialsToPageContent(finalContent,
+  audienceType, selected)`: locates the section by `testimonials-` id-prefix; **product** →
+  `elements.testimonials = selected.slice(0,3)` mapped to `{id,quote,author_name,author_role}`;
+  **service** → flat `selected[0]` **keeping real `author_company` + `author_photo`** (deliberately
+  NOT `injectRealTestimonials`, which clears them). Deep-cloned; returns null if no section.
+- `src/app/api/testimonials/apply-to-page/route.ts` — auth'd, flag-gated `POST { projectId,
+  testimonialIds }`: verifies project ownership + that ids are the caller's `approved` rows for that
+  project; unwraps `project.content.finalContent`, applies, **rewraps** `{ ...content, finalContent }`,
+  persists. Writes the **draft** only.
+- `src/components/dashboard/testimonials/FeatureOnPageDialog.tsx` — "Feature on page" toolbar button
+  → project picker (cap 3 product / 1 service) → capped checkboxes over that project's approved
+  testimonials → success panel: "open a **fresh** editor tab and Publish" + `/edit/{token}` link.
+- `page.tsx` projects query extended with `audienceType` + `token.value`; list passes richer projects.
+
+**Re-publish is owner-driven** (writes draft; owner re-publishes from a fresh editor — concurrent-open
+editor could clobber, hence "fresh"). Commits: P1 `8ffd3b1`, P2 `b4c3f07`, P2.5 `cbe51c4`, P3 `dbb63c9`, P4 = this.
+
+**Testimonial system is now feature-complete: collect → moderate → project-scope → feature on page.**
+Remaining: multi-page injection (deferred until the multipage branch merges to main); optional
+auto-publish; product photo/company-on-card template change; un-dark (flag on) when ready to ship.

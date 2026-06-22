@@ -21,10 +21,20 @@ export default async function TestimonialsPage() {
     listTestimonialsByOwner(userId),
     prisma.user.findUnique({
       where: { clerkId: userId },
-      include: { projects: { select: { id: true, title: true }, orderBy: { updatedAt: 'desc' } } },
+      include: {
+        projects: {
+          select: { id: true, title: true, audienceType: true, token: { select: { value: true } } },
+          orderBy: { updatedAt: 'desc' },
+        },
+      },
     }),
   ])
-  const projects = user?.projects ?? []
+  const projects = (user?.projects ?? []).map((p) => ({
+    id: p.id,
+    title: p.title,
+    audienceType: p.audienceType,
+    token: p.token?.value ?? null,
+  }))
 
   const counts = {
     total: testimonials.length,
