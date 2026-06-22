@@ -39,8 +39,14 @@ export default function TechPremiumNavPublished(props: Props) {
       <nav className="tp-nav">
         <div className="tp-nav-in">
           <a className="tp-brand" href="/">
-            {props.logo_image ? <img className="tp-brand__img" src={props.logo_image} alt="" /> : <span className="tp-brand__mk" aria-hidden="true" />}
-            <span className="tp-brand__wm">{logoText}</span>
+            {props.logo_image ? (
+              <img className="tp-brand__img" src={props.logo_image} alt={logoText} />
+            ) : (
+              <>
+                <span className="tp-brand__mk" aria-hidden="true" />
+                <span className="tp-brand__wm">{logoText}</span>
+              </>
+            )}
           </a>
 
           <div className="tp-nav-links">

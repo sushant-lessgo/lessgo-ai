@@ -41,7 +41,7 @@ export default function TechPremiumFooterPublished(props: Props) {
       <footer className="tp-footer">
         <div className="tp-footer__top">
           <div className="tp-footer__brand">
-            <span className="tp-footer__brand-wm">{props.logo_image ? <img className="tp-footer__img" src={props.logo_image} alt="" /> : <span className="tp-footer__mk" aria-hidden="true" />}{props.wordmark || ''}</span>
+            <span className="tp-footer__brand-wm">{props.logo_image ? <img className="tp-footer__img" src={props.logo_image} alt={props.wordmark || 'Logo'} /> : <><span className="tp-footer__mk" aria-hidden="true" />{props.wordmark || ''}</>}</span>
             {(props.blurb || props.tag) && <p className="tp-footer__blurb">{props.blurb || props.tag}</p>}
             {(props.contact_address || props.contact_tel || props.contact_email) && (
               <div className="tp-footer__contact">
