@@ -252,6 +252,63 @@ export function buildHomeSlice(): PageSlice {
   ]);
 }
 
+/** Gallery page (Phase 4c): one `gallery` section (filter bar + grid). Body-only. */
+export function buildGallerySlice(): PageSlice {
+  const gId = sectionId('gallery');
+  const gallery = {
+    id: gId,
+    data: section(gId, 'gallery', 'GalleryFullPage', {
+      eyebrow: 'Gallery',
+      headline: 'In the <em>field.</em>',
+      lede: 'Working installs photographed on real farms — controllers, sensors, grow rooms and crop.',
+      filters: [
+        { id: rid('flt'), label: 'Installs', cat: 'installs' },
+        { id: rid('flt'), label: 'Hardware', cat: 'hardware' },
+        { id: rid('flt'), label: 'Grow rooms', cat: 'rooms' },
+        { id: rid('flt'), label: 'Crop', cat: 'crop' },
+      ],
+      images: [
+        { id: rid('g'), src: '', tag: 'Controller install', category: 'installs' },
+        { id: rid('g'), src: '', tag: 'Sensor array', category: 'hardware' },
+        { id: rid('g'), src: '', tag: 'Grow room — racks + controller', category: 'rooms' },
+        { id: rid('g'), src: '', tag: 'Fogger line', category: 'hardware' },
+        { id: rid('g'), src: '', tag: 'Canopy', category: 'crop' },
+        { id: rid('g'), src: '', tag: 'Commissioning on site', category: 'installs' },
+        { id: rid('g'), src: '', tag: 'Dashboard in the office', category: 'hardware' },
+        { id: rid('g'), src: '', tag: 'Harvest', category: 'crop' },
+      ],
+    }),
+  };
+  return slice([gallery]);
+}
+
+/** Contact page (Phase 4c): one `contact` section (info + real lead form). Body-only.
+ *  `formId` is provisioned by `ensureContactForm` and wired into the form markup. */
+export function buildContactSlice(formId: string): PageSlice {
+  const cId = sectionId('contact');
+  const contact = {
+    id: cId,
+    data: section(cId, 'contact', 'ContactForm', {
+      eyebrow: 'Contact',
+      headline: 'Let’s <em>map it</em> to your setup.',
+      lede: 'Tell us how many chambers you run and what you grow — WhatsApp is the fastest way to reach us.',
+      form_id: formId,
+      form_heading: 'Book a demo',
+      form_note: 'No pricing pressure — just a 30-minute walkthrough of your rooms.',
+      form_foot: 'By submitting you agree to be contacted about your enquiry.',
+      whatsapp_text: 'Chat on WhatsApp',
+      whatsapp_href: '#',
+      map_caption: 'Embedded map — your location',
+      info: [
+        { id: rid('ci'), icon: 'Phone', k: 'Call / WhatsApp', v: '+91 99999 99999', href: 'tel:+919999999999', sub: 'Mon–Sat, 9am–7pm' },
+        { id: rid('ci'), icon: 'Mail', k: 'Email', v: 'hello@example.com', href: 'mailto:hello@example.com', sub: 'We reply within one business day' },
+        { id: rid('ci'), icon: 'MapPin', k: 'Office', v: 'Your city', href: '', sub: 'Installs across the region' },
+      ],
+    }),
+  };
+  return slice([contact]);
+}
+
 /** Product-detail (collection item) page: one `productdetail` record section + closing cta. */
 export function buildProductDetailSlice(opts: { title?: string; categoryId?: string } = {}): PageSlice {
   const name = opts.title?.trim() || 'New product';

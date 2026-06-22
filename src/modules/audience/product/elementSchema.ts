@@ -530,6 +530,61 @@ export const meridianElementSchema: Record<string, UIBlockSchemaV2> = {
       },
     },
   },
+
+  // ===== Gallery page (Phase 4c) =====
+  // Full filterable grid page. Filter bar + lightbox wired by naayom.v1.js
+  // (.tp-gfilter / [data-tp-lightbox-group] / .tp-gitem[data-cat]). Block prepends
+  // an implicit "All" filter button.
+  GalleryFullPage: {
+    sectionType: 'gallery',
+    elements: {
+      eyebrow:  { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      headline: { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'In the <em>field.</em>' },
+      lede:     { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+    },
+    collections: {
+      filters: {
+        requirement: 'optional', fillMode: 'manual_preferred', constraints: { min: 0, max: 6 },
+        fields: { id: { type: 'string', fillMode: 'system' }, label: { type: 'string', fillMode: 'manual_preferred', default: '' }, cat: { type: 'string', fillMode: 'manual_preferred', default: '' } },
+      },
+      images: {
+        requirement: 'required', fillMode: 'manual_preferred', constraints: { min: 1, max: 24 },
+        fields: { id: { type: 'string', fillMode: 'system' }, src: { type: 'string', fillMode: 'manual_preferred', default: '' }, tag: { type: 'string', fillMode: 'ai_generated', default: '' }, category: { type: 'string', fillMode: 'manual_preferred', default: '' } },
+      },
+    },
+  },
+
+  // ===== Contact page (Phase 4c) =====
+  // 2-col: contact-info rows (left) + real lead form (right) wired to form.v1.js via
+  // content.forms[form_id]. form_id is system-set on page creation (ensureContactForm).
+  ContactForm: {
+    sectionType: 'contact',
+    elements: {
+      eyebrow:       { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      headline:      { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Let’s <em>map it</em> to your setup.' },
+      lede:          { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      form_id:       { type: 'string', requirement: 'optional', fillMode: 'system', default: '' },
+      form_heading:  { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: 'Book a demo' },
+      form_note:     { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      form_foot:     { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      whatsapp_text: { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: 'Chat on WhatsApp' },
+      whatsapp_href: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '#' },
+      map_caption:   { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+    },
+    collections: {
+      info: {
+        requirement: 'optional', fillMode: 'manual_preferred', constraints: { min: 1, max: 4 },
+        fields: {
+          id:   { type: 'string', fillMode: 'system' },
+          icon: { type: 'string', fillMode: 'manual_preferred', default: 'Phone' },
+          k:    { type: 'string', fillMode: 'ai_generated', default: '' },
+          v:    { type: 'string', fillMode: 'manual_preferred', default: '' },
+          href: { type: 'string', fillMode: 'manual_preferred', default: '' },
+          sub:  { type: 'string', fillMode: 'ai_generated', default: '' },
+        },
+      },
+    },
+  },
 };
 
 /**

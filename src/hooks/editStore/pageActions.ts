@@ -7,17 +7,67 @@
 import type { EditStore, ProjectPageEntry, PageSlice } from '@/types/store';
 import { commitActivePage, loadPageIntoActive, findHomeId, splitChrome, HOME_PAGE_ID } from './pageHelpers';
 import { getCollectionDef } from '@/modules/collections/registry';
-import { buildCatalogSlice, buildProductDetailSlice, buildHomeSlice } from './archetypes';
+import { buildCatalogSlice, buildProductDetailSlice, buildHomeSlice, buildGallerySlice, buildContactSlice } from './archetypes';
 import { syncCollection, findCatalogPage, collectionItems } from './collectionHelpers';
 import { extractSectionType } from '@/modules/generatedLanding/componentRegistry';
+import { DEFAULT_CONTACT_FIELDS, CONTACT_SUBMIT_TEXT, CONTACT_SUCCESS_MESSAGE } from '@/modules/templates/techpremium/blocks/Contact/contactFields';
 import { logger } from '@/lib/logger';
 
 const clone = <T>(v: T): T => JSON.parse(JSON.stringify(v ?? null));
 
-/** Body-slice builders keyed by archetype (Phase 4b). Home = the full naayom layout. */
+/** Body-slice builders keyed by archetype (Phase 4b/4c). `contact` is excluded — it
+ *  needs a provisioned formId, so it's created only via addArchetypePage (not the
+ *  generic applyArchetype path). */
 const ARCHETYPE_BUILDERS: Record<string, () => PageSlice> = {
   home: buildHomeSlice,
+  gallery: buildGallerySlice,
 };
+
+/** Standalone archetype pages (Phase 4c): one-of-a-kind singletons (gallery, contact). */
+const ARCHETYPE_PAGE_SPECS: Record<string, { pathSlug: string; title: string }> = {
+  gallery: { pathSlug: '/gallery', title: 'Gallery' },
+  contact: { pathSlug: '/contact', title: 'Contact' },
+};
+
+/** Immer-draft helper: add a link to the shared header nav (idempotent by href).
+ *  Mirrors the inline nav-add in ensureCatalogDraft; reflects into the live mirror. */
+function addNavLink(state: any, label: string, href: string): void {
+  try {
+    const header: any = state.chrome?.header;
+    const navItems = header?.data?.elements?.nav_items;
+    if (Array.isArray(navItems) && !navItems.some((n: any) => n?.href === href)) {
+      const navItem = { id: `nav-${Math.random().toString(36).slice(2, 7)}`, label, href };
+      navItems.push(navItem);
+      const mirror: any = header.id ? (state.content as any)?.[header.id] : undefined;
+      if (mirror?.elements && Array.isArray(mirror.elements.nav_items)) {
+        mirror.elements.nav_items = [...mirror.elements.nav_items, { ...navItem }];
+      }
+    }
+  } catch {
+    /* best-effort */
+  }
+}
+
+/** Immer-draft helper: ensure a 'Contact' lead form exists in state.forms; returns its id.
+ *  Idempotent — reuses an existing 'Contact' form. Seeds readable field ids so the
+ *  dashboard columns are meaningful, and a dashboard integration so submissions land. */
+function ensureContactForm(state: any): string {
+  if (!state.forms) state.forms = {};
+  const existing = Object.values(state.forms).find((f: any) => f?.name === 'Contact');
+  if (existing) return (existing as any).id;
+  const id = `form-${Date.now()}`;
+  state.forms[id] = {
+    id,
+    name: 'Contact',
+    fields: clone(DEFAULT_CONTACT_FIELDS),
+    submitButtonText: CONTACT_SUBMIT_TEXT,
+    successMessage: CONTACT_SUCCESS_MESSAGE,
+    integrations: [{ id: 'int-dashboard', type: 'dashboard', name: 'Dashboard', enabled: true }],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+  return id;
+}
 
 function genPageId(): string {
   return `page-${Math.random().toString(36).slice(2, 10)}`;
@@ -179,6 +229,58 @@ export function createPageActions(set: any, get: any) {
         state.persistence.isDirty = true;
         state.lastUpdated = Date.now();
       }),
+
+    // Phase 4c: create a designed standalone page (gallery/contact) in one step —
+    // body comes from the archetype builder directly (no home-clone). Singleton:
+    // refuses a 2nd of the same archetype (switches to the existing one). Contact
+    // provisions its lead form first. Returns the page id.
+    addArchetypePage: (archetypeKey: string): string => {
+      const spec = ARCHETYPE_PAGE_SPECS[archetypeKey];
+      if (!spec) {
+        logger.warn(`addArchetypePage: unknown archetype ${archetypeKey}`);
+        return '';
+      }
+      let resultId = '';
+      set((state: EditStore) => {
+        commitActivePage(state); // flush outgoing edits before mutating pages
+        if (!state.pages) state.pages = {};
+        const existing = Object.values(state.pages).find((p: any) => p.archetypeKey === archetypeKey);
+        if (existing) {
+          resultId = (existing as ProjectPageEntry).id;
+          loadPageIntoActive(state, clone(existing as ProjectPageEntry));
+          state.selectedSection = undefined;
+          state.selectedElement = undefined;
+          return;
+        }
+        const id = genPageId();
+        const order = Object.keys(state.pages).length;
+        let body: PageSlice;
+        if (archetypeKey === 'contact') {
+          const formId = ensureContactForm(state); // form must exist → form.v1.js injects + dashboard
+          body = splitChrome(buildContactSlice(formId)).body;
+        } else {
+          body = splitChrome((ARCHETYPE_BUILDERS[archetypeKey] || buildGallerySlice)()).body;
+        }
+        const entry: ProjectPageEntry = {
+          id,
+          archetypeKey,
+          pathSlug: spec.pathSlug,
+          title: spec.title,
+          order,
+          kind: 'singleton',
+          ...body,
+        };
+        state.pages[id] = entry;
+        addNavLink(state, spec.title, spec.pathSlug); // discoverable from the shared header
+        loadPageIntoActive(state, clone(entry)); // switch to it (inject chrome)
+        state.selectedSection = undefined;
+        state.selectedElement = undefined;
+        state.persistence.isDirty = true;
+        state.lastUpdated = Date.now();
+        resultId = id;
+      });
+      return resultId;
+    },
 
     deletePage: (pageId: string) =>
       set((state: EditStore) => {

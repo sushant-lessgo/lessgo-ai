@@ -68,6 +68,13 @@ export interface PageActions {
    * swaps body-only fields, re-injects chrome. Refuses collection pages.
    */
   applyArchetype: (archetypeKey?: string) => void;
+  /**
+   * Create a designed standalone page from an archetype in one step (Phase 4c —
+   * 'gallery' | 'contact'). Body comes straight from the builder (no home-clone);
+   * singleton (refuses a 2nd of the same archetype, switches to it); contact
+   * provisions its lead form. Adds a header nav link. Returns the page id.
+   */
+  addArchetypePage: (archetypeKey: string) => string;
   /** Delete a page. The home page cannot be deleted. */
   deletePage: (pageId: string) => void;
   renamePage: (pageId: string, title: string, pathSlug?: string) => void;

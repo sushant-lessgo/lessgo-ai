@@ -25,6 +25,9 @@ export function PageSwitcher() {
   const hasCatalog = Object.values(pages).some(
     (p: any) => p.kind === 'singleton' && p.collectionKey === 'products',
   );
+  // Gallery + Contact are one-of-a-kind designed pages (Phase 4c). Offer a creation
+  // entry only until that page exists; after that it's a normal tab.
+  const hasArchetype = (key: string) => Object.values(pages).some((p: any) => p.archetypeKey === key);
 
   const handleAdd = () => {
     const title = window.prompt('Page name', 'New page');
@@ -116,6 +119,26 @@ export function PageSwitcher() {
           title="Add a products catalog"
         >
           + Products
+        </button>
+      )}
+      {isTechPremium && !hasArchetype('gallery') && (
+        <button
+          onClick={() => store.addArchetypePage('gallery')}
+          className="px-3 py-1 rounded-md text-sm text-gray-500 hover:bg-gray-100"
+          aria-label="Add gallery page"
+          title="Add the naayom Gallery page"
+        >
+          + Gallery
+        </button>
+      )}
+      {isTechPremium && !hasArchetype('contact') && (
+        <button
+          onClick={() => store.addArchetypePage('contact')}
+          className="px-3 py-1 rounded-md text-sm text-gray-500 hover:bg-gray-100"
+          aria-label="Add contact page"
+          title="Add the naayom Contact page"
+        >
+          + Contact
         </button>
       )}
       <button

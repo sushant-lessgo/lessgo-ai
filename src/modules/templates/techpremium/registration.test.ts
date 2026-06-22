@@ -11,7 +11,7 @@ import { techPremiumSectionSurfaces } from './sectionRules';
 import { extractSectionType } from '@/modules/generatedLanding/componentRegistry';
 import { meridianElementSchema } from '@/modules/audience/product/elementSchema';
 import { getSchemaDefaults } from '@/modules/sections/layoutElementSchema';
-import { buildHomeSlice } from '@/hooks/editStore/archetypes';
+import { buildHomeSlice, buildGallerySlice, buildContactSlice } from '@/hooks/editStore/archetypes';
 
 // Every section type TechPremium must render. Add 4b/4c types here as they ship.
 const TYPES = [
@@ -19,6 +19,8 @@ const TYPES = [
   'catalog', 'productdetail',
   // Phase 4b Home-page blocks.
   'trust', 'problem', 'process', 'explainer', 'lineup', 'gallerypreview', 'compatibility', 'faq',
+  // Phase 4c standalone pages.
+  'gallery', 'contact',
 ];
 
 const schemaTypes = new Set(
@@ -83,6 +85,30 @@ describe('TechPremium Home archetype (buildHomeSlice)', () => {
       // layout side — the PascalCase schema key must resolve (getSchemaDefaults ≠ null).
       expect(layout, `id ${id} must carry a layout`).toBeTruthy();
       expect(getSchemaDefaults(layout), `layout '${layout}' (id ${id}) schema`).not.toBeNull();
+    });
+  }
+});
+
+// Same guard for the Phase-4c standalone-page builders (gallery + contact). Each is
+// a single body section; assert type → real block AND layout → real schema.
+describe('TechPremium standalone-page archetypes (Phase 4c)', () => {
+  const cases: Array<{ name: string; slice: ReturnType<typeof buildGallerySlice> }> = [
+    { name: 'gallery', slice: buildGallerySlice() },
+    { name: 'contact', slice: buildContactSlice('form-test') },
+  ];
+  for (const c of cases) {
+    it(`${c.name}: body-only, type→block, layout→schema`, () => {
+      expect(c.slice.sections.length).toBeGreaterThan(0);
+      for (const id of c.slice.sections) {
+        const type = extractSectionType(id);
+        expect(type).not.toBe('header');
+        expect(type).not.toBe('footer');
+        const layout = c.slice.sectionLayouts[id];
+        expect(resolveTechPremiumBlock(type, 'edit'), `${c.name} '${type}' edit`).not.toBe(TechPremiumPlaceholderBlock);
+        expect(resolveTechPremiumBlock(type, 'published'), `${c.name} '${type}' published`).not.toBe(TechPremiumPlaceholderBlock);
+        expect(layout, `${c.name} id ${id} layout`).toBeTruthy();
+        expect(getSchemaDefaults(layout), `${c.name} layout '${layout}' schema`).not.toBeNull();
+      }
     });
   }
 });

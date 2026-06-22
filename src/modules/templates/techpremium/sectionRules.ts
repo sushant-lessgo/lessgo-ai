@@ -31,6 +31,9 @@ export const techPremiumSectionSurfaces: Record<string, TechPremiumSurface> = {
   gallerypreview: 'forest-d',
   compatibility:  'paper',
   faq:            'paper-2',
+  // Standalone pages (Phase 4c).
+  gallery:        'paper',
+  contact:        'paper',
 };
 
 const surfaceVarMap: Record<TechPremiumSurface, string> = {

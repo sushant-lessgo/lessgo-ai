@@ -26,6 +26,9 @@ import TechPremiumLineup from './blocks/Lineup/TechPremiumLineup';
 import TechPremiumGalleryPreview from './blocks/GalleryPreview/TechPremiumGalleryPreview';
 import TechPremiumCompatibility from './blocks/Compatibility/TechPremiumCompatibility';
 import TechPremiumFaq from './blocks/Faq/TechPremiumFaq';
+// Standalone pages (Phase 4c)
+import TechPremiumGallery from './blocks/Gallery/TechPremiumGallery';
+import TechPremiumContact from './blocks/Contact/TechPremiumContact';
 
 // Published-mode blocks
 import TechPremiumNavPublished from './blocks/Header/TechPremiumNav.published';
@@ -46,6 +49,9 @@ import TechPremiumLineupPublished from './blocks/Lineup/TechPremiumLineup.publis
 import TechPremiumGalleryPreviewPublished from './blocks/GalleryPreview/TechPremiumGalleryPreview.published';
 import TechPremiumCompatibilityPublished from './blocks/Compatibility/TechPremiumCompatibility.published';
 import TechPremiumFaqPublished from './blocks/Faq/TechPremiumFaq.published';
+// Standalone pages (Phase 4c)
+import TechPremiumGalleryPublished from './blocks/Gallery/TechPremiumGallery.published';
+import TechPremiumContactPublished from './blocks/Contact/TechPremiumContact.published';
 
 interface BlockEntry {
   edit: React.ComponentType<any>;
@@ -72,6 +78,9 @@ const TECHPREMIUM_BLOCK_REGISTRY: Record<string, BlockEntry> = {
   gallerypreview: { edit: TechPremiumGalleryPreview, published: TechPremiumGalleryPreviewPublished },
   compatibility:  { edit: TechPremiumCompatibility,  published: TechPremiumCompatibilityPublished },
   faq:            { edit: TechPremiumFaq,            published: TechPremiumFaqPublished },
+  // Standalone pages (Phase 4c) — archetype-only insertion.
+  gallery:        { edit: TechPremiumGallery,        published: TechPremiumGalleryPublished },
+  contact:        { edit: TechPremiumContact,        published: TechPremiumContactPublished },
 };
 
 export type TechPremiumBlockMode = 'edit' | 'published';
