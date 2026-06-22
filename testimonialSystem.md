@@ -248,7 +248,39 @@ support already existed, so **no schema/migration/repo change**. Build clean, te
 **UX:** invisible for the common single-project user; the project dimension only appears with
 multiple projects. Legacy Phase-2 null-project testimonials show under **"Unassigned"**, reassignable.
 
-### Next: Phase 3 — Collection
-Public `/t/[collectToken]` branded form + collect-token entity (**per project** — projectId auto-set
-at collection) + photo **file upload** (Blob, the deferred piece) → `pending` testimonials into the
-same moderation queue.
+## Phase 3 — As Built (2026-06-20): public collection + photo upload
+
+The customer-facing half. New `CollectLink` entity (per-project token); public branded form;
+public submit with photo upload + spam defense; owner link management. Build clean, tests 9/9,
+migration applied to the Neon `testimonials-dev` branch.
+
+**Security model:** the `collectToken` is the **only capability** — the public submit resolves
+owner `userId` + `projectId` **server-side** from the token (nothing trusted from the client,
+unlike `forms/submit`).
+
+- **`CollectLink` model** (migration `*_add_collect_link`): `token @unique`, `projectId @unique`
+  (one link/project), `userId` (Clerk owner), `isActive`, `onDelete: Cascade`. + `Project.collectLink`.
+- `src/lib/testimonials/collectLinks.ts` — `getOrCreateCollectLink` / `getCollectLinkByToken`
+  (public) / `setCollectLinkActive` / `rotateCollectLinkToken`. Owner ops verify project ownership.
+- `src/lib/testimonials/photo.ts` — `processAndUploadTestimonialPhoto`: ≤5MB, **Sharp always
+  re-encodes to webp** (512px; the decode IS the MIME guard — **no SVG passthrough**), Vercel Blob
+  `put` (dev FS fallback). Returns URL.
+- `src/app/api/testimonials/collect/route.ts` — **PUBLIC** submit: `request.formData()` (multipart),
+  honeypot (`website`), `withFormRateLimit` (10/min/IP), token→owner/project resolve, optional photo,
+  `createTestimonial({ status:'pending', source:'collect-form' })`. No auth, no CSRF.
+- `src/app/api/testimonials/collect-link/route.ts` — owner-only: `POST` get-or-create, `PATCH`
+  toggle active / rotate.
+- `src/app/t/[collectToken]/page.tsx` + `src/components/t/CollectFormClient.tsx` — public branded
+  page (flag-gated; `notFound` on bad token, friendly message if inactive) + form → thank-you.
+- `src/components/dashboard/testimonials/CollectLinksDialog.tsx` — "Collect link" button in the
+  moderation toolbar: project picker → URL (built from `window.location.origin`) + Copy + Disable/
+  Enable + Regenerate.
+- `src/app/api/testimonials/[id]/route.ts` (DELETE) — best-effort `del()` of Lessgo-Blob-hosted
+  photos on delete (no orphaned blobs).
+- `src/middleware.ts` — `/t/(.*)` + `/api/testimonials/collect` added to `isPublicRoute`.
+
+**Spam defense (v1):** honeypot + 10/min/IP rate limit. (hCaptcha later if needed.)
+
+### Next: Phase 4 — Feed approved testimonials onto pages
+"Add to page" picker → inject approved (project-scoped) testimonials into the page's testimonial
+section via the existing `injectRealTestimonials` seam (field-mapped per template) → re-publish.

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Testimonial } from '@prisma/client'
-import { Plus, Star, MessageSquare } from 'lucide-react'
+import { Plus, Star, MessageSquare, Link as LinkIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -15,6 +15,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import TestimonialFormDialog from './TestimonialFormDialog'
+import CollectLinksDialog from './CollectLinksDialog'
 
 type Filter = 'all' | 'pending' | 'approved' | 'rejected'
 const FILTERS: Filter[] = ['all', 'pending', 'approved', 'rejected']
@@ -41,6 +42,7 @@ export default function TestimonialModerationList({
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<Testimonial | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Testimonial | null>(null)
+  const [collectOpen, setCollectOpen] = useState(false)
 
   const projectMap = new Map(projects.map((p) => [p.id, p.title || 'Untitled project']))
   const hasUnassigned = initial.some((t) => !t.projectId)
@@ -123,15 +125,21 @@ export default function TestimonialModerationList({
             </select>
           )}
         </div>
-        <Button
-          onClick={() => {
-            setEditing(null)
-            setFormOpen(true)
-          }}
-        >
-          <Plus className="w-4 h-4 mr-1.5" />
-          Add testimonial
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => setCollectOpen(true)}>
+            <LinkIcon className="w-4 h-4 mr-1.5" />
+            Collect link
+          </Button>
+          <Button
+            onClick={() => {
+              setEditing(null)
+              setFormOpen(true)
+            }}
+          >
+            <Plus className="w-4 h-4 mr-1.5" />
+            Add testimonial
+          </Button>
+        </div>
       </div>
 
       {error && <p className="text-sm text-red-600 mb-3">{error}</p>}
@@ -249,6 +257,8 @@ export default function TestimonialModerationList({
         testimonial={editing}
         projects={projects}
       />
+
+      <CollectLinksDialog open={collectOpen} onOpenChange={setCollectOpen} projects={projects} />
 
       <Dialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
         <DialogContent>

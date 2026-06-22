@@ -29,6 +29,8 @@ const isPublicRoute = createRouteMatcher([
   '/api/audience/product/strategy',
   '/api/audience/product/generate-copy',
   '/p/(.*)',
+  '/t/(.*)', // public testimonial collection pages (flag-gated in the handler)
+  '/api/testimonials/collect', // public testimonial submit (flag-gated in the handler)
   '/thanks',
   '/privacy',
   '/terms',

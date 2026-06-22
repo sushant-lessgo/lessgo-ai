@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 import type { NextRequest } from 'next/server';
+import type { Testimonial } from '@prisma/client';
 import { z } from 'zod';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
@@ -29,7 +30,10 @@ const PatchBody = z.object({
 });
 
 // Ownership is enforced here (repo mutators take no userId): fetch then compare.
-async function requireOwned(id: string, userId: string) {
+async function requireOwned(
+  id: string,
+  userId: string,
+): Promise<{ testimonial?: Testimonial; fail?: Response }> {
   const testimonial = await getTestimonial(id);
   if (!testimonial) return { fail: createSecureResponse({ error: 'Not found' }, 404) };
   if (testimonial.userId !== userId) return { fail: createSecureResponse({ error: 'Forbidden' }, 403) };
@@ -77,6 +81,19 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
   const owned = await requireOwned(params.id, userId);
   if (owned.fail) return owned.fail;
 
+  const photoUrl = owned.testimonial?.authorPhotoUrl ?? null;
   await deleteTestimonial(params.id);
+
+  // Best-effort: remove the Blob-hosted photo so deletes don't orphan uploads. Only our own
+  // Blob URLs (not externally-pasted manual-add URLs); never fail the delete on a blob error.
+  if (photoUrl && photoUrl.includes('vercel-storage.com')) {
+    try {
+      const { del } = await import('@vercel/blob');
+      await del(photoUrl);
+    } catch (e) {
+      console.error('[testimonials] blob cleanup failed', e);
+    }
+  }
+
   return createSecureResponse({ deleted: true });
 }

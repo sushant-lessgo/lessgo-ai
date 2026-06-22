@@ -38,6 +38,7 @@ model Project {
   updatedAt      DateTime @updatedAt
 
   testimonials Testimonial[]
+  collectLink  CollectLink?
 }
 
 model Token {
@@ -377,4 +378,20 @@ model Testimonial {
   @@index([userId])
   @@index([projectId])
   @@index([status])
+}
+
+// Per-project public collect link (Phase 3). The token is the only capability: the public
+// submit endpoint resolves owner (userId) + projectId from it server-side — nothing trusted
+// from the client. One link per project; revoke via isActive, rotate by replacing token.
+model CollectLink {
+  id        String   @id @default(cuid())
+  token     String   @unique // unguessable, URL-safe
+  projectId String   @unique // one link per project
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  userId    String // Clerk id of the owner (denormalized, like Testimonial)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }
