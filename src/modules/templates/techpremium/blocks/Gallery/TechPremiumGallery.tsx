@@ -60,13 +60,16 @@ export default function TechPremiumGallery({ sectionId }: Props) {
 
   // Multi-file: upload each (→ /api/upload-image: Sharp → WebP ≤2400px) then append once.
   const onFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const picked = e.target.files;
+    // Snapshot files to a real array BEFORE clearing the input — `e.target.files`
+    // is a live FileList that `input.value = ''` empties, so reading it after the
+    // reset would yield 0 files (the bug: "uploaded but nothing happened").
+    const all = Array.from(e.target.files || []);
     e.target.value = '';
-    if (!picked || !picked.length || !uploadImage) return;
+    if (!all.length || !uploadImage) return;
     const room = MAX_IMAGES - images.length;
     if (room <= 0) { setImportMsg(`Gallery is full (${MAX_IMAGES} max) — remove some first.`); return; }
-    const list = Array.from(picked).slice(0, room);
-    const skipped = picked.length - list.length;
+    const list = all.slice(0, room);
+    const skipped = all.length - list.length;
     setImporting(true);
     const added: Image[] = [];
     for (let i = 0; i < list.length; i++) {
