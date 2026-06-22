@@ -29,6 +29,15 @@ const Lock = () => (<svg className="lock" viewBox="0 0 24 24" fill="none" stroke
 const Chev = () => (<svg className="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>);
 const Burger = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" /></svg>);
 
+// Edit-only logo upload affordance (not rendered on published).
+const LOGO_EDIT_CSS = `
+.tp-logo-edit { display:inline-flex; align-items:center; gap:6px; margin-left:8px; }
+.tp-logo-edit__btn { display:inline-flex; align-items:center; gap:4px; font-family:var(--font-mono); font-size:10.5px; letter-spacing:0.04em; color:var(--ink-3); border:1px dashed var(--line-2); border-radius:var(--r); padding:3px 8px; cursor:pointer; white-space:nowrap; }
+.tp-logo-edit__btn:hover { color:var(--forest); border-color:var(--forest); }
+.tp-logo-edit__x { background:transparent; border:none; color:var(--ink-3); font-family:var(--font-mono); font-size:10.5px; cursor:pointer; }
+.tp-logo-edit__x:hover { color:var(--forest); }
+`;
+
 export default function TechPremiumNav({ sectionId }: Props) {
   const { mode, blockContent, handleContentUpdate, handleCollectionUpdate } =
     useTechPremiumBlock<TechPremiumNavContent>({ sectionId });
@@ -36,8 +45,22 @@ export default function TechPremiumNav({ sectionId }: Props) {
   const navItems = blockContent.nav_items || [];
 
   const { sections, pages } = useEditStore();
+  const uploadImage = (useEditStore() as any).uploadImage as
+    | ((file: File, t?: { sectionId: string; elementKey: string }) => Promise<string | void>)
+    | undefined;
   const sectionOptions = React.useMemo(() => buildSectionLinkOptions(sections || []), [sections]);
   const pageOptions = React.useMemo(() => buildPageLinkOptions(pages), [pages]);
+
+  const [logoUploading, setLogoUploading] = React.useState(false);
+  const onLogoFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || !uploadImage) return;
+    setLogoUploading(true);
+    try { await uploadImage(file, { sectionId, elementKey: 'logo_image' }); }
+    catch (err) { /* surfaced by the store */ }
+    finally { setLogoUploading(false); }
+  };
 
   const setItems = (next: NavItem[]) => handleCollectionUpdate('nav_items', next);
   const patchItem = (id: string, p: Partial<NavItem>) => setItems(navItems.map((n) => (n.id === id ? { ...n, ...p } : n)));
@@ -58,12 +81,21 @@ export default function TechPremiumNav({ sectionId }: Props) {
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: NAV_STYLES }} />
+      <style dangerouslySetInnerHTML={{ __html: NAV_STYLES + LOGO_EDIT_CSS }} />
       <nav className="tp-nav" data-section-id={sectionId} data-edit={edit ? '1' : undefined}>
         <div className="tp-nav-in">
           <span className="tp-brand">
             {blockContent.logo_image ? <img className="tp-brand__img" src={blockContent.logo_image} alt="" /> : <span className="tp-brand__mk" aria-hidden="true" />}
             <TechPremiumEditable as="span" mode={mode} sectionId={sectionId} elementKey="logo_text" value={blockContent.logo_text} onSave={(v) => handleContentUpdate('logo_text', v)} enterBehavior="save" className="tp-brand__wm" placeholder="Brand" />
+            {edit && (
+              <span className="tp-logo-edit">
+                <label className="tp-logo-edit__btn">
+                  {logoUploading ? 'Uploading…' : (blockContent.logo_image ? 'Change logo' : '↥ Logo')}
+                  <input type="file" accept="image/*" onChange={onLogoFile} hidden disabled={logoUploading} />
+                </label>
+                {blockContent.logo_image && <button type="button" className="tp-logo-edit__x" onClick={() => handleContentUpdate('logo_image', '')}>remove</button>}
+              </span>
+            )}
           </span>
 
           <div className="tp-nav-links">

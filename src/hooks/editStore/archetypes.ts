@@ -252,6 +252,86 @@ export function buildHomeSlice(): PageSlice {
   ]);
 }
 
+/**
+ * TechPremium home as a flat `finalContent` (Phase 4c follow-up) — the deterministic
+ * default for new hardware-founder projects, replacing AI generation for now.
+ * TODO(ai-fill): TEMPORARY naayom-era bridge. Replace the GeneratingStep branch that
+ * calls this with an AI path that fills the 12 TechPremium section types from
+ * onboarding BEFORE onboarding a 2nd hardware founder (else customer #2 inherits
+ * naayom's copy). The 12-section *structure* default is permanent; the seeded *copy*
+ * is the time-boxed part.
+ *
+ * Returns the same flat shape `GeneratingStep.buildFinalContent` produces (header +
+ * 12 body sections from buildHomeSlice + footer) so loadDraft / single→multi-page
+ * normalization / edit / publish all behave identically to an AI-generated project.
+ */
+export function buildTechPremiumHomeFinalContent(opts: {
+  tokenId: string;
+  title: string;
+  productName?: string;
+  oneLiner?: string;
+  understanding?: any;
+  landingGoal?: string;
+  offer?: string;
+}): any {
+  const body = buildHomeSlice(); // 12 body sections (no chrome)
+  const brand = (opts.productName || '').trim();
+  const headerId = sectionId('header');
+  const footerId = sectionId('footer');
+
+  const header = section(headerId, 'header', 'MeridianNavHeader', {
+    logo_text: brand,
+    logo_image: '',
+    cta_text: 'Book a demo',
+    cta_href: '/contact',
+    signin_text: '',
+    signin_url: '',
+    nav_items: [
+      { id: rid('nav'), label: 'Home', href: '/' },
+      { id: rid('nav'), label: 'Contact', href: '/contact' },
+    ],
+  });
+  const footer = section(footerId, 'footer', 'HairlineFooter', {
+    wordmark: brand,
+    logo_image: '',
+    tag: '',
+    blurb: (opts.oneLiner || '').trim(),
+    contact_address: '',
+    contact_tel: '',
+    contact_email: '',
+    newsletter_placeholder: 'you@company.com',
+    newsletter_cta: 'Subscribe',
+    copyright: `© ${brand || 'Your Company'}`,
+    location: '',
+    whatsapp_number: '',
+    whatsapp_prefill: '',
+    whatsapp_label: 'Chat with us',
+    footer_columns: [
+      { id: rid('col'), heading: 'Company', links: [{ id: rid('ln'), label: 'Home', href: '/' }, { id: rid('ln'), label: 'Contact', href: '/contact' }] },
+    ],
+    socials: [],
+    legal_links: [],
+  });
+
+  const sections = [headerId, ...body.sections, footerId];
+  const sectionLayouts: Record<string, string> = { [headerId]: 'MeridianNavHeader', ...body.sectionLayouts, [footerId]: 'HairlineFooter' };
+  const content: Record<string, any> = { [headerId]: header, ...body.content, [footerId]: footer };
+
+  return {
+    layout: { sections, sectionLayouts, theme: {}, globalSettings: {} },
+    content,
+    meta: { id: opts.tokenId, title: opts.title, slug: '', lastUpdated: Date.now(), version: 1, tokenId: opts.tokenId },
+    onboardingData: {
+      oneLiner: opts.oneLiner,
+      productName: opts.productName,
+      understanding: opts.understanding,
+      landingGoal: opts.landingGoal,
+      offer: opts.offer,
+    },
+    generatedAt: Date.now(),
+  };
+}
+
 /** Gallery page (Phase 4c): one `gallery` section (filter bar + grid). Body-only. */
 export function buildGallerySlice(): PageSlice {
   const gId = sectionId('gallery');

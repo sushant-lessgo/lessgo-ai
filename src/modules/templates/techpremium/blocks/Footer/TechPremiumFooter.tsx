@@ -19,7 +19,7 @@ interface FooterLink { id: string; label: string; href: string }
 interface FooterColumn { id: string; heading: string; links: FooterLink[] }
 interface Social { id: string; icon: string; url: string }
 interface TechPremiumFooterContent {
-  wordmark: string; tag: string; blurb: string;
+  wordmark: string; logo_image: string; tag: string; blurb: string;
   contact_address: string; contact_tel: string; contact_email: string;
   newsletter_placeholder: string; newsletter_cta: string;
   copyright: string; location: string;
@@ -37,8 +37,22 @@ export default function TechPremiumFooter({ sectionId }: Props) {
   const edit = mode === 'edit';
 
   const { content, addForm, deleteForm, getFormById, setSection, sections, pages } = useEditStore();
+  const uploadImage = (useEditStore() as any).uploadImage as
+    | ((file: File, t?: { sectionId: string; elementKey: string }) => Promise<string | void>)
+    | undefined;
   const sectionOptions = React.useMemo(() => buildSectionLinkOptions(sections || []), [sections]);
   const pageOptions = React.useMemo(() => buildPageLinkOptions(pages), [pages]);
+
+  const [logoUploading, setLogoUploading] = React.useState(false);
+  const onLogoFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || !uploadImage) return;
+    setLogoUploading(true);
+    try { await uploadImage(file, { sectionId, elementKey: 'logo_image' }); }
+    catch (err) { /* surfaced by the store */ }
+    finally { setLogoUploading(false); }
+  };
   const newsletterFormId: string | undefined = content?.[sectionId]?.elementMetadata?.newsletter_cta?.buttonConfig?.formId;
   const isNewsletterConnected = !!(newsletterFormId && getFormById?.(newsletterFormId));
 
@@ -79,8 +93,17 @@ export default function TechPremiumFooter({ sectionId }: Props) {
         <div className="tp-footer__top">
           <div className="tp-footer__brand">
             <span className="tp-footer__brand-wm">
-              <span className="tp-footer__mk" aria-hidden="true" />
+              {blockContent.logo_image ? <img className="tp-footer__img" src={blockContent.logo_image} alt="" /> : <span className="tp-footer__mk" aria-hidden="true" />}
               <TechPremiumEditable as="span" mode={mode} sectionId={sectionId} elementKey="wordmark" value={blockContent.wordmark} onSave={(v) => handleContentUpdate('wordmark', v)} enterBehavior="save" placeholder="Brand" />
+              {edit && (
+                <span className="tp-flogo-edit">
+                  <label className="tp-flogo-edit__btn">
+                    {logoUploading ? 'Uploading…' : (blockContent.logo_image ? 'Change' : '↥ Logo')}
+                    <input type="file" accept="image/*" onChange={onLogoFile} hidden disabled={logoUploading} />
+                  </label>
+                  {blockContent.logo_image && <button type="button" className="tp-flogo-edit__x" onClick={() => handleContentUpdate('logo_image', '')}>remove</button>}
+                </span>
+              )}
             </span>
             {(blockContent.blurb || blockContent.tag || edit) && (
               <TechPremiumEditable as="p" mode={mode} sectionId={sectionId} elementKey="blurb" value={blockContent.blurb || blockContent.tag} onSave={(v) => handleContentUpdate('blurb', v)} multiline className="tp-footer__blurb" placeholder="A short line about what you do." />
@@ -206,4 +229,9 @@ const EDIT_EXTRA = `
 .tp-wa-edit { display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:14px var(--pad-x); border-top:1px dashed var(--line-dk); font-family:var(--font-mono); font-size:11px; color:oklch(0.84 0.022 140 / 0.7); }
 .tp-wa-edit strong { color:var(--lime); }
 .tp-wa-edit input { font-size:11px; padding:6px 8px; border:1px solid var(--line-dk); border-radius:var(--r); background:transparent; color:var(--paper); min-width:150px; }
+.tp-flogo-edit { display:inline-flex; align-items:center; gap:6px; margin-left:4px; }
+.tp-flogo-edit__btn { display:inline-flex; align-items:center; gap:4px; font-family:var(--font-mono); font-size:10px; letter-spacing:0.04em; color:oklch(0.84 0.022 140 / 0.7); border:1px dashed var(--line-dk); border-radius:var(--r); padding:2px 7px; cursor:pointer; white-space:nowrap; }
+.tp-flogo-edit__btn:hover { color:var(--lime); border-color:var(--lime); }
+.tp-flogo-edit__x { background:transparent; border:none; color:oklch(0.84 0.022 140 / 0.6); font-family:var(--font-mono); font-size:10px; cursor:pointer; }
+.tp-flogo-edit__x:hover { color:var(--lime); }
 `;

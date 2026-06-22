@@ -23,7 +23,7 @@ export const meridianElementSchema: Record<string, UIBlockSchemaV2> = {
   MeridianNavHeader: {
     sectionType: 'header',
     elements: {
-      logo_text:   { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'meridian' },
+      logo_text:   { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: '' },
       cta_text:    { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Start free' },
       cta_href:    { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '/contact' }, // Phase 4: Book-a-demo target
       signin_text: { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Sign in' },
@@ -208,7 +208,8 @@ export const meridianElementSchema: Record<string, UIBlockSchemaV2> = {
   HairlineFooter: {
     sectionType: 'footer',
     elements: {
-      wordmark:              { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'meridian' },
+      wordmark:              { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: '' },
+      logo_image:            { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' }, // Phase 4c: footer brand logo (parity with nav)
       tag:                   { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
       // Phase 4: multi-column footer — brand blurb + click-to-action contact.
       blurb:                 { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
@@ -217,7 +218,7 @@ export const meridianElementSchema: Record<string, UIBlockSchemaV2> = {
       contact_email:         { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
       newsletter_placeholder:{ type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: 'you@company.com' },
       newsletter_cta:        { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: 'subscribe' },
-      copyright:             { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: '© Meridian' },
+      copyright:             { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: '© Your Company' },
       location:              { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
       // Phase 4: floating WhatsApp widget (rendered by the footer → every page).
       whatsapp_number:       { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },

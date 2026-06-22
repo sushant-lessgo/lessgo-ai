@@ -13,7 +13,7 @@ interface FooterColumn { id?: string; heading?: string; links?: FooterLink[] }
 interface Social { id?: string; icon?: string; url?: string }
 interface Props {
   sectionId: string;
-  wordmark?: string; tag?: string; blurb?: string;
+  wordmark?: string; logo_image?: string; tag?: string; blurb?: string;
   contact_address?: string; contact_tel?: string; contact_email?: string;
   newsletter_placeholder?: string; newsletter_cta?: string;
   copyright?: string; location?: string;
@@ -41,7 +41,7 @@ export default function TechPremiumFooterPublished(props: Props) {
       <footer className="tp-footer">
         <div className="tp-footer__top">
           <div className="tp-footer__brand">
-            <span className="tp-footer__brand-wm"><span className="tp-footer__mk" aria-hidden="true" />{props.wordmark || 'Brand'}</span>
+            <span className="tp-footer__brand-wm">{props.logo_image ? <img className="tp-footer__img" src={props.logo_image} alt="" /> : <span className="tp-footer__mk" aria-hidden="true" />}{props.wordmark || ''}</span>
             {(props.blurb || props.tag) && <p className="tp-footer__blurb">{props.blurb || props.tag}</p>}
             {(props.contact_address || props.contact_tel || props.contact_email) && (
               <div className="tp-footer__contact">

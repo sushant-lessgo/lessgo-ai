@@ -8,6 +8,7 @@ export const FOOTER_STYLES = `
 .tp-footer__mk { width:34px; height:34px; border-radius:7px; background:oklch(0.34 0.045 158); display:grid; place-items:center; position:relative; flex-shrink:0; }
 .tp-footer__mk::before { content:""; width:14px; height:14px; border-radius:50%; border:2px solid var(--lime); }
 .tp-footer__mk::after { content:""; position:absolute; width:5px; height:5px; border-radius:50%; background:var(--lime); }
+.tp-footer__img { width:34px; height:34px; border-radius:7px; object-fit:cover; flex-shrink:0; }
 .tp-footer__blurb { font-size:14px; line-height:1.7; max-width:34ch; margin:18px 0; color:oklch(0.84 0.022 140 / 0.78); }
 .tp-footer__contact { font-family:var(--font-mono); font-size:12.5px; line-height:1.9; letter-spacing:0.02em; }
 .tp-footer__contact a { color:inherit; text-decoration:none; }
