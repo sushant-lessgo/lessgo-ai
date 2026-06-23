@@ -44,7 +44,7 @@ export default function TechPremiumCapabilities({ sectionId }: TechPremiumCapabi
     handleCollectionUpdate('features', features.map((f) => (f.id === id ? { ...f, [key]: value } : f)));
   };
   const addFeature = () => {
-    if (features.length >= 6) return;
+    if (features.length >= 9) return;
     handleCollectionUpdate('features', [
       ...features,
       { id: `f${Date.now()}`, title: 'New capability', description: 'Describe this capability.', icon: 'Activity', link_text: '' },
@@ -144,7 +144,7 @@ export default function TechPremiumCapabilities({ sectionId }: TechPremiumCapabi
                 )}
               </article>
             ))}
-            {mode === 'edit' && features.length < 6 && (
+            {mode === 'edit' && features.length < 9 && (
               <button type="button" className="tp-cap tp-cap--add" onClick={addFeature}>+ Add capability</button>
             )}
           </div>

@@ -131,6 +131,7 @@ export function buildHomeSlice(): PageSlice {
         { id: rid('f'), title: 'Stay Connected', description: 'Stay connected to your farm from anywhere in the world with Naayom’s advanced IoT platform.', icon: 'Wifi', link_text: '' },
         { id: rid('f'), title: 'Energy Savings', description: 'Reduce energy usage while maintaining perfect growing conditions.', icon: 'Zap', link_text: '' },
         { id: rid('f'), title: 'Support', description: 'We are available at every step to support our mushroom growers.', icon: 'LifeBuoy', link_text: '' },
+        { id: rid('f'), title: 'Instant Alerts', description: 'Get notified the moment a parameter drifts out of range — act before it affects the crop.', icon: 'BellRing', link_text: '' },
       ],
     }) },
     { id: pc, data: section(pc, 'process', 'ProcessSteps', {

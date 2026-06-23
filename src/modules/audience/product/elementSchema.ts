@@ -101,7 +101,7 @@ export const meridianElementSchema: Record<string, UIBlockSchemaV2> = {
       features: {
         requirement: 'required',
         fillMode: 'ai_generated',
-        constraints: { min: 3, max: 8 },
+        constraints: { min: 3, max: 9 },
         fields: {
           id:          { type: 'string', fillMode: 'system' },
           title:       { type: 'string', fillMode: 'ai_generated', default: '' },
