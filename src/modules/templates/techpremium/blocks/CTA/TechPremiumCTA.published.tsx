@@ -10,8 +10,6 @@ interface TechPremiumCTAPublishedProps {
   headline?: string;
   body?: string;
   cta_text?: string;
-  secondary_cta_text?: string;
-  tertiary_cta_text?: string;
   phone_line?: string;
   content?: any;
   elementMetadata?: any;
@@ -23,8 +21,6 @@ export default function TechPremiumCTAPublished(props: TechPremiumCTAPublishedPr
   const md = props.content?.[props.sectionId]?.elementMetadata || props.elementMetadata;
   const forms = props.content?.forms;
   const ctaHref = resolveCtaHref(md?.cta_text?.buttonConfig, forms, '#cta');
-  const secondaryHref = resolveCtaHref(md?.secondary_cta_text?.buttonConfig, forms, '#cta');
-  const tertiaryHref = resolveCtaHref(md?.tertiary_cta_text?.buttonConfig, forms, '#cta');
 
   return (
     <>
@@ -37,12 +33,6 @@ export default function TechPremiumCTAPublished(props: TechPremiumCTAPublishedPr
           <div className="tp-cta__actions">
             {props.cta_text && (
               <a className="tp-btn tp-btn--lime tp-btn--lg" href={ctaHref}>{props.cta_text}</a>
-            )}
-            {props.secondary_cta_text && (
-              <a className="tp-btn tp-btn--wa tp-btn--lg" href={secondaryHref}>{props.secondary_cta_text}</a>
-            )}
-            {props.tertiary_cta_text && (
-              <a className="tp-btn tp-btn--ghost-d tp-btn--lg" href={tertiaryHref}>{props.tertiary_cta_text}</a>
             )}
           </div>
           {props.phone_line && <p className="tp-cta__phone" dangerouslySetInnerHTML={{ __html: props.phone_line }} />}

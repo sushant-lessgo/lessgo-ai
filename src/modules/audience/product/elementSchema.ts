@@ -195,9 +195,7 @@ export const meridianElementSchema: Record<string, UIBlockSchemaV2> = {
       body:               { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: '' },
       cta_text:           { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Start free' },
       secondary_cta_text: { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
-      // Phase 4b contact-sales: 3rd action (call/ghost) + a mono phone note.
-      // Existing pages ignore these (optional). cta=demo, secondary=WhatsApp, call=tel.
-      tertiary_cta_text:  { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      // Phase 4b contact-sales: optional mono phone note below the action.
       phone_line:         { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
     },
   },

@@ -15,8 +15,6 @@ interface TechPremiumCTAContent {
   headline: string;
   body: string;
   cta_text: string;
-  secondary_cta_text: string;
-  tertiary_cta_text: string;
   phone_line: string;
 }
 
@@ -80,34 +78,6 @@ export default function TechPremiumCTA({ sectionId }: TechPremiumCTAProps) {
               className="tp-btn tp-btn--lime tp-btn--lg"
               placeholder="Book a demo"
             />
-            {(blockContent.secondary_cta_text || mode === 'edit') && (
-              <TechPremiumEditable
-                as="span"
-                mode={mode}
-                sectionId={sectionId}
-                elementKey="secondary_cta_text"
-                value={blockContent.secondary_cta_text}
-                onSave={(v) => handleContentUpdate('secondary_cta_text', v)}
-                enterBehavior="save"
-                isButton
-                className="tp-btn tp-btn--wa tp-btn--lg"
-                placeholder="WhatsApp"
-              />
-            )}
-            {(blockContent.tertiary_cta_text || mode === 'edit') && (
-              <TechPremiumEditable
-                as="span"
-                mode={mode}
-                sectionId={sectionId}
-                elementKey="tertiary_cta_text"
-                value={blockContent.tertiary_cta_text}
-                onSave={(v) => handleContentUpdate('tertiary_cta_text', v)}
-                enterBehavior="save"
-                isButton
-                className="tp-btn tp-btn--ghost-d tp-btn--lg"
-                placeholder="Call sales"
-              />
-            )}
           </div>
           {(blockContent.phone_line || mode === 'edit') && (
             <TechPremiumEditable

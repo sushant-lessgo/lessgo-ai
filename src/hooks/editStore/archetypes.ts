@@ -242,8 +242,6 @@ export function buildHomeSlice(): PageSlice {
       headline: 'Have any <em>questions?</em>',
       body: 'Talk to our team — we’ll spec the right system for your farm and walk you through the numbers. No pricing pressure, just a plan.',
       cta_text: 'Contact Sales',
-      secondary_cta_text: 'Chat on WhatsApp',
-      tertiary_cta_text: 'Call sales',
       phone_line: 'Or call <b>+91 9310119271</b> · Mon–Sat, 9am–7pm IST',
     }) },
   ]);
