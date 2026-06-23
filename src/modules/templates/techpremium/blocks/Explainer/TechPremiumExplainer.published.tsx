@@ -3,7 +3,7 @@
 
 import React from 'react';
 import { Check } from 'lucide-react';
-import { EXPLAINER_STYLES } from './TechPremiumExplainer';
+import { EXPLAINER_STYLES, ytEmbed } from './TechPremiumExplainer';
 import { SEC_HEAD_STYLES, PH_STYLES, BTN_STYLES } from '../shared/sharedStyles';
 
 interface Bullet { id?: string; text?: string }
@@ -13,6 +13,7 @@ interface Row {
   title?: string;
   body?: string;
   image?: string;
+  video_url?: string;
   flip?: boolean;
   cta_text?: string;
   cta_href?: string;
@@ -20,6 +21,9 @@ interface Row {
 }
 interface Props {
   sectionId: string;
+  eyebrow?: string;
+  headline?: string;
+  lede?: string;
   rows?: Row[];
 }
 
@@ -33,13 +37,25 @@ export default function TechPremiumExplainerPublished(props: Props) {
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
       <section className="tp-sec">
         <div className="tp-sec__inner">
+          {(props.eyebrow || props.headline || props.lede) && (
+            <div className="tp-sec-head">
+              {props.eyebrow && <span className="tp-eyebrow">{props.eyebrow}</span>}
+              {props.headline && <h2 dangerouslySetInnerHTML={{ __html: props.headline }} />}
+              {props.lede && <p className="tp-lede" dangerouslySetInnerHTML={{ __html: props.lede }} />}
+            </div>
+          )}
           {rows.map((r, idx) => {
             const bullets = Array.isArray(r.bullets) ? r.bullets : [];
+            const embed = ytEmbed(r.video_url || '');
             return (
               <div key={r.id || idx} className={`tp-explain${r.flip ? ' flip' : ''}`}>
                 <div className="tp-explain-media">
                   <div className="tp-ph">
-                    {r.image ? <img src={r.image} alt={r.title || ''} /> : <span className="tp-tag">{r.eyebrow || 'Photo'}</span>}
+                    {r.image
+                      ? <img src={r.image} alt={r.title || ''} />
+                      : embed
+                        ? <iframe className="tp-explain-video" src={embed} title={r.title || 'Video'} loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+                        : <span className="tp-tag">{r.eyebrow || 'Photo'}</span>}
                   </div>
                 </div>
                 <div className="tp-explain-copy">

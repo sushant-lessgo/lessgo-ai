@@ -147,18 +147,21 @@ export function buildHomeSlice(): PageSlice {
       ],
     }) },
     { id: ex, data: section(ex, 'explainer', 'ExplainerRows', {
+      eyebrow: 'The platform',
+      headline: 'From sensing to <em>insight</em> — one platform.',
+      lede: 'Hold every chamber at setpoint, see the whole farm at a glance, and turn each reading into a better next cycle.',
       rows: [
-        { id: rid('r'), eyebrow: 'Precision', title: 'Stage-based precision control.', body: 'Optimise mushroom cultivation with an advanced controller, ensuring ideal conditions at every stage for consistent, high-quality yields — seamlessly.', image: '', flip: false, cta_text: 'See controllers', cta_href: '/products', bullets: [
+        { id: rid('r'), eyebrow: 'Precision', title: 'Stage-based precision control.', body: 'Optimise mushroom cultivation with an advanced controller, ensuring ideal conditions at every stage for consistent, high-quality yields — seamlessly.', image: '', video_url: '', flip: false, cta_text: 'See controllers', cta_href: '/products', bullets: [
           { id: rid('b'), text: 'Stage-wise parameter settings' },
           { id: rid('b'), text: 'Integrated control algorithms' },
           { id: rid('b'), text: 'Customizable climate parameters' },
         ] },
-        { id: rid('r'), eyebrow: 'Visibility', title: 'Get the full picture at a glance.', body: 'Monitor and control all growing chambers, Phase II tunnels and Phase I bunkers in real time — via mobile or laptop.', image: '', flip: true, cta_text: 'See monitors', cta_href: '/products', bullets: [
+        { id: rid('r'), eyebrow: 'Visibility', title: 'Get the full picture at a glance.', body: 'Monitor and control all growing chambers, Phase II tunnels and Phase I bunkers in real time — via mobile or laptop.', image: '', video_url: '', flip: true, cta_text: 'See monitors', cta_href: '/products', bullets: [
           { id: rid('b'), text: 'Every chamber on one dashboard' },
           { id: rid('b'), text: 'Live values + historical trends' },
           { id: rid('b'), text: 'Alarms that signal faults' },
         ] },
-        { id: rid('r'), eyebrow: 'Insight', title: 'Data-driven farming.', body: 'Leverage data to get insights for precise parameter adjustments, proactive issue resolution, and to optimise farm productivity.', image: '', flip: false, cta_text: '', cta_href: '#', bullets: [
+        { id: rid('r'), eyebrow: 'Insight', title: 'Data-driven farming.', body: 'Leverage data to get insights for precise parameter adjustments, proactive issue resolution, and to optimise farm productivity.', image: '', video_url: '', flip: false, cta_text: '', cta_href: '#', bullets: [
           { id: rid('b'), text: 'Detailed trend graphs per parameter' },
           { id: rid('b'), text: 'Spot issues before they cost a batch' },
           { id: rid('b'), text: 'Benchmark room against room' },

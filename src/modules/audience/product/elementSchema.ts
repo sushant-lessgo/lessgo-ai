@@ -439,7 +439,11 @@ export const meridianElementSchema: Record<string, UIBlockSchemaV2> = {
 
   ExplainerRows: {
     sectionType: 'explainer',
-    elements: {},
+    elements: {
+      eyebrow:  { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      headline: { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      lede:     { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+    },
     collections: {
       rows: {
         requirement: 'required', fillMode: 'ai_generated', constraints: { min: 1, max: 4 },
@@ -449,6 +453,7 @@ export const meridianElementSchema: Record<string, UIBlockSchemaV2> = {
           title:   { type: 'string', fillMode: 'ai_generated', default: '' },
           body:    { type: 'string', fillMode: 'ai_generated', default: '' },
           image:   { type: 'string', fillMode: 'manual_preferred', default: '' },
+          video_url: { type: 'string', fillMode: 'manual_preferred', default: '' }, // Phase: YouTube embed in the row media slot (image wins if both set)
           flip:    { type: 'boolean', fillMode: 'ai_generated', default: false },
           cta_text:{ type: 'string', fillMode: 'ai_generated', default: '' },
           cta_href:{ type: 'string', fillMode: 'ai_generated', default: '#' },

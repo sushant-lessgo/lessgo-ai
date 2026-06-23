@@ -18,17 +18,26 @@ interface Row {
   title: string;
   body: string;
   image: string;
+  video_url: string;
   flip: boolean;
   cta_text: string;
   cta_href: string;
   bullets: Bullet[];
 }
-interface Content { rows: Row[] }
+interface Content { eyebrow: string; headline: string; lede: string; rows: Row[] }
 interface Props { sectionId: string }
 const rid = (p: string) => `${p}${Math.random().toString(36).slice(2, 7)}`;
 
+// Normalise a YouTube URL/ID → privacy-friendly embed URL ('' if not a YT link).
+export function ytEmbed(url: string): string {
+  if (!url) return '';
+  const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/))([\w-]{11})/);
+  const id = m ? m[1] : (/^[\w-]{11}$/.test(url.trim()) ? url.trim() : '');
+  return id ? `https://www.youtube-nocookie.com/embed/${id}` : '';
+}
+
 export default function TechPremiumExplainer({ sectionId }: Props) {
-  const { mode, blockContent, handleCollectionUpdate } = useTechPremiumBlock<Content>({ sectionId });
+  const { mode, blockContent, handleContentUpdate, handleCollectionUpdate } = useTechPremiumBlock<Content>({ sectionId });
   const edit = mode === 'edit';
   const rows = blockContent.rows || [];
 
@@ -38,7 +47,7 @@ export default function TechPremiumExplainer({ sectionId }: Props) {
     if (rows.length >= 4) return;
     handleCollectionUpdate('rows', [
       ...rows,
-      { id: rid('row'), eyebrow: '', title: 'New section', body: 'Describe this part of the story.', image: '', flip: rows.length % 2 === 1, cta_text: '', cta_href: '#', bullets: [] },
+      { id: rid('row'), eyebrow: '', title: 'New section', body: 'Describe this part of the story.', image: '', video_url: '', flip: rows.length % 2 === 1, cta_text: '', cta_href: '#', bullets: [] },
     ]);
   };
   const removeRow = (id: string) => {
@@ -69,14 +78,38 @@ export default function TechPremiumExplainer({ sectionId }: Props) {
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
       <section className="tp-sec" data-section-id={sectionId}>
         <div className="tp-sec__inner">
+          {(blockContent.eyebrow || blockContent.headline || blockContent.lede || edit) && (
+            <div className="tp-sec-head">
+              {(blockContent.eyebrow || edit) && (
+                <TechPremiumEditable as="span" className="tp-eyebrow" mode={mode} sectionId={sectionId} elementKey="eyebrow" value={blockContent.eyebrow} onSave={(v) => handleContentUpdate('eyebrow', v)} enterBehavior="save" placeholder="Eyebrow" />
+              )}
+              {(blockContent.headline || edit) && (
+                <TechPremiumEditable as="h2" mode={mode} sectionId={sectionId} elementKey="headline" value={blockContent.headline} onSave={(v) => handleContentUpdate('headline', v)} enterBehavior="save" placeholder="Section headline" />
+              )}
+              {(blockContent.lede || edit) && (
+                <TechPremiumEditable as="p" className="tp-lede" mode={mode} sectionId={sectionId} elementKey="lede" value={blockContent.lede} onSave={(v) => handleContentUpdate('lede', v)} multiline placeholder="Optional one or two sentences." />
+              )}
+            </div>
+          )}
           {rows.map((r) => {
             const bullets = r.bullets || [];
+            const embed = ytEmbed(r.video_url);
             return (
               <div key={r.id} className={`tp-explain${r.flip ? ' flip' : ''}`}>
                 <div className="tp-explain-media">
                   <div className="tp-ph">
-                    {r.image ? <img src={r.image} alt={r.title} /> : <span className="tp-tag">{r.eyebrow || 'Photo'}</span>}
+                    {r.image
+                      ? <img src={r.image} alt={r.title} />
+                      : embed
+                        ? <iframe className="tp-explain-video" src={embed} title={r.title || 'Video'} loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+                        : <span className="tp-tag">{r.eyebrow || 'Photo / video'}</span>}
                   </div>
+                  {edit && (
+                    <div className="tp-explain-media-edit">
+                      <input value={r.image} onChange={(e) => updateRow(r.id, 'image', e.target.value)} placeholder="Image URL (wins over video)" />
+                      <input value={r.video_url} onChange={(e) => updateRow(r.id, 'video_url', e.target.value)} placeholder="YouTube URL" />
+                    </div>
+                  )}
                 </div>
                 <div className="tp-explain-copy">
                   {(r.eyebrow || edit) && (
@@ -145,6 +178,9 @@ export const EXPLAINER_STYLES = `
 .tp-explain.flip .tp-explain-media{ order:2; }
 .tp-explain-media{ position:relative; }
 .tp-explain-media .tp-ph{ aspect-ratio:4/3; }
+.tp-explain-video{ position:absolute; inset:0; width:100%; height:100%; border:0; display:block; border-radius:var(--r-lg); }
+.tp-explain-media-edit{ display:flex; flex-direction:column; gap:6px; margin-top:8px; }
+.tp-explain-media-edit input{ width:100%; font-family:var(--font-mono); font-size:11px; padding:6px 8px; border:1px solid var(--line-2); border-radius:var(--r); background:var(--paper); color:var(--ink); }
 .tp-explain-copy h3.tp-explain-h3{ font-family:var(--font-display); font-weight:600; font-size:clamp(24px,3vw,34px); letter-spacing:-0.018em; line-height:1.15; color:var(--ink); margin:14px 0 14px; }
 .tp-explain-copy p.tp-explain-p{ color:var(--ink-2); font-size:16px; line-height:1.65; margin:0 0 18px; max-width:46ch; }
 .tp-explain-list{ list-style:none; padding:0; margin:0 0 22px; display:flex; flex-direction:column; gap:12px; }
