@@ -107,6 +107,7 @@ export function buildHomeSlice(): PageSlice {
       ],
     }) },
     { id: t, data: section(t, 'trust', 'TrustStrip', {
+      headline: 'Trusted by leading mushroom growers',
       metrics: [
         { id: rid('m'), value: '+50%', label: 'Cordyceps yield uplift' },
         { id: rid('m'), value: '24/7', label: 'real-time monitoring' },

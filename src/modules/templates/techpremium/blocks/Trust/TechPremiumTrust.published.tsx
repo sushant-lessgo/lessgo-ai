@@ -8,11 +8,12 @@ interface Metric { id: string; value: string; label: string }
 interface Logo { id: string; name: string; image: string }
 interface Props {
   sectionId: string;
+  headline?: string;
   metrics?: Metric[];
   logos?: Logo[];
 }
 
-export default function TechPremiumTrustPublished({ sectionId, metrics, logos }: Props) {
+export default function TechPremiumTrustPublished({ sectionId, headline, metrics, logos }: Props) {
   const ms = Array.isArray(metrics) ? metrics : [];
   const ls = Array.isArray(logos) ? logos : [];
 
@@ -32,12 +33,15 @@ export default function TechPremiumTrustPublished({ sectionId, metrics, logos }:
             </div>
           )}
           <div className="tp-trust__div" aria-hidden />
-          <div className="tp-trust__logos">
-            {ls.map((l) => (
-              <span key={l.id} className="tp-trust__logo">
-                {l.image ? <img src={l.image} alt={l.name} /> : <span className="tp-trust__logoph">{l.name || 'Logo'}</span>}
-              </span>
-            ))}
+          <div className="tp-trust__right">
+            {headline && <span className="tp-trust__label">{headline}</span>}
+            <div className="tp-trust__logos">
+              {ls.map((l) => (
+                <span key={l.id} className="tp-trust__logo">
+                  {l.image ? <img src={l.image} alt={l.name} /> : <span className="tp-trust__logoph">{l.name || 'Logo'}</span>}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
       </section>

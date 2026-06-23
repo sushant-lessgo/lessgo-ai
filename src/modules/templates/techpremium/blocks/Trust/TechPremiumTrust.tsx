@@ -10,12 +10,12 @@ import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 
 interface Metric { id: string; value: string; label: string }
 interface Logo { id: string; name: string; image: string }
-interface Content { metrics: Metric[]; logos: Logo[] }
+interface Content { headline: string; metrics: Metric[]; logos: Logo[] }
 interface Props { sectionId: string }
 const rid = (p: string) => `${p}${Math.random().toString(36).slice(2, 7)}`;
 
 export default function TechPremiumTrust({ sectionId }: Props) {
-  const { mode, blockContent, handleCollectionUpdate } = useTechPremiumBlock<Content>({ sectionId });
+  const { mode, blockContent, handleContentUpdate, handleCollectionUpdate } = useTechPremiumBlock<Content>({ sectionId });
   const edit = mode === 'edit';
   const metrics = blockContent.metrics || [];
   const logos = blockContent.logos || [];
@@ -59,7 +59,11 @@ export default function TechPremiumTrust({ sectionId }: Props) {
             </div>
           )}
           <div className="tp-trust__div" aria-hidden />
-          <div className="tp-trust__logos">
+          <div className="tp-trust__right">
+            {(blockContent.headline || edit) && (
+              <TechPremiumEditable as="span" className="tp-trust__label" mode={mode} sectionId={sectionId} elementKey="headline" value={blockContent.headline} onSave={(v) => handleContentUpdate('headline', v)} enterBehavior="save" placeholder="Trusted by leading growers" />
+            )}
+            <div className="tp-trust__logos">
             {logos.map((l) => (
               <span key={l.id} className={`tp-trust__logo${edit ? ' is-edit' : ''}`}>
                 {l.image ? <img src={l.image} alt={l.name} /> : <span className="tp-trust__logoph">{l.name || 'Logo'}</span>}
@@ -76,6 +80,7 @@ export default function TechPremiumTrust({ sectionId }: Props) {
               </span>
             ))}
             {edit && logos.length < 8 && <button type="button" className="tp-add" onClick={() => handleCollectionUpdate('logos', [...logos, { id: rid('lg'), name: 'Partner', image: '' }])}>+ logo</button>}
+            </div>
           </div>
         </div>
       </section>
@@ -91,6 +96,8 @@ export const TRUST_STYLES = `
 .tp-trust__m .tp-trust__v { font-family:var(--font-display); font-weight:700; font-size:34px; letter-spacing:-0.03em; color:var(--forest); line-height:1; display:block; }
 .tp-trust__m span { font-family:var(--font-mono); font-size:10.5px; letter-spacing:0.12em; text-transform:uppercase; color:var(--ink-3); margin-top:6px; display:block; }
 .tp-trust__div { background:var(--line); height:46px; }
+.tp-trust__right { display:flex; flex-direction:column; gap:10px; }
+.tp-trust__label { font-family:var(--font-mono); font-size:10.5px; letter-spacing:0.12em; text-transform:uppercase; color:var(--ink-3); }
 .tp-trust__logos { display:flex; flex-wrap:wrap; align-items:center; gap:14px 18px; }
 .tp-trust__logo { position:relative; display:inline-flex; align-items:center; height:30px; }
 .tp-trust__logo img { height:28px; object-fit:contain; }

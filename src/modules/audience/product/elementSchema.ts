@@ -394,7 +394,9 @@ export const meridianElementSchema: Record<string, UIBlockSchemaV2> = {
 
   TrustStrip: {
     sectionType: 'trust',
-    elements: {},
+    elements: {
+      headline: { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' }, // small label over the logo rail (e.g. "Trusted by leading growers")
+    },
     collections: {
       metrics: {
         requirement: 'optional', fillMode: 'ai_generated', constraints: { min: 0, max: 3 },
