@@ -8,7 +8,7 @@ export const NAV_STYLES = `
 .tp-brand__mk { width:34px; height:34px; border-radius:7px; background:var(--forest); display:grid; place-items:center; position:relative; flex-shrink:0; }
 .tp-brand__mk::before { content:""; width:14px; height:14px; border-radius:50%; border:2px solid var(--lime); }
 .tp-brand__mk::after { content:""; position:absolute; width:5px; height:5px; border-radius:50%; background:var(--lime); }
-.tp-brand__img { width:34px; height:34px; border-radius:7px; object-fit:cover; flex-shrink:0; }
+.tp-brand__img { height:32px; width:auto; max-width:180px; object-fit:contain; flex-shrink:0; }
 .tp-brand__wm { font-family:var(--font-display); font-weight:700; font-size:21px; letter-spacing:-0.02em; color:var(--ink); }
 .tp-nav-links { display:flex; align-items:center; gap:6px; margin-left:10px; }
 .tp-nav-links > a, .tp-nav-drop-t { font-family:var(--font-body); font-size:14px; font-weight:500; color:var(--ink-2); padding:8px 12px; border-radius:var(--r); display:inline-flex; align-items:center; gap:6px; background:transparent; border:none; cursor:pointer; text-decoration:none; transition:color .15s ease, background .15s ease; }

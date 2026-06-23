@@ -6,6 +6,7 @@
 import React from 'react';
 import { useTechPremiumBlock } from '../../hooks/useTechPremiumBlock';
 import { TechPremiumEditable } from '../../components/TechPremiumEditable';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 
 interface Metric { id: string; value: string; label: string }
 interface Logo { id: string; name: string; image: string }
@@ -19,6 +20,26 @@ export default function TechPremiumTrust({ sectionId }: Props) {
   const metrics = blockContent.metrics || [];
   const logos = blockContent.logos || [];
   const setM = (id: string, k: keyof Metric, v: string) => handleCollectionUpdate('metrics', metrics.map((m) => (m.id === id ? { ...m, [k]: v } : m)));
+
+  const store = useEditStore() as any;
+  const uploadImage = store.uploadImage as ((f: File, t?: { sectionId: string; elementKey: string }) => Promise<string | void>) | undefined;
+  const save = store.save as (() => Promise<void>) | undefined;
+  const [uploadingId, setUploadingId] = React.useState<string | null>(null);
+  const setLogo = (id: string, k: keyof Logo, v: string) => handleCollectionUpdate('logos', logos.map((l) => (l.id === id ? { ...l, [k]: v } : l)));
+  const onLogoFile = async (id: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || !uploadImage) return;
+    setUploadingId(id);
+    try {
+      const url = await uploadImage(file);
+      if (typeof url === 'string' && url) {
+        handleCollectionUpdate('logos', logos.map((l) => (l.id === id ? { ...l, image: url } : l)));
+        await save?.();
+      }
+    } catch (err) { /* surfaced by the store */ }
+    finally { setUploadingId(null); }
+  };
 
   return (
     <>
@@ -40,9 +61,18 @@ export default function TechPremiumTrust({ sectionId }: Props) {
           <div className="tp-trust__div" aria-hidden />
           <div className="tp-trust__logos">
             {logos.map((l) => (
-              <span key={l.id} className="tp-trust__logo">
+              <span key={l.id} className={`tp-trust__logo${edit ? ' is-edit' : ''}`}>
                 {l.image ? <img src={l.image} alt={l.name} /> : <span className="tp-trust__logoph">{l.name || 'Logo'}</span>}
-                {edit && <button type="button" className="tp-x" onClick={() => handleCollectionUpdate('logos', logos.filter((x) => x.id !== l.id))}>×</button>}
+                {edit && (
+                  <span className="tp-trust__logo-edit">
+                    <label className="tp-trust__logo-up">
+                      {uploadingId === l.id ? '…' : (l.image ? '⇄' : '↥')}
+                      <input type="file" accept="image/*" onChange={(e) => onLogoFile(l.id, e)} hidden disabled={uploadingId === l.id} />
+                    </label>
+                    <input className="tp-trust__logo-name" value={l.name} onChange={(e) => setLogo(l.id, 'name', e.target.value)} placeholder="Name" />
+                    <button type="button" className="tp-x" onClick={() => handleCollectionUpdate('logos', logos.filter((x) => x.id !== l.id))}>×</button>
+                  </span>
+                )}
               </span>
             ))}
             {edit && logos.length < 8 && <button type="button" className="tp-add" onClick={() => handleCollectionUpdate('logos', [...logos, { id: rid('lg'), name: 'Partner', image: '' }])}>+ logo</button>}
@@ -65,6 +95,11 @@ export const TRUST_STYLES = `
 .tp-trust__logo { position:relative; display:inline-flex; align-items:center; height:30px; }
 .tp-trust__logo img { height:28px; object-fit:contain; }
 .tp-trust__logoph { font-family:var(--font-mono); font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-3); border:1px dashed var(--line-2); border-radius:var(--r); padding:6px 12px; }
+.tp-trust__logo.is-edit { flex-direction:column; align-items:flex-start; height:auto; gap:6px; border:1px dashed var(--line-2); border-radius:var(--r); padding:8px; }
+.tp-trust__logo-edit { display:inline-flex; align-items:center; gap:6px; }
+.tp-trust__logo-up { display:inline-grid; place-items:center; width:24px; height:24px; border:1px solid var(--line-2); border-radius:var(--r); font-size:12px; color:var(--ink-2); cursor:pointer; }
+.tp-trust__logo-up:hover { border-color:var(--forest); color:var(--forest); }
+.tp-trust__logo-name { width:96px; font-family:var(--font-mono); font-size:11px; padding:4px 6px; border:1px solid var(--line-2); border-radius:var(--r); color:var(--ink); }
 .tp-x { background:transparent; border:none; color:var(--ink-3); font-size:12px; cursor:pointer; }
 .tp-add { background:transparent; border:1px dashed var(--line-2); color:var(--ink-3); font-family:var(--font-mono); font-size:11px; padding:4px 8px; border-radius:var(--r); cursor:pointer; }
 @media (max-width:760px){ .tp-trust__inner { grid-template-columns:1fr; } .tp-trust__div { display:none; } }

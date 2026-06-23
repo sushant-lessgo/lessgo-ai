@@ -70,6 +70,7 @@ export const meridianElementSchema: Record<string, UIBlockSchemaV2> = {
       cta_text:           { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Start building' },
       secondary_cta_text: { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
       caption:            { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      hero_image:         { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' }, // Phase 4c: product/hardware photo in the hero art frame
     },
     collections: {
       stats: {

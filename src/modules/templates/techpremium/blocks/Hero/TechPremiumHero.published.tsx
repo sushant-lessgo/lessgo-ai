@@ -22,6 +22,7 @@ interface TechPremiumHeroPublishedProps {
   cta_text?: string;
   secondary_cta_text?: string;
   caption?: string;
+  hero_image?: string;
   stats?: HeroStat[];
   content?: any;
   elementMetadata?: any;
@@ -65,7 +66,9 @@ export default function TechPremiumHeroPublished(props: TechPremiumHeroPublished
 
           <div className="tp-hero__art">
             <div className="tp-ph tp-ph--unit" aria-hidden="true">
-              <span className="tp-ph__tag">Product / hardware photo</span>
+              {props.hero_image
+                ? <img className="tp-hero__photo" src={props.hero_image} alt="" />
+                : <span className="tp-ph__tag">Product / hardware photo</span>}
             </div>
             <span className="tp-hero__corner" aria-hidden="true" />
             {stats.length > 0 && (
@@ -122,6 +125,7 @@ const STYLES = `
 .tp-ph { position:relative; background:var(--paper-2); overflow:hidden; background-image:repeating-linear-gradient(135deg, oklch(0.325 0.045 158 / 0.055) 0 1px, transparent 1px 12px); border:1px solid var(--line); border-radius:var(--r-lg); }
 .tp-ph__tag { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); font-family:var(--font-mono); font-size:10px; font-weight:500; letter-spacing:0.14em; text-transform:uppercase; color:var(--ink-3); white-space:nowrap; text-align:center; border:1px solid var(--line-2); padding:5px 10px; border-radius:var(--r); background:var(--paper); }
 .tp-ph--unit { aspect-ratio:4/4.4; }
+.tp-hero__photo { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; border-radius:var(--r-lg); }
 .tp-hero__corner { position:absolute; inset:12px; border:1px solid var(--lime); opacity:.4; pointer-events:none; border-radius:var(--r-lg); }
 .tp-readout { position:absolute; right:-22px; bottom:-26px; width:min(330px,82%); background:var(--paper); border:1px solid var(--line-2); border-radius:var(--r-lg); box-shadow:0 18px 48px -28px oklch(0.30 0.04 158 / 0.5), 0 2px 8px -4px oklch(0.30 0.04 158 / 0.25); overflow:hidden; }
 .tp-readout__top { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:11px 16px; border-bottom:1px solid var(--line); font-family:var(--font-mono); font-size:11px; font-weight:500; letter-spacing:0.10em; text-transform:uppercase; color:var(--ink-2); }
