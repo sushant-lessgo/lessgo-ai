@@ -6,7 +6,7 @@
 
 import React from 'react';
 import * as Icons from 'lucide-react';
-import { CONTACT_STYLES } from './TechPremiumContact';
+import { CONTACT_STYLES, mapEmbedSrc } from './TechPremiumContact';
 import { DEFAULT_CONTACT_FIELDS, CONTACT_SUBMIT_TEXT } from './contactFields';
 import type { MVPFormField } from '@/types/core/forms';
 
@@ -15,7 +15,7 @@ interface Props {
   sectionId: string;
   eyebrow?: string; headline?: string; lede?: string;
   form_id?: string; form_heading?: string; form_note?: string; form_foot?: string;
-  whatsapp_text?: string; whatsapp_href?: string; map_caption?: string;
+  whatsapp_text?: string; whatsapp_href?: string; map_caption?: string; map_embed?: string;
   info?: InfoRow[];
   content?: any; publishedPageId?: string; pageOwnerId?: string;
 }
@@ -97,11 +97,19 @@ export default function TechPremiumContactPublished(props: Props) {
             </form>
           </div>
 
-          {props.map_caption !== undefined && (
-            <div className="tp-contact-map">
-              <div className="tp-ph tp-map-ph"><span className="tp-tag">{props.map_caption || 'Map'}</span></div>
-            </div>
-          )}
+          {(() => {
+            const src = mapEmbedSrc(props.map_embed);
+            if (!src && props.map_caption === undefined) return null;
+            return (
+              <div className="tp-contact-map">
+                <div className="tp-ph tp-map-ph">
+                  {src
+                    ? <iframe className="tp-map-frame" src={src} loading="lazy" referrerPolicy="no-referrer-when-downgrade" allowFullScreen title="Location map" />
+                    : <span className="tp-tag">{props.map_caption || 'Map'}</span>}
+                </div>
+              </div>
+            );
+          })()}
         </div>
       </section>
     </>

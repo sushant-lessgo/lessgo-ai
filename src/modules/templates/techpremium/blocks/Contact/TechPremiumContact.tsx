@@ -19,11 +19,36 @@ interface InfoRow { id: string; icon: string; k: string; v: string; href: string
 interface Content {
   eyebrow: string; headline: string; lede: string;
   form_id: string; form_heading: string; form_note: string; form_foot: string;
-  whatsapp_text: string; whatsapp_href: string; map_caption: string;
+  whatsapp_text: string; whatsapp_href: string; map_caption: string; map_embed: string;
   info: InfoRow[];
 }
 interface Props { sectionId: string }
 const rid = (p: string) => `${p}${Math.random().toString(36).slice(2, 7)}`;
+
+/**
+ * Validate a Google Maps embed input → safe iframe src, or null.
+ * Accepts a bare "Embed a map" URL OR a full <iframe src="…"> paste (extracts src).
+ * Only https://*.google.com/.../maps/embed… survives — anything else returns null,
+ * so the published static HTML never emits an arbitrary/hostile iframe src.
+ */
+export function mapEmbedSrc(raw?: string): string | null {
+  if (!raw) return null;
+  const s = raw.trim();
+  if (!s) return null;
+  const m = s.match(/src=["']([^"']+)["']/i);
+  const candidate = m ? m[1] : s;
+  try {
+    const u = new URL(candidate);
+    if (u.protocol !== 'https:') return null;
+    const host = u.hostname.toLowerCase();
+    const okHost = host === 'maps.google.com' || host === 'google.com' || host.endsWith('.google.com');
+    if (!okHost) return null;
+    if (!u.pathname.toLowerCase().includes('/maps/embed')) return null;
+    return u.toString();
+  } catch {
+    return null;
+  }
+}
 
 const ICON_CHOICES = ['Phone', 'Mail', 'MapPin', 'Clock', 'MessageCircle'];
 
@@ -134,13 +159,36 @@ export default function TechPremiumContact({ sectionId }: Props) {
             </form>
           </div>
 
-          <div className="tp-contact-map">
-            <div className="tp-ph tp-map-ph">
-              <span className="tp-tag">
-                <TechPremiumEditable as="span" mode={mode} sectionId={sectionId} elementKey="map_caption" value={blockContent.map_caption} onSave={(v) => handleContentUpdate('map_caption', v)} enterBehavior="save" placeholder="Embedded map — your location" />
-              </span>
-            </div>
-          </div>
+          {(() => {
+            const src = mapEmbedSrc(blockContent.map_embed);
+            const badEmbed = !!(blockContent.map_embed && !src);
+            return (
+              <div className="tp-contact-map">
+                <div className="tp-ph tp-map-ph">
+                  {src ? (
+                    <iframe className="tp-map-frame" src={src} loading="lazy" referrerPolicy="no-referrer-when-downgrade" allowFullScreen title="Location map" />
+                  ) : (
+                    <span className="tp-tag">
+                      <TechPremiumEditable as="span" mode={mode} sectionId={sectionId} elementKey="map_caption" value={blockContent.map_caption} onSave={(v) => handleContentUpdate('map_caption', v)} enterBehavior="save" placeholder="Embedded map — your location" />
+                    </span>
+                  )}
+                </div>
+                {edit && (
+                  <div className="tp-map-edit">
+                    <input
+                      className="tp-map-input"
+                      value={blockContent.map_embed || ''}
+                      onChange={(e) => handleContentUpdate('map_embed', e.target.value)}
+                      placeholder="Paste Google Maps ‘Embed a map’ link or <iframe> code"
+                    />
+                    {badEmbed
+                      ? <span className="tp-map-hint tp-map-hint--bad">Not a Google Maps embed link — use Share → Embed a map.</span>
+                      : <span className="tp-map-hint">Google Maps → Share → Embed a map → paste here. Leave empty to hide.</span>}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
         </div>
       </section>
     </>
@@ -178,7 +226,12 @@ const CONTACT_OWN = `
 .tp-lead-form .tp-form-submit, .tp-lead-form button[type="submit"] { margin-top:18px; width:100%; }
 .tp-form-foot { font-family:var(--font-mono); font-size:11px; color:var(--ink-3); margin-top:14px; text-align:center; letter-spacing:0.03em; }
 .tp-contact-map { margin-top:clamp(40px,5vw,64px); }
-.tp-map-ph { aspect-ratio:16/6; }
+.tp-map-ph { aspect-ratio:16/6; overflow:hidden; }
+.tp-map-frame { position:absolute; inset:0; width:100%; height:100%; border:0; display:block; }
+.tp-map-edit { display:flex; flex-direction:column; gap:5px; margin-top:10px; }
+.tp-map-input { width:100%; font-family:var(--font-mono); font-size:11px; border:1px solid var(--line-2); border-radius:var(--r); padding:7px 10px; color:var(--ink-2); }
+.tp-map-hint { font-family:var(--font-mono); font-size:10.5px; letter-spacing:0.02em; color:var(--ink-3); }
+.tp-map-hint--bad { color:var(--lime-d); }
 .tp-add { background:transparent; border:1px dashed var(--line-2); color:var(--ink-3); font-family:var(--font-mono); font-size:11px; padding:6px 10px; border-radius:var(--r); cursor:pointer; align-self:flex-start; }
 .tp-x { background:transparent; border:none; color:var(--ink-3); font-family:var(--font-mono); font-size:11px; cursor:pointer; }
 @media (max-width:1040px){ .tp-contact-in { grid-template-columns:1fr; gap:40px; } }

@@ -577,6 +577,7 @@ export const meridianElementSchema: Record<string, UIBlockSchemaV2> = {
       whatsapp_text: { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: 'Chat on WhatsApp' },
       whatsapp_href: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '#' },
       map_caption:   { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      map_embed:     { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
     },
     collections: {
       info: {
