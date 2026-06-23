@@ -32,7 +32,7 @@ export default function TechPremiumTrustPublished({ sectionId, headline, metrics
               ))}
             </div>
           )}
-          <div className="tp-trust__div" aria-hidden />
+          {ms.length > 0 && <div className="tp-trust__div" aria-hidden />}
           <div className="tp-trust__right">
             {headline && <span className="tp-trust__label">{headline}</span>}
             <div className="tp-trust__logos">

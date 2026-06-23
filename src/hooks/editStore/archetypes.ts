@@ -107,19 +107,15 @@ export function buildHomeSlice(): PageSlice {
       ],
     }) },
     { id: t, data: section(t, 'trust', 'TrustStrip', {
-      headline: 'Trusted by leading mushroom growers',
-      metrics: [
-        { id: rid('m'), value: '+50%', label: 'Cordyceps yield uplift' },
-        { id: rid('m'), value: '24/7', label: 'real-time monitoring' },
-        { id: rid('m'), value: 'Remote', label: 'control from anywhere' },
-      ],
+      headline: '',
+      metrics: [],
       logos: [
-        { id: rid('lg'), name: 'Partner', image: '' },
-        { id: rid('lg'), name: 'Partner', image: '' },
-        { id: rid('lg'), name: 'Partner', image: '' },
-        { id: rid('lg'), name: 'Partner', image: '' },
-        { id: rid('lg'), name: 'Partner', image: '' },
-        { id: rid('lg'), name: 'Partner', image: '' },
+        { id: rid('lg'), name: 'Client', image: '' },
+        { id: rid('lg'), name: 'Client', image: '' },
+        { id: rid('lg'), name: 'Client', image: '' },
+        { id: rid('lg'), name: 'Client', image: '' },
+        { id: rid('lg'), name: 'Client', image: '' },
+        { id: rid('lg'), name: 'Client', image: '' },
       ],
     }) },
     { id: fe, data: section(fe, 'features', 'HairlineFeatureGrid', {
