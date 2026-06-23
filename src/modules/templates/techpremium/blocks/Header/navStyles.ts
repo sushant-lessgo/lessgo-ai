@@ -17,8 +17,8 @@ export const NAV_STYLES = `
 .tp-nav-drop-t .chev { width:14px; height:14px; transition:transform .18s ease; }
 .tp-nav-drop { position:relative; }
 .tp-nav-drop-menu { position:absolute; top:calc(100% + 8px); left:0; min-width:268px; padding:8px; background:var(--paper); border:1px solid var(--line-2); border-radius:var(--r-lg); box-shadow:0 24px 56px -28px oklch(0.30 0.04 158 / 0.55); z-index:5; opacity:0; visibility:hidden; transform:translateY(-6px); transition:opacity .16s ease, transform .16s ease, visibility .16s; }
-.tp-nav-drop:hover .tp-nav-drop-menu, .tp-nav-drop.is-open .tp-nav-drop-menu { opacity:1; visibility:visible; transform:translateY(0); }
-.tp-nav-drop:hover .tp-nav-drop-t .chev, .tp-nav-drop.is-open .tp-nav-drop-t .chev { transform:rotate(180deg); }
+.tp-nav:not([data-edit="1"]) .tp-nav-drop:hover .tp-nav-drop-menu, .tp-nav-drop.is-open .tp-nav-drop-menu { opacity:1; visibility:visible; transform:translateY(0); }
+.tp-nav:not([data-edit="1"]) .tp-nav-drop:hover .tp-nav-drop-t .chev, .tp-nav-drop.is-open .tp-nav-drop-t .chev, .tp-nav-drop.is-open .tp-nav-drop-caret .chev { transform:rotate(180deg); }
 .tp-nav-drop-menu a { display:flex; flex-direction:column; gap:2px; padding:9px 12px; border-radius:var(--r); text-decoration:none; }
 .tp-nav-drop-menu a:hover { background:var(--paper-2); }
 .tp-nav-drop-menu a b { font-family:var(--font-display); font-weight:600; font-size:14px; color:var(--ink); }
@@ -48,7 +48,8 @@ export const NAV_STYLES = `
 .tp-nav-edit-x { background:transparent; border:none; color:var(--ink-3); font-size:13px; line-height:1; cursor:pointer; }
 .tp-nav-edit-add { background:transparent; border:1px dashed var(--line-2); color:var(--ink-3); padding:3px 8px; border-radius:var(--r); font-family:var(--font-mono); font-size:11px; cursor:pointer; }
 .tp-nav-edit-href { font-size:11px; padding:4px 6px; border:1px solid var(--line-2); border-radius:var(--r); font-family:var(--font-mono); width:120px; }
-.tp-nav[data-edit="1"] .tp-nav-drop-menu { position:static; opacity:1; visibility:visible; transform:none; box-shadow:none; margin-top:6px; }
+.tp-nav-drop-caret { background:transparent; border:none; padding:2px; cursor:pointer; display:inline-grid; place-items:center; color:inherit; }
+.tp-nav[data-edit="1"] .tp-nav-drop-menu { max-height:60vh; overflow:auto; }
 @media (max-width:980px){
   .tp-nav-links { display:none; }
   .tp-nav-login span { display:none; }

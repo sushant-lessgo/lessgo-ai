@@ -52,6 +52,7 @@ export default function TechPremiumNav({ sectionId }: Props) {
   const pageOptions = React.useMemo(() => buildPageLinkOptions(pages), [pages]);
 
   const [logoUploading, setLogoUploading] = React.useState(false);
+  const [openDrop, setOpenDrop] = React.useState<string | null>(null);
   const onLogoFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = '';
@@ -110,7 +111,7 @@ export default function TechPremiumNav({ sectionId }: Props) {
                     {edit && (
                       <>
                         <LinkTargetPopover href={item.href} sectionOptions={sectionOptions} pageOptions={pageOptions} onChange={(href) => patchItem(item.id, { href })} triggerClassName="tp-nav-edit-x" />
-                        <button type="button" className="tp-nav-edit-add" onClick={() => addChild(item.id)} title="Make dropdown">▾</button>
+                        <button type="button" className="tp-nav-edit-add" onClick={() => { addChild(item.id); setOpenDrop(item.id); }} title="Make dropdown">▾</button>
                         {navItems.length > 2 && <button type="button" className="tp-nav-edit-x" onClick={() => removeItem(item.id)} aria-label="Remove">×</button>}
                       </>
                     )}
@@ -118,12 +119,14 @@ export default function TechPremiumNav({ sectionId }: Props) {
                 );
               }
               return (
-                <div key={item.id} className="tp-nav-drop">
-                  <button type="button" className="tp-nav-drop-t">
+                <div key={item.id} className={`tp-nav-drop${edit && openDrop === item.id ? ' is-open' : ''}`}>
+                  <div className="tp-nav-drop-t">
                     <TechPremiumEditable as="span" mode={mode} sectionId={sectionId} elementKey={`nav_items_label_${item.id}`} value={item.label} onSave={(v) => patchItem(item.id, { label: v })} enterBehavior="save" placeholder="Menu" />
-                    <Chev />
-                    {edit && navItems.length > 2 && <span className="tp-nav-edit-x" onClick={(e) => { e.stopPropagation(); removeItem(item.id); }}>×</span>}
-                  </button>
+                    {edit
+                      ? <button type="button" className="tp-nav-drop-caret" onClick={() => setOpenDrop(openDrop === item.id ? null : item.id)} aria-label="Edit menu items"><Chev /></button>
+                      : <Chev />}
+                    {edit && navItems.length > 2 && <button type="button" className="tp-nav-edit-x" onClick={() => removeItem(item.id)} aria-label="Remove">×</button>}
+                  </div>
                   <div className="tp-nav-drop-menu">
                     {(item.children || []).map((c) => (
                       <a key={c.id} href={edit ? undefined : c.href}>
