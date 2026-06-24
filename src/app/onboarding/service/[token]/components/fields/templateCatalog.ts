@@ -23,6 +23,13 @@ import {
 import { lexVariants } from '@/modules/templates/lex/tokens';
 import { inferDefaultPalette as inferLexPalette } from '@/modules/templates/lex/paletteSelection';
 
+import {
+  surgePaletteConfigs,
+  pilotEnabledPalettes as surgeEnabled,
+} from '@/modules/templates/surge/palettes';
+import { surgeVariants } from '@/modules/templates/surge/tokens';
+import { inferDefaultPalette as inferSurgePalette } from '@/modules/templates/surge/paletteSelection';
+
 export interface PaletteSwatchColors {
   accent: string;
   accentDeep: string;
@@ -74,6 +81,19 @@ export const TEMPLATE_CATALOG: Partial<Record<TemplateId, TemplateCatalogEntry>>
     variants: lexVariants,
     inferDefaultPalette: (u) => inferLexPalette(u),
   },
+  surge: {
+    id: 'surge',
+    label: templateLabels.surge,
+    blurb: templateBlurbs.surge,
+    palettes: palettesForTemplate('surge'),
+    enabled: surgeEnabled,
+    swatch: (p) => {
+      const c = (surgePaletteConfigs as Record<string, any>)[p];
+      return { accent: c?.accent, accentDeep: c?.accentDeep, wash: c?.accentSoft };
+    },
+    variants: surgeVariants,
+    inferDefaultPalette: (u) => inferSurgePalette(u),
+  },
 };
 
-export const TEMPLATE_ORDER: TemplateId[] = ['hearth', 'lex'];
+export const TEMPLATE_ORDER: TemplateId[] = ['hearth', 'lex', 'surge'];

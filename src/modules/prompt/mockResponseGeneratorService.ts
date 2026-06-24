@@ -21,6 +21,8 @@ export interface MockServiceStrategyInput {
   goal: ServiceGoal;
   offer: string;
   assets: ServiceAssetInput;
+  /** Selection-only — widens the section set for Surge in mock/dev mode. */
+  templateId?: string | null;
 }
 
 export function generateMockServiceStrategy(
@@ -30,6 +32,7 @@ export function generateMockServiceStrategy(
     awareness: 'search-aware-comparing',
     goal: input.goal,
     assets: input.assets,
+    templateId: (input.templateId as any) ?? null,
   });
   const { uiblocks } = selectServiceUIBlocks({ sections });
 

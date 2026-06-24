@@ -37,6 +37,7 @@ export default function GeneratingStep() {
   const assets = useServiceGenerationStore((s) => s.assets);
   const importedTestimonials = useServiceGenerationStore((s) => s.importedTestimonials);
   const paletteId = useServiceGenerationStore((s) => s.paletteId);
+  const templateId = useServiceGenerationStore((s) => s.templateId);
   const setStrategy = useServiceGenerationStore((s) => s.setStrategy);
   const setGenerationError = useServiceGenerationStore((s) => s.setGenerationError);
 
@@ -143,6 +144,10 @@ export default function GeneratingStep() {
           offer,
           assets,
           paletteId: effectivePalette,
+          // Selection-only: widens the section SET for templates that declare
+          // extra section types (Surge). Server passes it to section selection,
+          // NEVER to a prompt builder (firewall preserved).
+          templateId,
         }),
       });
       const json = await res.json();
@@ -250,6 +255,7 @@ export default function GeneratingStep() {
     offer,
     importedTestimonials,
     paletteId,
+    templateId,
     tokenId,
     posthog,
     router,

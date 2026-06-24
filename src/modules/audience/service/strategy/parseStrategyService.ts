@@ -6,6 +6,7 @@ import type {
   ServiceStrategyOutputAssembled,
   ServiceAssetInput,
   ServiceGoal,
+  TemplateId,
 } from '@/types/service';
 import type { ServiceStrategyResponse } from '@/lib/schemas/strategyService.schema';
 import { selectServiceSections } from '../sectionSelection';
@@ -15,6 +16,15 @@ export interface AssembleServiceStrategyInput {
   llmResponse: ServiceStrategyResponse;
   goal: ServiceGoal;
   assets: ServiceAssetInput;
+  /**
+   * The chosen template — passed ONLY to section selection (to widen the section
+   * SET for templates like Surge that declare extra section types). FIREWALL-SAFE:
+   * it is consumed here as a function arg and is deliberately NOT written onto the
+   * returned assembled-strategy object, so it cannot ride into the copy prompt
+   * (which receives `strategy` from the client request body). Never add it to the
+   * return value.
+   */
+  templateId?: TemplateId | null;
 }
 
 /**
@@ -26,13 +36,14 @@ export interface AssembleServiceStrategyInput {
 export function assembleServiceStrategy(
   input: AssembleServiceStrategyInput
 ): ServiceStrategyOutputAssembled {
-  const { llmResponse, goal, assets } = input;
+  const { llmResponse, goal, assets, templateId } = input;
 
   const sections = selectServiceSections({
     awareness: llmResponse.awareness,
     goal,
     assets,
     format: llmResponse.servicePresentation.format,
+    templateId,
   });
 
   const { uiblocks } = selectServiceUIBlocks({ sections });

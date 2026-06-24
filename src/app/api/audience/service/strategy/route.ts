@@ -56,10 +56,15 @@ const ServiceStrategyRequestSchema = z.object({
       .default(null),
   }),
   // Template-agnostic slug (palettes are template-scoped and grow per template).
-  // The route never receives templateId (firewall — must not reach prompts), so
   // template↔palette validity is enforced at the picker + saveDraft, not here.
   // Mirrors the DraftSaveSchema.paletteId widening (11a gap #9).
   paletteId: z.string().max(50).regex(/^[a-z0-9-]+$/, 'Invalid palette id'),
+  // SELECTION-ONLY. templateId is used here solely to widen the section SET for
+  // templates that declare extra section types (e.g. Surge → logos/about/
+  // casestudies/stats). It is passed to assembleServiceStrategy → selectServiceSections
+  // and is NEVER forwarded to buildServiceStrategyPrompt (assertNoTemplateLeak guards
+  // the prompt input). The firewall boundary is the PROMPT, not the route.
+  templateId: z.string().max(50).regex(/^[a-z0-9-]+$/, 'Invalid template id').optional(),
 });
 
 async function serviceStrategyHandler(req: NextRequest): Promise<Response> {
@@ -98,6 +103,7 @@ async function serviceStrategyHandler(req: NextRequest): Promise<Response> {
         goal: data.goal as any,
         offer: data.offer,
         assets: data.assets as any,
+        templateId: (data.templateId as any) ?? null,
       });
       return createSecureResponse({
         success: true,
@@ -142,11 +148,15 @@ async function serviceStrategyHandler(req: NextRequest): Promise<Response> {
       );
     }
 
-    // 5. Assemble (deterministic sections + uiblocks)
+    // 5. Assemble (deterministic sections + uiblocks). templateId is passed for
+    // SECTION SELECTION ONLY (widens the set for Surge); assembleServiceStrategy
+    // deliberately does not write it onto the returned object, so it can't ride
+    // into the copy prompt via the client request body.
     const strategyData = assembleServiceStrategy({
       llmResponse,
       goal: data.goal as any,
       assets: data.assets as any,
+      templateId: (data.templateId as any) ?? null,
     });
     logger.info('[Service Strategy] Final sections:', strategyData.sections);
     logger.info('[Service Strategy] Final UIBlocks:', strategyData.uiblocks);

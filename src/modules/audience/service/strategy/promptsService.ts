@@ -10,6 +10,7 @@ import type {
 } from '@/types/service';
 import { serviceGoalLabels } from '@/types/service';
 import { assertNoTemplateLeak } from '../promptFirewall';
+import { selectServiceVoice } from '../voice';
 
 export interface ServiceStrategyPromptInput {
   oneLiner: string;
@@ -23,6 +24,11 @@ export interface ServiceStrategyPromptInput {
 export function buildServiceStrategyPrompt(input: ServiceStrategyPromptInput): string {
   assertNoTemplateLeak(input, 'buildServiceStrategyPrompt');
   const { oneLiner, businessName, understanding, goal, offer, assets } = input;
+
+  // Voice by business archetype (firewall-safe — reads understanding, not
+  // templateId). Strategy fields must already read in the chosen voice so copy
+  // generation builds on the right framing.
+  const voice = selectServiceVoice(understanding);
 
   const assetSummary = [
     assets.hasTestimonials && `client testimonials (${assets.testimonialType ?? 'text'})`,
@@ -127,9 +133,9 @@ Advisory hints — final block choice may use heuristics. Provide your best gues
 
 ---
 
-## Voice Reminder (Hearth)
+## Voice Reminder (${voice.label})
 
-This page will use a warm, editorial, founder-to-founder voice. Avoid corporate jargon (unlock, leverage, synergy, solutions, best-in-class). Prefer concrete nouns and craftsperson-not-salesperson framing. Strategy fields — especially "oneClient.coreDesire", "ourPosition.promise", and "ourPosition.approach" — should already read in this voice; downstream copy generation builds on them.
+This page will use a ${voice.toneProfile} voice. Avoid these words: ${voice.lexicon.forbidden.join(', ')}. Prefer: ${voice.lexicon.preferred.join(', ')}. Strategy fields — especially "oneClient.coreDesire", "ourPosition.promise", and "ourPosition.approach" — should already read in this voice; downstream copy generation builds on them.
 
 ---
 
