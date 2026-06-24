@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { EditProvider } from '@/components/EditProvider';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
@@ -131,82 +131,6 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
     fetchPublishedStatus();
   }, [tokenId]);
 
-  // Validate publish readiness
-  const isPublishReady = useMemo(() => {
-    // Phase 1: Check hero section CTA
-    const heroSectionId = sections.find(id => id.includes('hero'));
-    if (!heroSectionId) {
-      return false; // No hero section found
-    }
-
-    const heroContent = content[heroSectionId]?.elements;
-    if (!heroContent) {
-      return false; // No hero content found
-    }
-
-    // Check if hero has CTA configured properly
-    // Option 1: Check if cta_text exists and has button configuration
-    if (heroContent.cta_text) {
-      // Check if button config exists in metadata
-      const buttonConfig = heroContent.cta_text?.metadata?.buttonConfig;
-      if (buttonConfig) {
-        if (buttonConfig.type === 'link' ? buttonConfig.url : buttonConfig.formId) {
-          return true;
-        }
-      }
-
-      // Check legacy format (cta_url or cta_embed directly in elements)
-      if (heroContent.cta_url || heroContent.cta_embed) {
-        return true;
-      }
-    }
-
-    // Option 2: Check if hero section has cta configuration
-    const heroSectionCta = (content[heroSectionId] as any)?.cta;
-    if (heroSectionCta) {
-      if (heroSectionCta.type === 'link' ? heroSectionCta.url : heroSectionCta.formId) {
-        return true;
-      }
-    }
-
-    // Phase 2: If hero has no valid CTA, check CTA section
-    const ctaSectionId = sections.find(id => id.includes('cta'));
-    if (!ctaSectionId) {
-      return false; // No CTA section found
-    }
-
-    const ctaContent = content[ctaSectionId]?.elements;
-    if (!ctaContent) {
-      return false; // No CTA section content found
-    }
-
-    // Check if CTA section has CTA configured (same 3 formats)
-    // Option 1: cta_text with button configuration
-    if (ctaContent.cta_text) {
-      const buttonConfig = ctaContent.cta_text?.metadata?.buttonConfig;
-      if (buttonConfig) {
-        if (buttonConfig.type === 'link' ? buttonConfig.url : buttonConfig.formId) {
-          return true;
-        }
-      }
-
-      // Check legacy format
-      if (ctaContent.cta_url || ctaContent.cta_embed) {
-        return true;
-      }
-    }
-
-    // Option 2: Section-level cta
-    const ctaSectionCta = (content[ctaSectionId] as any)?.cta;
-    if (ctaSectionCta) {
-      if (ctaSectionCta.type === 'link' ? ctaSectionCta.url : ctaSectionCta.formId) {
-        return true;
-      }
-    }
-
-    return false;
-  }, [sections, content]);
-
   // Initialize and validate data
   useEffect(() => {
     logger.debug(() => '🎨 [PREVIEW-DEBUG] Preview page initializing with theme:', () => ({
@@ -299,8 +223,6 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
 
   // Handle publish flow
   const handlePublishClick = () => {
-    if (!isPublishReady) return;
-
     // Get headline for fallback
     const heroSectionId = sections.find(id => id.includes('hero'));
     const headline = heroSectionId ? content[heroSectionId]?.elements?.headline : null;
@@ -338,7 +260,7 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
   };
 
   const handlePublish = async () => {
-    if (!customSlug || !isPublishReady) return;
+    if (!customSlug) return;
 
     setPublishing(true);
     setPublishError('');
@@ -431,7 +353,6 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
       posthog?.capture("publish_clicked", {
         slug: customSlug,
         title: publishTitle || "",
-        hasCTA: isPublishReady,
         fromEdit: true,
       });
 
@@ -541,9 +462,9 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
                   <div>
                     <button
                       onClick={handlePublishClick}
-                      disabled={!isPublishReady || publishing}
+                      disabled={publishing}
                       className={`px-5 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${
-                        !isPublishReady || publishing
+                        publishing
                           ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                           : 'bg-brand-accentPrimary hover:bg-orange-500 text-white'
                       }`}
@@ -559,11 +480,6 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
                     </button>
                   </div>
                 </TooltipTrigger>
-                {!isPublishReady && (
-                  <TooltipContent side="top">
-                    <p>Configure CTA button in hero or CTA section before publishing</p>
-                  </TooltipContent>
-                )}
               </Tooltip>
             </TooltipProvider>
           </div>
