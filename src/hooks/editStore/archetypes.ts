@@ -6,7 +6,8 @@
 // (audience-level, shared by all product templates). Phase 4 swaps the section
 // lists / seeds for the fully designed blocks — this file is the single swap point.
 
-import type { PageSlice, SectionData } from '@/types/store';
+import type { PageSlice, SectionData, ProjectPageEntry } from '@/types/store';
+import { materializeIntoPages } from './collectionHelpers';
 
 const rid = (p: string): string => `${p}${Math.random().toString(36).slice(2, 8)}`;
 const sectionId = (type: string): string => `${type}-${Math.random().toString(36).slice(2, 10)}`;
@@ -26,9 +27,9 @@ function section(id: string, type: string, layout: string, elements: Record<stri
 
 /** Default catalog categories (naayom's three lines; renamable/reorderable in-editor). */
 export const DEFAULT_PRODUCT_CATEGORIES = [
-  { id: 'controllers', title: 'Growing-room controllers', label: 'Full-room automation' },
-  { id: 'control', title: 'Control systems', label: 'Equipment drive & switching' },
-  { id: 'monitors', title: 'Monitors', label: 'Sense & alert' },
+  { id: 'controllers', title: 'Mushroom Growing Control Systems', label: 'Room · tunnel · bunker control' },
+  { id: 'control', title: 'Control systems', label: 'Parameter control & switching' },
+  { id: 'monitors', title: 'Monitoring systems', label: 'Sense & alert' },
 ];
 
 function ctaSection(): { id: string; data: SectionData } {
@@ -171,9 +172,9 @@ export function buildHomeSlice(): PageSlice {
       headline: 'Pick the system for your <em>farm</em>.',
       lede: 'We assist the world’s leading mushroom growers in optimizing their production through advanced connectivity and automation.',
       items: [
-        { id: rid('it'), model: 'NWC 1000', name: 'Mushroom Growing Room Controller', oneLiner: 'Advanced mushroom climate controller for grow rooms — remote connectivity and automated climate management.', image: '', cardSpec: 'Multi-channel · 3 probes', href: '/products' },
-        { id: rid('it'), model: 'NWC 2000', name: 'Phase II Tunnel Control System', oneLiner: 'Full tunnel climate automation for Phase II — built for tunnel-scale rooms.', image: '', cardSpec: 'Tunnel-scale · VFD-ready', href: '/products' },
-        { id: rid('it'), model: 'NWC 101', name: 'CO₂, Temperature & Humidity Control', oneLiner: 'Three-parameter control for a single room, with stage-wise settings.', image: '', cardSpec: '3 parameters · relay out', href: '/products' },
+        { id: rid('it'), model: 'NWC 1000', name: 'Mushroom Growing Room Controller', oneLiner: 'Advanced climate controller for grow rooms — stage-wise settings and remote connectivity.', image: '', cardSpec: 'Grow room · remote', href: '/products/nwc-1000' },
+        { id: rid('it'), model: 'NWC 101', name: 'CO₂, Temperature & Humidity Control', oneLiner: 'Three-parameter control for a single room — CO₂, temperature and humidity, with alarms.', image: '', cardSpec: 'CO₂ + Temp + RH · 4 ports', href: '/products/nwc-101' },
+        { id: rid('it'), model: 'NWM 100', name: 'CO₂, Temperature & Humidity Monitor', oneLiner: 'Continuous monitoring of CO₂, temperature and humidity with notifications.', image: '', cardSpec: 'CO₂ + Temp + RH · monitor', href: '/products/nwm-100' },
       ],
     }) },
     { id: te, data: section(te, 'testimonials', 'ProofWithLogoRail', {
@@ -350,7 +351,32 @@ export function buildTechPremiumHomeFinalContent(opts: {
   const sectionLayouts: Record<string, string> = { [headerId]: 'MeridianNavHeader', ...body.sectionLayouts, [footerId]: 'HairlineFooter' };
   const content: Record<string, any> = { [headerId]: header, ...body.content, [footerId]: footer };
 
+  // ── Multi-page: shared chrome + body-only pages (home + Products catalog + 9
+  // product detail pages). The loader takes the multi-page path when `pages` is
+  // non-empty (persistenceActions), strips chrome from every page, and injects the
+  // shared `chrome`. Catalog items + each detail's related[] are MATERIALIZED from
+  // the product records — never hand-seeded (items is fillMode:'system').
+  const HOME_ID = 'home';
+  const chrome = {
+    header: { id: headerId, layout: 'MeridianNavHeader', data: header },
+    footer: { id: footerId, layout: 'HairlineFooter', data: footer },
+  };
+  const pages: Record<string, ProjectPageEntry> = {
+    [HOME_ID]: {
+      id: HOME_ID,
+      archetypeKey: 'home',
+      pathSlug: '/',
+      title: opts.title || 'Home',
+      order: 0,
+      ...body, // body-only (12 sections, no chrome)
+    } as ProjectPageEntry,
+    ...buildNaayomProductPages(),
+  };
+  materializeIntoPages(pages, 'products'); // fill catalog items[] + detail related[]
+
   return {
+    // Flat top-level (back-compat single-page loaders + theme/meta/onboarding restore
+    // which the loader reads regardless of branch). The active home is chrome-inline.
     layout: { sections, sectionLayouts, theme: {}, globalSettings: {} },
     content,
     meta: { id: opts.tokenId, title: opts.title, slug: '', lastUpdated: Date.now(), version: 1, tokenId: opts.tokenId },
@@ -362,6 +388,11 @@ export function buildTechPremiumHomeFinalContent(opts: {
       offer: opts.offer,
     },
     generatedAt: Date.now(),
+    // Multi-page payload (ADD, not swap) — drives the multi-page load path.
+    chrome,
+    pages,
+    homeId: HOME_ID,
+    currentPageId: HOME_ID,
   };
 }
 
@@ -423,27 +454,157 @@ export function buildContactSlice(formId: string): PageSlice {
 }
 
 /** Product-detail (collection item) page: one `productdetail` record section + closing cta. */
-export function buildProductDetailSlice(opts: { title?: string; categoryId?: string } = {}): PageSlice {
+export function buildProductDetailSlice(opts: {
+  title?: string;
+  categoryId?: string;
+  model?: string;
+  oneLiner?: string;
+  lede?: string;
+  cardSpec?: string;
+  features?: string[];
+  specs?: Array<{ key: string; value: string }>;
+} = {}): PageSlice {
   const name = opts.title?.trim() || 'New product';
+  const label = opts.model || name;
   const pdId = sectionId('productdetail');
   const detail = {
     id: pdId,
     data: section(pdId, 'productdetail', 'ProductDetailRecord', {
-      model: '',
+      model: opts.model || '',
       name,
       category: opts.categoryId || DEFAULT_PRODUCT_CATEGORIES[0].id,
-      oneLiner: '',
-      lede: '',
-      cardSpec: '',
-      enquireText: `Enquire about ${name}`,
+      oneLiner: opts.oneLiner || '',
+      lede: opts.lede || '',
+      cardSpec: opts.cardSpec || '',
+      enquireText: `Enquire about ${label}`,
       whatsappText: 'Ask on WhatsApp',
       note: 'Sales-led — we spec the unit to your rooms. No online pricing.',
-      images: [{ id: rid('img'), src: '', tag: `${name} — product photo` }],
+      images: [{ id: rid('img'), src: '', tag: `${label} — product photo` }],
       badges: [],
-      features: [],
-      specs: [],
+      features: (opts.features || []).map((t) => ({ id: rid('ft'), text: t })),
+      specs: (opts.specs || []).map((s) => ({ id: rid('sp'), key: s.key, value: s.value })),
       related: [],
     }),
   };
   return slice([detail, ctaSection()]);
+}
+
+/** naayom's real catalog (from naayom.com) — 9 products across the 3 categories.
+ *  Single source of the seeded product copy (time-boxed naayom bridge, like the home seed). */
+export const NAAYOM_PRODUCTS: Array<{
+  model: string; name: string; categoryId: string; oneLiner: string; cardSpec: string;
+  features: string[]; specs: Array<{ key: string; value: string }>;
+}> = [
+  // ── Mushroom Growing Control Systems ──
+  {
+    model: 'NWC 1000', name: 'Mushroom Growing Room Controller', categoryId: 'controllers',
+    oneLiner: 'Advanced climate controller for grow rooms — an easy interface with remote connectivity and stage-wise parameter settings for higher, consistent yields.',
+    cardSpec: 'Grow room · stage-wise · remote',
+    features: ['Real-time monitoring', 'Trend graphs', 'Easy-to-use interface', 'Remote connectivity', 'Alarms on faults'],
+    specs: [{ key: 'Climate', value: 'Stage-wise parameters' }, { key: 'Access', value: 'Remote' }],
+  },
+  {
+    model: 'NWC 2000', name: 'Phase II Tunnel Control System', categoryId: 'controllers',
+    oneLiner: 'Real-time monitoring and automated control of Phase II tunnels with a 7-inch touch interface — balanced fresh/recirculated air and precise climate control.',
+    cardSpec: 'Phase II tunnel · 7″ touch',
+    features: ['Real-time monitoring & automated control of Phase II tunnels', '7-inch touch interface', 'Balances fresh and recirculated air to control supply-air temperature', 'Precise climate control throughout the cycle', 'Process automation for all stages', 'Consistent high-quality compost', 'Reduced power consumption'],
+    specs: [{ key: 'Interface', value: '7-inch touch' }, { key: 'Scope', value: 'Phase II tunnel' }],
+  },
+  {
+    model: 'NWB 3000', name: 'Phase I Bunker Control System', categoryId: 'controllers',
+    oneLiner: 'Automated monitoring and control for Phase I bunkers — track compost temperatures and adjust cycles remotely.',
+    cardSpec: 'Phase I bunker · 7″ touch',
+    features: ['Real-time monitoring of compost temperatures in Phase I bunkers', '7-inch touch interface', 'Notifications/alarms on faults', 'Adjust time periods and duty cycles remotely'],
+    specs: [{ key: 'Interface', value: '7-inch touch' }, { key: 'Scope', value: 'Phase I bunker' }],
+  },
+  // ── Control systems ──
+  {
+    model: 'NWC 101', name: 'CO₂, Temperature & Humidity Control', categoryId: 'control',
+    oneLiner: 'Real-time control of CO₂, temperature and humidity for a single room, with remote adjustment and alarms.',
+    cardSpec: 'CO₂ + Temp + RH · 4 ports',
+    features: ['Real-time monitoring of CO₂, temperature and humidity', 'Remotely track and adjust settings', 'Alarms and notifications', '4 ON/OFF control ports'],
+    specs: [{ key: 'Air temperature sensor', value: '1' }, { key: 'Humidity sensor', value: '1' }, { key: 'CO₂ sensor', value: '1' }, { key: 'Compost sensors', value: 'up to 3' }, { key: 'Control ports', value: '4 ON/OFF' }],
+  },
+  {
+    model: 'NWC 301', name: 'Temperature & Humidity Control', categoryId: 'control',
+    oneLiner: 'Continuous control of temperature and humidity with remote adjustment, alarms and four control outputs.',
+    cardSpec: 'Temp + RH · 4 ports',
+    features: ['Real-time monitoring of temperature and humidity', 'Remotely track and adjust settings', 'Alarms and notifications', '4 ON/OFF control ports'],
+    specs: [{ key: 'Humidity sensor', value: '1' }, { key: 'Temperature sensors', value: 'up to 4' }, { key: 'Control ports', value: '4 ON/OFF' }],
+  },
+  {
+    model: 'NWC 201', name: 'Temperature Control', categoryId: 'control',
+    oneLiner: 'Continuous temperature control with remote adjustment, alarms and four control outputs.',
+    cardSpec: 'Temp · 4 ports',
+    features: ['Real-time monitoring of temperature', 'Remotely track and adjust settings', 'Alarms and notifications', '4 ON/OFF control ports'],
+    specs: [{ key: 'Temperature sensors', value: 'up to 4' }, { key: 'Control ports', value: '4 ON/OFF' }],
+  },
+  // ── Monitoring systems ──
+  {
+    model: 'NWM 100', name: 'CO₂, Temperature & Humidity Monitor', categoryId: 'monitors',
+    oneLiner: 'Continuous real-time monitoring of CO₂, temperature and humidity with notifications.',
+    cardSpec: 'CO₂ + Temp + RH · monitor',
+    features: ['Continuous real-time monitoring of CO₂, temperature and humidity', 'Notifications'],
+    specs: [{ key: 'Temperature sensors', value: 'up to 5' }, { key: 'CO₂ sensor', value: '1' }, { key: 'Humidity sensor', value: '1' }],
+  },
+  {
+    model: 'NWM 300', name: 'Temperature & Humidity Monitor', categoryId: 'monitors',
+    oneLiner: 'Continuous real-time monitoring of temperature and humidity with notifications.',
+    cardSpec: 'Temp + RH · monitor',
+    features: ['Continuous real-time monitoring of temperature and humidity', 'Notifications'],
+    specs: [{ key: 'Temperature sensors', value: 'up to 5' }, { key: 'Humidity sensor', value: '1' }],
+  },
+  {
+    model: 'NWM 200', name: 'Temperature Monitor', categoryId: 'monitors',
+    oneLiner: 'Continuous real-time temperature monitoring with notifications.',
+    cardSpec: 'Temp · monitor',
+    features: ['Continuous real-time monitoring of temperature', 'Notifications'],
+    specs: [{ key: 'Temperature sensors', value: 'up to 4' }],
+  },
+];
+
+const productSlug = (model: string): string =>
+  model.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+/** Build the naayom Products collection as page entries: the catalog singleton +
+ *  one collectionItem detail page per product. Bodies are body-only (no chrome).
+ *  Caller must run `materializeIntoPages(pages, 'products')` after merging these in
+ *  (so the catalog `items[]` + each detail's `related[]` derive from the records).
+ *  `order` starts at 1 (home is 0). */
+export function buildNaayomProductPages(): Record<string, ProjectPageEntry> {
+  const pages: Record<string, ProjectPageEntry> = {};
+  const catId = 'page-catalog';
+  pages[catId] = {
+    id: catId,
+    archetypeKey: 'product-catalog',
+    pathSlug: '/products',
+    title: 'Products',
+    order: 1,
+    kind: 'singleton',
+    collectionKey: 'products',
+    ...buildCatalogSlice(),
+  };
+  NAAYOM_PRODUCTS.forEach((p, i) => {
+    const slug = productSlug(p.model);
+    const id = `page-${slug}`;
+    pages[id] = {
+      id,
+      archetypeKey: 'product-detail',
+      pathSlug: `/products/${slug}`,
+      title: `${p.model} — ${p.name}`,
+      order: 2 + i,
+      kind: 'collectionItem',
+      collectionKey: 'products',
+      ...buildProductDetailSlice({
+        title: p.name,
+        model: p.model,
+        categoryId: p.categoryId,
+        oneLiner: p.oneLiner,
+        cardSpec: p.cardSpec,
+        features: p.features,
+        specs: p.specs,
+      }),
+    };
+  });
+  return pages;
 }
