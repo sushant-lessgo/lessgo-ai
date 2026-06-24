@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { EditProvider } from '@/components/EditProvider';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
@@ -57,7 +57,25 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
     setMode,
     export: exportState,
     save,
+    pages,
+    currentPageId,
+    setCurrentPage,
   } = useEditStore();
+
+  // Multi-page preview defaults to the Home page (the preview has no page switcher
+  // yet, so without this it would open stuck on whatever page was last active in the
+  // editor — e.g. Contact). One-time on load: once pages have hydrated, switch the
+  // active page to the home entry (pathSlug '/'). setCurrentPage is a no-op when
+  // already home and doesn't mark the draft dirty.
+  const didDefaultToHome = useRef(false);
+  useEffect(() => {
+    if (didDefaultToHome.current) return;
+    const list = pages ? Object.values(pages) : [];
+    if (list.length === 0) return; // draft not loaded yet
+    const home = list.find((p: any) => p?.pathSlug === '/') as any;
+    if (home && currentPageId !== home.id) setCurrentPage(home.id);
+    didDefaultToHome.current = true;
+  }, [pages, currentPageId, setCurrentPage]);
 
   // Validate preview data loaded correctly
   useEffect(() => {
