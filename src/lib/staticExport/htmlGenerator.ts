@@ -10,6 +10,7 @@ import 'server-only';
 import React from 'react';
 import { LandingPagePublishedRenderer } from '@/modules/generatedLanding/LandingPagePublishedRenderer';
 import { validateAndResolveAssetURLs } from './assetResolver';
+import { renderLessgoBadge } from './lessgoBadge';
 import { usesTemplateModule } from '@/types/service';
 
 export interface StaticHTMLOptions {
@@ -225,6 +226,7 @@ function buildHTMLDocument(params: {
 </head>
 <body>
   ${bodyHTML}
+  ${renderLessgoBadge()}
 
   <!-- Phase 4: Form handler (loaded if page has forms) -->
   ${hasForms ? `<script src="https://lessgo.ai/assets/form.v1.js" defer></script>` : ''}
