@@ -1,6 +1,6 @@
 // Validation tests for the Google Maps embed sanitizer.
 import { describe, it, expect } from 'vitest';
-import { mapEmbedSrc } from './TechPremiumContact';
+import { mapEmbedSrc } from './mapEmbedSrc';
 
 const EMBED = 'https://www.google.com/maps/embed?pb=!1m18!1m12!2sNaayom';
 

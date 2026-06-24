@@ -10,6 +10,7 @@ import { Check } from 'lucide-react';
 import { useTechPremiumBlock } from '../../hooks/useTechPremiumBlock';
 import { TechPremiumEditable } from '../../components/TechPremiumEditable';
 import { SEC_HEAD_STYLES, PH_STYLES, BTN_STYLES } from '../shared/sharedStyles';
+import { ytEmbed } from './ytEmbed';
 
 interface Bullet { id: string; text: string }
 interface Row {
@@ -27,14 +28,6 @@ interface Row {
 interface Content { eyebrow: string; headline: string; lede: string; rows: Row[] }
 interface Props { sectionId: string }
 const rid = (p: string) => `${p}${Math.random().toString(36).slice(2, 7)}`;
-
-// Normalise a YouTube URL/ID → privacy-friendly embed URL ('' if not a YT link).
-export function ytEmbed(url: string): string {
-  if (!url) return '';
-  const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/))([\w-]{11})/);
-  const id = m ? m[1] : (/^[\w-]{11}$/.test(url.trim()) ? url.trim() : '');
-  return id ? `https://www.youtube-nocookie.com/embed/${id}` : '';
-}
 
 export default function TechPremiumExplainer({ sectionId }: Props) {
   const { mode, blockContent, handleContentUpdate, handleCollectionUpdate } = useTechPremiumBlock<Content>({ sectionId });

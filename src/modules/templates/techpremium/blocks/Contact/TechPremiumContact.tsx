@@ -13,6 +13,7 @@ import { useTechPremiumBlock } from '../../hooks/useTechPremiumBlock';
 import { TechPremiumEditable } from '../../components/TechPremiumEditable';
 import { SEC_HEAD_STYLES, PH_STYLES, BTN_STYLES } from '../shared/sharedStyles';
 import { DEFAULT_CONTACT_FIELDS, CONTACT_SUBMIT_TEXT } from './contactFields';
+import { mapEmbedSrc } from './mapEmbedSrc';
 import type { MVPFormField } from '@/types/core/forms';
 
 interface InfoRow { id: string; icon: string; k: string; v: string; href: string; sub: string }
@@ -25,30 +26,6 @@ interface Content {
 interface Props { sectionId: string }
 const rid = (p: string) => `${p}${Math.random().toString(36).slice(2, 7)}`;
 
-/**
- * Validate a Google Maps embed input → safe iframe src, or null.
- * Accepts a bare "Embed a map" URL OR a full <iframe src="…"> paste (extracts src).
- * Only https://*.google.com/.../maps/embed… survives — anything else returns null,
- * so the published static HTML never emits an arbitrary/hostile iframe src.
- */
-export function mapEmbedSrc(raw?: string): string | null {
-  if (!raw) return null;
-  const s = raw.trim();
-  if (!s) return null;
-  const m = s.match(/src=["']([^"']+)["']/i);
-  const candidate = m ? m[1] : s;
-  try {
-    const u = new URL(candidate);
-    if (u.protocol !== 'https:') return null;
-    const host = u.hostname.toLowerCase();
-    const okHost = host === 'maps.google.com' || host === 'google.com' || host.endsWith('.google.com');
-    if (!okHost) return null;
-    if (!u.pathname.toLowerCase().includes('/maps/embed')) return null;
-    return u.toString();
-  } catch {
-    return null;
-  }
-}
 
 const ICON_CHOICES = ['Phone', 'Mail', 'MapPin', 'Clock', 'MessageCircle'];
 

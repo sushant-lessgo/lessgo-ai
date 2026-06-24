@@ -3,7 +3,8 @@
 
 import React from 'react';
 import { Check } from 'lucide-react';
-import { EXPLAINER_STYLES, ytEmbed } from './TechPremiumExplainer';
+import { EXPLAINER_STYLES } from './TechPremiumExplainer';
+import { ytEmbed } from './ytEmbed';
 import { SEC_HEAD_STYLES, PH_STYLES, BTN_STYLES } from '../shared/sharedStyles';
 
 interface Bullet { id?: string; text?: string }
