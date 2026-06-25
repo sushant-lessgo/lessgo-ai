@@ -29,7 +29,7 @@ interface ContactFooterRichProps {
 }
 
 export default function ContactFooterRich({ sectionId }: ContactFooterRichProps) {
-  const { mode, blockContent, handleContentUpdate, handleCollectionUpdate } =
+  const { mode, blockContent, handleContentUpdate, handleCollectionUpdate, isExcluded } =
     useServiceBlock<ContactFooterRichContent>({ sectionId });
 
   const socialLinks = blockContent.social_links || [];
@@ -63,7 +63,7 @@ export default function ContactFooterRich({ sectionId }: ContactFooterRichProps)
               <span className="sg-footer__mark" />
               <span>Studio</span>
             </div>
-            {(blockContent.tagline || mode === 'edit') && (
+            {(blockContent.tagline || (mode === 'edit' && !isExcluded('tagline'))) && (
               <SurgeEditable
                 as="p"
                 mode={mode}
@@ -94,7 +94,7 @@ export default function ContactFooterRich({ sectionId }: ContactFooterRichProps)
                   placeholder="hello@example.com"
                 />
               </li>
-              {(blockContent.contact_phone || mode === 'edit') && (
+              {(blockContent.contact_phone || (mode === 'edit' && !isExcluded('contact_phone'))) && (
                 <li>
                   <SurgeEditable
                     as="span"
@@ -108,7 +108,7 @@ export default function ContactFooterRich({ sectionId }: ContactFooterRichProps)
                   />
                 </li>
               )}
-              {(blockContent.address || mode === 'edit') && (
+              {(blockContent.address || (mode === 'edit' && !isExcluded('address'))) && (
                 <li>
                   <SurgeEditable
                     as="span"

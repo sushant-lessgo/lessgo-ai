@@ -34,14 +34,14 @@ function initials(name: string): string {
 }
 
 export default function PullQuoteWithMark({ sectionId }: PullQuoteWithMarkProps) {
-  const { mode, blockContent, handleContentUpdate } = useServiceBlock<PullQuoteWithMarkContent>({ sectionId });
+  const { mode, blockContent, handleContentUpdate, isExcluded } = useServiceBlock<PullQuoteWithMarkContent>({ sectionId });
   const handleImageToolbar = useImageToolbar();
 
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: TESTI_STYLES }} />
       <section className="sg-testi" data-section-id={sectionId}>
-        {(blockContent.eyebrow || mode === 'edit') && (
+        {(blockContent.eyebrow || (mode === 'edit' && !isExcluded('eyebrow'))) && (
           <div className="sg-testi__head">
             <SurgeEditable
               as="span"
@@ -129,7 +129,7 @@ export default function PullQuoteWithMark({ sectionId }: PullQuoteWithMarkProps)
             </div>
           </div>
         </article>
-        {(blockContent.meta || mode === 'edit') && (
+        {(blockContent.meta || (mode === 'edit' && !isExcluded('meta'))) && (
           <SurgeEditable
             as="div"
             mode={mode}

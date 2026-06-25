@@ -1,7 +1,14 @@
 // Server-safe published variant of Surge IconServiceCards. No hooks, flat props.
 
 import React from 'react';
+import * as Icons from 'lucide-react';
 import { SERVICES_STYLES } from './styles';
+
+// `icon` is a Lucide icon NAME (shared service contract; same as Hearth).
+function ServiceIcon({ name }: { name?: string }) {
+  const Component = (name && (Icons as any)[name]) || Icons.TrendingUp;
+  return <Component size={20} strokeWidth={2} />;
+}
 
 interface ServiceCard {
   id?: string;
@@ -39,7 +46,7 @@ export default function IconServiceCardsPublished(props: IconServiceCardsPublish
           {services.map((s, idx) => (
             <article key={s.id || idx} className="sg-svc">
               <span className="sg-svc__n">{String(idx + 1).padStart(2, '0')}</span>
-              {s.icon && <span className="sg-svc__ic">{s.icon}</span>}
+              <span className="sg-svc__ic"><ServiceIcon name={s.icon} /></span>
               <h3 className="sg-svc__title" dangerouslySetInnerHTML={{ __html: s.title || '' }} />
               <p className="sg-svc__desc" dangerouslySetInnerHTML={{ __html: s.description || '' }} />
               {s.cta_text && <span className="sg-svc__cta">{s.cta_text}</span>}

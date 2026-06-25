@@ -9,7 +9,7 @@ import { SurgePlaceholderBlock } from './SurgePlaceholderBlock';
 import SurgeNavHeader from './blocks/Header/WarmNavHeader';
 import SurgeHero from './blocks/Hero/PetalFramedHero';
 import SurgeServiceCards from './blocks/Services/IconServiceCards';
-import SurgePullQuote from './blocks/Testimonials/PullQuoteWithMark';
+import SurgeTestimonials from './blocks/Testimonials/SurgeTestimonials';
 import SurgePackages from './blocks/Packages/TieredPackages';
 import SurgeCTA from './blocks/CTA/BookCallCTA';
 import SurgeFooter from './blocks/Footer/ContactFooterRich';
@@ -23,7 +23,7 @@ import SurgeStatsBand from './blocks/Stats/StatsBand';
 import SurgeNavHeaderPublished from './blocks/Header/WarmNavHeader.published';
 import SurgeHeroPublished from './blocks/Hero/PetalFramedHero.published';
 import SurgeServiceCardsPublished from './blocks/Services/IconServiceCards.published';
-import SurgePullQuotePublished from './blocks/Testimonials/PullQuoteWithMark.published';
+import SurgeTestimonialsPublished from './blocks/Testimonials/SurgeTestimonials.published';
 import SurgePackagesPublished from './blocks/Packages/TieredPackages.published';
 import SurgeCTAPublished from './blocks/CTA/BookCallCTA.published';
 import SurgeFooterPublished from './blocks/Footer/ContactFooterRich.published';
@@ -43,7 +43,7 @@ const SERVICE_BLOCK_REGISTRY: Record<string, BlockEntry> = {
   header:       { edit: SurgeNavHeader,    published: SurgeNavHeaderPublished },
   hero:         { edit: SurgeHero,         published: SurgeHeroPublished },
   services:     { edit: SurgeServiceCards, published: SurgeServiceCardsPublished },
-  testimonials: { edit: SurgePullQuote,    published: SurgePullQuotePublished },
+  testimonials: { edit: SurgeTestimonials, published: SurgeTestimonialsPublished },
   packages:     { edit: SurgePackages,     published: SurgePackagesPublished },
   cta:          { edit: SurgeCTA,          published: SurgeCTAPublished },
   footer:       { edit: SurgeFooter,       published: SurgeFooterPublished },

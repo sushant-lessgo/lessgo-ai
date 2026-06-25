@@ -46,7 +46,7 @@ export function assembleServiceStrategy(
     templateId,
   });
 
-  const { uiblocks } = selectServiceUIBlocks({ sections });
+  const { uiblocks } = selectServiceUIBlocks({ sections, templateId });
 
   return {
     awareness:           llmResponse.awareness,

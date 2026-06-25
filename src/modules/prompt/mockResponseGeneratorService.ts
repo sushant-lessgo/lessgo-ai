@@ -34,7 +34,7 @@ export function generateMockServiceStrategy(
     assets: input.assets,
     templateId: (input.templateId as any) ?? null,
   });
-  const { uiblocks } = selectServiceUIBlocks({ sections });
+  const { uiblocks } = selectServiceUIBlocks({ sections, templateId: (input.templateId as any) ?? null });
 
   return {
     awareness: 'search-aware-comparing',

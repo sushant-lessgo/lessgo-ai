@@ -30,7 +30,7 @@ interface TieredPackagesProps {
 }
 
 export default function TieredPackages({ sectionId }: TieredPackagesProps) {
-  const { mode, blockContent, handleContentUpdate, handleCollectionUpdate } =
+  const { mode, blockContent, handleContentUpdate, handleCollectionUpdate, isExcluded } =
     useServiceBlock<TieredPackagesContent>({ sectionId });
 
   const packages = blockContent.packages || [];
@@ -68,7 +68,7 @@ export default function TieredPackages({ sectionId }: TieredPackagesProps) {
       <style dangerouslySetInnerHTML={{ __html: PKG_STYLES }} />
       <section className="sg-pkg" data-section-id={sectionId}>
         <div className="sg-pkg__head">
-          {(blockContent.eyebrow || mode === 'edit') && (
+          {(blockContent.eyebrow || (mode === 'edit' && !isExcluded('eyebrow'))) && (
             <SurgeEditable
               as="div"
               mode={mode}
@@ -92,7 +92,7 @@ export default function TieredPackages({ sectionId }: TieredPackagesProps) {
             className="sg-sec-title"
             placeholder="Pricing built around <em>the work</em>"
           />
-          {(blockContent.lede || mode === 'edit') && (
+          {(blockContent.lede || (mode === 'edit' && !isExcluded('lede'))) && (
             <SurgeEditable
               as="p"
               mode={mode}

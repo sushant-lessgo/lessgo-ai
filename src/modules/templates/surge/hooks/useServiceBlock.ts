@@ -17,7 +17,11 @@ export interface UseServiceBlockProps {
 export interface UseServiceBlockReturn<T> {
   sectionId: string;
   mode: 'edit' | 'preview' | 'published';
+  /** Stored layout name (e.g. 'PullQuoteWithMark' | 'ReviewGrid') — for blocks that dispatch by layout. */
+  layout: string | undefined;
   blockContent: T;
+  /** True when the element was toggled off (in aiMetadata.excludedElements) — gate optional containers in edit. */
+  isExcluded: (elementKey: string) => boolean;
   handleContentUpdate: (elementKey: string, value: any) => void;
   handleCollectionUpdate: <C>(collectionKey: string, value: C) => void;
 }
@@ -54,10 +58,14 @@ export function useServiceBlock<T = Record<string, any>>({
     updateElementContent(sectionId, collectionKey, value as any);
   };
 
+  const isExcluded = (elementKey: string) => excludedElements.includes(elementKey);
+
   return {
     sectionId,
     mode: mode as 'edit' | 'preview' | 'published',
+    layout,
     blockContent,
+    isExcluded,
     handleContentUpdate,
     handleCollectionUpdate,
   };

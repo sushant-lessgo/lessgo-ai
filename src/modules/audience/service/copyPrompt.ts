@@ -102,9 +102,11 @@ Collection schemas (for array fields):
 - services: array of { id: string, title: string, description: string, icon: string, cta_text: string }
 - packages: array of { id: string, name: string, price_display: string [NEEDS_REVIEW], timeline: string, features: string[], cta_text: string, is_featured: boolean }
 - social_links: array of { id: string, platform: string, href: string }
-- logos: array of { id: string, name: string }  // client wordmarks — [NEEDS_REVIEW], placeholder if unknown
+- reviews: array of { id: string, quote: string, author_name: string, author_role: string, author_company: string }  // multi-review grid (when used); [NEEDS_REVIEW] real client quotes; quote may include <em> on the moved number
+- brands: array of { id: string, name: string }  // client wordmarks (logo strip) — [NEEDS_REVIEW], placeholder if unknown
 - tags: array of { id: string, label: string }   // short mono chips, e.g. "Founded 2024", "Pune, India"
-- stats: array of { id: string, value: string, label: string }  // value may include <em> for the unit, e.g. "9.2<em>M</em>"; [NEEDS_REVIEW]
+- stats: array of { id: string, value: string, label: string, sublabel: string }  // About sidebar stats; value may include <em>; [NEEDS_REVIEW]
+- metrics: array of { id: string, value: string, label: string }  // Stats band figures; value may include <em> for the unit, e.g. "9.2<em>M</em>"; [NEEDS_REVIEW]
 - cases: array of { id: string, client: string, client_meta: string, tag: string, headline: string, metrics: array of { value: string, label: string } }  // [NEEDS_REVIEW] — placeholders, see rule 10
 
 Notes:

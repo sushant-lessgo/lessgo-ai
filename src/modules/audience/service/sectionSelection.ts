@@ -66,10 +66,10 @@ const AWARENESS_MIDDLE_ORDER: Record<ServiceAwareness, string[]> = {
  * Only emitted when templateId === 'surge'; never affects Hearth/Lex.
  */
 const SURGE_MIDDLE_ORDER: Record<ServiceAwareness, string[]> = {
-  'search-aware-comparing': ['logos', 'about', 'services', 'casestudies', 'stats', 'testimonials', 'packages', 'cta'],
-  'search-aware-cold':      ['logos', 'casestudies', 'about', 'services', 'stats', 'testimonials', 'packages', 'cta'],
-  'referral-driven':        ['logos', 'about', 'services', 'packages', 'casestudies', 'stats', 'testimonials', 'cta'],
-  'relationship-warming':   ['about', 'logos', 'packages', 'services', 'casestudies', 'stats', 'testimonials', 'cta'],
+  'search-aware-comparing': ['hero', 'logos', 'about', 'services', 'casestudies', 'stats', 'testimonials', 'packages', 'cta'],
+  'search-aware-cold':      ['hero', 'logos', 'casestudies', 'about', 'services', 'stats', 'testimonials', 'packages', 'cta'],
+  'referral-driven':        ['hero', 'logos', 'about', 'services', 'packages', 'casestudies', 'stats', 'testimonials', 'cta'],
+  'relationship-warming':   ['hero', 'about', 'logos', 'packages', 'services', 'casestudies', 'stats', 'testimonials', 'cta'],
 };
 
 /**

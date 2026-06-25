@@ -11,18 +11,18 @@ interface LogoItem {
 interface LogoStripPublishedProps {
   sectionId: string;
   label?: string;
-  logos?: LogoItem[];
+  brands?: LogoItem[];
 }
 
 export default function LogoStripPublished(props: LogoStripPublishedProps) {
-  const logos = Array.isArray(props.logos) ? props.logos : [];
+  const brands = Array.isArray(props.brands) ? props.brands : [];
 
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: LOGOS_STYLES }} />
       <div className="sg-logos">
         {props.label && <span className="sg-logos__ll">{props.label}</span>}
-        {logos.map((l, idx) => (
+        {brands.map((l, idx) => (
           <span key={l.id || idx} className="sg-logos__logo">{l.name || ''}</span>
         ))}
       </div>

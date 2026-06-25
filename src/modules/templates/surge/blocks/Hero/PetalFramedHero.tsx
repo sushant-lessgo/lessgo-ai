@@ -27,7 +27,7 @@ interface PetalFramedHeroProps {
 }
 
 export default function PetalFramedHero({ sectionId }: PetalFramedHeroProps) {
-  const { mode, blockContent, handleContentUpdate } = useServiceBlock<PetalFramedHeroContent>({ sectionId });
+  const { mode, blockContent, handleContentUpdate, isExcluded } = useServiceBlock<PetalFramedHeroContent>({ sectionId });
   const handleImageToolbar = useImageToolbar();
 
   return (
@@ -36,7 +36,7 @@ export default function PetalFramedHero({ sectionId }: PetalFramedHeroProps) {
       <section className="sg-hero" data-section-id={sectionId}>
         <div className="sg-hero__grid">
           <div className="sg-hero__content">
-            {(blockContent.eyebrow || mode === 'edit') && (
+            {(blockContent.eyebrow || (mode === 'edit' && !isExcluded('eyebrow'))) && (
               <span className="sg-pill">
                 <span className="sg-dot" />
                 <SurgeEditable
@@ -90,7 +90,7 @@ export default function PetalFramedHero({ sectionId }: PetalFramedHeroProps) {
                   className="sg-btn sg-btn--primary"
                   placeholder="Book a free audit"
                 />
-                {(blockContent.secondary_cta_text || mode === 'edit') && (
+                {(blockContent.secondary_cta_text || (mode === 'edit' && !isExcluded('secondary_cta_text'))) && (
                   <SurgeEditable
                     as="span"
                     mode={mode}
@@ -105,7 +105,7 @@ export default function PetalFramedHero({ sectionId }: PetalFramedHeroProps) {
                   />
                 )}
               </div>
-              {(blockContent.meta || mode === 'edit') && (
+              {(blockContent.meta || (mode === 'edit' && !isExcluded('meta'))) && (
                 <div className="sg-hero__trust">
                   <SurgeEditable
                     as="span"

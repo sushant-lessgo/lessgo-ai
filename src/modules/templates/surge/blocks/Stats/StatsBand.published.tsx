@@ -14,11 +14,11 @@ interface StatsBandPublishedProps {
   sectionId: string;
   eyebrow?: string;
   headline?: string;
-  stats?: StatItem[];
+  metrics?: StatItem[];
 }
 
 export default function StatsBandPublished(props: StatsBandPublishedProps) {
-  const stats = Array.isArray(props.stats) ? props.stats : [];
+  const metrics = Array.isArray(props.metrics) ? props.metrics : [];
 
   return (
     <>
@@ -33,7 +33,7 @@ export default function StatsBandPublished(props: StatsBandPublishedProps) {
           </div>
         )}
         <div className="sg-stats__inner">
-          {stats.map((s, idx) => (
+          {metrics.map((s, idx) => (
             <div key={s.id || idx} className="sg-stat">
               <div className="sg-stat__big" dangerouslySetInnerHTML={{ __html: s.value || '' }} />
               <div className="sg-stat__lbl" dangerouslySetInnerHTML={{ __html: s.label || '' }} />

@@ -36,7 +36,7 @@ function Spark() {
 }
 
 export default function ResultCaseCards({ sectionId }: { sectionId: string }) {
-  const { mode, blockContent, handleContentUpdate, handleCollectionUpdate } =
+  const { mode, blockContent, handleContentUpdate, handleCollectionUpdate, isExcluded } =
     useServiceBlock<ResultCaseCardsContent>({ sectionId });
 
   const cases = blockContent.cases || [];
@@ -79,7 +79,7 @@ export default function ResultCaseCards({ sectionId }: { sectionId: string }) {
       <style dangerouslySetInnerHTML={{ __html: CASES_STYLES }} />
       <section className="sg-section" data-section-id={sectionId}>
         <div className="sg-sec-head">
-          {(blockContent.eyebrow || mode === 'edit') && (
+          {(blockContent.eyebrow || (mode === 'edit' && !isExcluded('eyebrow'))) && (
             <SurgeEditable
               as="div" mode={mode} sectionId={sectionId} elementKey="eyebrow"
               value={blockContent.eyebrow} onSave={(v) => handleContentUpdate('eyebrow', v)}
@@ -91,7 +91,7 @@ export default function ResultCaseCards({ sectionId }: { sectionId: string }) {
             value={blockContent.headline} onSave={(v) => handleContentUpdate('headline', v)}
             enterBehavior="save" className="sg-sec-title" placeholder="The proof is the <em>graph going up</em>"
           />
-          {(blockContent.lede || mode === 'edit') && (
+          {(blockContent.lede || (mode === 'edit' && !isExcluded('lede'))) && (
             <SurgeEditable
               as="p" mode={mode} sectionId={sectionId} elementKey="lede"
               value={blockContent.lede} onSave={(v) => handleContentUpdate('lede', v)}

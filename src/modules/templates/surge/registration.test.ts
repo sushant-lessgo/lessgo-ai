@@ -51,4 +51,8 @@ describe('Surge block registration', () => {
       expect(getSchemaDefaults(layout)).not.toBeNull();
     }
   });
+
+  it('ReviewGrid (alt testimonials layout) has a resolvable schema', () => {
+    expect(getSchemaDefaults('ReviewGrid')).not.toBeNull();
+  });
 });

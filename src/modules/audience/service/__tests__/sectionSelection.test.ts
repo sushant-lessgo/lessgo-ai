@@ -80,6 +80,14 @@ describe('selectServiceSections — Surge (template-aware)', () => {
     expect(new Set(out).size).toBe(out.length);
   });
 
+  it('surge always renders hero first after header (every awareness state)', () => {
+    for (const a of ['search-aware-comparing', 'search-aware-cold', 'referral-driven', 'relationship-warming'] as const) {
+      const out = selectServiceSections({ awareness: a, goal: 'book-call', assets: allAssets, templateId: 'surge' });
+      expect(out[0]).toBe('header');
+      expect(out[1]).toBe('hero');
+    }
+  });
+
   it('surge gates logos on hasClientLogos and casestudies on hasCaseStudies', () => {
     const out = selectServiceSections({
       awareness: 'search-aware-comparing',

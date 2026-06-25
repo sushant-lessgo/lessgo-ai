@@ -93,6 +93,35 @@ export const serviceElementSchema: Record<string, UIBlockSchemaV2> = {
     },
   },
 
+  // ===== Testimonials (alt layout) — multi-review grid =====
+  // Second `testimonials` layout (sectionType 'testimonials', same as
+  // PullQuoteWithMark). A template that registers multiple testimonials blocks
+  // (Surge) picks one at generation; render dispatch is by stored layout. quote
+  // may include <em>. Quotes/authors are needs_review (real proof).
+  ReviewGrid: {
+    sectionType: 'testimonials',
+    elements: {
+      eyebrow:  { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      headline: { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+    },
+    collections: {
+      // collection key ≠ section type 'testimonials' (avoids the elements-collapse trap).
+      reviews: {
+        requirement: 'required',
+        fillMode: 'ai_generated_needs_review',
+        constraints: { min: 1, max: 3 },
+        fields: {
+          id:             { type: 'string', fillMode: 'system' },
+          quote:          { type: 'string', fillMode: 'ai_generated_needs_review', default: '' },
+          author_name:    { type: 'string', fillMode: 'ai_generated_needs_review', default: '' },
+          author_role:    { type: 'string', fillMode: 'ai_generated_needs_review', default: '' },
+          author_company: { type: 'string', fillMode: 'ai_generated_needs_review', default: '' },
+          author_photo:   { type: 'string', fillMode: 'manual_preferred', default: '' },
+        },
+      },
+    },
+  },
+
   // ===== Packages =====
   // Prices flagged ai_generated_needs_review per spec §4 (avoid hallucination).
   TieredPackages: {
@@ -142,7 +171,9 @@ export const serviceElementSchema: Record<string, UIBlockSchemaV2> = {
       label: { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: 'Trusted by founders at' },
     },
     collections: {
-      logos: {
+      // NOTE: collection key deliberately ≠ section type 'logos' — a same-name
+      // collection makes gpt-4o-mini collapse `elements` into the bare array.
+      brands: {
         requirement: 'required',
         fillMode: 'ai_generated_needs_review',
         constraints: { min: 3, max: 8 },
@@ -233,7 +264,8 @@ export const serviceElementSchema: Record<string, UIBlockSchemaV2> = {
       headline: { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
     },
     collections: {
-      stats: {
+      // collection key ≠ section type 'stats' (avoids the elements-collapse trap).
+      metrics: {
         requirement: 'required',
         fillMode: 'ai_generated_needs_review',
         constraints: { min: 3, max: 4 },

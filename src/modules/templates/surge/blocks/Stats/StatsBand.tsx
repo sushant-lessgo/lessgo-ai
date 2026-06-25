@@ -1,8 +1,9 @@
 'use client';
 
 // Surge stats band (edit). Dark panel band of big metric figures. Surge-only delta.
-// Consumes: eyebrow (opt), headline (opt), stats[{id,value,label}] collection.
-// `value` may contain <em> (accent unit) — SurgeEditable preserves it.
+// Consumes: eyebrow (opt), headline (opt), metrics[{id,value,label}] collection.
+// (Collection key is `metrics`, NOT `stats` — a same-name collection collapses the
+// LLM output.) `value` may contain <em> (accent unit) — SurgeEditable preserves it.
 
 import React from 'react';
 import { useServiceBlock } from '../../hooks/useServiceBlock';
@@ -18,7 +19,7 @@ interface StatItem {
 interface StatsBandContent {
   eyebrow: string;
   headline: string;
-  stats: StatItem[];
+  metrics: StatItem[];
 }
 
 interface StatsBandProps {
@@ -26,35 +27,35 @@ interface StatsBandProps {
 }
 
 export default function StatsBand({ sectionId }: StatsBandProps) {
-  const { mode, blockContent, handleContentUpdate, handleCollectionUpdate } =
+  const { mode, blockContent, handleContentUpdate, handleCollectionUpdate, isExcluded } =
     useServiceBlock<StatsBandContent>({ sectionId });
 
-  const stats = blockContent.stats || [];
+  const metrics = blockContent.metrics || [];
 
   const updateField = (id: string, key: keyof StatItem, value: string) => {
-    handleCollectionUpdate('stats', stats.map((s) => (s.id === id ? { ...s, [key]: value } : s)));
+    handleCollectionUpdate('metrics', metrics.map((s) => (s.id === id ? { ...s, [key]: value } : s)));
   };
 
   const addStat = () => {
-    if (stats.length >= 4) return;
-    handleCollectionUpdate('stats', [
-      ...stats,
+    if (metrics.length >= 4) return;
+    handleCollectionUpdate('metrics', [
+      ...metrics,
       { id: `st${Date.now()}`, value: '100<em>%</em>', label: 'New metric' },
     ]);
   };
 
   const removeStat = (id: string) => {
-    if (stats.length <= 2) return;
-    handleCollectionUpdate('stats', stats.filter((s) => s.id !== id));
+    if (metrics.length <= 2) return;
+    handleCollectionUpdate('metrics', metrics.filter((s) => s.id !== id));
   };
 
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: STATS_STYLES }} />
       <section className="sg-stats" data-section-id={sectionId}>
-        {(blockContent.eyebrow || blockContent.headline || mode === 'edit') && (
+        {(blockContent.eyebrow || blockContent.headline || (mode === 'edit' && (!isExcluded('eyebrow') || !isExcluded('headline')))) && (
           <div className="sg-stats__head">
-            {(blockContent.eyebrow || mode === 'edit') && (
+            {(blockContent.eyebrow || (mode === 'edit' && !isExcluded('eyebrow'))) && (
               <SurgeEditable
                 as="div"
                 mode={mode}
@@ -67,7 +68,7 @@ export default function StatsBand({ sectionId }: StatsBandProps) {
                 placeholder="By the numbers"
               />
             )}
-            {(blockContent.headline || mode === 'edit') && (
+            {(blockContent.headline || (mode === 'edit' && !isExcluded('headline'))) && (
               <SurgeEditable
                 as="h2"
                 mode={mode}
@@ -83,13 +84,13 @@ export default function StatsBand({ sectionId }: StatsBandProps) {
           </div>
         )}
         <div className="sg-stats__inner">
-          {stats.map((s) => (
+          {metrics.map((s) => (
             <div key={s.id} className="sg-stat">
               <SurgeEditable
                 as="div"
                 mode={mode}
                 sectionId={sectionId}
-                elementKey={`stats_value_${s.id}`}
+                elementKey={`metrics_value_${s.id}`}
                 value={s.value}
                 onSave={(v) => updateField(s.id, 'value', v)}
                 enterBehavior="save"
@@ -100,14 +101,14 @@ export default function StatsBand({ sectionId }: StatsBandProps) {
                 as="div"
                 mode={mode}
                 sectionId={sectionId}
-                elementKey={`stats_label_${s.id}`}
+                elementKey={`metrics_label_${s.id}`}
                 value={s.label}
                 onSave={(v) => updateField(s.id, 'label', v)}
                 enterBehavior="save"
                 className="sg-stat__lbl"
                 placeholder="Impressions generated"
               />
-              {mode === 'edit' && stats.length > 2 && (
+              {mode === 'edit' && metrics.length > 2 && (
                 <button
                   type="button"
                   className="sg-stat__remove"
@@ -119,7 +120,7 @@ export default function StatsBand({ sectionId }: StatsBandProps) {
               )}
             </div>
           ))}
-          {mode === 'edit' && stats.length < 4 && (
+          {mode === 'edit' && metrics.length < 4 && (
             <button type="button" className="sg-stat sg-stat--add" onClick={addStat}>
               + Add stat
             </button>

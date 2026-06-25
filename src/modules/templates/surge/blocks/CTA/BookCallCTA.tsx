@@ -22,7 +22,7 @@ interface BookCallCTAProps {
 }
 
 export default function BookCallCTA({ sectionId }: BookCallCTAProps) {
-  const { mode, blockContent, handleContentUpdate } = useServiceBlock<BookCallCTAContent>({ sectionId });
+  const { mode, blockContent, handleContentUpdate, isExcluded } = useServiceBlock<BookCallCTAContent>({ sectionId });
 
   return (
     <>
@@ -30,7 +30,7 @@ export default function BookCallCTA({ sectionId }: BookCallCTAProps) {
       <section className="sg-cta-wrap" data-section-id={sectionId}>
         <div className="sg-cta">
           <div className="sg-cta__inner">
-            {(blockContent.eyebrow || mode === 'edit') && (
+            {(blockContent.eyebrow || (mode === 'edit' && !isExcluded('eyebrow'))) && (
               <SurgeEditable
                 as="div"
                 mode={mode}
@@ -78,7 +78,7 @@ export default function BookCallCTA({ sectionId }: BookCallCTAProps) {
                 className="sg-btn sg-btn--primary"
                 placeholder="Book a free audit ↗"
               />
-              {(blockContent.secondary_cta_text || mode === 'edit') && (
+              {(blockContent.secondary_cta_text || (mode === 'edit' && !isExcluded('secondary_cta_text'))) && (
                 <SurgeEditable
                   as="span"
                   mode={mode}
@@ -93,7 +93,7 @@ export default function BookCallCTA({ sectionId }: BookCallCTAProps) {
                 />
               )}
             </div>
-            {(blockContent.meta || mode === 'edit') && (
+            {(blockContent.meta || (mode === 'edit' && !isExcluded('meta'))) && (
               <SurgeEditable
                 as="span"
                 mode={mode}

@@ -5,9 +5,17 @@
 // short glyph/letter (e.g. "Q", "X", "@") rendered as text in the chip.
 
 import React from 'react';
+import * as Icons from 'lucide-react';
 import { useServiceBlock } from '../../hooks/useServiceBlock';
 import { SurgeEditable } from '../../components/SurgeEditable';
 import { SERVICES_STYLES } from './styles';
+
+// `icon` is a Lucide icon NAME (shared service contract; same as Hearth). Not
+// inline-editable — rendered as a Lucide glyph in the accent chip.
+function ServiceIcon({ name }: { name?: string }) {
+  const Component = (name && (Icons as any)[name]) || Icons.TrendingUp;
+  return <Component size={20} strokeWidth={2} />;
+}
 
 interface ServiceCard {
   id: string;
@@ -29,7 +37,7 @@ interface IconServiceCardsProps {
 }
 
 export default function IconServiceCards({ sectionId }: IconServiceCardsProps) {
-  const { mode, blockContent, handleContentUpdate, handleCollectionUpdate } =
+  const { mode, blockContent, handleContentUpdate, handleCollectionUpdate, isExcluded } =
     useServiceBlock<IconServiceCardsContent>({ sectionId });
 
   const services = blockContent.services || [];
@@ -45,7 +53,7 @@ export default function IconServiceCards({ sectionId }: IconServiceCardsProps) {
     if (services.length >= 6) return;
     handleCollectionUpdate('services', [
       ...services,
-      { id: `s${Date.now()}`, title: 'New service', description: 'Describe this service.', icon: '↗', cta_text: '' },
+      { id: `s${Date.now()}`, title: 'New service', description: 'Describe this service.', icon: 'TrendingUp', cta_text: '' },
     ]);
   };
 
@@ -59,7 +67,7 @@ export default function IconServiceCards({ sectionId }: IconServiceCardsProps) {
       <style dangerouslySetInnerHTML={{ __html: SERVICES_STYLES }} />
       <section className="sg-section" data-section-id={sectionId}>
         <div className="sg-sec-head">
-          {(blockContent.eyebrow || mode === 'edit') && (
+          {(blockContent.eyebrow || (mode === 'edit' && !isExcluded('eyebrow'))) && (
             <SurgeEditable
               as="div"
               mode={mode}
@@ -83,7 +91,7 @@ export default function IconServiceCards({ sectionId }: IconServiceCardsProps) {
             className="sg-sec-title"
             placeholder="Built around <em>one number per channel</em>"
           />
-          {(blockContent.lede || mode === 'edit') && (
+          {(blockContent.lede || (mode === 'edit' && !isExcluded('lede'))) && (
             <SurgeEditable
               as="p"
               mode={mode}
@@ -102,17 +110,7 @@ export default function IconServiceCards({ sectionId }: IconServiceCardsProps) {
           {services.map((s, idx) => (
             <article key={s.id} className="sg-svc">
               <span className="sg-svc__n">{String(idx + 1).padStart(2, '0')}</span>
-              <SurgeEditable
-                as="span"
-                mode={mode}
-                sectionId={sectionId}
-                elementKey={`services_icon_${s.id}`}
-                value={s.icon}
-                onSave={(v) => updateField(s.id, 'icon', v)}
-                enterBehavior="save"
-                className="sg-svc__ic"
-                placeholder="↗"
-              />
+              <span className="sg-svc__ic"><ServiceIcon name={s.icon} /></span>
               <SurgeEditable
                 as="h3"
                 mode={mode}

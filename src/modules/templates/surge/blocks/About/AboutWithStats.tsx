@@ -21,7 +21,7 @@ interface AboutWithStatsContent {
 }
 
 export default function AboutWithStats({ sectionId }: { sectionId: string }) {
-  const { mode, blockContent, handleContentUpdate, handleCollectionUpdate } =
+  const { mode, blockContent, handleContentUpdate, handleCollectionUpdate, isExcluded } =
     useServiceBlock<AboutWithStatsContent>({ sectionId });
 
   const tags = blockContent.tags || [];
@@ -51,7 +51,7 @@ export default function AboutWithStats({ sectionId }: { sectionId: string }) {
       <style dangerouslySetInnerHTML={{ __html: ABOUT_STYLES }} />
       <section className="sg-section" data-section-id={sectionId}>
         <div className="sg-sec-head">
-          {(blockContent.eyebrow || mode === 'edit') && (
+          {(blockContent.eyebrow || (mode === 'edit' && !isExcluded('eyebrow'))) && (
             <SurgeEditable
               as="div" mode={mode} sectionId={sectionId} elementKey="eyebrow"
               value={blockContent.eyebrow} onSave={(v) => handleContentUpdate('eyebrow', v)}
