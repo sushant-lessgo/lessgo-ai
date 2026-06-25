@@ -6,7 +6,7 @@
 
 import React from 'react';
 import * as Icons from 'lucide-react';
-import { CONTACT_STYLES } from './TechPremiumContact';
+import { CONTACT_STYLES } from './styles';
 import { mapEmbedSrc } from './mapEmbedSrc';
 import { DEFAULT_CONTACT_FIELDS, CONTACT_SUBMIT_TEXT } from './contactFields';
 import type { MVPFormField } from '@/types/core/forms';

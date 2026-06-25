@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Search } from 'lucide-react';
-import { GALLERY_STYLES } from './TechPremiumGallery';
+import { GALLERY_STYLES } from './styles';
 
 interface Filter { id?: string; label?: string; cat?: string }
 interface Image { id?: string; src?: string; tag?: string; category?: string }

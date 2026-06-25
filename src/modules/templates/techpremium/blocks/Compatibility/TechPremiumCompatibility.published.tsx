@@ -3,7 +3,7 @@
 // shared TechPremiumReadout (server-safe) and renders only when metrics are present.
 
 import React from 'react';
-import { STYLES } from './TechPremiumCompatibility';
+import { STYLES } from './styles';
 import { TechPremiumReadout, type ReadoutMetric } from '../Readout/TechPremiumReadout';
 
 interface Chip { id?: string; text?: string }

@@ -2,7 +2,7 @@
 // Server-safe published variant of TechPremiumLineup. Cards are plain <a href>.
 
 import React from 'react';
-import { STYLES } from './TechPremiumLineup';
+import { STYLES } from './styles';
 
 interface Item {
   id?: string; model?: string; name?: string; oneLiner?: string;

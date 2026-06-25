@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { Search } from 'lucide-react';
-import { STYLES } from './TechPremiumGalleryPreview';
+import { STYLES } from './styles';
 
 interface Image { id?: string; src?: string; tag?: string; category?: string }
 interface Props {

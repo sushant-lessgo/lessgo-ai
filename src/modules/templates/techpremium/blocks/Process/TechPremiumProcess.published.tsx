@@ -3,7 +3,7 @@
 
 import React from 'react';
 import * as Icons from 'lucide-react';
-import { PROCESS_STYLES } from './TechPremiumProcess';
+import { PROCESS_STYLES } from './styles';
 
 interface Step { id?: string; icon?: string; title?: string; body?: string }
 

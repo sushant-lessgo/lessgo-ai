@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { PackageOpen } from 'lucide-react';
-import { STYLES } from './TechPremiumCatalog';
+import { STYLES } from './styles';
 
 interface Category { id?: string; title?: string; label?: string }
 interface CatalogItem {

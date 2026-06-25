@@ -2,7 +2,7 @@
 // Server-safe published variant of TechPremiumFaq. Native <details> — no JS.
 
 import React from 'react';
-import { FAQ_STYLES } from './TechPremiumFaq';
+import { FAQ_STYLES } from './styles';
 
 interface FaqItem { id?: string; question?: string; answer?: string }
 

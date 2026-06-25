@@ -2,7 +2,7 @@
 // Server-safe published variant of TechPremiumProblem.
 
 import React from 'react';
-import { PROBLEM_STYLES } from './TechPremiumProblem';
+import { PROBLEM_STYLES } from './styles';
 
 interface Pain { id?: string; title?: string; body?: string }
 

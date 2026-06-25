@@ -3,9 +3,8 @@
 
 import React from 'react';
 import { Check } from 'lucide-react';
-import { EXPLAINER_STYLES } from './TechPremiumExplainer';
+import { STYLES } from './styles';
 import { ytEmbed } from './ytEmbed';
-import { SEC_HEAD_STYLES, PH_STYLES, BTN_STYLES } from '../shared/sharedStyles';
 
 interface Bullet { id?: string; text?: string }
 interface Row {
@@ -28,7 +27,6 @@ interface Props {
   rows?: Row[];
 }
 
-const STYLES = SEC_HEAD_STYLES + PH_STYLES + BTN_STYLES + EXPLAINER_STYLES;
 
 export default function TechPremiumExplainerPublished(props: Props) {
   const rows = Array.isArray(props.rows) ? props.rows : [];

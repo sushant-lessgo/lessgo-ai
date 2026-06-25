@@ -2,7 +2,7 @@
 // Mirrors TechPremiumTrust.tsx markup read-only. Surface paper-2.
 
 import React from 'react';
-import { TRUST_STYLES } from './TechPremiumTrust';
+import { TRUST_STYLES } from './styles';
 
 interface Metric { id: string; value: string; label: string }
 interface Logo { id: string; name: string; image: string }
