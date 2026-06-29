@@ -6,6 +6,7 @@ import React from 'react';
 import { resolveCtaHref, externalLinkProps } from '@/utils/resolveCtaHref';
 import { bilingualAttrs } from '../../i18nKeys';
 import { CONTACT_STYLES } from './styles';
+import { DEFAULT_CONTACT_FIELDS } from './contactFields';
 import type { MVPFormField } from '@/types/core/forms';
 
 interface Props {
@@ -34,7 +35,9 @@ const WA_ICON = (
 export default function LumenContactFormPublished(props: Props) {
   const formId = props.form_id || '';
   const form = formId ? props.content?.forms?.[formId] : undefined;
-  const fields: MVPFormField[] = Array.isArray(form?.fields) && form.fields.length ? form.fields : [];
+  // Fall back to the shared defaults so fields always render even if the form
+  // lookup is empty (e.g. forms not hydrated) — mirrors TechPremiumContact.
+  const fields: MVPFormField[] = Array.isArray(form?.fields) && form.fields.length ? form.fields : DEFAULT_CONTACT_FIELDS;
 
   const wa = (props.whatsapp_number || '').replace(/[^0-9]/g, '');
   const waHref = wa ? `https://wa.me/${wa}` : '';

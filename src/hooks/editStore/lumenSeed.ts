@@ -8,6 +8,8 @@
 // the client uploads. The AI fills NONE of this. Attach to the client's token via
 // saveDraft with templateId:'lumen', paletteId:'brass', variantId:'default'.
 
+import { DEFAULT_CONTACT_FIELDS, CONTACT_SUBMIT_TEXT } from '@/modules/templates/lumen/blocks/Contact/contactFields';
+
 const rid = (p: string): string => `${p}${Math.random().toString(36).slice(2, 8)}`;
 const sectionId = (type: string): string => `${type}-${Math.random().toString(36).slice(2, 10)}`;
 
@@ -251,17 +253,17 @@ export function buildLumenHomeFinalContent(opts: {
   secs.forEach((s) => { sectionLayouts[s.id] = s.layout; content[s.id] = s; });
 
   // Seed the enquiry form so form.v1.js wires + /api/forms/submit maps fields.
+  // CRITICAL: forms must be TOP-LEVEL on finalContent (sibling of `content`) — the
+  // store hydrates state.forms from finalContent.forms (persistenceActions.ts) and
+  // re-exports it there → published content.forms. Nesting it under content.forms
+  // would leave state.forms empty and the published form would render no fields.
   const now = new Date();
-  content.forms = {
+  const forms = {
     [formId]: {
       id: formId,
       name: 'Enquiry',
-      fields: [
-        { id: 'name', type: 'text', label: 'Name', placeholder: 'Your name', required: true },
-        { id: 'email', type: 'email', label: 'Email', placeholder: 'you@company.com', required: true },
-        { id: 'message', type: 'textarea', label: 'Message', placeholder: '', required: true },
-      ],
-      submitButtonText: 'Send enquiry',
+      fields: DEFAULT_CONTACT_FIELDS,
+      submitButtonText: CONTACT_SUBMIT_TEXT,
       successMessage: 'Enquiry received — I’ll reply within a day.',
       createdAt: now,
       updatedAt: now,
@@ -271,6 +273,7 @@ export function buildLumenHomeFinalContent(opts: {
   return {
     layout: { sections: order, sectionLayouts, theme: {}, globalSettings: {} },
     content,
+    forms,
     meta: { id: opts.tokenId, title, slug: '', lastUpdated: Date.now(), version: 1, tokenId: opts.tokenId },
     onboardingData: { oneLiner: `${brand} — corporate photography in Den Haag`, productName: `${brand} Photography` },
     generatedAt: Date.now(),

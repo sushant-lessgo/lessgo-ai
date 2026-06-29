@@ -8,8 +8,7 @@
 import React from 'react';
 import { useLumenBlock } from '../../hooks/useLumenBlock';
 import { LumenEditable } from '../../components/LumenEditable';
-import { LumenAddImageOverlay } from '../../components/LumenAddImageOverlay';
-import { useImageToolbar } from '@/hooks/useImageToolbar';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { ABOUT_STYLES } from './styles';
 
 interface AboutContent {
@@ -28,14 +27,22 @@ interface AboutContent {
 export default function LumenPhotographerAbout({ sectionId }: { sectionId: string }) {
   const { mode, blockContent, editLang, handleContentUpdate, isExcluded } =
     useLumenBlock<AboutContent>({ sectionId });
-  const handleImageToolbar = useImageToolbar();
   const edit = mode === 'edit';
-  const imgId = `${sectionId}-about-image`;
 
-  const openToolbar = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!edit) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    handleImageToolbar(imgId, { x: rect.left + rect.width / 2, y: rect.top - 10 });
+  // Naayom (TechPremium) inline image-replace pattern: hidden file input +
+  // uploadImage(file, {sectionId, elementKey}) — store auto-persists (no toolbar).
+  const uploadImage = (useEditStore() as any).uploadImage as
+    | ((file: File, t?: { sectionId: string; elementKey: string }) => Promise<string | void>)
+    | undefined;
+  const [photoUploading, setPhotoUploading] = React.useState(false);
+  const onPhotoFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || !uploadImage) return;
+    setPhotoUploading(true);
+    try { await uploadImage(file, { sectionId, elementKey: 'about_image' }); }
+    catch { /* surfaced by the store */ }
+    finally { setPhotoUploading(false); }
   };
 
   return (
@@ -43,19 +50,23 @@ export default function LumenPhotographerAbout({ sectionId }: { sectionId: strin
       <style dangerouslySetInnerHTML={{ __html: ABOUT_STYLES }} />
       <div className="lm-about-in" data-section-id={sectionId}>
         <div className="lm-about-portrait">
-          <div
-            className="lm-ph"
-            data-image-id={imgId}
-            data-element-key="about_image"
-            style={blockContent.about_image ? undefined : { cursor: edit ? 'pointer' : 'default' }}
-            onMouseUp={openToolbar}
-          >
+          <div className="lm-ph">
             {blockContent.about_image ? (
               <img src={blockContent.about_image} alt={blockContent.fig_caption || 'Portrait'} />
             ) : (
               <span className="lm-ph-tag">Portrait of the photographer</span>
             )}
-            {edit && !blockContent.about_image && <LumenAddImageOverlay />}
+            {edit && (
+              <span className="lm-photo-edit">
+                <label className="lm-photo-edit__btn">
+                  {photoUploading ? 'Uploading…' : (blockContent.about_image ? 'Change photo' : '↥ Add photo')}
+                  <input type="file" accept="image/*" onChange={onPhotoFile} hidden disabled={photoUploading} />
+                </label>
+                {blockContent.about_image && (
+                  <button type="button" className="lm-photo-edit__x" onClick={() => handleContentUpdate('about_image', '')}>remove</button>
+                )}
+              </span>
+            )}
           </div>
           <span className="lm-frameline" />
           <div className="lm-fig">

@@ -7,8 +7,7 @@
 import React from 'react';
 import { useLumenBlock } from '../../hooks/useLumenBlock';
 import { LumenEditable } from '../../components/LumenEditable';
-import { LumenAddImageOverlay } from '../../components/LumenAddImageOverlay';
-import { useImageToolbar } from '@/hooks/useImageToolbar';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { HERO_STYLES } from './styles';
 
 interface LumenHeroContent {
@@ -26,9 +25,23 @@ interface LumenHeroContent {
 
 export default function LumenHero({ sectionId }: { sectionId: string }) {
   const { mode, blockContent, editLang, handleContentUpdate } = useLumenBlock<LumenHeroContent>({ sectionId });
-  const handleImageToolbar = useImageToolbar();
   const edit = mode === 'edit';
-  const imgId = `${sectionId}-hero-image`;
+
+  // Naayom (TechPremium) inline image-replace pattern: hidden file input +
+  // uploadImage(file, {sectionId, elementKey}) — store auto-persists (no toolbar).
+  const uploadImage = (useEditStore() as any).uploadImage as
+    | ((file: File, t?: { sectionId: string; elementKey: string }) => Promise<string | void>)
+    | undefined;
+  const [photoUploading, setPhotoUploading] = React.useState(false);
+  const onPhotoFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || !uploadImage) return;
+    setPhotoUploading(true);
+    try { await uploadImage(file, { sectionId, elementKey: 'hero_image' }); }
+    catch { /* surfaced by the store */ }
+    finally { setPhotoUploading(false); }
+  };
 
   return (
     <>
@@ -73,23 +86,11 @@ export default function LumenHero({ sectionId }: { sectionId: string }) {
           </div>
 
           <div className="lm-hero-art">
-            <div
-              className="lm-ph lm-shot port on-dark"
-              data-image-id={imgId}
-              data-element-key="hero_image"
-              onMouseUp={(e) => {
-                if (!edit) return;
-                const r = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
-                handleImageToolbar(imgId, { x: r.left + r.width / 2, y: r.top - 10 });
-              }}
-            >
+            <div className="lm-ph lm-shot port on-dark">
               {blockContent.hero_image ? (
                 <img src={blockContent.hero_image} alt={blockContent.badge_text || 'Hero portrait'} />
               ) : (
-                <>
-                  <span className="lm-ph__tag">Hero portrait — executive, on-brand</span>
-                  {edit && <LumenAddImageOverlay />}
-                </>
+                <span className="lm-ph__tag">Hero portrait — executive, on-brand</span>
               )}
               {blockContent.badge_text && (
                 <LumenEditable
@@ -97,6 +98,17 @@ export default function LumenHero({ sectionId }: { sectionId: string }) {
                   content={blockContent} elementKey="badge_text" onSave={handleContentUpdate}
                   enterBehavior="save" className="lm-badge" placeholder="On location"
                 />
+              )}
+              {edit && (
+                <span className="lm-photo-edit">
+                  <label className="lm-photo-edit__btn">
+                    {photoUploading ? 'Uploading…' : (blockContent.hero_image ? 'Change photo' : '↥ Add photo')}
+                    <input type="file" accept="image/*" onChange={onPhotoFile} hidden disabled={photoUploading} />
+                  </label>
+                  {blockContent.hero_image && (
+                    <button type="button" className="lm-photo-edit__x" onClick={() => handleContentUpdate('hero_image', '')}>remove</button>
+                  )}
+                </span>
               )}
             </div>
             <span className="lm-frameline" />

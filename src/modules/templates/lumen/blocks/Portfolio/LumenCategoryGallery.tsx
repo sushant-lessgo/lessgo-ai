@@ -29,6 +29,12 @@ export default function LumenCategoryGallery({ sectionId }: { sectionId: string 
   const store = useEditStore() as any;
   const uploadImage = store.uploadImage as ((f: File) => Promise<string | void>) | undefined;
 
+  // Naayom gallery bulk-upload spec: per-category MAX cap + progress + count +
+  // optional URL paste. `busy`/`urlDrafts` are keyed by category id.
+  const MAX_PER_CAT = 24;
+  const [busy, setBusy] = React.useState<Record<string, string>>({});
+  const [urlDrafts, setUrlDrafts] = React.useState<Record<string, string>>({});
+
   const patchCat = (id: string, p: Partial<Category>) =>
     handleCollectionUpdate('categories', cats.map((c) => (c.id === id ? { ...c, ...p } : c)));
   const addCat = () => handleCollectionUpdate('categories', [...cats, { id: rid('cat'), group: 'Commercial', name: 'New category', ratio: 'land', fig: '', images: [] }]);
@@ -37,19 +43,46 @@ export default function LumenCategoryGallery({ sectionId }: { sectionId: string 
   const onCover = async (id: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]; e.target.value = '';
     if (!file || !uploadImage) return;
+    setBusy((b) => ({ ...b, [id]: 'Uploading cover…' }));
     const url = await uploadImage(file);
     if (typeof url === 'string' && url) patchCat(id, { cover_image: url });
+    setBusy((b) => ({ ...b, [id]: '' }));
   };
+
   const onPhotos = async (id: string, e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []); e.target.value = '';
-    if (!files.length || !uploadImage) return;
+    // Snapshot to a real array BEFORE clearing the input (live FileList is emptied
+    // by input.value = '' — the "uploaded but nothing happened" bug).
+    const all = Array.from(e.target.files || []); e.target.value = '';
+    if (!all.length || !uploadImage) return;
     const cat = cats.find((c) => c.id === id); if (!cat) return;
+    const existing = cat.images || [];
+    const room = MAX_PER_CAT - existing.length;
+    if (room <= 0) { setBusy((b) => ({ ...b, [id]: `Full (${MAX_PER_CAT} max) — remove some first.` })); return; }
+    const list = all.slice(0, room);
+    const skipped = all.length - list.length;
     const added: Img[] = [];
-    for (const f of files.slice(0, 24)) {
-      try { const url = await uploadImage(f); if (typeof url === 'string' && url) added.push({ id: rid('im'), src: url }); } catch { /* skip */ }
+    for (let i = 0; i < list.length; i++) {
+      setBusy((b) => ({ ...b, [id]: `Uploading ${i + 1} / ${list.length}…` }));
+      try { const url = await uploadImage(list[i]); if (typeof url === 'string' && url) added.push({ id: rid('im'), src: url }); } catch { /* skip failed */ }
     }
-    if (added.length) patchCat(id, { images: [...(cat.images || []), ...added] });
+    if (added.length) patchCat(id, { images: [...existing, ...added] });
     try { await store.save?.(); } catch { /* autosave retries */ }
+    setBusy((b) => ({ ...b, [id]: `Added ${added.length} photo${added.length === 1 ? '' : 's'}${skipped > 0 ? ` · ${skipped} skipped (${MAX_PER_CAT} max)` : ''}.` }));
+  };
+
+  const onAddUrls = (id: string) => {
+    const cat = cats.find((c) => c.id === id); if (!cat) return;
+    const existing = cat.images || [];
+    const room = MAX_PER_CAT - existing.length;
+    const parsed: Img[] = [];
+    for (const line of (urlDrafts[id] || '').split('\n').map((s) => s.trim()).filter(Boolean)) {
+      if (parsed.length >= room) break;
+      if (!/^https?:\/\//i.test(line)) continue;
+      parsed.push({ id: rid('im'), src: line });
+    }
+    if (parsed.length) patchCat(id, { images: [...existing, ...parsed] });
+    setUrlDrafts((d) => ({ ...d, [id]: '' }));
+    setBusy((b) => ({ ...b, [id]: `Added ${parsed.length} from URLs.` }));
   };
 
   // Preserve first-seen group order.
@@ -101,12 +134,26 @@ export default function LumenCategoryGallery({ sectionId }: { sectionId: string 
                         <span className="ratio">{c.ratio === 'port' ? '4:5' : '3:2'} · {(c.images || []).length}</span>
                       </div>
                       {edit && (
-                        <div className="lm-pf-edit">
-                          <label className="lm-pf-edit__btn">{c.cover_image ? 'Change cover' : '↥ Cover'}
-                            <input type="file" accept="image/*" hidden onChange={(e) => onCover(c.id, e)} /></label>
-                          <label className="lm-pf-edit__btn">+ Photos
-                            <input type="file" accept="image/*" multiple hidden onChange={(e) => onPhotos(c.id, e)} /></label>
-                          <button type="button" className="lm-pf-edit__btn" onClick={() => removeCat(c.id)}>remove</button>
+                        <div className="lm-pf-import">
+                          <div className="lm-pf-edit">
+                            <label className="lm-pf-edit__btn">{c.cover_image ? 'Change cover' : '↥ Cover'}
+                              <input type="file" accept="image/*" hidden onChange={(e) => onCover(c.id, e)} /></label>
+                            <label className="lm-pf-edit__btn">+ Photos
+                              <input type="file" accept="image/*" multiple hidden onChange={(e) => onPhotos(c.id, e)} disabled={(c.images || []).length >= MAX_PER_CAT} /></label>
+                            <span className="lm-pf-edit__count">{(c.images || []).length} / {MAX_PER_CAT}</span>
+                            <button type="button" className="lm-pf-edit__btn" onClick={() => removeCat(c.id)}>remove</button>
+                          </div>
+                          {busy[c.id] && <div className="lm-pf-import__msg">{busy[c.id]}</div>}
+                          <details className="lm-pf-urls">
+                            <summary>or paste image URLs</summary>
+                            <textarea
+                              rows={3}
+                              value={urlDrafts[c.id] || ''}
+                              onChange={(e) => setUrlDrafts((d) => ({ ...d, [c.id]: e.target.value }))}
+                              placeholder={'One image URL per line.\nPasted URLs are used as-is — not re-optimized.'}
+                            />
+                            <button type="button" className="lm-pf-edit__btn" onClick={() => onAddUrls(c.id)} disabled={!(urlDrafts[c.id] || '').trim()}>Add URLs</button>
+                          </details>
                         </div>
                       )}
                     </div>

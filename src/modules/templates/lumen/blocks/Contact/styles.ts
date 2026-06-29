@@ -3,7 +3,7 @@
 // the section bg — the data-surface="paper-2" wrapper does.
 
 export const CONTACT_STYLES = `
-.lm-contact-in{ max-width:var(--max-w); margin:0 auto; padding:0 var(--pad-x); display:grid; grid-template-columns:1.05fr 0.95fr; gap:clamp(40px,6vw,80px); align-items:start; }
+.lm-contact-in{ max-width:var(--max-w); margin:0 auto; padding:var(--pad-y) var(--pad-x); display:grid; grid-template-columns:1.05fr 0.95fr; gap:clamp(40px,6vw,80px); align-items:start; }
 .lm-contact-copy .lm-eyebrow{ font-family:var(--font-mono); font-weight:500; font-size:11px; letter-spacing:0.22em; text-transform:uppercase; color:var(--brass-d); display:inline-flex; align-items:center; gap:11px; }
 .lm-contact-copy .lm-eyebrow::before{ content:""; width:24px; height:1px; background:var(--line-2); }
 .lm-contact-copy h2{ font-family:var(--font-display); font-size:clamp(30px,4vw,48px); font-weight:400; letter-spacing:-0.012em; line-height:1.08; color:var(--ink); margin:16px 0 0; }

@@ -3,7 +3,7 @@
 // .pf-* 233-250, .lb-* lightbox 320-349). Block does NOT paint the section bg.
 
 export const PORTFOLIO_STYLES = `
-.lm-pf-in{ max-width:var(--max-w); margin:0 auto; padding:0 var(--pad-x); }
+.lm-pf-in{ max-width:var(--max-w); margin:0 auto; padding:var(--pad-y) var(--pad-x); }
 .lm-sec-head{ max-width:62ch; display:flex; flex-direction:column; gap:16px; margin-bottom:52px; }
 .lm-sec-head .lm-eyebrow{ font-family:var(--font-mono); font-weight:500; font-size:11px; letter-spacing:0.22em; text-transform:uppercase; color:var(--brass-d); display:inline-flex; align-items:center; gap:11px; }
 .lm-sec-head .lm-eyebrow::before{ content:""; width:24px; height:1px; background:var(--line-2); }
@@ -28,6 +28,11 @@ export const PORTFOLIO_STYLES = `
 .lm-fig .ratio{ margin-left:auto; color:var(--ink-3); opacity:.85; }
 .lm-pf-edit{ display:flex; gap:8px; align-items:center; margin-top:8px; flex-wrap:wrap; }
 .lm-pf-edit__btn{ font-family:var(--font-mono); font-size:10px; letter-spacing:0.04em; color:var(--ink-3); background:transparent; border:1px dashed var(--line-2); border-radius:2px; padding:4px 9px; cursor:pointer; }
+.lm-pf-edit__count{ font-family:var(--font-mono); font-size:10px; color:var(--ink-3); }
+.lm-pf-import__msg{ font-family:var(--font-mono); font-size:10.5px; color:var(--brass-d); margin-top:6px; }
+.lm-pf-urls{ margin-top:8px; }
+.lm-pf-urls summary{ font-family:var(--font-mono); font-size:10px; letter-spacing:0.04em; color:var(--ink-3); cursor:pointer; }
+.lm-pf-urls textarea{ width:100%; margin-top:6px; font-family:var(--font-mono); font-size:11px; color:var(--ink); background:var(--paper-2); border:1px solid var(--line-2); border-radius:var(--r); padding:8px 10px; resize:vertical; }
 .lm-pf-add{ font-family:var(--font-mono); font-size:10.5px; letter-spacing:0.04em; color:var(--ink-3); background:transparent; border:1px dashed var(--line-2); border-radius:2px; padding:6px 12px; cursor:pointer; margin-top:20px; }
 /* ---- lightbox (published; lumen.v1.js drives it) ---- */
 .lm-lb{ position:fixed; inset:0; z-index:200; display:none; }

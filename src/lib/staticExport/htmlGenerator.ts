@@ -182,6 +182,13 @@ function buildHTMLDocument(params: {
 }): string {
   const { bodyHTML, cssVariables, metadata, analyticsOptIn, hasForms, usesNaayom, usesLumen } = params;
 
+  // Asset origin for the injected fonts/scripts. PROD must stay absolute
+  // (https://lessgo.ai) because published HTML is also served from custom domains
+  // where /assets/* would 404. In dev (local publish) use a same-origin relative
+  // base so behaviors JS + fonts load from this server's public/ — otherwise they
+  // 404 against prod and the EN/NL toggle, lightbox, fonts never run locally.
+  const assetBase = process.env.NODE_ENV === 'production' ? 'https://lessgo.ai' : '';
+
   // Generate CSS variables style tag
   const cssVariablesStyle = generateCSSVariablesStyle(cssVariables);
 
@@ -221,7 +228,7 @@ function buildHTMLDocument(params: {
 
   <!-- Self-hosted template fonts (Inter, Inter Tight, JetBrains Mono, DM Sans,
        Fraunces, Source Serif 4, Lora, EB Garamond) -->
-  <link rel="stylesheet" href="https://lessgo.ai/assets/fonts-self-hosted.css">
+  <link rel="stylesheet" href="${assetBase}/assets/fonts-self-hosted.css">
 
   <!-- Shared CSS -->
   <link rel="stylesheet" href="/assets/published.css">
@@ -234,18 +241,18 @@ function buildHTMLDocument(params: {
   ${renderLessgoBadge()}
 
   <!-- Phase 4: Form handler (loaded if page has forms) -->
-  ${hasForms ? `<script src="https://lessgo.ai/assets/form.v1.js" defer></script>` : ''}
+  ${hasForms ? `<script src="${assetBase}/assets/form.v1.js" defer></script>` : ''}
 
   <!-- Phase 4: TechPremium behaviors (dropdown nav, lightbox, gallery filter, readout tick) -->
-  ${usesNaayom ? `<script src="https://lessgo.ai/assets/naayom.v1.js" defer></script>` : ''}
+  ${usesNaayom ? `<script src="${assetBase}/assets/naayom.v1.js" defer></script>` : ''}
 
   <!-- Lumen behaviors (lightbox + reveal + EN·NL toggle/geo) -->
-  ${usesLumen ? `<script src="https://lessgo.ai/assets/lumen.v1.js" defer></script>` : ''}
+  ${usesLumen ? `<script src="${assetBase}/assets/lumen.v1.js" defer></script>` : ''}
 
   <!-- Phase 4: Analytics beacon (opt-in) -->
   ${
     analyticsOptIn
-      ? `<script src="https://lessgo.ai/assets/a.v1.js" data-page-id="${metadata.publishedPageId}" data-slug="${metadata.slug}" defer></script>`
+      ? `<script src="${assetBase}/assets/a.v1.js" data-page-id="${metadata.publishedPageId}" data-slug="${metadata.slug}" defer></script>`
       : ''
   }
 </body>

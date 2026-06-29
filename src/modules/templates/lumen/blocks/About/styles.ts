@@ -19,6 +19,10 @@ export const ABOUT_STYLES = `
 .lm-ph{ position:relative; display:block; background:var(--paper-2); overflow:hidden; border:1px solid var(--line); background-image:repeating-linear-gradient(135deg, oklch(0.235 0.010 60 / 0.05) 0 1px, transparent 1px 13px); }
 .lm-ph img{ display:block; width:100%; height:100%; object-fit:cover; }
 .lm-ph .lm-ph-tag{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); font-family:var(--font-mono); font-size:10px; font-weight:500; letter-spacing:0.13em; text-transform:uppercase; color:var(--ink-3); white-space:nowrap; text-align:center; border:1px solid var(--line-2); padding:5px 11px; border-radius:var(--r); background:var(--paper); }
+.lm-photo-edit{ position:absolute; right:12px; bottom:12px; z-index:3; display:inline-flex; align-items:center; gap:8px; }
+.lm-photo-edit__btn{ font-family:var(--font-mono); font-size:10px; letter-spacing:0.06em; color:var(--ink); background:var(--paper); border:1px solid var(--line-2); border-radius:var(--r); padding:6px 10px; cursor:pointer; }
+.lm-photo-edit__btn:hover{ border-color:var(--brass); }
+.lm-photo-edit__x{ font-family:var(--font-mono); font-size:10px; color:var(--ink-2); background:var(--paper); border:1px solid var(--line-2); border-radius:var(--r); padding:6px 8px; cursor:pointer; }
 
 .lm-fig{ display:flex; align-items:baseline; gap:12px; margin-top:13px; font-family:var(--font-mono); font-size:10.5px; letter-spacing:0.10em; text-transform:uppercase; color:var(--ink-3); }
 .lm-fig .lm-fig-n{ color:var(--brass-d); }

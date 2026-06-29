@@ -17,6 +17,10 @@ export const HERO_STYLES = `
 .lm-hero-art{ position:relative; }
 .lm-hero-art .lm-frameline{ position:absolute; inset:-12px; border:1px solid var(--brass); opacity:.34; pointer-events:none; }
 .lm-hero-art .lm-badge{ position:absolute; top:16px; left:16px; z-index:2; font-family:var(--font-mono); font-size:10px; font-weight:500; letter-spacing:0.12em; text-transform:uppercase; color:var(--brass-l); background:oklch(0.205 0.010 52 / 0.82); border:1px solid var(--line-dk); padding:6px 10px; border-radius:var(--r); backdrop-filter:blur(4px); }
+.lm-photo-edit{ position:absolute; right:12px; bottom:12px; z-index:3; display:inline-flex; align-items:center; gap:8px; }
+.lm-photo-edit__btn{ font-family:var(--font-mono); font-size:10px; letter-spacing:0.06em; color:var(--ink); background:var(--paper); border:1px solid var(--line-2); border-radius:var(--r); padding:6px 10px; cursor:pointer; }
+.lm-photo-edit__btn:hover{ border-color:var(--brass); }
+.lm-photo-edit__x{ font-family:var(--font-mono); font-size:10px; color:var(--paper); background:oklch(0.205 0.010 52 / 0.82); border:1px solid var(--line-dk); border-radius:var(--r); padding:6px 8px; cursor:pointer; }
 .lm-ph{ position:relative; background:var(--paper-2); overflow:hidden; background-image:repeating-linear-gradient(135deg, oklch(0.235 0.010 60 / 0.05) 0 1px, transparent 1px 13px); border:1px solid var(--line); }
 .lm-ph.on-dark{ background-color:var(--esp); border-color:var(--line-dk); background-image:repeating-linear-gradient(135deg, oklch(0.815 0.050 74 / 0.08) 0 1px, transparent 1px 13px); }
 .lm-ph img{ display:block; width:100%; height:100%; object-fit:cover; }
