@@ -1,7 +1,7 @@
 // Server-safe published variant of the Surge hero. No hooks, flat props.
 
 import React from 'react';
-import { resolveCtaHref } from '@/utils/resolveCtaHref';
+import { resolveCtaHref, externalLinkProps } from '@/utils/resolveCtaHref';
 import { SurgeDashboard, SurgeFloatChips } from './SurgeDashboard';
 import { HERO_STYLES } from './styles';
 
@@ -40,10 +40,10 @@ export default function PetalFramedHeroPublished(props: PetalFramedHeroPublished
             <div className="sg-hero__actions">
               <div className="sg-hero__cta-row">
                 {props.cta_text && (
-                  <a className="sg-btn sg-btn--primary" href={ctaHref}>{props.cta_text}</a>
+                  <a className="sg-btn sg-btn--primary" href={ctaHref} {...externalLinkProps(ctaHref)}>{props.cta_text}</a>
                 )}
                 {props.secondary_cta_text && (
-                  <a className="sg-btn sg-btn--ghost" href={secondaryHref}>{props.secondary_cta_text}</a>
+                  <a className="sg-btn sg-btn--ghost" href={secondaryHref} {...externalLinkProps(secondaryHref)}>{props.secondary_cta_text}</a>
                 )}
               </div>
               {props.meta && (

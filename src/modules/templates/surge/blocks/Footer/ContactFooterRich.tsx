@@ -5,9 +5,16 @@
 // footer contract.
 
 import React from 'react';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { buildSectionLinkOptions } from '@/utils/sectionAnchors';
+import { buildPageLinkOptions } from '@/utils/pageLinks';
 import { useServiceBlock } from '../../hooks/useServiceBlock';
 import { SurgeEditable } from '../../components/SurgeEditable';
+import { LinkTargetPopover } from '../../components/LinkTargetPopover';
 import { FOOTER_STYLES } from './styles';
+import { DEFAULT_FOOTER_LINKS, type FooterLink } from './footerDefaults';
+
+const rid = (p: string) => `${p}${Math.random().toString(36).slice(2, 7)}`;
 
 interface SocialLink {
   id: string;
@@ -22,6 +29,26 @@ interface ContactFooterRichContent {
   address: string;
   copyright: string;
   social_links: SocialLink[];
+  whatsapp_number: string;
+  whatsapp_label: string;
+  whatsapp_prefill: string;
+  links_heading: string;
+  footer_links: FooterLink[];
+}
+
+// Inline MessageCircle glyph (server-safe; matches Surge's inline-SVG style).
+const WhatsAppIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+  </svg>
+);
+
+// Boundary note: kept local (NOT exported) — never import from a 'use client'
+// file into the published renderer. The published variant inlines the same logic.
+function buildWaHref(number?: string, prefill?: string): string {
+  const wa = (number || '').replace(/[^0-9]/g, '');
+  if (!wa) return '';
+  return `https://wa.me/${wa}${prefill ? `?text=${encodeURIComponent(prefill)}` : ''}`;
 }
 
 interface ContactFooterRichProps {
@@ -31,8 +58,18 @@ interface ContactFooterRichProps {
 export default function ContactFooterRich({ sectionId }: ContactFooterRichProps) {
   const { mode, blockContent, handleContentUpdate, handleCollectionUpdate, isExcluded } =
     useServiceBlock<ContactFooterRichContent>({ sectionId });
+  const edit = mode === 'edit';
+
+  const { sections, pages } = useEditStore();
+  const sectionOptions = React.useMemo(() => buildSectionLinkOptions(sections || []), [sections]);
+  const pageOptions = React.useMemo(() => buildPageLinkOptions(pages), [pages]);
 
   const socialLinks = blockContent.social_links || [];
+  const waHref = buildWaHref(blockContent.whatsapp_number, blockContent.whatsapp_prefill);
+
+  // Studio column: fall back to defaults when unconfigured so the footer stays 4-up.
+  const storedLinks = blockContent.footer_links || [];
+  const footerLinks: FooterLink[] = storedLinks.length ? storedLinks : DEFAULT_FOOTER_LINKS;
 
   const updateSocial = (id: string, key: keyof SocialLink, value: string) => {
     handleCollectionUpdate(
@@ -52,6 +89,12 @@ export default function ContactFooterRich({ sectionId }: ContactFooterRichProps)
   const removeSocial = (id: string) => {
     handleCollectionUpdate('social_links', socialLinks.filter((s) => s.id !== id));
   };
+
+  // Footer nav links — edits write the working set back (materializing defaults on first edit).
+  const setLinks = (next: FooterLink[]) => handleCollectionUpdate('footer_links', next);
+  const patchLink = (id: string, p: Partial<FooterLink>) => setLinks(footerLinks.map((l) => (l.id === id ? { ...l, ...p } : l)));
+  const addLink = () => footerLinks.length < 6 && setLinks([...footerLinks, { id: rid('fl'), label: 'Link', href: '#' }]);
+  const removeLink = (id: string) => setLinks(footerLinks.filter((l) => l.id !== id));
 
   return (
     <>
@@ -140,15 +183,23 @@ export default function ContactFooterRich({ sectionId }: ContactFooterRichProps)
                     enterBehavior="save"
                     placeholder="Platform"
                   />
-                  {mode === 'edit' && (
-                    <button
-                      type="button"
-                      className="sg-footer__social-remove"
-                      onClick={() => removeSocial(s.id)}
-                      aria-label="Remove link"
-                    >
-                      ×
-                    </button>
+                  {edit && (
+                    <>
+                      <input
+                        className="sg-footer__link-url"
+                        value={s.href || ''}
+                        onChange={(e) => updateSocial(s.id, 'href', e.target.value)}
+                        placeholder="https://…"
+                      />
+                      <button
+                        type="button"
+                        className="sg-footer__link-remove"
+                        onClick={() => removeSocial(s.id)}
+                        aria-label="Remove link"
+                      >
+                        ×
+                      </button>
+                    </>
                   )}
                 </li>
               ))}
@@ -163,12 +214,50 @@ export default function ContactFooterRich({ sectionId }: ContactFooterRichProps)
           </div>
 
           <div className="sg-footer__col">
-            <h4>Studio</h4>
+            <SurgeEditable
+              as="h4"
+              mode={mode}
+              sectionId={sectionId}
+              elementKey="links_heading"
+              value={blockContent.links_heading}
+              onSave={(v) => handleContentUpdate('links_heading', v)}
+              enterBehavior="save"
+              placeholder="Studio"
+            />
             <ul>
-              <li>About</li>
-              <li>Work</li>
-              <li>Clients</li>
-              <li>Contact</li>
+              {footerLinks.map((l) => (
+                <li key={l.id}>
+                  <SurgeEditable
+                    as="span"
+                    mode={mode}
+                    sectionId={sectionId}
+                    elementKey={`footer_links_label_${l.id}`}
+                    value={l.label}
+                    onSave={(v) => patchLink(l.id, { label: v })}
+                    enterBehavior="save"
+                    placeholder="Link"
+                  />
+                  {edit && (
+                    <>
+                      <LinkTargetPopover
+                        href={l.href}
+                        sectionOptions={sectionOptions}
+                        pageOptions={pageOptions}
+                        onChange={(href) => patchLink(l.id, { href })}
+                        triggerClassName="sg-footer__link-cfg"
+                      />
+                      {footerLinks.length > 1 && (
+                        <button type="button" className="sg-footer__link-remove" onClick={() => removeLink(l.id)} aria-label="Remove link">×</button>
+                      )}
+                    </>
+                  )}
+                </li>
+              ))}
+              {edit && footerLinks.length < 6 && (
+                <li>
+                  <button type="button" className="sg-footer__link-add" onClick={addLink}>+ link</button>
+                </li>
+              )}
             </ul>
           </div>
         </div>
@@ -186,7 +275,35 @@ export default function ContactFooterRich({ sectionId }: ContactFooterRichProps)
           />
           <span>Built with Lessgo</span>
         </div>
+
+        {mode === 'edit' && (
+          <div className="sg-wa-edit">
+            <strong>WhatsApp widget</strong>
+            <input
+              value={blockContent.whatsapp_number || ''}
+              onChange={(e) => handleContentUpdate('whatsapp_number', e.target.value)}
+              placeholder="Number e.g. 919999999999"
+            />
+            <input
+              value={blockContent.whatsapp_label || ''}
+              onChange={(e) => handleContentUpdate('whatsapp_label', e.target.value)}
+              placeholder="Label (optional) e.g. Chat with us"
+            />
+            <input
+              value={blockContent.whatsapp_prefill || ''}
+              onChange={(e) => handleContentUpdate('whatsapp_prefill', e.target.value)}
+              placeholder="Prefilled message (optional)"
+            />
+          </div>
+        )}
       </footer>
+
+      {waHref && (
+        <a className="sg-wa-fab" href={waHref} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+          <WhatsAppIcon />
+          {blockContent.whatsapp_label && <span className="sg-wa-label">{blockContent.whatsapp_label}</span>}
+        </a>
+      )}
     </>
   );
 }

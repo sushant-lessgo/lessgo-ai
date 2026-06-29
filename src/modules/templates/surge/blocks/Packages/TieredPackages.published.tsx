@@ -1,7 +1,7 @@
 // Server-safe published variant of the Surge packages block.
 
 import React from 'react';
-import { resolveCtaHref } from '@/utils/resolveCtaHref';
+import { resolveCtaHref, externalLinkProps } from '@/utils/resolveCtaHref';
 import { PKG_STYLES } from './styles';
 
 interface PackageTier {
@@ -56,14 +56,18 @@ export default function TieredPackagesPublished(props: TieredPackagesPublishedPr
                     ))}
                   </ul>
                 )}
-                {p.cta_text && (
-                  <a
-                    href={resolveCtaHref(md?.[`packages_cta_${p.id}`]?.buttonConfig, forms, '#contact')}
-                    className={`sg-btn ${p.is_featured ? 'sg-btn--primary' : 'sg-btn--soft'} sg-pkg__cta`}
-                  >
-                    {p.cta_text}
-                  </a>
-                )}
+                {p.cta_text && (() => {
+                  const pkgHref = resolveCtaHref(md?.[`packages_cta_${p.id}`]?.buttonConfig, forms, '#contact');
+                  return (
+                    <a
+                      href={pkgHref}
+                      {...externalLinkProps(pkgHref)}
+                      className={`sg-btn ${p.is_featured ? 'sg-btn--primary' : 'sg-btn--soft'} sg-pkg__cta`}
+                    >
+                      {p.cta_text}
+                    </a>
+                  );
+                })()}
               </article>
             );
           })}

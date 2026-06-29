@@ -287,6 +287,10 @@ export const serviceElementSchema: Record<string, UIBlockSchemaV2> = {
       contact_phone:  { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
       address:        { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
       copyright:      { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: '© Studio' },
+      whatsapp_number:  { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      whatsapp_label:   { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      whatsapp_prefill: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      links_heading:    { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: 'Studio' },
     },
     collections: {
       social_links: {
@@ -297,6 +301,18 @@ export const serviceElementSchema: Record<string, UIBlockSchemaV2> = {
           id:       { type: 'string', fillMode: 'system' },
           platform: { type: 'string', fillMode: 'manual_preferred', default: '' },
           href:     { type: 'string', fillMode: 'manual_preferred', default: '' },
+        },
+      },
+      // Editable footer nav column ("Studio"). Empty by default → the block falls
+      // back to DEFAULT_FOOTER_LINKS so the footer stays 4-up out of the box.
+      footer_links: {
+        requirement: 'optional',
+        fillMode: 'manual_preferred',
+        constraints: { min: 0, max: 6 },
+        fields: {
+          id:    { type: 'string', fillMode: 'system' },
+          label: { type: 'string', fillMode: 'manual_preferred', default: '' },
+          href:  { type: 'string', fillMode: 'manual_preferred', default: '#' },
         },
       },
     },

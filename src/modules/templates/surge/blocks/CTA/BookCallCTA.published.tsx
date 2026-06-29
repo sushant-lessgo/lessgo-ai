@@ -2,7 +2,7 @@
 // resolved via resolveCtaHref from elementMetadata buttonConfig.
 
 import React from 'react';
-import { resolveCtaHref } from '@/utils/resolveCtaHref';
+import { resolveCtaHref, externalLinkProps } from '@/utils/resolveCtaHref';
 import { CTA_STYLES } from './styles';
 
 interface BookCallCTAPublishedProps {
@@ -37,10 +37,10 @@ export default function BookCallCTAPublished(props: BookCallCTAPublishedProps) {
             )}
             <div className="sg-cta__actions">
               {props.cta_text && (
-                <a className="sg-btn sg-btn--primary" href={ctaHref}>{props.cta_text}</a>
+                <a className="sg-btn sg-btn--primary" href={ctaHref} {...externalLinkProps(ctaHref)}>{props.cta_text}</a>
               )}
               {props.secondary_cta_text && (
-                <a className="sg-btn sg-btn--ghost" href={secondaryHref}>{props.secondary_cta_text}</a>
+                <a className="sg-btn sg-btn--ghost" href={secondaryHref} {...externalLinkProps(secondaryHref)}>{props.secondary_cta_text}</a>
               )}
             </div>
             {props.meta && <span className="sg-cta__caption">{props.meta}</span>}

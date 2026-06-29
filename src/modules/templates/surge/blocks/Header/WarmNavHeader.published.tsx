@@ -1,8 +1,9 @@
 // Server-safe published variant of the Surge header. No hooks, flat props.
 
 import React from 'react';
-import { resolveCtaHref } from '@/utils/resolveCtaHref';
+import { resolveCtaHref, externalLinkProps } from '@/utils/resolveCtaHref';
 import { HEADER_STYLES } from './styles';
+// externalLinkProps used for both the CTA and the nav links below.
 
 interface NavItem {
   id?: string;
@@ -31,17 +32,25 @@ export default function WarmNavHeaderPublished(props: WarmNavHeaderPublishedProp
     <>
       <style dangerouslySetInnerHTML={{ __html: HEADER_STYLES }} />
       <nav className="sg-nav">
+        <div className="sg-nav-in">
         <div className="sg-brand">
-          <span className="sg-brand__mark" />
-          <span>{logoText}</span>
+          {props.logo_image ? (
+            <img className="sg-brand__img" src={props.logo_image} alt={logoText} />
+          ) : (
+            <>
+              <span className="sg-brand__mark" />
+              <span>{logoText}</span>
+            </>
+          )}
         </div>
         <div className="sg-nav-mid">
           {navItems.map((item, idx) => (
-            <a key={item.id || idx} href={item.href || '#'}>{item.label || ''}</a>
+            <a key={item.id || idx} href={item.href || '#'} {...externalLinkProps(item.href)}>{item.label || ''}</a>
           ))}
         </div>
         <div className="sg-nav-right">
-          <a className="sg-btn sg-btn--primary sg-btn--sm" href={ctaHref}>{ctaText}</a>
+          <a className="sg-btn sg-btn--primary sg-btn--sm" href={ctaHref} {...externalLinkProps(ctaHref)}>{ctaText}</a>
+        </div>
         </div>
       </nav>
     </>

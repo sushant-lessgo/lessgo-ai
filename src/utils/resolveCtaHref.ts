@@ -38,3 +38,14 @@ export function resolveCtaHref(
   }
   return fallback;
 }
+
+/**
+ * Anchor attrs for a resolved href. External links (http/https — e.g. a Calendly
+ * booking URL) open in a new tab; in-page anchors and internal paths stay same-tab.
+ * Plain server-safe module — spreadable into published <a> elements.
+ */
+export function externalLinkProps(href: string | undefined): { target?: '_blank'; rel?: string } {
+  return href && /^https?:\/\//i.test(href)
+    ? { target: '_blank', rel: 'noopener noreferrer' }
+    : {};
+}

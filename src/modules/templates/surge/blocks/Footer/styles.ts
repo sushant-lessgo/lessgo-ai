@@ -21,7 +21,28 @@ export const FOOTER_STYLES = `
 .sg-footer__col li:hover { color: #fff; }
 
 .sg-footer__social-remove { background: transparent; border: none; color: oklch(0.6 0.02 265); font-size: 14px; cursor: pointer; line-height: 1; }
-.sg-footer__social-add { background: transparent; border: 1px dashed var(--panel-line); color: oklch(0.72 0.01 265); padding: 4px 10px; border-radius: var(--r-sm); font-family: var(--font-mono); font-size: 12px; cursor: pointer; }
+.sg-footer__social-add, .sg-footer__link-add { background: transparent; border: 1px dashed var(--panel-line); color: oklch(0.72 0.01 265); padding: 4px 10px; border-radius: var(--r-sm); font-family: var(--font-mono); font-size: 12px; cursor: pointer; }
+.sg-footer__social-add:hover, .sg-footer__link-add:hover { color: #fff; border-color: oklch(0.6 0.02 265); }
+/* edit-only footer link affordances (panel surface) */
+.sg-footer__link-cfg { display: inline-flex; align-items: center; justify-content: center; background: transparent; border: none; color: oklch(0.6 0.02 265); cursor: pointer; padding: 0; }
+.sg-footer__link-cfg:hover { color: #fff; }
+.sg-footer__link-remove { background: transparent; border: none; color: oklch(0.6 0.02 265); font-size: 14px; line-height: 1; cursor: pointer; }
+.sg-footer__link-remove:hover { color: #fff; }
+.sg-footer__link-url { width: 120px; padding: 3px 6px; border-radius: var(--r-xs); border: 1px solid var(--panel-line); background: var(--panel-2); color: #fff; font-size: 11px; font-family: var(--font-mono); }
+.sg-footer__link-url::placeholder { color: oklch(0.5 0.02 265); }
 
 .sg-footer__bottom { display: flex; justify-content: space-between; align-items: center; max-width: var(--max-w); margin: 0 auto; padding-top: 22px; border-top: 1px solid var(--panel-line); font-family: var(--font-mono); font-size: 11px; color: oklch(0.6 0.02 265); flex-wrap: wrap; gap: 10px; }
+
+/* WhatsApp floating button (shared chrome — appears on every page) */
+.sg-wa-fab { position: fixed; right: clamp(16px,3vw,28px); bottom: clamp(16px,3vw,28px); z-index: 80; display: inline-flex; align-items: center; gap: 10px; padding: 12px 18px 12px 14px; background: #25D366; color: #fff; border-radius: 999px; font-family: var(--font-display); font-weight: 700; font-size: 14.5px; text-decoration: none; box-shadow: 0 14px 34px -12px rgba(37,211,102,0.55); transition: transform .16s ease, box-shadow .16s ease; }
+.sg-wa-fab:hover { transform: translateY(-2px); box-shadow: 0 18px 40px -12px rgba(37,211,102,0.7); }
+.sg-wa-fab svg { width: 24px; height: 24px; flex: none; }
+.sg-wa-fab .sg-wa-label { white-space: nowrap; }
+@media (max-width: 760px) { .sg-wa-fab { padding: 14px; } .sg-wa-fab .sg-wa-label { display: none; } }
+
+/* edit-only WhatsApp widget config (not rendered on published) */
+.sg-wa-edit { max-width: var(--max-w); margin: 24px auto 0; display: grid; gap: 8px; max-width: 380px; }
+.sg-wa-edit strong { font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(0.62 0.02 265); }
+.sg-wa-edit input { padding: 8px 10px; border-radius: var(--r-sm); border: 1px solid var(--panel-line); background: var(--panel-2); color: #fff; font-size: 13px; font-family: var(--font-body); }
+.sg-wa-edit input::placeholder { color: oklch(0.55 0.02 265); }
 `;
