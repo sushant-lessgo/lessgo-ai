@@ -6,10 +6,17 @@
 > **Out of scope:** standing up a new *audience type* (new onboarding flow + store + copy
 > prompts). See the final appendix for a pointer.
 
-> **Golden rule:** a new template is a **skin**. It supplies new *tokens, palettes, variants,
-> and block components* that **consume the audience's existing content contract**. It does
-> **NOT** change copy generation, the element schema, the strategy, or the section list.
-> If you find yourself editing `src/modules/audience/**`, stop — you're out of scope (see Appendix B).
+> **Golden rule:** a new template is, by default, a **skin** — new *tokens, palettes, variants,
+> and block components* that **consume the audience's existing content contract** (no `audience/**`
+> edits). This is the common case and the fastest path; do this unless you have a reason not to.
+>
+> **But a template MAY also extend the audience** — add new section types, multi-page, collections,
+> interactivity (TechPremium/naayom did all four). That is **deliberate, AI-first** work: new
+> section types flow through the audience's **AI generation** (schema + section selection + copy
+> prompt) so the model produces them — you do **not** hardcode page copy. Multi-page is now a
+> **standard** capability, not an exception. See **§12** before you touch `src/modules/audience/**`
+> or the multi-page store — going there by accident is still a mistake; going there on purpose,
+> following §12, is supported.
 
 ---
 
@@ -34,6 +41,12 @@ it, edit / preview / published / static-export all "just work."
 - **Published** (`/p/[slug]`) and **static export** → `LandingPagePublishedRenderer` → your block's **`.published.tsx`** (server-safe, no hooks).
 - **Dual-renderer parity is the #1 trap.** Every block is a *pair*; they must render the same
   layout/colors. A mismatch = "looks right in editor, wrong when published" (or vice-versa).
+
+**A project can hold multiple pages.** Multi-page is standard: one project = one site, with a Home
+plus optional subpages (`/gallery`, `/contact`, `/products/{slug}`, …) routed at `/p/{slug}/{path}`.
+Shared header/footer ("chrome") is edited once and injected into every page at publish. A pure skin
+needs to know none of this — the renderers handle it. A template that *adds* page types or
+collections does (see **§12** + `multiPagePlan.md`).
 
 ---
 
@@ -190,6 +203,52 @@ For **every** section type in the audience layout map (§2), create
 - **No collapsing section margins** — use padding inside the surface, not `margin: Npx 0` on the
   outer element (margin collapses through the `data-surface` wrapper and exposes the page bg).
 
+**Porting raw designer CSS (TechPremium learnings):**
+- **🔴 Per-block CSS lives in a PLAIN `styles.ts` module — never in the `'use client'` `.tsx`.** Put
+  the const in `<Block>/styles.ts` (a plain module, **no `'use client'`**), export it, and `import`
+  it into BOTH `<Block>.tsx` and `<Block>.published.tsx`, each rendering
+  `<style dangerouslySetInnerHTML={{ __html: STYLES }} />`. **Why this exact placement:** if you
+  `export const STYLES` from the `'use client'` `.tsx` and import it into `.published.tsx` (server),
+  the value resolves to a **client reference, not the string** → the published `<style>` emits
+  **empty** → the live page has no CSS (invisible in `/edit`, where inline styles work regardless —
+  it only breaks on `/p/[slug]`). This is a real P0 that shipped (same class as the
+  `'use client']` 500 bug — see [[project_published_client_boundary]]). Composed styles may import
+  shared consts from a plain `shared/styles.ts` (safe — plain module). Block CSS is **inline**, not
+  in `published.css`, so no CSS rebuild is needed for block styling.
+- **Prefix every ported class** (TechPremium used `tp-`). The designer's bare `.nav`/`.btn`/`.card`
+  will collide with the **editor's own UI** in edit mode and silently restyle toolbars/menus. A
+  template-unique prefix is mandatory, not cosmetic.
+- **Images via the store, not raw URL inputs.** For image elements/collections call
+  `useEditStore().uploadImage(file, { sectionId, elementKey })` (Sharp→WebP→Blob, auto-saves);
+  for collection items the key is the **nested dotted path** `images.{item.id}.src` (call
+  `uploadImage` directly — the `ImageToolbar` parser only splits the first two dot-parts and mangles
+  4-part keys). For many photos use `bulkUploadImages(files: FileList)`. The store's save serializes
+  the **full** multi-page draft (pages + chrome) — don't hand-roll a partial save.
+
+**Established editable affordances (proven on TechPremium/Surge — port, don't reinvent).** All keep
+edit/published parity (update both files; CSS in the plain `styles.ts`):
+- **Logo upload (header):** schema already has `logo_image` (`manual_preferred`). Edit `.tsx`: a hidden
+  `<input type=file>` + "Change / Remove logo" button calling
+  `uploadImage(file, { sectionId, elementKey: 'logo_image' })`; when set, render `<img class="…__img">`
+  **instead of** the wordmark/mark. Published: render `<img>` when `logo_image` present, else the mark.
+  Pattern source: `techpremium/blocks/Header/TechPremiumNav.tsx`.
+- **WhatsApp FAB (footer):** add optional schema keys `whatsapp_number`, `whatsapp_label`,
+  `whatsapp_prefill` (`manual_preferred`, default `''`). Render a fixed-position anchor after
+  `</footer>` when a number is set, `href = https://wa.me/{digitsOnly}?text={encoded prefill}`, inline
+  SVG icon, hardcoded green `#25D366`. **Pure anchor, no JS.** Source: `TechPremiumFooter`.
+- **Configurable nav / footer links:** the `LinkTargetPopover` (scroll-to-section / page / custom URL)
+  + add/remove affordances. Copy `LinkTargetPopover` into your template's `components/` (it's
+  `'use client'` — import it ONLY in edit `.tsx`, never `.published.tsx`); feed it
+  `buildSectionLinkOptions` (`@/utils/sectionAnchors`) + `buildPageLinkOptions` (`@/utils/pageLinks`).
+  Single-page templates → `pageOptions` is empty and the "Link to page" radio auto-hides. Published:
+  render `<a href={item.href} {...externalLinkProps(item.href)}>` (new-tab on external —
+  `@/utils/resolveCtaHref`). Source: `TechPremiumNav` / `TechPremiumFooter`.
+- **When converting hardcoded designer content (e.g. a fixed footer column) to an editable collection,
+  SEED defaults** — an empty collection + "hide when empty" silently drops the designed element.
+- **Adding template-specific OPTIONAL keys to a SHARED layout is safe** when `manual_preferred`
+  + `default ''` (other templates ignore them; the AI never fills `manual_preferred`). This is how
+  Surge added `whatsapp_*`/`footer_links` to the shared `ContactFooterRich` without affecting Hearth.
+
 ### 3g. `resolveFolioBlock.ts` + the `resolveBlock` export
 Map **section type (lowercase) → `{ edit, published }`** component pair:
 ```ts
@@ -203,6 +262,35 @@ export function resolveFolioBlock(sectionType: string, mode: 'edit' | 'published
 > Note: for template projects the renderer dispatches by **section type + templateId** (via
 > `resolveBlock`), **not** by the stored `layout` name. The `layout` name is used only for the
 > audience content schema/defaults. So your registry is keyed by section type.
+
+> ⚠️ **Two-identifier discipline — the #1 silent-failure source** (build stays green, runtime breaks).
+> Each section carries **two** names that must each stay consistent across several places:
+> - **lowercase `type`** — the section-id prefix (`hero-…`), the `resolveBlock` key, the
+>   `sectionRules` key, and the schema's internal `sectionType` field. **Wrong → placeholder block.**
+> - **PascalCase `LayoutName`** — the `elementSchema` object KEY, the section's `layout` field, and
+>   `sectionLayouts[id]`; `getSchemaDefaults(LayoutName)` drives content. **Wrong → block renders empty.**
+>
+> Neither mismatch throws a TS or build error. Two recurring traps:
+> 1. **Don't confuse the component name with either.** `TechPremiumResults` is the *component*; the
+>    `type` is `testimonials` and the `LayoutName` is `ProofWithLogoRail`. Registry/schema/builders
+>    use `type`/`LayoutName`, never the component name.
+> 2. **Section-id prefixes must be single all-lowercase tokens.** `extractSectionType` lowercases the
+>    prefix and runs a small `typeMap` in `componentRegistry.ts` — a compound/camelCase name gets
+>    mangled or collides (`howitworks` → `howItWorks`). TechPremium used **`process`** instead of
+>    `howitworks` to dodge it. Keep `type` a clean lowercase word.
+>
+> 3. **Layout names are GLOBAL across the merged `layoutElementSchema`, and PRODUCT WINS TIES.**
+>    `serviceElementSchema` is spread first, `meridianElementSchema` last (`layoutElementSchema.ts`
+>    ~`:331/:335`), so a service/template layout that reuses a product layout NAME (e.g. a bare
+>    `ContactForm`, which already exists in `meridianElementSchema`) is **silently shadowed** by the
+>    product entry → your block gets the wrong schema defaults, build stays green. **Prefix bespoke /
+>    template-specific layout names** (`Lumen*`, `TechPremium*`) so they're globally unique. (Lumen
+>    learned this — PO review 2026-06-29.)
+>
+> **Guard it with a smoke test** (TechPremium's `registration.test.ts`): for every section type assert
+> `resolveBlock(type) ≠ placeholder`, a surface band exists, the schema `sectionType` matches, and
+> `extractSectionType('type-x') === 'type'`. For archetype-seeded sections, also run the builder and
+> assert `getSchemaDefaults(layout) ≠ null`. This is the **only** thing that catches casing drift.
 
 ### 3h. `index.ts` — the module barrel (exact export names the registry consumes)
 Re-export with the **generic alias names** the registry loader maps (§6). At minimum:
@@ -313,6 +401,32 @@ For each **new** family the design needs:
 
 ---
 
+## 7.5 Interactive behaviors (published JS) — one shared asset, not per-block scripts
+
+If the design needs JS (nav dropdowns, mobile menu, image gallery/lightbox, gallery filters, live
+tickers), do **not** scatter inline `<script>` tags per block. Port the designer's JS into **one
+minified asset**, like the existing `form.v1.js` / `a.v1.js`:
+1. New `src/lib/staticExport/<template>Behaviors.js` — the designer JS, selectors renamed to your
+   `tp-`-style prefix, each behavior a no-op when its markup is absent, with an idempotent boot guard.
+2. `scripts/buildAssets.js` — add `{ src: '<template>Behaviors.js', out: '<template>.v1.js' }` (the
+   build minifies it into `public/assets/`).
+3. `src/lib/staticExport/htmlGenerator.ts` — inject `<script src="…/<template>.v1.js" defer>` gated
+   on `templateId === '<id>'` (mirror the `form.v1.js` injection).
+4. Blocks emit only **markup + hook attributes/classes** (e.g. `[data-tp-lightbox-group]`,
+   `.tp-gfilter`); the asset wires them. In **edit** mode use minimal React (`useState`) instead.
+
+Pitfalls: the asset's selectors must match block markup **exactly** — a renamed class is a silent
+no-op. Behaviors run on **published only** — `/preview` uses the edit renderer and won't show them,
+so **verify on the live `/p/[slug]` URL**, not preview. Bump `…v2.js` only on breaking markup changes.
+
+For **forms** (a contact/lead block), don't write a bespoke submit — reuse the platform pipeline:
+seed an `MVPForm` into `state.forms`, render `<form data-lessgo-form data-form-id data-page-id
+data-owner-id>` with `name={field.id}` inputs; `form.v1.js` (auto-injected when `content.forms` is
+non-empty) POSTs to `/api/forms/submit`. The published renderer passes `publishedPageId`/`pageOwnerId`
+to every block for the data-attributes.
+
+---
+
 ## 8. Picker wiring (you opted in) — show the template + its palettes/variants
 
 **Service** (onboarding StyleStep + editor ServiceThemePopover read a catalog):
@@ -375,6 +489,18 @@ Leave them if your projects always persist `templateId`+`paletteId`; otherwise g
    EditHeader shows it.
 7. **Grep:** no leftover `Hearth`/`hearth` (or whatever you cloned) identifiers in
    `src/modules/templates/folio/**`.
+8. **Registration smoke test** (esp. if you added section types): a `registration.test.ts` that, per
+   type, asserts non-placeholder resolve + surface + schema `sectionType` match + `extractSectionType`
+   round-trip (+ `getSchemaDefaults(layout) ≠ null` for archetype sections). Build-green ≠ correct —
+   this is the only catch for the two-identifier/casing traps (§3g).
+9. **Behaviors on the live URL, not preview:** any JS (§7.5) only runs on published — hard-refresh
+   `/p/[slug]` (and subpaths) and confirm dropdowns/lightbox/filters/forms actually work.
+10. **`'use client'` boundary guard (commit it):** a test/grep asserting no `*.published.tsx` imports
+    a non-component value (CSS `*_STYLES`, helpers) from a `'use client'` sibling. This bug class has
+    shipped **twice** (functions → 500; CSS strings → empty published styles) and fails **silently** —
+    `npm run build` stays green, only the live page breaks. Inline-CSS templates especially: confirm
+    the actual published HTML carries the rules (`curl /p/[slug] | grep '.your-class'`), since `/edit`
+    looks correct regardless. See [[project_published_client_boundary]].
 
 ---
 
@@ -391,9 +517,81 @@ Leave them if your projects always persist `templateId`+`paletteId`; otherwise g
 - [ ] `types/service.ts`: `templateIds`, `defaultVariantForTemplate`, palette union + `palettesForTemplate`, `templateLabels`, `templateBlurbs`.
 - [ ] `registry.ts`: loader entry.
 - [ ] Fonts: woff2 + `@font-face` in `fonts-self-hosted.css` (+ optional preload) for any new family.
-- [ ] Picker: `templateCatalog.ts` entry + `TEMPLATE_ORDER` (service).
+- [ ] Picker: `templateCatalog.ts` entry + `TEMPLATE_ORDER` (service). **Bespoke/exclusive (§13): SKIP this** so it stays unselectable; set `templateId` on the client's project by hand instead.
+- [ ] Block CSS in a **plain `styles.ts`** imported by both files (never exported from the `'use client'` `.tsx` → empty published CSS); **prefix all ported classes** (e.g. `tp-`); images via `uploadImage`/`bulkUploadImages` (§3f).
+- [ ] Reuse the proven affordances where needed: logo upload, WhatsApp FAB, `LinkTargetPopover` nav/footer links; seed defaults when making hardcoded content editable (§3f).
+- [ ] Commit the `'use client'` boundary guard test (§10.10); verify published HTML actually carries block CSS via `curl`.
+- [ ] Two-identifier discipline (lowercase `type` vs PascalCase `LayoutName`); single-lowercase id prefixes; add a `registration.test.ts` smoke guard (§3g/§10.8).
+- [ ] If interactive: one minified `<template>.v1.js` behaviors asset wired via `buildAssets.js` + `htmlGenerator.ts` (§7.5) — verify on the published URL.
+- [ ] If adding section types / pages: follow **§12** (AI generation, not hardcoded copy) + `multiPagePlan.md`.
 - [ ] Audit §9 hardcoded defaults.
 - [ ] Run §10 verification end-to-end (esp. edit==published parity + zero Google font calls).
+
+---
+
+## 12. Extending the audience — new section types & multi-page (beyond a skin)
+
+A skin reuses the audience's existing sections. A richer template (TechPremium/naayom) **adds**
+section types, pages, and collections. That is an **audience-level** change — it affects every
+template of that audience and touches the AI generation pipeline, so **coordinate with a PO** and
+read this before editing `src/modules/audience/**`.
+
+**Principle: AI-first, never hardcoded copy.** New section types must be wired so the **AI generates**
+their content through the normal `onboarding → strategy → copy` flow. (TechPremium shipped a
+deterministic 12-section copy seed as a one-off launch bridge for naayom — that was **removed and is
+not the pattern**. Don't reintroduce a hardcoded-copy default for a persona/template.)
+
+**A new section type, end-to-end** (all must use the same lowercase `type` / PascalCase `LayoutName`
+per §3g):
+1. **Schema (contract):** add `meridianElementSchema['<LayoutName>']` / `serviceElementSchema[...]`
+   with `sectionType: '<type>'` + its elements/collections (`src/modules/audience/<a>/elementSchema.ts`).
+2. **Generation (so the AI actually emits it — the point):**
+   - Section selection: product = `MERIDIAN_PILOT_SECTIONS` / `selectProductSections`
+     (`audience/product/sectionSelection.ts`); service = `selectServiceSections`
+     (`audience/service/sectionSelection.ts`, awareness-driven). The new type must be able to appear.
+   - Element map: `getCompleteElementsMap` / `getAllPossibleElements` (`modules/sections/elementDetermination.ts`).
+   - Prompts: `buildStrategyPrompt.ts` (cardCounts) + `buildPrompt.ts` (copy) must teach the model the
+     new section + its elements.
+3. **Render (your template):** `resolveBlock` pair + `sectionRules` surface (§3f/§3g).
+4. **Guard:** extend `registration.test.ts` (§10.8). If the generation work for a type isn't done yet,
+   that's generation work to finish — not a reason to hardcode its copy.
+
+**Multi-page & collections are standard** (`multiPagePlan.md` is the authority — don't duplicate it):
+- The page axis (store `pages` + mirror), shared **chrome** (header/footer injected at publish),
+  **collections** (catalog + repeatable detail pages, materialized), and **subpath publish/serve**
+  are generic. Your template supplies the *blocks*; the machinery is shared.
+- Template-specific pages are added via **archetype builders + page actions** (e.g.
+  `buildHomeSlice`/`buildGallerySlice` + `addArchetypePage`), not the generic section picker (which is
+  inert for template audiences). Keep insertion generic and mirror-safe (reuse the existing
+  `commitActivePage → mutate pages[id] → loadPageIntoActive` pattern; never assign `state.sections`
+  directly — it drops injected chrome).
+
+---
+
+## 13. Bespoke / single-use templates (hard-coded, client-exclusive)
+
+Some templates are built for **one paying client** — hand-written copy + real photos, never offered
+to anyone else (naayom on product; a photographer on service). This is a legitimate mode: don't force
+the AI-generation path (§12) on a site you'll never reuse. Rules:
+
+- **Exclusivity = register, but don't list in the picker.** Add the id to `templateIds`
+  (`types/service.ts`) + a `registry.ts` loader entry (so it renders), but **do NOT** add it to
+  `TEMPLATE_CATALOG`/`TEMPLATE_ORDER` (`templateCatalog.ts`). The onboarding picker loops
+  `TEMPLATE_ORDER` (`StyleStep.tsx`), so omitting it there keeps it **unselectable** by other users.
+  Precedent: `techpremium`/`meridian` are in `templateIds` but not the service `TEMPLATE_ORDER`.
+- **Set the template on the client's project by hand** — a deterministic seed or the
+  admin/transfer-ownership flow sets `audienceType` + `templateId` directly on the project. This
+  **bypasses the `/api/start` persona/waitlist gate entirely**, so the client's persona is irrelevant
+  and you don't add one. (For reference: a photographer is `service`; the *conceptual* persona is
+  `freelancer`/`local-service`, but those are pilot-waitlisted in `PILOT_SERVICE_PERSONAS` — another
+  reason bespoke skips the persona route. Only whitelist them if you later want self-serve onboarding.)
+- **Hard-code via a seed scoped to that project.** Copy + every `manual_preferred` image is seeded
+  (the AI fills none of it). **Never** bake the seed into a shared persona/template default a future
+  customer could inherit — keep it project-scoped (see [[project_before_customer_2]]).
+- **Skip the reusable-template wiring you don't need:** the picker (§8) and the AI-generation tie-in
+  (§12). You still need the module (blocks/tokens, §1–§7) and **all** the §3f CSS-boundary rules.
+- **Plan to retire/decouple, don't duplicate.** When done, leave it registered (inert, picker-less)
+  or remove it — don't fork the whole module "to keep a clean copy."
 
 ---
 
@@ -419,7 +617,8 @@ Every block also implicitly receives (published): `sectionId`, `content`, `publi
 - **New content field a block needs** (e.g. a field the audience schema doesn't have): that's an
   **audience-schema** change — edit `src/modules/audience/<audience>/elementSchema.ts` (+ the copy
   prompt's collection spec + `parseCopy` defaults). Coordinate with a PO; it affects *all*
-  templates of that audience. Avoid unless necessary.
+  templates of that audience. Avoid for a pure skin; if your template genuinely needs new sections
+  or fields, that's the **§12** path (AI-first), not a one-off.
 - **A brand-new audience type** (e.g. `ecommerce`): much larger — new onboarding flow + store +
   strategy/copy routes + element schema + `defaultTemplateForAudience` + `usesTemplateModule`
   gate. Separate plan; not covered here.

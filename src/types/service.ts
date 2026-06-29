@@ -19,7 +19,10 @@ export type AudienceType = (typeof audienceTypes)[number];
  * variantId is a per-template token rescale (Hearth: 'classic' default;
  * Meridian: developer/marketing/light — see types/product.ts).
  */
-export const templateIds = ['hearth', 'lex', 'surge', 'meridian', 'techpremium'] as const;
+// `lumen` = bespoke §13 photography template (Kundius). Registered + renderable
+// but intentionally NOT listed in the onboarding picker (templateCatalog) — same
+// pattern as meridian/techpremium. Service audience.
+export const templateIds = ['hearth', 'lex', 'surge', 'meridian', 'techpremium', 'lumen'] as const;
 export type TemplateId = (typeof templateIds)[number];
 
 export type VariantId = string;
@@ -31,6 +34,7 @@ export const defaultVariantForTemplate: Record<TemplateId, VariantId> = {
   surge: 'performance',
   meridian: 'developer',
   techpremium: 'default',
+  lumen: 'default',
 };
 
 /**
@@ -257,6 +261,15 @@ export const surgePalettes = [
 export type SurgePalette = (typeof surgePalettes)[number];
 
 /**
+ * ===== LUMEN PALETTE =====
+ * Lumen (bespoke §13 photography template) ships a SINGLE brass accent — the one
+ * user-facing hue knob per the Lumen HTML §09. Source: Lumen - Photography & Creative.html.
+ */
+export const lumenPalettes = ['brass'] as const;
+
+export type LumenPalette = (typeof lumenPalettes)[number];
+
+/**
  * ===== TEMPLATE PICKER METADATA =====
  * Leaf-level display data + palette scoping for the Phase 11b picker. Kept here
  * (NOT importing the template modules) so onboarding/editor pickers can scope by
@@ -270,6 +283,7 @@ export const templateLabels: Record<TemplateId, string> = {
   surge: 'Surge',
   meridian: 'Meridian',
   techpremium: 'TechPremium',
+  lumen: 'Lumen',
 };
 
 export const templateBlurbs: Record<TemplateId, string> = {
@@ -278,6 +292,7 @@ export const templateBlurbs: Record<TemplateId, string> = {
   surge: 'Growth & performance — dashboard hero, metric-led case studies.',
   meridian: 'Modern tech — dark surfaces, hairline rules, mono accents.',
   techpremium: 'Industrial IoT — warm paper, forest + signal-lime, control-room readouts.',
+  lumen: 'Photography & creative — warm gallery, one brass accent, editorial captions + lightbox.',
 };
 
 /** Palette id list for a template (Hearth → 9 warm, Lex → 9 trust, Surge → 9 accent-hue, Meridian → 9 accent, TechPremium → forest). */
@@ -286,6 +301,7 @@ export function palettesForTemplate(templateId: TemplateId): readonly string[] {
   if (templateId === 'surge') return surgePalettes;
   if (templateId === 'meridian') return meridianPalettes;
   if (templateId === 'techpremium') return techPremiumPalettes;
+  if (templateId === 'lumen') return lumenPalettes;
   return hearthPalettes;
 }
 

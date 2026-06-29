@@ -317,6 +317,319 @@ export const serviceElementSchema: Record<string, UIBlockSchemaV2> = {
       },
     },
   },
+
+  // ===================================================================
+  // ===== LUMEN (bespoke §13) — Kundius Photography ====================
+  // 9 Lumen-named layouts, isolated to the `lumen` template (seeded only,
+  // never section-selected). Globally-unique names so product schema can't
+  // shadow them (PO #2). Bilingual = independent twin `_nl` fields (everything
+  // is `manual_preferred`; Lumen bypasses AI generation entirely). Retirement =
+  // delete this whole block + the resolveLumenBlock/registry/types entries.
+  // `dutch_tagline` on service cards is an always-visible NL subtitle, NOT a twin.
+  // ===================================================================
+  LumenNav: {
+    sectionType: 'header',
+    elements: {
+      logo_text:     { type: 'string', requirement: 'required', fillMode: 'manual_preferred', default: 'Studio' },
+      logo_text_nl:  { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      brand_sub:     { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      brand_sub_nl:  { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      logo_image:    { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      cta_text:      { type: 'string', requirement: 'required', fillMode: 'manual_preferred', default: 'Request a quote' },
+      cta_text_nl:   { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+    },
+    collections: {
+      nav_items: {
+        requirement: 'required',
+        fillMode: 'manual_preferred',
+        constraints: { min: 2, max: 6 },
+        fields: {
+          id:       { type: 'string', fillMode: 'system' },
+          label:    { type: 'string', fillMode: 'manual_preferred', default: '' },
+          label_nl: { type: 'string', fillMode: 'manual_preferred', default: '' },
+          href:     { type: 'string', fillMode: 'manual_preferred', default: '#' },
+        },
+      },
+    },
+  },
+
+  LumenHero: {
+    sectionType: 'hero',
+    elements: {
+      eyebrow:               { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      eyebrow_nl:            { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      headline:              { type: 'string', requirement: 'required', fillMode: 'manual_preferred', default: 'The version of your company that <em>wins the room.</em>' },
+      headline_nl:           { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      lede:                  { type: 'string', requirement: 'required', fillMode: 'manual_preferred', default: '' },
+      lede_nl:               { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      cta_text:              { type: 'string', requirement: 'required', fillMode: 'manual_preferred', default: 'See recent work' },
+      cta_text_nl:           { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      secondary_cta_text:    { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      secondary_cta_text_nl: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      who_text:              { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      who_text_nl:           { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      badge_text:            { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      badge_text_nl:         { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      fig_caption:           { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      fig_caption_nl:        { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      fig_number:            { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: 'Fig. 01' },
+      fig_ratio:             { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '4:5' },
+      hero_image:            { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+    },
+  },
+
+  LumenLogos: {
+    sectionType: 'logos',
+    elements: {
+      label:    { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      label_nl: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+    },
+    collections: {
+      brands: {
+        requirement: 'required',
+        fillMode: 'manual_preferred',
+        constraints: { min: 2, max: 8 },
+        fields: {
+          id:      { type: 'string', fillMode: 'system' },
+          name:    { type: 'string', fillMode: 'manual_preferred', default: '' },
+          name_nl: { type: 'string', fillMode: 'manual_preferred', default: '' },
+        },
+      },
+    },
+  },
+
+  LumenPricedServiceCards: {
+    sectionType: 'services',
+    elements: {
+      eyebrow:     { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      eyebrow_nl:  { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      headline:    { type: 'string', requirement: 'required', fillMode: 'manual_preferred', default: 'Four ways to <em>photograph your business.</em>' },
+      headline_nl: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      lede:        { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      lede_nl:     { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+    },
+    collections: {
+      services: {
+        requirement: 'required',
+        fillMode: 'manual_preferred',
+        constraints: { min: 1, max: 6 },
+        fields: {
+          id:            { type: 'string', fillMode: 'system' },
+          name:          { type: 'string', fillMode: 'manual_preferred', default: '' },
+          name_nl:       { type: 'string', fillMode: 'manual_preferred', default: '' },
+          // Always-visible Dutch subtitle on the card (NOT an NL twin — both show).
+          dutch_tagline: { type: 'string', fillMode: 'manual_preferred', default: '' },
+          price:         { type: 'string', fillMode: 'manual_preferred', default: '' },
+          price_unit:    { type: 'string', fillMode: 'manual_preferred', default: '' },
+          price_unit_nl: { type: 'string', fillMode: 'manual_preferred', default: '' },
+          pitch:         { type: 'string', fillMode: 'manual_preferred', default: '' },
+          pitch_nl:      { type: 'string', fillMode: 'manual_preferred', default: '' },
+          cta_text:      { type: 'string', fillMode: 'manual_preferred', default: '' },
+          cta_text_nl:   { type: 'string', fillMode: 'manual_preferred', default: '' },
+          deliverables: {
+            type: 'array',
+            fillMode: 'manual_preferred',
+            constraints: { min: 1, max: 6 },
+            fields: {
+              id:      { type: 'string', fillMode: 'system' },
+              text:    { type: 'string', fillMode: 'manual_preferred', default: '' },
+              text_nl: { type: 'string', fillMode: 'manual_preferred', default: '' },
+            },
+          },
+        },
+      },
+    },
+  },
+
+  LumenShootProcess: {
+    sectionType: 'process',
+    elements: {
+      eyebrow:     { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      eyebrow_nl:  { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      headline:    { type: 'string', requirement: 'required', fillMode: 'manual_preferred', default: 'Simple to book, easy on the day.' },
+      headline_nl: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      lede:        { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      lede_nl:     { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+    },
+    collections: {
+      steps: {
+        requirement: 'required',
+        fillMode: 'manual_preferred',
+        constraints: { min: 2, max: 5 },
+        fields: {
+          id:             { type: 'string', fillMode: 'system' },
+          step_number:    { type: 'string', fillMode: 'manual_preferred', default: '' },
+          title:          { type: 'string', fillMode: 'manual_preferred', default: '' },
+          title_nl:       { type: 'string', fillMode: 'manual_preferred', default: '' },
+          description:    { type: 'string', fillMode: 'manual_preferred', default: '' },
+          description_nl: { type: 'string', fillMode: 'manual_preferred', default: '' },
+        },
+      },
+    },
+  },
+
+  LumenCategoryGallery: {
+    sectionType: 'portfolio',
+    elements: {
+      eyebrow:     { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      eyebrow_nl:  { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      headline:    { type: 'string', requirement: 'required', fillMode: 'manual_preferred', default: 'The portfolio, by <em>category.</em>' },
+      headline_nl: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      lede:        { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      lede_nl:     { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+    },
+    collections: {
+      categories: {
+        requirement: 'required',
+        fillMode: 'manual_preferred',
+        constraints: { min: 1, max: 8 },
+        fields: {
+          id:             { type: 'string', fillMode: 'system' },
+          group:          { type: 'string', fillMode: 'manual_preferred', default: '' },
+          group_nl:       { type: 'string', fillMode: 'manual_preferred', default: '' },
+          name:           { type: 'string', fillMode: 'manual_preferred', default: '' },
+          name_nl:        { type: 'string', fillMode: 'manual_preferred', default: '' },
+          index_label:    { type: 'string', fillMode: 'manual_preferred', default: '' },
+          index_label_nl: { type: 'string', fillMode: 'manual_preferred', default: '' },
+          ratio:          { type: 'string', fillMode: 'manual_preferred', default: 'land' },
+          fig:            { type: 'string', fillMode: 'manual_preferred', default: '' },
+          cover_image:    { type: 'string', fillMode: 'manual_preferred', default: '' },
+          images: {
+            type: 'array',
+            fillMode: 'manual_preferred',
+            constraints: { min: 0, max: 24 },
+            fields: {
+              id:  { type: 'string', fillMode: 'system' },
+              src: { type: 'string', fillMode: 'manual_preferred', default: '' },
+            },
+          },
+        },
+      },
+    },
+  },
+
+  LumenPhotographerAbout: {
+    sectionType: 'about',
+    elements: {
+      eyebrow:               { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      eyebrow_nl:            { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      headline:              { type: 'string', requirement: 'required', fillMode: 'manual_preferred', default: 'I’m a corporate photographer in <em>your city.</em>' },
+      headline_nl:           { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      body:                  { type: 'string', requirement: 'required', fillMode: 'manual_preferred', default: '' },
+      body_nl:               { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      body2:                 { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      body2_nl:              { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      signature:             { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      cta_text:              { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      cta_text_nl:           { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      secondary_cta_text:    { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      secondary_cta_text_nl: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      fig_caption:           { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      fig_caption_nl:        { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      fig_number:            { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: 'Fig. 08' },
+      about_image:           { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+    },
+  },
+
+  LumenContactForm: {
+    sectionType: 'contact',
+    elements: {
+      // Points at a seeded MVPForm in content.forms (fields name/email/message);
+      // form.v1.js POSTs to /api/forms/submit. Seeded by buildLumenHomeFinalContent.
+      form_id:          { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      eyebrow:          { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      eyebrow_nl:       { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      headline:         { type: 'string', requirement: 'required', fillMode: 'manual_preferred', default: 'Let’s book your <em>shoot.</em>' },
+      headline_nl:      { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      lede:             { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      lede_nl:          { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      based_in_label:   { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: 'Based in' },
+      based_in_label_nl:{ type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      based_in:         { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      based_in_nl:      { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      phone:            { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      email:            { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      whatsapp_number:  { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      whatsapp_label:   { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: 'WhatsApp' },
+      whatsapp_label_nl:{ type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      book_call_url:    { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      book_call_label:  { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: 'Book a call' },
+      book_call_label_nl:{ type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      name_label:       { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: 'Name' },
+      name_label_nl:    { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      name_ph:          { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: 'Your name' },
+      name_ph_nl:       { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      email_label:      { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: 'Email' },
+      email_label_nl:   { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      email_ph:         { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: 'you@company.com' },
+      email_ph_nl:      { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      message_label:    { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: 'Message' },
+      message_label_nl: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      message_ph:       { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      message_ph_nl:    { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      submit_text:      { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: 'Send enquiry' },
+      submit_text_nl:   { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      form_note:        { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      form_note_nl:     { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+    },
+  },
+
+  LumenFooter: {
+    sectionType: 'footer',
+    elements: {
+      brand_text:      { type: 'string', requirement: 'required', fillMode: 'manual_preferred', default: 'Studio' },
+      brand_text_nl:   { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      brand_sub:       { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      brand_sub_nl:    { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      tagline:         { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      tagline_nl:      { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      contact_line:    { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      contact_line_nl: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      contact_phone:   { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      contact_email:   { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      copyright:       { type: 'string', requirement: 'required', fillMode: 'manual_preferred', default: '© Studio' },
+      copyright_nl:    { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      whatsapp_number: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      whatsapp_label:  { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      whatsapp_label_nl:{ type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      whatsapp_prefill:{ type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      book_call_url:   { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+    },
+    collections: {
+      footer_columns: {
+        requirement: 'optional',
+        fillMode: 'manual_preferred',
+        constraints: { min: 0, max: 4 },
+        fields: {
+          id:         { type: 'string', fillMode: 'system' },
+          heading:    { type: 'string', fillMode: 'manual_preferred', default: '' },
+          heading_nl: { type: 'string', fillMode: 'manual_preferred', default: '' },
+          links: {
+            type: 'array',
+            fillMode: 'manual_preferred',
+            constraints: { min: 0, max: 8 },
+            fields: {
+              id:       { type: 'string', fillMode: 'system' },
+              label:    { type: 'string', fillMode: 'manual_preferred', default: '' },
+              label_nl: { type: 'string', fillMode: 'manual_preferred', default: '' },
+              href:     { type: 'string', fillMode: 'manual_preferred', default: '#' },
+            },
+          },
+        },
+      },
+      legal_links: {
+        requirement: 'optional',
+        fillMode: 'manual_preferred',
+        constraints: { min: 0, max: 4 },
+        fields: {
+          id:       { type: 'string', fillMode: 'system' },
+          label:    { type: 'string', fillMode: 'manual_preferred', default: '' },
+          label_nl: { type: 'string', fillMode: 'manual_preferred', default: '' },
+          href:     { type: 'string', fillMode: 'manual_preferred', default: '#' },
+        },
+      },
+    },
+  },
 };
 
 /**

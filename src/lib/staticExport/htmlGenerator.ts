@@ -85,6 +85,9 @@ export async function generateStaticHTML(
   // (dropdown nav, mobile menu, lightbox, gallery filter, live readout tick).
   const usesNaayom = options.templateId === 'techpremium';
 
+  // Lumen (bespoke §13) pages load lumen.v1.js (lightbox + reveal + EN·NL toggle/geo).
+  const usesLumen = options.templateId === 'lumen';
+
   // 5. Build complete HTML document
   const html = buildHTMLDocument({
     bodyHTML,
@@ -100,6 +103,7 @@ export async function generateStaticHTML(
     analyticsOptIn: options.analyticsOptIn || false,
     hasForms,
     usesNaayom,
+    usesLumen,
   });
 
   // 5. Validate and resolve asset URLs
@@ -174,8 +178,9 @@ function buildHTMLDocument(params: {
   analyticsOptIn: boolean;
   hasForms: boolean;
   usesNaayom: boolean;
+  usesLumen: boolean;
 }): string {
-  const { bodyHTML, cssVariables, metadata, analyticsOptIn, hasForms, usesNaayom } = params;
+  const { bodyHTML, cssVariables, metadata, analyticsOptIn, hasForms, usesNaayom, usesLumen } = params;
 
   // Generate CSS variables style tag
   const cssVariablesStyle = generateCSSVariablesStyle(cssVariables);
@@ -233,6 +238,9 @@ function buildHTMLDocument(params: {
 
   <!-- Phase 4: TechPremium behaviors (dropdown nav, lightbox, gallery filter, readout tick) -->
   ${usesNaayom ? `<script src="https://lessgo.ai/assets/naayom.v1.js" defer></script>` : ''}
+
+  <!-- Lumen behaviors (lightbox + reveal + EN·NL toggle/geo) -->
+  ${usesLumen ? `<script src="https://lessgo.ai/assets/lumen.v1.js" defer></script>` : ''}
 
   <!-- Phase 4: Analytics beacon (opt-in) -->
   ${

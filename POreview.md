@@ -1,44 +1,31 @@
-Verdict: Solid, well-architected, low-risk — approve with 2 must-fix defects.
+Verdict: Nearly ready. Fix the editor-toggle contradiction (must), decide the shared-schema containment (should), clean up two stale bits.
 
-  The approach is right and high-leverage: instrumentation hook + funneling the 98 logger.error sites through one captureException + targeted captures on the
-  raw-console.error paths (publish/middleware/domains). Additive and DSN-gated, so it can't regress existing behavior. Most claims check out. But two real defects would
-  make it silently capture nothing or send garbage if shipped as written.
+🔴 Internal contradiction: is the editor toggle active or not?
 
-  Must-fix
+The plan says both, in conflict:
+- §60 (WarmNavHeader): "edit: render inert/disabled — editor is EN-only."
+- §75 / §88 / §D: "the header toggle in edit mode sets editLang" and "LumenEditable binds to key or key_nl by the active lang."
 
-  1. Server + edge capture will silently never fire. You're on Next 14.2.28, and next.config.js:64 has the experimental block commented out. On Next 14,
-  instrumentation.ts's register() only runs with experimental: { instrumentationHook: true } (it didn't become default until Next 15). The plan's next.config.js section
-  never enables it → server/edge errors captured by nothing, while the build still passes green. Fix: uncomment + add the flag (or confirm the installed @sentry/nextjs
-  version injects it — on 14.2, set it explicitly). This is the headline risk; verification step #2 would eventually catch it, but it should be in the plan.
-  2. The logger.error forwarding snippet is broken pseudocode. Actual signature (logger.ts:64): error(message: LogValue, meta?: MetaValue) where both can be lazy thunks
-  (() => string / () => any), gated by if (shouldLog(LOG_LEVELS.ERROR)). The plan's snippet:
-    - references evalMsg — no such variable; the real param is message, often a function;
-    - passes raw meta to extra and tests meta instanceof Error — but a thunk is never an Error and would serialize as a function.
+These can't both be true. The agreed approach (POreview #1: she self-manages both languages) requires the active toggle — she edits NL too. So §60 is stale (left over from the earlier seed-both/EN-only idea) and must be rewritten to match §75/§88: the header toggle is active in edit, drives editLang, and LumenEditable routes edits to key/key_nl. This is the one blocker — left as-is, the dev gets contradictory instructions and could build an EN-only editor that can't edit Dutch (defeating the whole decision).
 
-  Fix: evaluate message/meta first (reuse the file's existing safeEvaluate, currently private in formatMessage), and decide placement vs the shouldLog gate — put
-  captureException outside it so log-suppressed environments still report (or accept prod-only, since ERROR always logs).
+Shared-schema containment (judgment call — recommend tightening)
 
-  Minor / adjust wording
+The plan reuses 4 shared layouts (WarmNavHeader, PetalFramedHero, LogoStrip, ContactFooterRich) and adds _nl twins to them in the shared serviceElementSchema (§37/§93). That works (additive, manual_preferred, other templates ignore them) — but it pollutes layouts used by Hearth/Lex/Surge with Lumen-only Dutch twins, and leaves residue when Lumen retires. For a §13 bespoke template whose whole point is containment + clean retirement, the cleaner move is Lumen-named layouts for all sections (LumenNav/LumenHero/LumenLogos/LumenFooter with _nl built in) — then retirement is just "delete the Lumen* entries," and nothing shared is touched. Tradeoff: a bit more schema duplication now vs. zero shared pollution + clean teardown. I'd lean Lumen-named-for-all given §13; the plan's reuse approach is acceptable if you'd rather minimize code — but call it consciously.
 
-  - verify-ownership/route.ts has no existing console.error (only verify-dns does, L105) — so "keep the existing console.error" is wrong there; the capture belongs in the
-  VercelApiError catch (there's a VercelApiError type at lib/vercel/domains to branch on).
-  - Cited publish line numbers drifted post-Phase-1 (fatal is L521/522, KV L451, blob L486/495) — match by context, not line.
-  - Quota/noise: forwarding all logger.error includes AI-provider fallbacks that "always fall back" (expected, non-actionable) — these could dominate the 5k/mo free tier
-  and bury real errors. Better than the plan's "tune later": add a beforeSend or a tag/fingerprint to down-rank the known AI-timeout category from day one.
+This also makes the plan's "no shared changes" claim honest — as written, it's not strictly true: the 4 reused-layout _nl twins and the middleware.ts geo cookie (§90/§121) are both shared touches. The geo cookie is harmless/additive (fine), but don't claim zero shared footprint.
 
-  Confirmed-good (de-risks the plan)
+Two cleanups
 
-  - removeConsole is { exclude: ['error'] } (next.config.js:41) → console.error survives in prod, so the "Vercel logs as backup" rationale actually holds. ✓
-  - Middleware has exactly 3 console.error sites (L62/74/101), as claimed. ✓
-  - Both domains routes exist with addDomain/getDomainConfig + a VercelApiError to tag on. ✓
-  - .env.example exists (plan's conditional resolves), no pre-existing instrumentation.ts. ✓
-  - Published static pages are genuinely unaffected — they're renderToStaticMarkup output with no Next client bundle, so Sentry client/replay never ships to Naayom's
-  end-visitors (matches the plan's stated scope). ✓
+- nl_subtitle naming clashes with the _nl twin convention (§66). It's a distinct, always-visible Dutch tagline on service cards (per the HTML), not a translation twin — but _nl-suffixed it reads like one. Rename (e.g. dutch_tagline) so no one treats it as the NL twin of a subtitle field.
+- Stale "translation tests" (§127): there's no translation pipeline anymore (PO #1). Replace with the twin-field/editLang test (edits in NL mode write *_nl; published emits both data-en/data-nl from seed) — which the plan otherwise describes well in §H/§129.
 
-  Unresolved questions
+Otherwise solid
 
-  1. tunnelRoute: '/monitoring' — confirm middleware doesn't rewrite /monitoring on the main app host (it only rewrites custom-domain/subdomain hosts → should pass, but
-  verify no collision).
-  2. instrumentationHook — enable explicitly, or confirm the SDK version auto-injects on Next 14.2?
-  3. AI-fallback errors — filter/down-rank via beforeSend from the start, or accept the noise for v1?
-  4. Tracing sample rate — keep 0.2, or start at 0 (errors-only) to protect free-tier quota until you see volume?
+The bilingual mechanism is right: independent twin fields seeded once, Lumen-scoped editLang flag (no shared store/persistence), published data-en/data-nl + lumen.v1.js toggle/geo, no pipeline/migration. Lumen* layout names + the collision-guard test (§110) correctly close the ContactForm bug. §13 exclusivity, §3f boundary (plain styles.ts + guard), §7.5 asset, proven affordances, single-page flat seed, Spectral fonts — all correct.
+
+Unresolved questions
+
+1. Resolve the toggle contradiction to the active-in-edit editLang approach (required) — confirm?
+2. Containment: Lumen-name all layouts (clean retirement, recommended) vs. reuse 4 shared + add _nl twins to the shared schema (less code, some pollution)?
+3. Rename nl_subtitle → dutch_tagline (or similar) to avoid the twin-convention clash?
+4. (carried) Kundius token exists or create it? Geo: navigator.language+cookie OK for v1?

@@ -291,3 +291,49 @@
   font-style: italic;
   font-display: swap;
 }
+
+/* ============================================================================
+   Spectral - Lumen display (static: 300/400/500/600 + italic 400). Editorial
+   serif; the italic is load-bearing (accent <em> + signature). Drop the latin
+   woff2 into public/fonts/spectral/ (see that dir's README).
+   ============================================================================ */
+
+@font-face {
+  font-family: 'Spectral';
+  src: url('/fonts/spectral/spectral-latin-300-normal.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Spectral';
+  src: url('/fonts/spectral/spectral-latin-400-normal.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Spectral';
+  src: url('/fonts/spectral/spectral-latin-400-italic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Spectral';
+  src: url('/fonts/spectral/spectral-latin-500-normal.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Spectral';
+  src: url('/fonts/spectral/spectral-latin-600-normal.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
