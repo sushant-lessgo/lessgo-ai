@@ -182,12 +182,14 @@ function buildHTMLDocument(params: {
 }): string {
   const { bodyHTML, cssVariables, metadata, analyticsOptIn, hasForms, usesNaayom, usesLumen } = params;
 
-  // Asset origin for the injected fonts/scripts. PROD must stay absolute
-  // (https://lessgo.ai) because published HTML is also served from custom domains
-  // where /assets/* would 404. In dev (local publish) use a same-origin relative
-  // base so behaviors JS + fonts load from this server's public/ — otherwise they
-  // 404 against prod and the EN/NL toggle, lightbox, fonts never run locally.
-  const assetBase = process.env.NODE_ENV === 'production' ? 'https://lessgo.ai' : '';
+  // Asset origin for the injected fonts/scripts. ALWAYS absolute https://lessgo.ai:
+  // these platform assets only live on the lessgo.ai CDN, and published HTML is
+  // served from prod subdomains AND custom domains (where a relative /assets/*
+  // would 404). NOTE: a dev-relative shim here is a footgun — when publishing to a
+  // real subdomain from `npm run dev`, validateAndResolveAssetURLs rewrites the
+  // relative src to the local baseURL (http://localhost:3000), freezing a broken
+  // localhost URL into the static HTML. So keep it absolute regardless of env.
+  const assetBase = 'https://lessgo.ai';
 
   // Generate CSS variables style tag
   const cssVariablesStyle = generateCSSVariablesStyle(cssVariables);
