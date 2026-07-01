@@ -50,20 +50,17 @@ export async function GET(req: NextRequest) {
   let status = page.customDomainStatus;
   let error = page.customDomainError;
 
-  // Lazy regression check for live domains
+  // Lazy regression check for live domains — REPORT ONLY, never persist.
+  // Vercel's `misconfigured` flag is transient/flaky (especially for apex A-record domains during
+  // DNS propagation or a Vercel API blip). Persisting 'failed' from a GET silently drifted the DB
+  // status away from 'live', which stranded custom domains on their old blob on the next republish
+  // (publish's canonical gate skipped a non-live domain). A read endpoint must not mutate publish
+  // state — surface the transient condition in the response and let the durable customDomainLiveAt
+  // marker keep the domain serving. A genuine, persistent regression is handled by explicit removal.
   if (status === 'live') {
     const cfg = await cachedConfig(page.customDomain);
     if (cfg?.misconfigured) {
-      status = 'failed';
       error = 'dns_regression';
-      await prisma.publishedPage.update({
-        where: { customDomain: page.customDomain },
-        data: {
-          customDomainStatus: 'failed',
-          customDomainFailedAt: new Date(),
-          customDomainError: error,
-        },
-      });
     }
   }
 

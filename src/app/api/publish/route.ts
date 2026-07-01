@@ -39,11 +39,6 @@ function injectChromeIntoPage(layout: any, contentMap: any, chrome: any) {
   layout.sections = next;
 }
 
-// First body (non-header/footer) hero section id, for meta description.
-function findHeroId(sections: string[] = []): string | undefined {
-  return sections.find((id) => /^hero/i.test(id)) || sections.find((id) => !/^(header|footer)/i.test(id));
-}
-
 async function publishHandler(req: NextRequest) {
   const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
   const host = req.headers.get("host") || "localhost:3000";
@@ -221,14 +216,20 @@ async function publishHandler(req: NextRequest) {
         throw new Error('Failed to get published page ID');
       }
 
-      // Resolve the canonical host once, BEFORE generation: use the custom domain only
-      // when it's already live, else leave undefined so the generator falls back to the
-      // {slug}.lessgo.site subdomain. Reused below for the KV domain list. (Domains that go
-      // live AFTER publish are handled by verify-dns regenerating the HTML.)
-      const canonicalDomain =
-        publishedPage?.customDomain && publishedPage.customDomainStatus === 'live'
-          ? publishedPage.customDomain
-          : undefined;
+      // Resolve the canonical host once, BEFORE generation: use the custom domain when it has
+      // gone live, else leave undefined so the generator falls back to the {slug}.lessgo.site
+      // subdomain. Reused below for the KV domain list. (Domains that go live AFTER publish are
+      // handled by verify-dns regenerating the HTML.)
+      //
+      // Gate on the DURABLE customDomainLiveAt marker (set once at go-live, cleared only on
+      // domain removal) in addition to status === 'live'. customDomainStatus can silently drift
+      // to 'failed' (e.g. GET /api/domains/status's regression check on a flaky Vercel
+      // `misconfigured` reading for apex domains); without this fallback a republish would drop
+      // the custom domain from the KV write and strand it on the old blob forever.
+      const domainHasGoneLive =
+        !!publishedPage?.customDomain &&
+        (publishedPage.customDomainStatus === 'live' || publishedPage.customDomainLiveAt != null);
+      const canonicalDomain = domainHasGoneLive ? publishedPage!.customDomain! : undefined;
 
       // Idempotency guard: prevent double-publish
       const currentPage = await prisma.publishedPage.findUnique({
@@ -247,169 +248,31 @@ async function publishHandler(req: NextRequest) {
         data: { publishState: 'publishing' }
       });
 
-      // Generate HTML
-      const { generateStaticHTML } = await import('@/lib/staticExport/htmlGenerator');
-      const { uploadStaticSite } = await import('@/lib/staticExport/blobUploader');
+      // Generate + upload the page (root + all subpages) and advance the version pointer.
+      // Shared with the custom-domain go-live path (verify-dns) via renderPublishedExport so
+      // both use one generation path (canonical/og:url resolution, subpage loop, versioning).
+      const { renderPublishedExport } = await import('@/lib/staticExport/renderPublishedExport');
       const { cleanupOldVersions } = await import('@/lib/staticExport/versionCleanup');
-      const { del } = await import('@vercel/blob');
 
-      // Extract description from hero section
-      const contentData = content as any;
-
-      // 🔥 REQUIRED: flatten nested section content
-      // Published renderer expects flat structure, not nested content.content
-      if (contentData.content && typeof contentData.content === 'object') {
-        Object.assign(contentData, contentData.content);
-        delete contentData.content;
-      }
-
-      // 🔥 REQUIRED: ensure forms exist at root
-      if (!contentData.forms) {
-        contentData.forms = {};
-      }
-
-      const heroSection = findHeroId(contentData.layout?.sections);
-      const heroContent = heroSection ? contentData[heroSection] : undefined;
-      const description =
-        heroContent?.elements?.subheadline?.content ||
-        heroContent?.elements?.headline?.content ||
-        cleanTitle;
-
-      const staticHTML = await generateStaticHTML({
-        sections: contentData.layout.sections,
-        content: contentData,
-        theme: contentData.layout.theme,
-        publishedPageId: pageId,
-        pageOwnerId: userId,
+      const { version, blobKey, blobUrl, sizeBytes, extraRoutes } = await renderPublishedExport({
+        pageId,
+        userId,
         slug,
+        content,
         title: cleanTitle,
-        description: typeof description === 'string' ? description.slice(0, 160) : cleanTitle.slice(0, 160),
         previewImage,
-        analyticsOptIn: analyticsEnabled || false, // Phase 4
-        baseURL: baseUrl,
+        analyticsEnabled: analyticsEnabled || false,
         audienceType,
         templateId,
-        paletteId,
         variantId,
+        paletteId,
+        baseUrl,
         canonicalDomain,
-        canonicalPath: '/',
       });
 
-      // Upload to blob with timeout protection
-      const uploadPromise = uploadStaticSite({
-        pageId,
-        html: staticHTML.html,
-        assetBundleVersion: 'v1',
-      });
-
-      const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error('Blob upload timeout after 15s')), 15000)
-      );
-
-      const { version, blobKey, blobUrl, sizeBytes } = await Promise.race([
-        uploadPromise,
-        timeoutPromise
-      ]);
-
+      // For the outer catch's rollback: if a step AFTER generation (KV wiring) fails, the
+      // orphaned blob is deleted. (Failures DURING generation self-clean inside the helper.)
       uploadedBlobKey = blobKey;
-
-      // Validate upload response
-      if (!version || !blobKey || !blobUrl) {
-        throw new Error('Invalid blob upload response');
-      }
-
-      // === MULTI-PAGE: render + upload each subpage under the SAME version ===
-      // Subpages live in content.subpages[pathSlug] = { layout:{sections,theme}, content }.
-      // Shared forms/legalPages/theme come from the root content.
-      const allBlobs: Array<{ path: string; blobKey: string; blobUrl: string; sizeBytes: number }> = [
-        { path: '/', blobKey, blobUrl, sizeBytes },
-      ];
-      const extraRoutes: Record<string, string> = {};
-      const subpages =
-        contentData.subpages && typeof contentData.subpages === 'object' ? contentData.subpages : {};
-
-      for (const [rawPath, sub] of Object.entries(subpages) as Array<[string, any]>) {
-        try {
-          const path = rawPath.startsWith('/') ? rawPath : `/${rawPath}`;
-          if (path === '/') continue; // root already published above
-          const pageName = path.replace(/^\//, '').replace(/\/$/, '') || 'index';
-
-          const subSections: string[] = sub?.layout?.sections || [];
-          const subTheme = sub?.layout?.theme || contentData.layout.theme;
-          const subFlat = {
-            ...(sub?.content || {}),
-            forms: contentData.forms || {},
-            legalPages: contentData.legalPages,
-          };
-          const subHero = subFlat[findHeroId(subSections) || ''];
-          const subDesc =
-            subHero?.elements?.subheadline?.content ||
-            subHero?.elements?.headline?.content ||
-            sub?.title ||
-            cleanTitle;
-
-          const subHtml = await generateStaticHTML({
-            sections: subSections,
-            content: subFlat,
-            theme: subTheme,
-            publishedPageId: pageId,
-            pageOwnerId: userId,
-            slug,
-            title: sub?.title || cleanTitle,
-            description: typeof subDesc === 'string' ? subDesc.slice(0, 160) : cleanTitle.slice(0, 160),
-            previewImage,
-            analyticsOptIn: analyticsEnabled || false,
-            baseURL: baseUrl,
-            audienceType,
-            templateId,
-            paletteId,
-            variantId,
-            canonicalDomain,
-            canonicalPath: path,
-          });
-
-          const subUpload = await uploadStaticSite({
-            pageId,
-            html: subHtml.html,
-            assetBundleVersion: 'v1',
-            version, // share the root's version
-            pageName,
-          });
-
-          allBlobs.push({ path, blobKey: subUpload.blobKey, blobUrl: subUpload.blobUrl, sizeBytes: subUpload.sizeBytes });
-          extraRoutes[path] = subUpload.blobUrl;
-        } catch (subErr) {
-          // A failed subpage must not block the rest of the publish.
-          console.error('[Phase 2] Subpage render/upload failed:', rawPath, subErr);
-        }
-      }
-
-      const totalSizeBytes = allBlobs.reduce((sum, b) => sum + b.sizeBytes, 0);
-
-      // Create version record — ONE version covers all pages; per-page blobs in metadata.
-      const newVersion = await prisma.publishedPageVersion.create({
-        data: {
-          publishedPageId: pageId,
-          version,
-          blobKey,
-          blobUrl,
-          sizeBytes: totalSizeBytes,
-          status: 'active',
-          metadata: { blobs: allBlobs } as any,
-        }
-      });
-
-      // Update page with current version pointer
-      await prisma.publishedPage.update({
-        where: { id: pageId },
-        data: {
-          publishState: 'published',
-          currentVersionId: newVersion.id,
-          lastPublishAt: new Date(),
-          analyticsEnabled: analyticsEnabled || false, // Phase 4
-          htmlContent: '', // Clear legacy field (save DB space)
-        },
-      });
 
       // === PHASE 3: UPDATE KV ROUTING WITH RETRY & VERIFICATION ===
       // Add after successful DB update

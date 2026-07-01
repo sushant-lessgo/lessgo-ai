@@ -10,6 +10,7 @@ import { getDomainConfig, VercelApiError } from '@/lib/vercel/domains';
 import { checkDomainRateLimit } from '@/lib/rateLimit';
 import { writeRedirect, atomicPublishWithRetry, writeSlugForHost } from '@/lib/routing/kvRoutes';
 import { publishSubdomainHosts } from '@/lib/domains/hosts';
+import { renderPublishedExport } from '@/lib/staticExport/renderPublishedExport';
 import * as Sentry from '@sentry/nextjs';
 
 const BodySchema = z.object({ slug: z.string().min(1).max(100) });
@@ -30,6 +31,15 @@ export async function POST(req: NextRequest) {
       customDomain: true,
       customDomainStatus: true,
       currentVersion: { select: { version: true, blobUrl: true } },
+      // For regenerating the static HTML with the custom domain baked into canonical/og:url:
+      content: true,
+      title: true,
+      previewImage: true,
+      analyticsEnabled: true,
+      audienceType: true,
+      templateId: true,
+      variantId: true,
+      paletteId: true,
     },
   });
   if (!page) return createSecureResponse({ error: 'Page not found' }, 404);
@@ -90,19 +100,54 @@ export async function POST(req: NextRequest) {
     },
   });
 
+  // Regenerate the static HTML with the custom domain baked into canonical/og:url (+ per-page
+  // paths for subpages), now that the domain is live — otherwise the served blob keeps claiming
+  // the {slug}.lessgo.ai subdomain until the user happens to republish. Only if the page was
+  // actually published; a regen failure must NOT block go-live (status is already 'live').
+  let rebuilt: Awaited<ReturnType<typeof renderPublishedExport>> | null = null;
+  if (page.currentVersion) {
+    try {
+      rebuilt = await renderPublishedExport({
+        pageId: page.id,
+        userId: page.userId,
+        slug: page.slug,
+        content: page.content,
+        title: page.title ?? page.slug,
+        previewImage: page.previewImage,
+        analyticsEnabled: page.analyticsEnabled,
+        audienceType: page.audienceType === 'service' ? 'service' : 'product',
+        templateId: page.templateId,
+        variantId: page.variantId,
+        paletteId: page.paletteId,
+        baseUrl: 'https://lessgo.ai',
+        canonicalDomain: customHost,
+      });
+    } catch (e) {
+      console.error('[verify-dns] canonical regen failed (non-fatal)', e);
+      Sentry.captureException(e, {
+        tags: { area: 'custom-domain', op: 'canonical-regen' },
+        extra: { domain: customHost, slug: page.slug },
+        user: { id: userId },
+      });
+    }
+  }
+
   // Wire KV: slug-for (SSR fallback, always) + route (static blob, if published) + redirect (subdomain → custom)
   try {
     // 1. slug-for — FIRST + unconditional. Enables SSR fallback even if static export failed.
     await writeSlugForHost(customHost, page.slug);
 
-    // 2. static blob route — only if currentVersion exists
-    if (page.currentVersion?.blobUrl && page.currentVersion?.version) {
+    // 2. static blob route — prefer the freshly-regenerated version (correct canonical + subpage
+    //    routes); fall back to the existing version if regen didn't run or failed.
+    const routeVersion = rebuilt?.version ?? page.currentVersion?.version;
+    const routeBlobUrl = rebuilt?.blobUrl ?? page.currentVersion?.blobUrl;
+    if (routeBlobUrl && routeVersion) {
       await atomicPublishWithRetry(
         page.id,
         [customHost],
-        page.currentVersion.version,
-        page.currentVersion.blobUrl,
-        { maxRetries: 3, baseDelay: 500 }
+        routeVersion,
+        routeBlobUrl,
+        { maxRetries: 3, baseDelay: 500, extraRoutes: rebuilt?.extraRoutes }
       );
     }
 

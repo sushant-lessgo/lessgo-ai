@@ -1,6 +1,6 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
-import { getRouteEdge, getRedirectEdge, getSlugForHostEdge } from '@/lib/routing/kvRoutes'
+import { getRouteByKeyEdge, getRedirectEdge, getSlugForHostEdge } from '@/lib/routing/kvRoutes'
 import { isLessgoAppHost, matchPublishSubdomain } from '@/lib/domains/hosts'
 import * as Sentry from '@sentry/nextjs'
 
@@ -77,12 +77,16 @@ export default clerkMiddleware(async (auth, req) => {
           Sentry.captureException(error, { level: 'warning', tags: { area: 'middleware', op: 'getRedirect' }, extra: { host } })
         }
 
-        // KV route lookup → blob proxy
+        // KV route lookup → blob proxy. Fetch the full RouteConfig (one GET, same round-trip as the
+        // old exists check) so we can append &v={version} — this varies the blob-proxy CDN cache key
+        // per publish, so republishes propagate immediately instead of lagging the s-maxage window.
         try {
-          const routeKey = await getRouteEdge(host, url.pathname || '/')
-          if (routeKey) {
+          const routeKey = `route:${host}:${url.pathname || '/'}`
+          const route = await getRouteByKeyEdge(routeKey)
+          if (route) {
             url.pathname = '/api/blob-proxy'
             url.searchParams.set('rk', routeKey)
+            url.searchParams.set('v', route.version)
             return stampGeo(NextResponse.rewrite(url))
           }
         } catch (error) {
@@ -100,11 +104,15 @@ export default clerkMiddleware(async (auth, req) => {
     else if (host && !isLessgoAppHost(host)) {
       const originalPath = url.pathname || '/'
       try {
-        // 1. Fast path: KV route → blob proxy (only root has static blob today; subpaths fall through)
-        const routeKey = await getRouteEdge(host, originalPath)
-        if (routeKey) {
+        // 1. Fast path: KV route → blob proxy (only root has static blob today; subpaths fall through).
+        // Fetch the full RouteConfig so we can append &v={version} — versions the CDN cache key per
+        // publish so custom-domain updates propagate immediately (see Branch A note).
+        const routeKey = `route:${host}:${originalPath}`
+        const route = await getRouteByKeyEdge(routeKey)
+        if (route) {
           url.pathname = '/api/blob-proxy'
           url.searchParams.set('rk', routeKey)
+          url.searchParams.set('v', route.version)
           return stampGeo(NextResponse.rewrite(url))
         }
         // 2. SSR fallback: look up slug → /p/{slug}{path} dynamic render

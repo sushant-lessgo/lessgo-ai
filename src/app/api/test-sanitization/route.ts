@@ -1,6 +1,6 @@
 // app/api/test-sanitization/route.ts - Test endpoint for HTML sanitization
 import { NextRequest, NextResponse } from 'next/server';
-import { runSanitizationTests } from '@/lib/htmlSanitizer.test';
+import { runSanitizationTests } from '@/lib/htmlSanitizerManualTest';
 import { 
   sanitizePublishedContent, 
   sanitizeFormattingContent, 
