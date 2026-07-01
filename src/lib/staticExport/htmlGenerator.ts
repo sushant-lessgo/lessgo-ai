@@ -11,6 +11,7 @@ import React from 'react';
 import { LandingPagePublishedRenderer } from '@/modules/generatedLanding/LandingPagePublishedRenderer';
 import { validateAndResolveAssetURLs } from './assetResolver';
 import { renderLessgoBadge } from './lessgoBadge';
+import { resolveCanonicalURL } from './canonicalUrl';
 import { usesTemplateModule } from '@/types/service';
 
 export interface StaticHTMLOptions {
@@ -30,6 +31,14 @@ export interface StaticHTMLOptions {
   templateId?: string | null;
   paletteId?: string | null;
   variantId?: string | null;
+
+  // Canonical / social URL resolution.
+  // canonicalDomain: the live custom domain (no scheme) when one is active; when unset,
+  // canonical falls back to `${slug}.lessgo.ai`. canonicalPath: this page's path
+  // (leading slash; '/' for root) so multi-page subpages self-report their own URL
+  // instead of the root's.
+  canonicalDomain?: string;
+  canonicalPath?: string;
 
   // Configuration
   analyticsOptIn?: boolean;
@@ -99,6 +108,8 @@ export async function generateStaticHTML(
       slug: options.slug,
       baseURL: options.baseURL || 'https://lessgo.ai',
       publishedPageId: options.publishedPageId,
+      canonicalDomain: options.canonicalDomain,
+      canonicalPath: options.canonicalPath,
     },
     analyticsOptIn: options.analyticsOptIn || false,
     hasForms,
@@ -174,6 +185,8 @@ function buildHTMLDocument(params: {
     slug: string;
     baseURL: string;
     publishedPageId: string;
+    canonicalDomain?: string;
+    canonicalPath?: string;
   };
   analyticsOptIn: boolean;
   hasForms: boolean;
@@ -194,11 +207,23 @@ function buildHTMLDocument(params: {
   // Generate CSS variables style tag
   const cssVariablesStyle = generateCSSVariablesStyle(cssVariables);
 
-  // OG image URL
+  // Canonical host: live custom domain when present, else the lessgo.ai subdomain.
+  // Path: this page's own path so subpages don't all claim the root canonical.
+  const canonicalURL = resolveCanonicalURL({
+    slug: metadata.slug,
+    canonicalDomain: metadata.canonicalDomain,
+    canonicalPath: metadata.canonicalPath,
+  });
+
+  // OG image URL. previewImage (manual upload) always wins. Auto-OG (/api/og/{slug}):
+  // when a live custom domain exists, serve it from that host so the absolute URL matches
+  // the domain the page lives on (custom domains route /api/* to the app). Otherwise keep
+  // the original baseURL fallback unchanged (no-custom-domain output stays byte-identical).
   const ogImage =
     metadata.previewImage ||
-    `${metadata.baseURL}/api/og/${metadata.slug}`;
-  const canonicalURL = `https://${metadata.slug}.lessgo.ai`;
+    (metadata.canonicalDomain
+      ? `https://${metadata.canonicalDomain}/api/og/${metadata.slug}`
+      : `${metadata.baseURL}/api/og/${metadata.slug}`);
 
   return `<!DOCTYPE html>
 <html lang="en">

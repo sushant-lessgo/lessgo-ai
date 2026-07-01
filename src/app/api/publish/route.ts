@@ -220,6 +220,15 @@ async function publishHandler(req: NextRequest) {
         throw new Error('Failed to get published page ID');
       }
 
+      // Resolve the canonical host once, BEFORE generation: use the custom domain only
+      // when it's already live, else leave undefined so the generator falls back to the
+      // {slug}.lessgo.ai subdomain. Reused below for the KV domain list. (Domains that go
+      // live AFTER publish are handled by verify-dns regenerating the HTML.)
+      const canonicalDomain =
+        publishedPage?.customDomain && publishedPage.customDomainStatus === 'live'
+          ? publishedPage.customDomain
+          : undefined;
+
       // Idempotency guard: prevent double-publish
       const currentPage = await prisma.publishedPage.findUnique({
         where: { id: pageId },
@@ -281,6 +290,8 @@ async function publishHandler(req: NextRequest) {
         templateId,
         paletteId,
         variantId,
+        canonicalDomain,
+        canonicalPath: '/',
       });
 
       // Upload to blob with timeout protection
@@ -352,6 +363,8 @@ async function publishHandler(req: NextRequest) {
             templateId,
             paletteId,
             variantId,
+            canonicalDomain,
+            canonicalPath: path,
           });
 
           const subUpload = await uploadStaticSite({
@@ -402,15 +415,9 @@ async function publishHandler(req: NextRequest) {
       try {
         const { atomicPublishWithRetry, writeRedirect, writeSlugForHost, removeRedirect } = await import('@/lib/routing/kvRoutes');
 
-        // Build domain list — includes custom domain when live
-        const pageDomains = await prisma.publishedPage.findUnique({
-          where: { id: pageId },
-          select: { customDomain: true, customDomainStatus: true },
-        });
+        // Build domain list — includes custom domain when live (resolved once above).
         const domains = [`${slug}.lessgo.ai`];
-        const hasLiveCustom =
-          pageDomains?.customDomain && pageDomains.customDomainStatus === 'live';
-        if (hasLiveCustom) domains.push(pageDomains!.customDomain!);
+        if (canonicalDomain) domains.push(canonicalDomain);
 
         // CRITICAL: Pass blobUrl (not blobKey) to KV
         // This allows proxy to fetch directly without head() API call
@@ -438,10 +445,10 @@ async function publishHandler(req: NextRequest) {
         });
 
         // Re-assert subdomain → custom domain 301 + slug-for fallback on every republish
-        if (hasLiveCustom) {
+        if (canonicalDomain) {
           try {
-            await writeRedirect(`${slug}.lessgo.ai`, `https://${pageDomains!.customDomain!}`, 301);
-            await writeSlugForHost(pageDomains!.customDomain!, slug);
+            await writeRedirect(`${slug}.lessgo.ai`, `https://${canonicalDomain}`, 301);
+            await writeSlugForHost(canonicalDomain, slug);
           } catch (e) {
             console.error('[Phase 3] writeRedirect/writeSlugForHost failed (non-fatal)', e);
           }
