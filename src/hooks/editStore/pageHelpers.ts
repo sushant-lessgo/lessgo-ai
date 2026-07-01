@@ -12,7 +12,7 @@
 
 import type { EditStore, PageSlice, ProjectPageEntry, ChromeEntry, ChromeState } from '@/types/store';
 import { extractSectionType } from '@/modules/generatedLanding/componentRegistry';
-import { syncCollection, materializeIntoPages, collectionKeysInPages } from './collectionHelpers';
+import { syncCollection, materializeIntoPages, collectionKeysInPages, syncHomeTeasers, materializeHomeTeasers } from './collectionHelpers';
 
 export const HOME_PAGE_ID = 'home';
 
@@ -118,6 +118,11 @@ export function commitActivePage(state: any): void {
   // page propagates to the catalog card. Only when this page belongs to one.
   const collectionKey = state.pages[id].collectionKey;
   if (collectionKey) syncCollection(state, collectionKey);
+
+  // "Pin to home": re-derive the home teasers (lineup + gallery-preview) from the
+  // flagged source content. Idempotent + no-op when Home lacks those sections, so
+  // it's safe to run on every commit for all templates.
+  syncHomeTeasers(state);
 }
 
 /** Immer-draft helper: load a body-only page entry + inject chrome into the working copy. */
@@ -170,6 +175,7 @@ export function buildPagesForExport(state: any): {
   // publish/save always ships a fresh catalog even if a live trigger was missed.
   // Operates on the plain clone (no active mirror here).
   for (const key of collectionKeysInPages(pages)) materializeIntoPages(pages, key);
+  materializeHomeTeasers(pages); // derive home lineup + gallery-preview from flags
 
   // The active working copy carries the latest chrome edits; fall back to state.chrome.
   const chrome: ChromeState =

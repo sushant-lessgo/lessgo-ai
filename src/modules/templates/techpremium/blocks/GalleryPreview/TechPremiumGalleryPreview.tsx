@@ -15,24 +15,15 @@ import { STYLES } from './styles';
 interface Image { id: string; src: string; tag: string; category: string }
 interface Content { eyebrow: string; headline: string; lede: string; images: Image[] }
 interface Props { sectionId: string }
-const rid = (p: string) => `${p}${Math.random().toString(36).slice(2, 7)}`;
 
 export default function TechPremiumGalleryPreview({ sectionId }: Props) {
-  const { mode, blockContent, handleContentUpdate, handleCollectionUpdate } =
+  const { mode, blockContent, handleContentUpdate } =
     useTechPremiumBlock<Content>({ sectionId });
   const edit = mode === 'edit';
+  // READ-ONLY: `images` are MATERIALIZED from Gallery-page photos flagged "⭐ show on
+  // home" (or first-N fallback) — see collectionHelpers.materializeHomeGallery. Curate
+  // on the Gallery page, not here. Only the section head stays editable.
   const images = blockContent.images || [];
-
-  const updateImage = (id: string, key: keyof Image, value: string) =>
-    handleCollectionUpdate('images', images.map((im) => (im.id === id ? { ...im, [key]: value } : im)));
-  const addImage = () => {
-    if (images.length >= 12) return;
-    handleCollectionUpdate('images', [...images, { id: rid('im'), src: '', tag: '', category: '' }]);
-  };
-  const removeImage = (id: string) => {
-    if (images.length <= 1) return;
-    handleCollectionUpdate('images', images.filter((im) => im.id !== id));
-  };
 
   return (
     <>
@@ -68,26 +59,11 @@ export default function TechPremiumGalleryPreview({ sectionId }: Props) {
                   {im.src ? <img src={im.src} alt={im.tag} /> : <span className="tp-tag">{im.tag || 'Photo'}</span>}
                 </div>
                 <div className="tp-ghover"><Search /></div>
-                {edit && (
-                  <div className="tp-gedit">
-                    <input
-                      className="tp-ginput" placeholder="Image URL"
-                      defaultValue={im.src} onBlur={(e) => updateImage(im.id, 'src', e.target.value)}
-                    />
-                    <input
-                      className="tp-ginput" placeholder="Caption"
-                      defaultValue={im.tag} onBlur={(e) => updateImage(im.id, 'tag', e.target.value)}
-                    />
-                    {images.length > 1 && (
-                      <button type="button" className="tp-gx" onClick={() => removeImage(im.id)} aria-label="Remove image">×</button>
-                    )}
-                  </div>
-                )}
               </div>
             ))}
           </div>
-          {edit && images.length < 12 && (
-            <button type="button" className="tp-gadd" onClick={addImage}>+ Add image</button>
+          {edit && (
+            <p className="tp-managed-hint">Managed from your <strong>Gallery page</strong> — flag <strong>⭐ show on home</strong> on a photo. Shows up to 6.</p>
           )}
         </div>
       </section>

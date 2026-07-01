@@ -44,6 +44,15 @@ describe('naayom products seed', () => {
     expect(rec.related.every((r: any) => r.categoryId === 'controllers')).toBe(true);
   });
 
+  it('home lineup items[] are materialized from the 3 featuredOnHome products (not hand-authored)', () => {
+    const home = pages.find((p) => p.pathSlug === '/');
+    const items = home.content[sidOfType(home, 'lineup')].elements.items;
+    expect(items.map((i: any) => i.model)).toEqual(['NWC 1000', 'NWC 101', 'NWM 100']);
+    expect(items.every((i: any) => i.href.startsWith('/products/'))).toBe(true);
+    // lineup card shape has no categoryId (unlike the catalog card)
+    expect(items[0]).not.toHaveProperty('categoryId');
+  });
+
   it('preserves the flat top-level fields (theme/meta/onboarding restore path)', () => {
     expect(fc.layout?.sections?.length).toBeGreaterThan(0);
     expect(fc.meta?.tokenId).toBe('t1');

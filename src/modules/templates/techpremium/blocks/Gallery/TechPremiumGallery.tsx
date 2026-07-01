@@ -17,7 +17,7 @@ import { STYLES } from './styles';
 const MAX_IMAGES = 24;
 
 interface Filter { id: string; label: string; cat: string }
-interface Image { id: string; src: string; tag: string; category: string }
+interface Image { id: string; src: string; tag: string; category: string; onHome?: boolean }
 interface Content { eyebrow: string; headline: string; lede: string; filters: Filter[]; images: Image[] }
 interface Props { sectionId: string }
 const rid = (p: string) => `${p}${Math.random().toString(36).slice(2, 7)}`;
@@ -38,11 +38,11 @@ export default function TechPremiumGallery({ sectionId }: Props) {
   const removeFilter = (id: string) =>
     handleCollectionUpdate('filters', filters.filter((f) => f.id !== id));
 
-  const updateImage = (id: string, key: keyof Image, value: string) =>
+  const updateImage = (id: string, key: keyof Image, value: string | boolean) =>
     handleCollectionUpdate('images', images.map((im) => (im.id === id ? { ...im, [key]: value } : im)));
   const addImage = () => {
     if (images.length >= 24) return;
-    handleCollectionUpdate('images', [...images, { id: rid('im'), src: '', tag: '', category: '' }]);
+    handleCollectionUpdate('images', [...images, { id: rid('im'), src: '', tag: '', category: '', onHome: false }]);
   };
   const removeImage = (id: string) => {
     if (images.length <= 1) return;
@@ -195,6 +195,10 @@ export default function TechPremiumGallery({ sectionId }: Props) {
                       <option value="">— category —</option>
                       {filters.map((f) => <option key={f.id} value={f.cat}>{f.label || f.cat || 'Category'}</option>)}
                     </select>
+                    <label className="tp-ghome">
+                      <input type="checkbox" checked={im.onHome ?? false} onChange={(e) => updateImage(im.id, 'onHome', e.target.checked)} />
+                      <span>⭐ show on home</span>
+                    </label>
                     {images.length > 1 && (
                       <button type="button" className="tp-gx" onClick={() => removeImage(im.id)} aria-label="Remove image">×</button>
                     )}
