@@ -20,7 +20,7 @@ interface Spec { id: string; key: string; value: string }
 interface RelatedCard { id: string; model: string; name: string; oneLiner: string; image: string; cardSpec: string; href: string }
 interface Record_ {
   model: string; name: string; category: string; oneLiner: string; lede: string; cardSpec: string;
-  enquireText: string; whatsappText: string; note: string;
+  enquireText: string; whatsappText: string; note: string; featuredOnHome?: boolean;
   images: Img[]; badges: Badge[]; features: Feature[]; specs: Spec[]; related: RelatedCard[];
 }
 
@@ -144,6 +144,12 @@ export default function TechPremiumProductDetail({ sectionId }: Props) {
               </div>
               {(blockContent.note || mode === 'edit') && (
                 <TechPremiumEditable as="p" mode={mode} sectionId={sectionId} elementKey="note" value={blockContent.note} onSave={(v) => handleContentUpdate('note', v)} className="tp-pd-note" placeholder="Sales-led — no online pricing." />
+              )}
+              {mode === 'edit' && (
+                <label className="tp-pd-home">
+                  <input type="checkbox" checked={blockContent.featuredOnHome ?? false} onChange={(e) => handleContentUpdate('featuredOnHome', e.target.checked)} />
+                  <span>⭐ Feature on home page <em>(shows in the home Products lineup)</em></span>
+                </label>
               )}
 
               {/* features */}

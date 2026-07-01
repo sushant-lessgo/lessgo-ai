@@ -164,3 +164,81 @@ export function collectionKeysInPages(pages: Pages): string[] {
   }
   return [...keys];
 }
+
+// ===== "Pin to home": derive the home teaser sections from flagged source content =====
+// The home `lineup` (products) + `gallerypreview` (gallery images) are MATERIALIZED
+// read-only views — a sibling of the catalog/related materialization above. Source
+// content carries a boolean flag (`featuredOnHome` on a product record, `onHome` on a
+// gallery image); when none are flagged we fall back to the first-N (order-sorted).
+
+const LINEUP_CAP = 4;      // home lineup shows up to N products
+const LINEUP_FALLBACK = 3; // when nothing flagged, first 3
+const GALLERY_CAP = 6;     // home gallery-preview shows up to N images (flagged or fallback)
+
+/** A home lineup card (subset of CatalogCard — the ProductLineup item shape). */
+export interface LineupCard { id: string; model: string; name: string; oneLiner: string; image: string; cardSpec: string; href: string }
+/** A home gallery-preview image. */
+export interface PreviewImage { id: string; src: string; tag: string; category: string }
+
+const findHomePage = (pages: Pages): ProjectPageEntry | undefined =>
+  Object.values(pages || {}).find((p) => p.pathSlug === '/');
+
+const sectionElements = (entry: ProjectPageEntry | undefined, sectionType: string): Record<string, any> | undefined => {
+  if (!entry) return undefined;
+  const sid = (entry.sections ?? []).find((id) => extractSectionType(id) === sectionType);
+  return sid ? ((entry.content as any)?.[sid]?.elements as Record<string, any>) : undefined;
+};
+
+/** Pure: products flagged `featuredOnHome` (or first-N fallback), as lineup cards. */
+export function materializeHomeLineup(pages: Pages): LineupCard[] {
+  const def = getCollectionDef('products');
+  if (!def) return [];
+  const items = collectionItems(pages, 'products'); // order-sorted collectionItem pages
+  const flagged = items.filter((p) => (recordOf(p, def.itemSectionType) ?? {}).featuredOnHome === true);
+  const chosen = flagged.length > 0 ? flagged.slice(0, LINEUP_CAP) : items.slice(0, LINEUP_FALLBACK);
+  return chosen.map((p) => {
+    const c = cardFromEntry(p, def); // {id,model,name,oneLiner,image,cardSpec,categoryId,href}
+    return { id: c.id, model: c.model, name: c.name, oneLiner: c.oneLiner, image: c.image, cardSpec: c.cardSpec, href: c.href };
+  });
+}
+
+/** Pure: gallery-page images flagged `onHome` (or first-N fallback), as preview images. */
+export function materializeHomeGallery(pages: Pages): PreviewImage[] {
+  const galleryPage = Object.values(pages || {}).find((p) => (p.sections ?? []).some((sid) => extractSectionType(sid) === 'gallery'));
+  const images = sectionElements(galleryPage, 'gallery')?.images;
+  const arr: any[] = Array.isArray(images) ? images : [];
+  const flagged = arr.filter((im) => im?.onHome === true);
+  const chosen = (flagged.length > 0 ? flagged : arr).slice(0, GALLERY_CAP);
+  return chosen.map((im) => ({ id: im.id, src: im.src ?? '', tag: im.tag ?? '', category: im.category ?? '' }));
+}
+
+/**
+ * Pure export-boundary variant: write the home page's lineup `items[]` +
+ * gallerypreview `images[]` from the flagged sources. No-op when the home page
+ * lacks those sections (other templates) → safe to call generically.
+ */
+export function materializeHomeTeasers(pages: Pages): void {
+  if (!pages) return;
+  const home = findHomePage(pages);
+  if (!home) return;
+  const writeInto = (sectionType: string, field: string, value: any) => {
+    const sid = (home.sections ?? []).find((id) => extractSectionType(id) === sectionType);
+    const sec = sid ? (home.content as any)?.[sid] : undefined;
+    if (sec) { if (!sec.elements) sec.elements = {}; sec.elements[field] = clone(value); }
+  };
+  writeInto('lineup', 'items', materializeHomeLineup(pages));
+  writeInto('gallerypreview', 'images', materializeHomeGallery(pages));
+}
+
+/**
+ * Immer-draft mutator (mirrors syncCollection): re-derive the home teasers into
+ * the store — writes both the stored home page AND the active mirror when Home is
+ * the current page. Run AFTER commitActivePage so source records are fresh.
+ */
+export function syncHomeTeasers(state: any): void {
+  if (!state?.pages) return;
+  const home = findHomePage(state.pages);
+  if (!home) return;
+  setSectionField(state, home.id, 'lineup', 'items', materializeHomeLineup(state.pages));
+  setSectionField(state, home.id, 'gallerypreview', 'images', materializeHomeGallery(state.pages));
+}

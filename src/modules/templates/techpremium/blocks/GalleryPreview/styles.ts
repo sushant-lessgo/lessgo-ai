@@ -15,8 +15,8 @@ export const GALLERY_STYLES = `
 .tp-gedit{ position:relative; z-index:3; display:flex; flex-direction:column; gap:6px; margin-top:8px; }
 .tp-ginput{ width:100%; font-family:var(--font-mono); font-size:11px; padding:6px 8px; border:1px solid var(--line-dk); border-radius:var(--r); background:var(--forest-d); color:var(--paper); }
 .tp-gx{ align-self:flex-start; background:transparent; border:1px solid var(--line-dk); color:oklch(0.78 0.03 140); font-size:12px; padding:2px 8px; border-radius:var(--r); cursor:pointer; }
-.tp-gadd{ display:block; margin:24px auto 0; border:1px dashed var(--line-dk); border-radius:var(--r-lg); background:transparent; color:oklch(0.78 0.03 140); font-family:var(--font-body); font-size:14px; padding:12px 24px; cursor:pointer; }
-.tp-gadd:hover{ border-color:var(--lime); color:var(--lime); }
+.tp-managed-hint{ margin:22px 0 0; font-family:var(--font-mono); font-size:11.5px; letter-spacing:0.02em; line-height:1.5; color:oklch(0.78 0.03 140); text-align:center; }
+.tp-managed-hint strong{ color:var(--lime); font-weight:600; }
 @media (max-width:1040px){ .tp-masonry{ column-count:3; } }
 @media (max-width:760px){ .tp-masonry{ column-count:2; } }
 @media (max-width:520px){ .tp-masonry{ column-count:1; } }

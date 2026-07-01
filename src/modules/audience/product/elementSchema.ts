@@ -328,6 +328,7 @@ export const meridianElementSchema: Record<string, UIBlockSchemaV2> = {
       enquireText:  { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: 'Enquire about this product' },
       whatsappText: { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: 'Ask on WhatsApp' },
       note:         { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: 'Sales-led — we spec the unit to your rooms. No online pricing.' },
+      featuredOnHome: { type: 'boolean', requirement: 'optional', fillMode: 'manual_preferred', default: false }, // → home lineup (materialized)
     },
     collections: {
       images: {
@@ -557,7 +558,7 @@ export const meridianElementSchema: Record<string, UIBlockSchemaV2> = {
       },
       images: {
         requirement: 'required', fillMode: 'manual_preferred', constraints: { min: 1, max: 24 },
-        fields: { id: { type: 'string', fillMode: 'system' }, src: { type: 'string', fillMode: 'manual_preferred', default: '' }, tag: { type: 'string', fillMode: 'ai_generated', default: '' }, category: { type: 'string', fillMode: 'manual_preferred', default: '' } },
+        fields: { id: { type: 'string', fillMode: 'system' }, src: { type: 'string', fillMode: 'manual_preferred', default: '' }, tag: { type: 'string', fillMode: 'ai_generated', default: '' }, category: { type: 'string', fillMode: 'manual_preferred', default: '' }, onHome: { type: 'boolean', fillMode: 'manual_preferred', default: false } },
       },
     },
   },

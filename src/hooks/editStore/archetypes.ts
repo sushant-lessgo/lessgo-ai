@@ -7,7 +7,7 @@
 // lists / seeds for the fully designed blocks — this file is the single swap point.
 
 import type { PageSlice, SectionData, ProjectPageEntry } from '@/types/store';
-import { materializeIntoPages } from './collectionHelpers';
+import { materializeIntoPages, materializeHomeTeasers } from './collectionHelpers';
 
 const rid = (p: string): string => `${p}${Math.random().toString(36).slice(2, 8)}`;
 const sectionId = (type: string): string => `${type}-${Math.random().toString(36).slice(2, 10)}`;
@@ -172,11 +172,9 @@ export function buildHomeSlice(): PageSlice {
       eyebrow: 'Our Products',
       headline: 'Pick the system for your <em>farm</em>.',
       lede: 'We assist the world’s leading mushroom growers in optimizing their production through advanced connectivity and automation.',
-      items: [
-        { id: rid('it'), model: 'NWC 1000', name: 'Mushroom Growing Room Controller', oneLiner: 'Advanced climate controller for grow rooms — stage-wise settings and remote connectivity.', image: '', cardSpec: 'Grow room · remote', href: '/products/nwc-1000' },
-        { id: rid('it'), model: 'NWC 101', name: 'CO₂, Temperature & Humidity Control', oneLiner: 'Three-parameter control for a single room — CO₂, temperature and humidity, with alarms.', image: '', cardSpec: 'CO₂ + Temp + RH · 4 ports', href: '/products/nwc-101' },
-        { id: rid('it'), model: 'NWM 100', name: 'CO₂, Temperature & Humidity Monitor', oneLiner: 'Continuous monitoring of CO₂, temperature and humidity with notifications.', image: '', cardSpec: 'CO₂ + Temp + RH · monitor', href: '/products/nwm-100' },
-      ],
+      // items[] is MATERIALIZED (read-only) from products flagged `featuredOnHome`
+      // (fallback: first-N) by materializeHomeTeasers — do not hand-author here.
+      items: [],
     }) },
     { id: te, data: section(te, 'testimonials', 'ProofWithLogoRail', {
       eyebrow: 'Success stories',
@@ -196,14 +194,9 @@ export function buildHomeSlice(): PageSlice {
       eyebrow: 'Gallery',
       headline: 'Climate controllers <em>in the field</em>.',
       lede: 'Real Naayom installations across mushroom farms.',
-      images: [
-        { id: rid('g'), src: '', tag: 'Controller install', category: 'install' },
-        { id: rid('g'), src: '', tag: 'Growing room', category: 'room' },
-        { id: rid('g'), src: '', tag: 'Phase II tunnel', category: 'room' },
-        { id: rid('g'), src: '', tag: 'Sensor array', category: 'hardware' },
-        { id: rid('g'), src: '', tag: 'Dashboard', category: 'software' },
-        { id: rid('g'), src: '', tag: 'Mushroom flush', category: 'crop' },
-      ],
+      // images[] is MATERIALIZED (read-only) from Gallery-page photos flagged `onHome`
+      // (fallback: first-N) by materializeHomeTeasers — do not hand-author here.
+      images: [],
     }) },
     { id: co, data: section(co, 'compatibility', 'CompatibilityChips', {
       eyebrow: 'Compatibility',
@@ -374,6 +367,7 @@ export function buildTechPremiumHomeFinalContent(opts: {
     ...buildNaayomProductPages(),
   };
   materializeIntoPages(pages, 'products'); // fill catalog items[] + detail related[]
+  materializeHomeTeasers(pages); // fill home lineup items[] + gallery-preview images[]
 
   return {
     // Flat top-level (back-compat single-page loaders + theme/meta/onboarding restore
@@ -464,6 +458,7 @@ export function buildProductDetailSlice(opts: {
   cardSpec?: string;
   features?: string[];
   specs?: Array<{ key: string; value: string }>;
+  featuredOnHome?: boolean;
 } = {}): PageSlice {
   const name = opts.title?.trim() || 'New product';
   const label = opts.model || name;
@@ -480,6 +475,7 @@ export function buildProductDetailSlice(opts: {
       enquireText: `Enquire about ${label}`,
       whatsappText: 'Ask on WhatsApp',
       note: 'Sales-led — we spec the unit to your rooms. No online pricing.',
+      featuredOnHome: opts.featuredOnHome ?? false,
       images: [{ id: rid('img'), src: '', tag: `${label} — product photo` }],
       badges: [],
       features: (opts.features || []).map((t) => ({ id: rid('ft'), text: t })),
@@ -494,7 +490,7 @@ export function buildProductDetailSlice(opts: {
  *  Single source of the seeded product copy (time-boxed naayom bridge, like the home seed). */
 export const NAAYOM_PRODUCTS: Array<{
   model: string; name: string; categoryId: string; oneLiner: string; cardSpec: string;
-  features: string[]; specs: Array<{ key: string; value: string }>;
+  features: string[]; specs: Array<{ key: string; value: string }>; featuredOnHome?: boolean;
 }> = [
   // ── Mushroom Growing Control Systems ──
   {
@@ -503,6 +499,7 @@ export const NAAYOM_PRODUCTS: Array<{
     cardSpec: 'Grow room · stage-wise · remote',
     features: ['Real-time monitoring', 'Trend graphs', 'Easy-to-use interface', 'Remote connectivity', 'Alarms on faults'],
     specs: [{ key: 'Climate', value: 'Stage-wise parameters' }, { key: 'Access', value: 'Remote' }],
+    featuredOnHome: true,
   },
   {
     model: 'NWC 2000', name: 'Phase II Tunnel Control System', categoryId: 'controllers',
@@ -525,6 +522,7 @@ export const NAAYOM_PRODUCTS: Array<{
     cardSpec: 'CO₂ + Temp + RH · 4 ports',
     features: ['Real-time monitoring of CO₂, temperature and humidity', 'Remotely track and adjust settings', 'Alarms and notifications', '4 ON/OFF control ports'],
     specs: [{ key: 'Air temperature sensor', value: '1' }, { key: 'Humidity sensor', value: '1' }, { key: 'CO₂ sensor', value: '1' }, { key: 'Compost sensors', value: 'up to 3' }, { key: 'Control ports', value: '4 ON/OFF' }],
+    featuredOnHome: true,
   },
   {
     model: 'NWC 301', name: 'Temperature & Humidity Control', categoryId: 'control',
@@ -547,6 +545,7 @@ export const NAAYOM_PRODUCTS: Array<{
     cardSpec: 'CO₂ + Temp + RH · monitor',
     features: ['Continuous real-time monitoring of CO₂, temperature and humidity', 'Notifications'],
     specs: [{ key: 'Temperature sensors', value: 'up to 5' }, { key: 'CO₂ sensor', value: '1' }, { key: 'Humidity sensor', value: '1' }],
+    featuredOnHome: true,
   },
   {
     model: 'NWM 300', name: 'Temperature & Humidity Monitor', categoryId: 'monitors',
@@ -604,6 +603,7 @@ export function buildNaayomProductPages(): Record<string, ProjectPageEntry> {
         cardSpec: p.cardSpec,
         features: p.features,
         specs: p.specs,
+        featuredOnHome: p.featuredOnHome,
       }),
     };
   });

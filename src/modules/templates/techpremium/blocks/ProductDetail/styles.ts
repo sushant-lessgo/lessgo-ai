@@ -3,6 +3,9 @@
 // Includes the product-card rules so the related strip renders on a product page.
 
 export const PD_STYLES = `
+.tp-pd-home { display:flex; align-items:center; gap:8px; margin-top:14px; font-family:var(--font-mono); font-size:11.5px; letter-spacing:0.02em; color:var(--ink-2); cursor:pointer; }
+.tp-pd-home input { width:15px; height:15px; accent-color:var(--forest); cursor:pointer; }
+.tp-pd-home em { font-style:normal; color:var(--ink-3); }
 .tp-pd { padding: var(--pad-y) var(--pad-x); }
 .tp-pd__inner { max-width: var(--max-w); margin: 0 auto; }
 .tp-crumb { font-family:var(--font-mono); font-size:11.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-3); margin-bottom:28px; }
