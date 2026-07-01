@@ -22,6 +22,9 @@ const GALLERY_OWN = `
 .tp-gedit{ position:relative; z-index:3; display:flex; flex-direction:column; gap:6px; margin-top:8px; }
 .tp-ginput{ width:100%; font-family:var(--font-mono); font-size:11px; padding:6px 8px; border:1px solid var(--line-2); border-radius:var(--r); background:var(--paper); color:var(--ink); }
 .tp-gsel{ width:100%; font-family:var(--font-mono); font-size:11px; padding:6px 8px; border:1px solid var(--line-2); border-radius:var(--r); background:var(--paper); color:var(--ink); }
+/* Native <option> popups render outside the normal cascade — CSS var() colors
+   don't resolve there, so option rows came out blank. Use literal colors. */
+.tp-gsel option{ color:#111827; background:#ffffff; }
 .tp-gx{ align-self:flex-start; background:transparent; border:1px solid var(--line-2); color:var(--ink-3); font-size:12px; padding:2px 8px; border-radius:var(--r); cursor:pointer; }
 .tp-x { background:transparent; border:none; color:var(--ink-3); font-size:12px; cursor:pointer; }
 .tp-add { background:transparent; border:1px dashed var(--line-2); color:var(--ink-3); font-family:var(--font-mono); font-size:11px; padding:4px 8px; border-radius:var(--r); cursor:pointer; }
