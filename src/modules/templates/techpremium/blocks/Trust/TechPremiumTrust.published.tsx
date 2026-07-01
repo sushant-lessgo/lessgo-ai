@@ -35,12 +35,20 @@ export default function TechPremiumTrustPublished({ sectionId, headline, metrics
           {ms.length > 0 && <div className="tp-trust__div" aria-hidden />}
           <div className="tp-trust__right">
             {headline && <span className="tp-trust__label">{headline}</span>}
-            <div className="tp-trust__logos">
-              {ls.map((l) => (
-                <span key={l.id} className="tp-trust__logo">
-                  {l.image ? <img src={l.image} alt={l.name} /> : <span className="tp-trust__logoph">{l.name || 'Logo'}</span>}
-                </span>
-              ))}
+            {/* INTENTIONAL edit↔published divergence: published wraps the logos in a
+                .tp-trust__marquee and renders the array TWICE (2nd copy aria-hidden)
+                so it auto-scrolls seamlessly. Edit keeps a static editable row. Logo
+                content is identical — not a dual-renderer parity bug. */}
+            <div className="tp-trust__marquee" aria-label="Trusted by">
+              <div className="tp-trust__logos">
+                {[0, 1].map((copy) =>
+                  ls.map((l) => (
+                    <span key={`${copy}-${l.id}`} className="tp-trust__logo" aria-hidden={copy === 1 || undefined}>
+                      {l.image ? <img src={l.image} alt={copy === 0 ? l.name : ''} /> : <span className="tp-trust__logoph">{l.name || 'Logo'}</span>}
+                    </span>
+                  ))
+                )}
+              </div>
             </div>
           </div>
         </div>

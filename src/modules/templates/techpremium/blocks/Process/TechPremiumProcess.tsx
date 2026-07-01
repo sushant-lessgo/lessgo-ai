@@ -10,6 +10,7 @@ import * as Icons from 'lucide-react';
 import { useTechPremiumBlock } from '../../hooks/useTechPremiumBlock';
 import { TechPremiumEditable } from '../../components/TechPremiumEditable';
 import { PROCESS_STYLES } from './styles';
+import { ytEmbed } from '../Explainer/ytEmbed';
 
 interface Step { id: string; icon: string; title: string; body: string }
 
@@ -17,6 +18,7 @@ interface TechPremiumProcessContent {
   eyebrow: string;
   headline: string;
   lede: string;
+  video_url: string;
   steps: Step[];
 }
 
@@ -39,6 +41,7 @@ export default function TechPremiumProcess({ sectionId }: TechPremiumProcessProp
 
   const edit = mode === 'edit';
   const steps = blockContent.steps || [];
+  const embed = ytEmbed(blockContent.video_url || '');
 
   const updateField = (id: string, key: keyof Step, value: string) => {
     handleCollectionUpdate('steps', steps.map((s) => (s.id === id ? { ...s, [key]: value } : s)));
@@ -96,6 +99,19 @@ export default function TechPremiumProcess({ sectionId }: TechPremiumProcessProp
               />
             )}
           </div>
+
+          {(embed || edit) && (
+            <div className="tp-how-video-wrap">
+              {embed && (
+                <div className="tp-how-video">
+                  <iframe src={embed} title={blockContent.headline || 'Video'} loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+                </div>
+              )}
+              {edit && (
+                <input className="tp-how-video-in" value={blockContent.video_url || ''} onChange={(e) => handleContentUpdate('video_url', e.target.value)} placeholder="YouTube URL (optional) — shows a video above the steps" />
+              )}
+            </div>
+          )}
 
           <div className="tp-how-steps" data-count={steps.length}>
             {steps.map((s, i) => (

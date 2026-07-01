@@ -9,6 +9,7 @@ import React from 'react';
 import { Check } from 'lucide-react';
 import { useTechPremiumBlock } from '../../hooks/useTechPremiumBlock';
 import { TechPremiumEditable } from '../../components/TechPremiumEditable';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { STYLES } from './styles';
 import { ytEmbed } from './ytEmbed';
 
@@ -33,6 +34,21 @@ export default function TechPremiumExplainer({ sectionId }: Props) {
   const { mode, blockContent, handleContentUpdate, handleCollectionUpdate } = useTechPremiumBlock<Content>({ sectionId });
   const edit = mode === 'edit';
   const rows = blockContent.rows || [];
+
+  const uploadImage = (useEditStore() as any).uploadImage as
+    | ((f: File, t?: { sectionId: string; elementKey: string }) => Promise<string | void>)
+    | undefined;
+  const [uploadingId, setUploadingId] = React.useState<string | null>(null);
+  const onRowImage = async (id: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || !uploadImage) return;
+    setUploadingId(id);
+    // Atomic store-target write into rows.<id>.image (+ auto-save); no stale closure.
+    try { await uploadImage(file, { sectionId, elementKey: `rows.${id}.image` }); }
+    catch (err) { /* surfaced by the store */ }
+    finally { setUploadingId(null); }
+  };
 
   const updateRow = (id: string, key: keyof Row, value: any) =>
     handleCollectionUpdate('rows', rows.map((r) => (r.id === id ? { ...r, [key]: value } : r)));
@@ -99,7 +115,11 @@ export default function TechPremiumExplainer({ sectionId }: Props) {
                   </div>
                   {edit && (
                     <div className="tp-explain-media-edit">
-                      <input value={r.image} onChange={(e) => updateRow(r.id, 'image', e.target.value)} placeholder="Image URL (wins over video)" />
+                      <label className="tp-explain-up">
+                        {uploadingId === r.id ? 'Uploading…' : (r.image ? '⇄ Replace photo' : '↥ Upload photo')}
+                        <input type="file" accept="image/*" hidden disabled={uploadingId === r.id} onChange={(e) => onRowImage(r.id, e)} />
+                      </label>
+                      <input value={r.image} onChange={(e) => updateRow(r.id, 'image', e.target.value)} placeholder="…or image URL (wins over video)" />
                       <input value={r.video_url} onChange={(e) => updateRow(r.id, 'video_url', e.target.value)} placeholder="YouTube URL" />
                     </div>
                   )}

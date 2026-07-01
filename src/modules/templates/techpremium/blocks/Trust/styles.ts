@@ -12,10 +12,19 @@ export const TRUST_STYLES = `
 .tp-trust__div { background:var(--line); width:1px; height:46px; }
 .tp-trust__right { display:flex; flex-direction:column; gap:10px; flex:1; min-width:0; }
 .tp-trust__label { font-family:var(--font-mono); font-size:10.5px; letter-spacing:0.12em; text-transform:uppercase; color:var(--ink-3); }
-.tp-trust__logos { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:24px 40px; }
+.tp-trust__logos { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:24px 44px; }
 .tp-trust__logo { position:relative; display:inline-flex; align-items:center; height:auto; }
-.tp-trust__logo img { height:48px; max-width:160px; object-fit:contain; }
+.tp-trust__logo img { height:60px; max-width:180px; object-fit:contain; }
 .tp-trust__logoph { font-family:var(--font-mono); font-size:12px; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-3); border:1px dashed var(--line-2); border-radius:var(--r); padding:14px 22px; }
+/* Auto-scroll marquee — PUBLISHED only (published wraps .tp-trust__logos in
+   .tp-trust__marquee + duplicates the array). Edit renders the static row above.
+   Per-item padding (not flex gap) so the 2 copies tile exactly → seamless -50% loop. */
+.tp-trust__marquee { position:relative; overflow:hidden; width:100%; -webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent); mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent); }
+.tp-trust__marquee .tp-trust__logos { flex-wrap:nowrap; justify-content:flex-start; width:max-content; gap:0; animation:tp-trust-marquee 32s linear infinite; }
+.tp-trust__marquee .tp-trust__logo { padding:0 28px; }
+.tp-trust__marquee:hover .tp-trust__logos { animation-play-state:paused; }
+@keyframes tp-trust-marquee { from { transform:translateX(0); } to { transform:translateX(-50%); } }
+@media (prefers-reduced-motion:reduce){ .tp-trust__marquee .tp-trust__logos { animation:none; } }
 .tp-trust__logo.is-edit { flex-direction:column; align-items:flex-start; height:auto; gap:6px; border:1px dashed var(--line-2); border-radius:var(--r); padding:8px; }
 .tp-trust__logo-edit { display:inline-flex; align-items:center; gap:6px; }
 .tp-trust__logo-up { display:inline-grid; place-items:center; width:24px; height:24px; border:1px solid var(--line-2); border-radius:var(--r); font-size:12px; color:var(--ink-2); cursor:pointer; }
@@ -23,5 +32,5 @@ export const TRUST_STYLES = `
 .tp-trust__logo-name { width:96px; font-family:var(--font-mono); font-size:11px; padding:4px 6px; border:1px solid var(--line-2); border-radius:var(--r); color:var(--ink); }
 .tp-x { background:transparent; border:none; color:var(--ink-3); font-size:12px; cursor:pointer; }
 .tp-add { background:transparent; border:1px dashed var(--line-2); color:var(--ink-3); font-family:var(--font-mono); font-size:11px; padding:4px 8px; border-radius:var(--r); cursor:pointer; }
-@media (max-width:760px){ .tp-trust__div { display:none; } .tp-trust__logo img { height:38px; } .tp-trust__logos { gap:20px 28px; } }
+@media (max-width:760px){ .tp-trust__div { display:none; } .tp-trust__logo img { height:44px; } .tp-trust__logos { gap:20px 28px; } .tp-trust__marquee .tp-trust__logo { padding:0 18px; } }
 `;

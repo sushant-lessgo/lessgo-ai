@@ -4,6 +4,10 @@
 import { SEC_HEAD_STYLES } from '../shared/sharedStyles';
 
 export const PROCESS_STYLES = SEC_HEAD_STYLES + `
+.tp-how-video-wrap{ max-width:820px; margin:0 auto 40px; display:flex; flex-direction:column; gap:10px; }
+.tp-how-video{ position:relative; width:100%; aspect-ratio:16/9; border:1px solid var(--line); border-radius:var(--r-lg); overflow:hidden; background:var(--paper-2); }
+.tp-how-video iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
+.tp-how-video-in{ font-family:var(--font-mono); font-size:11px; border:1px solid var(--line-2); border-radius:var(--r); padding:7px 10px; color:var(--ink-2); width:100%; }
 .tp-how-steps{ display:grid; grid-template-columns:repeat(3,1fr); gap:0; border:1px solid var(--line); border-radius:var(--r-lg); overflow:hidden; background:var(--paper); }
 .tp-how-steps[data-count="4"]{ grid-template-columns:repeat(4,1fr); }
 .tp-step{ padding:34px 30px; border-right:1px solid var(--line); position:relative; display:flex; flex-direction:column; }

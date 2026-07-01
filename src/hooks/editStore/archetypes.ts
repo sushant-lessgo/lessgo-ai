@@ -139,6 +139,7 @@ export function buildHomeSlice(): PageSlice {
       eyebrow: 'How Naayom works',
       headline: 'Sense, control, optimise — <em>automatically</em>.',
       lede: 'A closed loop that holds your climate steady and turns every reading into an insight.',
+      video_url: '',
       steps: [
         { id: rid('s'), icon: 'Radar', title: 'Sensing', body: 'IoT devices and sensors monitor CO₂, temperature and humidity levels in real time, helping growers make informed decisions.' },
         { id: rid('s'), icon: 'SlidersHorizontal', title: 'Control', body: 'Control any type of equipment installed at your farm — compressors, blowers, valves, dampers, VFDs, and more.' },

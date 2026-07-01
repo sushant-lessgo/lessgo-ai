@@ -24,7 +24,6 @@ export default function TechPremiumTrust({ sectionId }: Props) {
 
   const store = useEditStore() as any;
   const uploadImage = store.uploadImage as ((f: File, t?: { sectionId: string; elementKey: string }) => Promise<string | void>) | undefined;
-  const save = store.save as (() => Promise<void>) | undefined;
   const [uploadingId, setUploadingId] = React.useState<string | null>(null);
   const setLogo = (id: string, k: keyof Logo, v: string) => handleCollectionUpdate('logos', logos.map((l) => (l.id === id ? { ...l, [k]: v } : l)));
   const onLogoFile = async (id: string, e: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,11 +32,10 @@ export default function TechPremiumTrust({ sectionId }: Props) {
     if (!file || !uploadImage) return;
     setUploadingId(id);
     try {
-      const url = await uploadImage(file);
-      if (typeof url === 'string' && url) {
-        handleCollectionUpdate('logos', logos.map((l) => (l.id === id ? { ...l, image: url } : l)));
-        await save?.();
-      }
+      // Atomic store-target write: writes logos.<id>.image into the CURRENT store
+      // state (+ auto-saves). Avoids the stale-closure clobber a manual
+      // handleCollectionUpdate(logos.map(...)) had on rapid/concurrent uploads.
+      await uploadImage(file, { sectionId, elementKey: `logos.${id}.image` });
     } catch (err) { /* surfaced by the store */ }
     finally { setUploadingId(null); }
   };
@@ -64,6 +62,10 @@ export default function TechPremiumTrust({ sectionId }: Props) {
             {(blockContent.headline || edit) && (
               <TechPremiumEditable as="span" className="tp-trust__label" mode={mode} sectionId={sectionId} elementKey="headline" value={blockContent.headline} onSave={(v) => handleContentUpdate('headline', v)} enterBehavior="save" placeholder="Trusted by leading growers" />
             )}
+            {/* Edit = static, editable single row. Published wraps this in a
+                .tp-trust__marquee and duplicates the logo array to auto-scroll —
+                an INTENTIONAL edit↔published divergence (logo content is identical;
+                published only loops + animates it). Not a dual-renderer parity bug. */}
             <div className="tp-trust__logos">
             {logos.map((l) => (
               <span key={l.id} className={`tp-trust__logo${edit ? ' is-edit' : ''}`}>

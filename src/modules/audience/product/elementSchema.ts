@@ -425,9 +425,10 @@ export const meridianElementSchema: Record<string, UIBlockSchemaV2> = {
   ProcessSteps: {
     sectionType: 'process',
     elements: {
-      eyebrow:  { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
-      headline: { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'How it works' },
-      lede:     { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      eyebrow:   { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      headline:  { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'How it works' },
+      lede:      { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      video_url: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
     },
     collections: {
       steps: {

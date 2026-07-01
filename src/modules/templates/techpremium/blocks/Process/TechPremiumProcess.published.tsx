@@ -4,6 +4,7 @@
 import React from 'react';
 import * as Icons from 'lucide-react';
 import { PROCESS_STYLES } from './styles';
+import { ytEmbed } from '../Explainer/ytEmbed';
 
 interface Step { id?: string; icon?: string; title?: string; body?: string }
 
@@ -12,6 +13,7 @@ interface TechPremiumProcessPublishedProps {
   eyebrow?: string;
   headline?: string;
   lede?: string;
+  video_url?: string;
   steps?: Step[];
 }
 
@@ -25,6 +27,7 @@ function StepIcon({ name }: { name: string }) {
 
 export default function TechPremiumProcessPublished(props: TechPremiumProcessPublishedProps) {
   const steps = Array.isArray(props.steps) ? props.steps : [];
+  const embed = ytEmbed(props.video_url || '');
 
   return (
     <>
@@ -40,6 +43,14 @@ export default function TechPremiumProcessPublished(props: TechPremiumProcessPub
               <p className="tp-lede" dangerouslySetInnerHTML={{ __html: props.lede }} />
             )}
           </div>
+
+          {embed && (
+            <div className="tp-how-video-wrap">
+              <div className="tp-how-video">
+                <iframe src={embed} title={props.headline || 'Video'} loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+              </div>
+            </div>
+          )}
 
           {steps.length > 0 && (
             <div className="tp-how-steps" data-count={steps.length}>
