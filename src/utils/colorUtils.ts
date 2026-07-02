@@ -77,6 +77,23 @@ export function parseColor(color: string): RGB | null {
     };
   }
   
+  // Named colors (basic set) — checked before Tailwind so bare CSS words
+  // ("red", "blue", "green", "gray") resolve to CSS-standard RGB rather than
+  // being swallowed by the Tailwind class matcher (which would map "red" → red-500).
+  const namedColors: Record<string, RGB> = {
+    white: { r: 255, g: 255, b: 255 },
+    black: { r: 0, g: 0, b: 0 },
+    red: { r: 255, g: 0, b: 0 },
+    green: { r: 0, g: 128, b: 0 },
+    blue: { r: 0, g: 0, b: 255 },
+    gray: { r: 128, g: 128, b: 128 },
+    grey: { r: 128, g: 128, b: 128 }
+  };
+
+  if (namedColors[cleanColor]) {
+    return namedColors[cleanColor];
+  }
+
   // Handle Tailwind classes (bg-color-weight, text-color-weight)
   const tailwindMatch = cleanColor.match(/^(?:bg-|text-)?(\w+)(?:-(\d+))?$/);
   if (tailwindMatch) {
@@ -166,21 +183,6 @@ export function parseColor(color: string): RGB | null {
     }
   }
 
-  // Named colors (basic set)
-  const namedColors: Record<string, RGB> = {
-    white: { r: 255, g: 255, b: 255 },
-    black: { r: 0, g: 0, b: 0 },
-    red: { r: 255, g: 0, b: 0 },
-    green: { r: 0, g: 128, b: 0 },
-    blue: { r: 0, g: 0, b: 255 },
-    gray: { r: 128, g: 128, b: 128 },
-    grey: { r: 128, g: 128, b: 128 }
-  };
-  
-  if (namedColors[cleanColor]) {
-    return namedColors[cleanColor];
-  }
-  
   return null;
 }
 
@@ -334,7 +336,18 @@ export function getOptimalTextColor(
   } else if (lightContrast >= requiredLevel) {
     return options.preferredLight || '#ffffff';
   } else {
-    // Neither meets requirement, choose the better one
+    // Neither soft preferred color meets the requirement — escalate to the
+    // maximum-contrast extremes (pure black/white) before giving up.
+    const black: RGB = { r: 0, g: 0, b: 0 };
+    const white: RGB = { r: 255, g: 255, b: 255 };
+    const blackContrast = calculateContrastRatio(bgAnalysis.rgb, black);
+    const whiteContrast = calculateContrastRatio(bgAnalysis.rgb, white);
+
+    if (blackContrast >= requiredLevel || whiteContrast >= requiredLevel) {
+      return blackContrast >= whiteContrast ? '#000000' : '#ffffff';
+    }
+
+    // Even the extremes fail — return the better of the preferred colors.
     return darkContrast > lightContrast ? options.preferredDark || '#1f2937' : options.preferredLight || '#ffffff';
   }
 }
