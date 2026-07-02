@@ -36,6 +36,7 @@ const isPublicRoute = createRouteMatcher([
   '/privacy',
   '/terms',
   '/api/blob-proxy',
+  '/api/seo/(.*)', // per-host sitemap.xml/robots.txt rewrites (SEO Phase 4)
 ])
 
 export default clerkMiddleware(async (auth, req) => {
@@ -61,11 +62,24 @@ export default clerkMiddleware(async (auth, req) => {
   const isApiOrNext = url.pathname.startsWith('/api/') || url.pathname.startsWith('/_next/')
 
   if (!isApiOrNext) {
+    // Per-host sitemap.xml / robots.txt (SEO Phase 4) — resolved BEFORE the
+    // redirect/KV/SSR fallbacks in both published branches below.
+    const seoRewrite =
+      url.pathname === '/sitemap.xml' ? '/api/seo/sitemap'
+      : url.pathname === '/robots.txt' ? '/api/seo/robots'
+      : null
+
     // Branch A: Lessgo published subdomain (e.g. mypage.lessgo.site, or legacy mypage.lessgo.ai)
     const pubSubdomain = matchPublishSubdomain(host)
     if (pubSubdomain && host) {
       const subdomain = pubSubdomain
       {
+        if (seoRewrite) {
+          url.pathname = seoRewrite
+          url.searchParams.set('host', host)
+          return NextResponse.rewrite(url)
+        }
+
         // Check for redirect to custom domain first (301)
         try {
           const redirect = await getRedirectEdge(host, url.pathname || '/')
@@ -102,6 +116,11 @@ export default clerkMiddleware(async (auth, req) => {
     }
     // Branch B: Custom domain (host not owned by Lessgo)
     else if (host && !isLessgoAppHost(host)) {
+      if (seoRewrite) {
+        url.pathname = seoRewrite
+        url.searchParams.set('host', host)
+        return NextResponse.rewrite(url)
+      }
       const originalPath = url.pathname || '/'
       try {
         // 1. Fast path: KV route → blob proxy (only root has static blob today; subpaths fall through).
