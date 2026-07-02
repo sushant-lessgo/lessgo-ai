@@ -55,7 +55,7 @@ model ProjectPage {
   order        Int      @default(0)
   content      Json? // { sections: string[], sectionLayouts: {}, content: {} }
   createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  updatedAt    DateTime @default(now()) @updatedAt
 
   @@unique([projectId, pathSlug])
   @@index([projectId])
