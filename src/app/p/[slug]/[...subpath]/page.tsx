@@ -3,7 +3,8 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { sanitizeContentForPublish } from '@/modules/sections/layoutElementSchema';
 import { usesTemplateModule, type TemplateId } from '@/types/service';
-import { publishedSubdomainHost } from '@/lib/domains/hosts';
+import { resolveCanonicalURL } from '@/lib/staticExport/canonicalUrl';
+import { resolveOgImage } from '@/lib/staticExport/buildPageMetadata';
 
 // Multi-page subpage route. Serves content.subpages[pathSlug] from a published
 // project. The blob fast path (KV route:{host}:{path} → blob-proxy) handles most
@@ -30,16 +31,29 @@ function getSubpage(content: any, pathSlug: string): any | null {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const page = await prisma.publishedPage.findUnique({
     where: { slug: params.slug },
-    select: { title: true, content: true, previewImage: true },
+    select: {
+      title: true,
+      content: true,
+      previewImage: true,
+      customDomain: true,
+      customDomainStatus: true,
+    },
   });
   if (!page) return {};
 
   const content = page.content as any;
-  const sub = getSubpage(content, subPathFromParams(params.subpath));
+  const subPath = subPathFromParams(params.subpath);
+  const sub = getSubpage(content, subPath);
   if (!sub) return {};
 
   const sections: string[] = sub?.layout?.sections || [];
   const heroId = sections.find((id: string) => id.includes('hero'));
+
+  // Canonical/og:url resolve to the live custom domain when active, at this subpage's own path
+  // (shared with the static generator so the SSR fallback can't drift).
+  const canonicalDomain =
+    page.customDomainStatus === 'live' && page.customDomain ? page.customDomain : undefined;
+  const canonicalURL = resolveCanonicalURL({ slug: params.slug, canonicalDomain, canonicalPath: subPath });
 
   // Product-detail pages have no hero — derive SEO from the Product entry record.
   const pdId = sections.find((id: string) => /^productdetail/i.test(id));
@@ -47,7 +61,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   let headline: string;
   let description: string;
-  let ogImageUrl = page.previewImage || `/api/og/${params.slug}`;
+  let ogImageUrl = resolveOgImage({
+    slug: params.slug,
+    previewImage: page.previewImage,
+    canonicalDomain,
+    baseUrl: 'https://lessgo.ai',
+  });
 
   if (pdEl) {
     const model = typeof pdEl.model === 'string' ? pdEl.model : '';
@@ -72,10 +91,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: pageTitle,
     description,
+    alternates: { canonical: canonicalURL },
     openGraph: {
       title: pageTitle,
       description,
-      url: `https://${publishedSubdomainHost(params.slug)}${subPathFromParams(params.subpath)}`,
+      url: canonicalURL,
       siteName: 'Lessgo.ai',
       images: [{ url: ogImageUrl, width: 1200, height: 630, alt: pageTitle }],
       type: 'website',

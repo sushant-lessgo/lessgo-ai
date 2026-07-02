@@ -4,6 +4,7 @@ import { del } from '@vercel/blob';
 import { prisma } from '@/lib/prisma';
 import { generateStaticHTML } from './htmlGenerator';
 import { uploadStaticSite } from './blobUploader';
+import { buildPageMetadata } from './buildPageMetadata';
 
 /**
  * Render + upload a published page (root + all subpages) and advance its version pointer.
@@ -47,11 +48,6 @@ export interface RenderPublishedExportResult {
   newVersionId: string;
 }
 
-// First body (non-header/footer) hero section id, for meta description.
-function findHeroId(sections: string[] = []): string | undefined {
-  return sections.find((id) => /^hero/i.test(id)) || sections.find((id) => !/^(header|footer)/i.test(id));
-}
-
 export async function renderPublishedExport(
   input: RenderPublishedExportInput
 ): Promise<RenderPublishedExportResult> {
@@ -85,12 +81,15 @@ export async function renderPublishedExport(
     contentData.forms = {};
   }
 
-  const heroSection = findHeroId(contentData.layout?.sections);
-  const heroContent = heroSection ? contentData[heroSection] : undefined;
-  const description =
-    heroContent?.elements?.subheadline?.content ||
-    heroContent?.elements?.headline?.content ||
-    cleanTitle;
+  const rootMeta = buildPageMetadata({
+    slug,
+    pageTitle: cleanTitle,
+    content: contentData, // already flattened above
+    previewImage,
+    canonicalDomain,
+    canonicalPath: '/',
+    baseUrl,
+  });
 
   const staticHTML = await generateStaticHTML({
     sections: contentData.layout.sections,
@@ -100,7 +99,7 @@ export async function renderPublishedExport(
     pageOwnerId: userId,
     slug,
     title: cleanTitle,
-    description: typeof description === 'string' ? description.slice(0, 160) : cleanTitle.slice(0, 160),
+    description: rootMeta.description,
     previewImage: previewImage ?? undefined,
     analyticsOptIn: analyticsEnabled || false, // Phase 4
     baseURL: baseUrl,
@@ -156,12 +155,15 @@ export async function renderPublishedExport(
         forms: contentData.forms || {},
         legalPages: contentData.legalPages,
       };
-      const subHero = subFlat[findHeroId(subSections) || ''];
-      const subDesc =
-        subHero?.elements?.subheadline?.content ||
-        subHero?.elements?.headline?.content ||
-        sub?.title ||
-        cleanTitle;
+      const subMeta = buildPageMetadata({
+        slug,
+        pageTitle: sub?.title || cleanTitle,
+        content: { ...subFlat, layout: { sections: subSections } },
+        previewImage,
+        canonicalDomain,
+        canonicalPath: path,
+        baseUrl,
+      });
 
       const subHtml = await generateStaticHTML({
         sections: subSections,
@@ -171,7 +173,7 @@ export async function renderPublishedExport(
         pageOwnerId: userId,
         slug,
         title: sub?.title || cleanTitle,
-        description: typeof subDesc === 'string' ? subDesc.slice(0, 160) : cleanTitle.slice(0, 160),
+        description: subMeta.description,
         previewImage: previewImage ?? undefined,
         analyticsOptIn: analyticsEnabled || false,
         baseURL: baseUrl,

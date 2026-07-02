@@ -12,6 +12,7 @@ import { LandingPagePublishedRenderer } from '@/modules/generatedLanding/Landing
 import { validateAndResolveAssetURLs } from './assetResolver';
 import { renderLessgoBadge } from './lessgoBadge';
 import { resolveCanonicalURL } from './canonicalUrl';
+import { resolveOgImage } from './buildPageMetadata';
 import { usesTemplateModule } from '@/types/service';
 
 export interface StaticHTMLOptions {
@@ -215,15 +216,16 @@ function buildHTMLDocument(params: {
     canonicalPath: metadata.canonicalPath,
   });
 
-  // OG image URL. previewImage (manual upload) always wins. Auto-OG (/api/og/{slug}):
-  // when a live custom domain exists, serve it from that host so the absolute URL matches
-  // the domain the page lives on (custom domains route /api/* to the app). Otherwise keep
-  // the original baseURL fallback unchanged (no-custom-domain output stays byte-identical).
-  const ogImage =
-    metadata.previewImage ||
-    (metadata.canonicalDomain
-      ? `https://${metadata.canonicalDomain}/api/og/${metadata.slug}`
-      : `${metadata.baseURL}/api/og/${metadata.slug}`);
+  // OG image URL. Shared with the dynamic routes via resolveOgImage: previewImage (manual
+  // upload) always wins; else auto /api/og/{slug} served from the live custom domain when one
+  // exists (absolute URL matches the host the page lives on), else off baseURL. No-custom-domain
+  // output stays byte-identical.
+  const ogImage = resolveOgImage({
+    slug: metadata.slug,
+    previewImage: metadata.previewImage,
+    canonicalDomain: metadata.canonicalDomain,
+    baseUrl: metadata.baseURL,
+  });
 
   return `<!DOCTYPE html>
 <html lang="en">

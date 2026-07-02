@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { sanitizeContentForPublish } from '@/modules/sections/layoutElementSchema';
 import { usesTemplateModule, type TemplateId } from '@/types/service';
-import { publishedSubdomainHost } from '@/lib/domains/hosts';
+import { buildPageMetadata, flattenContent } from '@/lib/staticExport/buildPageMetadata';
 
 // ISR configuration - revalidate every hour
 export const revalidate = 3600;
@@ -20,53 +20,45 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: true,
       content: true,
       previewImage: true,
+      customDomain: true,
+      customDomainStatus: true,
     },
   });
 
   if (!page) return {};
 
-  // Extract hero content for description
-  const content = page.content as any;
-  const sections = content?.layout?.sections || [];
-  const heroSectionId = sections.find((id: string) => id.includes('hero'));
-  const heroElements = heroSectionId
-    ? content?.content?.[heroSectionId]?.elements || {}
-    : {};
-
-  const headline = heroElements.headline?.content || page.title || 'Landing Page';
-  const subheadline = heroElements.subheadline?.content || '';
-
-  // Truncate description to 160 characters
-  const description = subheadline
-    ? (subheadline.length > 160 ? subheadline.slice(0, 157) + '...' : subheadline)
-    : `Check out ${headline}`;
-
-  // Use manual override if exists, otherwise generate dynamically
-  const ogImageUrl = page.previewImage || `/api/og/${params.slug}`;
+  // Single source of truth (shared with the static generator). Canonical/og:url resolve to the
+  // live custom domain when one exists — otherwise the SSR fallback would point authority at the
+  // wrong host and omit the canonical entirely.
+  const canonicalDomain =
+    page.customDomainStatus === 'live' && page.customDomain ? page.customDomain : undefined;
+  const meta = buildPageMetadata({
+    slug: params.slug,
+    pageTitle: page.title || '',
+    content: flattenContent(page.content),
+    previewImage: page.previewImage,
+    canonicalDomain,
+    canonicalPath: '/',
+    baseUrl: 'https://lessgo.ai',
+  });
 
   return {
-    title: page.title || headline,
-    description,
+    title: meta.title,
+    description: meta.description,
+    alternates: { canonical: meta.canonicalURL },
     openGraph: {
-      title: page.title || headline,
-      description,
-      url: `https://${publishedSubdomainHost(params.slug)}`,
-      siteName: 'Lessgo.ai',
-      images: [
-        {
-          url: ogImageUrl,
-          width: 1200,
-          height: 630,
-          alt: page.title || headline,
-        },
-      ],
-      type: 'website',
+      title: meta.title,
+      description: meta.description,
+      url: meta.canonicalURL,
+      siteName: meta.siteName,
+      images: [{ url: meta.ogImage, width: 1200, height: 630, alt: meta.title }],
+      type: meta.ogType,
     },
     twitter: {
       card: 'summary_large_image',
-      title: page.title || headline,
-      description,
-      images: [ogImageUrl],
+      title: meta.title,
+      description: meta.description,
+      images: [meta.ogImage],
     },
   };
 }
