@@ -1,5 +1,7 @@
 // lib/security.ts - OWASP Security Headers and Utilities
 import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { isAdmin, logAdminOverride } from '@/lib/admin';
 
 // A05: Security Misconfiguration - Security headers
 export const getSecurityHeaders = () => ({
@@ -27,6 +29,98 @@ export const verifyProjectAccess = async (
   
   // Allow access if user owns the project or project is unowned
   return !projectUserId || projectUserId === userId;
+};
+
+// A01: Broken Access Control - Token-scoped project ownership gate.
+//
+// The project token (Token.value, in /edit/<token> & /preview/<token> URLs) identifies WHICH
+// project; it is NOT proof of ownership. This helper codifies the loadDraft check in one place so
+// every token-scoped route enforces it identically and can't drift:
+//   - demo token           -> allow (isDemo)
+//   - project owned by you  -> allow
+//   - orphan (no owner)     -> allow; claim for the caller when claimIfOrphan (first authed writer wins)
+//   - project missing       -> allow (project:null) when allowMissing (route's create branch owns it), else 404
+//   - admin, not owner      -> allow + logAdminOverride audit (matches publish/domains)
+//   - anyone else           -> deny 403
+const OWNERSHIP_DEMO_TOKEN = 'lessgodemomockdata';
+
+export type ProjectOwnerResult =
+  | {
+      ok: true;
+      isDemo: boolean;
+      adminOverride: boolean;
+      userRecord: { id: string } | null;
+      project: { userId: string | null } | null;
+    }
+  | { ok: false; status: number; error: string };
+
+export const assertProjectOwner = async (
+  clerkId: string | null | undefined,
+  tokenId: string,
+  opts: { action: string; claimIfOrphan?: boolean; allowMissing?: boolean }
+): Promise<ProjectOwnerResult> => {
+  // Demo token short-circuits every gate (parity with verifyProjectAccess / planCheck demo mode).
+  if (tokenId === OWNERSHIP_DEMO_TOKEN) {
+    return { ok: true, isDemo: true, adminOverride: false, userRecord: null, project: null };
+  }
+
+  if (!clerkId) {
+    return { ok: false, status: 401, error: 'Unauthorized' };
+  }
+
+  const userRecord = await prisma.user.findUnique({
+    where: { clerkId },
+    select: { id: true },
+  });
+  if (!userRecord) {
+    return { ok: false, status: 404, error: 'User not found' };
+  }
+
+  const project = await prisma.project.findUnique({
+    where: { tokenId },
+    select: { userId: true },
+  });
+
+  // No project row yet: writers (allowMissing) create-and-own it; readers get 404.
+  if (!project) {
+    if (opts.allowMissing) {
+      return { ok: true, isDemo: false, adminOverride: false, userRecord, project: null };
+    }
+    return { ok: false, status: 404, error: 'Project not found' };
+  }
+
+  // Owner.
+  if (project.userId === userRecord.id) {
+    return { ok: true, isDemo: false, adminOverride: false, userRecord, project };
+  }
+
+  // Orphan (unowned): claim-on-first-authenticated-write, else allow read.
+  if (project.userId == null) {
+    if (opts.claimIfOrphan) {
+      await prisma.project.update({ where: { tokenId }, data: { userId: userRecord.id } });
+      return {
+        ok: true,
+        isDemo: false,
+        adminOverride: false,
+        userRecord,
+        project: { userId: userRecord.id },
+      };
+    }
+    return { ok: true, isDemo: false, adminOverride: false, userRecord, project };
+  }
+
+  // Non-owner admin: allow with an audit entry (same shape as publish/domains overrides).
+  if (isAdmin(clerkId)) {
+    await logAdminOverride({
+      actorClerkId: clerkId,
+      ownerId: project.userId,
+      action: opts.action,
+      resource: { tokenId },
+    });
+    return { ok: true, isDemo: false, adminOverride: true, userRecord, project };
+  }
+
+  return { ok: false, status: 403, error: 'Access denied' };
 };
 
 // A02: Cryptographic Failures - Environment validation

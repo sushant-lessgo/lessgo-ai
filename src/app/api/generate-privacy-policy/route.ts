@@ -13,7 +13,7 @@ import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { logger } from '@/lib/logger';
-import { createSecureResponse } from '@/lib/security';
+import { createSecureResponse, assertProjectOwner } from '@/lib/security';
 import { withAIRateLimit } from '@/lib/rateLimit';
 import { requireAICredits } from '@/lib/middleware/planCheck';
 import { consumeCredits, CREDIT_COSTS, UsageEventType } from '@/lib/creditSystem';
@@ -102,11 +102,19 @@ async function handler(req: NextRequest): Promise<Response> {
     }
     const userId = creditCheck.userId!;
 
-    // Best-effort token lookup for onboarding context (does not gate the endpoint)
-    const tokenRow = await prisma.token.findUnique({
-      where: { value: input.token },
-      include: { project: true },
-    }).catch(() => null);
+    // Best-effort token lookup for onboarding context (does not gate the endpoint). A01: only pull
+    // the project's onboarding context when the caller owns the token, so a non-owner can't read
+    // another tenant's category/audience. Non-owners still get a policy from their form fields.
+    const access = await assertProjectOwner(userId, input.token, {
+      action: 'privacy-policy',
+      allowMissing: true,
+    });
+    const tokenRow = access.ok
+      ? await prisma.token.findUnique({
+          where: { value: input.token },
+          include: { project: true },
+        }).catch(() => null)
+      : null;
 
     const projectContent = (tokenRow?.project?.content as any) || {};
     const onboarding = projectContent.onboarding || {};

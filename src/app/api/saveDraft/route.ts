@@ -4,7 +4,7 @@ import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
 import { DraftSaveSchema, sanitizeForLogging } from '@/lib/validation';
-import { createSecureResponse, verifyProjectAccess } from '@/lib/security';
+import { createSecureResponse, assertProjectOwner } from '@/lib/security';
 import { withDraftRateLimit } from '@/lib/rateLimit';
 
 const DEMO_TOKEN = 'lessgodemomockdata';
@@ -81,14 +81,22 @@ async function saveDraftHandler(req: NextRequest) {
     } = validationResult.data;
 
     const isDemo = tokenId === DEMO_TOKEN;
-    let userRecord = null;
+    let userRecord: { id: string } | null = null;
 
-    // A01: Broken Access Control - Ensure user exists in DB (skip for demo)
+    // A01: Broken Access Control - Enforce project ownership before writing (skip for demo).
+    // The token identifies which project; it is not proof of ownership. assertProjectOwner denies
+    // non-owner writes (403), claims orphan rows for the first authed writer, and lets the caller
+    // create-and-own a brand-new token (allowMissing) so the upsert create branch below still works.
     if (!isDemo) {
-      userRecord = await prisma.user.findUnique({ where: { clerkId } });
-      if (!userRecord) {
-        return createSecureResponse({ error: 'User not found in database' }, 404);
+      const access = await assertProjectOwner(clerkId, tokenId, {
+        action: 'saveDraft',
+        claimIfOrphan: true,
+        allowMissing: true,
+      });
+      if (!access.ok) {
+        return createSecureResponse({ error: access.error }, access.status);
       }
+      userRecord = access.userRecord;
     }
 
     // ✅ Ensure token exists

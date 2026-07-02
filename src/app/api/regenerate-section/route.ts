@@ -7,6 +7,7 @@ import { prisma } from '@/lib/prisma';
 import { withAIRateLimit } from '@/lib/rateLimit';
 import { requireAICredits } from '@/lib/middleware/planCheck';
 import { consumeCredits, UsageEventType, CREDIT_COSTS } from '@/lib/creditSystem';
+import { assertProjectOwner } from '@/lib/security';
 
 async function handler(req: NextRequest) {
   const startTime = Date.now();
@@ -47,6 +48,18 @@ async function handler(req: NextRequest) {
     }
 
     const DEMO_TOKEN = "lessgodemomockdata";
+
+    // A01: Broken Access Control - the caller must own this project before we read its
+    // onboarding context into the AI prompt. Runs BEFORE the project fetch and consumeCredits so a
+    // non-owner is rejected before any cross-tenant read or charge. Skipped in mock/demo mode
+    // (requireAICredits returns a synthetic 'demo-user' id that is not a real Clerk user).
+    const isMock = process.env.NEXT_PUBLIC_USE_MOCK_GPT === "true" || tokenId === DEMO_TOKEN;
+    if (!isMock) {
+      const access = await assertProjectOwner(userId, tokenId, { action: 'regenerate-section' });
+      if (!access.ok) {
+        return NextResponse.json({ error: access.error }, { status: access.status });
+      }
+    }
 
     // Get project data to access onboarding information (optional enhancement)
     let projectData = null;
