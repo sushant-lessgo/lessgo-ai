@@ -14,6 +14,7 @@ export type Project = {
   slug: string | null
   type: 'unified'
   publishedAt?: string
+  owner?: string
 }
 
 type Props = {
@@ -87,6 +88,11 @@ export default function ProjectCard({ project, onEdit, onPreview }: Props) {
     <div className="border border-brand-border rounded-md p-4 flex items-center justify-between hover:shadow-sm transition duration-200 bg-white">
       <div>
         <h3 className="text-heading4 font-heading text-brand-text mb-1">{stripHTMLTags(project.name || '')}</h3>
+        {project.owner && (
+          <span className="inline-block mb-1 rounded bg-slate-100 text-slate-600 px-2 py-0.5 text-xs">
+            owner: {project.owner}
+          </span>
+        )}
         <p className="text-sm text-brand-mutedText">
           {project.status}
           {project.slug && ` at /p/${project.slug}`}

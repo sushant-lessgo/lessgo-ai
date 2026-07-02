@@ -1,6 +1,7 @@
 // hooks/editStore/sectionCRUDActions.ts - Store actions for section CRUD operations
 import type { EditStore } from '@/types/store';
 import { logger } from '@/lib/logger';
+import { isChromeId } from './pageHelpers';
 // import type { string } from '@/types/store/state'; // Commented out - type not available
 
 /**
@@ -355,13 +356,15 @@ export function createSectionCRUDActions(set: any, get: any) {
      */
     moveSectionUp: (sectionId: string) =>
       set((state: EditStore) => {
+        if (isChromeId(sectionId)) return; // shared chrome stays pinned
         const currentIndex = state.sections.indexOf(sectionId);
-        if (currentIndex <= 0) return false;
-        
+        if (currentIndex <= 0) return;
+        if (isChromeId(state.sections[currentIndex - 1])) return; // don't cross into chrome slot
+
         const newSections = [...state.sections];
-        [newSections[currentIndex - 1], newSections[currentIndex]] = 
+        [newSections[currentIndex - 1], newSections[currentIndex]] =
         [newSections[currentIndex], newSections[currentIndex - 1]];
-        
+
         state.sections = newSections;
         
         // Track change
@@ -379,7 +382,6 @@ export function createSectionCRUDActions(set: any, get: any) {
         state.persistence.isDirty = true;
         state.lastUpdated = Date.now();
         
-        return true;
       }),
 
     /**
@@ -387,13 +389,15 @@ export function createSectionCRUDActions(set: any, get: any) {
      */
     moveSectionDown: (sectionId: string) =>
       set((state: EditStore) => {
+        if (isChromeId(sectionId)) return; // shared chrome stays pinned
         const currentIndex = state.sections.indexOf(sectionId);
-        if (currentIndex === -1 || currentIndex >= state.sections.length - 1) return false;
-        
+        if (currentIndex === -1 || currentIndex >= state.sections.length - 1) return;
+        if (isChromeId(state.sections[currentIndex + 1])) return; // don't cross into chrome slot
+
         const newSections = [...state.sections];
-        [newSections[currentIndex], newSections[currentIndex + 1]] = 
+        [newSections[currentIndex], newSections[currentIndex + 1]] =
         [newSections[currentIndex + 1], newSections[currentIndex]];
-        
+
         state.sections = newSections;
         
         // Track change
@@ -411,7 +415,6 @@ export function createSectionCRUDActions(set: any, get: any) {
         state.persistence.isDirty = true;
         state.lastUpdated = Date.now();
         
-        return true;
       }),
 
     /**
@@ -419,11 +422,12 @@ export function createSectionCRUDActions(set: any, get: any) {
      */
     moveSectionToPosition: (sectionId: string, targetPosition: number) =>
       set((state: EditStore) => {
+        if (isChromeId(sectionId)) return; // shared chrome stays pinned
         const currentIndex = state.sections.indexOf(sectionId);
-        if (currentIndex === -1) return false;
-        
+        if (currentIndex === -1) return;
+
         const validPosition = validateSectionPosition(state.sections, targetPosition);
-        if (currentIndex === validPosition) return false;
+        if (currentIndex === validPosition) return;
         
         const newSections = [...state.sections];
         const [movedSection] = newSections.splice(currentIndex, 1);
@@ -446,7 +450,6 @@ export function createSectionCRUDActions(set: any, get: any) {
         state.persistence.isDirty = true;
         state.lastUpdated = Date.now();
         
-        return true;
       }),
 
 
@@ -498,7 +501,7 @@ export function createSectionCRUDActions(set: any, get: any) {
         // TODO: Archive functionality is not available in current SectionData structure
         // Implementation needed when isArchived property is added to SectionData type
         logger.warn('archiveSection: Not implemented - SectionData type needs isArchived property');
-        return false;
+        return;
       }),
 
     /**
@@ -509,7 +512,7 @@ export function createSectionCRUDActions(set: any, get: any) {
         // TODO: Archive functionality is not available in current SectionData structure
         // Implementation needed when isArchived property is added to SectionData type
         logger.warn('restoreSection: Not implemented - SectionData type needs isArchived property');
-        return false;
+        return;
       }),
 
     /**

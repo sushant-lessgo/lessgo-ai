@@ -1,7 +1,11 @@
 // hooks/editStore/persistenceActions.ts - Simplified persistence and forms/images actions
 import type { EditStore, FormField, ImageAsset } from '@/types/store';
+import { buildPagesForExport, loadPageIntoActive, findHomeId, HOME_PAGE_ID, splitChrome } from './pageHelpers';
+import type { ChromeState, PageSlice } from '@/types/store';
 
 import { logger } from '@/lib/logger';
+
+const deepClone = <T>(v: T): T => JSON.parse(JSON.stringify(v ?? null));
 /**
  * Consolidated persistence actions for save/load operations plus forms and images
  */
@@ -256,10 +260,64 @@ export function createPersistenceActions(set: any, get: any) {
             confirmedFields: onboardingFromContent?.confirmedFields || apiResponse.confirmedFields || {},
           };
           
+          // ===== Multi-page + shared-chrome hydration =====
+          // Pages are stored BODY-ONLY; shared header/footer live in `chrome`.
+          // - If the draft carries `chrome`, use it and assume pages are body-only.
+          // - Else (Phase-1 data or legacy single page) MIGRATE: extract chrome by
+          //   type from the home page and strip header/footer from ALL pages.
+          const pagesFromDraft = contentToLoad?.pages;
+          const chromeFromDraft: ChromeState | undefined = contentToLoad?.chrome;
+
+          if (pagesFromDraft && typeof pagesFromDraft === 'object' && Object.keys(pagesFromDraft).length > 0) {
+            const pages = deepClone(pagesFromDraft) as Record<string, any>;
+            const homeId = findHomeId(pages) || Object.keys(pages)[0];
+
+            if (chromeFromDraft && (chromeFromDraft.header || chromeFromDraft.footer)) {
+              state.chrome = deepClone(chromeFromDraft);
+            } else {
+              // Migration: pull chrome out of the home page, strip from all pages.
+              state.chrome = splitChrome(pages[homeId] as PageSlice).chrome;
+            }
+            // Ensure every page is body-only (idempotent; no-op when already clean).
+            for (const pid of Object.keys(pages)) {
+              const { body } = splitChrome(pages[pid] as PageSlice);
+              pages[pid] = { ...pages[pid], ...body };
+            }
+            state.pages = pages;
+
+            const desired =
+              contentToLoad.currentPageId && pages[contentToLoad.currentPageId]
+                ? contentToLoad.currentPageId
+                : homeId;
+            if (pages[desired]) loadPageIntoActive(state, pages[desired]); // injects chrome
+          } else {
+            // Legacy single page: top-level slice still has header/footer inline.
+            const { body, chrome } = splitChrome(
+              deepClone({
+                sections: state.sections,
+                sectionLayouts: state.sectionLayouts,
+                sectionSpacing: state.sectionSpacing || {},
+                content: state.content,
+              }) as PageSlice,
+            );
+            state.chrome = chrome;
+            state.pages = {
+              [HOME_PAGE_ID]: {
+                id: HOME_PAGE_ID,
+                archetypeKey: 'home',
+                pathSlug: '/',
+                title: state.title || 'Home',
+                order: 0,
+                ...body,
+              },
+            };
+            loadPageIntoActive(state, state.pages[HOME_PAGE_ID]); // re-inject chrome
+          }
+
           state.lastUpdated = Date.now();
           state.persistence.isLoading = false;
           state.persistence.isDirty = false;
-          
+
           // Ensure performance object is initialized
           if (!state.performance) {
             state.performance = {
@@ -284,14 +342,22 @@ export function createPersistenceActions(set: any, get: any) {
 
     export: () => {
       const state = get();
+      // Multi-page + chrome: commit active page (body-only), guarantee home,
+      // and emit the canonical `chrome`. Top-level sections/content are emitted
+      // BODY-ONLY (== pages[home]) for back-compat — never carry chrome inline.
+      const { pages, currentPageId, homeId, chrome } = buildPagesForExport(state);
+      const home = pages[homeId];
       const exportData = {
         id: state.id,
         title: state.title,
         slug: state.slug,
-        sections: state.sections,
-        sectionLayouts: state.sectionLayouts,
-        sectionSpacing: state.sectionSpacing,
-        content: state.content,
+        sections: home?.sections ?? [],
+        sectionLayouts: home?.sectionLayouts ?? {},
+        sectionSpacing: home?.sectionSpacing ?? {},
+        content: home?.content ?? {},
+        pages,
+        currentPageId,
+        chrome,
         theme: state.theme,
         globalSettings: state.globalSettings,
         navigationConfig: state.navigationConfig,

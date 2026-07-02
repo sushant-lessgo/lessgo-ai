@@ -10,6 +10,7 @@ import { MeridianEditable } from '../../components/MeridianEditable';
 import { LinkTargetPopover } from '../../components/LinkTargetPopover';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { buildSectionLinkOptions } from '@/utils/sectionAnchors';
+import { buildPageLinkOptions } from '@/utils/pageLinks';
 
 interface NavItem {
   id: string;
@@ -35,11 +36,12 @@ export default function MeridianNavHeader({ sectionId }: MeridianNavHeaderProps)
 
   const navItems = blockContent.nav_items || [];
 
-  const { sections } = useEditStore();
+  const { sections, pages } = useEditStore();
   const sectionOptions = React.useMemo(
     () => buildSectionLinkOptions(sections || []),
     [sections]
   );
+  const pageOptions = React.useMemo(() => buildPageLinkOptions(pages), [pages]);
 
   const updateNavLabel = (id: string, label: string) => {
     handleCollectionUpdate(
@@ -108,6 +110,7 @@ export default function MeridianNavHeader({ sectionId }: MeridianNavHeaderProps)
                   <LinkTargetPopover
                     href={item.href}
                     sectionOptions={sectionOptions}
+                    pageOptions={pageOptions}
                     onChange={(href) => updateNavHref(item.id, href)}
                     triggerClassName="mrd-nav-link-cfg"
                   />

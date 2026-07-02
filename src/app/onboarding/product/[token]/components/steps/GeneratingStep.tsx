@@ -14,6 +14,7 @@ import {
   defaultTechPremiumPalette,
   defaultTechPremiumVariant,
 } from '@/types/product';
+import { buildTechPremiumHomeFinalContent } from '@/hooks/editStore/archetypes';
 
 type Stage = 'strategy' | 'copy' | 'saving' | 'done';
 
@@ -143,6 +144,55 @@ export default function GeneratingStep() {
       .then((j) => (j?.persona ?? null) as string | null)
       .catch(() => null);
 
+    // ─── TechPremium deterministic bridge (Phase 4c) ───
+    // TODO(ai-fill): hardware-founder onboarding currently SKIPS AI strategy/copy and
+    // seeds the 12-section naayom Home deterministically (0 credits). This is a
+    // temporary naayom-era bridge — replace with an AI path that fills the 12
+    // TechPremium section types before onboarding a 2nd hardware founder.
+    const persona = await personaPromise;
+    if (persona === 'hardware-founder') {
+      setStage('saving');
+      try {
+        const finalContent = buildTechPremiumHomeFinalContent({
+          tokenId,
+          title,
+          productName: productName.trim(),
+          oneLiner,
+          understanding,
+          landingGoal,
+          offer,
+        });
+        const res = await fetch('/api/saveDraft', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tokenId,
+            title,
+            paletteId: defaultTechPremiumPalette,
+            templateId: 'techpremium',
+            variantId: defaultTechPremiumVariant,
+            finalContent,
+          }),
+        });
+        if (!res.ok) throw new Error('Failed to save draft');
+      } catch (e: any) {
+        setError(e?.message || 'Could not save the draft.');
+        return;
+      }
+      setStage('done');
+      posthog?.capture('product_onboarding_complete', {
+        totalDurationMs: Date.now() - startedAt.current,
+        sectionCount: 12,
+        templateId: 'techpremium',
+        paletteId: defaultTechPremiumPalette,
+        variantId: defaultTechPremiumVariant,
+        audienceType: 'product',
+        deterministic: true,
+      });
+      setTimeout(() => router.push(`/generate/${tokenId}`), 600);
+      return;
+    }
+
     // ─── Strategy ───
     setStage('strategy');
     const strategyStart = Date.now();
@@ -226,12 +276,11 @@ export default function GeneratingStep() {
 
     // ─── Save ───
     setStage('saving');
-    // Persona-gated template selection (resolved by now; awaiting adds no latency).
-    const persona = await personaPromise;
-    const isHardwareFounder = persona === 'hardware-founder';
-    const templateId = isHardwareFounder ? 'techpremium' : PILOT_TEMPLATE;
-    const paletteId = isHardwareFounder ? defaultTechPremiumPalette : PILOT_PALETTE;
-    const variantId = isHardwareFounder ? defaultTechPremiumVariant : PILOT_VARIANT;
+    // Hardware-founder (TechPremium) was handled by the deterministic branch above;
+    // only Meridian reaches here.
+    const templateId = PILOT_TEMPLATE;
+    const paletteId = PILOT_PALETTE;
+    const variantId = PILOT_VARIANT;
     try {
       const { finalContent } = buildFinalContent(strategy, copySections, title);
       const res = await fetch('/api/saveDraft', {

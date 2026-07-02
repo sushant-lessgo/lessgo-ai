@@ -9,6 +9,7 @@ import { logger } from '@/lib/logger'
 import { withAIRateLimit } from '@/lib/rateLimit'
 import { requireAICredits } from '@/lib/middleware/planCheck'
 import { consumeCredits, UsageEventType, CREDIT_COSTS } from '@/lib/creditSystem'
+import * as Sentry from '@sentry/nextjs'
 
 // Debug mode environment variables
 const DEBUG_AI_PROMPTS = process.env.DEBUG_AI_PROMPTS === 'true';
@@ -168,6 +169,7 @@ async function generateLandingHandler(req: NextRequest) {
     }
 
     const userId = creditCheck.userId!;
+    Sentry.setUser({ id: userId });
 
     const body = await req.json()
     const { prompt, onboardingStore, pageStore, layoutRequirements, use2Phase = true } = body

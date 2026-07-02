@@ -246,3 +246,94 @@
   font-style: italic;
   font-display: swap;
 }
+
+/* ============================================================================
+   Archivo - Surge display (VARIABLE: wght). Heavy grotesk; weight RANGE is
+   load-bearing (Surge headlines use 700-900).
+   ============================================================================ */
+
+@font-face {
+  font-family: 'Archivo';
+  src: url('/fonts/archivo/archivo-latin-wght-normal.woff2') format('woff2-variations');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ============================================================================
+   Hanken Grotesk - Surge body (VARIABLE: wght)
+   ============================================================================ */
+
+@font-face {
+  font-family: 'Hanken Grotesk';
+  src: url('/fonts/hanken-grotesk/hanken-grotesk-latin-wght-normal.woff2') format('woff2-variations');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ============================================================================
+   Instrument Serif - Surge `editorial` variant display (static 400 + italic)
+   ============================================================================ */
+
+@font-face {
+  font-family: 'Instrument Serif';
+  src: url('/fonts/instrument-serif/instrument-serif-latin-400-normal.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Instrument Serif';
+  src: url('/fonts/instrument-serif/instrument-serif-latin-400-italic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ============================================================================
+   Spectral - Lumen display (static: 300/400/500/600 + italic 400). Editorial
+   serif; the italic is load-bearing (accent <em> + signature). Drop the latin
+   woff2 into public/fonts/spectral/ (see that dir's README).
+   ============================================================================ */
+
+@font-face {
+  font-family: 'Spectral';
+  src: url('/fonts/spectral/spectral-latin-300-normal.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Spectral';
+  src: url('/fonts/spectral/spectral-latin-400-normal.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Spectral';
+  src: url('/fonts/spectral/spectral-latin-400-italic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Spectral';
+  src: url('/fonts/spectral/spectral-latin-500-normal.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Spectral';
+  src: url('/fonts/spectral/spectral-latin-600-normal.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}

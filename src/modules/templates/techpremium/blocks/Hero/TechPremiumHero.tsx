@@ -16,11 +16,14 @@
 import React from 'react';
 import { useTechPremiumBlock } from '../../hooks/useTechPremiumBlock';
 import { TechPremiumEditable } from '../../components/TechPremiumEditable';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 
 interface HeroStat {
   id: string;
   value: string;
   label: string;
+  unit?: string;
+  live?: string;
 }
 
 interface TechPremiumHeroContent {
@@ -31,6 +34,7 @@ interface TechPremiumHeroContent {
   cta_text: string;
   secondary_cta_text: string;
   caption: string;
+  hero_image: string;
   stats: HeroStat[];
 }
 
@@ -60,6 +64,20 @@ export default function TechPremiumHero({ sectionId }: TechPremiumHeroProps) {
   };
   const removeStat = (id: string) => {
     handleCollectionUpdate('stats', (blockContent.stats || []).filter((s) => s.id !== id));
+  };
+
+  const uploadImage = (useEditStore() as any).uploadImage as
+    | ((file: File, t?: { sectionId: string; elementKey: string }) => Promise<string | void>)
+    | undefined;
+  const [photoUploading, setPhotoUploading] = React.useState(false);
+  const onPhotoFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || !uploadImage) return;
+    setPhotoUploading(true);
+    try { await uploadImage(file, { sectionId, elementKey: 'hero_image' }); }
+    catch (err) { /* surfaced by the store */ }
+    finally { setPhotoUploading(false); }
   };
 
   const showReadout = stats.length > 0 || mode === 'edit';
@@ -169,8 +187,19 @@ export default function TechPremiumHero({ sectionId }: TechPremiumHeroProps) {
           </div>
 
           <div className="tp-hero__art">
-            <div className="tp-ph tp-ph--unit" aria-hidden="true">
-              <span className="tp-ph__tag">Product / hardware photo</span>
+            <div className="tp-ph tp-ph--unit">
+              {blockContent.hero_image
+                ? <img className="tp-hero__photo" src={blockContent.hero_image} alt="" />
+                : <span className="tp-ph__tag" aria-hidden="true">Product / hardware photo</span>}
+              {mode === 'edit' && (
+                <span className="tp-hero__photo-edit">
+                  <label className="tp-hero__photo-btn">
+                    {photoUploading ? 'Uploading…' : (blockContent.hero_image ? 'Change photo' : '↥ Add photo')}
+                    <input type="file" accept="image/*" onChange={onPhotoFile} hidden disabled={photoUploading} />
+                  </label>
+                  {blockContent.hero_image && <button type="button" className="tp-hero__photo-x" onClick={() => handleContentUpdate('hero_image', '')}>remove</button>}
+                </span>
+              )}
             </div>
             <span className="tp-hero__corner" aria-hidden="true" />
             {showReadout && (
@@ -193,17 +222,31 @@ export default function TechPremiumHero({ sectionId }: TechPremiumHeroProps) {
                         className="tp-metric__k"
                         placeholder="metric"
                       />
-                      <TechPremiumEditable
-                        as="div"
-                        mode={mode}
-                        sectionId={sectionId}
-                        elementKey={`stats_value_${s.id}`}
-                        value={s.value}
-                        onSave={(v) => updateStat(s.id, 'value', v)}
-                        enterBehavior="save"
-                        className="tp-metric__v"
-                        placeholder="00"
-                      />
+                      <div className="tp-metric__v" data-live={s.live || undefined}>
+                        <TechPremiumEditable
+                          as="span"
+                          mode={mode}
+                          sectionId={sectionId}
+                          elementKey={`stats_value_${s.id}`}
+                          value={s.value}
+                          onSave={(v) => updateStat(s.id, 'value', v)}
+                          enterBehavior="save"
+                          placeholder="00"
+                        />
+                        {(s.unit || mode === 'edit') && (
+                          <TechPremiumEditable
+                            as="span"
+                            mode={mode}
+                            sectionId={sectionId}
+                            elementKey={`stats_unit_${s.id}`}
+                            value={s.unit || ''}
+                            onSave={(v) => updateStat(s.id, 'unit', v)}
+                            enterBehavior="save"
+                            className="tp-metric__u"
+                            placeholder="unit"
+                          />
+                        )}
+                      </div>
                       {mode === 'edit' && (
                         <button type="button" className="tp-metric__remove" onClick={() => removeStat(s.id)} aria-label="Remove metric">×</button>
                       )}
@@ -249,6 +292,10 @@ const STYLES = `
 .tp-ph { position:relative; background:var(--paper-2); overflow:hidden; background-image:repeating-linear-gradient(135deg, oklch(0.325 0.045 158 / 0.055) 0 1px, transparent 1px 12px); border:1px solid var(--line); border-radius:var(--r-lg); }
 .tp-ph__tag { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); font-family:var(--font-mono); font-size:10px; font-weight:500; letter-spacing:0.14em; text-transform:uppercase; color:var(--ink-3); white-space:nowrap; text-align:center; border:1px solid var(--line-2); padding:5px 10px; border-radius:var(--r); background:var(--paper); }
 .tp-ph--unit { aspect-ratio:4/4.4; }
+.tp-hero__photo { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; border-radius:var(--r-lg); }
+.tp-hero__photo-edit { position:absolute; top:10px; left:10px; z-index:4; display:inline-flex; align-items:center; gap:6px; }
+.tp-hero__photo-btn { display:inline-flex; align-items:center; gap:4px; font-family:var(--font-mono); font-size:10.5px; letter-spacing:0.04em; color:var(--forest-d); background:var(--lime); border-radius:var(--r); padding:5px 10px; cursor:pointer; white-space:nowrap; }
+.tp-hero__photo-x { background:var(--paper); border:1px solid var(--line-2); border-radius:var(--r); color:var(--ink-3); font-family:var(--font-mono); font-size:10.5px; padding:4px 8px; cursor:pointer; }
 .tp-hero__corner { position:absolute; inset:12px; border:1px solid var(--lime); opacity:.4; pointer-events:none; border-radius:var(--r-lg); }
 .tp-readout { position:absolute; right:-22px; bottom:-26px; width:min(330px,82%); background:var(--paper); border:1px solid var(--line-2); border-radius:var(--r-lg); box-shadow:0 18px 48px -28px oklch(0.30 0.04 158 / 0.5), 0 2px 8px -4px oklch(0.30 0.04 158 / 0.25); overflow:hidden; }
 .tp-readout__top { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:11px 16px; border-bottom:1px solid var(--line); font-family:var(--font-mono); font-size:11px; font-weight:500; letter-spacing:0.10em; text-transform:uppercase; color:var(--ink-2); }
@@ -258,7 +305,8 @@ const STYLES = `
 .tp-metric { padding:16px 16px 14px; border-right:1px solid var(--line); position:relative; }
 .tp-metric:last-child { border-right:0; }
 .tp-metric__k { font-family:var(--font-mono); font-size:10px; font-weight:500; letter-spacing:0.16em; text-transform:uppercase; color:var(--ink-3); }
-.tp-metric__v { font-family:var(--font-mono); font-weight:600; font-size:22px; letter-spacing:-0.02em; color:var(--ink); margin-top:4px; line-height:1; }
+.tp-metric__v { font-family:var(--font-mono); font-weight:600; font-size:22px; letter-spacing:-0.02em; color:var(--ink); margin-top:4px; line-height:1; display:flex; align-items:baseline; gap:3px; }
+.tp-metric__u { font-size:11px; font-weight:500; color:var(--ink-3); letter-spacing:0; }
 .tp-metric__remove { position:absolute; top:4px; right:4px; background:transparent; border:none; color:var(--ink-3); font-size:12px; line-height:1; cursor:pointer; }
 .tp-readout__foot { padding:10px 16px 14px; border-top:1px solid var(--line); display:flex; align-items:center; gap:12px; }
 .tp-readout__spark { flex:1; height:34px; }

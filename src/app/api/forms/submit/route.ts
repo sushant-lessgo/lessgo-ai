@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { ConvertKitIntegration, mapFormDataToSubscriber } from '@/lib/integrations/convertkit';
+import { sendLeadNotification } from '@/lib/email/sendLeadNotification';
 import { FormSubmissionSchema, sanitizeForLogging } from '@/lib/validation';
 import { createSecureResponse } from '@/lib/security';
 import { withFormRateLimit } from '@/lib/rateLimit';
@@ -180,6 +181,20 @@ async function formSubmitHandler(request: NextRequest) {
           userId: userId.substring(0, 8) + '...', // Anonymized
           timestamp: new Date().toISOString()
         });
+
+        // Email notification to the configured inbox (env-gated; no-op + never
+        // throws when unset). Double-guarded so a send failure can't 500 a saved lead.
+        try {
+          await sendLeadNotification({
+            formName,
+            data: data as Record<string, string>,
+            fields: formConfig?.fields,
+            replyTo: (data as any)?.email,
+            pageId: publishedPageId,
+          });
+        } catch {
+          // helper already swallows; defensive only
+        }
 
         // A09: Security Logging - Safe success logging
         if (process.env.NODE_ENV !== 'production') {

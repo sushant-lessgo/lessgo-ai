@@ -1,0 +1,1312 @@
+<!doctype html>
+<html lang="en" data-palette="volt" data-variant="performance">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Surge — Growth &amp; Performance Marketing · Lessgo design system</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Hanken+Grotesk:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   SURGE — Growth & Performance Marketing
+   Metrics are the hero. The dashboard, running.
+   Up-and-to-the-right, made credible.
+   ============================================================ */
+
+:root {
+  --h: 265;           /* accent hue — the only thing the palette swaps */
+  --c: 0.18;          /* accent chroma, held across hues */
+
+  --bg:        oklch(0.984 0.004 265);
+  --bg-1:      oklch(0.965 0.006 265);
+  --surface:   oklch(1 0 0);
+
+  --tint:      oklch(0.955 0.022 var(--h));
+  --tint-2:    oklch(0.918 0.042 var(--h));
+
+  --accent:     oklch(0.605 var(--c) var(--h));
+  --accent-deep:oklch(0.50 calc(var(--c) + 0.02) var(--h));
+  --accent-soft:oklch(0.93 0.055 var(--h));
+  --accent-on:  oklch(0.99 0.012 var(--h));
+
+  /* held semantic colors — chart up/down never swap with palette */
+  --pos:  oklch(0.66 0.16 152);
+  --pos-soft: oklch(0.93 0.07 152);
+  --neg:  oklch(0.60 0.19 27);
+
+  --panel:     oklch(0.205 0.028 265);   /* dark dashboard ink */
+  --panel-2:   oklch(0.265 0.03 265);
+  --panel-line:oklch(0.34 0.025 265);
+
+  --ink:       oklch(0.22 0.022 265);
+  --ink-2:     oklch(0.42 0.02 265);
+  --ink-3:     oklch(0.575 0.018 265);
+  --ink-4:     oklch(0.74 0.014 265);
+
+  --line:      oklch(0.905 0.01 265);
+  --line-2:    oklch(0.84 0.014 265);
+
+  --shadow-s:  0 1px 2px oklch(0.4 0.03 265 / 0.06), 0 4px 10px -4px oklch(0.4 0.03 265 / 0.07);
+  --shadow-m:  0 10px 26px -10px oklch(0.35 0.04 265 / 0.18);
+  --shadow-l:  0 30px 64px -22px oklch(0.3 0.05 265 / 0.30);
+  --shadow-accent: 0 12px 26px -10px oklch(0.605 var(--c) var(--h) / 0.40);
+
+  --font-display: "Archivo", -apple-system, system-ui, sans-serif;
+  --font-body:    "Hanken Grotesk", -apple-system, system-ui, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, monospace;
+  --font-serif:   "Instrument Serif", Georgia, serif;
+
+  --r-xs: 4px; --r-sm: 7px; --r-md: 11px; --r-lg: 16px; --r-xl: 22px; --r-pill: 999px;
+
+  --sec-pad-y: 100px;
+  --sec-pad-x: clamp(20px, 4vw, 60px);
+  --max-w: 1280px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+.tnum { font-variant-numeric: tabular-nums; }
+
+/* ============================================================
+   SPEC DOC
+   ============================================================ */
+.doc { max-width: 1040px; margin: 0 auto; padding: 100px 32px 56px; }
+.doc-header {
+  display: grid; grid-template-columns: 1fr 234px;
+  gap: 56px; align-items: end;
+  padding-bottom: 34px; margin-bottom: 46px;
+  border-bottom: 2px solid var(--ink);
+}
+.doc-eyebrow {
+  font-family: var(--font-mono); font-size: 11px; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink-2); margin-bottom: 26px;
+  display: flex; align-items: center; gap: 12px;
+}
+.doc-eyebrow .tag {
+  display: inline-flex; align-items: center;
+  padding: 4px 10px; background: var(--accent); color: var(--accent-on);
+  border-radius: var(--r-xs); font-size: 10.5px; letter-spacing: 0.1em;
+}
+.doc-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(54px, 8.2vw, 122px);
+  line-height: 0.94; letter-spacing: -0.04em;
+  margin: 0; color: var(--ink);
+}
+.doc-title em { font-style: normal; color: var(--accent); }
+.doc-title .arrow { color: var(--accent); font-style: normal; }
+.doc-sub {
+  font-weight: 500;
+  font-size: 21px; line-height: 1.5;
+  color: var(--ink-2); max-width: 54ch;
+  margin: 24px 0 0;
+}
+.doc-stamp {
+  font-family: var(--font-mono); font-size: 10.5px; font-weight: 400;
+  letter-spacing: 0.08em; color: var(--ink-3);
+  align-self: end; text-align: right;
+  line-height: 1.9; text-transform: uppercase;
+  background: var(--tint); border-radius: var(--r-md);
+  padding: 16px 18px;
+}
+.doc-stamp b {
+  font-family: var(--font-display); font-weight: 800;
+  color: var(--ink); font-size: 18px; letter-spacing: -0.01em; text-transform: none;
+  display: block; margin-bottom: 8px;
+}
+.doc-meta {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+  margin-bottom: 54px;
+}
+.doc-meta > div {
+  border: 1px solid var(--line); border-radius: var(--r-md);
+  padding: 14px 16px; background: var(--surface);
+}
+.doc-meta dt {
+  font-family: var(--font-mono); font-size: 9.5px; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3);
+  margin-bottom: 7px;
+}
+.doc-meta dd { margin: 0; font-size: 14.5px; font-weight: 600; color: var(--ink); }
+.doc-meta dd b { color: var(--accent); }
+
+.doc section { margin-bottom: 60px; }
+.doc section h2 {
+  font-family: var(--font-display); font-weight: 800;
+  font-size: 30px; letter-spacing: -0.03em; margin: 0 0 14px;
+  display: flex; align-items: baseline; gap: 14px;
+}
+.doc section h2 .n {
+  font-family: var(--font-mono); font-size: 13px; font-weight: 700;
+  color: var(--accent); letter-spacing: 0;
+}
+.doc .dek { font-size: 18px; color: var(--ink-2); max-width: 68ch; margin: 0 0 16px; font-weight: 500; }
+.doc p { color: var(--ink-2); max-width: 68ch; }
+.doc p strong { color: var(--ink); font-weight: 700; }
+.doc h3 {
+  font-family: var(--font-mono); font-size: 11px; font-weight: 700;
+  letter-spacing: 0.13em; text-transform: uppercase; margin: 34px 0 14px; color: var(--ink-2);
+}
+.doc h4 { margin: 0 0 10px; font-family: var(--font-display); font-weight: 700; font-size: 15px; letter-spacing: -0.01em; }
+.doc ul { margin: 0; padding: 0; list-style: none; }
+.doc section > ul li {
+  padding: 12px 0 12px 26px; position: relative; border-bottom: 1px solid var(--line);
+  color: var(--ink-2); max-width: 74ch;
+}
+.doc section > ul li::before {
+  content: "↗"; position: absolute; left: 0; top: 12px; color: var(--accent); font-weight: 700;
+}
+.doc section > ul li strong { color: var(--ink); }
+
+.pull {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: clamp(22px, 3vw, 30px); line-height: 1.18; letter-spacing: -0.02em;
+  color: var(--ink); margin: 26px 0; padding: 22px 0 22px 26px;
+  border-left: 3px solid var(--accent); max-width: 30ch;
+}
+.pull em { font-style: normal; color: var(--accent); }
+
+.banned { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 6px; }
+.banned .col { border: 1px solid var(--line); border-radius: var(--r-md); padding: 20px 22px; background: var(--surface); }
+.banned .col.no { background: oklch(0.97 0.012 27); border-color: oklch(0.88 0.04 27); }
+.banned .col.yes { background: var(--pos-soft); border-color: oklch(0.85 0.06 152); }
+.banned h4 { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.06em; }
+.banned .no h4 { color: var(--neg); }
+.banned .yes h4 { color: oklch(0.45 0.13 152); }
+.banned ul li { padding: 6px 0; font-size: 14px; color: var(--ink-2); border: 0; }
+
+.plate {
+  border: 1px solid var(--line); border-radius: var(--r-lg); padding: 30px;
+  background: var(--surface); position: relative; overflow: hidden;
+}
+.plate-label {
+  font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--ink-3);
+}
+.plate-num { font-family: var(--font-mono); font-size: 10px; color: var(--ink-4); float: right; }
+.plate .s-d1 {
+  font-family: var(--font-display); font-weight: 800; font-size: clamp(46px, 7vw, 84px);
+  line-height: 0.94; letter-spacing: -0.04em; margin: 18px 0 8px;
+}
+.plate .s-d1 em { font-style: normal; color: var(--accent); }
+.plate .s-scale { display: flex; flex-wrap: wrap; align-items: baseline; gap: 22px; margin-top: 20px; }
+.plate .s-scale b { font-family: var(--font-display); font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+
+.spec { margin-top: 18px; border: 1px solid var(--line); border-radius: var(--r-md); overflow: hidden; }
+.spec .row {
+  display: grid; grid-template-columns: 80px 1.4fr 1fr 1fr 1fr; gap: 16px; align-items: center;
+  padding: 13px 18px; border-bottom: 1px solid var(--line); font-size: 14px;
+}
+.spec .row:last-child { border-bottom: 0; }
+.spec .row.head { background: var(--bg-1); font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); }
+.spec .row > span:not(.sample) { color: var(--ink-2); font-family: var(--font-mono); font-size: 12.5px; }
+.spec .sample { font-family: var(--font-display); font-weight: 800; color: var(--ink); letter-spacing: -0.01em; }
+
+.swatch-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 6px; }
+.swatch { border: 1px solid var(--line); border-radius: var(--r-md); overflow: hidden; background: var(--surface); }
+.swatch .chip { height: 64px; }
+.swatch .lbl { padding: 10px 12px; }
+.swatch .lbl b { display: block; font-family: var(--font-display); font-weight: 700; font-size: 13px; }
+.swatch .lbl span { font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-3); }
+
+/* ============================================================
+   TOKENS
+   ============================================================ */
+.tokens { max-width: 1040px; margin: 92px auto; padding: 0 32px; }
+.tokens h2 { font-family: var(--font-display); font-weight: 800; font-size: 40px; letter-spacing: -0.03em; margin: 0 0 8px; }
+.tokens h2 em { font-style: normal; color: var(--accent); }
+.tokens p { color: var(--ink-2); max-width: 66ch; margin: 12px 0 24px; }
+.tokens code { font-family: var(--font-mono); font-size: 12.5px; background: var(--tint); padding: 2px 6px; border-radius: var(--r-xs); color: var(--accent-deep); }
+.tokens h3 { font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; margin: 34px 0 12px; color: var(--ink-2); }
+.tokens pre {
+  background: var(--panel); color: oklch(0.9 0.01 265); border-radius: var(--r-lg);
+  padding: 26px 28px; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.85;
+  overflow-x: auto; white-space: pre;
+}
+.tokens pre .c { color: oklch(0.6 0.02 265); }
+.tokens pre .k { color: oklch(0.8 0.09 var(--h)); }
+.tokens pre .v { color: oklch(0.85 0.12 calc(var(--h) + 60)); }
+
+/* ============================================================
+   STAGE
+   ============================================================ */
+.stage { max-width: var(--max-w); margin: 80px auto 90px; padding: 0 clamp(16px, 3vw, 40px); }
+.stage-header { display: flex; align-items: baseline; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-n { font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent-on); background: var(--accent); padding: 4px 10px; border-radius: var(--r-xs); }
+.stage-title { font-family: var(--font-display); font-weight: 800; font-size: 20px; letter-spacing: -0.02em; }
+.stage-note { font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); margin-left: auto; }
+
+.frame {
+  border-radius: var(--r-xl); overflow: hidden; background: var(--surface);
+  box-shadow: var(--shadow-l), 0 0 0 1px var(--line);
+}
+
+/* generic buttons */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px; justify-content: center;
+  font-family: var(--font-display); font-weight: 700; font-size: 15px; letter-spacing: -0.01em;
+  padding: 13px 22px; border-radius: var(--r-sm); white-space: nowrap; cursor: pointer;
+  transition: transform 140ms ease, background 140ms ease, box-shadow 140ms ease;
+}
+.btn-sm { padding: 9px 16px; font-size: 13.5px; }
+.btn-primary { background: var(--accent); color: var(--accent-on); box-shadow: var(--shadow-accent); }
+.btn-primary:hover { transform: translateY(-1px); background: var(--accent-deep); }
+.btn-ink { background: var(--ink); color: var(--bg); }
+.btn-ink:hover { transform: translateY(-1px); }
+.btn-ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line-2); }
+.btn-ghost:hover { box-shadow: inset 0 0 0 1.5px var(--ink); }
+.btn-soft { background: var(--accent-soft); color: var(--accent-deep); }
+.btn-soft:hover { background: var(--tint-2); }
+
+/* NAV */
+.nav {
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center;
+  padding: 18px var(--sec-pad-x); gap: 24px; border-bottom: 1px solid var(--line);
+  position: relative; background: var(--surface);
+}
+.brand { display: inline-flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: 800; font-size: 19px; letter-spacing: -0.02em; }
+.brand .mark {
+  width: 26px; height: 26px; border-radius: var(--r-xs); background: var(--ink); position: relative; overflow: hidden;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.brand .mark::before { content: "↗"; color: var(--accent); font-weight: 800; font-size: 16px; line-height: 1; }
+.nav-mid { display: flex; gap: 28px; justify-content: center; }
+.nav-mid a { font-size: 14.5px; font-weight: 600; color: var(--ink-2); }
+.nav-mid a:hover { color: var(--ink); }
+.nav-right { display: flex; align-items: center; gap: 14px; }
+.nav-right .login { font-size: 14.5px; font-weight: 600; color: var(--ink-2); }
+.nav-right .login:hover { color: var(--ink); }
+
+/* HERO */
+.hero { padding: clamp(48px, 7vw, 84px) var(--sec-pad-x) clamp(40px, 5vw, 64px); position: relative; overflow: hidden; }
+.hero::before {
+  content: ""; position: absolute; inset: -10% -10% auto auto; width: 60%; height: 120%;
+  background: radial-gradient(circle at 70% 30%, var(--accent-soft), transparent 62%); opacity: 0.7; pointer-events: none;
+}
+.hero-grid { display: grid; grid-template-columns: 1.02fr 1.1fr; gap: clamp(32px, 4vw, 64px); align-items: center; position: relative; }
+.hero-content { max-width: 560px; }
+.pill {
+  display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-mono);
+  font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--accent-deep); background: var(--accent-soft); padding: 7px 13px; border-radius: var(--r-pill); margin-bottom: 22px;
+}
+.pill .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--pos); box-shadow: 0 0 0 3px var(--pos-soft); }
+.hero-display {
+  font-family: var(--font-display); font-weight: 800; font-size: clamp(40px, 5.6vw, 74px);
+  line-height: 0.98; letter-spacing: -0.04em; margin: 0; color: var(--ink);
+}
+.hero-display em { font-style: normal; color: var(--accent); }
+.hero-display .arrow { color: var(--accent); }
+.hero-lede { font-size: 18.5px; line-height: 1.55; color: var(--ink-2); margin: 22px 0 28px; font-weight: 500; max-width: 46ch; }
+.hero-actions { display: flex; flex-direction: column; gap: 18px; }
+.hero-cta-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.hero-trust { display: flex; align-items: center; gap: 14px; font-size: 13.5px; color: var(--ink-3); font-weight: 500; }
+.hero-trust .avs { display: flex; }
+.hero-trust .avs span {
+  width: 30px; height: 30px; border-radius: 50%; background: var(--tint-2); margin-left: -8px;
+  box-shadow: 0 0 0 2px var(--surface); display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-weight: 700; font-size: 11px; color: var(--accent-deep);
+}
+.hero-trust .avs span:first-child { margin-left: 0; }
+.hero-trust b { color: var(--ink); }
+
+/* DASHBOARD (hero centerpiece) */
+.dash-wrap { position: relative; }
+.float-chip {
+  position: absolute; z-index: 5; background: var(--surface);
+  box-shadow: var(--shadow-m), 0 0 0 1px var(--line); border-radius: var(--r-md);
+  padding: 11px 14px; display: flex; align-items: center; gap: 11px;
+}
+.float-chip .fi { width: 34px; height: 34px; border-radius: var(--r-sm); display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-weight: 700; font-size: 15px; }
+.float-chip b { display: block; font-family: var(--font-display); font-weight: 800; font-size: 15px; letter-spacing: -0.01em; line-height: 1.1; }
+.float-chip small { font-size: 11px; color: var(--ink-3); font-family: var(--font-mono); }
+.float-chip.a { top: -18px; left: -26px; }
+.float-chip.a .fi { background: var(--pos-soft); color: oklch(0.45 0.13 152); }
+.float-chip.b { bottom: 26px; right: -24px; }
+.float-chip.b .fi { background: var(--accent-soft); color: var(--accent-deep); }
+
+.dash {
+  background: var(--panel); border-radius: var(--r-lg); padding: 18px; color: oklch(0.92 0.01 265);
+  box-shadow: var(--shadow-l), 0 0 0 1px var(--panel-line); position: relative;
+}
+.dash-bar { display: flex; align-items: center; gap: 10px; padding: 2px 4px 14px; border-bottom: 1px solid var(--panel-line); }
+.dash-dots { display: flex; gap: 6px; }
+.dash-dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--panel-line); }
+.dash-tabs { display: flex; gap: 6px; margin-left: 8px; }
+.dash-tabs span { font-family: var(--font-mono); font-size: 10.5px; font-weight: 500; color: oklch(0.62 0.02 265); padding: 4px 9px; border-radius: var(--r-xs); }
+.dash-tabs span.on { background: var(--panel-2); color: oklch(0.95 0.01 265); }
+.dash-live { margin-left: auto; font-family: var(--font-mono); font-size: 10px; color: var(--pos); display: flex; align-items: center; gap: 6px; }
+.dash-live .lv { width: 6px; height: 6px; border-radius: 50%; background: var(--pos); box-shadow: 0 0 0 3px oklch(0.66 0.16 152 / 0.25); }
+
+.kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0; }
+.kpi { background: var(--panel-2); border-radius: var(--r-md); padding: 13px 14px; }
+.kpi .k-l { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(0.62 0.02 265); }
+.kpi .k-v { font-family: var(--font-display); font-weight: 800; font-size: 26px; letter-spacing: -0.03em; margin: 5px 0 4px; color: #fff; font-variant-numeric: tabular-nums; }
+.kpi .k-d { font-family: var(--font-mono); font-size: 10.5px; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; }
+.kpi .k-d.up { color: var(--pos); }
+.kpi .k-d.down { color: var(--pos); }
+
+.chart-card { background: var(--panel-2); border-radius: var(--r-md); padding: 14px 16px 8px; }
+.chart-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 6px; }
+.chart-head .ct { font-family: var(--font-display); font-weight: 700; font-size: 13.5px; color: #fff; }
+.chart-head .cv { font-family: var(--font-mono); font-size: 10.5px; color: var(--pos); }
+.trend { width: 100%; height: 96px; display: block; }
+.chart-x { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 9px; color: oklch(0.55 0.02 265); padding: 6px 2px 2px; }
+
+.mix { margin-top: 12px; display: grid; gap: 9px; }
+.mix .m-row { display: grid; grid-template-columns: 92px 1fr 38px; gap: 10px; align-items: center; }
+.mix .m-l { font-family: var(--font-mono); font-size: 11px; color: oklch(0.78 0.01 265); }
+.mix .m-track { height: 8px; border-radius: var(--r-pill); background: var(--panel); overflow: hidden; }
+.mix .m-track i { display: block; height: 100%; border-radius: var(--r-pill); background: var(--accent); }
+.mix .m-row:nth-child(2) .m-track i { background: var(--accent); opacity: 0.82; }
+.mix .m-row:nth-child(3) .m-track i { background: var(--accent); opacity: 0.62; }
+.mix .m-row:nth-child(4) .m-track i { background: var(--accent); opacity: 0.42; }
+.mix .m-v { font-family: var(--font-mono); font-size: 11px; color: #fff; text-align: right; }
+
+/* LOGO STRIP */
+.logos { padding: 26px var(--sec-pad-x); border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 30px; flex-wrap: wrap; justify-content: center; background: var(--bg-1); }
+.logos .ll { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); }
+.logos .logo { font-family: var(--font-display); font-weight: 800; font-size: 19px; letter-spacing: -0.02em; color: var(--ink-3); opacity: 0.85; }
+
+/* SECTION SCAFFOLD */
+.section { padding: var(--sec-pad-y) var(--sec-pad-x); }
+.sec-head { max-width: 720px; margin-bottom: 44px; }
+.sec-head.center { margin-left: auto; margin-right: auto; text-align: center; }
+.sec-eyebrow { font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: var(--accent-deep); display: inline-flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+.sec-eyebrow::before { content: "↗"; }
+.sec-title { font-family: var(--font-display); font-weight: 800; font-size: clamp(32px, 4vw, 50px); line-height: 1.02; letter-spacing: -0.035em; margin: 0; }
+.sec-title em { font-style: normal; color: var(--accent); }
+.sec-dek { font-size: 18px; color: var(--ink-2); margin: 16px 0 0; font-weight: 500; max-width: 60ch; }
+.sec-head.center .sec-dek { margin-left: auto; margin-right: auto; }
+
+/* ABOUT */
+.about { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: clamp(36px, 5vw, 72px); align-items: center; }
+.about-lede { font-family: var(--font-display); font-weight: 700; font-size: clamp(22px, 2.6vw, 30px); line-height: 1.22; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 20px; }
+.about-lede em { font-style: normal; color: var(--accent); }
+.about p { color: var(--ink-2); font-size: 16.5px; margin: 0 0 16px; max-width: 52ch; }
+.about-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+.about-tags span { font-family: var(--font-mono); font-size: 11.5px; font-weight: 500; color: var(--ink-2); background: var(--tint); padding: 7px 12px; border-radius: var(--r-pill); }
+.about-side { display: grid; gap: 12px; }
+.about-stat { border: 1px solid var(--line); border-radius: var(--r-lg); padding: 22px 24px; background: var(--surface); display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; }
+.about-stat .big { font-family: var(--font-display); font-weight: 800; font-size: 42px; letter-spacing: -0.03em; color: var(--ink); line-height: 1; font-variant-numeric: tabular-nums; }
+.about-stat .big em { font-style: normal; color: var(--accent); }
+.about-stat .at { font-size: 14px; color: var(--ink-2); font-weight: 500; }
+.about-stat .at b { display: block; font-family: var(--font-display); font-weight: 700; color: var(--ink); font-size: 14.5px; }
+
+/* SERVICES */
+.services-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.svc {
+  border: 1px solid var(--line); border-radius: var(--r-lg); padding: 26px 24px; background: var(--surface);
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease; position: relative; overflow: hidden;
+}
+.svc:hover { transform: translateY(-3px); box-shadow: var(--shadow-m); border-color: var(--line-2); }
+.svc .svc-n { font-family: var(--font-mono); font-size: 11px; color: var(--ink-4); font-weight: 700; }
+.svc .svc-ic {
+  width: 44px; height: 44px; border-radius: var(--r-md); background: var(--accent-soft); color: var(--accent-deep);
+  display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-weight: 700; font-size: 17px;
+  margin: 14px 0 16px;
+}
+.svc h3 { font-family: var(--font-display); font-weight: 700; font-size: 20px; letter-spacing: -0.02em; margin: 0 0 8px; }
+.svc p { color: var(--ink-2); font-size: 14.5px; margin: 0 0 16px; }
+.svc ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 7px; }
+.svc ul li { font-size: 13px; color: var(--ink-2); padding-left: 18px; position: relative; font-family: var(--font-mono); }
+.svc ul li::before { content: "›"; position: absolute; left: 2px; color: var(--accent); font-weight: 700; }
+
+/* PROJECTS / CASE STUDIES */
+.cases { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.case {
+  border: 1px solid var(--line); border-radius: var(--r-lg); padding: 26px 26px 24px; background: var(--surface);
+  display: grid; gap: 16px; transition: transform 160ms ease, box-shadow 160ms ease;
+}
+.case:hover { transform: translateY(-3px); box-shadow: var(--shadow-m); }
+.case-top { display: flex; align-items: center; justify-content: space-between; }
+.case-client { display: flex; align-items: center; gap: 11px; }
+.case-client .cl-mark { width: 38px; height: 38px; border-radius: var(--r-sm); background: var(--ink); color: var(--accent); display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 800; font-size: 16px; }
+.case-client b { display: block; font-family: var(--font-display); font-weight: 700; font-size: 15.5px; letter-spacing: -0.01em; }
+.case-client small { font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-3); }
+.case-tag { font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent-deep); background: var(--accent-soft); padding: 5px 10px; border-radius: var(--r-pill); }
+.case-headline { font-family: var(--font-display); font-weight: 700; font-size: 17px; line-height: 1.3; letter-spacing: -0.01em; margin: 0; color: var(--ink); }
+.case-metrics { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; padding: 16px 0 4px; border-top: 1px solid var(--line); }
+.case-metrics .cm .v { font-family: var(--font-display); font-weight: 800; font-size: 27px; letter-spacing: -0.03em; color: var(--ink); line-height: 1; font-variant-numeric: tabular-nums; }
+.case-metrics .cm .v em { font-style: normal; color: var(--pos); }
+.case-metrics .cm .l { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-3); margin-top: 7px; }
+.spark { width: 100%; height: 38px; display: block; }
+
+/* STATS BAND */
+.stats-band { background: var(--panel); color: #fff; padding: clamp(48px, 6vw, 76px) var(--sec-pad-x); }
+.stats-inner { display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px; max-width: var(--max-w); margin: 0 auto; }
+.stat .big { font-family: var(--font-display); font-weight: 800; font-size: clamp(40px, 5vw, 60px); letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
+.stat .big em { font-style: normal; color: var(--accent); }
+.stat .lbl { font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.04em; color: oklch(0.7 0.02 265); margin-top: 12px; }
+.stat { position: relative; padding-left: 20px; }
+.stat::before { content: ""; position: absolute; left: 0; top: 4px; bottom: 4px; width: 2px; background: var(--accent); }
+
+/* TESTIMONIALS */
+.reviews { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.review { border: 1px solid var(--line); border-radius: var(--r-lg); padding: 26px 24px; background: var(--surface); display: flex; flex-direction: column; }
+.review.feat { background: var(--panel); color: oklch(0.92 0.01 265); border-color: var(--panel-line); }
+.review .quote-mark { font-family: var(--font-serif); font-size: 52px; line-height: 0.6; color: var(--accent); height: 26px; }
+.review p { font-size: 16px; line-height: 1.55; color: var(--ink); margin: 16px 0 22px; font-weight: 500; }
+.review.feat p { color: oklch(0.95 0.01 265); }
+.review p .hl { background: linear-gradient(transparent 62%, var(--accent-soft) 62%); padding: 0 2px; font-weight: 700; }
+.review.feat p .hl { background: none; color: var(--accent); }
+.review .by { display: flex; align-items: center; gap: 11px; margin-top: auto; }
+.review .av { width: 40px; height: 40px; border-radius: 50%; background: var(--tint-2); color: var(--accent-deep); display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 14px; }
+.review.feat .av { background: var(--panel-2); color: var(--accent); }
+.review .by b { display: block; font-family: var(--font-display); font-weight: 700; font-size: 14.5px; }
+.review .by small { font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-3); }
+.review.feat .by small { color: oklch(0.68 0.02 265); }
+
+/* CONTACT */
+.contact-band { background: var(--bg-1); padding: var(--sec-pad-y) var(--sec-pad-x); border-top: 1px solid var(--line); }
+.contact-grid { display: grid; grid-template-columns: 1fr 0.9fr; gap: clamp(36px, 5vw, 72px); max-width: var(--max-w); margin: 0 auto; align-items: start; }
+.contact-left .sec-title { margin-bottom: 18px; }
+.contact-left p { color: var(--ink-2); font-size: 17px; max-width: 44ch; margin: 0 0 30px; }
+.contact-points { display: grid; gap: 2px; }
+.cpoint { display: grid; grid-template-columns: 120px 1fr; gap: 14px; padding: 16px 0; border-top: 1px solid var(--line); align-items: baseline; }
+.cpoint .cp-l { font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+.cpoint .cp-v { font-size: 16px; font-weight: 600; color: var(--ink); }
+.cpoint .cp-v small { display: block; font-weight: 500; color: var(--ink-2); font-size: 13.5px; margin-top: 2px; font-family: var(--font-body); }
+.form { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-xl); padding: 30px; box-shadow: var(--shadow-m); }
+.form .fl { font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); display: block; margin: 0 0 8px; }
+.form .frow { margin-bottom: 18px; }
+.form .fgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form input, .form textarea, .form select {
+  width: 100%; font: inherit; font-size: 15px; color: var(--ink); background: var(--bg-1);
+  border: 1px solid var(--line); border-radius: var(--r-sm); padding: 12px 14px; outline: none;
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+.form input::placeholder, .form textarea::placeholder { color: var(--ink-4); }
+.form input:focus, .form textarea:focus, .form select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.form textarea { resize: vertical; min-height: 96px; }
+.form .btn { width: 100%; margin-top: 4px; }
+.form .fnote { font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-3); text-align: center; margin: 14px 0 0; }
+
+/* FOOTER */
+.footer { background: var(--panel); color: oklch(0.78 0.01 265); padding: 64px var(--sec-pad-x) 30px; }
+.footer-top { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 36px; max-width: var(--max-w); margin: 0 auto 40px; }
+.footer .brand { color: #fff; margin-bottom: 16px; }
+.footer .brand .mark { background: var(--panel-2); }
+.footer-brand p { font-size: 14.5px; max-width: 34ch; margin: 0 0 18px; color: oklch(0.72 0.01 265); }
+.footer-brand .badge { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 11px; color: var(--pos); }
+.footer-brand .badge .lv { width: 6px; height: 6px; border-radius: 50%; background: var(--pos); }
+.footer-col h4 { font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(0.62 0.02 265); margin: 0 0 16px; }
+.footer-col ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 11px; }
+.footer-col li { font-size: 14px; color: oklch(0.78 0.01 265); cursor: pointer; }
+.footer-col li:hover { color: #fff; }
+.footer-bottom { display: flex; justify-content: space-between; align-items: center; max-width: var(--max-w); margin: 0 auto; padding-top: 22px; border-top: 1px solid var(--panel-line); font-family: var(--font-mono); font-size: 11px; color: oklch(0.6 0.02 265); flex-wrap: wrap; gap: 10px; }
+
+/* ============================================================
+   PALETTES — accent hue only (held green/red + slate base stay put)
+   ============================================================ */
+html[data-palette="volt"]    { --h: 265; --c: 0.18; }
+html[data-palette="azure"]   { --h: 245; --accent: oklch(0.6 0.16 245); }
+html[data-palette="cyan"]    { --h: 215; --accent: oklch(0.66 0.13 215); }
+html[data-palette="teal"]    { --h: 185; --accent: oklch(0.64 0.12 185); }
+html[data-palette="violet"]  { --h: 295; --accent: oklch(0.58 0.19 295); }
+html[data-palette="magenta"] { --h: 350; --accent: oklch(0.62 0.2 350); }
+html[data-palette="coral"]   { --h: 30;  --accent: oklch(0.66 0.17 30); }
+html[data-palette="amber"]   { --h: 75;  --accent: oklch(0.74 0.15 75);  --accent-on: oklch(0.26 0.05 75); }
+html[data-palette="lime"]    { --h: 135; --accent: oklch(0.72 0.17 135); --accent-on: oklch(0.24 0.05 135); }
+
+/* ============================================================
+   VARIANTS
+   ============================================================ */
+
+/* EDITORIAL — serif headlines, airier, premium brand agencies */
+html[data-variant="editorial"] {
+  --sec-pad-y: 120px;
+  --r-sm: 9px; --r-md: 13px; --r-lg: 18px; --r-xl: 26px;
+}
+html[data-variant="editorial"] .doc-title,
+html[data-variant="editorial"] .hero-display,
+html[data-variant="editorial"] .sec-title,
+html[data-variant="editorial"] .about-lede,
+html[data-variant="editorial"] .review p,
+html[data-variant="editorial"] .case-headline {
+  font-family: var(--font-serif); font-weight: 400; letter-spacing: -0.01em;
+}
+html[data-variant="editorial"] .hero-display { font-size: clamp(46px, 6.2vw, 86px); line-height: 0.98; }
+html[data-variant="editorial"] .sec-title { font-size: clamp(36px, 4.4vw, 58px); }
+html[data-variant="editorial"] .hero-display em,
+html[data-variant="editorial"] .sec-title em,
+html[data-variant="editorial"] .doc-title em { font-style: italic; }
+html[data-variant="editorial"] .hero { background: var(--bg-1); }
+html[data-variant="editorial"] .sec-dek,
+html[data-variant="editorial"] .hero-lede { font-weight: 400; }
+html[data-variant="editorial"] .svc:hover,
+html[data-variant="editorial"] .case:hover { transform: none; box-shadow: var(--shadow-s); }
+
+/* BOLD — oversized type, accent color-blocking, punchy launch energy */
+html[data-variant="bold"] {
+  --sec-pad-y: 92px;
+}
+html[data-variant="bold"] .hero-display { font-size: clamp(46px, 7vw, 92px); letter-spacing: -0.05em; line-height: 0.92; }
+html[data-variant="bold"] .sec-title { font-size: clamp(36px, 5vw, 64px); letter-spacing: -0.045em; }
+html[data-variant="bold"] .doc-title { letter-spacing: -0.05em; }
+html[data-variant="bold"] .hero { background: var(--accent); }
+html[data-variant="bold"] .hero::before { display: none; }
+html[data-variant="bold"] .hero-display,
+html[data-variant="bold"] .hero-lede { color: var(--accent-on); }
+html[data-variant="bold"] .hero-display em { color: var(--ink); }
+html[data-variant="bold"] .pill { background: oklch(1 0 0 / 0.18); color: var(--accent-on); }
+html[data-variant="bold"] .hero-content .btn-primary { background: var(--ink); color: var(--bg); box-shadow: none; }
+html[data-variant="bold"] .hero-content .btn-ghost { box-shadow: inset 0 0 0 1.5px var(--accent-on); color: var(--accent-on); }
+html[data-variant="bold"] .hero-trust { color: oklch(1 0 0 / 0.8); }
+html[data-variant="bold"] .hero-trust b { color: #fff; }
+html[data-variant="bold"] .hero-trust .avs span { background: oklch(1 0 0 / 0.2); color: #fff; box-shadow: 0 0 0 2px var(--accent); }
+html[data-variant="bold"] .sec-eyebrow { background: var(--accent); color: var(--accent-on); padding: 6px 12px; border-radius: var(--r-pill); }
+html[data-variant="bold"] .sec-eyebrow::before { content: "↗"; }
+html[data-variant="bold"] .svc .svc-ic { background: var(--accent); color: var(--accent-on); }
+html[data-variant="bold"] .case-tag,
+html[data-variant="bold"] .pill.solid { background: var(--accent); color: var(--accent-on); }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 1080px) {
+  .nav { grid-template-columns: 1fr auto; }
+  .nav-mid { display: none; }
+  .hero-grid { grid-template-columns: 1fr; }
+  .dash-wrap { max-width: 520px; }
+  .about { grid-template-columns: 1fr; }
+  .services-grid { grid-template-columns: 1fr 1fr; }
+  .cases { grid-template-columns: 1fr; }
+  .reviews { grid-template-columns: 1fr; }
+  .contact-grid { grid-template-columns: 1fr; }
+  .stats-inner { grid-template-columns: 1fr 1fr; gap: 26px 30px; }
+  .footer-top { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 720px) {
+  :root { --sec-pad-y: 68px; }
+  .doc { padding: 60px 22px 46px; }
+  .doc-header { grid-template-columns: 1fr; gap: 28px; }
+  .doc-meta { grid-template-columns: 1fr 1fr; }
+  .swatch-grid { grid-template-columns: 1fr 1fr; }
+  .banned { grid-template-columns: 1fr; }
+  .services-grid { grid-template-columns: 1fr; }
+  .case-metrics { grid-template-columns: 1fr 1fr 1fr; }
+  .stats-inner { grid-template-columns: 1fr 1fr; }
+  .footer-top { grid-template-columns: 1fr 1fr; }
+  .form .fgrid { grid-template-columns: 1fr; }
+  .float-chip { display: none; }
+  .spec .row { grid-template-columns: 70px 1fr; gap: 12px; }
+  .spec .row > *:nth-child(3), .spec .row > *:nth-child(4), .spec .row > *:nth-child(5) { display: none; }
+}
+
+/* ============================================================
+   SWITCHER
+   ============================================================ */
+.switcher {
+  position: fixed; top: 20px; right: 20px; z-index: 100;
+  background: var(--surface); border-radius: var(--r-lg);
+  box-shadow: var(--shadow-l), 0 0 0 1px var(--line);
+  padding: 16px 18px 18px; width: 280px; font-family: var(--font-body);
+}
+.switcher-title {
+  font-family: var(--font-mono); font-size: 10px; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3);
+  display: flex; align-items: center; gap: 9px;
+  padding-bottom: 13px; border-bottom: 1px solid var(--line);
+}
+.switcher-title em { font-family: var(--font-display); font-weight: 800; font-style: normal; font-size: 17px; letter-spacing: -0.02em; color: var(--ink); text-transform: none; }
+.switcher-label { font-family: var(--font-mono); font-size: 9.5px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin: 16px 0 10px; }
+.switcher-palettes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+.switcher-palettes button {
+  height: 40px; border-radius: var(--r-sm); padding: 0; cursor: pointer; position: relative; overflow: hidden; border: 0;
+  outline: 2.5px solid transparent; outline-offset: 2px; transition: outline-color 140ms ease, transform 140ms ease;
+}
+.switcher-palettes button:hover { transform: translateY(-1px); }
+.switcher .switcher-palettes button[aria-pressed="true"] { outline-color: var(--ink) !important; }
+.switcher-palettes button .name {
+  position: absolute; bottom: 3px; left: 6px; font-family: var(--font-display); font-weight: 700; font-size: 10px;
+  color: #fff; text-transform: none; pointer-events: none; text-shadow: 0 1px 3px oklch(0 0 0 / 0.55);
+}
+.switcher-variants { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border-radius: var(--r-sm); overflow: hidden; box-shadow: inset 0 0 0 1px var(--line); }
+.switcher-variants button {
+  font-family: var(--font-display); font-weight: 700; font-size: 12.5px; letter-spacing: -0.01em; padding: 10px 4px;
+  background: transparent; color: var(--ink); border: 0; border-right: 1px solid var(--line); cursor: pointer;
+  transition: background 140ms ease, color 140ms ease;
+}
+.switcher-variants button:last-child { border-right: 0; }
+.switcher-variants button:hover { background: var(--tint); }
+.switcher .switcher-variants button[aria-pressed="true"] { background-color: var(--accent) !important; color: var(--accent-on) !important; }
+.switcher-caption { font-size: 13px; font-weight: 500; line-height: 1.5; color: var(--ink-2); margin-top: 13px; padding-top: 12px; border-top: 1px solid var(--line); }
+.switcher-caption b { color: var(--ink); font-weight: 700; }
+@media (max-width: 720px) { .switcher { top: auto; bottom: 12px; right: 12px; left: 12px; width: auto; } }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     SWITCHER
+     ============================================================ -->
+<aside class="switcher" aria-label="Surge design system controls">
+  <div class="switcher-title">№ 12 · <em>Surge</em> · controls</div>
+
+  <div class="switcher-label">Palette · accent hue</div>
+  <div class="switcher-palettes" role="radiogroup" aria-label="Palette">
+    <button data-set-palette="volt"    title="Volt · default, electric indigo" aria-label="Volt" style="background: oklch(0.605 0.18 265)"><span class="name">Volt</span></button>
+    <button data-set-palette="azure"   title="Azure · confident blue" aria-label="Azure" style="background: oklch(0.6 0.16 245)"><span class="name">Azure</span></button>
+    <button data-set-palette="cyan"    title="Cyan · fresh, analytical" aria-label="Cyan" style="background: oklch(0.66 0.13 215)"><span class="name">Cyan</span></button>
+    <button data-set-palette="teal"    title="Teal · calm growth" aria-label="Teal" style="background: oklch(0.64 0.12 185)"><span class="name">Teal</span></button>
+    <button data-set-palette="violet"  title="Violet · premium, modern" aria-label="Violet" style="background: oklch(0.58 0.19 295)"><span class="name">Violet</span></button>
+    <button data-set-palette="magenta" title="Magenta · bold, creative" aria-label="Magenta" style="background: oklch(0.62 0.2 350)"><span class="name">Magenta</span></button>
+    <button data-set-palette="coral"   title="Coral · warm, energetic" aria-label="Coral" style="background: oklch(0.66 0.17 30)"><span class="name">Coral</span></button>
+    <button data-set-palette="amber"   title="Amber · optimistic" aria-label="Amber" style="background: oklch(0.74 0.15 75)"><span class="name" style="color:#3a2c08;text-shadow:none">Amber</span></button>
+    <button data-set-palette="lime"    title="Lime · fresh, kinetic" aria-label="Lime" style="background: oklch(0.72 0.17 135)"><span class="name" style="color:#16280a;text-shadow:none">Lime</span></button>
+  </div>
+
+  <div class="switcher-label">Variant</div>
+  <div class="switcher-variants" role="radiogroup" aria-label="Variant">
+    <button data-set-variant="performance" title="Performance · default. Dense, charty, sharp.">Perf</button>
+    <button data-set-variant="editorial"   title="Editorial · serif headlines, airy, premium.">Editorial</button>
+    <button data-set-variant="bold"         title="Bold · oversized type, accent color-blocking.">Bold</button>
+  </div>
+
+  <div class="switcher-caption" id="switcherCaption">
+    <b>Performance.</b> The default — dense dashboards, sharp corners, numbers everywhere. Built for growth &amp; paid-media shops.
+  </div>
+</aside>
+
+<!-- ============================================================
+     SPEC DOC
+     ============================================================ -->
+<div class="doc">
+  <header class="doc-header">
+    <div>
+      <div class="doc-eyebrow"><span class="tag">№ 12</span> Growth &amp; Performance Marketing · Lessgo design library</div>
+      <h1 class="doc-title">Surge,<br><em>up&#8202;<span class="arrow">↗</span>&#8202;and to the right.</em></h1>
+      <p class="doc-sub">A results-led system for marketing agencies. The metric is the hero, the dashboard is the centerpiece, and every section answers one question: <strong>what number did you move?</strong></p>
+    </div>
+    <div class="doc-stamp">
+      Lessgo Library<br>
+      <b>Volume XII</b>
+      June · MMXXVI<br>
+      Service line
+    </div>
+  </header>
+
+  <dl class="doc-meta">
+    <div><dt>For</dt><dd>Growth · paid media · <b>SEO</b> · branding</dd></div>
+    <div><dt>Mode</dt><dd>Light · cool slate</dd></div>
+    <div><dt>Voice</dt><dd>Confident · proof-led</dd></div>
+    <div><dt>Centerpiece</dt><dd>The <b>live dashboard</b></dd></div>
+  </dl>
+
+  <section>
+    <h2><span class="n">01</span> Identity</h2>
+    <p class="dek">Surge is for agencies that sell outcomes. Where Hearth is warm and photo-led and Riot is loud and brutalist, Surge is the proof-led middle: cool, composed, data-forward. It looks like the inside of a growth dashboard, because that's what the work produces.</p>
+    <p>The whole system orbits one job — <strong>make the visitor believe you'll move their number.</strong> The hero shows a live growth chart. Services are framed by the metric they improve. Case studies lead with the result, not the logo. Proof is the agency's own vocabulary: ROAS, impressions, organic traffic, pipeline.</p>
+
+    <div class="pull">If a section doesn't show a number you moved, it doesn't <em>convince.</em></div>
+
+    <h3>Five commitments</h3>
+    <ul>
+      <li><strong>Metrics are the hero.</strong> Big tabular figures with delta chips (<b>+312%</b>, <b>3.4×</b>) lead every block — never adjectives, never "we're passionate".</li>
+      <li><strong>Dashboard grammar.</strong> CSS/SVG growth charts, KPI cards and channel-mix bars are the signature — the agency's craft, made visible.</li>
+      <li><strong>Case studies as the proof spine.</strong> Each one is client + the metric moved + a sparkline. The portfolio convinces, not a manifesto.</li>
+      <li><strong>Confident &amp; kinetic, not loud.</strong> Cool slate ink, one electric accent, an ↗ motif. Energy through rising charts — not stamps, marquees or shouting.</li>
+      <li><strong>Held semantic color.</strong> A fixed green/red marks up/down on charts; the brand accent swaps freely without ever confusing "good" and "bad".</li>
+    </ul>
+
+    <h3>What it is — and isn't</h3>
+    <div class="banned">
+      <div class="col no">
+        <h4>✕ Never</h4>
+        <ul>
+          <li>Stock "team high-fiving at laptops" photos</li>
+          <li>"Full-service · passionate · results-driven" lorem</li>
+          <li>Vanity stats with no client attached</li>
+          <li>Brutalist stamps or marquees (that's Riot)</li>
+          <li>Gradient-soup cards with a left accent border</li>
+        </ul>
+      </div>
+      <div class="col yes">
+        <h4>✓ Always</h4>
+        <ul>
+          <li>A real, legible chart or KPI in the hero</li>
+          <li>Every claim tied to a named client + number</li>
+          <li>Channels named as tags (SEO, X, LinkedIn)</li>
+          <li>One held green for "up", one red for "down"</li>
+          <li>Specific, human copy — real names, real figures</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">02</span> Type</h2>
+    <p class="dek">Archivo for display — a sturdy grotesk that reads as confident and modern at heavy weights. Hanken Grotesk for body — clean and highly readable. JetBrains Mono for the data layer: KPI labels, deltas, axis ticks. Instrument Serif appears only in the Editorial variant.</p>
+
+    <div class="plate">
+      <span class="plate-label">Display · Archivo 800</span>
+      <span class="plate-num">Aa — Gg — 0–9</span>
+      <div class="s-d1">Move the<br><em>number.</em></div>
+      <div class="s-scale">
+        <b style="font-size:46px">ROAS</b>
+        <b style="font-size:34px">Traffic</b>
+        <b style="font-size:26px">Pipeline</b>
+        <b style="font-size:19px; font-family:var(--font-body); font-weight:500; color:var(--ink-2)">Hanken Grotesk carries the reading — paragraphs, lists, labels — at a calm 1.6 line-height.</b>
+      </div>
+    </div>
+
+    <div class="spec">
+      <div class="row head"><span>Role</span><span>Font / weight</span><span>Size</span><span>Tracking</span><span>Leading</span></div>
+      <div class="row"><span class="sample" style="font-size:20px">H1</span><span>Archivo 800</span><span>40–74px</span><span>-0.04em</span><span>0.98</span></div>
+      <div class="row"><span class="sample" style="font-size:18px">H2</span><span>Archivo 800</span><span>32–50px</span><span>-0.035em</span><span>1.02</span></div>
+      <div class="row"><span class="sample" style="font-size:16px">H3</span><span>Archivo 700</span><span>18–28px</span><span>-0.02em</span><span>1.1</span></div>
+      <div class="row"><span class="sample">Body</span><span>Hanken Grotesk 500</span><span>14–19px</span><span>0</span><span>1.6</span></div>
+      <div class="row"><span class="sample" style="font-family:var(--font-mono); font-size:12px">Data</span><span>JetBrains Mono 700</span><span>9–13px</span><span>0.1em</span><span>1.4</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">03</span> Color</h2>
+    <p class="dek">A cool slate base with one electric accent. The palette knob swaps only the accent hue — chroma and lightness held — so it always lands vivid-but-balanced. A separate, never-swapping green/red pair carries chart semantics, so "up" is always good no matter the brand color.</p>
+
+    <div class="swatch-grid">
+      <div class="swatch"><div class="chip" style="background:var(--accent)"></div><div class="lbl"><b>Accent</b><span>oklch(0.605 0.18 H)</span></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--accent-deep)"></div><div class="lbl"><b>Accent deep</b><span>press · hover</span></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--accent-soft)"></div><div class="lbl"><b>Accent soft</b><span>pills · tags</span></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--pos)"></div><div class="lbl"><b>Positive</b><span>held · up deltas</span></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--panel)"></div><div class="lbl"><b>Panel</b><span>dashboards · bands</span></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--bg); box-shadow: inset 0 0 0 1px var(--line)"></div><div class="lbl"><b>Background</b><span>cool near-white</span></div></div>
+    </div>
+
+    <h3>Nine accent hues — flip in the panel</h3>
+    <div class="swatch-grid">
+      <div class="swatch"><div class="chip" style="background:oklch(0.605 0.18 265)"></div><div class="lbl"><b>Volt</b><span>H 265 · default</span></div></div>
+      <div class="swatch"><div class="chip" style="background:oklch(0.6 0.16 245)"></div><div class="lbl"><b>Azure</b><span>H 245</span></div></div>
+      <div class="swatch"><div class="chip" style="background:oklch(0.66 0.13 215)"></div><div class="lbl"><b>Cyan</b><span>H 215</span></div></div>
+      <div class="swatch"><div class="chip" style="background:oklch(0.64 0.12 185)"></div><div class="lbl"><b>Teal</b><span>H 185</span></div></div>
+      <div class="swatch"><div class="chip" style="background:oklch(0.58 0.19 295)"></div><div class="lbl"><b>Violet</b><span>H 295</span></div></div>
+      <div class="swatch"><div class="chip" style="background:oklch(0.62 0.2 350)"></div><div class="lbl"><b>Magenta</b><span>H 350</span></div></div>
+      <div class="swatch"><div class="chip" style="background:oklch(0.66 0.17 30)"></div><div class="lbl"><b>Coral</b><span>H 30</span></div></div>
+      <div class="swatch"><div class="chip" style="background:oklch(0.74 0.15 75)"></div><div class="lbl"><b>Amber</b><span>H 75</span></div></div>
+      <div class="swatch"><div class="chip" style="background:oklch(0.72 0.17 135)"></div><div class="lbl"><b>Lime</b><span>H 135</span></div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">04</span> Shape &amp; data</h2>
+    <p class="dek">Corners are tight and precise — this is software, not a brochure. Depth is restrained: hairlines and soft slate shadows. The personality lives in the data viz — rising line charts, channel-mix bars, sparklines and KPI tiles, all CSS/SVG drawn so they stay crisp at any palette.</p>
+    <div class="spec">
+      <div class="row head"><span>Token</span><span>Use</span><span>Value</span><span></span><span></span></div>
+      <div class="row"><span class="sample">sm</span><span>Buttons, inputs, tiles</span><span>7px</span><span></span><span></span></div>
+      <div class="row"><span class="sample">md</span><span>KPI cards, tags, chips</span><span>11px</span><span></span><span></span></div>
+      <div class="row"><span class="sample">lg</span><span>Cards, dashboards, reviews</span><span>16px</span><span></span><span></span></div>
+      <div class="row"><span class="sample">xl</span><span>Frame, forms, hero panel</span><span>22px</span><span></span><span></span></div>
+      <div class="row"><span class="sample">↗</span><span>The motif — eyebrows, deltas, mark</span><span>U+2197</span><span></span><span></span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">05</span> Components</h2>
+    <p class="dek">The kit: a live growth dashboard, KPI tiles, a rising line chart, channel-mix bars, sparklines, service cards, case-study result cards, a testimonial set, a stats band and a contact block. Below, the system assembled into a complete agency site — its first deployment: <strong>Nextgen Ads</strong>, a growth &amp; personal-branding studio in Pune.</p>
+    <p>Flip <strong>palette</strong> and <strong>variant</strong> in the panel, top-right. Performance is dense and charty; Editorial brings serif headlines and air for brand-led shops; Bold blocks the accent and cranks the type for launches.</p>
+  </section>
+</div>
+
+<!-- ============================================================
+     STAGE — full agency site (Nextgen Ads)
+     ============================================================ -->
+<div class="stage">
+  <div class="stage-header">
+    <span class="stage-n">Mockup</span>
+    <span class="stage-title">Agency site — assembled · Nextgen Ads</span>
+    <span class="stage-note">First deployment: a Pune growth &amp; personal-branding studio.</span>
+  </div>
+
+  <div class="frame" data-screen-label="Surge mockup · Nextgen Ads">
+
+    <!-- NAV -->
+    <nav class="nav">
+      <a class="brand" href="#"><span class="mark"></span>Nextgen Ads</a>
+      <div class="nav-mid">
+        <a href="#about">About</a>
+        <a href="#services">Services</a>
+        <a href="#work">Work</a>
+        <a href="#voices">Clients</a>
+        <a href="#contact">Contact</a>
+      </div>
+      <div class="nav-right">
+        <a class="login" href="#">+91 98220 41100</a>
+        <a class="btn btn-primary btn-sm" href="#contact">Book a growth audit</a>
+      </div>
+    </nav>
+
+    <!-- HERO -->
+    <header class="hero">
+      <div class="hero-grid">
+        <div class="hero-content">
+          <span class="pill"><span class="dot"></span>Now booking · Q3 2026</span>
+          <h1 class="hero-display">We turn attention into <em>pipeline<span class="arrow">↗</span></em></h1>
+          <p class="hero-lede">Nextgen Ads is a growth &amp; personal-branding studio in Pune. We grow founders and brands across SEO, X and LinkedIn — and we report in the only language that matters: the numbers we moved.</p>
+          <div class="hero-actions">
+            <div class="hero-cta-row">
+              <a class="btn btn-primary" href="#contact">Book a free audit</a>
+              <a class="btn btn-ghost" href="#work">See the work →</a>
+            </div>
+            <div class="hero-trust">
+              <span class="avs"><span>S</span><span>B</span><span>F</span><span>T</span></span>
+              <span><b>20+ founders &amp; brands</b> grown since 2024</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="dash-wrap">
+          <div class="float-chip a"><span class="fi">↗</span><div><b>+312%</b><small>impressions / qtr</small></div></div>
+          <div class="float-chip b"><span class="fi">@</span><div><b>+24.6k</b><small>followers · 5 mo</small></div></div>
+          <div class="dash">
+            <div class="dash-bar">
+              <span class="dash-dots"><i></i><i></i><i></i></span>
+              <span class="dash-tabs"><span class="on">Overview</span><span>Channels</span><span>Content</span></span>
+              <span class="dash-live"><span class="lv"></span>LIVE</span>
+            </div>
+
+            <div class="kpi-row">
+              <div class="kpi"><div class="k-l">Impressions</div><div class="k-v">3.2M</div><div class="k-d up">↗ +312%</div></div>
+              <div class="kpi"><div class="k-l">Followers</div><div class="k-v">24.6k</div><div class="k-d up">↗ +18.4×</div></div>
+              <div class="kpi"><div class="k-l">Engagement</div><div class="k-v">8.4%</div><div class="k-d up">↗ +5.1pt</div></div>
+            </div>
+
+            <div class="chart-card">
+              <div class="chart-head"><span class="ct">Impressions · last 6 months</span><span class="cv">↗ trending up</span></div>
+              <svg class="trend" viewBox="0 0 320 96" preserveAspectRatio="none" aria-hidden="true">
+                <defs>
+                  <linearGradient id="ag" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="var(--accent)" stop-opacity="0.34"/>
+                    <stop offset="1" stop-color="var(--accent)" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <path class="area" d="M0,82 L46,76 L92,80 L138,60 L184,52 L230,34 L276,24 L320,8 L320,96 L0,96 Z" fill="url(#ag)"/>
+                <path class="line" d="M0,82 L46,76 L92,80 L138,60 L184,52 L230,34 L276,24 L320,8" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="320" cy="8" r="4" fill="var(--accent)"/>
+                <circle cx="320" cy="8" r="8" fill="var(--accent)" opacity="0.22"/>
+              </svg>
+              <div class="chart-x"><span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span></div>
+            </div>
+
+            <div class="mix">
+              <div class="m-row"><span class="m-l">X / Twitter</span><span class="m-track"><i style="width:48%"></i></span><span class="m-v">48%</span></div>
+              <div class="m-row"><span class="m-l">LinkedIn</span><span class="m-track"><i style="width:27%"></i></span><span class="m-v">27%</span></div>
+              <div class="m-row"><span class="m-l">SEO / organic</span><span class="m-track"><i style="width:18%"></i></span><span class="m-v">18%</span></div>
+              <div class="m-row"><span class="m-l">Newsletter</span><span class="m-track"><i style="width:7%"></i></span><span class="m-v">7%</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- LOGO STRIP -->
+    <div class="logos">
+      <span class="ll">Trusted by founders at</span>
+      <span class="logo">Saral</span>
+      <span class="logo">Brewhouse</span>
+      <span class="logo">Finly</span>
+      <span class="logo">Trailhead</span>
+    </div>
+
+    <!-- ABOUT -->
+    <section class="section" id="about">
+      <div class="sec-head">
+        <span class="sec-eyebrow">About us</span>
+        <h2 class="sec-title">A small senior team, <em>obsessed with the graph</em></h2>
+      </div>
+      <div class="about">
+        <div>
+          <p class="about-lede">We started Nextgen Ads in 2024 because most "marketing" never touches a number. We do the opposite — <em>everything we ship is measured</em>, and we only take on brands where we can point at the line going up.</p>
+          <p>Based in Pune, we work with a handful of founders and lean teams at a time — no account-manager telephone game, no 40-slide decks. You talk to the people doing the work: search, social, and the writing that earns attention.</p>
+          <p>We're channel-agnostic and outcome-obsessive. Some months that's SEO and a content engine; some months it's a founder's X account going from quiet to quoted. The plan follows the goal — never the other way around.</p>
+          <div class="about-tags">
+            <span>Founded 2024</span>
+            <span>Pune, India</span>
+            <span>4-person senior team</span>
+            <span>Founder-led</span>
+            <span>No long contracts</span>
+          </div>
+        </div>
+        <div class="about-side">
+          <div class="about-stat"><div class="big">3.4<em>×</em></div><div class="at"><b>Avg engagement lift</b>across active clients</div></div>
+          <div class="about-stat"><div class="big">~4<em>wk</em></div><div class="at"><b>To first results</b>not first invoice</div></div>
+          <div class="about-stat"><div class="big">100<em>%</em></div><div class="at"><b>Client retention</b>since we started</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SERVICES -->
+    <section class="section" id="services" style="padding-top:0">
+      <div class="sec-head">
+        <span class="sec-eyebrow">Services</span>
+        <h2 class="sec-title">Built around <em>one number per channel</em></h2>
+        <p class="sec-dek">No bundles you don't need. Pick the growth lever that matters this quarter — we'll tell you honestly if it's not the right one.</p>
+      </div>
+      <div class="services-grid">
+        <div class="svc">
+          <span class="svc-n">01</span>
+          <span class="svc-ic">Q</span>
+          <h3>SEO &amp; Content</h3>
+          <p>Technical fixes, a real content engine and the links to back it — built to compound, not spike.</p>
+          <ul>
+            <li>Technical &amp; on-page audit</li>
+            <li>Keyword &amp; topic strategy</li>
+            <li>Editorial production</li>
+            <li>Metric: organic traffic</li>
+          </ul>
+        </div>
+        <div class="svc">
+          <span class="svc-n">02</span>
+          <span class="svc-ic">X</span>
+          <h3>X (Twitter) Marketing</h3>
+          <p>Daily posting, threads and engagement that turn a quiet handle into a feed people screenshot.</p>
+          <ul>
+            <li>Content calendar &amp; hooks</li>
+            <li>Ghostwriting &amp; editing</li>
+            <li>Community &amp; reply strategy</li>
+            <li>Metric: impressions &amp; follows</li>
+          </ul>
+        </div>
+        <div class="svc">
+          <span class="svc-n">03</span>
+          <span class="svc-ic">@</span>
+          <h3>Personal Branding</h3>
+          <p>We make founders the face of their company — a clear voice, a point of view, and a feed that earns inbound.</p>
+          <ul>
+            <li>Positioning &amp; narrative</li>
+            <li>Cross-platform voice</li>
+            <li>Profile &amp; bio overhaul</li>
+            <li>Metric: qualified inbound</li>
+          </ul>
+        </div>
+        <div class="svc">
+          <span class="svc-n">04</span>
+          <span class="svc-ic">in</span>
+          <h3>LinkedIn Growth</h3>
+          <p>B2B's warmest channel. Founder &amp; company presence that puts you in front of the right buyers.</p>
+          <ul>
+            <li>Founder &amp; page content</li>
+            <li>Document &amp; carousel posts</li>
+            <li>Outreach support</li>
+            <li>Metric: profile → pipeline</li>
+          </ul>
+        </div>
+        <div class="svc">
+          <span class="svc-n">05</span>
+          <span class="svc-ic">▦</span>
+          <h3>Paid Social</h3>
+          <p>Creative-led campaigns across Meta and X, optimised to a target CAC — not vanity reach.</p>
+          <ul>
+            <li>Creative &amp; offer testing</li>
+            <li>Audience &amp; budget strategy</li>
+            <li>Weekly optimisation</li>
+            <li>Metric: blended ROAS</li>
+          </ul>
+        </div>
+        <div class="svc">
+          <span class="svc-n">06</span>
+          <span class="svc-ic">∿</span>
+          <h3>Analytics &amp; Reporting</h3>
+          <p>A live dashboard you actually read, plus a plain-English note on what changed and why.</p>
+          <ul>
+            <li>Tracking &amp; attribution setup</li>
+            <li>Live growth dashboard</li>
+            <li>Monthly review call</li>
+            <li>Metric: clarity, finally</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROJECTS / WORK -->
+    <section class="section" id="work" style="padding-top:0">
+      <div class="sec-head">
+        <span class="sec-eyebrow">Selected work</span>
+        <h2 class="sec-title">The proof is the <em>graph going up</em></h2>
+        <p class="sec-dek">A few recent engagements. Real clients, real numbers — every figure is one we reported and can walk you through.</p>
+      </div>
+      <div class="cases">
+
+        <div class="case">
+          <div class="case-top">
+            <div class="case-client"><span class="cl-mark">S</span><div><b>Saral</b><small>B2B SaaS · Pune</small></div></div>
+            <span class="case-tag">Personal branding · X</span>
+          </div>
+          <p class="case-headline">Took a quiet founder to a quoted one — and turned the feed into a demo pipeline.</p>
+          <svg class="spark" viewBox="0 0 200 38" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M0,34 L28,32 L56,30 L84,22 L112,18 L140,12 L168,8 L200,3" fill="none" stroke="var(--pos)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="200" cy="3" r="3.4" fill="var(--pos)"/>
+          </svg>
+          <div class="case-metrics">
+            <div class="cm"><div class="v"><em>26k</em></div><div class="l">Followers (from 1.4k)</div></div>
+            <div class="cm"><div class="v">3.4M</div><div class="l">Impressions / qtr</div></div>
+            <div class="cm"><div class="v"><em>5.1×</em></div><div class="l">Demo requests</div></div>
+          </div>
+        </div>
+
+        <div class="case">
+          <div class="case-top">
+            <div class="case-client"><span class="cl-mark">B</span><div><b>Brewhouse</b><small>D2C coffee · Mumbai</small></div></div>
+            <span class="case-tag">SEO &amp; content</span>
+          </div>
+          <p class="case-headline">Rebuilt the content engine — now they rank for the searches that actually convert.</p>
+          <svg class="spark" viewBox="0 0 200 38" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M0,33 L28,31 L56,26 L84,24 L112,16 L140,14 L168,8 L200,4" fill="none" stroke="var(--pos)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="200" cy="4" r="3.4" fill="var(--pos)"/>
+          </svg>
+          <div class="case-metrics">
+            <div class="cm"><div class="v"><em>+210%</em></div><div class="l">Organic traffic</div></div>
+            <div class="cm"><div class="v">41</div><div class="l">Page-1 keywords</div></div>
+            <div class="cm"><div class="v"><em>−34%</em></div><div class="l">Blended CAC</div></div>
+          </div>
+        </div>
+
+        <div class="case">
+          <div class="case-top">
+            <div class="case-client"><span class="cl-mark">F</span><div><b>Finly</b><small>Fintech · Bengaluru</small></div></div>
+            <span class="case-tag">LinkedIn + X</span>
+          </div>
+          <p class="case-headline">Put the founder in front of the right buyers — inbound replaced a chunk of outbound.</p>
+          <svg class="spark" viewBox="0 0 200 38" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M0,35 L28,30 L56,28 L84,20 L112,17 L140,11 L168,9 L200,5" fill="none" stroke="var(--pos)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="200" cy="5" r="3.4" fill="var(--pos)"/>
+          </svg>
+          <div class="case-metrics">
+            <div class="cm"><div class="v"><em>5.4×</em></div><div class="l">Qualified inbound</div></div>
+            <div class="cm"><div class="v">1.1M</div><div class="l">LinkedIn impressions</div></div>
+            <div class="cm"><div class="v"><em>+62</em></div><div class="l">Sales convos / qtr</div></div>
+          </div>
+        </div>
+
+        <div class="case">
+          <div class="case-top">
+            <div class="case-client"><span class="cl-mark">T</span><div><b>Trailhead</b><small>D2C outdoor · Pune</small></div></div>
+            <span class="case-tag">Paid social + content</span>
+          </div>
+          <p class="case-headline">Creative-led paid social plus organic — signups up, cost per signup down.</p>
+          <svg class="spark" viewBox="0 0 200 38" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M0,34 L28,33 L56,27 L84,23 L112,19 L140,13 L168,10 L200,4" fill="none" stroke="var(--pos)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="200" cy="4" r="3.4" fill="var(--pos)"/>
+          </svg>
+          <div class="case-metrics">
+            <div class="cm"><div class="v"><em>2.8×</em></div><div class="l">Newsletter signups</div></div>
+            <div class="cm"><div class="v">4.6×</div><div class="l">Blended ROAS</div></div>
+            <div class="cm"><div class="v"><em>−41%</em></div><div class="l">Cost per signup</div></div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- STATS BAND -->
+    <section class="stats-band">
+      <div class="stats-inner">
+        <div class="stat"><span class="big">20<em>+</em></span><span class="lbl">Founders &amp; brands grown</span></div>
+        <div class="stat"><span class="big">9.2<em>M</em></span><span class="lbl">Impressions generated</span></div>
+        <div class="stat"><span class="big">3.4<em>×</em></span><span class="lbl">Avg engagement lift</span></div>
+        <div class="stat"><span class="big">100<em>%</em></span><span class="lbl">Client retention</span></div>
+      </div>
+    </section>
+
+    <!-- TESTIMONIALS -->
+    <section class="section" id="voices">
+      <div class="sec-head">
+        <span class="sec-eyebrow">In their words</span>
+        <h2 class="sec-title">What clients <em>actually say</em></h2>
+      </div>
+      <div class="reviews">
+        <div class="review feat">
+          <span class="quote-mark">&#8220;</span>
+          <p>Within five months my X account went from <span class="hl">1,400 to 26,000</span> followers — and three of our best customers this year said they found us through my posts.</p>
+          <div class="by"><span class="av">AK</span><div><b>Aditya Kale</b><small>Founder, Saral</small></div></div>
+        </div>
+        <div class="review">
+          <span class="quote-mark">&#8220;</span>
+          <p>They actually understood SEO instead of selling it. Organic is now our <span class="hl">cheapest channel</span> — and traffic more than tripled in two quarters.</p>
+          <div class="by"><span class="av">PN</span><div><b>Priya Nair</b><small>CMO, Brewhouse</small></div></div>
+        </div>
+        <div class="review">
+          <span class="quote-mark">&#8220;</span>
+          <p>Small team, no fluff, weekly numbers. We <span class="hl">replaced part of our SDR spend</span> with founder content they ghostwrite — and it's working.</p>
+          <div class="by"><span class="av">RD</span><div><b>Rohan Deshpande</b><small>Founder, Finly</small></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section class="contact-band" id="contact">
+      <div class="contact-grid">
+        <div class="contact-left">
+          <span class="sec-eyebrow">Contact us</span>
+          <h2 class="sec-title">Let's find your <em>fastest number to move</em></h2>
+          <p>Book a free 30-minute growth audit. We'll look at your channels, tell you where the quick wins are, and whether we're the right team — no pressure, no 40-slide deck.</p>
+          <div class="contact-points">
+            <div class="cpoint"><span class="cp-l">Email</span><span class="cp-v"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="1179747d7d7e517f74696576747f7075623f787f">[email&#160;protected]</a><small>We reply within one working day</small></span></div>
+            <div class="cpoint"><span class="cp-l">Phone</span><span class="cp-v">+91 98220 41100<small>Mon–Fri · 10am–7pm IST</small></span></div>
+            <div class="cpoint"><span class="cp-l">Studio</span><span class="cp-v">Baner, Pune 411045<small>Maharashtra, India</small></span></div>
+          </div>
+        </div>
+        <form class="form" onsubmit="return false">
+          <div class="frow fgrid">
+            <div><label class="fl" for="f-name">Name</label><input id="f-name" type="text" placeholder="Your name" /></div>
+            <div><label class="fl" for="f-co">Company</label><input id="f-co" type="text" placeholder="Company / brand" /></div>
+          </div>
+          <div class="frow"><label class="fl" for="f-email">Email</label><input id="f-email" type="email" placeholder="you@company.com" /></div>
+          <div class="frow"><label class="fl" for="f-svc">What do you need?</label>
+            <select id="f-svc">
+              <option>SEO &amp; Content</option>
+              <option>X (Twitter) Marketing</option>
+              <option>Personal Branding</option>
+              <option>LinkedIn Growth</option>
+              <option>Paid Social</option>
+              <option>Not sure yet — help me decide</option>
+            </select>
+          </div>
+          <div class="frow"><label class="fl" for="f-msg">Where are you today?</label><textarea id="f-msg" placeholder="A line on your goal and current numbers helps us prep."></textarea></div>
+          <button class="btn btn-primary" type="submit">Request my free audit ↗</button>
+          <p class="fnote">No spam. No retainer talk until we've proven a number.</p>
+        </form>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <a class="brand" href="#"><span class="mark"></span>Nextgen Ads</a>
+          <p>A growth &amp; personal-branding studio in Pune. We turn attention into pipeline — and report the numbers.</p>
+          <div class="badge"><span class="lv"></span>Booking Q3 2026</div>
+        </div>
+        <div class="footer-col"><h4>Services</h4><ul><li>SEO &amp; Content</li><li>X Marketing</li><li>Personal Branding</li><li>LinkedIn Growth</li></ul></div>
+        <div class="footer-col"><h4>Studio</h4><ul><li>About</li><li>Work</li><li>Clients</li><li>Contact</li></ul></div>
+        <div class="footer-col"><h4>Reach us</h4><ul><li><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="b8d0ddd4d4d7f8d6ddc0ccdfddd6d9dccb96d1d6">[email&#160;protected]</a></li><li>+91 98220 41100</li><li>Baner, Pune</li><li>@nextgenads</li></ul></div>
+      </div>
+      <div class="footer-bottom">
+        <span>© MMXXVI Nextgen Ads · Pune, India</span>
+        <span>Built with the Lessgo library · Vol. XII — Surge</span>
+      </div>
+    </footer>
+
+  </div>
+</div>
+
+<!-- ============================================================
+     TOKENS
+     ============================================================ -->
+<div class="tokens">
+  <h2>Copy the <em>tokens</em></h2>
+  <p>Drop this into <code>:root</code>, then set <code>data-palette</code> and <code>data-variant</code> on <code>&lt;html&gt;</code>. The palette knob swaps only the accent hue; the held green/red never move. Everything else is baked.</p>
+
+  <h3>Root + accent</h3>
+  <pre><span class="c">/* Surge — base tokens */</span>
+<span class="k">:root</span> {
+  <span class="k">--h</span>: <span class="v">265</span>;            <span class="c">/* accent hue — the only thing palette swaps */</span>
+  <span class="k">--c</span>: <span class="v">0.18</span>;           <span class="c">/* accent chroma, held */</span>
+
+  <span class="k">--bg</span>:        <span class="v">oklch(0.984 0.004 265)</span>;
+  <span class="k">--surface</span>:   <span class="v">oklch(1 0 0)</span>;
+  <span class="k">--tint</span>:      <span class="v">oklch(0.955 0.022 var(--h))</span>;
+
+  <span class="k">--accent</span>:     <span class="v">oklch(0.605 var(--c) var(--h))</span>;
+  <span class="k">--accent-deep</span>:<span class="v">oklch(0.50 calc(var(--c) + 0.02) var(--h))</span>;
+  <span class="k">--accent-soft</span>:<span class="v">oklch(0.93 0.055 var(--h))</span>;
+  <span class="k">--accent-on</span>:  <span class="v">oklch(0.99 0.012 var(--h))</span>;
+
+  <span class="c">/* held semantic — never swap with palette */</span>
+  <span class="k">--pos</span>:        <span class="v">oklch(0.66 0.16 152)</span>;
+  <span class="k">--neg</span>:        <span class="v">oklch(0.60 0.19 27)</span>;
+
+  <span class="k">--panel</span>:      <span class="v">oklch(0.205 0.028 265)</span>;
+  <span class="k">--ink</span>:        <span class="v">oklch(0.22 0.022 265)</span>;
+  <span class="k">--ink-2</span>:      <span class="v">oklch(0.42 0.02 265)</span>;
+  <span class="k">--line</span>:       <span class="v">oklch(0.905 0.01 265)</span>;
+
+  <span class="k">--font-display</span>: <span class="v">"Archivo"</span>;
+  <span class="k">--font-body</span>:    <span class="v">"Hanken Grotesk"</span>;
+  <span class="k">--font-mono</span>:    <span class="v">"JetBrains Mono"</span>;
+  <span class="k">--font-serif</span>:   <span class="v">"Instrument Serif"</span>;  <span class="c">/* editorial only */</span>
+
+  <span class="k">--r-sm</span>: <span class="v">7px</span>; <span class="k">--r-md</span>: <span class="v">11px</span>; <span class="k">--r-lg</span>: <span class="v">16px</span>; <span class="k">--r-xl</span>: <span class="v">22px</span>;
+}</pre>
+
+  <h3>Palettes — accent hue only</h3>
+  <pre><span class="k">[data-palette="volt"]</span>    { <span class="k">--h</span>: <span class="v">265</span>; <span class="k">--c</span>: <span class="v">0.18</span>; }
+<span class="k">[data-palette="azure"]</span>   { <span class="k">--h</span>: <span class="v">245</span>; <span class="k">--accent</span>: <span class="v">oklch(0.6 0.16 245)</span>; }
+<span class="k">[data-palette="cyan"]</span>    { <span class="k">--h</span>: <span class="v">215</span>; <span class="k">--accent</span>: <span class="v">oklch(0.66 0.13 215)</span>; }
+<span class="k">[data-palette="teal"]</span>    { <span class="k">--h</span>: <span class="v">185</span>; <span class="k">--accent</span>: <span class="v">oklch(0.64 0.12 185)</span>; }
+<span class="k">[data-palette="violet"]</span>  { <span class="k">--h</span>: <span class="v">295</span>; <span class="k">--accent</span>: <span class="v">oklch(0.58 0.19 295)</span>; }
+<span class="k">[data-palette="magenta"]</span> { <span class="k">--h</span>: <span class="v">350</span>; <span class="k">--accent</span>: <span class="v">oklch(0.62 0.2 350)</span>; }
+<span class="k">[data-palette="coral"]</span>   { <span class="k">--h</span>: <span class="v">30</span>;  <span class="k">--accent</span>: <span class="v">oklch(0.66 0.17 30)</span>; }
+<span class="k">[data-palette="amber"]</span>   { <span class="k">--h</span>: <span class="v">75</span>;  <span class="k">--accent</span>: <span class="v">oklch(0.74 0.15 75)</span>;  <span class="k">--accent-on</span>: <span class="v">oklch(0.26 0.05 75)</span>; }
+<span class="k">[data-palette="lime"]</span>    { <span class="k">--h</span>: <span class="v">135</span>; <span class="k">--accent</span>: <span class="v">oklch(0.72 0.17 135)</span>; <span class="k">--accent-on</span>: <span class="v">oklch(0.24 0.05 135)</span>; }</pre>
+
+  <h3>Variants</h3>
+  <pre><span class="c">/* performance — default: dense, sharp, charty, grotesk display */</span>
+<span class="c">/* editorial   — serif headlines, airier padding, lighter weights */</span>
+<span class="k">[data-variant="editorial"]</span> <span class="k">.sec-title</span> { <span class="k">font-family</span>: <span class="v">var(--font-serif)</span>; <span class="k">font-weight</span>: <span class="v">400</span>; }
+<span class="k">[data-variant="editorial"]</span> <span class="k">.hero</span> { <span class="k">background</span>: <span class="v">var(--bg-1)</span>; }
+
+<span class="c">/* bold        — oversized type, accent-blocked hero, punchy */</span>
+<span class="k">[data-variant="bold"]</span> <span class="k">.hero</span> { <span class="k">background</span>: <span class="v">var(--accent)</span>; }
+<span class="k">[data-variant="bold"]</span> <span class="k">.sec-eyebrow</span> { <span class="k">background</span>: <span class="v">var(--accent)</span>; <span class="k">color</span>: <span class="v">var(--accent-on)</span>; }</pre>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+(() => {
+  const root = document.documentElement;
+  const KEY_P = "surge.palette";
+  const KEY_V = "surge.variant";
+  const VARIANT_DESC = {
+    "performance": "<b>Performance.</b> The default — dense dashboards, sharp corners, numbers everywhere. Built for growth &amp; paid-media shops.",
+    "editorial":   "<b>Editorial.</b> Serif headlines, more air, lighter weights. For brand-led and boutique agencies that want premium over dense.",
+    "bold":        "<b>Bold.</b> Oversized type and an accent-blocked hero. Punchy launch energy for loud growth shops and campaigns."
+  };
+  try {
+    const p = localStorage.getItem(KEY_P);
+    const v = localStorage.getItem(KEY_V);
+    if (p) root.setAttribute("data-palette", p);
+    if (v) root.setAttribute("data-variant", v);
+  } catch {}
+  const syncPressed = () => {
+    const p = root.getAttribute("data-palette") || "volt";
+    const v = root.getAttribute("data-variant") || "performance";
+    document.querySelectorAll("[data-set-palette]").forEach(b =>
+      b.setAttribute("aria-pressed", b.dataset.setPalette === p));
+    document.querySelectorAll("[data-set-variant]").forEach(b =>
+      b.setAttribute("aria-pressed", b.dataset.setVariant === v));
+    const cap = document.getElementById("switcherCaption");
+    if (cap) cap.innerHTML = VARIANT_DESC[v] || VARIANT_DESC.performance;
+  };
+  document.querySelectorAll("[data-set-palette]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      root.setAttribute("data-palette", btn.dataset.setPalette);
+      try { localStorage.setItem(KEY_P, btn.dataset.setPalette); } catch {}
+      syncPressed();
+    });
+  });
+  document.querySelectorAll("[data-set-variant]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      root.setAttribute("data-variant", btn.dataset.setVariant);
+      try { localStorage.setItem(KEY_V, btn.dataset.setVariant); } catch {}
+      syncPressed();
+    });
+  });
+  syncPressed();
+})();
+</script>
+
+</body>
+</html>

@@ -38,6 +38,19 @@ export const templateRegistry: Record<TemplateId, TemplateModuleLoader> = {
       paletteImageKeywords: m.PALETTE_IMAGE_KEYWORDS,
     };
   },
+  surge: async () => {
+    const m = await import('@/modules/templates/surge');
+    return {
+      resolveBlock: m.resolveBlock,
+      ThemeInjector: m.ThemeInjector,
+      SSRTokens: m.SSRTokens,
+      getSurfaceForSection: m.getSurfaceForSection,
+      defaultPaletteId: m.defaultSurgePalette,
+      variants: m.surgeVariants,
+      defaultVariantId: m.defaultSurgeVariant,
+      paletteImageKeywords: m.PALETTE_IMAGE_KEYWORDS,
+    };
+  },
   meridian: async () => {
     const m = await import('@/modules/templates/meridian');
     return {
@@ -61,6 +74,20 @@ export const templateRegistry: Record<TemplateId, TemplateModuleLoader> = {
       defaultPaletteId: m.defaultTechPremiumPalette,
       variants: m.techPremiumVariants,
       defaultVariantId: m.defaultTechPremiumVariant,
+      paletteImageKeywords: m.PALETTE_IMAGE_KEYWORDS,
+    };
+  },
+  // Bespoke §13 — registered + renderable, but absent from the onboarding picker.
+  lumen: async () => {
+    const m = await import('@/modules/templates/lumen');
+    return {
+      resolveBlock: m.resolveBlock,
+      ThemeInjector: m.ThemeInjector,
+      SSRTokens: m.SSRTokens,
+      getSurfaceForSection: m.getSurfaceForSection,
+      defaultPaletteId: m.defaultLumenPalette,
+      variants: m.lumenVariants,
+      defaultVariantId: m.defaultLumenVariant,
       paletteImageKeywords: m.PALETTE_IMAGE_KEYWORDS,
     };
   },

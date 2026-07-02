@@ -44,7 +44,7 @@ export default function TechPremiumCapabilities({ sectionId }: TechPremiumCapabi
     handleCollectionUpdate('features', features.map((f) => (f.id === id ? { ...f, [key]: value } : f)));
   };
   const addFeature = () => {
-    if (features.length >= 6) return;
+    if (features.length >= 9) return;
     handleCollectionUpdate('features', [
       ...features,
       { id: `f${Date.now()}`, title: 'New capability', description: 'Describe this capability.', icon: 'Activity', link_text: '' },
@@ -144,7 +144,7 @@ export default function TechPremiumCapabilities({ sectionId }: TechPremiumCapabi
                 )}
               </article>
             ))}
-            {mode === 'edit' && features.length < 6 && (
+            {mode === 'edit' && features.length < 9 && (
               <button type="button" className="tp-cap tp-cap--add" onClick={addFeature}>+ Add capability</button>
             )}
           </div>
@@ -165,7 +165,8 @@ const STYLES = `
 .tp-cap-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:var(--r-lg); overflow:hidden; }
 .tp-cap { background:var(--paper); padding:30px 28px; display:flex; flex-direction:column; gap:14px; transition:background .16s ease; position:relative; }
 .tp-cap:hover { background:var(--paper-2); }
-.tp-cap__ico { width:40px; height:40px; border-radius:9px; border:1px solid var(--line-2); display:grid; place-items:center; color:var(--forest); }
+.tp-cap__ico { width:42px; height:42px; border-radius:10px; background:var(--lime-dim); border:1px solid transparent; display:grid; place-items:center; color:var(--forest); transition:background .16s ease, color .16s ease, transform .16s ease; }
+.tp-cap:hover .tp-cap__ico { background:var(--lime); color:var(--forest-d); transform:translateY(-1px); }
 .tp-cap__h3 { font-family:var(--font-display); font-weight:600; font-size:18px; letter-spacing:-0.018em; line-height:1.2; color:var(--ink); margin:0; }
 .tp-cap__p { margin:0; color:var(--ink-2); font-size:14.5px; line-height:1.6; }
 .tp-cap__link { font-family:var(--font-mono); font-size:11.5px; letter-spacing:0.04em; color:var(--lime-d); cursor:pointer; }

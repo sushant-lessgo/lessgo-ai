@@ -18,6 +18,12 @@ interface Testimonial {
   author_role: string;
 }
 
+interface ResultStat {
+  id: string;
+  value: string;
+  label: string;
+}
+
 interface Logo {
   id: string;
   name: string;
@@ -26,6 +32,7 @@ interface Logo {
 interface TechPremiumResultsContent {
   eyebrow: string;
   headline: string;
+  stats: ResultStat[];
   testimonials: Testimonial[];
   logos: Logo[];
 }
@@ -38,8 +45,20 @@ export default function TechPremiumResults({ sectionId }: TechPremiumResultsProp
   const { mode, blockContent, handleContentUpdate, handleCollectionUpdate } =
     useTechPremiumBlock<TechPremiumResultsContent>({ sectionId });
 
+  const stats = blockContent.stats || [];
   const testimonials = blockContent.testimonials || [];
   const logos = blockContent.logos || [];
+
+  const updateStat = (id: string, key: keyof ResultStat, value: string) => {
+    handleCollectionUpdate('stats', stats.map((s) => (s.id === id ? { ...s, [key]: value } : s)));
+  };
+  const addStat = () => {
+    if (stats.length >= 3) return;
+    handleCollectionUpdate('stats', [...stats, { id: `rs${Date.now()}`, value: '00%', label: 'metric' }]);
+  };
+  const removeStat = (id: string) => {
+    handleCollectionUpdate('stats', stats.filter((s) => s.id !== id));
+  };
 
   const updateTesti = (id: string, key: keyof Testimonial, value: string) => {
     handleCollectionUpdate('testimonials', testimonials.map((t) => (t.id === id ? { ...t, [key]: value } : t)));
@@ -98,6 +117,43 @@ export default function TechPremiumResults({ sectionId }: TechPremiumResultsProp
               placeholder="The numbers customers came back with."
             />
           </div>
+
+          {(stats.length > 0 || mode === 'edit') && (
+            <div className="tp-results-stats">
+              {stats.map((s) => (
+                <div key={s.id} className="tp-rstat">
+                  <TechPremiumEditable
+                    as="div"
+                    mode={mode}
+                    sectionId={sectionId}
+                    elementKey={`stats_value_${s.id}`}
+                    value={s.value}
+                    onSave={(v) => updateStat(s.id, 'value', v)}
+                    enterBehavior="save"
+                    className="tp-rstat__v"
+                    placeholder="00%"
+                  />
+                  <TechPremiumEditable
+                    as="div"
+                    mode={mode}
+                    sectionId={sectionId}
+                    elementKey={`stats_label_${s.id}`}
+                    value={s.label}
+                    onSave={(v) => updateStat(s.id, 'label', v)}
+                    enterBehavior="save"
+                    className="tp-rstat__l"
+                    placeholder="metric label"
+                  />
+                  {mode === 'edit' && (
+                    <button type="button" className="tp-rstat__remove" onClick={() => removeStat(s.id)} aria-label="Remove stat">×</button>
+                  )}
+                </div>
+              ))}
+              {mode === 'edit' && stats.length < 3 && (
+                <button type="button" className="tp-rstat tp-rstat--add" onClick={addStat}>+ stat</button>
+              )}
+            </div>
+          )}
 
           <div className="tp-t-grid">
             {testimonials.map((t) => (
@@ -190,7 +246,15 @@ const STYLES = `
 .tp-sec-head__h2 { font-family:var(--font-display); font-weight:600; font-size:clamp(30px,4vw,46px); letter-spacing:-0.018em; line-height:1.1; color:var(--ink); margin:0; }
 .tp-pill { display:inline-flex; align-items:center; gap:6px; font-family:var(--font-mono); font-size:10.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; padding:4px 9px 4px 7px; border-radius:999px; color:var(--ok); background:var(--ok-bg); border:1px solid oklch(0.66 0.15 150 / 0.30); align-self:flex-start; }
 .tp-pill__dot { width:6px; height:6px; border-radius:50%; background:var(--ok); box-shadow:0 0 0 3px var(--ok-bg); }
+.tp-results-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:22px; margin-bottom:40px; }
+.tp-rstat { position:relative; border:1px solid var(--line); border-radius:var(--r-lg); padding:28px 26px; background:var(--paper); }
+.tp-rstat__v { font-family:var(--font-display); font-weight:700; font-size:clamp(34px,4vw,46px); letter-spacing:-0.03em; color:var(--forest); line-height:1; }
+.tp-rstat__l { font-family:var(--font-mono); font-size:11px; letter-spacing:0.10em; text-transform:uppercase; color:var(--ink-3); margin-top:12px; }
+.tp-rstat__remove { position:absolute; top:12px; right:12px; width:22px; height:22px; background:transparent; border:1px solid var(--line-2); border-radius:50%; color:var(--ink-3); font-size:13px; line-height:1; cursor:pointer; }
+.tp-rstat--add { border:1px dashed var(--line-2); color:var(--ink-3); font-family:var(--font-body); font-size:14px; cursor:pointer; display:grid; place-items:center; min-height:120px; }
+.tp-rstat--add:hover { color:var(--forest); border-color:var(--forest); }
 .tp-t-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
+@media (max-width:760px){ .tp-results-stats { grid-template-columns:1fr; } }
 .tp-tcard { border:1px solid var(--line); border-radius:var(--r-lg); padding:28px 26px; background:var(--paper); display:flex; flex-direction:column; gap:18px; position:relative; }
 .tp-tcard__quote { font-family:var(--font-display); font-weight:500; font-size:18.5px; line-height:1.45; color:var(--ink); letter-spacing:-0.01em; margin:0; flex:1; }
 .tp-tcard__who { display:flex; align-items:center; gap:13px; margin-top:auto; }

@@ -11,9 +11,37 @@ import { withPublishRateLimit } from '@/lib/rateLimit';
 import { getUserPlan, checkLimit } from '@/lib/planManager';
 import { stripHTMLTags } from '@/utils/smartTitleGenerator';
 import { sanitizeContentForPublish } from '@/modules/sections/layoutElementSchema';
+import * as Sentry from '@sentry/nextjs';
 
 // Force Node.js runtime for ReactDOMServer support
 export const runtime = 'nodejs';
+
+// Multi-page shared chrome (Phase 2): inject the project's shared header/footer
+// into a page's { layout:{sections}, content } so every frozen/generated page is
+// self-contained. Header prepended, footer appended; idempotent.
+function injectChromeIntoPage(layout: any, contentMap: any, chrome: any) {
+  if (!chrome || !layout || !contentMap) return;
+  const sections: string[] = Array.isArray(layout.sections) ? layout.sections : [];
+  const without = sections.filter(
+    (id) => !(chrome.header && id === chrome.header.id) && !(chrome.footer && id === chrome.footer.id),
+  );
+  const next: string[] = [];
+  if (chrome.header?.id) {
+    next.push(chrome.header.id);
+    contentMap[chrome.header.id] = chrome.header.data;
+  }
+  next.push(...without);
+  if (chrome.footer?.id) {
+    next.push(chrome.footer.id);
+    contentMap[chrome.footer.id] = chrome.footer.data;
+  }
+  layout.sections = next;
+}
+
+// First body (non-header/footer) hero section id, for meta description.
+function findHeroId(sections: string[] = []): string | undefined {
+  return sections.find((id) => /^hero/i.test(id)) || sections.find((id) => !/^(header|footer)/i.test(id));
+}
 
 async function publishHandler(req: NextRequest) {
   const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
@@ -27,6 +55,7 @@ async function publishHandler(req: NextRequest) {
     if (!userId) {
       return createSecureResponse({ error: 'Unauthorized' }, 401);
     }
+    Sentry.setUser({ id: userId });
 
     const body = await req.json();
     
@@ -44,6 +73,21 @@ async function publishHandler(req: NextRequest) {
     // Sanitize: strip excluded elements, set required defaults
     if (content && typeof content === 'object') {
       sanitizeContentForPublish(content as Record<string, any>);
+    }
+
+    // Multi-page (Phase 2): inject shared chrome into the root + every subpage so
+    // each frozen/generated page contains the same header/footer. Done BEFORE the
+    // DB write + static export so published routes need no chrome logic.
+    {
+      const c = content as any;
+      const chrome = c?.chrome;
+      if (chrome && (chrome.header || chrome.footer)) {
+        if (c.layout && c.content) injectChromeIntoPage(c.layout, c.content, chrome);
+        const subs = c.subpages && typeof c.subpages === 'object' ? c.subpages : {};
+        for (const sub of Object.values(subs) as any[]) {
+          if (sub?.layout && sub?.content) injectChromeIntoPage(sub.layout, sub.content, chrome);
+        }
+      }
     }
 
     // Sanitize title - strip HTML tags for meta/OG image safety
@@ -141,21 +185,23 @@ async function publishHandler(req: NextRequest) {
     }
 
 
-    // ✅ 🔁 Always upsert into Project as well
+    // ✅ 🔁 Mark the Project published — but DO NOT overwrite Project.content.
+    // Project.content is the editor DRAFT (onboarding + finalContent.pages). The
+    // published snapshot lives in PublishedPage.content. Clobbering the draft with
+    // the (pages-less) publish payload destroyed multi-page structure on next edit
+    // (the catalog/products vanished). The editor autosaves the draft separately
+    // (and preview now force-saves before publish), so we only flip status/title.
     await prisma.project.upsert({
       where: { tokenId },
       create: {
         tokenId,
         userId,
         title: cleanTitle,
-        content: content as any,
         inputText,
         status: 'published',
       },
       update: {
         title: cleanTitle,
-        content: content as any,
-        inputText,
         status: 'published',
         updatedAt: new Date(),
       },
@@ -173,6 +219,15 @@ async function publishHandler(req: NextRequest) {
       if (!pageId) {
         throw new Error('Failed to get published page ID');
       }
+
+      // Resolve the canonical host once, BEFORE generation: use the custom domain only
+      // when it's already live, else leave undefined so the generator falls back to the
+      // {slug}.lessgo.ai subdomain. Reused below for the KV domain list. (Domains that go
+      // live AFTER publish are handled by verify-dns regenerating the HTML.)
+      const canonicalDomain =
+        publishedPage?.customDomain && publishedPage.customDomainStatus === 'live'
+          ? publishedPage.customDomain
+          : undefined;
 
       // Idempotency guard: prevent double-publish
       const currentPage = await prisma.publishedPage.findUnique({
@@ -212,8 +267,8 @@ async function publishHandler(req: NextRequest) {
         contentData.forms = {};
       }
 
-      const heroSection = contentData.layout?.sections?.[0];
-      const heroContent = contentData[heroSection];
+      const heroSection = findHeroId(contentData.layout?.sections);
+      const heroContent = heroSection ? contentData[heroSection] : undefined;
       const description =
         heroContent?.elements?.subheadline?.content ||
         heroContent?.elements?.headline?.content ||
@@ -235,6 +290,8 @@ async function publishHandler(req: NextRequest) {
         templateId,
         paletteId,
         variantId,
+        canonicalDomain,
+        canonicalPath: '/',
       });
 
       // Upload to blob with timeout protection
@@ -260,15 +317,84 @@ async function publishHandler(req: NextRequest) {
         throw new Error('Invalid blob upload response');
       }
 
-      // Create version record
+      // === MULTI-PAGE: render + upload each subpage under the SAME version ===
+      // Subpages live in content.subpages[pathSlug] = { layout:{sections,theme}, content }.
+      // Shared forms/legalPages/theme come from the root content.
+      const allBlobs: Array<{ path: string; blobKey: string; blobUrl: string; sizeBytes: number }> = [
+        { path: '/', blobKey, blobUrl, sizeBytes },
+      ];
+      const extraRoutes: Record<string, string> = {};
+      const subpages =
+        contentData.subpages && typeof contentData.subpages === 'object' ? contentData.subpages : {};
+
+      for (const [rawPath, sub] of Object.entries(subpages) as Array<[string, any]>) {
+        try {
+          const path = rawPath.startsWith('/') ? rawPath : `/${rawPath}`;
+          if (path === '/') continue; // root already published above
+          const pageName = path.replace(/^\//, '').replace(/\/$/, '') || 'index';
+
+          const subSections: string[] = sub?.layout?.sections || [];
+          const subTheme = sub?.layout?.theme || contentData.layout.theme;
+          const subFlat = {
+            ...(sub?.content || {}),
+            forms: contentData.forms || {},
+            legalPages: contentData.legalPages,
+          };
+          const subHero = subFlat[findHeroId(subSections) || ''];
+          const subDesc =
+            subHero?.elements?.subheadline?.content ||
+            subHero?.elements?.headline?.content ||
+            sub?.title ||
+            cleanTitle;
+
+          const subHtml = await generateStaticHTML({
+            sections: subSections,
+            content: subFlat,
+            theme: subTheme,
+            publishedPageId: pageId,
+            pageOwnerId: userId,
+            slug,
+            title: sub?.title || cleanTitle,
+            description: typeof subDesc === 'string' ? subDesc.slice(0, 160) : cleanTitle.slice(0, 160),
+            previewImage,
+            analyticsOptIn: analyticsEnabled || false,
+            baseURL: baseUrl,
+            audienceType,
+            templateId,
+            paletteId,
+            variantId,
+            canonicalDomain,
+            canonicalPath: path,
+          });
+
+          const subUpload = await uploadStaticSite({
+            pageId,
+            html: subHtml.html,
+            assetBundleVersion: 'v1',
+            version, // share the root's version
+            pageName,
+          });
+
+          allBlobs.push({ path, blobKey: subUpload.blobKey, blobUrl: subUpload.blobUrl, sizeBytes: subUpload.sizeBytes });
+          extraRoutes[path] = subUpload.blobUrl;
+        } catch (subErr) {
+          // A failed subpage must not block the rest of the publish.
+          console.error('[Phase 2] Subpage render/upload failed:', rawPath, subErr);
+        }
+      }
+
+      const totalSizeBytes = allBlobs.reduce((sum, b) => sum + b.sizeBytes, 0);
+
+      // Create version record — ONE version covers all pages; per-page blobs in metadata.
       const newVersion = await prisma.publishedPageVersion.create({
         data: {
           publishedPageId: pageId,
           version,
           blobKey,
           blobUrl,
-          sizeBytes,
+          sizeBytes: totalSizeBytes,
           status: 'active',
+          metadata: { blobs: allBlobs } as any,
         }
       });
 
@@ -287,17 +413,11 @@ async function publishHandler(req: NextRequest) {
       // === PHASE 3: UPDATE KV ROUTING WITH RETRY & VERIFICATION ===
       // Add after successful DB update
       try {
-        const { atomicPublishWithRetry, writeRedirect, writeSlugForHost } = await import('@/lib/routing/kvRoutes');
+        const { atomicPublishWithRetry, writeRedirect, writeSlugForHost, removeRedirect } = await import('@/lib/routing/kvRoutes');
 
-        // Build domain list — includes custom domain when live
-        const pageDomains = await prisma.publishedPage.findUnique({
-          where: { id: pageId },
-          select: { customDomain: true, customDomainStatus: true },
-        });
+        // Build domain list — includes custom domain when live (resolved once above).
         const domains = [`${slug}.lessgo.ai`];
-        const hasLiveCustom =
-          pageDomains?.customDomain && pageDomains.customDomainStatus === 'live';
-        if (hasLiveCustom) domains.push(pageDomains!.customDomain!);
+        if (canonicalDomain) domains.push(canonicalDomain);
 
         // CRITICAL: Pass blobUrl (not blobKey) to KV
         // This allows proxy to fetch directly without head() API call
@@ -313,7 +433,7 @@ async function publishHandler(req: NextRequest) {
           domains,
           version,
           blobUrl,  // Use blobUrl from upload result, not blobKey
-          { maxRetries: 3, baseDelay: 1000 }
+          { maxRetries: 3, baseDelay: 1000, extraRoutes }  // extraRoutes = subpage paths → blobUrls
         );
 
         console.log('[Phase 3] ✓ KV routing updated successfully:', {
@@ -325,12 +445,22 @@ async function publishHandler(req: NextRequest) {
         });
 
         // Re-assert subdomain → custom domain 301 + slug-for fallback on every republish
-        if (hasLiveCustom) {
+        if (canonicalDomain) {
           try {
-            await writeRedirect(`${slug}.lessgo.ai`, `https://${pageDomains!.customDomain!}`, 301);
-            await writeSlugForHost(pageDomains!.customDomain!, slug);
+            await writeRedirect(`${slug}.lessgo.ai`, `https://${canonicalDomain}`, 301);
+            await writeSlugForHost(canonicalDomain, slug);
           } catch (e) {
             console.error('[Phase 3] writeRedirect/writeSlugForHost failed (non-fatal)', e);
+          }
+        } else {
+          // Self-heal: no live custom domain → clear any STALE subdomain→custom-domain
+          // redirect so {slug}.lessgo.ai serves its own page. Without this, a redirect:
+          // KV entry left over from a removed custom domain or a DB wipe survives and the
+          // middleware 301s the subdomain to a dead/wrong target (e.g. test1 → kundius...).
+          try {
+            await removeRedirect(`${slug}.lessgo.ai`);
+          } catch (e) {
+            console.error('[publish] removeRedirect (stale) failed (non-fatal)', e);
           }
         }
 
@@ -344,6 +474,13 @@ async function publishHandler(req: NextRequest) {
           pageId,
           slug,
           blobUrl,
+        });
+
+        Sentry.captureException(kvError, {
+          level: 'fatal',
+          tags: { area: 'publish-kv' },
+          extra: { pageId, slug, blobUrl },
+          user: { id: userId },
         });
 
         // Set failed state in DB
@@ -376,6 +513,11 @@ async function publishHandler(req: NextRequest) {
 
     } catch (error) {
       console.error('[Phase 2] Static export failed:', error);
+      Sentry.captureException(error, {
+        tags: { area: 'publish', phase: 'static-export' },
+        extra: { slug },
+        user: { id: userId },
+      });
 
       // Rollback: delete uploaded blob if DB update failed
       if (uploadedBlobKey) {
@@ -411,6 +553,7 @@ async function publishHandler(req: NextRequest) {
 
   } catch (err) {
   console.error('[publish] fatal error:', err);
+  Sentry.captureException(err, { tags: { area: 'publish', phase: 'fatal' } });
   return createSecureResponse({ error: 'Internal Server Error' }, 500);
 }
 }

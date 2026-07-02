@@ -16,6 +16,7 @@ import IconPicker from '@/components/ui/IconPicker';
 import * as LucideIcons from 'lucide-react';
 import { getDisabledBehaviorOptions } from '@/utils/formPlacement';
 import { hasPrimaryCTASection } from '@/utils/sectionHelpers';
+import { buildPageLinkOptions } from '@/utils/pageLinks';
 
 // Some button elements are items inside a collection (pricing/package tiers):
 // their elementKey is `<collection>_cta_<id>` and the visible text lives nested at
@@ -38,9 +39,11 @@ function getCollectionCtaRef(
 }
 
 interface ButtonConfig {
-  type: 'link' | 'form' | 'link-with-input';
+  type: 'link' | 'form' | 'link-with-input' | 'page';
   text: string;
   url?: string;
+  pageId?: string; // cross-page link: target page id
+  pathSlug?: string; // cross-page link: target page pathSlug ('/contact')
   formId?: string;
   behavior?: 'scrollTo' | 'openModal';
   ctaType?: 'primary' | 'secondary'; // NEW: CTA type for placement logic
@@ -73,9 +76,11 @@ export function ButtonConfigurationModal({
     showFormBuilder,
     content,
     setSection,
-    sections // NEW: Get sections for placement logic
+    sections, // NEW: Get sections for placement logic
+    pages, // multi-page: cross-page link targets
   } = useEditStore();
-  
+
+  const pageOptions = buildPageLinkOptions(pages);
   const availableForms = getAllForms();
 
   const [config, setConfig] = useState<ButtonConfig>({
@@ -119,6 +124,8 @@ export function ButtonConfigurationModal({
             type: savedConfig.type || 'link',
             text: buttonText,
             url: savedConfig.url || '',
+            pageId: savedConfig.pageId,
+            pathSlug: savedConfig.pathSlug,
             formId: savedConfig.formId || '',
             behavior: savedConfig.behavior || 'scrollTo',
             ctaType: savedConfig.ctaType || 'primary', // NEW: Load CTA type
@@ -166,6 +173,10 @@ export function ButtonConfigurationModal({
       newErrors.form = 'Please select a form or create a new one.';
     }
 
+    if (config.type === 'page' && !config.pathSlug?.trim()) {
+      newErrors.page = 'Please choose a page to link to.';
+    }
+
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length > 0) {
@@ -194,16 +205,21 @@ export function ButtonConfigurationModal({
             formId: config.formId,
             behavior: config.behavior
           }),
+          ...(config.type === 'page' && {
+            pageId: config.pageId,
+            pathSlug: config.pathSlug,
+          }),
           leadingIcon: config.leadingIcon,
           trailingIcon: config.trailingIcon,
           iconConfig: config.iconConfig,
         };
 
-        // Create ctaConfig for compatibility with HeroSection
+        // Create ctaConfig for compatibility with HeroSection. An internal page
+        // link maps to a plain link whose url is the target pathSlug ('/contact').
         const ctaConfig = {
-          type: config.type === 'link-with-input' ? 'link-with-input' as const : (config.type === 'link' ? 'link' as const : 'form' as const),
+          type: config.type === 'link-with-input' ? 'link-with-input' as const : (config.type === 'form' ? 'form' as const : 'link' as const),
           cta_text: config.text,
-          url: (config.type === 'link' || config.type === 'link-with-input') ? config.url : undefined,
+          url: config.type === 'page' ? config.pathSlug : ((config.type === 'link' || config.type === 'link-with-input') ? config.url : undefined),
           formId: config.type === 'form' ? config.formId : undefined,
           behavior: config.type === 'form' ? config.behavior : undefined,
           inputConfig: config.type === 'link-with-input' ? config.inputConfig : undefined,
@@ -231,6 +247,8 @@ export function ButtonConfigurationModal({
           updatedElements.cta_url = config.url;
         } else if (config.type === 'form' && config.formId) {
           updatedElements.cta_embed = `form:${config.formId}`;
+        } else if (config.type === 'page' && config.pathSlug) {
+          updatedElements.cta_url = config.pathSlug;
         }
 
         // V2: Store buttonConfig in elementMetadata (separate from element)
@@ -550,8 +568,41 @@ export function ButtonConfigurationModal({
                   </p>
                 </div>
               </div>
+
+              {pageOptions.length > 1 && (
+                <div className="flex items-start space-x-2 mt-2">
+                  <RadioGroupItem value="page" id="page" />
+                  <div>
+                    <Label htmlFor="page">Link to Page</Label>
+                    <p className="text-sm text-gray-600">
+                      Navigate to another page in this project.
+                    </p>
+                  </div>
+                </div>
+              )}
             </RadioGroup>
           </div>
+
+          {/* Internal page configuration */}
+          {config.type === 'page' && (
+            <div>
+              <Label htmlFor="page-target">Page*</Label>
+              <Select
+                value={config.pathSlug || ''}
+                onValueChange={(val) => setConfig(prev => ({ ...prev, pathSlug: val }))}
+              >
+                <SelectTrigger id="page-target">
+                  <SelectValue placeholder="Choose page…" />
+                </SelectTrigger>
+                <SelectContent>
+                  {pageOptions.map((o) => (
+                    <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.page && <p className="text-sm text-red-500 mt-1">{errors.page}</p>}
+            </div>
+          )}
 
           {/* Link Configuration */}
           {config.type === 'link' && (

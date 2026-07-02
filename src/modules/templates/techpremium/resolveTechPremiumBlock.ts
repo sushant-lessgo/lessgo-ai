@@ -15,6 +15,20 @@ import TechPremiumResults from './blocks/Testimonials/TechPremiumResults';
 import TechPremiumPricing from './blocks/Pricing/TechPremiumPricing';
 import TechPremiumCTA from './blocks/CTA/TechPremiumCTA';
 import TechPremiumFooter from './blocks/Footer/TechPremiumFooter';
+import TechPremiumCatalog from './blocks/Catalog/TechPremiumCatalog';
+import TechPremiumProductDetail from './blocks/ProductDetail/TechPremiumProductDetail';
+// Home-page blocks (Phase 4b)
+import TechPremiumTrust from './blocks/Trust/TechPremiumTrust';
+import TechPremiumProblem from './blocks/Problem/TechPremiumProblem';
+import TechPremiumProcess from './blocks/Process/TechPremiumProcess';
+import TechPremiumExplainer from './blocks/Explainer/TechPremiumExplainer';
+import TechPremiumLineup from './blocks/Lineup/TechPremiumLineup';
+import TechPremiumGalleryPreview from './blocks/GalleryPreview/TechPremiumGalleryPreview';
+import TechPremiumCompatibility from './blocks/Compatibility/TechPremiumCompatibility';
+import TechPremiumFaq from './blocks/Faq/TechPremiumFaq';
+// Standalone pages (Phase 4c)
+import TechPremiumGallery from './blocks/Gallery/TechPremiumGallery';
+import TechPremiumContact from './blocks/Contact/TechPremiumContact';
 
 // Published-mode blocks
 import TechPremiumNavPublished from './blocks/Header/TechPremiumNav.published';
@@ -24,6 +38,20 @@ import TechPremiumResultsPublished from './blocks/Testimonials/TechPremiumResult
 import TechPremiumPricingPublished from './blocks/Pricing/TechPremiumPricing.published';
 import TechPremiumCTAPublished from './blocks/CTA/TechPremiumCTA.published';
 import TechPremiumFooterPublished from './blocks/Footer/TechPremiumFooter.published';
+import TechPremiumCatalogPublished from './blocks/Catalog/TechPremiumCatalog.published';
+import TechPremiumProductDetailPublished from './blocks/ProductDetail/TechPremiumProductDetail.published';
+// Home-page blocks (Phase 4b)
+import TechPremiumTrustPublished from './blocks/Trust/TechPremiumTrust.published';
+import TechPremiumProblemPublished from './blocks/Problem/TechPremiumProblem.published';
+import TechPremiumProcessPublished from './blocks/Process/TechPremiumProcess.published';
+import TechPremiumExplainerPublished from './blocks/Explainer/TechPremiumExplainer.published';
+import TechPremiumLineupPublished from './blocks/Lineup/TechPremiumLineup.published';
+import TechPremiumGalleryPreviewPublished from './blocks/GalleryPreview/TechPremiumGalleryPreview.published';
+import TechPremiumCompatibilityPublished from './blocks/Compatibility/TechPremiumCompatibility.published';
+import TechPremiumFaqPublished from './blocks/Faq/TechPremiumFaq.published';
+// Standalone pages (Phase 4c)
+import TechPremiumGalleryPublished from './blocks/Gallery/TechPremiumGallery.published';
+import TechPremiumContactPublished from './blocks/Contact/TechPremiumContact.published';
 
 interface BlockEntry {
   edit: React.ComponentType<any>;
@@ -38,6 +66,21 @@ const TECHPREMIUM_BLOCK_REGISTRY: Record<string, BlockEntry> = {
   pricing:      { edit: TechPremiumPricing,      published: TechPremiumPricingPublished },
   cta:          { edit: TechPremiumCTA,          published: TechPremiumCTAPublished },
   footer:       { edit: TechPremiumFooter,       published: TechPremiumFooterPublished },
+  // Collection system (Phase 3) — editor-only insertion, never generated.
+  catalog:       { edit: TechPremiumCatalog,       published: TechPremiumCatalogPublished },
+  productdetail: { edit: TechPremiumProductDetail, published: TechPremiumProductDetailPublished },
+  // Home-page blocks (Phase 4b) — archetype-only insertion.
+  trust:          { edit: TechPremiumTrust,          published: TechPremiumTrustPublished },
+  problem:        { edit: TechPremiumProblem,        published: TechPremiumProblemPublished },
+  process:        { edit: TechPremiumProcess,        published: TechPremiumProcessPublished },
+  explainer:      { edit: TechPremiumExplainer,      published: TechPremiumExplainerPublished },
+  lineup:         { edit: TechPremiumLineup,         published: TechPremiumLineupPublished },
+  gallerypreview: { edit: TechPremiumGalleryPreview, published: TechPremiumGalleryPreviewPublished },
+  compatibility:  { edit: TechPremiumCompatibility,  published: TechPremiumCompatibilityPublished },
+  faq:            { edit: TechPremiumFaq,            published: TechPremiumFaqPublished },
+  // Standalone pages (Phase 4c) — archetype-only insertion.
+  gallery:        { edit: TechPremiumGallery,        published: TechPremiumGalleryPublished },
+  contact:        { edit: TechPremiumContact,        published: TechPremiumContactPublished },
 };
 
 export type TechPremiumBlockMode = 'edit' | 'published';

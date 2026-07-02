@@ -27,6 +27,7 @@ import {
   processServiceCopy,
   validateServiceCopyCompleteness,
   injectRealTestimonials,
+  normalizeServiceCopy,
 } from '@/modules/audience/service/parseCopy';
 import { generateMockServiceCopy } from '@/modules/prompt/mockResponseGeneratorService';
 import {
@@ -179,8 +180,12 @@ async function serviceCopyHandler(req: NextRequest): Promise<Response> {
       attempts++;
       logger.dev(`[service-generate-copy] Attempt ${attempts}/${MAX_RETRIES + 1}`);
       try {
-        const response = await generateRawJson('copy', currentPrompt, CopyResponseSchema);
-        sections = response as Record<string, SectionCopy>;
+        // Generate permissively, then tolerate a collapsed collection-only section
+        // (gpt-4o-mini sometimes makes `elements` the array itself) by rewrapping
+        // before strict validation. A genuine miss still throws → retry.
+        const raw = await generateRawJson('copy', currentPrompt, z.record(z.string(), z.any()));
+        const normalized = normalizeServiceCopy(raw as Record<string, any>, uiblocks);
+        sections = CopyResponseSchema.parse(normalized) as Record<string, SectionCopy>;
       } catch (aiError: any) {
         lastError = aiError.message || 'AI generation failed';
         logger.error(`[service-generate-copy] Attempt ${attempts} failed:`, aiError);

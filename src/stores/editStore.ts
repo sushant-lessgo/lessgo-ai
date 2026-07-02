@@ -25,6 +25,7 @@ import { createFormsImageActions } from '../hooks/editStore/formsImageActions';
 import { createLayoutActions } from '../hooks/editStore/layoutActions';
 import { createCSSVariableActions } from '../hooks/editStore/cssVariableActions';
 import { createRegenerationActions } from '../hooks/editStore/regenerationActions';
+import { createPageActions } from '../hooks/editStore/pageActions';
 
 // Import storage utilities
 import { getStorageKey, trackProjectAccess, isStorageAvailable } from '@/utils/storage';
@@ -129,7 +130,13 @@ function createInitialState(tokenId: string): EditStore {
     
     // Content Slice
     content: {} as Record<string, SectionData>,
-    
+
+    // Page Axis (multi-page) — `pages` holds every page's slice; the top-level
+    // layout/content fields above are the live working copy of `currentPageId`.
+    pages: {} as Record<string, import('@/types/store').ProjectPageEntry>,
+    currentPageId: '' as string,
+    chrome: { header: null, footer: null } as import('@/types/store').ChromeState,
+
     // UI Slice
     mode: 'edit' as const,
     editMode: 'section' as const,
@@ -340,6 +347,7 @@ export function createEditStore(tokenId: string) {
             ...createLayoutActions(set, get),
             ...createCSSVariableActions(set, get),
             ...createRegenerationActions(set, get),
+            ...createPageActions(set, get),
 
             // Token-specific actions
             loadFromOnboarding: () => {
@@ -376,6 +384,9 @@ export function createEditStore(tokenId: string) {
               sectionLayouts: state.sectionLayouts,
               sectionSpacing: state.sectionSpacing,
               content: state.content,
+              pages: state.pages,
+              currentPageId: state.currentPageId,
+              chrome: state.chrome,
               theme: state.theme,
               navigationConfig: state.navigationConfig,
               socialMediaConfig: state.socialMediaConfig,

@@ -2,6 +2,7 @@ import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import { getRouteEdge, getRedirectEdge, getSlugForHostEdge } from '@/lib/routing/kvRoutes'
 import { isLessgoAppHost } from '@/lib/domains/hosts'
+import * as Sentry from '@sentry/nextjs'
 
 const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
@@ -41,6 +42,16 @@ export default clerkMiddleware(async (auth, req) => {
   const host = req.headers.get('host')
   const url = req.nextUrl.clone()
 
+  // Lumen (+ any geo-aware template) reads this cookie client-side to pick the
+  // default language (NL → Dutch). Additive + template-agnostic; lumen.v1.js
+  // falls back to navigator.language when it's absent. Stamped on the published
+  // rewrites below via stampGeo().
+  const geoCountry = ((req as any).geo?.country || '').toUpperCase()
+  const stampGeo = (res: NextResponse) => {
+    if (geoCountry) res.cookies.set('geo-country', geoCountry, { path: '/', maxAge: 86400, httpOnly: false, sameSite: 'lax' })
+    return res
+  }
+
   // Block /dev/* routes in production
   if (url.pathname.startsWith('/dev/') && process.env.NODE_ENV === 'production') {
     return NextResponse.json({ error: 'Dev routes disabled in production' }, { status: 404 })
@@ -62,6 +73,7 @@ export default clerkMiddleware(async (auth, req) => {
           }
         } catch (error) {
           console.error('[Middleware] getRedirectEdge error:', error)
+          Sentry.captureException(error, { level: 'warning', tags: { area: 'middleware', op: 'getRedirect' }, extra: { host } })
         }
 
         // KV route lookup → blob proxy
@@ -70,16 +82,17 @@ export default clerkMiddleware(async (auth, req) => {
           if (routeKey) {
             url.pathname = '/api/blob-proxy'
             url.searchParams.set('rk', routeKey)
-            return NextResponse.rewrite(url)
+            return stampGeo(NextResponse.rewrite(url))
           }
         } catch (error) {
           console.error('[Middleware] KV lookup error:', error)
+          Sentry.captureException(error, { level: 'warning', tags: { area: 'middleware', op: 'kvLookup' }, extra: { host } })
         }
 
         // Fallback: legacy SSR (preserve subpath, e.g. /privacy)
         const originalPath = url.pathname || '/'
         url.pathname = originalPath === '/' ? `/p/${subdomain}` : `/p/${subdomain}${originalPath}`
-        return NextResponse.rewrite(url)
+        return stampGeo(NextResponse.rewrite(url))
       }
     }
     // Branch B: Custom domain (host not owned by Lessgo)
@@ -91,16 +104,17 @@ export default clerkMiddleware(async (auth, req) => {
         if (routeKey) {
           url.pathname = '/api/blob-proxy'
           url.searchParams.set('rk', routeKey)
-          return NextResponse.rewrite(url)
+          return stampGeo(NextResponse.rewrite(url))
         }
         // 2. SSR fallback: look up slug → /p/{slug}{path} dynamic render
         const slug = await getSlugForHostEdge(host)
         if (slug) {
           url.pathname = originalPath === '/' ? `/p/${slug}` : `/p/${slug}${originalPath}`
-          return NextResponse.rewrite(url)
+          return stampGeo(NextResponse.rewrite(url))
         }
       } catch (error) {
         console.error('[Middleware] custom-domain KV error:', error)
+        Sentry.captureException(error, { level: 'warning', tags: { area: 'middleware', op: 'customDomainKv' }, extra: { host } })
       }
       return new NextResponse('Not Found', { status: 404 })
     }

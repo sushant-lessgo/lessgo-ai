@@ -28,6 +28,8 @@ const outDir = path.join(__dirname, '../public/assets');
 const files = [
   { src: 'formHandler.js', out: 'form.v1.js' },
   { src: 'analyticsGenerator.js', out: 'a.v1.js' },
+  { src: 'naayomBehaviors.js', out: 'naayom.v1.js' }, // Phase 4: TechPremium behaviors
+  { src: 'lumenBehaviors.js', out: 'lumen.v1.js' },   // Lumen: lightbox + reveal + EN/NL toggle/geo
 ];
 
 // Static CSS copied verbatim (no minify) into public/assets for published pages.

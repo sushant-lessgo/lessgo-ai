@@ -9,6 +9,7 @@ import { createSecureResponse } from '@/lib/security';
 import { getDomainConfig, VercelApiError } from '@/lib/vercel/domains';
 import { checkDomainRateLimit } from '@/lib/rateLimit';
 import { writeRedirect, atomicPublishWithRetry, writeSlugForHost } from '@/lib/routing/kvRoutes';
+import * as Sentry from '@sentry/nextjs';
 
 const BodySchema = z.object({ slug: z.string().min(1).max(100) });
 
@@ -53,6 +54,11 @@ export async function POST(req: NextRequest) {
     cfg = await getDomainConfig(page.customDomain);
   } catch (e) {
     const err = e as VercelApiError;
+    Sentry.captureException(e, {
+      tags: { area: 'custom-domain', op: 'getDomainConfig', code: err?.code || 'unknown' },
+      extra: { domain: page.customDomain },
+      user: { id: userId },
+    });
     return createSecureResponse({ error: err?.code || 'vercel_error', message: err?.message }, 502);
   }
 
@@ -103,6 +109,11 @@ export async function POST(req: NextRequest) {
     await writeRedirect(subdomainHost, `https://${customHost}`, 301);
   } catch (e) {
     console.error('[verify-dns] KV wiring failed', e);
+    Sentry.captureException(e, {
+      tags: { area: 'custom-domain', op: 'kv-wiring' },
+      extra: { domain: customHost, slug: page.slug },
+      user: { id: userId },
+    });
     // Non-fatal for status — user can republish to repair
   }
 

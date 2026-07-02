@@ -60,10 +60,21 @@ const nextConfig = {
       },
     ],
   },
-  // Experimental features disabled for stability
-  // experimental: {
-  //   optimizeCss: true,
-  // },
+  // Required on Next 14 so instrumentation.ts register() runs (Sentry server/edge
+  // init). Became default in Next 15; must be explicit here.
+  experimental: {
+    instrumentationHook: true,
+  },
 };
 
-module.exports = nextConfig; 
+const { withSentryConfig } = require('@sentry/nextjs');
+
+module.exports = withSentryConfig(nextConfig, {
+  org: 'lessgo-ai',
+  project: 'lessgo-ai',
+  silent: !process.env.CI,
+  widenClientFileUpload: true,
+  sourcemaps: { disable: false },
+  // tunnelRoute intentionally omitted: a /monitoring route would collide with
+  // middleware.ts Branch A rewrites on *.lessgo.ai hosts.
+});

@@ -36,6 +36,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# sentry
+.env.sentry-build-plugin
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
@@ -64,3 +67,7 @@ tmpclaude-*
 
 # Prod data backups (never commit)
 backups/
+
+# Designer handoff package (local reference only; not shipped)
+Lessgo.zip
+design_handoff_naayom/

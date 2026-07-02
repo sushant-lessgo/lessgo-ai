@@ -19,7 +19,10 @@ export type AudienceType = (typeof audienceTypes)[number];
  * variantId is a per-template token rescale (Hearth: 'classic' default;
  * Meridian: developer/marketing/light — see types/product.ts).
  */
-export const templateIds = ['hearth', 'lex', 'meridian', 'techpremium'] as const;
+// `lumen` = bespoke §13 photography template (Kundius). Registered + renderable
+// but intentionally NOT listed in the onboarding picker (templateCatalog) — same
+// pattern as meridian/techpremium. Service audience.
+export const templateIds = ['hearth', 'lex', 'surge', 'meridian', 'techpremium', 'lumen'] as const;
 export type TemplateId = (typeof templateIds)[number];
 
 export type VariantId = string;
@@ -28,8 +31,10 @@ export type VariantId = string;
 export const defaultVariantForTemplate: Record<TemplateId, VariantId> = {
   hearth: 'classic',
   lex: 'statesman',
+  surge: 'performance',
   meridian: 'developer',
   techpremium: 'default',
+  lumen: 'default',
 };
 
 /**
@@ -235,6 +240,36 @@ export const lexPalettes = [
 export type LexPalette = (typeof lexPalettes)[number];
 
 /**
+ * ===== SURGE PALETTE =====
+ * Surge (template #3, growth & performance marketing) ships 9 accent-hue
+ * palettes. The palette knob swaps ONLY the accent hue (--h / --accent); the
+ * cool-slate base + held green/red chart semantics never move.
+ * Source: Surge - Growth & Performance Marketing.html.
+ */
+export const surgePalettes = [
+  'volt',
+  'azure',
+  'cyan',
+  'teal',
+  'violet',
+  'magenta',
+  'coral',
+  'amber',
+  'lime',
+] as const;
+
+export type SurgePalette = (typeof surgePalettes)[number];
+
+/**
+ * ===== LUMEN PALETTE =====
+ * Lumen (bespoke §13 photography template) ships a SINGLE brass accent — the one
+ * user-facing hue knob per the Lumen HTML §09. Source: Lumen - Photography & Creative.html.
+ */
+export const lumenPalettes = ['brass'] as const;
+
+export type LumenPalette = (typeof lumenPalettes)[number];
+
+/**
  * ===== TEMPLATE PICKER METADATA =====
  * Leaf-level display data + palette scoping for the Phase 11b picker. Kept here
  * (NOT importing the template modules) so onboarding/editor pickers can scope by
@@ -245,22 +280,28 @@ export type LexPalette = (typeof lexPalettes)[number];
 export const templateLabels: Record<TemplateId, string> = {
   hearth: 'Hearth',
   lex: 'Lex',
+  surge: 'Surge',
   meridian: 'Meridian',
   techpremium: 'TechPremium',
+  lumen: 'Lumen',
 };
 
 export const templateBlurbs: Record<TemplateId, string> = {
   hearth: 'Warm, editorial — cream surfaces, serif accents.',
   lex: 'Trust & professional — serif authority, cool document surfaces.',
+  surge: 'Growth & performance — dashboard hero, metric-led case studies.',
   meridian: 'Modern tech — dark surfaces, hairline rules, mono accents.',
   techpremium: 'Industrial IoT — warm paper, forest + signal-lime, control-room readouts.',
+  lumen: 'Photography & creative — warm gallery, one brass accent, editorial captions + lightbox.',
 };
 
-/** Palette id list for a template (Hearth → 9 warm, Lex → 9 trust, Meridian → 9 accent, TechPremium → forest). */
+/** Palette id list for a template (Hearth → 9 warm, Lex → 9 trust, Surge → 9 accent-hue, Meridian → 9 accent, TechPremium → forest). */
 export function palettesForTemplate(templateId: TemplateId): readonly string[] {
   if (templateId === 'lex') return lexPalettes;
+  if (templateId === 'surge') return surgePalettes;
   if (templateId === 'meridian') return meridianPalettes;
   if (templateId === 'techpremium') return techPremiumPalettes;
+  if (templateId === 'lumen') return lumenPalettes;
   return hearthPalettes;
 }
 

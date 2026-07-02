@@ -10,6 +10,8 @@ import 'server-only';
 import React from 'react';
 import { LandingPagePublishedRenderer } from '@/modules/generatedLanding/LandingPagePublishedRenderer';
 import { validateAndResolveAssetURLs } from './assetResolver';
+import { renderLessgoBadge } from './lessgoBadge';
+import { resolveCanonicalURL } from './canonicalUrl';
 import { usesTemplateModule } from '@/types/service';
 
 export interface StaticHTMLOptions {
@@ -29,6 +31,14 @@ export interface StaticHTMLOptions {
   templateId?: string | null;
   paletteId?: string | null;
   variantId?: string | null;
+
+  // Canonical / social URL resolution.
+  // canonicalDomain: the live custom domain (no scheme) when one is active; when unset,
+  // canonical falls back to `${slug}.lessgo.ai`. canonicalPath: this page's path
+  // (leading slash; '/' for root) so multi-page subpages self-report their own URL
+  // instead of the root's.
+  canonicalDomain?: string;
+  canonicalPath?: string;
 
   // Configuration
   analyticsOptIn?: boolean;
@@ -80,6 +90,13 @@ export async function generateStaticHTML(
   // 4. Detect if page has forms
   const hasForms = Boolean(options.content?.forms && Object.keys(options.content.forms).length > 0);
 
+  // Phase 4: TechPremium pages load the shared naayom.v1.js behaviors asset
+  // (dropdown nav, mobile menu, lightbox, gallery filter, live readout tick).
+  const usesNaayom = options.templateId === 'techpremium';
+
+  // Lumen (bespoke §13) pages load lumen.v1.js (lightbox + reveal + EN·NL toggle/geo).
+  const usesLumen = options.templateId === 'lumen';
+
   // 5. Build complete HTML document
   const html = buildHTMLDocument({
     bodyHTML,
@@ -91,9 +108,13 @@ export async function generateStaticHTML(
       slug: options.slug,
       baseURL: options.baseURL || 'https://lessgo.ai',
       publishedPageId: options.publishedPageId,
+      canonicalDomain: options.canonicalDomain,
+      canonicalPath: options.canonicalPath,
     },
     analyticsOptIn: options.analyticsOptIn || false,
     hasForms,
+    usesNaayom,
+    usesLumen,
   });
 
   // 5. Validate and resolve asset URLs
@@ -164,20 +185,45 @@ function buildHTMLDocument(params: {
     slug: string;
     baseURL: string;
     publishedPageId: string;
+    canonicalDomain?: string;
+    canonicalPath?: string;
   };
   analyticsOptIn: boolean;
   hasForms: boolean;
+  usesNaayom: boolean;
+  usesLumen: boolean;
 }): string {
-  const { bodyHTML, cssVariables, metadata, analyticsOptIn, hasForms } = params;
+  const { bodyHTML, cssVariables, metadata, analyticsOptIn, hasForms, usesNaayom, usesLumen } = params;
+
+  // Asset origin for the injected fonts/scripts. ALWAYS absolute https://lessgo.ai:
+  // these platform assets only live on the lessgo.ai CDN, and published HTML is
+  // served from prod subdomains AND custom domains (where a relative /assets/*
+  // would 404). NOTE: a dev-relative shim here is a footgun — when publishing to a
+  // real subdomain from `npm run dev`, validateAndResolveAssetURLs rewrites the
+  // relative src to the local baseURL (http://localhost:3000), freezing a broken
+  // localhost URL into the static HTML. So keep it absolute regardless of env.
+  const assetBase = 'https://lessgo.ai';
 
   // Generate CSS variables style tag
   const cssVariablesStyle = generateCSSVariablesStyle(cssVariables);
 
-  // OG image URL
+  // Canonical host: live custom domain when present, else the lessgo.ai subdomain.
+  // Path: this page's own path so subpages don't all claim the root canonical.
+  const canonicalURL = resolveCanonicalURL({
+    slug: metadata.slug,
+    canonicalDomain: metadata.canonicalDomain,
+    canonicalPath: metadata.canonicalPath,
+  });
+
+  // OG image URL. previewImage (manual upload) always wins. Auto-OG (/api/og/{slug}):
+  // when a live custom domain exists, serve it from that host so the absolute URL matches
+  // the domain the page lives on (custom domains route /api/* to the app). Otherwise keep
+  // the original baseURL fallback unchanged (no-custom-domain output stays byte-identical).
   const ogImage =
     metadata.previewImage ||
-    `${metadata.baseURL}/api/og/${metadata.slug}`;
-  const canonicalURL = `https://${metadata.slug}.lessgo.ai`;
+    (metadata.canonicalDomain
+      ? `https://${metadata.canonicalDomain}/api/og/${metadata.slug}`
+      : `${metadata.baseURL}/api/og/${metadata.slug}`);
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -209,7 +255,7 @@ function buildHTMLDocument(params: {
 
   <!-- Self-hosted template fonts (Inter, Inter Tight, JetBrains Mono, DM Sans,
        Fraunces, Source Serif 4, Lora, EB Garamond) -->
-  <link rel="stylesheet" href="https://lessgo.ai/assets/fonts-self-hosted.css">
+  <link rel="stylesheet" href="${assetBase}/assets/fonts-self-hosted.css">
 
   <!-- Shared CSS -->
   <link rel="stylesheet" href="/assets/published.css">
@@ -219,14 +265,21 @@ function buildHTMLDocument(params: {
 </head>
 <body>
   ${bodyHTML}
+  ${renderLessgoBadge()}
 
   <!-- Phase 4: Form handler (loaded if page has forms) -->
-  ${hasForms ? `<script src="https://lessgo.ai/assets/form.v1.js" defer></script>` : ''}
+  ${hasForms ? `<script src="${assetBase}/assets/form.v1.js" defer></script>` : ''}
+
+  <!-- Phase 4: TechPremium behaviors (dropdown nav, lightbox, gallery filter, readout tick) -->
+  ${usesNaayom ? `<script src="${assetBase}/assets/naayom.v1.js" defer></script>` : ''}
+
+  <!-- Lumen behaviors (lightbox + reveal + EN·NL toggle/geo) -->
+  ${usesLumen ? `<script src="${assetBase}/assets/lumen.v1.js" defer></script>` : ''}
 
   <!-- Phase 4: Analytics beacon (opt-in) -->
   ${
     analyticsOptIn
-      ? `<script src="https://lessgo.ai/assets/a.v1.js" data-page-id="${metadata.publishedPageId}" data-slug="${metadata.slug}" defer></script>`
+      ? `<script src="${assetBase}/assets/a.v1.js" data-page-id="${metadata.publishedPageId}" data-slug="${metadata.slug}" defer></script>`
       : ''
   }
 </body>

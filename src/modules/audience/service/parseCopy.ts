@@ -59,6 +59,43 @@ export function backfillCollectionIds(
   return sections;
 }
 
+/** The single collection key for a layout, or null if it has 0 or >1 collections. */
+function singleCollectionKey(layout: string | undefined): string | null {
+  const schema = layout ? serviceElementSchema[layout] : undefined;
+  const keys = schema?.collections ? Object.keys(schema.collections) : [];
+  return keys.length === 1 ? keys[0] : null;
+}
+
+/**
+ * Tolerate the LLM collapsing a collection-only section. gpt-4o-mini sometimes
+ * emits `"<section>": { "elements": [ …items ] }` (or `"<section>": [ …items ]`)
+ * instead of `{ elements: { <collectionKey>: [ …items ] } }` — most likely when a
+ * section has a single collection and no required scalar (e.g. Surge's stats/logos
+ * bands). Rewrap such sections into the correct shape using the layout's single
+ * collection key BEFORE strict CopyResponseSchema validation. Sections whose layout
+ * has no single collection (scalar-only, or multi-collection like About) are passed
+ * through untouched — they carry required scalars and don't collapse.
+ */
+export function normalizeServiceCopy(
+  raw: Record<string, any>,
+  uiblocks: Record<string, string>
+): Record<string, any> {
+  const out: Record<string, any> = {};
+  for (const [sectionType, value] of Object.entries(raw || {})) {
+    const collKey = singleCollectionKey(uiblocks[sectionType]);
+    if (Array.isArray(value)) {
+      out[sectionType] = collKey ? { elements: { [collKey]: value } } : { elements: {} };
+    } else if (value && typeof value === 'object' && Array.isArray((value as any).elements)) {
+      out[sectionType] = collKey
+        ? { elements: { [collKey]: (value as any).elements } }
+        : { elements: {} };
+    } else {
+      out[sectionType] = value;
+    }
+  }
+  return out;
+}
+
 /**
  * Replace the generated testimonial with a REAL (verbatim) one imported from the
  * user's website. Done AFTER the LLM and BEFORE processServiceCopy (so schema

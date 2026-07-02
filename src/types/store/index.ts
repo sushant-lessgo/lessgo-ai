@@ -182,8 +182,23 @@ import type {
   CSSVariableSlice,
 } from './cssVariables';
 
+import type {
+  PageAxisState,
+  PageActions,
+} from './pages';
+
+export type {
+  PageSlice,
+  ProjectPageEntry,
+  PageAxisState,
+  PageActions,
+  SectionSpacing,
+  ChromeEntry,
+  ChromeState,
+} from './pages';
+
 // Complete EditStore interface combining all slices and actions
-export interface EditStore extends 
+export interface EditStore extends
   StoreState,
   LayoutActions,
   ContentActions,
@@ -195,6 +210,8 @@ export interface EditStore extends
   GenerationActions,
   // RegenerationActions,
   CSSVariableSlice,
+  PageAxisState,
+  PageActions,
   AutoSaveMiddlewareState {
   
   // Any additional store-specific properties can be added here

@@ -1,4 +1,6 @@
 // lib/logger.ts - Production-safe logging with lazy evaluation
+import * as Sentry from '@sentry/nextjs';
+
 interface LogLevel {
   ERROR: 0;
   WARN: 1;
@@ -64,6 +66,22 @@ export const logger = {
   error: (message: LogValue, meta?: MetaValue) => {
     if (shouldLog(LOG_LEVELS.ERROR)) {
       console.error(formatMessage('ERROR', message, meta));
+    }
+
+    // Forward to Sentry (no-op when DSN unset → dev/test unaffected). Evaluate
+    // lazy thunks first so we never hand Sentry a function. Outside the
+    // shouldLog gate so suppressed-log envs still report (in prod ERROR always
+    // logs anyway). The beforeSend filter drops expected AI-fallback noise.
+    const evalMsg = typeof message === 'function' ? safeEvaluate(message) : message;
+    const evalMeta = meta !== undefined
+      ? (typeof meta === 'function' ? safeEvaluate(meta) : meta)
+      : undefined;
+    if (evalMeta instanceof Error) {
+      Sentry.captureException(evalMeta, { extra: { message: String(evalMsg) } });
+    } else {
+      Sentry.captureException(new Error(String(evalMsg)), {
+        extra: evalMeta !== undefined ? { meta: evalMeta } : undefined,
+      });
     }
   },
   

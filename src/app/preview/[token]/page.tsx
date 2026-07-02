@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { EditProvider } from '@/components/EditProvider';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
@@ -54,8 +54,28 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
     title,
     onboardingData,
     legalPages,
-    setMode
+    setMode,
+    export: exportState,
+    save,
+    pages,
+    currentPageId,
+    setCurrentPage,
   } = useEditStore();
+
+  // Multi-page preview defaults to the Home page (the preview has no page switcher
+  // yet, so without this it would open stuck on whatever page was last active in the
+  // editor — e.g. Contact). One-time on load: once pages have hydrated, switch the
+  // active page to the home entry (pathSlug '/'). setCurrentPage is a no-op when
+  // already home and doesn't mark the draft dirty.
+  const didDefaultToHome = useRef(false);
+  useEffect(() => {
+    if (didDefaultToHome.current) return;
+    const list = pages ? Object.values(pages) : [];
+    if (list.length === 0) return; // draft not loaded yet
+    const home = list.find((p: any) => p?.pathSlug === '/') as any;
+    if (home && currentPageId !== home.id) setCurrentPage(home.id);
+    didDefaultToHome.current = true;
+  }, [pages, currentPageId, setCurrentPage]);
 
   // Validate preview data loaded correctly
   useEffect(() => {
@@ -128,82 +148,6 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
 
     fetchPublishedStatus();
   }, [tokenId]);
-
-  // Validate publish readiness
-  const isPublishReady = useMemo(() => {
-    // Phase 1: Check hero section CTA
-    const heroSectionId = sections.find(id => id.includes('hero'));
-    if (!heroSectionId) {
-      return false; // No hero section found
-    }
-
-    const heroContent = content[heroSectionId]?.elements;
-    if (!heroContent) {
-      return false; // No hero content found
-    }
-
-    // Check if hero has CTA configured properly
-    // Option 1: Check if cta_text exists and has button configuration
-    if (heroContent.cta_text) {
-      // Check if button config exists in metadata
-      const buttonConfig = heroContent.cta_text?.metadata?.buttonConfig;
-      if (buttonConfig) {
-        if (buttonConfig.type === 'link' ? buttonConfig.url : buttonConfig.formId) {
-          return true;
-        }
-      }
-
-      // Check legacy format (cta_url or cta_embed directly in elements)
-      if (heroContent.cta_url || heroContent.cta_embed) {
-        return true;
-      }
-    }
-
-    // Option 2: Check if hero section has cta configuration
-    const heroSectionCta = (content[heroSectionId] as any)?.cta;
-    if (heroSectionCta) {
-      if (heroSectionCta.type === 'link' ? heroSectionCta.url : heroSectionCta.formId) {
-        return true;
-      }
-    }
-
-    // Phase 2: If hero has no valid CTA, check CTA section
-    const ctaSectionId = sections.find(id => id.includes('cta'));
-    if (!ctaSectionId) {
-      return false; // No CTA section found
-    }
-
-    const ctaContent = content[ctaSectionId]?.elements;
-    if (!ctaContent) {
-      return false; // No CTA section content found
-    }
-
-    // Check if CTA section has CTA configured (same 3 formats)
-    // Option 1: cta_text with button configuration
-    if (ctaContent.cta_text) {
-      const buttonConfig = ctaContent.cta_text?.metadata?.buttonConfig;
-      if (buttonConfig) {
-        if (buttonConfig.type === 'link' ? buttonConfig.url : buttonConfig.formId) {
-          return true;
-        }
-      }
-
-      // Check legacy format
-      if (ctaContent.cta_url || ctaContent.cta_embed) {
-        return true;
-      }
-    }
-
-    // Option 2: Section-level cta
-    const ctaSectionCta = (content[ctaSectionId] as any)?.cta;
-    if (ctaSectionCta) {
-      if (ctaSectionCta.type === 'link' ? ctaSectionCta.url : ctaSectionCta.formId) {
-        return true;
-      }
-    }
-
-    return false;
-  }, [sections, content]);
 
   // Initialize and validate data
   useEffect(() => {
@@ -297,8 +241,6 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
 
   // Handle publish flow
   const handlePublishClick = () => {
-    if (!isPublishReady) return;
-
     // Get headline for fallback
     const heroSectionId = sections.find(id => id.includes('hero'));
     const headline = heroSectionId ? content[heroSectionId]?.elements?.headline : null;
@@ -336,12 +278,21 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
   };
 
   const handlePublish = async () => {
-    if (!customSlug || !isPublishReady) return;
+    if (!customSlug) return;
 
     setPublishing(true);
     setPublishError('');
 
     try {
+      // Persist the full draft (finalContent.pages + chrome) to the DB BEFORE
+      // publishing. Publish no longer writes Project.content, so the draft must be
+      // current here or a dashboard→Edit after publish would load a stale draft.
+      try {
+        if (typeof save === 'function') await save();
+      } catch (e) {
+        logger.warn('Pre-publish save failed (continuing):', e);
+      }
+
       // Get HTML content from rendered page
       const previewElement = document.getElementById('landing-preview');
       if (!previewElement) {
@@ -360,6 +311,26 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
       // Serialize forms to strip non-serializable Zustand properties
       const safeForms = forms ? JSON.parse(JSON.stringify(forms)) : {};
 
+      // Multi-page: commit the active page + collect every page. Root is always
+      // the home page; the rest become content.subpages keyed by pathSlug.
+      const exported: any = exportState ? exportState() : null;
+      const allPages: Record<string, any> = exported?.pages || {};
+      const homeEntry = Object.values(allPages).find((p: any) => p?.pathSlug === '/') as any;
+      const rootSections = homeEntry?.sections || sections;
+      const rootContent = homeEntry?.content || content;
+      const subpages: Record<string, any> = {};
+      for (const p of Object.values(allPages) as any[]) {
+        if (!p || p.pathSlug === '/') continue;
+        subpages[p.pathSlug] = {
+          layout: { sections: p.sections, theme },
+          content: p.content,
+          title: p.title,
+        };
+      }
+      const safeSubpages = JSON.parse(JSON.stringify(subpages));
+      // Shared chrome (Phase 2) — body pages are chrome-free; publish injects it per page.
+      const safeChrome = exported?.chrome ? JSON.parse(JSON.stringify(exported.chrome)) : undefined;
+
       // Publish the page
       const response = await fetch('/api/publish', {
         method: 'POST',
@@ -369,10 +340,12 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
           htmlContent,
           title: stripHTMLTags(publishTitle || title || 'Untitled Page'),
           content: {
-            layout: { sections, theme },
-            content,
+            layout: { sections: rootSections, theme },
+            content: rootContent,
             forms: safeForms,
             legalPages: legalPages || undefined,
+            subpages: safeSubpages,
+            chrome: safeChrome,
           },
           themeValues: {
             primary: colorTokens.accent,
@@ -398,7 +371,6 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
       posthog?.capture("publish_clicked", {
         slug: customSlug,
         title: publishTitle || "",
-        hasCTA: isPublishReady,
         fromEdit: true,
       });
 
@@ -508,9 +480,9 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
                   <div>
                     <button
                       onClick={handlePublishClick}
-                      disabled={!isPublishReady || publishing}
+                      disabled={publishing}
                       className={`px-5 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${
-                        !isPublishReady || publishing
+                        publishing
                           ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                           : 'bg-brand-accentPrimary hover:bg-orange-500 text-white'
                       }`}
@@ -526,11 +498,6 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
                     </button>
                   </div>
                 </TooltipTrigger>
-                {!isPublishReady && (
-                  <TooltipContent side="top">
-                    <p>Configure CTA button in hero or CTA section before publishing</p>
-                  </TooltipContent>
-                )}
               </Tooltip>
             </TooltipProvider>
           </div>

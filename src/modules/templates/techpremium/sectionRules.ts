@@ -19,6 +19,21 @@ export const techPremiumSectionSurfaces: Record<string, TechPremiumSurface> = {
   pricing:      'paper-2',
   cta:          'forest',
   footer:       'forest-d',
+  // Collection system (Phase 3) — both sit on warm paper.
+  catalog:       'paper',
+  productdetail: 'paper',
+  // Home-page blocks (Phase 4b) — naayom light/dark rhythm.
+  trust:          'paper-2',
+  problem:        'forest',
+  process:        'paper',
+  explainer:      'paper-2',
+  lineup:         'paper-2',
+  gallerypreview: 'forest-d',
+  compatibility:  'paper',
+  faq:            'paper-2',
+  // Standalone pages (Phase 4c).
+  gallery:        'paper',
+  contact:        'paper',
 };
 
 const surfaceVarMap: Record<TechPremiumSurface, string> = {

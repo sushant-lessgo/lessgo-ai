@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { InlineTextEditorV2 } from '@/app/edit/[token]/components/editor/InlineTextEditorV2';
+import { useIsElementExcluded } from '../../shared/elementExclusion';
 
 type Tag = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span' | 'div';
 
@@ -53,6 +54,10 @@ export function HearthEditable({
   const isHtml = /<[^>]*>/.test(value || '');
   // Button mode: render a selectable (non-editing) element until double-clicked.
   const [editing, setEditing] = React.useState(false);
+  // Hide an optional element that was toggled off (Elements modal → excludedElements)
+  // even in edit mode, so "delete" actually removes it from the editor (not just publish).
+  const isElExcluded = useIsElementExcluded(sectionId, elementKey);
+  if (mode === 'edit' && isElExcluded) return null;
 
   if (mode === 'edit' && isButton && !editing) {
     // Selectable static button. Single click → global editor selection picks it
