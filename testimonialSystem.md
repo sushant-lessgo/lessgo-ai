@@ -304,5 +304,29 @@ Closes the loop: owner features approved, project-scoped testimonials on the pro
 editor could clobber, hence "fresh"). Commits: P1 `8ffd3b1`, P2 `b4c3f07`, P2.5 `cbe51c4`, P3 `dbb63c9`, P4 = this.
 
 **Testimonial system is now feature-complete: collect → moderate → project-scope → feature on page.**
-Remaining: multi-page injection (deferred until the multipage branch merges to main); optional
-auto-publish; product photo/company-on-card template change; un-dark (flag on) when ready to ship.
+
+## Phase 4b — As Built (2026-07-02): page-store-aware injection (multipage fix)
+
+Done in the primary worktree on `main` after the testimonials branch merged. The Phase-4 helper wrote
+only the flat `finalContent.content` mirror — but the current editor stores each page under
+`finalContent.pages[pageId]` (authoritative) and **ignores the mirror on load** (rebuilds home from
+`pages[homeId]`, regenerates the mirror on export). Every current draft has `pages` (single-page gets a
+lone `home` entry), so the injection was silently discarded on the next edit/re-publish. (`ProjectPage`
+table is vestigial — all content is in `Project.content.finalContent` JSON.)
+
+- `src/lib/testimonials/applyToPage.ts` — rewritten: if `finalContent.pages` is non-empty, resolve
+  `homeId` (page with `pathSlug === '/'`, else first key — **must mirror the store's
+  `findHomeId || first-key`**, `pageHelpers.ts`), locate the `testimonials-` section on the home page
+  (**home-first, then any page**), write `pages[homeId].content[sectionId]` (authoritative) **and** sync
+  the flat mirror when it holds that section. Legacy (no `pages`) → flat `content` as before. Field
+  mapping unchanged (product ≤3 collection; service flat keeping company+photo). Factored into
+  `applyToSectionElements`.
+- API route / dialog **unchanged** (route already unwraps `.finalContent` + rewraps preserving `onboarding`).
+- Tests: `applyToPage.test.ts` extended — page-store product (writes home + mirror, other pages untouched),
+  service (keeps company/photo), home-by-pathSlug when key≠'home', non-home-page fallback, legacy. 19 pass.
+
+Still **dark**. Commits: P1 `8ffd3b1`, P2 `b4c3f07`, P2.5 `cbe51c4`, P3 `dbb63c9`, P4 `7051299`, merge `b78e9bb`, P4b = this.
+
+**Remaining:** optional auto-publish; product photo/company-on-card template change; **un-dark**
+(flip `TESTIMONIALS_ENABLED` + `NEXT_PUBLIC_TESTIMONIALS_ENABLED` in Vercel prod) when ready to ship —
+after a live end-to-end validation. Concurrent-editor race note (open a fresh editor) already in the dialog.
