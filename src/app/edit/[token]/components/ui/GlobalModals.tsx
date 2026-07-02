@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { SectionBackgroundModal } from './SectionBackgroundModal';
 import { GlobalButtonConfigModal } from '@/components/layout/GlobalButtonConfigModal';
 import { ProductsModal } from './ProductsModal';
+import { SeoSettingsModal } from './SeoSettingsModal';
 
 // Global state for modals (outside React to persist)
 let modalState = {
@@ -11,6 +12,9 @@ let modalState = {
     sectionId: null as string | null
   },
   productsModal: {
+    isOpen: false,
+  },
+  seoModal: {
     isOpen: false,
   },
 };
@@ -35,6 +39,16 @@ export function showProductsModal() {
 
 export function hideProductsModal() {
   modalState.productsModal = { isOpen: false };
+  modalEvents.dispatchEvent(new Event('stateChange'));
+}
+
+export function showSeoModal() {
+  modalState.seoModal = { isOpen: true };
+  modalEvents.dispatchEvent(new Event('stateChange'));
+}
+
+export function hideSeoModal() {
+  modalState.seoModal = { isOpen: false };
   modalEvents.dispatchEvent(new Event('stateChange'));
 }
 
@@ -70,6 +84,10 @@ export function GlobalModals() {
       
       {state.productsModal.isOpen && (
         <ProductsModal onClose={hideProductsModal} />
+      )}
+
+      {state.seoModal.isOpen && (
+        <SeoSettingsModal onClose={hideSeoModal} />
       )}
 
       {/* Button Configuration Modal - uses global Zustand state */}

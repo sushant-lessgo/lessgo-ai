@@ -7,6 +7,7 @@ import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { UserButton, useUser } from '@clerk/nextjs';
 import Logo from '@/components/shared/Logo';
 import { PageSwitcher } from './PageSwitcher';
+import { showSeoModal } from '../ui/GlobalModals';
 
 interface GlobalAppHeaderProps {
   tokenId: string;
@@ -49,6 +50,19 @@ export function GlobalAppHeader({ tokenId }: GlobalAppHeaderProps) {
 
           {/* Multi-page switcher */}
           <PageSwitcher />
+
+          {/* SEO & Social settings */}
+          <button
+            onClick={showSeoModal}
+            className="hidden sm:inline-flex items-center gap-1.5 rounded-md border border-gray-200 px-2.5 py-1.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+            aria-label="SEO and social settings"
+            title="SEO & Social"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" />
+            </svg>
+            <span>SEO</span>
+          </button>
         </div>
 
         {/* Right: User info and actions */}
