@@ -114,7 +114,7 @@ export async function getRoute(
  * Atomic publish operation
  * Updates KV routing for all domains
  * @param pageId - PublishedPage.id from database
- * @param domains - List of domains (e.g., ['{slug}.lessgo.ai'])
+ * @param domains - List of domains (e.g., ['{slug}.lessgo.site', '{slug}.lessgo.ai'])
  * @param version - Version ID from blobUploader
  * @param blobUrl - Direct CDN URL from Vercel Blob (CRITICAL: not blobKey)
  */

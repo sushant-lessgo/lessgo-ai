@@ -9,6 +9,7 @@ import { createSecureResponse } from '@/lib/security';
 import { getDomainConfig, VercelApiError } from '@/lib/vercel/domains';
 import { checkDomainRateLimit } from '@/lib/rateLimit';
 import { writeRedirect, atomicPublishWithRetry, writeSlugForHost } from '@/lib/routing/kvRoutes';
+import { publishSubdomainHosts } from '@/lib/domains/hosts';
 import * as Sentry from '@sentry/nextjs';
 
 const BodySchema = z.object({ slug: z.string().min(1).max(100) });
@@ -77,7 +78,7 @@ export async function POST(req: NextRequest) {
 
   // DNS good. If not yet live, mark issuing_ssl then live in one call.
   // Vercel cert issuance is automatic once DNS is correct; we transition to live here.
-  const subdomainHost = `${page.slug}.lessgo.ai`;
+  const subdomainHosts = publishSubdomainHosts(page.slug);
   const customHost = page.customDomain;
 
   await prisma.publishedPage.update({
@@ -105,8 +106,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 3. 301 from subdomain → custom domain
-    await writeRedirect(subdomainHost, `https://${customHost}`, 301);
+    // 3. 301 from each publish subdomain (lessgo.site + legacy lessgo.ai) → custom domain
+    for (const sub of subdomainHosts) {
+      await writeRedirect(sub, `https://${customHost}`, 301);
+    }
   } catch (e) {
     console.error('[verify-dns] KV wiring failed', e);
     Sentry.captureException(e, {

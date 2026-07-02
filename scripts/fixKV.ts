@@ -36,7 +36,7 @@ async function fixKV() {
     console.log('');
 
     // Check current KV entry
-    const host = `${slug}.lessgo.ai`;
+    const host = `${slug}.lessgo.site`;
     const routeKey = `route:${host}:/`;
     const currentKV = await kv.get(routeKey);
 
@@ -60,7 +60,7 @@ async function fixKV() {
 
     console.log('✅ KV entry updated successfully!');
     console.log('');
-    console.log(`Test: https://${slug}.lessgo.ai`);
+    console.log(`Test: https://${slug}.lessgo.site`);
 
   } catch (error) {
     console.error('❌ Error:', error);

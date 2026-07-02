@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { kv } from '@vercel/kv';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/admin';
+import { publishedSubdomainHost } from '@/lib/domains/hosts';
 
 export const runtime = 'nodejs';
 
@@ -22,7 +23,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Missing slug parameter' }, { status: 400 });
     }
 
-    const host = `${slug}.lessgo.ai`;
+    const host = publishedSubdomainHost(slug);
     const routeKey = `route:${host}:/`;
 
     // Get KV entry
@@ -114,7 +115,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Update KV with correct info
-    const host = `${slug}.lessgo.ai`;
+    const host = publishedSubdomainHost(slug);
     const routeKey = `route:${host}:/`;
 
     const newRouteConfig = {
@@ -138,7 +139,7 @@ export async function POST(request: NextRequest) {
       updated: newRouteConfig,
       verified: verifiedKV,
       message: 'KV entry updated successfully. Try accessing the page now.',
-      testUrl: `https://${slug}.lessgo.ai`,
+      testUrl: `https://${publishedSubdomainHost(slug)}`,
     });
 
   } catch (error) {

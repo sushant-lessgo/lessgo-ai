@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { sanitizeContentForPublish } from '@/modules/sections/layoutElementSchema';
 import { usesTemplateModule, type TemplateId } from '@/types/service';
+import { publishedSubdomainHost } from '@/lib/domains/hosts';
 
 // ISR configuration - revalidate every hour
 export const revalidate = 3600;
@@ -49,7 +50,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     openGraph: {
       title: page.title || headline,
       description,
-      url: `https://${params.slug}.lessgo.ai`,
+      url: `https://${publishedSubdomainHost(params.slug)}`,
       siteName: 'Lessgo.ai',
       images: [
         {

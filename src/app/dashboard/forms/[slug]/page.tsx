@@ -8,6 +8,7 @@ import ExportFormCSV from './components/ExportFormCSV'
 import { ArrowLeft, FileText, ClipboardList, Calendar } from 'lucide-react'
 import Link from 'next/link'
 import { stripHTMLTags } from '@/utils/htmlSanitization'
+import { publishedSubdomainHost } from '@/lib/domains/hosts'
 
 interface PageProps {
   params: {
@@ -83,12 +84,12 @@ export default async function FormSubmissionsPage({ params }: PageProps) {
             {stripHTMLTags(publishedPage.title || 'Untitled Page')}
           </h1>
           <a
-            href={`/p/${params.slug}`}
+            href={`https://${publishedSubdomainHost(params.slug)}`}
             target="_blank"
             rel="noopener noreferrer"
             className="text-sm text-gray-500 hover:text-blue-600"
           >
-            lessgo.ai/p/{params.slug} ↗
+            {publishedSubdomainHost(params.slug)} ↗
           </a>
         </div>
 

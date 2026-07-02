@@ -34,7 +34,7 @@ export interface StaticHTMLOptions {
 
   // Canonical / social URL resolution.
   // canonicalDomain: the live custom domain (no scheme) when one is active; when unset,
-  // canonical falls back to `${slug}.lessgo.ai`. canonicalPath: this page's path
+  // canonical falls back to `${slug}.lessgo.site`. canonicalPath: this page's path
   // (leading slash; '/' for root) so multi-page subpages self-report their own URL
   // instead of the root's.
   canonicalDomain?: string;

@@ -2,10 +2,10 @@ import { describe, it, expect } from 'vitest';
 import { resolveCanonicalURL } from './canonicalUrl';
 
 describe('resolveCanonicalURL', () => {
-  it('falls back to the {slug}.lessgo.ai subdomain when no custom domain', () => {
-    expect(resolveCanonicalURL({ slug: 'acme' })).toBe('https://acme.lessgo.ai');
+  it('falls back to the {slug}.lessgo.site subdomain when no custom domain', () => {
+    expect(resolveCanonicalURL({ slug: 'acme' })).toBe('https://acme.lessgo.site');
     expect(resolveCanonicalURL({ slug: 'acme', canonicalPath: '/' })).toBe(
-      'https://acme.lessgo.ai'
+      'https://acme.lessgo.site'
     );
   });
 
@@ -27,7 +27,7 @@ describe('resolveCanonicalURL', () => {
 
   it('appends the subpath on the subdomain fallback too', () => {
     expect(resolveCanonicalURL({ slug: 'acme', canonicalPath: '/contact' })).toBe(
-      'https://acme.lessgo.ai/contact'
+      'https://acme.lessgo.site/contact'
     );
   });
 });

@@ -6,7 +6,7 @@ config({ path: '.env.local' });
 
 async function checkKV() {
   const slug = process.argv[2] || 'page1';
-  const host = `${slug}.lessgo.ai`;
+  const host = `${slug}.lessgo.site`;
   const routeKey = `route:${host}:/`;
 
   console.log('🔍 Checking KV entry for:', routeKey);

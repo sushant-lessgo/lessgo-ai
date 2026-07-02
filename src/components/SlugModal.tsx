@@ -36,7 +36,7 @@ export function SlugModal({
   analyticsEnabled,
   onAnalyticsChange
 }: SlugModalProps) {
-  const fullUrl = `https://${slug}.lessgo.ai`;
+  const fullUrl = `https://${slug}.lessgo.site`;
   const [isChangingSlug, setIsChangingSlug] = useState(false);
 
   // Detect if user changes slug from existing
@@ -68,7 +68,7 @@ export function SlugModal({
               <strong>Currently published at:</strong>
             </p>
             <p className="text-sm font-mono text-blue-900 break-all">
-              https://{existingPublished.slug}.lessgo.ai
+              https://{existingPublished.slug}.lessgo.site
             </p>
             <p className="text-xs text-blue-600 mt-1">
               Last updated: {new Date(existingPublished.publishedAt).toLocaleDateString()}
@@ -85,7 +85,7 @@ export function SlugModal({
               <div>
                 <p className="text-sm font-semibold text-amber-800">Warning: Changing URL</p>
                 <p className="text-xs text-amber-700 mt-1">
-                  Your old URL (https://{existingPublished.slug}.lessgo.ai) will stop working.
+                  Your old URL (https://{existingPublished.slug}.lessgo.site) will stop working.
                   Any links you've shared will break. Only change if necessary.
                 </p>
               </div>
@@ -111,7 +111,7 @@ export function SlugModal({
                 )
               }
             />
-            <span className="text-gray-500">.lessgo.ai</span>
+            <span className="text-gray-500">.lessgo.site</span>
           </div>
         </div>
 

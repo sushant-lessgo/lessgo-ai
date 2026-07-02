@@ -12,6 +12,7 @@ import DeviceBreakdown from './components/DeviceBreakdown'
 import ExportCSV from './components/ExportCSV'
 import EmptyState from './components/EmptyState'
 import { stripHTMLTags } from '@/utils/htmlSanitization'
+import { publishedSubdomainHost } from '@/lib/domains/hosts'
 
 interface PageProps {
   params: {
@@ -188,12 +189,12 @@ export default async function AnalyticsPage({ params, searchParams }: PageProps)
             {stripHTMLTags(publishedPage.title || 'Untitled Page')}
           </h1>
           <a
-            href={`/p/${params.slug}`}
+            href={`https://${publishedSubdomainHost(params.slug)}`}
             target="_blank"
             rel="noopener noreferrer"
             className="text-sm text-brand-mutedText hover:text-brand-accentPrimary"
           >
-            lessgo.ai/p/{params.slug} ↗
+            {publishedSubdomainHost(params.slug)} ↗
           </a>
         </div>
 

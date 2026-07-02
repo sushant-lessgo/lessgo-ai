@@ -11,6 +11,7 @@ import { withPublishRateLimit } from '@/lib/rateLimit';
 import { getUserPlan, checkLimit } from '@/lib/planManager';
 import { stripHTMLTags } from '@/utils/smartTitleGenerator';
 import { sanitizeContentForPublish } from '@/modules/sections/layoutElementSchema';
+import { publishedSubdomainHost, publishSubdomainHosts } from '@/lib/domains/hosts';
 import * as Sentry from '@sentry/nextjs';
 
 // Force Node.js runtime for ReactDOMServer support
@@ -222,7 +223,7 @@ async function publishHandler(req: NextRequest) {
 
       // Resolve the canonical host once, BEFORE generation: use the custom domain only
       // when it's already live, else leave undefined so the generator falls back to the
-      // {slug}.lessgo.ai subdomain. Reused below for the KV domain list. (Domains that go
+      // {slug}.lessgo.site subdomain. Reused below for the KV domain list. (Domains that go
       // live AFTER publish are handled by verify-dns regenerating the HTML.)
       const canonicalDomain =
         publishedPage?.customDomain && publishedPage.customDomainStatus === 'live'
@@ -415,8 +416,9 @@ async function publishHandler(req: NextRequest) {
       try {
         const { atomicPublishWithRetry, writeRedirect, writeSlugForHost, removeRedirect } = await import('@/lib/routing/kvRoutes');
 
-        // Build domain list — includes custom domain when live (resolved once above).
-        const domains = [`${slug}.lessgo.ai`];
+        // Build domain list — publish subdomains (new lessgo.site + legacy lessgo.ai)
+        // plus the custom domain when live (resolved once above).
+        const domains = [...publishSubdomainHosts(slug)];
         if (canonicalDomain) domains.push(canonicalDomain);
 
         // CRITICAL: Pass blobUrl (not blobKey) to KV
@@ -444,21 +446,26 @@ async function publishHandler(req: NextRequest) {
           verified: kvResult.verified,
         });
 
-        // Re-assert subdomain → custom domain 301 + slug-for fallback on every republish
+        // Re-assert subdomain → custom domain 301 + slug-for fallback on every republish.
+        // Both publish subdomains (lessgo.site + legacy lessgo.ai) redirect to the custom domain.
         if (canonicalDomain) {
           try {
-            await writeRedirect(`${slug}.lessgo.ai`, `https://${canonicalDomain}`, 301);
+            for (const sub of publishSubdomainHosts(slug)) {
+              await writeRedirect(sub, `https://${canonicalDomain}`, 301);
+            }
             await writeSlugForHost(canonicalDomain, slug);
           } catch (e) {
             console.error('[Phase 3] writeRedirect/writeSlugForHost failed (non-fatal)', e);
           }
         } else {
           // Self-heal: no live custom domain → clear any STALE subdomain→custom-domain
-          // redirect so {slug}.lessgo.ai serves its own page. Without this, a redirect:
+          // redirect so each {slug} subdomain serves its own page. Without this, a redirect:
           // KV entry left over from a removed custom domain or a DB wipe survives and the
           // middleware 301s the subdomain to a dead/wrong target (e.g. test1 → kundius...).
           try {
-            await removeRedirect(`${slug}.lessgo.ai`);
+            for (const sub of publishSubdomainHosts(slug)) {
+              await removeRedirect(sub);
+            }
           } catch (e) {
             console.error('[publish] removeRedirect (stale) failed (non-fatal)', e);
           }
@@ -548,7 +555,7 @@ async function publishHandler(req: NextRequest) {
 
     return createSecureResponse({
       message: 'Page published successfully',
-      url: `https://${slug}.lessgo.ai`,
+      url: `https://${publishedSubdomainHost(slug)}`,
     });
 
   } catch (err) {

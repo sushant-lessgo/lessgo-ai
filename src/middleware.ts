@@ -1,7 +1,7 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import { getRouteEdge, getRedirectEdge, getSlugForHostEdge } from '@/lib/routing/kvRoutes'
-import { isLessgoAppHost } from '@/lib/domains/hosts'
+import { isLessgoAppHost, matchPublishSubdomain } from '@/lib/domains/hosts'
 import * as Sentry from '@sentry/nextjs'
 
 const isPublicRoute = createRouteMatcher([
@@ -61,10 +61,11 @@ export default clerkMiddleware(async (auth, req) => {
   const isApiOrNext = url.pathname.startsWith('/api/') || url.pathname.startsWith('/_next/')
 
   if (!isApiOrNext) {
-    // Branch A: Lessgo subdomain (e.g. mypage.lessgo.ai)
-    if (host && host.includes('.lessgo.ai')) {
-      const subdomain = host.split('.')[0]
-      if (subdomain && subdomain !== 'www' && subdomain !== 'lessgo') {
+    // Branch A: Lessgo published subdomain (e.g. mypage.lessgo.site, or legacy mypage.lessgo.ai)
+    const pubSubdomain = matchPublishSubdomain(host)
+    if (pubSubdomain && host) {
+      const subdomain = pubSubdomain
+      {
         // Check for redirect to custom domain first (301)
         try {
           const redirect = await getRedirectEdge(host, url.pathname || '/')

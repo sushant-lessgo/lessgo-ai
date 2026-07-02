@@ -8,6 +8,7 @@ import { prisma } from '@/lib/prisma';
 import { createSecureResponse } from '@/lib/security';
 import { removeDomain, VercelApiError } from '@/lib/vercel/domains';
 import { removeRoutes, removeRedirect } from '@/lib/routing/kvRoutes';
+import { publishSubdomainHosts } from '@/lib/domains/hosts';
 
 const BodySchema = z.object({ slug: z.string().min(1).max(100) });
 
@@ -27,7 +28,7 @@ export async function DELETE(req: NextRequest) {
   if (!page.customDomain) return createSecureResponse({ error: 'No custom domain' }, 400);
 
   const customHost = page.customDomain;
-  const subdomainHost = `${page.slug}.lessgo.ai`;
+  const subdomainHosts = publishSubdomainHosts(page.slug);
 
   try {
     await removeDomain(customHost);
@@ -40,9 +41,11 @@ export async function DELETE(req: NextRequest) {
   }
 
   try {
-    // Fully remove custom-domain keys; on subdomain, drop ONLY the redirect so it serves again
+    // Fully remove custom-domain keys; on each subdomain, drop ONLY the redirect so it serves again
     await removeRoutes([customHost]);
-    await removeRedirect(subdomainHost);
+    for (const sub of subdomainHosts) {
+      await removeRedirect(sub);
+    }
   } catch (e) {
     console.error('[domains/remove] KV cleanup failed', e);
   }

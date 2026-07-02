@@ -18,3 +18,41 @@ export function isLessgoAppHost(host: string | null | undefined): boolean {
   const appHosts = getAppHosts();
   return appHosts.some((suffix) => h === suffix || h.endsWith(`.${suffix}`));
 }
+
+/**
+ * Host that published pages live on: `{slug}.lessgo.site`. Overridable via env.
+ * The app itself (dashboard/marketing) stays on lessgo.ai — this is publish-only.
+ */
+export const PUBLISH_HOST = (process.env.LESSGO_PUBLISH_HOST || 'lessgo.site').toLowerCase();
+
+// Legacy suffix kept so already-shared `.lessgo.ai` links keep resolving.
+const PUBLISH_SUFFIXES = Array.from(new Set([PUBLISH_HOST, 'lessgo.ai']));
+
+/** Canonical published host for a slug (the one we display/return). */
+export function publishedSubdomainHost(slug: string): string {
+  return `${slug}.${PUBLISH_HOST}`;
+}
+
+/**
+ * Every host a published page is reachable on. KV routes are written for all of
+ * them so both the new `.lessgo.site` and legacy `.lessgo.ai` serve the same blob.
+ */
+export function publishSubdomainHosts(slug: string): string[] {
+  return PUBLISH_SUFFIXES.map((s) => `${slug}.${s}`);
+}
+
+/**
+ * Middleware Branch-A matcher: if `host` is a single-label published subdomain
+ * (`{slug}.lessgo.site` or legacy `{slug}.lessgo.ai`), return the slug label,
+ * else null. Reserved labels (`www`, apex `lessgo`) return null.
+ */
+export function matchPublishSubdomain(host?: string | null): string | null {
+  if (!host) return null;
+  const h = host.toLowerCase().split(':')[0];
+  if (!h) return null;
+  const suffix = PUBLISH_SUFFIXES.find((s) => h.endsWith(`.${s}`));
+  if (!suffix) return null;
+  const label = h.slice(0, h.length - suffix.length - 1);
+  if (!label || label.includes('.') || label === 'www' || label === 'lessgo') return null;
+  return label;
+}

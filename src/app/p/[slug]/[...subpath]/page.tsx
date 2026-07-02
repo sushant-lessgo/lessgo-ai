@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { sanitizeContentForPublish } from '@/modules/sections/layoutElementSchema';
 import { usesTemplateModule, type TemplateId } from '@/types/service';
+import { publishedSubdomainHost } from '@/lib/domains/hosts';
 
 // Multi-page subpage route. Serves content.subpages[pathSlug] from a published
 // project. The blob fast path (KV route:{host}:{path} → blob-proxy) handles most
@@ -74,7 +75,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     openGraph: {
       title: pageTitle,
       description,
-      url: `https://${params.slug}.lessgo.ai${subPathFromParams(params.subpath)}`,
+      url: `https://${publishedSubdomainHost(params.slug)}${subPathFromParams(params.subpath)}`,
       siteName: 'Lessgo.ai',
       images: [{ url: ogImageUrl, width: 1200, height: 630, alt: pageTitle }],
       type: 'website',
