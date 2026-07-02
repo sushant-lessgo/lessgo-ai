@@ -291,6 +291,7 @@ export const serviceElementSchema: Record<string, UIBlockSchemaV2> = {
       whatsapp_label:   { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
       whatsapp_prefill: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
       links_heading:    { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: 'Studio' },
+      logo_image:       { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
     },
     collections: {
       social_links: {

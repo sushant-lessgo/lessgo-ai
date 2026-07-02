@@ -24,6 +24,7 @@ interface ContactFooterRichPublishedProps {
   whatsapp_prefill?: string;
   links_heading?: string;
   footer_links?: FooterLink[];
+  logo_image?: string;
   content?: any;
 }
 
@@ -48,8 +49,14 @@ export default function ContactFooterRichPublished(props: ContactFooterRichPubli
         <div className="sg-footer__top">
           <div className="sg-footer__brand">
             <div className="sg-footer__brand-row">
-              <span className="sg-footer__mark" />
-              <span>Studio</span>
+              {props.logo_image ? (
+                <img className="sg-footer__img" src={props.logo_image} alt="Logo" />
+              ) : (
+                <>
+                  <span className="sg-footer__mark" />
+                  <span>Studio</span>
+                </>
+              )}
             </div>
             {props.tagline && <p className="sg-footer__tagline">{props.tagline}</p>}
             <div className="sg-footer__badge"><span className="lv" />Booking now</div>
@@ -89,7 +96,6 @@ export default function ContactFooterRichPublished(props: ContactFooterRichPubli
 
         <div className="sg-footer__bottom">
           <span>{props.copyright || ''}</span>
-          <span>Built with Lessgo</span>
         </div>
       </footer>
 

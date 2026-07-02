@@ -34,6 +34,7 @@ interface ContactFooterRichContent {
   whatsapp_prefill: string;
   links_heading: string;
   footer_links: FooterLink[];
+  logo_image: string;
 }
 
 // Inline MessageCircle glyph (server-safe; matches Surge's inline-SVG style).
@@ -63,6 +64,20 @@ export default function ContactFooterRich({ sectionId }: ContactFooterRichProps)
   const { sections, pages } = useEditStore();
   const sectionOptions = React.useMemo(() => buildSectionLinkOptions(sections || []), [sections]);
   const pageOptions = React.useMemo(() => buildPageLinkOptions(pages), [pages]);
+
+  const uploadImage = (useEditStore() as any).uploadImage as
+    | ((file: File, t?: { sectionId: string; elementKey: string }) => Promise<string | void>)
+    | undefined;
+  const [logoUploading, setLogoUploading] = React.useState(false);
+  const onLogoFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || !uploadImage) return;
+    setLogoUploading(true);
+    try { await uploadImage(file, { sectionId, elementKey: 'logo_image' }); }
+    catch (err) { /* surfaced by the store */ }
+    finally { setLogoUploading(false); }
+  };
 
   const socialLinks = blockContent.social_links || [];
   const waHref = buildWaHref(blockContent.whatsapp_number, blockContent.whatsapp_prefill);
@@ -103,8 +118,25 @@ export default function ContactFooterRich({ sectionId }: ContactFooterRichProps)
         <div className="sg-footer__top">
           <div className="sg-footer__brand">
             <div className="sg-footer__brand-row">
-              <span className="sg-footer__mark" />
-              <span>Studio</span>
+              {blockContent.logo_image ? (
+                <img className="sg-footer__img" src={blockContent.logo_image} alt="Logo" />
+              ) : (
+                <>
+                  <span className="sg-footer__mark" />
+                  <span>Studio</span>
+                </>
+              )}
+              {edit && (
+                <span className="sg-footer__logo-edit">
+                  <label className="sg-footer__logo-edit-btn">
+                    {logoUploading ? 'Uploading…' : (blockContent.logo_image ? 'Change logo' : '↥ Logo')}
+                    <input type="file" accept="image/*" onChange={onLogoFile} hidden disabled={logoUploading} />
+                  </label>
+                  {blockContent.logo_image && (
+                    <button type="button" className="sg-footer__logo-edit-x" onClick={() => handleContentUpdate('logo_image', '')}>remove</button>
+                  )}
+                </span>
+              )}
             </div>
             {(blockContent.tagline || (mode === 'edit' && !isExcluded('tagline'))) && (
               <SurgeEditable
@@ -273,7 +305,6 @@ export default function ContactFooterRich({ sectionId }: ContactFooterRichProps)
             enterBehavior="save"
             placeholder="© 2026 Studio"
           />
-          <span>Built with Lessgo</span>
         </div>
 
         {mode === 'edit' && (
