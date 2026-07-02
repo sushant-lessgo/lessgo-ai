@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { sanitizeContentForPublish } from '@/modules/sections/layoutElementSchema';
 import { usesTemplateModule, type TemplateId } from '@/types/service';
 import { buildPageMetadata, flattenContent } from '@/lib/staticExport/buildPageMetadata';
+import { buildStructuredData, serializeJsonLd, extractLogoUrl } from '@/lib/staticExport/structuredData';
 
 // ISR configuration - revalidate every hour
 export const revalidate = 3600;
@@ -47,6 +48,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     description: meta.description,
     alternates: { canonical: meta.canonicalURL },
     ...(meta.noIndex ? { robots: { index: false, follow: false } } : {}),
+    ...(meta.faviconUrl ? { icons: { icon: meta.faviconUrl } } : {}),
     openGraph: {
       title: meta.title,
       description: meta.description,
@@ -79,6 +81,8 @@ export default async function PublishedPage({ params }: PageProps) {
       templateId: true,
       variantId: true,
       paletteId: true,
+      customDomain: true,
+      customDomainStatus: true,
     },
   });
 
@@ -129,8 +133,36 @@ export default async function PublishedPage({ params }: PageProps) {
     legalPages: content.legalPages || undefined,  // Page-level legal pages (privacy etc.)
   };
 
+  // JSON-LD (SEO Phase 3): same builder as the static export so the SSR fallback
+  // matches the blob HTML. Root page only; JSON-LD in <body> is valid for Google.
+  const flat = flattenContent(content);
+  const jsonLdMeta = buildPageMetadata({
+    slug: params.slug,
+    pageTitle: page.title || '',
+    content: flat,
+    canonicalDomain:
+      page.customDomainStatus === 'live' && page.customDomain ? page.customDomain : undefined,
+    canonicalPath: '/',
+    baseUrl: 'https://lessgo.ai',
+  });
+  const jsonLd = buildStructuredData({
+    type: (content.seo as any)?.structuredDataType,
+    audienceType,
+    name: jsonLdMeta.title,
+    description: jsonLdMeta.description,
+    url: jsonLdMeta.canonicalURL,
+    logoUrl: extractLogoUrl(flat),
+    imageUrl: jsonLdMeta.ogImage,
+  });
+
   return (
     <>
+      {jsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
+        />
+      )}
       {/* Preload the hero-headline (LCP) display face for this template/variant —
           p/layout only preloads the shared near-body faces. */}
       <CriticalFontPreload templateId={templateId as TemplateId | null} variantId={page.variantId} />

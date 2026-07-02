@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { generateStaticHTML } from './htmlGenerator';
 import { uploadStaticSite } from './blobUploader';
 import { buildPageMetadata } from './buildPageMetadata';
+import { buildStructuredData, serializeJsonLd, extractLogoUrl } from './structuredData';
 
 /**
  * Render + upload a published page (root + all subpages) and advance its version pointer.
@@ -91,6 +92,17 @@ export async function renderPublishedExport(
     baseUrl,
   });
 
+  // JSON-LD (Phase 3): root page only. 'auto' → safe generic Organization.
+  const rootJsonLd = buildStructuredData({
+    type: contentData.seo?.structuredDataType,
+    audienceType,
+    name: rootMeta.title,
+    description: rootMeta.description,
+    url: rootMeta.canonicalURL,
+    logoUrl: extractLogoUrl(contentData),
+    imageUrl: rootMeta.ogImage,
+  });
+
   const staticHTML = await generateStaticHTML({
     sections: contentData.layout.sections,
     content: contentData,
@@ -103,6 +115,7 @@ export async function renderPublishedExport(
     previewImage: previewImage ?? undefined,
     seo: contentData.seo,
     faviconUrl: rootMeta.faviconUrl,
+    jsonLd: rootJsonLd ? serializeJsonLd(rootJsonLd) : undefined,
     analyticsOptIn: analyticsEnabled || false, // Phase 4
     baseURL: baseUrl,
     audienceType,

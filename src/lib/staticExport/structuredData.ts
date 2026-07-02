@@ -1,11 +1,74 @@
 /**
- * Structured-data helpers for published pages (SEO track).
+ * Structured-data (JSON-LD) helpers for published pages (SEO track, Phase 3).
  *
- * extractLogoUrl ships first (used by the OG image route); the JSON-LD builders
- * (buildStructuredData / serializeJsonLd) land with the structured-data phase.
+ * Type policy: 'auto' (the default) emits a safe generic Organization — rich
+ * types (Product/LocalBusiness) are explicit user picks only, because e.g. a
+ * Product block without offers/reviews draws Search Console warnings. JSON-LD
+ * renders on the ROOT page only.
  *
  * Pure + dependency-free so it unit-tests without the server-only render stack.
  */
+import type { StructuredDataType } from '@/types/store/pages';
+
+export interface StructuredDataInput {
+  /** Page's seo.structuredDataType; undefined behaves as 'auto'. */
+  type?: StructuredDataType;
+  audienceType?: 'product' | 'service';
+  name: string; // resolved page title
+  description: string;
+  url: string; // canonical URL
+  logoUrl?: string;
+  imageUrl?: string; // resolved OG image
+}
+
+/** Build the schema.org object for a page, or null when type is 'none'. */
+export function buildStructuredData(input: StructuredDataInput): Record<string, unknown> | null {
+  const type = input.type || 'auto';
+  if (type === 'none') return null;
+
+  const base = {
+    '@context': 'https://schema.org',
+    name: input.name,
+    description: input.description,
+    url: input.url,
+  };
+
+  switch (type) {
+    case 'Service':
+      return {
+        ...base,
+        '@type': 'Service',
+        provider: { '@type': 'Organization', name: input.name },
+      };
+    case 'LocalBusiness':
+      return {
+        ...base,
+        '@type': 'LocalBusiness',
+        ...(input.imageUrl ? { image: input.imageUrl } : {}),
+      };
+    case 'Product':
+      return {
+        '@context': 'https://schema.org',
+        '@type': 'Product',
+        name: input.name,
+        description: input.description,
+        ...(input.imageUrl ? { image: input.imageUrl } : {}),
+      };
+    case 'auto':
+    case 'Organization':
+    default:
+      return {
+        ...base,
+        '@type': 'Organization',
+        ...(input.logoUrl ? { logo: input.logoUrl } : {}),
+      };
+  }
+}
+
+/** Script-breakout-safe serialization for embedding in a <script> tag. */
+export function serializeJsonLd(data: Record<string, unknown>): string {
+  return JSON.stringify(data).replace(/</g, '\\u003c');
+}
 
 /**
  * The uploaded site logo, from the header section's `logo_image` element.

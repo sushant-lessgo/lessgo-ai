@@ -95,11 +95,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (seo?.description) description = seo.description;
   if (seo?.ogImage) ogImageUrl = seo.ogImage;
 
+  const faviconUrl = seo?.faviconUrl || content?.seo?.faviconUrl;
+
   return {
     title: pageTitle,
     description,
     alternates: { canonical: canonicalURL },
     ...(seo?.noIndex ? { robots: { index: false, follow: false } } : {}),
+    ...(faviconUrl ? { icons: { icon: faviconUrl } } : {}),
     openGraph: {
       title: pageTitle,
       description,

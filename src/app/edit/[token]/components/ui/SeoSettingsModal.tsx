@@ -185,6 +185,36 @@ export function SeoSettingsModal({ onClose }: { onClose: () => void }) {
                 </div>
               )}
 
+              {isRoot && (
+                <div>
+                  <label htmlFor="seo-sdtype" className="mb-1 block text-sm font-medium text-gray-700">Structured data</label>
+                  <p className="mb-2 text-xs text-gray-400">Tells Google what kind of business this page represents.</p>
+                  <select
+                    id="seo-sdtype"
+                    value={seo.structuredDataType || 'auto'}
+                    onChange={(e) =>
+                      patch({
+                        structuredDataType:
+                          e.target.value === 'auto' ? undefined : (e.target.value as PageSeo['structuredDataType']),
+                      })
+                    }
+                    className="w-full rounded-md border px-3 py-2 text-sm"
+                  >
+                    <option value="auto">Automatic (recommended)</option>
+                    <option value="Organization">Organization</option>
+                    <option value="LocalBusiness">Local business</option>
+                    <option value="Service">Service</option>
+                    <option value="Product">Product</option>
+                    <option value="none">None</option>
+                  </select>
+                  {seo.structuredDataType === 'Product' && (
+                    <p className="mt-1 text-xs text-amber-600">
+                      Product markup without prices/reviews can trigger Google Search Console warnings.
+                    </p>
+                  )}
+                </div>
+              )}
+
               {uploadError && <p className="text-sm text-red-600">{uploadError}</p>}
 
               <label className="flex items-start gap-2 pt-1">

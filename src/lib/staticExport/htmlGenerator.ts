@@ -13,7 +13,7 @@ import { validateAndResolveAssetURLs } from './assetResolver';
 import { renderLessgoBadge } from './lessgoBadge';
 import { resolveCanonicalURL } from './canonicalUrl';
 import { resolveOgImage } from './buildPageMetadata';
-import { escapeHTML, robotsMetaTag, faviconLinkTag } from './headTags';
+import { escapeHTML, robotsMetaTag, faviconLinkTag, jsonLdScriptTag } from './headTags';
 import { usesTemplateModule } from '@/types/service';
 import type { PageSeo } from '@/types/store/pages';
 
@@ -48,6 +48,9 @@ export interface StaticHTMLOptions {
   // buildPageMetadata. faviconUrl is resolved separately (root seo cascades).
   seo?: PageSeo | null;
   faviconUrl?: string;
+  // JSON-LD (Phase 3): pre-serialized (script-breakout-safe) structured data;
+  // the caller builds it via structuredData.ts — root page only.
+  jsonLd?: string;
 
   // Configuration
   analyticsOptIn?: boolean;
@@ -122,6 +125,7 @@ export async function generateStaticHTML(
       ogImageOverride: options.seo?.ogImage,
       noIndex: !!options.seo?.noIndex,
       faviconUrl: options.faviconUrl,
+      jsonLd: options.jsonLd,
     },
     analyticsOptIn: options.analyticsOptIn || false,
     hasForms,
@@ -202,6 +206,7 @@ function buildHTMLDocument(params: {
     ogImageOverride?: string;
     noIndex?: boolean;
     faviconUrl?: string;
+    jsonLd?: string;
   };
   analyticsOptIn: boolean;
   hasForms: boolean;
@@ -279,7 +284,7 @@ function buildHTMLDocument(params: {
   <link rel="stylesheet" href="/assets/published.css">
 
   <!-- Theme CSS Variables (inline, per-page) -->
-  ${cssVariablesStyle}
+  ${cssVariablesStyle}${jsonLdScriptTag(metadata.jsonLd)}
 </head>
 <body>
   ${bodyHTML}
