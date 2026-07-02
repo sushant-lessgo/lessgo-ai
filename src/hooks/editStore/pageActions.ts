@@ -4,7 +4,7 @@
 // is immediately valid and renderable (no blank-canvas problem, no drag-drop).
 // Real template archetypes replace the clone in Phase 4.
 
-import type { EditStore, ProjectPageEntry, PageSlice } from '@/types/store';
+import type { EditStore, ProjectPageEntry, PageSlice, PageSeo } from '@/types/store';
 import { commitActivePage, loadPageIntoActive, findHomeId, splitChrome, HOME_PAGE_ID } from './pageHelpers';
 import { getCollectionDef } from '@/modules/collections/registry';
 import { buildCatalogSlice, buildProductDetailSlice, buildHomeSlice, buildGallerySlice, buildContactSlice } from './archetypes';
@@ -324,6 +324,19 @@ export function createPageActions(set: any, get: any) {
         }
         // Slug change → catalog card href changes → re-materialize.
         if (target.kind === 'collectionItem' && target.collectionKey) syncCollection(state, target.collectionKey);
+        state.persistence.isDirty = true;
+        state.lastUpdated = Date.now();
+      }),
+
+    updatePageSeo: (pageId: string, seo: Partial<PageSeo>) =>
+      set((state: EditStore) => {
+        const target = state.pages?.[pageId];
+        if (!target) return;
+        const merged: Partial<PageSeo> = { ...(target.seo || {}), ...seo };
+        (Object.keys(merged) as (keyof PageSeo)[]).forEach((k) => {
+          if (merged[k] === undefined || merged[k] === '') delete merged[k];
+        });
+        target.seo = Object.keys(merged).length ? (merged as PageSeo) : undefined;
         state.persistence.isDirty = true;
         state.lastUpdated = Date.now();
       }),

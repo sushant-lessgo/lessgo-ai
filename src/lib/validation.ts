@@ -40,6 +40,44 @@ export const DraftSaveSchema = z.object({
   variantId: z.string().max(50).optional(),
 });
 
+// Per-page SEO overrides (SEO track, Phase 2). These are user-controlled strings
+// that get baked into the published <head>, so: https-only URLs (no javascript:/
+// data:/http:), bounded lengths, unknown keys stripped. Strings are additionally
+// HTML-escaped at render time (htmlGenerator escapeHTML) — this schema is the
+// server-entry gate, not the only defense.
+const HttpsUrl = z
+  .string()
+  .max(500)
+  .url()
+  .refine((u) => u.startsWith('https://'), 'Must be an https:// URL');
+
+export const PageSeoSchema = z
+  .object({
+    title: z.string().max(70).optional(),
+    description: z.string().max(200).optional(),
+    ogImage: HttpsUrl.optional(),
+    noIndex: z.boolean().optional(),
+    faviconUrl: HttpsUrl.optional(),
+    structuredDataType: z
+      .enum(['auto', 'none', 'Organization', 'LocalBusiness', 'Product', 'Service'])
+      .optional(),
+  })
+  .strip();
+
+export type SanitizedPageSeo = z.infer<typeof PageSeoSchema>;
+
+/** Best-effort seo sanitizer: an invalid/hostile blob becomes undefined — never fails the publish. */
+export function sanitizeSeo(raw: unknown): SanitizedPageSeo | undefined {
+  if (!raw || typeof raw !== 'object') return undefined;
+  const parsed = PageSeoSchema.safeParse(raw);
+  if (!parsed.success) return undefined;
+  const seo = parsed.data;
+  (Object.keys(seo) as (keyof SanitizedPageSeo)[]).forEach((k) => {
+    if (seo[k] === undefined) delete seo[k];
+  });
+  return Object.keys(seo).length > 0 ? seo : undefined;
+}
+
 export const PublishSchema = z.object({
   slug: z.string()
     .min(1, 'Slug is required')

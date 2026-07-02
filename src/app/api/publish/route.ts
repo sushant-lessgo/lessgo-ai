@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import type { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { PublishSchema, sanitizeForLogging } from '@/lib/validation';
+import { PublishSchema, sanitizeForLogging, sanitizeSeo } from '@/lib/validation';
 import { createSecureResponse, validateSlug, sanitizeHtmlContent, verifyProjectAccess } from '@/lib/security';
 import { withPublishRateLimit } from '@/lib/rateLimit';
 import { getUserPlan, checkLimit } from '@/lib/planManager';
@@ -70,6 +70,18 @@ async function publishHandler(req: NextRequest) {
     // Sanitize: strip excluded elements, set required defaults
     if (content && typeof content === 'object') {
       sanitizeContentForPublish(content as Record<string, any>);
+    }
+
+    // SEO (Phase 2): sanitize the per-page seo blobs in place — user-controlled
+    // strings that get baked into the published <head>. Invalid/hostile blobs are
+    // dropped (never fail the publish); https-only URLs enforced by the schema.
+    if (content && typeof content === 'object') {
+      const c = content as any;
+      c.seo = sanitizeSeo(c.seo);
+      const subs = c.subpages && typeof c.subpages === 'object' ? c.subpages : {};
+      for (const sub of Object.values(subs) as any[]) {
+        if (sub && typeof sub === 'object') sub.seo = sanitizeSeo(sub.seo);
+      }
     }
 
     // Multi-page (Phase 2): inject shared chrome into the root + every subpage so

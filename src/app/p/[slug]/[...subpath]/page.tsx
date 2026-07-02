@@ -59,6 +59,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const pdId = sections.find((id: string) => /^productdetail/i.test(id));
   const pdEl = pdId ? sub?.content?.[pdId]?.elements || {} : null;
 
+  // Per-page seo overrides (sanitized at publish; subpage seo lives on the sub entry).
+  const seo = sub?.seo || undefined;
+
   let headline: string;
   let description: string;
   let ogImageUrl = resolveOgImage({
@@ -86,12 +89,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         : subheadline
       : `Check out ${headline}`;
   }
-  const pageTitle = sub?.title ? `${sub.title} — ${page.title}` : page.title || headline;
+  const pageTitle =
+    seo?.title || (sub?.title ? `${sub.title} — ${page.title}` : page.title || headline);
+  if (seo?.description) description = seo.description;
+  if (seo?.ogImage) ogImageUrl = seo.ogImage;
 
   return {
     title: pageTitle,
     description,
     alternates: { canonical: canonicalURL },
+    ...(seo?.noIndex ? { robots: { index: false, follow: false } } : {}),
     openGraph: {
       title: pageTitle,
       description,

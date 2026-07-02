@@ -124,3 +124,96 @@ describe('buildPageMetadata', () => {
     ).toBe('https://scalifixai.com/gallery');
   });
 });
+
+describe('buildPageMetadata — seo overrides (Phase 2)', () => {
+  const base = {
+    slug: 'acme',
+    pageTitle: 'Acme',
+    previewImage: undefined,
+    baseUrl: 'https://lessgo.ai',
+  };
+
+  it('no-seo output is unchanged and reports noIndex=false, no favicon (parity guard)', () => {
+    const m = buildPageMetadata({ ...base, content: flatContent });
+    expect(m.noIndex).toBe(false);
+    expect(m.faviconUrl).toBeUndefined();
+  });
+
+  it('an empty seo blob behaves exactly like no seo', () => {
+    const withEmpty = buildPageMetadata({ ...base, content: flatContent, seo: {} });
+    const without = buildPageMetadata({ ...base, content: flatContent });
+    expect(withEmpty).toEqual(without);
+  });
+
+  it('seo.title and seo.description override the auto derivation', () => {
+    const m = buildPageMetadata({
+      ...base,
+      content: flatContent,
+      seo: { title: 'Custom SEO Title', description: 'Custom snippet.' },
+    });
+    expect(m.title).toBe('Custom SEO Title');
+    expect(m.description).toBe('Custom snippet.');
+  });
+
+  it('reads seo from content.seo when input.seo is omitted (root page via flattenContent)', () => {
+    const m = buildPageMetadata({
+      ...base,
+      content: { ...flatContent, seo: { title: 'From Content Seo' } },
+    });
+    expect(m.title).toBe('From Content Seo');
+  });
+
+  it('explicit input.seo wins over content.seo', () => {
+    const m = buildPageMetadata({
+      ...base,
+      content: { ...flatContent, seo: { title: 'Root Title' } },
+      seo: { title: 'Subpage Title' },
+    });
+    expect(m.title).toBe('Subpage Title');
+  });
+
+  it('ogImage precedence: seo.ogImage > previewImage > auto', () => {
+    const withSeo = buildPageMetadata({
+      ...base,
+      content: flatContent,
+      previewImage: 'https://cdn/preview.png',
+      seo: { ogImage: 'https://cdn/og-override.png' },
+    });
+    expect(withSeo.ogImage).toBe('https://cdn/og-override.png');
+
+    const withPreview = buildPageMetadata({
+      ...base,
+      content: flatContent,
+      previewImage: 'https://cdn/preview.png',
+      seo: { title: 'x' },
+    });
+    expect(withPreview.ogImage).toBe('https://cdn/preview.png');
+
+    const auto = buildPageMetadata({ ...base, content: flatContent, seo: { title: 'x' } });
+    expect(auto.ogImage).toBe('https://lessgo.ai/api/og/acme');
+  });
+
+  it('noIndex flows through', () => {
+    expect(buildPageMetadata({ ...base, content: flatContent, seo: { noIndex: true } }).noIndex).toBe(
+      true
+    );
+  });
+
+  it('faviconUrl: own seo wins, else falls back to rootSeo (site-wide cascade)', () => {
+    const own = buildPageMetadata({
+      ...base,
+      content: flatContent,
+      seo: { faviconUrl: 'https://cdn/own.ico' },
+      rootSeo: { faviconUrl: 'https://cdn/root.ico' },
+    });
+    expect(own.faviconUrl).toBe('https://cdn/own.ico');
+
+    const inherited = buildPageMetadata({
+      ...base,
+      content: flatContent,
+      seo: { title: 'x' },
+      rootSeo: { faviconUrl: 'https://cdn/root.ico' },
+    });
+    expect(inherited.faviconUrl).toBe('https://cdn/root.ico');
+  });
+});

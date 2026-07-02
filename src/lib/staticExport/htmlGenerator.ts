@@ -13,7 +13,9 @@ import { validateAndResolveAssetURLs } from './assetResolver';
 import { renderLessgoBadge } from './lessgoBadge';
 import { resolveCanonicalURL } from './canonicalUrl';
 import { resolveOgImage } from './buildPageMetadata';
+import { escapeHTML, robotsMetaTag, faviconLinkTag } from './headTags';
 import { usesTemplateModule } from '@/types/service';
+import type { PageSeo } from '@/types/store/pages';
 
 export interface StaticHTMLOptions {
   // Content
@@ -40,6 +42,12 @@ export interface StaticHTMLOptions {
   // instead of the root's.
   canonicalDomain?: string;
   canonicalPath?: string;
+
+  // SEO (Phase 2): this page's sanitized seo overrides (ogImage precedence +
+  // noindex). Title/description overrides are already resolved by the caller via
+  // buildPageMetadata. faviconUrl is resolved separately (root seo cascades).
+  seo?: PageSeo | null;
+  faviconUrl?: string;
 
   // Configuration
   analyticsOptIn?: boolean;
@@ -111,6 +119,9 @@ export async function generateStaticHTML(
       publishedPageId: options.publishedPageId,
       canonicalDomain: options.canonicalDomain,
       canonicalPath: options.canonicalPath,
+      ogImageOverride: options.seo?.ogImage,
+      noIndex: !!options.seo?.noIndex,
+      faviconUrl: options.faviconUrl,
     },
     analyticsOptIn: options.analyticsOptIn || false,
     hasForms,
@@ -188,6 +199,9 @@ function buildHTMLDocument(params: {
     publishedPageId: string;
     canonicalDomain?: string;
     canonicalPath?: string;
+    ogImageOverride?: string;
+    noIndex?: boolean;
+    faviconUrl?: string;
   };
   analyticsOptIn: boolean;
   hasForms: boolean;
@@ -216,13 +230,14 @@ function buildHTMLDocument(params: {
     canonicalPath: metadata.canonicalPath,
   });
 
-  // OG image URL. Shared with the dynamic routes via resolveOgImage: previewImage (manual
-  // upload) always wins; else auto /api/og/{slug} served from the live custom domain when one
-  // exists (absolute URL matches the host the page lives on), else off baseURL. No-custom-domain
-  // output stays byte-identical.
+  // OG image URL. Shared with the dynamic routes via resolveOgImage: seo.ogImage
+  // (per-page override) wins, then previewImage (manual upload), else auto
+  // /api/og/{slug} served from the live custom domain when one exists (absolute
+  // URL matches the host the page lives on), else off baseURL. No-seo output
+  // stays byte-identical.
   const ogImage = resolveOgImage({
     slug: metadata.slug,
-    previewImage: metadata.previewImage,
+    previewImage: metadata.ogImageOverride || metadata.previewImage,
     canonicalDomain: metadata.canonicalDomain,
     baseUrl: metadata.baseURL,
   });
@@ -238,7 +253,7 @@ function buildHTMLDocument(params: {
   <meta name="description" content="${escapeHTML(metadata.description)}">
 
   <!-- Canonical URL -->
-  <link rel="canonical" href="${canonicalURL}">
+  <link rel="canonical" href="${canonicalURL}">${robotsMetaTag(metadata.noIndex)}${faviconLinkTag(metadata.faviconUrl)}
 
   <!-- Open Graph -->
   <meta property="og:type" content="website">
@@ -305,19 +320,6 @@ function generateCSSVariablesStyle(
 ${declarations}
 }
 </style>`;
-}
-
-/**
- * Helper: Escape HTML special characters
- */
-function escapeHTML(str: string): string {
-  if (!str) return '';
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
 }
 
 /**

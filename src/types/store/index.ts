@@ -192,6 +192,8 @@ export type {
   ProjectPageEntry,
   PageAxisState,
   PageActions,
+  PageSeo,
+  StructuredDataType,
   SectionSpacing,
   ChromeEntry,
   ChromeState,

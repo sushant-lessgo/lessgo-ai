@@ -17,6 +17,7 @@
  * The static path already flattens before calling; the dynamic routes must flatten explicitly.
  */
 import { resolveCanonicalURL } from './canonicalUrl';
+import type { PageSeo } from '@/types/store/pages';
 
 export interface BuildPageMetadataInput {
   slug: string;
@@ -32,6 +33,13 @@ export interface BuildPageMetadataInput {
   canonicalPath?: string;
   /** Origin for the auto /api/og fallback when no custom domain is live. */
   baseUrl: string;
+  /**
+   * This page's SEO overrides (SEO track, Phase 2). Defaults to `content.seo`
+   * when omitted — the root page gets its overrides for free via flattenContent.
+   */
+  seo?: PageSeo | null;
+  /** Root page's seo — favicon is site-wide, so subpages fall back to it. */
+  rootSeo?: PageSeo | null;
 }
 
 export interface PageMetadata {
@@ -41,6 +49,8 @@ export interface PageMetadata {
   ogImage: string;
   siteName: string;
   ogType: 'website';
+  noIndex: boolean;
+  faviconUrl?: string;
 }
 
 /**
@@ -83,20 +93,27 @@ export function resolveOgImage(opts: {
 
 export function buildPageMetadata(input: BuildPageMetadataInput): PageMetadata {
   const content = input.content || {};
+  // Per-page seo overrides. `content.seo` is the sanitized blob the publish route
+  // stored; explicit input.seo wins (subpages, whose seo lives on the sub entry).
+  const seo: PageSeo | undefined = input.seo ?? content?.seo ?? undefined;
   const sections: string[] = content?.layout?.sections || [];
   const heroId = findHeroId(sections);
   const heroEls = heroId ? content?.[heroId]?.elements : undefined;
 
-  // Description: subheadline → headline → title, capped at 160 (matches the static path exactly).
+  // Description: seo override → subheadline → headline → title, capped at 160 for
+  // the auto path (matches the static path exactly); overrides render verbatim
+  // (schema caps them at 200).
   const rawDesc = heroEls?.subheadline?.content || heroEls?.headline?.content || input.pageTitle;
-  const description =
+  const autoDescription =
     typeof rawDesc === 'string' ? rawDesc.slice(0, 160) : input.pageTitle.slice(0, 160);
+  const description = seo?.description || autoDescription;
 
-  // Title: the resolved page title, falling back to the hero headline then a generic label.
-  // For the static path pageTitle is always set, so this is inert there (byte-identical head);
-  // it only benefits the dynamic route where page.title may be empty.
+  // Title: seo override → the resolved page title → hero headline → generic label.
+  // For the static path pageTitle is always set, so the fallbacks are inert there
+  // (byte-identical head); they only benefit the dynamic route where page.title may be empty.
   const headline = heroEls?.headline?.content;
-  const title = input.pageTitle || (typeof headline === 'string' ? headline : '') || 'Landing Page';
+  const title =
+    seo?.title || input.pageTitle || (typeof headline === 'string' ? headline : '') || 'Landing Page';
 
   const canonicalURL = resolveCanonicalURL({
     slug: input.slug,
@@ -104,12 +121,24 @@ export function buildPageMetadata(input: BuildPageMetadataInput): PageMetadata {
     canonicalPath: input.canonicalPath,
   });
 
+  // OG image precedence: seo.ogImage > previewImage > auto /api/og. Implemented by
+  // feeding the override through resolveOgImage's previewImage slot so the helper
+  // (and the no-seo output) stays byte-identical.
   const ogImage = resolveOgImage({
     slug: input.slug,
-    previewImage: input.previewImage,
+    previewImage: seo?.ogImage || input.previewImage,
     canonicalDomain: input.canonicalDomain,
     baseUrl: input.baseUrl,
   });
 
-  return { title, description, canonicalURL, ogImage, siteName: 'Lessgo.ai', ogType: 'website' };
+  return {
+    title,
+    description,
+    canonicalURL,
+    ogImage,
+    siteName: 'Lessgo.ai',
+    ogType: 'website',
+    noIndex: !!seo?.noIndex,
+    faviconUrl: seo?.faviconUrl || input.rootSeo?.faviconUrl || undefined,
+  };
 }

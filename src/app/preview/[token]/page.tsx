@@ -325,6 +325,7 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
           layout: { sections: p.sections, theme },
           content: p.content,
           title: p.title,
+          seo: p.seo,
         };
       }
       const safeSubpages = JSON.parse(JSON.stringify(subpages));
@@ -346,6 +347,8 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
             legalPages: legalPages || undefined,
             subpages: safeSubpages,
             chrome: safeChrome,
+            // Root page's seo doubles as the site-level seo (favicon cascade).
+            seo: homeEntry?.seo ? JSON.parse(JSON.stringify(homeEntry.seo)) : undefined,
           },
           themeValues: {
             primary: colorTokens.accent,

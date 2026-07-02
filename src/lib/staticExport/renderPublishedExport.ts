@@ -84,7 +84,7 @@ export async function renderPublishedExport(
   const rootMeta = buildPageMetadata({
     slug,
     pageTitle: cleanTitle,
-    content: contentData, // already flattened above
+    content: contentData, // already flattened above; carries content.seo when set
     previewImage,
     canonicalDomain,
     canonicalPath: '/',
@@ -98,9 +98,11 @@ export async function renderPublishedExport(
     publishedPageId: pageId,
     pageOwnerId: userId,
     slug,
-    title: cleanTitle,
+    title: rootMeta.title,
     description: rootMeta.description,
     previewImage: previewImage ?? undefined,
+    seo: contentData.seo,
+    faviconUrl: rootMeta.faviconUrl,
     analyticsOptIn: analyticsEnabled || false, // Phase 4
     baseURL: baseUrl,
     audienceType,
@@ -163,6 +165,8 @@ export async function renderPublishedExport(
         canonicalDomain,
         canonicalPath: path,
         baseUrl,
+        seo: sub?.seo, // subpage seo lives on the sub entry, not inside its content
+        rootSeo: contentData.seo, // favicon cascades from the root
       });
 
       const subHtml = await generateStaticHTML({
@@ -172,9 +176,11 @@ export async function renderPublishedExport(
         publishedPageId: pageId,
         pageOwnerId: userId,
         slug,
-        title: sub?.title || cleanTitle,
+        title: subMeta.title,
         description: subMeta.description,
         previewImage: previewImage ?? undefined,
+        seo: sub?.seo,
+        faviconUrl: subMeta.faviconUrl,
         analyticsOptIn: analyticsEnabled || false,
         baseURL: baseUrl,
         audienceType,

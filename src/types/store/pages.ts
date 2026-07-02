@@ -23,6 +23,29 @@ export interface PageSlice {
 /** A page's role in the multi-page model (Phase 3 collection system). */
 export type PageKind = 'singleton' | 'collectionItem';
 
+/** schema.org type for the page's JSON-LD block. 'auto' derives a safe default. */
+export type StructuredDataType =
+  | 'auto'
+  | 'none'
+  | 'Organization'
+  | 'LocalBusiness'
+  | 'Product'
+  | 'Service';
+
+/**
+ * Per-page SEO overrides (SEO track, Phase 2). Everything optional — an absent
+ * field falls back to the auto-derived behavior in buildPageMetadata. The home
+ * page's entry doubles as the site-level seo (lifted to content.seo at publish).
+ */
+export interface PageSeo {
+  title?: string; // <=70 chars; <title> + og:title override
+  description?: string; // <=200 chars; meta description + og:description override
+  ogImage?: string; // absolute https URL; wins over previewImage + auto /api/og
+  noIndex?: boolean; // -> <meta name="robots" content="noindex,nofollow">
+  faviconUrl?: string; // site-wide; only meaningful on the root (home) entry
+  structuredDataType?: StructuredDataType; // default 'auto'
+}
+
 /** A page entry = its slice plus identity/route metadata. Maps to a ProjectPage row. */
 export interface ProjectPageEntry extends PageSlice {
   id: string;
@@ -33,6 +56,7 @@ export interface ProjectPageEntry extends PageSlice {
   // Collection system (Phase 3). Optional → Phase-1/2 drafts default to 'singleton'.
   kind?: PageKind; // default 'singleton'
   collectionKey?: string; // e.g. 'products' — set on the catalog page AND each item
+  seo?: PageSeo;
 }
 
 /** A shared chrome entry (header or footer) — one per project, rendered on every page. */
@@ -78,6 +102,8 @@ export interface PageActions {
   /** Delete a page. The home page cannot be deleted. */
   deletePage: (pageId: string) => void;
   renamePage: (pageId: string, title: string, pathSlug?: string) => void;
+  /** Merge a partial seo patch into a page's seo blob (undefined values delete keys). */
+  updatePageSeo: (pageId: string, seo: Partial<PageSeo>) => void;
   /** All pages, order-sorted (home first). */
   getPagesList: () => ProjectPageEntry[];
 
