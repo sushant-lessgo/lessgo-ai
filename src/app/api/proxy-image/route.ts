@@ -5,6 +5,7 @@ import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
 import sharp from 'sharp';
 import { put, list } from '@vercel/blob';
+import { isAdmin } from '@/lib/admin';
 
 const MAX_INPUT_SIZE = 15 * 1024 * 1024; // 15MB max from Pexels
 const MAX_WIDTH = 2400;
@@ -45,7 +46,12 @@ export async function POST(request: NextRequest) {
       include: { project: true },
     });
 
-    if (!token || !token.project || token.project.userId !== user.id) {
+    // Read-side image fetch/cache: admins may proxy for any project (silent bypass, no audit —
+    // the write-side upload-image audits its overrides).
+    if (!token || !token.project) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+    if (token.project.userId !== user.id && !isAdmin(clerkId)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 

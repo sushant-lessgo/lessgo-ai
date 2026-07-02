@@ -11,6 +11,7 @@ import { checkDomainRateLimit } from '@/lib/rateLimit';
 import { writeRedirect, atomicPublishWithRetry, writeSlugForHost } from '@/lib/routing/kvRoutes';
 import { publishSubdomainHosts } from '@/lib/domains/hosts';
 import { renderPublishedExport } from '@/lib/staticExport/renderPublishedExport';
+import { isAdmin, logAdminOverride } from '@/lib/admin';
 import * as Sentry from '@sentry/nextjs';
 
 const BodySchema = z.object({ slug: z.string().min(1).max(100) });
@@ -43,7 +44,10 @@ export async function POST(req: NextRequest) {
     },
   });
   if (!page) return createSecureResponse({ error: 'Page not found' }, 404);
-  if (page.userId !== userId) return createSecureResponse({ error: 'Forbidden' }, 403);
+  if (page.userId !== userId) {
+    if (!isAdmin(userId)) return createSecureResponse({ error: 'Forbidden' }, 403);
+    await logAdminOverride({ actorClerkId: userId, ownerId: page.userId, action: 'domain.verify-dns', resource: { slug: page.slug, domain: page.customDomain } });
+  }
   if (!page.customDomain) return createSecureResponse({ error: 'No custom domain' }, 400);
   if (page.customDomainStatus === 'live') {
     return createSecureResponse({ status: 'live', domain: page.customDomain });

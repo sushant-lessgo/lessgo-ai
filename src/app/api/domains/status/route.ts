@@ -7,6 +7,7 @@ import { prisma } from '@/lib/prisma';
 import { createSecureResponse } from '@/lib/security';
 import { getDomainConfig, getApexIp, type VercelDomainConfig } from '@/lib/vercel/domains';
 import { ownershipTxtHost, ownershipTxtValue } from '@/lib/domains/verify';
+import { isAdmin } from '@/lib/admin';
 
 // Per-instance cache for Vercel config lookups (60s TTL). Cold-start resets.
 const configCache = new Map<string, { cfg: VercelDomainConfig; fetchedAt: number }>();
@@ -44,7 +45,9 @@ export async function GET(req: NextRequest) {
     },
   });
   if (!page) return createSecureResponse({ error: 'Page not found' }, 404);
-  if (page.userId !== userId) return createSecureResponse({ error: 'Forbidden' }, 403);
+  // Read-only status: admins may view any page's domain status (silent bypass, no audit — matches
+  // the published-slug read-bypass precedent). Mutating domain routes audit-log their overrides.
+  if (page.userId !== userId && !isAdmin(userId)) return createSecureResponse({ error: 'Forbidden' }, 403);
   if (!page.customDomain) return createSecureResponse({ status: null });
 
   let status = page.customDomainStatus;

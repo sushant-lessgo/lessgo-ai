@@ -416,3 +416,19 @@ model CollectLink {
 
   @@index([userId])
 }
+
+// Durable audit trail for privileged admin overrides — an admin (ADMIN_CLERK_IDS) acting on a
+// resource they don't own (publish/domain/image on another user's page). System-of-record for
+// "which admin touched whose page/domain, and when"; deliberately separate from UsageEvent (the
+// billing ledger). Written best-effort by logAdminOverride() in src/lib/admin.ts.
+model AdminAuditLog {
+  id           String   @id @default(cuid())
+  actorClerkId String // the admin who acted (Clerk id)
+  ownerId      String? // resource owner (PublishedPage.userId=clerkId, or Project.userId FK)
+  action       String // 'publish' | 'domain.add' | 'domain.remove' | 'domain.verify-ownership' | 'domain.verify-dns' | 'image.upload'
+  resource     Json? // { slug, domain, tokenId, ... }
+  createdAt    DateTime @default(now())
+
+  @@index([actorClerkId])
+  @@index([createdAt])
+}

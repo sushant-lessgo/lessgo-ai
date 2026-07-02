@@ -11,6 +11,7 @@ import { validateDomain } from '@/lib/domains/validate';
 import { ownershipTxtHost, ownershipTxtValue } from '@/lib/domains/verify';
 import { getApexIp } from '@/lib/vercel/domains';
 import { hasFeature, checkLimit } from '@/lib/planManager';
+import { isAdmin, logAdminOverride } from '@/lib/admin';
 
 const BodySchema = z.object({
   slug: z.string().min(1).max(100),
@@ -35,7 +36,10 @@ export async function POST(req: NextRequest) {
     select: { id: true, userId: true, customDomain: true, customDomainStatus: true },
   });
   if (!page) return createSecureResponse({ error: 'Page not found' }, 404);
-  if (page.userId !== userId) return createSecureResponse({ error: 'Forbidden' }, 403);
+  if (page.userId !== userId) {
+    if (!isAdmin(userId)) return createSecureResponse({ error: 'Forbidden' }, 403);
+    await logAdminOverride({ actorClerkId: userId, ownerId: page.userId, action: 'domain.add', resource: { slug, domain: customDomain } });
+  }
   if (page.customDomain && page.customDomainStatus !== 'failed') {
     return createSecureResponse({ error: 'Page already has a custom domain' }, 409);
   }

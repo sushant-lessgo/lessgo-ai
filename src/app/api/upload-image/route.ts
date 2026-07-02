@@ -6,6 +6,7 @@ import { prisma } from '@/lib/prisma';
 import sharp from 'sharp';
 import { nanoid } from 'nanoid';
 import { put } from '@vercel/blob';
+import { isAdmin, logAdminOverride } from '@/lib/admin';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
@@ -83,9 +84,18 @@ export async function POST(request: NextRequest) {
 
     console.log('🔵 [UPLOAD] Token data:', { hasProject: !!token.project, projectUserId: token.project?.userId, userInternalId: user.id });
 
-    if (!token.project || token.project.userId !== user.id) {
-      console.log('🔴 [UPLOAD] Unauthorized - not project owner');
+    if (!token.project) {
+      console.log('🔴 [UPLOAD] Token has no project, returning 403');
       return NextResponse.json({ error: 'Unauthorized - not project owner' }, { status: 403 });
+    }
+    if (token.project.userId !== user.id) {
+      // Owner mismatch: reject unless the actor is an admin (support/ops override on another
+      // user's project). Audit-logged. isAdmin needs the Clerk id, not the internal user id.
+      if (!isAdmin(clerkId)) {
+        console.log('🔴 [UPLOAD] Unauthorized - not project owner');
+        return NextResponse.json({ error: 'Unauthorized - not project owner' }, { status: 403 });
+      }
+      await logAdminOverride({ actorClerkId: clerkId, ownerId: token.project.userId, action: 'image.upload', resource: { tokenId } });
     }
     console.log('🔵 [UPLOAD] Project ownership verified');
 

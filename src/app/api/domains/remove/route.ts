@@ -9,6 +9,7 @@ import { createSecureResponse } from '@/lib/security';
 import { removeDomain, VercelApiError } from '@/lib/vercel/domains';
 import { removeRoutes, removeRedirect } from '@/lib/routing/kvRoutes';
 import { publishSubdomainHosts } from '@/lib/domains/hosts';
+import { isAdmin, logAdminOverride } from '@/lib/admin';
 
 const BodySchema = z.object({ slug: z.string().min(1).max(100) });
 
@@ -24,7 +25,10 @@ export async function DELETE(req: NextRequest) {
     select: { id: true, userId: true, slug: true, customDomain: true },
   });
   if (!page) return createSecureResponse({ error: 'Page not found' }, 404);
-  if (page.userId !== userId) return createSecureResponse({ error: 'Forbidden' }, 403);
+  if (page.userId !== userId) {
+    if (!isAdmin(userId)) return createSecureResponse({ error: 'Forbidden' }, 403);
+    await logAdminOverride({ actorClerkId: userId, ownerId: page.userId, action: 'domain.remove', resource: { slug: page.slug, domain: page.customDomain } });
+  }
   if (!page.customDomain) return createSecureResponse({ error: 'No custom domain' }, 400);
 
   const customHost = page.customDomain;

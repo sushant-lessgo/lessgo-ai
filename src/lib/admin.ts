@@ -1,5 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { logger } from '@/lib/logger';
 
 const ADMIN_IDS = (process.env.ADMIN_CLERK_IDS ?? '')
   .split(',')
@@ -8,6 +10,37 @@ const ADMIN_IDS = (process.env.ADMIN_CLERK_IDS ?? '')
 
 export function isAdmin(clerkId: string | null | undefined): boolean {
   return !!clerkId && ADMIN_IDS.includes(clerkId);
+}
+
+/**
+ * Record a privileged admin override — an admin acting on a resource they don't own
+ * (publish/domain/image on another user's page). The DB row is the durable system-of-record;
+ * the logger.warn line is live-ops visibility (dev). Best-effort: an audit-write failure must
+ * NEVER break the underlying operation, so this swallows its own errors.
+ *
+ * Call at each ownership-check site ONLY on the admin-bypass branch, after confirming the actor
+ * is an admin and is NOT the owner. Capture both the actor and the resource owner.
+ */
+export async function logAdminOverride(p: {
+  actorClerkId: string; // the admin acting
+  ownerId: string | null; // resource owner (PublishedPage.userId=clerkId, or Project.userId FK)
+  action: string; // e.g. 'publish', 'domain.add', 'image.upload'
+  resource?: Record<string, unknown>; // { slug, domain, tokenId, ... }
+}): Promise<void> {
+  logger.warn('[admin-override]', p);
+  try {
+    await prisma.adminAuditLog.create({
+      data: {
+        actorClerkId: p.actorClerkId,
+        ownerId: p.ownerId ?? null,
+        action: p.action,
+        resource: (p.resource ?? undefined) as any,
+      },
+    });
+  } catch (e) {
+    // Never throw — auditing must not block the operation it records.
+    logger.error('[admin-override] audit write failed', e as Error);
+  }
 }
 
 export async function requireAdmin(req: NextRequest): Promise<NextResponse | null> {

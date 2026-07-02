@@ -12,6 +12,7 @@ import { getUserPlan, checkLimit } from '@/lib/planManager';
 import { stripHTMLTags } from '@/utils/smartTitleGenerator';
 import { sanitizeContentForPublish } from '@/modules/sections/layoutElementSchema';
 import { publishedSubdomainHost, publishSubdomainHosts } from '@/lib/domains/hosts';
+import { isAdmin, logAdminOverride } from '@/lib/admin';
 import * as Sentry from '@sentry/nextjs';
 
 // Force Node.js runtime for ReactDOMServer support
@@ -115,7 +116,13 @@ async function publishHandler(req: NextRequest) {
 
     if (existing) {
       if (existing.userId !== userId) {
-        return createSecureResponse({ error: 'Slug already taken' }, 409);
+        // Owner mismatch: reject unless the actor is an admin (support/ops override). Admins may
+        // republish a customer's page; ownership is NOT rewritten (the update below never touches
+        // userId), so the customer stays the owner. Every override is audit-logged.
+        if (!isAdmin(userId)) {
+          return createSecureResponse({ error: 'Slug already taken' }, 409);
+        }
+        await logAdminOverride({ actorClerkId: userId, ownerId: existing.userId, action: 'publish', resource: { slug } });
       }
 
       await prisma.publishedPage.update({
