@@ -240,6 +240,7 @@ function buildHTMLDocument(params: {
     previewImage: metadata.ogImageOverride || metadata.previewImage,
     canonicalDomain: metadata.canonicalDomain,
     baseUrl: metadata.baseURL,
+    canonicalPath: metadata.canonicalPath,
   });
 
   return `<!DOCTYPE html>

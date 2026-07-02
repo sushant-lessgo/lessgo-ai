@@ -69,6 +69,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     previewImage: page.previewImage,
     canonicalDomain,
     baseUrl: 'https://lessgo.ai',
+    canonicalPath: subPath,
   });
 
   if (pdEl) {

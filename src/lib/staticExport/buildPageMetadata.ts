@@ -76,18 +76,24 @@ function findHeroId(sections: string[] = []): string | undefined {
  * OG image precedence: manual `previewImage` > auto `/api/og/{slug}` served from the live custom
  * domain (so the absolute URL matches the host the page lives on) > auto `/api/og/{slug}` on baseUrl.
  * Lifted verbatim from the static generator so no-custom-domain output stays byte-identical.
+ * `canonicalPath` (non-root) appends `?path=` so multi-page subpages get their own auto OG image.
  */
 export function resolveOgImage(opts: {
   slug: string;
   previewImage?: string | null;
   canonicalDomain?: string;
   baseUrl: string;
+  canonicalPath?: string;
 }): string {
+  const pathQuery =
+    opts.canonicalPath && opts.canonicalPath !== '/'
+      ? `?path=${encodeURIComponent(opts.canonicalPath)}`
+      : '';
   return (
     opts.previewImage ||
     (opts.canonicalDomain
-      ? `https://${opts.canonicalDomain}/api/og/${opts.slug}`
-      : `${opts.baseUrl}/api/og/${opts.slug}`)
+      ? `https://${opts.canonicalDomain}/api/og/${opts.slug}${pathQuery}`
+      : `${opts.baseUrl}/api/og/${opts.slug}${pathQuery}`)
   );
 }
 
@@ -129,6 +135,7 @@ export function buildPageMetadata(input: BuildPageMetadataInput): PageMetadata {
     previewImage: seo?.ogImage || input.previewImage,
     canonicalDomain: input.canonicalDomain,
     baseUrl: input.baseUrl,
+    canonicalPath: input.canonicalPath,
   });
 
   return {

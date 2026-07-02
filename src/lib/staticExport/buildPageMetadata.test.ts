@@ -61,6 +61,37 @@ describe('resolveOgImage', () => {
       'https://lessgo.ai/api/og/acme'
     );
   });
+
+  it('appends ?path= for non-root pages so subpages get their own auto OG', () => {
+    expect(
+      resolveOgImage({ slug: 'acme', baseUrl: 'https://lessgo.ai', canonicalPath: '/gallery' })
+    ).toBe('https://lessgo.ai/api/og/acme?path=%2Fgallery');
+    expect(
+      resolveOgImage({
+        slug: 'acme',
+        canonicalDomain: 'scalifixai.com',
+        baseUrl: 'https://lessgo.ai',
+        canonicalPath: '/products/nwc-2000',
+      })
+    ).toBe('https://scalifixai.com/api/og/acme?path=%2Fproducts%2Fnwc-2000');
+  });
+
+  it('root path leaves the auto OG URL unchanged (parity guard)', () => {
+    expect(resolveOgImage({ slug: 'acme', baseUrl: 'https://lessgo.ai', canonicalPath: '/' })).toBe(
+      'https://lessgo.ai/api/og/acme'
+    );
+  });
+
+  it('manual previewImage still wins over the path-suffixed auto URL', () => {
+    expect(
+      resolveOgImage({
+        slug: 'acme',
+        previewImage: 'https://cdn/x.png',
+        baseUrl: 'https://lessgo.ai',
+        canonicalPath: '/gallery',
+      })
+    ).toBe('https://cdn/x.png');
+  });
 });
 
 describe('buildPageMetadata', () => {

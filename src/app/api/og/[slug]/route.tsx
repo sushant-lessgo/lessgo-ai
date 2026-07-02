@@ -1,9 +1,12 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { extractLogoUrl } from '@/lib/staticExport/structuredData';
 
 // Using Node.js runtime instead of edge because Prisma doesn't support edge runtime
 
+// Legacy fallback only: old pages stored themeValues.colors.{baseColor,accentColor}
+// as named tokens. Current publishes store real hex in content.layout.theme.colors.
 const COLOR_MAP: Record<string, string> = {
   blue: '#3b82f6',
   purple: '#a855f7',
@@ -14,6 +17,29 @@ const COLOR_MAP: Record<string, string> = {
   teal: '#14b8a6',
   indigo: '#6366f1',
 };
+
+/** True for values we can safely drop into a CSS gradient stop. */
+function isCssColor(v: unknown): v is string {
+  return typeof v === 'string' && /^(#([0-9a-f]{3}|[0-9a-f]{6})$|rgb|hsl)/i.test(v.trim());
+}
+
+/**
+ * Darken a hex color by `amount` (0..1) for a readable gradient end. Tolerates
+ * 3-digit hex; returns null for anything it can't parse (rgb()/hsl()/tokens) —
+ * callers fall back rather than throw.
+ */
+function darkenHex(hex: string, amount: number): string | null {
+  const m = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(hex.trim());
+  if (!m) return null;
+  let h = m[1];
+  if (h.length === 3) h = h.split('').map((c) => c + c).join('');
+  const n = parseInt(h, 16);
+  const scale = (c: number) => Math.max(0, Math.round(c * (1 - amount)));
+  const r = scale((n >> 16) & 0xff);
+  const g = scale((n >> 8) & 0xff);
+  const b = scale(n & 0xff);
+  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
+}
 
 export async function GET(
   req: NextRequest,
@@ -33,25 +59,69 @@ export async function GET(
       return new Response('Page not found', { status: 404 });
     }
 
-    // Extract content from hero section
     const content = page.content as any;
-    const sections = content?.layout?.sections || [];
+
+    // Multi-page: ?path=/gallery renders the subpage's own hero. Subpages store
+    // sections flat under `.content` (same nested shape as the root).
+    const rawPath = req.nextUrl.searchParams.get('path');
+    const path = rawPath && rawPath !== '/' ? (rawPath.startsWith('/') ? rawPath : `/${rawPath}`) : null;
+    const sub = path ? (content?.subpages || {})[path] || (content?.subpages || {})[path.slice(1)] : null;
+    if (path && !sub) {
+      return new Response('Page not found', { status: 404 });
+    }
+
+    const sections: string[] = (sub ? sub?.layout?.sections : content?.layout?.sections) || [];
+    const container: Record<string, any> = (sub ? sub?.content : content?.content) || {};
+    const flatView = { layout: { sections }, ...container };
+
     const heroSectionId = sections.find((id: string) => id.includes('hero'));
-    const heroElements = heroSectionId
-      ? content?.content?.[heroSectionId]?.elements || {}
-      : {};
+    const heroElements = heroSectionId ? container?.[heroSectionId]?.elements || {} : {};
 
-    const headline = heroElements.headline?.content || page.title || 'Landing Page';
-    const subheadline = heroElements.subheadline?.content || '';
-    const badgeText = heroElements.badge_text?.content || '';
+    let headline = heroElements.headline?.content || sub?.title || page.title || 'Landing Page';
+    let subheadline = heroElements.subheadline?.content || '';
+    let badgeText = heroElements.badge_text?.content || '';
 
-    // Extract theme colors
-    const theme = page.themeValues as any;
-    const baseColor = theme?.colors?.baseColor || 'blue';
-    const accentColor = theme?.colors?.accentColor || 'purple';
+    // Product-detail subpages have no hero — derive from the Product entry record
+    // (same derivation as the dynamic subpath route).
+    if (sub && !heroSectionId) {
+      const pdId = sections.find((id: string) => /^productdetail/i.test(id));
+      const pdEl = pdId ? container?.[pdId]?.elements || {} : null;
+      if (pdEl) {
+        const model = typeof pdEl.model === 'string' ? pdEl.model : '';
+        const name = typeof pdEl.name === 'string' ? pdEl.name : '';
+        headline = [model, name].filter(Boolean).join(' ') || headline;
+        subheadline =
+          (typeof pdEl.oneLiner === 'string' && pdEl.oneLiner) ||
+          (typeof pdEl.lede === 'string' && pdEl.lede) ||
+          '';
+        badgeText = '';
+      }
+    }
 
-    const gradientStart = COLOR_MAP[baseColor] || COLOR_MAP.blue;
-    const gradientEnd = COLOR_MAP[accentColor] || COLOR_MAP.purple;
+    // Palette: the real page theme (content.layout.theme.colors — hex values used
+    // by the published CSS vars) with the legacy named-token map as last resort.
+    // themeValues.colors is dead for current publishes (stores {primary,background,
+    // muted}), so without this every new page rendered blue→purple.
+    const pageTheme = (sub?.layout?.theme || content?.layout?.theme) as any;
+    const gradientColors = pageTheme?.colors?.gradientColors;
+    const accent = pageTheme?.colors?.accentColor;
+
+    let gradientStart: string;
+    let gradientEnd: string;
+    if (isCssColor(gradientColors?.from) && isCssColor(gradientColors?.to)) {
+      gradientStart = gradientColors.from;
+      gradientEnd = gradientColors.to;
+    } else if (isCssColor(accent) && darkenHex(accent, 0.3)) {
+      gradientStart = accent;
+      gradientEnd = darkenHex(accent, 0.3)!;
+    } else {
+      const legacy = page.themeValues as any;
+      gradientStart = COLOR_MAP[legacy?.colors?.baseColor] || COLOR_MAP.blue;
+      gradientEnd = COLOR_MAP[legacy?.colors?.accentColor] || COLOR_MAP.purple;
+    }
+
+    // Uploaded site logo (header chrome is injected per page at publish).
+    const logoUrl = extractLogoUrl(flatView);
 
     // Truncate text for display
     const displayHeadline = headline.length > 60 ? headline.slice(0, 57) + '...' : headline;
@@ -72,21 +142,37 @@ export async function GET(
             fontFamily: 'Inter, system-ui, sans-serif',
           }}
         >
-          {badgeText && (
-            <div
+          {logoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={logoUrl}
+              alt=""
               style={{
                 position: 'absolute',
-                top: 60,
+                top: 52,
                 left: 80,
-                fontSize: 24,
-                color: 'rgba(255, 255, 255, 0.9)',
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
+                height: 56,
+                maxWidth: 240,
+                objectFit: 'contain',
               }}
-            >
-              {badgeText}
-            </div>
+            />
+          ) : (
+            badgeText && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 60,
+                  left: 80,
+                  fontSize: 24,
+                  color: 'rgba(255, 255, 255, 0.9)',
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                }}
+              >
+                {badgeText}
+              </div>
+            )
           )}
 
           <div
@@ -161,6 +247,11 @@ export async function GET(
       {
         width: 1200,
         height: 630,
+        headers: {
+          // OG scrapers + CDN cache; SWR keeps shares fresh after a republish
+          // without a hard hourly miss.
+          'Cache-Control': 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800',
+        },
       }
     );
   } catch (error) {
