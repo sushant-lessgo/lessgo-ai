@@ -169,5 +169,12 @@ export async function POST(req: NextRequest) {
     // Non-fatal for status — user can republish to repair
   }
 
+  // Blog (Phase 1): re-render published posts + /blog index so their canonical/og
+  // point at the now-live custom domain, and emit their routes on the new host
+  // (fire-and-forget, self-contained errors — must never delay/fail go-live).
+  import('@/lib/blog/publishBlogPost')
+    .then(({ syncBlogAfterSitePublish }) => syncBlogAfterSitePublish(page.id, 'https://lessgo.ai'))
+    .catch((e) => console.error('[verify-dns] blog sync failed (non-fatal):', e));
+
   return createSecureResponse({ status: 'live', domain: customHost });
 }

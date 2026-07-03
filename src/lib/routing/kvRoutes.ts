@@ -161,6 +161,41 @@ export async function atomicPublish(
 }
 
 /**
+ * Blog (Phase 1): incremental single-path route writes/deletes.
+ * Unlike atomicPublish (which always rewrites root '/'), these touch ONLY the
+ * given host+path keys — used for per-post publish/unpublish of /blog routes.
+ */
+export async function setRoutes(
+  entries: Array<{ host: string; path: string; config: RouteConfig }>
+): Promise<void> {
+  if (entries.length === 0) return;
+  try {
+    const pipeline = kv.pipeline();
+    for (const { host, path, config } of entries) {
+      pipeline.set(`route:${host}:${path}`, config, { ex: 365 * 24 * 60 * 60 });
+    }
+    await pipeline.exec();
+  } catch (error) {
+    console.error('[KV] setRoutes failed:', error);
+    throw new Error(`KV setRoutes failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+export async function deleteRoutes(keys: Array<{ host: string; path: string }>): Promise<void> {
+  if (keys.length === 0) return;
+  try {
+    const pipeline = kv.pipeline();
+    for (const { host, path } of keys) {
+      pipeline.del(`route:${host}:${path}`);
+    }
+    await pipeline.exec();
+  } catch (error) {
+    console.error('[KV] deleteRoutes failed:', error);
+    throw new Error(`KV deleteRoutes failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+/**
  * Sleep helper for exponential backoff
  */
 function sleep(ms: number): Promise<void> {

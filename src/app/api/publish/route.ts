@@ -379,6 +379,13 @@ async function publishHandler(req: NextRequest) {
         console.error('[Cleanup Error]', err);
       });
 
+      // Blog (Phase 1): re-render published posts + /blog index with the fresh
+      // chrome/theme/canonical (fire-and-forget, self-contained errors — must
+      // never delay or fail the site publish).
+      import('@/lib/blog/publishBlogPost')
+        .then(({ syncBlogAfterSitePublish }) => syncBlogAfterSitePublish(pageId, baseUrl))
+        .catch(err => console.error('[blog] sync after publish failed (non-fatal):', err));
+
     } catch (error) {
       console.error('[Phase 2] Static export failed:', error);
       Sentry.captureException(error, {

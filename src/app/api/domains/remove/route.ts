@@ -7,7 +7,7 @@ import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
 import { createSecureResponse } from '@/lib/security';
 import { removeDomain, VercelApiError } from '@/lib/vercel/domains';
-import { removeRoutes, removeRedirect } from '@/lib/routing/kvRoutes';
+import { removeRoutes, removeRedirect, deleteRoutes } from '@/lib/routing/kvRoutes';
 import { publishSubdomainHosts } from '@/lib/domains/hosts';
 import { isAdmin, logAdminOverride } from '@/lib/admin';
 
@@ -22,7 +22,7 @@ export async function DELETE(req: NextRequest) {
 
   const page = await prisma.publishedPage.findUnique({
     where: { slug: parse.data.slug },
-    select: { id: true, userId: true, slug: true, customDomain: true },
+    select: { id: true, userId: true, slug: true, customDomain: true, projectId: true },
   });
   if (!page) return createSecureResponse({ error: 'Page not found' }, 404);
   if (page.userId !== userId) {
@@ -50,6 +50,21 @@ export async function DELETE(req: NextRequest) {
     for (const sub of subdomainHosts) {
       await removeRedirect(sub);
     }
+
+    // Blog (Phase 1): removeRoutes only deletes root-path keys — the removed host's
+    // /blog and /blog/{slug} routes must go explicitly.
+    if (page.projectId) {
+      const posts = await prisma.blogPost.findMany({
+        where: { projectId: page.projectId, status: 'published' },
+        select: { slug: true },
+      });
+      if (posts.length > 0) {
+        await deleteRoutes([
+          { host: customHost, path: '/blog' },
+          ...posts.map((p) => ({ host: customHost, path: `/blog/${p.slug}` })),
+        ]);
+      }
+    }
   } catch (e) {
     console.error('[domains/remove] KV cleanup failed', e);
   }
@@ -69,6 +84,13 @@ export async function DELETE(req: NextRequest) {
       customDomainError: null,
     },
   });
+
+  // Blog (Phase 1): re-render posts/index so canonicals fall back to the subdomain
+  // (fire-and-forget, self-contained errors). Runs AFTER the DB clear above so
+  // liveHostsForPage sees only the remaining hosts.
+  import('@/lib/blog/publishBlogPost')
+    .then(({ syncBlogAfterSitePublish }) => syncBlogAfterSitePublish(page.id, 'https://lessgo.ai'))
+    .catch((e) => console.error('[domains/remove] blog sync failed (non-fatal):', e));
 
   return createSecureResponse({ removed: true, retryAfter: 60 });
 }
