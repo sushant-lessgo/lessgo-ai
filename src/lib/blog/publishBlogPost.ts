@@ -20,6 +20,8 @@ import { setRoutes, deleteRoutes } from '@/lib/routing/kvRoutes';
 import type { RouteConfig } from '@/lib/routing/types';
 import { usesTemplateModule } from '@/types/service';
 import { sanitizeSeo } from '@/lib/validation';
+import { serializeJsonLd, extractLogoUrl } from '@/lib/staticExport/structuredData';
+import { buildBlogPostingJsonLd } from './jsonLd';
 import {
   buildBlogPostPageDef,
   buildBlogIndexPageDef,
@@ -98,6 +100,8 @@ async function renderAndUpload(opts: {
   pageName: string;
   seo?: ReturnType<typeof sanitizeSeo>;
   previewImage?: string | null;
+  /** P2: when set (article pages only), a BlogPosting JSON-LD script is baked in. */
+  jsonLdPost?: { title: string; firstPublishedAt: Date | null; publishedAt: Date };
 }): Promise<{ blobKey: string; blobUrl: string }> {
   const { page, def } = opts;
 
@@ -113,6 +117,24 @@ async function renderAndUpload(opts: {
     rootSeo: opts.pageContentFlat?.seo, // favicon cascades from the site root
   });
 
+  // BlogPosting JSON-LD (P2). Index pages get none (a bare Blog type adds no
+  // rich-result value). datePublished = original publish; dateModified = this one.
+  let jsonLd: string | undefined;
+  if (opts.jsonLdPost) {
+    jsonLd = serializeJsonLd(
+      buildBlogPostingJsonLd({
+        headline: opts.jsonLdPost.title,
+        description: opts.seo?.description || def.description || meta.description,
+        url: meta.canonicalURL,
+        imageUrl: meta.ogImage,
+        datePublishedISO: (opts.jsonLdPost.firstPublishedAt ?? opts.jsonLdPost.publishedAt).toISOString(),
+        dateModifiedISO: opts.jsonLdPost.publishedAt.toISOString(),
+        authorName: page.title || page.slug,
+        publisherLogoUrl: extractLogoUrl(opts.pageContentFlat) || undefined,
+      })
+    );
+  }
+
   const html = await generateStaticHTML({
     sections: def.sections,
     content: def.content,
@@ -125,6 +147,7 @@ async function renderAndUpload(opts: {
     previewImage: opts.previewImage ?? undefined,
     seo: opts.seo,
     faviconUrl: meta.faviconUrl,
+    jsonLd,
     analyticsOptIn: page.analyticsEnabled,
     baseURL: opts.baseUrl,
     audienceType: page.audienceType as 'product' | 'service',
@@ -213,6 +236,7 @@ export async function publishBlogPost(opts: {
     pageName: `blog/${post.slug}`,
     seo,
     previewImage: post.heroImage,
+    jsonLdPost: { title: post.title, firstPublishedAt: post.firstPublishedAt, publishedAt: now },
   });
 
   const others = await publishedPosts(post.projectId, post.id);
@@ -382,6 +406,11 @@ export async function syncBlogAfterSitePublish(pageId: string, baseUrl: string):
         pageName: `blog/${post.slug}`,
         seo,
         previewImage: post.heroImage,
+        jsonLdPost: {
+          title: post.title,
+          firstPublishedAt: post.firstPublishedAt,
+          publishedAt: post.publishedAt || new Date(),
+        },
       });
       for (const host of hosts) {
         entries.push({

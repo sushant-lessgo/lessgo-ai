@@ -6,6 +6,8 @@ import { loadBlogSsr, renderBlogSsrPage, toSsrPostData } from '@/lib/blog/ssr';
 import { resolveCanonicalURL } from '@/lib/staticExport/canonicalUrl';
 import { resolveOgImage } from '@/lib/staticExport/buildPageMetadata';
 import { sanitizeSeo } from '@/lib/validation';
+import { serializeJsonLd, extractLogoUrl } from '@/lib/staticExport/structuredData';
+import { buildBlogPostingJsonLd } from '@/lib/blog/jsonLd';
 
 // Blog article SSR fallback (blob fast path via KV route:{host}:/blog/{postSlug}
 // is primary). Static segment — wins over the [...subpath] catch-all. Live DB
@@ -77,5 +79,37 @@ export default async function BlogPostPage({ params }: PageProps) {
   if (!post) return notFound();
 
   const def = buildBlogPostPageDef(ctx.pageContentFlat, toSsrPostData(post));
-  return renderBlogSsrPage(ctx, def);
+
+  // BlogPosting JSON-LD (P2) — same derivations as generateMetadata above; the
+  // static-export path bakes an identical script into the blob head. Body-placed
+  // JSON-LD is valid for Google (root-page precedent).
+  const seo = sanitizeSeo(post.seo);
+  const body = (post.body as any) || {};
+  const canonicalPath = `/blog/${post.slug}`;
+  const jsonLd = buildBlogPostingJsonLd({
+    headline: post.title,
+    description:
+      seo?.description ||
+      post.excerpt ||
+      markdownToDescription(typeof body.markdown === 'string' ? body.markdown : ''),
+    url: resolveCanonicalURL({ slug: params.slug, canonicalDomain: ctx.canonicalDomain, canonicalPath }),
+    imageUrl: resolveOgImage({
+      slug: params.slug,
+      previewImage: seo?.ogImage || post.heroImage,
+      canonicalDomain: ctx.canonicalDomain,
+      baseUrl: 'https://lessgo.ai',
+      canonicalPath,
+    }),
+    datePublishedISO: (post.firstPublishedAt ?? post.publishedAt ?? new Date()).toISOString(),
+    dateModifiedISO: (post.publishedAt ?? undefined)?.toISOString(),
+    authorName: ctx.page.title || ctx.page.slug,
+    publisherLogoUrl: extractLogoUrl(ctx.pageContentFlat) || undefined,
+  });
+
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }} />
+      {await renderBlogSsrPage(ctx, def)}
+    </>
+  );
 }
