@@ -1,12 +1,13 @@
 'use client'
 
-// Blog (Phase 1) post editor: metadata fields + markdown textarea with live
-// ReactMarkdown preview (modeled on PrivacyPolicyEditor). Manual save; publish/
-// unpublish hit the per-post pipeline. Hero upload reuses /api/upload-image.
+// Blog post editor: metadata fields + Tiptap WYSIWYG (markdown stays canonical —
+// BlogRichTextEditor serializes back to markdown on every change) with a raw-
+// markdown escape hatch. Manual save; publish/unpublish hit the per-post
+// pipeline. Hero + inline images reuse /api/upload-image.
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import ReactMarkdown from 'react-markdown'
 import { publishedSubdomainHost } from '@/lib/domains/hosts'
+import BlogRichTextEditor from './BlogRichTextEditor'
 
 interface EditorPost {
   id: string
@@ -50,6 +51,11 @@ export default function BlogPostEditor({
   const [busy, setBusy] = useState<null | 'save' | 'publish' | 'unpublish' | 'upload'>(null)
   const [notice, setNotice] = useState<string | null>(null)
   const [showSeo, setShowSeo] = useState(false)
+  // Rich (Tiptap) vs raw-markdown escape hatch. Both write the same `markdown`
+  // state; `richKey` remounts the rich editor so it re-parses markdown edited
+  // in raw mode (external changes aren't synced into a live Tiptap instance).
+  const [mode, setMode] = useState<'rich' | 'markdown'>('rich')
+  const [richKey, setRichKey] = useState(0)
   const fileRef = useRef<HTMLInputElement>(null)
 
   const flash = (msg: string) => {
@@ -296,27 +302,46 @@ export default function BlogPostEditor({
         </div>
       </div>
 
-      {/* Markdown editor + live preview */}
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden flex flex-col">
-          <div className="px-4 py-2 border-b border-gray-100 bg-gray-50/50 text-xs font-medium text-gray-500">
-            MARKDOWN
+      {/* Article body — Tiptap WYSIWYG (markdown canonical) w/ raw escape hatch */}
+      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+        <div className="flex items-center justify-between px-4 py-2 border-b border-gray-100 bg-gray-50/50">
+          <span className="text-xs font-medium text-gray-500">ARTICLE</span>
+          <div className="flex items-center gap-1 text-xs">
+            <button
+              type="button"
+              onClick={() => {
+                setMode('rich')
+                setRichKey((k) => k + 1) // re-parse markdown possibly edited in raw mode
+              }}
+              className={`px-2 py-1 rounded ${mode === 'rich' ? 'bg-gray-900 text-white' : 'text-gray-500 hover:bg-gray-100'}`}
+            >
+              Rich
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode('markdown')}
+              className={`px-2 py-1 rounded ${mode === 'markdown' ? 'bg-gray-900 text-white' : 'text-gray-500 hover:bg-gray-100'}`}
+              title="Raw markdown (saved markdown may be normalized by the rich editor — same rendering)"
+            >
+              Markdown
+            </button>
           </div>
+        </div>
+        {mode === 'rich' ? (
+          <BlogRichTextEditor
+            key={richKey}
+            initialMarkdown={markdown}
+            onChange={setMarkdown}
+            tokenId={tokenId}
+          />
+        ) : (
           <textarea
-            className="flex-1 w-full p-4 font-mono text-sm leading-relaxed resize-none focus:outline-none min-h-[480px]"
+            className="w-full p-4 font-mono text-sm leading-relaxed resize-none focus:outline-none min-h-[480px]"
             value={markdown}
             placeholder={'# Heading\n\nWrite your article in markdown…'}
             onChange={(e) => setMarkdown(e.target.value)}
           />
-        </div>
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-          <div className="px-4 py-2 border-b border-gray-100 bg-gray-50/50 text-xs font-medium text-gray-500">
-            PREVIEW
-          </div>
-          <div className="p-6 prose prose-sm max-w-none min-h-[480px] overflow-auto [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:mb-3 [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:mt-5 [&_h2]:mb-2 [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:mt-4 [&_h3]:mb-2 [&_p]:mb-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-3 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:mb-3 [&_a]:text-blue-600 [&_a]:underline [&_blockquote]:border-l-2 [&_blockquote]:border-gray-300 [&_blockquote]:pl-3 [&_blockquote]:text-gray-600 [&_code]:bg-gray-100 [&_code]:px-1 [&_code]:rounded [&_pre]:bg-gray-100 [&_pre]:p-3 [&_pre]:rounded [&_pre]:overflow-auto [&_img]:max-w-full [&_img]:rounded">
-            <ReactMarkdown>{markdown || '*Nothing to preview yet.*'}</ReactMarkdown>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   )
