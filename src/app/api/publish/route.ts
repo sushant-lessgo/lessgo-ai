@@ -13,32 +13,11 @@ import { stripHTMLTags } from '@/utils/smartTitleGenerator';
 import { sanitizeContentForPublish } from '@/modules/sections/layoutElementSchema';
 import { publishedSubdomainHost, publishSubdomainHosts } from '@/lib/domains/hosts';
 import { isAdmin, logAdminOverride } from '@/lib/admin';
+import { injectChromeIntoPage } from '@/lib/staticExport/injectChrome';
 import * as Sentry from '@sentry/nextjs';
 
 // Force Node.js runtime for ReactDOMServer support
 export const runtime = 'nodejs';
-
-// Multi-page shared chrome (Phase 2): inject the project's shared header/footer
-// into a page's { layout:{sections}, content } so every frozen/generated page is
-// self-contained. Header prepended, footer appended; idempotent.
-function injectChromeIntoPage(layout: any, contentMap: any, chrome: any) {
-  if (!chrome || !layout || !contentMap) return;
-  const sections: string[] = Array.isArray(layout.sections) ? layout.sections : [];
-  const without = sections.filter(
-    (id) => !(chrome.header && id === chrome.header.id) && !(chrome.footer && id === chrome.footer.id),
-  );
-  const next: string[] = [];
-  if (chrome.header?.id) {
-    next.push(chrome.header.id);
-    contentMap[chrome.header.id] = chrome.header.data;
-  }
-  next.push(...without);
-  if (chrome.footer?.id) {
-    next.push(chrome.footer.id);
-    contentMap[chrome.footer.id] = chrome.footer.data;
-  }
-  layout.sections = next;
-}
 
 async function publishHandler(req: NextRequest) {
   const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
