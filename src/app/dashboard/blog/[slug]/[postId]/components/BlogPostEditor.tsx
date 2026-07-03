@@ -171,6 +171,14 @@ export default function BlogPostEditor({
           {notice && <span className="text-sm text-green-700">{notice}</span>}
         </div>
         <div className="space-x-2">
+          <a
+            href={`/dashboard/blog/${slug}/${post.id}/preview`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block px-4 py-2 text-sm rounded-lg border border-gray-300 bg-white hover:bg-gray-50"
+          >
+            Preview saved draft
+          </a>
           <button
             onClick={save}
             disabled={busy !== null}
