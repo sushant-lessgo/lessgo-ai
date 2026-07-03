@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildSitemapXml, buildRobotsTxt, collectSitemapPaths } from './buildSitemapXml';
+import { appendBlogPaths, buildSitemapXml, buildRobotsTxt, collectSitemapPaths } from './buildSitemapXml';
 
 describe('collectSitemapPaths', () => {
   it('root-only page', () => {
@@ -56,6 +56,30 @@ describe('buildSitemapXml', () => {
   it('XML-escapes path characters', () => {
     const xml = buildSitemapXml({ canonicalHost: 'a.lessgo.site', paths: ['/a&b<c'] });
     expect(xml).toContain('<loc>https://a.lessgo.site/a&amp;b&lt;c</loc>');
+  });
+});
+
+describe('appendBlogPaths (Blog Phase 1)', () => {
+  it('zero posts → unchanged (no /blog index without posts)', () => {
+    expect(appendBlogPaths(['/'], [])).toEqual(['/']);
+  });
+
+  it('appends /blog + sorted post paths', () => {
+    expect(appendBlogPaths(['/', '/contact'], [{ slug: 'zeta' }, { slug: 'alpha' }])).toEqual([
+      '/',
+      '/contact',
+      '/blog',
+      '/blog/alpha',
+      '/blog/zeta',
+    ]);
+  });
+
+  it('omits noindexed posts but keeps the index', () => {
+    expect(appendBlogPaths(['/'], [{ slug: 'a', seo: { noIndex: true } }, { slug: 'b' }])).toEqual([
+      '/',
+      '/blog',
+      '/blog/b',
+    ]);
   });
 });
 
