@@ -40,6 +40,34 @@ model Project {
   pages        ProjectPage[]
   testimonials Testimonial[]
   collectLink  CollectLink?
+  blogPosts    BlogPost[]
+}
+
+// Blog (Phase 1). Posts have their own draft→publish lifecycle, decoupled from
+// PublishedPageVersion: each publish uploads blobs under a 'blog-*' version that
+// is never registered in a version row (invisible to versionCleanup) and writes
+// route:{host}:/blog/{slug} KV keys per live host. See blogFeature.md.
+model BlogPost {
+  id               String    @id @default(cuid())
+  projectId        String
+  project          Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  slug             String // immutable once firstPublishedAt is set (URL permanence)
+  title            String
+  excerpt          String?
+  heroImage        String?
+  body             Json // { format: 'markdown', markdown: string }
+  seo              Json? // sanitized via sanitizeSeo (title/description/og overrides)
+  status           String    @default("draft") // draft | published
+  publishedAt      DateTime? // last successful publish
+  firstPublishedAt DateTime? // set once; slug locked when non-null
+  publishedVersion String? // current blob version (blog-{ts}-{nanoid})
+  blobKey          String? // current post blob key (stale-cleanup on republish)
+  blobUrl          String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@unique([projectId, slug])
+  @@index([projectId, status])
 }
 
 // Multi-page support. Uniform model: every page of a project is a row, including
@@ -108,6 +136,10 @@ model PublishedPage {
   customDomainLiveAt              DateTime?
   customDomainFailedAt            DateTime?
   customDomainError               String?
+
+  // Blog (Phase 1): current /blog index blob { version, blobKey, blobUrl } —
+  // tracked so each index regen can delete the stale blob.
+  blogIndex Json?
 
   // Relations
   currentVersion PublishedPageVersion?  @relation("CurrentVersion", fields: [currentVersionId], references: [id])
