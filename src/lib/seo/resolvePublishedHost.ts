@@ -7,6 +7,7 @@ import { matchPublishSubdomain, publishedSubdomainHost } from '@/lib/domains/hos
 
 const SELECT = {
   slug: true,
+  title: true, // blog: RSS channel title
   content: true,
   lastPublishAt: true,
   isPublished: true,
@@ -19,6 +20,7 @@ const SELECT = {
 export interface ResolvedPublishedHost {
   page: {
     slug: string;
+    title: string | null;
     content: unknown;
     lastPublishAt: Date | null;
     projectId: string | null;
@@ -47,6 +49,7 @@ export async function resolvePublishedPageByHost(hostRaw: string): Promise<Resol
   return {
     page: {
       slug: page.slug,
+      title: page.title,
       content: page.content,
       lastPublishAt: page.lastPublishAt,
       projectId: page.projectId,

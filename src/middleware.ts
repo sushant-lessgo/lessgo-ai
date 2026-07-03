@@ -67,6 +67,7 @@ export default clerkMiddleware(async (auth, req) => {
     const seoRewrite =
       url.pathname === '/sitemap.xml' ? '/api/seo/sitemap'
       : url.pathname === '/robots.txt' ? '/api/seo/robots'
+      : url.pathname === '/rss.xml' ? '/api/seo/rss' // blog P2
       : null
 
     // Branch A: Lessgo published subdomain (e.g. mypage.lessgo.site, or legacy mypage.lessgo.ai)
