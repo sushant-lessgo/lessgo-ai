@@ -21,15 +21,22 @@ function BlogButton() {
   const open = async () => {
     if (busy) return;
     setBusy(true);
+    // Open the tab SYNCHRONOUSLY (still inside the click gesture) — calling
+    // window.open after the await gets popup-blocked silently.
+    const tab = window.open('about:blank', '_blank');
     try {
       const res = await fetch(`/api/projects/${params.token}/published-slug`);
       const data = await res.json().catch(() => ({}));
       if (res.ok && data?.published && data?.slug) {
-        window.open(`/dashboard/blog/${data.slug}`, '_blank');
+        const url = `/dashboard/blog/${data.slug}`;
+        if (tab) tab.location.href = url;
+        else window.location.href = url; // popup blocked anyway → same-tab fallback
       } else {
+        tab?.close();
         showToast('Publish your site first to start a blog', 'info');
       }
     } catch {
+      tab?.close();
       showToast('Could not open the blog manager', 'error');
     } finally {
       setBusy(false);
