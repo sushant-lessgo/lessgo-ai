@@ -102,8 +102,13 @@ Schema + CRUD API + minimal editor (markdown + preview) + 2 block pairs + per-po
 
 **Decision gate:** publish an essay on a pilot site → live at `{host}/blog/{slug}` **served from blob fast path**, in sitemap, index lists it, unpublish works, existing single/multi-page publish unaffected. Build/tsc/tests green before push (no CI gate — memory).
 
-### Phase 2 — SEO polish + living-surface UX
-BlogPosting JSON-LD · per-post OG image · RSS · canonical · draft preview URL · rich-text upgrade if markdown chafes.
+### Phase 2 — SEO polish + living-surface UX — STATUS: ✅ BUILT (2026-07-03, branch `feat/blog-phase1`)
+- **OG fix**: `/api/og/{slug}?path=/blog*` no longer 404s (was a live bug — metadata already emitted those URLs); index + post cards, root palette/logo, unit-tested.
+- **BlogPosting JSON-LD** on article pages, blob + SSR identical (`src/lib/blog/jsonLd.ts`); existing blobs pick it up on next republish/site publish (no backfill). Index pages: none.
+- **RSS** at `{host}/rss.xml` (middleware seoRewrite → `/api/seo/rss`; pure `buildRssXml`; excerpt-only items, noIndex filtered, 404 at zero posts).
+- **Draft preview**: `dashboard/blog/[slug]/[postId]/preview` (Clerk owner-gated, any status, draft banner, analytics off) + "Preview saved draft" anchor in the editor.
+- **Native subscriber emails (replaces ConvertKit — user decision)**: `BlogSubscriber` table; blog-subscribe submissions upsert it; FIRST publish of a post emails all subscribed readers via Resend (env: `RESEND_API_KEY`, `BLOG_NOTIFICATION_FROM` — ⚠️ verify a real Resend domain before pilot, default onboarding@resend.dev is test-grade); tokened public `/api/blog/unsubscribe`; dashboard shows subscriber count. Republish is silent.
+- Deferred within P2: Tiptap (own phase — markdown stays canonical, `tiptap-markdown` editor-side), subscriber list UI/export, double opt-in, batch sending, RSS full-body items.
 
 ### Phase 3 — AI generation (separate decision later)
 Generation off business-context object (the moat per `blogDirection.md`) · free-tier caps (content-farm abuse vector) · credit pricing · maybe scheduling. Not scoped here.
