@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { EditProvider } from "@/components/EditProvider";
 import { EditLayout } from "./components/layout/EditLayout";
 import { EditLayoutErrorBoundary } from "@/app/edit/[token]/components/layout/EditLayoutErrorBoundary";
+import { ToastProvider } from "./components/ui/ToastProvider";
 
 
 export default function EditPage() {
@@ -39,7 +40,9 @@ export default function EditPage() {
       }}
     >
       <EditLayoutErrorBoundary tokenId={tokenId}>
-        <EditPageContent tokenId={tokenId} />
+        <ToastProvider>
+          <EditPageContent tokenId={tokenId} />
+        </ToastProvider>
       </EditLayoutErrorBoundary>
     </EditProvider>
   );

@@ -115,7 +115,7 @@ Generation off business-context object (the moat per `blogDirection.md`) · free
 3. Per-post instant publish, no site republish (site must publish once first — 409 otherwise).
 4. Slug immutable after first publish (`firstPublishedAt` kept on unpublish → stays locked).
 5. No free-tier cap P1.
-6. `/blog` auto-enables on first published post, auto-disables at zero; editor `/blog` button in `PageSwitcher` (unpublished project → toast).
+6. `/blog` auto-enables on first published post, auto-disables at zero; editor `/blog` button in `PageSwitcher` — **hidden until the site is published** (user decision 2026-07-03; blog-after-publish is the P1 constraint). P2 backlog: pre-publish drafting via tokenId-keyed blog screens.
 7. Pilot: **vishwas dubey — has his OWN custom domain** → custom-domain gate checks mandatory. (Verified: middleware Branch-B KV fast path is already path-aware; its "subpaths fall through" comment was stale, now fixed.)
 8. `{slug}.lessgo.site` already the default publish host (`PUBLISH_SUFFIXES`); blog routes written for all live hosts incl. custom domain.
 

@@ -12,6 +12,17 @@ interface Toast {
 let toastState: Toast[] = [];
 let setToastState: React.Dispatch<React.SetStateAction<Toast[]>> | null = null;
 
+// ToastProvider claims the singleton explicitly on mount (parent effects run
+// after children's, so the provider always wins over the auto-claim below) and
+// releases it on unmount so a re-mounted editor rebinds instead of dispatching
+// toasts to a dead component.
+export function bindToastRoot(setter: React.Dispatch<React.SetStateAction<Toast[]>>) {
+  setToastState = setter;
+}
+export function unbindToastRoot(setter: React.Dispatch<React.SetStateAction<Toast[]>>) {
+  if (setToastState === setter) setToastState = null;
+}
+
 export function useToast() {
   const [toasts, setToasts] = useState<Toast[]>([]);
   

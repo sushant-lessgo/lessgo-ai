@@ -7,52 +7,43 @@ import React from 'react';
 import { useParams } from 'next/navigation';
 import { useEditStore } from '@/hooks/useEditStoreLegacy';
 import { showProductsModal } from '../ui/GlobalModals';
-import { useToast } from '../ui/useToast';
 import { usesTemplateModule } from '@/types/service';
 
-// Blog (Phase 1): opens the dashboard blog manager for this project's published
-// site. Needs the site published once (per-post publish requires it anyway) —
-// unpublished projects get a toast instead. Template-backed projects only.
+// Blog (Phase 1): link to the dashboard blog manager for this project's
+// published site. Blog-after-publish is a P1 constraint (per-post publish needs
+// the PublishedPage: hosts/theme/chrome; dashboard screens are slug-keyed), so
+// the entry simply doesn't render until the site has been published once.
+// Prefetch on mount → plain anchor: no async-in-click, no popup-blocker race.
 function BlogButton() {
   const params = useParams<{ token: string }>();
-  const { showToast } = useToast();
-  const [busy, setBusy] = React.useState(false);
+  const [slug, setSlug] = React.useState<string | null>(null);
 
-  const open = async () => {
-    if (busy) return;
-    setBusy(true);
-    // Open the tab SYNCHRONOUSLY (still inside the click gesture) — calling
-    // window.open after the await gets popup-blocked silently.
-    const tab = window.open('about:blank', '_blank');
-    try {
-      const res = await fetch(`/api/projects/${params.token}/published-slug`);
-      const data = await res.json().catch(() => ({}));
-      if (res.ok && data?.published && data?.slug) {
-        const url = `/dashboard/blog/${data.slug}`;
-        if (tab) tab.location.href = url;
-        else window.location.href = url; // popup blocked anyway → same-tab fallback
-      } else {
-        tab?.close();
-        showToast('Publish your site first to start a blog', 'info');
-      }
-    } catch {
-      tab?.close();
-      showToast('Could not open the blog manager', 'error');
-    } finally {
-      setBusy(false);
-    }
-  };
+  React.useEffect(() => {
+    let cancelled = false;
+    fetch(`/api/projects/${params.token}/published-slug`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled && data?.published && data?.slug) setSlug(data.slug);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [params.token]);
+
+  if (!slug) return null;
 
   return (
-    <button
-      onClick={open}
-      disabled={busy}
-      className="px-3 py-1 rounded-md text-sm text-gray-500 hover:bg-gray-100 disabled:opacity-50"
+    <a
+      href={`/dashboard/blog/${slug}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="px-3 py-1 rounded-md text-sm text-gray-500 hover:bg-gray-100"
       aria-label="Manage blog"
       title="Write and publish blog posts at /blog"
     >
       /blog
-    </button>
+    </a>
   );
 }
 
