@@ -33,6 +33,11 @@ import SurgeAboutPublished from './blocks/About/AboutWithStats.published';
 import SurgeCaseCardsPublished from './blocks/CaseStudies/ResultCaseCards.published';
 import SurgeStatsBandPublished from './blocks/Stats/StatsBand.published';
 
+// Shared blog blocks (server-safe; same component for edit + published — blog
+// pages never enter the edit canvas). See src/modules/templates/shared/blog/.
+import BlogPostBodyBlock from '../shared/blog/BlogPostBodyBlock';
+import BlogIndexBlock from '../shared/blog/BlogIndexBlock';
+
 interface BlockEntry {
   edit: React.ComponentType<any>;
   published: React.ComponentType<any>;
@@ -52,6 +57,9 @@ const SERVICE_BLOCK_REGISTRY: Record<string, BlockEntry> = {
   about:        { edit: SurgeAbout,        published: SurgeAboutPublished },
   casestudies:  { edit: SurgeCaseCards,    published: SurgeCaseCardsPublished },
   stats:        { edit: SurgeStatsBand,    published: SurgeStatsBandPublished },
+  // Blog (Phase 1) — publish-time synthesized pages, never generated/edited.
+  blogpostbody: { edit: BlogPostBodyBlock, published: BlogPostBodyBlock },
+  blogindex:    { edit: BlogIndexBlock,    published: BlogIndexBlock },
 };
 
 export type ServiceBlockMode = 'edit' | 'published';

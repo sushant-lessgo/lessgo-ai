@@ -29,6 +29,9 @@ export const lexSectionSurfaces: Record<string, LexSurface> = {
   transformation:   'paper-1',
   cta:              'paper-1',    // engraved invitation
   footer:           'paper-2',
+  // Blog (Phase 1) — article + index on the light body surface.
+  blogpostbody:     'paper',
+  blogindex:        'paper',
 };
 
 const surfaceVarMap: Record<LexSurface, string> = {

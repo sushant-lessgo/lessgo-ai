@@ -169,7 +169,8 @@ export function serializeBaseTokens(t: SurgeBaseTokens = surgeBaseTokens): strin
 [data-surface="bg-1"]{background:var(--bg-1);}
 [data-surface="surface"]{background:var(--surface);}
 [data-surface="panel"]{background:var(--panel);}
-[data-palette] em{font-style:normal;color:var(--accent);}`;
+[data-palette] em{font-style:normal;color:var(--accent);}
+:root{--blog-ink:var(--ink);--blog-ink-2:var(--ink-2);--blog-line:var(--line);--blog-accent:var(--accent);--blog-accent-on:var(--accent-on);}`;
 }
 
 /**

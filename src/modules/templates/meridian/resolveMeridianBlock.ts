@@ -25,6 +25,11 @@ import ThreeTierPricingPublished from './blocks/Pricing/ThreeTierPricing.publish
 import ArcCTAPublished from './blocks/CTA/ArcCTA.published';
 import HairlineFooterPublished from './blocks/Footer/HairlineFooter.published';
 
+// Shared blog blocks (server-safe; same component for edit + published — blog
+// pages never enter the edit canvas). See src/modules/templates/shared/blog/.
+import BlogPostBodyBlock from '../shared/blog/BlogPostBodyBlock';
+import BlogIndexBlock from '../shared/blog/BlogIndexBlock';
+
 interface BlockEntry {
   edit: React.ComponentType<any>;
   published: React.ComponentType<any>;
@@ -43,6 +48,9 @@ const MERIDIAN_BLOCK_REGISTRY: Record<string, BlockEntry> = {
   pricing:      { edit: ThreeTierPricing,     published: ThreeTierPricingPublished },
   cta:          { edit: ArcCTA,               published: ArcCTAPublished },
   footer:       { edit: HairlineFooter,       published: HairlineFooterPublished },
+  // Blog (Phase 1) — publish-time synthesized pages, never generated/edited.
+  blogpostbody: { edit: BlogPostBodyBlock,    published: BlogPostBodyBlock },
+  blogindex:    { edit: BlogIndexBlock,       published: BlogIndexBlock },
 };
 
 export type MeridianBlockMode = 'edit' | 'published';

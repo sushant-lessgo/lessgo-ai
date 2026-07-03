@@ -20,6 +20,9 @@ export const meridianSectionSurfaces: Record<string, MeridianSurface> = {
   pricing:      'ink',
   cta:          'ink',
   footer:       'ink',
+  // Blog (Phase 1) — article + index on the base ink surface.
+  blogpostbody: 'ink',
+  blogindex:    'ink',
 };
 
 const surfaceVarMap: Record<MeridianSurface, string> = {

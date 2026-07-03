@@ -34,6 +34,9 @@ export const techPremiumSectionSurfaces: Record<string, TechPremiumSurface> = {
   // Standalone pages (Phase 4c).
   gallery:        'paper',
   contact:        'paper',
+  // Blog (Phase 1) — article + index on the light body surface.
+  blogpostbody:   'paper',
+  blogindex:      'paper',
 };
 
 const surfaceVarMap: Record<TechPremiumSurface, string> = {

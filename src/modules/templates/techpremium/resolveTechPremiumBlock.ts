@@ -53,6 +53,11 @@ import TechPremiumFaqPublished from './blocks/Faq/TechPremiumFaq.published';
 import TechPremiumGalleryPublished from './blocks/Gallery/TechPremiumGallery.published';
 import TechPremiumContactPublished from './blocks/Contact/TechPremiumContact.published';
 
+// Shared blog blocks (server-safe; same component for edit + published — blog
+// pages never enter the edit canvas). See src/modules/templates/shared/blog/.
+import BlogPostBodyBlock from '../shared/blog/BlogPostBodyBlock';
+import BlogIndexBlock from '../shared/blog/BlogIndexBlock';
+
 interface BlockEntry {
   edit: React.ComponentType<any>;
   published: React.ComponentType<any>;
@@ -81,6 +86,9 @@ const TECHPREMIUM_BLOCK_REGISTRY: Record<string, BlockEntry> = {
   // Standalone pages (Phase 4c) — archetype-only insertion.
   gallery:        { edit: TechPremiumGallery,        published: TechPremiumGalleryPublished },
   contact:        { edit: TechPremiumContact,        published: TechPremiumContactPublished },
+  // Blog (Phase 1) — publish-time synthesized pages, never generated/edited.
+  blogpostbody:   { edit: BlogPostBodyBlock,         published: BlogPostBodyBlock },
+  blogindex:      { edit: BlogIndexBlock,            published: BlogIndexBlock },
 };
 
 export type TechPremiumBlockMode = 'edit' | 'published';

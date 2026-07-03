@@ -21,6 +21,9 @@ export const lumenSectionSurfaces: Record<string, LumenSurface> = {
   about:     'paper-2',  // about sits on a subtle band per HTML
   contact:   'paper-2',
   footer:    'esp-d',    // dark footer
+  // Blog (Phase 1) — article + index on the light body surface.
+  blogpostbody: 'paper',
+  blogindex:    'paper',
 };
 
 const surfaceVarMap: Record<LumenSurface, string> = {

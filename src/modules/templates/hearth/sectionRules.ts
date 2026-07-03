@@ -28,6 +28,9 @@ export const hearthSectionSurfaces: Record<string, HearthSurface> = {
   transformation:   'cream-1',
   cta:              'cream',       // hero-like emphasis
   footer:           'cream-2',
+  // Blog (Phase 1) — article + index on the light body surface.
+  blogpostbody:     'cream',
+  blogindex:        'cream',
 };
 
 const surfaceVarMap: Record<HearthSurface, string> = {

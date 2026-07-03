@@ -20,6 +20,11 @@ import BookCallCTA from './blocks/CTA/BookCallCTA';
 import ContactFooterRich from './blocks/Footer/ContactFooterRich';
 
 // Published-mode blocks
+// Shared blog blocks (server-safe; same component for edit + published — blog
+// pages never enter the edit canvas). See src/modules/templates/shared/blog/.
+import BlogPostBodyBlock from '../shared/blog/BlogPostBodyBlock';
+import BlogIndexBlock from '../shared/blog/BlogIndexBlock';
+
 import WarmNavHeaderPublished from './blocks/Header/WarmNavHeader.published';
 import PetalFramedHeroPublished from './blocks/Hero/PetalFramedHero.published';
 import IconServiceCardsPublished from './blocks/Services/IconServiceCards.published';
@@ -42,6 +47,9 @@ const SERVICE_BLOCK_REGISTRY: Record<string, BlockEntry> = {
   packages:     { edit: TieredPackages,    published: TieredPackagesPublished },
   cta:          { edit: BookCallCTA,       published: BookCallCTAPublished },
   footer:       { edit: ContactFooterRich, published: ContactFooterRichPublished },
+  // Blog (Phase 1) — publish-time synthesized pages, never generated/edited.
+  blogpostbody: { edit: BlogPostBodyBlock, published: BlogPostBodyBlock },
+  blogindex:    { edit: BlogIndexBlock,    published: BlogIndexBlock },
 };
 
 export type ServiceBlockMode = 'edit' | 'published';

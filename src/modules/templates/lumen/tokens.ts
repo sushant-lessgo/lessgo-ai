@@ -102,7 +102,8 @@ export function serializeBaseTokens(t: LumenBaseTokens = lumenBaseTokens): strin
 [data-surface="paper-2"]{background:var(--paper-2);}
 [data-surface="esp"]{background:var(--esp);}
 [data-surface="esp-d"]{background:var(--esp-d);}
-[data-palette] em{font-style:italic;color:var(--brass-d);}`;
+[data-palette] em{font-style:italic;color:var(--brass-d);}
+:root{--blog-ink:var(--ink);--blog-ink-2:var(--ink-2);--blog-line:var(--line);--blog-accent:var(--brass-d);--blog-accent-on:var(--paper);}`;
 }
 
 /**

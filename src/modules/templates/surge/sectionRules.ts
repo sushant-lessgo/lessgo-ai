@@ -25,6 +25,9 @@ export const surgeSectionSurfaces: Record<string, SurgeSurface> = {
   about:        'bg',
   casestudies:  'bg',
   stats:        'panel',    // dark stats band — the signature contrast
+  // Blog (Phase 1) — article + index on the light body surface.
+  blogpostbody: 'bg',
+  blogindex:    'bg',
 };
 
 const surfaceVarMap: Record<SurgeSurface, string> = {

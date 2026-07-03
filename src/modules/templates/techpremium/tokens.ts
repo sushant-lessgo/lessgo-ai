@@ -153,5 +153,6 @@ export function serializeBaseTokens(t: TechPremiumBaseTokens = techPremiumBaseTo
 [data-surface="forest"]{background:var(--forest);}
 [data-surface="forest-d"]{background:var(--forest-d);}
 [data-palette] em{font-style:normal;color:var(--forest-2);}
-[data-surface="forest"] em,[data-surface="forest-d"] em{color:var(--lime);}`;
+[data-surface="forest"] em,[data-surface="forest-d"] em{color:var(--lime);}
+:root{--blog-ink:var(--ink);--blog-ink-2:var(--ink-2);--blog-line:var(--line);--blog-accent:var(--forest);--blog-accent-on:var(--paper);}`;
 }

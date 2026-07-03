@@ -123,7 +123,8 @@ export function serializeBaseTokens(t: LexBaseTokens = lexBaseTokens): string {
 [data-surface="paper"]{background:var(--paper);}
 [data-surface="paper-1"]{background:var(--paper-1);}
 [data-surface="paper-2"]{background:var(--paper-2);}
-[data-palette] em{font-style:italic;color:var(--accent-deep);}`;
+[data-palette] em{font-style:italic;color:var(--accent-deep);}
+:root{--blog-ink:var(--ink);--blog-ink-2:var(--ink-2);--blog-line:var(--rule);--blog-accent:var(--accent-deep);--blog-accent-on:var(--paper);}`;
 }
 
 /**

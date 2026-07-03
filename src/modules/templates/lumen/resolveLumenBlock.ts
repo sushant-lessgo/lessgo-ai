@@ -28,6 +28,11 @@ import LumenPhotographerAboutPublished from './blocks/About/LumenPhotographerAbo
 import LumenContactFormPublished from './blocks/Contact/LumenContactForm.published';
 import LumenFooterPublished from './blocks/Footer/LumenFooter.published';
 
+// Shared blog blocks (server-safe; same component for edit + published — blog
+// pages never enter the edit canvas). See src/modules/templates/shared/blog/.
+import BlogPostBodyBlock from '../shared/blog/BlogPostBodyBlock';
+import BlogIndexBlock from '../shared/blog/BlogIndexBlock';
+
 interface BlockEntry {
   edit: React.ComponentType<any>;
   published: React.ComponentType<any>;
@@ -44,6 +49,9 @@ const LUMEN_BLOCK_REGISTRY: Record<string, BlockEntry> = {
   about:     { edit: LumenPhotographerAbout,  published: LumenPhotographerAboutPublished },
   contact:   { edit: LumenContactForm,        published: LumenContactFormPublished },
   footer:    { edit: LumenFooter,             published: LumenFooterPublished },
+  // Blog (Phase 1) — publish-time synthesized pages, never generated/edited.
+  blogpostbody: { edit: BlogPostBodyBlock,    published: BlogPostBodyBlock },
+  blogindex:    { edit: BlogIndexBlock,       published: BlogIndexBlock },
 };
 
 export type LumenBlockMode = 'edit' | 'published';

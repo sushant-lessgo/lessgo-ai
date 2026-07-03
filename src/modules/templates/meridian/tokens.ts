@@ -128,5 +128,6 @@ export function serializeBaseTokens(t: MeridianBaseTokens = meridianBaseTokens):
 [data-surface="ink"]{background:var(--ink);}
 [data-surface="ink-1"]{background:var(--ink-1);}
 [data-surface="ink-2"]{background:var(--ink-2);}
-[data-palette] em{font-style:normal;color:var(--accent);}`;
+[data-palette] em{font-style:normal;color:var(--accent);}
+:root{--blog-ink:var(--bone);--blog-ink-2:var(--bone-2);--blog-line:var(--line);--blog-accent:var(--accent);--blog-accent-on:var(--accent-ink);}`;
 }

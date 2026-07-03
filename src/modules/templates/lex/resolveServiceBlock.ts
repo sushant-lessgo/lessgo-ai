@@ -27,6 +27,11 @@ import FeeSchedulePublished from './blocks/Packages/FeeSchedule.published';
 import EngravedInvitationCTAPublished from './blocks/CTA/EngravedInvitationCTA.published';
 import ColophonFooterPublished from './blocks/Footer/ColophonFooter.published';
 
+// Shared blog blocks (server-safe; same component for edit + published — blog
+// pages never enter the edit canvas). See src/modules/templates/shared/blog/.
+import BlogPostBodyBlock from '../shared/blog/BlogPostBodyBlock';
+import BlogIndexBlock from '../shared/blog/BlogIndexBlock';
+
 interface BlockEntry {
   edit: React.ComponentType<any>;
   published: React.ComponentType<any>;
@@ -41,6 +46,9 @@ const LEX_BLOCK_REGISTRY: Record<string, BlockEntry> = {
   packages:     { edit: FeeSchedule,          published: FeeSchedulePublished },
   cta:          { edit: EngravedInvitationCTA, published: EngravedInvitationCTAPublished },
   footer:       { edit: ColophonFooter,       published: ColophonFooterPublished },
+  // Blog (Phase 1) — publish-time synthesized pages, never generated/edited.
+  blogpostbody: { edit: BlogPostBodyBlock,    published: BlogPostBodyBlock },
+  blogindex:    { edit: BlogIndexBlock,       published: BlogIndexBlock },
 };
 
 export type LexBlockMode = 'edit' | 'published';

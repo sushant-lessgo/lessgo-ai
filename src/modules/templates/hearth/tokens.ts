@@ -127,7 +127,8 @@ export function serializeBaseTokens(t: HearthBaseTokens = hearthBaseTokens): str
 [data-surface="cream"]{background:var(--cream);}
 [data-surface="cream-1"]{background:var(--cream-1);}
 [data-surface="cream-2"]{background:var(--cream-2);}
-[data-palette] em{font-style:italic;color:var(--accent-deep);}`;
+[data-palette] em{font-style:italic;color:var(--accent-deep);}
+:root{--blog-ink:var(--ink);--blog-ink-2:var(--ink-2);--blog-line:var(--line);--blog-accent:var(--accent);--blog-accent-on:var(--accent-ink);}`;
 }
 
 /**
