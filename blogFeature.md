@@ -108,7 +108,10 @@ Schema + CRUD API + minimal editor (markdown + preview) + 2 block pairs + per-po
 - **RSS** at `{host}/rss.xml` (middleware seoRewrite → `/api/seo/rss`; pure `buildRssXml`; excerpt-only items, noIndex filtered, 404 at zero posts).
 - **Draft preview**: `dashboard/blog/[slug]/[postId]/preview` (Clerk owner-gated, any status, draft banner, analytics off) + "Preview saved draft" anchor in the editor.
 - **Native subscriber emails (replaces ConvertKit — user decision)**: `BlogSubscriber` table; blog-subscribe submissions upsert it; FIRST publish of a post emails all subscribed readers via Resend (env: `RESEND_API_KEY`, `BLOG_NOTIFICATION_FROM` — ⚠️ verify a real Resend domain before pilot, default onboarding@resend.dev is test-grade); tokened public `/api/blog/unsubscribe`; dashboard shows subscriber count. Republish is silent.
-- Deferred within P2: Tiptap (own phase — markdown stays canonical, `tiptap-markdown` editor-side), subscriber list UI/export, double opt-in, batch sending, RSS full-body items.
+- Deferred within P2: subscriber list UI/export, double opt-in, batch sending, RSS full-body items.
+
+### Tiptap rich-text — STATUS: ✅ BUILT (2026-07-03, branch `feat/blog-phase1`)
+Markdown stays canonical (`BlogPost.body` unchanged; publish/SSR/XSS contract untouched). `BlogRichTextEditor` (Tiptap v3.27 + `tiptap-markdown@0.9` + `@tiptap/extension-image` — v3 StarterKit bundles Link but NOT Image, images silently drop without it) serializes to markdown on every change; toolbar: H2/H3, bold/italic/code, lists, quote, code block, https-only links, inline image upload, hr, undo/redo. Raw-Markdown escape-hatch toggle kept (note: rich editor normalizes stored markdown cosmetically — same rendering, expected). Round-trip contract pinned in `tiptapRoundTrip.test.ts` (spike-gated per PO). Bundle confined to the post-editor route.
 
 ### Phase 3 — AI generation (separate decision later)
 Generation off business-context object (the moat per `blogDirection.md`) · free-tier caps (content-farm abuse vector) · credit pricing · maybe scheduling. Not scoped here.
