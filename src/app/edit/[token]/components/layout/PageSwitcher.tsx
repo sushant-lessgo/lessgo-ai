@@ -4,16 +4,69 @@
 "use client";
 
 import React from 'react';
+import { useParams } from 'next/navigation';
 import { useEditStore } from '@/hooks/useEditStoreLegacy';
 import { showProductsModal } from '../ui/GlobalModals';
+import { useToast } from '../ui/useToast';
+import { usesTemplateModule } from '@/types/service';
+
+// Blog (Phase 1): opens the dashboard blog manager for this project's published
+// site. Needs the site published once (per-post publish requires it anyway) —
+// unpublished projects get a toast instead. Template-backed projects only.
+function BlogButton() {
+  const params = useParams<{ token: string }>();
+  const { showToast } = useToast();
+  const [busy, setBusy] = React.useState(false);
+
+  const open = async () => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const res = await fetch(`/api/projects/${params.token}/published-slug`);
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data?.published && data?.slug) {
+        window.open(`/dashboard/blog/${data.slug}`, '_blank');
+      } else {
+        showToast('Publish your site first to start a blog', 'info');
+      }
+    } catch {
+      showToast('Could not open the blog manager', 'error');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <button
+      onClick={open}
+      disabled={busy}
+      className="px-3 py-1 rounded-md text-sm text-gray-500 hover:bg-gray-100 disabled:opacity-50"
+      aria-label="Manage blog"
+      title="Write and publish blog posts at /blog"
+    >
+      /blog
+    </button>
+  );
+}
 
 export function PageSwitcher() {
   const store = useEditStore();
   const pages = store.pages || {};
   const currentPageId = store.currentPageId;
 
+  // Blog is a template-module capability (legacy 47-block product pages can't
+  // render the shared blog blocks).
+  const showBlog = usesTemplateModule(store.audienceType as any, store.templateId as any);
+
   const list = store.getPagesList ? store.getPagesList() : Object.values(pages);
-  if (list.length <= 1 && Object.keys(pages).length === 0) return null;
+  if (list.length <= 1 && Object.keys(pages).length === 0) {
+    // No page axis yet (single-page project) — still surface the blog entry.
+    return showBlog ? (
+      <div className="hidden md:flex items-center gap-1">
+        <BlogButton />
+      </div>
+    ) : null;
+  }
 
   // A collection item (product) page is managed via the Products panel, not shown
   // as an individual tab. The catalog singleton + all other pages remain tabs.
@@ -126,6 +179,7 @@ export function PageSwitcher() {
       >
         + Add page
       </button>
+      {showBlog && <BlogButton />}
     </div>
   );
 }
