@@ -19,12 +19,19 @@ vi.mock('@/lib/staticExport/htmlGenerator', () => ({
 }));
 vi.mock('@/lib/staticExport/blobUploader', () => ({ uploadStaticSite: vi.fn() }));
 vi.mock('@/lib/routing/kvRoutes', () => ({ setRoutes: vi.fn(), deleteRoutes: vi.fn() }));
+vi.mock('@/lib/email/sendBlogPostNotification', () => ({ sendBlogPostNotification: vi.fn().mockResolvedValue(undefined) }));
 
 import { prisma } from '@/lib/prisma';
 import { del } from '@vercel/blob';
 import { uploadStaticSite } from '@/lib/staticExport/blobUploader';
 import { setRoutes, deleteRoutes } from '@/lib/routing/kvRoutes';
+import { sendBlogPostNotification } from '@/lib/email/sendBlogPostNotification';
 import { publishBlogPost, unpublishBlogPost, BlogPublishError } from '../publishBlogPost';
+
+const notifyMock = sendBlogPostNotification as unknown as ReturnType<typeof vi.fn>;
+
+/** The notify call is detached (un-awaited dynamic import) — flush microtasks. */
+const flush = () => new Promise((r) => setTimeout(r, 0));
 
 const db = prisma as any;
 const upload = uploadStaticSite as unknown as ReturnType<typeof vi.fn>;
@@ -168,6 +175,32 @@ describe('publishBlogPost', () => {
     arm({ post: { ...POST, status: 'published', firstPublishedAt: first } });
     await publishBlogPost({ postId: 'post_1', tokenId: 'tok', baseUrl: 'https://x' });
     expect(db.blogPost.update.mock.calls[0][0].data.firstPublishedAt).toBe(first);
+  });
+
+  it('notifies subscribers on FIRST publish only (P2)', async () => {
+    await publishBlogPost({ postId: 'post_1', tokenId: 'tok', baseUrl: 'https://x' });
+    await flush();
+    expect(notifyMock).toHaveBeenCalledTimes(1);
+    expect(notifyMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        publishedPageId: 'page_1',
+        canonicalHost: 'acme.com', // custom domain wins as reader-facing host
+        post: expect.objectContaining({ slug: 'hello', title: 'Hello' }),
+      })
+    );
+  });
+
+  it('republish sends NO subscriber notification (P2)', async () => {
+    arm({ post: { ...POST, status: 'published', firstPublishedAt: new Date('2026-06-01') } });
+    await publishBlogPost({ postId: 'post_1', tokenId: 'tok', baseUrl: 'https://x' });
+    await flush();
+    expect(notifyMock).not.toHaveBeenCalled();
+  });
+
+  it('notification failure never fails the publish (P2, detached)', async () => {
+    notifyMock.mockRejectedValueOnce(new Error('resend down'));
+    await expect(publishBlogPost({ postId: 'post_1', tokenId: 'tok', baseUrl: 'https://x' })).resolves.toBeTruthy();
+    await flush();
   });
 });
 

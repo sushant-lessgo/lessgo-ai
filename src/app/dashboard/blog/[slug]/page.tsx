@@ -46,6 +46,10 @@ export default async function BlogManagerPage({ params }: PageProps) {
     },
   })
 
+  const subscriberCount = await prisma.blogSubscriber.count({
+    where: { publishedPageId: publishedPage.id, status: 'subscribed' },
+  })
+
   const host = publishedSubdomainHost(params.slug)
 
   return (
@@ -72,6 +76,9 @@ export default async function BlogManagerPage({ params }: PageProps) {
             >
               {host}/blog ↗
             </a>
+            <span className="ml-3 text-sm text-gray-500">
+              {subscriberCount} subscriber{subscriberCount === 1 ? '' : 's'}
+            </span>
           </div>
           <NewPostButton tokenId={project.tokenId} slug={params.slug} />
         </div>

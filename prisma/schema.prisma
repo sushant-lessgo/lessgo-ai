@@ -70,6 +70,22 @@ model BlogPost {
   @@index([projectId, status])
 }
 
+// Blog (P2). Native subscriber list for the blog-subscribe CTA: captured on
+// /api/forms/submit, emailed (Resend) when a post is FIRST published, opt-out
+// via tokened unsubscribe link. Scoped to the published site.
+model BlogSubscriber {
+  id              String   @id @default(cuid())
+  publishedPageId String
+  email           String
+  status          String   @default("subscribed") // subscribed | unsubscribed
+  token           String   @unique @default(cuid()) // unsubscribe link token
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([publishedPageId, email])
+  @@index([publishedPageId, status])
+}
+
 // Multi-page support. Uniform model: every page of a project is a row, including
 // the home page (archetypeKey 'home', pathSlug '/'). content holds this page's
 // own { sections, sectionLayouts, content } slice. See multiPagePlan.md.

@@ -289,6 +289,21 @@ export async function publishBlogPost(opts: {
     // 5. Fire-and-forget stale-blob cleanup.
     if (previousPostBlobKey !== postUpload.blobKey) safeDel(previousPostBlobKey, 'post');
     if (previousIndexBlobKey !== indexUpload.blobKey) safeDel(previousIndexBlobKey, 'index');
+
+    // 6. Subscriber notification (P2) — FIRST publish only (republish is silent),
+    // detached + self-contained (the lib never throws; publish never waits).
+    if (!post.firstPublishedAt) {
+      import('@/lib/email/sendBlogPostNotification')
+        .then(({ sendBlogPostNotification }) =>
+          sendBlogPostNotification({
+            publishedPageId: page.id,
+            siteTitle: page.title || page.slug,
+            canonicalHost: canonicalDomain || hosts[0],
+            post: { slug: post.slug, title: post.title, excerpt: post.excerpt },
+          })
+        )
+        .catch((e) => console.error('[blog] subscriber notification failed (non-fatal):', e));
+    }
   } catch (err) {
     // KV or DB failed: remove the just-uploaded blobs; the post row is untouched.
     safeDel(postUpload.blobKey, 'rollback post');

@@ -36,7 +36,8 @@ const isPublicRoute = createRouteMatcher([
   '/privacy',
   '/terms',
   '/api/blob-proxy',
-  '/api/seo/(.*)', // per-host sitemap.xml/robots.txt rewrites (SEO Phase 4)
+  '/api/seo/(.*)', // per-host sitemap.xml/robots.txt/rss.xml rewrites (SEO Phase 4 + blog P2)
+  '/api/blog/unsubscribe', // tokened one-click unsubscribe from notification emails (blog P2)
 ])
 
 export default clerkMiddleware(async (auth, req) => {

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { ConvertKitIntegration, mapFormDataToSubscriber } from '@/lib/integrations/convertkit';
 import { sendLeadNotification } from '@/lib/email/sendLeadNotification';
+import { BLOG_SUBSCRIBE_FORM_ID } from '@/lib/blog/buildBlogPages';
 import { FormSubmissionSchema, sanitizeForLogging } from '@/lib/validation';
 import { createSecureResponse } from '@/lib/security';
 import { withFormRateLimit } from '@/lib/rateLimit';
@@ -181,6 +182,24 @@ async function formSubmitHandler(request: NextRequest) {
           userId: userId.substring(0, 8) + '...', // Anonymized
           timestamp: new Date().toISOString()
         });
+
+        // Blog (P2): the blog-subscribe CTA feeds the native subscriber list —
+        // upsert so a resubmit after unsubscribing re-subscribes. Never throws
+        // (a subscribe is still a saved FormSubmission even if this fails).
+        if (formId === BLOG_SUBSCRIBE_FORM_ID && typeof publishedPageId === 'string' && publishedPageId) {
+          try {
+            const email = typeof (data as any)?.email === 'string' ? (data as any).email.trim().toLowerCase() : '';
+            if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+              await prisma.blogSubscriber.upsert({
+                where: { publishedPageId_email: { publishedPageId, email } },
+                create: { publishedPageId, email },
+                update: { status: 'subscribed' },
+              });
+            }
+          } catch (subErr) {
+            console.error('[blog] subscriber upsert failed (non-fatal):', subErr);
+          }
+        }
 
         // Email notification to the configured inbox (env-gated; no-op + never
         // throws when unset). Double-guarded so a send failure can't 500 a saved lead.
