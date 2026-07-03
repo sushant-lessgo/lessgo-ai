@@ -33,6 +33,24 @@ export function collectSitemapPaths(content: any): string[] {
   return [...paths, ...subPaths];
 }
 
+/**
+ * Blog (Phase 1): append '/blog' + '/blog/{slug}' for the given PUBLISHED posts.
+ * Zero posts → paths unchanged (the index only exists when posts do). Posts with
+ * seo.noIndex are omitted (their pages carry the meta robots tag). Pure — the
+ * sitemap route does the DB query.
+ */
+export function appendBlogPaths(
+  paths: string[],
+  posts: Array<{ slug: string; seo?: any }>
+): string[] {
+  if (!posts.length) return paths;
+  const postPaths = posts
+    .filter((p) => !p.seo?.noIndex)
+    .map((p) => `/blog/${p.slug}`)
+    .sort();
+  return [...paths, '/blog', ...postPaths];
+}
+
 export function buildSitemapXml(opts: {
   canonicalHost: string;
   lastPublishAt?: Date | null;

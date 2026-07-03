@@ -6,6 +6,7 @@ import { generateStaticHTML } from './htmlGenerator';
 import { uploadStaticSite } from './blobUploader';
 import { buildPageMetadata } from './buildPageMetadata';
 import { buildStructuredData, serializeJsonLd, extractLogoUrl } from './structuredData';
+import { isReservedBlogPath } from '@/utils/reservedPaths';
 
 /**
  * Render + upload a published page (root + all subpages) and advance its version pointer.
@@ -161,6 +162,12 @@ export async function renderPublishedExport(
     try {
       const path = rawPath.startsWith('/') ? rawPath : `/${rawPath}`;
       if (path === '/') continue; // root already published above
+      // Blog (Phase 1): /blog* is reserved — blog routes/blobs are owned by the
+      // per-post publish pipeline; a stale/hostile draft page must never clobber them.
+      if (isReservedBlogPath(path)) {
+        console.warn('[Phase 2] Skipping reserved /blog subpage path:', rawPath);
+        continue;
+      }
       const pageName = path.replace(/^\//, '').replace(/\/$/, '') || 'index';
 
       const subSections: string[] = sub?.layout?.sections || [];

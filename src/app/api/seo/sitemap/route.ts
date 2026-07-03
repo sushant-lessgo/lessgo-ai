@@ -7,8 +7,9 @@
  * this route.
  */
 import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 import { resolvePublishedPageByHost } from '@/lib/seo/resolvePublishedHost';
-import { buildSitemapXml, collectSitemapPaths } from '@/lib/seo/buildSitemapXml';
+import { appendBlogPaths, buildSitemapXml, collectSitemapPaths } from '@/lib/seo/buildSitemapXml';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -23,7 +24,17 @@ export async function GET(req: NextRequest) {
     const resolved = await resolvePublishedPageByHost(host);
     if (!resolved) return new NextResponse('Not Found', { status: 404 });
 
-    const paths = collectSitemapPaths(resolved.page.content);
+    let paths = collectSitemapPaths(resolved.page.content);
+
+    // Blog (Phase 1): published posts live in their own table, not content.subpages.
+    if (resolved.page.projectId) {
+      const posts = await prisma.blogPost.findMany({
+        where: { projectId: resolved.page.projectId, status: 'published' },
+        select: { slug: true, seo: true },
+      });
+      paths = appendBlogPaths(paths, posts);
+    }
+
     if (paths.length === 0) return new NextResponse('Not Found', { status: 404 });
 
     const xml = buildSitemapXml({

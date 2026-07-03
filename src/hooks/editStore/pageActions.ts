@@ -12,6 +12,7 @@ import { syncCollection, findCatalogPage, collectionItems } from './collectionHe
 import { extractSectionType } from '@/modules/generatedLanding/componentRegistry';
 import { DEFAULT_CONTACT_FIELDS, CONTACT_SUBMIT_TEXT, CONTACT_SUCCESS_MESSAGE } from '@/modules/templates/techpremium/blocks/Contact/contactFields';
 import { logger } from '@/lib/logger';
+import { isReservedBlogPath } from '@/utils/reservedPaths';
 
 const clone = <T>(v: T): T => JSON.parse(JSON.stringify(v ?? null));
 
@@ -160,6 +161,12 @@ export function createPageActions(set: any, get: any) {
       }),
 
     addPage: (opts: { archetypeKey?: string; title?: string; pathSlug?: string } = {}) => {
+      // Blog (Phase 1): /blog* is reserved for the blog pipeline — a page there
+      // would collide with blog routes/blobs (server guard: renderPublishedExport).
+      if (opts.pathSlug && isReservedBlogPath(opts.pathSlug)) {
+        logger.warn(`addPage: '${opts.pathSlug}' is reserved for the blog`);
+        return '';
+      }
       const newId = genPageId();
       set((state: EditStore) => {
         commitActivePage(state);
@@ -309,6 +316,11 @@ export function createPageActions(set: any, get: any) {
         const target = state.pages?.[pageId];
         if (!target) return;
         target.title = title;
+        // Blog (Phase 1): never allow a page to move onto the reserved /blog* space.
+        if (pathSlug && isReservedBlogPath(pathSlug)) {
+          logger.warn(`renamePage: '${pathSlug}' is reserved for the blog`);
+          pathSlug = undefined;
+        }
         if (pathSlug && target.pathSlug !== '/') {
           // Collection items live under basePath; keep slugs unique (publish keys
           // subpages by pathSlug, so a collision would silently overwrite a blob).

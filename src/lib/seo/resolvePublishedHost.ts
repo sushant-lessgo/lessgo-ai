@@ -13,6 +13,7 @@ const SELECT = {
   customDomain: true,
   customDomainStatus: true,
   customDomainLiveAt: true,
+  projectId: true, // blog: post lookup for sitemap paths
 } as const;
 
 export interface ResolvedPublishedHost {
@@ -20,6 +21,7 @@ export interface ResolvedPublishedHost {
     slug: string;
     content: unknown;
     lastPublishAt: Date | null;
+    projectId: string | null;
   };
   /** Live custom domain when one exists, else the {slug}.lessgo.site subdomain. */
   canonicalHost: string;
@@ -43,7 +45,12 @@ export async function resolvePublishedPageByHost(hostRaw: string): Promise<Resol
   const canonicalHost = domainLive ? page.customDomain! : publishedSubdomainHost(page.slug);
 
   return {
-    page: { slug: page.slug, content: page.content, lastPublishAt: page.lastPublishAt },
+    page: {
+      slug: page.slug,
+      content: page.content,
+      lastPublishAt: page.lastPublishAt,
+      projectId: page.projectId,
+    },
     canonicalHost,
   };
 }

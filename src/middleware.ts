@@ -123,7 +123,8 @@ export default clerkMiddleware(async (auth, req) => {
       }
       const originalPath = url.pathname || '/'
       try {
-        // 1. Fast path: KV route → blob proxy (only root has static blob today; subpaths fall through).
+        // 1. Fast path: KV route → blob proxy. Path-aware: any route:{host}:{path} key
+        //    (root, multi-page subpaths, /blog/*) serves its blob; unknown paths fall through.
         // Fetch the full RouteConfig so we can append &v={version} — versions the CDN cache key per
         // publish so custom-domain updates propagate immediately (see Branch A note).
         const routeKey = `route:${host}:${originalPath}`
