@@ -550,10 +550,9 @@ const handleAddSection = (afterSectionId?: string) => {
 
   return (
     <SelectionSystem>
-      <main 
+      <main
         ref={containerRef}
-        className="flex-1 overflow-y-auto bg-gray-50 relative"
-        style={{ maxHeight: '100vh' }}
+        className="flex-1 min-h-0 overflow-y-auto bg-gray-50 relative"
         onClick={handleBackgroundClick}
       >
         {/* Main Content Container */}

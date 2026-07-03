@@ -163,7 +163,7 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
         )}
 
         {/* Right Content Area */}
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 min-h-0">
           {/* Edit Header */}
           <EditHeader tokenId={tokenId} />
 
