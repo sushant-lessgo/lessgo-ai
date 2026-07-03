@@ -52,6 +52,7 @@ export async function GET(
         title: true,
         content: true,
         themeValues: true,
+        projectId: true, // blog: post lookup for ?path=/blog/* OG images
       },
     });
 
@@ -65,8 +66,31 @@ export async function GET(
     // sections flat under `.content` (same nested shape as the root).
     const rawPath = req.nextUrl.searchParams.get('path');
     const path = rawPath && rawPath !== '/' ? (rawPath.startsWith('/') ? rawPath : `/${rawPath}`) : null;
-    const sub = path ? (content?.subpages || {})[path] || (content?.subpages || {})[path.slice(1)] : null;
-    if (path && !sub) {
+
+    // Blog (P2): /blog paths live in the BlogPost table, not content.subpages —
+    // without this branch every blog OG URL (already emitted by buildPageMetadata)
+    // 404s. Text comes from the post; palette/logo derive from the ROOT content.
+    let blogText: { headline: string; subheadline: string } | null = null;
+    if (path === '/blog' || path?.startsWith('/blog/')) {
+      if (path === '/blog') {
+        blogText = { headline: page.title ? `Blog — ${page.title}` : 'Blog', subheadline: '' };
+      } else {
+        const postSlug = path.slice('/blog/'.length);
+        const post = page.projectId
+          ? await prisma.blogPost.findUnique({
+              where: { projectId_slug: { projectId: page.projectId, slug: postSlug } },
+              select: { title: true, excerpt: true, status: true },
+            })
+          : null;
+        if (!post || post.status !== 'published') {
+          return new Response('Page not found', { status: 404 });
+        }
+        blogText = { headline: post.title, subheadline: post.excerpt || '' };
+      }
+    }
+
+    const sub = path && !blogText ? (content?.subpages || {})[path] || (content?.subpages || {})[path.slice(1)] : null;
+    if (path && !blogText && !sub) {
       return new Response('Page not found', { status: 404 });
     }
 
@@ -96,6 +120,13 @@ export async function GET(
           '';
         badgeText = '';
       }
+    }
+
+    // Blog pages: text from the post/index (root palette + logo below apply as-is).
+    if (blogText) {
+      headline = blogText.headline;
+      subheadline = blogText.subheadline;
+      badgeText = '';
     }
 
     // Palette: the real page theme (content.layout.theme.colors — hex values used
