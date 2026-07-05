@@ -32,7 +32,6 @@ import {
 import { generateMockMeridianCopy } from '@/modules/prompt/mockResponseGeneratorProduct';
 import { landingGoals } from '@/types/generation';
 import type { SectionCopy } from '@/types/generation';
-import { isAdmin } from '@/lib/admin';
 import type { ProductVoiceId } from '@/modules/audience/product/voice';
 import {
   getFreshSiteContext,
@@ -153,13 +152,7 @@ async function productCopyHandler(req: NextRequest): Promise<Response> {
     }
     const userId = authCheck.userId!;
 
-    // 2a. Vestria admin gate (matches the strategy route) + voice derivation.
-    if (templateId === 'vestria' && !isAdmin(userId)) {
-      return createSecureResponse(
-        { success: false, error: 'forbidden', message: 'This template is not yet generally available.' },
-        403
-      );
-    }
+    // Voice derivation — vestria copy runs on the tailored-trade voice.
     const voiceId: ProductVoiceId = templateId === 'vestria' ? 'tailored-trade' : 'modern-tech';
 
     // 2b. Mock mode

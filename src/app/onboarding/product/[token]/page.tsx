@@ -32,7 +32,7 @@ const stepComponents: Record<string, React.ComponentType> = {
   generating: GeneratingStep,
 };
 
-// Whitelisted ?template= values (vestria is additionally admin-gated server-side).
+// Whitelisted ?template= values (all open to every user).
 const TEMPLATE_PARAM_WHITELIST = ['meridian', 'vestria'] as const;
 
 export default function ProductOnboardingPage() {
@@ -45,12 +45,28 @@ export default function ProductOnboardingPage() {
   const templateParam = searchParams?.get('template');
   const checkedResume = useRef(false);
 
-  // Read ?template=vestria once on mount (pilot selection; a future product
-  // picker sets the same store field).
+  // Template selection once on mount. Explicit ?template= wins; otherwise the
+  // `manufacturer` persona defaults to Vestria (mirrors the param → same store
+  // field, so the rest of the flow — sitemap gate, fan-out — is unchanged).
   useEffect(() => {
     if (templateParam && (TEMPLATE_PARAM_WHITELIST as readonly string[]).includes(templateParam)) {
       setTemplateId(templateParam as (typeof TEMPLATE_PARAM_WHITELIST)[number]);
+      return;
     }
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/user/persona');
+        if (!res.ok) return;
+        const { persona } = await res.json();
+        if (!cancelled && persona === 'manufacturer') setTemplateId('vestria');
+      } catch {
+        /* best-effort — falls back to Meridian */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [templateParam, setTemplateId]);
 
   // Resume an in-progress multi-page generation after a reload/tab close: the

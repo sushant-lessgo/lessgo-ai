@@ -31,8 +31,8 @@ export type AudienceType = (typeof audienceTypes)[number];
 // same pattern as lumen/meridian/techpremium. Writer audience.
 // `vestria` = GA product template (B2B manufacturing / trade lead-gen; pilot:
 // Golden Shadow Trading). Registered + renderable; product has no picker yet —
-// selected via the onboarding `?template=vestria` param (admin-gated server-side
-// until GA metering).
+// selected via the onboarding `?template=vestria` param OR by default for the
+// `manufacturer` persona. Open to all users (no admin gate).
 export const templateIds = ['hearth', 'lex', 'surge', 'meridian', 'techpremium', 'lumen', 'granth', 'vestria'] as const;
 export type TemplateId = (typeof templateIds)[number];
 
@@ -93,6 +93,7 @@ export const userPersonas = [
   'saas-founder',
   'indie-maker',
   'hardware-founder',
+  'manufacturer',
   'agency',
   'consultant',
   'coach',
@@ -108,6 +109,7 @@ export const userPersonaLabels: Record<UserPersona, string> = {
   'saas-founder': 'SaaS / app founder',
   'indie-maker': 'Indie maker',
   'hardware-founder': 'Hardware / connected-product founder',
+  'manufacturer': 'Manufacturer / trade supplier',
   'agency': 'Agency owner',
   'consultant': 'Consultant / advisor',
   'coach': 'Coach',
@@ -121,6 +123,7 @@ export const userPersonaDescriptions: Record<UserPersona, string> = {
   'saas-founder': 'Building a SaaS, app, or web tool',
   'indie-maker': 'Shipping plugins, indie products, or side projects',
   'hardware-founder': 'Building a physical, IoT, or connected hardware product',
+  'manufacturer': 'B2B manufacturing, industrial, or trade supply — quote / lead-gen',
   'agency': 'Marketing, dev, or creative agency',
   'consultant': 'Strategic advisory or expert consulting',
   'coach': '1:1 or group coaching',
@@ -139,7 +142,8 @@ export function personaToAudienceType(persona: UserPersona): AudienceType {
   if (
     persona === 'saas-founder' ||
     persona === 'indie-maker' ||
-    persona === 'hardware-founder'
+    persona === 'hardware-founder' ||
+    persona === 'manufacturer'
   ) {
     return 'product';
   }

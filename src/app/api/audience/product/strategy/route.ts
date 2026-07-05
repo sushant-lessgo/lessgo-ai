@@ -27,7 +27,6 @@ import { getPageArchetypesForTemplate } from '@/modules/audience/product/pageArc
 import { assembleProductStrategy } from '@/modules/audience/product/strategy/parseStrategyProduct';
 import { generateMockMeridianStrategy } from '@/modules/prompt/mockResponseGeneratorProduct';
 import { landingGoals } from '@/types/generation';
-import { isAdmin } from '@/lib/admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -78,15 +77,6 @@ async function productStrategyHandler(req: NextRequest): Promise<Response> {
       );
     }
     const userId = authCheck.userId!;
-
-    // 2a. Vestria admin gate — unmetered N× credit path until GA metering ships
-    // (credits system rebuild). Pilot (Golden Shadow) runs on an admin account.
-    if (data.templateId === 'vestria' && !isAdmin(userId)) {
-      return createSecureResponse(
-        { success: false, error: 'forbidden', message: 'This template is not yet generally available.' },
-        403
-      );
-    }
 
     // 2b. Mock mode
     const authHeader = req.headers.get('authorization');

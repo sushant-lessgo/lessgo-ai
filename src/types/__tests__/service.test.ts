@@ -63,8 +63,8 @@ describe('palettesForTemplate (picker scoping)', () => {
 });
 
 describe('persona derivation', () => {
-  it('saas/indie/hardware → product, writer → writer, all others → service', () => {
-    const productPersonas = new Set(['saas-founder', 'indie-maker', 'hardware-founder']);
+  it('saas/indie/hardware/manufacturer → product, writer → writer, all others → service', () => {
+    const productPersonas = new Set(['saas-founder', 'indie-maker', 'hardware-founder', 'manufacturer']);
     for (const p of userPersonas) {
       const expected =
         productPersonas.has(p) ? 'product'
