@@ -3,7 +3,6 @@ import React from 'react';
 import { getComponent, extractSectionType } from '@/modules/generatedLanding/componentRegistry';
 import { useTemplateModule } from '@/modules/templates/useTemplateReady';
 import { sectionList } from '@/modules/sections/sectionList';
-import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { InlineTextEditorV2 } from '@/app/edit/[token]/components/editor/InlineTextEditorV2';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { usesTemplateModule } from '@/types/service';
