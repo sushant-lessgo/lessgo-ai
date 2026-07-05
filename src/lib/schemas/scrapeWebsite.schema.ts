@@ -39,3 +39,35 @@ export const ScrapeWebsiteSchema = z.object({
 
 export type ScrapedTestimonial = z.infer<typeof ScrapedTestimonialSchema>;
 export type ScrapeWebsiteData = z.infer<typeof ScrapeWebsiteSchema>;
+
+// ===== Extended extraction (SiteContext — newGeneration.md Part 2) =====
+// Same single AI call at scrape time, extended with confidence-tagged atomic
+// facts + VERBATIM excerpts. Product path only for now (service mirrors later,
+// on need). NO summary field — summaries launder away the exact phrasing.
+
+export const SiteFactSchema = z.object({
+  // One atomic claim in the extractor's own words.
+  fact: z.string(),
+  topic: z.enum(['company', 'product', 'service', 'proof', 'logistics', 'people', 'other']),
+  // high = literally stated on the site; medium = strongly implied; low = inferred.
+  confidence: z.enum(['high', 'medium', 'low']),
+});
+
+export const SiteExcerptSchema = z.object({
+  // WORD-FOR-WORD text from the site (never paraphrased), ≤ ~300 chars.
+  text: z.string(),
+  kind: z.enum(['voice', 'proof', 'value-prop', 'testimonial']),
+});
+
+export const ScrapeWebsiteExtendedSchema = ScrapeWebsiteSchema.extend({
+  // 10-25 atomic, confidence-tagged claims (materials, years, certs, numbers,
+  // differentiators, locations, client segments…).
+  facts: z.array(SiteFactSchema).max(25),
+  // 5-12 strong REAL lines copied verbatim (founder voice, proof phrasing,
+  // value claims). Testimonials also appear here as kind 'testimonial'.
+  excerpts: z.array(SiteExcerptSchema).max(12),
+});
+
+export type SiteFactData = z.infer<typeof SiteFactSchema>;
+export type SiteExcerptData = z.infer<typeof SiteExcerptSchema>;
+export type ScrapeWebsiteExtendedData = z.infer<typeof ScrapeWebsiteExtendedSchema>;

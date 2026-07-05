@@ -415,6 +415,44 @@ model IVOCCache {
   @@index([audienceKey])
 }
 
+// Persisted website-scrape context (newGeneration.md Part 2). GLOBAL cache keyed
+// by normalized origin (IVOCCache pattern, NOT project-scoped): dedupe is
+// URL-shaped (onboarding reload retries, re-onboarding, multi-project) and the
+// content is the public web. Upsert overwrites (no rows-per-scrape); freshness =
+// scrapedAt + TTL (src/lib/siteContext.ts). Projects link via importSourceUrl
+// persisted in finalContent.onboardingData.
+model SiteContext {
+  id String @id @default(cuid())
+
+  // Normalized origin (lowercase host, strip www + trailing slash) for lookups.
+  urlKey       String
+  urlRaw       String
+  audienceType String @default("product")
+
+  // Raw crawl output the route previously discarded: ScrapedPage[] {url,title,text}
+  // (bounded: MAX_PAGES=8 × PER_PAGE_CHARS=6000).
+  pages Json
+
+  // The structured extraction payload the client hydrates from (7+ fields).
+  extract Json
+
+  // SiteFact[] {fact, topic, confidence, sourceUrl?} — confidence-tagged claims.
+  facts Json
+
+  // SiteExcerpt[] {text VERBATIM ≤300ch, kind, sourceUrl?} — tone reference only.
+  excerpts Json
+
+  model     String   @default("gpt-4o-mini")
+  version   Int      @default(1)
+  scrapedAt DateTime @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([urlKey, audienceType])
+  @@index([urlKey])
+}
+
 // Testimonial collection system. Owner-scoped (Clerk userId, external — not a FK,
 // matching PublishedPage/FormSubmission). Superset of fields; templates consume only
 // what they render. See testimonialSystem.md for the full track plan.

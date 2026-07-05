@@ -19,11 +19,17 @@ import { withAIRateLimit } from '@/lib/rateLimit';
 import { requireAuth } from '@/lib/middleware/planCheck';
 import { consumeCredits, CREDIT_COSTS, UsageEventType } from '@/lib/creditSystem';
 import { generateWithSchema } from '@/lib/aiClient';
-import { ScrapeWebsiteSchema, ScrapeWebsiteServiceSchema } from '@/lib/schemas';
-import type { ScrapeWebsiteData, ScrapeWebsiteServiceData } from '@/lib/schemas';
+import { ScrapeWebsiteExtendedSchema, ScrapeWebsiteServiceSchema } from '@/lib/schemas';
+import type { ScrapeWebsiteData, ScrapeWebsiteExtendedData, ScrapeWebsiteServiceData } from '@/lib/schemas';
 import { buildServiceScrapePrompt } from '@/modules/audience/service/promptScrape';
 import { isDemoMode } from '@/lib/mockMode';
 import { scrapeSite, ScrapeError } from '@/lib/scrape/fetchSite';
+import type { ScrapedPage } from '@/lib/scrape/fetchSite';
+import {
+  normalizeUrlKey,
+  getFreshSiteContext,
+  upsertSiteContext,
+} from '@/lib/siteContext';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,6 +58,14 @@ Return a JSON object:
 - offer: the main call-to-action / offer the visitor gets (e.g. "Contact sales", "Free trial"), or "" if none is evident
 - landingGoal: best-guess primary goal — one of waitlist | signup | free-trial | buy | demo | download — or null if unclear
 - testimonials: up to 3 REAL customer testimonials found anywhere in the text, each { quote, author_name, author_role }
+- facts: 10-25 ATOMIC claims about the business, each { fact, topic, confidence }.
+  - One claim per fact, in your own words (materials, founding year, certifications, volumes, locations, client segments, differentiators, delivery/logistics, people).
+  - topic: one of company | product | service | proof | logistics | people | other.
+  - confidence: high = literally stated in the text; medium = strongly implied; low = inferred. When in doubt, rate LOWER.
+- excerpts: 5-12 strong REAL lines copied WORD-FOR-WORD from the text, each { text, kind }.
+  - Pick lines that show how the business talks or that carry real proof: founder voice, value claims, proof phrasing. Keep each under ~300 characters.
+  - kind: one of voice | proof | value-prop | testimonial. Duplicate the testimonials here as kind "testimonial".
+  - NEVER paraphrase, shorten, or fix grammar in an excerpt — verbatim only.
 
 RULES:
 - Extract only what is stated or strongly implied across the pages — do NOT invent.
@@ -140,13 +154,34 @@ async function scrapeHandler(req: NextRequest): Promise<Response> {
       });
     }
 
+    // 2c. Cache check FIRST (SiteContext, global URL-keyed, TTL-gated) — a fresh
+    // stored scrape returns instantly: no crawl, no AI call, 0 credits.
+    try {
+      const cached = await getFreshSiteContext(normalizeUrlKey(url), audienceType);
+      if (cached) {
+        logger.info(`[scrape-website] cache hit for ${url} (${audienceType}) — 0 credits`);
+        return createSecureResponse({
+          success: true,
+          data: cached.extract,
+          cached: true,
+          creditsUsed: 0,
+          creditsRemaining: undefined,
+        });
+      }
+    } catch (e) {
+      // Cache lookup failure must never block a scrape — fall through to crawl.
+      logger.warn('[scrape-website] cache lookup failed, proceeding to crawl:', e as Error);
+    }
+
     // 3. SSRF-safe fetch + crawl + strip
     let combinedText: string;
     let pageCount: number;
+    let sitePages: ScrapedPage[] = [];
     try {
       const site = await scrapeSite(url);
       combinedText = site.combinedText;
       pageCount = site.pages.length;
+      sitePages = site.pages;
     } catch (err) {
       if (err instanceof ScrapeError) {
         logger.warn(`[scrape-website] scrape failed (${err.code}) for ${url}`);
@@ -170,8 +205,10 @@ async function scrapeHandler(req: NextRequest): Promise<Response> {
       );
     }
 
-    // 4. ONE AI call with structured outputs (audience-specific schema + prompt)
-    let data: ScrapeWebsiteData | ScrapeWebsiteServiceData;
+    // 4. ONE AI call with structured outputs (audience-specific schema + prompt).
+    //    Product uses the EXTENDED schema (facts + verbatim excerpts) — same
+    //    single call, the site read is already paid for.
+    let data: ScrapeWebsiteData | ScrapeWebsiteExtendedData | ScrapeWebsiteServiceData;
     try {
       data = isService
         ? await generateWithSchema(
@@ -183,7 +220,7 @@ async function scrapeHandler(req: NextRequest): Promise<Response> {
         : await generateWithSchema(
             'understand',
             [{ role: 'user', content: buildScrapePrompt(combinedText) }],
-            ScrapeWebsiteSchema,
+            ScrapeWebsiteExtendedSchema,
             'scrape_website'
           );
     } catch (error: any) {
@@ -198,6 +235,21 @@ async function scrapeHandler(req: NextRequest): Promise<Response> {
         500
       );
     }
+
+    // 4b. Persist SiteContext (never blocks the response). Product carries
+    //     facts/excerpts from the extended schema; service stores empty arrays
+    //     (extraction mirroring deferred until service needs it). The client
+    //     response carries the STRIPPED extract — same shape as before this
+    //     feature (and as the cached path).
+    const { facts, excerpts, ...extract } = data as Partial<ScrapeWebsiteExtendedData> & Record<string, unknown>;
+    await upsertSiteContext({
+      urlRaw: url,
+      audienceType,
+      pages: sitePages,
+      extract,
+      facts: (facts as any) ?? [],
+      excerpts: (excerpts as any) ?? [],
+    });
 
     // 5. Consume credits
     const creditResult = await consumeCredits(
@@ -223,7 +275,8 @@ async function scrapeHandler(req: NextRequest): Promise<Response> {
 
     return createSecureResponse({
       success: true,
-      data,
+      data: extract,
+      cached: false,
       creditsUsed: CREDIT_COSTS.SCRAPE_WEBSITE,
       creditsRemaining: creditResult.remaining,
     });
