@@ -29,6 +29,38 @@ export interface ProductCopyPromptInput {
    *  stance: the prompt receives a VOICE, never template identity (uiblocks are
    *  already template-derived data — same class of capability input). */
   voiceId?: ProductVoiceId;
+  /** Multi-page fan-out (Phase 3): which page of the site THIS call writes. */
+  page?: {
+    archetypeKey: string;
+    title: string;
+    pathSlug: string;
+    isHome: boolean;
+  };
+  /** The full agreed sitemap — nav/link context + anti-duplication. */
+  sitePages?: Array<{ title: string; pathSlug: string }>;
+  /** Rendered SiteContext block (buildSiteContextPromptBlock) — facts + verbatim
+   *  excerpts from the business's existing site. '' / absent for new businesses. */
+  siteContextBlock?: string;
+}
+
+/** Page-identity block for multi-page fan-out — prevents every page re-pitching
+ *  the home hero and keeps links site-aware. */
+function buildPageContextBlock(
+  page: NonNullable<ProductCopyPromptInput['page']>,
+  sitePages: Array<{ title: string; pathSlug: string }>
+): string {
+  const siteList = sitePages.map((p) => `- ${p.title} (${p.pathSlug})`).join('\n');
+  const depth = page.isHome
+    ? 'This is the HOME page — the overview. Each section earns its own page-depth elsewhere; here it makes the case and moves on.'
+    : `This is a DEDICATED page — go DEEP on its topic. Do NOT re-pitch the home hero or restate the whole business; assume the visitor navigated here on purpose.`;
+  return `## PAGE CONTEXT (multi-page site)
+You are writing the "${page.title}" page (${page.pathSlug}) of a multi-page site.
+
+Full site:
+${siteList}
+
+${depth}
+Nav/footer link labels may point at page paths from the site list above.`;
 }
 
 function formatElement(element: LayoutElement): string {
@@ -157,7 +189,11 @@ export function buildProductCopyPrompt(input: ProductCopyPromptInput): string {
   const voiceId: ProductVoiceId = input.voiceId ?? 'modern-tech';
   const isTrade = voiceId === 'tailored-trade';
 
-  const sectionSpecs = strategy.sections
+  // Multi-page fan-out: the SECTION SET for this call comes from uiblocks (the
+  // page's sections), not strategy.sections (which is home + chrome).
+  const sectionTypes = input.page ? Object.keys(uiblocks) : strategy.sections;
+
+  const sectionSpecs = sectionTypes
     .map((sectionType) => {
       const layout = uiblocks[sectionType];
       if (!layout) return null;
@@ -166,8 +202,14 @@ export function buildProductCopyPrompt(input: ProductCopyPromptInput): string {
     .filter(Boolean)
     .join('\n\n');
 
-  const sectionList = strategy.sections.join(', ');
-  const hasPricing = strategy.sections.includes('pricing');
+  const sectionList = sectionTypes.join(', ');
+  const hasPricing = sectionTypes.includes('pricing');
+
+  const pageContextBlock =
+    input.page && input.sitePages?.length
+      ? `\n${buildPageContextBlock(input.page, input.sitePages)}\n`
+      : '';
+  const siteContextBlock = input.siteContextBlock ? `\n${input.siteContextBlock}\n` : '';
 
   const identity = isTrade
     ? `## IDENTITY
@@ -175,8 +217,11 @@ You are a conversion copywriter for a premium B2B manufacturer's lead-generation
     : `## IDENTITY
 You are a conversion copywriter for a software product landing page. The page uses the Meridian design family — "Modern Tech": confident, precise, builder-to-builder. You write in that voice, NOT generic breathless SaaS marketing voice.`;
 
+  const hasHero = sectionTypes.includes('hero');
   const accentRule = isTrade
-    ? `1. **Accent convention — HERO HEADLINE ONLY.** Wrap 1-2 emphasized words in <em>...</em> in the HERO headline ONLY. The renderer styles <em> as an ITALIC serif word in the accent colour. Do NOT add <em> anywhere else — the accent budget is one moment per page.`
+    ? hasHero
+      ? `1. **Accent convention — HERO HEADLINE ONLY.** Wrap 1-2 emphasized words in <em>...</em> in the HERO headline ONLY. The renderer styles <em> as an ITALIC serif word in the accent colour. Do NOT add <em> anywhere else — the accent budget is one moment per page.`
+      : `1. **No <em> anywhere on this page** — the accent moment lives on the home hero only.`
     : `1. **Accent convention — HEADLINES ONLY.** Wrap 1-2 emphasized words in <em>...</em> in the HERO headline and the CTA headline ONLY. The renderer styles <em> as an accent-COLORED upright word (never italic). Do NOT add <em> to ledes, feature titles, pricing, testimonials, footer text, or any other field — Meridian's accent budget is deliberately small.`;
 
   const pricingRule = hasPricing
@@ -186,7 +231,9 @@ You are a conversion copywriter for a software product landing page. The page us
   const voiceRuleName = isTrade ? 'Tailored-trade' : 'Meridian';
 
   const selfCheckAccent = isTrade
-    ? `(b) The hero headline contains exactly one <em>...</em>; NO other field does.`
+    ? hasHero
+      ? `(b) The hero headline contains exactly one <em>...</em>; NO other field does.`
+      : `(b) NO field contains <em>.`
     : `(b) The hero headline and the cta headline each contain exactly one <em>...</em>; NO other field does.`;
 
   const selfCheckPricing = hasPricing ? `\n(c) Exactly one pricing tier has featured:true.` : '';
@@ -285,7 +332,7 @@ Only the hero headline carries <em>. Match this PATTERN with copy drawn from THI
 Only the hero headline and cta headline carry <em>. Match this PATTERN with copy drawn from THIS product.`;
 
   return `${identity}
-
+${pageContextBlock}
 ## PRODUCT
 Name: ${productName}
 One-liner: ${oneLiner}
@@ -320,7 +367,7 @@ Reason to believe: ${strategy.oneIdea.reasonToBelieve}
 ${strategy.featureAnalysis
   .map((f) => `- ${f.feature} → ${f.benefit} → ${f.benefitOfBenefit}`)
   .join('\n')}
-
+${siteContextBlock}
 ${formatProductVoiceForPrompt(voiceId)}
 
 ## SECTIONS TO GENERATE

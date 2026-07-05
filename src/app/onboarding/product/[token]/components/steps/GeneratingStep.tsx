@@ -18,6 +18,14 @@ import {
 } from '@/types/product';
 import { buildTechPremiumHomeFinalContent } from '@/hooks/editStore/archetypes';
 import { selectProductBlocks } from '@/modules/audience/product/selectBlocks';
+import {
+  buildMultiPageSkeleton,
+  mergePageIntoFinalContent,
+  finalizeMultiPageGeneration,
+  isResumableGeneration,
+  type MultiPageOnboardingData,
+} from '@/modules/generation/multiPageAssembly';
+import type { SitemapPage } from '@/types/product';
 // Plain data module (fields only, no component code) — safe to import statically
 // without breaching the template bundle firewall.
 import {
@@ -65,6 +73,8 @@ export default function GeneratingStep() {
   const [stage, setStage] = useState<Stage>('strategy');
   const [creditsError, setCreditsError] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Multi-page fan-out progress ("Writing the copy — page X of N").
+  const [pageProgress, setPageProgress] = useState<{ done: number; total: number } | null>(null);
   const startedAt = useRef<number>(Date.now());
   const hasRun = useRef(false);
 
@@ -164,16 +174,9 @@ export default function GeneratingStep() {
   };
 
   const runPipeline = useCallback(async () => {
-    if (!understanding || !landingGoal) {
-      setError('Missing onboarding data. Please restart from the beginning.');
-      return;
-    }
-
     // Strategy route requires a non-empty product name; fall back when skipped.
     const effectiveProductName = productName.trim() || 'Your Product';
     const title = (productName.trim() || oneLiner || 'Untitled Page').slice(0, 50);
-    const features = understanding.features ?? [];
-    const audiences = understanding.audiences ?? [];
 
     setError(null);
     setCreditsError(false);
@@ -182,6 +185,159 @@ export default function GeneratingStep() {
     // ?template=vestria → store.templateId; a vestria run must never be hijacked
     // by the hardware-founder persona bridge below.
     const explicitVestria = storeTemplateId === 'vestria';
+
+    // ─── Multi-page fan-out (Phase 3): shared helpers ───
+    // (Defined BEFORE the store-data guard — a RESUMED run reads everything from
+    // the DB draft; the in-memory store is empty after a reload.)
+    const saveFC = async (
+      fc: any,
+      templateInfo?: { templateId: string; paletteId: string; variantId: string }
+    ) => {
+      const res = await fetch('/api/saveDraft', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tokenId,
+          title: fc.meta?.title || title,
+          ...(templateInfo ?? {}),
+          finalContent: fc,
+        }),
+      });
+      if (!res.ok) throw new Error('Failed to save draft');
+    };
+
+    // Sequential per-page loop with PER-PAGE PERSISTENCE: each completed page is
+    // saved before the next generates — a paid page is never lost to a fetch
+    // failure or a closed tab. Retry/reload resumes from the DB (first missing
+    // page), never re-paying completed ones.
+    const runFanOut = async (fc: any) => {
+      const ob = fc.onboardingData as MultiPageOnboardingData;
+      const sitemap: SitemapPage[] = ob.sitemap;
+      const fanStrategy = ob.strategy;
+      const fanFeatures: string[] = ob.understanding?.features ?? [];
+      const sitePages = sitemap.map((p) => ({ title: p.title, pathSlug: p.pathSlug }));
+      const total = sitemap.length;
+
+      setStage('copy');
+      try {
+        for (let i = 0; i < sitemap.length; i++) {
+          const page = sitemap[i];
+          if (fc.generationProgress.completedPageKeys.includes(page.archetypeKey)) continue;
+          setPageProgress({ done: fc.generationProgress.completedPageKeys.length + 1, total });
+
+          const isHome = page.pathSlug === '/';
+          const types = isHome ? ['header', ...page.sections, 'footer'] : [...page.sections];
+          const { uiblocks } = selectProductBlocks({ sections: types, templateId: 'vestria' });
+
+          const res = await fetch('/api/audience/product/generate-copy', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              strategy: fanStrategy,
+              uiblocks,
+              productName: (ob.productName || '').trim() || 'Your Product',
+              oneLiner: ob.oneLiner,
+              offer: ob.offer,
+              landingGoal: ob.landingGoal,
+              features: fanFeatures,
+              // Real testimonials only for the page(s) that carry them.
+              ...(page.sections.includes('testimonials') && ob.importedTestimonials?.length
+                ? { realTestimonials: ob.importedTestimonials }
+                : {}),
+              templateId: 'vestria',
+              page: {
+                archetypeKey: page.archetypeKey,
+                title: page.title,
+                pathSlug: page.pathSlug,
+                isHome,
+              },
+              sitePages,
+              ...(ob.importSourceUrl ? { sourceUrl: ob.importSourceUrl } : {}),
+            }),
+          });
+          const json = await res.json();
+          posthog?.capture('product_copy_call_complete', {
+            success: !!json?.success,
+            creditsUsed: json?.creditsUsed,
+            creditsRemaining: json?.creditsRemaining,
+            attempts: json?.meta?.attempts,
+            audienceType: 'product',
+            page: page.archetypeKey,
+            pageIndex: i,
+            pageTotal: total,
+          });
+          if (!res.ok || !json?.success) {
+            if (res.status === 402 || /credit/i.test(json?.error ?? '')) {
+              setCreditsError(true);
+              return;
+            }
+            throw new Error(json?.message || `Copy generation failed (${page.title})`);
+          }
+
+          mergePageIntoFinalContent({
+            fc,
+            page,
+            order: i,
+            copy: json.sections,
+            templateId: 'vestria',
+            formSpec: {
+              fields: DEFAULT_VESTRIA_LEAD_FIELDS,
+              submitButtonText: VESTRIA_LEAD_SUBMIT_TEXT,
+              successMessage: VESTRIA_LEAD_SUCCESS_MESSAGE,
+            },
+          });
+          await saveFC(fc); // persist THIS page before generating the next
+        }
+      } catch (e: any) {
+        setError(e?.message || 'Copy generation failed.');
+        return;
+      }
+
+      setStage('saving');
+      try {
+        finalizeMultiPageGeneration(fc);
+        await saveFC(fc);
+      } catch (e: any) {
+        setError(e?.message || 'Could not save the draft.');
+        return;
+      }
+
+      setStage('done');
+      posthog?.capture('product_onboarding_complete', {
+        totalDurationMs: Date.now() - startedAt.current,
+        pageCount: total,
+        templateId: 'vestria',
+        paletteId: defaultVestriaPalette,
+        variantId: defaultVestriaVariant,
+        audienceType: 'product',
+        multiPage: true,
+      });
+      setTimeout(() => router.push(`/generate/${tokenId}`), 600);
+    };
+
+    // ─── Resume check FIRST: an in-progress multi-page generation in the DB
+    // wins (survives reload/tab close — the in-memory store is gone but the
+    // draft carries sitemap + strategy + completed pages).
+    try {
+      const res = await fetch(`/api/loadDraft?tokenId=${encodeURIComponent(tokenId)}`);
+      if (res.ok) {
+        const json = await res.json();
+        const loaded = json?.finalContent || json?.content?.finalContent || json?.content;
+        if (isResumableGeneration(loaded)) {
+          return runFanOut(loaded);
+        }
+      }
+    } catch {
+      /* resume is best-effort — fall through to a fresh run */
+    }
+
+    // ─── Fresh run: onboarding store data required from here on ───
+    if (!understanding || !landingGoal) {
+      setError('Missing onboarding data. Please restart from the beginning.');
+      return;
+    }
+    const features = understanding.features ?? [];
+    const audiences = understanding.audiences ?? [];
 
     // ─── Persona → template (fired in parallel with generation; no serial cost) ───
     // The hardware-founder persona gets the TechPremium product template; every other
@@ -330,18 +486,37 @@ export default function GeneratingStep() {
 
     // ─── Strategy ───
     // Sitemap-gated flows (vestria) already fetched strategy in the review step
-    // — reuse it (no second charge) and honor the USER-EDITED home shape.
+    // — reuse it (no second charge) and honor the USER-EDITED shape.
     if (storeStrategy) {
-      let strategy = storeStrategy;
+      // Multi-page: skeleton-save the gate output (durable BEFORE any copy
+      // call), then fan out page by page.
       if (storeSitemap?.length) {
-        const homeSections = ['header', ...storeSitemap[0].sections, 'footer'];
-        const { uiblocks } = selectProductBlocks({
-          sections: homeSections,
-          templateId: storeTemplateId,
-        });
-        strategy = { ...strategy, sections: homeSections, uiblocks, sitemap: storeSitemap };
+        const ob: MultiPageOnboardingData = {
+          oneLiner,
+          productName,
+          understanding,
+          landingGoal,
+          offer,
+          ...(importSourceUrl ? { importSourceUrl } : {}),
+          ...(importedTestimonials?.length ? { importedTestimonials } : {}),
+          sitemap: storeSitemap,
+          strategy: storeStrategy,
+        };
+        const fc = buildMultiPageSkeleton({ tokenId, title, onboardingData: ob });
+        try {
+          await saveFC(fc, {
+            templateId: 'vestria',
+            paletteId: defaultVestriaPalette,
+            variantId: defaultVestriaVariant,
+          });
+        } catch (e: any) {
+          setError(e?.message || 'Could not save the draft.');
+          return;
+        }
+        return runFanOut(fc);
       }
-      return runCopyAndSave(strategy);
+      // Single-page fallback (no sitemap): behave as before.
+      return runCopyAndSave(storeStrategy);
     }
 
     setStage('strategy');
@@ -496,6 +671,9 @@ export default function GeneratingStep() {
                 }`}
               >
                 {s.label}
+                {s.id === 'copy' && status === 'active' && pageProgress && pageProgress.total > 1
+                  ? ` — page ${pageProgress.done} of ${pageProgress.total}`
+                  : ''}
               </span>
             </li>
           );

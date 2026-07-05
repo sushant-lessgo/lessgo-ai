@@ -34,6 +34,11 @@ import { landingGoals } from '@/types/generation';
 import type { SectionCopy } from '@/types/generation';
 import { isAdmin } from '@/lib/admin';
 import type { ProductVoiceId } from '@/modules/audience/product/voice';
+import {
+  getFreshSiteContext,
+  normalizeUrlKey,
+  buildSiteContextPromptBlock,
+} from '@/lib/siteContext';
 
 export const dynamic = 'force-dynamic';
 
@@ -91,6 +96,22 @@ const GenerateProductCopyRequestSchema = z.object({
   // Voice derivation only (whitelist) — stripped before prompt input; the prompt
   // receives a copy-voice id, never template identity. vestria admin-gated.
   templateId: z.enum(['meridian', 'vestria']).optional(),
+  // ===== Multi-page fan-out (Phase 3) — all optional; absent = single-page =====
+  // Which page of the agreed sitemap THIS call writes (uiblocks then carries the
+  // page's section set, body-only except home which includes chrome).
+  page: z
+    .object({
+      archetypeKey: z.string().min(1),
+      title: z.string().min(1),
+      pathSlug: z.string().min(1),
+      isHome: z.boolean(),
+    })
+    .optional(),
+  // The full agreed sitemap — nav/link context + anti-duplication.
+  sitePages: z.array(z.object({ title: z.string(), pathSlug: z.string() })).optional(),
+  // SiteContext lookup key — the SERVER fetches facts/excerpts from the store;
+  // never trust a client-passed content blob.
+  sourceUrl: z.string().url().optional(),
 });
 
 async function productCopyHandler(req: NextRequest): Promise<Response> {
@@ -117,6 +138,9 @@ async function productCopyHandler(req: NextRequest): Promise<Response> {
       features,
       realTestimonials,
       templateId,
+      page,
+      sitePages,
+      sourceUrl,
     } = validation.data;
 
     // 2. Auth
@@ -155,7 +179,8 @@ async function productCopyHandler(req: NextRequest): Promise<Response> {
         : mockSections;
       const processed = autoMapLinkHrefs(
         processProductCopy(withReal, uiblocks),
-        new Set(Object.keys(uiblocks))
+        new Set(Object.keys(uiblocks)),
+        sitePages
       );
       return createSecureResponse({
         success: true,
@@ -164,6 +189,19 @@ async function productCopyHandler(req: NextRequest): Promise<Response> {
         creditsRemaining: 999,
         meta: { attempts: 0, complete: true },
       });
+    }
+
+    // 2c. SiteContext (Phase 3): SERVER-side lookup by sourceUrl — facts are the
+    //     claim backbone, verbatim excerpts are tone-only. Absent/stale/missing →
+    //     empty block (brand-new business path). Never blocks generation.
+    let siteContextBlock = '';
+    if (sourceUrl) {
+      try {
+        const ctx = await getFreshSiteContext(normalizeUrlKey(sourceUrl), 'product');
+        if (ctx) siteContextBlock = buildSiteContextPromptBlock(ctx.facts, ctx.excerpts);
+      } catch (e) {
+        logger.warn('[product-generate-copy] SiteContext lookup failed (continuing without):', e as Error);
+      }
     }
 
     // 3. Build prompt (voiceId only — templateId never reaches the prompt layer)
@@ -176,6 +214,9 @@ async function productCopyHandler(req: NextRequest): Promise<Response> {
       landingGoal: landingGoal as any,
       features,
       voiceId,
+      page,
+      sitePages,
+      siteContextBlock,
     });
     logger.dev('[product-generate-copy] PROMPT:', prompt);
 
@@ -218,9 +259,9 @@ async function productCopyHandler(req: NextRequest): Promise<Response> {
       sections = injectRealTestimonials(sections, realTestimonials);
     }
     let processed = processProductCopy(sections, uiblocks);
-    // Auto-map nav/footer link targets to on-page section anchors by label
-    // (user-overridable in the editor). presentTypes = section types on this page.
-    processed = autoMapLinkHrefs(processed, new Set(Object.keys(uiblocks)));
+    // Auto-map nav/footer link targets: sitemap page paths first (multi-page),
+    // then on-page section anchors by label (user-overridable in the editor).
+    processed = autoMapLinkHrefs(processed, new Set(Object.keys(uiblocks)), sitePages);
 
     const { complete, missingSections } = validateProductCopyCompleteness(processed, uiblocks);
     if (!complete) {

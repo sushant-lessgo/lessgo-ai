@@ -150,13 +150,39 @@ function matchAnchorType(label: unknown): string | undefined {
   return LABEL_ANCHOR_RULES.find((r) => r.keywords.some((k) => norm === k || norm.includes(k)))?.type;
 }
 
+/** A site page the chrome may link to (multi-page fan-out — Phase 3). */
+export interface SitePageLink {
+  title: string;
+  pathSlug: string;
+}
+
+const normLabel = (label: unknown): string =>
+  typeof label === 'string' ? label.replace(/<[^>]*>/g, '').toLowerCase().trim() : '';
+
 export function autoMapLinkHrefs(
   sections: Record<string, SectionCopy>,
-  presentTypes: Set<string>
+  presentTypes: Set<string>,
+  sitePages?: SitePageLink[]
 ): Record<string, SectionCopy> {
   const mapLink = (link: Record<string, any>) => {
     if (!link || typeof link !== 'object') return;
     if (link.href && link.href !== '#') return; // user/LLM already set a real target
+    // Multi-page: a label matching a sitemap page title maps to that page's
+    // path FIRST (chrome is shared across pages, so links must be site-absolute
+    // paths, not on-page anchors). Fallback: on-page section anchor.
+    if (sitePages?.length) {
+      const norm = normLabel(link.label);
+      const page = norm
+        ? sitePages.find((p) => {
+            const t = p.title.toLowerCase().trim();
+            return t && (norm === t || norm.includes(t) || t.includes(norm));
+          })
+        : undefined;
+      if (page && page.pathSlug !== '/') {
+        link.href = page.pathSlug;
+        return;
+      }
+    }
     const type = matchAnchorType(link.label);
     if (type && presentTypes.has(type)) link.href = `#${type}`;
   };
@@ -171,6 +197,15 @@ export function autoMapLinkHrefs(
     const footerColumns = elements.footer_columns;
     if (Array.isArray(footerColumns)) {
       for (const col of footerColumns) {
+        const links = (col as Record<string, any>)?.links;
+        if (Array.isArray(links)) links.forEach((l) => mapLink(l as Record<string, any>));
+      }
+    }
+
+    // Vestria footer link columns (same nested shape, different key).
+    const linkColumns = elements.link_columns;
+    if (Array.isArray(linkColumns)) {
+      for (const col of linkColumns) {
         const links = (col as Record<string, any>)?.links;
         if (Array.isArray(links)) links.forEach((l) => mapLink(l as Record<string, any>));
       }
