@@ -123,7 +123,7 @@ export function SelectionSystem({ children }: SelectionSystemProps) {
   }, [mode, selectedSection, selectedElement]);
 
   return (
-    <div className="selection-system">
+    <div className="selection-system flex-1 min-h-0 min-w-0 flex flex-col">
       {children}
       
       {/* Selection Indicators */}
