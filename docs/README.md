@@ -12,8 +12,8 @@ One line per doc. Root keeps only `CLAUDE.md` + `README.md`. Completed/stale pla
 - [STRIPE_SETUP.md](architecture/STRIPE_SETUP.md) — Stripe setup/config guide
 
 ## guides/ — how-tos
-- [newTemplate.md](guides/newTemplate.md) — adding a new template (clone an existing one); §12 multi-page
-- [TESTING.md](guides/TESTING.md) — manual pre-launch checklist (P0/P1/P2); automation lives in `e2e/` + Vitest
+- Adding a new template (clone an existing one; §12 multi-page) — now the `/new-template` skill: [.claude/skills/new-template/SKILL.md](../.claude/skills/new-template/SKILL.md)
+- Manual pre-launch checklist (P0/P1/P2; automation lives in `e2e/` + Vitest) — now the `/manual-test` skill: [.claude/skills/manual-test/SKILL.md](../.claude/skills/manual-test/SKILL.md)
 
 ## tracks/ — one plan doc per track (fold phase specs in; no separate spec files)
 - [meridianPlan.md](tracks/meridianPlan.md) — product template track

@@ -236,7 +236,7 @@ Upload reuses existing image upload/proxy pipeline.
   a fixture with no SEO overrides (no regression).
 - New unit tests: canonical resolution (subdomain vs live custom domain), noindex,
   structured-data shape, sitemap XML for multi-page.
-- Manual (docs/guides/TESTING.md addendum): publish scalifix → view-source confirms canonical =
+- Manual (`/manual-test` skill addendum): publish scalifix → view-source confirms canonical =
   scalifixai.com, OG debugger (Facebook/Twitter/LinkedIn) renders card, Google Rich
   Results test passes JSON-LD, `/sitemap.xml` + `/robots.txt` resolve on custom domain.
 

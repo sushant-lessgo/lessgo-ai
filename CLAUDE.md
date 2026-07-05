@@ -31,6 +31,12 @@ npm run postinstall          # prisma generate && prisma migrate deploy
 > `scripts/buildAssets.js` (minifies `formHandler.js`/`analyticsGenerator.js` → `public/assets/`,
 > copies self-hosted fonts CSS). Changes to published-page styling/assets require a rebuild to take effect.
 
+## Feature Workflow (`/feature`)
+
+Non-trivial features run through a delegation pipeline (agents in `.claude/agents/`, orchestrated by the `/feature` skill): **discuss** (`/discuss` skill, Opus/medium, PO-style interrogation → spec) → **scout** (Opus/low, read-only explore) → **plan** (Fable/high, phased plan with a per-phase *Files touched* list + human-gate markers) → **plan-review** (Opus/high, loop ×3) → **implement** per phase (Fable/medium, edits only its Files-touched, writes an `audit.md`) → **impl-review** (Opus/high, scoped diff + `tsc`/`test:run` gate, loop ×3).
+
+Usage: `/discuss <idea>` → agree → it writes `docs/task/<feature>.spec.md` → run `/feature docs/task/<feature>.spec.md`. Artifacts (`spec`/`plan`/`audit`) live in `docs/task/`. The pipeline never commits/pushes — you do that manually.
+
 ## Architecture Overview
 
 ### 3-Tier Template Model (core mental model)
@@ -46,7 +52,7 @@ A landing page is rendered from three orthogonal inputs:
 - **Type contracts:** `src/types/service.ts` (audience + templateIds + defaults), `src/types/product.ts` (product palettes/variants), `src/types/template.ts` (`TemplateModule` contract).
 - **Registry:** `src/modules/templates/registry.ts` — each `templateId` is loaded via an **async dynamic-import loader** so template code never enters the main bundle (the "dispatch firewall"). Module surface: `resolveBlock()`, `ThemeInjector`, `SSRTokens`, `getSurfaceForSection()`, palette/variant defaults.
 - **Templates live in** `src/modules/templates/{meridian,techpremium,hearth,lex}/` — each with `tokens.ts`, `palettes.ts`, `sectionRules.ts`, `ThemeInjector.tsx`, `resolve*Block.ts`, `index.ts`, and `blocks/<Section>/`.
-- A **template is a skin**: it supplies tokens/palettes/variants/block components but consumes the audience's existing content contract. It does NOT change copy generation, the element schema, or the section list. See `docs/guides/newTemplate.md` for the full guide to adding one.
+- A **template is a skin**: it supplies tokens/palettes/variants/block components but consumes the audience's existing content contract. It does NOT change copy generation, the element schema, or the section list. See the `/new-template` skill (`.claude/skills/new-template/SKILL.md`) for the full guide to adding one.
 
 ### ⚠️ Dual-Renderer Pitfall (the #1 architectural trap)
 
@@ -133,7 +139,7 @@ Token-based project access is core to the architecture. **Use `prisma migrate de
 
 - **Vitest** (`vitest.config.ts`, jsdom): unit/integration `src/**/*.test.{ts,tsx}`. Coverage includes utils/validation, template **dispatch** regression, **palette-selection** regression, service **section selection**, **generation contract** (frozen-fixture shape), and **golden** tests (`captureGolden.test.ts`, opt-in real-LLM via `CAPTURE=1`).
 - **Playwright** (`playwright.config.ts`, serial/1 worker): `e2e/` has public specs (`generation.spec.ts`, `render.spec.ts`, mock mode) + an authed `publish.spec.ts` using a Clerk session from `auth.setup.ts` (`@clerk/testing`). Toggles: `E2E_LLM=real`, `E2E_PORT`. See `e2e/README.md`.
-- **`docs/guides/TESTING.md`** is the manual pre-launch checklist (P0/P1/P2) covering what automation can't: real-LLM quality, **editor↔published parity**, editor interactions — run against `npm run dev`, not mocked.
+- The **`/manual-test` skill** (`.claude/skills/manual-test/SKILL.md`) is the manual pre-launch checklist (P0/P1/P2) covering what automation can't: real-LLM quality, **editor↔published parity**, editor interactions — run against `npm run dev`, not mocked.
 
 ## API Routes (`src/app/api/`)
 
@@ -162,7 +168,7 @@ When unset/false: prompts/responses are smart-truncated (~800/~1000 chars) but m
 All project docs live under `docs/` (see `docs/README.md` for the full index):
 
 - `docs/architecture/` — evergreen references: `publishArch.md`, `pricingSystem.md`, `design-system-v3.md`, `newServiceOnboarding.md`, `phase11aArchitectureGaps.md` (multi-template firewall + dual-renderer notes), `TROUBLESHOOTING.md`, `STRIPE_SETUP.md`.
-- `docs/guides/` — how-to guides: `newTemplate.md` (adding a template — clone an existing one), `TESTING.md` (manual pre-launch checklist).
+- `docs/guides/` — how-to guides. (Two former guides are now skills: manual pre-launch checklist → `/manual-test` (`.claude/skills/manual-test/SKILL.md`); adding a template — clone an existing one — → `/new-template` (`.claude/skills/new-template/SKILL.md`).)
 - `docs/tracks/` — one plan doc per active track (product=`meridianPlan.md`, service=`nsoPlan.md`, plus multi-page, blog, SEO, testimonials, writer, i18n, newGeneration). Fold new phase specs into the track's existing doc; don't create separate spec files.
 - `docs/product/` — `productBacklog.md`, `brandMessage.md`.
 - Completed/stale plans are deleted (recoverable via git history). Scratch files (dev logs, review verdicts like `POreview.md`) are written at repo root when needed and deleted after use — don't commit them long-term.

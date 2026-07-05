@@ -71,7 +71,7 @@ Add `granth` loader with the standard module surface (`resolveBlock`, `ThemeInje
 
 ### 3.3 Template module — `src/modules/templates/granth/`
 
-**Clone base: `lumen`** (closest precedent: bespoke containment, contained editable component `LumenEditable.tsx`, external-link popover `LinkTargetPopover.tsx`, per-block shared `styles.ts`, `registration.test.ts`). Follow `docs/guides/newTemplate.md` for the full checklist.
+**Clone base: `lumen`** (closest precedent: bespoke containment, contained editable component `LumenEditable.tsx`, external-link popover `LinkTargetPopover.tsx`, per-block shared `styles.ts`, `registration.test.ts`). Follow the `/new-template` skill (`.claude/skills/new-template/SKILL.md`) for the full checklist.
 
 ```
 granth/
@@ -181,5 +181,5 @@ Hindi generation pipeline · blog injection · bilingual toggle · template pick
 
 - `registration.test.ts` (lumen precedent) + template dispatch regression suite must stay green
 - `npm run build` + tsc + `npm run test:run` green locally BEFORE push to main (no-PR workflow; Vercel auto-deploys)
-- Manual (docs/guides/TESTING.md style): editor↔published parity per section · 360px mobile · palette/variant toggles · optional-section drop (no writing, no praise) · 2-book and 8-book shelf · long names (e.g. "केशव नारायण 'अरण्य'") · all outlinks `_blank noopener` · Lighthouse on published page (fonts subset properly; LCP = hero name)
+- Manual (`/manual-test` skill style): editor↔published parity per section · 360px mobile · palette/variant toggles · optional-section drop (no writing, no praise) · 2-book and 8-book shelf · long names (e.g. "केशव नारायण 'अरण्य'") · all outlinks `_blank noopener` · Lighthouse on published page (fonts subset properly; LCP = hero name)
 - ⚠️ Dual-renderer trap + published/client boundary memories apply to every block

@@ -1,3 +1,16 @@
+---
+name: manual-test
+description: >-
+  Manual pre-launch test checklist for the Lessgo landing-page app — the P0/P1/P2
+  checks that automation can't cover: real-LLM generation quality, editor↔published
+  (dual-renderer) parity, editor interactions, template/palette/variant picker,
+  failure/edge cases, cross-browser/mobile. Use when the user wants to manually QA
+  a template or the app before launch/deploy, verify a page generates + publishes
+  correctly, or check editor==published parity by hand. Run against `npm run dev`
+  (real LLM, not mock). Automated layers live in e2e/ + Vitest — this covers what
+  human eyes must sign off.
+---
+
 # Manual Test Checklist — pre-launch (Hearth + Lex + Meridian)
 
 Covers what the automated suite **can't**: visual correctness, real-LLM quality,

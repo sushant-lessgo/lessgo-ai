@@ -68,7 +68,7 @@ The two use cases need different authoring models — the platform must serve bo
 6. Locale set to support first (en/nl/hi) and how new locales are added.
 
 ## Related
-- `docs/guides/newTemplate.md` §13 (bespoke templates), §3f (CSS boundary).
+- `/new-template` skill (`.claude/skills/new-template/SKILL.md`) §13 (bespoke templates), §3f (CSS boundary).
 - PO decision (2026-06-29): Lumen-contained bilingual approved; no shared i18n infra yet.
 - Memory: multilingual platform direction; [[project_before_customer_2]] (don't build shared infra for
   one client — this clears that bar with 2 use cases).

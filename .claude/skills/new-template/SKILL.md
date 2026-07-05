@@ -1,6 +1,21 @@
-# Adding a New Template — Dev Agent Guide
+---
+name: new-template
+description: >-
+  Guide for adding a brand-new visual template (the middle tier of
+  audienceType → templateId → variant+palette) for an EXISTING audience
+  (product or service) in the Lessgo landing-page app. Use when the user
+  wants to add/create/clone a template, port a designer's static HTML into
+  a template module (tokens/palettes/variants/blocks + dual-renderer pairs),
+  wire it into the registry/picker, or build a bespoke single-client
+  (photographer/naayom-style) template. Covers the module contract, the
+  dual-renderer parity trap, the two-identifier (type vs LayoutName)
+  discipline, fonts, interactive behaviors, and audience-extension (§12) vs
+  skin. NOT for standing up a new audience type.
+---
 
-> **Audience:** a dev agent adding a brand-new visual **template** (the middle tier of
+# Adding a New Template
+
+> **Audience of this skill:** a dev agent adding a brand-new visual **template** (the middle tier of
 > `audienceType → templateId → variant+palette`) for an **existing audience type**
 > (`product` or `service`). This is how **Lex** was added under `service` (a clone of Hearth).
 > **Out of scope:** standing up a new *audience type* (new onboarding flow + store + copy
