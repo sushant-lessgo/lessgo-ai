@@ -13,7 +13,7 @@ import type { StructuredDataType } from '@/types/store/pages';
 export interface StructuredDataInput {
   /** Page's seo.structuredDataType; undefined behaves as 'auto'. */
   type?: StructuredDataType;
-  audienceType?: 'product' | 'service';
+  audienceType?: 'product' | 'service' | 'writer';
   name: string; // resolved page title
   description: string;
   url: string; // canonical URL

@@ -339,7 +339,7 @@ export interface MetaSlice {
   lastUpdated: number;
   version: number;
   tokenId: string;
-  audienceType: 'product' | 'service' | 'ecommerce';
+  audienceType: 'product' | 'service' | 'ecommerce' | 'writer';
   templateId: string | null;
   variantId: string | null;
   paletteId: string | null;

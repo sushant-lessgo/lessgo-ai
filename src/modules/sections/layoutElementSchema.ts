@@ -1,5 +1,6 @@
 import { serviceElementSchema } from '@/modules/audience/service/elementSchema';
 import { meridianElementSchema } from '@/modules/audience/product/elementSchema';
+import { writerElementSchema } from '@/modules/audience/writer/elementSchema';
 
 /**
  * Generation types for elements:
@@ -333,6 +334,10 @@ export const layoutElementSchema: LayoutSchema = {
   // ===== Meridian product-template pilot blocks (P2) =====
   // Layout names distinct from service + v3 product — no collision risk.
   ...meridianElementSchema,
+
+  // ===== Writer-audience Granth blocks (bespoke §13) =====
+  // Globally-unique Granth* names — seeded, never AI-generated.
+  ...writerElementSchema,
 }
 
 /**

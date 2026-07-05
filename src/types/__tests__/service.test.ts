@@ -31,6 +31,12 @@ describe('usesTemplateModule (render gate)', () => {
     expect(usesTemplateModule('product', undefined)).toBe(false);
   });
 
+  it('writer always renders through a template module (Granth vertical, seeded)', () => {
+    expect(usesTemplateModule('writer', 'granth')).toBe(true);
+    expect(usesTemplateModule('writer', null)).toBe(true);
+    expect(usesTemplateModule('writer', undefined)).toBe(true);
+  });
+
   it('ecommerce and unknown/empty audiences never use a template module', () => {
     expect(usesTemplateModule('ecommerce', 'meridian')).toBe(false);
     expect(usesTemplateModule(null, 'meridian')).toBe(false);
@@ -57,10 +63,13 @@ describe('palettesForTemplate (picker scoping)', () => {
 });
 
 describe('persona derivation', () => {
-  it('only saas-founder + indie-maker + hardware-founder map to product; all others to service', () => {
+  it('saas/indie/hardware → product, writer → writer, all others → service', () => {
     const productPersonas = new Set(['saas-founder', 'indie-maker', 'hardware-founder']);
     for (const p of userPersonas) {
-      const expected = productPersonas.has(p) ? 'product' : 'service';
+      const expected =
+        productPersonas.has(p) ? 'product'
+        : p === 'writer' ? 'writer'
+        : 'service';
       expect(personaToAudienceType(p)).toBe(expected);
     }
   });
@@ -84,9 +93,10 @@ describe('template defaults completeness', () => {
     }
   });
 
-  it('product defaults to meridian, service to hearth, ecommerce parked', () => {
+  it('product defaults to meridian, service to hearth, writer to granth, ecommerce parked', () => {
     expect(defaultTemplateForAudience.product).toBe('meridian');
     expect(defaultTemplateForAudience.service).toBe('hearth');
+    expect(defaultTemplateForAudience.writer).toBe('granth');
     expect(defaultTemplateForAudience.ecommerce).toBeNull();
   });
 });

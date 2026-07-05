@@ -9,7 +9,11 @@ import { meridianPalettes, techPremiumPalettes } from '@/types/product';
  * Top tier of the 3-tier model: audienceType → templateId → variantId + paletteId.
  * `ecommerce` reserved for the Phase 13 wave (no persona maps to it yet).
  */
-export const audienceTypes = ['product', 'service', 'ecommerce'] as const;
+// `writer` = the Writer vertical (Hindi literary profile sites; Granth template).
+// First-class audience per writerFlownTemplate.md §1, but v1 has NO generation
+// store / strategy / onboarding route — writer projects are seeded white-glove and
+// render through the template module (usesTemplateModule returns true below).
+export const audienceTypes = ['product', 'service', 'ecommerce', 'writer'] as const;
 export type AudienceType = (typeof audienceTypes)[number];
 
 /**
@@ -22,7 +26,10 @@ export type AudienceType = (typeof audienceTypes)[number];
 // `lumen` = bespoke §13 photography template (Kundius). Registered + renderable
 // but intentionally NOT listed in the onboarding picker (templateCatalog) — same
 // pattern as meridian/techpremium. Service audience.
-export const templateIds = ['hearth', 'lex', 'surge', 'meridian', 'techpremium', 'lumen'] as const;
+// `granth` = bespoke §13 Hindi-literary template (Writer vertical). Registered +
+// renderable but intentionally NOT in the onboarding picker (templateCatalog) —
+// same pattern as lumen/meridian/techpremium. Writer audience.
+export const templateIds = ['hearth', 'lex', 'surge', 'meridian', 'techpremium', 'lumen', 'granth'] as const;
 export type TemplateId = (typeof templateIds)[number];
 
 export type VariantId = string;
@@ -35,6 +42,7 @@ export const defaultVariantForTemplate: Record<TemplateId, VariantId> = {
   meridian: 'developer',
   techpremium: 'default',
   lumen: 'default',
+  granth: 'granth', // serif-led (Tiro) default; 'adhunik' = sans-led (Mukta) alt
 };
 
 /**
@@ -47,6 +55,7 @@ export const defaultTemplateForAudience: Record<AudienceType, TemplateId | null>
   product: 'meridian',
   service: 'hearth',
   ecommerce: null,
+  writer: 'granth',
 };
 
 /**
@@ -65,6 +74,7 @@ export function usesTemplateModule(
 ): boolean {
   return (
     audienceType === 'service' ||
+    audienceType === 'writer' ||
     (audienceType === 'product' && (templateId === 'meridian' || templateId === 'techpremium'))
   );
 }
@@ -83,6 +93,7 @@ export const userPersonas = [
   'freelancer',
   'local-service',
   'productized-service',
+  'writer',
 ] as const;
 
 export type UserPersona = (typeof userPersonas)[number];
@@ -97,6 +108,7 @@ export const userPersonaLabels: Record<UserPersona, string> = {
   'freelancer': 'Freelancer / solo expert',
   'local-service': 'Local service owner',
   'productized-service': 'Productized service operator',
+  'writer': 'Writer / author',
 };
 
 export const userPersonaDescriptions: Record<UserPersona, string> = {
@@ -109,6 +121,7 @@ export const userPersonaDescriptions: Record<UserPersona, string> = {
   'freelancer': 'Solo expertise sold by the project',
   'local-service': 'Clinic, salon, home services, or local trade',
   'productized-service': 'Fixed-scope service offerings',
+  'writer': 'Author, poet, or essayist — a literary profile site',
 };
 
 /**
@@ -123,6 +136,9 @@ export function personaToAudienceType(persona: UserPersona): AudienceType {
     persona === 'hardware-founder'
   ) {
     return 'product';
+  }
+  if (persona === 'writer') {
+    return 'writer';
   }
   return 'service';
 }
@@ -270,6 +286,17 @@ export const lumenPalettes = ['brass'] as const;
 export type LumenPalette = (typeof lumenPalettes)[number];
 
 /**
+ * ===== GRANTH PALETTE =====
+ * Granth (bespoke §13 Hindi-literary template, Writer vertical) ships a small
+ * palette family designed for growth: `sinduri` (ivory paper + maroon accent,
+ * default) and `neel` (cool grey + deep blue). More may be added later (e.g.
+ * `van` forest-green) like the hearth/lex families. Source: WRDirection1Granth.html.
+ */
+export const granthPalettes = ['sinduri', 'neel'] as const;
+
+export type GranthPalette = (typeof granthPalettes)[number];
+
+/**
  * ===== TEMPLATE PICKER METADATA =====
  * Leaf-level display data + palette scoping for the Phase 11b picker. Kept here
  * (NOT importing the template modules) so onboarding/editor pickers can scope by
@@ -284,6 +311,7 @@ export const templateLabels: Record<TemplateId, string> = {
   meridian: 'Meridian',
   techpremium: 'TechPremium',
   lumen: 'Lumen',
+  granth: 'Granth',
 };
 
 export const templateBlurbs: Record<TemplateId, string> = {
@@ -293,6 +321,7 @@ export const templateBlurbs: Record<TemplateId, string> = {
   meridian: 'Modern tech — dark surfaces, hairline rules, mono accents.',
   techpremium: 'Industrial IoT — warm paper, forest + signal-lime, control-room readouts.',
   lumen: 'Photography & creative — warm gallery, one brass accent, editorial captions + lightbox.',
+  granth: 'Hindi literary — ivory paper, maroon accent, Devanagari-first.',
 };
 
 /** Palette id list for a template (Hearth → 9 warm, Lex → 9 trust, Surge → 9 accent-hue, Meridian → 9 accent, TechPremium → forest). */
@@ -302,6 +331,7 @@ export function palettesForTemplate(templateId: TemplateId): readonly string[] {
   if (templateId === 'meridian') return meridianPalettes;
   if (templateId === 'techpremium') return techPremiumPalettes;
   if (templateId === 'lumen') return lumenPalettes;
+  if (templateId === 'granth') return granthPalettes;
   return hearthPalettes;
 }
 

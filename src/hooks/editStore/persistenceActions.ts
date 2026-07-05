@@ -229,7 +229,10 @@ export function createPersistenceActions(set: any, get: any) {
           state.id = apiResponse.tokenId || urlTokenId || '';
           state.title = apiResponse.title || 'Untitled Project';
           state.tokenId = apiResponse.tokenId || urlTokenId || '';
-          state.audienceType = apiResponse.audienceType === 'service' ? 'service' : 'product';
+          state.audienceType =
+            apiResponse.audienceType === 'service' ? 'service'
+            : apiResponse.audienceType === 'writer' ? 'writer'
+            : 'product';
           state.templateId = apiResponse.templateId ?? null;
           state.variantId = apiResponse.variantId ?? null;
           state.paletteId = apiResponse.paletteId ?? null;

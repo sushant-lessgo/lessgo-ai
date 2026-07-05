@@ -94,7 +94,10 @@ async function publishHandler(req: NextRequest) {
       select: { id: true, audienceType: true, templateId: true, variantId: true, paletteId: true }
     });
 
-    const audienceType: 'product' | 'service' = project?.audienceType === 'service' ? 'service' : 'product';
+    const audienceType: 'product' | 'service' | 'writer' =
+      project?.audienceType === 'service' ? 'service'
+      : project?.audienceType === 'writer' ? 'writer'
+      : 'product';
     const templateId: string | null = project?.templateId ?? null;
     const variantId: string | null = project?.variantId ?? null;
     const paletteId: string | null = project?.paletteId ?? null;

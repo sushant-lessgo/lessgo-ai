@@ -30,7 +30,7 @@ export interface RenderPublishedExportInput {
   title: string;
   previewImage?: string | null;
   analyticsEnabled: boolean;
-  audienceType: 'product' | 'service';
+  audienceType: 'product' | 'service' | 'writer';
   templateId: string | null;
   variantId: string | null;
   paletteId: string | null;

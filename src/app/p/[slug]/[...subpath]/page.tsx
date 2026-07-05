@@ -143,8 +143,15 @@ export default async function PublishedSubpage({ params }: PageProps) {
   const { LandingPagePublishedRenderer } = await import('@/modules/generatedLanding/LandingPagePublishedRenderer');
   const { CriticalFontPreload } = await import('@/modules/templates/CriticalFontPreload');
 
-  const audienceType = page.audienceType === 'service' ? 'service' : 'product';
-  const templateId = page.templateId || (audienceType === 'service' ? 'hearth' : null);
+  const audienceType =
+    page.audienceType === 'service' ? 'service'
+    : page.audienceType === 'writer' ? 'writer'
+    : 'product';
+  const templateId = page.templateId || (
+    audienceType === 'service' ? 'hearth'
+    : audienceType === 'writer' ? 'granth'
+    : null
+  );
   if (usesTemplateModule(audienceType, templateId)) {
     const { preloadTemplate } = await import('@/modules/templates/registry');
     await preloadTemplate(templateId as any);

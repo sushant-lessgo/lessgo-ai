@@ -53,6 +53,14 @@ function criticalFontHrefs(
         '/fonts/dm-sans/dm-sans-v17-latin-regular.woff2',
       ];
 
+    case 'granth':
+      // Hero NAME (LCP) = Tiro Devanagari Hindi 400 (Devanagari subset). The
+      // `adhunik` variant swaps the display face to Mukta; preload its 400.
+      // Devanagari subset file, since the hero name is Hindi.
+      return variantId === 'adhunik'
+        ? ['/fonts/mukta/mukta-devanagari-400-normal.woff2']
+        : ['/fonts/tiro-devanagari-hindi/tiro-devanagari-hindi-devanagari-400-normal.woff2'];
+
     default:
       return [];
   }

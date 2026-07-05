@@ -30,7 +30,7 @@ export interface StaticHTMLOptions {
   title: string;
   description?: string;
   previewImage?: string;
-  audienceType?: 'product' | 'service';
+  audienceType?: 'product' | 'service' | 'writer';
   templateId?: string | null;
   paletteId?: string | null;
   variantId?: string | null;

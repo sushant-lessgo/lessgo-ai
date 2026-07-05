@@ -119,8 +119,15 @@ export default async function PublishedPage({ params }: PageProps) {
   // STRICT: keep templateId as stored (no default-synthesis) — a legacy
   // product page (templateId=null + 47-block content) must stay on the legacy
   // path. Only default to 'hearth' for service (its null-templateId legacy).
-  const audienceType = page.audienceType === 'service' ? 'service' : 'product';
-  const templateId = page.templateId || (audienceType === 'service' ? 'hearth' : null);
+  const audienceType =
+    page.audienceType === 'service' ? 'service'
+    : page.audienceType === 'writer' ? 'writer'
+    : 'product';
+  const templateId = page.templateId || (
+    audienceType === 'service' ? 'hearth'
+    : audienceType === 'writer' ? 'granth'
+    : null
+  );
   if (usesTemplateModule(audienceType, templateId)) {
     const { preloadTemplate } = await import('@/modules/templates/registry');
     await preloadTemplate(templateId as any);
