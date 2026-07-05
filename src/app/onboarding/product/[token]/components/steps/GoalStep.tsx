@@ -10,6 +10,7 @@ import {
   CreditCard,
   Calendar,
   Download,
+  Mail,
 } from 'lucide-react';
 
 const goalIcons: Record<LandingGoal, React.ReactNode> = {
@@ -19,6 +20,7 @@ const goalIcons: Record<LandingGoal, React.ReactNode> = {
   buy: <CreditCard className="w-6 h-6" />,
   demo: <Calendar className="w-6 h-6" />,
   download: <Download className="w-6 h-6" />,
+  enquiry: <Mail className="w-6 h-6" />,
 };
 
 const goalDescriptions: Record<LandingGoal, string> = {
@@ -28,6 +30,7 @@ const goalDescriptions: Record<LandingGoal, string> = {
   buy: 'Purchase or subscribe now',
   demo: 'Schedule a product walkthrough',
   download: 'Get the app or resource',
+  enquiry: 'Get enquiries / quote requests from buyers',
 };
 
 export default function GoalStep() {

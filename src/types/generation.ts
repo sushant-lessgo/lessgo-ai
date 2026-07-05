@@ -12,7 +12,8 @@ export const landingGoals = [
   'free-trial',
   'buy',
   'demo',
-  'download'
+  'download',
+  'enquiry'
 ] as const;
 
 export type LandingGoal = (typeof landingGoals)[number];
@@ -23,7 +24,8 @@ export const landingGoalLabels: Record<LandingGoal, string> = {
   'free-trial': 'Start free trial',
   'buy': 'Buy now',
   'demo': 'Book demo',
-  'download': 'Download'
+  'download': 'Download',
+  'enquiry': 'Send enquiry'
 };
 
 /**
@@ -297,6 +299,13 @@ export interface UnderstandingData {
   audiences: string[];
   whatItDoes: string;
   features: string[];
+  // Manufacturer / trade-supplier flow (optional — D2: SaaS fields above stay
+  // required so existing readers compile untouched; manufacturer writers pad
+  // the SaaS fields with []/'' when building this object).
+  whatYouMake?: string;
+  industriesServed?: string[];
+  productCategories?: string[];
+  valueAdds?: string[];
 }
 
 /**

@@ -117,6 +117,8 @@ function getGoalCtaGuidance(goal: LandingGoal): string {
       'Goal = book a demo. CTA copy: "Book a demo", "See it in action", "Get a walkthrough". For higher-consideration/B2B.',
     download:
       'Goal = download. CTA copy: "Download", "Get the app", "Install now". Direct, action-first.',
+    enquiry:
+      'Goal = send an enquiry via the on-page contact form. CTA copy: "Send enquiry", "Request a quote", "Get in touch". Enquiry-driven — every CTA points to the contact form, not a signup/checkout.',
   };
   return map[goal] ?? map.signup;
 }

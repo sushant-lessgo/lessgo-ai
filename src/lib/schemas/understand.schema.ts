@@ -11,3 +11,17 @@ export const UnderstandingResponseSchema = z.object({
 });
 
 export type UnderstandingResponse = z.infer<typeof UnderstandingResponseSchema>;
+
+// Manufacturer / trade-supplier flow (onboarding1, D2). Parallel schema — the
+// SaaS schema above is untouched; the understand route picks by
+// isManufacturerFlow(templateId).
+export const ManufacturerUnderstandingResponseSchema = z.object({
+  whatYouMake: z.string().min(1),
+  industriesServed: z.array(z.string()).min(1).max(3),
+  productCategories: z.array(z.string()).min(1).max(8),
+  valueAdds: z.array(z.string()).min(1).max(8),
+});
+
+export type ManufacturerUnderstandingResponse = z.infer<
+  typeof ManufacturerUnderstandingResponseSchema
+>;

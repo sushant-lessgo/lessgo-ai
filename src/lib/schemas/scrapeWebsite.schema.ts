@@ -71,3 +71,16 @@ export const ScrapeWebsiteExtendedSchema = ScrapeWebsiteSchema.extend({
 export type SiteFactData = z.infer<typeof SiteFactSchema>;
 export type SiteExcerptData = z.infer<typeof SiteExcerptSchema>;
 export type ScrapeWebsiteExtendedData = z.infer<typeof ScrapeWebsiteExtendedSchema>;
+
+// ===== Manufacturer / trade-supplier variant (onboarding1, D2) =====
+// Parallel schema so the existing SaaS parse path (ScrapeWebsiteExtendedSchema)
+// stays byte-for-byte untouched. The scrape route picks by
+// isManufacturerFlow(templateId) (wired in Phase 2).
+export const ScrapeWebsiteManufacturerSchema = ScrapeWebsiteExtendedSchema.extend({
+  whatYouMake: z.string().optional(),
+  industriesServed: z.array(z.string()).optional(),
+  productCategories: z.array(z.string()).optional(),
+  valueAdds: z.array(z.string()).optional(),
+});
+
+export type ScrapeWebsiteManufacturerData = z.infer<typeof ScrapeWebsiteManufacturerSchema>;
