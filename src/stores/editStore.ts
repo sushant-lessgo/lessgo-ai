@@ -380,6 +380,13 @@ export function createEditStore(tokenId: string) {
           {
             name: storageKey, // Token-specific storage key
             partialize: (state) => ({
+              // Template identity — persist alongside sections so first-paint
+              // rehydration engages the template gate (blank ~ms) instead of
+              // flashing "Layout Component Missing" for the loadDraft round-trip.
+              audienceType: state.audienceType,
+              templateId: state.templateId,
+              variantId: state.variantId,
+              paletteId: state.paletteId,
               sections: state.sections,
               sectionLayouts: state.sectionLayouts,
               sectionSpacing: state.sectionSpacing,
