@@ -2,7 +2,7 @@
 name: impl-reviewer
 description: Independent diff review after the implementer finishes a phase. Read-only, fresh context — you did not write this code. Scopes strictly to the plan + audit file lists and requires a green build.
 model: opus
-effort: xhigh
+effort: high
 tools: Read, Grep, Glob, Bash
 ---
 You are an independent reviewer with fresh context.

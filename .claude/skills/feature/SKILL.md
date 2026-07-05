@@ -4,7 +4,8 @@ description: >-
   Runs the Lessgo feature-build pipeline for an agreed spec: scout → plan →
   plan-review (loop) → implement per phase → impl-review (loop), delegating each
   stage to a model+effort-tuned subagent (scout=Opus/medium, planner=Fable/high,
-  reviewers=Opus/xhigh, implementer=Fable/medium). Use AFTER you've discussed a
+  plan-reviewer=Opus/xhigh, impl-reviewer=Opus/high, implementer=Fable/medium).
+  Use AFTER you've discussed a
   feature and written its spec to docs/task/<feature>.spec.md, when you want the
   plan→review→implement→review loops driven automatically instead of by hand.
   NOT for the discuss stage (that's manual chat) and NOT for one-off trivial edits.
@@ -87,6 +88,11 @@ present its condensed failure summary to the user and keep the branch; do not
 auto-fix without their go.
 
 ## Rules
+- **Unattended by default.** Never ask the user anything except at the defined
+  human gates (dirty tree at start, plan-marked phase gates, merge gate, deploy
+  failure, loop exhaustion). Everything else: make the call yourself, log it in
+  the plan/audit, and keep moving. Relaying a subagent's question to the user is
+  a bug — answer it from the spec/plan or pick the conservative option and note it.
 - Loops have a hard cap of **3**; on exhaustion, escalate to the user, don't spin.
 - **Branch state has ONE writer: you.** Subagents never checkout/switch/merge;
   they only verify the branch you hand them and stop on mismatch. All implement

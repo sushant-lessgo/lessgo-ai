@@ -1,0 +1,48 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Edit",
+      "Write",
+      "Glob",
+      "Grep",
+      "Bash(npx tsc *)",
+      "Bash(npm run *)",
+      "Bash(npm test *)",
+      "Bash(npx vitest *)",
+      "Bash(npx playwright *)",
+      "Bash(npx prisma generate)",
+      "Bash(npx prisma migrate dev *)",
+      "Bash(npx prisma migrate dev)",
+      "Bash(git status *)",
+      "Bash(git status)",
+      "Bash(git diff *)",
+      "Bash(git diff)",
+      "Bash(git log *)",
+      "Bash(git show *)",
+      "Bash(git branch *)",
+      "Bash(git branch)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git checkout *)",
+      "Bash(git switch *)",
+      "Bash(git merge *)",
+      "Bash(git stash *)",
+      "Bash(git mv *)",
+      "Bash(git rm *)"
+    ],
+    "deny": [],
+    "ask": [
+      "Bash(git push *)",
+      "Bash(git push)",
+      "Bash(git reset --hard *)",
+      "Bash(git clean *)",
+      "Bash(npx prisma db push *)",
+      "Bash(npx prisma db push)",
+      "Bash(npx prisma migrate deploy *)",
+      "Bash(npx prisma migrate deploy)",
+      "Bash(npx prisma migrate reset *)",
+      "Bash(npx prisma migrate reset)"
+    ]
+  }
+}

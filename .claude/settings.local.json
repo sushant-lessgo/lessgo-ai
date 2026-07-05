@@ -171,7 +171,9 @@
       "Read(//c/Users/susha/lessgo-ai/**)",
       "WebFetch(domain:goldenshadowtrading.com)",
       "WebFetch(domain:www.context.dev)",
-      "Read(//c/Users/susha/.claude/**)"
+      "Read(//c/Users/susha/.claude/**)",
+      "Bash(npx prisma *)",
+      "Skill(update-config)"
     ],
     "deny": [],
     "ask": [],
